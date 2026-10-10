@@ -100,7 +100,7 @@ fun MarkdownImportSheet(
         expanded = true,
         onDismiss = onDismiss,
         title = "Text & Markdown",
-        subtitle = "Turn .md and .txt files, or a .zip with folders, into Emberr notes.",
+        subtitle = "Turn .md, .txt and .canvas files, or a .zip with folders, into Emberr notes.",
         contentHorizontalPadding = 0.dp,
         isDismissible = importProgress !is ImportProgress.Importing
     ) {
@@ -330,7 +330,7 @@ private fun ChooseFilesPrompt() {
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface
         )
-        FadedLine(text = ".md, .markdown, .txt or .zip")
+        FadedLine(text = ".md, .markdown, .txt, .canvas or .zip")
     }
 }
 
