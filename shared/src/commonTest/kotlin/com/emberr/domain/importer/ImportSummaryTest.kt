@@ -1,12 +1,16 @@
 package com.emberr.domain.importer
 
+import okio.Buffer
+import okio.Source
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ImportSummaryTest {
 
     private class FakeImportFile(override val relativePath: String) : ImportFile {
+        override val sizeBytes: Long = 0L
         override suspend fun readBytes(): ByteArray = ByteArray(0)
+        override fun openSource(): Source = Buffer()
     }
 
     private fun pickedFiles(relativePaths: List<String>, skippedNames: List<String> = emptyList()) =

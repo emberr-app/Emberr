@@ -3,6 +3,7 @@ package com.emberr.domain.importer
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.importer.markdown.ConvertedNote
 import com.emberr.domain.importer.markdown.ImportedNoteConverter
 import com.emberr.domain.importer.markdown.PendingAttachment
 import com.emberr.domain.model.DocumentBlock
@@ -53,7 +54,12 @@ private val mimeTypesByExtension = mapOf(
 
 sealed interface ImportProgress {
     data object NotStarted : ImportProgress
-    data class Importing(val handledNoteCount: Int, val totalNoteCount: Int) : ImportProgress
+    data class Importing(
+        val handledNoteCount: Int,
+        val totalNoteCount: Int,
+        val doneFraction: Float,
+        val copyingFileName: String? = null
+    ) : ImportProgress
     data class Finished(val result: ImportResult) : ImportProgress
 }
 
@@ -75,7 +81,7 @@ class MarkdownNotesImporter(
     val progress: StateFlow<ImportProgress> = _progress.asStateFlow()
 
     fun startImport(pickedFiles: PickedImportFiles, spaceId: String) {
-        _progress.value = ImportProgress.Importing(handledNoteCount = 0, totalNoteCount = noteFilesOf(pickedFiles).size)
+        _progress.value = ImportProgress.Importing(handledNoteCount = 0, totalNoteCount = noteFilesOf(pickedFiles).size, doneFraction = 0f)
         appScope.launch {
             val savedNotes = mutableListOf<Pair<NoteMetadataEntity, NoteContent>>()
             val result = pickedFiles.use { files ->
@@ -107,47 +113,76 @@ class MarkdownNotesImporter(
         )
 
         val failedNames = linkedSetOf<String>()
-        val folderIdsByPath = createFolders(noteFiles, spaceId, now, failedNames)
-        val copiedAttachments = mutableMapOf<String, MediaInfo?>()
-        val customPropertiesByName = mutableMapOf<String, CustomPropertyEntity>()
-        var importedNoteCount = 0
-
-        plannedNotes.forEachIndexed { index, plannedNote ->
+        val convertedNotesByNoteId = mutableMapOf<String, ConvertedNote>()
+        plannedNotes.forEach { plannedNote ->
             val notePath = plannedNote.file.relativePath
             try {
-                val converted = ImportedNoteConverter.convert(
+                convertedNotesByNoteId[plannedNote.noteId] = ImportedNoteConverter.convert(
                     relativePath = notePath,
-                    content = plannedNote.file.readBytes().decodeToString(),
+                    content = TextFileDecoder.decode(plannedNote.file.readBytes()),
                     linkResolver = linkTargets.resolverFor(notePath),
                     now = now
                 )
-                val details = ImportedProperties.detailsOf(converted.frontMatter, converted.inlineTags)
-                val propertyBlocks = propertyBlocksFor(details.properties, spaceId, now, customPropertiesByName)
-                val blocks = propertyBlocks + withAttachmentsCopied(converted.blocks, converted.pendingAttachments, now, failedNames) { attachmentPath ->
-                    copiedAttachments.getOrPut(attachmentPath) { copyAttachment(attachmentFilesByPath.getValue(attachmentPath)) }
-                }
-                val content = NoteContent(blocks = blocks)
-                val metadata = NoteMetadataEntity(
-                    noteId = plannedNote.noteId,
-                    title = converted.title,
-                    folderId = folderIdsByPath[notePath.substringBeforeLast('/', missingDelimiterValue = "")],
-                    isDaily = false,
-                    dateString = null,
-                    createdAt = details.createdAt ?: now,
-                    updatedAt = now,
-                    filePath = "",
-                    snippet = generateSnippet(blocks),
-                    spaceId = spaceId
-                )
-                repository.saveNoteInSpace(spaceId, metadata, content)
-                onNoteSaved(metadata, content)
-                importedNoteCount++
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (_: Exception) {
                 failedNames += notePath
             }
-            _progress.value = ImportProgress.Importing(handledNoteCount = index + 1, totalNoteCount = plannedNotes.size)
+        }
+
+        val usedAttachmentPaths = convertedNotesByNoteId.values
+            .flatMap { converted -> converted.pendingAttachments.map { it.relativePath } }
+            .toSet()
+        val progressTracker = ImportProgressTracker(
+            totalNoteCount = plannedNotes.size,
+            totalWorkBytes = plannedNotes.sumOf { workBytesOf(it.file) } +
+                usedAttachmentPaths.sumOf { attachmentFilesByPath.getValue(it).sizeBytes },
+            publish = { progress -> _progress.value = progress }
+        )
+
+        val folderIdsByPath = createFolders(noteFiles, spaceId, now, failedNames)
+        val copiedAttachments = mutableMapOf<String, MediaInfo?>()
+        val customPropertiesByName = mutableMapOf<String, CustomPropertyEntity>()
+        var importedNoteCount = 0
+
+        plannedNotes.forEach { plannedNote ->
+            val notePath = plannedNote.file.relativePath
+            val converted = convertedNotesByNoteId[plannedNote.noteId]
+            if (converted != null) {
+                try {
+                    val details = ImportedProperties.detailsOf(converted.frontMatter, converted.inlineTags)
+                    val propertyBlocks = propertyBlocksFor(details.properties, spaceId, now, customPropertiesByName)
+                    val blocks = propertyBlocks + withAttachmentsCopied(converted.blocks, converted.pendingAttachments, now, failedNames) { attachmentPath ->
+                        if (attachmentPath in copiedAttachments) {
+                            copiedAttachments[attachmentPath]
+                        } else {
+                            copyAttachment(attachmentFilesByPath.getValue(attachmentPath), progressTracker)
+                                .also { mediaInfo -> copiedAttachments[attachmentPath] = mediaInfo }
+                        }
+                    }
+                    val content = NoteContent(blocks = blocks)
+                    val metadata = NoteMetadataEntity(
+                        noteId = plannedNote.noteId,
+                        title = converted.title,
+                        folderId = folderIdsByPath[notePath.substringBeforeLast('/', missingDelimiterValue = "")],
+                        isDaily = false,
+                        dateString = null,
+                        createdAt = details.createdAt ?: now,
+                        updatedAt = now,
+                        filePath = "",
+                        snippet = generateSnippet(blocks),
+                        spaceId = spaceId
+                    )
+                    repository.saveNoteInSpace(spaceId, metadata, content)
+                    onNoteSaved(metadata, content)
+                    importedNoteCount++
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                    failedNames += notePath
+                }
+            }
+            progressTracker.noteHandled(workBytesOf(plannedNote.file))
         }
 
         return ImportResult(
@@ -253,20 +288,20 @@ class MarkdownNotesImporter(
         }
     }
 
-    private suspend fun copyAttachment(file: ImportFile): MediaInfo? {
-        val extension = file.relativePath.substringAfterLast('/').substringAfterLast('.', missingDelimiterValue = "").lowercase()
-        return try {
-            mediaStorageHelper.saveBytesToInternalStorage(
-                bytes = file.readBytes(),
-                extension = extension,
-                mimeType = mimeTypesByExtension[extension] ?: UNKNOWN_MIME_TYPE
-            )
-        } catch (cancellation: CancellationException) {
-            throw cancellation
-        } catch (_: Exception) {
-            null
-        }
+    private suspend fun copyAttachment(file: ImportFile, progressTracker: ImportProgressTracker): MediaInfo? {
+        val fileName = file.relativePath.substringAfterLast('/')
+        val extension = fileName.substringAfterLast('.', missingDelimiterValue = "").lowercase()
+        val mediaInfo = mediaStorageHelper.saveStreamToInternalStorage(
+            openSource = file::openSource,
+            extension = extension,
+            mimeType = mimeTypesByExtension[extension] ?: UNKNOWN_MIME_TYPE,
+            onBytesCopied = { copiedBytes -> progressTracker.attachmentCopying(fileName, copiedBytes.coerceAtMost(file.sizeBytes)) }
+        )
+        progressTracker.attachmentFinished(file.sizeBytes)
+        return mediaInfo
     }
+
+    private fun workBytesOf(noteFile: ImportFile): Long = noteFile.sizeBytes.coerceAtLeast(1)
 
     private fun noteFilesOf(pickedFiles: PickedImportFiles): List<ImportFile> =
         pickedFiles.files.filter { file -> ImportPaths.isNoteFile(file.relativePath) }
@@ -275,4 +310,47 @@ class MarkdownNotesImporter(
     private fun newId(): String = Uuid.random().toString()
 
     private class PlannedNote(val file: ImportFile, val noteId: String)
+}
+
+private class ImportProgressTracker(
+    private val totalNoteCount: Int,
+    private val totalWorkBytes: Long,
+    private val publish: (ImportProgress.Importing) -> Unit
+) {
+    private var doneWorkBytes = 0L
+    private var handledNoteCount = 0
+    private var lastPublished: ImportProgress.Importing? = null
+
+    fun noteHandled(noteBytes: Long) {
+        handledNoteCount++
+        doneWorkBytes += noteBytes
+        publishIfVisiblyChanged(copyingFileName = null, bytesInProgress = 0L)
+    }
+
+    fun attachmentCopying(fileName: String, copiedBytes: Long) {
+        publishIfVisiblyChanged(copyingFileName = fileName, bytesInProgress = copiedBytes)
+    }
+
+    fun attachmentFinished(attachmentBytes: Long) {
+        doneWorkBytes += attachmentBytes
+    }
+
+    private fun publishIfVisiblyChanged(copyingFileName: String?, bytesInProgress: Long) {
+        val doneFraction = when {
+            totalWorkBytes > 0 -> ((doneWorkBytes + bytesInProgress).toFloat() / totalWorkBytes).coerceIn(0f, 1f)
+            totalNoteCount > 0 -> handledNoteCount.toFloat() / totalNoteCount
+            else -> 0f
+        }
+        val progress = ImportProgress.Importing(handledNoteCount, totalNoteCount, doneFraction, copyingFileName)
+        val previous = lastPublished
+        val looksTheSame = previous != null &&
+            previous.handledNoteCount == progress.handledNoteCount &&
+            previous.copyingFileName == progress.copyingFileName &&
+            wholePercentOf(previous.doneFraction) == wholePercentOf(progress.doneFraction)
+        if (looksTheSame) return
+        lastPublished = progress
+        publish(progress)
+    }
+
+    private fun wholePercentOf(fraction: Float): Int = (fraction * 100).toInt()
 }

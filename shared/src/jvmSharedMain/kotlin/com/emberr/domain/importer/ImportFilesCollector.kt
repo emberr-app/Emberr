@@ -2,6 +2,8 @@ package com.emberr.domain.importer
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okio.Source
+import okio.source
 import java.io.File
 import java.io.IOException
 import java.nio.charset.Charset
@@ -97,7 +99,11 @@ private class LocalImportFile(
     override val relativePath: String,
     private val file: File
 ) : ImportFile {
+    override val sizeBytes: Long get() = file.length()
+
     override suspend fun readBytes(): ByteArray = withContext(Dispatchers.IO) { file.readBytes() }
+
+    override fun openSource(): Source = file.source()
 }
 
 private class ZipEntryImportFile(
@@ -105,7 +111,11 @@ private class ZipEntryImportFile(
     private val zipFile: ZipFile,
     private val entry: ZipEntry
 ) : ImportFile {
+    override val sizeBytes: Long get() = entry.size.coerceAtLeast(0)
+
     override suspend fun readBytes(): ByteArray = withContext(Dispatchers.IO) {
         zipFile.getInputStream(entry).use { stream -> stream.readBytes() }
     }
+
+    override fun openSource(): Source = zipFile.getInputStream(entry).source()
 }

@@ -1,5 +1,6 @@
 package com.emberr.domain.util.media
 
+import okio.Source
 import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -27,6 +28,12 @@ data class MediaInfo(
 interface MediaStorageHelper {
     suspend fun copyUriToInternalStorage(uriString: String): MediaInfo?
     suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo?
+    suspend fun saveStreamToInternalStorage(
+        openSource: () -> Source,
+        extension: String,
+        mimeType: String,
+        onBytesCopied: (copiedBytes: Long) -> Unit
+    ): MediaInfo?
     fun getAbsoluteMediaPath(fileName: String): String
     fun listAllMediaFileNames(): List<String>
 }

@@ -5,6 +5,8 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okio.Source
+import okio.source
 import java.io.IOException
 
 private const val FALLBACK_FOLDER_NAME = "Folder"
@@ -48,6 +50,7 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
                 child.isFolder -> collectFiles(treeUri, child.documentId, childPath, files, skippedNames)
                 else -> files += DocumentImportFile(
                     relativePath = childPath,
+                    sizeBytes = child.sizeBytes,
                     documentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, child.documentId),
                     context = context
                 )
@@ -60,7 +63,8 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
         val projection = arrayOf(
             DocumentsContract.Document.COLUMN_DOCUMENT_ID,
             DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-            DocumentsContract.Document.COLUMN_MIME_TYPE
+            DocumentsContract.Document.COLUMN_MIME_TYPE,
+            DocumentsContract.Document.COLUMN_SIZE
         )
         val children = mutableListOf<FolderChild>()
         context.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
@@ -71,7 +75,8 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
                     children += FolderChild(
                         documentId = documentId,
                         name = name,
-                        isFolder = cursor.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR
+                        isFolder = cursor.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR,
+                        sizeBytes = if (cursor.isNull(3)) 0L else cursor.getLong(3)
                     )
                 }
             }
@@ -90,10 +95,11 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
     }
 }
 
-private class FolderChild(val documentId: String, val name: String, val isFolder: Boolean)
+private class FolderChild(val documentId: String, val name: String, val isFolder: Boolean, val sizeBytes: Long)
 
 private class DocumentImportFile(
     override val relativePath: String,
+    override val sizeBytes: Long,
     private val documentUri: Uri,
     private val context: Context
 ) : ImportFile {
@@ -101,4 +107,7 @@ private class DocumentImportFile(
         context.contentResolver.openInputStream(documentUri)?.use { stream -> stream.readBytes() }
             ?: throw IOException("Cannot open $relativePath")
     }
+
+    override fun openSource(): Source =
+        context.contentResolver.openInputStream(documentUri)?.source() ?: throw IOException("Cannot open $relativePath")
 }

@@ -1,6 +1,7 @@
 package com.emberr.domain.importer
 
 import kotlinx.coroutines.test.runTest
+import okio.buffer
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.file.Files
@@ -116,6 +117,18 @@ class ImportFilesCollectorTest {
     fun aZipEntryCanBeReadAfterPicking() = runTest {
         collect(zipFile("vault.zip", mapOf("Notes/hello.md" to "Hello"))).use { picked ->
             assertEquals("Hello", picked.files.single().readBytes().decodeToString())
+        }
+    }
+
+    @Test
+    fun zipEntriesAndLooseFilesCanBeStreamed() {
+        val zip = zipFile("vault.zip", mapOf("Notes/hello.md" to "Hello from the zip"))
+
+        collect(zip, looseFile("plan.md", "Hello from a file")).use { picked ->
+            assertEquals(
+                listOf("Hello from the zip", "Hello from a file"),
+                picked.files.map { file -> file.openSource().buffer().use { source -> source.readUtf8() } }
+            )
         }
     }
 

@@ -26,6 +26,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import okio.Buffer
+import okio.Source
+import okio.buffer
 import java.io.IOException
 import java.lang.reflect.Proxy
 import kotlin.test.AfterTest
@@ -84,13 +87,32 @@ class MarkdownNotesImporterTest {
 
     private class InMemoryMediaStorage : MediaStorageHelper {
         val savedFileNames = mutableListOf<String>()
+        val savedTextsByFileName = mutableMapOf<String, String>()
+        var whileCopying: () -> Unit = {}
 
         override suspend fun copyUriToInternalStorage(uriString: String): MediaInfo? =
             error("The importer is not expected to copy from a uri")
 
-        override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo {
+        override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo? =
+            error("The importer is expected to stream attachments instead of loading them whole")
+
+        override suspend fun saveStreamToInternalStorage(
+            openSource: () -> Source,
+            extension: String,
+            mimeType: String,
+            onBytesCopied: (copiedBytes: Long) -> Unit
+        ): MediaInfo? {
+            val bytes = try {
+                openSource().buffer().use { source -> source.readByteArray() }
+            } catch (_: IOException) {
+                return null
+            }
+            onBytesCopied(bytes.size / 2L)
+            whileCopying()
+            onBytesCopied(bytes.size.toLong())
             val fileName = "media_${savedFileNames.size + 1}.$extension"
             savedFileNames += fileName
+            savedTextsByFileName[fileName] = bytes.decodeToString()
             return MediaInfo(localFileName = fileName, originalName = fileName, mimeType = mimeType, sizeBytes = bytes.size.toLong())
         }
 
@@ -100,7 +122,11 @@ class MarkdownNotesImporterTest {
     }
 
     private class FakeImportFile(override val relativePath: String, private val content: String?) : ImportFile {
+        override val sizeBytes: Long = content?.encodeToByteArray()?.size?.toLong() ?: 0L
+
         override suspend fun readBytes(): ByteArray = content?.encodeToByteArray() ?: throw IOException("Cannot read $relativePath")
+
+        override fun openSource(): Source = content?.let { Buffer().writeUtf8(it) } ?: throw IOException("Cannot read $relativePath")
     }
 
     private fun pickedFiles(vararg files: Pair<String, String?>, onClose: () -> Unit = {}) = PickedImportFiles(
@@ -174,6 +200,7 @@ class MarkdownNotesImporterTest {
         assertEquals("report.pdf", report.fileName)
         assertEquals("application/pdf", report.mimeType)
         assertEquals(listOf("media_1.png", "media_2.pdf"), mediaStorage.savedFileNames)
+        assertEquals("png bytes", mediaStorage.savedTextsByFileName["media_1.png"])
     }
 
     @Test
@@ -242,6 +269,22 @@ class MarkdownNotesImporterTest {
         assertEquals(1, result.importedNoteCount)
         assertEquals(listOf("Bad.md"), result.failedNames)
         assertEquals(listOf("Good"), importedNotes().map { it.title })
+    }
+
+    @Test
+    fun theProgressMovesWhileABigAttachmentIsCopied() = runTest {
+        val importer = importer(backgroundScope)
+        val progressSeenWhileCopying = mutableListOf<ImportProgress>()
+        mediaStorage.whileCopying = { progressSeenWhileCopying += importer.progress.value }
+
+        importer.importFiles(
+            pickedFiles("Note.md" to "![](video.mp4)", "video.mp4" to "x".repeat(10_000)),
+            spaceId = IMPORT_SPACE_ID
+        )
+
+        val halfwayThroughTheVideo = progressSeenWhileCopying.single() as ImportProgress.Importing
+        assertEquals("video.mp4", halfwayThroughTheVideo.copyingFileName)
+        assertTrue(halfwayThroughTheVideo.doneFraction in 0.4f..0.6f)
     }
 
     @Test

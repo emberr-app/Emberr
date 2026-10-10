@@ -1,8 +1,12 @@
 package com.emberr.domain.importer
 
+import okio.Source
+
 interface ImportFile {
     val relativePath: String
+    val sizeBytes: Long
     suspend fun readBytes(): ByteArray
+    fun openSource(): Source
 }
 
 class PickedImportFiles(

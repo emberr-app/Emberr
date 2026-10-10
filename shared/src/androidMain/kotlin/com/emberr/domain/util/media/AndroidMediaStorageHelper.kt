@@ -9,9 +9,14 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okio.Source
+import okio.buffer
+import okio.sink
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
+
+private const val STREAM_CHUNK_BYTES = 64L * 1024
 
 class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelper {
 
@@ -124,6 +129,42 @@ class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelp
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
+                null
+            }
+        }
+
+    override suspend fun saveStreamToInternalStorage(
+        openSource: () -> Source,
+        extension: String,
+        mimeType: String,
+        onBytesCopied: (copiedBytes: Long) -> Unit
+    ): MediaInfo? =
+        withContext(Dispatchers.IO) {
+            val localFileName = "media_${UUID.randomUUID()}${if (extension.isNotEmpty()) ".$extension" else ""}"
+            val file = File(mediaDir, localFileName)
+            try {
+                openSource().use { source ->
+                    file.sink().buffer().use { sink ->
+                        var copiedBytes = 0L
+                        while (true) {
+                            val readBytes = source.read(sink.buffer, STREAM_CHUNK_BYTES)
+                            if (readBytes == -1L) break
+                            sink.emitCompleteSegments()
+                            copiedBytes += readBytes
+                            onBytesCopied(copiedBytes)
+                        }
+                    }
+                }
+
+                MediaInfo(
+                    localFileName = localFileName,
+                    originalName = localFileName,
+                    mimeType = mimeType,
+                    sizeBytes = file.length()
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                file.delete()
                 null
             }
         }
