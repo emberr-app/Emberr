@@ -289,6 +289,7 @@ interface EditorActions {
     fun onStopAudio()
     fun onDeleteImageBlock(id: String)
     fun onRequestImagePicker(blockId: String)
+    fun onImageFetched(blockId: String, localFileName: String)
     fun onRequestDocumentPicker(blockId: String)
     fun onOpenFile(filePath: String, mimeType: String)
     fun onTogglePin()

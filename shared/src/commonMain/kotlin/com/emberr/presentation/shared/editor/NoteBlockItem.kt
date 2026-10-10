@@ -886,6 +886,7 @@ fun NoteBlockItem(
                                 onToggleSelection = { actions.onToggleSelection(block.id) },
                                 onRequestPicker = { actions.onRequestImagePicker(block.id) },
                                 onRequestCamera = { actions.onRequestCamera(block.id) },
+                                onImageFetched = { localFileName -> actions.onImageFetched(block.id, localFileName) },
                                 onDelete = { actions.onDeleteImageBlock(block.id) }
                             )
                             is DocumentBlock -> DocumentBlockView(

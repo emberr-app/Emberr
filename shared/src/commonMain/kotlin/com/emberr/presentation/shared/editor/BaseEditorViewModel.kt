@@ -2174,6 +2174,12 @@ abstract class BaseEditorViewModel(
         }
     }
 
+    fun handleImageFetched(blockId: String, localFileName: String) {
+        val now = System.currentTimeMillis()
+        modifyBlocks { list -> mapBlockById(list, blockId) { if (it is ImageBlock) it.copy(localFilePath = localFileName, updatedAt = now) else it } }
+        scheduleAutosave()
+    }
+
     fun handleDocumentPicked(blockId: String, uriString: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val mediaInfo = mediaStorageHelper.copyUriToInternalStorage(uriString)

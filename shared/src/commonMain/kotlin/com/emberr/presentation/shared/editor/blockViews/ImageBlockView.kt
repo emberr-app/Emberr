@@ -5,8 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,11 +39,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.toSize
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
@@ -48,6 +62,8 @@ import com.emberr.domain.sync.MediaRetryCoordinator
 import com.emberr.domain.util.media.ImageClipboard
 import com.emberr.domain.util.media.ImageDownloader
 import com.emberr.domain.util.media.MediaStorageHelper
+import com.emberr.domain.util.media.WebImageFetcher
+import com.emberr.domain.util.media.webImageAddressOrNull
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showFeedback
 import com.emberr.presentation.LocalImageOverlay
@@ -60,14 +76,18 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.camera
 import emberr.shared.generated.resources.circle_x
 import emberr.shared.generated.resources.copy
+import emberr.shared.generated.resources.upload2
 import emberr.shared.generated.resources.image
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.koinInject
 import java.io.File
 
 private val MaximumImageBlockHeight = 320.dp
 private val LoadingImageBlockHeight = 180.dp
+private val EmptyImageButtonSidePadding = 8.dp
+private val EmptyImageButtonsEndSpace = 6.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -77,7 +97,8 @@ fun ImageBlockView(
     onToggleSelection: () -> Unit,
     onRequestPicker: () -> Unit,
     onDelete: () -> Unit = {},
-    onRequestCamera: () -> Unit
+    onRequestCamera: () -> Unit,
+    onImageFetched: (localFileName: String) -> Unit
 ) {
     val mediaStorageHelper = koinInject<MediaStorageHelper>()
     val mediaRetryCoordinator = koinInject<MediaRetryCoordinator>()
@@ -87,65 +108,13 @@ fun ImageBlockView(
     val setFullScreenOverlay = LocalImageOverlay.current
 
     if (block.localFilePath == null) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .defaultMinSize(minHeight = 52.dp)
-                .clip(DefaultBlockShape)
-                .background(MaterialTheme.colorScheme.surface),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .weight(1f)
-                        .combinedClickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {
-                                if (inSelectionMode) onToggleSelection()
-                                else onRequestPicker()
-                            },
-                            onLongClick = if (isDesktopPlatform) null else onToggleSelection
-                        )
-                        .padding(horizontal = 14.dp, vertical = 14.dp)
-                ) {
-                    Icon(painterResource(Res.drawable.image), contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(10.dp))
-                    Text("Add image", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
-                }
-
-                if (!isDesktopPlatform) {
-                    Box(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(24.dp)
-                            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                    )
-                    Box(
-                        modifier = Modifier
-                            .clickable {
-                                if (inSelectionMode) onToggleSelection()
-                                else onRequestCamera()
-                            }
-                            .padding(horizontal = 18.dp, vertical = 14.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.camera),
-                            contentDescription = "Take Photo",
-                            tint = MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
-        }
+        EmptyImageBlock(
+            inSelectionMode = inSelectionMode,
+            onToggleSelection = onToggleSelection,
+            onRequestPicker = onRequestPicker,
+            onRequestCamera = onRequestCamera,
+            onImageFetched = onImageFetched
+        )
     } else {
         val absolutePath = remember(block.localFilePath) {
             mediaStorageHelper.getAbsoluteMediaPath(block.localFilePath)
@@ -331,5 +300,153 @@ fun ImageBlockView(
                 }
             }
         }
+    }
+}
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun EmptyImageBlock(
+    inSelectionMode: Boolean,
+    onToggleSelection: () -> Unit,
+    onRequestPicker: () -> Unit,
+    onRequestCamera: () -> Unit,
+    onImageFetched: (localFileName: String) -> Unit
+) {
+    val webImageFetcher = koinInject<WebImageFetcher>()
+    val coroutineScope = rememberCoroutineScope()
+    var linkText by remember { mutableStateOf("") }
+    var isFetching by remember { mutableStateOf(false) }
+    var hasFetchFailed by remember { mutableStateOf(false) }
+    val hintColor = MaterialTheme.colorScheme.outline
+
+    fun fetchImage(address: String) {
+        if (isFetching) return
+        coroutineScope.launch {
+            isFetching = true
+            hasFetchFailed = false
+            val mediaInfo = webImageFetcher.fetchIntoMedia(address)
+            isFetching = false
+            if (mediaInfo != null) onImageFetched(mediaInfo.localFileName) else hasFetchFailed = true
+        }
+    }
+
+    fun fetchTypedLink() {
+        webImageAddressOrNull(linkText)?.let { address -> fetchImage(address) }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .defaultMinSize(minHeight = 52.dp)
+            .clip(DefaultBlockShape)
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+                    .combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { if (inSelectionMode) onToggleSelection() },
+                        onLongClick = if (isDesktopPlatform) null else onToggleSelection
+                    )
+                    .padding(horizontal = 14.dp, vertical = 14.dp)
+            ) {
+                Icon(painterResource(Res.drawable.image), contentDescription = null, tint = hintColor, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(10.dp))
+                Box(modifier = Modifier.weight(1f)) {
+                    if (linkText.isEmpty()) {
+                        Text(
+                            text = "Paste an image link, or upload one",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = hintColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    BasicTextField(
+                        value = linkText,
+                        onValueChange = { newText ->
+                            val wasPasted = newText.length - linkText.length > 1
+                            linkText = newText
+                            hasFetchFailed = false
+                            val address = webImageAddressOrNull(newText)
+                            if (wasPasted && address != null) fetchImage(address)
+                        },
+                        enabled = !inSelectionMode && !isFetching,
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { fetchTypedLink() }),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onPreviewKeyEvent { event ->
+                                val isEnterPress = event.type == KeyEventType.KeyDown &&
+                                    (event.key == Key.Enter || event.key == Key.NumPadEnter)
+                                if (isEnterPress) fetchTypedLink()
+                                isEnterPress
+                            }
+                    )
+                }
+                if (isFetching) {
+                    Spacer(Modifier.width(8.dp))
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(24.dp)
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+            )
+            Spacer(Modifier.width(EmptyImageButtonSidePadding))
+            EmptyImageBlockButton(
+                icon = Res.drawable.upload2,
+                contentDescription = "Upload Image",
+                onClick = { if (inSelectionMode) onToggleSelection() else onRequestPicker() }
+            )
+            if (!isDesktopPlatform) {
+                EmptyImageBlockButton(
+                    icon = Res.drawable.camera,
+                    contentDescription = "Take Photo",
+                    onClick = { if (inSelectionMode) onToggleSelection() else onRequestCamera() }
+                )
+            }
+            Spacer(Modifier.width(EmptyImageButtonsEndSpace))
+        }
+
+        if (hasFetchFailed) {
+            Text(
+                text = "Couldn't load an image from this link",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 44.dp, end = 14.dp, bottom = 10.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyImageBlockButton(icon: DrawableResource, contentDescription: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick)
+            .padding(horizontal = EmptyImageButtonSidePadding, vertical = 14.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painterResource(icon),
+            contentDescription = contentDescription,
+            tint = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

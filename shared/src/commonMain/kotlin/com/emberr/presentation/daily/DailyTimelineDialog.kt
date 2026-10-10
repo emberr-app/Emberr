@@ -689,6 +689,7 @@ private fun TimelineBlockContent(
             onToggleSelection = {},
             onRequestPicker = {},
             onRequestCamera = {},
+            onImageFetched = {},
             onDelete = {}
         )
 
