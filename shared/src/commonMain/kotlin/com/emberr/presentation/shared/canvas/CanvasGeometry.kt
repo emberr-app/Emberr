@@ -25,6 +25,7 @@ const val CANVAS_CLUSTER_RADIUS = 600f
 const val CANVAS_PREVIEW_MIN_ZOOM = 0.1f
 const val CANVAS_PREVIEW_MAX_ZOOM = 1f
 const val CANVAS_PREVIEW_FILL_RATIO = 0.85f
+const val CANVAS_EDGE_LABEL_MAX_WIDTH = 200f
 
 data class CanvasViewport(
     val panOffset: Offset = Offset.Zero,
@@ -59,6 +60,11 @@ data class CanvasViewport(
 fun canvasViewportCenteredOn(worldCenter: Offset, zoom: Float, screenCenter: Offset, density: Float): CanvasViewport {
     val clampedZoom = zoom.coerceIn(CANVAS_MIN_ZOOM, CANVAS_MAX_ZOOM)
     return CanvasViewport(panOffset = screenCenter - worldCenter * (clampedZoom * density), zoom = clampedZoom)
+}
+
+fun edgeLabelWorldRect(curve: CanvasCurve, labelSize: Size): Rect {
+    val middle = curve.pointAt(0.5f)
+    return Rect(offset = middle - Offset(labelSize.width / 2f, labelSize.height / 2f), size = labelSize)
 }
 
 val CanvasNodeEntity.worldRect: Rect

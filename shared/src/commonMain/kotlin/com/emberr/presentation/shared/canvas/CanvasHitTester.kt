@@ -2,6 +2,7 @@ package com.emberr.presentation.shared.canvas
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import com.emberr.data.local.room.entity.CanvasEdgeEntity
 import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.data.local.room.entity.CanvasSide
@@ -14,7 +15,8 @@ internal data class CanvasHandle(val nodeId: String, val side: CanvasSide)
 internal class CanvasHitTester(
     private val canvas: CanvasContent,
     private val viewport: CanvasViewport,
-    private val density: Float
+    private val density: Float,
+    private val edgeLabelSizes: Map<String, Size> = emptyMap()
 ) {
 
     fun screenRectOf(node: CanvasNodeEntity): Rect = viewport.worldRectToScreen(node.worldRect, density)
@@ -72,8 +74,24 @@ internal class CanvasHitTester(
         val nodesById = canvas.nodes.associateBy { it.nodeId }
         return canvas.edges.lastOrNull { edge ->
             val curve = screenCurveFor(edge, nodesById, viewport, density) ?: return@lastOrNull false
-            curve.distanceTo(screenPoint) <= hitDistance
+            curve.distanceTo(screenPoint) <= hitDistance || edgeLabelScreenRectOf(edge, nodesById)?.contains(screenPoint) == true
         }
+    }
+
+    fun labelAreaOfEdge(edgeId: String?): Rect? {
+        val edge = canvas.edges.firstOrNull { it.edgeId == edgeId } ?: return null
+        return labelScreenRectOf(edge, canvas.nodes.associateBy { it.nodeId })
+    }
+
+    private fun edgeLabelScreenRectOf(edge: CanvasEdgeEntity, nodesById: Map<String, CanvasNodeEntity>): Rect? {
+        if (edge.label.isNullOrBlank()) return null
+        return labelScreenRectOf(edge, nodesById)
+    }
+
+    private fun labelScreenRectOf(edge: CanvasEdgeEntity, nodesById: Map<String, CanvasNodeEntity>): Rect? {
+        val labelSize = edgeLabelSizes[edge.edgeId] ?: return null
+        val worldCurve = worldCurveFor(edge, nodesById) ?: return null
+        return viewport.worldRectToScreen(edgeLabelWorldRect(worldCurve, labelSize), density)
     }
 
     fun snapTargetNear(screenPoint: Offset, anchoredNodeId: String, snapRadius: Float): CanvasHandle? {

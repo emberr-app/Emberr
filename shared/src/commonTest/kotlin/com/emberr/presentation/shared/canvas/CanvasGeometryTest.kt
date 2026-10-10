@@ -10,6 +10,13 @@ import kotlin.test.assertTrue
 
 class CanvasGeometryTest {
 
+    @Test
+    fun anEdgeLabelSitsCenteredOnTheMiddleOfItsCurve() {
+        val curve = CanvasCurve(start = Offset(0f, 0f), startControl = Offset(25f, 0f), endControl = Offset(75f, 0f), end = Offset(100f, 0f))
+
+        assertEquals(Rect(left = 30f, top = -10f, right = 70f, bottom = 10f), edgeLabelWorldRect(curve, Size(40f, 20f)))
+    }
+
     private val density = 2f
 
     private fun assertClose(expected: Offset, actual: Offset) {

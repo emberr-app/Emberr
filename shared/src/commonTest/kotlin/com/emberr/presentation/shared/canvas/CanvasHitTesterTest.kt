@@ -1,6 +1,9 @@
 package com.emberr.presentation.shared.canvas
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import com.emberr.data.local.room.entity.CanvasEdgeEntity
 import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.data.local.room.entity.CanvasNodeType
 import com.emberr.data.local.room.entity.CanvasSide
@@ -34,10 +37,53 @@ class CanvasHitTesterTest {
         density = 1f
     )
 
+    private fun testerWithArrowLabelled(label: String?) = CanvasHitTester(
+        canvas = CanvasContent(
+            nodes = listOf(
+                node("left", x = 0f, y = 0f, width = 100f, height = 50f),
+                node("right", x = 300f, y = 0f, width = 100f, height = 50f)
+            ),
+            edges = listOf(
+                CanvasEdgeEntity(
+                    edgeId = "arrow",
+                    noteId = "canvas-1",
+                    fromNodeId = "left",
+                    fromSide = CanvasSide.RIGHT,
+                    toNodeId = "right",
+                    toSide = CanvasSide.LEFT,
+                    createdAt = 1L,
+                    updatedAt = 1L,
+                    label = label
+                )
+            )
+        ),
+        viewport = CanvasViewport(),
+        density = 1f,
+        edgeLabelSizes = mapOf("arrow" to Size(60f, 30f))
+    )
+
     @Test
     fun aBoxIsFoundBeforeTheGroupBehindIt() {
         assertEquals("inside", tester.nodeAt(Offset(60f, 60f))?.nodeId)
         assertEquals("group", tester.nodeAt(Offset(500f, 300f))?.nodeId)
+    }
+
+    @Test
+    fun tappingAnArrowLabelAwayFromTheLineStillFindsTheArrow() {
+        val onTheLabelBelowTheLine = Offset(225f, 38f)
+
+        assertEquals("arrow", testerWithArrowLabelled("leads to").edgeAt(onTheLabelBelowTheLine, hitDistance = 6f)?.edgeId)
+        assertNull(testerWithArrowLabelled(null).edgeAt(onTheLabelBelowTheLine, hitDistance = 6f))
+        assertNull(testerWithArrowLabelled("leads to").edgeAt(Offset(225f, 60f), hitDistance = 6f))
+    }
+
+    @Test
+    fun theLabelAreaOfAnArrowBeingGivenItsFirstLabelIsKnownBeforeAnyTextIsTyped() {
+        assertEquals(
+            Rect(left = 170f, top = 10f, right = 230f, bottom = 40f),
+            testerWithArrowLabelled(null).labelAreaOfEdge("arrow")
+        )
+        assertNull(testerWithArrowLabelled(null).labelAreaOfEdge(null))
     }
 
     @Test

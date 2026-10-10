@@ -36,6 +36,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -61,6 +63,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PointMode
@@ -94,6 +97,7 @@ import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.isTertiaryPressed
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
@@ -101,7 +105,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -133,6 +139,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.image
 import emberr.shared.generated.resources.square
+import emberr.shared.generated.resources.text_type
 import emberr.shared.generated.resources.trash
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -168,6 +175,11 @@ private const val ZOOM_BUTTON_STEP = 1.25f
 private const val VIEW_POSITION_SAVE_DELAY_MILLIS = 500L
 private const val TOOL_SETTINGS_SAVE_DELAY_MILLIS = 300L
 private val EDGE_HIT_DISTANCE = 6.dp
+private val EDGE_LABEL_CORNER_RADIUS = 4.dp
+private val EDGE_LABEL_HORIZONTAL_PADDING = 6.dp
+private val EDGE_LABEL_VERTICAL_PADDING = 2.dp
+private val EDGE_LABEL_MIN_EDITING_WIDTH = 40.dp
+private const val EDGE_LABEL_TEXT_ALPHA = 0.8f
 internal val EDGE_STROKE_WIDTH = 1.5.dp
 private val SELECTED_EDGE_STROKE_WIDTH = 2.5.dp
 internal val ARROW_SIZE = 9.dp
@@ -226,8 +238,10 @@ fun CanvasScreen(
     val isAddingImage by viewModel.isAddingImage.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
     var viewport by remember(noteId) { mutableStateOf(CanvasViewport()) }
+    val edgeLabelSizes = remember(noteId) { HashMap<String, Size>() }
     var selection by remember(noteId) { mutableStateOf<CanvasSelection>(CanvasSelection.None) }
     var editingNodeId by remember(noteId) { mutableStateOf<String?>(null) }
+    var editingEdgeId by remember(noteId) { mutableStateOf<String?>(null) }
     var hoveredNodeId by remember(noteId) { mutableStateOf<String?>(null) }
     var dragPreview by remember(noteId) { mutableStateOf<CanvasDragPreview?>(null) }
     var contextMenuRequest by remember(noteId) { mutableStateOf<CanvasContextMenuRequest?>(null) }
@@ -267,6 +281,16 @@ fun CanvasScreen(
         val finishedNodeId = previousEditingNodeId
         previousEditingNodeId = editingNodeId
         if (finishedNodeId != null && finishedNodeId != editingNodeId) viewModel.finishTextEditing(finishedNodeId)
+    }
+    var previousEditingEdgeId by remember(noteId) { mutableStateOf<String?>(null) }
+    LaunchedEffect(editingEdgeId) {
+        val finishedEdgeId = previousEditingEdgeId
+        previousEditingEdgeId = editingEdgeId
+        if (finishedEdgeId != null && finishedEdgeId != editingEdgeId) viewModel.finishEdgeLabelEditing(finishedEdgeId)
+    }
+    LaunchedEffect(selection) {
+        val labelEdgeId = editingEdgeId ?: return@LaunchedEffect
+        if (selection != CanvasSelection.Edge(labelEdgeId)) editingEdgeId = null
     }
     LaunchedEffect(isActive, isFullScreen) {
         if (!isEmbedded) return@LaunchedEffect
@@ -481,10 +505,18 @@ fun CanvasScreen(
 
     val keyboardHeightPx = WindowInsets.ime.getBottom(LocalDensity.current)
     val keyboardClearancePx = with(LocalDensity.current) { KEYBOARD_CLEARANCE.toPx() }
-    LaunchedEffect(editingNodeId, keyboardHeightPx, boardSize) {
+    fun editingEdgeLabelWorldRect(): Rect? {
+        val edge = canvas.edges.firstOrNull { it.edgeId == editingEdgeId } ?: return null
+        val worldCurve = worldCurveFor(edge, canvas.nodes.associateBy { it.nodeId }) ?: return null
+        return edgeLabelWorldRect(worldCurve, edgeLabelSizes[edge.edgeId] ?: Size.Zero)
+    }
+
+    LaunchedEffect(editingNodeId, editingEdgeId, keyboardHeightPx, boardSize) {
         if (isDesktopPlatform || (isEmbedded && !isFullScreen) || keyboardHeightPx == 0) return@LaunchedEffect
-        val editingNode = canvas.nodes.firstOrNull { it.nodeId == editingNodeId } ?: return@LaunchedEffect
-        val editingRect = viewport.worldRectToScreen(editingNode.worldRect, pixelDensity)
+        val editingWorldRect = canvas.nodes.firstOrNull { it.nodeId == editingNodeId }?.worldRect
+            ?: editingEdgeLabelWorldRect()
+            ?: return@LaunchedEffect
+        val editingRect = viewport.worldRectToScreen(editingWorldRect, pixelDensity)
         val visibleBottom = boardSize.height - keyboardHeightPx - keyboardClearancePx
         val hiddenBelowKeyboard = editingRect.bottom - visibleBottom
         if (hiddenBelowKeyboard <= 0f) return@LaunchedEffect
@@ -543,6 +575,14 @@ fun CanvasScreen(
 
     fun contextMenuOptionsFor(target: CanvasSelection): List<CanvasMenuOption> {
         val deleteOption = CanvasMenuOption("Delete", Res.drawable.trash, isDestructive = true) { deleteItems(target) }
+        if (target is CanvasSelection.Edge) {
+            val hasLabel = canvas.edges.any { it.edgeId == target.edgeId && !it.label.isNullOrBlank() }
+            val labelOption = CanvasMenuOption(if (hasLabel) "Edit label" else "Add label", Res.drawable.text_type) {
+                selection = target
+                editingEdgeId = target.edgeId
+            }
+            return listOf(labelOption, deleteOption)
+        }
         if (target !is CanvasSelection.Nodes) return listOf(deleteOption)
         val clickedGroup = target.nodeIds.singleOrNull()?.let { nodeId ->
             canvas.nodes.firstOrNull { it.nodeId == nodeId && it.isGroup }
@@ -578,19 +618,25 @@ fun CanvasScreen(
                 .onPreviewKeyEvent { event ->
                     if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                     val isEditingGroupTitle = canvas.nodes.any { it.nodeId == editingNodeId && it.isGroup }
+                    val isEditingText = editingNodeId != null || editingEdgeId != null
                     val isCommandPressed = event.isCtrlPressed || event.isMetaPressed
                     when {
                         event.key == Key.Escape && activeTool != null -> {
                             dropActiveTool()
                             true
                         }
-                        editingNodeId == null && isCommandPressed && event.key == Key.Z && !event.isShiftPressed -> {
+                        !isEditingText && isCommandPressed && event.key == Key.Z && !event.isShiftPressed -> {
                             viewModel.undo()
                             true
                         }
-                        editingNodeId == null && isCommandPressed &&
+                        !isEditingText && isCommandPressed &&
                             (event.key == Key.Y || (event.key == Key.Z && event.isShiftPressed)) -> {
                             viewModel.redo()
+                            true
+                        }
+                        (event.key == Key.Escape || event.key == Key.Enter) && editingEdgeId != null -> {
+                            editingEdgeId = null
+                            canvasFocusRequester.requestFocus()
                             true
                         }
                         event.key == Key.Escape && editingNodeId != null -> {
@@ -603,11 +649,11 @@ fun CanvasScreen(
                             canvasFocusRequester.requestFocus()
                             true
                         }
-                        editingNodeId == null && isCommandPressed && event.key == Key.V -> {
+                        !isEditingText && isCommandPressed && event.key == Key.V -> {
                             viewModel.pasteImageFromClipboard(boardCenterInWorld())
                             true
                         }
-                        editingNodeId == null && (event.key == Key.Delete || event.key == Key.Backspace) -> {
+                        !isEditingText && (event.key == Key.Delete || event.key == Key.Backspace) -> {
                             deleteItems(selection)
                             true
                         }
@@ -628,7 +674,7 @@ fun CanvasScreen(
                         return isDoubleTap
                     }
 
-                    fun hitTester() = CanvasHitTester(canvas, viewport, density)
+                    fun hitTester() = CanvasHitTester(canvas, viewport, density, edgeLabelSizes)
 
                     fun movedLooseEnd(dragging: CanvasDragPreview.DraggingEdgeEnd, screenPoint: Offset) = dragging.copy(
                         looseEndWorld = viewport.screenToWorld(screenPoint, density),
@@ -706,6 +752,7 @@ fun CanvasScreen(
                         val downPosition = down.position
                         val tester = hitTester()
                         val editingArea = tester.editingAreaOf(editingNodeId, TOUCH_RESIZE_GRAB_DISTANCE.toPx())
+                            ?: tester.labelAreaOfEdge(editingEdgeId)
                         if (editingArea != null && editingArea.contains(downPosition)) return@awaitEachGesture
 
                         down.consume()
@@ -771,7 +818,13 @@ fun CanvasScreen(
                                             }
                                         }
                                     }
-                                    pressedEdge != null -> selection = CanvasSelection.Edge(pressedEdge.edgeId)
+                                    pressedEdge != null -> {
+                                        if (selection == CanvasSelection.Edge(pressedEdge.edgeId)) {
+                                            editingEdgeId = pressedEdge.edgeId
+                                        } else {
+                                            selection = CanvasSelection.Edge(pressedEdge.edgeId)
+                                        }
+                                    }
                                     else -> {
                                         selection = CanvasSelection.None
                                         if (registerTap("empty", down.uptimeMillis, downPosition)) {
@@ -895,7 +948,7 @@ fun CanvasScreen(
                         return isDoubleClick
                     }
 
-                    fun hitTester() = CanvasHitTester(canvas, viewport, density)
+                    fun hitTester() = CanvasHitTester(canvas, viewport, density, edgeLabelSizes)
 
                     fun groupTitleScreenRectOf(group: CanvasNodeEntity): Rect = hitTester().groupTitleScreenRectOf(group)
 
@@ -1031,6 +1084,7 @@ fun CanvasScreen(
                         }
 
                         val editingArea = hitTester().editingAreaOf(editingNodeId, RESIZE_GRAB_DISTANCE.toPx())
+                            ?: hitTester().labelAreaOfEdge(editingEdgeId)
                         if (editingArea != null && editingArea.contains(pressPosition)) {
                             return@awaitEachGesture
                         }
@@ -1151,6 +1205,7 @@ fun CanvasScreen(
                         }
 
                         if (pressedEdge != null) {
+                            val wasAlreadySelected = selection == CanvasSelection.Edge(pressedEdge.edgeId)
                             selection = CanvasSelection.Edge(pressedEdge.edgeId)
                             val pressedCurve = screenCurveFor(pressedEdge, canvas.nodes.associateBy { it.nodeId }, viewport, density)
                             val grabbedArrowHead = (pressedCurve?.closestProgressTo(pressPosition) ?: 1f) >= 0.5f
@@ -1171,6 +1226,8 @@ fun CanvasScreen(
                             dragPreview = null
                             if (snapTarget != null) {
                                 viewModel.reconnectEdge(pressedEdge.edgeId, grabbedArrowHead, snapTarget.nodeId, snapTarget.side)
+                            } else if (detachedEnd == null && wasAlreadySelected) {
+                                editingEdgeId = pressedEdge.edgeId
                             }
                             return@awaitEachGesture
                         }
@@ -1238,6 +1295,32 @@ fun CanvasScreen(
                         edgeCurve(loosePoint, looseSide, anchoredPoint, preview.anchoredSide, controlDistance)
                     }
                     drawCanvasEdge(worldCurve.toScreen(viewport, pixelDensity), CanvasSelectionColor, SELECTED_EDGE_STROKE_WIDTH.toPx(), ARROW_SIZE.toPx())
+                }
+            }
+
+            val nodesById = canvas.nodes.associateBy { it.nodeId }
+            val detachedEdgeId = (dragPreview as? CanvasDragPreview.DraggingEdgeEnd)?.detachedEdgeId
+            canvas.edges.forEach { edge ->
+                val isEditingLabel = edge.edgeId == editingEdgeId
+                val label = edge.label.orEmpty()
+                if (label.isBlank() && !isEditingLabel) return@forEach
+                if (edge.edgeId == detachedEdgeId) return@forEach
+                val worldCurve = worldCurveFor(edge, nodesById) ?: return@forEach
+                key(edge.edgeId) {
+                    CanvasEdgeLabel(
+                        text = label,
+                        worldCenter = worldCurve.pointAt(0.5f),
+                        viewport = viewport,
+                        isSelected = selection == CanvasSelection.Edge(edge.edgeId),
+                        isEditing = isEditingLabel,
+                        cursorColor = accentColor,
+                        onTextChange = { text -> viewModel.updateEdgeLabel(edge.edgeId, text) },
+                        onDone = {
+                            editingEdgeId = null
+                            canvasFocusRequester.requestFocus()
+                        },
+                        onSizeMeasured = { worldSize -> edgeLabelSizes[edge.edgeId] = worldSize }
+                    )
                 }
             }
 
@@ -1880,6 +1963,61 @@ internal fun CanvasNodeCard(
 }
 
 @Composable
+internal fun CanvasEdgeLabel(
+    text: String,
+    worldCenter: Offset,
+    viewport: CanvasViewport,
+    isSelected: Boolean,
+    isEditing: Boolean,
+    cursorColor: Color,
+    onTextChange: (String) -> Unit,
+    onDone: () -> Unit,
+    onSizeMeasured: (Size) -> Unit
+) {
+    val baseDensity = LocalDensity.current
+    val screenCenter = viewport.worldToScreen(worldCenter, baseDensity.density)
+    val pixelsPerUnit = viewport.pixelsPerUnit(baseDensity.density)
+    val zoomedDensity = Density(pixelsPerUnit, baseDensity.fontScale)
+    val textStyle = MaterialTheme.typography.bodyMedium.copy(
+        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = EDGE_LABEL_TEXT_ALPHA),
+        textAlign = TextAlign.Center
+    )
+
+    Box(
+        Modifier.layout { measurable, _ ->
+            val placeable = measurable.measure(Constraints())
+            layout(placeable.width, placeable.height) {
+                placeable.place(
+                    x = (screenCenter.x - placeable.width / 2f).roundToInt(),
+                    y = (screenCenter.y - placeable.height / 2f).roundToInt()
+                )
+            }
+        }
+    ) {
+        CompositionLocalProvider(LocalDensity provides zoomedDensity) {
+            val labelModifier = Modifier
+                .onSizeChanged { measured -> onSizeMeasured(Size(measured.width / pixelsPerUnit, measured.height / pixelsPerUnit)) }
+                .widthIn(min = if (isEditing) EDGE_LABEL_MIN_EDITING_WIDTH else 0.dp, max = CANVAS_EDGE_LABEL_MAX_WIDTH.dp)
+                .background(MaterialTheme.colorScheme.background, RoundedCornerShape(EDGE_LABEL_CORNER_RADIUS))
+                .padding(horizontal = EDGE_LABEL_HORIZONTAL_PADDING, vertical = EDGE_LABEL_VERTICAL_PADDING)
+            if (isEditing) {
+                CanvasNodeTextField(
+                    text = text,
+                    textStyle = textStyle,
+                    cursorColor = cursorColor,
+                    onTextChange = onTextChange,
+                    singleLine = true,
+                    onDone = onDone,
+                    modifier = labelModifier
+                )
+            } else {
+                Text(text = text, style = textStyle, modifier = labelModifier)
+            }
+        }
+    }
+}
+
+@Composable
 internal fun CanvasFreeTextCard(
     node: CanvasNodeEntity,
     viewport: CanvasViewport,
@@ -1960,6 +2098,7 @@ private fun CanvasNodeTextField(
     cursorColor: Color,
     onTextChange: (String) -> Unit,
     singleLine: Boolean = false,
+    onDone: (() -> Unit)? = null,
     modifier: Modifier = Modifier.fillMaxSize()
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -1973,6 +2112,8 @@ private fun CanvasNodeTextField(
         },
         textStyle = textStyle,
         singleLine = singleLine,
+        keyboardOptions = if (onDone == null) KeyboardOptions.Default else KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = if (onDone == null) KeyboardActions.Default else KeyboardActions(onDone = { onDone() }),
         cursorBrush = SolidColor(cursorColor),
         modifier = modifier.focusRequester(focusRequester)
     )
@@ -2072,7 +2213,9 @@ internal fun screenCurveFor(
     nodesById: Map<String, CanvasNodeEntity>,
     viewport: CanvasViewport,
     density: Float
-): CanvasCurve? {
+): CanvasCurve? = worldCurveFor(edge, nodesById)?.toScreen(viewport, density)
+
+internal fun worldCurveFor(edge: CanvasEdgeEntity, nodesById: Map<String, CanvasNodeEntity>): CanvasCurve? {
     val fromNode = nodesById[edge.fromNodeId] ?: return null
     val toNode = nodesById[edge.toNodeId] ?: return null
     val startWorld = fromNode.anchorOn(edge.fromSide)
@@ -2083,7 +2226,7 @@ internal fun screenCurveFor(
         end = endWorld,
         endSide = edge.toSide,
         controlDistance = edgeControlDistance(startWorld, endWorld, EDGE_MIN_CONTROL_UNITS, EDGE_MAX_CONTROL_UNITS)
-    ).toScreen(viewport, density)
+    )
 }
 
 private fun CanvasCurve.toScreen(viewport: CanvasViewport, density: Float): CanvasCurve = CanvasCurve(

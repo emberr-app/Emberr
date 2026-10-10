@@ -23,6 +23,7 @@ import com.emberr.domain.canvas.CanvasStrokePoint
 import com.emberr.domain.canvas.CanvasStrokePoints
 import com.emberr.domain.canvas.CanvasViewPosition
 import com.emberr.domain.canvas.CanvasViewPositionStore
+import com.emberr.domain.canvas.cleanedEdgeLabel
 import com.emberr.domain.canvas.isFreeText
 import com.emberr.domain.canvas.isGroup
 import com.emberr.domain.canvas.isInside
@@ -103,6 +104,7 @@ class CanvasViewModel(
     private var saveJob: Job? = null
     private val history = CanvasHistory()
     private var textEditStepNodeId: String? = null
+    private var labelEditStepEdgeId: String? = null
     private var freeTextCreatedInOpenStepId: String? = null
     private var lastIndexedSignature: Int? = null
     private var needsIndexBaseline = true
@@ -181,6 +183,7 @@ class CanvasViewModel(
             loadedNoteId.value = noteId
             history.clear()
             textEditStepNodeId = null
+            labelEditStepEdgeId = null
             _canvas.value = CanvasContent()
         }
         viewModelScope.launch { reloadFromDatabase() }
@@ -225,6 +228,7 @@ class CanvasViewModel(
     fun beginUndoStep() {
         history.beginStep(_canvas.value)
         textEditStepNodeId = null
+        labelEditStepEdgeId = null
         freeTextCreatedInOpenStepId = null
     }
 
@@ -238,12 +242,14 @@ class CanvasViewModel(
     fun undo() {
         val step = history.takeStepToUndo(_canvas.value) ?: return
         textEditStepNodeId = null
+        labelEditStepEdgeId = null
         restoreStates(step.nodesBefore, step.edgesBefore, step.strokesBefore)
     }
 
     fun redo() {
         val step = history.takeStepToRedo(_canvas.value) ?: return
         textEditStepNodeId = null
+        labelEditStepEdgeId = null
         restoreStates(step.nodesAfter, step.edgesAfter, step.strokesAfter)
     }
 
@@ -475,6 +481,21 @@ class CanvasViewModel(
         rememberUnsavedEdge(stampedEdge)
     }
 
+    fun updateEdgeLabel(edgeId: String, label: String) {
+        if (labelEditStepEdgeId != edgeId) {
+            beginUndoStep()
+            labelEditStepEdgeId = edgeId
+        }
+        updateEdge(edgeId) { it.copy(label = label) }
+    }
+
+    fun finishEdgeLabelEditing(edgeId: String) {
+        labelEditStepEdgeId = null
+        val edge = _canvas.value.edges.firstOrNull { it.edgeId == edgeId } ?: return
+        val cleanedLabel = cleanedEdgeLabel(edge.label)
+        if (cleanedLabel != edge.label) updateEdge(edgeId) { it.copy(label = cleanedLabel) }
+    }
+
     fun deleteEdge(edgeId: String) {
         val current = _canvas.value
         val deletedEdge = current.edges.firstOrNull { it.edgeId == edgeId } ?: return
@@ -543,6 +564,17 @@ class CanvasViewModel(
         val now = System.currentTimeMillis()
         _canvas.value = current.copy(strokes = remainingStrokes)
         erasedStrokes.forEach { rememberUnsavedStroke(it.copy(isDeleted = true, updatedAt = now)) }
+    }
+
+    private fun updateEdge(edgeId: String, change: (CanvasEdgeEntity) -> CanvasEdgeEntity) {
+        var updatedEdge: CanvasEdgeEntity? = null
+        _canvas.value = _canvas.value.copy(
+            edges = _canvas.value.edges.map { edge ->
+                if (edge.edgeId != edgeId) return@map edge
+                change(edge).copy(updatedAt = System.currentTimeMillis()).also { updatedEdge = it }
+            }
+        )
+        updatedEdge?.let { rememberUnsavedEdge(it) }
     }
 
     private fun updateNode(nodeId: String, change: (CanvasNodeEntity) -> CanvasNodeEntity) {
