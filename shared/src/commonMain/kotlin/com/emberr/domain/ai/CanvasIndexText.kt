@@ -2,6 +2,7 @@ package com.emberr.domain.ai
 
 import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.domain.canvas.CanvasContent
+import com.emberr.domain.canvas.cleanedEdgeLabel
 import com.emberr.domain.canvas.isGroup
 
 private const val ARROW_LABEL_MAX_LENGTH = 80
@@ -18,7 +19,8 @@ fun canvasTextForIndexing(canvas: CanvasContent): String {
     val arrowLines = liveCanvas.edges.mapNotNull { edge ->
         val fromLabel = nodesById[edge.fromNodeId]?.let { arrowLabelOf(it) } ?: return@mapNotNull null
         val toLabel = nodesById[edge.toNodeId]?.let { arrowLabelOf(it) } ?: return@mapNotNull null
-        "$fromLabel → $toLabel"
+        val arrowText = cleanedEdgeLabel(edge.label)
+        if (arrowText == null) "$fromLabel → $toLabel" else "$fromLabel → $toLabel: $arrowText"
     }
     return (nodeLines + arrowLines).joinToString("\n")
 }

@@ -31,7 +31,7 @@ class CanvasIndexTextTest {
         type = type
     )
 
-    private fun arrow(fromNodeId: String, toNodeId: String) = CanvasEdgeEntity(
+    private fun arrow(fromNodeId: String, toNodeId: String, label: String? = null) = CanvasEdgeEntity(
         edgeId = "$fromNodeId-$toNodeId",
         noteId = "canvas-1",
         fromNodeId = fromNodeId,
@@ -39,7 +39,8 @@ class CanvasIndexTextTest {
         toNodeId = toNodeId,
         toSide = CanvasSide.LEFT,
         createdAt = 1L,
-        updatedAt = 1L
+        updatedAt = 1L,
+        label = label
     )
 
     @Test
@@ -78,6 +79,20 @@ class CanvasIndexTextTest {
         )
 
         assertEquals("Idea\nwith details\nPlan\nIdea → Plan", canvasTextForIndexing(canvas))
+    }
+
+    @Test
+    fun anArrowLabelIsAddedAfterTheRelationshipAndABlankLabelIsLeftOut() {
+        val canvas = CanvasContent(
+            nodes = listOf(
+                node("idea", "Idea", y = 0f),
+                node("prototype", "Prototype", y = 200f),
+                node("launch", "Launch", y = 400f)
+            ),
+            edges = listOf(arrow("idea", "prototype", label = " leads to "), arrow("prototype", "launch", label = "  "))
+        )
+
+        assertEquals("Idea\nPrototype\nLaunch\nIdea → Prototype: leads to\nPrototype → Launch", canvasTextForIndexing(canvas))
     }
 
     @Test

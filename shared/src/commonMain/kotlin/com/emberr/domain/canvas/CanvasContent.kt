@@ -51,6 +51,11 @@ data class CanvasContent(
     }
 }
 
+private val whitespaceRun = Regex("\\s+")
+
+fun cleanedEdgeLabel(typedText: String?): String? =
+    typedText?.replace(whitespaceRun, " ")?.trim()?.takeIf { it.isNotEmpty() }
+
 val CanvasNodeEntity.isGroup: Boolean
     get() = type == CanvasNodeType.GROUP
 

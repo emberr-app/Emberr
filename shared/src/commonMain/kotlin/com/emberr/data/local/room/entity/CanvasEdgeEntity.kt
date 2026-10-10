@@ -34,5 +34,6 @@ data class CanvasEdgeEntity(
     val toSide: CanvasSide,
     val createdAt: Long,
     val updatedAt: Long,
-    val isDeleted: Boolean = false
+    val isDeleted: Boolean = false,
+    val label: String? = null
 )

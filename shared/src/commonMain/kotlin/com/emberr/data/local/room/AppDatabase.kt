@@ -1,5 +1,6 @@
 package com.emberr.data.local.room
 
+import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -46,7 +47,7 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.data.local.room.entity.UnappliedSyncChangeEntity
 import com.emberr.data.local.room.entity.UnusedMediaFileEntity
 
-const val APP_DATABASE_VERSION = 1
+const val APP_DATABASE_VERSION = 2
 
 @Database(
     entities = [
@@ -73,7 +74,8 @@ const val APP_DATABASE_VERSION = 1
         UnusedMediaFileEntity::class
     ],
     version = APP_DATABASE_VERSION,
-    exportSchema = true
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)]
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {

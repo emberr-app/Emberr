@@ -72,6 +72,16 @@ class CanvasContentCopyTest {
     }
 
     @Test
+    fun aCopiedArrowKeepsItsLabel() {
+        val original = CanvasContent(
+            nodes = listOf(node("agenda", "Agenda"), node("notes", "Notes")),
+            edges = listOf(edge("arrow", fromNodeId = "agenda", toNodeId = "notes").copy(label = "leads to"))
+        )
+
+        assertEquals("leads to", copyOf(original).edges.single().label)
+    }
+
+    @Test
     fun deletedBoxesAndArrowsAreNotCopied() {
         val original = CanvasContent(
             nodes = listOf(node("agenda", "Agenda"), node("removed", "Removed", isDeleted = true)),
