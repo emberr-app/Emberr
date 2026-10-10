@@ -93,6 +93,7 @@ private val firstLevelHeadingTypes = setOf(MarkdownElementTypes.ATX_1, MarkdownE
 internal class ConvertedMarkdown(
     val blocks: List<NoteBlock>,
     val pendingAttachments: List<PendingAttachment>,
+    val pendingWebImages: List<PendingWebImage>,
     val inlineTags: List<String>
 )
 
@@ -114,7 +115,7 @@ internal object MarkdownToBlocks {
             ).buildMarkdownTreeFromString(markdownText)
             root to LinkMap.buildLinkMap(root, markdownText)
         } catch (_: Exception) {
-            return ConvertedMarkdown(PlainTextToBlocks.convert(markdownText.toString(), now, newBlockId), emptyList(), emptyList())
+            return ConvertedMarkdown(PlainTextToBlocks.convert(markdownText.toString(), now, newBlockId), emptyList(), emptyList(), emptyList())
         }
 
         val (root, linkMap) = parsed
@@ -176,11 +177,12 @@ private class MarkdownBlockBuilder(
 
     private val blocks = mutableListOf<NoteBlock>()
     private val pendingAttachments = mutableListOf<PendingAttachment>()
+    private val pendingWebImages = mutableListOf<PendingWebImage>()
     private val inlineTags = mutableListOf<String>()
 
     fun build(root: ASTNode, baseIndentation: Int): ConvertedMarkdown {
         root.children.forEach { node -> convertBlock(node, baseIndentation) }
-        return ConvertedMarkdown(blocks.toList(), pendingAttachments.toList(), inlineTags.toList())
+        return ConvertedMarkdown(blocks.toList(), pendingAttachments.toList(), pendingWebImages.toList(), inlineTags.toList())
     }
 
     private fun convertBlock(node: ASTNode, indentation: Int) {
@@ -426,6 +428,7 @@ private class MarkdownBlockBuilder(
         val comment = MarkdownToBlocks.convert(commentMarkdown, linkResolver, now, newBlockId, baseIndentation = indentation + 1)
         blocks += comment.blocks
         pendingAttachments += comment.pendingAttachments
+        pendingWebImages += comment.pendingWebImages
     }
 
     private fun addIndentedCode(codeBlock: ASTNode, indentation: Int) {
@@ -495,7 +498,7 @@ private class MarkdownBlockBuilder(
             when (part) {
                 is InlinePart.Words -> blocks += wordsBlock(part.styledText, indentation)
                 is InlinePart.Attachment -> addAttachment(part.relativePath, indentation)
-                is InlinePart.WebImage -> blocks += bookmarkBlock(part.url, part.altText, indentation)
+                is InlinePart.WebImage -> addWebImage(part.url, part.altText, indentation)
             }
         }
     }
@@ -508,6 +511,12 @@ private class MarkdownBlockBuilder(
             DocumentBlock(id = id, fileName = relativePath.substringAfterLast('/'), indentationLevel = indentation, updatedAt = now)
         }
         pendingAttachments += PendingAttachment(blockId = id, relativePath = relativePath)
+    }
+
+    private fun addWebImage(url: String, altText: String, indentation: Int) {
+        val id = newBlockId()
+        blocks += ImageBlock(id = id, indentationLevel = indentation, updatedAt = now)
+        pendingWebImages += PendingWebImage(blockId = id, url = url, altText = altText)
     }
 
     private fun inlinePartsOf(nodes: List<ASTNode>): List<InlinePart> =

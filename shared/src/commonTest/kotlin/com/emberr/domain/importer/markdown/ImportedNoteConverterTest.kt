@@ -304,10 +304,14 @@ class ImportedNoteConverterTest {
     }
 
     @Test
-    fun anImageFromTheWebBecomesABookmark() {
+    fun anImageFromTheWebWaitsToBeDownloaded() {
+        val converted = convert("![logo](https://example.com/logo.png)")
+
+        val image = converted.blocks.single()
+        assertTrue(image is ImageBlock)
         assertEquals(
-            listOf(BookmarkBlock(id = "", url = "https://example.com/logo.png", title = "logo", updatedAt = NOW)),
-            blocksOf("![logo](https://example.com/logo.png)")
+            listOf(PendingWebImage(blockId = image.id, url = "https://example.com/logo.png", altText = "logo")),
+            converted.pendingWebImages
         )
     }
 

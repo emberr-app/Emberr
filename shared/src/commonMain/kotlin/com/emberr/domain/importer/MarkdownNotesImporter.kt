@@ -12,6 +12,8 @@ import com.emberr.domain.importer.canvas.ObsidianCanvasConverter
 import com.emberr.domain.importer.markdown.ConvertedNote
 import com.emberr.domain.importer.markdown.ImportedNoteConverter
 import com.emberr.domain.importer.markdown.PendingAttachment
+import com.emberr.domain.importer.markdown.PendingWebImage
+import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.NoteBlock
@@ -22,6 +24,7 @@ import com.emberr.domain.model.generateSnippet
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.media.MediaInfo
 import com.emberr.domain.util.media.MediaStorageHelper
+import com.emberr.domain.util.media.WebImageFetcher
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,6 +84,7 @@ class MarkdownNotesImporter(
     private val repository: NoteRepository,
     private val canvasRepository: CanvasRepository,
     private val mediaStorageHelper: MediaStorageHelper,
+    private val webImageFetcher: WebImageFetcher,
     private val appScope: CoroutineScope
 ) {
 
@@ -174,6 +178,7 @@ class MarkdownNotesImporter(
 
         val folderIdsByPath = createFolders(noteFiles, spaceId, now, failedNames)
         val copiedAttachments = mutableMapOf<String, MediaInfo?>()
+        val downloadedWebImages = mutableMapOf<String, MediaInfo?>()
         val customPropertiesByName = mutableMapOf<String, CustomPropertyEntity>()
         var importedNoteCount = 0
 
@@ -192,8 +197,15 @@ class MarkdownNotesImporter(
                 try {
                     val details = ImportedProperties.detailsOf(converted.frontMatter, converted.inlineTags)
                     val propertyBlocks = propertyBlocksFor(details.properties, spaceId, now, customPropertiesByName)
-                    val blocks = propertyBlocks + withAttachmentsCopied(converted.blocks, converted.pendingAttachments, now, failedNames) { attachmentPath ->
+                    val blocksWithAttachments = withAttachmentsCopied(converted.blocks, converted.pendingAttachments, now, failedNames) { attachmentPath ->
                         copiedAttachmentFor(attachmentPath)
+                    }
+                    val blocks = propertyBlocks + withWebImagesDownloaded(blocksWithAttachments, converted.pendingWebImages, now) { url ->
+                        if (url in downloadedWebImages) {
+                            downloadedWebImages[url]
+                        } else {
+                            downloadWebImage(url, progressTracker).also { mediaInfo -> downloadedWebImages[url] = mediaInfo }
+                        }
                     }
                     val content = NoteContent(blocks = blocks)
                     val metadata = NoteMetadataEntity(
@@ -250,7 +262,7 @@ class MarkdownNotesImporter(
             spaceId = spaceId,
             importedNoteCount = importedNoteCount,
             createdFolderCount = folderIdsByPath.size,
-            copiedAttachmentCount = copiedAttachments.values.count { it != null },
+            copiedAttachmentCount = copiedAttachments.values.count { it != null } + downloadedWebImages.values.count { it != null },
             failedNames = failedNames.toList()
         )
     }
@@ -347,6 +359,36 @@ class MarkdownNotesImporter(
                 else -> block
             }
         }
+    }
+
+    private suspend fun withWebImagesDownloaded(
+        blocks: List<NoteBlock>,
+        pendingWebImages: List<PendingWebImage>,
+        now: Long,
+        downloadedImageFor: suspend (String) -> MediaInfo?
+    ): List<NoteBlock> {
+        val webImagesByBlockId = pendingWebImages.associateBy { it.blockId }
+        return blocks.map { block ->
+            val webImage = webImagesByBlockId[block.id] ?: return@map block
+            val mediaInfo = downloadedImageFor(webImage.url)
+            if (mediaInfo != null && block is ImageBlock) {
+                block.copy(localFilePath = mediaInfo.localFileName)
+            } else {
+                BookmarkBlock(
+                    id = block.id,
+                    url = webImage.url,
+                    title = webImage.altText.takeIf { it.isNotBlank() && it != webImage.url },
+                    indentationLevel = block.indentationLevel,
+                    updatedAt = now
+                )
+            }
+        }
+    }
+
+    private suspend fun downloadWebImage(url: String, progressTracker: ImportProgressTracker): MediaInfo? {
+        val shownName = url.substringBefore('?').substringAfterLast('/').ifBlank { url }
+        progressTracker.attachmentCopying(shownName, copiedBytes = 0L)
+        return webImageFetcher.fetchIntoMedia(url)
     }
 
     private suspend fun withCanvasImagesCopied(

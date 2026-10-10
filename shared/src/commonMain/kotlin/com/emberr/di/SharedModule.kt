@@ -362,11 +362,15 @@ val sharedModule = module {
             activeSpaceStore = get()
         )
     }
+    single<com.emberr.domain.util.media.WebImageFetcher> {
+        com.emberr.domain.util.media.KtorWebImageFetcher(mediaStorageHelper = get())
+    }
     single {
         com.emberr.domain.importer.MarkdownNotesImporter(
             repository = get(),
             canvasRepository = get(),
             mediaStorageHelper = get(),
+            webImageFetcher = get(),
             appScope = get(named("AppScope"))
         )
     }

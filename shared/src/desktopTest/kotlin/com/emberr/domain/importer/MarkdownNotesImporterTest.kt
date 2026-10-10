@@ -14,6 +14,7 @@ import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.canvas.CanvasRepository
+import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.LinkedNoteBlock
@@ -23,6 +24,7 @@ import com.emberr.domain.repository.NoteRepositoryImpl
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.util.media.MediaInfo
 import com.emberr.domain.util.media.MediaStorageHelper
+import com.emberr.domain.util.media.WebImageFetcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -99,8 +101,14 @@ class MarkdownNotesImporterTest {
         override suspend fun copyUriToInternalStorage(uriString: String): MediaInfo? =
             error("The importer is not expected to copy from a uri")
 
-        override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo? =
-            error("The importer is expected to stream attachments instead of loading them whole")
+        val fileNamesSavedFromBytes = mutableListOf<String>()
+
+        override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo {
+            val fileName = "media_${savedFileNames.size + 1}.$extension"
+            savedFileNames += fileName
+            fileNamesSavedFromBytes += fileName
+            return MediaInfo(localFileName = fileName, originalName = fileName, mimeType = mimeType, sizeBytes = bytes.size.toLong())
+        }
 
         override suspend fun saveStreamToInternalStorage(
             openSource: () -> Source,
@@ -142,11 +150,24 @@ class MarkdownNotesImporterTest {
         releaseResources = onClose
     )
 
+    private val webImages = FakeWebImageFetcher()
+
+    private class FakeWebImageFetcher : WebImageFetcher {
+        val savedImagesByUrl = mutableMapOf<String, MediaInfo>()
+        val requestedUrls = mutableListOf<String>()
+
+        override suspend fun fetchIntoMedia(url: String): MediaInfo? {
+            requestedUrls += url
+            return savedImagesByUrl[url]
+        }
+    }
+
     private fun importer(appScope: CoroutineScope) =
         MarkdownNotesImporter(
             repository = repository,
             canvasRepository = canvasRepository,
             mediaStorageHelper = mediaStorage,
+            webImageFetcher = webImages,
             appScope = appScope
         )
 
@@ -212,6 +233,7 @@ class MarkdownNotesImporterTest {
         assertEquals("application/pdf", report.mimeType)
         assertEquals(listOf("media_1.png", "media_2.pdf"), mediaStorage.savedFileNames)
         assertEquals("png bytes", mediaStorage.savedTextsByFileName["media_1.png"])
+        assertEquals(emptyList(), mediaStorage.fileNamesSavedFromBytes)
     }
 
     @Test
@@ -310,6 +332,29 @@ class MarkdownNotesImporterTest {
 
         val expectedCreatedAt = LocalDateTime(2026, 10, 1, 0, 0).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
         assertEquals(expectedCreatedAt, plan.createdAt)
+    }
+
+    @Test
+    fun webImagesAreDownloadedOnceAndBecomeBookmarksWhenTheyCannotBe() = runTest {
+        webImages.savedImagesByUrl["https://example.com/logo.png"] =
+            MediaInfo(localFileName = "media_web.png", originalName = "media_web.png", mimeType = "image/png", sizeBytes = 9)
+
+        val result = importer(backgroundScope).importFiles(
+            pickedFiles(
+                "First.md" to "![logo](https://example.com/logo.png)\n\n![gone](https://example.com/gone.png)",
+                "Second.md" to "![logo](https://example.com/logo.png)"
+            ),
+            spaceId = IMPORT_SPACE_ID
+        )
+
+        val firstBlocks = repository.getNoteContent(importedNotes().single { it.title == "First" }.noteId)!!.blocks
+        assertEquals("media_web.png", (firstBlocks[0] as ImageBlock).localFilePath)
+        val fallback = firstBlocks[1] as BookmarkBlock
+        assertEquals("https://example.com/gone.png", fallback.url)
+        assertEquals("gone", fallback.title)
+        assertEquals(listOf("https://example.com/logo.png", "https://example.com/gone.png"), webImages.requestedUrls)
+        assertEquals(1, result.copiedAttachmentCount)
+        assertEquals(emptyList(), result.failedNames)
     }
 
     @Test

@@ -18,10 +18,13 @@ interface ImportLinkResolver {
 
 data class PendingAttachment(val blockId: String, val relativePath: String)
 
+data class PendingWebImage(val blockId: String, val url: String, val altText: String)
+
 data class ConvertedNote(
     val title: String,
     val blocks: List<NoteBlock>,
     val pendingAttachments: List<PendingAttachment>,
+    val pendingWebImages: List<PendingWebImage>,
     val frontMatter: List<FrontMatterField>,
     val inlineTags: List<String>
 )
@@ -42,6 +45,7 @@ object ImportedNoteConverter {
                 title = titleFromPath(relativePath),
                 blocks = PlainTextToBlocks.convert(cleanedContent, now, newBlockId),
                 pendingAttachments = emptyList(),
+                pendingWebImages = emptyList(),
                 frontMatter = emptyList(),
                 inlineTags = emptyList()
             )
@@ -54,6 +58,7 @@ object ImportedNoteConverter {
             title = title,
             blocks = converted.blocks.withoutRepeatedTitle(title),
             pendingAttachments = converted.pendingAttachments,
+            pendingWebImages = converted.pendingWebImages,
             frontMatter = withFrontMatter.frontMatter,
             inlineTags = converted.inlineTags
         )
