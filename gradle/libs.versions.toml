@@ -40,6 +40,7 @@ koinCompose = "4.2.2"
 ktor = "3.5.2"
 okio = "3.18.2"
 jsoup = "1.23.2"
+jetbrainsMarkdown = "0.7.14"
 dbusJava = "5.2.0"
 jmdns = "3.6.3"
 jna = "5.13.0"
@@ -121,6 +122,7 @@ ktor-server-auth = { group = "io.ktor", name = "ktor-server-auth", version.ref =
 # Networking utilities
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+jetbrains-markdown = { group = "org.jetbrains", name = "markdown", version.ref = "jetbrainsMarkdown" }
 dbus-java-core = { group = "com.github.hypfvieh", name = "dbus-java-core", version.ref = "dbusJava" }
 dbus-java-transport-native-unixsocket = { group = "com.github.hypfvieh", name = "dbus-java-transport-native-unixsocket", version.ref = "dbusJava" }
 jmdns = { group = "org.jmdns", name = "jmdns", version.ref = "jmdns" }

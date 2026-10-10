@@ -42,6 +42,8 @@ import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.voice.DesktopAudioRecorder
 import com.emberr.domain.util.media.DesktopImageDownloader
+import com.emberr.domain.importer.DesktopImportFileReader
+import com.emberr.domain.importer.ImportFileReader
 import com.emberr.domain.util.media.DesktopMediaStorageHelper
 import com.emberr.domain.util.voice.DesktopVoiceRecognizer
 import com.emberr.domain.util.media.ImageDownloader
@@ -118,6 +120,7 @@ val desktopModule = module {
     single<MediaStorageHelper> { DesktopMediaStorageHelper() }
     single<ImageDownloader> { DesktopImageDownloader() }
     single<AudioRecorder> { DesktopAudioRecorder() }
+    single<ImportFileReader> { DesktopImportFileReader() }
 
     // Self-hosted WebDAV sync
     single<KeyDerivationManager> { Pbkdf2KeyDerivationManager() }

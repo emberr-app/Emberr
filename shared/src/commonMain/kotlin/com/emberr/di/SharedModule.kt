@@ -362,6 +362,22 @@ val sharedModule = module {
             activeSpaceStore = get()
         )
     }
+    single {
+        com.emberr.domain.importer.MarkdownNotesImporter(
+            repository = get(),
+            mediaStorageHelper = get(),
+            appScope = get(named("AppScope"))
+        )
+    }
+    viewModel {
+        com.emberr.presentation.settings.importer.ImportViewModel(
+            spaceRepository = get(),
+            activeSpaceStore = get(),
+            importFileReader = get(),
+            importFolderReader = getOrNull(),
+            markdownNotesImporter = get()
+        )
+    }
     viewModel {
         com.emberr.presentation.calendar.CalendarViewModel(
             repository = get(),

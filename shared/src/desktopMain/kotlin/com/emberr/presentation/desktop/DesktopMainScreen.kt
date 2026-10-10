@@ -53,6 +53,7 @@ import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.settings.SettingsScreen
 import com.emberr.presentation.settings.about.AboutScreen
+import com.emberr.presentation.settings.importer.ImportScreen
 import com.emberr.presentation.settings.about.OpenSourceLicensesScreen
 import com.emberr.presentation.settings.selfhost.SelfHostSetupScreen
 import com.emberr.presentation.shared.UserSettings
@@ -165,6 +166,7 @@ sealed interface DetailPane {
     data object Settings : DetailPane
     data object SelfHostSetup : DetailPane
     data object About : DetailPane
+    data object ImportNotes : DetailPane
     data object OpenSourceLicenses : DetailPane
     data object Trash : DetailPane
     data object Properties : DetailPane
@@ -182,6 +184,7 @@ private fun DetailPane.encode(): String = when (this) {
     DetailPane.Settings -> "PANEL:SETTINGS"
     DetailPane.SelfHostSetup -> "PANEL:SELFHOST"
     DetailPane.About -> "PANEL:ABOUT"
+    DetailPane.ImportNotes -> "PANEL:IMPORT_NOTES"
     DetailPane.OpenSourceLicenses -> "PANEL:LICENSES"
     DetailPane.Trash -> "PANEL:TRASH"
     DetailPane.Properties -> "PANEL:PROPERTIES"
@@ -200,6 +203,7 @@ private fun decodeDetailPane(raw: String, today: LocalDate): DetailPane = when {
     raw == "PANEL:SETTINGS" -> DetailPane.Settings
     raw == "PANEL:SELFHOST" -> DetailPane.SelfHostSetup
     raw == "PANEL:ABOUT" -> DetailPane.About
+    raw == "PANEL:IMPORT_NOTES" -> DetailPane.ImportNotes
     raw == "PANEL:LICENSES" -> DetailPane.OpenSourceLicenses
     raw == "PANEL:TRASH" -> DetailPane.Trash
     raw == "PANEL:PROPERTIES" -> DetailPane.Properties
@@ -1565,6 +1569,7 @@ fun DesktopMainScreen(
                             onImportClick = onImportBackupClick,
                             onNavigateToSelfHostSetup = { detail = DetailPane.SelfHostSetup },
                             onNavigateToAbout = { detail = DetailPane.About },
+                            onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
                             showBackButton = isSidebarVisible,
                             syncViewModel = syncViewModel
                         )
@@ -1581,6 +1586,11 @@ fun DesktopMainScreen(
                             onNavigateBack = { detail = DetailPane.Settings },
                             onOpenSourceLicensesClick = { detail = DetailPane.OpenSourceLicenses }
                         )
+                    }
+                }
+                DetailPane.ImportNotes -> key("import_notes") {
+                    Box(Modifier.fillMaxSize()) {
+                        ImportScreen(onNavigateBack = { detail = DetailPane.Settings })
                     }
                 }
                 DetailPane.OpenSourceLicenses -> key("open_source_licenses") {

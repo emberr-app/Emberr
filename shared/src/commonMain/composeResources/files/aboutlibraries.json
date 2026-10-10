@@ -7193,6 +7193,29 @@
             ]
         },
         {
+            "uniqueId": "org.jetbrains:markdown",
+            "artifactVersion": "0.7.14",
+            "name": "markdown",
+            "description": "Markdown parser in Kotlin",
+            "website": "https://github.com/JetBrains/markdown",
+            "developers": [
+                {
+                    "name": "Valentin Fondaratov",
+                    "organisationUrl": "https://jetbrains.com"
+                }
+            ],
+            "scm": {
+                "connection": "scm:git:git://github.com/JetBrains/markdown.git",
+                "url": "https://github.com/JetBrains/markdown"
+            },
+            "licenses": [
+                "Apache-2.0"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
             "uniqueId": "org.jmdns:jmdns",
             "artifactVersion": "3.6.3",
             "name": "JmDNS",

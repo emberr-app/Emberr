@@ -73,6 +73,7 @@ import emberr.shared.generated.resources.badge_question_mark
 import emberr.shared.generated.resources.bell
 import emberr.shared.generated.resources.calendar_clock
 import emberr.shared.generated.resources.daily
+import emberr.shared.generated.resources.download
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.file_down
 import emberr.shared.generated.resources.files
@@ -129,6 +130,7 @@ fun SettingsScreen(
     onRequestBackupFolder: () -> Unit = {},
     onNavigateToSelfHostSetup: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
+    onNavigateToImportNotes: () -> Unit = {},
     showBackButton: Boolean = true,
     viewModel: SettingsViewModel = koinViewModel(),
     syncViewModel: SyncViewModel = koinViewModel()
@@ -221,6 +223,7 @@ fun SettingsScreen(
                     backupTime = backupTime,
                     backupDay = backupDay,
                     onImportExportClick = { showImportExportSheet = true },
+                    onImportNotesClick = onNavigateToImportNotes,
                     onAutoBackupChange = { isChecked ->
                         when {
                             !isChecked -> viewModel.setAutoBackupEnabled(false)
@@ -951,6 +954,7 @@ private fun DataSettingsSection(
     backupTime: String,
     backupDay: String,
     onImportExportClick: () -> Unit,
+    onImportNotesClick: () -> Unit,
     onAutoBackupChange: (Boolean) -> Unit,
     onBackupFrequencySelected: (String) -> Unit,
     onPickBackupDay: () -> Unit,
@@ -1014,6 +1018,14 @@ private fun DataSettingsSection(
                 }
             }
         }
+    }
+
+    SettingsGroup(title = "Import") {
+        SettingsActionRow(
+            icon = painterResource(Res.drawable.download),
+            title = "Import Notes",
+            onClick = onImportNotesClick
+        )
     }
 }
 
@@ -1474,7 +1486,7 @@ internal fun SettingsValuePill(label: String, isDestructive: Boolean = false) {
 }
 
 @Composable
-private fun SettingsFootnote(text: String, startPadding: Dp = 50.dp) {
+internal fun SettingsFootnote(text: String, startPadding: Dp = 50.dp) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelSmall,

@@ -126,6 +126,7 @@ kotlin {
                 implementation(libs.coil.network.ktor3)
                 implementation(libs.androidx.sqlite.bundled)
                 implementation(libs.okio)
+                implementation(libs.jetbrains.markdown)
 
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)

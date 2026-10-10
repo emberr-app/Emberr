@@ -1024,6 +1024,32 @@ class NoteRepositoryImpl(
             AutoSyncTrigger.requestSync()
         }
 
+    override suspend fun createPropertyTagsInSpace(spaceId: String, propertyKey: String, names: List<String>) =
+        withContext(Dispatchers.IO) {
+            val now = System.currentTimeMillis()
+            val savedTags = propertyTagDao.getAllTagsOnce(spaceId).filter { it.propertyKey == propertyKey }
+            val newNames = names
+                .filter { name -> savedTags.none { it.name.equals(name, ignoreCase = true) } }
+                .distinctBy { it.lowercase() }
+            if (newNames.isEmpty()) return@withContext
+
+            val firstSortOrder = (savedTags.maxOfOrNull { it.sortOrder } ?: -1) + 1
+            newNames.forEachIndexed { position, name ->
+                propertyTagDao.insertOrUpdateTag(
+                    PropertyTagEntity(
+                        tagId = UUID.randomUUID().toString(),
+                        propertyKey = propertyKey,
+                        name = name,
+                        createdAt = now,
+                        updatedAt = now,
+                        spaceId = spaceId,
+                        sortOrder = firstSortOrder + position
+                    )
+                )
+            }
+            AutoSyncTrigger.requestSync()
+        }
+
     override suspend fun reorderPropertyTags(propertyKey: String, orderedNames: List<String>) =
         withContext(Dispatchers.IO) {
             val now = System.currentTimeMillis()
@@ -1164,6 +1190,29 @@ class NoteRepositoryImpl(
                 )
             )
             AutoSyncTrigger.requestSync()
+        }
+
+    override suspend fun findOrCreateCustomPropertyInSpace(
+        spaceId: String,
+        name: String,
+        valueType: PropertyValueType
+    ): CustomPropertyEntity =
+        withContext(Dispatchers.IO) {
+            customPropertyDao.getAllProperties(spaceId).first().firstOrNull { it.name.equals(name, ignoreCase = true) }
+                ?: run {
+                    val now = System.currentTimeMillis()
+                    val newProperty = CustomPropertyEntity(
+                        propertyId = UUID.randomUUID().toString(),
+                        name = name,
+                        valueType = valueType,
+                        createdAt = now,
+                        updatedAt = now,
+                        spaceId = spaceId
+                    )
+                    customPropertyDao.insertOrUpdateProperty(newProperty)
+                    AutoSyncTrigger.requestSync()
+                    newProperty
+                }
         }
 
     override suspend fun renameCustomProperty(propertyId: String, newName: String) =

@@ -44,6 +44,10 @@ import com.emberr.domain.update.AndroidUpdateChecker
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.voice.AndroidAudioRecorder
 import com.emberr.domain.util.media.AndroidImageDownloader
+import com.emberr.domain.importer.AndroidImportFileReader
+import com.emberr.domain.importer.AndroidImportFolderReader
+import com.emberr.domain.importer.ImportFileReader
+import com.emberr.domain.importer.ImportFolderReader
 import com.emberr.domain.util.media.AndroidMediaStorageHelper
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.ImageDownloader
@@ -72,6 +76,8 @@ val androidModule = module {
     single<VoiceRecognizer> { NativeVoiceRecognizer(androidContext()) }
     single<ReminderScheduler> { AndroidReminderScheduler(androidContext()) }
     single<AudioRecorder> { AndroidAudioRecorder(androidContext()) }
+    single<ImportFileReader> { AndroidImportFileReader(androidContext()) }
+    single<ImportFolderReader> { AndroidImportFolderReader(androidContext()) }
 
     single { AndroidSecretCipher(androidContext()) }
 
