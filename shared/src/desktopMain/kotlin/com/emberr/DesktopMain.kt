@@ -357,14 +357,7 @@ private fun runEmberrDesktopApp() = application {
                                     )
                                 }
                             } else {
-                                val tmpDir = java.io.File(System.getProperty("java.io.tmpdir"), "emberr_view").apply { mkdirs() }
-                                val viewFile = java.io.File(tmpDir, originalFile.name)
-
-                                if (!viewFile.exists() || viewFile.length() != originalFile.length()) {
-                                    originalFile.copyTo(viewFile, overwrite = true)
-                                }
-
-                                java.awt.Desktop.getDesktop().open(viewFile)
+                                java.awt.Desktop.getDesktop().open(originalFile)
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -503,14 +496,7 @@ private fun runEmberrDesktopApp() = application {
                                             )
                                         }
                                     } else {
-                                        val tmpDir = java.io.File(System.getProperty("java.io.tmpdir"), "emberr_view").apply { mkdirs() }
-                                        val viewFile = java.io.File(tmpDir, originalFile.name)
-
-                                        if (!viewFile.exists() || viewFile.length() != originalFile.length()) {
-                                            originalFile.copyTo(viewFile, overwrite = true)
-                                        }
-
-                                        java.awt.Desktop.getDesktop().open(viewFile)
+                                        java.awt.Desktop.getDesktop().open(originalFile)
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
