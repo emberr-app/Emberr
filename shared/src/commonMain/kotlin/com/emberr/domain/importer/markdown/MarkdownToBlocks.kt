@@ -2,12 +2,13 @@ package com.emberr.domain.importer.markdown
 
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
+import com.emberr.domain.model.CalloutBlock
+import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
-import com.emberr.domain.model.InlineSpan
 import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
@@ -41,6 +42,35 @@ private const val MINIMUM_FENCE_LENGTH = 3
 private val codeFenceOpening = Regex("^ {0,3}(`{3,}|~{3,})")
 private val calloutMarker = Regex("""^\[!([A-Za-z][A-Za-z0-9_-]*)]([+-]?)""")
 private val calloutMarkerWithSpaces = Regex("""^\[![^\]]*][+-]?\s*""")
+private val calloutTypesByWrittenName: Map<String, CalloutType> = mapOf(
+    "note" to CalloutType.NOTE,
+    "abstract" to CalloutType.ABSTRACT,
+    "summary" to CalloutType.ABSTRACT,
+    "tldr" to CalloutType.ABSTRACT,
+    "info" to CalloutType.INFO,
+    "todo" to CalloutType.TODO,
+    "tip" to CalloutType.TIP,
+    "hint" to CalloutType.TIP,
+    "important" to CalloutType.TIP,
+    "success" to CalloutType.SUCCESS,
+    "check" to CalloutType.SUCCESS,
+    "done" to CalloutType.SUCCESS,
+    "question" to CalloutType.QUESTION,
+    "help" to CalloutType.QUESTION,
+    "faq" to CalloutType.QUESTION,
+    "warning" to CalloutType.WARNING,
+    "caution" to CalloutType.WARNING,
+    "attention" to CalloutType.WARNING,
+    "failure" to CalloutType.FAILURE,
+    "fail" to CalloutType.FAILURE,
+    "missing" to CalloutType.FAILURE,
+    "danger" to CalloutType.DANGER,
+    "error" to CalloutType.DANGER,
+    "bug" to CalloutType.BUG,
+    "example" to CalloutType.EXAMPLE,
+    "quote" to CalloutType.QUOTE,
+    "cite" to CalloutType.QUOTE
+)
 private val htmlCommentPattern = Regex("<!--.*?-->", RegexOption.DOT_MATCHES_ALL)
 private val lineBreakingHtmlTag = Regex(
     "</?(p|div|br|details|summary|li|ul|ol|tr|td|th|table|thead|tbody|h[1-6]|aside|blockquote|figure|figcaption|hr|section|header|footer)\\b[^>]*>",
@@ -323,40 +353,31 @@ private class MarkdownBlockBuilder(
         addCallout(marker.groupValues[1], marker.groupValues[2], titleNodes, body, indentation)
     }
 
-    private fun addCallout(type: String, foldMarker: String, titleNodes: List<ASTNode>, body: List<CalloutPart>, indentation: Int) {
-        val isFoldable = foldMarker.isNotEmpty()
-        val title = calloutTitle(type, titleNodes, isBold = !isFoldable)
-
-        if (isFoldable) {
-            blocks += ToggleBlock(
-                id = newBlockId(),
-                text = title.text,
-                isExpanded = foldMarker == "+",
-                indentationLevel = indentation,
-                inlineSpans = title.spans,
-                updatedAt = now
-            )
-            body.forEach { part -> addCalloutPart(part, indentation + 1, ::textBlock) }
-            return
-        }
-
-        val firstWords = body.firstOrNull() as? CalloutPart.Words
-        val firstParts = firstWords?.let { inlinePartsOf(it.nodes) }.orEmpty()
-        val wordsJoinedToTitle = firstParts.firstOrNull() as? InlinePart.Words
-        blocks += quoteBlock(wordsJoinedToTitle?.let { title.joinedWithLineBreak(it.styledText) } ?: title, indentation)
-        addInlineParts(if (wordsJoinedToTitle != null) firstParts.drop(1) else firstParts, indentation, ::quoteBlock)
-        body.drop(if (firstWords != null) 1 else 0).forEach { part -> addCalloutPart(part, indentation, ::quoteBlock) }
+    private fun addCallout(writtenType: String, foldMarker: String, titleNodes: List<ASTNode>, body: List<CalloutPart>, indentation: Int) {
+        val calloutType = calloutTypesByWrittenName[writtenType.lowercase()] ?: CalloutType.NOTE
+        val title = calloutTitle(writtenType, calloutType, titleNodes)
+        blocks += CalloutBlock(
+            id = newBlockId(),
+            text = title.text,
+            calloutTypeName = calloutType.name,
+            isFoldable = foldMarker.isNotEmpty(),
+            isExpanded = foldMarker != "-",
+            indentationLevel = indentation,
+            inlineSpans = title.spans,
+            updatedAt = now
+        )
+        body.forEach { part -> addCalloutPart(part, indentation + 1, ::textBlock) }
     }
 
-    private fun calloutTitle(type: String, titleNodes: List<ASTNode>, isBold: Boolean): StyledText {
-        val writtenTitle = (inlinePartsOf(titleNodes, CharacterStyle(bold = isBold)).firstOrNull() as? InlinePart.Words)?.styledText
+    private fun calloutTitle(writtenType: String, calloutType: CalloutType, titleNodes: List<ASTNode>): StyledText {
+        val writtenTitle = (inlinePartsOf(titleNodes).firstOrNull() as? InlinePart.Words)?.styledText
         val markerLength = writtenTitle?.let { calloutMarkerWithSpaces.find(it.text)?.value?.length } ?: 0
         val titleWithoutMarker = writtenTitle?.withoutFirstCharacters(markerLength)
-        if (titleWithoutMarker != null && titleWithoutMarker.text.isNotBlank()) return titleWithoutMarker
-
-        val typeTitle = type.lowercase().replaceFirstChar { it.titlecase() }
-        val typeTitleSpans = if (isBold) listOf(InlineSpan(start = 0, end = typeTitle.length, bold = true)) else emptyList()
-        return StyledText(text = typeTitle, spans = typeTitleSpans)
+        return when {
+            titleWithoutMarker != null && titleWithoutMarker.text.isNotBlank() -> titleWithoutMarker
+            writtenType.equals(calloutType.name, ignoreCase = true) -> StyledText.EMPTY
+            else -> StyledText(text = writtenType.lowercase().replaceFirstChar { it.titlecase() }, spans = emptyList())
+        }
     }
 
     private fun calloutPartOf(node: ASTNode): CalloutPart =
@@ -489,8 +510,8 @@ private class MarkdownBlockBuilder(
         pendingAttachments += PendingAttachment(blockId = id, relativePath = relativePath)
     }
 
-    private fun inlinePartsOf(nodes: List<ASTNode>, baseStyle: CharacterStyle = CharacterStyle()): List<InlinePart> =
-        MarkdownInlineConverter(document, linkResolver, inlineTags).convert(nodes, baseStyle)
+    private fun inlinePartsOf(nodes: List<ASTNode>): List<InlinePart> =
+        MarkdownInlineConverter(document, linkResolver, inlineTags).convert(nodes)
 
     private fun textBlock(styledText: StyledText, indentation: Int): NoteBlock = TextBlock(
         id = newBlockId(),

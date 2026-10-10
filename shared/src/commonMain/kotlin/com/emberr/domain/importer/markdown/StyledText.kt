@@ -39,15 +39,6 @@ internal data class StyledText(val text: String, val spans: List<InlineSpan>, va
         tags = tags
     )
 
-    fun joinedWithLineBreak(other: StyledText): StyledText {
-        val offset = text.length + 1
-        return StyledText(
-            text = "$text\n${other.text}",
-            spans = spans + other.spans.map { span -> span.copy(start = span.start + offset, end = span.end + offset) },
-            tags = tags + other.tags
-        )
-    }
-
     companion object {
         val EMPTY = StyledText(text = "", spans = emptyList())
     }

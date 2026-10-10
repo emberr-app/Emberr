@@ -2,6 +2,7 @@ package com.emberr.domain.importer.markdown
 
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
+import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
 import com.emberr.domain.model.DocumentBlock
@@ -368,42 +369,54 @@ class ImportedNoteConverterTest {
     }
 
     @Test
-    fun aCalloutWithATitleBecomesAQuoteWithABoldFirstLine() {
+    fun aCalloutBecomesACalloutBlockWithItsBodyIndentedUnderIt() {
         assertEquals(
             listOf(
-                QuoteBlock(
-                    id = "",
-                    text = "Remember\nBack up your vault.",
-                    inlineSpans = listOf(InlineSpan(start = 0, end = 8, bold = true)),
-                    updatedAt = NOW
-                )
+                CalloutBlock(id = "", text = "Remember", calloutTypeName = "INFO", updatedAt = NOW),
+                TextBlock(id = "", text = "Back up your vault.", indentationLevel = 1, updatedAt = NOW),
+                BulletedListBlock(id = "", text = "Twice a week", indentationLevel = 1, updatedAt = NOW)
             ),
-            blocksOf("> [!info] Remember\n> Back up your vault.")
+            blocksOf("> [!info] Remember\n> Back up your vault.\n>\n> - Twice a week")
         )
     }
 
     @Test
-    fun aCalloutWithoutATitleIsNamedAfterItsType() {
+    fun aCalloutWithoutATitleLetsItsTypeNameShowAndOtherTypesKeepTheirName() {
         assertEquals(
             listOf(
-                QuoteBlock(id = "", text = "Tip\nStay hydrated.", inlineSpans = listOf(InlineSpan(start = 0, end = 3, bold = true)), updatedAt = NOW),
-                QuoteBlock(id = "", text = "Idea\nWrite it down.", inlineSpans = listOf(InlineSpan(start = 0, end = 4, bold = true)), updatedAt = NOW)
+                CalloutBlock(id = "", text = "", calloutTypeName = "TIP", updatedAt = NOW),
+                TextBlock(id = "", text = "Stay hydrated.", indentationLevel = 1, updatedAt = NOW),
+                CalloutBlock(id = "", text = "Idea", calloutTypeName = "NOTE", updatedAt = NOW),
+                TextBlock(id = "", text = "Write it down.", indentationLevel = 1, updatedAt = NOW)
             ),
             blocksOf("> [!TIP]\n> Stay hydrated.\n\n> [!idea]\n> Write it down.")
         )
     }
 
     @Test
-    fun foldableCalloutsBecomeToggles() {
+    fun calloutAliasesUseTheMatchingEmberrType() {
+        assertEquals(
+            listOf("ABSTRACT", "WARNING", "DANGER"),
+            blocksOf("> [!summary] A\n\n> [!caution] B\n\n> [!error] C").filterIsInstance<CalloutBlock>().map { it.calloutTypeName }
+        )
+    }
+
+    @Test
+    fun foldableCalloutsKeepWhetherTheyStartOpenOrClosed() {
         assertEquals(
             listOf(
-                ToggleBlock(id = "", text = "Why?", isExpanded = false, updatedAt = NOW),
+                CalloutBlock(id = "", text = "Why?", calloutTypeName = "QUESTION", isFoldable = true, isExpanded = false, updatedAt = NOW),
                 TextBlock(id = "", text = "Because.", indentationLevel = 1, updatedAt = NOW),
-                ToggleBlock(id = "", text = "Open one", isExpanded = true, updatedAt = NOW),
+                CalloutBlock(id = "", text = "Open one", calloutTypeName = "QUESTION", isFoldable = true, isExpanded = true, updatedAt = NOW),
                 TextBlock(id = "", text = "Visible.", indentationLevel = 1, updatedAt = NOW)
             ),
             blocksOf("> [!faq]- Why?\n> Because.\n\n> [!faq]+ Open one\n> Visible.")
         )
+    }
+
+    @Test
+    fun aPlainQuoteStaysAQuote() {
+        assertEquals(listOf(QuoteBlock(id = "", text = "Just a quote", updatedAt = NOW)), blocksOf("> Just a quote"))
     }
 
     @Test

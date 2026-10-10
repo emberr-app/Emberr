@@ -1,6 +1,7 @@
 package com.emberr.domain.importer.markdown
 
 import com.emberr.domain.model.BulletedListBlock
+import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
 import com.emberr.domain.model.HeadingBlock
@@ -41,7 +42,9 @@ class MarkdownRoundTripTest {
             CodeBlock(id = "code", code = "fun main() {}\n    return", language = "kotlin"),
             SolidDividerBlock(id = "solid"),
             ThreeDotDividerBlock(id = "dots"),
-            TableBlock(id = "table", rows = listOf(listOf("Name", "Note"), listOf("Ann", "a|b")))
+            TableBlock(id = "table", rows = listOf(listOf("Name", "Note"), listOf("Ann", "a|b"))),
+            CalloutBlock(id = "callout", text = "Remember", calloutTypeName = "TIP", isFoldable = true, isExpanded = false),
+            TextBlock(id = "inside", text = "Inside the callout", indentationLevel = 1)
         )
 
         val exportedMarkdown = NoteMarkdownWriter.writeMarkdown(blocks)

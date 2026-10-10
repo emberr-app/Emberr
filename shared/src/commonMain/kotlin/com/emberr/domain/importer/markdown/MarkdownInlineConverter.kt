@@ -26,8 +26,8 @@ internal class MarkdownInlineConverter(
     private var words = StyledTextBuilder()
     private var htmlStyle = CharacterStyle()
 
-    fun convert(nodes: List<ASTNode>, baseStyle: CharacterStyle = CharacterStyle()): List<InlinePart> {
-        nodes.forEach { node -> visit(node, baseStyle) }
+    fun convert(nodes: List<ASTNode>): List<InlinePart> {
+        nodes.forEach { node -> visit(node, CharacterStyle()) }
         finishWords()
         return parts.toList()
     }
