@@ -52,6 +52,28 @@ class ImportedLinkTargetsTest {
     }
 
     @Test
+    fun aCanvasIsOnlyMatchedWhenTheLinkNamesItsExtension() {
+        val withCanvas = ImportedLinkTargets(
+            noteIdsByPath = mapOf("Vault/Boards/Board.canvas" to "board-canvas"),
+            attachmentPaths = emptyList()
+        ).resolverFor("Vault/Plan.md")
+
+        assertNull(withCanvas.noteIdFor("Board"))
+        assertEquals("board-canvas", withCanvas.noteIdFor("Board.canvas"))
+    }
+
+    @Test
+    fun aNoteAndACanvasWithTheSameNameAreToldApartByTheExtension() {
+        val withBoth = ImportedLinkTargets(
+            noteIdsByPath = mapOf("Vault/Board.md" to "board-note", "Vault/Board.canvas" to "board-canvas"),
+            attachmentPaths = emptyList()
+        ).resolverFor("Vault/Plan.md")
+
+        assertEquals("board-note", withBoth.noteIdFor("Board"))
+        assertEquals("board-canvas", withBoth.noteIdFor("Board.canvas"))
+    }
+
+    @Test
     fun notesAreNeverReturnedAsAttachmentsAndUnknownTargetsMatchNothing() {
         assertNull(fromPlan.attachmentPathFor("../Ideas.md"))
         assertNull(fromPlan.noteIdFor("Nowhere"))

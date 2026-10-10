@@ -43,7 +43,9 @@ private class PathLookup(paths: Collection<String>) {
 
         val targetName = fileNameOf(target).lowercase()
         val sameNamePaths = pathsByLowercaseName[targetName]
-            ?: pathsByLowercaseNameWithoutExtension[targetName].takeIf { extensionsToTry.isNotEmpty() }
+            ?: pathsByLowercaseNameWithoutExtension[targetName]
+                ?.filter { path -> extensionsToTry.any { extension -> path.endsWith(extension, ignoreCase = true) } }
+                ?.takeIf { it.isNotEmpty() }
             ?: return null
         return sameNamePaths.minWithOrNull(
             compareBy<String>({ folderOf(it) != fromFolder }, { it.length }, { it })
