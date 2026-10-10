@@ -365,6 +365,7 @@ val sharedModule = module {
     single {
         com.emberr.domain.importer.MarkdownNotesImporter(
             repository = get(),
+            canvasRepository = get(),
             mediaStorageHelper = get(),
             appScope = get(named("AppScope"))
         )

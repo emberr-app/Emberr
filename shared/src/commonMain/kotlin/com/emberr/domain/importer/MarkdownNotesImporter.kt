@@ -1,8 +1,14 @@
 package com.emberr.domain.importer
 
+import com.emberr.data.local.room.entity.CanvasNodeType
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.FolderEntity
+import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.canvas.CanvasContent
+import com.emberr.domain.canvas.CanvasRepository
+import com.emberr.domain.importer.canvas.ConvertedCanvas
+import com.emberr.domain.importer.canvas.ObsidianCanvasConverter
 import com.emberr.domain.importer.markdown.ConvertedNote
 import com.emberr.domain.importer.markdown.ImportedNoteConverter
 import com.emberr.domain.importer.markdown.PendingAttachment
@@ -73,6 +79,7 @@ data class ImportResult(
 
 class MarkdownNotesImporter(
     private val repository: NoteRepository,
+    private val canvasRepository: CanvasRepository,
     private val mediaStorageHelper: MediaStorageHelper,
     private val appScope: CoroutineScope
 ) {
@@ -84,11 +91,15 @@ class MarkdownNotesImporter(
         _progress.value = ImportProgress.Importing(handledNoteCount = 0, totalNoteCount = noteFilesOf(pickedFiles).size, doneFraction = 0f)
         appScope.launch {
             val savedNotes = mutableListOf<Pair<NoteMetadataEntity, NoteContent>>()
+            val savedCanvases = mutableListOf<Pair<String, CanvasContent>>()
             val result = pickedFiles.use { files ->
-                importFiles(files, spaceId) { metadata, content -> savedNotes += metadata to content }
+                importFiles(files, spaceId, onCanvasSaved = { noteId, canvas -> savedCanvases += noteId to canvas }) { metadata, content ->
+                    savedNotes += metadata to content
+                }
             }
             _progress.value = ImportProgress.Finished(result)
             savedNotes.forEach { (metadata, content) -> repository.indexNote(metadata, content) }
+            savedCanvases.forEach { (noteId, canvas) -> repository.indexCanvas(noteId, canvas) }
         }
     }
 
@@ -99,6 +110,7 @@ class MarkdownNotesImporter(
     suspend fun importFiles(
         pickedFiles: PickedImportFiles,
         spaceId: String,
+        onCanvasSaved: (String, CanvasContent) -> Unit = { _, _ -> },
         onNoteSaved: (NoteMetadataEntity, NoteContent) -> Unit = { _, _ -> }
     ): ImportResult {
         val now = System.currentTimeMillis()
@@ -107,6 +119,7 @@ class MarkdownNotesImporter(
             .filterNot { file -> ImportPaths.isNoteFile(file.relativePath) }
             .associateBy { file -> file.relativePath }
         val plannedNotes = noteFiles.map { file -> PlannedNote(file = file, noteId = newId()) }
+        val (plannedCanvases, plannedMarkdownNotes) = plannedNotes.partition { ImportPaths.isCanvasFile(it.file.relativePath) }
         val linkTargets = ImportedLinkTargets(
             noteIdsByPath = plannedNotes.distinctBy { it.file.relativePath }.associate { it.file.relativePath to it.noteId },
             attachmentPaths = attachmentFilesByPath.keys
@@ -114,7 +127,7 @@ class MarkdownNotesImporter(
 
         val failedNames = linkedSetOf<String>()
         val convertedNotesByNoteId = mutableMapOf<String, ConvertedNote>()
-        plannedNotes.forEach { plannedNote ->
+        plannedMarkdownNotes.forEach { plannedNote ->
             val notePath = plannedNote.file.relativePath
             try {
                 convertedNotesByNoteId[plannedNote.noteId] = ImportedNoteConverter.convert(
@@ -130,9 +143,28 @@ class MarkdownNotesImporter(
             }
         }
 
-        val usedAttachmentPaths = convertedNotesByNoteId.values
-            .flatMap { converted -> converted.pendingAttachments.map { it.relativePath } }
-            .toSet()
+        val noteTitlesById = convertedNotesByNoteId.mapValues { (_, converted) -> converted.title }
+        val convertedCanvasesByNoteId = mutableMapOf<String, ConvertedCanvas>()
+        plannedCanvases.forEach { plannedCanvas ->
+            val canvasPath = plannedCanvas.file.relativePath
+            try {
+                convertedCanvasesByNoteId[plannedCanvas.noteId] = ObsidianCanvasConverter.convert(
+                    canvasJson = TextFileDecoder.decode(plannedCanvas.file.readBytes()),
+                    linkResolver = linkTargets.resolverFor(canvasPath),
+                    noteTitlesById = noteTitlesById,
+                    now = now
+                )
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                failedNames += canvasPath
+            }
+        }
+
+        val usedAttachmentPaths = (
+            convertedNotesByNoteId.values.flatMap { converted -> converted.pendingAttachments.map { it.relativePath } } +
+                convertedCanvasesByNoteId.values.flatMap { converted -> converted.pendingImages.map { it.relativePath } }
+            ).toSet()
         val progressTracker = ImportProgressTracker(
             totalNoteCount = plannedNotes.size,
             totalWorkBytes = plannedNotes.sumOf { workBytesOf(it.file) } +
@@ -145,6 +177,14 @@ class MarkdownNotesImporter(
         val customPropertiesByName = mutableMapOf<String, CustomPropertyEntity>()
         var importedNoteCount = 0
 
+        suspend fun copiedAttachmentFor(attachmentPath: String): MediaInfo? =
+            if (attachmentPath in copiedAttachments) {
+                copiedAttachments[attachmentPath]
+            } else {
+                copyAttachment(attachmentFilesByPath.getValue(attachmentPath), progressTracker)
+                    .also { mediaInfo -> copiedAttachments[attachmentPath] = mediaInfo }
+            }
+
         plannedNotes.forEach { plannedNote ->
             val notePath = plannedNote.file.relativePath
             val converted = convertedNotesByNoteId[plannedNote.noteId]
@@ -153,12 +193,7 @@ class MarkdownNotesImporter(
                     val details = ImportedProperties.detailsOf(converted.frontMatter, converted.inlineTags)
                     val propertyBlocks = propertyBlocksFor(details.properties, spaceId, now, customPropertiesByName)
                     val blocks = propertyBlocks + withAttachmentsCopied(converted.blocks, converted.pendingAttachments, now, failedNames) { attachmentPath ->
-                        if (attachmentPath in copiedAttachments) {
-                            copiedAttachments[attachmentPath]
-                        } else {
-                            copyAttachment(attachmentFilesByPath.getValue(attachmentPath), progressTracker)
-                                .also { mediaInfo -> copiedAttachments[attachmentPath] = mediaInfo }
-                        }
+                        copiedAttachmentFor(attachmentPath)
                     }
                     val content = NoteContent(blocks = blocks)
                     val metadata = NoteMetadataEntity(
@@ -175,6 +210,32 @@ class MarkdownNotesImporter(
                     )
                     repository.saveNoteInSpace(spaceId, metadata, content)
                     onNoteSaved(metadata, content)
+                    importedNoteCount++
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                    failedNames += notePath
+                }
+            }
+            val convertedCanvas = convertedCanvasesByNoteId[plannedNote.noteId]
+            if (convertedCanvas != null) {
+                try {
+                    val content = withCanvasImagesCopied(convertedCanvas, failedNames) { imagePath -> copiedAttachmentFor(imagePath) }
+                    val metadata = NoteMetadataEntity(
+                        noteId = plannedNote.noteId,
+                        title = notePath.substringAfterLast('/').substringBeforeLast('.').trim(),
+                        folderId = folderIdsByPath[notePath.substringBeforeLast('/', missingDelimiterValue = "")],
+                        isDaily = false,
+                        dateString = null,
+                        createdAt = now,
+                        updatedAt = now,
+                        filePath = "",
+                        spaceId = spaceId,
+                        kind = NoteKind.CANVAS
+                    )
+                    repository.saveNoteInSpace(spaceId, metadata, NoteContent(blocks = emptyList()))
+                    canvasRepository.saveChanges(plannedNote.noteId, content, stampNoteUpdatedAt = false)
+                    onCanvasSaved(plannedNote.noteId, content)
                     importedNoteCount++
                 } catch (cancellation: CancellationException) {
                     throw cancellation
@@ -286,6 +347,25 @@ class MarkdownNotesImporter(
                 else -> block
             }
         }
+    }
+
+    private suspend fun withCanvasImagesCopied(
+        convertedCanvas: ConvertedCanvas,
+        failedNames: MutableSet<String>,
+        copiedAttachmentFor: suspend (String) -> MediaInfo?
+    ): CanvasContent {
+        val imagePathsByNodeId = convertedCanvas.pendingImages.associate { it.nodeId to it.relativePath }
+        val nodes = convertedCanvas.content.nodes.map { node ->
+            val imagePath = imagePathsByNodeId[node.nodeId] ?: return@map node
+            val mediaInfo = copiedAttachmentFor(imagePath)
+            if (mediaInfo == null) {
+                failedNames += imagePath
+                node.copy(type = CanvasNodeType.TEXT, text = imagePath.substringAfterLast('/'))
+            } else {
+                node.copy(imagePath = mediaInfo.localFileName)
+            }
+        }
+        return convertedCanvas.content.copy(nodes = nodes)
     }
 
     private suspend fun copyAttachment(file: ImportFile, progressTracker: ImportProgressTracker): MediaInfo? {

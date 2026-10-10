@@ -5,11 +5,15 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.AppDatabase
+import com.emberr.data.local.room.entity.CanvasNodeType
+import com.emberr.data.local.room.entity.CanvasSide
 import com.emberr.data.local.room.entity.DEFAULT_SPACE_ID
+import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.database.EmberrDatabase
 import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.ai.external.AiSettingsRepository
+import com.emberr.domain.canvas.CanvasRepository
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.LinkedNoteBlock
@@ -77,6 +81,8 @@ class MarkdownNotesImporterTest {
         canvasDao = appDatabase.canvasDao()
     )
 
+    private val canvasRepository = CanvasRepository(canvasDao = appDatabase.canvasDao(), noteDao = appDatabase.noteDao())
+
     private val mediaStorage = InMemoryMediaStorage()
 
     @AfterTest
@@ -137,7 +143,12 @@ class MarkdownNotesImporterTest {
     )
 
     private fun importer(appScope: CoroutineScope) =
-        MarkdownNotesImporter(repository = repository, mediaStorageHelper = mediaStorage, appScope = appScope)
+        MarkdownNotesImporter(
+            repository = repository,
+            canvasRepository = canvasRepository,
+            mediaStorageHelper = mediaStorage,
+            appScope = appScope
+        )
 
     private suspend fun importedNotes() =
         appDatabase.noteDao().getAllNotesForBackup().filter { it.spaceId == IMPORT_SPACE_ID }
@@ -201,6 +212,76 @@ class MarkdownNotesImporterTest {
         assertEquals("application/pdf", report.mimeType)
         assertEquals(listOf("media_1.png", "media_2.pdf"), mediaStorage.savedFileNames)
         assertEquals("png bytes", mediaStorage.savedTextsByFileName["media_1.png"])
+    }
+
+    @Test
+    fun anObsidianCanvasBecomesACanvasNoteInItsFolderAndNotesCanLinkToIt() = runTest {
+        val roadmapJson = """
+            {
+              "nodes": [
+                {"id": "group", "type": "group", "label": "Ideas", "x": -150, "y": -100, "width": 900, "height": 700},
+                {"id": "start", "type": "text", "text": "**Start** here", "x": -100, "y": -50, "width": 250, "height": 60, "color": "4"},
+                {"id": "plan", "type": "file", "file": "Vault/Plan.md", "subpath": "#Goals", "x": 300, "y": -50, "width": 250, "height": 60},
+                {"id": "cat", "type": "file", "file": "images/cat.png", "x": -100, "y": 100, "width": 300, "height": 200},
+                {"id": "broken", "type": "file", "file": "images/broken.png", "x": 300, "y": 100, "width": 300, "height": 200}
+              ],
+              "edges": [
+                {"id": "edge", "fromNode": "start", "fromSide": "right", "toNode": "plan", "toSide": "left", "label": "then"}
+              ]
+            }
+        """.trimIndent()
+
+        val result = importer(backgroundScope).importFiles(
+            pickedFiles(
+                "Vault/Boards/Roadmap.canvas" to roadmapJson,
+                "Vault/Plan.md" to "[[Roadmap.canvas]]\n\n![[Roadmap.canvas]]",
+                "Vault/images/cat.png" to "png bytes",
+                "Vault/images/broken.png" to null,
+                "Vault/Broken.canvas" to "{ not a canvas"
+            ),
+            spaceId = IMPORT_SPACE_ID
+        )
+
+        assertEquals(
+            ImportResult(
+                spaceId = IMPORT_SPACE_ID,
+                importedNoteCount = 2,
+                createdFolderCount = 2,
+                copiedAttachmentCount = 1,
+                failedNames = listOf("Vault/Broken.canvas", "Vault/images/broken.png")
+            ),
+            result
+        )
+
+        val boards = appDatabase.folderDao().getAllFolders(IMPORT_SPACE_ID).first().single { it.name == "Boards" }
+        val notes = importedNotes()
+        val roadmap = notes.single { it.title == "Roadmap" }
+        val plan = notes.single { it.title == "Plan" }
+        assertEquals(NoteKind.CANVAS, roadmap.kind)
+        assertEquals(boards.folderId, roadmap.folderId)
+        assertEquals(2, notes.size)
+
+        val planBlocks = repository.getNoteContent(plan.noteId)!!.blocks
+        assertEquals(listOf(roadmap.noteId, roadmap.noteId), planBlocks.map { (it as LinkedNoteBlock).linkedNoteId })
+
+        val canvas = canvasRepository.loadCanvasIncludingDeleted(roadmap.noteId)
+        val group = canvas.nodes.single { it.type == CanvasNodeType.GROUP }
+        val startCard = canvas.nodes.single { it.text == "Start here" }
+        val planCard = canvas.nodes.single { it.text == "Plan › Goals" }
+        val catImage = canvas.nodes.single { it.type == CanvasNodeType.IMAGE }
+        val brokenImageCard = canvas.nodes.single { it.text == "broken.png" }
+        assertEquals("Ideas", group.text)
+        assertEquals(40f to 40f, group.x to group.y)
+        assertEquals(80f to 80f, startCard.x to startCard.y)
+        assertEquals("green", startCard.color)
+        assertEquals("media_1.png", catImage.imagePath)
+        assertEquals(CanvasNodeType.TEXT, brokenImageCard.type)
+        assertEquals(5, canvas.nodes.size)
+
+        val edge = canvas.edges.single()
+        assertEquals(startCard.nodeId to CanvasSide.RIGHT, edge.fromNodeId to edge.fromSide)
+        assertEquals(planCard.nodeId to CanvasSide.LEFT, edge.toNodeId to edge.toSide)
+        assertEquals("then", edge.label)
     }
 
     @Test

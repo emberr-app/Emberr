@@ -18,6 +18,14 @@ class ImportPathsTest {
     }
 
     @Test
+    fun obsidianCanvasesAreNotes() {
+        assertTrue(ImportPaths.isNoteFile("Boards/Roadmap.canvas"))
+        assertTrue(ImportPaths.isCanvasFile("Boards/Roadmap.CANVAS"))
+        assertFalse(ImportPaths.isCanvasFile("plan.md"))
+        assertTrue(ImportPaths.isSupportedPickedFile("Roadmap.canvas"))
+    }
+
+    @Test
     fun onlyNotesAndZipsCanBePicked() {
         assertTrue(ImportPaths.isSupportedPickedFile("vault.ZIP"))
         assertTrue(ImportPaths.isSupportedPickedFile("plan.md"))

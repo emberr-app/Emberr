@@ -49,6 +49,15 @@ class ImportSummaryTest {
     }
 
     @Test
+    fun aCanvasCountsAsANoteAndItsFolderIsCounted() {
+        val summary = ImportSummary.of(pickedFiles(listOf("Boards/Roadmap.canvas", "plan.md")))
+
+        assertEquals(2, summary.noteCount)
+        assertEquals(1, summary.folderCount)
+        assertEquals(0, summary.attachmentCount)
+    }
+
+    @Test
     fun aZipWithoutNotesHasNoNotesAndNoFolders() {
         val summary = ImportSummary.of(pickedFiles(listOf("Photos/beach.png")))
 

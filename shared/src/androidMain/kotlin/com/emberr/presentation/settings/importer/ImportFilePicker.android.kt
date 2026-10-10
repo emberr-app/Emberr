@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 
 private val importPickerMimeTypes = arrayOf(
     "text/*",
+    "application/json",
     "application/zip",
     "application/x-zip-compressed",
     "application/octet-stream"
