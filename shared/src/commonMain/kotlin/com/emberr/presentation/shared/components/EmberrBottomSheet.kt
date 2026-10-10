@@ -110,6 +110,7 @@ fun EmberrBottomSheet(
     applyNavPadding: Boolean = false,
     headerAction: EmberrBottomSheetAction? = null,
     contentHorizontalPadding: Dp = SheetHorizontalPadding,
+    isDismissible: Boolean = true,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     if (!expanded) return
@@ -122,6 +123,7 @@ fun EmberrBottomSheet(
                 subtitle = subtitle,
                 headerAction = headerAction,
                 contentHorizontalPadding = contentHorizontalPadding,
+                isDismissible = isDismissible,
                 content = content
             )
         } else {
@@ -132,6 +134,7 @@ fun EmberrBottomSheet(
                 applyNavPadding = applyNavPadding,
                 headerAction = headerAction,
                 contentHorizontalPadding = contentHorizontalPadding,
+                isDismissible = isDismissible,
                 content = content
             )
         }
@@ -145,6 +148,7 @@ private fun EmberrFloatingDialog(
     subtitle: String?,
     headerAction: EmberrBottomSheetAction? = null,
     contentHorizontalPadding: Dp,
+    isDismissible: Boolean,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     fun closeAnd(action: () -> Unit) {
@@ -155,8 +159,8 @@ private fun EmberrFloatingDialog(
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true,
+            dismissOnBackPress = isDismissible,
+            dismissOnClickOutside = isDismissible,
             usePlatformDefaultWidth = false
         )
     ) {
@@ -242,10 +246,15 @@ private fun EmberrModalBottomSheet(
     applyNavPadding: Boolean,
     headerAction: EmberrBottomSheetAction? = null,
     contentHorizontalPadding: Dp,
+    isDismissible: Boolean,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val latestIsDismissible by rememberUpdatedState(isDismissible)
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { newValue -> newValue != SheetValue.Hidden || latestIsDismissible }
+    )
     val nonScrollingAreaDragRelay = rememberScrollableState { 0f }
 
     fun closeAnd(action: () -> Unit) {
@@ -274,6 +283,7 @@ private fun EmberrModalBottomSheet(
         )
     ) {
         KmpBackHandler(enabled = true) {
+            if (!latestIsDismissible) return@KmpBackHandler
             coroutineScope.launch {
                 try {
                     kotlinx.coroutines.withTimeoutOrNull(250.milliseconds) {
