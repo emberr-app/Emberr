@@ -875,7 +875,7 @@ fun EditorScreen(
 
                     val rowAnimation = Modifier.animateItem(
                         fadeInSpec = tween(EditorRowAnimationMillis),
-                        placementSpec = tween(EditorRowAnimationMillis, easing = FastOutSlowInEasing),
+                        placementSpec = if (block.id == activeBlockId) null else tween(EditorRowAnimationMillis, easing = FastOutSlowInEasing),
                         fadeOutSpec = tween(EditorRowFadeOutMillis)
                     )
 
