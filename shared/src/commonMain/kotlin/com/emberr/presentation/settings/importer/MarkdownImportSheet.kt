@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -67,6 +68,8 @@ private val ChooseFilesBoxShape = RoundedCornerShape(ChooseFilesBoxCornerRadius)
 private val ChooseFilesBoxBorderWidth = 1.5.dp
 private val ChooseFilesBoxDashLength = 8.dp
 private val ChooseFilesBoxDashGap = 6.dp
+private const val CHOOSE_FILES_BOX_BORDER_ALPHA = 0.25f
+private val ChooseFolderButtonHeight = 46.dp
 private const val UNAVAILABLE_OPTION_ALPHA = 0.38f
 private const val FADED_TEXT_ALPHA = 0.6f
 private const val PROGRESS_TRACK_ALPHA = 0.12f
@@ -144,12 +147,9 @@ private fun ImportChoices(
         modifier = Modifier.padding(horizontal = SheetContentPadding)
     )
     if (onChooseFolderClick != null) {
-        EmberrButtonSecondary(
-            text = "Choose a Folder",
+        ChooseFolderButton(
             onClick = onChooseFolderClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp, start = SheetContentPadding, end = SheetContentPadding)
+            modifier = Modifier.padding(top = 12.dp, start = SheetContentPadding, end = SheetContentPadding)
         )
     }
 
@@ -281,25 +281,14 @@ private fun ChooseFilesBox(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+    val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = CHOOSE_FILES_BOX_BORDER_ALPHA)
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = ChooseFilesBoxMinHeight)
-            .drawBehind {
-                drawRoundRect(
-                    color = borderColor,
-                    cornerRadius = CornerRadius(ChooseFilesBoxCornerRadius.toPx()),
-                    style = Stroke(
-                        width = ChooseFilesBoxBorderWidth.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(
-                            floatArrayOf(ChooseFilesBoxDashLength.toPx(), ChooseFilesBoxDashGap.toPx())
-                        )
-                    )
-                )
-            }
+            .dashedChooseBorder(borderColor)
             .clip(ChooseFilesBoxShape)
             .clickable(enabled = pickedFilesState != PickedFilesState.Reading, onClick = onClick)
             .padding(16.dp)
@@ -312,6 +301,42 @@ private fun ChooseFilesBox(
         }
     }
 }
+
+@Composable
+private fun ChooseFolderButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = CHOOSE_FILES_BOX_BORDER_ALPHA)
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(ChooseFolderButtonHeight)
+            .dashedChooseBorder(borderColor)
+            .clip(ChooseFilesBoxShape)
+            .clickable(onClick = onClick)
+    ) {
+        Text(
+            text = "Choose a Folder",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+private fun Modifier.dashedChooseBorder(color: Color): Modifier =
+    drawBehind {
+        drawRoundRect(
+            color = color,
+            cornerRadius = CornerRadius(ChooseFilesBoxCornerRadius.toPx()),
+            style = Stroke(
+                width = ChooseFilesBoxBorderWidth.toPx(),
+                pathEffect = PathEffect.dashPathEffect(
+                    floatArrayOf(ChooseFilesBoxDashLength.toPx(), ChooseFilesBoxDashGap.toPx())
+                )
+            )
+        )
+    }
 
 @Composable
 private fun ChooseFilesPrompt() {
