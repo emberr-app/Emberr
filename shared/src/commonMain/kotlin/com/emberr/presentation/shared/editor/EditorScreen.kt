@@ -1,7 +1,6 @@
 package com.emberr.presentation.shared.editor
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -191,9 +190,6 @@ sealed interface SlashMenuIcon {
     data class Vector(val image: ImageVector, val size: Dp = SlashMenuIconSlot) : SlashMenuIcon
     data class Label(val text: String) : SlashMenuIcon
 }
-
-private const val EditorRowAnimationMillis = 300
-private const val EditorRowFadeOutMillis = 200
 
 data class SlashMenuItemData(
     val label: String,
@@ -874,12 +870,6 @@ fun EditorScreen(
                         else -> null
                     }
 
-                    val rowAnimation = Modifier.animateItem(
-                        fadeInSpec = tween(EditorRowAnimationMillis),
-                        placementSpec = if (block.id == activeBlockId) null else tween(EditorRowAnimationMillis, easing = FastOutSlowInEasing),
-                        fadeOutSpec = tween(EditorRowFadeOutMillis)
-                    )
-
                     val previousBlock = blocks.getOrNull(index - 1)
                     val isFirstChildOfToggleOrCallout = (previousBlock is ToggleBlock || previousBlock is CalloutBlock) &&
                         block.indentationLevel == previousBlock.indentationLevel + 1
@@ -892,7 +882,7 @@ fun EditorScreen(
                                 text = label,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                modifier = rowAnimation
+                                modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = if (isDesktopPlatform) 36.dp else 16.dp)
                                     .padding(top = if (index == 0) 0.dp else 20.dp, bottom = 8.dp)
@@ -900,7 +890,7 @@ fun EditorScreen(
                         }
                     }
 
-                    Box(modifier = rowAnimation.fillMaxWidth().drawCalloutFrames(calloutFrames[index], MaterialTheme.colorScheme.surface)) {
+                    Box(modifier = Modifier.fillMaxWidth().drawCalloutFrames(calloutFrames[index], MaterialTheme.colorScheme.surface)) {
                         NoteBlockItem(
                             block = block,
                             displayedIndentationLevel = displayedIndentationLevelOf(block, calloutFrames[index]),
