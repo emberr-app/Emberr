@@ -332,6 +332,111 @@ class ImportedNoteConverterTest {
     }
 
     @Test
+    fun anHtmlImageInsideASentenceSplitsTheSentence() {
+        val linkResolver = FakeLinkResolver(attachmentPathsByTarget = mapOf("a.png" to "Notes/a.png"))
+        val converted = convert("Before <img src=\"a.png\" alt=\"Pic\"> after", linkResolver = linkResolver)
+
+        assertEquals(
+            listOf(
+                TextBlock(id = "", text = "Before", updatedAt = NOW),
+                ImageBlock(id = "", updatedAt = NOW),
+                TextBlock(id = "", text = "after", updatedAt = NOW)
+            ),
+            converted.blocks.map { it.withId("") }
+        )
+        assertEquals(listOf(PendingAttachment(blockId = converted.blocks[1].id, relativePath = "Notes/a.png")), converted.pendingAttachments)
+    }
+
+    @Test
+    fun anHtmlImageFromTheWebWaitsToBeDownloaded() {
+        val converted = convert("<img src=\"https://example.com/logo.png?size=1&amp;dark=0\" alt=\"Logo\" width=\"10\"/>")
+
+        val image = converted.blocks.single()
+        assertTrue(image is ImageBlock)
+        assertEquals(
+            listOf(PendingWebImage(blockId = image.id, url = "https://example.com/logo.png?size=1&dark=0", altText = "Logo")),
+            converted.pendingWebImages
+        )
+    }
+
+    @Test
+    fun anHtmlImageInsideAnHtmlBlockKeepsTheTextAroundIt() {
+        val linkResolver = FakeLinkResolver(attachmentPathsByTarget = mapOf("c.png" to "Notes/c.png"))
+
+        assertEquals(
+            listOf(
+                TextBlock(id = "", text = "Intro", updatedAt = NOW),
+                ImageBlock(id = "", updatedAt = NOW),
+                TextBlock(id = "", text = "outro", updatedAt = NOW)
+            ),
+            blocksOf("<p align=\"center\">Intro <img src='c.png'> outro</p>", linkResolver)
+        )
+    }
+
+    @Test
+    fun anHtmlImageThatIsNotInTheImportBecomesItsAltTextOrFileName() {
+        assertEquals(
+            listOf(
+                TextBlock(id = "", text = "Diagram", updatedAt = NOW),
+                TextBlock(id = "", text = "See missing.png here", updatedAt = NOW)
+            ),
+            blocksOf("<img src=\"missing.png\" alt=\"Diagram\">\n\nSee <img src=\"pics/missing.png\"> here")
+        )
+    }
+
+    @Test
+    fun anIframeBecomesABookmark() {
+        assertEquals(
+            listOf(
+                BookmarkBlock(id = "", url = "https://www.youtube.com/embed/xyz", updatedAt = NOW),
+                BookmarkBlock(id = "", url = "https://example.com/embed", updatedAt = NOW)
+            ),
+            blocksOf(
+                "<iframe src=\"https://www.youtube.com/embed/xyz\" width=\"560\"></iframe>\n\n" +
+                    "<div>\n<iframe src=\"https://example.com/embed\"></iframe>\n</div>"
+            )
+        )
+    }
+
+    @Test
+    fun anIframeWithoutAWebAddressKeepsItsAddressAsText() {
+        assertEquals(listOf(TextBlock(id = "", text = "page.html", updatedAt = NOW)), blocksOf("<iframe src=\"page.html\"></iframe>"))
+    }
+
+    @Test
+    fun footnotesStayAsPlainText() {
+        assertEquals(
+            listOf(
+                TextBlock(id = "", text = "Water boils at 100°C[^1] and freezes at 0°C[^2][^3].", updatedAt = NOW),
+                TextBlock(id = "", text = "[^1]: Celsius", updatedAt = NOW),
+                TextBlock(id = "", text = "[^2]: https://example.com", updatedAt = NOW),
+                TextBlock(id = "", text = "[^3]: Measured at sea level", updatedAt = NOW)
+            ),
+            blocksOf(
+                "Water boils at 100°C[^1] and freezes at 0°C[^2][^3].\n\n" +
+                    "[^1]: Celsius\n[^2]: https://example.com\n\n[^3]: Measured at sea level"
+            )
+        )
+    }
+
+    @Test
+    fun aFootnoteNamedLikeAnImportedFileStaysAsPlainText() {
+        val linkResolver = FakeLinkResolver(attachmentPathsByTarget = mapOf("chart.png" to "Notes/chart.png"))
+        val converted = convert("See the chart[^1].\n\n[^1]: chart.png", linkResolver = linkResolver)
+
+        assertEquals(listOf("See the chart[^1].", "[^1]: chart.png"), converted.blocks.map { (it as TextBlock).text })
+        assertEquals(emptyList(), converted.pendingAttachments)
+    }
+
+    @Test
+    fun ordinaryReferenceLinksStillUseTheirDefinition() {
+        assertEquals(
+            listOf(TextBlock(id = "", text = "Read the site (https://example.com) today", updatedAt = NOW)),
+            blocksOf("Read [the site][ref] today\n\n[ref]: https://example.com")
+        )
+    }
+
+    @Test
     fun aTextFileBecomesOneTextBlockPerLine() {
         val converted = convert("\nfirst line\n\nsecond line\n\n", relativePath = "journal.txt")
 

@@ -37,7 +37,9 @@ internal class MarkdownDocument(private val text: CharSequence, private val link
                 ?: ""
         MarkdownElementTypes.FULL_REFERENCE_LINK, MarkdownElementTypes.SHORT_REFERENCE_LINK ->
             linkNode.findChildOfType(MarkdownElementTypes.LINK_LABEL)
-                ?.let { label -> linkMap.getLinkInfo(textOf(label)) }
+                ?.let { label -> textOf(label) }
+                ?.takeUnless(::isFootnoteLabel)
+                ?.let { label -> linkMap.getLinkInfo(label) }
                 ?.destination
                 ?.toString()
         MarkdownElementTypes.AUTOLINK -> textOf(linkNode).removeSurrounding("<", ">")
@@ -104,6 +106,8 @@ internal class WikiLink(val target: String, private val alias: String?, private 
             }
     }
 }
+
+internal fun isFootnoteLabel(label: String): Boolean = label.startsWith("[^")
 
 internal fun isExternalDestination(destination: String): Boolean =
     destination.startsWith("www.", ignoreCase = true) || urlSchemeAtStart.containsMatchIn(destination)

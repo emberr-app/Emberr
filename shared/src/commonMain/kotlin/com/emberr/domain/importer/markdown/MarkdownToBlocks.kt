@@ -77,6 +77,7 @@ private val lineBreakingHtmlTag = Regex(
     RegexOption.IGNORE_CASE
 )
 private val anyHtmlTag = Regex("<[^>]+>")
+private val htmlMediaTag = Regex("<(img|iframe)\\b([^>]*)>", RegexOption.IGNORE_CASE)
 
 private val headingTypes = setOf(
     MarkdownElementTypes.ATX_1,
@@ -197,7 +198,7 @@ private class MarkdownBlockBuilder(
             MarkdownTokenTypes.HORIZONTAL_RULE -> addDivider(node, indentation)
             GFMElementTypes.TABLE -> addTable(node, indentation)
             MarkdownElementTypes.HTML_BLOCK -> addHtmlBlock(node, indentation)
-            MarkdownElementTypes.LINK_DEFINITION -> Unit
+            MarkdownElementTypes.LINK_DEFINITION -> addFootnoteDefinitionAsText(node, indentation)
             else -> node.children.forEach { child -> convertBlock(child, indentation) }
         }
     }
@@ -481,9 +482,31 @@ private class MarkdownBlockBuilder(
         return (parts.singleOrNull() as? InlinePart.Words)?.styledText ?: StyledText.EMPTY
     }
 
+    private fun addFootnoteDefinitionAsText(definition: ASTNode, indentation: Int) {
+        val label = definition.findChildOfType(MarkdownElementTypes.LINK_LABEL) ?: return
+        if (!isFootnoteLabel(document.textOf(label))) return
+        blocks += textBlock(StyledText(text = document.textOf(definition).trim(), spans = emptyList()), indentation)
+    }
+
     private fun addHtmlBlock(htmlBlock: ASTNode, indentation: Int) {
-        val visibleText = document.textOf(htmlBlock)
-            .replace(htmlCommentPattern, "")
+        val html = document.textOf(htmlBlock).replace(htmlCommentPattern, "")
+        var textStart = 0
+        htmlMediaTag.findAll(html).forEach { tag ->
+            addHtmlText(html.substring(textStart, tag.range.first), indentation)
+            val media = htmlMediaOf(tag.groupValues[1], tag.groupValues[2], linkResolver)
+            val mediaPart = media?.part
+            when {
+                mediaPart != null -> addInlineParts(listOf(mediaPart), indentation, ::textBlock)
+                media != null && media.fallbackText.isNotBlank() ->
+                    blocks += textBlock(StyledText(text = media.fallbackText.trim(), spans = emptyList()), indentation)
+            }
+            textStart = tag.range.last + 1
+        }
+        addHtmlText(html.substring(textStart), indentation)
+    }
+
+    private fun addHtmlText(html: String, indentation: Int) {
+        val visibleText = html
             .replace(lineBreakingHtmlTag, "\n")
             .replace(anyHtmlTag, "")
         decodeMarkdownEscapes(visibleText)
@@ -499,6 +522,7 @@ private class MarkdownBlockBuilder(
                 is InlinePart.Words -> blocks += wordsBlock(part.styledText, indentation)
                 is InlinePart.Attachment -> addAttachment(part.relativePath, indentation)
                 is InlinePart.WebImage -> addWebImage(part.url, part.altText, indentation)
+                is InlinePart.Embed -> blocks += bookmarkBlock(part.url, labelText = "", indentation)
             }
         }
     }
