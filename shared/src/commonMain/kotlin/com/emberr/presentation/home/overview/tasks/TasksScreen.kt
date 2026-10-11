@@ -225,7 +225,6 @@ fun TasksScreen(
                         override fun onPlayAudio(filePath: String, onComplete: () -> Unit) {}
                         override fun onStopAudio() {}
                         override fun onDeleteImageBlock(id: String) {}
-                        override fun onImageFetched(blockId: String, localFileName: String) {}
                         override fun onRequestImagePicker(blockId: String) {}
                         override fun onRequestDocumentPicker(blockId: String) {}
                         override fun onTogglePin() {}

@@ -414,6 +414,7 @@ class MarkdownNotesImporterTest {
         assertEquals("media_web.png", (blocks[0] as ImageBlock).localFilePath)
         assertEquals("See", (blocks[1] as TextBlock).text)
         assertEquals("png bytes", mediaStorage.savedTextsByFileName[(blocks[2] as ImageBlock).localFilePath])
+        assertNull((blocks[2] as ImageBlock).sourceUrl)
         assertEquals("here", (blocks[3] as TextBlock).text)
         val fallback = blocks[4] as BookmarkBlock
         assertEquals("https://example.com/gone.png" to "Gone", fallback.url to fallback.title)
@@ -437,6 +438,7 @@ class MarkdownNotesImporterTest {
 
         val firstBlocks = repository.getNoteContent(importedNotes().single { it.title == "First" }.noteId)!!.blocks
         assertEquals("media_web.png", (firstBlocks[0] as ImageBlock).localFilePath)
+        assertEquals("https://example.com/logo.png", (firstBlocks[0] as ImageBlock).sourceUrl)
         val fallback = firstBlocks[1] as BookmarkBlock
         assertEquals("https://example.com/gone.png", fallback.url)
         assertEquals("gone", fallback.title)

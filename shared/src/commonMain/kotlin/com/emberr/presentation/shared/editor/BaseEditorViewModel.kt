@@ -24,6 +24,7 @@ import com.emberr.domain.util.eventbus.AiEventBus
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.network.HtmlMetadataFetcher
 import com.emberr.domain.util.media.MediaStorageHelper
+import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.ui.theme.HighlightColor
@@ -81,6 +82,7 @@ private data class FormatRequest(
 abstract class BaseEditorViewModel(
     protected val repository: NoteRepository,
     protected val mediaStorageHelper: MediaStorageHelper,
+    private val webImageFetcher: WebImageFetcher,
     protected val reminderScheduler: ReminderScheduler,
     protected val audioRecorder: AudioRecorder,
     private val appScope: CoroutineScope
@@ -2174,9 +2176,24 @@ abstract class BaseEditorViewModel(
         }
     }
 
-    fun handleImageFetched(blockId: String, localFileName: String) {
+    private val _imageLinkFetches = MutableStateFlow<Map<String, ImageLinkFetch>>(emptyMap())
+    val imageLinkFetches: StateFlow<Map<String, ImageLinkFetch>> = _imageLinkFetches.asStateFlow()
+
+    fun handleImageLinkSubmitted(blockId: String, address: String) {
+        if (_imageLinkFetches.value[blockId]?.hasFailed == false) return
+        _imageLinkFetches.update { fetches -> fetches + (blockId to ImageLinkFetch(address, hasFailed = false)) }
+        viewModelScope.launch {
+            val mediaInfo = webImageFetcher.fetchIntoMedia(address)
+            if (mediaInfo != null) handleImageFetched(blockId, mediaInfo.localFileName, sourceUrl = address)
+            _imageLinkFetches.update { fetches ->
+                if (mediaInfo != null) fetches - blockId else fetches + (blockId to ImageLinkFetch(address, hasFailed = true))
+            }
+        }
+    }
+
+    private fun handleImageFetched(blockId: String, localFileName: String, sourceUrl: String) {
         val now = System.currentTimeMillis()
-        modifyBlocks { list -> mapBlockById(list, blockId) { if (it is ImageBlock) it.copy(localFilePath = localFileName, updatedAt = now) else it } }
+        modifyBlocks { list -> mapBlockById(list, blockId) { if (it is ImageBlock) it.copy(localFilePath = localFileName, sourceUrl = sourceUrl, updatedAt = now) else it } }
         scheduleAutosave()
     }
 

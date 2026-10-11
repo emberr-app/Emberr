@@ -7,6 +7,7 @@ import com.emberr.domain.model.*
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
+import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.presentation.shared.editor.BaseEditorViewModel
@@ -23,10 +24,11 @@ import kotlinx.coroutines.withContext
 class NoteEditorViewModel(
     repository: NoteRepository,
     mediaStorageHelper: MediaStorageHelper,
+    webImageFetcher: WebImageFetcher,
     reminderScheduler: ReminderScheduler,
     audioRecorder: AudioRecorder,
     appScope: CoroutineScope
-) : BaseEditorViewModel(repository, mediaStorageHelper, reminderScheduler, audioRecorder, appScope) {
+) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope) {
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()

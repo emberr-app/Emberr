@@ -10,6 +10,7 @@ import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.util.eventbus.AiEventBus
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
+import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.NoteSyncEvent
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
@@ -47,11 +48,12 @@ import kotlin.time.Duration.Companion.milliseconds
 class DailyEditorViewModel(
     repository: NoteRepository,
     mediaStorageHelper: MediaStorageHelper,
+    webImageFetcher: WebImageFetcher,
     reminderScheduler: ReminderScheduler,
     audioRecorder: AudioRecorder,
     appScope: CoroutineScope,
     private val activeSpaceStore: ActiveSpaceStore
-) : BaseEditorViewModel(repository, mediaStorageHelper, reminderScheduler, audioRecorder, appScope) {
+) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope) {
 
     // Date state
     private val _currentDateString = MutableStateFlow<String?>(null)

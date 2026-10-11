@@ -1,6 +1,8 @@
 package com.emberr.domain.util.export
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.ui.graphics.toArgb
@@ -10,6 +12,17 @@ import com.emberr.domain.util.media.MediaStorageHelper
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.withTranslation
 import androidx.core.graphics.withSave
+
+private const val PDF_IMAGE_LARGEST_SIDE_PIXELS = 1920
+
+private fun decodeUprightBitmapForPdf(imageFile: java.io.File): Bitmap =
+    ImageDecoder.decodeBitmap(ImageDecoder.createSource(imageFile)) { decoder, info, _ ->
+        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+        val largestSide = maxOf(info.size.width, info.size.height)
+        var sampleSize = 1
+        while (largestSide / (sampleSize * 2) >= PDF_IMAGE_LARGEST_SIDE_PIXELS) sampleSize *= 2
+        decoder.setTargetSampleSize(sampleSize)
+    }
 
 private fun pdfHighlightColorFor(colorName: String?): Int =
     HighlightColor.named(colorName).lightBackground.toArgb()
@@ -189,7 +202,7 @@ fun generateAndSaveAndroidPdf(
 
                     if (imgFile.exists()) {
                         try {
-                            val bitmap = android.graphics.BitmapFactory.decodeFile(imgFile.absolutePath) ?: continue
+                            val bitmap = decodeUprightBitmapForPdf(imgFile)
                             val aspectRatio = bitmap.height.toFloat() / bitmap.width.toFloat()
                             var drawWidth = availableWidth.toFloat()
                             var drawHeight = drawWidth * aspectRatio

@@ -881,14 +881,18 @@ fun NoteBlockItem(
                                 onOpenNote = { actions.onNoteLinkClick(block.linkedNoteId) },
                                 getNoteMetadata = { actions.getNoteMetadata(it) }
                             )
-                            is ImageBlock -> ImageBlockView(
-                                block, inSelectionMode,
-                                onToggleSelection = { actions.onToggleSelection(block.id) },
-                                onRequestPicker = { actions.onRequestImagePicker(block.id) },
-                                onRequestCamera = { actions.onRequestCamera(block.id) },
-                                onImageFetched = { localFileName -> actions.onImageFetched(block.id, localFileName) },
-                                onDelete = { actions.onDeleteImageBlock(block.id) }
-                            )
+                            is ImageBlock -> {
+                                val imageLinkFetches by actions.imageLinkFetches.collectAsState()
+                                ImageBlockView(
+                                    block, inSelectionMode,
+                                    onToggleSelection = { actions.onToggleSelection(block.id) },
+                                    onRequestPicker = { actions.onRequestImagePicker(block.id) },
+                                    onRequestCamera = { actions.onRequestCamera(block.id) },
+                                    imageLinkFetch = imageLinkFetches[block.id],
+                                    onImageLinkSubmitted = { address -> actions.onImageLinkSubmitted(block.id, address) },
+                                    onDelete = { actions.onDeleteImageBlock(block.id) }
+                                )
+                            }
                             is DocumentBlock -> DocumentBlockView(
                                 block = block,
                                 inSelectionMode = inSelectionMode,

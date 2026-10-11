@@ -53,6 +53,7 @@ import org.jetbrains.compose.resources.painterResource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.download
+import emberr.shared.generated.resources.square_top_down
 import emberr.shared.generated.resources.trash
 import kotlin.math.abs
 import kotlinx.coroutines.launch
@@ -74,7 +75,8 @@ fun FullScreenImageScreen(
     onBack: () -> Unit,
     onDownload: () -> Unit,
     onCopy: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onOpenSourceLink: (() -> Unit)? = null
 ) {
     val density = LocalDensity.current
     val gestureScope = rememberCoroutineScope()
@@ -328,6 +330,17 @@ fun FullScreenImageScreen(
                     },
                     tint = tint
                 )
+
+                if (onOpenSourceLink != null) {
+                    Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
+
+                    Icon(
+                        painter = painterResource(Res.drawable.square_top_down),
+                        contentDescription = "Open Link",
+                        modifier = Modifier.size(iconSize).clickable { onOpenSourceLink() },
+                        tint = tint
+                    )
+                }
 
                 Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
 

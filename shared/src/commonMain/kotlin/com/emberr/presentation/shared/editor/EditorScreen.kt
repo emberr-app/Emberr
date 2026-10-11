@@ -99,6 +99,9 @@ import androidx.compose.foundation.gestures.animateScrollBy
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.ui.platform.LocalDensity
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
@@ -249,6 +252,10 @@ object EditorEventBus {
     val cancelMentionEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 }
 
+data class ImageLinkFetch(val address: String, val hasFailed: Boolean)
+
+private val noImageLinkFetches: StateFlow<Map<String, ImageLinkFetch>> = MutableStateFlow<Map<String, ImageLinkFetch>>(emptyMap()).asStateFlow()
+
 @Stable
 interface EditorActions {
 
@@ -285,7 +292,8 @@ interface EditorActions {
     fun onStopAudio()
     fun onDeleteImageBlock(id: String)
     fun onRequestImagePicker(blockId: String)
-    fun onImageFetched(blockId: String, localFileName: String)
+    fun onImageLinkSubmitted(blockId: String, address: String) {}
+    val imageLinkFetches: StateFlow<Map<String, ImageLinkFetch>> get() = noImageLinkFetches
     fun onRequestDocumentPicker(blockId: String)
     fun onOpenFile(filePath: String, mimeType: String)
     fun onTogglePin()

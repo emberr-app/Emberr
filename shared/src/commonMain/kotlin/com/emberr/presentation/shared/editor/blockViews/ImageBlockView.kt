@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -62,8 +63,9 @@ import com.emberr.domain.sync.MediaRetryCoordinator
 import com.emberr.domain.util.media.ImageClipboard
 import com.emberr.domain.util.media.ImageDownloader
 import com.emberr.domain.util.media.MediaStorageHelper
-import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.media.webImageAddressOrNull
+import com.emberr.presentation.shared.editor.ImageLinkFetch
+import com.emberr.presentation.shared.editor.rememberWebLinkActions
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showFeedback
 import com.emberr.presentation.LocalImageOverlay
@@ -88,6 +90,7 @@ private val MaximumImageBlockHeight = 320.dp
 private val LoadingImageBlockHeight = 180.dp
 private val EmptyImageButtonSidePadding = 8.dp
 private val EmptyImageButtonsEndSpace = 6.dp
+private val SourceLinkPillMaxWidth = 200.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -98,12 +101,14 @@ fun ImageBlockView(
     onRequestPicker: () -> Unit,
     onDelete: () -> Unit = {},
     onRequestCamera: () -> Unit,
-    onImageFetched: (localFileName: String) -> Unit
+    imageLinkFetch: ImageLinkFetch?,
+    onImageLinkSubmitted: (address: String) -> Unit
 ) {
     val mediaStorageHelper = koinInject<MediaStorageHelper>()
     val mediaRetryCoordinator = koinInject<MediaRetryCoordinator>()
     val imageDownloader = koinInject<ImageDownloader>()
     val coroutineScope = rememberCoroutineScope()
+    val webLinkActions = rememberWebLinkActions()
     var showFullScreen by remember { mutableStateOf(false) }
     val setFullScreenOverlay = LocalImageOverlay.current
 
@@ -113,7 +118,8 @@ fun ImageBlockView(
             onToggleSelection = onToggleSelection,
             onRequestPicker = onRequestPicker,
             onRequestCamera = onRequestCamera,
-            onImageFetched = onImageFetched
+            imageLinkFetch = imageLinkFetch,
+            onImageLinkSubmitted = onImageLinkSubmitted
         )
     } else {
         val absolutePath = remember(block.localFilePath) {
@@ -258,6 +264,31 @@ fun ImageBlockView(
                                 }
                             }
                     )
+
+                    block.sourceUrl?.let { sourceUrl ->
+                        Text(
+                            text = sourceUrl,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(8.dp)
+                                .widthIn(max = SourceLinkPillMaxWidth)
+                                .clip(CircleShape)
+                                .border(
+                                    width = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                    shape = CircleShape
+                                )
+                                .emberrBlur(imageHazeState, EmberrBlur.OnImage)
+                                .clickable {
+                                    if (inSelectionMode) onToggleSelection() else webLinkActions.openLink(sourceUrl)
+                                }
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
                 }
             }
 
@@ -292,7 +323,8 @@ fun ImageBlockView(
                                 setFullScreenOverlay?.invoke(null)
                                 showFullScreen = false
                                 onDelete()
-                            }
+                            },
+                            onOpenSourceLink = block.sourceUrl?.let { sourceUrl -> { webLinkActions.openLink(sourceUrl) } }
                         )
                     }
                 } else {
@@ -309,24 +341,18 @@ private fun EmptyImageBlock(
     onToggleSelection: () -> Unit,
     onRequestPicker: () -> Unit,
     onRequestCamera: () -> Unit,
-    onImageFetched: (localFileName: String) -> Unit
+    imageLinkFetch: ImageLinkFetch?,
+    onImageLinkSubmitted: (address: String) -> Unit
 ) {
-    val webImageFetcher = koinInject<WebImageFetcher>()
-    val coroutineScope = rememberCoroutineScope()
-    var linkText by remember { mutableStateOf("") }
-    var isFetching by remember { mutableStateOf(false) }
-    var hasFetchFailed by remember { mutableStateOf(false) }
+    var linkText by remember { mutableStateOf(imageLinkFetch?.address.orEmpty()) }
+    var hasEditedLinkSinceLastTry by remember { mutableStateOf(false) }
+    val isFetching = imageLinkFetch?.hasFailed == false
+    val hasFetchFailed = imageLinkFetch?.hasFailed == true && !hasEditedLinkSinceLastTry
     val hintColor = MaterialTheme.colorScheme.outline
 
     fun fetchImage(address: String) {
-        if (isFetching) return
-        coroutineScope.launch {
-            isFetching = true
-            hasFetchFailed = false
-            val mediaInfo = webImageFetcher.fetchIntoMedia(address)
-            isFetching = false
-            if (mediaInfo != null) onImageFetched(mediaInfo.localFileName) else hasFetchFailed = true
-        }
+        hasEditedLinkSinceLastTry = false
+        onImageLinkSubmitted(address)
     }
 
     fun fetchTypedLink() {
@@ -371,7 +397,7 @@ private fun EmptyImageBlock(
                         onValueChange = { newText ->
                             val wasPasted = newText.length - linkText.length > 1
                             linkText = newText
-                            hasFetchFailed = false
+                            hasEditedLinkSinceLastTry = true
                             val address = webImageAddressOrNull(newText)
                             if (wasPasted && address != null) fetchImage(address)
                         },

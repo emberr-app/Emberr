@@ -340,6 +340,7 @@ data class LinkedNoteBlock(
 data class ImageBlock(
     override val id: String,
     val localFilePath: String? = null,
+    val sourceUrl: String? = null,
     override val indentationLevel: Int = 0,
     override val isBold: Boolean = false,
     override val isItalic: Boolean = false,

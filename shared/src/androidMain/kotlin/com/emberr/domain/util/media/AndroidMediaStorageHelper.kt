@@ -2,9 +2,7 @@ package com.emberr.domain.util.media
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.media.ExifInterface
+import android.graphics.ImageDecoder
 import android.net.Uri
 import android.provider.OpenableColumns
 import kotlinx.coroutines.Dispatchers
@@ -14,9 +12,11 @@ import okio.buffer
 import okio.sink
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.util.UUID
 
 private const val STREAM_CHUNK_BYTES = 64L * 1024
+private const val CONVERTED_HEIC_JPEG_QUALITY = 95
 
 class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelper {
 
@@ -45,55 +45,16 @@ class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelp
 
             val mimeType = contentResolver.getType(uri) ?: if (displayName.lowercase().endsWith(".jpg")) "image/jpeg" else "application/octet-stream"
             val extension = displayName.substringAfterLast('.', "")
-            val localFileName = "media_${UUID.randomUUID()}${if (extension.isNotEmpty()) ".$extension" else ".jpg"}"
+            val uprightHeicBitmap = if (mimeType == "image/heic" || mimeType == "image/heif") decodeUprightBitmapOrNull(uri) else null
+            val savedExtension = if (uprightHeicBitmap != null) "jpg" else extension.ifEmpty { "jpg" }
+            val localFileName = "media_${UUID.randomUUID()}.$savedExtension"
 
             // Save the file into the dedicated media folder
             val file = File(mediaDir, localFileName)
 
-            if (mimeType.startsWith("image/") && !mimeType.contains("gif")) {
-                var orientation = ExifInterface.ORIENTATION_NORMAL
-                try {
-                    contentResolver.openInputStream(uri)?.use {
-                        val exif = ExifInterface(it)
-                        orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-                    }
-                } catch (e: Exception) { e.printStackTrace() }
-
-                val matrix = Matrix()
-                when (orientation) {
-                    ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
-                    ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
-                    ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
-                }
-
-                var inSampleSize = 1
-                contentResolver.openInputStream(uri)?.use { inputStream ->
-                    val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                    BitmapFactory.decodeStream(inputStream, null, options)
-
-                    val reqSize = 1920
-                    if (options.outHeight > reqSize || options.outWidth > reqSize) {
-                        val halfHeight = options.outHeight / 2
-                        val halfWidth = options.outWidth / 2
-                        while (halfHeight / inSampleSize >= reqSize && halfWidth / inSampleSize >= reqSize) {
-                            inSampleSize *= 2
-                        }
-                    }
-                }
-
-                val decodeOptions = BitmapFactory.Options().apply { this.inSampleSize = inSampleSize }
-                val bitmap = contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, decodeOptions) }
-
-                if (bitmap != null) {
-                    val rotatedBitmap = if (matrix.isIdentity) bitmap else Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-                    FileOutputStream(file).use { out -> rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out) }
-                    if (rotatedBitmap != bitmap) rotatedBitmap.recycle()
-                    bitmap.recycle()
-                } else {
-                    contentResolver.openInputStream(uri)?.use { inputStream ->
-                        FileOutputStream(file).use { outputStream -> inputStream.copyTo(outputStream) }
-                    }
-                }
+            if (uprightHeicBitmap != null) {
+                FileOutputStream(file).use { out -> uprightHeicBitmap.compress(Bitmap.CompressFormat.JPEG, CONVERTED_HEIC_JPEG_QUALITY, out) }
+                uprightHeicBitmap.recycle()
             } else {
                 contentResolver.openInputStream(uri)?.use { inputStream ->
                     FileOutputStream(file).use { outputStream -> inputStream.copyTo(outputStream) }
@@ -105,7 +66,7 @@ class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelp
             MediaInfo(
                 localFileName = localFileName,
                 originalName = displayName,
-                mimeType = mimeType,
+                mimeType = if (uprightHeicBitmap != null) "image/jpeg" else mimeType,
                 sizeBytes = size
             )
         } catch (e: Exception) {
@@ -113,6 +74,15 @@ class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelp
             null
         }
     }
+
+    private fun decodeUprightBitmapOrNull(uri: Uri): Bitmap? =
+        try {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)) { decoder, _, _ ->
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            }
+        } catch (_: IOException) {
+            null
+        }
 
     override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo? =
         withContext(Dispatchers.IO) {

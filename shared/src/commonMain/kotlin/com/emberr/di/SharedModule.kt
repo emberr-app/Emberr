@@ -320,6 +320,7 @@ val sharedModule = module {
         com.emberr.presentation.home.note.NoteEditorViewModel(
             repository = get(),
             mediaStorageHelper = get(),
+            webImageFetcher = get(),
             reminderScheduler = get(),
             audioRecorder = get(),
             appScope = get(named("AppScope"))
@@ -329,6 +330,7 @@ val sharedModule = module {
         DailyEditorViewModel(
             repository = get(),
             mediaStorageHelper = get(),
+            webImageFetcher = get(),
             reminderScheduler = get(),
             audioRecorder = get(),
             appScope = get(named("AppScope")),

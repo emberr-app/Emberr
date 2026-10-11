@@ -446,7 +446,7 @@ class MarkdownNotesImporter(
             val webImage = webImagesByBlockId[block.id] ?: return@map block
             val mediaInfo = downloadedImageFor(webImage.url)
             if (mediaInfo != null && block is ImageBlock) {
-                block.copy(localFilePath = mediaInfo.localFileName)
+                block.copy(localFilePath = mediaInfo.localFileName, sourceUrl = webImage.url)
             } else {
                 BookmarkBlock(
                     id = block.id,
