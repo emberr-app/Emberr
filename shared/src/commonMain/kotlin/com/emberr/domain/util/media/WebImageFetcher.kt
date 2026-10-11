@@ -13,15 +13,6 @@ import kotlinx.coroutines.CancellationException
 private const val CONNECT_TIMEOUT_MILLIS = 15_000L
 private const val REQUEST_TIMEOUT_MILLIS = 30_000L
 private const val LARGEST_WEB_IMAGE_BYTES = 25L * 1024 * 1024
-private val extensionsByImageMimeType = mapOf(
-    "image/png" to "png",
-    "image/jpeg" to "jpg",
-    "image/gif" to "gif",
-    "image/webp" to "webp",
-    "image/bmp" to "bmp",
-    "image/heic" to "heic",
-    "image/heif" to "heif"
-)
 
 fun webImageAddressOrNull(text: String): String? {
     val address = text.trim()
@@ -57,7 +48,7 @@ class KtorWebImageFetcher(private val mediaStorageHelper: MediaStorageHelper) : 
     private suspend fun saveImageFrom(response: HttpResponse): MediaInfo? {
         if (!response.status.isSuccess()) return null
         val mimeType = response.contentType()?.let { "${it.contentType}/${it.contentSubtype}" }?.lowercase() ?: return null
-        val extension = extensionsByImageMimeType[mimeType] ?: return null
+        val extension = imageExtensionForMimeType(mimeType) ?: return null
         if ((response.contentLength() ?: 0L) > LARGEST_WEB_IMAGE_BYTES) return null
 
         val bytes = response.body<ByteArray>()
