@@ -6,10 +6,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
 
 class BackupRestoreFilesTest {
 
@@ -49,27 +46,5 @@ class BackupRestoreFilesTest {
         val notADatabase = File(workingDirectory, "notes.txt").apply { writeText("x".repeat(200)) }
 
         assertFailsWith<IllegalStateException> { checkBackupDatabaseCanBeRestored(notADatabase) }
-    }
-
-    @Test
-    fun aMediaFileNameCannotPointOutsideTheMediaFolder() {
-        assertEquals("photo.png", safeMediaFileName("media/../../photo.png", "media/"))
-    }
-
-    @Test
-    fun aMediaEntryWithoutAFileNameIsSkipped() {
-        assertNull(safeMediaFileName("media/", "media/"))
-    }
-
-    @Test
-    fun restoredMediaIsMovedIntoTheMediaFolder() {
-        val mediaDirectory = File(workingDirectory, "media")
-        val restoredMediaDirectory = File(workingDirectory, "restored").apply { mkdirs() }
-        File(restoredMediaDirectory, "photo.png").writeText("image")
-
-        moveRestoredMediaInto(mediaDirectory, restoredMediaDirectory)
-
-        assertEquals("image", File(mediaDirectory, "photo.png").readText())
-        assertFalse(File(restoredMediaDirectory, "photo.png").exists())
     }
 }

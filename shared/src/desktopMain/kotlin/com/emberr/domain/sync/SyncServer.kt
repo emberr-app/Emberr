@@ -16,7 +16,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.serialization.json.Json
-import java.util.concurrent.atomic.AtomicBoolean
 
 // Tracks active file uploads so GET requests return HTTP 425 (Too Early)
 // when a requested file is currently being uploaded by another device.
@@ -114,7 +113,6 @@ fun startSyncServer(
 
     val seal = LanSyncSeal(hmacSigner, syncEncryptionManager) { settingsManager.getSyncEncryptionKey() }
     val syncJson = Json { ignoreUnknownKeys = true; coerceInputValues = true }
-    val lastPushWasAppliedCleanly = AtomicBoolean(false)
 
     val server = embeddedServer(Netty, host = "0.0.0.0", port = port) {
         routing {
@@ -134,9 +132,6 @@ fun startSyncServer(
                     changesWaitingToRetry = syncRepository.countChangesWaitingToRetry()
                 )
                 call.respondSealed(seal, seal.lockMessage(syncJson.encodeToString(payload)))
-                if (since == 0L && lastPushWasAppliedCleanly.get() && payload.changesWaitingToRetry == 0) {
-                    settingsManager.saveMediaCleanupWaitingForLanSync(false)
-                }
             }
 
             post(SyncConstants.ROUTE_PUSH) {
@@ -149,7 +144,6 @@ fun startSyncServer(
                     // Applies incoming changes per envelope. If any envelope fails or is skipped due to a lock,
                     // returns a non-2xx status so the client knows to retry the push.
                     val appliedCleanly = syncRepository.applyRemoteChanges(payload.changes)
-                    lastPushWasAppliedCleanly.set(appliedCleanly)
                     if (appliedCleanly) {
                         call.respondSealed(seal)
                     } else {

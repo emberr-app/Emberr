@@ -1,18 +1,13 @@
 package com.emberr.presentation.settings.importer
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,9 +27,6 @@ import com.emberr.presentation.settings.SettingsDivider
 import com.emberr.presentation.settings.SettingsFootnote
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.desktopSettingsSidePadding
-import com.emberr.presentation.shared.components.EmberrAlertDialog
-import com.emberr.presentation.shared.components.EmberrButtonPrimary
-import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
@@ -48,16 +40,18 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ImportScreen(
     onNavigateBack: () -> Unit,
-    onImportBackupClick: () -> Unit,
     showTopBar: Boolean = true,
-    viewModel: ImportViewModel = koinViewModel()
+    viewModel: ImportViewModel = koinViewModel(),
+    emberrImportViewModel: EmberrImportViewModel = koinViewModel()
 ) {
     val spaces by viewModel.spaces.collectAsState()
     val selectedSpaceId by viewModel.selectedSpaceId.collectAsState()
     val pickedFilesState by viewModel.pickedFilesState.collectAsState()
     val importProgress by viewModel.importProgress.collectAsState()
     var showMarkdownImportSheet by rememberSaveable { mutableStateOf(false) }
-    var showRestoreConfirmation by remember { mutableStateOf(false) }
+    val pickedBackupState by emberrImportViewModel.pickedBackupState.collectAsState()
+    val emberrImportProgress by emberrImportViewModel.importProgress.collectAsState()
+    var showEmberrImportSheet by rememberSaveable { mutableStateOf(false) }
 
     val hazeState = remember { HazeState() }
     val density = LocalDensity.current
@@ -93,7 +87,7 @@ fun ImportScreen(
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.emberr_ghost),
                         title = "Emberr",
-                        onClick = { showRestoreConfirmation = true }
+                        onClick = { showEmberrImportSheet = true }
                     )
                 }
             }
@@ -135,41 +129,17 @@ fun ImportScreen(
         )
     }
 
-    if (showRestoreConfirmation) {
-        EmberrAlertDialog(
-            onDismissRequest = { showRestoreConfirmation = false },
-            title = "Replace Everything?"
-        ) {
-            Text(
-                text = "Restoring replaces everything on this device with the backup. This can't be undone. " +
-                        "Your other synced devices aren't changed. When you sync, anything newer on them " +
-                        "will come back to this device.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-            )
-            Spacer(Modifier.height(20.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                EmberrButtonSecondary(
-                    text = "Cancel",
-                    onClick = { showRestoreConfirmation = false },
-                    modifier = Modifier.weight(1f)
-                )
-                EmberrButtonPrimary(
-                    text = "Choose Backup",
-                    onClick = {
-                        showRestoreConfirmation = false
-                        onImportBackupClick()
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+    if (showEmberrImportSheet) {
+        EmberrImportSheet(
+            pickedBackupState = pickedBackupState,
+            importProgress = emberrImportProgress,
+            onFilePicked = emberrImportViewModel::readBackupFile,
+            onImportClick = emberrImportViewModel::startImport,
+            onStopClick = emberrImportViewModel::stopImport,
+            onDismiss = {
+                showEmberrImportSheet = false
+                emberrImportViewModel.closeEmberrImport()
             }
-            Spacer(Modifier.height(10.dp))
-            EmberrButtonPrimary(
-                text = "Restore Everywhere (Coming Soon)",
-                onClick = {},
-                enabled = false,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        )
     }
 }

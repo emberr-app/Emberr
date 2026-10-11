@@ -38,7 +38,6 @@ interface SettingsManager {
     fun getLastFetchedTimestamp(): Long
     fun saveLastFetchedTimestamp(timestamp: Long)
     fun getOrCreateLanSyncDesktopId(): String
-    fun forgetLanSyncDesktopId()
     fun getLastSyncedDesktopId(): String
     fun saveLastSyncedDesktopId(desktopId: String)
 
@@ -181,18 +180,6 @@ interface SettingsManager {
 
     fun isMediaReferenceListBuilt(): Boolean
     fun saveMediaReferenceListBuilt(built: Boolean)
-
-    fun isRestoreUnfinished(): Boolean
-    fun saveRestoreUnfinished(unfinished: Boolean)
-
-    fun isLanSyncResetPending(): Boolean
-    fun saveLanSyncResetPending(pending: Boolean)
-
-    fun isMediaCleanupWaitingForLanSync(): Boolean
-    fun saveMediaCleanupWaitingForLanSync(waiting: Boolean)
-
-    fun isMediaCleanupWaitingForSelfHostSync(): Boolean
-    fun saveMediaCleanupWaitingForSelfHostSync(waiting: Boolean)
 
     fun isSampleNotesSeeded(): Boolean
     fun saveSampleNotesSeeded(seeded: Boolean)

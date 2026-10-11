@@ -1,9 +1,7 @@
 package com.emberr.domain.media
 
-import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.UnusedMediaFileDao
 import com.emberr.data.local.room.entity.UnusedMediaFileEntity
-import com.emberr.domain.selfhost.sync.SelfHostConnectionState
 import com.emberr.domain.util.media.MediaStorageHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,25 +10,12 @@ import java.io.File
 class LocalMediaGarbageCollector(
     private val mediaReferenceIndex: MediaReferenceIndex,
     private val mediaStorageHelper: MediaStorageHelper,
-    private val unusedMediaFileDao: UnusedMediaFileDao,
-    private val settingsManager: SettingsManager,
-    private val selfHostConnectionState: SelfHostConnectionState
+    private val unusedMediaFileDao: UnusedMediaFileDao
 ) {
 
     suspend fun collectAndDeleteOrphanedMedia() = withContext(Dispatchers.IO) {
         deleteExpiredTempFiles()
         try {
-            val isWaitingForSync = isMediaCleanupWaitingForSync(
-                waitingForLanSync = settingsManager.isMediaCleanupWaitingForLanSync(),
-                isLanPaired = settingsManager.isSyncPairingConfirmed(),
-                waitingForSelfHostSync = settingsManager.isMediaCleanupWaitingForSelfHostSync(),
-                isSelfHostConnected = selfHostConnectionState.isConnected.value
-            )
-            if (isWaitingForSync) {
-                LocalMediaGcLog.d("collectAndDeleteOrphanedMedia: skipped, waiting for sync to bring notes back after a restore")
-                return@withContext
-            }
-
             val nowMs = System.currentTimeMillis()
             val plan = planLocalMediaCleanup(
                 fileNamesOnDisk = mediaStorageHelper.listAllMediaFileNames()

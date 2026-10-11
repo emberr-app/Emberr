@@ -86,8 +86,7 @@ fun EmberrApp(
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
     onTakePhoto: (onPathSelected: (String) -> Unit) -> Unit = {},
     onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
-    onExportBackup: () -> Unit = {},
-    onImportBackupClick: () -> Unit = {},
+    onExportBackup: (spaceIds: Set<String>) -> Unit = {},
     onRequestBackupFolder: () -> Unit,
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     onExitApp: () -> Unit = {}
@@ -361,7 +360,6 @@ fun EmberrApp(
                             onExportMarkdown = onExportMarkdown,
                             onExportPdf = onExportPdf,
                             onExportBackup = onExportBackup,
-                            onImportBackupClick = onImportBackupClick,
                             onAiIconTap = openAiChat,
                             isAiChatVisible = showAiChatOverlay,
                             ragViewModel = ragViewModel,
@@ -936,8 +934,7 @@ fun EmberrApp(
                             }
                         ) {
                             com.emberr.presentation.settings.importer.ImportScreen(
-                                onNavigateBack = { navController.popBackStack() },
-                                onImportBackupClick = onImportBackupClick
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
 

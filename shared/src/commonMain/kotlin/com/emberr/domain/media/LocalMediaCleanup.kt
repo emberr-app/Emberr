@@ -23,10 +23,3 @@ internal fun planLocalMediaCleanup(
         }
     )
 }
-
-internal fun isMediaCleanupWaitingForSync(
-    waitingForLanSync: Boolean,
-    isLanPaired: Boolean,
-    waitingForSelfHostSync: Boolean,
-    isSelfHostConnected: Boolean
-): Boolean = (waitingForLanSync && isLanPaired) || (waitingForSelfHostSync && isSelfHostConnected)

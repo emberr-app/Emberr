@@ -135,9 +135,6 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         return newDesktopId
     }
 
-    @Synchronized
-    override fun forgetLanSyncDesktopId() = prefs.remove(SyncConstants.KEY_LAN_SYNC_DESKTOP_ID)
-
     override fun getLastSyncedDesktopId(): String = prefs.get(SyncConstants.KEY_LAST_SYNCED_DESKTOP_ID, "")
 
     override fun saveLastSyncedDesktopId(desktopId: String) = prefs.put(SyncConstants.KEY_LAST_SYNCED_DESKTOP_ID, desktopId)
@@ -556,44 +553,6 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
     override fun saveMediaReferenceListBuilt(built: Boolean) {
         prefs.putBoolean(SyncConstants.KEY_MEDIA_REFERENCE_LIST_BUILT, built)
         hasBuiltMediaReferenceList = built
-    }
-
-    private var isRestoreStillUnfinished = prefs.getBoolean(
-        SyncConstants.KEY_RESTORE_UNFINISHED,
-        SyncConstants.DEFAULT_RESTORE_UNFINISHED
-    )
-
-    override fun isRestoreUnfinished(): Boolean = isRestoreStillUnfinished
-
-    override fun saveRestoreUnfinished(unfinished: Boolean) {
-        prefs.putBoolean(SyncConstants.KEY_RESTORE_UNFINISHED, unfinished)
-        isRestoreStillUnfinished = unfinished
-    }
-
-    private var isLanSyncResetStillPending = prefs.getBoolean(
-        SyncConstants.KEY_LAN_SYNC_RESET_PENDING,
-        SyncConstants.DEFAULT_LAN_SYNC_RESET_PENDING
-    )
-
-    override fun isLanSyncResetPending(): Boolean = isLanSyncResetStillPending
-
-    override fun saveLanSyncResetPending(pending: Boolean) {
-        prefs.putBoolean(SyncConstants.KEY_LAN_SYNC_RESET_PENDING, pending)
-        isLanSyncResetStillPending = pending
-    }
-
-    override fun isMediaCleanupWaitingForLanSync(): Boolean =
-        prefs.getBoolean(SyncConstants.KEY_MEDIA_CLEANUP_WAITING_FOR_LAN_SYNC, false)
-
-    override fun saveMediaCleanupWaitingForLanSync(waiting: Boolean) {
-        prefs.putBoolean(SyncConstants.KEY_MEDIA_CLEANUP_WAITING_FOR_LAN_SYNC, waiting)
-    }
-
-    override fun isMediaCleanupWaitingForSelfHostSync(): Boolean =
-        prefs.getBoolean(SyncConstants.KEY_MEDIA_CLEANUP_WAITING_FOR_SELF_HOST_SYNC, false)
-
-    override fun saveMediaCleanupWaitingForSelfHostSync(waiting: Boolean) {
-        prefs.putBoolean(SyncConstants.KEY_MEDIA_CLEANUP_WAITING_FOR_SELF_HOST_SYNC, waiting)
     }
 
     private var hasSeededSampleNotes = prefs.getBoolean(

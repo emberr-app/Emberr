@@ -24,7 +24,6 @@ import com.emberr.domain.sync.SyncRepositoryImpl
 import com.emberr.domain.backup.automatic.DesktopBackupRescheduler
 import com.emberr.domain.backup.automatic.BackupRescheduler
 import com.emberr.domain.backup.manual.DesktopManualBackupExporter
-import com.emberr.domain.backup.manual.DesktopManualBackupImporter
 import com.emberr.database.DatabaseDriverFactory
 import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.ai.RagRepository
@@ -121,6 +120,7 @@ val desktopModule = module {
     single<ImageDownloader> { DesktopImageDownloader() }
     single<AudioRecorder> { DesktopAudioRecorder() }
     single<ImportFileReader> { DesktopImportFileReader() }
+    single<com.emberr.domain.backup.manual.EmberrBackupFileReader> { com.emberr.domain.backup.manual.DesktopEmberrBackupFileReader() }
 
     // Self-hosted WebDAV sync
     single<KeyDerivationManager> { Pbkdf2KeyDerivationManager() }
@@ -161,10 +161,5 @@ val desktopModule = module {
     }
 
     // Manual export/import
-    single { DesktopManualBackupExporter(appDatabase = get(), settingsManager = get()) }
-    single {
-        DesktopManualBackupImporter(
-            backupRestorer = get()
-        )
-    }
+    single { DesktopManualBackupExporter(appDatabase = get()) }
 }

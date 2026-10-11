@@ -3,9 +3,11 @@ package com.emberr.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.backup.automatic.BackupRescheduler
 import com.emberr.domain.ai.AiPurgeReport
 import com.emberr.domain.ai.DisableAiFeaturesUseCase
+import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.home.overview.OverviewSection
@@ -21,8 +23,15 @@ class SettingsViewModel(
     private val settingsManager: SettingsManager,
     private val backupRescheduler: BackupRescheduler,
     private val disableAiFeaturesUseCase: DisableAiFeaturesUseCase,
-    private val appScope: CoroutineScope
+    private val appScope: CoroutineScope,
+    spaceRepository: SpaceRepository
 ) : ViewModel() {
+
+    val spaces: StateFlow<List<SpaceEntity>> = spaceRepository.observeSpaces().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     val autoBackupEnabled: StateFlow<Boolean> = settingsManager.autoBackupEnabledFlow.stateIn(
         scope = viewModelScope,

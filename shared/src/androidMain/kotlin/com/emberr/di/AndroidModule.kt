@@ -25,11 +25,9 @@ import com.emberr.domain.sync.SyncRepositoryImpl
 import com.emberr.domain.backup.automatic.AndroidBackupRescheduler
 import com.emberr.domain.backup.automatic.BackupNotifier
 import com.emberr.domain.backup.automatic.BackupScheduler
-import com.emberr.domain.backup.automatic.BackupSnapshotExporter
 import com.emberr.domain.backup.automatic.BackupWorker
 import com.emberr.domain.backup.automatic.BackupRescheduler
 import com.emberr.domain.backup.manual.AndroidManualBackupExporter
-import com.emberr.domain.backup.manual.AndroidManualBackupImporter
 import com.emberr.database.DatabaseDriverFactory
 import com.emberr.domain.ai.RagRepository
 import com.emberr.domain.selfhost.crypto.KeyDerivationManager
@@ -65,7 +63,6 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.dsl.worker
 import org.koin.core.module.dsl.viewModel
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val androidModule = module {
@@ -77,6 +74,9 @@ val androidModule = module {
     single<ReminderScheduler> { AndroidReminderScheduler(androidContext()) }
     single<AudioRecorder> { AndroidAudioRecorder(androidContext()) }
     single<ImportFileReader> { AndroidImportFileReader(androidContext()) }
+    single<com.emberr.domain.backup.manual.EmberrBackupFileReader> {
+        com.emberr.domain.backup.manual.AndroidEmberrBackupFileReader(androidContext())
+    }
     single<ImportFolderReader> { AndroidImportFolderReader(androidContext()) }
 
     single { AndroidSecretCipher(androidContext()) }
@@ -300,24 +300,14 @@ val androidModule = module {
     }
     viewModel { SyncViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    // Manual export/import (unrelated to automatic backups below)
     single {
         AndroidManualBackupExporter(
             context = androidContext(),
-            appDatabase = get(),
-            settingsManager = get()
-        )
-    }
-    single {
-        AndroidManualBackupImporter(
-            context = androidContext(),
-            backupRestorer = get(),
-            appScope = get(named("AppScope"))
+            appDatabase = get()
         )
     }
 
     // Automatic backups
-    single { BackupSnapshotExporter(context = androidContext(), appDatabase = get(), settingsManager = get()) }
     worker {
         BackupWorker(
             appContext = get(),

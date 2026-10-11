@@ -2,7 +2,6 @@ package com.emberr.domain.media
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class LocalMediaCleanupTest {
@@ -85,53 +84,5 @@ class LocalMediaCleanupTest {
         )
 
         assertEquals(setOf("gone.jpg"), plan.fileNamesToForget)
-    }
-
-    @Test
-    fun cleanupWaitsAfterARestoreWhileLanSyncHasNotCaughtUp() {
-        assertTrue(
-            isMediaCleanupWaitingForSync(
-                waitingForLanSync = true,
-                isLanPaired = true,
-                waitingForSelfHostSync = false,
-                isSelfHostConnected = false
-            )
-        )
-    }
-
-    @Test
-    fun cleanupWaitsAfterARestoreWhileSelfHostSyncHasNotCaughtUp() {
-        assertTrue(
-            isMediaCleanupWaitingForSync(
-                waitingForLanSync = false,
-                isLanPaired = true,
-                waitingForSelfHostSync = true,
-                isSelfHostConnected = true
-            )
-        )
-    }
-
-    @Test
-    fun cleanupRunsOnceEverySyncHasCaughtUp() {
-        assertFalse(
-            isMediaCleanupWaitingForSync(
-                waitingForLanSync = false,
-                isLanPaired = true,
-                waitingForSelfHostSync = false,
-                isSelfHostConnected = true
-            )
-        )
-    }
-
-    @Test
-    fun cleanupStopsWaitingForASyncThatWasTurnedOff() {
-        assertFalse(
-            isMediaCleanupWaitingForSync(
-                waitingForLanSync = true,
-                isLanPaired = false,
-                waitingForSelfHostSync = true,
-                isSelfHostConnected = false
-            )
-        )
     }
 }

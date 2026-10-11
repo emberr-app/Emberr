@@ -7,6 +7,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.domain.backup.manual.AndroidManualBackupExporter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -20,7 +21,7 @@ class BackupWorker(
     workerParams: WorkerParameters,
     private val settingsManager: SettingsManager,
     private val backupNotifier: BackupNotifier,
-    private val backupExporter: BackupSnapshotExporter,
+    private val backupExporter: AndroidManualBackupExporter,
     private val backupScheduler: BackupScheduler
 ) : CoroutineWorker(appContext, workerParams) {
 
@@ -63,7 +64,7 @@ class BackupWorker(
                 ?: throw java.io.IOException("Failed to create file. Storage might be full.")
 
             try {
-                backupExporter.exportToZip(newBackupFile.uri)
+                backupExporter.exportAllSpacesToZip(newBackupFile.uri)
             } catch (e: Exception) {
                 newBackupFile.delete()
                 throw e

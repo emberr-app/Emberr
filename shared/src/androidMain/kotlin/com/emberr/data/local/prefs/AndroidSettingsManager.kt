@@ -174,11 +174,6 @@ class AndroidSettingsManager(
         return newDesktopId
     }
 
-    @Synchronized
-    override fun forgetLanSyncDesktopId() {
-        sharedPreferences.edit(commit = true) { remove(SyncConstants.KEY_LAN_SYNC_DESKTOP_ID) }
-    }
-
     override fun getLastSyncedDesktopId(): String {
         return sharedPreferences.getString(SyncConstants.KEY_LAST_SYNCED_DESKTOP_ID, "") ?: ""
     }
@@ -624,44 +619,6 @@ class AndroidSettingsManager(
     override fun saveMediaReferenceListBuilt(built: Boolean) {
         sharedPreferences.edit(commit = true) { putBoolean(SyncConstants.KEY_MEDIA_REFERENCE_LIST_BUILT, built) }
         hasBuiltMediaReferenceList = built
-    }
-
-    private var isRestoreStillUnfinished = sharedPreferences.getBoolean(
-        SyncConstants.KEY_RESTORE_UNFINISHED,
-        SyncConstants.DEFAULT_RESTORE_UNFINISHED
-    )
-
-    override fun isRestoreUnfinished(): Boolean = isRestoreStillUnfinished
-
-    override fun saveRestoreUnfinished(unfinished: Boolean) {
-        sharedPreferences.edit(commit = true) { putBoolean(SyncConstants.KEY_RESTORE_UNFINISHED, unfinished) }
-        isRestoreStillUnfinished = unfinished
-    }
-
-    private var isLanSyncResetStillPending = sharedPreferences.getBoolean(
-        SyncConstants.KEY_LAN_SYNC_RESET_PENDING,
-        SyncConstants.DEFAULT_LAN_SYNC_RESET_PENDING
-    )
-
-    override fun isLanSyncResetPending(): Boolean = isLanSyncResetStillPending
-
-    override fun saveLanSyncResetPending(pending: Boolean) {
-        sharedPreferences.edit(commit = true) { putBoolean(SyncConstants.KEY_LAN_SYNC_RESET_PENDING, pending) }
-        isLanSyncResetStillPending = pending
-    }
-
-    override fun isMediaCleanupWaitingForLanSync(): Boolean =
-        sharedPreferences.getBoolean(SyncConstants.KEY_MEDIA_CLEANUP_WAITING_FOR_LAN_SYNC, false)
-
-    override fun saveMediaCleanupWaitingForLanSync(waiting: Boolean) {
-        sharedPreferences.edit(commit = true) { putBoolean(SyncConstants.KEY_MEDIA_CLEANUP_WAITING_FOR_LAN_SYNC, waiting) }
-    }
-
-    override fun isMediaCleanupWaitingForSelfHostSync(): Boolean =
-        sharedPreferences.getBoolean(SyncConstants.KEY_MEDIA_CLEANUP_WAITING_FOR_SELF_HOST_SYNC, false)
-
-    override fun saveMediaCleanupWaitingForSelfHostSync(waiting: Boolean) {
-        sharedPreferences.edit(commit = true) { putBoolean(SyncConstants.KEY_MEDIA_CLEANUP_WAITING_FOR_SELF_HOST_SYNC, waiting) }
     }
 
     private var hasSeededSampleNotes = sharedPreferences.getBoolean(

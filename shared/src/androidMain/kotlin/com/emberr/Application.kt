@@ -7,7 +7,7 @@ import com.emberr.di.androidModule
 import com.emberr.di.sharedModule
 import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.backup.automatic.BackupScheduler
-import com.emberr.domain.backup.manual.resetLanSyncProgressIfPending
+import com.emberr.domain.backup.manual.deleteBackupImportCopiesLeftFromEarlierRuns
 import com.emberr.domain.importer.deleteImportCopiesLeftFromEarlierRuns
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.reminders.ReminderRescheduler
@@ -36,14 +36,13 @@ class EmberrApplication : Application() {
             workManagerFactory()
             modules(sharedModule, androidModule)
         }
-        resetLanSyncProgressIfPending(getKoin().get())
 
         CoroutineScope(Dispatchers.IO).launch {
             getKoin().get<AppDatabase>()
             getKoin().get<SharedPreferences>()
             getKoin().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
-            getKoin().get<com.emberr.domain.backup.manual.UnfinishedRestoreFinisher>().finishIfNeeded()
             deleteImportCopiesLeftFromEarlierRuns(this@EmberrApplication)
+            deleteBackupImportCopiesLeftFromEarlierRuns(this@EmberrApplication)
             isReady = true
             FirstContentRenderSignal.awaitFirstContentOrTimeout()
             getKoin().get<com.emberr.presentation.widget.note.NoteWidgetCoordinator>().start()

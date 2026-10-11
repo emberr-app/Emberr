@@ -73,7 +73,6 @@ import com.emberr.ui.theme.EmberrTheme
 import com.emberr.domain.util.export.handleExportBackup
 import com.emberr.domain.util.export.handleExportMarkdown
 import com.emberr.domain.util.export.handleExportPdf
-import com.emberr.domain.util.export.handleImportBackup
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
 import kotlinx.coroutines.Dispatchers
@@ -141,8 +140,6 @@ private fun runEmberrDesktopApp() = application {
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             GlobalContext.get().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
-            com.emberr.domain.backup.manual.resetLanSyncProgressIfPending(GlobalContext.get().get())
-            GlobalContext.get().get<com.emberr.domain.backup.manual.UnfinishedRestoreFinisher>().finishIfNeeded()
         }
     }
 
@@ -382,11 +379,8 @@ private fun runEmberrDesktopApp() = application {
                     onExportPdf = { fileName, title, blocks ->
                         Thread { handleExportPdf(currentWindow, fileName, title, blocks) }.start()
                     },
-                    onExportBackup = {
-                        Thread { handleExportBackup(currentWindow) }.start()
-                    },
-                    onImportBackupClick = {
-                        Thread { handleImportBackup(currentWindow) }.start()
+                    onExportBackup = { spaceIds ->
+                        Thread { handleExportBackup(currentWindow, spaceIds) }.start()
                     },
                     onRequestBackupFolder = {
                         SwingUtilities.invokeLater {

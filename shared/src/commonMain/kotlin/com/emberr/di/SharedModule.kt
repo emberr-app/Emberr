@@ -150,9 +150,7 @@ val sharedModule = module {
         com.emberr.domain.media.LocalMediaGarbageCollector(
             mediaReferenceIndex = get(),
             mediaStorageHelper = get(),
-            unusedMediaFileDao = get(),
-            settingsManager = get(),
-            selfHostConnectionState = get()
+            unusedMediaFileDao = get()
         )
     }
 
@@ -213,36 +211,13 @@ val sharedModule = module {
         )
     }
 
-    single {
-        com.emberr.domain.backup.manual.BackupRestorer(
-            appDatabase = get(),
-            noteRepository = get(),
-            spaceRepository = get(),
-            settingsManager = get(),
-            calendarTaskDao = get(),
-            reminderScheduler = get(),
-            reminderRescheduler = get(),
-            vectorDatabase = get(),
-            reindexAllNotesUseCase = get(),
-            selfHostConnectionState = get()
-        )
-    }
-
-    single {
-        com.emberr.domain.backup.manual.UnfinishedRestoreFinisher(
-            settingsManager = get(),
-            vectorDatabase = get(),
-            reindexAllNotesUseCase = get(),
-            appScope = get(named("AppScope"))
-        )
-    }
-
     viewModel {
         com.emberr.presentation.settings.SettingsViewModel(
             settingsManager = get(),
             backupRescheduler = get(),
             disableAiFeaturesUseCase = get(),
-            appScope = get(named("AppScope"))
+            appScope = get(named("AppScope")),
+            spaceRepository = get()
         )
     }
 
@@ -368,6 +343,15 @@ val sharedModule = module {
         com.emberr.domain.util.media.KtorWebImageFetcher(mediaStorageHelper = get())
     }
     single {
+        com.emberr.domain.backup.manual.EmberrBackupImporter(
+            appDatabase = get(),
+            repository = get(),
+            mediaStorageHelper = get(),
+            reminderRescheduler = get(),
+            appScope = get(named("AppScope"))
+        )
+    }
+    single {
         com.emberr.domain.importer.MarkdownNotesImporter(
             repository = get(),
             canvasRepository = get(),
@@ -375,6 +359,12 @@ val sharedModule = module {
             webImageFetcher = get(),
             reminderRescheduler = get(),
             appScope = get(named("AppScope"))
+        )
+    }
+    viewModel {
+        com.emberr.presentation.settings.importer.EmberrImportViewModel(
+            backupFileReader = get(),
+            emberrBackupImporter = get()
         )
     }
     viewModel {

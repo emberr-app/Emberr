@@ -64,12 +64,6 @@ object SyncConstants {
     const val KEY_SEEDED_TEMPLATE_NOTE_IDS = "seeded_template_note_ids"
     const val KEY_MEDIA_REFERENCE_LIST_BUILT = "media_reference_list_built"
     const val DEFAULT_MEDIA_REFERENCE_LIST_BUILT = false
-    const val KEY_RESTORE_UNFINISHED = "restore_unfinished"
-    const val DEFAULT_RESTORE_UNFINISHED = false
-    const val KEY_LAN_SYNC_RESET_PENDING = "lan_sync_reset_pending"
-    const val DEFAULT_LAN_SYNC_RESET_PENDING = false
-    const val KEY_MEDIA_CLEANUP_WAITING_FOR_LAN_SYNC = "media_cleanup_waiting_for_lan_sync"
-    const val KEY_MEDIA_CLEANUP_WAITING_FOR_SELF_HOST_SYNC = "media_cleanup_waiting_for_self_host_sync"
     // Sync Keys
     const val KEY_SYNC_PUSHED_TIMESTAMP = "last_sync_timestamp"
     const val KEY_SYNC_FETCHED_TIMESTAMP = "last_sync_fetched_timestamp"

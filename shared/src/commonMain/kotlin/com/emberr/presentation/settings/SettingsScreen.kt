@@ -87,7 +87,6 @@ import emberr.shared.generated.resources.daily
 import emberr.shared.generated.resources.download
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.chevron_right
-import emberr.shared.generated.resources.file_down
 import emberr.shared.generated.resources.files
 import emberr.shared.generated.resources.folder_input
 import emberr.shared.generated.resources.folder_sync
@@ -98,6 +97,7 @@ import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.qr_code
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.scan_line
+import emberr.shared.generated.resources.share
 import emberr.shared.generated.resources.shield_alert
 import emberr.shared.generated.resources.sidebar
 import emberr.shared.generated.resources.sliders_horizontal
@@ -138,14 +138,13 @@ private class SettingsCategory(
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    onExportReady: () -> Unit = {},
+    onExportReady: (spaceIds: Set<String>) -> Unit = {},
     onRequestBackupFolder: () -> Unit = {},
     onNavigateToSelfHostSetup: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
     onNavigateToImportNotes: () -> Unit = {},
     desktopSubPage: SettingsSubPage? = null,
     onDesktopSubPageChange: (SettingsSubPage?) -> Unit = {},
-    onImportBackupClick: () -> Unit = {},
     showBackButton: Boolean = true,
     viewModel: SettingsViewModel = koinViewModel(),
     syncViewModel: SyncViewModel = koinViewModel()
@@ -197,6 +196,8 @@ fun SettingsScreen(
     val aiPurgeResultMessage by viewModel.aiPurgeResultMessage.collectAsState()
     var showDisableAiConfirmation by remember { mutableStateOf(false) }
     var showClearAllDataConfirmation by remember { mutableStateOf(false) }
+    val spaces by viewModel.spaces.collectAsState()
+    var showExportSpacesSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(aiPurgeResultMessage) {
         aiPurgeResultMessage?.let { message ->
@@ -234,7 +235,7 @@ fun SettingsScreen(
                     backupFrequency = backupFrequency,
                     backupTime = backupTime,
                     backupDay = backupDay,
-                    onExportClick = onExportReady,
+                    onExportClick = { showExportSpacesSheet = true },
                     onImportNotesClick = onNavigateToImportNotes,
                     onAutoBackupChange = { isChecked ->
                         when {
@@ -375,7 +376,6 @@ fun SettingsScreen(
                         SettingsSubPage.SELF_HOST -> SelfHostSetupScreen(onNavigateBack = goBack, showTopBar = false)
                         SettingsSubPage.IMPORT -> ImportScreen(
                             onNavigateBack = goBack,
-                            onImportBackupClick = onImportBackupClick,
                             showTopBar = false
                         )
                         SettingsSubPage.ABOUT -> AboutScreen(
@@ -491,6 +491,14 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+
+    if (showExportSpacesSheet) {
+        ExportSpacesSheet(
+            spaces = spaces,
+            onExportClick = onExportReady,
+            onDismiss = { showExportSpacesSheet = false }
+        )
     }
 
     if (showThemeSheet) {
@@ -962,7 +970,7 @@ private fun DataSettingsSection(
         )
         SettingsDivider()
         SettingsActionRow(
-            icon = painterResource(Res.drawable.file_down),
+            icon = painterResource(Res.drawable.share),
             title = "Export Backup",
             onClick = onExportClick
         )

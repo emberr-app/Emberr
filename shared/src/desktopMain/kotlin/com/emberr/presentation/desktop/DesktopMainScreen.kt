@@ -559,8 +559,7 @@ fun DesktopMainScreen(
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
     onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
-    onExportBackup: () -> Unit = {},
-    onImportBackupClick: () -> Unit = {},
+    onExportBackup: (spaceIds: Set<String>) -> Unit = {},
     onAiIconTap: () -> Unit = {},
     isAiChatVisible: Boolean = false,
     ragViewModel: com.emberr.presentation.ai.RagViewModel? = null,
@@ -1603,7 +1602,6 @@ fun DesktopMainScreen(
                             onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
                             desktopSubPage = d.settingsSubPage(),
                             onDesktopSubPageChange = { page -> detail = page.toDetailPane() },
-                            onImportBackupClick = onImportBackupClick,
                             showBackButton = isSidebarVisible,
                             syncViewModel = syncViewModel
                         )

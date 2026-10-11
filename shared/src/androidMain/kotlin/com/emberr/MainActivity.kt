@@ -27,9 +27,6 @@ import com.emberr.domain.util.eventbus.WidgetCalendarDateBus
 import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
 import com.emberr.domain.util.eventbus.WidgetNavigationBus
 import com.emberr.domain.util.eventbus.ShareEventBus
-import com.emberr.domain.util.system.restartApplication
-import com.emberr.domain.backup.manual.BackupImportStatus
-import com.emberr.presentation.settings.BackupRestoringDialog
 import com.emberr.presentation.settings.selfhost.SelfHostUpdateRequiredDialog
 import com.emberr.presentation.shared.FirstContentRenderSignal
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
@@ -74,11 +71,11 @@ import com.emberr.presentation.sync.SyncViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
@@ -119,7 +116,6 @@ class MainActivity : ComponentActivity() {
 
     private val mediaStorageHelper: com.emberr.domain.util.media.MediaStorageHelper by inject()
     private val manualBackupExporter: com.emberr.domain.backup.manual.AndroidManualBackupExporter by inject()
-    private val manualBackupImporter: com.emberr.domain.backup.manual.AndroidManualBackupImporter by inject()
 
     private val takePhoto = registerForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -280,6 +276,7 @@ class MainActivity : ComponentActivity() {
                     var pendingMarkdownContent by remember { mutableStateOf("") }
                     var pendingPdfTitle by remember { mutableStateOf("") }
                     var pendingPdfBlocks by remember { mutableStateOf(emptyList<NoteBlock>()) }
+                    var pendingExportSpaceIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
                     // Markdown Saver
                     val exportMarkdownLauncher = rememberLauncherForActivityResult(
@@ -308,9 +305,10 @@ class MainActivity : ComponentActivity() {
                         ActivityResultContracts.CreateDocument("application/zip")
                     ) { uri ->
                         uri?.let { destinationUri ->
+                            val spaceIds = pendingExportSpaceIds.toSet()
                             lifecycleScope.launch(Dispatchers.IO) {
                                 try {
-                                    manualBackupExporter.exportToZip(destinationUri)
+                                    manualBackupExporter.exportToZip(destinationUri, spaceIds)
 
                                     withContext(Dispatchers.Main) {
                                         Toast.makeText(context, "Backup saved!", Toast.LENGTH_SHORT).show()
@@ -321,28 +319,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             }
-                        }
-                    }
-
-                    // BACKUP IMPORT LAUNCHER
-                    val importBackupLauncher = rememberLauncherForActivityResult(
-                        ActivityResultContracts.OpenDocument()
-                    ) { uri ->
-                        uri?.let { sourceUri -> manualBackupImporter.startImport(sourceUri) }
-                    }
-
-                    val backupImportStatus by manualBackupImporter.status.collectAsState()
-                    LaunchedEffect(backupImportStatus) {
-                        when (val status = backupImportStatus) {
-                            BackupImportStatus.Restored -> {
-                                ActiveEditorRegistry.discardAllPendingWrites()
-                                restartApplication()
-                            }
-                            is BackupImportStatus.Failed -> {
-                                Toast.makeText(context, "Import failed: ${status.reason}", Toast.LENGTH_LONG).show()
-                                manualBackupImporter.clearFailure()
-                            }
-                            else -> {}
                         }
                     }
 
@@ -415,21 +391,15 @@ class MainActivity : ComponentActivity() {
                             pendingPdfBlocks = blocks
                             exportPdfLauncher.launch(fileName)
                         },
-                        onExportBackup = {
+                        onExportBackup = { spaceIds ->
+                            pendingExportSpaceIds = spaceIds.toList()
                             val fileName = "EmberrBackup_${System.currentTimeMillis()}.emberr"
                             exportBackupLauncher.launch(fileName)
-                        },
-                        onImportBackupClick = {
-                            importBackupLauncher.launch(arrayOf("application/zip", "application/octet-stream", "application/x-zip-compressed"))
                         },
                         onRequestBackupFolder = {
                             backupFolderPickerLauncher.launch(null)
                         }
                     )
-
-                    if (backupImportStatus == BackupImportStatus.Restoring) {
-                        BackupRestoringDialog()
-                    }
 
                     SelfHostUpdateRequiredDialog(onUpdateClick = updateChecker::openReleasePage)
                 }
