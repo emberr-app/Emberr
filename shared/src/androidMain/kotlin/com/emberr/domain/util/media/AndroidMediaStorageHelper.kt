@@ -8,14 +8,11 @@ import android.provider.OpenableColumns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.Source
-import okio.buffer
-import okio.sink
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
 
-private const val STREAM_CHUNK_BYTES = 64L * 1024
 private const val CONVERTED_HEIC_JPEG_QUALITY = 95
 
 class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelper {
@@ -113,18 +110,7 @@ class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelp
             val localFileName = "media_${UUID.randomUUID()}${if (extension.isNotEmpty()) ".$extension" else ""}"
             val file = File(mediaDir, localFileName)
             try {
-                openSource().use { source ->
-                    file.sink().buffer().use { sink ->
-                        var copiedBytes = 0L
-                        while (true) {
-                            val readBytes = source.read(sink.buffer, STREAM_CHUNK_BYTES)
-                            if (readBytes == -1L) break
-                            sink.emitCompleteSegments()
-                            copiedBytes += readBytes
-                            onBytesCopied(copiedBytes)
-                        }
-                    }
-                }
+                copySourceIntoFile(openSource, file, onBytesCopied)
 
                 MediaInfo(
                     localFileName = localFileName,

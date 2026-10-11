@@ -4,13 +4,9 @@ import com.emberr.core.desktop.DesktopAppStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.Source
-import okio.buffer
-import okio.sink
 import java.io.File
 import java.nio.file.Files
 import java.util.UUID
-
-private const val STREAM_CHUNK_BYTES = 64L * 1024
 
 class DesktopMediaStorageHelper : MediaStorageHelper {
 
@@ -75,18 +71,7 @@ class DesktopMediaStorageHelper : MediaStorageHelper {
             val localFileName = "media_${UUID.randomUUID()}${if (extension.isNotEmpty()) ".$extension" else ""}"
             val destFile = File(mediaStorageDir, localFileName)
             try {
-                openSource().use { source ->
-                    destFile.sink().buffer().use { sink ->
-                        var copiedBytes = 0L
-                        while (true) {
-                            val readBytes = source.read(sink.buffer, STREAM_CHUNK_BYTES)
-                            if (readBytes == -1L) break
-                            sink.emitCompleteSegments()
-                            copiedBytes += readBytes
-                            onBytesCopied(copiedBytes)
-                        }
-                    }
-                }
+                copySourceIntoFile(openSource, destFile, onBytesCopied)
 
                 MediaInfo(
                     localFileName = localFileName,
