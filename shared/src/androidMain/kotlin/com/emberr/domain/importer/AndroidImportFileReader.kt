@@ -20,31 +20,33 @@ fun deleteImportCopiesLeftFromEarlierRuns(context: Context) {
 
 class AndroidImportFileReader(private val context: Context) : ImportFileReader {
 
-    override suspend fun readPickedFiles(pickedPaths: List<String>): PickedImportFiles = withContext(Dispatchers.IO) {
+    override suspend fun readPickedFiles(pickedPaths: List<String>): PickedImportFiles {
         val copiesFolder = File(File(context.cacheDir, IMPORT_COPIES_FOLDER_NAME), UUID.randomUUID().toString())
         val collector = ImportFilesCollector()
         val pickedNames = mutableListOf<String>()
 
         try {
-            pickedPaths.forEachIndexed { index, pickedPath ->
-                ensureActive()
-                val uri = Uri.parse(pickedPath)
-                val displayName = displayNameOf(uri)
-                pickedNames += displayName
+            withContext(Dispatchers.IO) {
+                pickedPaths.forEachIndexed { index, pickedPath ->
+                    ensureActive()
+                    val uri = Uri.parse(pickedPath)
+                    val displayName = displayNameOf(uri)
+                    pickedNames += displayName
 
-                if (!ImportPaths.isSupportedPickedFile(displayName)) {
-                    collector.skip(displayName)
-                    return@forEachIndexed
+                    if (!ImportPaths.isSupportedPickedFile(displayName)) {
+                        collector.skip(displayName)
+                        return@forEachIndexed
+                    }
+
+                    val copy = copyIntoFolder(uri, copiesFolder, copyName = index.toString())
+                    if (copy == null) collector.skip(displayName) else collector.addPickedFile(displayName, copy)
                 }
-
-                val copy = copyIntoFolder(uri, copiesFolder, copyName = index.toString())
-                if (copy == null) collector.skip(displayName) else collector.addPickedFile(displayName, copy)
             }
-            collector.finish(pickedNames) { copiesFolder.deleteRecursively() }
         } catch (error: Throwable) {
             collector.finish(pickedNames) { copiesFolder.deleteRecursively() }.close()
             throw error
         }
+        return collector.finish(pickedNames) { copiesFolder.deleteRecursively() }
     }
 
     private fun displayNameOf(uri: Uri): String {
