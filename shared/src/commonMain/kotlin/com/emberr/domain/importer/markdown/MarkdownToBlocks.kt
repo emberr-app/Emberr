@@ -1,5 +1,7 @@
 package com.emberr.domain.importer.markdown
 
+import com.emberr.domain.importer.ImportLinkResolver
+import com.emberr.domain.importer.ImportPaths
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock
@@ -556,7 +558,7 @@ private class MarkdownBlockBuilder(
 
     private fun addAttachment(relativePath: String, indentation: Int) {
         val id = newBlockId()
-        blocks += if (isImagePath(relativePath)) {
+        blocks += if (ImportPaths.isImageFile(relativePath)) {
             ImageBlock(id = id, indentationLevel = indentation, updatedAt = now)
         } else {
             DocumentBlock(id = id, fileName = relativePath.substringAfterLast('/'), indentationLevel = indentation, updatedAt = now)

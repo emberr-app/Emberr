@@ -1,8 +1,6 @@
 package com.emberr.domain.importer
 
-import com.emberr.domain.importer.markdown.ImportLinkResolver
-
-private val noteFileExtensions = listOf(".md", ".markdown", ".txt")
+private val noteFileExtensions = ImportPaths.markdownNoteExtensions.map { extension -> ".$extension" }
 
 class ImportedLinkTargets(
     private val noteIdsByPath: Map<String, String>,
@@ -13,7 +11,7 @@ class ImportedLinkTargets(
     private val attachmentLookup = PathLookup(attachmentPaths)
 
     fun resolverFor(notePath: String): ImportLinkResolver {
-        val noteFolder = folderOf(notePath)
+        val noteFolder = ImportPaths.folderOf(notePath)
         return object : ImportLinkResolver {
             override fun noteIdFor(linkTarget: String): String? =
                 notePaths.find(noteFolder, linkTarget, extensionsToTry = noteFileExtensions)?.let(noteIdsByPath::get)
@@ -48,12 +46,10 @@ private class PathLookup(paths: Collection<String>) {
                 ?.takeIf { it.isNotEmpty() }
             ?: return null
         return sameNamePaths.minWithOrNull(
-            compareBy<String>({ folderOf(it) != fromFolder }, { it.length }, { it })
+            compareBy<String>({ ImportPaths.folderOf(it) != fromFolder }, { it.length }, { it })
         )
     }
 }
-
-private fun folderOf(path: String): String = path.substringBeforeLast('/', missingDelimiterValue = "")
 
 private fun fileNameOf(path: String): String = path.substringAfterLast('/')
 

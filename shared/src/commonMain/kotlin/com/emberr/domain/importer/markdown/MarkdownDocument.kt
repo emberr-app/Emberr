@@ -10,7 +10,6 @@ import org.intellij.markdown.parser.LinkMap
 
 private val urlSchemeAtStart = Regex("^[a-zA-Z][a-zA-Z0-9+.-]+:")
 private val standaloneWikiLinkPattern = Regex("""^(!?)\[\[([^\[\]\n]+)]]$""")
-private val imageExtensions = setOf("png", "jpg", "jpeg", "gif", "webp", "bmp", "heic", "heif")
 private val markupTokenTypes = setOf(
     MarkdownTokenTypes.EMPH,
     MarkdownTokenTypes.BACKTICK,
@@ -122,9 +121,6 @@ internal fun isSameAddress(label: String, address: String): Boolean =
     label == address || listOf("https://", "http://", "mailto:").any { prefix -> prefix + label == address }
 
 internal fun internalPathOf(destination: String): String = percentDecode(destination.substringBefore('#')).trim()
-
-internal fun isImagePath(path: String): Boolean =
-    path.substringAfterLast('/').substringAfterLast('.', missingDelimiterValue = "").lowercase() in imageExtensions
 
 internal fun percentDecode(text: String): String {
     if ('%' !in text) return text

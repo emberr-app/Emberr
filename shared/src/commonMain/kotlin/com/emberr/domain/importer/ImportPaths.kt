@@ -1,19 +1,30 @@
 package com.emberr.domain.importer
 
+import com.emberr.domain.util.media.isImageExtension
+
 private const val CANVAS_FILE_EXTENSION = "canvas"
-private val noteFileExtensions = setOf("md", "markdown", "txt", CANVAS_FILE_EXTENSION)
 private const val ZIP_FILE_EXTENSION = "zip"
+private const val UNTITLED_NOTE_TITLE = "Untitled"
 private val unsupportedObsidianFileEndings = listOf(".excalidraw", ".excalidraw.md", ".base")
 private val ignoredNames = setOf("__MACOSX", "Thumbs.db", "desktop.ini")
 private val windowsDriveAtStart = Regex("^[A-Za-z]:")
 
 object ImportPaths {
 
-    fun isNoteFile(path: String): Boolean = extensionOf(path) in noteFileExtensions
+    val markdownNoteExtensions = listOf("md", "markdown", "txt")
+
+    fun isNoteFile(path: String): Boolean = extensionOf(path) in markdownNoteExtensions || isCanvasFile(path)
 
     fun isCanvasFile(path: String): Boolean = extensionOf(path) == CANVAS_FILE_EXTENSION
 
     fun isZipFile(path: String): Boolean = extensionOf(path) == ZIP_FILE_EXTENSION
+
+    fun isImageFile(path: String): Boolean = isImageExtension(extensionOf(path))
+
+    fun folderOf(path: String): String = path.substringBeforeLast('/', missingDelimiterValue = "")
+
+    fun noteTitleOf(path: String): String =
+        path.substringAfterLast('/').substringBeforeLast('.').trim().ifEmpty { UNTITLED_NOTE_TITLE }
 
     fun isUnsupportedObsidianFile(path: String): Boolean =
         unsupportedObsidianFileEndings.any { ending -> path.endsWith(ending, ignoreCase = true) }

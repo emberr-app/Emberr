@@ -1,8 +1,8 @@
 package com.emberr.domain.importer.canvas
 
-import com.emberr.domain.importer.markdown.ImportLinkResolver
+import com.emberr.domain.importer.ImportLinkResolver
+import com.emberr.domain.importer.ImportPaths
 import com.emberr.domain.importer.markdown.MarkdownToBlocks
-import com.emberr.domain.importer.markdown.isImagePath
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock
@@ -30,7 +30,7 @@ internal object CanvasCardText {
 
     private val imagesOnlyResolver = object : ImportLinkResolver {
         override fun noteIdFor(linkTarget: String): String? = null
-        override fun attachmentPathFor(linkTarget: String): String? = linkTarget.takeIf(::isImagePath)
+        override fun attachmentPathFor(linkTarget: String): String? = linkTarget.takeIf(ImportPaths::isImageFile)
     }
 
     fun fromMarkdown(markdown: String, now: Long): String {

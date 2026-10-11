@@ -6,8 +6,8 @@ import com.emberr.data.local.room.entity.CanvasNodeType
 import com.emberr.data.local.room.entity.CanvasSide
 import com.emberr.domain.canvas.CanvasContent
 import com.emberr.domain.canvas.cleanedEdgeLabel
-import com.emberr.domain.importer.markdown.ImportLinkResolver
-import com.emberr.domain.importer.markdown.isImagePath
+import com.emberr.domain.importer.ImportLinkResolver
+import com.emberr.domain.importer.ImportPaths
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -107,7 +107,7 @@ object ObsidianCanvasConverter {
                 GROUP_NODE -> emptyNode.copy(text = obsidianNode.label.orEmpty(), type = CanvasNodeType.GROUP)
                 FILE_NODE -> {
                     val filePath = obsidianNode.file.orEmpty()
-                    val imagePath = linkResolver.attachmentPathFor(filePath)?.takeIf(::isImagePath)
+                    val imagePath = linkResolver.attachmentPathFor(filePath)?.takeIf(ImportPaths::isImageFile)
                     if (imagePath != null) {
                         pendingImages += PendingCanvasImage(nodeId = nodeId, relativePath = imagePath)
                         emptyNode.copy(type = CanvasNodeType.IMAGE)

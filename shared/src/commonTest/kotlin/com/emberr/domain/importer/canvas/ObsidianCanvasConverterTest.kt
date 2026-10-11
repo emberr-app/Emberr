@@ -4,7 +4,7 @@ import com.emberr.data.local.room.entity.CanvasEdgeEntity
 import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.data.local.room.entity.CanvasNodeType
 import com.emberr.data.local.room.entity.CanvasSide
-import com.emberr.domain.importer.markdown.ImportLinkResolver
+import com.emberr.domain.importer.ImportLinkResolver
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails

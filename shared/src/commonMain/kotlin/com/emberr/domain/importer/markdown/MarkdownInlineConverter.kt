@@ -1,5 +1,6 @@
 package com.emberr.domain.importer.markdown
 
+import com.emberr.domain.importer.ImportLinkResolver
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode

@@ -1,5 +1,6 @@
 package com.emberr.domain.importer.markdown
 
+import com.emberr.domain.importer.ImportLinkResolver
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock

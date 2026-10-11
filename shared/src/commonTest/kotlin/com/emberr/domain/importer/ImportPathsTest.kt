@@ -26,6 +26,34 @@ class ImportPathsTest {
     }
 
     @Test
+    fun imageFilesAreRecognisedByTheirExtension() {
+        assertTrue(ImportPaths.isImageFile("assets/Photo.PNG"))
+        assertTrue(ImportPaths.isImageFile("scan.jpeg"))
+        assertFalse(ImportPaths.isImageFile("diagram.svg"))
+        assertFalse(ImportPaths.isImageFile("report.pdf"))
+        assertFalse(ImportPaths.isImageFile("png"))
+    }
+
+    @Test
+    fun theFolderOfAPathIsEverythingBeforeTheFileName() {
+        assertEquals("Work/Projects", ImportPaths.folderOf("Work/Projects/plan.md"))
+        assertEquals("", ImportPaths.folderOf("plan.md"))
+    }
+
+    @Test
+    fun aNoteTitleIsTheFileNameWithoutItsExtension() {
+        assertEquals("Roadmap", ImportPaths.noteTitleOf("Boards/Roadmap.canvas"))
+        assertEquals("v1.2 notes", ImportPaths.noteTitleOf("v1.2 notes.md"))
+        assertEquals("Plan", ImportPaths.noteTitleOf("  Plan  .md"))
+    }
+
+    @Test
+    fun aBlankFileNameBecomesUntitled() {
+        assertEquals("Untitled", ImportPaths.noteTitleOf(" .canvas"))
+        assertEquals("Untitled", ImportPaths.noteTitleOf("Boards/.md"))
+    }
+
+    @Test
     fun excalidrawDrawingsAreRecognisedAndCannotBePicked() {
         assertTrue(ImportPaths.isUnsupportedObsidianFile("Drawings/Sketch.excalidraw.md"))
         assertTrue(ImportPaths.isUnsupportedObsidianFile("Sketch.EXCALIDRAW"))
