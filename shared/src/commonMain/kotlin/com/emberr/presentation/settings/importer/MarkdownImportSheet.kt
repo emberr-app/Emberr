@@ -55,7 +55,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.folder
-import emberr.shared.generated.resources.folder_open
+import emberr.shared.generated.resources.upload2
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
@@ -319,7 +319,7 @@ private fun ChooseFilesPrompt() {
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Icon(
-            painter = painterResource(Res.drawable.folder_open),
+            painter = painterResource(Res.drawable.upload2),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = FADED_TEXT_ALPHA),
             modifier = Modifier.size(28.dp)
