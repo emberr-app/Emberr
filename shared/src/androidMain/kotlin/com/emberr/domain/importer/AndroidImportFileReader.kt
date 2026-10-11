@@ -18,6 +18,21 @@ fun deleteImportCopiesLeftFromEarlierRuns(context: Context) {
     File(context.cacheDir, IMPORT_COPIES_FOLDER_NAME).deleteRecursively()
 }
 
+internal fun displayNameOf(context: Context, uri: Uri): String {
+    val nameFromProvider = try {
+        context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) cursor.getString(0) else null
+        }
+    } catch (_: SecurityException) {
+        null
+    } catch (_: IllegalArgumentException) {
+        null
+    }
+    return nameFromProvider?.takeIf { it.isNotBlank() }
+        ?: uri.lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
+        ?: FALLBACK_DISPLAY_NAME
+}
+
 class AndroidImportFileReader(private val context: Context) : ImportFileReader {
 
     override suspend fun readPickedFiles(pickedPaths: List<String>): PickedImportFiles {
@@ -30,7 +45,7 @@ class AndroidImportFileReader(private val context: Context) : ImportFileReader {
                 pickedPaths.forEachIndexed { index, pickedPath ->
                     ensureActive()
                     val uri = Uri.parse(pickedPath)
-                    val displayName = displayNameOf(uri)
+                    val displayName = displayNameOf(context, uri)
                     pickedNames += displayName
 
                     if (!ImportPaths.isSupportedPickedFile(displayName)) {
@@ -47,21 +62,6 @@ class AndroidImportFileReader(private val context: Context) : ImportFileReader {
             throw error
         }
         return collector.finish(pickedNames) { copiesFolder.deleteRecursively() }
-    }
-
-    private fun displayNameOf(uri: Uri): String {
-        val nameFromProvider = try {
-            context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) cursor.getString(0) else null
-            }
-        } catch (_: SecurityException) {
-            null
-        } catch (_: IllegalArgumentException) {
-            null
-        }
-        return nameFromProvider?.takeIf { it.isNotBlank() }
-            ?: uri.lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
-            ?: FALLBACK_DISPLAY_NAME
     }
 
     private fun lastModifiedOf(uri: Uri): Long? =
