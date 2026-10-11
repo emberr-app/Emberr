@@ -48,9 +48,11 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
             when {
                 ImportPaths.isIgnoredEntry(childPath) -> Unit
                 child.isFolder -> collectFiles(treeUri, child.documentId, childPath, files, skippedNames)
+                ImportPaths.isExcalidrawFile(childPath) -> skippedNames += childPath
                 else -> files += DocumentImportFile(
                     relativePath = childPath,
                     sizeBytes = child.sizeBytes,
+                    lastModifiedAt = child.lastModifiedAt,
                     documentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, child.documentId),
                     context = context
                 )
@@ -64,7 +66,8 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
             DocumentsContract.Document.COLUMN_DOCUMENT_ID,
             DocumentsContract.Document.COLUMN_DISPLAY_NAME,
             DocumentsContract.Document.COLUMN_MIME_TYPE,
-            DocumentsContract.Document.COLUMN_SIZE
+            DocumentsContract.Document.COLUMN_SIZE,
+            DocumentsContract.Document.COLUMN_LAST_MODIFIED
         )
         val children = mutableListOf<FolderChild>()
         context.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
@@ -76,7 +79,8 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
                         documentId = documentId,
                         name = name,
                         isFolder = cursor.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR,
-                        sizeBytes = if (cursor.isNull(3)) 0L else cursor.getLong(3)
+                        sizeBytes = if (cursor.isNull(3)) 0L else cursor.getLong(3),
+                        lastModifiedAt = if (cursor.isNull(4)) null else cursor.getLong(4).takeIf { it > 0 }
                     )
                 }
             }
@@ -95,11 +99,18 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
     }
 }
 
-private class FolderChild(val documentId: String, val name: String, val isFolder: Boolean, val sizeBytes: Long)
+private class FolderChild(
+    val documentId: String,
+    val name: String,
+    val isFolder: Boolean,
+    val sizeBytes: Long,
+    val lastModifiedAt: Long?
+)
 
 private class DocumentImportFile(
     override val relativePath: String,
     override val sizeBytes: Long,
+    override val lastModifiedAt: Long?,
     private val documentUri: Uri,
     private val context: Context
 ) : ImportFile {

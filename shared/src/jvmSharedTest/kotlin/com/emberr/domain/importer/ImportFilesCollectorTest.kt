@@ -11,7 +11,10 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
+
+private const val FILE_DATE = 1_709_634_030_000L
 
 class ImportFilesCollectorTest {
 
@@ -25,12 +28,13 @@ class ImportFilesCollectorTest {
     private fun zipFile(
         name: String,
         entries: Map<String, String>,
-        nameCharset: Charset = Charsets.UTF_8
+        nameCharset: Charset = Charsets.UTF_8,
+        entryDate: Long? = null
     ): File {
         val zip = File(workingDirectory, name)
         ZipOutputStream(zip.outputStream(), nameCharset).use { output ->
             entries.forEach { (path, content) ->
-                output.putNextEntry(ZipEntry(path))
+                output.putNextEntry(ZipEntry(path).apply { if (entryDate != null) time = entryDate })
                 output.write(content.toByteArray())
                 output.closeEntry()
             }
@@ -137,6 +141,45 @@ class ImportFilesCollectorTest {
         collect(looseFile("photo.png", "png")).use { picked ->
             assertEquals(emptyList(), picked.files)
             assertEquals(listOf("photo.png"), picked.skippedNames)
+        }
+    }
+
+    @Test
+    fun excalidrawDrawingsAreSkippedInZipsAndAsLooseFiles() {
+        val zip = zipFile(
+            "vault.zip",
+            mapOf(
+                "Vault/Drawings/Sketch.excalidraw.md" to "drawing",
+                "Vault/Drawings/Old.excalidraw" to "{}",
+                "Vault/plan.md" to "# Plan"
+            )
+        )
+
+        collect(zip, looseFile("Loose.excalidraw.md", "drawing")).use { picked ->
+            assertEquals(listOf("Vault/plan.md"), picked.files.map { file -> file.relativePath })
+            assertEquals(
+                listOf("Vault/Drawings/Sketch.excalidraw.md", "Vault/Drawings/Old.excalidraw", "Loose.excalidraw.md"),
+                picked.skippedNames
+            )
+        }
+    }
+
+    @Test
+    fun zipEntriesAndLooseFilesKeepTheirLastModifiedDate() {
+        val zip = zipFile("vault.zip", mapOf("Notes/hello.md" to "Hello"), entryDate = FILE_DATE)
+        val planFile = looseFile("plan.md", "# Plan").apply { setLastModified(FILE_DATE) }
+
+        collect(zip, planFile).use { picked ->
+            assertEquals(listOf(FILE_DATE, FILE_DATE), picked.files.map { file -> file.lastModifiedAt })
+        }
+    }
+
+    @Test
+    fun aLooseFileWithoutADateHasNoLastModifiedDate() {
+        val missingFile = File(workingDirectory, "gone.md")
+
+        collect(missingFile).use { picked ->
+            assertNull(picked.files.single().lastModifiedAt)
         }
     }
 

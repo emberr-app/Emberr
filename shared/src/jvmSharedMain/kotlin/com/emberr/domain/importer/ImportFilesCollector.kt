@@ -20,6 +20,7 @@ class ImportFilesCollector {
 
     fun addPickedFile(displayName: String, file: File) {
         when {
+            ImportPaths.isExcalidrawFile(displayName) -> skippedNames += displayName
             ImportPaths.isZipFile(displayName) -> addZipFile(displayName, file)
             ImportPaths.isNoteFile(displayName) -> files += LocalImportFile(displayName, file)
             else -> skippedNames += displayName
@@ -55,6 +56,10 @@ class ImportFilesCollector {
             val relativePath = ImportPaths.safeRelativePath(entry.name)
             if (relativePath == null) {
                 skippedNames += entry.name
+                continue
+            }
+            if (ImportPaths.isExcalidrawFile(relativePath)) {
+                skippedNames += relativePath
                 continue
             }
             files += ZipEntryImportFile(relativePath, openedZip.zipFile, entry)
@@ -101,6 +106,8 @@ private class LocalImportFile(
 ) : ImportFile {
     override val sizeBytes: Long get() = file.length()
 
+    override val lastModifiedAt: Long? get() = file.lastModified().takeIf { it > 0 }
+
     override suspend fun readBytes(): ByteArray = withContext(Dispatchers.IO) { file.readBytes() }
 
     override fun openSource(): Source = file.source()
@@ -112,6 +119,8 @@ private class ZipEntryImportFile(
     private val entry: ZipEntry
 ) : ImportFile {
     override val sizeBytes: Long get() = entry.size.coerceAtLeast(0)
+
+    override val lastModifiedAt: Long? get() = entry.time.takeIf { it > 0 }
 
     override suspend fun readBytes(): ByteArray = withContext(Dispatchers.IO) {
         zipFile.getInputStream(entry).use { stream -> stream.readBytes() }

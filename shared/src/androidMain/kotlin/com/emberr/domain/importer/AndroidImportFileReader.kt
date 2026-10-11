@@ -2,6 +2,7 @@ package com.emberr.domain.importer
 
 import android.content.Context
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -56,12 +57,24 @@ class AndroidImportFileReader(private val context: Context) : ImportFileReader {
             ?: FALLBACK_DISPLAY_NAME
     }
 
+    private fun lastModifiedOf(uri: Uri): Long? =
+        try {
+            context.contentResolver.query(uri, arrayOf(DocumentsContract.Document.COLUMN_LAST_MODIFIED), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst() && !cursor.isNull(0)) cursor.getLong(0).takeIf { it > 0 } else null
+            }
+        } catch (_: SecurityException) {
+            null
+        } catch (_: IllegalArgumentException) {
+            null
+        }
+
     private fun copyIntoFolder(uri: Uri, folder: File, copyName: String): File? {
         return try {
             folder.mkdirs()
             val copy = File(folder, copyName)
             val input = context.contentResolver.openInputStream(uri) ?: return null
             input.use { stream -> copy.outputStream().use { output -> stream.copyTo(output) } }
+            lastModifiedOf(uri)?.let(copy::setLastModified)
             copy
         } catch (_: IOException) {
             null

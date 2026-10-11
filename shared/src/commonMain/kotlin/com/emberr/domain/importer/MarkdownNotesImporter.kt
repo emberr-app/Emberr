@@ -214,7 +214,7 @@ class MarkdownNotesImporter(
                         folderId = folderIdsByPath[notePath.substringBeforeLast('/', missingDelimiterValue = "")],
                         isDaily = false,
                         dateString = null,
-                        createdAt = details.createdAt ?: now,
+                        createdAt = details.createdAt ?: fileDateOf(plannedNote.file, now),
                         updatedAt = now,
                         filePath = "",
                         snippet = generateSnippet(blocks),
@@ -239,7 +239,7 @@ class MarkdownNotesImporter(
                         folderId = folderIdsByPath[notePath.substringBeforeLast('/', missingDelimiterValue = "")],
                         isDaily = false,
                         dateString = null,
-                        createdAt = now,
+                        createdAt = fileDateOf(plannedNote.file, now),
                         updatedAt = now,
                         filePath = "",
                         spaceId = spaceId,
@@ -422,6 +422,8 @@ class MarkdownNotesImporter(
         progressTracker.attachmentFinished(file.sizeBytes)
         return mediaInfo
     }
+
+    private fun fileDateOf(file: ImportFile, now: Long): Long = file.lastModifiedAt?.coerceAtMost(now) ?: now
 
     private fun workBytesOf(noteFile: ImportFile): Long = noteFile.sizeBytes.coerceAtLeast(1)
 

@@ -135,7 +135,11 @@ class MarkdownNotesImporterTest {
         override fun listAllMediaFileNames(): List<String> = savedFileNames.toList()
     }
 
-    private class FakeImportFile(override val relativePath: String, private val content: String?) : ImportFile {
+    private class FakeImportFile(
+        override val relativePath: String,
+        private val content: String?,
+        override val lastModifiedAt: Long? = null
+    ) : ImportFile {
         override val sizeBytes: Long = content?.encodeToByteArray()?.size?.toLong() ?: 0L
 
         override suspend fun readBytes(): ByteArray = content?.encodeToByteArray() ?: throw IOException("Cannot read $relativePath")
@@ -143,9 +147,13 @@ class MarkdownNotesImporterTest {
         override fun openSource(): Source = content?.let { Buffer().writeUtf8(it) } ?: throw IOException("Cannot read $relativePath")
     }
 
-    private fun pickedFiles(vararg files: Pair<String, String?>, onClose: () -> Unit = {}) = PickedImportFiles(
+    private fun pickedFiles(
+        vararg files: Pair<String, String?>,
+        fileDatesByPath: Map<String, Long> = emptyMap(),
+        onClose: () -> Unit = {}
+    ) = PickedImportFiles(
         pickedNames = listOf("vault.zip"),
-        files = files.map { (path, content) -> FakeImportFile(path, content) },
+        files = files.map { (path, content) -> FakeImportFile(path, content, fileDatesByPath[path]) },
         skippedNames = emptyList(),
         releaseResources = onClose
     )
@@ -332,6 +340,67 @@ class MarkdownNotesImporterTest {
 
         val expectedCreatedAt = LocalDateTime(2026, 10, 1, 0, 0).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
         assertEquals(expectedCreatedAt, plan.createdAt)
+    }
+
+    @Test
+    fun notesAndCanvasesWithoutAFrontMatterDateAreCreatedAtTheirFileDate() = runTest {
+        val fileDate = LocalDateTime(2024, 3, 5, 10, 20).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        val importStartedAt = System.currentTimeMillis()
+
+        importer(backgroundScope).importFiles(
+            pickedFiles(
+                "Old.md" to "Written long ago",
+                "Dated.md" to "---\ncreated: 2026-10-01\n---\nHas its own date",
+                "Board.canvas" to "{\"nodes\": [], \"edges\": []}",
+                "Future.md" to "The file clock was wrong",
+                "Undated.md" to "No file date",
+                fileDatesByPath = mapOf(
+                    "Old.md" to fileDate,
+                    "Dated.md" to fileDate,
+                    "Board.canvas" to fileDate,
+                    "Future.md" to importStartedAt + 86_400_000L
+                )
+            ),
+            spaceId = IMPORT_SPACE_ID
+        )
+        val importFinishedAt = System.currentTimeMillis()
+
+        val notesByTitle = importedNotes().associateBy { it.title }
+        val frontMatterDate = LocalDateTime(2026, 10, 1, 0, 0).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        assertEquals(fileDate, notesByTitle.getValue("Old").createdAt)
+        assertEquals(frontMatterDate, notesByTitle.getValue("Dated").createdAt)
+        assertEquals(fileDate, notesByTitle.getValue("Board").createdAt)
+        assertTrue(notesByTitle.getValue("Future").createdAt in importStartedAt..importFinishedAt)
+        assertTrue(notesByTitle.getValue("Undated").createdAt in importStartedAt..importFinishedAt)
+        assertTrue(notesByTitle.values.all { note -> note.updatedAt in importStartedAt..importFinishedAt })
+    }
+
+    @Test
+    fun htmlImagesAndIframesAreImportedLikeMarkdownImagesAndLinks() = runTest {
+        webImages.savedImagesByUrl["https://example.com/logo.png"] =
+            MediaInfo(localFileName = "media_web.png", originalName = "media_web.png", mimeType = "image/png", sizeBytes = 9)
+
+        val result = importer(backgroundScope).importFiles(
+            pickedFiles(
+                "Page.md" to "<img src=\"https://example.com/logo.png\" alt=\"Logo\">\n\n" +
+                    "See <img src=\"pics/cat.png\" alt=\"Cat\"> here\n\n" +
+                    "<img src=\"https://example.com/gone.png\" alt=\"Gone\">\n\n" +
+                    "<iframe src=\"https://www.youtube.com/embed/xyz\"></iframe>",
+                "pics/cat.png" to "png bytes"
+            ),
+            spaceId = IMPORT_SPACE_ID
+        )
+
+        val blocks = repository.getNoteContent(importedNotes().single { it.title == "Page" }.noteId)!!.blocks
+        assertEquals("media_web.png", (blocks[0] as ImageBlock).localFilePath)
+        assertEquals("See", (blocks[1] as TextBlock).text)
+        assertEquals("png bytes", mediaStorage.savedTextsByFileName[(blocks[2] as ImageBlock).localFilePath])
+        assertEquals("here", (blocks[3] as TextBlock).text)
+        val fallback = blocks[4] as BookmarkBlock
+        assertEquals("https://example.com/gone.png" to "Gone", fallback.url to fallback.title)
+        assertEquals("https://www.youtube.com/embed/xyz", (blocks[5] as BookmarkBlock).url)
+        assertEquals(6, blocks.size)
+        assertEquals(emptyList(), result.failedNames)
     }
 
     @Test

@@ -26,6 +26,15 @@ class ImportPathsTest {
     }
 
     @Test
+    fun excalidrawDrawingsAreRecognisedAndCannotBePicked() {
+        assertTrue(ImportPaths.isExcalidrawFile("Drawings/Sketch.excalidraw.md"))
+        assertTrue(ImportPaths.isExcalidrawFile("Sketch.EXCALIDRAW"))
+        assertFalse(ImportPaths.isExcalidrawFile("excalidraw notes.md"))
+        assertFalse(ImportPaths.isSupportedPickedFile("Sketch.excalidraw.md"))
+        assertFalse(ImportPaths.isSupportedPickedFile("Sketch.excalidraw"))
+    }
+
+    @Test
     fun onlyNotesAndZipsCanBePicked() {
         assertTrue(ImportPaths.isSupportedPickedFile("vault.ZIP"))
         assertTrue(ImportPaths.isSupportedPickedFile("plan.md"))

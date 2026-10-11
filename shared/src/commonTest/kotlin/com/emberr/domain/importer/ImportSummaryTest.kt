@@ -9,6 +9,7 @@ class ImportSummaryTest {
 
     private class FakeImportFile(override val relativePath: String) : ImportFile {
         override val sizeBytes: Long = 0L
+        override val lastModifiedAt: Long? = null
         override suspend fun readBytes(): ByteArray = ByteArray(0)
         override fun openSource(): Source = Buffer()
     }

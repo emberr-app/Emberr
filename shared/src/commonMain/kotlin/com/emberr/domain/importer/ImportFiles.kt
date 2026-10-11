@@ -5,6 +5,7 @@ import okio.Source
 interface ImportFile {
     val relativePath: String
     val sizeBytes: Long
+    val lastModifiedAt: Long?
     suspend fun readBytes(): ByteArray
     fun openSource(): Source
 }
