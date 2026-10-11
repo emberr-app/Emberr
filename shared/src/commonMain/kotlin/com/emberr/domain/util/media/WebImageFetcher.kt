@@ -9,6 +9,8 @@ import io.ktor.http.contentLength
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 private const val CONNECT_TIMEOUT_MILLIS = 15_000L
 private const val REQUEST_TIMEOUT_MILLIS = 30_000L
@@ -53,6 +55,6 @@ class KtorWebImageFetcher(private val mediaStorageHelper: MediaStorageHelper) : 
 
         val bytes = response.body<ByteArray>()
         if (bytes.isEmpty() || bytes.size > LARGEST_WEB_IMAGE_BYTES) return null
-        return mediaStorageHelper.saveBytesToInternalStorage(bytes, extension, mimeType)
+        return withContext(NonCancellable) { mediaStorageHelper.saveBytesToInternalStorage(bytes, extension, mimeType) }
     }
 }
