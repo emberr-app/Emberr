@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,6 +44,9 @@ import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.editor.DefaultBlockShape
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.file_text
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import java.io.File
 
@@ -120,7 +121,7 @@ fun LinkedNoteBlockView(
                     Text(text = icon, style = MaterialTheme.typography.titleLarge)
                 } else {
                     Icon(
-                        Icons.Default.Description,
+                        painterResource(Res.drawable.file_text),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
