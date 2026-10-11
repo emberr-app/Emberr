@@ -27,7 +27,7 @@ class LanSyncSchemaTest {
         "code" to "id, code, language, indentationLevel, textAlignment, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "bookmark" to "id, url, title, description, previewImageUrl, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "linked_note" to "id, linkedNoteId, showIcon, showCoverImage, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
-        "image" to "id, localFilePath, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
+        "image" to "id, localFilePath, sourceUrl, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "document" to "id, localFilePath, fileName, mimeType, fileSizeString, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "table" to "id, rows, cellStyles, cellSpans, rowStyles, columnStyles, columnWidths, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "voice" to "id, localFilePath, durationSeconds, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
