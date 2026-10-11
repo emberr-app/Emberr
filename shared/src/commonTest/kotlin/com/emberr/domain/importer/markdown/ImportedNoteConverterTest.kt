@@ -13,12 +13,17 @@ import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
 import com.emberr.domain.model.QuoteBlock
+import com.emberr.domain.model.RecurrenceFrequency
+import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.model.SolidDividerBlock
 import com.emberr.domain.model.TableBlock
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.ThreeDotDividerBlock
 import com.emberr.domain.model.ToggleBlock
 import com.emberr.domain.model.withId
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -564,6 +569,97 @@ class ImportedNoteConverterTest {
         assertEquals(
             listOf(CodeBlock(id = "", code = "x^2 + y^2", language = "latex", updatedAt = NOW)),
             blocksOf("\$\$\nx^2 + y^2\n\$\$")
+        )
+    }
+
+    @Test
+    fun aWikiEmbedOfAnImportedFileBecomesItsOwnBlockWhereverItIs() {
+        val linkResolver = FakeLinkResolver(
+            attachmentPathsByTarget = mapOf("a.png" to "Notes/a.png", "b.png" to "Notes/b.png", "report.pdf" to "Notes/report.pdf")
+        )
+        val converted = convert(
+            "![[a.png]]\n![[b.png|300]]\n\n- ![[a.png]]\n\n> [!tip] Setup\n> ![[b.png]]\n\nRead this ![[report.pdf#page=2]] first",
+            linkResolver = linkResolver
+        )
+
+        assertEquals(
+            listOf(
+                ImageBlock(id = "", updatedAt = NOW),
+                ImageBlock(id = "", updatedAt = NOW),
+                ImageBlock(id = "", updatedAt = NOW),
+                CalloutBlock(id = "", text = "Setup", calloutTypeName = "TIP", updatedAt = NOW),
+                ImageBlock(id = "", indentationLevel = 1, updatedAt = NOW),
+                TextBlock(id = "", text = "Read this", updatedAt = NOW),
+                DocumentBlock(id = "", fileName = "report.pdf", updatedAt = NOW),
+                TextBlock(id = "", text = "first", updatedAt = NOW)
+            ),
+            converted.blocks.map { it.withId("") }
+        )
+        assertEquals(
+            listOf("Notes/a.png", "Notes/b.png", "Notes/a.png", "Notes/b.png", "Notes/report.pdf"),
+            converted.pendingAttachments.map { it.relativePath }
+        )
+    }
+
+    @Test
+    fun aWikiEmbedOfSomethingNotInTheImportStaysText() {
+        assertEquals(listOf(TextBlock(id = "", text = "See missing.png here", updatedAt = NOW)), blocksOf("See ![[missing.png]] here"))
+    }
+
+    @Test
+    fun aListItemThatStartsWithAnImageHasNoEmptyBulletInFrontOfIt() {
+        val linkResolver = FakeLinkResolver(attachmentPathsByTarget = mapOf("a.png" to "Notes/a.png"))
+
+        assertEquals(
+            listOf(
+                ImageBlock(id = "", updatedAt = NOW),
+                TextBlock(id = "", text = "the chart", updatedAt = NOW),
+                CheckboxBlock(id = "", text = "", updatedAt = NOW),
+                ImageBlock(id = "", indentationLevel = 1, updatedAt = NOW)
+            ),
+            blocksOf("- ![](a.png) the chart\n- [ ] ![](a.png)", linkResolver)
+        )
+    }
+
+    @Test
+    fun aListItemThatIsOnlyALinkToAnImportedNoteBecomesALinkedNote() {
+        val linkResolver = FakeLinkResolver(
+            noteIdsByTarget = mapOf("Project A" to "note-a", "Project B" to "note-b", "Meetings.md" to "note-m")
+        )
+
+        assertEquals(
+            listOf(
+                LinkedNoteBlock(id = "", linkedNoteId = "note-a", updatedAt = NOW),
+                LinkedNoteBlock(id = "", linkedNoteId = "note-b", updatedAt = NOW),
+                LinkedNoteBlock(id = "", linkedNoteId = "note-m", indentationLevel = 1, updatedAt = NOW),
+                BulletedListBlock(id = "", text = "Deleted note", updatedAt = NOW),
+                BulletedListBlock(id = "", text = "Some idea, see Project A", updatedAt = NOW),
+                CheckboxBlock(id = "", text = "Project A", updatedAt = NOW)
+            ),
+            blocksOf(
+                "- [[Project A]]\n- [[Project B|B (paused)]]\n    - [Meetings](Meetings.md)\n- [[Deleted note]]\n" +
+                    "- Some idea, see [[Project A]]\n- [ ] [[Project A]]",
+                linkResolver
+            )
+        )
+    }
+
+    @Test
+    fun tasksPluginFieldsOnACheckboxBecomeItsReminderAndRepeatRule() {
+        val dueAt = LocalDateTime(2026, 11, 1, 9, 0).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+
+        assertEquals(
+            listOf(
+                CheckboxBlock(
+                    id = "",
+                    text = "Pay rent #home",
+                    reminderTimestamp = dueAt,
+                    recurrenceRule = RecurrenceRule(RecurrenceFrequency.MONTHLY),
+                    updatedAt = NOW
+                ),
+                BulletedListBlock(id = "", text = "Not a task 📅 2026-11-01", updatedAt = NOW)
+            ),
+            blocksOf("- [ ] Pay rent 🔁 every month #home 📅 2026-11-01\n- Not a task 📅 2026-11-01")
         )
     }
 

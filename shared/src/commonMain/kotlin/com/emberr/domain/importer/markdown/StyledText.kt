@@ -39,6 +39,22 @@ internal data class StyledText(val text: String, val spans: List<InlineSpan>, va
         tags = tags
     )
 
+    fun withoutCharacterRanges(ranges: List<IntRange>): StyledText {
+        val isRemoved = BooleanArray(text.length)
+        ranges.forEach { range -> range.forEach { index -> isRemoved[index] = true } }
+        val keptCountBefore = IntArray(text.length + 1)
+        text.indices.forEach { index -> keptCountBefore[index + 1] = keptCountBefore[index] + if (isRemoved[index]) 0 else 1 }
+        return StyledText(
+            text = text.filterIndexed { index, _ -> !isRemoved[index] },
+            spans = spans.mapNotNull { span ->
+                val start = keptCountBefore[span.start]
+                val end = keptCountBefore[span.end]
+                if (end <= start) null else span.copy(start = start, end = end)
+            },
+            tags = tags
+        )
+    }
+
     companion object {
         val EMPTY = StyledText(text = "", spans = emptyList())
     }
@@ -60,17 +76,47 @@ internal class StyledTextBuilder {
         text.forEach { character -> characters += StyledCharacter(character, style, isLiteral = true) }
     }
 
-    fun build(): StyledText {
-        val cleanedCharacters = characters
-            .let(::decodeEscapesAndEntities)
-            .let(::removeSpacesAroundLineBreaks)
-            .let(::removeInlineComments)
-            .let(::applyDoubleEqualsHighlights)
-            .let(::replaceWikiLinksWithTheirText)
-            .let(::withoutSurroundingWhitespace)
-            .let(::withoutTrailingBlockId)
-        return StyledText(text = textOf(cleanedCharacters), spans = spansOf(cleanedCharacters), tags = tagsIn(cleanedCharacters))
+    fun build(): StyledText = finishedStyledTextOf(cleanedCharacters())
+
+    fun buildAroundAttachmentEmbeds(attachmentPathFor: (String) -> String?): List<InlinePart> {
+        val cleanedCharacters = cleanedCharacters()
+        val parts = mutableListOf<InlinePart>()
+        fun addWords(pieceCharacters: List<StyledCharacter>) {
+            val styledText = finishedStyledTextOf(pieceCharacters)
+            if (styledText.text.isNotEmpty()) parts += InlinePart.Words(styledText)
+        }
+
+        var pieceStart = 0
+        var index = 0
+        while (index < cleanedCharacters.size) {
+            val wikiLink = if (cleanedCharacters[index].isMarker('!')) wikiLinkAt(cleanedCharacters, index + 1) else null
+            val attachmentPath = wikiLink?.let { attachmentPathFor(WikiLink.fromInnerText(textOf(it.inside), isEmbed = true).target) }
+            if (wikiLink != null && attachmentPath != null) {
+                addWords(cleanedCharacters.subList(pieceStart, index))
+                parts += InlinePart.Attachment(attachmentPath)
+                index = wikiLink.endIndex
+                pieceStart = index
+            } else {
+                index++
+            }
+        }
+        addWords(cleanedCharacters.subList(pieceStart, cleanedCharacters.size))
+        return parts
     }
+
+    private fun cleanedCharacters(): List<StyledCharacter> = characters
+        .let(::decodeEscapesAndEntities)
+        .let(::removeSpacesAroundLineBreaks)
+        .let(::removeInlineComments)
+        .let(::applyDoubleEqualsHighlights)
+}
+
+private fun finishedStyledTextOf(cleanedCharacters: List<StyledCharacter>): StyledText {
+    val finishedCharacters = cleanedCharacters
+        .let(::replaceWikiLinksWithTheirText)
+        .let(::withoutSurroundingWhitespace)
+        .let(::withoutTrailingBlockId)
+    return StyledText(text = textOf(finishedCharacters), spans = spansOf(finishedCharacters), tags = tagsIn(finishedCharacters))
 }
 
 internal fun decodeMarkdownEscapes(rawText: String): String {
@@ -176,23 +222,28 @@ private fun applyDoubleEqualsHighlights(characters: List<StyledCharacter>): List
     return result
 }
 
+private class FoundWikiLink(val inside: List<StyledCharacter>, val endIndex: Int)
+
+private fun wikiLinkAt(characters: List<StyledCharacter>, index: Int): FoundWikiLink? {
+    if (!isDoubleMarkerAt(characters, index, '[')) return null
+    val closingIndex = findDoubleMarker(characters, startingAt = index + 2, marker = ']') ?: return null
+    val inside = characters.subList(index + 2, closingIndex)
+    if (inside.isEmpty() || inside.any { it.character == '\n' || it.isMarker('[') }) return null
+    return FoundWikiLink(inside = inside, endIndex = closingIndex + 2)
+}
+
 private fun replaceWikiLinksWithTheirText(characters: List<StyledCharacter>): List<StyledCharacter> {
     val result = mutableListOf<StyledCharacter>()
     var index = 0
     while (index < characters.size) {
-        if (isDoubleMarkerAt(characters, index, '[')) {
-            val closingIndex = findDoubleMarker(characters, startingAt = index + 2, marker = ']')
-            val inside = closingIndex?.let { characters.subList(index + 2, it) }
-            if (closingIndex != null && inside != null && inside.isNotEmpty() &&
-                inside.none { it.character == '\n' || it.isMarker('[') }
-            ) {
-                val isEmbed = result.lastOrNull()?.isMarker('!') == true
-                if (isEmbed) result.removeAt(result.lastIndex)
-                val shownText = WikiLink.fromInnerText(textOf(inside), isEmbed).shownText
-                shownText.forEach { character -> result += StyledCharacter(character, inside.first().style, isLiteral = true) }
-                index = closingIndex + 2
-                continue
-            }
+        val wikiLink = wikiLinkAt(characters, index)
+        if (wikiLink != null) {
+            val isEmbed = result.lastOrNull()?.isMarker('!') == true
+            if (isEmbed) result.removeAt(result.lastIndex)
+            val shownText = WikiLink.fromInnerText(textOf(wikiLink.inside), isEmbed).shownText
+            shownText.forEach { character -> result += StyledCharacter(character, wikiLink.inside.first().style, isLiteral = true) }
+            index = wikiLink.endIndex
+            continue
         }
         result += characters[index]
         index++

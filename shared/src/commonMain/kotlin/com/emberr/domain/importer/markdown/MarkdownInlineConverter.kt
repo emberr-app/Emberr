@@ -194,9 +194,13 @@ internal class MarkdownInlineConverter(
     }
 
     private fun finishWords() {
-        val styledText = words.build()
-        inlineTags += styledText.tags
-        if (styledText.text.isNotEmpty()) parts += InlinePart.Words(styledText)
+        val finishedParts = if (keepsMediaAsText) {
+            listOf(InlinePart.Words(words.build())).filter { it.styledText.text.isNotEmpty() }
+        } else {
+            words.buildAroundAttachmentEmbeds(linkResolver::attachmentPathFor)
+        }
+        finishedParts.forEach { part -> if (part is InlinePart.Words) inlineTags += part.styledText.tags }
+        parts += finishedParts
         words = StyledTextBuilder()
     }
 }

@@ -277,27 +277,54 @@ private class MarkdownBlockBuilder(
         val checkBox = item.findChildOfType(GFMTokenTypes.CHECK_BOX)
         val contentNodes = item.children.filter { it.children.isNotEmpty() }
         val firstParagraph = contentNodes.firstOrNull()?.takeIf { it.type == MarkdownElementTypes.PARAGRAPH }
+        val linkedNoteId = if (checkBox == null) firstParagraph?.let(::noteIdOfOnlyLinkIn) else null
 
-        val parts = firstParagraph?.let { inlinePartsOf(it.children) }.orEmpty()
-        val itemWords = parts.firstOrNull() as? InlinePart.Words
-        blocks += listItemBlock(itemWords?.styledText ?: StyledText.EMPTY, checkBox, number, indentation)
-
-        addInlineParts(if (itemWords != null) parts.drop(1) else parts, indentation + 1, ::textBlock)
+        if (linkedNoteId != null) {
+            blocks += linkedNoteBlock(linkedNoteId, indentation)
+        } else {
+            val parts = firstParagraph?.let { inlinePartsOf(it.children) }.orEmpty()
+            val itemWords = parts.firstOrNull() as? InlinePart.Words
+            if (itemWords == null && checkBox == null && parts.isNotEmpty()) {
+                addInlineParts(parts, indentation, ::textBlock)
+            } else {
+                blocks += listItemBlock(itemWords?.styledText ?: StyledText.EMPTY, checkBox, number, indentation)
+                addInlineParts(if (itemWords != null) parts.drop(1) else parts, indentation + 1, ::textBlock)
+            }
+        }
         val remainingNodes = if (firstParagraph != null) contentNodes.drop(1) else contentNodes
         remainingNodes.forEach { child -> convertBlock(child, indentation + 1) }
+    }
+
+    private fun noteIdOfOnlyLinkIn(paragraph: ASTNode): String? {
+        val wikiLink = WikiLink.standaloneIn(document.textOf(paragraph))
+        if (wikiLink != null) return wikiLink.target.takeIf { it.isNotEmpty() }?.let(linkResolver::noteIdFor)
+
+        val onlyChild = paragraph.children
+            .filterNot { it.type == MarkdownTokenTypes.WHITE_SPACE || it.type == MarkdownTokenTypes.EOL }
+            .singleOrNull()
+            ?.takeIf { it.type in linkNodeTypes }
+            ?: return null
+        val destination = document.destinationOf(onlyChild)?.takeUnless(::isExternalDestination) ?: return null
+        return internalPathOf(destination).takeIf { it.isNotEmpty() }?.let(linkResolver::noteIdFor)
     }
 
     private fun listItemBlock(styledText: StyledText, checkBox: ASTNode?, number: Int?, indentation: Int): NoteBlock {
         val id = newBlockId()
         return when {
-            checkBox != null -> CheckboxBlock(
-                id = id,
-                text = styledText.text,
-                isChecked = isChecked(checkBox),
-                indentationLevel = indentation,
-                inlineSpans = styledText.spans,
-                updatedAt = now
-            )
+            checkBox != null -> {
+                val task = TasksPluginFields.read(styledText)
+                CheckboxBlock(
+                    id = id,
+                    text = task.styledText.text,
+                    isChecked = isChecked(checkBox),
+                    indentationLevel = indentation,
+                    inlineSpans = task.styledText.spans,
+                    reminderTimestamp = task.reminderTimestamp,
+                    completedAt = task.completedAt,
+                    recurrenceRule = task.recurrenceRule,
+                    updatedAt = now
+                )
+            }
             number != null -> NumberedListBlock(
                 id = id,
                 text = styledText.text,
