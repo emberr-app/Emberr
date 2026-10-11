@@ -189,12 +189,12 @@ class MarkdownNotesImporterTest {
         }
     }
 
-    private fun importer(appScope: CoroutineScope) =
+    private fun importer(appScope: CoroutineScope, webImageFetcher: WebImageFetcher = webImages) =
         MarkdownNotesImporter(
             repository = repository,
             canvasRepository = canvasRepository,
             mediaStorageHelper = mediaStorage,
-            webImageFetcher = webImages,
+            webImageFetcher = webImageFetcher,
             reminderRescheduler = ReminderRescheduler(
                 calendarTaskDao = appDatabase.calendarTaskDao(),
                 calendarEventExceptionDao = appDatabase.calendarEventExceptionDao(),
@@ -579,13 +579,30 @@ class MarkdownNotesImporterTest {
     fun stoppingAnImportRemovesWhatItAddedAndKeepsWhatWasThereBefore() = runTest {
         val existingAuthor = repository.createCustomPropertyInSpace(IMPORT_SPACE_ID, "author", PropertyValueType.TEXT)
         repository.createPropertyTagsInSpace(IMPORT_SPACE_ID, "TAGS", listOf("project"))
-        val importer = importer(backgroundScope)
-        mediaStorage.whileCopying = { if (mediaStorage.savedFileNames.size == 1) importer.stopImport() }
+        val webImageSaver = object : WebImageFetcher {
+            override suspend fun fetchIntoMedia(url: String): MediaInfo =
+                mediaStorage.saveBytesToInternalStorage("web bytes".encodeToByteArray(), "png", "image/png")
+        }
+        val importer = importer(backgroundScope, webImageFetcher = webImageSaver)
+        mediaStorage.whileCopying = { if (mediaStorage.fileNamesSavedFromBytes.isNotEmpty()) importer.stopImport() }
+        val boardJson = """
+            {
+              "nodes": [
+                {"id": "start", "type": "text", "text": "Start", "x": 0, "y": 0, "width": 200, "height": 60},
+                {"id": "end", "type": "text", "text": "End", "x": 300, "y": 0, "width": 200, "height": 60}
+              ],
+              "edges": [
+                {"id": "edge", "fromNode": "start", "toNode": "end"}
+              ]
+            }
+        """.trimIndent()
 
         importer.startImport(
             pickedFiles(
-                "Vault/Work/Plan.md" to "---\ntags: [project, idea]\nauthor: Ann\nmood: calm\n---\n![](chart.png)",
+                "Vault/Work/Plan.md" to "---\ntags: [project, idea]\nauthor: Ann\nmood: calm\n---\n![](chart.png)\n\n" +
+                    "![](https://example.com/photo.png)\n\n- [ ] Call 📅 2030-01-01",
                 "Vault/Work/chart.png" to "png bytes",
+                "Vault/Board.canvas" to boardJson,
                 "Vault/Later.md" to "![](video.mp4)",
                 "Vault/video.mp4" to "video bytes"
             ),
@@ -595,6 +612,9 @@ class MarkdownNotesImporterTest {
 
         assertEquals(emptyList(), importedNotes())
         assertEquals(emptyList(), appDatabase.folderDao().getAllFolders(IMPORT_SPACE_ID).first())
+        assertEquals(emptyList(), appDatabase.canvasDao().getAllNodesForBackup())
+        assertEquals(emptyList(), appDatabase.canvasDao().getAllEdgesForBackup())
+        assertEquals(emptyList(), appDatabase.calendarTaskDao().getAllTasksAcrossSpaces())
         assertEquals(
             listOf(existingAuthor.propertyId),
             appDatabase.customPropertyDao().getAllProperties(IMPORT_SPACE_ID).first().map { it.propertyId }
