@@ -292,6 +292,10 @@ fun CanvasScreen(
         val labelEdgeId = editingEdgeId ?: return@LaunchedEffect
         if (selection != CanvasSelection.Edge(labelEdgeId)) editingEdgeId = null
     }
+    LaunchedEffect(canvas.edges) {
+        val edgeIds = canvas.edges.mapTo(HashSet()) { it.edgeId }
+        edgeLabelSizes.keys.retainAll(edgeIds)
+    }
     LaunchedEffect(isActive, isFullScreen) {
         if (!isEmbedded) return@LaunchedEffect
         if (isActive) {
