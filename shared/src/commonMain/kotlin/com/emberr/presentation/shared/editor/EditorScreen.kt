@@ -118,7 +118,7 @@ import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.eye3
-import emberr.shared.generated.resources.file_text
+import emberr.shared.generated.resources.document_text_12
 import emberr.shared.generated.resources.format_bold
 import emberr.shared.generated.resources.highlight
 import emberr.shared.generated.resources.image
@@ -1567,7 +1567,7 @@ fun buildSlashMenuSections(
     SlashMenuSectionData("Media & Links", listOf(
         SlashMenuItemData("Voice Note", Res.drawable.microphone) { onChangeBlockType("voice") },
         SlashMenuItemData("Image", Res.drawable.image) { onInsertMediaBlock("image") },
-        SlashMenuItemData("Document / File", Res.drawable.file_text) { onInsertMediaBlock("document") },
+        SlashMenuItemData("Document / File", Res.drawable.document_text_12) { onInsertMediaBlock("document") },
         SlashMenuItemData("Web Bookmark", Res.drawable.bookmark) { onInsertMediaBlock("bookmark") },
         SlashMenuItemData("Simple Table", Res.drawable.table) { onInsertMediaBlock("table") },
         SlashMenuItemData("Database", Res.drawable.database) { onInsertMediaBlock("database") },

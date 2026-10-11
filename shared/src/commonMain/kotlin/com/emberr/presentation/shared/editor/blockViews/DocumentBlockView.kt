@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +32,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.circle_x
-import emberr.shared.generated.resources.file_text
+import emberr.shared.generated.resources.document_text_12
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
@@ -91,7 +89,7 @@ fun DocumentBlockView(
             contentAlignment = Alignment.CenterStart
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(14.dp)) {
-                Icon(painterResource(Res.drawable.file_text), contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(18.dp))
+                Icon(painterResource(Res.drawable.document_text_12), contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(10.dp))
                 Text("Attach a file", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
             }
@@ -177,7 +175,7 @@ fun DocumentBlockView(
                     color = MaterialTheme.colorScheme.outline
                 )
                 MediaAvailability.Available -> Icon(
-                    imageVector = Icons.Default.Description,
+                    painter = painterResource(Res.drawable.document_text_12),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.outline,
                     modifier = Modifier
