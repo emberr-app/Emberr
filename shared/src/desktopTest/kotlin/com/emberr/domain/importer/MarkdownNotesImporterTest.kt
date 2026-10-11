@@ -16,10 +16,13 @@ import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.canvas.CanvasRepository
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.DocumentBlock
+import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.TextBlock
+import com.emberr.domain.reminders.ReminderRescheduler
+import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.repository.NoteRepositoryImpl
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.util.media.MediaInfo
@@ -160,6 +163,16 @@ class MarkdownNotesImporterTest {
 
     private val webImages = FakeWebImageFetcher()
 
+    private val scheduledReminderTexts = mutableListOf<String>()
+    private val reminderScheduler: ReminderScheduler = stubOf { methodName, arguments ->
+        when (methodName) {
+            "schedule" -> scheduledReminderTexts += arguments[2] as String
+            "cancel" -> Unit
+            else -> error("These tests do not expect ReminderScheduler.$methodName to be called")
+        }
+        Unit
+    }
+
     private class FakeWebImageFetcher : WebImageFetcher {
         val savedImagesByUrl = mutableMapOf<String, MediaInfo>()
         val requestedUrls = mutableListOf<String>()
@@ -176,6 +189,12 @@ class MarkdownNotesImporterTest {
             canvasRepository = canvasRepository,
             mediaStorageHelper = mediaStorage,
             webImageFetcher = webImages,
+            reminderRescheduler = ReminderRescheduler(
+                calendarTaskDao = appDatabase.calendarTaskDao(),
+                calendarEventExceptionDao = appDatabase.calendarEventExceptionDao(),
+                noteDao = appDatabase.noteDao(),
+                reminderScheduler = reminderScheduler
+            ),
             appScope = appScope
         )
 
@@ -480,6 +499,60 @@ class MarkdownNotesImporterTest {
         val halfwayThroughTheVideo = progressSeenWhileCopying.single() as ImportProgress.Importing
         assertEquals("video.mp4", halfwayThroughTheVideo.copyingFileName)
         assertTrue(halfwayThroughTheVideo.doneFraction in 0.4f..0.6f)
+    }
+
+    @Test
+    fun filesThatNoNoteLinksToAreGatheredInAnUnlinkedAttachmentsNote() = runTest {
+        val result = importer(backgroundScope).importFiles(
+            pickedFiles(
+                "Vault/Notes/Plan.md" to "![[chart.png]]",
+                "Vault/Files/chart.png" to "chart bytes",
+                "Vault/Files/tax-2023.pdf" to "pdf bytes",
+                "Vault/Files/scan.jpg" to "jpg bytes",
+                "Vault/song.mp3" to "mp3 bytes"
+            ),
+            spaceId = IMPORT_SPACE_ID
+        )
+
+        assertEquals(1, result.importedNoteCount)
+        assertEquals(4, result.copiedAttachmentCount)
+        assertEquals(emptyList(), result.failedNames)
+
+        val vault = appDatabase.folderDao().getAllFolders(IMPORT_SPACE_ID).first().single { it.name == "Vault" }
+        val unlinked = importedNotes().single { it.title == "Unlinked attachments" }
+        assertEquals(vault.folderId, unlinked.folderId)
+
+        val blocks = repository.getNoteContent(unlinked.noteId)!!.blocks
+        assertEquals("Vault/Files", (blocks[0] as HeadingBlock).text)
+        assertEquals("jpg bytes", mediaStorage.savedTextsByFileName[(blocks[1] as ImageBlock).localFilePath])
+        assertEquals("tax-2023.pdf", (blocks[2] as DocumentBlock).fileName)
+        assertEquals("Vault", (blocks[3] as HeadingBlock).text)
+        val song = blocks[4] as DocumentBlock
+        assertEquals("song.mp3" to "audio/mpeg", song.fileName to song.mimeType)
+        assertEquals(5, blocks.size)
+    }
+
+    @Test
+    fun anImportWithoutUnlinkedFilesAddsNoExtraNote() = runTest {
+        importer(backgroundScope).importFiles(
+            pickedFiles("Note.md" to "![](a.png)", "a.png" to "png bytes"),
+            spaceId = IMPORT_SPACE_ID
+        )
+
+        assertEquals(listOf("Note"), importedNotes().map { it.title })
+    }
+
+    @Test
+    fun aStartedImportArmsTheRemindersOfImportedTasks() = runTest {
+        val importer = importer(backgroundScope)
+
+        importer.startImport(
+            pickedFiles("Chores.md" to "- [ ] Pay rent 📅 2099-11-01\n- [ ] Old bill 📅 2001-01-01\n- [x] Done already 📅 2099-11-01"),
+            spaceId = IMPORT_SPACE_ID
+        )
+        importer.progress.first { it is ImportProgress.Finished }
+
+        assertEquals(listOf("Pay rent"), scheduledReminderTexts)
     }
 
     @Test

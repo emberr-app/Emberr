@@ -13,14 +13,17 @@ import com.emberr.domain.importer.markdown.ConvertedNote
 import com.emberr.domain.importer.markdown.ImportedNoteConverter
 import com.emberr.domain.importer.markdown.PendingAttachment
 import com.emberr.domain.importer.markdown.PendingWebImage
+import com.emberr.domain.importer.markdown.isImagePath
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.DocumentBlock
+import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.generateSnippet
+import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.media.MediaInfo
 import com.emberr.domain.util.media.MediaStorageHelper
@@ -58,8 +61,13 @@ private val mimeTypesByExtension = mapOf(
     "mp3" to "audio/mpeg",
     "m4a" to "audio/mp4",
     "wav" to "audio/wav",
+    "webm" to "audio/webm",
+    "ogg" to "audio/ogg",
+    "opus" to "audio/opus",
+    "flac" to "audio/flac",
     "mp4" to "video/mp4"
 )
+private const val UNLINKED_ATTACHMENTS_TITLE = "Unlinked attachments"
 
 sealed interface ImportProgress {
     data object NotStarted : ImportProgress
@@ -85,6 +93,7 @@ class MarkdownNotesImporter(
     private val canvasRepository: CanvasRepository,
     private val mediaStorageHelper: MediaStorageHelper,
     private val webImageFetcher: WebImageFetcher,
+    private val reminderRescheduler: ReminderRescheduler,
     private val appScope: CoroutineScope
 ) {
 
@@ -101,6 +110,7 @@ class MarkdownNotesImporter(
                     savedNotes += metadata to content
                 }
             }
+            reminderRescheduler.rescheduleUpcomingReminders()
             _progress.value = ImportProgress.Finished(result)
             savedNotes.forEach { (metadata, content) -> repository.indexNote(metadata, content) }
             savedCanvases.forEach { (noteId, canvas) -> repository.indexCanvas(noteId, canvas) }
@@ -169,10 +179,11 @@ class MarkdownNotesImporter(
             convertedNotesByNoteId.values.flatMap { converted -> converted.pendingAttachments.map { it.relativePath } } +
                 convertedCanvasesByNoteId.values.flatMap { converted -> converted.pendingImages.map { it.relativePath } }
             ).toSet()
+        val unlinkedAttachmentPaths = (attachmentFilesByPath.keys - usedAttachmentPaths).sorted()
         val progressTracker = ImportProgressTracker(
             totalNoteCount = plannedNotes.size,
             totalWorkBytes = plannedNotes.sumOf { workBytesOf(it.file) } +
-                usedAttachmentPaths.sumOf { attachmentFilesByPath.getValue(it).sizeBytes },
+                attachmentFilesByPath.values.sumOf { it.sizeBytes },
             publish = { progress -> _progress.value = progress }
         )
 
@@ -258,6 +269,33 @@ class MarkdownNotesImporter(
             progressTracker.noteHandled(workBytesOf(plannedNote.file))
         }
 
+        if (unlinkedAttachmentPaths.isNotEmpty()) {
+            try {
+                val (blocks, pendingAttachments) = unlinkedAttachmentBlocks(unlinkedAttachmentPaths, now)
+                val content = NoteContent(blocks = withAttachmentsCopied(blocks, pendingAttachments, now, failedNames) { attachmentPath ->
+                    copiedAttachmentFor(attachmentPath)
+                })
+                val metadata = NoteMetadataEntity(
+                    noteId = newId(),
+                    title = UNLINKED_ATTACHMENTS_TITLE,
+                    folderId = sharedTopFolderOf(pickedFiles.files)?.let(folderIdsByPath::get),
+                    isDaily = false,
+                    dateString = null,
+                    createdAt = now,
+                    updatedAt = now,
+                    filePath = "",
+                    snippet = generateSnippet(content.blocks),
+                    spaceId = spaceId
+                )
+                repository.saveNoteInSpace(spaceId, metadata, content)
+                onNoteSaved(metadata, content)
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                failedNames += UNLINKED_ATTACHMENTS_TITLE
+            }
+        }
+
         return ImportResult(
             spaceId = spaceId,
             importedNoteCount = importedNoteCount,
@@ -328,6 +366,29 @@ class MarkdownNotesImporter(
             }
             filledBlock
         }
+
+    private fun unlinkedAttachmentBlocks(attachmentPaths: List<String>, now: Long): Pair<List<NoteBlock>, List<PendingAttachment>> {
+        val blocks = mutableListOf<NoteBlock>()
+        val pendingAttachments = mutableListOf<PendingAttachment>()
+        attachmentPaths.groupBy { it.substringBeforeLast('/', missingDelimiterValue = "") }.forEach { (folderPath, pathsInFolder) ->
+            if (folderPath.isNotEmpty()) blocks += HeadingBlock(id = newId(), text = folderPath, level = 2, updatedAt = now)
+            pathsInFolder.forEach { attachmentPath ->
+                val blockId = newId()
+                blocks += if (isImagePath(attachmentPath)) {
+                    ImageBlock(id = blockId, updatedAt = now)
+                } else {
+                    DocumentBlock(id = blockId, fileName = attachmentPath.substringAfterLast('/'), updatedAt = now)
+                }
+                pendingAttachments += PendingAttachment(blockId = blockId, relativePath = attachmentPath)
+            }
+        }
+        return blocks to pendingAttachments
+    }
+
+    private fun sharedTopFolderOf(files: List<ImportFile>): String? {
+        val topFolders = files.map { file -> file.relativePath.substringBefore('/', missingDelimiterValue = "") }.toSet()
+        return topFolders.singleOrNull()?.takeIf { it.isNotEmpty() }
+    }
 
     private suspend fun withAttachmentsCopied(
         blocks: List<NoteBlock>,

@@ -371,6 +371,7 @@ val sharedModule = module {
             canvasRepository = get(),
             mediaStorageHelper = get(),
             webImageFetcher = get(),
+            reminderRescheduler = get(),
             appScope = get(named("AppScope"))
         )
     }
