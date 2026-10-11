@@ -125,7 +125,7 @@ val AppTypography: Typography
             ),
             labelSmall = TextStyle(
                 fontFamily = family,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Normal,
                 fontSize = sizes.labelSmall,
                 lineHeight = (sizes.labelSmall.value * 1.5f).sp,
                 letterSpacing = 0.5.sp
