@@ -5,12 +5,12 @@ private val frontMatterKeyLine = Regex("^[A-Za-z0-9_\"'][^:]*:(\\s|$)")
 private val keyValueLine = Regex("^([^:#\\s][^:]*?)\\s*:(?:\\s+(.*))?$")
 private val listItemLine = Regex("^\\s*-(?:\\s+(.*))?$")
 
-sealed interface FrontMatterValue {
+internal sealed interface FrontMatterValue {
     data class Single(val text: String) : FrontMatterValue
     data class Many(val items: List<String>) : FrontMatterValue
 }
 
-data class FrontMatterField(val key: String, val value: FrontMatterValue)
+internal data class FrontMatterField(val key: String, val value: FrontMatterValue)
 
 internal class MarkdownWithFrontMatter(val frontMatter: List<FrontMatterField>, val body: String)
 

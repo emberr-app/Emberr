@@ -24,18 +24,17 @@ private val dateAndTimePattern = Regex("""^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2})
 private val timeZoneEnding = Regex("""^(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$""")
 private val numberPattern = Regex("""^-?\d+(?:\.\d+)?$""")
 private val tagSeparators = Regex("""[,\s]+""")
-private val whitespaceRun = Regex("""\s+""")
 
-sealed interface PropertyDestination {
+internal sealed interface PropertyDestination {
     data class BuiltIn(val propertyType: PropertyType) : PropertyDestination
     data class Custom(val name: String, val valueType: PropertyValueType) : PropertyDestination
 }
 
-data class ImportedProperty(val destination: PropertyDestination, val value: FrontMatterValue)
+internal data class ImportedProperty(val destination: PropertyDestination, val value: FrontMatterValue)
 
-data class ImportedNoteDetails(val createdAt: Long?, val properties: List<ImportedProperty>)
+internal data class ImportedNoteDetails(val createdAt: Long?, val properties: List<ImportedProperty>)
 
-object ImportedProperties {
+internal object ImportedProperties {
 
     fun detailsOf(frontMatter: List<FrontMatterField>, inlineTags: List<String>): ImportedNoteDetails {
         var createdAt: Long? = null
@@ -91,7 +90,7 @@ object ImportedProperties {
         key.trim().lowercase().replace('_', ' ').replace('-', ' ').replace(whitespaceRun, " ")
 }
 
-fun PropertyBlock.withImportedValue(value: FrontMatterValue): PropertyBlock? {
+internal fun PropertyBlock.withImportedValue(value: FrontMatterValue): PropertyBlock? {
     val text = textOf(value).trim()
     return when {
         valueType.holdsTags -> {

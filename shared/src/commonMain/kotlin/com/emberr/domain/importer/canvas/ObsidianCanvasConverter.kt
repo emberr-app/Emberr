@@ -8,6 +8,7 @@ import com.emberr.domain.canvas.CanvasContent
 import com.emberr.domain.canvas.cleanedEdgeLabel
 import com.emberr.domain.importer.ImportLinkResolver
 import com.emberr.domain.importer.ImportPaths
+import com.emberr.domain.importer.newImportId
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -15,8 +16,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 private const val TEXT_NODE = "text"
 private const val FILE_NODE = "file"
@@ -31,9 +30,9 @@ private const val CONTENT_MARGIN = 40f
 private const val SUBPATH_SEPARATOR = " › "
 private const val BLOCK_REFERENCE_MARKER = '^'
 
-data class PendingCanvasImage(val nodeId: String, val relativePath: String)
+internal data class PendingCanvasImage(val nodeId: String, val relativePath: String)
 
-data class ConvertedCanvas(
+internal data class ConvertedCanvas(
     val content: CanvasContent,
     val pendingImages: List<PendingCanvasImage>
 )
@@ -71,7 +70,7 @@ private class ObsidianCanvasEdge(
     val label: String? = null
 )
 
-object ObsidianCanvasConverter {
+internal object ObsidianCanvasConverter {
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -80,9 +79,9 @@ object ObsidianCanvasConverter {
         linkResolver: ImportLinkResolver,
         noteTitlesById: Map<String, String>,
         now: Long,
-        newId: () -> String = ::randomId
+        newId: () -> String = ::newImportId
     ): ConvertedCanvas {
-        val canvasFile = json.decodeFromString(ObsidianCanvasFile.serializer(), canvasJson.removePrefix("\uFEFF"))
+        val canvasFile = json.decodeFromString(ObsidianCanvasFile.serializer(), canvasJson)
         val pendingImages = mutableListOf<PendingCanvasImage>()
         val emberrNodeIdsByObsidianId = mutableMapOf<String, String>()
 
@@ -200,6 +199,3 @@ object ObsidianCanvasConverter {
     private fun sideNamed(name: String?): CanvasSide? =
         CanvasSide.entries.firstOrNull { side -> side.name.equals(name?.trim(), ignoreCase = true) }
 }
-
-@OptIn(ExperimentalUuidApi::class)
-private fun randomId(): String = Uuid.random().toString()

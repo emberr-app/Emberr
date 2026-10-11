@@ -2,21 +2,20 @@ package com.emberr.domain.importer.markdown
 
 import com.emberr.domain.importer.ImportLinkResolver
 import com.emberr.domain.importer.ImportPaths
+import com.emberr.domain.importer.newImportId
+import com.emberr.domain.importer.whitespaceRun
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.TextBlock
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 private const val PLAIN_TEXT_EXTENSION = ".txt"
 private const val FRONT_MATTER_TITLE_KEY = "title"
-private val whitespaceRun = Regex("\\s+")
 
-data class PendingAttachment(val blockId: String, val relativePath: String)
+internal data class PendingAttachment(val blockId: String, val relativePath: String)
 
-data class PendingWebImage(val blockId: String, val url: String, val altText: String)
+internal data class PendingWebImage(val blockId: String, val url: String, val altText: String)
 
-data class ConvertedNote(
+internal data class ConvertedNote(
     val title: String,
     val blocks: List<NoteBlock>,
     val pendingAttachments: List<PendingAttachment>,
@@ -25,16 +24,16 @@ data class ConvertedNote(
     val inlineTags: List<String>
 )
 
-object ImportedNoteConverter {
+internal object ImportedNoteConverter {
 
     fun convert(
         relativePath: String,
         content: String,
         linkResolver: ImportLinkResolver,
         now: Long,
-        newBlockId: () -> String = ::randomBlockId
+        newBlockId: () -> String = ::newImportId
     ): ConvertedNote {
-        val cleanedContent = content.removePrefix("\uFEFF").replace("\r\n", "\n").replace('\r', '\n')
+        val cleanedContent = content.replace("\r\n", "\n").replace('\r', '\n')
 
         if (relativePath.endsWith(PLAIN_TEXT_EXTENSION, ignoreCase = true)) {
             return ConvertedNote(
@@ -81,6 +80,3 @@ internal object PlainTextToBlocks {
             .dropLastWhile { it.isBlank() }
             .map { line -> TextBlock(id = newBlockId(), text = line.trimEnd(), updatedAt = now) }
 }
-
-@OptIn(ExperimentalUuidApi::class)
-private fun randomBlockId(): String = Uuid.random().toString()
