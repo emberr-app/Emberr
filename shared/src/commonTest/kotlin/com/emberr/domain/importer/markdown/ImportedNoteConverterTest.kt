@@ -547,6 +547,13 @@ class ImportedNoteConverterTest {
     }
 
     @Test
+    fun tagsInsideABlockCommentAreCollectedLikeTagsInTheText() {
+        val converted = convert("About #work\n\n%%\nLater: #ideas\n%%")
+
+        assertEquals(listOf("work", "ideas"), converted.inlineTags)
+    }
+
+    @Test
     fun blockIdsAtTheEndOfABlockAreRemoved() {
         assertEquals(
             listOf(

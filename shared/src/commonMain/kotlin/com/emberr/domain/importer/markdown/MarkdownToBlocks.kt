@@ -42,6 +42,7 @@ private const val BLOCK_COMMENT_TITLE = "Comment"
 private const val MINIMUM_FENCE_LENGTH = 3
 
 private val codeFenceOpening = Regex("^ {0,3}(`{3,}|~{3,})")
+private val backtickRun = Regex("`+")
 private val calloutMarker = Regex("""^\[!([A-Za-z][A-Za-z0-9_-]*)]([+-]?)""")
 private val calloutMarkerWithSpaces = Regex("""^\[![^\]]*][+-]?\s*""")
 private val calloutTypesByWrittenName: Map<String, CalloutType> = mapOf(
@@ -168,7 +169,7 @@ internal object MarkdownToBlocks {
     }
 
     private fun longestBacktickRun(lines: List<String>): Int =
-        lines.maxOfOrNull { line -> Regex("`+").findAll(line).maxOfOrNull { it.value.length } ?: 0 } ?: 0
+        lines.maxOfOrNull { line -> backtickRun.findAll(line).maxOfOrNull { it.value.length } ?: 0 } ?: 0
 }
 
 private class MarkdownBlockBuilder(
@@ -459,6 +460,7 @@ private class MarkdownBlockBuilder(
         blocks += comment.blocks
         pendingAttachments += comment.pendingAttachments
         pendingWebImages += comment.pendingWebImages
+        inlineTags += comment.inlineTags
     }
 
     private fun addIndentedCode(codeBlock: ASTNode, indentation: Int) {
