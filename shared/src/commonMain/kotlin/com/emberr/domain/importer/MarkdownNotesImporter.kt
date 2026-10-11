@@ -68,6 +68,7 @@ private val mimeTypesByExtension = mapOf(
     "mp4" to "video/mp4"
 )
 private const val UNLINKED_ATTACHMENTS_TITLE = "Unlinked attachments"
+private const val IMPORT_STOPPED_EARLY = "the rest of the import (it stopped early)"
 
 sealed interface ImportProgress {
     data object NotStarted : ImportProgress
@@ -105,10 +106,22 @@ class MarkdownNotesImporter(
         appScope.launch {
             val savedNotes = mutableListOf<Pair<NoteMetadataEntity, NoteContent>>()
             val savedCanvases = mutableListOf<Pair<String, CanvasContent>>()
-            val result = pickedFiles.use { files ->
-                importFiles(files, spaceId, onCanvasSaved = { noteId, canvas -> savedCanvases += noteId to canvas }) { metadata, content ->
-                    savedNotes += metadata to content
+            val result = try {
+                pickedFiles.use { files ->
+                    importFiles(files, spaceId, onCanvasSaved = { noteId, canvas -> savedCanvases += noteId to canvas }) { metadata, content ->
+                        savedNotes += metadata to content
+                    }
                 }
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Throwable) {
+                ImportResult(
+                    spaceId = spaceId,
+                    importedNoteCount = savedNotes.size + savedCanvases.size,
+                    createdFolderCount = 0,
+                    copiedAttachmentCount = 0,
+                    failedNames = listOf(IMPORT_STOPPED_EARLY)
+                )
             }
             reminderRescheduler.rescheduleUpcomingReminders()
             _progress.value = ImportProgress.Finished(result)
