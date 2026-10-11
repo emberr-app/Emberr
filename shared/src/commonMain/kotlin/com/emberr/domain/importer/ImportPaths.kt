@@ -3,7 +3,7 @@ package com.emberr.domain.importer
 private const val CANVAS_FILE_EXTENSION = "canvas"
 private val noteFileExtensions = setOf("md", "markdown", "txt", CANVAS_FILE_EXTENSION)
 private const val ZIP_FILE_EXTENSION = "zip"
-private val excalidrawFileEndings = listOf(".excalidraw", ".excalidraw.md")
+private val unsupportedObsidianFileEndings = listOf(".excalidraw", ".excalidraw.md", ".base")
 private val ignoredNames = setOf("__MACOSX", "Thumbs.db", "desktop.ini")
 private val windowsDriveAtStart = Regex("^[A-Za-z]:")
 
@@ -15,10 +15,10 @@ object ImportPaths {
 
     fun isZipFile(path: String): Boolean = extensionOf(path) == ZIP_FILE_EXTENSION
 
-    fun isExcalidrawFile(path: String): Boolean =
-        excalidrawFileEndings.any { ending -> path.endsWith(ending, ignoreCase = true) }
+    fun isUnsupportedObsidianFile(path: String): Boolean =
+        unsupportedObsidianFileEndings.any { ending -> path.endsWith(ending, ignoreCase = true) }
 
-    fun isSupportedPickedFile(name: String): Boolean = !isExcalidrawFile(name) && (isNoteFile(name) || isZipFile(name))
+    fun isSupportedPickedFile(name: String): Boolean = !isUnsupportedObsidianFile(name) && (isNoteFile(name) || isZipFile(name))
 
     fun isIgnoredEntry(rawPath: String): Boolean {
         val normalizedPath = rawPath.replace('\\', '/')

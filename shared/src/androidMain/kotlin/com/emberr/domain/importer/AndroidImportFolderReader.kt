@@ -48,7 +48,7 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
             when {
                 ImportPaths.isIgnoredEntry(childPath) -> Unit
                 child.isFolder -> collectFiles(treeUri, child.documentId, childPath, files, skippedNames)
-                ImportPaths.isExcalidrawFile(childPath) -> skippedNames += childPath
+                ImportPaths.isUnsupportedObsidianFile(childPath) -> skippedNames += childPath
                 else -> files += DocumentImportFile(
                     relativePath = childPath,
                     sizeBytes = child.sizeBytes,

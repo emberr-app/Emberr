@@ -27,11 +27,18 @@ class ImportPathsTest {
 
     @Test
     fun excalidrawDrawingsAreRecognisedAndCannotBePicked() {
-        assertTrue(ImportPaths.isExcalidrawFile("Drawings/Sketch.excalidraw.md"))
-        assertTrue(ImportPaths.isExcalidrawFile("Sketch.EXCALIDRAW"))
-        assertFalse(ImportPaths.isExcalidrawFile("excalidraw notes.md"))
+        assertTrue(ImportPaths.isUnsupportedObsidianFile("Drawings/Sketch.excalidraw.md"))
+        assertTrue(ImportPaths.isUnsupportedObsidianFile("Sketch.EXCALIDRAW"))
+        assertFalse(ImportPaths.isUnsupportedObsidianFile("excalidraw notes.md"))
         assertFalse(ImportPaths.isSupportedPickedFile("Sketch.excalidraw.md"))
         assertFalse(ImportPaths.isSupportedPickedFile("Sketch.excalidraw"))
+    }
+
+    @Test
+    fun obsidianBasesAreRecognisedAndCannotBePicked() {
+        assertTrue(ImportPaths.isUnsupportedObsidianFile("Views/Books.base"))
+        assertFalse(ImportPaths.isUnsupportedObsidianFile("Database notes.md"))
+        assertFalse(ImportPaths.isSupportedPickedFile("Books.base"))
     }
 
     @Test

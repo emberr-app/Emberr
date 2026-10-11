@@ -20,7 +20,7 @@ class ImportFilesCollector {
 
     fun addPickedFile(displayName: String, file: File) {
         when {
-            ImportPaths.isExcalidrawFile(displayName) -> skippedNames += displayName
+            ImportPaths.isUnsupportedObsidianFile(displayName) -> skippedNames += displayName
             ImportPaths.isZipFile(displayName) -> addZipFile(displayName, file)
             ImportPaths.isNoteFile(displayName) -> files += LocalImportFile(displayName, file)
             else -> skippedNames += displayName
@@ -58,7 +58,7 @@ class ImportFilesCollector {
                 skippedNames += entry.name
                 continue
             }
-            if (ImportPaths.isExcalidrawFile(relativePath)) {
+            if (ImportPaths.isUnsupportedObsidianFile(relativePath)) {
                 skippedNames += relativePath
                 continue
             }
