@@ -40,7 +40,7 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.database
+import emberr.shared.generated.resources.emberr_ghost
 import emberr.shared.generated.resources.file_text
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -91,8 +91,8 @@ fun ImportScreen(
                     SettingsFootnote(text = "Also works for Obsidian and Bear notes.\nSome Obsidian features may not import fully.")
                     SettingsDivider()
                     SettingsActionRow(
-                        icon = painterResource(Res.drawable.database),
-                        title = "Emberr Backup",
+                        icon = painterResource(Res.drawable.emberr_ghost),
+                        title = "Emberr",
                         onClick = { showRestoreConfirmation = true }
                     )
                 }
