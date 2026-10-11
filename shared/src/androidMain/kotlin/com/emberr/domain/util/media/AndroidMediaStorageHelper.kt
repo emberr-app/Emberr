@@ -133,4 +133,8 @@ class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelp
     override fun listAllMediaFileNames(): List<String> {
         return mediaDir.listFiles()?.mapNotNull { if (it.isFile) it.name else null } ?: emptyList()
     }
+
+    override suspend fun deleteMediaFile(fileName: String) {
+        withContext(Dispatchers.IO) { File(getAbsoluteMediaPath(fileName)).delete() }
+    }
 }

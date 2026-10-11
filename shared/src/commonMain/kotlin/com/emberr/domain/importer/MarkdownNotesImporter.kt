@@ -30,12 +30,17 @@ import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.media.mimeTypeForExtension
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import kotlinx.coroutines.withContext
 
 private const val UNKNOWN_MIME_TYPE = "application/octet-stream"
 private const val UNLINKED_ATTACHMENTS_TITLE = "Unlinked attachments"
@@ -53,9 +58,11 @@ class MarkdownNotesImporter(
     private val _progress = MutableStateFlow<ImportProgress>(ImportProgress.NotStarted)
     val progress: StateFlow<ImportProgress> = _progress.asStateFlow()
 
+    private var importJob: Job? = null
+
     fun startImport(pickedFiles: PickedImportFiles, spaceId: String) {
         _progress.value = ImportProgress.Importing(handledNoteCount = 0, totalNoteCount = noteFilesOf(pickedFiles).size, doneFraction = 0f)
-        appScope.launch {
+        importJob = appScope.launch {
             val savedNotes = mutableListOf<Pair<NoteMetadataEntity, NoteContent>>()
             val savedCanvases = mutableListOf<Pair<String, CanvasContent>>()
             val result = try {
@@ -65,6 +72,7 @@ class MarkdownNotesImporter(
                     }
                 }
             } catch (cancellation: CancellationException) {
+                _progress.value = ImportProgress.Stopped
                 throw cancellation
             } catch (_: Throwable) {
                 ImportResult(
@@ -75,15 +83,25 @@ class MarkdownNotesImporter(
                     failedNames = listOf(IMPORT_STOPPED_EARLY)
                 )
             }
-            reminderRescheduler.rescheduleUpcomingReminders()
-            _progress.value = ImportProgress.Finished(result)
-            savedNotes.forEach { (metadata, content) -> repository.indexNote(metadata, content) }
-            savedCanvases.forEach { (noteId, canvas) -> repository.indexCanvas(noteId, canvas) }
+            withContext(NonCancellable) {
+                reminderRescheduler.rescheduleUpcomingReminders()
+                _progress.value = ImportProgress.Finished(result)
+                savedNotes.forEach { (metadata, content) -> repository.indexNote(metadata, content) }
+                savedCanvases.forEach { (noteId, canvas) -> repository.indexCanvas(noteId, canvas) }
+            }
         }
     }
 
+    fun stopImport() {
+        if (_progress.value !is ImportProgress.Importing) return
+        _progress.value = ImportProgress.Stopping
+        importJob?.cancel()
+    }
+
     fun clearFinishedImport() {
-        if (_progress.value is ImportProgress.Finished) _progress.value = ImportProgress.NotStarted
+        if (_progress.value is ImportProgress.Finished || _progress.value == ImportProgress.Stopped) {
+            _progress.value = ImportProgress.NotStarted
+        }
     }
 
     suspend fun importFiles(
@@ -92,12 +110,28 @@ class MarkdownNotesImporter(
         onCanvasSaved: (String, CanvasContent) -> Unit = { _, _ -> },
         onNoteSaved: (NoteMetadataEntity, NoteContent) -> Unit = { _, _ -> }
     ): ImportResult {
+        val createdItems = ItemsCreatedByImport()
+        return try {
+            importFilesRecordingCreatedItems(pickedFiles, spaceId, createdItems, onCanvasSaved, onNoteSaved)
+        } catch (cancellation: CancellationException) {
+            withContext(NonCancellable) { deleteCreatedItems(createdItems) }
+            throw cancellation
+        }
+    }
+
+    private suspend fun importFilesRecordingCreatedItems(
+        pickedFiles: PickedImportFiles,
+        spaceId: String,
+        createdItems: ItemsCreatedByImport,
+        onCanvasSaved: (String, CanvasContent) -> Unit,
+        onNoteSaved: (NoteMetadataEntity, NoteContent) -> Unit
+    ): ImportResult {
         val now = System.currentTimeMillis()
         val noteFiles = noteFilesOf(pickedFiles)
         val attachmentFilesByPath = pickedFiles.files
             .filterNot { file -> ImportPaths.isNoteFile(file.relativePath) }
             .associateBy { file -> file.relativePath }
-        val plannedNotes = noteFiles.map { file -> PlannedNote(file = file, noteId = newId()) }
+        val plannedNotes = noteFiles.map { file -> PlannedNote(file = file, noteId = newImportId()) }
         val (plannedCanvases, plannedMarkdownNotes) = plannedNotes.partition { ImportPaths.isCanvasFile(it.file.relativePath) }
         val linkTargets = ImportedLinkTargets(
             noteIdsByPath = plannedNotes.distinctBy { it.file.relativePath }.associate { it.file.relativePath to it.noteId },
@@ -141,10 +175,10 @@ class MarkdownNotesImporter(
             totalNoteCount = plannedNotes.size,
             totalWorkBytes = plannedNotes.sumOf { workBytesOf(it.file) } +
                 attachmentFilesByPath.values.sumOf { it.sizeBytes },
-            publish = { progress -> _progress.value = progress }
+            publish = { progress -> _progress.update { current -> if (current == ImportProgress.Stopping) current else progress } }
         )
 
-        val folderIdsByPath = createFolders(noteFiles, spaceId, now, failedNames)
+        val folderIdsByPath = createFolders(noteFiles, spaceId, now, failedNames, createdItems)
         val copiedAttachments = mutableMapOf<String, MediaInfo?>()
         val downloadedWebImages = mutableMapOf<String, MediaInfo?>()
         val customPropertiesByName = mutableMapOf<String, CustomPropertyEntity>()
@@ -154,7 +188,7 @@ class MarkdownNotesImporter(
             if (attachmentPath in copiedAttachments) {
                 copiedAttachments[attachmentPath]
             } else {
-                copyAttachment(attachmentFilesByPath.getValue(attachmentPath), progressTracker)
+                copyAttachment(attachmentFilesByPath.getValue(attachmentPath), progressTracker, createdItems)
                     .also { mediaInfo -> copiedAttachments[attachmentPath] = mediaInfo }
             }
 
@@ -164,7 +198,7 @@ class MarkdownNotesImporter(
             if (converted != null) {
                 rememberFailure(failedNames, notePath) {
                     val details = ImportedProperties.detailsOf(converted.frontMatter, converted.inlineTags)
-                    val propertyBlocks = propertyBlocksFor(details.properties, spaceId, now, customPropertiesByName)
+                    val propertyBlocks = propertyBlocksFor(details.properties, spaceId, now, customPropertiesByName, createdItems)
                     val blocksWithAttachments = withAttachmentsCopied(converted.blocks, converted.pendingAttachments, now, failedNames) { attachmentPath ->
                         copiedAttachmentFor(attachmentPath)
                     }
@@ -172,7 +206,7 @@ class MarkdownNotesImporter(
                         if (url in downloadedWebImages) {
                             downloadedWebImages[url]
                         } else {
-                            downloadWebImage(url, progressTracker).also { mediaInfo -> downloadedWebImages[url] = mediaInfo }
+                            downloadWebImage(url, progressTracker, createdItems).also { mediaInfo -> downloadedWebImages[url] = mediaInfo }
                         }
                     }
                     val content = NoteContent(blocks = blocks)
@@ -185,6 +219,7 @@ class MarkdownNotesImporter(
                         spaceId = spaceId,
                         snippet = generateSnippet(blocks)
                     )
+                    createdItems.noteIds += metadata.noteId
                     repository.saveNoteInSpace(spaceId, metadata, content)
                     onNoteSaved(metadata, content)
                     importedNoteCount++
@@ -203,6 +238,7 @@ class MarkdownNotesImporter(
                         spaceId = spaceId,
                         kind = NoteKind.CANVAS
                     )
+                    createdItems.noteIds += metadata.noteId
                     repository.saveNoteInSpace(spaceId, metadata, NoteContent(blocks = emptyList()))
                     canvasRepository.saveChanges(plannedNote.noteId, content, stampNoteUpdatedAt = false)
                     onCanvasSaved(plannedNote.noteId, content)
@@ -219,7 +255,7 @@ class MarkdownNotesImporter(
                     copiedAttachmentFor(attachmentPath)
                 })
                 val metadata = importedNoteMetadata(
-                    noteId = newId(),
+                    noteId = newImportId(),
                     title = UNLINKED_ATTACHMENTS_TITLE,
                     folderId = sharedTopFolderOf(pickedFiles.files)?.let(folderIdsByPath::get),
                     createdAt = now,
@@ -227,6 +263,7 @@ class MarkdownNotesImporter(
                     spaceId = spaceId,
                     snippet = generateSnippet(content.blocks)
                 )
+                createdItems.noteIds += metadata.noteId
                 repository.saveNoteInSpace(spaceId, metadata, content)
                 onNoteSaved(metadata, content)
             }
@@ -245,15 +282,17 @@ class MarkdownNotesImporter(
         noteFiles: List<ImportFile>,
         spaceId: String,
         now: Long,
-        failedNames: MutableSet<String>
+        failedNames: MutableSet<String>,
+        createdItems: ItemsCreatedByImport
     ): Map<String, String> {
         val folderIdsByPath = mutableMapOf<String, String>()
         val folderPaths = ImportPaths.folderPathsHoldingNotes(noteFiles.map { it.relativePath })
             .sortedWith(compareBy({ it.count { character -> character == '/' } }, { it }))
 
         for (folderPath in folderPaths) {
-            val folderId = newId()
+            val folderId = newImportId()
             rememberFailure(failedNames, folderPath) {
+                createdItems.folderIds += folderId
                 repository.insertFolderInSpace(
                     spaceId,
                     FolderEntity(
@@ -274,17 +313,20 @@ class MarkdownNotesImporter(
         properties: List<ImportedProperty>,
         spaceId: String,
         now: Long,
-        customPropertiesByName: MutableMap<String, CustomPropertyEntity>
+        customPropertiesByName: MutableMap<String, CustomPropertyEntity>,
+        createdItems: ItemsCreatedByImport
     ): List<NoteBlock> =
         properties.mapNotNull { property ->
             val emptyBlock = when (val destination = property.destination) {
-                is PropertyDestination.BuiltIn -> PropertyBlock(id = newId(), propertyType = destination.propertyType, updatedAt = now)
+                is PropertyDestination.BuiltIn -> PropertyBlock(id = newImportId(), propertyType = destination.propertyType, updatedAt = now)
                 is PropertyDestination.Custom -> {
                     val customProperty = customPropertiesByName.getOrPut(destination.name.lowercase()) {
-                        repository.findOrCreateCustomPropertyInSpace(spaceId, destination.name, destination.valueType)
+                        repository.findCustomPropertyInSpace(spaceId, destination.name)
+                            ?: finishEvenIfStopped { repository.createCustomPropertyInSpace(spaceId, destination.name, destination.valueType) }
+                                .also { createdProperty -> createdItems.customPropertyIds += createdProperty.propertyId }
                     }
                     PropertyBlock(
-                        id = newId(),
+                        id = newImportId(),
                         customPropertyId = customProperty.propertyId,
                         customLabel = customProperty.name,
                         customValueType = customProperty.valueType,
@@ -294,7 +336,8 @@ class MarkdownNotesImporter(
             }
             val filledBlock = emptyBlock.withImportedValue(property.value) ?: return@mapNotNull null
             if (filledBlock.valueType.holdsTags) {
-                repository.createPropertyTagsInSpace(spaceId, filledBlock.tagPoolKey, filledBlock.tags)
+                val createdTags = finishEvenIfStopped { repository.createPropertyTagsInSpace(spaceId, filledBlock.tagPoolKey, filledBlock.tags) }
+                createdItems.propertyTagIds += createdTags.map { it.tagId }
             }
             filledBlock
         }
@@ -303,9 +346,9 @@ class MarkdownNotesImporter(
         val blocks = mutableListOf<NoteBlock>()
         val pendingAttachments = mutableListOf<PendingAttachment>()
         attachmentPaths.groupBy(ImportPaths::folderOf).forEach { (folderPath, pathsInFolder) ->
-            if (folderPath.isNotEmpty()) blocks += HeadingBlock(id = newId(), text = folderPath, level = 2, updatedAt = now)
+            if (folderPath.isNotEmpty()) blocks += HeadingBlock(id = newImportId(), text = folderPath, level = 2, updatedAt = now)
             pathsInFolder.forEach { attachmentPath ->
-                val blockId = newId()
+                val blockId = newImportId()
                 blocks += if (ImportPaths.isImageFile(attachmentPath)) {
                     ImageBlock(id = blockId, updatedAt = now)
                 } else {
@@ -378,10 +421,10 @@ class MarkdownNotesImporter(
         }
     }
 
-    private suspend fun downloadWebImage(url: String, progressTracker: ImportProgressTracker): MediaInfo? {
+    private suspend fun downloadWebImage(url: String, progressTracker: ImportProgressTracker, createdItems: ItemsCreatedByImport): MediaInfo? {
         val shownName = url.substringBefore('?').substringAfterLast('/').ifBlank { url }
         progressTracker.attachmentCopying(shownName, copiedBytes = 0L)
-        return webImageFetcher.fetchIntoMedia(url)
+        return webImageFetcher.fetchIntoMedia(url)?.also { mediaInfo -> createdItems.mediaFileNames += mediaInfo.localFileName }
     }
 
     private suspend fun withCanvasImagesCopied(
@@ -403,17 +446,46 @@ class MarkdownNotesImporter(
         return convertedCanvas.content.copy(nodes = nodes)
     }
 
-    private suspend fun copyAttachment(file: ImportFile, progressTracker: ImportProgressTracker): MediaInfo? {
+    private suspend fun copyAttachment(
+        file: ImportFile,
+        progressTracker: ImportProgressTracker,
+        createdItems: ItemsCreatedByImport
+    ): MediaInfo? {
         val fileName = file.relativePath.substringAfterLast('/')
         val extension = fileName.substringAfterLast('.', missingDelimiterValue = "").lowercase()
-        val mediaInfo = mediaStorageHelper.saveStreamToInternalStorage(
-            openSource = file::openSource,
-            extension = extension,
-            mimeType = mimeTypeForExtension(extension) ?: UNKNOWN_MIME_TYPE,
-            onBytesCopied = { copiedBytes -> progressTracker.attachmentCopying(fileName, copiedBytes.coerceAtMost(file.sizeBytes)) }
-        )
+        val importJob = currentCoroutineContext().job
+        val mediaInfo = finishEvenIfStopped {
+            mediaStorageHelper.saveStreamToInternalStorage(
+                openSource = file::openSource,
+                extension = extension,
+                mimeType = mimeTypeForExtension(extension) ?: UNKNOWN_MIME_TYPE,
+                onBytesCopied = { copiedBytes ->
+                    importJob.ensureActive()
+                    progressTracker.attachmentCopying(fileName, copiedBytes.coerceAtMost(file.sizeBytes))
+                }
+            )
+        }
+        mediaInfo?.let { createdItems.mediaFileNames += it.localFileName }
         progressTracker.attachmentFinished(file.sizeBytes)
         return mediaInfo
+    }
+
+    private suspend fun <T> finishEvenIfStopped(work: suspend () -> T): T = withContext(NonCancellable) { work() }
+
+    private suspend fun deleteCreatedItems(createdItems: ItemsCreatedByImport) {
+        createdItems.noteIds.forEach { noteId ->
+            tryDeleting { if (repository.getNoteById(noteId) != null) repository.deleteNote(noteId, filePath = "") }
+        }
+        createdItems.folderIds.forEach { folderId -> tryDeleting { repository.deleteFolder(folderId) } }
+        tryDeleting { repository.deleteCustomPropertiesAndTags(createdItems.customPropertyIds, createdItems.propertyTagIds) }
+        createdItems.mediaFileNames.forEach { fileName -> tryDeleting { mediaStorageHelper.deleteMediaFile(fileName) } }
+    }
+
+    private inline fun tryDeleting(delete: () -> Unit) {
+        try {
+            delete()
+        } catch (_: Exception) {
+        }
     }
 
     private fun importedNoteMetadata(
@@ -457,8 +529,13 @@ class MarkdownNotesImporter(
     private fun noteFilesOf(pickedFiles: PickedImportFiles): List<ImportFile> =
         pickedFiles.files.filter { file -> ImportPaths.isNoteFile(file.relativePath) }
 
-    @OptIn(ExperimentalUuidApi::class)
-    private fun newId(): String = Uuid.random().toString()
-
     private class PlannedNote(val file: ImportFile, val noteId: String)
+
+    private class ItemsCreatedByImport {
+        val noteIds = mutableListOf<String>()
+        val folderIds = mutableListOf<String>()
+        val customPropertyIds = mutableListOf<String>()
+        val propertyTagIds = mutableListOf<String>()
+        val mediaFileNames = mutableListOf<String>()
+    }
 }

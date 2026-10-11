@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +56,7 @@ fun ImportScreen(
     val selectedSpaceId by viewModel.selectedSpaceId.collectAsState()
     val pickedFilesState by viewModel.pickedFilesState.collectAsState()
     val importProgress by viewModel.importProgress.collectAsState()
-    var showMarkdownImportSheet by remember { mutableStateOf(false) }
+    var showMarkdownImportSheet by rememberSaveable { mutableStateOf(false) }
     var showRestoreConfirmation by remember { mutableStateOf(false) }
 
     val hazeState = remember { HazeState() }
@@ -126,6 +127,7 @@ fun ImportScreen(
             onFolderPicked = viewModel::readPickedFolder,
             onSpaceSelected = viewModel::selectSpace,
             onImportClick = viewModel::startImport,
+            onStopClick = viewModel::stopImport,
             onDismiss = {
                 showMarkdownImportSheet = false
                 viewModel.closeMarkdownImport()

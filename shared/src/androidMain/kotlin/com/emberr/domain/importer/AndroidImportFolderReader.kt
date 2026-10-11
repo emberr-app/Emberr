@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import okio.Source
 import okio.source
@@ -24,7 +26,7 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
         PickedImportFiles(pickedNames = listOf(folderName), files = files, skippedNames = skippedNames) {}
     }
 
-    private fun collectFiles(
+    private suspend fun collectFiles(
         treeUri: Uri,
         folderDocumentId: String,
         folderPath: String,
@@ -44,6 +46,7 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
         }
 
         for (child in children) {
+            currentCoroutineContext().ensureActive()
             val childPath = "$folderPath/${child.name}"
             when {
                 ImportPaths.isIgnoredEntry(childPath) -> Unit

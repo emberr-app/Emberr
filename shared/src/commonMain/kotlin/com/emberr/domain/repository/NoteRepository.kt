@@ -147,7 +147,7 @@ interface NoteRepository {
     fun getPropertyTags(propertyKey: String): Flow<List<PropertyTagEntity>>
     fun getAllPropertyTags(): Flow<List<PropertyTagEntity>>
     suspend fun createPropertyTag(propertyKey: String, name: String)
-    suspend fun createPropertyTagsInSpace(spaceId: String, propertyKey: String, names: List<String>)
+    suspend fun createPropertyTagsInSpace(spaceId: String, propertyKey: String, names: List<String>): List<PropertyTagEntity>
     suspend fun reorderPropertyTags(propertyKey: String, orderedNames: List<String>)
     suspend fun setPropertyTagColor(propertyKey: String, name: String, colorName: String?)
     suspend fun renamePropertyTag(propertyKey: String, oldName: String, newName: String)
@@ -157,9 +157,11 @@ interface NoteRepository {
 
     fun getCustomProperties(): Flow<List<CustomPropertyEntity>>
     suspend fun createCustomProperty(name: String, valueType: PropertyValueType)
-    suspend fun findOrCreateCustomPropertyInSpace(spaceId: String, name: String, valueType: PropertyValueType): CustomPropertyEntity
+    suspend fun findCustomPropertyInSpace(spaceId: String, name: String): CustomPropertyEntity?
+    suspend fun createCustomPropertyInSpace(spaceId: String, name: String, valueType: PropertyValueType): CustomPropertyEntity
     suspend fun renameCustomProperty(propertyId: String, newName: String)
     suspend fun deleteCustomProperty(propertyId: String)
+    suspend fun deleteCustomPropertiesAndTags(propertyIds: List<String>, tagIds: List<String>)
     suspend fun getCustomPropertiesModifiedSince(timestamp: Long): List<CustomPropertyEntity>
     suspend fun applyRemoteCustomProperty(property: CustomPropertyEntity)
 

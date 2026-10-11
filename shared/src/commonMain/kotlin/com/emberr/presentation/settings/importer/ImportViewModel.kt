@@ -12,6 +12,7 @@ import com.emberr.domain.importer.PickedImportFiles
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.space.SpaceRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -46,6 +47,7 @@ class ImportViewModel(
     val importProgress: StateFlow<ImportProgress> = markdownNotesImporter.progress
 
     private var pickedImportFiles: PickedImportFiles? = null
+    private var readingJob: Job? = null
     private var latestReadNumber = 0
 
     fun prepareMarkdownImport() {
@@ -70,7 +72,7 @@ class ImportViewModel(
         releasePickedFiles()
         val thisReadNumber = ++latestReadNumber
         _pickedFilesState.value = PickedFilesState.Reading
-        viewModelScope.launch {
+        readingJob = viewModelScope.launch {
             val pickedFiles = try {
                 read()
             } catch (cancellation: CancellationException) {
@@ -95,6 +97,10 @@ class ImportViewModel(
         markdownNotesImporter.startImport(pickedFiles, _selectedSpaceId.value)
     }
 
+    fun stopImport() {
+        markdownNotesImporter.stopImport()
+    }
+
     fun closeMarkdownImport() {
         latestReadNumber++
         releasePickedFiles()
@@ -102,6 +108,7 @@ class ImportViewModel(
     }
 
     private fun releasePickedFiles() {
+        readingJob?.cancel()
         pickedImportFiles?.close()
         pickedImportFiles = null
         _pickedFilesState.value = PickedFilesState.NothingPicked

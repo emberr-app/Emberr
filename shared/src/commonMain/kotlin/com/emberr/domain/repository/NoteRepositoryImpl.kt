@@ -1027,30 +1027,30 @@ class NoteRepositoryImpl(
             AutoSyncTrigger.requestSync()
         }
 
-    override suspend fun createPropertyTagsInSpace(spaceId: String, propertyKey: String, names: List<String>) =
+    override suspend fun createPropertyTagsInSpace(spaceId: String, propertyKey: String, names: List<String>): List<PropertyTagEntity> =
         withContext(Dispatchers.IO) {
             val now = System.currentTimeMillis()
             val savedTags = propertyTagDao.getAllTagsOnce(spaceId).filter { it.propertyKey == propertyKey }
             val newNames = names
                 .filter { name -> savedTags.none { it.name.equals(name, ignoreCase = true) } }
                 .distinctBy { it.lowercase() }
-            if (newNames.isEmpty()) return@withContext
+            if (newNames.isEmpty()) return@withContext emptyList()
 
             val firstSortOrder = (savedTags.maxOfOrNull { it.sortOrder } ?: -1) + 1
-            newNames.forEachIndexed { position, name ->
-                propertyTagDao.insertOrUpdateTag(
-                    PropertyTagEntity(
-                        tagId = UUID.randomUUID().toString(),
-                        propertyKey = propertyKey,
-                        name = name,
-                        createdAt = now,
-                        updatedAt = now,
-                        spaceId = spaceId,
-                        sortOrder = firstSortOrder + position
-                    )
+            val newTags = newNames.mapIndexed { position, name ->
+                PropertyTagEntity(
+                    tagId = UUID.randomUUID().toString(),
+                    propertyKey = propertyKey,
+                    name = name,
+                    createdAt = now,
+                    updatedAt = now,
+                    spaceId = spaceId,
+                    sortOrder = firstSortOrder + position
                 )
             }
+            newTags.forEach { tag -> propertyTagDao.insertOrUpdateTag(tag) }
             AutoSyncTrigger.requestSync()
+            newTags
         }
 
     override suspend fun reorderPropertyTags(propertyKey: String, orderedNames: List<String>) =
@@ -1195,27 +1195,29 @@ class NoteRepositoryImpl(
             AutoSyncTrigger.requestSync()
         }
 
-    override suspend fun findOrCreateCustomPropertyInSpace(
+    override suspend fun findCustomPropertyInSpace(spaceId: String, name: String): CustomPropertyEntity? =
+        withContext(Dispatchers.IO) {
+            customPropertyDao.getAllProperties(spaceId).first().firstOrNull { it.name.equals(name, ignoreCase = true) }
+        }
+
+    override suspend fun createCustomPropertyInSpace(
         spaceId: String,
         name: String,
         valueType: PropertyValueType
     ): CustomPropertyEntity =
         withContext(Dispatchers.IO) {
-            customPropertyDao.getAllProperties(spaceId).first().firstOrNull { it.name.equals(name, ignoreCase = true) }
-                ?: run {
-                    val now = System.currentTimeMillis()
-                    val newProperty = CustomPropertyEntity(
-                        propertyId = UUID.randomUUID().toString(),
-                        name = name,
-                        valueType = valueType,
-                        createdAt = now,
-                        updatedAt = now,
-                        spaceId = spaceId
-                    )
-                    customPropertyDao.insertOrUpdateProperty(newProperty)
-                    AutoSyncTrigger.requestSync()
-                    newProperty
-                }
+            val now = System.currentTimeMillis()
+            val newProperty = CustomPropertyEntity(
+                propertyId = UUID.randomUUID().toString(),
+                name = name,
+                valueType = valueType,
+                createdAt = now,
+                updatedAt = now,
+                spaceId = spaceId
+            )
+            customPropertyDao.insertOrUpdateProperty(newProperty)
+            AutoSyncTrigger.requestSync()
+            newProperty
         }
 
     override suspend fun renameCustomProperty(propertyId: String, newName: String) =
@@ -1250,6 +1252,23 @@ class NoteRepositoryImpl(
             }
             AutoSyncTrigger.requestSync()
             reindexNotes(rewrittenNotes)
+        }
+
+    override suspend fun deleteCustomPropertiesAndTags(propertyIds: List<String>, tagIds: List<String>) =
+        withContext(Dispatchers.IO) {
+            if (propertyIds.isEmpty() && tagIds.isEmpty()) return@withContext
+            val now = System.currentTimeMillis()
+            propertyIds.forEach { propertyId ->
+                customPropertyDao.getPropertyById(propertyId)?.let { property ->
+                    customPropertyDao.insertOrUpdateProperty(property.copy(isDeleted = true, updatedAt = now))
+                }
+            }
+            tagIds.forEach { tagId ->
+                propertyTagDao.getTagById(tagId)?.let { tag ->
+                    propertyTagDao.insertOrUpdateTag(tag.copy(isDeleted = true, updatedAt = now))
+                }
+            }
+            AutoSyncTrigger.requestSync()
         }
 
     override suspend fun getCustomPropertiesModifiedSince(timestamp: Long): List<CustomPropertyEntity> =

@@ -94,6 +94,7 @@ fun MarkdownImportSheet(
     onFolderPicked: (String) -> Unit,
     onSpaceSelected: (String) -> Unit,
     onImportClick: () -> Unit,
+    onStopClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val openFilePicker = rememberImportFilePicker(onFilesPicked)
@@ -105,7 +106,7 @@ fun MarkdownImportSheet(
         title = "Text & Markdown",
         subtitle = "Turn .md, .txt and .canvas files, or a .zip with folders, into Emberr notes.",
         contentHorizontalPadding = 0.dp,
-        isDismissible = importProgress !is ImportProgress.Importing
+        isDismissible = importProgress !is ImportProgress.Importing && importProgress != ImportProgress.Stopping
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
             when (importProgress) {
@@ -119,7 +120,9 @@ fun MarkdownImportSheet(
                     onImportClick = onImportClick,
                     onCloseClick = onDismiss
                 )
-                is ImportProgress.Importing -> ImportingMessage(importProgress)
+                is ImportProgress.Importing -> ImportingMessage(importProgress, onStopClick = onStopClick)
+                ImportProgress.Stopping -> StoppingMessage()
+                ImportProgress.Stopped -> ImportStoppedMessage(onDoneClick = onDismiss)
                 is ImportProgress.Finished -> ImportFinishedMessage(
                     result = importProgress.result,
                     spaceName = spaces.firstOrNull { it.spaceId == importProgress.result.spaceId }?.displayName,
@@ -202,7 +205,7 @@ private fun ImportChoices(
 }
 
 @Composable
-private fun ImportingMessage(importing: ImportProgress.Importing) {
+private fun ImportingMessage(importing: ImportProgress.Importing, onStopClick: () -> Unit) {
     val progressFraction = importing.doneFraction
     val progressText = importing.copyingFileName?.let { fileName -> "Copying $fileName…" }
         ?: "Importing ${importing.handledNoteCount} of ${countLabel(importing.totalNoteCount, "note")}…"
@@ -233,7 +236,48 @@ private fun ImportingMessage(importing: ImportProgress.Importing) {
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-        FadedLine(text = "Keep this open until the import finishes.")
+        EmberrButtonSecondary(
+            text = "Stop import",
+            onClick = onStopClick,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun StoppingMessage() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = SheetContentPadding, vertical = 8.dp)
+    ) {
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+        Text(
+            text = "Stopping and removing what was imported…",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+private fun ImportStoppedMessage(onDoneClick: () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = SheetContentPadding, vertical = 8.dp)
+    ) {
+        Text(
+            text = "Import stopped",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(text = "Nothing was added.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        EmberrButtonPrimary(
+            text = "Done",
+            onClick = onDoneClick,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        )
     }
 }
 

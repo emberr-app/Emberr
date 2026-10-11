@@ -95,4 +95,8 @@ class DesktopMediaStorageHelper : MediaStorageHelper {
     override fun listAllMediaFileNames(): List<String> {
         return mediaStorageDir.listFiles()?.mapNotNull { if (it.isFile) it.name else null } ?: emptyList()
     }
+
+    override suspend fun deleteMediaFile(fileName: String) {
+        withContext(Dispatchers.IO) { File(getAbsoluteMediaPath(fileName)).delete() }
+    }
 }

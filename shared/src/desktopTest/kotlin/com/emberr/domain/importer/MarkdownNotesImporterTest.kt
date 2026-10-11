@@ -20,6 +20,7 @@ import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.PropertyBlock
+import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.reminders.ReminderScheduler
@@ -136,6 +137,11 @@ class MarkdownNotesImporterTest {
         override fun getAbsoluteMediaPath(fileName: String): String = fileName
 
         override fun listAllMediaFileNames(): List<String> = savedFileNames.toList()
+
+        override suspend fun deleteMediaFile(fileName: String) {
+            savedFileNames -= fileName
+            savedTextsByFileName -= fileName
+        }
     }
 
     private class FakeImportFile(
@@ -567,5 +573,36 @@ class MarkdownNotesImporterTest {
 
         assertEquals(1, finished.result.importedNoteCount)
         assertTrue(closed)
+    }
+
+    @Test
+    fun stoppingAnImportRemovesWhatItAddedAndKeepsWhatWasThereBefore() = runTest {
+        val existingAuthor = repository.createCustomPropertyInSpace(IMPORT_SPACE_ID, "author", PropertyValueType.TEXT)
+        repository.createPropertyTagsInSpace(IMPORT_SPACE_ID, "TAGS", listOf("project"))
+        val importer = importer(backgroundScope)
+        mediaStorage.whileCopying = { if (mediaStorage.savedFileNames.size == 1) importer.stopImport() }
+
+        importer.startImport(
+            pickedFiles(
+                "Vault/Work/Plan.md" to "---\ntags: [project, idea]\nauthor: Ann\nmood: calm\n---\n![](chart.png)",
+                "Vault/Work/chart.png" to "png bytes",
+                "Vault/Later.md" to "![](video.mp4)",
+                "Vault/video.mp4" to "video bytes"
+            ),
+            spaceId = IMPORT_SPACE_ID
+        )
+        importer.progress.first { it == ImportProgress.Stopped }
+
+        assertEquals(emptyList(), importedNotes())
+        assertEquals(emptyList(), appDatabase.folderDao().getAllFolders(IMPORT_SPACE_ID).first())
+        assertEquals(
+            listOf(existingAuthor.propertyId),
+            appDatabase.customPropertyDao().getAllProperties(IMPORT_SPACE_ID).first().map { it.propertyId }
+        )
+        assertEquals(
+            listOf("TAGS" to "project"),
+            appDatabase.propertyTagDao().getAllTagsOnce(IMPORT_SPACE_ID).map { it.propertyKey to it.name }
+        )
+        assertEquals(emptyList(), mediaStorage.savedFileNames)
     }
 }

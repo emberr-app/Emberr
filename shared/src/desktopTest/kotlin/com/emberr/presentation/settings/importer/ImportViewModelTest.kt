@@ -19,6 +19,7 @@ import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.media.WebImageFetcher
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -79,11 +80,30 @@ class ImportViewModelTest {
         assertEquals(listOf("second.md"), state.summary.pickedNames)
     }
 
+    @Test
+    fun closingTheSheetWhileReadingStopsTheRead() {
+        val viewModel = importViewModel()
+
+        viewModel.readPickedFiles(listOf("vault.zip"))
+        viewModel.closeMarkdownImport()
+
+        assertEquals(1, fileReader.stoppedReadCount)
+        assertEquals(PickedFilesState.NothingPicked, viewModel.pickedFilesState.value)
+    }
+
     private class ControlledFileReader : ImportFileReader {
         val pendingReads = mutableListOf<CompletableDeferred<PickedImportFiles>>()
+        var stoppedReadCount = 0
 
-        override suspend fun readPickedFiles(pickedPaths: List<String>): PickedImportFiles =
-            CompletableDeferred<PickedImportFiles>().also { pendingReads += it }.await()
+        override suspend fun readPickedFiles(pickedPaths: List<String>): PickedImportFiles {
+            val pendingRead = CompletableDeferred<PickedImportFiles>().also { pendingReads += it }
+            try {
+                return pendingRead.await()
+            } catch (cancellation: CancellationException) {
+                stoppedReadCount++
+                throw cancellation
+            }
+        }
     }
 
     private fun importViewModel(): ImportViewModel {

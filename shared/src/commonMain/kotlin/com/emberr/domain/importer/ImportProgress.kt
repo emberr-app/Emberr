@@ -8,6 +8,8 @@ sealed interface ImportProgress {
         val doneFraction: Float,
         val copyingFileName: String? = null
     ) : ImportProgress
+    data object Stopping : ImportProgress
+    data object Stopped : ImportProgress
     data class Finished(val result: ImportResult) : ImportProgress
 }
 

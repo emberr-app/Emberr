@@ -36,4 +36,5 @@ interface MediaStorageHelper {
     ): MediaInfo?
     fun getAbsoluteMediaPath(fileName: String): String
     fun listAllMediaFileNames(): List<String>
+    suspend fun deleteMediaFile(fileName: String)
 }
