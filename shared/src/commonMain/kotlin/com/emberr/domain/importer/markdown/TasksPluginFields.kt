@@ -52,7 +52,12 @@ internal object TasksPluginFields {
         )
     }
 
-    private fun dateOf(field: MatchResult): LocalDate? = runCatching { LocalDate.parse(field.groupValues[1]) }.getOrNull()
+    private fun dateOf(field: MatchResult): LocalDate? =
+        try {
+            LocalDate.parse(field.groupValues[1])
+        } catch (_: IllegalArgumentException) {
+            null
+        }
 
     private fun recurrenceRuleOf(writtenRule: String): RecurrenceRule? {
         val rule = writtenRule.trim().lowercase().removeSuffix(WHEN_DONE_ENDING)
