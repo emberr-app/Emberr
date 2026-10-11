@@ -12,10 +12,24 @@ private val importPickerMimeTypes = arrayOf(
     "application/octet-stream"
 )
 
+private val backupPickerMimeTypes = arrayOf(
+    "application/zip",
+    "application/x-zip-compressed",
+    "application/octet-stream"
+)
+
 @Composable
 actual fun rememberImportFilePicker(onFilesPicked: (List<String>) -> Unit): () -> Unit {
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         onFilesPicked(uris.map { uri -> uri.toString() })
     }
     return { launcher.launch(importPickerMimeTypes) }
+}
+
+@Composable
+actual fun rememberBackupFilePicker(onFilePicked: (String) -> Unit): () -> Unit {
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { onFilePicked(it.toString()) }
+    }
+    return { launcher.launch(backupPickerMimeTypes) }
 }
