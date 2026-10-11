@@ -1,13 +1,18 @@
 package com.emberr.presentation.settings.importer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,23 +31,23 @@ import com.emberr.presentation.settings.SettingsDivider
 import com.emberr.presentation.settings.SettingsFootnote
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.desktopSettingsSidePadding
+import com.emberr.presentation.shared.components.EmberrAlertDialog
+import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.database
-import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.file_text
-import emberr.shared.generated.resources.notes2
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
-
-private const val COMING_SOON_LABEL = "Coming Soon"
 
 @Composable
 fun ImportScreen(
     onNavigateBack: () -> Unit,
+    onImportBackupClick: () -> Unit,
     viewModel: ImportViewModel = koinViewModel()
 ) {
     val spaces by viewModel.spaces.collectAsState()
@@ -50,6 +55,7 @@ fun ImportScreen(
     val pickedFilesState by viewModel.pickedFilesState.collectAsState()
     val importProgress by viewModel.importProgress.collectAsState()
     var showMarkdownImportSheet by remember { mutableStateOf(false) }
+    var showRestoreConfirmation by remember { mutableStateOf(false) }
 
     val hazeState = remember { HazeState() }
     val density = LocalDensity.current
@@ -84,26 +90,8 @@ fun ImportScreen(
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.database),
-                        title = "Notion",
-                        trailingLabel = COMING_SOON_LABEL,
-                        isEnabled = false,
-                        onClick = {}
-                    )
-                    SettingsDivider()
-                    SettingsActionRow(
-                        icon = painterResource(Res.drawable.notes2),
-                        title = "Joplin",
-                        trailingLabel = COMING_SOON_LABEL,
-                        isEnabled = false,
-                        onClick = {}
-                    )
-                    SettingsDivider()
-                    SettingsActionRow(
-                        icon = painterResource(Res.drawable.doc_text),
-                        title = "Evernote",
-                        trailingLabel = COMING_SOON_LABEL,
-                        isEnabled = false,
-                        onClick = {}
+                        title = "Emberr Backup",
+                        onClick = { showRestoreConfirmation = true }
                     )
                 }
             }
@@ -117,7 +105,7 @@ fun ImportScreen(
                 .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = "Import Notes",
+                title = "Import",
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 onBackClick = onNavigateBack
@@ -140,5 +128,43 @@ fun ImportScreen(
                 viewModel.closeMarkdownImport()
             }
         )
+    }
+
+    if (showRestoreConfirmation) {
+        EmberrAlertDialog(
+            onDismissRequest = { showRestoreConfirmation = false },
+            title = "Replace Everything?"
+        ) {
+            Text(
+                text = "Restoring replaces everything on this device with the backup. This can't be undone. " +
+                        "Your other synced devices aren't changed. When you sync, anything newer on them " +
+                        "will come back to this device.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+            )
+            Spacer(Modifier.height(20.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                EmberrButtonSecondary(
+                    text = "Cancel",
+                    onClick = { showRestoreConfirmation = false },
+                    modifier = Modifier.weight(1f)
+                )
+                EmberrButtonPrimary(
+                    text = "Choose Backup",
+                    onClick = {
+                        showRestoreConfirmation = false
+                        onImportBackupClick()
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            EmberrButtonPrimary(
+                text = "Restore Everywhere (Coming Soon)",
+                onClick = {},
+                enabled = false,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }

@@ -869,7 +869,6 @@ fun EmberrApp(
                             com.emberr.presentation.settings.SettingsScreen(
                                 onNavigateBack = leaveSettings,
                                 onExportReady = onExportBackup,
-                                onImportClick = onImportBackupClick,
                                 onRequestBackupFolder = onRequestBackupFolder,
                                 onNavigateToSelfHostSetup = { navController.navigate(Screen.SelfHostSetup.route) },
                                 onNavigateToAbout = { navController.navigate(Screen.About.route) },
@@ -937,7 +936,8 @@ fun EmberrApp(
                             }
                         ) {
                             com.emberr.presentation.settings.importer.ImportScreen(
-                                onNavigateBack = { navController.popBackStack() }
+                                onNavigateBack = { navController.popBackStack() },
+                                onImportBackupClick = onImportBackupClick
                             )
                         }
 

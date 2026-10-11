@@ -1567,7 +1567,6 @@ fun DesktopMainScreen(
                         SettingsScreen(
                             onNavigateBack = closeDetailPane,
                             onExportReady = onExportBackup,
-                            onImportClick = onImportBackupClick,
                             onNavigateToSelfHostSetup = { detail = DetailPane.SelfHostSetup },
                             onNavigateToAbout = { detail = DetailPane.About },
                             onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
@@ -1591,7 +1590,10 @@ fun DesktopMainScreen(
                 }
                 DetailPane.ImportNotes -> key("import_notes") {
                     Box(Modifier.fillMaxSize()) {
-                        ImportScreen(onNavigateBack = { detail = DetailPane.Settings })
+                        ImportScreen(
+                            onNavigateBack = { detail = DetailPane.Settings },
+                            onImportBackupClick = onImportBackupClick
+                        )
                     }
                 }
                 DetailPane.OpenSourceLicenses -> key("open_source_licenses") {

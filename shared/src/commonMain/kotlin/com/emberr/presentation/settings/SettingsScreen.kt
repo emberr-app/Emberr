@@ -125,7 +125,6 @@ private class SettingsCategory(
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    onImportClick: () -> Unit = {},
     onExportReady: () -> Unit = {},
     onRequestBackupFolder: () -> Unit = {},
     onNavigateToSelfHostSetup: () -> Unit = {},
@@ -135,8 +134,6 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel(),
     syncViewModel: SyncViewModel = koinViewModel()
 ) {
-    var showImportExportSheet by remember { mutableStateOf(false) }
-
     val isPaired by syncViewModel.isPaired.collectAsState()
     val isSelfHostConnected by syncViewModel.isSelfHostConnected.collectAsState()
     val syncStatus by syncViewModel.syncStatus.collectAsState()
@@ -146,7 +143,6 @@ fun SettingsScreen(
     var activePairingData by remember { mutableStateOf<SyncPairingData?>(null) }
     var showScannerDialog by remember { mutableStateOf(false) }
     var showUnpairConfirmation by remember { mutableStateOf(false) }
-    var showRestoreConfirmation by remember { mutableStateOf(false) }
     var syncPortInput by remember { mutableStateOf(syncViewModel.getSyncPort().toString()) }
 
     val autoBackupEnabled by viewModel.autoBackupEnabled.collectAsState()
@@ -222,7 +218,7 @@ fun SettingsScreen(
                     backupFrequency = backupFrequency,
                     backupTime = backupTime,
                     backupDay = backupDay,
-                    onImportExportClick = { showImportExportSheet = true },
+                    onExportClick = onExportReady,
                     onImportNotesClick = onNavigateToImportNotes,
                     onAutoBackupChange = { isChecked ->
                         when {
@@ -380,48 +376,6 @@ fun SettingsScreen(
                 showBackButton = showBackButton,
                 onBackClick = onNavigateBack
             )
-        }
-
-        if (showImportExportSheet) {
-            EmberrBottomSheet(
-                expanded = true,
-                onDismiss = { showImportExportSheet = false },
-                title = "Import / Export",
-                subtitle = "Backup your data securely to a local file, or restore a previous backup."
-            ) { closeAnd ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        EmberrButtonPrimary(
-                            text = "Export",
-                            onClick = {
-                                showImportExportSheet = false
-                                onExportReady()
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        EmberrButtonSecondary(
-                            text = "Import",
-                            onClick = {
-                                showImportExportSheet = false
-                                showRestoreConfirmation = true
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    EmberrButtonPrimary(
-                        text = "Close",
-                        onClick = { closeAnd { showImportExportSheet = false } },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
         }
     }
 
@@ -777,44 +731,6 @@ fun SettingsScreen(
             }
         }
     }
-
-    if (showRestoreConfirmation) {
-        EmberrAlertDialog(
-            onDismissRequest = { showRestoreConfirmation = false },
-            title = "Replace Everything?"
-        ) {
-            Text(
-                text = "Restoring replaces everything on this device with the backup. This can't be undone. " +
-                        "Your other synced devices aren't changed. When you sync, anything newer on them " +
-                        "will come back to this device.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-            )
-            Spacer(Modifier.height(20.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                EmberrButtonSecondary(
-                    text = "Cancel",
-                    onClick = { showRestoreConfirmation = false },
-                    modifier = Modifier.weight(1f)
-                )
-                EmberrButtonPrimary(
-                    text = "Choose Backup",
-                    onClick = {
-                        showRestoreConfirmation = false
-                        onImportClick()
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            Spacer(Modifier.height(10.dp))
-            EmberrButtonPrimary(
-                text = "Restore Everywhere (Coming Soon)",
-                onClick = {},
-                enabled = false,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
 }
 
 @Composable
@@ -953,7 +869,7 @@ private fun DataSettingsSection(
     backupFrequency: String,
     backupTime: String,
     backupDay: String,
-    onImportExportClick: () -> Unit,
+    onExportClick: () -> Unit,
     onImportNotesClick: () -> Unit,
     onAutoBackupChange: (Boolean) -> Unit,
     onBackupFrequencySelected: (String) -> Unit,
@@ -963,9 +879,15 @@ private fun DataSettingsSection(
 ) {
     SettingsGroup(title = "Data & Storage") {
         SettingsActionRow(
+            icon = painterResource(Res.drawable.download),
+            title = "Import",
+            onClick = onImportNotesClick
+        )
+        SettingsDivider()
+        SettingsActionRow(
             icon = painterResource(Res.drawable.file_down),
-            title = "Import / Export",
-            onClick = onImportExportClick
+            title = "Export Backup",
+            onClick = onExportClick
         )
 
         if (!isDesktopPlatform) {
@@ -1018,14 +940,6 @@ private fun DataSettingsSection(
                 }
             }
         }
-    }
-
-    SettingsGroup(title = "Import") {
-        SettingsActionRow(
-            icon = painterResource(Res.drawable.download),
-            title = "Import Notes",
-            onClick = onImportNotesClick
-        )
     }
 }
 
