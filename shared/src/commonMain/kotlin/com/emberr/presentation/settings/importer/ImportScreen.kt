@@ -48,6 +48,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ImportScreen(
     onNavigateBack: () -> Unit,
     onImportBackupClick: () -> Unit,
+    showTopBar: Boolean = true,
     viewModel: ImportViewModel = koinViewModel()
 ) {
     val spaces by viewModel.spaces.collectAsState()
@@ -86,7 +87,7 @@ fun ImportScreen(
                             showMarkdownImportSheet = true
                         }
                     )
-                    SettingsFootnote(text = "Also works for Obsidian and Bear notes.")
+                    SettingsFootnote(text = "Also works for Obsidian and Bear notes.\nSome Obsidian features may not import fully.")
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.database),
@@ -97,19 +98,21 @@ fun ImportScreen(
             }
         }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .zIndex(10f)
-                .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
-        ) {
-            EmberrTopHeaderBar(
-                title = "Import",
-                hazeState = hazeState,
-                contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                onBackClick = onNavigateBack
-            )
+        if (showTopBar) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .zIndex(10f)
+                    .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
+            ) {
+                EmberrTopHeaderBar(
+                    title = "Import",
+                    hazeState = hazeState,
+                    contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    onBackClick = onNavigateBack
+                )
+            }
         }
     }
 

@@ -83,6 +83,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun SelfHostSetupScreen(
     onNavigateBack: () -> Unit,
+    showTopBar: Boolean = true,
     viewModel: SelfHostSetupViewModel = koinViewModel()
 ) {
     val screenState by viewModel.screenState.collectAsState()
@@ -112,19 +113,21 @@ fun SelfHostSetupScreen(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .zIndex(10f)
-                .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
-        ) {
-            EmberrTopHeaderBar(
-                title = "Self-Host",
-                hazeState = internalHazeState,
-                contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                onBackClick = onNavigateBack
-            )
+        if (showTopBar) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .zIndex(10f)
+                    .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
+            ) {
+                EmberrTopHeaderBar(
+                    title = "Self-Host",
+                    hazeState = internalHazeState,
+                    contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    onBackClick = onNavigateBack
+                )
+            }
         }
     }
 }

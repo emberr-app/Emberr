@@ -47,7 +47,8 @@ private const val AGPL_LICENSE_URL = "https://www.gnu.org/licenses/agpl-3.0.html
 @Composable
 fun AboutScreen(
     onNavigateBack: () -> Unit,
-    onOpenSourceLicensesClick: () -> Unit
+    onOpenSourceLicensesClick: () -> Unit,
+    showTopBar: Boolean = true
 ) {
     val hazeState = remember { HazeState() }
     val density = LocalDensity.current
@@ -104,19 +105,21 @@ fun AboutScreen(
             }
         }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .zIndex(10f)
-                .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
-        ) {
-            EmberrTopHeaderBar(
-                title = "About",
-                hazeState = hazeState,
-                contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                onBackClick = onNavigateBack
-            )
+        if (showTopBar) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .zIndex(10f)
+                    .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
+            ) {
+                EmberrTopHeaderBar(
+                    title = "About",
+                    hazeState = hazeState,
+                    contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    onBackClick = onNavigateBack
+                )
+            }
         }
     }
 }

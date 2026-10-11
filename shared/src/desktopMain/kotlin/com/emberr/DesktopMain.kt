@@ -48,6 +48,7 @@ import com.emberr.domain.util.system.appVersionName
 import com.emberr.presentation.EmberrApp
 import com.emberr.presentation.LocalImagePicker
 import com.emberr.presentation.settings.PlainTextSecretWarningDialog
+import com.emberr.presentation.desktop.DesktopEscapeKeyBus
 import com.emberr.presentation.desktop.DesktopSearchShortcutBus
 import com.emberr.presentation.desktop.DesktopRestartBus
 import com.emberr.presentation.desktop.EmberrSystemTray
@@ -267,6 +268,10 @@ private fun runEmberrDesktopApp() = application {
             } else {
                 false
             }
+        },
+        onKeyEvent = { event ->
+            if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) DesktopEscapeKeyBus.notifyPressed()
+            false
         }
     ) {
         val currentWindow = this.window as Frame

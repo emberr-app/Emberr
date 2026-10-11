@@ -64,7 +64,7 @@ private const val FONT_ID_PREFIX = "font:"
 private val LibraryCardCornerRadius = 18.dp
 
 @Composable
-fun OpenSourceLicensesScreen(onNavigateBack: () -> Unit) {
+fun OpenSourceLicensesScreen(onNavigateBack: () -> Unit, showTopBar: Boolean = true) {
     val hazeState = remember { HazeState() }
     val listState = rememberLazyListState()
     val density = LocalDensity.current
@@ -109,19 +109,21 @@ fun OpenSourceLicensesScreen(onNavigateBack: () -> Unit) {
                 .padding(top = topBarHeightDp, bottom = 8.dp)
         )
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .zIndex(10f)
-                .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
-        ) {
-            EmberrTopHeaderBar(
-                title = "Open-Source Licenses",
-                hazeState = hazeState,
-                contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                onBackClick = onNavigateBack
-            )
+        if (showTopBar) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .zIndex(10f)
+                    .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
+            ) {
+                EmberrTopHeaderBar(
+                    title = "Open-Source Licenses",
+                    hazeState = hazeState,
+                    contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    onBackClick = onNavigateBack
+                )
+            }
         }
     }
 

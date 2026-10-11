@@ -53,10 +53,7 @@ import com.emberr.presentation.LocalCanvasFullScreenOverlay
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.settings.SettingsScreen
-import com.emberr.presentation.settings.about.AboutScreen
-import com.emberr.presentation.settings.importer.ImportScreen
-import com.emberr.presentation.settings.about.OpenSourceLicensesScreen
-import com.emberr.presentation.settings.selfhost.SelfHostSetupScreen
+import com.emberr.presentation.settings.SettingsSubPage
 import com.emberr.presentation.shared.UserSettings
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
@@ -124,6 +121,7 @@ import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isBackPressed
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -176,6 +174,22 @@ sealed interface DetailPane {
     data object Images : DetailPane
     data object Documents : DetailPane
     data object Calendar : DetailPane
+}
+
+private fun DetailPane?.settingsSubPage(): SettingsSubPage? = when (this) {
+    DetailPane.SelfHostSetup -> SettingsSubPage.SELF_HOST
+    DetailPane.ImportNotes -> SettingsSubPage.IMPORT
+    DetailPane.About -> SettingsSubPage.ABOUT
+    DetailPane.OpenSourceLicenses -> SettingsSubPage.OPEN_SOURCE_LICENSES
+    else -> null
+}
+
+private fun SettingsSubPage?.toDetailPane(): DetailPane = when (this) {
+    null -> DetailPane.Settings
+    SettingsSubPage.SELF_HOST -> DetailPane.SelfHostSetup
+    SettingsSubPage.IMPORT -> DetailPane.ImportNotes
+    SettingsSubPage.ABOUT -> DetailPane.About
+    SettingsSubPage.OPEN_SOURCE_LICENSES -> DetailPane.OpenSourceLicenses
 }
 
 private fun DetailPane.encode(): String = when (this) {
@@ -669,6 +683,13 @@ fun DesktopMainScreen(
             if (!isSidebarVisibleNow) onToggleSidebar()
             shouldFocusSearchField = true
         }
+    }
+    fun goBackFromSettingsSubPage() {
+        val openSubPage = detail.settingsSubPage() ?: return
+        detail = openSubPage.parentPage.toDetailPane()
+    }
+    LaunchedEffect(Unit) {
+        DesktopEscapeKeyBus.presses.collect { goBackFromSettingsSubPage() }
     }
 
     // Sync
@@ -1562,43 +1583,30 @@ fun DesktopMainScreen(
                         null -> Box(Modifier.fillMaxSize())
                     }
                 }
-                DetailPane.Settings -> key("settings") {
-                    Box(Modifier.fillMaxSize()) {
+                DetailPane.Settings,
+                DetailPane.SelfHostSetup,
+                DetailPane.About,
+                DetailPane.ImportNotes,
+                DetailPane.OpenSourceLicenses -> key("settings") {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .onPointerEvent(PointerEventType.Press) { event ->
+                                if (event.buttons.isBackPressed) goBackFromSettingsSubPage()
+                            }
+                    ) {
                         SettingsScreen(
                             onNavigateBack = closeDetailPane,
                             onExportReady = onExportBackup,
                             onNavigateToSelfHostSetup = { detail = DetailPane.SelfHostSetup },
                             onNavigateToAbout = { detail = DetailPane.About },
                             onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
+                            desktopSubPage = d.settingsSubPage(),
+                            onDesktopSubPageChange = { page -> detail = page.toDetailPane() },
+                            onImportBackupClick = onImportBackupClick,
                             showBackButton = isSidebarVisible,
                             syncViewModel = syncViewModel
                         )
-                    }
-                }
-                DetailPane.SelfHostSetup -> key("selfhost_setup") {
-                    Box(Modifier.fillMaxSize()) {
-                        SelfHostSetupScreen(onNavigateBack = { detail = DetailPane.Settings })
-                    }
-                }
-                DetailPane.About -> key("about") {
-                    Box(Modifier.fillMaxSize()) {
-                        AboutScreen(
-                            onNavigateBack = { detail = DetailPane.Settings },
-                            onOpenSourceLicensesClick = { detail = DetailPane.OpenSourceLicenses }
-                        )
-                    }
-                }
-                DetailPane.ImportNotes -> key("import_notes") {
-                    Box(Modifier.fillMaxSize()) {
-                        ImportScreen(
-                            onNavigateBack = { detail = DetailPane.Settings },
-                            onImportBackupClick = onImportBackupClick
-                        )
-                    }
-                }
-                DetailPane.OpenSourceLicenses -> key("open_source_licenses") {
-                    Box(Modifier.fillMaxSize()) {
-                        OpenSourceLicensesScreen(onNavigateBack = { detail = DetailPane.About })
                     }
                 }
                 DetailPane.Trash -> key("trash") {
