@@ -8,6 +8,7 @@ import com.emberr.di.sharedModule
 import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.backup.automatic.BackupScheduler
 import com.emberr.domain.backup.manual.resetLanSyncProgressIfPending
+import com.emberr.domain.importer.deleteImportCopiesLeftFromEarlierRuns
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.presentation.shared.FirstContentRenderSignal
@@ -42,6 +43,7 @@ class EmberrApplication : Application() {
             getKoin().get<SharedPreferences>()
             getKoin().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
             getKoin().get<com.emberr.domain.backup.manual.UnfinishedRestoreFinisher>().finishIfNeeded()
+            deleteImportCopiesLeftFromEarlierRuns(this@EmberrApplication)
             isReady = true
             FirstContentRenderSignal.awaitFirstContentOrTimeout()
             getKoin().get<com.emberr.presentation.widget.note.NoteWidgetCoordinator>().start()

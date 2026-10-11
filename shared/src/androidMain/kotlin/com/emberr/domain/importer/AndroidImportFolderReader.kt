@@ -94,6 +94,8 @@ class AndroidImportFolderReader(private val context: Context) : ImportFolderRead
                 ?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
         } catch (_: SecurityException) {
             null
+        } catch (_: IllegalArgumentException) {
+            null
         }
         return name?.takeIf { it.isNotBlank() } ?: FALLBACK_FOLDER_NAME
     }

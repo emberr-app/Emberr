@@ -307,6 +307,7 @@ private fun ChooseFilesBox(
         when (pickedFilesState) {
             PickedFilesState.NothingPicked -> ChooseFilesPrompt()
             PickedFilesState.Reading -> ReadingFilesMessage()
+            PickedFilesState.CouldNotRead -> FadedLine(text = "Couldn't read those files. Tap to choose again.")
             is PickedFilesState.Ready -> PickedFilesSummary(pickedFilesState.summary)
         }
     }

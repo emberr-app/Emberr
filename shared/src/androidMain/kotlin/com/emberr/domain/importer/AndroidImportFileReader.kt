@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -14,6 +13,10 @@ import java.util.UUID
 
 private const val IMPORT_COPIES_FOLDER_NAME = "notes_import"
 private const val FALLBACK_DISPLAY_NAME = "file"
+
+fun deleteImportCopiesLeftFromEarlierRuns(context: Context) {
+    File(context.cacheDir, IMPORT_COPIES_FOLDER_NAME).deleteRecursively()
+}
 
 class AndroidImportFileReader(private val context: Context) : ImportFileReader {
 
@@ -38,9 +41,9 @@ class AndroidImportFileReader(private val context: Context) : ImportFileReader {
                 if (copy == null) collector.skip(displayName) else collector.addPickedFile(displayName, copy)
             }
             collector.finish(pickedNames) { copiesFolder.deleteRecursively() }
-        } catch (cancellation: CancellationException) {
+        } catch (error: Throwable) {
             collector.finish(pickedNames) { copiesFolder.deleteRecursively() }.close()
-            throw cancellation
+            throw error
         }
     }
 
@@ -50,6 +53,8 @@ class AndroidImportFileReader(private val context: Context) : ImportFileReader {
                 if (cursor.moveToFirst()) cursor.getString(0) else null
             }
         } catch (_: SecurityException) {
+            null
+        } catch (_: IllegalArgumentException) {
             null
         }
         return nameFromProvider?.takeIf { it.isNotBlank() }

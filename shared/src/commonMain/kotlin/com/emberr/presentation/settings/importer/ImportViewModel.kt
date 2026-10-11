@@ -11,6 +11,7 @@ import com.emberr.domain.importer.MarkdownNotesImporter
 import com.emberr.domain.importer.PickedImportFiles
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.space.SpaceRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 sealed interface PickedFilesState {
     data object NothingPicked : PickedFilesState
     data object Reading : PickedFilesState
+    data object CouldNotRead : PickedFilesState
     data class Ready(val summary: ImportSummary) : PickedFilesState
 }
 
@@ -69,7 +71,14 @@ class ImportViewModel(
         val thisReadNumber = ++latestReadNumber
         _pickedFilesState.value = PickedFilesState.Reading
         viewModelScope.launch {
-            val pickedFiles = read()
+            val pickedFiles = try {
+                read()
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                if (thisReadNumber == latestReadNumber) _pickedFilesState.value = PickedFilesState.CouldNotRead
+                return@launch
+            }
             if (thisReadNumber != latestReadNumber) {
                 pickedFiles.close()
                 return@launch
