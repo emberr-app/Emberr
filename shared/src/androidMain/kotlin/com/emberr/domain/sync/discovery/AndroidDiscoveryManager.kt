@@ -13,8 +13,9 @@ class AndroidDiscoveryManager(context: Context) : SyncDiscoveryManager {
     override val discoveredDevices = MutableStateFlow<List<DiscoveredDevice>>(emptyList())
 
     private val isDebugBuild = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    private val isBenchmarkBuild = context.packageName.endsWith(".benchmark")
 
-    private val serviceType = discoveryServiceTypeFor(isDebugBuild)
+    private val serviceType = discoveryServiceTypeFor(isDebugBuild || isBenchmarkBuild)
 
     private var discoveryListener: NsdManager.DiscoveryListener? = null
 
