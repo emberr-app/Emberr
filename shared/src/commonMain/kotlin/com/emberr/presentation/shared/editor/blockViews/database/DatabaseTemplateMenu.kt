@@ -33,6 +33,7 @@ import emberr.shared.generated.resources.pen
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.star
+import emberr.shared.generated.resources.star_outline
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -156,9 +157,8 @@ private fun DatabaseTemplateOption(
     ) { closeLayerAnd ->
         DatabaseMenuOption(
             label = if (isDefault) "Default for new rows" else "Set as default",
-            isSelected = isDefault,
-            icon = { DatabaseOptionIcon(Res.drawable.star) },
-            onClick = { closeLayerAnd(onSetDefault) }
+            icon = { DatabaseOptionIcon(if (isDefault) Res.drawable.star else Res.drawable.star_outline) },
+            onClick = onSetDefault
         )
         if (onRepeatChange != null) {
             DatabaseMenuLayer(
