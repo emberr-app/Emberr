@@ -106,7 +106,7 @@ import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-internal const val MinimumColumnWidth = 80
+internal const val MinimumColumnWidth = 40
 internal const val MaximumColumnWidth = 600
 internal const val ColumnWidthStep = 20
 internal val DatabaseCellMinHeight = 44.dp
