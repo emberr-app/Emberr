@@ -294,6 +294,7 @@ fun FullScreenImageScreen(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .graphicsLayer { alpha = currentExpansion() },
+            topEdgeFadeAlpha = 0f,
             hazeState = hazeState,
             applyStatusBarPadding = true,
             contentPadding = topHeaderBarPadding(horizontal = 18.dp),
