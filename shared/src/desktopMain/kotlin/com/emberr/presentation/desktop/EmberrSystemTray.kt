@@ -1,10 +1,13 @@
 package com.emberr.presentation.desktop
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import com.emberr.presentation.desktop.tray.StatusNotifierTray
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.withContext
 import java.awt.MenuItem
 import java.awt.PopupMenu
 import java.awt.SystemTray
@@ -50,19 +53,21 @@ fun EmberrSystemTray(
     val latestOnIconClick by rememberUpdatedState(onIconClick)
     val latestActions by rememberUpdatedState(actions)
 
-    DisposableEffect(iconResourcePath, tooltip) {
+    LaunchedEffect(iconResourcePath, tooltip) {
         val actionsOnUiThread = {
             latestActions.map { action ->
                 TrayMenuAction(action.label) { onUiThread { action.onSelected() } }
             }
         }
 
-        val desktopShellTray = StatusNotifierTray.start(
-            iconResourcePath = iconResourcePath,
-            tooltip = tooltip,
-            onActivate = { onUiThread { latestOnIconClick() } },
-            currentActions = actionsOnUiThread
-        )
+        val desktopShellTray = withContext(Dispatchers.IO) {
+            StatusNotifierTray.start(
+                iconResourcePath = iconResourcePath,
+                tooltip = tooltip,
+                onActivate = { onUiThread { latestOnIconClick() } },
+                currentActions = actionsOnUiThread
+            )
+        }
 
         val systemDrawnTray = if (desktopShellTray == null) {
             startSystemDrawnTray(
@@ -75,7 +80,9 @@ fun EmberrSystemTray(
             null
         }
 
-        onDispose {
+        try {
+            awaitCancellation()
+        } finally {
             desktopShellTray?.stop()
             systemDrawnTray?.let { icon ->
                 runCatching { SystemTray.getSystemTray().remove(icon) }
