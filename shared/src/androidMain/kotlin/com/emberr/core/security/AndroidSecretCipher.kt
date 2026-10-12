@@ -9,11 +9,9 @@ import com.google.crypto.tink.integration.android.AndroidKeysetManager
 
 class AndroidSecretCipher(applicationContext: Context) {
 
-    private val aead: Aead
-
-    init {
+    private val aead: Aead by lazy {
         AeadConfig.register()
-        aead = AndroidKeysetManager.Builder()
+        AndroidKeysetManager.Builder()
             .withSharedPref(applicationContext, KEYSET_NAME, KEYSET_STORAGE_FILE_NAME)
             .withKeyTemplate(KeyTemplates.get(AES_256_GCM_TEMPLATE_NAME))
             .withMasterKeyUri(ANDROID_KEYSTORE_MASTER_KEY_URI)

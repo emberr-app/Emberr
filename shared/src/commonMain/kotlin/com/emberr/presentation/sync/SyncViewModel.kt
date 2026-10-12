@@ -213,7 +213,7 @@ class SyncViewModel(
 
     fun triggerAutoSync(discoveryManager: com.emberr.domain.sync.discovery.SyncDiscoveryManager) {
         viewModelScope.launch {
-            val currentAuth = settingsManager.getSyncAuthToken()
+            val currentAuth = withContext(Dispatchers.IO) { settingsManager.getSyncAuthToken() }
             if (currentAuth.isBlank()) return@launch
 
             discoveryManager.startScanning()

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
@@ -78,10 +80,15 @@ actual class SelfHostSyncScheduler(
 
     private val appLifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
-            if (!selfHostConnectionState.isConnected.value) return
-            SelfHostSyncLog.d("Scheduler: app foregrounded, starting poller and running a baseline sync shortly")
-            foregroundSyncPoller.start()
             schedulerScope.launch {
+                if (!selfHostConnectionState.isConnected.value) return@launch
+                val isStillInForeground = withContext(Dispatchers.Main) {
+                    val isInForeground = owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                    if (isInForeground) foregroundSyncPoller.start()
+                    isInForeground
+                }
+                if (!isStillInForeground) return@launch
+                SelfHostSyncLog.d("Scheduler: app foregrounded, starting poller and running a baseline sync shortly")
                 delay(WAIT_BEFORE_BASELINE_SYNC_AFTER_OPENING)
                 selfHostSyncEngine.runBaselineSync()
             }
