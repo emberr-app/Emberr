@@ -43,13 +43,11 @@ import com.emberr.presentation.properties.PropertiesScreen
 import dev.chrisbanes.haze.HazeState
 import com.emberr.presentation.splash.LoadingScreen
 import com.emberr.domain.model.NoteBlock
-import com.emberr.domain.repository.EmojiRepository
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.presentation.shared.canvas.CanvasScreen
 import com.emberr.domain.util.system.AppPermission
 import com.emberr.domain.util.system.rememberAppPermissionCoordinator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -60,8 +58,6 @@ import com.emberr.presentation.search.SearchViewModel
 import com.emberr.presentation.share.ShareReceiverSheet
 import com.emberr.presentation.share.ShareViewModel
 import dev.chrisbanes.haze.hazeSource
-import emberr.shared.generated.resources.Res.readBytes
-import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 private val DESKTOP_SIDEBAR_WIDTH = 340.dp
@@ -91,17 +87,6 @@ fun EmberrApp(
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     onExitApp: () -> Unit = {}
 ) {
-
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            try {
-                val bytes = readBytes("files/data-by-group.json")
-                EmojiRepository.initialize(bytes.decodeToString())
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 
     val navController = rememberNavController()
     val homeGridState = remember { LazyStaggeredGridState() }

@@ -1057,6 +1057,10 @@ fun CategorizedEmojiPicker(
     onEmojiSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    LaunchedEffect(Unit) {
+        EmojiRepository.loadIfNeeded()
+    }
+
     if (!EmojiRepository.isLoaded) {
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(

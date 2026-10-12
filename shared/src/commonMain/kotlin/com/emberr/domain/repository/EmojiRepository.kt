@@ -3,6 +3,7 @@ package com.emberr.domain.repository
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import emberr.shared.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -40,13 +41,16 @@ object EmojiRepository {
     var categoryEmojiLists by mutableStateOf<List<List<String>>>(emptyList())
         private set
 
+    private const val EMOJI_FILE_PATH = "files/data-by-group.json"
+
     // Ignore extra fields in the JSON to prevent crashes
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun initialize(jsonString: String) {
+    suspend fun loadIfNeeded() {
         if (isLoaded) return
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             try {
+                val jsonString = Res.readBytes(EMOJI_FILE_PATH).decodeToString()
                 val data = json.decodeFromString<List<EmojiCategoryDto>>(jsonString)
 
                 categories = data.map { it.name }
