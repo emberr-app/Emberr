@@ -24,6 +24,7 @@ import com.emberr.presentation.shared.editor.ActiveEditorRegistry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -78,9 +79,10 @@ actual class SelfHostSyncScheduler(
     private val appLifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
             if (!selfHostConnectionState.isConnected.value) return
-            SelfHostSyncLog.d("Scheduler: app foregrounded, starting poller and running an immediate baseline sync")
+            SelfHostSyncLog.d("Scheduler: app foregrounded, starting poller and running a baseline sync shortly")
             foregroundSyncPoller.start()
             schedulerScope.launch {
+                delay(WAIT_BEFORE_BASELINE_SYNC_AFTER_OPENING)
                 selfHostSyncEngine.runBaselineSync()
             }
         }
@@ -250,5 +252,6 @@ actual class SelfHostSyncScheduler(
         const val TAG_TEXT_SYNC = "EmberrSelfHostTextSync"
         const val TAG_MEDIA_SYNC = "EmberrSelfHostMediaSync"
         const val FLUSH_BEFORE_BACKGROUND_TIMEOUT_MS = 3000L
+        val WAIT_BEFORE_BASELINE_SYNC_AFTER_OPENING = 5.seconds
     }
 }
