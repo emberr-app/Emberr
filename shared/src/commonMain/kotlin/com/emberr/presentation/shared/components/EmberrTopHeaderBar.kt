@@ -181,22 +181,29 @@ fun EmberrTopHeaderBar(
                 leadingContent()
 
                 if (titlePlacement == TopHeaderTitlePlacement.Start) {
-                    TopHeaderBarTitle(
-                        text = title,
-                        style = titleStyle,
-                        color = titleColor,
-                        fontWeight = titleFontWeight,
-                        visibility = titleVisibility,
-                        padding = titlePadding,
-                        leadingIcon = titleLeadingIcon,
-                        trailingIcon = titleTrailingIcon,
-                        onClick = onTitleClick
-                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 16.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        TopHeaderBarTitle(
+                            text = title,
+                            style = titleStyle,
+                            color = titleColor,
+                            fontWeight = titleFontWeight,
+                            visibility = titleVisibility,
+                            padding = titlePadding,
+                            leadingIcon = titleLeadingIcon,
+                            trailingIcon = titleTrailingIcon,
+                            onClick = onTitleClick
+                        )
+                    }
                 }
 
                 if (centerContent != null) {
                     centerContent()
-                } else {
+                } else if (titlePlacement != TopHeaderTitlePlacement.Start) {
                     Spacer(Modifier.weight(1f))
                 }
 
@@ -350,6 +357,7 @@ private fun TopHeaderBarTitle(
             style = style,
             fontWeight = fontWeight,
             color = color,
+            modifier = Modifier.weight(1f, fill = false),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
