@@ -1069,6 +1069,7 @@ fun EmberrApp(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
+                                .hazeSource(state = hazeState, zIndex = 1f)
                                 .background(MaterialTheme.colorScheme.background)
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
