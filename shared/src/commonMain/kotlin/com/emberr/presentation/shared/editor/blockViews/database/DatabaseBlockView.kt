@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.shape.CircleShape
@@ -562,15 +563,18 @@ private fun DatabaseBlockContent(
                                 tableScrollState = scrollState,
                                 showsSelectionColumn = rowSelection.isSelecting
                             )
-
-                            DatabaseNewRowLine(
-                                showsNewButton = !blocksEdits,
-                                rowCountCaption = rowCountCaption,
-                                onNewRow = { editor.addRow(block.id) },
-                                modifier = Modifier.width(tableWidth)
-                            )
                         }
                     }
+
+                    DatabaseNewRowLine(
+                        showsNewButton = !blocksEdits,
+                        rowCountCaption = rowCountCaption,
+                        onNewRow = { editor.addRow(block.id) },
+                        modifier = Modifier
+                            .padding(horizontal = DatabaseSidePadding)
+                            .widthIn(max = tableWidth)
+                            .fillMaxWidth()
+                    )
 
                     EmberrHorizontalScrollbar(
                         scrollState = scrollState,
