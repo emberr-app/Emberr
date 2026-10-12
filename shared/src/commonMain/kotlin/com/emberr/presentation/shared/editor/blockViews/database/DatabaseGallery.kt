@@ -301,9 +301,8 @@ internal fun DatabaseRowCard(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val icon = row.icon
-                if (view.showsIcon && icon != null) {
-                    Text(text = icon, style = MaterialTheme.typography.bodyLarge)
+                if (view.showsIcon) {
+                    DatabaseRowIcon(icon = row.icon, emojiStyle = MaterialTheme.typography.bodyLarge)
                     Spacer(modifier = Modifier.width(6.dp))
                 }
                 Text(

@@ -45,6 +45,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
@@ -71,6 +72,7 @@ import com.emberr.ui.theme.tableGridLineColor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.ellipsis
+import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.square_arrow_out_up_right
 import emberr.shared.generated.resources.square_check
 import emberr.shared.generated.resources.trash
@@ -144,7 +146,8 @@ internal fun DatabaseRowItem(
                         key(historyStepsApplied) {
                             DatabaseTitleCell(
                                 title = row.title,
-                                icon = row.icon.takeIf { showsIcon },
+                                showsIcon = showsIcon,
+                                icon = row.icon,
                                 width = columnWidth(column),
                                 textColor = databaseTextColorNamed(cellStyle.textColorName),
                                 alignment = cellStyle.alignment,
@@ -188,8 +191,23 @@ internal fun DatabaseRowItem(
 }
 
 @Composable
+internal fun DatabaseRowIcon(icon: String?, emojiStyle: TextStyle, modifier: Modifier = Modifier) {
+    if (icon != null) {
+        Text(text = icon, style = emojiStyle, modifier = modifier)
+    } else {
+        Icon(
+            painter = painterResource(Res.drawable.file_text),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = modifier.size(16.dp)
+        )
+    }
+}
+
+@Composable
 private fun DatabaseTitleCell(
     title: String,
+    showsIcon: Boolean,
     icon: String?,
     width: Int,
     textColor: Color?,
@@ -244,8 +262,8 @@ private fun DatabaseTitleCell(
             modifier = Modifier.fillMaxWidth().padding(start = DatabaseCellHorizontalPadding, end = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (icon != null) {
-                Text(text = icon, style = textStyle, modifier = Modifier.padding(end = 6.dp))
+            if (showsIcon) {
+                DatabaseRowIcon(icon = icon, emojiStyle = textStyle, modifier = Modifier.padding(end = 6.dp))
             }
             Box(modifier = Modifier.weight(1f)) {
                 BasicTextField(
