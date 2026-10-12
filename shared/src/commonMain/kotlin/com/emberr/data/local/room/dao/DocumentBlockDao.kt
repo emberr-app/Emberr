@@ -16,10 +16,10 @@ interface DocumentBlockDao {
     @Query("DELETE FROM document_blocks WHERE noteId = :noteId")
     suspend fun deleteByNoteId(noteId: String)
 
-    @Query("SELECT * FROM document_blocks WHERE noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId) ORDER BY noteCreatedAt DESC")
+    @Query("SELECT * FROM document_blocks WHERE noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId AND trashedAt IS NULL) ORDER BY noteCreatedAt DESC")
     fun getAllDocumentsFlow(spaceId: String): Flow<List<DocumentBlockEntity>>
 
-    @Query("SELECT COUNT(*) FROM document_blocks WHERE noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId)")
+    @Query("SELECT COUNT(*) FROM document_blocks WHERE noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId AND trashedAt IS NULL)")
     fun getDocumentsCount(spaceId: String): Flow<Int>
 
     @Query("SELECT * FROM document_blocks ORDER BY noteCreatedAt DESC")

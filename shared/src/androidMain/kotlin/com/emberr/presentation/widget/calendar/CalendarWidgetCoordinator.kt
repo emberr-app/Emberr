@@ -24,7 +24,7 @@ class CalendarWidgetCoordinator(
     fun start() {
         coordinatorScope.launch {
             try {
-                calendarTaskDao.getAllTasksAcrossSpacesFlow()
+                calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow()
                     .distinctUntilChanged()
                     .debounce(calendarSettleDelayMillis)
                     .collect { refreshCalendarWidgets(context) }

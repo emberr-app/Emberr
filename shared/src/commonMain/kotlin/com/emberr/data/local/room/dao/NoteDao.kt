@@ -141,7 +141,7 @@ interface NoteDao {
     @Query("UPDATE notes_metadata SET updatedAt = :updatedAt WHERE noteId = :noteId")
     suspend fun updateNoteUpdatedAt(noteId: String, updatedAt: Long)
 
-    @Query("SELECT COUNT(*) FROM calendar_tasks WHERE spaceId = :spaceId AND isChecked = 0")
+    @Query("SELECT COUNT(*) FROM calendar_tasks WHERE spaceId = :spaceId AND isChecked = 0 AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     fun getIncompleteTasksCount(spaceId: String): Flow<Int>
 
     @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isTemplate = 0 AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND databaseId IS NULL")

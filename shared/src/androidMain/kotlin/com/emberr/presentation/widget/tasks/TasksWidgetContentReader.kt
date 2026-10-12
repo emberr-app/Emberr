@@ -30,7 +30,7 @@ class TasksWidgetContentReader(
     private val noteDao: NoteDao
 ) {
     fun observeTasks(): Flow<List<CalendarTaskEntity>> =
-        calendarTaskDao.getAllTasksAcrossSpacesFlow()
+        calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow()
             .flowOn(Dispatchers.IO)
             .catch { cause -> WidgetLog.e("Stopped observing the task list", cause) }
 

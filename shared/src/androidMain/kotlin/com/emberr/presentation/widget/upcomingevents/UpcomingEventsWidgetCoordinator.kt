@@ -24,7 +24,7 @@ class UpcomingEventsWidgetCoordinator(
     fun start() {
         coordinatorScope.launch {
             try {
-                calendarTaskDao.getAllTasksAcrossSpacesFlow()
+                calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow()
                     .distinctUntilChanged()
                     .debounce(upcomingEventsSettleDelayMillis)
                     .collect { refreshUpcomingEventsWidgets(context) }

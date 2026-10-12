@@ -16,10 +16,10 @@ interface BookmarkBlockDao {
     @Query("DELETE FROM bookmark_blocks WHERE noteId = :noteId")
     suspend fun deleteByNoteId(noteId: String)
 
-    @Query("SELECT * FROM bookmark_blocks WHERE noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId) ORDER BY noteUpdatedAt DESC")
+    @Query("SELECT * FROM bookmark_blocks WHERE noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId AND trashedAt IS NULL) ORDER BY noteUpdatedAt DESC")
     fun getAllBookmarksFlow(spaceId: String): Flow<List<BookmarkBlockEntity>>
 
-    @Query("SELECT COUNT(*) FROM bookmark_blocks WHERE noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId)")
+    @Query("SELECT COUNT(*) FROM bookmark_blocks WHERE noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId AND trashedAt IS NULL)")
     fun getBookmarksCount(spaceId: String): Flow<Int>
 
     @Query("SELECT * FROM bookmark_blocks ORDER BY noteUpdatedAt DESC")

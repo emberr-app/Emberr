@@ -18,14 +18,14 @@ interface CalendarTaskDao {
     @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND targetDate LIKE :yearMonth || '%'")
     fun getTasksForMonth(spaceId: String, yearMonth: String): Flow<List<CalendarTaskEntity>>
 
-    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND targetDate LIKE :yearMonth || '%'")
+    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND targetDate LIKE :yearMonth || '%' AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     suspend fun getTasksInMonth(spaceId: String, yearMonth: String): List<CalendarTaskEntity>
 
     // Precise query for the Bottom Sheet when a user clicks a specific day.
     @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND targetDate = :dateString")
     fun getTasksForDate(spaceId: String, dateString: String): Flow<List<CalendarTaskEntity>>
 
-    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND targetDate = :dateString")
+    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND targetDate = :dateString AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     suspend fun getTasksOnDate(spaceId: String, dateString: String): List<CalendarTaskEntity>
 
     @Query("SELECT * FROM calendar_tasks WHERE blockId = :blockId LIMIT 1")
@@ -46,17 +46,20 @@ interface CalendarTaskDao {
     @Query("DELETE FROM calendar_tasks WHERE blockId = :blockId")
     suspend fun deleteTaskById(blockId: String)
 
-    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND targetDate >= :fromDate AND isChecked = 0 ORDER BY targetDate ASC")
+    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND targetDate >= :fromDate AND isChecked = 0 AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL) ORDER BY targetDate ASC")
     suspend fun getUpcomingTasks(spaceId: String, fromDate: String): List<CalendarTaskEntity>
 
-    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId")
+    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     fun getAllTasksFlow(spaceId: String): Flow<List<CalendarTaskEntity>>
 
-    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId")
+    @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     suspend fun getAllTasks(spaceId: String): List<CalendarTaskEntity>
 
     @Query("SELECT * FROM calendar_tasks")
     fun getAllTasksAcrossSpacesFlow(): Flow<List<CalendarTaskEntity>>
+
+    @Query("SELECT * FROM calendar_tasks WHERE noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
+    fun getTasksOutsideTrashAcrossSpacesFlow(): Flow<List<CalendarTaskEntity>>
 
     @Query("SELECT * FROM calendar_tasks")
     suspend fun getAllTasksAcrossSpaces(): List<CalendarTaskEntity>
