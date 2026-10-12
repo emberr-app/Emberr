@@ -156,7 +156,7 @@ interface NoteRepository {
     suspend fun applyRemotePropertyTag(tag: PropertyTagEntity)
 
     fun getCustomProperties(): Flow<List<CustomPropertyEntity>>
-    suspend fun createCustomProperty(name: String, valueType: PropertyValueType)
+    suspend fun createCustomProperty(name: String, valueType: PropertyValueType): CustomPropertyEntity
     suspend fun findCustomPropertyInSpace(spaceId: String, name: String): CustomPropertyEntity?
     suspend fun createCustomPropertyInSpace(spaceId: String, name: String, valueType: PropertyValueType): CustomPropertyEntity
     suspend fun renameCustomProperty(propertyId: String, newName: String)

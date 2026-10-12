@@ -8,17 +8,22 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -64,6 +69,10 @@ import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
+import com.emberr.presentation.shared.components.EmberrBottomSheetOption
+import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
+import com.emberr.presentation.shared.components.EmberrSwitch
+import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.editor.rememberCustomProperties
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
 import com.emberr.presentation.shared.editor.components.DesktopCursor
@@ -442,6 +451,9 @@ private fun DatabaseWidthStepButton(icon: DrawableResource, contentDescription: 
     }
 }
 
+private val PropertyChoicesMaxHeight = 420.dp
+private val NewPropertyValueTypesMaxHeight = 280.dp
+
 @Composable
 private fun DatabaseAddColumnButton(
     block: DatabaseBlock,
@@ -490,94 +502,122 @@ internal fun DatabaseAddColumnChoices(
     closePickerAnd: (() -> Unit) -> Unit,
     beforeColumn: DatabaseColumnTarget? = null
 ) {
-    val builtInPropertiesToAdd = block.builtInPropertiesNotYetAdded().sortedBy { it.label.lowercase() }
-    builtInPropertiesToAdd.forEach { propertyType ->
-        DatabaseMenuOption(
-            label = propertyType.label,
-            icon = { DatabaseOptionIcon(propertyType.iconResource()) },
-            onClick = { closePickerAnd { editor.addColumn(block.id, DatabaseColumnTarget.Property(propertyType), beforeColumn = beforeColumn) } }
+    var searchText by remember { mutableStateOf("") }
+    fun matchesSearch(name: String) = name.contains(searchText.trim(), ignoreCase = true)
+
+    DatabaseMenuContent {
+        EmberrTextField(
+            value = searchText,
+            onValueChange = { searchText = it },
+            placeholder = "Search properties",
+            modifier = Modifier.doesNotWidenMenu().fillMaxWidth().padding(vertical = 6.dp)
         )
     }
 
-    val hiddenProperties = block.customPropertiesNotShown()
-    if (hiddenProperties.isNotEmpty()) {
-        if (builtInPropertiesToAdd.isNotEmpty()) {
-            DatabaseMenuSectionDivider()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (isDesktopPlatform) {
+                    Modifier.heightIn(max = PropertyChoicesMaxHeight).verticalScroll(rememberScrollState())
+                } else {
+                    Modifier
+                }
+            )
+    ) {
+        val builtInPropertiesToAdd = block.builtInPropertiesNotYetAdded()
+            .filter { matchesSearch(it.label) }
+            .sortedBy { it.label.lowercase() }
+        builtInPropertiesToAdd.forEach { propertyType ->
+            DatabaseMenuOption(
+                label = propertyType.label,
+                icon = { DatabaseOptionIcon(propertyType.iconResource()) },
+                onClick = { closePickerAnd { editor.addColumn(block.id, DatabaseColumnTarget.Property(propertyType), beforeColumn = beforeColumn) } }
+            )
         }
-        DatabaseMenuSectionLabel(text = "In this database")
-        hiddenProperties.forEach { property ->
-            key(property.id) {
-                DatabaseMenuLayer(
-                    title = "Edit property",
-                    showsCloseButton = false,
-                    anchor = { openLayer ->
-                        DatabaseMenuOption(
-                            label = property.name,
-                            icon = { DatabaseOptionIcon(property.valueType.iconResource()) },
-                            trailing = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.pen),
-                                    contentDescription = "Edit ${property.name}",
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable(onClick = openLayer)
-                                        .padding(4.dp)
-                                        .size(16.dp)
-                                )
-                            },
-                            onClick = {
-                                closePickerAnd { editor.addColumn(block.id, DatabaseColumnTarget.CustomProperty(property.id), beforeColumn = beforeColumn) }
-                            }
+
+        val hiddenProperties = block.customPropertiesNotShown().filter { matchesSearch(it.name) }
+        if (hiddenProperties.isNotEmpty()) {
+            if (builtInPropertiesToAdd.isNotEmpty()) {
+                DatabaseMenuSectionDivider()
+            }
+            DatabaseMenuSectionLabel(text = "In this database")
+            hiddenProperties.forEach { property ->
+                key(property.id) {
+                    DatabaseMenuLayer(
+                        title = "Edit property",
+                        showsCloseButton = false,
+                        anchor = { openLayer ->
+                            DatabaseMenuOption(
+                                label = property.name,
+                                icon = { DatabaseOptionIcon(property.valueType.iconResource()) },
+                                trailing = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.pen),
+                                        contentDescription = "Edit ${property.name}",
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .clickable(onClick = openLayer)
+                                            .padding(4.dp)
+                                            .size(16.dp)
+                                    )
+                                },
+                                onClick = {
+                                    closePickerAnd { editor.addColumn(block.id, DatabaseColumnTarget.CustomProperty(property.id), beforeColumn = beforeColumn) }
+                                }
+                            )
+                        }
+                    ) { closeLayerAnd ->
+                        DatabaseEditPropertyPage(
+                            block = block,
+                            property = property,
+                            rowCount = rowCount,
+                            editor = editor,
+                            onCancel = { closeLayerAnd { } },
+                            closeAnd = closeLayerAnd
                         )
                     }
-                ) { closeLayerAnd ->
-                    DatabaseEditPropertyPage(
-                        block = block,
-                        property = property,
-                        rowCount = rowCount,
-                        editor = editor,
-                        onCancel = { closeLayerAnd { } },
-                        closeAnd = closeLayerAnd
+                }
+            }
+        }
+
+        val sharedPropertiesToAdd = block.sharedPropertiesNotYetAdded(rememberSharedProperties()).filter { matchesSearch(it.name) }
+        if (sharedPropertiesToAdd.isNotEmpty()) {
+            if (builtInPropertiesToAdd.isNotEmpty() || hiddenProperties.isNotEmpty()) {
+                DatabaseMenuSectionDivider()
+            }
+            DatabaseMenuSectionLabel(text = "From Properties")
+            sharedPropertiesToAdd.forEach { property ->
+                key(property.id) {
+                    DatabaseMenuOption(
+                        label = property.name,
+                        icon = { DatabaseOptionIcon(property.valueType.iconResource()) },
+                        onClick = { closePickerAnd { editor.addSharedProperty(block.id, property, beforeColumn = beforeColumn) } }
                     )
                 }
             }
         }
-    }
 
-    val sharedPropertiesToAdd = block.sharedPropertiesNotYetAdded(rememberSharedProperties())
-    if (sharedPropertiesToAdd.isNotEmpty()) {
-        DatabaseMenuSectionDivider()
-        DatabaseMenuSectionLabel(text = "From Properties")
-        sharedPropertiesToAdd.forEach { property ->
-            key(property.id) {
+        DatabaseMenuLayer(
+            title = "New property",
+            showsCloseButton = false,
+            anchor = { openLayer ->
                 DatabaseMenuOption(
-                    label = property.name,
-                    icon = { DatabaseOptionIcon(property.valueType.iconResource()) },
-                    onClick = { closePickerAnd { editor.addSharedProperty(block.id, property, beforeColumn = beforeColumn) } }
+                    label = "New property",
+                    icon = { DatabaseOptionIcon(Res.drawable.plus) },
+                    onClick = openLayer
                 )
             }
-        }
-    }
-
-    DatabaseMenuLayer(
-        title = "New property",
-        showsCloseButton = false,
-        anchor = { openLayer ->
-            DatabaseMenuOption(
-                label = "New property",
-                icon = { DatabaseOptionIcon(Res.drawable.plus) },
-                onClick = openLayer
+        ) { closeLayerAnd ->
+            DatabaseNewPropertyPage(
+                block = block,
+                editor = editor,
+                onCancel = { closeLayerAnd { } },
+                closeAnd = { action -> closeLayerAnd { closePickerAnd(action) } },
+                beforeColumn = beforeColumn
             )
         }
-    ) { closeLayerAnd ->
-        DatabaseNewPropertyPage(
-            block = block,
-            editor = editor,
-            onCancel = { closeLayerAnd { } },
-            closeAnd = { action -> closeLayerAnd { closePickerAnd(action) } },
-            beforeColumn = beforeColumn
-        )
     }
 }
 
@@ -594,7 +634,11 @@ internal fun DatabaseNewPropertyPage(
     var state by remember {
         mutableStateOf(PropertyEditorState(propertyId = null, originalName = "", name = "", valueType = allowedValueTypes.first()))
     }
-    val isNameTaken = block.isPropertyNameTaken(state.name, ignoringPropertyId = null)
+    var addsToProperties by remember { mutableStateOf(false) }
+    val canAddToProperties = !state.valueType.isOnlyForDatabases
+    val sharedProperties = rememberSharedProperties()
+    val isNameTaken = block.isPropertyNameTaken(state.name, ignoringPropertyId = null) ||
+        (addsToProperties && canAddToProperties && sharedProperties.any { it.name.equals(state.name.trim(), ignoreCase = true) })
 
     DatabaseMenuContent {
         PropertyEditor(
@@ -610,10 +654,39 @@ internal fun DatabaseNewPropertyPage(
                 if (state.name.isNotBlank() && !isNameTaken) {
                     val name = state.name
                     val valueType = state.valueType
-                    closeAnd { editor.createProperty(block.id, name, valueType, viewIdToGroupByIt, beforeColumn) }
+                    val addsItToProperties = addsToProperties && canAddToProperties
+                    closeAnd { editor.createProperty(block.id, name, valueType, viewIdToGroupByIt, beforeColumn, addsItToProperties) }
                 }
             },
-            allowedValueTypes = allowedValueTypes
+            allowedValueTypes = allowedValueTypes,
+            valueTypesMaxHeight = if (isDesktopPlatform) NewPropertyValueTypesMaxHeight else null,
+            extraOptions = {
+                if (canAddToProperties) {
+                    DatabaseAddToPropertiesOption(isOn = addsToProperties, onToggle = { addsToProperties = !addsToProperties })
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun DatabaseAddToPropertiesOption(isOn: Boolean, onToggle: () -> Unit) {
+    val label = "Add to Properties"
+    if (isDesktopPlatform) {
+        EmberrDesktopMenuOption(
+            label = label,
+            onClick = onToggle,
+            trailing = { EmberrSwitch(isOn = isOn) },
+            modifier = Modifier.padding(top = 8.dp),
+            outerHorizontalPadding = 0.dp
+        )
+    } else {
+        EmberrBottomSheetOption(
+            label = label,
+            onClick = onToggle,
+            trailing = { EmberrSwitch(isOn = isOn) },
+            modifier = Modifier.padding(top = 8.dp),
+            outerHorizontalPadding = 0.dp
         )
     }
 }

@@ -591,13 +591,22 @@ class DatabaseBlockEditor(
         name: String,
         valueType: PropertyValueType,
         viewIdToGroupByIt: String? = null,
-        beforeColumn: DatabaseColumnTarget? = null
+        beforeColumn: DatabaseColumnTarget? = null,
+        addsToProperties: Boolean = false
     ) {
         val databaseBlock = host.findDatabaseBlock(blockId) ?: return
         val cleanedName = name.trim()
         if (cleanedName.isEmpty() || databaseBlock.isPropertyNameTaken(cleanedName, ignoringPropertyId = null)) return
-        val property = DatabaseCustomProperty(id = Uuid.random().toString(), name = cleanedName, valueType = valueType)
-        addPropertyColumn(blockId, property, viewIdToGroupByIt, beforeColumn)
+        if (!addsToProperties || valueType.isOnlyForDatabases) {
+            val property = DatabaseCustomProperty(id = Uuid.random().toString(), name = cleanedName, valueType = valueType)
+            addPropertyColumn(blockId, property, viewIdToGroupByIt, beforeColumn)
+            return
+        }
+        writeInOrder {
+            val globalProperty = repository.createCustomProperty(cleanedName, valueType)
+            val property = DatabaseCustomProperty(id = globalProperty.propertyId, name = globalProperty.name, valueType = globalProperty.valueType)
+            addPropertyColumn(blockId, property, viewIdToGroupByIt, beforeColumn)
+        }
     }
 
     fun addSharedProperty(

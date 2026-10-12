@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.model.PropertyType
@@ -314,7 +316,9 @@ internal fun PropertyEditor(
     onDeleteConfirm: () -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
-    allowedValueTypes: List<PropertyValueType> = PropertyValueType.entries.filterNot { it.isOnlyForDatabases }
+    allowedValueTypes: List<PropertyValueType> = PropertyValueType.entries.filterNot { it.isOnlyForDatabases },
+    valueTypesMaxHeight: Dp? = null,
+    extraOptions: @Composable () -> Unit = {}
 ) {
     val isNew = state.propertyId == null
 
@@ -364,32 +368,40 @@ internal fun PropertyEditor(
                 modifier = Modifier.padding(start = 4.dp, top = 14.dp, bottom = 6.dp)
             )
             if (isNew) {
-                allowedValueTypes.forEach { valueType ->
-                    val isSelected = valueType == state.valueType
-                    val valueTypeIcon = @Composable {
-                        Icon(
-                            painter = painterResource(valueType.iconResource()),
-                            contentDescription = null,
-                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    if (isDesktopPlatform) {
-                        EmberrDesktopMenuOption(
-                            label = valueType.label,
-                            isSelected = isSelected,
-                            onClick = { onValueTypeChange(valueType) },
-                            icon = valueTypeIcon,
-                            outerHorizontalPadding = 0.dp
-                        )
+                Column(
+                    modifier = if (valueTypesMaxHeight == null) {
+                        Modifier
                     } else {
-                        EmberrBottomSheetOption(
-                            label = valueType.label,
-                            isSelected = isSelected,
-                            onClick = { onValueTypeChange(valueType) },
-                            icon = valueTypeIcon,
-                            outerHorizontalPadding = 0.dp
-                        )
+                        Modifier.heightIn(max = valueTypesMaxHeight).verticalScroll(rememberScrollState())
+                    }
+                ) {
+                    allowedValueTypes.forEach { valueType ->
+                        val isSelected = valueType == state.valueType
+                        val valueTypeIcon = @Composable {
+                            Icon(
+                                painter = painterResource(valueType.iconResource()),
+                                contentDescription = null,
+                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        if (isDesktopPlatform) {
+                            EmberrDesktopMenuOption(
+                                label = valueType.label,
+                                isSelected = isSelected,
+                                onClick = { onValueTypeChange(valueType) },
+                                icon = valueTypeIcon,
+                                outerHorizontalPadding = 0.dp
+                            )
+                        } else {
+                            EmberrBottomSheetOption(
+                                label = valueType.label,
+                                isSelected = isSelected,
+                                onClick = { onValueTypeChange(valueType) },
+                                icon = valueTypeIcon,
+                                outerHorizontalPadding = 0.dp
+                            )
+                        }
                     }
                 }
             } else {
@@ -433,6 +445,8 @@ internal fun PropertyEditor(
                     )
                 }
             }
+
+            extraOptions()
 
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),

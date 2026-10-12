@@ -1182,21 +1182,8 @@ class NoteRepositoryImpl(
     override fun getCustomProperties(): Flow<List<CustomPropertyEntity>> =
         inActiveSpace { customPropertyDao.getAllProperties(it) }
 
-    override suspend fun createCustomProperty(name: String, valueType: PropertyValueType) =
-        withContext(Dispatchers.IO) {
-            val now = System.currentTimeMillis()
-            customPropertyDao.insertOrUpdateProperty(
-                CustomPropertyEntity(
-                    propertyId = UUID.randomUUID().toString(),
-                    name = name,
-                    valueType = valueType,
-                    createdAt = now,
-                    updatedAt = now,
-                    spaceId = activeSpaceId()
-                )
-            )
-            AutoSyncTrigger.requestSync()
-        }
+    override suspend fun createCustomProperty(name: String, valueType: PropertyValueType): CustomPropertyEntity =
+        createCustomPropertyInSpace(activeSpaceId(), name, valueType)
 
     override suspend fun findCustomPropertyInSpace(spaceId: String, name: String): CustomPropertyEntity? =
         withContext(Dispatchers.IO) {
