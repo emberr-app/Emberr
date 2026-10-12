@@ -28,15 +28,24 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
     private var textScope: CoroutineScope? = null
     private var mediaScope: CoroutineScope? = null
 
-    actual fun scheduleDailySync() {
+    actual fun scheduleDailySync() = scheduleDailySync(afterFirstSync = {})
+
+    fun scheduleDailySyncThenMediaSync() = scheduleDailySync(afterFirstSync = {
+        SelfHostSyncLog.d("Scheduler: first text sync finished, starting media sync")
+        scheduleMediaSync()
+    })
+
+    private fun scheduleDailySync(afterFirstSync: () -> Unit) {
         textScope?.cancel()
         val newScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         textScope = newScope
 
         newScope.launch {
+            selfHostSyncEngine.runSync()
+            afterFirstSync()
             while (isActive) {
-                selfHostSyncEngine.runSync()
                 delay(24.hours)
+                selfHostSyncEngine.runSync()
             }
         }
 

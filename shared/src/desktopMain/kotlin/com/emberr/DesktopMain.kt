@@ -92,6 +92,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private const val DESKTOP_IMAGE_CACHE_BYTES = 48L * 1024 * 1024
 private const val MILLIS_TO_WAIT_FOR_FIRST_FRAME_BEFORE_STARTING_ANYWAY = 4000L
+private const val MILLIS_TO_WAIT_BEFORE_SECRET_STORE_AND_LAN_SYNC = 2_000L
+private const val MILLIS_TO_WAIT_BEFORE_FIRST_SELF_HOST_SYNC = 5_000L
+private const val MILLIS_TO_WAIT_BEFORE_UPDATE_CHECK = 30_000L
 
 fun main() {
     if (!DesktopSingleInstance.claimOwnershipOrWakeRunningApp()) return
@@ -145,22 +148,19 @@ private fun runEmberrDesktopApp() = application {
 
     LaunchedEffect(isBackgroundStartupAllowed) {
         if (!isBackgroundStartupAllowed) return@LaunchedEffect
-        withContext(Dispatchers.IO) {
-            GlobalContext.get().get<DesktopSecretStore>().initialise()
-        }
-    }
-
-    LaunchedEffect(isBackgroundStartupAllowed) {
-        if (!isBackgroundStartupAllowed) return@LaunchedEffect
+        delay(MILLIS_TO_WAIT_BEFORE_SECRET_STORE_AND_LAN_SYNC)
         withContext(Dispatchers.IO) {
             val koin = GlobalContext.get()
-            koin.get<DesktopSecretStore>().awaitReadyState()
+            val desktopSecretStore = koin.get<DesktopSecretStore>()
+            desktopSecretStore.initialise()
+            desktopSecretStore.awaitReadyState()
             koin.get<LanSyncServerController>().startIfPaired()
         }
     }
 
     LaunchedEffect(isBackgroundStartupAllowed) {
         if (!isBackgroundStartupAllowed) return@LaunchedEffect
+        delay(MILLIS_TO_WAIT_BEFORE_FIRST_SELF_HOST_SYNC)
         withContext(Dispatchers.IO) {
             val koin = GlobalContext.get()
             koin.get<DesktopSecretStore>().awaitReadyState()
@@ -173,8 +173,7 @@ private fun runEmberrDesktopApp() = application {
 
             if (isVaultConfigured) {
                 SelfHostSyncLog.d("DesktopMain: vault already configured, arming background sync schedules on launch")
-                selfHostSyncScheduler.scheduleDailySync()
-                selfHostSyncScheduler.scheduleMediaSync()
+                selfHostSyncScheduler.scheduleDailySyncThenMediaSync()
                 foregroundSyncPoller.start()
             } else {
                 SelfHostSyncLog.d("DesktopMain: no self-host vault configured, skipping background sync schedules")
@@ -184,6 +183,7 @@ private fun runEmberrDesktopApp() = application {
 
     LaunchedEffect(isBackgroundStartupAllowed) {
         if (!isBackgroundStartupAllowed) return@LaunchedEffect
+        delay(MILLIS_TO_WAIT_BEFORE_UPDATE_CHECK)
         withContext(Dispatchers.IO) {
             GlobalContext.get().get<AppUpdateController>().checkOnLaunch()
         }
