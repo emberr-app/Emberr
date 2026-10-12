@@ -306,7 +306,6 @@ interface EditorActions {
     fun onOpenFile(filePath: String, mimeType: String)
     fun onTogglePin()
     fun onUpdateTable(id: String, rows: List<List<String>>)
-    fun onUpdateTableColumnWidth(id: String, columnIndex: Int, width: Int)
     fun onUpdateTableStyle(
         id: String,
         cellStyles: Map<String, com.emberr.domain.model.TableCellStyle>,

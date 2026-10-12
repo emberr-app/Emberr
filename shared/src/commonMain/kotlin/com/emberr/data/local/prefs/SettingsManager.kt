@@ -24,6 +24,9 @@ interface SettingsManager {
     fun getExpandedFolderIdsJson(): String
     fun saveExpandedFolderIdsJson(json: String)
 
+    fun getTableLayoutJson(blockId: String): String?
+    fun saveTableLayoutJson(blockId: String, json: String)
+
     fun getCanvasViewPositionJson(canvasNoteId: String): String?
     fun saveCanvasViewPositionJson(canvasNoteId: String, json: String)
     fun getCanvasIdsWithSavedViewPosition(): Set<String>

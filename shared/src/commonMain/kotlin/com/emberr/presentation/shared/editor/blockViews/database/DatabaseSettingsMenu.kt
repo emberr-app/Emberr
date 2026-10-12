@@ -26,9 +26,11 @@ import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.columnKey
 import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.valueTypeOf
+import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.presentation.shared.components.EmberrSwitch
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
+import com.emberr.presentation.shared.editor.blockViews.rememberDeviceTableLayout
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.calendar_day
@@ -43,6 +45,7 @@ import emberr.shared.generated.resources.pin_tack
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.sigma
 import emberr.shared.generated.resources.textalign_justifycenter2
+import org.koin.compose.koinInject
 
 @Composable
 internal fun DatabaseSettingsMenu(
@@ -53,6 +56,8 @@ internal fun DatabaseSettingsMenu(
 ) {
     val activeView = block.activeView()
     val hiddenColumnCount = block.columns.count { it.columnKey in activeView.hiddenColumnKeys }
+    val tableLayoutStore = koinInject<DeviceTableLayoutStore>()
+    val freezesTitleColumn = rememberDeviceTableLayout(block.id).freezesTitleColumn(activeView)
 
     DatabaseMenu(expanded = expanded, title = "Database settings", onDismiss = onDismiss) { closeAnd ->
         DatabaseMenuSectionLabel(text = "${activeView.name.ifBlank { activeView.type.label }} view")
@@ -66,8 +71,8 @@ internal fun DatabaseSettingsMenu(
             DatabaseMenuOption(
                 label = "Freeze title column",
                 icon = { DatabaseOptionIcon(Res.drawable.pin_tack) },
-                trailing = { EmberrSwitch(isOn = activeView.freezesTitleColumn) },
-                onClick = { editor.changeView(block.id, activeView.id) { it.copy(freezesTitleColumn = !it.freezesTitleColumn) } }
+                trailing = { EmberrSwitch(isOn = freezesTitleColumn) },
+                onClick = { tableLayoutStore.setFreezesTitleColumn(block.id, activeView.id, !freezesTitleColumn) }
             )
             DatabaseMenuOption(
                 label = "Wrap cell text",

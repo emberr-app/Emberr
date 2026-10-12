@@ -76,6 +76,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.TableBlock
+import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.model.InlineSpan
 import com.emberr.domain.model.TableCellContentType
 import com.emberr.domain.model.TableCellStyle
@@ -137,6 +138,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val DefaultColumnWidth = 140
@@ -184,8 +186,7 @@ fun TableBlockView(
         cellStyles: Map<String, TableCellStyle>,
         rowStyles: Map<String, TableCellStyle>,
         columnStyles: Map<String, TableCellStyle>
-    ) -> Unit,
-    onUpdateColumnWidth: (columnIndex: Int, width: Int) -> Unit
+    ) -> Unit
 ) {
     val rows = block.rows
     val columnCount = rows.firstOrNull()?.size ?: 0
@@ -239,17 +240,23 @@ fun TableBlockView(
         onUpdateTable(rows.map { row -> row.filterIndexed { i, _ -> i != index } })
     }
 
-    // Overrides block.columnWidths while a drag is in progress, so the column resizes instantly
-    // on every pointer delta instead of waiting on a full modifyBlocks -> StateFlow -> recompose
-    // round trip per pixel. Re-keyed (and thus cleared) whenever the persisted widths change -
+    val tableLayoutStore = koinInject<DeviceTableLayoutStore>()
+    val deviceLayout = rememberDeviceTableLayout(block.id)
+
+    // Overrides the saved widths while a drag is in progress, so the column resizes instantly
+    // on every pointer delta. Re-keyed (and thus cleared) whenever the saved widths change -
     // i.e. once this same drag's own onDragStopped commit lands, or a sync update arrives.
-    val liveColumnWidths = remember(block.columnWidths) { mutableStateMapOf<Int, Int>() }
+    val liveColumnWidths = remember(block.columnWidths, deviceLayout.columnWidths) { mutableStateMapOf<Int, Int>() }
 
     fun columnWidthFor(colIndex: Int): Int =
-        liveColumnWidths[colIndex] ?: block.columnWidths["$colIndex"] ?: DefaultColumnWidth
+        liveColumnWidths[colIndex] ?: deviceLayout.columnWidths["$colIndex"] ?: block.columnWidths["$colIndex"] ?: DefaultColumnWidth
+
+    fun saveColumnWidth(colIndex: Int, width: Int) {
+        tableLayoutStore.setColumnWidth(block.id, "$colIndex", width.coerceIn(40, 600))
+    }
 
     fun updateColumnWidthBy(colIndex: Int, delta: Int) {
-        onUpdateColumnWidth(colIndex, (columnWidthFor(colIndex) + delta).coerceIn(40, 600))
+        saveColumnWidth(colIndex, columnWidthFor(colIndex) + delta)
     }
 
     fun moveRow(index: Int, targetIndex: Int) {
@@ -547,7 +554,7 @@ fun TableBlockView(
                                                                 }
                                                             },
                                                             onDragStopped = {
-                                                                liveColumnWidths[columnIndex]?.let { onUpdateColumnWidth(columnIndex, it) }
+                                                                liveColumnWidths[columnIndex]?.let { saveColumnWidth(columnIndex, it) }
                                                             }
                                                         )
                                                 )

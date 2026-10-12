@@ -297,8 +297,6 @@ fun DailyScreen(
             override fun onTogglePin() = viewModel.togglePinSelectedBlocks()
             override fun onUpdateTable(id: String, rows: List<List<String>>) =
                 viewModel.updateTable(id, rows)
-            override fun onUpdateTableColumnWidth(id: String, columnIndex: Int, width: Int) =
-                viewModel.updateTableColumnWidth(id, columnIndex, width)
             override fun onUpdateTableStyle(
                 id: String,
                 cellStyles: Map<String, TableCellStyle>,

@@ -1880,7 +1880,6 @@ fun DesktopMainScreen(
                             override fun onStopAudio() = dailyViewModel.stopAudio()
                             override fun onTogglePin() = dailyViewModel.togglePinSelectedBlocks()
                             override fun onUpdateTable(id: String, rows: List<List<String>>) = dailyViewModel.updateTable(id, rows)
-                            override fun onUpdateTableColumnWidth(id: String, columnIndex: Int, width: Int) = dailyViewModel.updateTableColumnWidth(id, columnIndex, width)
                             override fun onUpdateTableStyle(
                                 id: String,
                                 cellStyles: Map<String, com.emberr.domain.model.TableCellStyle>,

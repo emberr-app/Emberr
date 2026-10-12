@@ -120,6 +120,13 @@ class AndroidSettingsManager(
         sharedPreferences.edit { putString(SyncConstants.KEY_EXPANDED_FOLDER_IDS_JSON, json) }
     }
 
+    override fun getTableLayoutJson(blockId: String): String? =
+        sharedPreferences.getString(SyncConstants.KEY_TABLE_LAYOUT_PREFIX + blockId, null)
+
+    override fun saveTableLayoutJson(blockId: String, json: String) {
+        sharedPreferences.edit { putString(SyncConstants.KEY_TABLE_LAYOUT_PREFIX + blockId, json) }
+    }
+
     override fun getCanvasViewPositionJson(canvasNoteId: String): String? =
         sharedPreferences.getString(SyncConstants.KEY_CANVAS_VIEW_POSITION_PREFIX + canvasNoteId, null)
 

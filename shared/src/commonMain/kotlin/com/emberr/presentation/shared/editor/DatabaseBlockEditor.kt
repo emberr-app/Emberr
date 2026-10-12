@@ -199,10 +199,6 @@ class DatabaseBlockEditor(
         host.changeDatabaseBlock(blockId) { it.copy(title = title) }
     }
 
-    fun setColumnWidth(blockId: String, columnKey: String, width: Int) {
-        host.changeDatabaseBlock(blockId) { it.copy(columnWidths = it.columnWidths + (columnKey to width)) }
-    }
-
     @OptIn(ExperimentalUuidApi::class)
     fun addFilter(blockId: String, viewId: String, target: DatabaseColumnTarget) {
         val valueType = host.findDatabaseBlock(blockId)?.valueTypeOf(target) ?: return

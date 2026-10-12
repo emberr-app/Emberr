@@ -720,9 +720,6 @@ private fun TimelineBlockContent(
                 onUpdateTable = { editorActions.onUpdateTable(block.id, it) },
                 onUpdateTableStyle = { cellStyles, rowStyles, columnStyles ->
                     editorActions.onUpdateTableStyle(block.id, cellStyles, rowStyles, columnStyles)
-                },
-                onUpdateColumnWidth = { columnIndex, width ->
-                    editorActions.onUpdateTableColumnWidth(block.id, columnIndex, width)
                 }
             )
         }

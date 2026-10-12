@@ -229,7 +229,6 @@ fun TasksScreen(
                         override fun onRequestDocumentPicker(blockId: String) {}
                         override fun onTogglePin() {}
                         override fun onUpdateTable(id: String, rows: List<List<String>>) {}
-                        override fun onUpdateTableColumnWidth(id: String, columnIndex: Int, width: Int) {}
                         override fun onUpdateTableStyle(
                             id: String,
                             cellStyles: Map<String, com.emberr.domain.model.TableCellStyle>,

@@ -81,6 +81,13 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         prefs.put(SyncConstants.KEY_EXPANDED_FOLDER_IDS_JSON, json)
     }
 
+    override fun getTableLayoutJson(blockId: String): String? =
+        prefs.getOrNull(SyncConstants.KEY_TABLE_LAYOUT_PREFIX + blockId)
+
+    override fun saveTableLayoutJson(blockId: String, json: String) {
+        prefs.put(SyncConstants.KEY_TABLE_LAYOUT_PREFIX + blockId, json)
+    }
+
     override fun getCanvasViewPositionJson(canvasNoteId: String): String? =
         prefs.getOrNull(SyncConstants.KEY_CANVAS_VIEW_POSITION_PREFIX + canvasNoteId)
 

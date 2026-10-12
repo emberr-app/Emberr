@@ -38,8 +38,8 @@ fun DatabaseBlock.visibleColumnsInTableOrder(): List<DatabaseColumnTarget> {
     return columnsInTableOrder().filter { it == DatabaseColumnTarget.NotesTitle || it.columnKey !in hiddenColumnKeys }
 }
 
-fun DatabaseBlock.frozenColumns(): Set<DatabaseColumnTarget> {
-    if (!activeView().freezesTitleColumn) return emptySet()
+fun DatabaseBlock.frozenColumns(freezesTitleColumn: Boolean = activeView().freezesTitleColumn): Set<DatabaseColumnTarget> {
+    if (!freezesTitleColumn) return emptySet()
     val tableColumns = visibleColumnsInTableOrder()
     return tableColumns.take(tableColumns.indexOf(DatabaseColumnTarget.NotesTitle) + 1).toSet()
 }

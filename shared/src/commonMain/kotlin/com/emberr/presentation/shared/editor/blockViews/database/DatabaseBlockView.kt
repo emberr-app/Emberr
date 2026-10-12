@@ -84,11 +84,13 @@ import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.DatabaseViewType
 import com.emberr.domain.model.columnKey
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.DatabaseSettingsState
 import com.emberr.presentation.shared.editor.GlobalEditorState
+import com.emberr.presentation.shared.editor.blockViews.rememberDeviceTableLayout
 import com.emberr.ui.theme.LocalEmberrFontStyle
 import com.emberr.ui.theme.fontFamilyFor
 import com.emberr.ui.theme.tableGridLineColor
@@ -105,6 +107,7 @@ import emberr.shared.generated.resources.x
 import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 internal const val MinimumColumnWidth = 40
 internal const val MaximumColumnWidth = 600
@@ -205,7 +208,9 @@ private fun DatabaseBlockContent(
     var tableViewportWidth by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
     val tableBorderColor = tableGridLineColor
-    val liveColumnWidths = remember(block.columnWidths) { mutableStateMapOf<String, Int>() }
+    val tableLayoutStore = koinInject<DeviceTableLayoutStore>()
+    val deviceLayout = rememberDeviceTableLayout(block.id)
+    val liveColumnWidths = remember(block.columnWidths, deviceLayout.columnWidths) { mutableStateMapOf<String, Int>() }
     var showSettingsMenu by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
     var showTemplateMenu by remember { mutableStateOf(false) }
@@ -213,7 +218,7 @@ private fun DatabaseBlockContent(
     val newRowIds = remember(block.databaseId) { mutableStateListOf<String>() }
 
     fun savedColumnWidth(target: DatabaseColumnTarget): Int =
-        block.columnWidths[target.columnKey] ?: defaultColumnWidth(target)
+        deviceLayout.columnWidths[target.columnKey] ?: block.columnWidths[target.columnKey] ?: defaultColumnWidth(target)
 
     fun columnWidth(target: DatabaseColumnTarget): Int =
         liveColumnWidths[target.columnKey] ?: savedColumnWidth(target)
@@ -223,14 +228,14 @@ private fun DatabaseBlockContent(
             liveColumnWidths.remove(target.columnKey)
             return
         }
-        editor.setColumnWidth(block.id, target.columnKey, width)
+        tableLayoutStore.setColumnWidth(block.id, target.columnKey, width)
     }
 
     val selectionColumnWidth = if (rowSelection.isSelecting) DatabaseSelectionColumnWidth else 0.dp
     val tableWidth = (columnWidth(DatabaseColumnTarget.NotesTitle) + block.visibleColumns().sumOf { columnWidth(it) }).dp +
         DatabaseGutterWidth + selectionColumnWidth
     var loadedRowCount by remember(block.databaseId, activeView.id, activeView.loadLimit) { mutableIntStateOf(activeView.loadLimit) }
-    val frozenColumns = block.frozenColumns()
+    val frozenColumns = block.frozenColumns(deviceLayout.freezesTitleColumn(activeView))
     val blocksEdits = inSelectionMode || block.isLocked
     val rowCountCaption = if (block.showsRowCount) rowCountLabel(shownRowCount = visibleRows.size, totalRowCount = rows.size) else null
 
