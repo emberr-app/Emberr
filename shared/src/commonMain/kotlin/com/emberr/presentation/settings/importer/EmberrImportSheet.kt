@@ -10,10 +10,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.backup.manual.EmberrImportProgress
 import com.emberr.domain.backup.manual.EmberrImportResult
 import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrChoiceRow
+import com.emberr.presentation.shared.components.EmberrSpaceCheckboxOptions
+import com.emberr.presentation.shared.components.checkedSpacesLabel
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.folder
 
@@ -87,9 +89,8 @@ private fun BackupChoices(
     onImportClick: (spaceIds: Set<String>) -> Unit,
     onCloseClick: () -> Unit
 ) {
-    var uncheckedSpaceIds by remember(pickedBackupState) { mutableStateOf(emptySet<String>()) }
     val spaces = (pickedBackupState as? PickedBackupState.Ready)?.spaces.orEmpty()
-    val checkedSpaceIds = spaces.map { it.spaceId }.filterNot { it in uncheckedSpaceIds }.toSet()
+    var checkedSpaceIds by remember(pickedBackupState) { mutableStateOf(spaces.map { it.spaceId }.toSet()) }
 
     ImportChooseBox(
         isClickable = pickedBackupState != PickedBackupState.Reading,
@@ -113,25 +114,18 @@ private fun BackupChoices(
     }
 
     Column(modifier = Modifier.padding(top = 16.dp)) {
-        ImportChoiceRow(
+        EmberrChoiceRow(
             label = "Spaces to Import",
-            value = chosenSpacesLabel(spaces, checkedSpaceIds),
+            value = checkedSpacesLabel(spaces, checkedSpaceIds),
             icon = Res.drawable.folder
         ) {
             if (spaces.isEmpty()) {
                 ImportMenuOption(label = "Choose a backup first", isSelected = false, isAvailable = false, onClick = {})
-            }
-            spaces.forEach { space ->
-                ImportMenuOption(
-                    label = space.displayName,
-                    isSelected = space.spaceId in checkedSpaceIds,
-                    onClick = {
-                        uncheckedSpaceIds = if (space.spaceId in uncheckedSpaceIds) {
-                            uncheckedSpaceIds - space.spaceId
-                        } else {
-                            uncheckedSpaceIds + space.spaceId
-                        }
-                    }
+            } else {
+                EmberrSpaceCheckboxOptions(
+                    spaces = spaces,
+                    checkedSpaceIds = checkedSpaceIds,
+                    onCheckedSpaceIdsChange = { checkedSpaceIds = it }
                 )
             }
         }
@@ -156,12 +150,4 @@ private fun ImportFinishedMessage(result: EmberrImportResult, onDoneClick: () ->
         },
         onDoneClick = onDoneClick
     )
-}
-
-private fun chosenSpacesLabel(spaces: List<SpaceEntity>, checkedSpaceIds: Set<String>): String = when {
-    spaces.isEmpty() -> "None yet"
-    checkedSpaceIds.isEmpty() -> "None"
-    checkedSpaceIds.size == spaces.size && spaces.size == 1 -> spaces.single().displayName
-    checkedSpaceIds.size == spaces.size -> "All ${spaces.size} spaces"
-    else -> "${checkedSpaceIds.size} of ${spaces.size} spaces"
 }

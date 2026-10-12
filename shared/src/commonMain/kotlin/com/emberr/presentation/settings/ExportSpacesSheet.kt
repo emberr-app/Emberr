@@ -12,9 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.presentation.shared.components.EmberrBottomSheet
-import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
+import com.emberr.presentation.shared.components.EmberrChoiceRow
+import com.emberr.presentation.shared.components.EmberrSpaceCheckboxOptions
+import com.emberr.presentation.shared.components.checkedSpacesLabel
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.folder
 
 private val ExportSheetButtonPadding = 20.dp
 
@@ -25,7 +29,8 @@ fun ExportSpacesSheet(
     onDismiss: () -> Unit
 ) {
     var uncheckedSpaceIds by remember { mutableStateOf(emptySet<String>()) }
-    val checkedSpaceIds = spaces.map { it.spaceId }.filterNot { it in uncheckedSpaceIds }.toSet()
+    val allSpaceIds = spaces.map { it.spaceId }.toSet()
+    val checkedSpaceIds = allSpaceIds - uncheckedSpaceIds
 
     EmberrBottomSheet(
         expanded = true,
@@ -35,17 +40,15 @@ fun ExportSpacesSheet(
         contentHorizontalPadding = 0.dp
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-            spaces.forEach { space ->
-                EmberrBottomSheetOption(
-                    label = space.displayName,
-                    isSelected = space.spaceId in checkedSpaceIds,
-                    onClick = {
-                        uncheckedSpaceIds = if (space.spaceId in uncheckedSpaceIds) {
-                            uncheckedSpaceIds - space.spaceId
-                        } else {
-                            uncheckedSpaceIds + space.spaceId
-                        }
-                    }
+            EmberrChoiceRow(
+                label = "Select Spaces",
+                value = checkedSpacesLabel(spaces, checkedSpaceIds),
+                icon = Res.drawable.folder
+            ) {
+                EmberrSpaceCheckboxOptions(
+                    spaces = spaces,
+                    checkedSpaceIds = checkedSpaceIds,
+                    onCheckedSpaceIdsChange = { newCheckedSpaceIds -> uncheckedSpaceIds = allSpaceIds - newCheckedSpaceIds }
                 )
             }
             EmberrButtonPrimary(

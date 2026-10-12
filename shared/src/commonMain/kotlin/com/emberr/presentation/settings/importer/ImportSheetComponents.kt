@@ -1,10 +1,6 @@
 package com.emberr.presentation.settings.importer
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -22,10 +16,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,19 +28,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
-import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.upload2
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 
@@ -65,15 +50,6 @@ private const val CHOOSE_BOX_BORDER_ALPHA = 0.25f
 private const val UNAVAILABLE_OPTION_ALPHA = 0.38f
 private const val FADED_TEXT_ALPHA = 0.6f
 private const val PROGRESS_TRACK_ALPHA = 0.12f
-private val ImportMenuWidth = 280.dp
-private val ImportMenuVerticalPadding = 6.dp
-private val ImportMenuGap = 6.dp
-private val ImportRowIconSize = 18.dp
-private val ValueButtonShape = RoundedCornerShape(8.dp)
-private val ValueButtonIconSize = 14.dp
-private val ValueButtonMaxTextWidth = 160.dp
-private const val VALUE_BUTTON_BACKGROUND_ALPHA = 0.08f
-private const val VALUE_BUTTON_CONTENT_ALPHA = 0.7f
 
 @Composable
 internal fun importChooseBorderColor(): Color = MaterialTheme.colorScheme.onSurface.copy(alpha = CHOOSE_BOX_BORDER_ALPHA)
@@ -180,104 +156,6 @@ internal fun ImportFadedLine(text: String, maxLines: Int = Int.MAX_VALUE) {
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis
     )
-}
-
-@Composable
-internal fun ImportChoiceRow(
-    label: String,
-    value: String,
-    icon: DrawableResource,
-    menuContent: @Composable (closeMenuAnd: (() -> Unit) -> Unit) -> Unit
-) {
-    var isMenuOpen by remember { mutableStateOf(false) }
-
-    EmberrBottomSheetOption(
-        label = label,
-        icon = {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(ImportRowIconSize)
-            )
-        },
-        trailing = {
-            Box {
-                ImportValueButton(value = value, isMenuOpen = isMenuOpen, onClick = { isMenuOpen = true })
-                if (isDesktopPlatform) {
-                    EmberrDesktopMenu(
-                        expanded = isMenuOpen,
-                        onDismissRequest = { isMenuOpen = false },
-                        offset = DpOffset(x = 0.dp, y = ImportMenuGap),
-                        modifier = Modifier.width(ImportMenuWidth)
-                    ) {
-                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = ImportMenuVerticalPadding)) {
-                            menuContent { action ->
-                                action()
-                                isMenuOpen = false
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        onClick = { isMenuOpen = true }
-    )
-
-    if (!isDesktopPlatform) {
-        EmberrBottomSheet(
-            expanded = isMenuOpen,
-            onDismiss = { isMenuOpen = false },
-            title = label,
-            contentHorizontalPadding = 0.dp
-        ) { closeAnd ->
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                menuContent(closeAnd)
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { closeAnd {} },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp, start = ImportSheetContentPadding, end = ImportSheetContentPadding)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ImportValueButton(value: String, isMenuOpen: Boolean, onClick: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    val showsBackground = isHovered || isMenuOpen || !isDesktopPlatform
-    val contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = VALUE_BUTTON_CONTENT_ALPHA)
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clip(ValueButtonShape)
-            .background(
-                if (showsBackground) MaterialTheme.colorScheme.onSurface.copy(alpha = VALUE_BUTTON_BACKGROUND_ALPHA) else Color.Transparent
-            )
-            .hoverable(interactionSource)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp)
-    ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.labelSmall,
-            color = contentColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.widthIn(max = ValueButtonMaxTextWidth)
-        )
-        Icon(
-            painter = painterResource(Res.drawable.chevron_down),
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.padding(start = 4.dp).size(ValueButtonIconSize)
-        )
-    }
 }
 
 @Composable

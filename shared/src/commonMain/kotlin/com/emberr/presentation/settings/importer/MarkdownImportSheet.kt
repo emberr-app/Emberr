@@ -19,6 +19,7 @@ import com.emberr.domain.importer.ImportProgress
 import com.emberr.domain.importer.ImportResult
 import com.emberr.domain.importer.ImportSummary
 import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrChoiceRow
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.folder
@@ -119,7 +120,7 @@ private fun ImportChoices(
     }
 
     Column(modifier = Modifier.padding(top = 16.dp)) {
-        ImportChoiceRow(
+        EmberrChoiceRow(
             label = "Save to Space",
             value = spaces.firstOrNull { it.spaceId == selectedSpaceId }?.displayName.orEmpty(),
             icon = Res.drawable.folder
@@ -132,7 +133,7 @@ private fun ImportChoices(
                 )
             }
         }
-        ImportChoiceRow(label = "Import As", value = EMBERR_NOTES_LABEL, icon = Res.drawable.file_text) { closeMenuAnd ->
+        EmberrChoiceRow(label = "Import As", value = EMBERR_NOTES_LABEL, icon = Res.drawable.file_text) { closeMenuAnd ->
             ImportMenuOption(
                 label = EMBERR_NOTES_LABEL,
                 subtitle = "Each file becomes a note made of blocks.",
