@@ -448,14 +448,16 @@ class DailyEditorViewModel(
         }
     }
 
-    private suspend fun reconcileWithDisk(dateString: String, snapshot: List<NoteBlock>): List<NoteBlock> {
+    private suspend fun reconcileWithDisk(dateString: String, snapshot: List<NoteBlock>): List<NoteBlock> =
+        editorDiskReconciler.reconcile(snapshot, storedBlocksOf(dateString))
+
+    private suspend fun storedBlocksOf(dateString: String): List<NoteBlock> {
         val dayBlocks = repository.getDailyNote(dateString)?.blocks ?: emptyList()
         val pinnedBlocks = repository.getDailyNote("global_pinned")?.blocks ?: emptyList()
         val liveDayBlocks = dayBlocks.filter { !it.isDeleted }
         if (isNoteActuallyEmpty(liveDayBlocks)) editorDiskReconciler.rememberBlocksShown(liveDayBlocks)
 
-        val storedBlocks = DailyStoredBlocks.combineDayAndPinnedList(dayBlocks, pinnedBlocks)
-        return editorDiskReconciler.reconcile(snapshot, storedBlocks)
+        return DailyStoredBlocks.combineDayAndPinnedList(dayBlocks, pinnedBlocks)
     }
 
     private suspend fun theDayAlreadyHoldsThis(dateString: String, blocksToSave: List<NoteBlock>): Boolean {
@@ -490,8 +492,8 @@ class DailyEditorViewModel(
                     if (currentDateString != dateToSave) return@withLock false
                     if (!activeSpaceStore.isActiveSpace(spaceToSave)) return@withLock false
 
-                    val reconciled = reconcileWithDisk(dateToSave, _blocks.value)
-                    if (reconciled !== _blocks.value) _blocks.value = reconciled
+                    val storedBlocks = storedBlocksOf(dateToSave)
+                    val reconciled = _blocks.updateAndGet { editorBlocks -> editorDiskReconciler.reconcile(editorBlocks, storedBlocks) }
 
                     saveDayUnlessNothingChanged(dateToSave, reconciled)
                     true

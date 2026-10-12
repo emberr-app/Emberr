@@ -121,10 +121,11 @@ class NoteEditorViewModel(
         }
     }
 
-    private suspend fun reconcileWithDisk(noteId: String, snapshot: List<NoteBlock>): List<NoteBlock> {
-        val diskBlocks = repository.getNoteContent(noteId)?.blocks ?: emptyList()
-        return editorDiskReconciler.reconcile(snapshot, diskBlocks)
-    }
+    private suspend fun reconcileWithDisk(noteId: String, snapshot: List<NoteBlock>): List<NoteBlock> =
+        editorDiskReconciler.reconcile(snapshot, diskBlocksOf(noteId))
+
+    private suspend fun diskBlocksOf(noteId: String): List<NoteBlock> =
+        repository.getNoteContent(noteId)?.blocks ?: emptyList()
 
     private suspend fun theNoteAlreadyHoldsThis(
         noteId: String,
@@ -154,8 +155,8 @@ class NoteEditorViewModel(
                     // switched to into meta's note instead of its own - cross-note contamination.
                     if (currentMetadata?.noteId != meta.noteId) return@withLock false
 
-                    val reconciled = reconcileWithDisk(meta.noteId, _blocks.value)
-                    if (reconciled !== _blocks.value) _blocks.value = reconciled
+                    val diskBlocks = diskBlocksOf(meta.noteId)
+                    val reconciled = _blocks.updateAndGet { editorBlocks -> editorDiskReconciler.reconcile(editorBlocks, diskBlocks) }
 
                     val updatedMeta = meta.withDetailsFromEditor().copy(
                         snippet = generateSnippet(reconciled),
