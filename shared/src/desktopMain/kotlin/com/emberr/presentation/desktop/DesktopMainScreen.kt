@@ -485,7 +485,7 @@ private fun OverviewRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 2.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(rowBackground)
             .noRippleClickable(interactionSource, onClick)
             .heightIn(min = 42.dp)
