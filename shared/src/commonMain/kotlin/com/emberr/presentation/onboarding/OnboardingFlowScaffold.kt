@@ -9,8 +9,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
@@ -27,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -86,7 +83,6 @@ private val WideGapBelowStatements = 12.dp
 private val CompactGapBelowStatements = 8.dp
 private val WideGapAboveButton = 48.dp
 private val CompactGapAboveButton = 40.dp
-private val WideButtonGap = 16.dp
 private val WideBottomMargin = 68.dp
 private val DesktopCompactBottomMargin = 40.dp
 private val MobileBottomMargin = 30.dp
@@ -333,58 +329,37 @@ fun OnboardingFlowBottomBar(
 ) {
     val isWideLayout = LocalOnboardingWideLayout.current
 
-    Box(modifier = Modifier.fillMaxWidth()) {
-        if (isWideLayout) {
-            val backButtonOffset =
-                -(WideButtonWidth / 2 + WideButtonGap + ControlHeight / 2)
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = if (isWideLayout) Modifier.width(WideButtonWidth) else Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AnimatedVisibility(
+                visible = showBack,
+                enter = fadeIn(tween(300, delayMillis = 160)) + expandHorizontally(
+                    animationSpec = tween(400, easing = OnboardingGlideEasing),
+                    expandFrom = Alignment.Start
+                ),
+                exit = fadeOut(tween(140)) + shrinkHorizontally(
+                    animationSpec = tween(340, easing = OnboardingGlideEasing),
+                    shrinkTowards = Alignment.Start
+                )
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OnboardingStepBackButton(onClick = onBack)
+
+                    Spacer(modifier = Modifier.width(14.dp))
+                }
+            }
 
             OnboardingPillButton(
                 label = label,
                 onClick = onNext,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .width(WideButtonWidth)
+                modifier = Modifier.weight(1f)
             )
-
-            AnimatedVisibility(
-                visible = showBack,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .offset(x = backButtonOffset),
-                enter = fadeIn(tween(320)) + scaleIn(tween(320), initialScale = 0.8f),
-                exit = fadeOut(tween(170)) + scaleOut(tween(170), targetScale = 0.8f)
-            ) {
-                OnboardingStepBackButton(onClick = onBack)
-            }
-        } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AnimatedVisibility(
-                    visible = showBack,
-                    enter = fadeIn(tween(300, delayMillis = 160)) + expandHorizontally(
-                        animationSpec = tween(400, easing = OnboardingGlideEasing),
-                        expandFrom = Alignment.Start
-                    ),
-                    exit = fadeOut(tween(140)) + shrinkHorizontally(
-                        animationSpec = tween(340, easing = OnboardingGlideEasing),
-                        shrinkTowards = Alignment.Start
-                    )
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        OnboardingStepBackButton(onClick = onBack)
-
-                        Spacer(modifier = Modifier.width(14.dp))
-                    }
-                }
-
-                OnboardingPillButton(
-                    label = label,
-                    onClick = onNext,
-                    modifier = Modifier.weight(1f)
-                )
-            }
         }
     }
 }
