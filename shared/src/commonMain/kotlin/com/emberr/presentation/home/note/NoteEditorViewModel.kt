@@ -119,6 +119,31 @@ class NoteEditorViewModel(
                     }
                 }
         }
+        viewModelScope.launch {
+            _currentlyLoadedNoteId
+                .filterNotNull()
+                .flatMapLatest { noteId -> repository.observeNoteMetadata(noteId) }
+                .filterNotNull()
+                .collect { storedMetadata ->
+                    if (_isLoading.value) return@collect
+                    adoptMetadataChangedOutsideEditor(storedMetadata)
+                }
+        }
+    }
+
+    private fun adoptMetadataChangedOutsideEditor(storedMetadata: NoteMetadataEntity) {
+        val knownMetadata = currentMetadata ?: return
+        if (storedMetadata.noteId != knownMetadata.noteId) return
+        if (storedMetadata.updatedAt <= knownMetadata.updatedAt) return
+
+        if (_noteTitle.value == knownMetadata.title) _noteTitle.value = storedMetadata.title
+        if (_noteIcon.value == knownMetadata.icon) _noteIcon.value = storedMetadata.icon
+        if (_isFavorite.value == knownMetadata.isFavorite) _isFavorite.value = storedMetadata.isFavorite
+        if (_coverImagePath.value == knownMetadata.coverImagePath) _coverImagePath.value = storedMetadata.coverImagePath
+        if (_showWordCount.value == knownMetadata.showWordCount) _showWordCount.value = storedMetadata.showWordCount
+        _isTemplate.value = storedMetadata.isTemplate
+        _noteUpdatedAt.value = storedMetadata.updatedAt
+        currentMetadata = storedMetadata
     }
 
     private suspend fun reconcileWithDisk(noteId: String, snapshot: List<NoteBlock>): List<NoteBlock> =
