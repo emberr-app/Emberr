@@ -99,7 +99,7 @@ val desktopModule = module {
 
     // AI
     single { LocalAiEngine(aiSettingsRepository = get()) }
-    single { RagRepository(get(), get(), get(), get(), get()) }
+    single { RagRepository(inject(), get(), get(), get(), get()) }
     single<com.emberr.domain.ai.external.SecureAiKeyStorage> {
         com.emberr.domain.ai.external.SecureAiKeyStorage(get())
     }
@@ -134,7 +134,7 @@ val desktopModule = module {
     single<SyncDiscoveryManager> { DesktopDiscoveryManager() }
     single { com.emberr.domain.sync.SyncServerAvailability() }
     single<com.emberr.domain.sync.SyncClient> { com.emberr.domain.sync.SyncClient(get(), get(), get()) }
-    single<SyncRepository> { SyncRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    single<SyncRepository> { SyncRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), inject(), get(), get(), get(), get(), get()) }
     single<com.emberr.domain.sync.LanSyncServerController> {
         com.emberr.domain.sync.DesktopLanSyncServerController(
             settingsManager = get(),

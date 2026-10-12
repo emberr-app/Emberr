@@ -9,10 +9,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class NoteIndexer(
-    private val database: EmberrDatabase,
+    lazyDatabase: Lazy<EmberrDatabase>,
     private val aiEngine: LocalAiEngine,
     private val settingsManager: SettingsManager
 ) {
+
+    private val database by lazyDatabase
+
     private data class PendingIndex(
         val blockId: String,
         val chunkText: String,

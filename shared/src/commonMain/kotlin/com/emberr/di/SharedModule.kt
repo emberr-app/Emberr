@@ -41,7 +41,7 @@ val sharedModule = module {
 
     single {
         NoteIndexer(
-            database = get(),
+            lazyDatabase = inject(),
             aiEngine = get(),
             settingsManager = get()
         )
@@ -49,7 +49,7 @@ val sharedModule = module {
 
     single {
         com.emberr.domain.ai.DisableAiFeaturesUseCase(
-            database = get(),
+            lazyDatabase = inject(),
             settingsManager = get(),
             aiSettingsRepository = get(),
             secureAiKeyStorage = get(),
@@ -416,7 +416,7 @@ val sharedModule = module {
             chatSessionDao = get(),
             selfHostDeletedApiConfigDao = get(),
             aiSettingsRepository = get(),
-            database = get(),
+            lazyDatabase = inject(),
             bookmarkCategoryOrderStore = get(),
             favoriteNoteOrderStore = get(),
             mediaReferenceIndex = get(),

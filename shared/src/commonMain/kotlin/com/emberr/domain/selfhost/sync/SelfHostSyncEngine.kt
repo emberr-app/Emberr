@@ -116,13 +116,15 @@ class SelfHostSyncEngine(
     private val chatSessionDao: ChatSessionDao,
     private val selfHostDeletedApiConfigDao: SelfHostDeletedApiConfigDao,
     private val aiSettingsRepository: AiSettingsRepository,
-    private val database: EmberrDatabase,
+    lazyDatabase: Lazy<EmberrDatabase>,
     private val bookmarkCategoryOrderStore: BookmarkCategoryOrderStore,
     private val favoriteNoteOrderStore: FavoriteNoteOrderStore,
     private val mediaReferenceIndex: MediaReferenceIndex,
     private val canvasRepository: CanvasRepository,
     private val meteredNetworkChecker: MeteredNetworkChecker
 ) {
+
+    private val database by lazyDatabase
 
     private val textSyncMutex = Mutex()
     private val mediaSyncMutex = Mutex()
@@ -1331,8 +1333,12 @@ class SelfHostSyncEngine(
         blocks: List<NoteBlockEntity>,
         ifMatchEtag: String?
     ) {
-        val embeddedBlocks = database.vectorStoreQueries.getBlocksForNote(metadata.noteId).executeAsList()
-            .map { EmbeddedBlockPayload(blockId = it.block_id, chunkText = it.chunk_text, embedding = it.embedding) }
+        val embeddedBlocks = if (settingsManager.isAiFeaturesDisabled()) {
+            emptyList()
+        } else {
+            database.vectorStoreQueries.getBlocksForNote(metadata.noteId).executeAsList()
+                .map { EmbeddedBlockPayload(blockId = it.block_id, chunkText = it.chunk_text, embedding = it.embedding) }
+        }
         val canvas = canvasRepository.loadCanvasIncludingDeleted(metadata.noteId)
         val json = NoteJsonCompiler.compileNoteToJson(metadata, blocks, embeddedBlocks, canvas)
 

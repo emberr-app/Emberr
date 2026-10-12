@@ -23,13 +23,16 @@ data class AiPurgeReport(
 }
 
 class DisableAiFeaturesUseCase(
-    private val database: EmberrDatabase,
+    lazyDatabase: Lazy<EmberrDatabase>,
     private val settingsManager: SettingsManager,
     private val aiSettingsRepository: AiSettingsRepository,
     private val secureAiKeyStorage: SecureAiKeyStorage,
     private val localAiEngine: LocalAiEngine,
     private val modelDownloadScheduler: ModelDownloadScheduler
 ) {
+
+    private val database by lazyDatabase
+
     suspend fun execute(): AiPurgeReport {
         settingsManager.saveAiFeaturesDisabled(true)
 

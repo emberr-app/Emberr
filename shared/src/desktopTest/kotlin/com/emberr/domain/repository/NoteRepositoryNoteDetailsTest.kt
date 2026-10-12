@@ -45,7 +45,7 @@ class NoteRepositoryNoteDetailsTest {
         noteDao = appDatabase.noteDao(),
         folderDao = appDatabase.folderDao(),
         blockDao = appDatabase.blockDao(),
-        noteIndexer = NoteIndexer(EmberrDatabase(aiIndexDriver), LocalAiEngine(aiSettingsThatAreNeverRead), settings),
+        noteIndexer = NoteIndexer(lazyOf(EmberrDatabase(aiIndexDriver)), LocalAiEngine(aiSettingsThatAreNeverRead), settings),
         calendarTaskDao = appDatabase.calendarTaskDao(),
         calendarEventExceptionDao = appDatabase.calendarEventExceptionDao(),
         imageBlockDao = appDatabase.imageBlockDao(),

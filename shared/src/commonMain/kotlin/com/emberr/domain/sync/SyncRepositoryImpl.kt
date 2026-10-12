@@ -74,13 +74,15 @@ class SyncRepositoryImpl(
     private val spaceRepository: SpaceRepository,
     private val selfHostDeletedApiConfigDao: SelfHostDeletedApiConfigDao,
     private val aiSettingsRepository: AiSettingsRepository,
-    private val database: EmberrDatabase,
+    lazyDatabase: Lazy<EmberrDatabase>,
     private val bookmarkCategoryOrderStore: BookmarkCategoryOrderStore,
     private val favoriteNoteOrderStore: FavoriteNoteOrderStore,
     private val mediaReferenceIndex: MediaReferenceIndex,
     private val canvasRepository: CanvasRepository,
     private val unappliedSyncChangeDao: UnappliedSyncChangeDao
 ) : SyncRepository {
+
+    private val database by lazyDatabase
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -779,8 +781,12 @@ class SyncRepositoryImpl(
                 val eId =
                     if (meta.isDaily && meta.dateString != null) meta.dateString else meta.noteId
 
-                val embeddedBlocks = database.vectorStoreQueries.getBlocksForNote(meta.noteId).executeAsList()
-                    .map { EmbeddedBlockPayload(blockId = it.block_id, chunkText = it.chunk_text, embedding = it.embedding) }
+                val embeddedBlocks = if (settingsManager.isAiFeaturesDisabled()) {
+                    emptyList()
+                } else {
+                    database.vectorStoreQueries.getBlocksForNote(meta.noteId).executeAsList()
+                        .map { EmbeddedBlockPayload(blockId = it.block_id, chunkText = it.chunk_text, embedding = it.embedding) }
+                }
                 val encryptedEmbeddedBlocks = if (embeddedBlocks.isEmpty()) {
                     ""
                 } else {

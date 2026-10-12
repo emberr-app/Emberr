@@ -14,12 +14,15 @@ import kotlinx.coroutines.flow.flowOn
 import kotlin.math.sqrt
 
 class RagRepository(
-    private val database: EmberrDatabase,
+    lazyDatabase: Lazy<EmberrDatabase>,
     private val localAiEngine: LocalAiEngine,
     private val externalAiEngine: ExternalAiEngine,
     private val aiSettingsRepository: AiSettingsRepository,
     private val activeSpaceStore: ActiveSpaceStore
 ) {
+
+    private val database by lazyDatabase
+
     val localAiUnsupportedReason: String? get() = localAiEngine.unsupportedHardwareReason
 
     private val canSearchNoteKnowledge: Boolean get() = localAiUnsupportedReason == null
