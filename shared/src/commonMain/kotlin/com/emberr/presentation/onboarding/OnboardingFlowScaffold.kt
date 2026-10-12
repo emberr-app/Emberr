@@ -64,6 +64,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
@@ -434,6 +435,7 @@ private fun OnboardingPillButton(
         Crossfade(
             targetState = label,
             animationSpec = tween(450),
+            modifier = Modifier.fillMaxWidth(),
             label = "onboarding-button-label"
         ) { visibleLabel ->
             Text(
@@ -441,7 +443,9 @@ private fun OnboardingPillButton(
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onPrimary,
-                maxLines = 1
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
