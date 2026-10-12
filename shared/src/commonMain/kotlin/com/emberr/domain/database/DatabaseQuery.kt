@@ -59,17 +59,26 @@ fun filterConditionsFor(valueType: PropertyValueType): List<DatabaseFilterCondit
     )
 }
 
-fun applyFiltersAndSort(rows: List<DatabaseRow>, database: DatabaseBlock, today: LocalDate = todayInThisTimeZone()): List<DatabaseRow> {
-    val view = database.activeView()
-    val usableFilters = view.filters.mapNotNull { filter ->
-        if (!database.hasColumn(filter.target)) return@mapNotNull null
-        val valueType = database.valueTypeOf(filter.target) ?: return@mapNotNull null
+fun applyFiltersAndSort(
+    rows: List<DatabaseRow>,
+    database: DatabaseBlock,
+    today: LocalDate = todayInThisTimeZone(),
+    rowIdsShownDespiteFilters: Set<String> = emptySet()
+): List<DatabaseRow> {
+    val usableFilters = database.usableFilters()
+    return rows
+        .filter { row ->
+            row.noteId in rowIdsShownDespiteFilters || usableFilters.all { (filter, valueType) -> row.matches(filter, valueType, today) }
+        }
+        .sortedWith(rowOrder(database, database.activeView().sorts))
+}
+
+internal fun DatabaseBlock.usableFilters(): List<Pair<DatabaseFilter, PropertyValueType>> =
+    activeView().filters.mapNotNull { filter ->
+        if (!hasColumn(filter.target)) return@mapNotNull null
+        val valueType = valueTypeOf(filter.target) ?: return@mapNotNull null
         if (filter.isUsable(valueType)) filter to valueType else null
     }
-    return rows
-        .filter { row -> usableFilters.all { (filter, valueType) -> row.matches(filter, valueType, today) } }
-        .sortedWith(rowOrder(database, view.sorts))
-}
 
 fun List<DatabaseRow>.matchingSearch(searchText: String, database: DatabaseBlock): List<DatabaseRow> {
     val cleanedSearchText = searchText.trim()
@@ -134,7 +143,7 @@ private fun DatabaseRow.matches(filter: DatabaseFilter, valueType: PropertyValue
     else -> textMatches(displayValueAt(filter.target), filter)
 }
 
-private fun numberMatches(value: Double?, filter: DatabaseFilter): Boolean {
+internal fun numberMatches(value: Double?, filter: DatabaseFilter): Boolean {
     val filterNumber = filter.text.trim().toDoubleOrNull() ?: return true
     return when (filter.condition) {
         DatabaseFilterCondition.IS -> value == filterNumber
@@ -145,7 +154,7 @@ private fun numberMatches(value: Double?, filter: DatabaseFilter): Boolean {
     }
 }
 
-private fun textMatches(value: String, filter: DatabaseFilter): Boolean {
+internal fun textMatches(value: String, filter: DatabaseFilter): Boolean {
     val containsText = value.contains(filter.text.trim(), ignoreCase = true)
     return when (filter.condition) {
         DatabaseFilterCondition.CONTAINS -> containsText
@@ -154,7 +163,7 @@ private fun textMatches(value: String, filter: DatabaseFilter): Boolean {
     }
 }
 
-private fun dateMatches(value: LocalDate?, filter: DatabaseFilter, today: LocalDate): Boolean {
+internal fun dateMatches(value: LocalDate?, filter: DatabaseFilter, today: LocalDate): Boolean {
     if (filter.condition == DatabaseFilterCondition.IS_WITHIN) {
         val range = filter.dateRange?.daysFrom(today) ?: return true
         return value != null && value in range
@@ -170,7 +179,7 @@ private fun dateMatches(value: LocalDate?, filter: DatabaseFilter, today: LocalD
     }
 }
 
-private fun tagsMatch(tags: List<String>, filter: DatabaseFilter): Boolean {
+internal fun tagsMatch(tags: List<String>, filter: DatabaseFilter): Boolean {
     val hasTag = tags.any { it.equals(filter.tagName, ignoreCase = true) }
     return when (filter.condition) {
         DatabaseFilterCondition.IS, DatabaseFilterCondition.CONTAINS -> hasTag

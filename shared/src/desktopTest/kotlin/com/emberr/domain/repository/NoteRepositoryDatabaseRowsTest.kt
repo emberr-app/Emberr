@@ -21,9 +21,15 @@ import com.emberr.domain.database.databaseSettingsBlockId
 import com.emberr.domain.database.RepeatedRowToCreate
 import com.emberr.domain.database.databaseCellBlockId
 import com.emberr.domain.database.repeatedRowNoteId
+import com.emberr.domain.database.applyFiltersAndSort
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseColumnTarget
+import com.emberr.domain.model.DatabaseFilter
+import com.emberr.domain.model.DatabaseFilterCondition
+import com.emberr.domain.model.DatabaseView
+import com.emberr.domain.model.DatabaseViewType
+import com.emberr.domain.model.DEFAULT_VIEW_ID
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.PropertyBlock
@@ -488,6 +494,27 @@ class NoteRepositoryDatabaseRowsTest {
         assertEquals(listOf("Done"), rowsOf("days").single().cell(statusColumn)?.tags)
         repository.applyDatabaseRowChanges(listOf(change), HistoryDirection.UNDO)
         assertEquals(emptyList(), rowsOf("days"))
+    }
+
+    @Test
+    fun aRowAddedWhileAViewIsFilteredStartsWithValuesThatPassTheFilters() = runTest {
+        val filteredView = DatabaseView(
+            id = DEFAULT_VIEW_ID,
+            name = "Table",
+            type = DatabaseViewType.TABLE,
+            filters = listOf(
+                DatabaseFilter(id = "status-filter", target = statusColumn, condition = DatabaseFilterCondition.IS, tagName = "Doing"),
+                DatabaseFilter(id = "title-filter", target = DatabaseColumnTarget.NotesTitle, condition = DatabaseFilterCondition.CONTAINS, text = "Weekly")
+            )
+        )
+        val filteredDays = daysWithStatus.copy(views = listOf(filteredView))
+
+        repository.createDatabaseRow(filteredDays)
+
+        val row = rowsOf("days").single()
+        assertEquals(listOf("Doing"), row.cell(statusColumn)?.tags)
+        assertEquals("Weekly", row.title)
+        assertEquals(listOf(row.noteId), applyFiltersAndSort(listOf(row), filteredDays).map { it.noteId })
     }
 
     private suspend fun statusOptionNames(): List<String> = repository.getPropertyTags("STATUS").first().map { it.name }

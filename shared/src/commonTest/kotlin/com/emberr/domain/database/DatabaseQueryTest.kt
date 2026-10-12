@@ -129,6 +129,16 @@ class DatabaseQueryTest {
     }
 
     @Test
+    fun aRowMarkedToShowDespiteFiltersIsShownEvenWhenItFailsThem() {
+        val rows = listOf(row("old", createdAt = 10L, status = "Done"), row("new", createdAt = 20L), row("other", createdAt = 30L))
+        val database = databaseShowing(listOf(filter(statusColumn, DatabaseFilterCondition.IS_NOT_EMPTY)), emptyList())
+
+        val shown = applyFiltersAndSort(rows, database, today = wednesday, rowIdsShownDespiteFilters = setOf("new"))
+
+        assertEquals(listOf("old", "new"), noteIdsOf(shown))
+    }
+
+    @Test
     fun withoutFiltersOrSortRowsKeepTheOrderTheyWereCreatedIn() {
         val rows = listOf(row("c", createdAt = 30L), row("a", createdAt = 10L), row("b", createdAt = 20L))
 

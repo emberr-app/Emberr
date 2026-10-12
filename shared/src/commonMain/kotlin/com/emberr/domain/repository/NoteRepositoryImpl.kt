@@ -62,6 +62,9 @@ import com.emberr.domain.database.withDatabaseCellRenamed
 import com.emberr.domain.database.withDatabaseCellPlaced
 import com.emberr.domain.database.withDatabaseColumnRemoved
 import com.emberr.domain.database.withCellPreset
+import com.emberr.domain.database.withCellsMatchingFilters
+import com.emberr.domain.database.titleMatchingFilters
+import com.emberr.domain.database.todayInThisTimeZone
 import com.emberr.domain.database.withDatabaseColumnShown
 import com.emberr.domain.database.withRowIdsReplaced
 import com.emberr.domain.model.BookmarkBlock
@@ -1321,8 +1324,10 @@ class NoteRepositoryImpl(
                 val blocksFromTemplate = database.rowBlocksFromTemplate(templateBlocks, template.noteId, rowNoteId, now)
                 copyDatabasesIn(copyEmbeddedCanvasesIn(NoteContent(blocks = blocksFromTemplate))).blocks
             }
-            val rowBlocks = cellPreset?.let { blocksBeforePreset.withCellPreset(database, it, rowNoteId, now) } ?: blocksBeforePreset
-            val rowNote = newRowMetadata(rowNoteId, database, template, title = template?.title.orEmpty(), now = now)
+            val blocksMatchingFilters = blocksBeforePreset.withCellsMatchingFilters(database, rowNoteId, now, todayInThisTimeZone())
+            val rowBlocks = cellPreset?.let { blocksMatchingFilters.withCellPreset(database, it, rowNoteId, now) } ?: blocksMatchingFilters
+            val rowTitle = database.titleMatchingFilters(template?.title.orEmpty())
+            val rowNote = newRowMetadata(rowNoteId, database, template, title = rowTitle, now = now)
             SyncCoordinator.mutex.withLock {
                 saveNote(rowNote, NoteContent(blocks = rowBlocks))
             }
