@@ -2,7 +2,6 @@ package com.emberr.presentation.shared.editor.blockViews
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.text.BasicTextField
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -34,12 +32,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -69,15 +65,10 @@ import com.emberr.presentation.shared.editor.rememberWebLinkActions
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showFeedback
 import com.emberr.presentation.LocalImageOverlay
-import com.emberr.presentation.shared.components.EmberrBlur
-import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.editor.DefaultBlockShape
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.camera
 import emberr.shared.generated.resources.circle_x
-import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.upload2
 import emberr.shared.generated.resources.image
 import kotlinx.coroutines.launch
@@ -90,7 +81,6 @@ private val MaximumImageBlockHeight = 320.dp
 private val LoadingImageBlockHeight = 180.dp
 private val EmptyImageButtonSidePadding = 8.dp
 private val EmptyImageButtonsEndSpace = 6.dp
-private val SourceLinkPillMaxWidth = 200.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -190,7 +180,6 @@ fun ImageBlockView(
                     .build()
             }
 
-            val imageHazeState = remember { HazeState() }
             var widthToHeightRatio by remember(absolutePath) { mutableStateOf<Float?>(null) }
             var thumbnailBoundsInRoot by remember { mutableStateOf<Rect?>(null) }
 
@@ -238,7 +227,7 @@ fun ImageBlockView(
                     AsyncImage(
                         model = request,
                         contentDescription = "Note Image",
-                        modifier = Modifier.fillMaxSize().hazeSource(state = imageHazeState),
+                        modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
                         onSuccess = { successState ->
                             if (widthToHeightRatio == null) {
@@ -249,55 +238,6 @@ fun ImageBlockView(
                             }
                         }
                     )
-
-                    Icon(
-                        painterResource(Res.drawable.copy),
-                        contentDescription = "Copy Image",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(8.dp)
-                            .clip(CircleShape)
-                            .border(
-                                width = 0.5.dp,
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                shape = CircleShape
-                            )
-                            .emberrBlur(imageHazeState, EmberrBlur.OnImage)
-                            .padding(8.dp)
-                            .size(16.dp)
-                            .clickable {
-                                coroutineScope.launch {
-                                    val success = ImageClipboard.copyImageToClipboard(absolutePath)
-                                    showFeedback(if (success) "Image copied to clipboard" else "Failed to copy image")
-                                }
-                            }
-                    )
-
-                    block.sourceUrl?.let { sourceUrl ->
-                        Text(
-                            text = sourceUrl,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(8.dp)
-                                .widthIn(max = SourceLinkPillMaxWidth)
-                                .clip(CircleShape)
-                                .border(
-                                    width = 0.5.dp,
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                    shape = CircleShape
-                                )
-                                .emberrBlur(imageHazeState, EmberrBlur.OnImage)
-                                .clickable {
-                                    if (inSelectionMode) onToggleSelection() else webLinkActions.openLink(sourceUrl)
-                                }
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
-                    }
                 }
             }
 
