@@ -22,6 +22,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 class LocalAiEngine(
     private val aiSettingsRepository: AiSettingsRepository
@@ -109,9 +110,14 @@ class LocalAiEngine(
 
     // Private helpers
     private fun unloadModelAfterIdlePeriod() {
+        val idleTimeBeforeUnloading = if (loadedModel == LoadedModel.EMBEDDER) {
+            IDLE_TIME_BEFORE_UNLOADING_EMBEDDER
+        } else {
+            IDLE_TIME_BEFORE_UNLOADING_GENERATOR
+        }
         pendingModelUnload?.cancel()
         pendingModelUnload = modelUnloadScope.launch {
-            delay(IDLE_TIME_BEFORE_UNLOADING_MODEL)
+            delay(idleTimeBeforeUnloading)
             runCatching { shutdown() }
         }
     }
@@ -238,6 +244,7 @@ class LocalAiEngine(
 
     private companion object {
         const val MIN_OUTPUT_TOKENS = 128
-        val IDLE_TIME_BEFORE_UNLOADING_MODEL = 5.minutes
+        val IDLE_TIME_BEFORE_UNLOADING_GENERATOR = 5.minutes
+        val IDLE_TIME_BEFORE_UNLOADING_EMBEDDER = 60.seconds
     }
 }
