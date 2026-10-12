@@ -160,7 +160,7 @@ fun DatabaseBlockView(
     runAfterKeyboardCloses: (() -> Unit) -> Unit
 ) {
     val settingsState by remember(block.databaseId) { editor.settingsShownFor(block.databaseId) }
-        .collectAsState(initial = DatabaseSettingsState.Loading)
+        .collectAsState(initial = editor.currentSettingsShownFor(block.databaseId))
 
     when (val shownSettings = settingsState) {
         DatabaseSettingsState.Loading -> Unit
@@ -193,7 +193,7 @@ private fun DatabaseBlockContent(
     onOpenRow: (String) -> Unit,
     runAfterKeyboardCloses: (() -> Unit) -> Unit
 ) {
-    val savedRows by remember(block.databaseId) { editor.rowsOf(block.databaseId) }.collectAsState(initial = emptyList())
+    val savedRows by remember(block.databaseId) { editor.rowsOf(block.databaseId) }.collectAsState()
     val rows = remember(savedRows, block) { savedRows.withFormulaResults(block) }
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }

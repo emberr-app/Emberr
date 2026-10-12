@@ -73,6 +73,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -80,6 +81,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -133,6 +135,7 @@ class DatabaseBlockEditor(
     private var pendingTextEditsJob: Job? = null
     private val rowNoteIdsToIndex = mutableSetOf<String>()
     private val databaseIdsWithRenamesToIndex = mutableSetOf<String>()
+    private val rowsByDatabaseId = mutableMapOf<String, StateFlow<List<DatabaseRow>>>()
     private val savedSettings = MutableStateFlow<Map<String, DatabaseBlock?>>(emptyMap())
     private val unsavedSettings = MutableStateFlow<Map<String, DatabaseBlock>>(emptyMap())
     private val databaseIdsOfSettingsToWrite = mutableSetOf<String>()
@@ -144,7 +147,17 @@ class DatabaseBlockEditor(
     private val _historyStepsApplied = MutableStateFlow(0)
     val historyStepsApplied: StateFlow<Int> = _historyStepsApplied.asStateFlow()
 
-    fun rowsOf(databaseId: String): Flow<List<DatabaseRow>> = repository.observeDatabaseRows(databaseId)
+    fun rowsOf(databaseId: String): StateFlow<List<DatabaseRow>> =
+        rowsByDatabaseId.getOrPut(databaseId) {
+            repository.observeDatabaseRows(databaseId).stateIn(
+                scope = appScope,
+                started = SharingStarted.WhileSubscribed(
+                    stopTimeoutMillis = ROWS_KEPT_WHILE_OFF_SCREEN_MILLIS,
+                    replayExpirationMillis = 0
+                ),
+                initialValue = emptyList()
+            )
+        }
 
     val databaseTemplates: Flow<List<NoteMetadataEntity>> = repository.getAllDatabaseTemplates()
 
@@ -153,13 +166,22 @@ class DatabaseBlockEditor(
 
     fun settingsShownFor(databaseId: String): Flow<DatabaseSettingsState> =
         combine(savedSettings, unsavedSettings) { saved, unsaved ->
-            when {
-                databaseId !in saved -> DatabaseSettingsState.Loading
-                else -> newerSettings(saved[databaseId], unsaved[databaseId])
-                    ?.let { DatabaseSettingsState.Found(it) }
-                    ?: DatabaseSettingsState.Missing
-            }
+            settingsStateOf(databaseId, saved, unsaved)
         }.distinctUntilChanged()
+
+    fun currentSettingsShownFor(databaseId: String): DatabaseSettingsState =
+        settingsStateOf(databaseId, savedSettings.value, unsavedSettings.value)
+
+    private fun settingsStateOf(
+        databaseId: String,
+        saved: Map<String, DatabaseBlock?>,
+        unsaved: Map<String, DatabaseBlock>
+    ): DatabaseSettingsState = when {
+        databaseId !in saved -> DatabaseSettingsState.Loading
+        else -> newerSettings(saved[databaseId], unsaved[databaseId])
+            ?.let { DatabaseSettingsState.Found(it) }
+            ?: DatabaseSettingsState.Missing
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun keepDatabaseSettingsUpdated() {
@@ -845,5 +867,6 @@ class DatabaseBlockEditor(
     private companion object {
         const val TEXT_SAVE_DELAY_MILLIS = 600L
         const val NEW_COLOR_RULE_BACKGROUND = "red"
+        const val ROWS_KEPT_WHILE_OFF_SCREEN_MILLIS = 2 * 60 * 1000L
     }
 }
