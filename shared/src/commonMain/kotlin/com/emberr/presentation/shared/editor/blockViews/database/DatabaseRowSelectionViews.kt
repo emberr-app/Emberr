@@ -125,10 +125,12 @@ internal fun DatabaseSelectionBar(
             maxLines = 1
         )
         Spacer(modifier = Modifier.weight(1f))
+        val hasSelectedRows = selectedRowIds.isNotEmpty()
         Box {
             DatabaseSelectionBarButton(
                 label = "Edit",
                 icon = Res.drawable.pen,
+                enabled = hasSelectedRows,
                 onClick = { runAfterKeyboardCloses { showsEditMenu = true } }
             )
             DatabaseMenu(expanded = showsEditMenu, title = "Edit ${selectedRowIds.size} rows", onDismiss = { showsEditMenu = false }) { closeMenuAnd ->
@@ -138,6 +140,7 @@ internal fun DatabaseSelectionBar(
         DatabaseSelectionBarButton(
             label = "Duplicate",
             icon = Res.drawable.copy,
+            enabled = hasSelectedRows,
             onClick = {
                 editor.duplicateRows(block.id, viewId, shownRowIds, selectedRowIds)
                 onClearSelection()
@@ -147,6 +150,7 @@ internal fun DatabaseSelectionBar(
             label = "Delete",
             icon = Res.drawable.trash,
             isDestructive = true,
+            enabled = hasSelectedRows,
             onClick = {
                 editor.deleteRows(selectedRowIds)
                 onClearSelection()
@@ -170,13 +174,15 @@ private fun DatabaseSelectionBarButton(
     label: String,
     icon: DrawableResource,
     onClick: () -> Unit,
-    isDestructive: Boolean = false
+    isDestructive: Boolean = false,
+    enabled: Boolean = true
 ) {
-    val color = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    val fullColor = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    val color = if (enabled) fullColor else fullColor.copy(alpha = 0.38f)
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

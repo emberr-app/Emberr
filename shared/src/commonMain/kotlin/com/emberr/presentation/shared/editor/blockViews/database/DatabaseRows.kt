@@ -96,7 +96,8 @@ internal fun DatabaseRowItem(
     columnDragState: DatabaseColumnDragState,
     editor: DatabaseBlockEditor,
     onOpenRow: (String) -> Unit,
-    runAfterKeyboardCloses: (() -> Unit) -> Unit
+    runAfterKeyboardCloses: (() -> Unit) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val draggedBackground = draggedColumnBackground()
     val frozenBackground = MaterialTheme.colorScheme.background
@@ -104,7 +105,7 @@ internal fun DatabaseRowItem(
     val firstFrozenColumn = frozenColumns.firstOrNull().takeUnless { rowSelection.isSelecting }
     val blocksEdits = inSelectionMode || isLocked
     val today = todayInThisTimeZone()
-    Row(modifier = Modifier.height(IntrinsicSize.Max).defaultMinSize(minHeight = DatabaseCellMinHeight)) {
+    Row(modifier = modifier.height(IntrinsicSize.Max).defaultMinSize(minHeight = DatabaseCellMinHeight)) {
         if (rowSelection.isSelecting) {
             DatabaseRowCheckboxCell(
                 isChecked = rowSelection.isSelected(row.noteId),

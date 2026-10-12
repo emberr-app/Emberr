@@ -114,7 +114,7 @@ internal fun DatabaseHeaderRow(
             DatabaseRowCheckboxCell(
                 isChecked = allShownRowsAreSelected,
                 enabled = !inSelectionMode,
-                onToggle = { if (allShownRowsAreSelected) rowSelection.clear() else rowSelection.selectAll(shownRowIds) },
+                onToggle = { if (allShownRowsAreSelected) rowSelection.unselectAll() else rowSelection.selectAll(shownRowIds) },
                 modifier = Modifier.staysInPlaceWhileScrolling(frozenColumns.isNotEmpty(), tableScrollState, frozenBackground, tableBorderColor)
             )
         }

@@ -2,6 +2,8 @@ package com.emberr.presentation.shared.editor.blockViews.database
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -36,6 +38,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +56,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -83,6 +88,7 @@ import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.DatabaseSettingsState
+import com.emberr.presentation.shared.editor.GlobalEditorState
 import com.emberr.ui.theme.LocalEmberrFontStyle
 import com.emberr.ui.theme.fontFamilyFor
 import com.emberr.ui.theme.tableGridLineColor
@@ -96,6 +102,7 @@ import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.x
+import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -186,7 +193,11 @@ private fun DatabaseBlockContent(
     val rows = remember(savedRows, block) { savedRows.withFormulaResults(block) }
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
-    val visibleRows = remember(rows, block, searchText) { applyFiltersAndSort(rows, block).matchingSearch(searchText, block) }
+    val activeView = block.activeView()
+    var rowIdsShownDespiteFilters by remember(block.databaseId, activeView.id, activeView.filters) { mutableStateOf(emptySet<String>()) }
+    val visibleRows = remember(rows, block, searchText, rowIdsShownDespiteFilters) {
+        applyFiltersAndSort(rows, block, rowIdsShownDespiteFilters = rowIdsShownDespiteFilters).matchingSearch(searchText, block)
+    }
     val historyStepsApplied by editor.historyStepsApplied.collectAsState()
     val rowToFocus by editor.rowToFocus.collectAsState()
     val scrollState = rememberScrollState()
@@ -218,7 +229,6 @@ private fun DatabaseBlockContent(
     val selectionColumnWidth = if (rowSelection.isSelecting) DatabaseSelectionColumnWidth else 0.dp
     val tableWidth = (columnWidth(DatabaseColumnTarget.NotesTitle) + block.visibleColumns().sumOf { columnWidth(it) }).dp +
         DatabaseGutterWidth + selectionColumnWidth
-    val activeView = block.activeView()
     var loadedRowCount by remember(block.databaseId, activeView.id, activeView.loadLimit) { mutableIntStateOf(activeView.loadLimit) }
     val frozenColumns = block.frozenColumns()
     val blocksEdits = inSelectionMode || block.isLocked
@@ -238,7 +248,7 @@ private fun DatabaseBlockContent(
     }
 
     LaunchedEffect(activeView.id, block.isLocked) {
-        rowSelection.clear()
+        rowSelection.stopSelecting()
     }
 
     LaunchedEffect(rowToFocus) {
@@ -246,6 +256,13 @@ private fun DatabaseBlockContent(
         isSearchOpen = false
         searchText = ""
         if (newRowNoteId !in newRowIds) newRowIds += newRowNoteId
+        rowIdsShownDespiteFilters += newRowNoteId
+    }
+
+    LaunchedEffect(block.databaseId, activeView.id, activeView.filters) {
+        snapshotFlow { GlobalEditorState.tapsOutsideNewDatabaseRows }
+            .drop(1)
+            .collect { rowIdsShownDespiteFilters = emptySet() }
     }
 
     LaunchedEffect(rowToFocus, activeView.type) {
@@ -271,6 +288,19 @@ private fun DatabaseBlockContent(
                 )
             }
 
+            if (!isDesktopPlatform) {
+                DatabaseViewTabs(
+                    block = block,
+                    editor = editor,
+                    inSelectionMode = inSelectionMode,
+                    isLocked = block.isLocked,
+                    runAfterKeyboardCloses = runAfterKeyboardCloses,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 8.dp)
+                )
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -278,14 +308,16 @@ private fun DatabaseBlockContent(
                 horizontalArrangement = Arrangement.spacedBy(HeaderButtonGap),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                DatabaseViewTabs(
-                    block = block,
-                    editor = editor,
-                    inSelectionMode = inSelectionMode,
-                    isLocked = block.isLocked,
-                    runAfterKeyboardCloses = runAfterKeyboardCloses,
-                    modifier = Modifier.weight(1f)
-                )
+                if (isDesktopPlatform) {
+                    DatabaseViewTabs(
+                        block = block,
+                        editor = editor,
+                        inSelectionMode = inSelectionMode,
+                        isLocked = block.isLocked,
+                        runAfterKeyboardCloses = runAfterKeyboardCloses,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
                 DatabaseHeaderButton(
                     label = "Search",
                     icon = Res.drawable.search,
@@ -296,6 +328,9 @@ private fun DatabaseBlockContent(
                         isSearchOpen = !isSearchOpen
                     }
                 ) {}
+                if (!isDesktopPlatform) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
                 if (block.isLocked) {
                     DatabaseHeaderButton(
                         label = "Locked",
@@ -429,7 +464,7 @@ private fun DatabaseBlockContent(
                             selectedRowIds = shownRowIds.filter { rowSelection.isSelected(it) },
                             shownRowIds = shownRowIds,
                             editor = editor,
-                            onClearSelection = rowSelection::clear,
+                            onClearSelection = rowSelection::stopSelecting,
                             runAfterKeyboardCloses = runAfterKeyboardCloses,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -495,7 +530,12 @@ private fun DatabaseBlockContent(
                                                 columnDragState = columnDragState,
                                                 editor = editor,
                                                 onOpenRow = onOpenRow,
-                                                runAfterKeyboardCloses = runAfterKeyboardCloses
+                                                runAfterKeyboardCloses = runAfterKeyboardCloses,
+                                                modifier = if (row.noteId in rowIdsShownDespiteFilters) {
+                                                    Modifier.marksPressesAsOnNewRow()
+                                                } else {
+                                                    Modifier
+                                                }
                                             )
                                         }
                                     }
@@ -547,6 +587,13 @@ private fun DatabaseBlockContent(
                     )
             )
         }
+    }
+}
+
+private fun Modifier.marksPressesAsOnNewRow(): Modifier = pointerInput(Unit) {
+    awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        GlobalEditorState.pressStartedOnNewDatabaseRow = true
     }
 }
 

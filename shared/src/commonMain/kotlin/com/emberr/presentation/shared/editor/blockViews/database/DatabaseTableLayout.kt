@@ -46,12 +46,14 @@ internal class DatabaseRowSelection {
     var selectedRowIds by mutableStateOf(emptySet<String>())
         private set
 
-    val isSelecting: Boolean get() = selectedRowIds.isNotEmpty()
+    var isSelecting by mutableStateOf(false)
+        private set
 
     fun isSelected(rowNoteId: String): Boolean = rowNoteId in selectedRowIds
 
     fun select(rowNoteId: String) {
         selectedRowIds = selectedRowIds + rowNoteId
+        isSelecting = true
     }
 
     fun toggle(rowNoteId: String) {
@@ -65,9 +67,15 @@ internal class DatabaseRowSelection {
 
     fun selectAll(rowNoteIds: List<String>) {
         selectedRowIds = rowNoteIds.toSet()
+        isSelecting = true
     }
 
-    fun clear() {
+    fun unselectAll() {
         selectedRowIds = emptySet()
+    }
+
+    fun stopSelecting() {
+        selectedRowIds = emptySet()
+        isSelecting = false
     }
 }
