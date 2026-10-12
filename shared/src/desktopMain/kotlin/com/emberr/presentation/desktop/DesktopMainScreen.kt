@@ -1062,7 +1062,7 @@ fun DesktopMainScreen(
                                                 .animateItem(
                                                     fadeInSpec = TreeRowFadeInSpec,
                                                     fadeOutSpec = TreeRowFadeOutSpec,
-                                                    placementSpec = TreeRowPlacementSpec
+                                                    placementSpec = null
                                                 )
                                                 .padding(top = 4.dp, bottom = 8.dp)
                                         ) {
