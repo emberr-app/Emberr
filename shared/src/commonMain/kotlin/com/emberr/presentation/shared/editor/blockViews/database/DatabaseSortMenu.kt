@@ -176,7 +176,7 @@ private fun DatabaseSortColumnChoices(
     columns.forEach { target ->
         DatabaseMenuOption(
             label = block.labelOf(target),
-            isSelected = target == selectedColumn,
+            isSelected = selectedColumn?.let { target == it },
             icon = { DatabaseOptionIcon(block.iconOf(target)) },
             onClick = { onPick(target) }
         )
