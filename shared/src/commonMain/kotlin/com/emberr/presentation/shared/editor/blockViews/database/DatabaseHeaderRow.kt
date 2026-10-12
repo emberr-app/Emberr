@@ -99,12 +99,14 @@ internal fun DatabaseHeaderRow(
     val tableBorderColor = tableGridLineColor
     val firstFrozenColumn = frozenColumns.firstOrNull().takeUnless { rowSelection.isSelecting }
     val allShownRowsAreSelected = shownRowIds.isNotEmpty() && shownRowIds.all { rowSelection.isSelected(it) }
+    val latestHeaderColumns by rememberUpdatedState(headerColumns)
 
     fun dropDraggedColumn() {
         val draggedColumn = dragState.draggedColumn ?: return
-        val beforeColumn = columnToDropBefore(headerColumns, dragState.headerSpans, dragState.pointerX)
+        val columnsNow = latestHeaderColumns
+        val beforeColumn = columnToDropBefore(columnsNow, dragState.headerSpans, dragState.pointerX)
         dragState.reset()
-        if (!dropKeepsColumnInPlace(headerColumns, draggedColumn, beforeColumn)) {
+        if (!dropKeepsColumnInPlace(columnsNow, draggedColumn, beforeColumn)) {
             editor.moveColumnBefore(block.id, draggedColumn, beforeColumn)
         }
     }

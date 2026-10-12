@@ -80,6 +80,7 @@ internal fun DatabaseViewTabs(
     val views = block.allViews()
     val activeViewId = block.activeView().id
     val viewIds = views.map { it.id }
+    val latestViewIds by rememberUpdatedState(viewIds)
     val dragState = remember { DatabaseViewDragState() }
     val dropLineColor = MaterialTheme.colorScheme.primary
     val scrollState = rememberScrollState()
@@ -100,9 +101,10 @@ internal fun DatabaseViewTabs(
 
     fun dropDraggedView() {
         val draggedViewId = dragState.draggedViewId ?: return
-        val beforeViewId = viewToDropBefore(viewIds, dragState.pillSpans, dragState.pointerX)
+        val viewIdsNow = latestViewIds
+        val beforeViewId = viewToDropBefore(viewIdsNow, dragState.pillSpans, dragState.pointerX)
         dragState.reset()
-        if (!dropKeepsViewInPlace(viewIds, draggedViewId, beforeViewId)) {
+        if (!dropKeepsViewInPlace(viewIdsNow, draggedViewId, beforeViewId)) {
             editor.moveViewBefore(block.id, draggedViewId, beforeViewId)
         }
     }
