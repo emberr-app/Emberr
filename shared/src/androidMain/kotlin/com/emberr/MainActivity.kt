@@ -54,6 +54,8 @@ import com.emberr.ui.theme.EmberrTheme
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -86,6 +88,7 @@ import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.util.export.generateAndSaveAndroidPdf
 import com.emberr.domain.update.AndroidUpdateChecker
 import com.emberr.presentation.navigation.Screen
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 import kotlin.time.Clock
@@ -98,6 +101,8 @@ import android.provider.OpenableColumns
 
 
 private val aiWarmUpFallbackDelay = 8000L.milliseconds
+private val updateCheckDelayAfterOpening = 30000L.milliseconds
+private val lanSyncDelayAfterOpening = 2000L.milliseconds
 
 class MainActivity : ComponentActivity() {
 
@@ -143,7 +148,10 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
 
-        updateChecker.checkOnLaunchOnce()
+        lifecycleScope.launch {
+            delay(updateCheckDelayAfterOpening)
+            updateChecker.checkOnLaunchOnce()
+        }
 
         lifecycleScope.launch {
             withTimeoutOrNull(aiWarmUpFallbackDelay) { FirstContentRenderSignal.awaitFirstContent() }
@@ -173,13 +181,22 @@ class MainActivity : ComponentActivity() {
         val syncViewModel: SyncViewModel by inject()
         val discoveryManager: SyncDiscoveryManager by inject()
 
+        var hasResumedBefore = false
+        var pendingLanSyncStart: Job? = null
+
         lifecycle.addObserver(LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    syncViewModel.triggerAutoSync(discoveryManager)
-                    syncViewModel.startForegroundWatchdog()
+                    val waitBeforeLanSync = if (hasResumedBefore) Duration.ZERO else lanSyncDelayAfterOpening
+                    hasResumedBefore = true
+                    pendingLanSyncStart = lifecycleScope.launch {
+                        delay(waitBeforeLanSync)
+                        syncViewModel.triggerAutoSync(discoveryManager)
+                        syncViewModel.startForegroundWatchdog()
+                    }
                 }
                 Lifecycle.Event.ON_PAUSE -> {
+                    pendingLanSyncStart?.cancel()
                     syncViewModel.stopForegroundWatchdog()
                     lifecycleScope.launch(Dispatchers.Default) {
                         ActiveEditorRegistry.flushAllPending()
