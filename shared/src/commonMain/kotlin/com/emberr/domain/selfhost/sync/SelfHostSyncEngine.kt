@@ -55,12 +55,22 @@ import com.emberr.domain.util.sync.withSyncCoordinatorWaitingAtMost
 import com.emberr.database.EmberrDatabase
 import java.io.File
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -80,6 +90,7 @@ sealed class SelfHostSyncResult {
     data object AlreadyInProgress : SelfHostSyncResult()
     data object NotConfigured : SelfHostSyncResult()
     data object WaitingForAllowedNetwork : SelfHostSyncResult()
+    data object Cancelled : SelfHostSyncResult()
 }
 
 internal enum class ReconcileOutcome { SYNCED, CONFLICT_SKIPPED, LOCK_BUSY, UNCHANGED, BROKEN_NOTE }
@@ -133,9 +144,21 @@ class SelfHostSyncEngine(
     private val blockJson = Json { ignoreUnknownKeys = true }
     private val collectionJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val mediaRetryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val syncPassScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val _noteSyncProgress = MutableStateFlow<SelfHostSyncProgress?>(null)
+    val noteSyncProgress: StateFlow<SelfHostSyncProgress?> = _noteSyncProgress.asStateFlow()
+
+    private val _imageSyncProgress = MutableStateFlow<SelfHostSyncProgress?>(null)
+    val imageSyncProgress: StateFlow<SelfHostSyncProgress?> = _imageSyncProgress.asStateFlow()
+
+    @Volatile
+    var isPausedUntilAppRestart = false
+        private set
 
     private companion object {
         const val MAX_MANIFEST_UPLOAD_RETRIES = 3
+        const val PROGRESS_REPORT_STEP_BYTES = 256L * 1024
         val SYNC_LOCK_MAX_WAIT = 10.seconds
     }
 
@@ -156,14 +179,16 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("runSync() skipped, this network is not one the user picked for sync")
             return SelfHostSyncResult.WaitingForAllowedNetwork
         }
-        if (!textSyncMutex.tryLock()) {
-            SelfHostSyncLog.d("runSync() skipped, a sync is already in progress")
-            return SelfHostSyncResult.AlreadyInProgress
-        }
-        return try {
-            runSyncLocked()
-        } finally {
-            textSyncMutex.unlock()
+        return runAsCancellablePass {
+            if (!textSyncMutex.tryLock()) {
+                SelfHostSyncLog.d("runSync() skipped, a sync is already in progress")
+                return@runAsCancellablePass SelfHostSyncResult.AlreadyInProgress
+            }
+            try {
+                runSyncLocked()
+            } finally {
+                textSyncMutex.unlock()
+            }
         }
     }
 
@@ -173,7 +198,7 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("runSyncAfterAnyRunningOne() skipped, this network is not one the user picked for sync")
             return SelfHostSyncResult.WaitingForAllowedNetwork
         }
-        return textSyncMutex.withLock { runSyncLocked() }
+        return runAsCancellablePass { textSyncMutex.withLock { runSyncLocked() } }
     }
 
     suspend fun forgetServerSyncProgress() = textSyncMutex.withLock {
@@ -189,18 +214,20 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("syncMedia() skipped, this network is not one the user picked for sync")
             return SelfHostSyncResult.WaitingForAllowedNetwork
         }
-        if (!mediaSyncMutex.tryLock()) {
-            SelfHostSyncLog.d("syncMedia() skipped, a sync is already in progress")
-            return SelfHostSyncResult.AlreadyInProgress
-        }
-        return try {
-            // Media sync only touches files on disk and the remote manifest, never note data, so it
-            // doesn't need SyncCoordinator.mutex - mediaSyncMutex already prevents two media
-            // passes from overlapping. Holding SyncCoordinator.mutex here would instead
-            // freeze every local editor save for as long as a large attachment takes to transfer.
-            syncMediaLocked()
-        } finally {
-            mediaSyncMutex.unlock()
+        return runAsCancellablePass {
+            if (!mediaSyncMutex.tryLock()) {
+                SelfHostSyncLog.d("syncMedia() skipped, a sync is already in progress")
+                return@runAsCancellablePass SelfHostSyncResult.AlreadyInProgress
+            }
+            try {
+                // Media sync only touches files on disk and the remote manifest, never note data, so it
+                // doesn't need SyncCoordinator.mutex - mediaSyncMutex already prevents two media
+                // passes from overlapping. Holding SyncCoordinator.mutex here would instead
+                // freeze every local editor save for as long as a large attachment takes to transfer.
+                syncMediaLocked()
+            } finally {
+                mediaSyncMutex.unlock()
+            }
         }
     }
 
@@ -210,7 +237,36 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("syncMediaAfterAnyRunningOne() skipped, this network is not one the user picked for sync")
             return SelfHostSyncResult.WaitingForAllowedNetwork
         }
-        return mediaSyncMutex.withLock { syncMediaLocked() }
+        return runAsCancellablePass { mediaSyncMutex.withLock { syncMediaLocked() } }
+    }
+
+    fun pauseUntilAppRestart() {
+        SelfHostSyncLog.d("Sync paused until the app restarts or the user taps Sync Now")
+        isPausedUntilAppRestart = true
+    }
+
+    fun resumeAfterPause() {
+        isPausedUntilAppRestart = false
+    }
+
+    fun stopRunningSync() {
+        SelfHostSyncLog.d("Stopping every running sync pass")
+        syncPassScope.coroutineContext.cancelChildren()
+    }
+
+    private suspend fun runAsCancellablePass(pass: suspend () -> SelfHostSyncResult): SelfHostSyncResult {
+        if (isPausedUntilAppRestart) {
+            SelfHostSyncLog.d("Sync pass skipped, sync is paused after the user cancelled it")
+            return SelfHostSyncResult.Cancelled
+        }
+        val passJob = syncPassScope.async { pass() }
+        return try {
+            passJob.await()
+        } catch (cause: CancellationException) {
+            currentCoroutineContext().ensureActive()
+            SelfHostSyncLog.d("Sync pass was stopped")
+            SelfHostSyncResult.Cancelled
+        }
     }
 
     // Lets UI explicitly retry one specific file on demand (e.g. a "tap to retry" affordance on a
@@ -258,6 +314,8 @@ class SelfHostSyncEngine(
                     )
                     else -> SelfHostSyncLog.d("runBaselineSync(): baseline media sync finished with $mediaResult")
                 }
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
                 SelfHostSyncLog.e(
                     "runBaselineSync(): baseline media sync threw unexpectedly, will retry via background worker",
@@ -272,6 +330,7 @@ class SelfHostSyncEngine(
     }
 
     private suspend fun syncMediaLocked(): SelfHostSyncResult {
+        _imageSyncProgress.value = SelfHostSyncProgress()
         return try {
             webDavSyncClient.ensureRemoteLayoutExists()
 
@@ -296,9 +355,18 @@ class SelfHostSyncEngine(
             val toDownload = mediaFilesToDownload(manifestMediaEntries, referencedFileNames, existingLocalFileNames)
             SelfHostSyncLog.d("MediaSync: ${toUpload.size} to upload, ${toDownload.size} to download")
 
+            val mediaSizesByFileName = manifestMediaEntries.associate { it.entryId to it.mediaSizeBytes }
+            val uploadSizesByFileName = toUpload.associateWith { File(mediaStorageHelper.getAbsoluteMediaPath(it)).length() }
+            _imageSyncProgress.value = SelfHostSyncProgress(
+                stage = SelfHostSyncStage.TRANSFERRING,
+                toSend = uploadSizesByFileName.values.sum(),
+                toReceive = toDownload.sumOf { mediaSizesByFileName[it] ?: 0L }
+            )
+
             var uploadedCount = 0
             var failedCount = 0
             val successfullyUploaded = mutableMapOf<String, Long>()
+            var bytesOfFinishedUploads = 0L
 
             for (fileName in toUpload) {
                 val file = File(mediaStorageHelper.getAbsoluteMediaPath(fileName))
@@ -313,21 +381,27 @@ class SelfHostSyncEngine(
                 MediaTransferStatusBus.markStarted(fileName, MediaTransferPhase.UPLOADING)
                 var uploadSucceeded = false
                 try {
-                    successfullyUploaded[fileName] = webDavSyncClient.uploadMediaInPieces(fileName, file)
+                    successfullyUploaded[fileName] = webDavSyncClient.uploadMediaInPieces(fileName, file) { bytesDoneForFile ->
+                        reportImageBytesSent(bytesOfFinishedUploads + bytesDoneForFile)
+                    }
                     uploadSucceeded = true
                     uploadedCount++
                     SelfHostSyncLog.d("MediaSync: uploaded $fileName (${file.length()} bytes)")
+                } catch (cause: CancellationException) {
+                    MediaTransferStatusBus.markDeferred(fileName)
+                    throw cause
                 } catch (cause: Exception) {
                     failedCount++
                     SelfHostSyncLog.e("MediaSync Error: failed to upload $fileName: ${cause.message}", cause)
-                } finally {
-                    MediaTransferStatusBus.markFinished(fileName, uploadSucceeded)
                 }
+                MediaTransferStatusBus.markFinished(fileName, uploadSucceeded)
+                bytesOfFinishedUploads += uploadSizesByFileName.getValue(fileName)
+                reportImageBytesSent(bytesOfFinishedUploads)
             }
 
             var downloadedCount = 0
             val missingOnServer = mutableSetOf<String>()
-            val mediaSizesByFileName = manifestMediaEntries.associate { it.entryId to it.mediaSizeBytes }
+            var bytesOfFinishedDownloads = 0L
             for (fileName in toDownload) {
                 val sizeBytes = mediaSizesByFileName[fileName]
                 if (sizeBytes == null) {
@@ -341,7 +415,9 @@ class SelfHostSyncEngine(
                 MediaTransferStatusBus.markStarted(fileName, MediaTransferPhase.DOWNLOADING)
                 var downloadSucceeded = false
                 try {
-                    val downloaded = webDavSyncClient.downloadMediaInPieces(fileName, sizeBytes, file)
+                    val downloaded = webDavSyncClient.downloadMediaInPieces(fileName, sizeBytes, file) { bytesDoneForFile ->
+                        reportImageBytesReceived(bytesOfFinishedDownloads + bytesDoneForFile)
+                    }
                     if (!downloaded) {
                         missingOnServer += fileName
                         SelfHostSyncLog.e(
@@ -353,14 +429,19 @@ class SelfHostSyncEngine(
                         downloadedCount++
                         SelfHostSyncLog.d("MediaSync: downloaded $fileName (${file.length()} bytes)")
                     }
+                } catch (cause: CancellationException) {
+                    MediaTransferStatusBus.markDeferred(fileName)
+                    throw cause
                 } catch (cause: Exception) {
                     failedCount++
                     SelfHostSyncLog.e("MediaSync Error: failed to download $fileName: ${cause.message}", cause)
-                } finally {
-                    MediaTransferStatusBus.markFinished(fileName, downloadSucceeded)
                 }
+                MediaTransferStatusBus.markFinished(fileName, downloadSucceeded)
+                bytesOfFinishedDownloads += sizeBytes
+                reportImageBytesReceived(bytesOfFinishedDownloads)
             }
 
+            _imageSyncProgress.update { it?.copy(stage = SelfHostSyncStage.FINISHING) }
             val nowMs = Clock.System.now().toEpochMilliseconds()
             val decisions = decideMediaCleanup(
                 mediaEntries = manifestMediaEntries,
@@ -393,11 +474,33 @@ class SelfHostSyncEngine(
         } catch (cause: WebDavConfigurationException) {
             SelfHostSyncLog.d("MediaSync: not configured (${cause.message})")
             SelfHostSyncResult.NotConfigured
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("MediaSync: sync failed with ${cause::class.simpleName}", cause)
             SelfHostSyncResult.Failure(cause)
+        } finally {
+            _imageSyncProgress.value = null
         }
     }
+
+    private fun reportImageBytesSent(bytesSent: Long) {
+        _imageSyncProgress.update { progress ->
+            if (progress == null || !isWorthReporting(progress.sent, bytesSent, progress.toSend)) progress
+            else progress.copy(sent = bytesSent)
+        }
+    }
+
+    private fun reportImageBytesReceived(bytesReceived: Long) {
+        _imageSyncProgress.update { progress ->
+            if (progress == null || !isWorthReporting(progress.received, bytesReceived, progress.toReceive)) progress
+            else progress.copy(received = bytesReceived)
+        }
+    }
+
+    private fun isWorthReporting(reportedBytes: Long, newBytes: Long, totalBytes: Long): Boolean =
+        newBytes > reportedBytes &&
+            (newBytes - reportedBytes >= PROGRESS_REPORT_STEP_BYTES || newBytes >= totalBytes)
 
     private fun fileExistsLocally(fileName: String): Boolean {
         return try {
@@ -424,6 +527,8 @@ class SelfHostSyncEngine(
                 webDavSyncClient.moveFile(WebDavSyncPaths.mediaFolderPath(fileName), WebDavSyncPaths.trashedMediaFolderPath(fileName))
                 movedToTrash += fileName
                 SelfHostSyncLog.d("MediaSync: moved $fileName to the server trash, no note has used it for a day")
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
                 SelfHostSyncLog.e("MediaSync Error: failed to move $fileName to the server trash: ${cause.message}", cause)
             }
@@ -442,6 +547,8 @@ class SelfHostSyncEngine(
                     goneFromServer += fileName
                     SelfHostSyncLog.e("MediaSync: $fileName is used again but is no longer on the server, a device with a copy will upload it")
                 }
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
                 SelfHostSyncLog.e("MediaSync Error: failed to restore $fileName from the server trash: ${cause.message}", cause)
             }
@@ -451,7 +558,9 @@ class SelfHostSyncEngine(
             try {
                 webDavSyncClient.deleteFile(WebDavSyncPaths.trashedMediaFolderPath(fileName))
                 goneFromServer += fileName
-                SelfHostSyncLog.d("MediaSync: emptied $fileName from the server trash after 30 days")
+                SelfHostSyncLog.d("MediaSync: emptied $fileName from the server trash after 7 days")
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
                 SelfHostSyncLog.e("MediaSync Error: failed to empty $fileName from the server trash: ${cause.message}", cause)
             }
@@ -475,6 +584,8 @@ class SelfHostSyncEngine(
                 .filter { it.isCollection }
                 .mapNotNull { WebDavSyncPaths.mediaIdFromFolderName(WebDavSyncPaths.lastPathSegment(it.href)) }
                 .filter { it !in finishedFileNames && it !in fileNamesUploadedThisRun }
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("MediaSync Error: failed to list the media folder to find unfinished uploads: ${cause.message}", cause)
             return 0
@@ -489,6 +600,8 @@ class SelfHostSyncEngine(
                     deletedCount++
                     SelfHostSyncLog.d("MediaSync: deleted the unfinished upload of $fileName, no new piece arrived for 7 days")
                 }
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
                 SelfHostSyncLog.e("MediaSync Error: failed to check the unfinished upload of $fileName: ${cause.message}", cause)
             }
@@ -511,6 +624,10 @@ class SelfHostSyncEngine(
             nowMs = Clock.System.now().toEpochMilliseconds()
         )
         val newManifest = SelfHostManifest(entries = nonMediaEntries + mediaEntries)
+        if (newManifest.isAlreadySavedAs(previousManifest)) {
+            SelfHostSyncLog.d("MediaSync: manifest unchanged, not uploading it")
+            return
+        }
 
         try {
             webDavSyncClient.uploadEncryptedJson(
@@ -526,6 +643,7 @@ class SelfHostSyncEngine(
     }
 
     private suspend fun runSyncLocked(): SelfHostSyncResult {
+        _noteSyncProgress.value = SelfHostSyncProgress()
         return try {
             webDavSyncClient.ensureRemoteLayoutExists()
 
@@ -534,6 +652,8 @@ class SelfHostSyncEngine(
                 if (dedupedCount > 0) {
                     SelfHostSyncLog.d("TextSync: deduped $dedupedCount duplicate daily note row(s) left over from earlier syncs")
                 }
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
                 SelfHostSyncLog.e("TextSync: dedupeDuplicateDailyNotes failed, continuing sync anyway", cause)
             }
@@ -563,8 +683,10 @@ class SelfHostSyncEngine(
                     localRowsByNoteId[entry.entryId]
                 }
 
-            val remoteChangedEntries = remoteTextEntries
-                .filter { it.updatedAt > (localRowForEntry(it)?.selfHostSyncedAt ?: 0L) }
+            val localDeletedAtByEntryId = selfHostDeletedNoteDao.getAllTombstones()
+                .associate { tombstone -> manifestEntryForTombstone(tombstone).entryId to tombstone.deletedAt }
+
+            val remoteChangedEntries = serverEntriesToPull(remoteTextEntries, ::localRowForEntry, localDeletedAtByEntryId)
 
             val candidates = LinkedHashMap<String, SelfHostManifestEntry?>()
             remoteChangedEntries.forEach { entry ->
@@ -578,6 +700,11 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d(
                 "TextSync: remoteChanged=${remoteChangedEntries.size}, localChanged=${localChangedNotes.size}, " +
                         "candidates=${candidates.size}"
+            )
+            _noteSyncProgress.value = SelfHostSyncProgress(
+                stage = SelfHostSyncStage.TRANSFERRING,
+                toSend = candidates.values.count { it == null }.toLong(),
+                toReceive = candidates.values.count { it != null }.toLong()
             )
 
             var syncLockWaitForThisRun = SYNC_LOCK_MAX_WAIT
@@ -613,7 +740,15 @@ class SelfHostSyncEngine(
                     ReconcileOutcome.UNCHANGED -> Unit
                     ReconcileOutcome.BROKEN_NOTE -> { brokenNoteCount++; noteIdsStillWaitingToUpload += noteId }
                 }
+                _noteSyncProgress.update { progress ->
+                    when {
+                        progress == null -> null
+                        remoteEntry == null -> progress.copy(sent = progress.sent + 1)
+                        else -> progress.copy(received = progress.received + 1)
+                    }
+                }
             }
+            _noteSyncProgress.update { it?.copy(stage = SelfHostSyncStage.FINISHING) }
 
             if (withSyncLock { reconcileFolders() } == null) {
                 SelfHostSyncLog.d("TextSync: folders skipped this cycle, SyncCoordinator.mutex busy - will retry next trigger")
@@ -673,9 +808,13 @@ class SelfHostSyncEngine(
         } catch (cause: WebDavConfigurationException) {
             SelfHostSyncLog.d("TextSync: not configured (${cause.message})")
             SelfHostSyncResult.NotConfigured
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("TextSync: sync failed with ${cause::class.simpleName}", cause)
             SelfHostSyncResult.Failure(cause)
+        } finally {
+            _noteSyncProgress.value = null
         }
     }
 
@@ -710,6 +849,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("SpaceSync: complete, ${mergedList.size} space(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("SpaceSync: remote spaces.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("SpaceSync: failed to sync spaces: ${cause.message}", cause)
         }
@@ -748,6 +889,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("FolderSync: complete, ${mergedList.size} folder(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("FolderSync: remote folders.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("FolderSync: failed to sync folders: ${cause.message}", cause)
         }
@@ -787,6 +930,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("EventExceptionSync: complete, ${mergedList.size} occurrence override(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("EventExceptionSync: remote event_exceptions.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("EventExceptionSync: failed to sync event exceptions: ${cause.message}", cause)
         }
@@ -826,6 +971,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("CategorySync: complete, ${mergedList.size} categor(y/ies) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("CategorySync: remote categories.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("CategorySync: failed to sync categories: ${cause.message}", cause)
         }
@@ -862,6 +1009,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("PropertyTagSync: complete, ${mergedList.size} tag(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("PropertyTagSync: remote property_tags.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("PropertyTagSync: failed to sync property tags: ${cause.message}", cause)
         }
@@ -898,6 +1047,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("CustomPropertySync: complete, ${mergedList.size} propert(y/ies) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("CustomPropertySync: remote custom_properties.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("CustomPropertySync: failed to sync custom properties: ${cause.message}", cause)
         }
@@ -972,6 +1123,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("ApiConfigSync: complete, ${mergedEntries.size} provider config(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("ApiConfigSync: remote api_configs.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("ApiConfigSync: failed to sync api configs: ${cause.message}", cause)
         }
@@ -1001,6 +1154,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("BookmarkCategoryOrderSync: complete, ${mergedOrders.ordersBySpaceId.size} space(s) ordered")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("BookmarkCategoryOrderSync: remote bookmark_category_order.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("BookmarkCategoryOrderSync: failed to sync bookmark category order: ${cause.message}", cause)
         }
@@ -1030,6 +1185,8 @@ class SelfHostSyncEngine(
             SelfHostSyncLog.d("FavoriteNoteOrderSync: complete, ${mergedOrders.ordersBySpaceId.size} space(s) ordered")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("FavoriteNoteOrderSync: remote favorite_note_order.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("FavoriteNoteOrderSync: failed to sync favorite note order: ${cause.message}", cause)
         }
@@ -1047,6 +1204,8 @@ class SelfHostSyncEngine(
             try {
                 val entry = reconcileChatSession(sessionId, localSessionsById[sessionId], remoteEntriesById[sessionId])
                 if (entry != null) entries += entry
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
                 SelfHostSyncLog.e("ChatSessionSync: failed to reconcile $sessionId: ${cause.message}", cause)
                 remoteEntriesById[sessionId]?.let { entries += it }
@@ -1251,7 +1410,19 @@ class SelfHostSyncEngine(
                 remoteEmbeddedBlocks = remoteOps?.embeddedBlocks.orEmpty()
             )
 
-            pushMergedNote(mergedMetadata, mergedBlocks, downloadTimeEtag)
+            val serverAlreadyHasThisNote = serverAlreadyHasMergedNote(
+                localMetadata = localMetadata,
+                remoteMetadata = remoteOps?.metadataUpsert,
+                mergedMetadata = mergedMetadata,
+                mergedBlocks = mergedBlocks,
+                remoteUpserts = remoteUpserts,
+                remoteDeletions = remoteDeletions
+            )
+            if (serverAlreadyHasThisNote) {
+                SelfHostSyncLog.d("TextSync: note=$noteId came from the server unchanged, not uploading it back")
+            } else {
+                pushMergedNote(mergedMetadata, mergedBlocks, downloadTimeEtag)
+            }
 
             // Only update `selfHostSyncedAt` if the push succeeds.
             // If the push fails, the note remains a sync candidate for the next cycle.
@@ -1475,6 +1646,8 @@ class SelfHostSyncEngine(
                 }
                 webDavSyncClient.deleteFile(remotePath)
                 selfHostDeletedNoteDao.markRemoteFileDeleted(tombstone.noteId)
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
                 SelfHostSyncLog.e(
                     "TextSync: failed to delete remote file for permanently-deleted note ${tombstone.noteId}, will retry next cycle",
@@ -1504,6 +1677,10 @@ class SelfHostSyncEngine(
         val newManifest = SelfHostManifest(
             entries = noteEntries + mergedTombstonesById.values + preservedMediaEntries + chatSessionEntries
         )
+        if (newManifest.isAlreadySavedAs(previousManifest)) {
+            SelfHostSyncLog.d("TextSync: manifest unchanged, not uploading it")
+            return
+        }
 
         // The If-Match ETag check prevents concurrent manifest uploads from overwriting each other.
         // On a conflict (412 status), we abort and retry with a fresh download.

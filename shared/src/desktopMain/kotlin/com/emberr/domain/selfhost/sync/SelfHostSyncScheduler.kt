@@ -76,6 +76,7 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
 
     actual fun syncNow() {
         SelfHostSyncLog.d("Scheduler: syncNow() running inline on desktop, text sync then media sync")
+        selfHostSyncEngine.resumeAfterPause()
         CoroutineScope(Dispatchers.Default).launch {
             _isSyncActive.value = true
             _syncError.value = null
@@ -106,11 +107,18 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
         }
     }
 
+    actual fun cancelSync() {
+        SelfHostSyncLog.d("Scheduler: cancelSync() stopping the running sync and pausing until the app restarts")
+        selfHostSyncEngine.pauseUntilAppRestart()
+        selfHostSyncEngine.stopRunningSync()
+    }
+
     actual fun cancelAll() {
         SelfHostSyncLog.d("Scheduler: cancelAll() cancelling desktop sync loops")
         textScope?.cancel()
         textScope = null
         mediaScope?.cancel()
         mediaScope = null
+        selfHostSyncEngine.stopRunningSync()
     }
 }

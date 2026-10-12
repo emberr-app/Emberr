@@ -14,6 +14,7 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncEngine
 import com.emberr.domain.selfhost.sync.SelfHostSyncResult
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
+import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.selfhost.sync.SelfHostUpdateRequiredSignal
 import com.emberr.domain.selfhost.webdav.WebDavConfigurationException
@@ -23,6 +24,9 @@ import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Instant
@@ -33,7 +37,7 @@ enum class ConnectionTestStatus { NOT_TESTED, TESTING, VERIFIED, FAILED }
 
 enum class SetupPhase { FORM, FINALIZING, ERROR }
 
-enum class ManualSyncStatus { IDLE, SYNCING }
+enum class ManualSyncStatus { IDLE, SYNCING, CANCELLING }
 
 enum class VaultMode { UNKNOWN, CREATE_VAULT, RESTORE_VAULT }
 
@@ -72,7 +76,9 @@ data class SelfHostConnectedState(
     val lastSyncedAtMillis: Long? = null,
     val isDisconnecting: Boolean = false,
     val syncError: String? = null,
-    val syncNetwork: SelfHostSyncNetwork = SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA
+    val syncNetwork: SelfHostSyncNetwork = SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA,
+    val noteSyncProgress: SelfHostSyncProgress? = null,
+    val imageSyncProgress: SelfHostSyncProgress? = null
 )
 
 sealed class SelfHostScreenState {
@@ -80,6 +86,8 @@ sealed class SelfHostScreenState {
     data class Unconfigured(val form: SelfHostSetupFormState) : SelfHostScreenState()
     data class Connected(val connectedState: SelfHostConnectedState) : SelfHostScreenState()
 }
+
+private const val WAIT_BEFORE_SHOWING_SYNC_FINISHED_MS = 1_000L
 
 private fun waitingForNetworkMessage(syncNetwork: SelfHostSyncNetwork): String = when (syncNetwork) {
     SelfHostSyncNetwork.WIFI_ONLY -> "Sync is set to Wi-Fi only. It will run when you connect to Wi-Fi."
@@ -116,18 +124,34 @@ class SelfHostSetupViewModel(
             refreshConnectionState()
         }
         viewModelScope.launch {
-            selfHostSyncScheduler.isSyncActive.collect { active ->
-                SelfHostSyncLog.d("ViewModel: isSyncActive changed to $active")
-                updateConnected {
-                    it.copy(
-                        syncStatus = if (active) ManualSyncStatus.SYNCING else ManualSyncStatus.IDLE,
-                        lastSyncedAtMillis = if (active) {
-                            it.lastSyncedAtMillis
-                        } else {
-                            settingsManager.getSelfHostLastSyncTimestamp().takeIf { ts -> ts > 0L }
-                        }
-                    )
+            combine(
+                selfHostSyncScheduler.isSyncActive,
+                selfHostSyncEngine.noteSyncProgress,
+                selfHostSyncEngine.imageSyncProgress
+            ) { isManualSyncActive, noteProgress, imageProgress ->
+                isManualSyncActive || noteProgress != null || imageProgress != null
+            }
+                .debounce { isRunning -> if (isRunning) 0L else WAIT_BEFORE_SHOWING_SYNC_FINISHED_MS }
+                .distinctUntilChanged()
+                .collect { active ->
+                    SelfHostSyncLog.d("ViewModel: isSyncActive changed to $active")
+                    updateConnected {
+                        it.copy(
+                            syncStatus = if (active) ManualSyncStatus.SYNCING else ManualSyncStatus.IDLE,
+                            lastSyncedAtMillis = if (active) {
+                                it.lastSyncedAtMillis
+                            } else {
+                                settingsManager.getSelfHostLastSyncTimestamp().takeIf { ts -> ts > 0L }
+                            }
+                        )
+                    }
                 }
+        }
+        viewModelScope.launch {
+            combine(selfHostSyncEngine.noteSyncProgress, selfHostSyncEngine.imageSyncProgress) { noteProgress, imageProgress ->
+                noteProgress to imageProgress
+            }.collect { (noteProgress, imageProgress) ->
+                updateConnected { it.copy(noteSyncProgress = noteProgress, imageSyncProgress = imageProgress) }
             }
         }
         viewModelScope.launch {
@@ -384,9 +408,10 @@ class SelfHostSetupViewModel(
             }
 
             selfHostConnectionState.refresh()
+            selfHostSyncEngine.resumeAfterPause()
 
             when (val result = selfHostSyncEngine.runBaselineSync()) {
-                is SelfHostSyncResult.Success -> {
+                is SelfHostSyncResult.Success, SelfHostSyncResult.Cancelled -> {
                     _screenState.value = SelfHostScreenState.Connected(
                         SelfHostConnectedState(
                             serverUrl = credentials.serverUrl,
@@ -432,8 +457,8 @@ class SelfHostSetupViewModel(
     fun syncNow() {
         SelfHostSyncLog.d("ViewModel: syncNow() invoked")
         if (_screenState.value !is SelfHostScreenState.Connected) return
-        if (selfHostSyncScheduler.isSyncActive.value) {
-            SelfHostSyncLog.d("ViewModel: syncNow() ignored, a sync is already active")
+        if (currentSyncStatus() != ManualSyncStatus.IDLE) {
+            SelfHostSyncLog.d("ViewModel: syncNow() ignored, a sync is already running")
             return
         }
         if (!selfHostSyncEngine.isOnAllowedNetwork()) {
@@ -442,6 +467,16 @@ class SelfHostSetupViewModel(
         }
         selfHostSyncScheduler.syncNow()
     }
+
+    fun cancelSync() {
+        SelfHostSyncLog.d("ViewModel: cancelSync() invoked")
+        if (currentSyncStatus() != ManualSyncStatus.SYNCING) return
+        updateConnected { it.copy(syncStatus = ManualSyncStatus.CANCELLING) }
+        selfHostSyncScheduler.cancelSync()
+    }
+
+    private fun currentSyncStatus(): ManualSyncStatus? =
+        (_screenState.value as? SelfHostScreenState.Connected)?.connectedState?.syncStatus
 
     fun onSyncNetworkSelected(syncNetwork: SelfHostSyncNetwork) {
         settingsManager.saveSelfHostSyncNetwork(syncNetwork.name)

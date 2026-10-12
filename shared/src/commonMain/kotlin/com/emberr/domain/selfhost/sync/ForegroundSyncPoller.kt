@@ -3,6 +3,7 @@ package com.emberr.domain.selfhost.sync
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import com.emberr.domain.selfhost.webdav.WebDavSyncPaths
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,6 +32,8 @@ class ForegroundSyncPoller(
                 delay(POLL_INTERVAL)
                 try {
                     pollOnce()
+                } catch (cause: CancellationException) {
+                    throw cause
                 } catch (cause: Exception) {
                     SelfHostSyncLog.e("ForegroundSyncPoller: poll failed, will retry next interval", cause)
                 }
@@ -62,8 +65,10 @@ class ForegroundSyncPoller(
                 "ForegroundSyncPoller: remoteChanged=$remoteChanged, hasUnsentLocalChanges=$hasUnsentLocalChanges, " +
                         "triggering text sync then media sync"
             )
-            selfHostSyncEngine.runSync()
-            selfHostSyncEngine.syncMedia()
+            scope.launch {
+                selfHostSyncEngine.runSync()
+                selfHostSyncEngine.syncMedia()
+            }.join()
         }
     }
 

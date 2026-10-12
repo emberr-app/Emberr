@@ -35,6 +35,14 @@ data class SelfHostManifest(
     val entries: List<SelfHostManifestEntry> = emptyList()
 )
 
+internal fun SelfHostManifest.isAlreadySavedAs(serverManifest: SelfHostManifest): Boolean {
+    val serverManifestHasEntries = serverManifest.entries.isNotEmpty()
+    return serverManifestHasEntries &&
+        schemaVersion == serverManifest.schemaVersion &&
+        entries.size == serverManifest.entries.size &&
+        entries.toSet() == serverManifest.entries.toSet()
+}
+
 @Serializable
 private data class SelfHostManifestVersion(val schemaVersion: Int = 1)
 

@@ -112,6 +112,10 @@ actual class SelfHostSyncScheduler(
             }
 
             if (!selfHostConnectionState.isConnected.value) return
+            if (selfHostSyncEngine.isPausedUntilAppRestart) {
+                SelfHostSyncLog.d("Scheduler: not scheduling the background push, sync is paused after the user cancelled it")
+                return
+            }
             SelfHostSyncLog.d("Scheduler: handing the background push off to WorkManager, no in-process race")
             scheduleDeferredSyncAfterAppClose()
         }
@@ -180,7 +184,7 @@ actual class SelfHostSyncScheduler(
 
         SelfHostSyncLog.d("Scheduler: enqueueing deferred post-close text sync then media sync")
         WorkManager.getInstance(context)
-            .beginUniqueWork(WORK_NAME_DEFERRED, ExistingWorkPolicy.REPLACE, textRequest)
+            .beginUniqueWork(WORK_NAME_DEFERRED, ExistingWorkPolicy.APPEND_OR_REPLACE, textRequest)
             .then(mediaRequest)
             .enqueue()
     }
@@ -209,26 +213,29 @@ actual class SelfHostSyncScheduler(
             return
         }
         _syncError.value = null
+        selfHostSyncEngine.resumeAfterPause()
 
-        val textRequest = OneTimeWorkRequestBuilder<SelfHostSyncWorker>()
+        val manualRequest = OneTimeWorkRequestBuilder<SelfHostSyncWorker>()
             .setConstraints(allowedNetworkConstraints())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
-            .setInputData(workDataOf(SelfHostSyncWorker.KEY_SYNC_SCOPE to SelfHostSyncWorker.SCOPE_TEXT))
+            .setInputData(workDataOf(SelfHostSyncWorker.KEY_SYNC_SCOPE to SelfHostSyncWorker.SCOPE_MANUAL))
             .addTag(TAG_TEXT_SYNC)
-            .build()
-
-        val mediaRequest = OneTimeWorkRequestBuilder<SelfHostSyncWorker>()
-            .setConstraints(allowedNetworkConstraints())
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
-            .setInputData(workDataOf(SelfHostSyncWorker.KEY_SYNC_SCOPE to SelfHostSyncWorker.SCOPE_MEDIA))
             .addTag(TAG_MEDIA_SYNC)
             .build()
 
-        SelfHostSyncLog.d("Scheduler: syncNow() chaining text sync -> media sync, media will not dispatch until text finishes")
+        SelfHostSyncLog.d("Scheduler: syncNow() enqueueing one manual sync, text then media, with a notification")
         WorkManager.getInstance(context)
-            .beginUniqueWork(WORK_NAME_MANUAL, ExistingWorkPolicy.KEEP, textRequest)
-            .then(mediaRequest)
-            .enqueue()
+            .enqueueUniqueWork(WORK_NAME_MANUAL, ExistingWorkPolicy.KEEP, manualRequest)
+    }
+
+    actual fun cancelSync() {
+        SelfHostSyncLog.d("Scheduler: cancelSync() stopping the running sync and pausing until the app restarts")
+        selfHostSyncEngine.pauseUntilAppRestart()
+        WorkManager.getInstance(context).apply {
+            cancelUniqueWork(WORK_NAME_MANUAL)
+            cancelUniqueWork(WORK_NAME_DEFERRED)
+        }
+        selfHostSyncEngine.stopRunningSync()
     }
 
     actual fun cancelAll() {
@@ -240,6 +247,7 @@ actual class SelfHostSyncScheduler(
             cancelUniqueWork(WORK_NAME_MANUAL)
         }
         foregroundSyncPoller.stop()
+        selfHostSyncEngine.stopRunningSync()
     }
 
     private fun allowedNetworkConstraints(): Constraints {

@@ -9,5 +9,6 @@ expect class SelfHostSyncScheduler {
     fun scheduleDeferredSyncAfterAppClose()
     fun scheduleMediaSync()
     fun syncNow()
+    fun cancelSync()
     fun cancelAll()
 }

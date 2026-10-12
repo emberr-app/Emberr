@@ -3,7 +3,7 @@ package com.emberr.domain.selfhost.sync
 import com.emberr.domain.selfhost.webdav.WebDavResourceInfo
 
 internal const val MEDIA_UNCLAIMED_WAIT_MS = 24L * 60 * 60 * 1000
-internal const val MEDIA_TRASH_KEEP_MS = 30L * 24 * 60 * 60 * 1000
+internal const val MEDIA_TRASH_KEEP_MS = 7L * 24 * 60 * 60 * 1000
 internal const val ABANDONED_UPLOAD_WAIT_MS = 7L * 24 * 60 * 60 * 1000
 
 internal data class MediaCleanupDecisions(

@@ -5,6 +5,8 @@ import com.emberr.domain.selfhost.crypto.SecureSyncKeyStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.onDownload
+import io.ktor.client.plugins.onUpload
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -20,6 +22,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.fromHttpToGmtDate
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
@@ -68,6 +71,7 @@ class WebDavSyncClient(
         const val CONNECT_TIMEOUT_MS = 15_000L
         const val SOCKET_TIMEOUT_MS = 30_000L
         const val MEDIA_PIECE_REQUEST_TIMEOUT_MS = 10L * 60 * 1000
+        const val MEDIA_PIECE_SOCKET_TIMEOUT_MS = 2L * 60 * 1000
         const val PARTIAL_DOWNLOAD_SUFFIX = ".partial.tmp"
     }
 
@@ -342,7 +346,7 @@ class WebDavSyncClient(
     suspend fun downloadDailyWithEtag(spaceId: String, dateString: String): Pair<String, String?>? =
         downloadAndDecryptJsonWithEtag(WebDavSyncPaths.dailyPath(spaceId, dateString))
 
-    suspend fun uploadMediaInPieces(mediaId: String, sourceFile: File): Long {
+    suspend fun uploadMediaInPieces(mediaId: String, sourceFile: File, onBytesDone: (Long) -> Unit = {}): Long {
         val fileSizeBytes = sourceFile.length()
         val pieceCount = mediaPieceCount(fileSizeBytes)
         val folderPath = WebDavSyncPaths.mediaFolderPath(mediaId)
@@ -352,7 +356,12 @@ class WebDavSyncClient(
         val encryptionKey = requireEncryptionKeyBase64()
 
         for (pieceIndex in 0 until pieceCount) {
-            if (pieceIndex in piecesOnServer) continue
+            val pieceStart = mediaPieceStart(pieceIndex)
+            val pieceLength = mediaPieceLength(pieceIndex, fileSizeBytes).toLong()
+            if (pieceIndex in piecesOnServer) {
+                onBytesDone(pieceStart + pieceLength)
+                continue
+            }
             val encryptedPiece = withContext(Dispatchers.IO) {
                 val plainPiece = readPiece(sourceFile, pieceIndex, fileSizeBytes)
                 ByteArrayOutputStream().also { output ->
@@ -364,12 +373,24 @@ class WebDavSyncClient(
                     )
                 }.toByteArray()
             }
-            putFile(WebDavSyncPaths.mediaPiecePath(mediaId, pieceIndex), encryptedPiece, ifMatchEtag = null, allowLongTransfer = true)
+            putFile(
+                WebDavSyncPaths.mediaPiecePath(mediaId, pieceIndex),
+                encryptedPiece,
+                ifMatchEtag = null,
+                allowLongTransfer = true,
+                onBytesSent = { bytesSent -> onBytesDone(pieceStart + pieceLength * bytesSent / encryptedPiece.size) }
+            )
+            onBytesDone(pieceStart + pieceLength)
         }
         return fileSizeBytes
     }
 
-    suspend fun downloadMediaInPieces(mediaId: String, fileSizeBytes: Long, destinationFile: File): Boolean =
+    suspend fun downloadMediaInPieces(
+        mediaId: String,
+        fileSizeBytes: Long,
+        destinationFile: File,
+        onBytesDone: (Long) -> Unit = {}
+    ): Boolean =
         mediaDownloadLock(mediaId).withLock {
             if (destinationFile.exists()) return@withLock true
             val partialFile = File(destinationFile.parentFile, "${destinationFile.name}$PARTIAL_DOWNLOAD_SUFFIX")
@@ -381,8 +402,23 @@ class WebDavSyncClient(
                 alreadyDownloaded
             }
 
+            onBytesDone(minOf(mediaPieceStart(piecesDone), fileSizeBytes))
+
             for (pieceIndex in piecesDone until pieceCount) {
-                val encryptedPiece = getFileWithEtag(WebDavSyncPaths.mediaPiecePath(mediaId, pieceIndex), allowLongTransfer = true)
+                val pieceStart = mediaPieceStart(pieceIndex)
+                val pieceLength = mediaPieceLength(pieceIndex, fileSizeBytes).toLong()
+                val encryptedPiece = getFileWithEtag(
+                    WebDavSyncPaths.mediaPiecePath(mediaId, pieceIndex),
+                    allowLongTransfer = true,
+                    onBytesReceived = { bytesReceived, encryptedLength ->
+                        val pieceBytesDone = if (encryptedLength != null && encryptedLength > 0) {
+                            pieceLength * bytesReceived / encryptedLength
+                        } else {
+                            minOf(bytesReceived, pieceLength)
+                        }
+                        onBytesDone(pieceStart + pieceBytesDone)
+                    }
+                )
                     ?.first
                     ?: return@withLock false
                 withContext(Dispatchers.IO) {
@@ -399,6 +435,7 @@ class WebDavSyncClient(
                     }
                     FileOutputStream(partialFile, true).use { it.write(plainPiece) }
                 }
+                onBytesDone(pieceStart + pieceLength)
             }
 
             withContext(Dispatchers.IO) {
@@ -477,7 +514,8 @@ class WebDavSyncClient(
         remotePath: String,
         bytes: ByteArray,
         ifMatchEtag: String?,
-        allowLongTransfer: Boolean = false
+        allowLongTransfer: Boolean = false,
+        onBytesSent: ((Long) -> Unit)? = null
     ): String? {
         val credentials = requireCredentials()
         if (ifMatchEtag != null && isWeakETag(ifMatchEtag)) throw WebDavWeakETagException()
@@ -495,13 +533,22 @@ class WebDavSyncClient(
                 httpClient.put(resolveUrl(credentials, remotePath)) {
                     header(HttpHeaders.Authorization, basicAuthHeaderValue(credentials))
                     contentType(ContentType.Application.OctetStream)
-                    if (allowLongTransfer) timeout { requestTimeoutMillis = MEDIA_PIECE_REQUEST_TIMEOUT_MS }
+                    if (allowLongTransfer) {
+                        timeout {
+                            requestTimeoutMillis = MEDIA_PIECE_REQUEST_TIMEOUT_MS
+                            socketTimeoutMillis = MEDIA_PIECE_SOCKET_TIMEOUT_MS
+                        }
+                    }
                     if (ifMatchEtag != null) {
                         header(HttpHeaders.IfMatch, ifMatchEtag)
                     }
+                    if (onBytesSent != null) onUpload { bytesSentTotal, _ -> onBytesSent(bytesSentTotal) }
                     setBody(bytes)
                 }
+            } catch (cause: CancellationException) {
+                throw cause
             } catch (cause: Exception) {
+                if (allowLongTransfer && fileArrivedWithSize(remotePath, bytes.size)) return null
                 if (networkAttempt >= MAX_NETWORK_RETRIES) throw cause
                 delay((NETWORK_RETRY_BASE_DELAY_MS * (networkAttempt + 1)).milliseconds)
                 networkAttempt++
@@ -523,6 +570,15 @@ class WebDavSyncClient(
         }
     }
 
+    private suspend fun fileArrivedWithSize(remotePath: String, expectedSizeBytes: Int): Boolean =
+        try {
+            getResourceInfo(remotePath)?.contentLength == expectedSizeBytes.toLong()
+        } catch (cause: CancellationException) {
+            throw cause
+        } catch (cause: Exception) {
+            false
+        }
+
     private suspend fun getFile(remotePath: String): ByteArray? = getFileWithEtag(remotePath)?.first
 
     // Returns the ETag from the SAME response the content came from, rather than the caller doing a
@@ -531,7 +587,11 @@ class WebDavSyncClient(
     // the fresh ETag matches by the time of the PUT, so the write silently succeeds and overwrites the
     // other device's change instead of being rejected as a conflict. Callers that push back what they
     // read here (WebDAV note/daily reconcile) must thread this exact ETag through to that PUT.
-    private suspend fun getFileWithEtag(remotePath: String, allowLongTransfer: Boolean = false): Pair<ByteArray, String?>? {
+    private suspend fun getFileWithEtag(
+        remotePath: String,
+        allowLongTransfer: Boolean = false,
+        onBytesReceived: ((Long, Long?) -> Unit)? = null
+    ): Pair<ByteArray, String?>? {
         val credentials = requireCredentials()
 
         // A dropped connection mid-response surfaces here as an exception from response.body()
@@ -544,7 +604,15 @@ class WebDavSyncClient(
             try {
                 val response = httpClient.get(resolveUrl(credentials, remotePath)) {
                     header(HttpHeaders.Authorization, basicAuthHeaderValue(credentials))
-                    if (allowLongTransfer) timeout { requestTimeoutMillis = MEDIA_PIECE_REQUEST_TIMEOUT_MS }
+                    if (allowLongTransfer) {
+                        timeout {
+                            requestTimeoutMillis = MEDIA_PIECE_REQUEST_TIMEOUT_MS
+                            socketTimeoutMillis = MEDIA_PIECE_SOCKET_TIMEOUT_MS
+                        }
+                    }
+                    if (onBytesReceived != null) {
+                        onDownload { bytesReceivedTotal, contentLength -> onBytesReceived(bytesReceivedTotal, contentLength) }
+                    }
                 }
                 if (response.status.value == HttpStatusCode.NotFound.value) return null
                 if (response.status.value !in 200..299) {

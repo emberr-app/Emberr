@@ -1,9 +1,17 @@
 package com.emberr.domain.selfhost.sync
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
+import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import com.emberr.R
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -18,10 +26,13 @@ class SelfHostSyncWorker(
         SelfHostSyncLog.d("Worker: doWork() starting, scope=$scope, runAttemptCount=$runAttemptCount")
 
         try {
-            val outcome = if (scope == SCOPE_MEDIA) {
-                selfHostSyncEngine.syncMediaAfterAnyRunningOne()
-            } else {
-                selfHostSyncEngine.runSyncAfterAnyRunningOne()
+            val outcome = when (scope) {
+                SCOPE_MEDIA -> selfHostSyncEngine.syncMediaAfterAnyRunningOne()
+                SCOPE_MANUAL -> {
+                    showSyncNotification()
+                    syncTextThenMedia()
+                }
+                else -> selfHostSyncEngine.runSyncAfterAnyRunningOne()
             }
 
             when (outcome) {
@@ -51,6 +62,11 @@ class SelfHostSyncWorker(
                     Result.success()
                 }
 
+                is SelfHostSyncResult.Cancelled -> {
+                    SelfHostSyncLog.d("Worker: sync was cancelled by the user, not retrying")
+                    Result.success()
+                }
+
                 is SelfHostSyncResult.Failure -> {
                     val message =
                         outcome.cause.localizedMessage ?: outcome.cause.message ?: "Sync failed"
@@ -62,6 +78,8 @@ class SelfHostSyncWorker(
                     }
                 }
             }
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Exception) {
             val message = cause.localizedMessage ?: cause.message ?: "Unexpected sync error"
             SelfHostSyncLog.e(
@@ -69,6 +87,49 @@ class SelfHostSyncWorker(
                 cause
             )
             retryOrGiveUp(message)
+        }
+    }
+
+    private suspend fun syncTextThenMedia(): SelfHostSyncResult {
+        val textOutcome = selfHostSyncEngine.runSyncAfterAnyRunningOne()
+        if (textOutcome !is SelfHostSyncResult.Success) return textOutcome
+        val mediaOutcome = selfHostSyncEngine.syncMediaAfterAnyRunningOne()
+        return if (mediaOutcome is SelfHostSyncResult.Success) textOutcome else mediaOutcome
+    }
+
+    private suspend fun showSyncNotification() {
+        try {
+            ensureNotificationChannel()
+            setForeground(createForegroundInfo())
+        } catch (cause: CancellationException) {
+            throw cause
+        } catch (cause: Exception) {
+            SelfHostSyncLog.e("Worker: could not show the sync notification, syncing without it", cause)
+        }
+    }
+
+    private fun ensureNotificationChannel() {
+        val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (manager.getNotificationChannel(CHANNEL_ID) == null) {
+            manager.createNotificationChannel(
+                NotificationChannel(CHANNEL_ID, "Server sync", NotificationManager.IMPORTANCE_LOW)
+            )
+        }
+    }
+
+    private fun createForegroundInfo(): ForegroundInfo {
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setContentTitle("Syncing with your server")
+            .setSmallIcon(R.drawable.ic_notification)
+            .setProgress(0, 0, true)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .build()
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(NOTIFICATION_ID, notification)
         }
     }
 
@@ -85,8 +146,11 @@ class SelfHostSyncWorker(
         const val KEY_SYNC_SCOPE = "self_host_sync_scope"
         const val SCOPE_TEXT = "text"
         const val SCOPE_MEDIA = "media"
+        const val SCOPE_MANUAL = "manual"
         const val KEY_ERROR_MESSAGE = "self_host_sync_error_message"
         const val KEY_NOTES_NOT_SYNCED_MESSAGE = "self_host_sync_notes_not_synced_message"
         const val MAX_RETRY_ATTEMPTS = 5
+        private const val CHANNEL_ID = "emberr_server_sync"
+        private const val NOTIFICATION_ID = 4822
     }
 }

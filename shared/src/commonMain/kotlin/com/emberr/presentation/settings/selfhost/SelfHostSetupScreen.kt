@@ -34,6 +34,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -65,12 +66,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
+import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
+import com.emberr.domain.selfhost.sync.SelfHostSyncStage
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.SettingsSegmentedOptions
 import com.emberr.presentation.settings.desktopSettingsSidePadding
 import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -79,6 +83,7 @@ import com.emberr.ui.theme.fontFamilyFor
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.roundToInt
 
 @Composable
 fun SelfHostSetupScreen(
@@ -303,20 +308,40 @@ private fun ConnectedDashboard(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    EmberrButtonPrimary(
-                        text = if (state.syncStatus == ManualSyncStatus.SYNCING) "Syncing..." else "Sync Now",
-                        onClick = {
-                            SelfHostSyncLog.d("UI: Sync Now button tapped")
-                            viewModel.syncNow()
-                        },
-                        enabled = state.syncStatus != ManualSyncStatus.SYNCING,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    val isSyncRunning = state.syncStatus != ManualSyncStatus.IDLE
+
+                    if (isSyncRunning) {
+                        EmberrButtonSecondary(
+                            text = if (state.syncStatus == ManualSyncStatus.CANCELLING) "Cancelling..." else "Cancel Sync",
+                            onClick = {
+                                SelfHostSyncLog.d("UI: Cancel Sync button tapped")
+                                viewModel.cancelSync()
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Cancelling pauses sync until you restart the app or tap Sync Now.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                        )
+                    } else {
+                        EmberrButtonPrimary(
+                            text = "Sync Now",
+                            onClick = {
+                                SelfHostSyncLog.d("UI: Sync Now button tapped")
+                                viewModel.syncNow()
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (state.syncStatus == ManualSyncStatus.SYNCING) {
+                        if (isSyncRunning) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(14.dp),
                                 strokeWidth = 2.dp,
@@ -325,7 +350,7 @@ private fun ConnectedDashboard(
                             Spacer(modifier = Modifier.width(8.dp))
                         }
                         Text(
-                            text = if (state.syncStatus == ManualSyncStatus.SYNCING) {
+                            text = if (isSyncRunning) {
                                 "Syncing..."
                             } else {
                                 formatLastSynced(state.lastSyncedAtMillis)
@@ -333,6 +358,16 @@ private fun ConnectedDashboard(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
+                    }
+
+                    state.noteSyncProgress?.let { progress ->
+                        Spacer(modifier = Modifier.height(14.dp))
+                        SyncProgressDetails(title = "Notes", progress = progress, describeAmount = ::describeNoteCount)
+                    }
+
+                    state.imageSyncProgress?.let { progress ->
+                        Spacer(modifier = Modifier.height(14.dp))
+                        SyncProgressDetails(title = "Images", progress = progress, describeAmount = ::describeImageBytes)
                     }
 
                     state.syncError?.let { error ->
@@ -444,6 +479,98 @@ private fun ConnectedDashboard(
             }
         )
     }
+}
+
+@Composable
+private fun SyncProgressDetails(
+    title: String,
+    progress: SelfHostSyncProgress,
+    describeAmount: (done: Long, total: Long) -> String
+) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+        )
+        when (progress.stage) {
+            SelfHostSyncStage.PREPARING -> SyncProgressHint("Checking for changes...")
+            SelfHostSyncStage.FINISHING -> SyncProgressHint("Finishing up...")
+            SelfHostSyncStage.TRANSFERRING -> {
+                SyncDirectionProgress(
+                    label = "Sending",
+                    emptyMessage = "Nothing to send",
+                    done = progress.sent,
+                    total = progress.toSend,
+                    describeAmount = describeAmount
+                )
+                SyncDirectionProgress(
+                    label = "Receiving",
+                    emptyMessage = "Nothing to receive",
+                    done = progress.received,
+                    total = progress.toReceive,
+                    describeAmount = describeAmount
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SyncDirectionProgress(
+    label: String,
+    emptyMessage: String,
+    done: Long,
+    total: Long,
+    describeAmount: (done: Long, total: Long) -> String
+) {
+    if (total == 0L) {
+        SyncProgressHint(emptyMessage)
+        return
+    }
+    val doneFraction = (done.toFloat() / total).coerceIn(0f, 1f)
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "$label ${(doneFraction * 100).roundToInt()}%",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = describeAmount(done, total),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+            )
+        }
+        LinearProgressIndicator(
+            progress = { doneFraction },
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun SyncProgressHint(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+    )
+}
+
+private fun describeNoteCount(done: Long, total: Long): String =
+    "${minOf(done, total)} of $total ${if (total == 1L) "note" else "notes"}"
+
+private fun describeImageBytes(done: Long, total: Long): String =
+    "${formatMegabytes(minOf(done, total))} of ${formatMegabytes(total)} MB"
+
+private fun formatMegabytes(bytes: Long): String {
+    val tenthsOfMegabyte = bytes * 10 / (1024 * 1024)
+    return "${tenthsOfMegabyte / 10}.${tenthsOfMegabyte % 10}"
 }
 
 @Composable
