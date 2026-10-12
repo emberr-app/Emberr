@@ -39,6 +39,8 @@ import emberr.shared.generated.resources.circle_plus
 import org.jetbrains.compose.resources.painterResource
 
 private val SelectionHighlightShape = RoundedCornerShape(12.dp)
+private val DesktopImageCardHeight = 220.dp
+private val MobileImageCardHeight = 220.dp
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -161,9 +163,7 @@ fun ImagesScreen(
                 } else {
                     items(groupedBlocks, key = { it.monthYear }) { group ->
                         Column(
-                            modifier = Modifier
-                                .background(MaterialTheme.colorScheme.background)
-                                .padding(bottom = 36.dp)
+                            modifier = Modifier.background(MaterialTheme.colorScheme.background)
                         ) {
                             Text(
                                 text = group.monthYear,
@@ -251,67 +251,59 @@ fun ImageGrid(
     isSelectionMode: Boolean,
     viewModel: ImagesViewModel
 ) {
-    BoxWithConstraints(
+    val columns = if (isDesktopPlatform) 4 else 2
+    val cardHeight = if (isDesktopPlatform) DesktopImageCardHeight else MobileImageCardHeight
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp)
+            .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        val minItemWidth = 120f
-        val spacing = 12f
-        val columns = maxOf(2, ((maxWidth.value + spacing) / (minItemWidth + spacing)).toInt())
+        val chunkedBlocks = blocks.chunked(columns)
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            val chunkedBlocks = blocks.chunked(columns)
+        chunkedBlocks.forEach { rowBlocks ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                rowBlocks.forEach { block ->
+                    val isSelected = selectedBlockIds.contains(block.id)
 
-            chunkedBlocks.forEach { rowBlocks ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    rowBlocks.forEach { block ->
-                        val isSelected = selectedBlockIds.contains(block.id)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 4.dp)
+                            .height(cardHeight)
+                            .clip(RoundedCornerShape(12.dp))
+                    ) {
+                        ImageBlockView(
+                            block = block,
+                            inSelectionMode = isSelectionMode,
+                            onToggleSelection = { viewModel.toggleSelection(block.id) },
+                            onRequestPicker = {},
+                            onRequestCamera = {},
+                            imageLinkFetch = null,
+                            onImageLinkSubmitted = {},
+                            onDelete = { viewModel.deleteImageBlock(block.id) },
+                            fillsAvailableSpace = true
+                        )
 
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                        ) {
-                            ImageBlockView(
-                                block = block,
-                                inSelectionMode = isSelectionMode,
-                                onToggleSelection = { viewModel.toggleSelection(block.id) },
-                                onRequestPicker = {},
-                                onRequestCamera = {},
-                                imageLinkFetch = null,
-                                onImageLinkSubmitted = {},
-                                onDelete = { viewModel.deleteImageBlock(block.id) }
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .border(3.dp, MaterialTheme.colorScheme.primary, SelectionHighlightShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                             )
-
-                            if (isSelected) {
-                                Box(
-                                    modifier = Modifier
-                                        .matchParentSize()
-                                        .border(3.dp, MaterialTheme.colorScheme.primary, SelectionHighlightShape)
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                )
-                            }
                         }
                     }
+                }
 
-                    val emptySpaces = columns - rowBlocks.size
-                    repeat(emptySpaces) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .background(MaterialTheme.colorScheme.background)
-                        )
-                    }
+                val emptySpaces = columns - rowBlocks.size
+                repeat(emptySpaces) {
+                    Box(modifier = Modifier.weight(1f).background(MaterialTheme.colorScheme.background))
                 }
             }
         }

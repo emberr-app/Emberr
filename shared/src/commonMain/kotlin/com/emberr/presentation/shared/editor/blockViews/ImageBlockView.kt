@@ -102,7 +102,8 @@ fun ImageBlockView(
     onDelete: () -> Unit = {},
     onRequestCamera: () -> Unit,
     imageLinkFetch: ImageLinkFetch?,
-    onImageLinkSubmitted: (address: String) -> Unit
+    onImageLinkSubmitted: (address: String) -> Unit,
+    fillsAvailableSpace: Boolean = false
 ) {
     val mediaStorageHelper = koinInject<MediaStorageHelper>()
     val mediaRetryCoordinator = koinInject<MediaRetryCoordinator>()
@@ -194,18 +195,26 @@ fun ImageBlockView(
             var thumbnailBoundsInRoot by remember { mutableStateOf<Rect?>(null) }
 
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                modifier = if (fillsAvailableSpace) {
+                    Modifier.fillMaxSize()
+                } else {
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                },
                 contentAlignment = Alignment.CenterStart
             ) {
-                val sizeModifier = widthToHeightRatio?.let { ratio ->
-                    if (isDesktopPlatform) {
-                        Modifier.heightIn(max = MaximumImageBlockHeight).aspectRatio(ratio)
-                    } else {
-                        Modifier.fillMaxWidth().aspectRatio(ratio)
-                    }
-                } ?: Modifier.fillMaxWidth().height(LoadingImageBlockHeight)
+                val sizeModifier = if (fillsAvailableSpace) {
+                    Modifier.fillMaxSize()
+                } else {
+                    widthToHeightRatio?.let { ratio ->
+                        if (isDesktopPlatform) {
+                            Modifier.heightIn(max = MaximumImageBlockHeight).aspectRatio(ratio)
+                        } else {
+                            Modifier.fillMaxWidth().aspectRatio(ratio)
+                        }
+                    } ?: Modifier.fillMaxWidth().height(LoadingImageBlockHeight)
+                }
 
                 Box(
                     modifier = sizeModifier

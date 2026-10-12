@@ -74,6 +74,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private val SelectionHighlightShape = RoundedCornerShape(12.dp)
 private val CategoryPillShape = RoundedCornerShape(20.dp)
+private val DesktopBookmarkCardHeight = 220.dp
 private val PillAutoScrollEdgeWidth = 56.dp
 private val PillAutoScrollStep = 9.dp
 private val PillSettleAnimationSpec = spring<Float>(
@@ -465,7 +466,7 @@ fun BookmarkGrid(
     isSelectionMode: Boolean,
     viewModel: BookmarksViewModel
 ) {
-    val columns = if (isDesktopPlatform) 3 else 2
+    val columns = if (isDesktopPlatform) 4 else 2
 
     Column(
         modifier = Modifier
@@ -493,7 +494,9 @@ fun BookmarkGrid(
                             block = block,
                             inSelectionMode = isSelectionMode,
                             onToggleSelection = { viewModel.toggleSelection(block.id) },
-                            onUrlSubmit = { url -> viewModel.handleUrlSubmit(block.id, url) }
+                            onUrlSubmit = { url -> viewModel.handleUrlSubmit(block.id, url) },
+                            desktopCardHeight = DesktopBookmarkCardHeight,
+                            desktopShowsImageOnTop = true
                         )
 
                         if (isSelected) {

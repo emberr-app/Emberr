@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.network.httpHeaders
 import coil3.request.crossfade
@@ -67,7 +68,9 @@ fun BookmarkBlockView(
     block: BookmarkBlock,
     inSelectionMode: Boolean,
     onToggleSelection: () -> Unit,
-    onUrlSubmit: (String) -> Unit
+    onUrlSubmit: (String) -> Unit,
+    desktopCardHeight: Dp = 120.dp,
+    desktopShowsImageOnTop: Boolean = false
 ) {
     var isEditing by remember { mutableStateOf(block.url.isEmpty()) }
     var inputUrl by remember { mutableStateOf(block.url) }
@@ -269,9 +272,20 @@ fun BookmarkBlockView(
                 }
             }
 
-            if (isDesktopPlatform) {
+            if (isDesktopPlatform && desktopShowsImageOnTop) {
+                Column(
+                    modifier = commonContainerModifier.height(desktopCardHeight)
+                ) {
+                    if (block.previewImageUrl != null) {
+                        imageContent(Modifier.fillMaxWidth().weight(1f))
+                        textContent(Modifier.fillMaxWidth())
+                    } else {
+                        textContent(Modifier.fillMaxWidth().weight(1f))
+                    }
+                }
+            } else if (isDesktopPlatform) {
                 Row(
-                    modifier = commonContainerModifier.height(120.dp)
+                    modifier = commonContainerModifier.height(desktopCardHeight)
                 ) {
                     textContent(Modifier.weight(1f).fillMaxHeight())
 
