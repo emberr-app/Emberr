@@ -398,7 +398,8 @@ fun NoteBlockItem(
                         if (press.isConsumed || isFocused) continue
 
                         val opensContextMenu = event.buttons.isSecondaryPressed &&
-                            linkHoverState.hoveredLink == null
+                            linkHoverState.hoveredLink == null &&
+                            !GlobalEditorState.isPointerOverDatabaseViewPill
                         val extendsSelection = event.buttons.isPrimaryPressed &&
                             event.keyboardModifiers.isShiftPressed &&
                             latestInSelectionMode
@@ -426,7 +427,11 @@ fun NoteBlockItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = { if (inSelectionMode) actions.onToggleSelection(block.id) },
-                onLongClick = if (isDesktopPlatform) null else { { actions.onToggleSelection(block.id) } }
+                onLongClick = if (isDesktopPlatform) {
+                    null
+                } else {
+                    { if (!GlobalEditorState.pressStartedOnDatabaseViewPill) actions.onToggleSelection(block.id) }
+                }
             )
     ) {
         if (isChoosingHighlightColor) {

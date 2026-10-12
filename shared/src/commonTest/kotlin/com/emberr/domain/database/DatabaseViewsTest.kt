@@ -30,6 +30,26 @@ class DatabaseViewsTest {
     }
 
     @Test
+    fun aViewCanBeMovedBeforeAnotherViewOrToTheEnd() {
+        val board = DatabaseView(id = "board-id", name = "Board", type = DatabaseViewType.BOARD)
+        val withThreeViews = database.withViewAdded(gallery).withViewAdded(board)
+
+        val boardFirst = withThreeViews.withViewMovedBefore("board-id", DEFAULT_VIEW_ID)
+        val tableLast = withThreeViews.withViewMovedBefore(DEFAULT_VIEW_ID, beforeViewId = null)
+
+        assertEquals(listOf("board-id", DEFAULT_VIEW_ID, "gallery-id"), boardFirst.allViews().map { it.id })
+        assertEquals(listOf("gallery-id", "board-id", DEFAULT_VIEW_ID), tableLast.allViews().map { it.id })
+        assertEquals("board-id", boardFirst.activeView().id)
+    }
+
+    @Test
+    fun movingAViewThatDoesNotExistChangesNothing() {
+        val withGallery = database.withViewAdded(gallery)
+
+        assertSame(withGallery, withGallery.withViewMovedBefore("deleted-elsewhere", DEFAULT_VIEW_ID))
+    }
+
+    @Test
     fun anUnknownActiveViewFallsBackToTheFirstView() {
         val result = database.withViewAdded(gallery).copy(activeViewId = "deleted-elsewhere")
 

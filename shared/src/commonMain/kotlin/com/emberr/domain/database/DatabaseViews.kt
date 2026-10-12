@@ -26,6 +26,13 @@ fun DatabaseBlock.withViewAdded(view: DatabaseView): DatabaseBlock =
 fun DatabaseBlock.withViewChanged(viewId: String, change: (DatabaseView) -> DatabaseView): DatabaseBlock =
     copy(views = allViews().map { if (it.id == viewId) change(it) else it })
 
+fun DatabaseBlock.withViewMovedBefore(viewId: String, beforeViewId: String?): DatabaseBlock {
+    val views = allViews()
+    val view = views.firstOrNull { it.id == viewId } ?: return this
+    val beforeView = views.firstOrNull { it.id == beforeViewId }
+    return copy(views = views.withItemMovedBefore(view, beforeView))
+}
+
 fun DatabaseBlock.withViewDeleted(viewId: String): DatabaseBlock {
     val remainingViews = allViews().filterNot { it.id == viewId }
     if (remainingViews.isEmpty()) return this

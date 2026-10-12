@@ -24,6 +24,7 @@ import com.emberr.domain.database.withStyle
 import com.emberr.domain.database.withViewAdded
 import com.emberr.domain.database.withViewChanged
 import com.emberr.domain.database.withViewDeleted
+import com.emberr.domain.database.withViewMovedBefore
 import com.emberr.domain.database.withViewGroupedBy
 import com.emberr.domain.database.withRowStylesCopied
 import com.emberr.domain.database.withDatabasePropertyCreated
@@ -236,6 +237,10 @@ class DatabaseBlockEditor(
 
     fun renameView(blockId: String, viewId: String, name: String) {
         host.changeDatabaseBlock(blockId) { databaseBlock -> databaseBlock.withViewChanged(viewId) { it.copy(name = name) } }
+    }
+
+    fun moveViewBefore(blockId: String, viewId: String, beforeViewId: String?) {
+        host.changeDatabaseBlock(blockId) { it.withViewMovedBefore(viewId, beforeViewId) }
     }
 
     fun deleteView(blockId: String, viewId: String) {
