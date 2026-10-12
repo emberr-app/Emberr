@@ -70,7 +70,7 @@ class SyncViewModel(
 
     val isPaired = pairingState.isPaired
 
-    val isSelfHostConnected = selfHostConnectionState.isConnected
+    val isSelfHostConnected by lazy { selfHostConnectionState.isConnected }
 
     fun startServerForPairing() {
         viewModelScope.launch(Dispatchers.IO) {
