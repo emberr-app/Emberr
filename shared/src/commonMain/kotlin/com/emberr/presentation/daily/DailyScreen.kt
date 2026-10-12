@@ -581,24 +581,9 @@ fun DailyScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0),
         topBar = {
-            val isCalendarStripVisible = !isSelectionMode && !isKeyboardOpen
             val calendarStripHeightAllowance = 44.dp
-            val headerBlurHeight by animateDpAsState(
-                targetValue = if (isCalendarStripVisible) {
-                    DailyHeaderBaseBlurHeight + calendarStripHeightAllowance
-                } else {
-                    DailyHeaderBaseBlurHeight
-                },
-                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
-            )
-            val headerGradientHeight by animateDpAsState(
-                targetValue = if (isCalendarStripVisible) {
-                    DailyHeaderBaseGradientHeight + calendarStripHeightAllowance
-                } else {
-                    DailyHeaderBaseGradientHeight
-                },
-                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
-            )
+            val headerBlurHeight = DailyHeaderBaseBlurHeight + calendarStripHeightAllowance
+            val headerGradientHeight = DailyHeaderBaseGradientHeight + calendarStripHeightAllowance
 
             Column {
                 EmberrTopHeaderBar(
@@ -667,19 +652,12 @@ fun DailyScreen(
                     }
                 )
 
-                AnimatedVisibility(
-                    visible = isCalendarStripVisible,
-                    enter = fadeIn(tween(durationMillis = 250, delayMillis = 100)) +
-                        expandVertically(tween(durationMillis = 250, delayMillis = 100)),
-                    exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
-                ) {
-                    DailyBottomWeekStrip(
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                        selectedDate = selectedDate,
-                        onDateSelected = { viewModel.selectDate(it) },
-                        hazeState = hazeState
-                    )
-                }
+                DailyBottomWeekStrip(
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    selectedDate = selectedDate,
+                    onDateSelected = { viewModel.selectDate(it) },
+                    hazeState = hazeState
+                )
             }
         }
     ) { paddingValues ->
