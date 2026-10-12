@@ -307,12 +307,11 @@ compose.desktop {
             "-XX:MaxMetaspaceSize=256m",
             "-XX:+UseG1GC",
             "-XX:G1PeriodicGCInterval=30000",
-            "-XX:MaxHeapFreeRatio=30",
-            "-XX:MinHeapFreeRatio=10",
+            "-XX:MaxHeapFreeRatio=50",
+            "-XX:MinHeapFreeRatio=20",
             "-XX:ParallelGCThreads=4",
-            "-XX:ConcGCThreads=1",
-            "-XX:G1ConcRefinementThreads=4",
-            "-XX:CICompilerCount=2"
+            "-XX:ConcGCThreads=2",
+            "-XX:G1ConcRefinementThreads=4"
         )
 
         if (isBuildingOnWindows) {
