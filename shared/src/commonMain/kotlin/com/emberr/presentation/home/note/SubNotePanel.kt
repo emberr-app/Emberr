@@ -24,8 +24,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.NoteBlock
 import com.emberr.presentation.shared.SubNoteOpenMode
+import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.TopHeaderBarTopPadding
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.maximize_2
@@ -155,8 +157,8 @@ fun SubNotePanel(
             var innerPanelNoteId by remember { mutableStateOf<String?>(null) }
             val hazeState = remember { HazeState() }
 
-            val topBarBgColor = MaterialTheme.colorScheme.background.copy(alpha = 0.65f)
             val topBarContentColor = MaterialTheme.colorScheme.onSurface
+            val topBarButtonHazeStyle = EmberrBlur.Regular
 
             val panelColorScheme = MaterialTheme.colorScheme.copy(
                 background = if (isExpanded) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface
@@ -172,8 +174,8 @@ fun SubNotePanel(
                     onExportMarkdown = onExportMarkdown,
                     onExportPdf = onExportPdf,
                     externalHazeState = hazeState,
-                    topBarBgColor = topBarBgColor,
                     topBarContentColor = topBarContentColor,
+                    topBarButtonHazeStyle = topBarButtonHazeStyle,
                     onNavigateToEditor = { nestedId ->
                         innerPanelNoteId = nestedId
                         showInnerPanel = true
@@ -200,11 +202,10 @@ fun SubNotePanel(
                 modifier = Modifier.align(Alignment.TopStart),
                 backIcon = (if (isExpanded) painterResource(Res.drawable.minimize_2) else painterResource(Res.drawable.maximize_2)).scaledDown(0.8f),
                 backContentDescription = if (isExpanded) "Collapse panel" else "Expand panel",
-                backButtonBackground = MaterialTheme.colorScheme.background.copy(alpha = 0.65f),
-                backButtonTint = MaterialTheme.colorScheme.onSurface,
+                backButtonTint = MaterialTheme.colorScheme.primary,
                 hazeState = hazeState,
                 applyStatusBarPadding = false,
-                contentPadding = PaddingValues(top = 16.dp, start = 74.dp),
+                contentPadding = PaddingValues(top = TopHeaderBarTopPadding, start = 74.dp),
                 onBackClick = { isExpanded = !isExpanded }
             )
         }

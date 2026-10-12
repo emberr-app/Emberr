@@ -54,6 +54,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.editor.EditorToolbar
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
 import coil3.compose.AsyncImage
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.editor.GlobalEditorState
@@ -146,8 +147,8 @@ fun NoteScreen(
     onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     externalHazeState: HazeState? = null,
-    topBarBgColor: Color? = null,
     topBarContentColor: Color? = null,
+    topBarButtonHazeStyle: HazeStyle? = null,
     desktopTopMargin: Dp = 0.dp,
     isSearchActive: Boolean = false,
     viewModel: NoteEditorViewModel = koinViewModel(key = noteId)
@@ -676,9 +677,9 @@ fun NoteScreen(
                     titleVisibility = if (isEditingTemplate) 0f else titleCollapseProgress,
                     titleColor = topBarContentColor ?: MaterialTheme.colorScheme.onSurface,
                     onTitleClick = onCollapsedTitleClick,
-                    background = topBarBgColor ?: Color.Transparent,
                     topEdgeFadeAlpha = if (isDesktopPlatform) 0f else topEdgeFadeAlpha,
                     hazeState = hazeState,
+                    hazeStyle = topBarButtonHazeStyle ?: EmberrBlur.Regular,
                     contentPadding = topHeaderBarPadding(
                         top = desktopTopMargin + if (isDesktopPlatform) 20.dp else 10.dp,
                         horizontal = if (isDesktopPlatform) 22.dp else 16.dp
@@ -709,7 +710,7 @@ fun NoteScreen(
                                 bgColor = Color.Transparent,
                                 tint = MaterialTheme.colorScheme.primary,
                                 hazeState = hazeState,
-                                hazeStyle = EmberrBlur.Regular,
+                                hazeStyle = topBarButtonHazeStyle ?: EmberrBlur.Regular,
                                 onClick = { showOptionsMenu = true }
                             )
 
