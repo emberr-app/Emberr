@@ -78,7 +78,7 @@ class ImagesViewModel(
                         val key       = "${months[localDate.month.number]} ${localDate.year}"
 
                         monthGroups.getOrPut(key) { mutableListOf() }.add(
-                            ImageBlock(id = entity.blockId, localFilePath = entity.localFilePath)
+                            ImageBlock(id = entity.blockId, localFilePath = entity.localFilePath, sourceUrl = entity.sourceUrl)
                         )
                         monthTimestamp[key] = entity.noteCreatedAt
                     }

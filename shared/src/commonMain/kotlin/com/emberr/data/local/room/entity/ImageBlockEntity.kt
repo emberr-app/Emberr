@@ -18,5 +18,6 @@ data class ImageBlockEntity(
     val noteId: String,
     val localFilePath: String,
     val noteCreatedAt: Long,
-    val sourceType: TaskSource
+    val sourceType: TaskSource,
+    val sourceUrl: String? = null
 )

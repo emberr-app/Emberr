@@ -47,7 +47,7 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.data.local.room.entity.UnappliedSyncChangeEntity
 import com.emberr.data.local.room.entity.UnusedMediaFileEntity
 
-const val APP_DATABASE_VERSION = 2
+const val APP_DATABASE_VERSION = 3
 
 @Database(
     entities = [
@@ -75,7 +75,7 @@ const val APP_DATABASE_VERSION = 2
     ],
     version = APP_DATABASE_VERSION,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)]
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)]
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {

@@ -2220,7 +2220,8 @@ class NoteRepositoryImpl(
                     noteId = noteId,
                     localFilePath = block.localFilePath!!,
                     noteCreatedAt = noteCreatedAt,
-                    sourceType = sourceType
+                    sourceType = sourceType,
+                    sourceUrl = block.sourceUrl
                 )
             }
 
