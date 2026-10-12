@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.ui.theme.LocalEmberrFontStyle
 import com.emberr.ui.theme.fontFamilyFor
 import kotlinx.coroutines.delay
@@ -21,16 +22,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun LoadingScreen(onLoadingComplete: () -> Unit) {
-    var startAnimation by remember { mutableStateOf(false) }
-
-    val alphaAnim = animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(durationMillis = 600, easing = LinearEasing),
-        label = "alpha"
-    )
-
     LaunchedEffect(Unit) {
-        startAnimation = true
         delay(1500.milliseconds) // Keeps the splash visible for 1.5 seconds
         onLoadingComplete()
     }
@@ -59,36 +51,54 @@ fun LoadingScreen(onLoadingComplete: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Box(
-                modifier = Modifier
-                    .width(120.dp)
-                    .height(4.dp)
-                    .alpha(alphaAnim.value)
-                    .clip(RoundedCornerShape(100f))
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                val infiniteTransition = rememberInfiniteTransition(label = "loading")
-                val offset by infiniteTransition.animateFloat(
-                    initialValue = -120f,
-                    targetValue = 120f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(1000, easing = FastOutSlowInEasing),
-                        repeatMode = RepeatMode.Restart
-                    ),
-                    label = "offset"
-                )
-
-                Box(
-                    modifier = Modifier
-                        .offset(x = offset.dp)
-                        .width(60.dp)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(100f))
-                        .background(MaterialTheme.colorScheme.onBackground)
-                )
+            if (!isDesktopPlatform) {
+                Spacer(modifier = Modifier.height(48.dp))
+                MovingLoadingBar()
             }
         }
+    }
+}
+
+@Composable
+private fun MovingLoadingBar() {
+    var startAnimation by remember { mutableStateOf(false) }
+
+    val alphaAnim = animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(durationMillis = 600, easing = LinearEasing),
+        label = "alpha"
+    )
+
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
+
+    Box(
+        modifier = Modifier
+            .width(120.dp)
+            .height(4.dp)
+            .alpha(alphaAnim.value)
+            .clip(RoundedCornerShape(100f))
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        val infiniteTransition = rememberInfiniteTransition(label = "loading")
+        val offset by infiniteTransition.animateFloat(
+            initialValue = -120f,
+            targetValue = 120f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "offset"
+        )
+
+        Box(
+            modifier = Modifier
+                .offset(x = offset.dp)
+                .width(60.dp)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(100f))
+                .background(MaterialTheme.colorScheme.onBackground)
+        )
     }
 }
