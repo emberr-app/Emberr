@@ -210,16 +210,6 @@ class LocalAiEngine(
         }
     }
 
-    suspend fun warmUpGenerator() = nativeMutex.withLock {
-        withContext(Dispatchers.Default) {
-            try {
-                ensureGeneratorLoaded()
-            } finally {
-                unloadModelAfterIdlePeriod()
-            }
-        }
-    }
-
     override suspend fun isModelAvailable(): Boolean =
         isEmbeddingModelAvailable() && isGeneratorModelAvailable()
 

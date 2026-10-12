@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import com.emberr.data.local.room.AppDatabase
 import com.emberr.di.androidModule
 import com.emberr.di.sharedModule
-import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.backup.automatic.BackupScheduler
 import com.emberr.domain.backup.manual.deleteBackupImportCopiesLeftFromEarlierRuns
 import com.emberr.domain.importer.deleteImportCopiesLeftFromEarlierRuns
@@ -19,15 +18,12 @@ import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
-import java.util.concurrent.atomic.AtomicBoolean
 
 class EmberrApplication : Application() {
     companion object {
         @Volatile
         var isReady = false
     }
-
-    private val hasStartedAiWarmUp = AtomicBoolean(false)
 
     override fun onCreate() {
         super.onCreate()
@@ -58,18 +54,5 @@ class EmberrApplication : Application() {
             getKoin().get<SelfHostSyncScheduler>()
         }
 
-    }
-
-    fun warmUpAiEngineOnce() {
-        if (!hasStartedAiWarmUp.compareAndSet(false, true)) return
-
-        CoroutineScope(Dispatchers.Default).launch {
-            try {
-                if (getKoin().get<com.emberr.data.local.prefs.SettingsManager>().isAiFeaturesDisabled()) return@launch
-                getKoin().get<LocalAiEngine>().warmUpGenerator()
-            } catch (e: Exception) {
-                // Silent — if pre-warm fails, first query just pays the load cost
-            }
-        }
     }
 }

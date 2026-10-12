@@ -16,10 +16,6 @@ object FirstContentRenderSignal {
 
     fun hasFirstContent(): Boolean = firstContentRendered.isCompleted
 
-    suspend fun awaitFirstContent() {
-        firstContentRendered.await()
-    }
-
     suspend fun awaitFirstContentOrTimeout() {
         withTimeoutOrNull(longestWaitForFirstContent) { firstContentRendered.await() }
     }

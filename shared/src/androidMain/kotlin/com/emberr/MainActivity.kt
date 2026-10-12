@@ -58,7 +58,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.inject
 import java.util.UUID
 import androidx.lifecycle.Lifecycle
@@ -100,7 +99,6 @@ import androidx.core.content.IntentCompat
 import android.provider.OpenableColumns
 
 
-private val aiWarmUpFallbackDelay = 8000L.milliseconds
 private val updateCheckDelayAfterOpening = 30000L.milliseconds
 private val lanSyncDelayAfterOpening = 2000L.milliseconds
 
@@ -151,11 +149,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             delay(updateCheckDelayAfterOpening)
             updateChecker.checkOnLaunchOnce()
-        }
-
-        lifecycleScope.launch {
-            withTimeoutOrNull(aiWarmUpFallbackDelay) { FirstContentRenderSignal.awaitFirstContent() }
-            (application as? EmberrApplication)?.warmUpAiEngineOnce()
         }
 
         lifecycleScope.launch {
