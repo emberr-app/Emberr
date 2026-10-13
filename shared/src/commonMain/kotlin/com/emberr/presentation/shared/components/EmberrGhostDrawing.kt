@@ -56,7 +56,7 @@ internal fun DrawScope.drawEmberrGhostEyes(
     }
 }
 
-private fun blinkOpenness(phase: Float): Float {
+internal fun blinkOpenness(phase: Float): Float {
     val timeInBlinkCycle = phase % BLINK_INTERVAL_SECONDS
     if (timeInBlinkCycle > BLINK_DURATION_SECONDS) return 1f
     val halfBlink = BLINK_DURATION_SECONDS / 2f
