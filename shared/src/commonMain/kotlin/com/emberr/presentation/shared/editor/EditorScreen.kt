@@ -136,7 +136,7 @@ import emberr.shared.generated.resources.mouse_square2
 import emberr.shared.generated.resources.ordered_list
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.quote_down2
-import emberr.shared.generated.resources.info
+import emberr.shared.generated.resources.card_edit2
 import emberr.shared.generated.resources.redo_circle
 import emberr.shared.generated.resources.scissor2
 import emberr.shared.generated.resources.table
@@ -1205,7 +1205,7 @@ fun EditorToolbar(
                                         Icon(painterResource(Res.drawable.quote_down2), "Quote", tint = tint, modifier = Modifier.size(customIconSize - 3.dp))
                                     }
                                     ToolbarButton(onClick = { onChangeBlockType("callout") }) {
-                                        Icon(painterResource(Res.drawable.info), "Callout", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
+                                        Icon(painterResource(Res.drawable.card_edit2), "Callout", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
                                     }
                                     ToolbarButton(onClick = { onChangeBlockType("code") }) {
                                         Icon(painterResource(Res.drawable.code), "Code", tint = tint, modifier = Modifier.size(customIconSize))
@@ -1592,7 +1592,7 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Numbered List", Res.drawable.ordered_list, 14.dp) { onChangeBlockType("number") },
         SlashMenuItemData("Toggle List", Res.drawable.arrow_right2) { onChangeBlockType("toggle") },
         SlashMenuItemData("Quote", Res.drawable.quote_down2, 14.dp) { onChangeBlockType("quote") },
-        SlashMenuItemData("Callout", Res.drawable.info) { onChangeBlockType("callout") },
+        SlashMenuItemData("Callout", Res.drawable.card_edit2) { onChangeBlockType("callout") },
         SlashMenuItemData("Code Block", Res.drawable.code) { onChangeBlockType("code") }
     )),
     SlashMenuSectionData("Media & Links", listOf(
@@ -2283,7 +2283,7 @@ fun BlockStyleBar(
                             Icon(painterResource(Res.drawable.quote_down2), "Quote", tint = tint, modifier = Modifier.size(customIconSize - 3.dp))
                         }
                         ToolbarButton(onClick = { onChangeBlockType("callout") }) {
-                            Icon(painterResource(Res.drawable.info), "Callout", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
+                            Icon(painterResource(Res.drawable.card_edit2), "Callout", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
                         }
                         ToolbarButton(onClick = { onChangeBlockType("code") }) {
                             Icon(painterResource(Res.drawable.code), "Code", tint = tint, modifier = Modifier.size(customIconSize))
