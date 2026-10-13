@@ -21,7 +21,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.emberr.ui.theme.LocalAppIsDark
 
-private val EmberrAlertDialogShape = RoundedCornerShape(16.dp)
+private val EmberrAlertDialogShape = RoundedCornerShape(22.dp)
 
 @Composable
 fun EmberrAlertDialog(
