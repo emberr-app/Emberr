@@ -1,5 +1,6 @@
 package com.emberr.presentation.shared.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -9,20 +10,26 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,8 +56,49 @@ import kotlin.time.Duration.Companion.milliseconds
 private val UpdatePeekGhostSize = 56.dp
 private val UpdatePeekVisibleHeight = 32.dp
 private val UpdatePeekDelayAfterLaunch = 800.milliseconds
+private val UpdatePeekGoodbyeDuration = 1500.milliseconds
 private val UpdatePillGrowsFromBottom = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 1f)
-private val UpdateDialogShape = RoundedCornerShape(16.dp)
+private val UpdateDialogShape = RoundedCornerShape(22.dp)
+private val UpdateDialogMaxHeight = 560.dp
+
+private class UpdateNotesSection(val heading: String, val items: List<String>)
+
+private val CurrentUpdateNotes = listOf(
+    UpdateNotesSection(
+        heading = "Added",
+        items = listOf(
+            "Import your notes from Markdown files or an Obsidian vault",
+            "A new callout block for tips and warnings",
+            "Write text on canvas arrows",
+            "Paste an image link to add a picture from the web",
+            "Back up only the spaces you pick, and restore them as new spaces",
+            "Use the same properties across all your databases",
+            "See how far your self-hosted sync has got, and cancel it anytime"
+        )
+    ),
+    UpdateNotesSection(
+        heading = "Improved",
+        items = listOf(
+            "Emberr opens faster and uses less memory",
+            "New rows in a filtered database fit the filter automatically",
+            "Database column widths stay the way you set them on each device",
+            "Images and Bookmarks look tidier",
+            "Voice notes take up less space on Android",
+            "Smoother sideways scrolling with a trackpad on Linux"
+        )
+    ),
+    UpdateNotesSection(
+        heading = "Fixed",
+        items = listOf(
+            "Self-hosted sync no longer restarts on its own or brings back deleted notes",
+            "Notes in the trash no longer show up in overviews, the calendar or widgets",
+            "Voice recordings on desktop are no longer silent",
+            "Scrolling over tables on desktop works again",
+            "Database changes are no longer lost while saving",
+            "Renaming a note now updates its title everywhere"
+        )
+    )
+)
 
 @Composable
 fun EmberrUpdatePeek(
@@ -61,8 +109,9 @@ fun EmberrUpdatePeek(
     onPeekingChange: (Boolean) -> Unit = {}
 ) {
     var hasWaitedAfterLaunch by remember { mutableStateOf(false) }
-    var hasBeenOpened by remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
+    var isSayingGoodbye by remember { mutableStateOf(false) }
+    var isGone by remember { mutableStateOf(false) }
 
     LaunchedEffect(isDue) {
         if (isDue) {
@@ -71,7 +120,14 @@ fun EmberrUpdatePeek(
         }
     }
 
-    val isPeeking = isDue && hasWaitedAfterLaunch && canShow && !hasBeenOpened
+    LaunchedEffect(isSayingGoodbye) {
+        if (isSayingGoodbye) {
+            delay(UpdatePeekGoodbyeDuration)
+            isGone = true
+        }
+    }
+
+    val isPeeking = isDue && hasWaitedAfterLaunch && canShow && !isGone
 
     LaunchedEffect(isPeeking) {
         onPeekingChange(isPeeking)
@@ -85,18 +141,17 @@ fun EmberrUpdatePeek(
                 initialScale = 0.8f,
                 transformOrigin = UpdatePillGrowsFromBottom
             ),
-            exit = fadeOut(tween(150)) + scaleOut(
-                animationSpec = tween(150),
+            exit = fadeOut(tween(300)) + scaleOut(
+                animationSpec = tween(300),
                 targetScale = 0.8f,
                 transformOrigin = UpdatePillGrowsFromBottom
             )
         ) {
-            WhatsNewPill(
+            UpdatePeekPill(
+                label = if (isSayingGoodbye) "See you later!" else "What's new?",
                 hazeState = hazeState,
-                onClick = {
-                    hasBeenOpened = true
-                    isDialogOpen = true
-                }
+                isClickable = !isSayingGoodbye,
+                onClick = { isDialogOpen = true }
             )
         }
 
@@ -106,7 +161,12 @@ fun EmberrUpdatePeek(
     }
 
     if (isDialogOpen) {
-        EmberrUpdateDialog(onDismissRequest = { isDialogOpen = false })
+        EmberrUpdateDialog(
+            onDismissRequest = {
+                isDialogOpen = false
+                isSayingGoodbye = true
+            }
+        )
     }
 }
 
@@ -121,7 +181,7 @@ private fun PeekingGhost(isPeeking: Boolean) {
             visible = isPeeking,
             modifier = Modifier.wrapContentHeight(align = Alignment.Top, unbounded = true),
             enter = slideInVertically(tween(450, easing = FastOutSlowInEasing)) { fullHeight -> fullHeight },
-            exit = slideOutVertically(tween(300, easing = FastOutSlowInEasing)) { fullHeight -> fullHeight }
+            exit = slideOutVertically(tween(800, easing = FastOutSlowInEasing)) { fullHeight -> fullHeight }
         ) {
             EmberrFrontGhost(modifier = Modifier.size(UpdatePeekGhostSize))
         }
@@ -129,12 +189,13 @@ private fun PeekingGhost(isPeeking: Boolean) {
 }
 
 @Composable
-private fun WhatsNewPill(hazeState: HazeState?, onClick: () -> Unit) {
-    Text(
-        text = "What's new?",
-        style = MaterialTheme.typography.labelSmall,
-        fontWeight = FontWeight.Medium,
-        color = MaterialTheme.colorScheme.onSurface,
+private fun UpdatePeekPill(
+    label: String,
+    hazeState: HazeState?,
+    isClickable: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
         modifier = Modifier
             .customEmberrShadow(CircleShape)
             .clip(CircleShape)
@@ -144,9 +205,22 @@ private fun WhatsNewPill(hazeState: HazeState?, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                 shape = CircleShape
             )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
-    )
+            .clickable(enabled = isClickable, onClick = onClick)
+    ) {
+        AnimatedContent(
+            targetState = label,
+            transitionSpec = { fadeIn(tween(220, delayMillis = 90)) togetherWith fadeOut(tween(90)) },
+            label = "update-peek-pill-label"
+        ) { visibleLabel ->
+            Text(
+                text = visibleLabel,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -157,34 +231,42 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = 400.dp)
-                .fillMaxWidth(0.88f)
+                .widthIn(max = 560.dp)
+                .fillMaxWidth(0.92f)
+                .heightIn(max = UpdateDialogMaxHeight)
                 .clip(UpdateDialogShape)
                 .background(
                     if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface
                     else MaterialTheme.colorScheme.background
                 )
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(24.dp)
         ) {
-            EmberrGhost(modifier = Modifier.size(72.dp))
-
-            Spacer(Modifier.height(8.dp))
-
             Text(
                 text = "What's new",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-
             appVersionName?.let { version ->
-                Spacer(Modifier.height(4.dp))
                 Text(
                     text = "Version $version",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Column(
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(28.dp)
+            ) {
+                CurrentUpdateNotes.forEach { section ->
+                    UpdateNotesSectionView(section)
+                }
             }
 
             Spacer(Modifier.height(24.dp))
@@ -194,6 +276,33 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                 onClick = onDismissRequest,
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+    }
+}
+
+@Composable
+private fun UpdateNotesSectionView(section: UpdateNotesSection) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(
+            text = section.heading,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        section.items.forEach { item ->
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "•",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.outline
+                )
+                Text(
+                    text = item,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }
