@@ -151,6 +151,7 @@ fun NoteScreen(
     topBarButtonHazeStyle: HazeStyle? = null,
     desktopTopMargin: Dp = 0.dp,
     isSearchActive: Boolean = false,
+    hideWordCount: Boolean = false,
     viewModel: NoteEditorViewModel = koinViewModel(key = noteId)
 ) {
 
@@ -640,7 +641,7 @@ fun NoteScreen(
 
                 // Word Count Overlay
                 AnimatedVisibility(
-                    visible = showWordCount && !isSelectionMode,
+                    visible = showWordCount && !isSelectionMode && !hideWordCount,
                     enter = fadeIn(tween(200)),
                     exit = fadeOut(tween(200)),
                     modifier = Modifier

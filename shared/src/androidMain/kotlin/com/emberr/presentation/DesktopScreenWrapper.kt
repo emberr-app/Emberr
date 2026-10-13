@@ -21,5 +21,6 @@ actual fun DesktopMainScreenWrapper(
     onAiIconTap: () -> Unit,
     isAiChatVisible: Boolean,
     ragViewModel: RagViewModel?,
-    onDismissAiChat: () -> Unit
+    onDismissAiChat: () -> Unit,
+    isUpdatePeekDue: Boolean
 ) {}

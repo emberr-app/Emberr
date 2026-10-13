@@ -59,6 +59,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.EmberrUpdatePeek
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.canvas.CanvasScreen
 import com.emberr.presentation.shared.components.NoteKindTabs
@@ -564,8 +565,10 @@ fun DesktopMainScreen(
     isAiChatVisible: Boolean = false,
     ragViewModel: com.emberr.presentation.ai.RagViewModel? = null,
     onDismissAiChat: () -> Unit = {},
+    isUpdatePeekDue: Boolean = false,
 ) {
     val hazeState = remember { HazeState() }
+    var isUpdatePeekShowing by remember { mutableStateOf(false) }
     val savedWidth by settingsManager.desktopSidebarWidthFlow.collectAsState(initial = sidebarWidth.value)
     val isAiDisabled by settingsManager.aiFeaturesDisabledFlow.collectAsState(
         initial = settingsManager.isAiFeaturesDisabled()
@@ -1577,7 +1580,8 @@ fun DesktopMainScreen(
                             onPickImage = onPickImage, onTakePhoto = onTakePhoto, onPickDocument = onPickDocument,
                             onOpenFile = onOpenFile, onExportMarkdown = onExportMarkdown, onExportPdf = onExportPdf,
                             onNavigateToEditor = { openNote(it) },
-                            desktopTopMargin = 0.dp
+                            desktopTopMargin = 0.dp,
+                            hideWordCount = isUpdatePeekShowing
                         )
                         null -> Box(Modifier.fillMaxSize())
                     }
@@ -1700,6 +1704,15 @@ fun DesktopMainScreen(
                         canvasFullScreenContent?.let { content ->
                             Box(Modifier.zIndex(11f)) { content() }
                         }
+                        EmberrUpdatePeek(
+                            isDue = isUpdatePeekDue,
+                            canShow = true,
+                            hazeState = hazeState,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(end = 32.dp),
+                            onPeekingChange = { isPeeking -> isUpdatePeekShowing = isPeeking }
+                        )
                     }
 
                     val isRagPanelVisible = isAiChatVisible && ragViewModel != null

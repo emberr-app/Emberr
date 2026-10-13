@@ -181,6 +181,9 @@ interface SettingsManager {
     fun isOnboardingCompleted(): Boolean
     fun saveOnboardingCompleted(completed: Boolean)
 
+    fun getLastUpdatePeekVersion(): String
+    fun saveLastUpdatePeekVersion(version: String)
+
     fun isMediaReferenceListBuilt(): Boolean
     fun saveMediaReferenceListBuilt(built: Boolean)
 

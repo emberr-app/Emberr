@@ -550,6 +550,13 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _hasCompletedOnboarding.value = completed
     }
 
+    override fun getLastUpdatePeekVersion(): String =
+        prefs.get(SyncConstants.KEY_LAST_UPDATE_PEEK_VERSION, "")
+
+    override fun saveLastUpdatePeekVersion(version: String) {
+        prefs.put(SyncConstants.KEY_LAST_UPDATE_PEEK_VERSION, version)
+    }
+
     private var hasBuiltMediaReferenceList = prefs.getBoolean(
         SyncConstants.KEY_MEDIA_REFERENCE_LIST_BUILT,
         SyncConstants.DEFAULT_MEDIA_REFERENCE_LIST_BUILT

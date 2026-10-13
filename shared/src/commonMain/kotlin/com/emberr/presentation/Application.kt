@@ -32,10 +32,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.emberr.domain.util.eventbus.AiEventBus
+import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.daily.DailyScreen
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.onboarding.OnboardingScreen
+import com.emberr.presentation.shared.components.EmberrUpdatePeek
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.LocalEmberrBlurSource
 import com.emberr.presentation.trash.TrashScreen
@@ -92,6 +94,7 @@ fun EmberrApp(
     val homeGridState = remember { LazyStaggeredGridState() }
     val noteRepository: NoteRepository = koinInject()
     val settingsManager = koinInject<com.emberr.data.local.prefs.SettingsManager>()
+    val isUpdatePeekDue = rememberSaveable { claimUpdatePeekForThisLaunch(settingsManager) }
     val isDailyNotesEnabled by settingsManager.dailyNotesEnabledFlow.collectAsState(
         initial = settingsManager.isDailyNotesEnabled()
     )
@@ -348,7 +351,8 @@ fun EmberrApp(
                             onAiIconTap = openAiChat,
                             isAiChatVisible = showAiChatOverlay,
                             ragViewModel = ragViewModel,
-                            onDismissAiChat = dismissAiChat
+                            onDismissAiChat = dismissAiChat,
+                            isUpdatePeekDue = isUpdatePeekDue && hasSplashFinished
                         )
                     } else if (hasFirstFrameRendered) {
                         OnboardingScreen(onFinished = { isOnboardingCompleted = true })
@@ -1087,6 +1091,19 @@ fun EmberrApp(
                     KmpBackHandler(enabled = isSearchBarOpen) { closeSearchBar() }
 
                     if (!isDesktopPlatform) {
+                        EmberrUpdatePeek(
+                            isDue = isUpdatePeekDue,
+                            canShow = isBottomBarVisible &&
+                                currentRoute != Screen.Note.route &&
+                                !isBottomBarCompact &&
+                                !isSearchBarOpen,
+                            hazeState = hazeState,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .navigationBarsPadding()
+                                .padding(bottom = EXPANDED_BOTTOM_BAR_PILL_HEIGHT + BOTTOM_BAR_BOTTOM_PADDING)
+                        )
+
                         AnimatedVisibility(
                             visible = isBottomBarVisible,
                             enter = if (suppressBottomBarEnterAnimation) {
@@ -1197,4 +1214,10 @@ fun EmberrApp(
             }
         }
     }
+}
+private fun claimUpdatePeekForThisLaunch(settingsManager: com.emberr.data.local.prefs.SettingsManager): Boolean {
+    val currentVersion = appVersionName ?: return false
+    if (settingsManager.getLastUpdatePeekVersion() == currentVersion) return false
+    settingsManager.saveLastUpdatePeekVersion(currentVersion)
+    return settingsManager.isOnboardingCompleted()
 }

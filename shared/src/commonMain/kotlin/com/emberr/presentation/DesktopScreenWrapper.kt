@@ -21,5 +21,6 @@ expect fun DesktopMainScreenWrapper(
     onAiIconTap: () -> Unit,
     isAiChatVisible: Boolean = false,
     ragViewModel: RagViewModel? = null,
-    onDismissAiChat: () -> Unit = {}
+    onDismissAiChat: () -> Unit = {},
+    isUpdatePeekDue: Boolean = false
 )

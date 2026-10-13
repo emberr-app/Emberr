@@ -616,6 +616,13 @@ class AndroidSettingsManager(
         _hasCompletedOnboarding.value = completed
     }
 
+    override fun getLastUpdatePeekVersion(): String =
+        sharedPreferences.getString(SyncConstants.KEY_LAST_UPDATE_PEEK_VERSION, null).orEmpty()
+
+    override fun saveLastUpdatePeekVersion(version: String) {
+        sharedPreferences.edit { putString(SyncConstants.KEY_LAST_UPDATE_PEEK_VERSION, version) }
+    }
+
     private var hasBuiltMediaReferenceList = sharedPreferences.getBoolean(
         SyncConstants.KEY_MEDIA_REFERENCE_LIST_BUILT,
         SyncConstants.DEFAULT_MEDIA_REFERENCE_LIST_BUILT
