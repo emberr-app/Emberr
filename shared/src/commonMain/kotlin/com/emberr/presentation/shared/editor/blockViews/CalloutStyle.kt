@@ -1,22 +1,22 @@
 package com.emberr.presentation.shared.editor.blockViews
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Assignment
-import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.outlined.Bolt
-import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.FormatQuote
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.LocalFireDepartment
-import androidx.compose.material.icons.outlined.TaskAlt
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.emberr.domain.model.CalloutType
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.`abstract`
+import emberr.shared.generated.resources.bolt_lightning
+import emberr.shared.generated.resources.bug
+import emberr.shared.generated.resources.check_read
+import emberr.shared.generated.resources.check_square
+import emberr.shared.generated.resources.danger2
+import emberr.shared.generated.resources.doc_add
+import emberr.shared.generated.resources.fire
+import emberr.shared.generated.resources.help_square
+import emberr.shared.generated.resources.info
+import emberr.shared.generated.resources.list_square
+import emberr.shared.generated.resources.quote_down2
+import emberr.shared.generated.resources.x
+import org.jetbrains.compose.resources.DrawableResource
 
 private val CalloutBlue = Color(0xFF086DDD)
 private val CalloutCyan = Color(0xFF00BFBC)
@@ -42,18 +42,18 @@ fun CalloutType.backgroundColor(surfaceColor: Color): Color = when (this) {
     else -> accentColor().copy(alpha = CalloutTintedBackgroundAlpha)
 }
 
-fun CalloutType.icon(): ImageVector = when (this) {
-    CalloutType.NOTE -> Icons.Outlined.Edit
-    CalloutType.ABSTRACT -> Icons.AutoMirrored.Outlined.Assignment
-    CalloutType.INFO -> Icons.Outlined.Info
-    CalloutType.TODO -> Icons.Outlined.TaskAlt
-    CalloutType.TIP -> Icons.Outlined.LocalFireDepartment
-    CalloutType.SUCCESS -> Icons.Outlined.Check
-    CalloutType.QUESTION -> Icons.AutoMirrored.Outlined.HelpOutline
-    CalloutType.WARNING -> Icons.Outlined.WarningAmber
-    CalloutType.FAILURE -> Icons.Outlined.Close
-    CalloutType.DANGER -> Icons.Outlined.Bolt
-    CalloutType.BUG -> Icons.Outlined.BugReport
-    CalloutType.EXAMPLE -> Icons.AutoMirrored.Outlined.FormatListBulleted
-    CalloutType.QUOTE -> Icons.Outlined.FormatQuote
+fun CalloutType.icon(): DrawableResource = when (this) {
+    CalloutType.NOTE -> Res.drawable.doc_add
+    CalloutType.ABSTRACT -> Res.drawable.`abstract`
+    CalloutType.INFO -> Res.drawable.info
+    CalloutType.TODO -> Res.drawable.check_square
+    CalloutType.TIP -> Res.drawable.fire
+    CalloutType.SUCCESS -> Res.drawable.check_read
+    CalloutType.QUESTION -> Res.drawable.help_square
+    CalloutType.WARNING -> Res.drawable.danger2
+    CalloutType.FAILURE -> Res.drawable.x
+    CalloutType.DANGER -> Res.drawable.bolt_lightning
+    CalloutType.BUG -> Res.drawable.bug
+    CalloutType.EXAMPLE -> Res.drawable.list_square
+    CalloutType.QUOTE -> Res.drawable.quote_down2
 }

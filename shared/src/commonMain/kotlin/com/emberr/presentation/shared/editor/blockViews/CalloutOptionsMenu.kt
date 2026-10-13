@@ -17,6 +17,7 @@ import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrSwitch
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun CalloutOptionsMenu(
@@ -29,7 +30,7 @@ fun CalloutOptionsMenu(
     val foldableSwitch: @Composable () -> Unit = { EmberrSwitch(isOn = block.isFoldable) }
     val calloutTypeIcon: @Composable (CalloutType) -> Unit = { calloutType ->
         Icon(
-            imageVector = calloutType.icon(),
+            painter = painterResource(calloutType.icon()),
             contentDescription = null,
             tint = calloutType.accentColor(),
             modifier = Modifier.size(18.dp)

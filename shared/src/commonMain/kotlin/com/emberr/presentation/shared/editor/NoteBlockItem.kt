@@ -545,7 +545,7 @@ fun NoteBlockItem(
                         }
                         is CalloutBlock -> {
                             Icon(
-                                block.calloutType.icon(), "Callout options",
+                                painterResource(block.calloutType.icon()), "Callout options",
                                 tint = block.calloutType.accentColor(),
                                 modifier = Modifier
                                     .size(24.dp)
