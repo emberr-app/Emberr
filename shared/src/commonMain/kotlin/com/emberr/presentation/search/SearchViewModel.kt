@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 private const val QUERY_SETTLE_MILLIS = 90L
 
@@ -43,23 +44,37 @@ class SearchViewModel(
     settingsManager: SettingsManager
 ) : ViewModel() {
 
-    private data class SearchRequest(val query: String, val spaceId: String, val includesDailyNotes: Boolean)
+    private data class SearchRequest(
+        val query: String,
+        val spaceId: String,
+        val includesDailyNotes: Boolean,
+        val refreshCount: Int
+    )
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
+    private val refreshCount = MutableStateFlow(0)
+    private var lastSearchedQuery = ""
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val results: StateFlow<List<NoteSearchResult>> = combine(
         _query.debounce(QUERY_SETTLE_MILLIS).distinctUntilChanged(),
         activeSpaceStore.activeSpaceId,
-        settingsManager.dailyNotesEnabledFlow
-    ) { query, spaceId, isDailyNotesEnabled -> SearchRequest(query, spaceId, isDailyNotesEnabled) }
+        settingsManager.dailyNotesEnabledFlow,
+        refreshCount
+    ) { query, spaceId, isDailyNotesEnabled, refreshCount ->
+        SearchRequest(query, spaceId, isDailyNotesEnabled, refreshCount)
+    }
         .distinctUntilChanged()
         .flatMapLatest { request ->
+            val isSameQueryAsBefore = request.query == lastSearchedQuery
+            lastSearchedQuery = request.query
             if (request.query.isBlank()) flowOf(emptyList())
             else flow {
-                val quickMatches = repository.searchNoteTitlesAndSnippets(request.query).visibleFor(request)
-                if (quickMatches.isNotEmpty()) emit(quickMatches)
+                if (!isSameQueryAsBefore) {
+                    val quickMatches = repository.searchNoteTitlesAndSnippets(request.query).visibleFor(request)
+                    if (quickMatches.isNotEmpty()) emit(quickMatches)
+                }
                 emit(repository.searchNotes(request.query).visibleFor(request))
             }
         }
@@ -68,6 +83,10 @@ class SearchViewModel(
 
     fun onQueryChange(newQuery: String) {
         _query.value = newQuery
+    }
+
+    fun refreshResults() {
+        refreshCount.update { count -> count + 1 }
     }
 
     private fun List<NoteSearchResult>.visibleFor(request: SearchRequest): List<NoteSearchResult> =
