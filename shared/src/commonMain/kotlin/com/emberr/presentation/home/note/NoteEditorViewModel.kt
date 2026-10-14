@@ -5,6 +5,7 @@ import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.database.withDatabasesAsTables
 import com.emberr.domain.model.*
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.media.WebImageFetcher
@@ -27,8 +28,9 @@ class NoteEditorViewModel(
     webImageFetcher: WebImageFetcher,
     reminderScheduler: ReminderScheduler,
     audioRecorder: AudioRecorder,
-    appScope: CoroutineScope
-) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope) {
+    appScope: CoroutineScope,
+    deviceTableLayoutStore: DeviceTableLayoutStore
+) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore) {
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()

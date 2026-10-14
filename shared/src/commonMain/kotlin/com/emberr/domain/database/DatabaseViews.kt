@@ -39,8 +39,5 @@ fun DatabaseBlock.withViewDeleted(viewId: String): DatabaseBlock {
     return copy(views = remainingViews, activeViewId = activeViewId.takeUnless { it == viewId })
 }
 
-fun DatabaseBlock.withActiveView(viewId: String, now: Long): DatabaseBlock =
-    if (activeView().id == viewId) this else copy(activeViewId = viewId).withSettingTimesStamped(before = this, now)
-
 fun List<DatabaseRow>.loadedRows(loadedCount: Int, alwaysShownRowIds: Collection<String> = emptySet()): List<DatabaseRow> =
     filterIndexed { position, row -> position < loadedCount || row.noteId in alwaysShownRowIds }

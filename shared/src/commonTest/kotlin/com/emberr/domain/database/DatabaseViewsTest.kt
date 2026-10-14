@@ -87,21 +87,6 @@ class DatabaseViewsTest {
     }
 
     @Test
-    fun choosingTheViewThatIsAlreadyOpenChangesNothing() {
-        assertSame(database, database.withActiveView(DEFAULT_VIEW_ID, now = 500L))
-    }
-
-    @Test
-    fun choosingAnotherViewRemembersItAndStampsTheChoiceForSync() {
-        val withGallery = database.withViewAdded(gallery).copy(activeViewId = DEFAULT_VIEW_ID)
-
-        val result = withGallery.withActiveView("gallery-id", now = 500L)
-
-        assertEquals("gallery-id", result.activeViewId)
-        assertEquals(500L, result.settingTimes["active_view"]?.updatedAt)
-    }
-
-    @Test
     fun aViewSavedBeforeCardSizesExistedOpensWithMediumCards() {
         val view = Json.decodeFromString<DatabaseView>("""{"id":"gallery-id","name":"Gallery","type":"GALLERY"}""")
 

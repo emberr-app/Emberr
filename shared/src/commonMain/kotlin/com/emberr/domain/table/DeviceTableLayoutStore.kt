@@ -1,6 +1,8 @@
 package com.emberr.domain.table
 
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.domain.database.allViews
+import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseView
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,9 +16,15 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class DeviceTableLayout(
     val columnWidths: Map<String, Int> = emptyMap(),
-    val freezesTitleColumnByViewId: Map<String, Boolean> = emptyMap()
+    val freezesTitleColumnByViewId: Map<String, Boolean> = emptyMap(),
+    val activeViewId: String? = null
 ) {
     fun freezesTitleColumn(view: DatabaseView): Boolean = freezesTitleColumnByViewId[view.id] ?: view.freezesTitleColumn
+}
+
+fun DatabaseBlock.withActiveViewOf(deviceLayout: DeviceTableLayout): DatabaseBlock {
+    val viewIdOnThisDevice = deviceLayout.activeViewId ?: return this
+    return if (allViews().any { it.id == viewIdOnThisDevice }) copy(activeViewId = viewIdOnThisDevice) else this
 }
 
 class DeviceTableLayoutStore(private val settingsManager: SettingsManager) {
@@ -39,6 +47,8 @@ class DeviceTableLayoutStore(private val settingsManager: SettingsManager) {
 
     fun setFreezesTitleColumn(blockId: String, viewId: String, freezes: Boolean) =
         change(blockId) { it.copy(freezesTitleColumnByViewId = it.freezesTitleColumnByViewId + (viewId to freezes)) }
+
+    fun setActiveViewId(blockId: String, viewId: String) = change(blockId) { it.copy(activeViewId = viewId) }
 
     private fun change(blockId: String, update: (DeviceTableLayout) -> DeviceTableLayout) {
         loadIfNeeded(blockId)

@@ -7,6 +7,7 @@ import com.emberr.data.local.room.entity.toRecurrenceRule
 import com.emberr.domain.model.*
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.ActiveSpaceStore
+import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.eventbus.AiEventBus
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
@@ -52,8 +53,9 @@ class DailyEditorViewModel(
     reminderScheduler: ReminderScheduler,
     audioRecorder: AudioRecorder,
     appScope: CoroutineScope,
-    private val activeSpaceStore: ActiveSpaceStore
-) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope) {
+    private val activeSpaceStore: ActiveSpaceStore,
+    deviceTableLayoutStore: DeviceTableLayoutStore
+) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore) {
 
     // Date state
     private val _currentDateString = MutableStateFlow<String?>(null)

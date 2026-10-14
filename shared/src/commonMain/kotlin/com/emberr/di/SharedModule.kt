@@ -299,7 +299,8 @@ val sharedModule = module {
             webImageFetcher = get(),
             reminderScheduler = get(),
             audioRecorder = get(),
-            appScope = get(named("AppScope"))
+            appScope = get(named("AppScope")),
+            deviceTableLayoutStore = get()
         )
     }
     viewModel {
@@ -310,7 +311,8 @@ val sharedModule = module {
             reminderScheduler = get(),
             audioRecorder = get(),
             appScope = get(named("AppScope")),
-            activeSpaceStore = get()
+            activeSpaceStore = get(),
+            deviceTableLayoutStore = get()
         )
     }
     single {

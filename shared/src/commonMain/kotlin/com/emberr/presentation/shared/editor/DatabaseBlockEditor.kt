@@ -250,7 +250,10 @@ class DatabaseBlockEditor(
     fun addView(blockId: String, type: DatabaseViewType) {
         val databaseBlock = host.findDatabaseBlock(blockId) ?: return
         val view = DatabaseView(id = Uuid.random().toString(), name = databaseBlock.newViewName(type), type = type)
-        host.changeDatabaseBlock(blockId) { it.withViewAdded(view) }
+        host.changeDatabaseBlock(blockId) { databaseBlockNow ->
+            databaseBlockNow.withViewAdded(view).copy(activeViewId = databaseBlockNow.activeViewId)
+        }
+        host.showDatabaseView(blockId, view.id)
     }
 
     fun renameView(blockId: String, viewId: String, name: String) {

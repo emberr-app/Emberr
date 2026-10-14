@@ -1,6 +1,8 @@
 package com.emberr.domain.table
 
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.domain.database.activeView
+import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseView
 import com.emberr.domain.model.DatabaseViewType
 import java.lang.reflect.Proxy
@@ -53,6 +55,18 @@ class DeviceTableLayoutStoreTest {
         store.setFreezesTitleColumn("block-1", "table-view", freezes = false)
 
         assertFalse(store.currentLayoutOf("block-1").freezesTitleColumn(frozenInTheNote))
+    }
+
+    @Test
+    fun theViewOpenedOnThisDeviceIsShownAfterARestartUntilItIsDeletedElsewhere() {
+        val galleryView = DatabaseView(id = "gallery-view", name = "Gallery", type = DatabaseViewType.GALLERY)
+        val database = DatabaseBlock(id = "block-1", databaseId = "books", views = listOf(tableView, galleryView), activeViewId = "table-view")
+        DeviceTableLayoutStore(settings).setActiveViewId("block-1", "gallery-view")
+
+        val layoutAfterRestart = DeviceTableLayoutStore(settings).currentLayoutOf("block-1")
+
+        assertEquals("gallery-view", database.withActiveViewOf(layoutAfterRestart).activeView().id)
+        assertEquals("table-view", database.copy(views = listOf(tableView)).withActiveViewOf(layoutAfterRestart).activeView().id)
     }
 
     @Test
