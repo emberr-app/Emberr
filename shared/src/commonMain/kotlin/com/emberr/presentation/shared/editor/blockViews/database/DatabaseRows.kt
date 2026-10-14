@@ -41,11 +41,15 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
@@ -61,12 +65,12 @@ import com.emberr.domain.model.DatabaseCellStyle
 import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.columnKey
-import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyCheckboxValue
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyDateValue
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagsValue
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTextValue
+import com.emberr.presentation.shared.editor.blockViews.property.TapToCursorPosition
 import com.emberr.presentation.shared.editor.blockViews.property.toTextAlign
 import com.emberr.ui.theme.tableGridLineColor
 import emberr.shared.generated.resources.Res
@@ -225,6 +229,9 @@ private fun DatabaseTitleCell(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     var fieldValue by remember { mutableStateOf(TextFieldValue(title, TextRange(title.length))) }
+    val tapToCursor = remember { TapToCursorPosition() }
+    val textMeasurer = rememberTextMeasurer()
+    var isFocusRequestedByTap by remember { mutableStateOf(false) }
     val textsSentButNotYetEchoed = remember { mutableListOf<String>() }
     var isFocused by remember { mutableStateOf(false) }
     val lineColor = tableGridLineColor
@@ -249,6 +256,13 @@ private fun DatabaseTitleCell(
         runCatching { focusRequester.requestFocus() }
         keyboardController?.show()
         onFocusTaken()
+    }
+
+    LaunchedEffect(isFocusRequestedByTap) {
+        if (!isFocusRequestedByTap) return@LaunchedEffect
+        runCatching { focusRequester.requestFocus() }
+        keyboardController?.show()
+        isFocusRequestedByTap = false
     }
 
     Box(
@@ -297,7 +311,10 @@ private fun DatabaseTitleCell(
                             isEnterPress
                         },
                     decorationBox = { innerTextField ->
-                        Box(propagateMinConstraints = true) {
+                        Box(
+                            modifier = Modifier.onGloballyPositioned { tapToCursor.textAreaCoordinates = it },
+                            propagateMinConstraints = true
+                        ) {
                             if (fieldValue.text.isEmpty()) {
                                 Text(text = "Untitled", style = textStyle.copy(color = MaterialTheme.colorScheme.outline))
                             }
@@ -306,14 +323,18 @@ private fun DatabaseTitleCell(
                     }
                 )
 
-                if (!isDesktopPlatform && !isFocused && !inSelectionMode) {
+                if (!isFocused && !inSelectionMode) {
                     Box(
                         modifier = Modifier
                             .matchParentSize()
-                            .pointerInput(Unit) {
-                                detectTapGestures(onTap = {
-                                    focusRequester.requestFocus()
-                                    keyboardController?.show()
+                            .pointerHoverIcon(PointerIcon.Text)
+                            .onGloballyPositioned { tapToCursor.tapAreaCoordinates = it }
+                            .pointerInput(wrapsText, textStyle) {
+                                detectTapGestures(onTap = { tapPosition ->
+                                    tapToCursor.cursorOffsetAt(tapPosition, fieldValue.text, textStyle, wrapsText, textMeasurer)?.let { cursorOffset ->
+                                        fieldValue = fieldValue.copy(selection = TextRange(cursorOffset))
+                                    }
+                                    isFocusRequestedByTap = true
                                 })
                             }
                     )
@@ -422,7 +443,7 @@ private fun DatabasePropertyCell(
                     inSelectionMode = inSelectionMode,
                     onUpdateText = { editor.updateCellText(database.id, row.noteId, column, it) },
                     widthModifier = valueModifier,
-                    ignoresLongPressUntilFocused = true,
+                    catchesTapsUntilFocused = true,
                     textColor = textColor,
                     alignment = style.alignment,
                     wrapsText = wrapsText

@@ -49,11 +49,15 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -202,7 +206,7 @@ internal fun PropertyTextValue(
     inSelectionMode: Boolean,
     onUpdateText: (String) -> Unit,
     widthModifier: Modifier,
-    ignoresLongPressUntilFocused: Boolean = false,
+    catchesTapsUntilFocused: Boolean = false,
     textColor: Color? = null,
     alignment: TextAlignment? = null,
     wrapsText: Boolean = true,
@@ -215,6 +219,13 @@ internal fun PropertyTextValue(
     var isFocused by remember { mutableStateOf(false) }
     val webLinkActions = rememberWebLinkActions()
     var fieldValue by remember { mutableStateOf(TextFieldValue(block.text, TextRange(block.text.length))) }
+    val tapToCursor = remember { TapToCursorPosition() }
+    val textMeasurer = rememberTextMeasurer()
+    var isFocusRequestedByTap by remember { mutableStateOf(false) }
+    val textStyle = MaterialTheme.typography.bodyLarge.copy(
+        color = textColor ?: MaterialTheme.colorScheme.onBackground,
+        textAlign = alignment.toTextAlign()
+    )
     val textsSentButNotYetEchoed = remember { mutableListOf<String>() }
 
     LaunchedEffect(block.text) {
@@ -232,6 +243,13 @@ internal fun PropertyTextValue(
         withFrameNanos { }
         runCatching { focusRequester.requestFocus() }
         keyboardController?.show()
+    }
+
+    LaunchedEffect(isFocusRequestedByTap) {
+        if (!isFocusRequestedByTap) return@LaunchedEffect
+        runCatching { focusRequester.requestFocus() }
+        keyboardController?.show()
+        isFocusRequestedByTap = false
     }
 
     val keyboardType = when (block.valueType) {
@@ -274,10 +292,7 @@ internal fun PropertyTextValue(
             },
             enabled = !inSelectionMode,
             singleLine = !wrapsText,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                color = textColor ?: MaterialTheme.colorScheme.onBackground,
-                textAlign = alignment.toTextAlign()
-            ),
+            textStyle = textStyle,
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             keyboardOptions = KeyboardOptions(
                 capitalization = capitalization,
@@ -304,7 +319,8 @@ internal fun PropertyTextValue(
                     Box(
                         modifier = Modifier
                             .weight(1f, fill = alignment != null)
-                            .padding(horizontal = PropertyValueHorizontalPadding, vertical = PropertyValueVerticalPadding),
+                            .padding(horizontal = PropertyValueHorizontalPadding, vertical = PropertyValueVerticalPadding)
+                            .onGloballyPositioned { tapToCursor.textAreaCoordinates = it },
                         propagateMinConstraints = true
                     ) {
                         if (fieldValue.text.isEmpty()) {
@@ -335,15 +351,19 @@ internal fun PropertyTextValue(
             }
         )
 
-        if (ignoresLongPressUntilFocused && !isDesktopPlatform && !isFocused && !inSelectionMode) {
+        if (catchesTapsUntilFocused && !isFocused && !inSelectionMode) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .padding(end = if (showsOpenIcon) OpenValueIconWidth else 0.dp)
-                    .pointerInput(Unit) {
-                        detectTapGestures(onTap = {
-                            focusRequester.requestFocus()
-                            keyboardController?.show()
+                    .pointerHoverIcon(PointerIcon.Text)
+                    .onGloballyPositioned { tapToCursor.tapAreaCoordinates = it }
+                    .pointerInput(wrapsText, textStyle) {
+                        detectTapGestures(onTap = { tapPosition ->
+                            tapToCursor.cursorOffsetAt(tapPosition, fieldValue.text, textStyle, wrapsText, textMeasurer)?.let { cursorOffset ->
+                                fieldValue = fieldValue.copy(selection = TextRange(cursorOffset))
+                            }
+                            isFocusRequestedByTap = true
                         })
                     }
             )
