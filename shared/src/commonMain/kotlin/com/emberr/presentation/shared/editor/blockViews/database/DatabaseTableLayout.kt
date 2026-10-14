@@ -2,6 +2,8 @@ package com.emberr.presentation.shared.editor.blockViews.database
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,9 +15,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.emberr.domain.util.system.isDesktopPlatform
 
 internal val DatabaseSelectionColumnWidth = 40.dp
 internal val DatabaseTableBorderWidth = 0.8.dp
+internal val DatabaseInlineIconSize = if (isDesktopPlatform) 18.dp else 16.dp
+private const val DesktopInlineIconAlpha = 0.6f
+
+@Composable
+internal fun databaseInlineIconTint(mobileTint: Color): Color =
+    if (isDesktopPlatform) MaterialTheme.colorScheme.onSurface.copy(alpha = DesktopInlineIconAlpha) else mobileTint
 private const val FrozenCellZIndex = 2f
 
 internal fun Modifier.staysInPlaceWhileScrolling(

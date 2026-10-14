@@ -59,7 +59,7 @@ import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.notes2
+import emberr.shared.generated.resources.file_text
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -78,7 +78,7 @@ internal val DatabaseMenuRowInset: Dp
 internal val DatabaseMenuTextInset: Dp = 20.dp
 
 internal fun DatabaseBlock.iconOf(column: DatabaseColumnTarget): DrawableResource = when (column) {
-    DatabaseColumnTarget.NotesTitle -> Res.drawable.notes2
+    DatabaseColumnTarget.NotesTitle -> Res.drawable.file_text
     is DatabaseColumnTarget.Property -> column.propertyType.iconResource()
     is DatabaseColumnTarget.CustomProperty -> (valueTypeOf(column) ?: PropertyValueType.TEXT).iconResource()
 }

@@ -203,8 +203,8 @@ internal fun DatabaseRowIcon(icon: String?, emojiStyle: TextStyle, modifier: Mod
         Icon(
             painter = painterResource(Res.drawable.file_text),
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = modifier.size(16.dp)
+            tint = databaseInlineIconTint(mobileTint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)),
+            modifier = modifier.size(DatabaseInlineIconSize)
         )
     }
 }
