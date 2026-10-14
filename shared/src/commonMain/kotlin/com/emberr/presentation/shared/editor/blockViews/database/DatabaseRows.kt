@@ -47,6 +47,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -331,7 +332,7 @@ private fun DatabaseTitleCell(
                             .onGloballyPositioned { tapToCursor.tapAreaCoordinates = it }
                             .pointerInput(wrapsText, textStyle) {
                                 detectTapGestures(onTap = { tapPosition ->
-                                    tapToCursor.cursorOffsetAt(tapPosition, fieldValue.text, textStyle, wrapsText, textMeasurer)?.let { cursorOffset ->
+                                    tapToCursor.cursorOffsetAt(tapPosition, AnnotatedString(fieldValue.text), textStyle, wrapsText, textMeasurer)?.let { cursorOffset ->
                                         fieldValue = fieldValue.copy(selection = TextRange(cursorOffset))
                                     }
                                     isFocusRequestedByTap = true

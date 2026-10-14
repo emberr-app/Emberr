@@ -2,6 +2,7 @@ package com.emberr.presentation.shared.editor.blockViews.property
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Constraints
@@ -12,7 +13,7 @@ internal class TapToCursorPosition {
 
     fun cursorOffsetAt(
         tapPosition: Offset,
-        text: String,
+        text: AnnotatedString,
         style: TextStyle,
         wrapsText: Boolean,
         textMeasurer: TextMeasurer
