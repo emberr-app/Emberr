@@ -8,6 +8,34 @@ import com.emberr.database.EmberrDatabase
 import java.text.SimpleDateFormat
 import java.util.*
 
+private const val MAX_CHUNK_HEADER_CHARACTERS = 200
+
+internal fun embeddingSafeChunkTexts(header: String, body: String): List<String> {
+    val chunkHeader = header.take(MAX_CHUNK_HEADER_CHARACTERS)
+    val bodyCharacterLimit = MAX_EMBEDDING_INPUT_CHARACTERS - chunkHeader.length - 1
+    return splitIntoChunks(body, bodyCharacterLimit).map { chunk -> "$chunkHeader\n$chunk" }
+}
+
+private fun splitIntoChunks(text: String, characterLimit: Int): List<String> {
+    if (text.length <= characterLimit) return listOf(text)
+
+    val chunks = mutableListOf<String>()
+    var startIndex = 0
+    while (startIndex < text.length) {
+        var endIndex = (startIndex + characterLimit).coerceAtMost(text.length)
+        if (endIndex < text.length) {
+            val paragraphBreak = text.lastIndexOf('\n', endIndex)
+            val wordBreak = text.lastIndexOf(' ', endIndex)
+            val breakPoint = maxOf(paragraphBreak, wordBreak)
+            if (breakPoint > startIndex) endIndex = breakPoint
+        }
+        val chunk = text.substring(startIndex, endIndex).trim()
+        if (chunk.isNotBlank()) chunks.add(chunk)
+        startIndex = endIndex
+    }
+    return chunks
+}
+
 class NoteIndexer(
     lazyDatabase: Lazy<EmberrDatabase>,
     private val aiEngine: LocalAiEngine,
@@ -21,28 +49,6 @@ class NoteIndexer(
         val chunkText: String,
         val embeddingString: String
     )
-
-    private val embeddingChunkCharacterLimit = 1800
-
-    private fun splitIntoEmbeddingSafeChunks(text: String): List<String> {
-        if (text.length <= embeddingChunkCharacterLimit) return listOf(text)
-
-        val chunks = mutableListOf<String>()
-        var startIndex = 0
-        while (startIndex < text.length) {
-            var endIndex = (startIndex + embeddingChunkCharacterLimit).coerceAtMost(text.length)
-            if (endIndex < text.length) {
-                val paragraphBreak = text.lastIndexOf('\n', endIndex)
-                val wordBreak = text.lastIndexOf(' ', endIndex)
-                val breakPoint = maxOf(paragraphBreak, wordBreak)
-                if (breakPoint > startIndex) endIndex = breakPoint
-            }
-            val chunk = text.substring(startIndex, endIndex).trim()
-            if (chunk.isNotBlank()) chunks.add(chunk)
-            startIndex = endIndex
-        }
-        return chunks
-    }
 
     private val dateOnlyFormatter = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
     private val dateTimeFormatter = SimpleDateFormat("MMMM d, yyyy 'at' h:mm a", Locale.getDefault())
@@ -85,11 +91,11 @@ class NoteIndexer(
             )
 
             if (!blockText.isNullOrBlank()) {
-                val subChunks = splitIntoEmbeddingSafeChunks(blockText)
-                subChunks.forEachIndexed { index, subChunk ->
-                    val chunkBlockId = if (subChunks.size == 1) block.id else "${block.id}#$index"
+                val subChunkTexts = embeddingSafeChunkTexts(baseContext, blockText)
+                subChunkTexts.forEachIndexed { index, subChunkText ->
+                    val chunkBlockId = if (subChunkTexts.size == 1) block.id else "${block.id}#$index"
                     blockIds.add(chunkBlockId)
-                    chunkTexts.add("$baseContext\n$subChunk")
+                    chunkTexts.add(subChunkText)
                 }
             }
         }
@@ -107,9 +113,8 @@ class NoteIndexer(
             if (!ownerNoteTitle.isNullOrBlank()) appendLine("Inside note: $ownerNoteTitle")
         }
         val canvasText = canvasTextForIndexing(canvas)
-        val chunkBodies = if (canvasText.isBlank()) emptyList() else splitIntoEmbeddingSafeChunks(canvasText)
-        val blockIds = chunkBodies.indices.map { index -> "canvas:${metadata.noteId}#$index" }
-        val chunkTexts = chunkBodies.map { body -> "$context\n$body" }
+        val chunkTexts = if (canvasText.isBlank()) emptyList() else embeddingSafeChunkTexts(context, canvasText)
+        val blockIds = chunkTexts.indices.map { index -> "canvas:${metadata.noteId}#$index" }
         replaceIndexForNote(metadata, blockIds, chunkTexts)
     }
 
