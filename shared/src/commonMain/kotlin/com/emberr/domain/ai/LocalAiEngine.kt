@@ -24,6 +24,8 @@ import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+internal const val MAX_EMBEDDING_INPUT_CHARACTERS = 500
+
 class LocalAiEngine(
     private val aiSettingsRepository: AiSettingsRepository
 ) : AiGenerationEngine {
@@ -50,7 +52,7 @@ class LocalAiEngine(
 
                 try {
                     ensureEmbedderLoaded()
-                    texts.map { LlamaBridge.embed(it).toList() }
+                    texts.map { LlamaBridge.embed(it.take(MAX_EMBEDDING_INPUT_CHARACTERS)).toList() }
                 } finally {
                     unloadModelAfterIdlePeriod()
                 }
