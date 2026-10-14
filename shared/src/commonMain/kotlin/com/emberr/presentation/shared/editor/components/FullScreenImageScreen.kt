@@ -29,7 +29,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -56,10 +58,12 @@ import emberr.shared.generated.resources.download
 import emberr.shared.generated.resources.square_top_down
 import emberr.shared.generated.resources.trash
 import kotlin.math.abs
+import kotlin.math.pow
 import kotlinx.coroutines.launch
 
 private const val DoubleTapZoomScale = 2.5f
 private const val MaximumZoomScale = 5f
+private const val WheelZoomStep = 1.2f
 private const val OpenCloseDurationMillis = 300
 private const val ScaleWhenThumbnailBoundsAreUnknown = 0.92f
 private const val DismissDragHeightFraction = 0.18f
@@ -136,6 +140,22 @@ fun FullScreenImageScreen(
         (currentDismissFraction() / DismissDragHeightFraction).coerceIn(0f, 1f)
 
     fun currentExpansion(): Float = openProgress.value * (1f - currentDismissFraction())
+
+    fun zoomAroundPointer(zoomFactor: Float, pointerFromCenter: Offset) {
+        val startingScale = if (zoomScale.isRunning) zoomScale.targetValue else zoomScale.value
+        val startingOffset = if (panOffset.isRunning) panOffset.targetValue else panOffset.value
+        val targetScale = (startingScale * zoomFactor).coerceIn(1f, MaximumZoomScale)
+        val imagePointUnderPointer = (pointerFromCenter - startingOffset) / startingScale
+        val unclampedOffset = pointerFromCenter - imagePointUnderPointer * targetScale
+        val maxX = (fittedImageSize.width * (targetScale - 1f)) / 2f
+        val maxY = (fittedImageSize.height * (targetScale - 1f)) / 2f
+        val targetOffset = Offset(
+            x = unclampedOffset.x.coerceIn(-maxX, maxX),
+            y = unclampedOffset.y.coerceIn(-maxY, maxY)
+        )
+        gestureScope.launch { zoomScale.animateTo(targetScale, zoomAnimationSpec) }
+        gestureScope.launch { panOffset.animateTo(targetOffset, panAnimationSpec) }
+    }
 
     LaunchedEffect(Unit) {
         openProgress.animateTo(1f, openCloseProgressSpec)
@@ -246,6 +266,21 @@ fun FullScreenImageScreen(
                             gestureScope.launch { panOffset.animateTo(targetOffset, panAnimationSpec) }
                         }
                     )
+                }
+                .pointerInput(fittedImageSize) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (event.type != PointerEventType.Scroll || !event.keyboardModifiers.isCtrlPressed) continue
+                            val wheelChange = event.changes.firstOrNull() ?: continue
+                            wheelChange.consume()
+                            val viewportCenter = Offset(size.width / 2f, size.height / 2f)
+                            zoomAroundPointer(
+                                zoomFactor = WheelZoomStep.pow(-wheelChange.scrollDelta.y),
+                                pointerFromCenter = wheelChange.position - viewportCenter
+                            )
+                        }
+                    }
                 }
                 .pointerInput(fittedImageSize) {
                     detectZoomPanAndDismissDrag(
