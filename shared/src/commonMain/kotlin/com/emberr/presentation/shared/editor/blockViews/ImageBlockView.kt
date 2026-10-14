@@ -76,11 +76,14 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.koinInject
 import java.io.File
+import kotlin.math.abs
 
 private val MaximumImageBlockHeight = 320.dp
 private val LoadingImageBlockHeight = 180.dp
 private val EmptyImageButtonSidePadding = 8.dp
 private val EmptyImageButtonsEndSpace = 6.dp
+private val knownImageRatiosByPath = mutableMapOf<String, Float>()
+private const val NOTICEABLE_RATIO_DIFFERENCE = 0.01f
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -180,7 +183,11 @@ fun ImageBlockView(
                     .build()
             }
 
-            var widthToHeightRatio by remember(absolutePath) { mutableStateOf<Float?>(null) }
+            var widthToHeightRatio by remember(absolutePath) {
+                val knownRatio = knownImageRatiosByPath[absolutePath]
+                    ?: readImageWidthToHeightRatio(absolutePath)?.also { knownImageRatiosByPath[absolutePath] = it }
+                mutableStateOf(knownRatio)
+            }
             var thumbnailBoundsInRoot by remember { mutableStateOf<Rect?>(null) }
 
             Box(
@@ -230,10 +237,13 @@ fun ImageBlockView(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
                         onSuccess = { successState ->
-                            if (widthToHeightRatio == null) {
-                                val loadedImage = successState.result.image
-                                if (loadedImage.width > 0 && loadedImage.height > 0) {
-                                    widthToHeightRatio = loadedImage.width.toFloat() / loadedImage.height.toFloat()
+                            val loadedImage = successState.result.image
+                            if (loadedImage.width > 0 && loadedImage.height > 0) {
+                                val loadedRatio = loadedImage.width.toFloat() / loadedImage.height.toFloat()
+                                val shownRatio = widthToHeightRatio
+                                if (shownRatio == null || abs(shownRatio - loadedRatio) > NOTICEABLE_RATIO_DIFFERENCE) {
+                                    knownImageRatiosByPath[absolutePath] = loadedRatio
+                                    widthToHeightRatio = loadedRatio
                                 }
                             }
                         }
