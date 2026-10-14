@@ -489,7 +489,7 @@ private fun OverviewRow(
             .clip(RoundedCornerShape(12.dp))
             .background(rowBackground)
             .noRippleClickable(interactionSource, onClick)
-            .heightIn(min = 42.dp)
+            .heightIn(min = 40.dp)
             .padding(start = 4.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
