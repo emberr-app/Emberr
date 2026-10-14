@@ -58,6 +58,7 @@ import com.emberr.presentation.desktop.update.SelfHostUpdateRequiredPrompt
 import com.emberr.presentation.desktop.window.CustomWindowFrameSupport
 import com.emberr.presentation.desktop.window.DesktopAppRelauncher
 import com.emberr.presentation.desktop.window.EmberrWindowFrame
+import com.emberr.presentation.desktop.window.FollowLiveDisplayScale
 import com.emberr.presentation.desktop.window.MatchWindowsTitleBarToAppTheme
 import com.emberr.presentation.desktop.window.raiseWindowToFront
 import com.emberr.presentation.desktop.window.WindowFrameSize
@@ -317,6 +318,7 @@ private fun runEmberrDesktopApp() = application {
             ThemePreference.SYSTEM -> linuxSystemIsDark ?: systemIsDark
         }
 
+        FollowLiveDisplayScale(mainWindowState) {
         EmberrTheme(darkTheme = darkTheme, fontSizePreference = fontSizePreference, fontStylePreference = fontStylePreference) {
             MatchWindowsTitleBarToAppTheme(currentWindow)
 
@@ -399,6 +401,7 @@ private fun runEmberrDesktopApp() = application {
                 SelfHostUpdateRequiredPrompt()
             }
         }
+        }
     }
     }
 
@@ -442,6 +445,7 @@ private fun runEmberrDesktopApp() = application {
 
                 val stickyWindow = this.window as Frame
 
+                FollowLiveDisplayScale(stickyNoteWindowState) {
                 EmberrTheme(darkTheme = darkTheme, fontSizePreference = fontSizePreference, fontStylePreference = fontStylePreference) {
                     MatchWindowsTitleBarToAppTheme(stickyWindow)
 
@@ -520,6 +524,7 @@ private fun runEmberrDesktopApp() = application {
                     }
                     }
                     }
+                }
                 }
             }
         }
