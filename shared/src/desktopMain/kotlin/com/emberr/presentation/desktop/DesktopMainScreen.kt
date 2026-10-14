@@ -23,7 +23,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.VerticalSplit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -41,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.data.local.prefs.SettingsManager
@@ -94,6 +100,9 @@ import com.emberr.presentation.home.overview.tasks.TasksScreen
 import com.emberr.domain.model.NoteSearchResult
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.presentation.search.SearchViewModel
+import com.emberr.presentation.search.canBeFavoritedOrTrashed
+import com.emberr.presentation.search.canBeRenamed
+import com.emberr.presentation.search.favoriteOptionLabel
 import com.emberr.presentation.search.defaultHighlightStyle
 import com.emberr.presentation.search.highlightMatches
 import com.emberr.presentation.trash.TrashScreen
@@ -122,6 +131,7 @@ import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.isBackPressed
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -134,6 +144,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import com.emberr.domain.reminders.ReminderTargetResolver
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.LocalEmberrBlurSource
@@ -193,7 +205,7 @@ private fun SettingsSubPage?.toDetailPane(): DetailPane = when (this) {
     SettingsSubPage.OPEN_SOURCE_LICENSES -> DetailPane.OpenSourceLicenses
 }
 
-private fun DetailPane.encode(): String = when (this) {
+internal fun DetailPane.encode(): String = when (this) {
     is DetailPane.Daily -> "DAILY:${date}"
     DetailPane.Empty -> "PANEL:EMPTY"
     is DetailPane.Note -> "NOTE:${noteId}"
@@ -211,7 +223,7 @@ private fun DetailPane.encode(): String = when (this) {
     DetailPane.Calendar -> "PANEL:CALENDAR"
 }
 
-private fun decodeDetailPane(raw: String, today: LocalDate): DetailPane = when {
+internal fun decodeDetailPane(raw: String, today: LocalDate): DetailPane = when {
     raw.startsWith("DAILY:") -> runCatching { DetailPane.Daily(LocalDate.parse(raw.removePrefix("DAILY:"))) }
         .getOrElse { DetailPane.Daily(today) }
     raw.startsWith("NOTE:") -> DetailPane.Note(raw.removePrefix("NOTE:"))
@@ -338,6 +350,13 @@ private fun SidebarSearchResults(
     query: String,
     results: List<NoteSearchResult>,
     onResultClick: (NoteSearchResult) -> Unit,
+    openInSplitViewActionFor: (NoteSearchResult) -> (() -> Unit)?,
+    onRenameNote: (noteId: String, newTitle: String) -> Unit,
+    onSetNoteFavorite: (noteId: String, isFavorite: Boolean) -> Unit,
+    onTrashNote: (noteId: String) -> Unit,
+    dragState: DesktopListDragState,
+    rowHeightPx: Float,
+    onDropOutsideList: (payload: String, cursorInWindow: Offset) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val resultsListState = rememberLazyListState()
@@ -371,7 +390,19 @@ private fun SidebarSearchResults(
         } else {
             LazyColumn(
                 state = resultsListState,
-                modifier = Modifier.fillMaxSize().smoothWheelScroll(resultsListState),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .desktopListDragTracker(
+                        dragState = dragState,
+                        listState = resultsListState,
+                        rowKeys = results.map { result -> HomeItemKey.forNote(result.note.noteId) },
+                        payloadForKey = { key -> key?.let { "$DRAG_PREFIX_NOTE${HomeItemKey.noteIdOf(it)}" } },
+                        isDropTarget = { _, _ -> false },
+                        onDrop = { _, _, _ -> },
+                        onDropOutsideList = onDropOutsideList,
+                        rowHeightPx = rowHeightPx
+                    )
+                    .smoothWheelScroll(resultsListState),
                 contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 16.dp)
             ) {
                 itemsIndexed(results, key = { _, result -> result.note.noteId }) { index, result ->
@@ -379,7 +410,11 @@ private fun SidebarSearchResults(
                         SidebarSearchResultRow(
                             result = result,
                             query = query,
-                            onClick = { onResultClick(result) }
+                            onClick = { onResultClick(result) },
+                            onOpenInSplitView = openInSplitViewActionFor(result),
+                            onRename = { newTitle -> onRenameNote(result.note.noteId, newTitle) },
+                            onSetFavorite = { isFavorite -> onSetNoteFavorite(result.note.noteId, isFavorite) },
+                            onDelete = { onTrashNote(result.note.noteId) }
                         )
                         if (index < results.lastIndex) {
                             HorizontalDivider(
@@ -399,12 +434,22 @@ private fun SidebarSearchResults(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SidebarSearchResultRow(
     result: NoteSearchResult,
     query: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onOpenInSplitView: (() -> Unit)?,
+    onRename: (String) -> Unit,
+    onSetFavorite: (Boolean) -> Unit,
+    onDelete: () -> Unit
 ) {
+    val hasContextMenu = onOpenInSplitView != null || result.canBeRenamed || result.canBeFavoritedOrTrashed
+    var showContextMenu by remember { mutableStateOf(false) }
+    var showRenamePopup by remember { mutableStateOf(false) }
+    var contextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    val density = LocalDensity.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val rowBackground by animateColorAsState(
@@ -417,51 +462,109 @@ private fun SidebarSearchResultRow(
     val titleText = dailyDateString ?: result.note.title.ifBlank { "Untitled" }
     val snippetText = result.matchedText.takeIf { it.isNotBlank() && it != result.note.title }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(SidebarSearchResultShape)
-            .background(rowBackground)
-            .noRippleClickable(interactionSource, onClick)
-            .padding(horizontal = 10.dp, vertical = 8.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = highlightMatches(titleText, query, highlightStyle),
-                style = sidebarRowTextStyle,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false)
-            )
-            if (dailyDateString != null) {
-                Spacer(Modifier.width(6.dp))
+    Box {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onPointerEvent(PointerEventType.Press) { event ->
+                    if (!hasContextMenu || !event.buttons.isSecondaryPressed) return@onPointerEvent
+                    val pressPosition = event.changes.first().position
+                    contextMenuOffset = with(density) { DpOffset(pressPosition.x.toDp(), pressPosition.y.toDp()) }
+                    showContextMenu = true
+                }
+                .clip(SidebarSearchResultShape)
+                .background(rowBackground)
+                .noRippleClickable(interactionSource, onClick)
+                .padding(horizontal = 10.dp, vertical = 8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Daily",
+                    text = highlightMatches(titleText, query, highlightStyle),
+                    style = sidebarRowTextStyle,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                if (dailyDateString != null) {
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "Daily",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                    )
+                }
+            }
+            if (snippetText != null) {
+                Text(
+                    text = highlightMatches(snippetText, query, highlightStyle),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+            result.parentTitle?.let { parentTitle ->
+                Text(
+                    text = "in $parentTitle",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp)
                 )
             }
         }
-        if (snippetText != null) {
-            Text(
-                text = highlightMatches(snippetText, query, highlightStyle),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-        }
-        result.parentTitle?.let { parentTitle ->
-            Text(
-                text = "in $parentTitle",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 2.dp)
-            )
+        if (hasContextMenu) {
+            Box(modifier = Modifier.offset(x = contextMenuOffset.x, y = contextMenuOffset.y)) {
+                EmberrDesktopMenu(
+                    expanded = showContextMenu,
+                    onDismissRequest = { showContextMenu = false },
+                    offset = DpOffset.Zero
+                ) {
+                    SidebarMenuItems {
+                        if (onOpenInSplitView != null) {
+                            SidebarMenuItem("Open in split view", Icons.Default.VerticalSplit) {
+                                showContextMenu = false
+                                onOpenInSplitView()
+                            }
+                        }
+                        if (result.canBeRenamed) {
+                            SidebarMenuItem("Rename", Icons.Default.Edit) {
+                                showContextMenu = false
+                                showRenamePopup = true
+                            }
+                        }
+                        if (result.canBeFavoritedOrTrashed) {
+                            SidebarMenuItem(result.favoriteOptionLabel, Icons.Default.Star) {
+                                showContextMenu = false
+                                onSetFavorite(!result.note.isFavorite)
+                            }
+                            SidebarMenuItem("Delete", Icons.Default.Delete, isDestructive = true) {
+                                showContextMenu = false
+                                onDelete()
+                            }
+                        }
+                    }
+                }
+                EmberrDesktopMenu(
+                    expanded = showRenamePopup,
+                    onDismissRequest = { showRenamePopup = false },
+                    modifier = Modifier.width(280.dp)
+                ) {
+                    DesktopNamePopup(
+                        title = "Rename Note",
+                        initialValue = result.note.title,
+                        confirmLabel = "Save",
+                        onConfirm = { newTitle ->
+                            onRename(newTitle)
+                            showRenamePopup = false
+                        },
+                        onDismiss = { showRenamePopup = false }
+                    )
+                }
+            }
         }
     }
 }
@@ -625,33 +728,54 @@ fun DesktopMainScreen(
     val spaces by spaceViewModel.spaces.collectAsState()
     val activeSpaceId by spaceViewModel.activeSpaceId.collectAsState()
 
-    var detail by remember { mutableStateOf<DetailPane?>(null) }
+    val splitState = rememberDesktopSplitState()
+    var detail by splitState::focusedPane
     var hasRestored by remember { mutableStateOf(false) }
 
     LaunchedEffect(lastOpenedState, isLoading) {
         if (!hasRestored && !isLoading) {
-            val decoded = if (lastOpenedState.isBlank()) DetailPane.Daily(today)
-            else decodeDetailPane(lastOpenedState, today)
-            val decodedOverviewSection = OverviewSection.entries.firstOrNull { section -> section.detailPane() == decoded }
-            val restored = when {
-                decoded is DetailPane.Daily && !isDailyNotesEnabled -> DetailPane.Empty
-                decoded is DetailPane.Empty && isDailyNotesEnabled -> DetailPane.Daily(today)
-                decodedOverviewSection != null && decodedOverviewSection !in visibleOverviewSections ->
-                    if (isDailyNotesEnabled) DetailPane.Daily(today) else DetailPane.Empty
-                else -> decoded
+            fun restorablePane(decoded: DetailPane): DetailPane {
+                val decodedOverviewSection = OverviewSection.entries.firstOrNull { section -> section.detailPane() == decoded }
+                return when {
+                    decoded is DetailPane.Daily && !isDailyNotesEnabled -> DetailPane.Empty
+                    decoded is DetailPane.Empty && isDailyNotesEnabled -> DetailPane.Daily(today)
+                    decodedOverviewSection != null && decodedOverviewSection !in visibleOverviewSections ->
+                        if (isDailyNotesEnabled) DetailPane.Daily(today) else DetailPane.Empty
+                    else -> decoded
+                }
             }
-            if (restored is DetailPane.Daily) dailyViewModel.selectDate(restored.date)
-            detail = restored
+
+            val savedSplit = decodeSavedSplitLayout(lastOpenedState, today)
+            val restorableSplitPanes = savedSplit?.panes.orEmpty().filter { pane -> restorablePane(pane) == pane }
+            if (savedSplit != null && restorableSplitPanes.size >= 2) {
+                splitState.restoreSplit(savedSplit.keepingOnly(restorableSplitPanes))
+            } else {
+                val decoded = when {
+                    savedSplit != null -> restorableSplitPanes.firstOrNull() ?: savedSplit.focusedPane
+                    lastOpenedState.isBlank() -> DetailPane.Daily(today)
+                    else -> decodeDetailPane(lastOpenedState, today)
+                }
+                detail = restorablePane(decoded)
+            }
+            splitState.panes
+                .filterIsInstance<DetailPane.Daily>()
+                .firstOrNull()
+                ?.let { dailyPane -> dailyViewModel.selectDate(dailyPane.date) }
             hasRestored = true
         }
     }
 
-    LaunchedEffect(detail) {
-        detail?.let { settingsManager.saveLastOpenedDesktopState(it.encode()) }
+    val saveOpenedState: () -> Unit = {
+        splitState.encodeOpenedState()?.let { openedState -> settingsManager.saveLastOpenedDesktopState(openedState) }
+    }
+
+    LaunchedEffect(splitState.panes, splitState.focusedIndex) {
+        saveOpenedState()
     }
 
     LaunchedEffect(isDailyNotesEnabled) {
         if (!isDailyNotesEnabled && detail is DetailPane.Daily) detail = DetailPane.Empty
+        if (!isDailyNotesEnabled) splitState.closeUnfocusedPanesWhere { pane -> pane is DetailPane.Daily }
     }
 
     // Menus / popups
@@ -708,11 +832,18 @@ fun DesktopMainScreen(
         isPeeking = false
     }
     val openNote: (String) -> Unit = { id ->
-        detail = DetailPane.Note(id)
+        val notePane = DetailPane.Note(id)
+        if (splitState.isSplit && splitState.canAddPane(notePane)) splitState.addPane(notePane, shouldFocusNewPane = true)
+        else detail = notePane
+        isPeeking = false
+    }
+    val openSubNote: (String) -> Unit = { id ->
+        splitState.exitSplitAndShow(DetailPane.Note(id))
         isPeeking = false
     }
     val closeDetailPane: () -> Unit = {
-        detail = if (isDailyNotesEnabled) DetailPane.Daily(selectedDate) else DetailPane.Empty
+        if (splitState.isSplit) splitState.closePane(splitState.focusedIndex)
+        else detail = if (isDailyNotesEnabled) DetailPane.Daily(selectedDate) else DetailPane.Empty
     }
 
     LaunchedEffect(syncState) {
@@ -749,6 +880,15 @@ fun DesktopMainScreen(
 
     // Drag
     val dragState = rememberDesktopListDragState()
+    var screenOriginInWindow by remember { mutableStateOf(Offset.Zero) }
+    val splitDropTarget by remember {
+        derivedStateOf {
+            val isDraggingNoteOverContent = dragState.dragging &&
+                    dragState.isOutsideList &&
+                    dragState.payload?.startsWith(DRAG_PREFIX_NOTE) == true
+            if (isDraggingNoteOverContent) splitState.dropTargetAt(dragState.cursorInWindow) else null
+        }
+    }
     val sidebarListState = rememberLazyListState()
     val hasOverviewRows = visibleOverviewSections.isNotEmpty()
     DisposableEffect(hasOverviewRows) {
@@ -771,6 +911,7 @@ fun DesktopMainScreen(
         val keepCurrentPane = isOpeningReminderTarget
         isOpeningReminderTarget = false
 
+        splitState.closeUnfocusedPanesWhere { pane -> pane is DetailPane.Note }
         if (detail is DetailPane.Note && !keepCurrentPane) {
             if (isDailyNotesEnabled) {
                 dailyViewModel.selectDate(today)
@@ -800,6 +941,33 @@ fun DesktopMainScreen(
             } else {
                 detail = DetailPane.Note(target.noteId)
             }
+            isPeeking = false
+        }
+    }
+
+    fun openInSplitViewActionFor(pane: DetailPane, isPartOfSelection: Boolean = false): (() -> Unit)? {
+        if (isPartOfSelection || !splitState.canAddPane(pane)) return null
+        return {
+            if (pane is DetailPane.Daily) dailyViewModel.selectDate(pane.date)
+            splitState.addPane(pane, shouldFocusNewPane = false)
+            isPeeking = false
+        }
+    }
+
+    fun paneForSearchResult(result: NoteSearchResult): DetailPane {
+        val dailyDateString = result.note.dateString?.takeIf { result.note.isDaily }
+        return if (dailyDateString != null) DetailPane.Daily(LocalDate.parse(dailyDateString)) else DetailPane.Note(result.note.noteId)
+    }
+
+    val dropNoteOnContent: (String, Offset) -> Unit = { payload, cursorInWindow ->
+        val dropTarget = splitState.dropTargetAt(cursorInWindow)
+        if (payload.startsWith(DRAG_PREFIX_NOTE) && dropTarget != null) {
+            val droppedNoteId = payload.removePrefix(DRAG_PREFIX_NOTE)
+            val droppedPane = searchResults.firstOrNull { result -> result.note.noteId == droppedNoteId }
+                ?.let { result -> paneForSearchResult(result) }
+                ?: DetailPane.Note(droppedNoteId)
+            splitState.dropPane(droppedPane, dropTarget)
+            if (droppedPane is DetailPane.Daily && splitState.isShowing(droppedPane)) dailyViewModel.selectDate(droppedPane.date)
             isPeeking = false
         }
     }
@@ -969,6 +1137,17 @@ fun DesktopMainScreen(
                             if (result.note.isDaily) result.note.dateString?.let { openDaily(LocalDate.parse(it)) }
                             else openNote(result.note.noteId)
                         },
+                        openInSplitViewActionFor = { result -> openInSplitViewActionFor(paneForSearchResult(result)) },
+                        onRenameNote = { noteId, newTitle ->
+                            homeViewModel.renameNote(noteId, newTitle, onDone = searchViewModel::refreshResults)
+                        },
+                        onSetNoteFavorite = { noteId, isFavorite ->
+                            homeViewModel.setNotesFavorite(setOf(noteId), isFavorite, onDone = searchViewModel::refreshResults)
+                        },
+                        onTrashNote = { noteId -> homeViewModel.trashNote(noteId, onDone = searchViewModel::refreshResults) },
+                        dragState = dragState,
+                        rowHeightPx = rowHeightPx,
+                        onDropOutsideList = dropNoteOnContent,
                         modifier = Modifier.weight(1f).fillMaxWidth()
                     )
                 } else {
@@ -1050,7 +1229,8 @@ fun DesktopMainScreen(
                                                 )
                                             }
                                         }
-                                    }
+                                    },
+                                    onDropOutsideList = dropNoteOnContent
                                 )
                         ) {
                             LazyColumn(
@@ -1081,7 +1261,7 @@ fun DesktopMainScreen(
                                                     painterResource(section.icon),
                                                     section.title,
                                                     subtitle,
-                                                    isSelected = detail == sectionPane
+                                                    isSelected = splitState.isShowing(sectionPane)
                                                 ) { detail = sectionPane; isPeeking = false }
                                             }
                                             SidebarGroupSeparator()
@@ -1119,13 +1299,14 @@ fun DesktopMainScreen(
                                                     placementSpec = TreeRowPlacementSpec
                                                 ),
                                                 note = note, level = 0,
-                                                isActive = (detail as? DetailPane.Note)?.noteId == note.noteId,
+                                                isActive = splitState.isShowing(DetailPane.Note(note.noteId)),
                                                 isSelected = selectedNoteIds.contains(note.noteId),
                                                 dragState = dragState,
                                                 menu = rowMenuTarget.menu,
                                                 onClick = { modifiers ->
                                                     handleRowClick(favoriteRows, favoriteRowKey, modifiers) { openNote(note.noteId) }
                                                 },
+                                                onOpenInSplitView = openInSplitViewActionFor(DetailPane.Note(note.noteId), rowMenuTarget.usesSelection),
                                                 onToggleFavorite = {
                                                     homeViewModel.setNotesFavorite(rowMenuTarget.noteIds, rowMenuTarget.menu.makeFavorite)
                                                 },
@@ -1417,13 +1598,14 @@ fun DesktopMainScreen(
                                                 note = row.note,
                                                 level = row.level,
                                                 guideLines = treeGuideLines.getOrElse(index) { ROOT_TREE_GUIDE_LINES },
-                                                isActive = (detail as? DetailPane.Note)?.noteId == row.note.noteId,
+                                                isActive = splitState.isShowing(DetailPane.Note(row.note.noteId)),
                                                 isSelected = selectedNoteIds.contains(row.note.noteId),
                                                 dragState = dragState,
                                                 menu = rowMenuTarget.menu,
                                                 onClick = { modifiers ->
                                                     handleRowClick(treeRows, row.key, modifiers) { openNote(row.note.noteId) }
                                                 },
+                                                onOpenInSplitView = openInSplitViewActionFor(DetailPane.Note(row.note.noteId), rowMenuTarget.usesSelection),
                                                 onToggleFavorite = {
                                                     homeViewModel.setNotesFavorite(rowMenuTarget.noteIds, rowMenuTarget.menu.makeFavorite)
                                                 },
@@ -1455,10 +1637,11 @@ fun DesktopMainScreen(
                                                     placementSpec = TreeRowPlacementSpec
                                                 ),
                                                 note = note, level = 0,
-                                                isActive = (detail as? DetailPane.Note)?.noteId == note.noteId,
+                                                isActive = splitState.isShowing(DetailPane.Note(note.noteId)),
                                                 isSelected = false,
                                                 dragState = dragState,
                                                 onClick = { openNote(note.noteId) },
+                                                onOpenInSplitView = openInSplitViewActionFor(DetailPane.Note(note.noteId)),
                                                 onRename = { newTitle -> homeViewModel.renameNote(note.noteId, newTitle) },
                                                 onDelete = { homeViewModel.trashNote(note.noteId) },
                                                 rowKey = "sb_recent_${note.noteId}"
@@ -1467,24 +1650,6 @@ fun DesktopMainScreen(
                                     }
                                 }
                             }
-
-                            DesktopListDragChip(
-                                dragState = dragState,
-                                labelForPayload = { payload ->
-                                    when {
-                                        payload.startsWith(DRAG_PREFIX_NOTE) -> {
-                                            val id = payload.removePrefix(DRAG_PREFIX_NOTE)
-                                            (notesByFolder.values.flatten() + favoriteNotes + recentNotes)
-                                                .find { it.noteId == id }?.title?.ifEmpty { "Untitled" } ?: "Note"
-                                        }
-                                        payload.startsWith(DRAG_PREFIX_FOLDER) -> {
-                                            val id = payload.removePrefix(DRAG_PREFIX_FOLDER)
-                                            foldersByParent.values.flatten().find { it.folderId == id }?.name ?: "Folder"
-                                        }
-                                        else -> ""
-                                    }
-                                }
-                            )
                         }
 
                         val hasScrolledList by remember { derivedStateOf { sidebarListState.canScrollBackward } }
@@ -1536,126 +1701,142 @@ fun DesktopMainScreen(
     }
 
     // RIGHT PANEL
-    val rightPanel = @Composable {
-        Box(Modifier.fillMaxSize().hazeSource(state = hazeState)) {
-            when (val d = detail) {
-                null -> Box(Modifier.fillMaxSize())
-                DetailPane.Empty -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "Select a note from the sidebar",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+    val detailPaneContent = @Composable { d: DetailPane? ->
+        when (d) {
+            null -> Box(Modifier.fillMaxSize())
+            DetailPane.Empty -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Select a note from the sidebar",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                )
+            }
+            is DetailPane.Daily -> Box(Modifier.fillMaxSize()) {
+                DailyEditorPane(
+                    viewModel = dailyViewModel,
+                    hazeState = hazeState,
+                    isSidebarVisible = isSidebarVisible,
+                    onPickImage = onPickImage,
+                    onTakePhoto = onTakePhoto,
+                    onPickDocument = onPickDocument,
+                    onOpenFile = onOpenFile,
+                    onNavigateToEditor = openSubNote,
+                    onExportMarkdown = onExportMarkdown,
+                    onExportPdf = onExportPdf,
+                    onSelectionModeChange = onSelectionModeChange
+                )
+            }
+            is DetailPane.Note -> key(d.noteId) {
+                val noteKind by produceState<NoteKind?>(initialValue = null) {
+                    value = noteRepository.getNoteById(d.noteId)?.kind ?: NoteKind.NOTE
+                }
+                when (noteKind) {
+                    NoteKind.CANVAS -> CanvasScreen(
+                        noteId = d.noteId,
+                        showBackButton = isSidebarVisible,
+                        onNavigateBack = closeDetailPane
+                    )
+                    NoteKind.NOTE, NoteKind.DATABASE -> NoteScreen(
+                        noteId = d.noteId,
+                        onNavigateBack = closeDetailPane,
+                        showBackButton = isSidebarVisible,
+                        onSelectionModeChange = onSelectionModeChange,
+                        onPickImage = onPickImage, onTakePhoto = onTakePhoto, onPickDocument = onPickDocument,
+                        onOpenFile = onOpenFile, onExportMarkdown = onExportMarkdown, onExportPdf = onExportPdf,
+                        onNavigateToEditor = openSubNote,
+                        desktopTopMargin = 0.dp,
+                        hideWordCount = isUpdatePeekShowing
+                    )
+                    null -> Box(Modifier.fillMaxSize())
+                }
+            }
+            DetailPane.Settings,
+            DetailPane.SelfHostSetup,
+            DetailPane.About,
+            DetailPane.ImportNotes,
+            DetailPane.OpenSourceLicenses -> key("settings") {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .onPointerEvent(PointerEventType.Press) { event ->
+                            if (event.buttons.isBackPressed) goBackFromSettingsSubPage()
+                        }
+                ) {
+                    SettingsScreen(
+                        onNavigateBack = closeDetailPane,
+                        onExportReady = onExportBackup,
+                        onNavigateToSelfHostSetup = { detail = DetailPane.SelfHostSetup },
+                        onNavigateToAbout = { detail = DetailPane.About },
+                        onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
+                        desktopSubPage = d.settingsSubPage(),
+                        onDesktopSubPageChange = { page -> detail = page.toDetailPane() },
+                        showBackButton = isSidebarVisible,
+                        syncViewModel = syncViewModel
                     )
                 }
-                is DetailPane.Daily -> Box(Modifier.fillMaxSize()) {
-                    DailyEditorPane(
-                        viewModel = dailyViewModel,
-                        hazeState = hazeState,
-                        isSidebarVisible = isSidebarVisible,
-                        onPickImage = onPickImage,
-                        onTakePhoto = onTakePhoto,
-                        onPickDocument = onPickDocument,
-                        onOpenFile = onOpenFile,
-                        onNavigateToEditor = { openNote(it) },
-                        onExportMarkdown = onExportMarkdown,
-                        onExportPdf = onExportPdf,
-                        onSelectionModeChange = onSelectionModeChange
+            }
+            DetailPane.Trash -> key("trash") {
+                Box(Modifier.fillMaxSize()) {
+                    TrashScreen(onNavigateBack = closeDetailPane)
+                }
+            }
+            DetailPane.Properties -> key("properties") {
+                Box(Modifier.fillMaxSize()) {
+                    PropertiesScreen(onNavigateBack = closeDetailPane)
+                }
+            }
+            DetailPane.Reminders -> key("reminders") {
+                Box(Modifier.fillMaxSize()) {
+                    TasksScreen(onNavigateBack = closeDetailPane, onOpenFile = onOpenFile, onNavigateToEditor = { openNote(it) })
+                }
+            }
+            DetailPane.Images -> key("images") {
+                Box(Modifier.fillMaxSize()) {
+                    ImagesScreen(onNavigateBack = closeDetailPane, onTriggerImagePicker = { onPickImage { } })
+                }
+            }
+            DetailPane.Documents -> key("documents") {
+                Box(Modifier.fillMaxSize()) {
+                    DocumentsScreen(onNavigateBack = closeDetailPane, onTriggerDocumentPicker = { onPickDocument { } }, onOpenFile = onOpenFile)
+                }
+            }
+            DetailPane.Bookmarks -> key("bookmarks") {
+                Box(Modifier.fillMaxSize()) {
+                    BookmarksScreen(onNavigateBack = closeDetailPane)
+                }
+            }
+            DetailPane.Calendar -> key("calendar") {
+                Box(Modifier.fillMaxSize()) {
+                    CalendarScreen(
+                        onNavigateBack = closeDetailPane,
+                        showBackButton = isSidebarVisible
                     )
-                }
-                is DetailPane.Note -> key(d.noteId) {
-                    val noteKind by produceState<NoteKind?>(initialValue = null) {
-                        value = noteRepository.getNoteById(d.noteId)?.kind ?: NoteKind.NOTE
-                    }
-                    when (noteKind) {
-                        NoteKind.CANVAS -> CanvasScreen(
-                            noteId = d.noteId,
-                            showBackButton = isSidebarVisible,
-                            onNavigateBack = closeDetailPane
-                        )
-                        NoteKind.NOTE, NoteKind.DATABASE -> NoteScreen(
-                            noteId = d.noteId,
-                            onNavigateBack = closeDetailPane,
-                            showBackButton = isSidebarVisible,
-                            onSelectionModeChange = onSelectionModeChange,
-                            onPickImage = onPickImage, onTakePhoto = onTakePhoto, onPickDocument = onPickDocument,
-                            onOpenFile = onOpenFile, onExportMarkdown = onExportMarkdown, onExportPdf = onExportPdf,
-                            onNavigateToEditor = { openNote(it) },
-                            desktopTopMargin = 0.dp,
-                            hideWordCount = isUpdatePeekShowing
-                        )
-                        null -> Box(Modifier.fillMaxSize())
-                    }
-                }
-                DetailPane.Settings,
-                DetailPane.SelfHostSetup,
-                DetailPane.About,
-                DetailPane.ImportNotes,
-                DetailPane.OpenSourceLicenses -> key("settings") {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .onPointerEvent(PointerEventType.Press) { event ->
-                                if (event.buttons.isBackPressed) goBackFromSettingsSubPage()
-                            }
-                    ) {
-                        SettingsScreen(
-                            onNavigateBack = closeDetailPane,
-                            onExportReady = onExportBackup,
-                            onNavigateToSelfHostSetup = { detail = DetailPane.SelfHostSetup },
-                            onNavigateToAbout = { detail = DetailPane.About },
-                            onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
-                            desktopSubPage = d.settingsSubPage(),
-                            onDesktopSubPageChange = { page -> detail = page.toDetailPane() },
-                            showBackButton = isSidebarVisible,
-                            syncViewModel = syncViewModel
-                        )
-                    }
-                }
-                DetailPane.Trash -> key("trash") {
-                    Box(Modifier.fillMaxSize()) {
-                        TrashScreen(onNavigateBack = closeDetailPane)
-                    }
-                }
-                DetailPane.Properties -> key("properties") {
-                    Box(Modifier.fillMaxSize()) {
-                        PropertiesScreen(onNavigateBack = closeDetailPane)
-                    }
-                }
-                DetailPane.Reminders -> key("reminders") {
-                    Box(Modifier.fillMaxSize()) {
-                        TasksScreen(onNavigateBack = closeDetailPane, onOpenFile = onOpenFile, onNavigateToEditor = { openNote(it) })
-                    }
-                }
-                DetailPane.Images -> key("images") {
-                    Box(Modifier.fillMaxSize()) {
-                        ImagesScreen(onNavigateBack = closeDetailPane, onTriggerImagePicker = { onPickImage { } })
-                    }
-                }
-                DetailPane.Documents -> key("documents") {
-                    Box(Modifier.fillMaxSize()) {
-                        DocumentsScreen(onNavigateBack = closeDetailPane, onTriggerDocumentPicker = { onPickDocument { } }, onOpenFile = onOpenFile)
-                    }
-                }
-                DetailPane.Bookmarks -> key("bookmarks") {
-                    Box(Modifier.fillMaxSize()) {
-                        BookmarksScreen(onNavigateBack = closeDetailPane)
-                    }
-                }
-                DetailPane.Calendar -> key("calendar") {
-                    Box(Modifier.fillMaxSize()) {
-                        CalendarScreen(
-                            onNavigateBack = closeDetailPane,
-                            showBackButton = isSidebarVisible
-                        )
-                    }
                 }
             }
         }
     }
 
+    val rightPanel = @Composable {
+        Box(Modifier.fillMaxSize()) {
+            DesktopSplitLayout(
+                splitState = splitState,
+                hazeState = hazeState,
+                dropTarget = splitDropTarget,
+                onDividerDragEnd = saveOpenedState,
+                paneContent = detailPaneContent
+            )
+        }
+    }
+
     CompositionLocalProvider(LocalEmberrBlurSource provides hazeState) {
         Scaffold(containerColor = MaterialTheme.colorScheme.background, contentWindowInsets = WindowInsets(0)) { paddingValues ->
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues).consumeWindowInsets(paddingValues)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .consumeWindowInsets(paddingValues)
+                    .onGloballyPositioned { coordinates -> screenOriginInWindow = coordinates.positionInWindow() }
+            ) {
                 Row(modifier = Modifier.fillMaxSize()) {
 
                     AnimatedVisibility(
@@ -1839,6 +2020,25 @@ fun DesktopMainScreen(
                         leftPanel(5.dp, 5.dp)
                     }
                 }
+
+                DesktopListDragChip(
+                    dragState = dragState,
+                    containerOriginInWindow = screenOriginInWindow,
+                    labelForPayload = { payload ->
+                        when {
+                            payload.startsWith(DRAG_PREFIX_NOTE) -> {
+                                val id = payload.removePrefix(DRAG_PREFIX_NOTE)
+                                (notesByFolder.values.flatten() + favoriteNotes + recentNotes + searchResults.map { it.note })
+                                    .find { it.noteId == id }?.title?.ifEmpty { "Untitled" } ?: "Note"
+                            }
+                            payload.startsWith(DRAG_PREFIX_FOLDER) -> {
+                                val id = payload.removePrefix(DRAG_PREFIX_FOLDER)
+                                foldersByParent.values.flatten().find { it.folderId == id }?.name ?: "Folder"
+                            }
+                            else -> ""
+                        }
+                    }
+                )
 
                 // Sheets
                 if (showTimelineDialog) {

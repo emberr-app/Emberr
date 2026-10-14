@@ -35,6 +35,10 @@ import com.emberr.presentation.home.DropInsertPosition
 import com.emberr.presentation.home.HomeItemKey
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -42,13 +46,13 @@ import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
@@ -75,15 +79,20 @@ internal object ListScrollActivity {
 private const val AUTO_SCROLL_EDGE_ZONE_IN_ROWS = 1.5f
 private const val AUTO_SCROLL_ROWS_PER_SECOND   = 10f
 
+private val CHIP_GAP_RIGHT_OF_CURSOR = 14.dp
+private val CHIP_RAISE_ABOVE_CURSOR  = 16.dp
+
 class DesktopListDragState {
     var dragging     by mutableStateOf(false)
     var payload      by mutableStateOf<String?>(null)
     var dropTargetId by mutableStateOf<String?>(null)
     var dropPosition by mutableStateOf(DropInsertPosition.BEFORE)
     var cursorY      by mutableStateOf(0f)
+    var cursorInWindow by mutableStateOf(Offset.Zero)
+    var isOutsideList  by mutableStateOf(false)
 
     fun startDrag(p: String) { payload = p; dragging = true }
-    fun endDrag()            { dragging = false; payload = null; dropTargetId = null; cursorY = 0f; dropPosition = DropInsertPosition.BEFORE }
+    fun endDrag()            { dragging = false; payload = null; dropTargetId = null; cursorY = 0f; dropPosition = DropInsertPosition.BEFORE; cursorInWindow = Offset.Zero; isOutsideList = false }
 }
 
 @Composable
@@ -94,6 +103,7 @@ fun rememberDesktopListDragState() = remember { DesktopListDragState() }
 @Composable
 fun DesktopListDragChip(
     dragState: DesktopListDragState,
+    containerOriginInWindow: Offset,
     labelForPayload: (String) -> String,
     modifier: Modifier = Modifier
 ) {
@@ -101,17 +111,21 @@ fun DesktopListDragChip(
         visible = dragState.dragging,
         enter = fadeIn(tween(120)) + expandVertically(tween(120)),
         exit  = fadeOut(tween(80)) + shrinkVertically(tween(80)),
-        modifier = modifier.zIndex(100f)
+        modifier = modifier
+            .zIndex(100f)
+            .offset {
+                val cursorInContainer = dragState.cursorInWindow - containerOriginInWindow
+                IntOffset(
+                    x = (cursorInContainer.x + CHIP_GAP_RIGHT_OF_CURSOR.toPx()).roundToInt(),
+                    y = (cursorInContainer.y - CHIP_RAISE_ABOVE_CURSOR.toPx()).roundToInt().coerceAtLeast(0)
+                )
+            }
     ) {
-        val density     = LocalDensity.current
         val label       = dragState.payload?.let { labelForPayload(it) } ?: ""
         val isFolder    = dragState.payload?.startsWith(DRAG_PREFIX_FOLDER) == true
-        val chipOffsetY = with(density) { dragState.cursorY.toDp() - 16.dp }
 
         Row(
             modifier = Modifier
-                .offset(y = chipOffsetY.coerceAtLeast(0.dp))
-                .padding(start = 12.dp)
                 .shadow(EmberrShadowElevation.Standard, RoundedCornerShape(8.dp))
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.surface)
@@ -146,6 +160,7 @@ fun Modifier.desktopListDragTracker(
     payloadForKey: (String?) -> String?,
     isDropTarget: (key: String?, payload: String) -> Boolean,
     onDrop: (payload: String, targetKey: String, insertBefore: Boolean) -> Unit,
+    onDropOutsideList: (payload: String, cursorInWindow: Offset) -> Unit,
     rowHeightPx: Float,
     dragThresholdPx: Float = 8f
 ): Modifier {
@@ -153,6 +168,8 @@ fun Modifier.desktopListDragTracker(
     val currentPayloadForKey by rememberUpdatedState(payloadForKey)
     val currentIsDropTarget  by rememberUpdatedState(isDropTarget)
     val currentOnDrop        by rememberUpdatedState(onDrop)
+    val currentOnDropOutsideList by rememberUpdatedState(onDropOutsideList)
+    var listOriginInWindow by remember { mutableStateOf(Offset.Zero) }
 
     val isDragging = dragState.dragging
 
@@ -164,6 +181,7 @@ fun Modifier.desktopListDragTracker(
             val frameTimeNanos = withFrameNanos { it }
             val secondsSinceLastFrame = (frameTimeNanos - lastFrameTimeNanos) / 1_000_000_000f
             lastFrameTimeNanos = frameTimeNanos
+            if (dragState.isOutsideList) continue
 
             val scrollDistance = autoScrollDistanceForFrame(
                 cursorY               = dragState.cursorY,
@@ -251,16 +269,22 @@ fun Modifier.desktopListDragTracker(
                                 change.consume()
                                 val cursorY = change.position.y
                                 dragState.cursorY = cursorY
+                                dragState.cursorInWindow = listOriginInWindow + change.position
+                                dragState.isOutsideList = change.position.x < 0f || change.position.x > size.width
                                 val payload = dragState.payload ?: ""
 
-                                resolveDropTarget(
-                                    cursorY      = cursorY,
-                                    listState    = listState,
-                                    rowKeys      = currentRowKeys,
-                                    payload      = payload,
-                                    isDropTarget = currentIsDropTarget,
-                                    dragState    = dragState
-                                )
+                                if (dragState.isOutsideList) {
+                                    dragState.dropTargetId = null
+                                } else {
+                                    resolveDropTarget(
+                                        cursorY      = cursorY,
+                                        listState    = listState,
+                                        rowKeys      = currentRowKeys,
+                                        payload      = payload,
+                                        isDropTarget = currentIsDropTarget,
+                                        dragState    = dragState
+                                    )
+                                }
                             }
                         }
 
@@ -269,7 +293,9 @@ fun Modifier.desktopListDragTracker(
                                 change.consume()
                                 val target  = dragState.dropTargetId
                                 val payload = dragState.payload
-                                if (target != null && payload != null) {
+                                if (dragState.isOutsideList && payload != null) {
+                                    currentOnDropOutsideList(payload, dragState.cursorInWindow)
+                                } else if (target != null && payload != null) {
                                     currentOnDrop(
                                         payload,
                                         target,
@@ -288,7 +314,7 @@ fun Modifier.desktopListDragTracker(
                 }
             }
         }
-    }
+    }.onGloballyPositioned { coordinates -> listOriginInWindow = coordinates.positionInWindow() }
 }
 
 private fun autoScrollDistanceForFrame(
