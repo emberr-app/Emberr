@@ -441,6 +441,7 @@ fun SidebarNoteRow(
     dragState: DesktopListDragState,
     menu: TreeSelectionMenu = SINGLE_ITEM_TREE_MENU,
     onClick: (SidebarClickModifiers) -> Unit,
+    onOpenInSplitView: (() -> Unit)? = null,
     onToggleFavorite: () -> Unit = {},
     onRename: (String) -> Unit = {},
     onDelete: () -> Unit = {},
@@ -593,6 +594,9 @@ fun SidebarNoteRow(
                 offset = DpOffset.Zero
             ) {
                 SidebarMenuItems {
+                    if (onOpenInSplitView != null) {
+                        SidebarMenuItem("Open in split view", Icons.Default.VerticalSplit) { showContextMenu = false; onOpenInSplitView() }
+                    }
                     if (menu.showRename) {
                         SidebarMenuItem("Rename", Icons.Default.Edit) { showContextMenu = false; showRenamePopup = true }
                     }
@@ -769,7 +773,7 @@ private fun SidebarTrailingCheck() {
 private val SidebarMenuWidth = 220.dp
 
 @Composable
-private fun SidebarMenuItems(content: @Composable ColumnScope.() -> Unit) {
+internal fun SidebarMenuItems(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier.width(SidebarMenuWidth).padding(vertical = 4.dp),
         content = content
@@ -777,7 +781,7 @@ private fun SidebarMenuItems(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-private fun SidebarMenuItem(
+internal fun SidebarMenuItem(
     text: String,
     icon: ImageVector,
     isDestructive: Boolean = false,
