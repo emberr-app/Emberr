@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Splitscreen
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -120,11 +119,6 @@ fun DesktopSpaceBar(
                         showAddMenu = false
                         showCreatePopup = true
                     }
-                    SpaceMenuItem(
-                        text = "Split View",
-                        icon = Icons.Default.Splitscreen,
-                        enabled = false
-                    ) {}
                 }
             }
 
