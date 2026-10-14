@@ -61,7 +61,8 @@ enum class FontStylePreference(val displayName: String) {
     LORA("Lora"),
     MERRIWEATHER("Merriweather"),
     OPEN_SANS("Open Sans"),
-    JETBRAINS_MONO("JetBrains Mono")
+    JETBRAINS_MONO("JetBrains Mono"),
+    SYSTEM("System")
 }
 
 val LocalEmberrFontStyle = staticCompositionLocalOf { FontStylePreference.POPPINS }
@@ -98,6 +99,7 @@ fun fontFamilyFor(preference: FontStylePreference): FontFamily = when (preferenc
         Font(Res.font.jetbrainsmono_medium, FontWeight.Medium),
         Font(Res.font.jetbrainsmono_bold, FontWeight.Bold)
     )
+    FontStylePreference.SYSTEM -> FontFamily.Default
 }
 
 // --- Typography ---
