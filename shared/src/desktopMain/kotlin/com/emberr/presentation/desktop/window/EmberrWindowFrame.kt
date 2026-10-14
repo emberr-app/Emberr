@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -216,6 +217,7 @@ fun WindowScope.EmberrWindowFrame(
 
             val titleBarHeightPx = with(LocalDensity.current) { frameSize.titleBarHeight.toPx() }
             val revealBandPx = with(LocalDensity.current) { TitleBarRevealBand.toPx() }
+            val titleBarRevealBlocker = remember { TitleBarRevealBlocker() }
 
             Box(
                 modifier = Modifier
@@ -223,16 +225,18 @@ fun WindowScope.EmberrWindowFrame(
                     .onPointerEvent(PointerEventType.Move, pass = PointerEventPass.Initial) { event ->
                         val pointerY = event.changes.first().position.y
                         val revealLimit = if (isTitleBarVisible) titleBarHeightPx else revealBandPx
-                        isTitleBarVisible = pointerY <= revealLimit
+                        isTitleBarVisible = pointerY <= revealLimit && !titleBarRevealBlocker.isPointerOverBlockingElement
                     }
                     .onPointerEvent(PointerEventType.Exit, pass = PointerEventPass.Initial) {
                         isTitleBarVisible = false
                     }
             ) {
-                content()
+                CompositionLocalProvider(LocalTitleBarRevealBlocker provides titleBarRevealBlocker) {
+                    content()
+                }
 
                 AnimatedVisibility(
-                    visible = isTitleBarVisible,
+                    visible = isTitleBarVisible && !titleBarRevealBlocker.isPointerOverBlockingElement,
                     modifier = Modifier.align(Alignment.TopCenter),
                     enter = slideInVertically(tween(TitleBarRevealMillis)) { -it } +
                         fadeIn(tween(TitleBarRevealMillis)),
