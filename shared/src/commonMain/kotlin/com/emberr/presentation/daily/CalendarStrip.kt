@@ -3,7 +3,6 @@ package com.emberr.presentation.daily
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,8 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,12 +30,12 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.chevron_right
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.datetime.number
 import kotlin.time.Clock
@@ -64,10 +61,9 @@ fun CollapsedWeekStrip(
 
     val dates = remember(anchorDate) { (-15..15).map { anchorDate.plus(it, DateTimeUnit.DAY) } }
     val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()) }
-    val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
     val leadingOffset = if (isDesktopPlatform) 1 else 2
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 15 - leadingOffset)
 
     val chipWidth = 74.dp
     val chipHeight = 32.dp
@@ -98,19 +94,7 @@ fun CollapsedWeekStrip(
         state = listState,
         modifier = modifier
             .fillMaxWidth()
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        if (event.type == PointerEventType.Scroll) {
-                            val delta = event.changes.first().scrollDelta.y
-                            coroutineScope.launch {
-                                listState.animateScrollBy(delta * 60f)
-                            }
-                        }
-                    }
-                }
-            },
+            .horizontalScrollFromBackAndForwardButtons(listState),
         horizontalArrangement = Arrangement.spacedBy(chipSpacing),
         verticalAlignment = Alignment.CenterVertically
     ) {
