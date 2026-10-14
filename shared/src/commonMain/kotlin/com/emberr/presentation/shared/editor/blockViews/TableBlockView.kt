@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -40,12 +41,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,14 +65,17 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.input.TextFieldValue
@@ -91,6 +97,7 @@ import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.rememberKeyboardHandoff
 import com.emberr.presentation.shared.editor.WebLinkVisualTransformation
 import com.emberr.presentation.shared.editor.GlobalEditorState
+import com.emberr.presentation.shared.editor.blockViews.property.TapToCursorPosition
 import com.emberr.presentation.shared.editor.rememberWebLinkActions
 import com.emberr.presentation.shared.editor.LinkContextMenu
 import com.emberr.presentation.shared.editor.LinkHoverCard
@@ -486,127 +493,129 @@ fun TableBlockView(
         }
     }
 
-    Column {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScrollFromBackAndForwardButtons(scrollState)
-                .horizontalScroll(scrollState)
-        ) {
-            Column(modifier = Modifier.padding(horizontal = SidePadding)) {
-                Surface(
-                    shape = RoundedCornerShape(0.dp),
-                    color = Color.Transparent,
-                    modifier = Modifier.tableOutline(borderColor)
-                ) {
-                    Column {
-                        rows.forEachIndexed { rowIndex, row ->
-                            Row(modifier = Modifier.height(IntrinsicSize.Max).defaultMinSize(minHeight = CellMinHeight)) {
-                                row.forEachIndexed { columnIndex, cellValue ->
-                                    val isActiveCell = activeRowIndex == rowIndex && activeColIndex == columnIndex
-                                    val isHighlighted = isActiveCell && showCellActions
-                                    val cellStyle = effectiveStyle(rowIndex, columnIndex)
-                                    val cellKey = "$rowIndex:$columnIndex"
-                                    val tapAnchor = rememberMenuTapAnchor()
+    CompositionLocalProvider(LocalBringIntoViewSpec provides ScrollOnlyWhenHiddenBringIntoViewSpec) {
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScrollFromBackAndForwardButtons(scrollState)
+                    .horizontalScroll(scrollState)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = SidePadding)) {
+                    Surface(
+                        shape = RoundedCornerShape(0.dp),
+                        color = Color.Transparent,
+                        modifier = Modifier.tableOutline(borderColor)
+                    ) {
+                        Column {
+                            rows.forEachIndexed { rowIndex, row ->
+                                Row(modifier = Modifier.height(IntrinsicSize.Max).defaultMinSize(minHeight = CellMinHeight)) {
+                                    row.forEachIndexed { columnIndex, cellValue ->
+                                        val isActiveCell = activeRowIndex == rowIndex && activeColIndex == columnIndex
+                                        val isHighlighted = isActiveCell && showCellActions
+                                        val cellStyle = effectiveStyle(rowIndex, columnIndex)
+                                        val cellKey = "$rowIndex:$columnIndex"
+                                        val tapAnchor = rememberMenuTapAnchor()
 
-                                    Box(modifier = Modifier.menuTapAnchor(tapAnchor)) {
-                                        TableGridCell(
-                                            value = cellValue,
-                                            cellKey = cellKey,
-                                            spans = block.cellSpans[cellKey].orEmpty(),
-                                            style = cellStyle,
-                                            width = columnWidthFor(columnIndex).dp,
-                                            inSelectionMode = inSelectionMode,
-                                            isHighlighted = isHighlighted,
-                                            borderColor = borderColor,
-                                            onValueChange = { updateCell(rowIndex, columnIndex, it) },
-                                            onLongPress = { openCellActions(rowIndex, columnIndex) }
-                                        )
+                                        Box(modifier = Modifier.menuTapAnchor(tapAnchor)) {
+                                            TableGridCell(
+                                                value = cellValue,
+                                                cellKey = cellKey,
+                                                spans = block.cellSpans[cellKey].orEmpty(),
+                                                style = cellStyle,
+                                                width = columnWidthFor(columnIndex).dp,
+                                                inSelectionMode = inSelectionMode,
+                                                isHighlighted = isHighlighted,
+                                                borderColor = borderColor,
+                                                onValueChange = { updateCell(rowIndex, columnIndex, it) },
+                                                onLongPress = { openCellActions(rowIndex, columnIndex) }
+                                            )
 
-                                        if (isDesktopPlatform) {
-                                            MenuAtTap(tapAnchor, menuWidth = MenuMaxWidth) {
-                                                EmberrDesktopMenu(
-                                                    expanded = isActiveCell && showCellActions,
-                                                    onDismissRequest = { closeMenu() }
-                                                ) {
-                                                    TableMenuPopupContent(title = "Cell Actions") { cellActionsBody() }
+                                            if (isDesktopPlatform) {
+                                                MenuAtTap(tapAnchor, menuWidth = MenuMaxWidth) {
+                                                    EmberrDesktopMenu(
+                                                        expanded = isActiveCell && showCellActions,
+                                                        onDismissRequest = { closeMenu() }
+                                                    ) {
+                                                        TableMenuPopupContent(title = "Cell Actions") { cellActionsBody() }
+                                                    }
                                                 }
-                                            }
 
-                                            if (rowIndex == 0) {
-                                                val density = LocalDensity.current
-                                                var widthDragAccumulator by remember(columnIndex) { mutableStateOf(0f) }
-                                                Box(
-                                                    modifier = Modifier
-                                                        .align(Alignment.CenterEnd)
-                                                        .fillMaxHeight()
-                                                        .width(8.dp)
-                                                        .desktopPointerCursor(DesktopCursor.RESIZE_HORIZONTAL)
-                                                        .draggable(
-                                                            orientation = Orientation.Horizontal,
-                                                            state = rememberDraggableState { delta ->
-                                                                widthDragAccumulator += with(density) { delta.toDp().value }
-                                                                val wholePixels = widthDragAccumulator.toInt()
-                                                                if (wholePixels != 0) {
-                                                                    widthDragAccumulator -= wholePixels
-                                                                    val newWidth = (columnWidthFor(columnIndex) + wholePixels).coerceIn(40, 600)
-                                                                    liveColumnWidths[columnIndex] = newWidth
+                                                if (rowIndex == 0) {
+                                                    val density = LocalDensity.current
+                                                    var widthDragAccumulator by remember(columnIndex) { mutableStateOf(0f) }
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .align(Alignment.CenterEnd)
+                                                            .fillMaxHeight()
+                                                            .width(8.dp)
+                                                            .desktopPointerCursor(DesktopCursor.RESIZE_HORIZONTAL)
+                                                            .draggable(
+                                                                orientation = Orientation.Horizontal,
+                                                                state = rememberDraggableState { delta ->
+                                                                    widthDragAccumulator += with(density) { delta.toDp().value }
+                                                                    val wholePixels = widthDragAccumulator.toInt()
+                                                                    if (wholePixels != 0) {
+                                                                        widthDragAccumulator -= wholePixels
+                                                                        val newWidth = (columnWidthFor(columnIndex) + wholePixels).coerceIn(40, 600)
+                                                                        liveColumnWidths[columnIndex] = newWidth
+                                                                    }
+                                                                },
+                                                                onDragStopped = {
+                                                                    liveColumnWidths[columnIndex]?.let { saveColumnWidth(columnIndex, it) }
                                                                 }
-                                                            },
-                                                            onDragStopped = {
-                                                                liveColumnWidths[columnIndex]?.let { saveColumnWidth(columnIndex, it) }
-                                                            }
-                                                        )
-                                                )
+                                                            )
+                                                    )
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                Box(
-                                    modifier = Modifier
-                                        .width(GutterSize)
-                                        .fillMaxHeight()
-                                        .defaultMinSize(minHeight = CellMinHeight)
-                                        .drawBehind {
-                                            val px = TableLineWidth.toPx()
-                                            drawLine(borderColor, Offset(0f, size.height), Offset(size.width, size.height), px)
+                                    Box(
+                                        modifier = Modifier
+                                            .width(GutterSize)
+                                            .fillMaxHeight()
+                                            .defaultMinSize(minHeight = CellMinHeight)
+                                            .drawBehind {
+                                                val px = TableLineWidth.toPx()
+                                                drawLine(borderColor, Offset(0f, size.height), Offset(size.width, size.height), px)
+                                            }
+                                            .then(
+                                                if (rowIndex == 0 && !inSelectionMode) Modifier.clickable { addColumn() } else Modifier
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (rowIndex == 0 && !inSelectionMode) {
+                                            Icon(painterResource(Res.drawable.plus), contentDescription = "Add column", modifier = Modifier.size(17.dp), tint = MaterialTheme.colorScheme.outline)
                                         }
-                                        .then(
-                                            if (rowIndex == 0 && !inSelectionMode) Modifier.clickable { addColumn() } else Modifier
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (rowIndex == 0 && !inSelectionMode) {
-                                        Icon(painterResource(Res.drawable.plus), contentDescription = "Add column", modifier = Modifier.size(17.dp), tint = MaterialTheme.colorScheme.outline)
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                if (!inSelectionMode) {
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 6.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { addRow() }
-                            .padding(horizontal = 8.dp, vertical = 7.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(painterResource(Res.drawable.plus), contentDescription = "Add row", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface)
-                        Spacer(Modifier.width(7.dp))
-                        Text(text = "New Row", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                    if (!inSelectionMode) {
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 6.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { addRow() }
+                                .padding(horizontal = 8.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(painterResource(Res.drawable.plus), contentDescription = "Add row", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface)
+                            Spacer(Modifier.width(7.dp))
+                            Text(text = "New Row", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                        }
                     }
                 }
             }
-        }
 
-        EmberrHorizontalScrollbar(
-            scrollState = scrollState,
-            modifier = Modifier.fillMaxWidth().padding(start = SidePadding, end = SidePadding, top = 4.dp)
-        )
+            EmberrHorizontalScrollbar(
+                scrollState = scrollState,
+                modifier = Modifier.fillMaxWidth().padding(start = SidePadding, end = SidePadding, top = 4.dp)
+            )
+        }
     }
 
     if (!isDesktopPlatform) {
@@ -671,6 +680,16 @@ private fun TableGridCell(
 
     var editorValue by remember { mutableStateOf(TextFieldValue(value, TextRange(value.length))) }
     val textsSentButNotYetEchoed = remember { mutableListOf<String>() }
+    val tapToCursor = remember { TapToCursorPosition() }
+    val textMeasurer = rememberTextMeasurer()
+    var isFocusRequestedByTap by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isFocusRequestedByTap) {
+        if (!isFocusRequestedByTap) return@LaunchedEffect
+        runCatching { focusRequester.requestFocus() }
+        keyboardController?.show()
+        isFocusRequestedByTap = false
+    }
 
     LaunchedEffect(value) {
         if (editorValue.text == value) {
@@ -700,6 +719,17 @@ private fun TableGridCell(
         TextAlignment.CENTER -> TextAlign.Center
         else -> TextAlign.Start
     }
+    val textStyle = TextStyle(
+        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+        fontFamily = if (style.isCode) FontFamily.Monospace else FontFamily.Default,
+        fontWeight = if (style.isBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (style.isItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
+        color = textColor
+    )
+    val latestTextStyle by rememberUpdatedState(textStyle)
+    val latestWebLinkTransformation by rememberUpdatedState(webLinkTransformation)
 
     Box(
         modifier = Modifier
@@ -758,18 +788,11 @@ private fun TableGridCell(
             enabled = !inSelectionMode,
             visualTransformation = webLinkTransformation,
             onTextLayout = { textLayoutResult = it },
-            textStyle = TextStyle(
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                fontFamily = if (style.isCode) FontFamily.Monospace else FontFamily.Default,
-                fontWeight = if (style.isBold) FontWeight.Bold else FontWeight.Normal,
-                fontStyle = if (style.isItalic) FontStyle.Italic else FontStyle.Normal,
-                textDecoration = textDecoration,
-                textAlign = textAlign,
-                color = textColor
-            ),
+            textStyle = textStyle,
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             modifier = Modifier
                 .fillMaxWidth()
+                .onGloballyPositioned { tapToCursor.textAreaCoordinates = it }
                 .linkHover(linkHoverState) { textLayoutResult }
                 .openLinksOnPress(
                     onOpenWebLink = { webLinkActions.openLink(it) },
@@ -805,6 +828,7 @@ private fun TableGridCell(
                     .fillMaxWidth()
                     .fillMaxHeight()
                     .linkHover(linkHoverState) { textLayoutResult }
+                    .onGloballyPositioned { tapToCursor.tapAreaCoordinates = it }
                     .pointerInput(Unit) {
                         detectTapGestures(onTap = { position ->
                             when (val tappedLink = textLayoutResult?.hoveredLinkAt(position, emptySet())) {
@@ -812,8 +836,11 @@ private fun TableGridCell(
                                 is HoveredLink.Email -> webLinkActions.openEmail(tappedLink.email)
                                 is HoveredLink.Phone -> webLinkActions.openPhone(tappedLink.phone)
                                 else -> {
-                                    focusRequester.requestFocus()
-                                    keyboardController?.show()
+                                    val shownText = latestWebLinkTransformation.filter(AnnotatedString(editorValue.text)).text
+                                    tapToCursor.cursorOffsetAt(position, shownText, latestTextStyle, wrapsText = true, textMeasurer)?.let { cursorOffset ->
+                                        editorValue = editorValue.copy(selection = TextRange(cursorOffset))
+                                    }
+                                    isFocusRequestedByTap = true
                                 }
                             }
                         })

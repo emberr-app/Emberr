@@ -5,7 +5,6 @@ package com.emberr.presentation.shared.editor.blockViews.database
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -99,6 +98,7 @@ import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForw
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.DatabaseSettingsState
 import com.emberr.presentation.shared.editor.GlobalEditorState
+import com.emberr.presentation.shared.editor.blockViews.ScrollOnlyWhenHiddenBringIntoViewSpec
 import com.emberr.presentation.shared.editor.blockViews.rememberDeviceTableLayout
 import com.emberr.ui.theme.LocalEmberrFontStyle
 import com.emberr.ui.theme.fontFamilyFor
@@ -158,8 +158,6 @@ private fun Modifier.databaseTableOutline(color: Color, drawsBottomLine: Boolean
     drawLine(color, Offset(size.width, 0f), Offset(size.width, size.height), lineWidth)
     if (drawsBottomLine) drawLine(color, Offset(0f, size.height), Offset(size.width, size.height), lineWidth)
 }
-
-private val ScrollOnlyWhenHiddenBringIntoViewSpec = object : BringIntoViewSpec {}
 
 @Composable
 fun DatabaseBlockView(
