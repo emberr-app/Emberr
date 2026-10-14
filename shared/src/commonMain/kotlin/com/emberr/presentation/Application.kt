@@ -1083,6 +1083,15 @@ fun EmberrApp(
                                         launchSingleTop = true
                                     }
                                 },
+                                onRenameNote = { noteId, newTitle ->
+                                    HomeViewModel.renameNote(noteId, newTitle, onDone = searchViewModel::refreshResults)
+                                },
+                                onSetNoteFavorite = { noteId, isFavorite ->
+                                    HomeViewModel.setNotesFavorite(setOf(noteId), isFavorite, onDone = searchViewModel::refreshResults)
+                                },
+                                onTrashNote = { noteId ->
+                                    HomeViewModel.trashNote(noteId, onDone = searchViewModel::refreshResults)
+                                },
                                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp)
                             )
                         }

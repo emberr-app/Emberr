@@ -515,7 +515,7 @@ class HomeViewModel(
         }
     }
 
-    fun renameNote(noteId: String, newTitle: String) {
+    fun renameNote(noteId: String, newTitle: String, onDone: () -> Unit = {}) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 SyncCoordinator.mutex.withLock {
@@ -527,6 +527,7 @@ class HomeViewModel(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            withContext(Dispatchers.Main) { onDone() }
         }
     }
 
@@ -537,7 +538,7 @@ class HomeViewModel(
         }
     }
 
-    fun trashNote(noteId: String) {
+    fun trashNote(noteId: String, onDone: () -> Unit = {}) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 SyncCoordinator.mutex.withLock {
@@ -548,6 +549,7 @@ class HomeViewModel(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            withContext(Dispatchers.Main) { onDone() }
         }
     }
 
@@ -576,7 +578,7 @@ class HomeViewModel(
         _selectedFolderIds.update { it + folderIds }
     }
 
-    fun setNotesFavorite(noteIds: Collection<String>, isFavorite: Boolean) {
+    fun setNotesFavorite(noteIds: Collection<String>, isFavorite: Boolean, onDone: () -> Unit = {}) {
         if (noteIds.isEmpty()) return
         clearSelection()
         viewModelScope.launch(Dispatchers.IO) {
@@ -588,6 +590,7 @@ class HomeViewModel(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            withContext(Dispatchers.Main) { onDone() }
         }
     }
 
