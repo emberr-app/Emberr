@@ -214,8 +214,8 @@ private fun DatabaseColumnHeader(
                 Icon(
                     painter = painterResource(block.iconOf(column)),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(16.dp)
+                    tint = databaseInlineIconTint(mobileTint = MaterialTheme.colorScheme.outline),
+                    modifier = Modifier.size(DatabaseInlineIconSize)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(

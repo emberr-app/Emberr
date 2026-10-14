@@ -216,7 +216,7 @@ private fun DatabaseViewTab(
                 .padding(horizontal = HeaderButtonInnerPadding, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(painter = painterResource(view.type.iconResource()), contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
+            Icon(painter = painterResource(view.type.iconResource()), contentDescription = null, tint = databaseInlineIconTint(mobileTint = color), modifier = Modifier.size(DatabaseInlineIconSize))
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = view.name.ifBlank { view.type.label },

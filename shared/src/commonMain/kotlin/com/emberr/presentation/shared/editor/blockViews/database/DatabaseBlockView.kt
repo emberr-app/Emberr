@@ -777,7 +777,12 @@ private fun DatabaseHeaderButton(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isDesktopPlatform) {
-                Icon(painter = painterResource(icon), contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    tint = if (isActive) color else databaseInlineIconTint(mobileTint = color),
+                    modifier = Modifier.size(DatabaseInlineIconSize)
+                )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(text = label, style = MaterialTheme.typography.bodyLarge, color = color, maxLines = 1)
             } else {
