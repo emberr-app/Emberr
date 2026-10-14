@@ -1,7 +1,12 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.emberr.presentation.shared.editor.blockViews.database
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.scrollBy
@@ -29,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -70,6 +76,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.emberr.domain.database.DatabaseRow
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.applyFiltersAndSort
 import com.emberr.domain.database.frozenColumns
@@ -86,6 +93,7 @@ import com.emberr.domain.model.DatabaseViewType
 import com.emberr.domain.model.columnKey
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.table.DeviceTableLayoutStore
+import com.emberr.domain.table.withActiveViewOf
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
@@ -99,6 +107,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.chevron_right
+import emberr.shared.generated.resources.funnel
 import emberr.shared.generated.resources.list_sort_descending
 import emberr.shared.generated.resources.lock
 import emberr.shared.generated.resources.plus
@@ -150,6 +159,8 @@ private fun Modifier.databaseTableOutline(color: Color, drawsBottomLine: Boolean
     if (drawsBottomLine) drawLine(color, Offset(0f, size.height), Offset(size.width, size.height), lineWidth)
 }
 
+private val ScrollOnlyWhenHiddenBringIntoViewSpec = object : BringIntoViewSpec {}
+
 @Composable
 fun DatabaseBlockView(
     block: DatabaseBlock,
@@ -161,6 +172,7 @@ fun DatabaseBlockView(
 ) {
     val settingsState by remember(block.databaseId) { editor.settingsShownFor(block.databaseId) }
         .collectAsState(initial = editor.currentSettingsShownFor(block.databaseId))
+    val savedRows by remember(block.databaseId) { editor.rowsOf(block.databaseId) }.collectAsState()
 
     when (val shownSettings = settingsState) {
         DatabaseSettingsState.Loading -> Unit
@@ -171,15 +183,21 @@ fun DatabaseBlockView(
             modifier = Modifier.padding(horizontal = DatabaseSidePadding, vertical = DatabaseVerticalPadding)
         )
         is DatabaseSettingsState.Found -> {
-            val shownBlock = remember(block, shownSettings.settings) { block.withSharedSettingsFrom(shownSettings.settings) }
-            DatabaseBlockContent(
-                block = shownBlock,
-                editor = editor,
-                inSelectionMode = inSelectionMode,
-                onToggleSelection = onToggleSelection,
-                onOpenRow = onOpenRow,
-                runAfterKeyboardCloses = runAfterKeyboardCloses
-            )
+            val deviceLayout = rememberDeviceTableLayout(block.id)
+            val shownBlock = remember(block, shownSettings.settings, deviceLayout) {
+                block.withSharedSettingsFrom(shownSettings.settings).withActiveViewOf(deviceLayout)
+            }
+            CompositionLocalProvider(LocalBringIntoViewSpec provides ScrollOnlyWhenHiddenBringIntoViewSpec) {
+                DatabaseBlockContent(
+                    block = shownBlock,
+                    savedRows = savedRows,
+                    editor = editor,
+                    inSelectionMode = inSelectionMode,
+                    onToggleSelection = onToggleSelection,
+                    onOpenRow = onOpenRow,
+                    runAfterKeyboardCloses = runAfterKeyboardCloses
+                )
+            }
         }
     }
 }
@@ -187,13 +205,13 @@ fun DatabaseBlockView(
 @Composable
 private fun DatabaseBlockContent(
     block: DatabaseBlock,
+    savedRows: List<DatabaseRow>,
     editor: DatabaseBlockEditor,
     inSelectionMode: Boolean,
     onToggleSelection: () -> Unit,
     onOpenRow: (String) -> Unit,
     runAfterKeyboardCloses: (() -> Unit) -> Unit
 ) {
-    val savedRows by remember(block.databaseId) { editor.rowsOf(block.databaseId) }.collectAsState()
     val rows = remember(savedRows, block) { savedRows.withFormulaResults(block) }
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
@@ -214,12 +232,15 @@ private fun DatabaseBlockContent(
     val liveColumnWidths = remember(block.columnWidths, deviceLayout.columnWidths) { mutableStateMapOf<String, Int>() }
     var showSettingsMenu by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
+    var showFilterMenu by remember { mutableStateOf(false) }
     var showTemplateMenu by remember { mutableStateOf(false) }
     val rowSelection = remember(block.databaseId) { DatabaseRowSelection() }
     val newRowIds = remember(block.databaseId) { mutableStateListOf<String>() }
 
-    fun savedColumnWidth(target: DatabaseColumnTarget): Int =
-        deviceLayout.columnWidths[target.columnKey] ?: block.columnWidths[target.columnKey] ?: defaultColumnWidth(target)
+    fun savedColumnWidth(target: DatabaseColumnTarget): Int {
+        val widthSavedInTheNote = if (isDesktopPlatform) block.columnWidths[target.columnKey] else null
+        return deviceLayout.columnWidths[target.columnKey] ?: widthSavedInTheNote ?: defaultColumnWidth(target)
+    }
 
     fun columnWidth(target: DatabaseColumnTarget): Int =
         liveColumnWidths[target.columnKey] ?: savedColumnWidth(target)
@@ -283,7 +304,7 @@ private fun DatabaseBlockContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 4.dp),
+                    .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 DatabaseTitleField(
@@ -303,14 +324,14 @@ private fun DatabaseBlockContent(
                     runAfterKeyboardCloses = runAfterKeyboardCloses,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 8.dp)
+                        .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 12.dp)
                 )
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 8.dp),
+                    .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(HeaderButtonGap),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -361,6 +382,20 @@ private fun DatabaseBlockContent(
                         )
                     }
                     DatabaseHeaderButton(
+                        label = "Filter",
+                        icon = Res.drawable.funnel,
+                        isActive = activeView.filters.isNotEmpty(),
+                        enabled = !inSelectionMode,
+                        onClick = { runAfterKeyboardCloses { showFilterMenu = true } }
+                    ) {
+                        DatabaseFilterMenu(
+                            expanded = showFilterMenu,
+                            block = block,
+                            editor = editor,
+                            onDismiss = { showFilterMenu = false }
+                        )
+                    }
+                    DatabaseHeaderButton(
                         label = "Settings",
                         icon = Res.drawable.sliders_horizontal,
                         isActive = false,
@@ -400,7 +435,7 @@ private fun DatabaseBlockContent(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 8.dp)
+                        .padding(start = DatabaseSidePadding, end = HeaderEndPadding, bottom = 16.dp)
                 )
             }
 
@@ -675,8 +710,8 @@ private fun DatabaseSearchField(
 
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

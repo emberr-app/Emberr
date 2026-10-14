@@ -343,7 +343,6 @@ private fun DatabaseColumnMenu(
         if (block.canFormatNumbersIn(column)) {
             DatabaseNumberFormatOption(block = block, column = column, editor = editor)
         }
-        DatabaseColumnFilterOption(block = block, column = column, editor = editor)
         DatabaseCalculateOption(block = block, column = column, editor = editor, closeMenuAnd = closeMenuAnd)
         if (column != DatabaseColumnTarget.NotesTitle) {
             DatabaseMenuLayer(
@@ -417,7 +416,7 @@ internal fun DatabaseColumnWidthStepper(width: Int, onWidthChosen: (Int) -> Unit
         DatabaseWidthStepButton(
             icon = Res.drawable.minus,
             contentDescription = "Decrease column width",
-            onClick = { onWidthChosen((width - ColumnWidthStep).coerceIn(MinimumColumnWidth, MaximumColumnWidth)) }
+            onClick = { onWidthChosen(widthOneStepNarrower(width)) }
         )
         Text(
             text = "$width px",
@@ -429,10 +428,16 @@ internal fun DatabaseColumnWidthStepper(width: Int, onWidthChosen: (Int) -> Unit
         DatabaseWidthStepButton(
             icon = Res.drawable.plus,
             contentDescription = "Increase column width",
-            onClick = { onWidthChosen((width + ColumnWidthStep).coerceIn(MinimumColumnWidth, MaximumColumnWidth)) }
+            onClick = { onWidthChosen(widthOneStepWider(width)) }
         )
     }
 }
+
+private fun widthOneStepNarrower(width: Int): Int =
+    (((width - 1) / ColumnWidthStep) * ColumnWidthStep).coerceIn(MinimumColumnWidth, MaximumColumnWidth)
+
+private fun widthOneStepWider(width: Int): Int =
+    ((width / ColumnWidthStep + 1) * ColumnWidthStep).coerceIn(MinimumColumnWidth, MaximumColumnWidth)
 
 @Composable
 private fun DatabaseWidthStepButton(icon: DrawableResource, contentDescription: String, onClick: () -> Unit) {

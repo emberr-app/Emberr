@@ -45,7 +45,7 @@ internal fun DatabaseSortMenu(
     DatabaseMenu(expanded = expanded, title = "Sort", onDismiss = onDismiss) { _ ->
         if (sorts.isEmpty()) {
             DatabaseMenuSectionLabel(text = "Sort by")
-            DatabaseSortColumnChoices(
+            DatabaseColumnChoices(
                 block = block,
                 columns = columnTargets,
                 selectedColumn = null,
@@ -93,7 +93,7 @@ private fun DatabaseActiveSorts(
                 )
             }
         ) { closeLayerAnd ->
-            DatabaseSortColumnChoices(
+            DatabaseColumnChoices(
                 block = block,
                 columns = unsortedColumns,
                 selectedColumn = null,
@@ -125,7 +125,7 @@ private fun DatabaseSortEditor(
             title = "Sort by",
             anchor = { openLayer -> DatabaseChoiceButton(text = block.labelOf(sort.target), onClick = openLayer) }
         ) { closeLayerAnd ->
-            DatabaseSortColumnChoices(
+            DatabaseColumnChoices(
                 block = block,
                 columns = columnsToPick,
                 selectedColumn = sort.target,
@@ -167,7 +167,7 @@ private fun DatabaseSortEditor(
 }
 
 @Composable
-private fun DatabaseSortColumnChoices(
+internal fun DatabaseColumnChoices(
     block: DatabaseBlock,
     columns: List<DatabaseColumnTarget>,
     selectedColumn: DatabaseColumnTarget?,

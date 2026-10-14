@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,7 +48,6 @@ import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagChip
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
 import com.emberr.presentation.shared.editor.blockViews.property.rememberPropertyTagColor
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.funnel
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.x
 import kotlinx.coroutines.flow.flowOf
@@ -58,63 +58,64 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Instant
 
-private val DesktopFilterMenuWidth = 320.dp
-
 @Composable
-internal fun DatabaseColumnFilterOption(
+internal fun DatabaseFilterMenu(
+    expanded: Boolean,
     block: DatabaseBlock,
-    column: DatabaseColumnTarget,
-    editor: DatabaseBlockEditor
+    editor: DatabaseBlockEditor,
+    onDismiss: () -> Unit
 ) {
     val view = block.activeView()
-    val columnFilters = view.filters.filter { it.target == column }
+    val columnTargets = listOf<DatabaseColumnTarget>(DatabaseColumnTarget.NotesTitle) + block.columns
 
-    DatabaseMenuLayer(
-        title = "Filter",
-        desktopWidth = DesktopFilterMenuWidth,
-        anchor = { openLayer ->
-            DatabaseMenuOption(
-                label = "Filter",
-                icon = { DatabaseOptionIcon(Res.drawable.funnel) },
-                trailing = if (columnFilters.isEmpty()) null else {
-                    {
-                        Text(
-                            text = columnFilters.size.toString(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            maxLines = 1
+    DatabaseMenu(expanded = expanded, title = "Filter", onDismiss = onDismiss) { _ ->
+        if (view.filters.isEmpty()) {
+            DatabaseMenuSectionLabel(text = "Filter by")
+            DatabaseColumnChoices(
+                block = block,
+                columns = columnTargets,
+                selectedColumn = null,
+                onPick = { target -> editor.addFilter(block.id, view.id, target) }
+            )
+        } else {
+            view.filters.forEachIndexed { index, filter ->
+                key(filter.id) {
+                    if (index > 0) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = DatabaseMenuRowInset, vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
                         )
                     }
-                },
-                onClick = openLayer
-            )
-        }
-    ) { _ ->
-        if (columnFilters.isEmpty()) {
-            DatabaseMenuMessage(text = "No filters on this column yet", color = MaterialTheme.colorScheme.outline)
-        }
+                    DatabaseMenuSectionLabel(text = block.labelOf(filter.target))
+                    DatabaseFilterEditor(
+                        block = block,
+                        filter = filter,
+                        editor = editor,
+                        onChange = { change -> editor.changeFilter(block.id, view.id, filter.id, change) },
+                        onRemove = { editor.removeFilter(block.id, view.id, filter.id) }
+                    )
+                }
+            }
 
-        columnFilters.forEachIndexed { index, filter ->
-            if (index > 0) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = DatabaseMenuRowInset, vertical = 8.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            DatabaseMenuSectionDivider()
+            DatabaseMenuLayer(
+                title = "Add filter",
+                anchor = { openLayer ->
+                    DatabaseMenuOption(
+                        label = "Add filter",
+                        icon = { DatabaseOptionIcon(Res.drawable.plus) },
+                        onClick = openLayer
+                    )
+                }
+            ) { closeLayerAnd ->
+                DatabaseColumnChoices(
+                    block = block,
+                    columns = columnTargets,
+                    selectedColumn = null,
+                    onPick = { target -> closeLayerAnd { editor.addFilter(block.id, view.id, target) } }
                 )
             }
-            DatabaseFilterEditor(
-                block = block,
-                filter = filter,
-                editor = editor,
-                onChange = { change -> editor.changeFilter(block.id, view.id, filter.id, change) },
-                onRemove = { editor.removeFilter(block.id, view.id, filter.id) }
-            )
         }
-
-        DatabaseMenuOption(
-            label = "Add filter",
-            icon = { DatabaseOptionIcon(Res.drawable.plus) },
-            onClick = { editor.addFilter(block.id, view.id, column) }
-        )
     }
 }
 
