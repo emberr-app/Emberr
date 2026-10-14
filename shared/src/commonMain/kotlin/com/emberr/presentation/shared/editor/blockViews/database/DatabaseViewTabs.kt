@@ -114,7 +114,7 @@ internal fun DatabaseViewTabs(
             .onSizeChanged { viewportWidth = it.width }
             .horizontalScroll(scrollState)
             .viewDropLine(dragState, viewIds, dropLineColor),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         views.forEach { view ->
@@ -220,7 +220,7 @@ private fun DatabaseViewTab(
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = view.name.ifBlank { view.type.label },
-                style = MaterialTheme.typography.labelSmall,
+                style = if (isDesktopPlatform) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelSmall,
                 color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 maxLines = 1
             )
