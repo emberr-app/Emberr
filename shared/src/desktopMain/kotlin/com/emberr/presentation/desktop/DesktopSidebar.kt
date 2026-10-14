@@ -84,7 +84,7 @@ private val INDENT_STEP          = 32.dp
 private val SIDEBAR_BASE_START   = 8.dp
 private val ROW_ICON_SLOT        = 26.dp
 private val ROW_ICON_SIZE        = 24.dp
-private val ROW_MIN_HEIGHT       = 42.dp
+private val ROW_MIN_HEIGHT       = 40.dp
 private val ROW_VERTICAL_PADDING = 2.dp
 private val ROW_INNER_PADDING    = 4.dp
 private val ROW_ICON_LEADING_GAP = 8.dp
@@ -341,7 +341,7 @@ fun SidebarFolderRow(
             Text(
                 text = folder.name,
                 style = sidebarRowTextStyle,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Normal,
                 color = if (isIntoTarget) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.92f),
                 maxLines = 1,
