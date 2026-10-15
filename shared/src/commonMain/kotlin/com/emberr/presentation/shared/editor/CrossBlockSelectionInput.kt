@@ -36,6 +36,8 @@ interface CrossBlockSelectionCommands {
     fun cut()
     fun paste()
     fun replaceWith(text: String)
+    fun splitAtSelection()
+    fun adjustIndentation(increase: Boolean)
     fun toggleFormat(format: String)
     fun collapseTo(position: BlockTextPosition)
 }
@@ -192,6 +194,7 @@ fun handleCrossBlockSelectionKey(
             Key.C -> commands.copy()
             Key.X -> commands.cut()
             Key.V -> commands.paste()
+            Key.A -> selection.selectWholeNote()
             else -> {
                 selection.clear()
                 return false
@@ -216,6 +219,14 @@ fun handleCrossBlockSelectionKey(
             }
             Key.Backspace, Key.Delete -> {
                 commands.replaceWith("")
+                true
+            }
+            Key.Enter, Key.NumPadEnter -> {
+                commands.splitAtSelection()
+                true
+            }
+            Key.Tab -> {
+                commands.adjustIndentation(increase = !keyEvent.isShiftPressed)
                 true
             }
             Key.DirectionLeft, Key.DirectionUp -> {

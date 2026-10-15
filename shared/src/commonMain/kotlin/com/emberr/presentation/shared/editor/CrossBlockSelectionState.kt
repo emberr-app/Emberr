@@ -75,6 +75,14 @@ class CrossBlockSelectionState {
         return true
     }
 
+    fun selectWholeNote(): Boolean {
+        val firstBlockId = blockIdsInOrder.firstOrNull() ?: return false
+        val lastBlockId = blockIdsInOrder.last()
+        startAt(BlockTextPosition(firstBlockId, 0))
+        focus = BlockTextPosition(lastBlockId, host?.textLengthOf(lastBlockId) ?: 0)
+        return true
+    }
+
     fun extendByKeyboard(step: SelectionStep) {
         focus = focusMovedBy(step) ?: return
         host?.revealFocus(step)
