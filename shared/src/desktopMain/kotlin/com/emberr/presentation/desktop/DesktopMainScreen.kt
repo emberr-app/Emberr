@@ -58,6 +58,7 @@ import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.LocalCanvasFullScreenOverlay
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
+import com.emberr.presentation.shared.editor.MarkdownShortcut
 import com.emberr.presentation.settings.SettingsScreen
 import com.emberr.presentation.settings.SettingsSubPage
 import com.emberr.presentation.shared.UserSettings
@@ -2061,6 +2062,8 @@ fun DesktopMainScreen(
                             override fun onSetBlockAlignment(alignment: TextAlignment) = dailyViewModel.setFocusedBlockAlignment(alignment)
                             override fun onEnterPressed(id: String, before: String, after: String) = dailyViewModel.handleEnter(id, before, after)
                             override fun onBackspaceOnEmpty(id: String) = dailyViewModel.handleBackspaceOnEmpty(id)
+                            override fun onMarkdownShortcut(blockId: String, literalText: String, shortcut: MarkdownShortcut) =
+                                dailyViewModel.applyMarkdownShortcut(blockId, literalText, shortcut)
                             override fun onToggleSelection(id: String) = dailyViewModel.toggleSelection(id)
                             override fun onUpdateReminder(id: String, timestamp: Long?) = dailyViewModel.updateReminder(id, timestamp)
                             override fun onUrlSubmit(id: String, url: String) = dailyViewModel.handleUrlSubmit(id, url)

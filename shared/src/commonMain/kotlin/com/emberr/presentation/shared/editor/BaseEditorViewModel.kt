@@ -1458,22 +1458,7 @@ abstract class BaseEditorViewModel(
                 } else {
                     val inheritedAlignment = b.textAlignmentOrNull() ?: TextAlignment.LEFT
                     val inheritedSpans = shiftSpansForEdit(b.inlineSpansOrEmpty(), rawText, cleanedText)
-                    val newBlock = when (type) {
-                        "text" -> TextBlock(id, cleanedText, b.indentationLevel, inheritedAlignment, inheritedSpans, updatedAt = now)
-                        "h1" -> HeadingBlock(id, cleanedText, 1, b.indentationLevel, inheritedAlignment, inheritedSpans, updatedAt = now)
-                        "h2" -> HeadingBlock(id, cleanedText, 2, b.indentationLevel, inheritedAlignment, inheritedSpans, updatedAt = now)
-                        "checkbox" -> CheckboxBlock(id, cleanedText, false, b.indentationLevel, inheritedAlignment, inheritedSpans, updatedAt = now)
-                        "quote" -> QuoteBlock(id, cleanedText, b.indentationLevel, inheritedAlignment, inheritedSpans, updatedAt = now)
-                        "bullet" -> BulletedListBlock(id, cleanedText, b.indentationLevel, inheritedAlignment, inheritedSpans, updatedAt = now)
-                        "number" -> NumberedListBlock(id, cleanedText, 1, b.indentationLevel, inheritedAlignment, inheritedSpans, updatedAt = now)
-                        "toggle" -> ToggleBlock(id, cleanedText, true, b.indentationLevel, inheritedAlignment, inheritedSpans, updatedAt = now)
-                        "callout" -> CalloutBlock(id, cleanedText, indentationLevel = b.indentationLevel, textAlignment = inheritedAlignment, inlineSpans = inheritedSpans, updatedAt = now)
-                        "code" -> CodeBlock(id, cleanedText, textAlignment = inheritedAlignment, updatedAt = now)
-                        "voice" -> VoiceBlock(id, indentationLevel = b.indentationLevel, updatedAt = now)
-                        "divider_solid" -> SolidDividerBlock(id = id, indentationLevel = b.indentationLevel, updatedAt = now)
-                        "divider_dots" -> ThreeDotDividerBlock(id = id, indentationLevel = b.indentationLevel, updatedAt = now)
-                        else -> b
-                    }
+                    val newBlock = blockOfType(type, b, cleanedText, inheritedSpans, now)
 
                     mutable[idx] = newBlock.withPin(b.isPinned, now)
 
@@ -1487,6 +1472,95 @@ abstract class BaseEditorViewModel(
             }
         }
         scheduleAutosave()
+    }
+
+    private fun blockOfType(type: String, b: NoteBlock, text: String, spans: List<InlineSpan>, now: Long): NoteBlock {
+        val id = b.id
+        val inheritedAlignment = b.textAlignmentOrNull() ?: TextAlignment.LEFT
+        return when (type) {
+            "text" -> TextBlock(id, text, b.indentationLevel, inheritedAlignment, spans, updatedAt = now)
+            "h1" -> HeadingBlock(id, text, 1, b.indentationLevel, inheritedAlignment, spans, updatedAt = now)
+            "h2" -> HeadingBlock(id, text, 2, b.indentationLevel, inheritedAlignment, spans, updatedAt = now)
+            "checkbox" -> CheckboxBlock(id, text, false, b.indentationLevel, inheritedAlignment, spans, updatedAt = now)
+            "quote" -> QuoteBlock(id, text, b.indentationLevel, inheritedAlignment, spans, updatedAt = now)
+            "bullet" -> BulletedListBlock(id, text, b.indentationLevel, inheritedAlignment, spans, updatedAt = now)
+            "number" -> NumberedListBlock(id, text, 1, b.indentationLevel, inheritedAlignment, spans, updatedAt = now)
+            "toggle" -> ToggleBlock(id, text, true, b.indentationLevel, inheritedAlignment, spans, updatedAt = now)
+            "callout" -> CalloutBlock(id, text, indentationLevel = b.indentationLevel, textAlignment = inheritedAlignment, inlineSpans = spans, updatedAt = now)
+            "code" -> CodeBlock(id, text, textAlignment = inheritedAlignment, updatedAt = now)
+            "voice" -> VoiceBlock(id, indentationLevel = b.indentationLevel, updatedAt = now)
+            "divider_solid" -> SolidDividerBlock(id = id, indentationLevel = b.indentationLevel, updatedAt = now)
+            "divider_dots" -> ThreeDotDividerBlock(id = id, indentationLevel = b.indentationLevel, updatedAt = now)
+            else -> b
+        }
+    }
+
+    fun applyMarkdownShortcut(blockId: String, literalText: String, shortcut: MarkdownShortcut): Boolean {
+        if (isVirtualOccurrence(blockId)) return false
+        val block = _blocks.value.firstOrNull { it.id == blockId && !it.isDeleted } ?: return false
+        val isSupported = when (shortcut) {
+            is MarkdownShortcut.TurnInto, MarkdownShortcut.Divider -> block is TextBlock
+            is MarkdownShortcut.InlineFormat -> block !is CodeBlock && block.editableTextOrNull() != null
+        }
+        if (!isSupported) return false
+
+        updateBlockText(blockId, literalText)
+        sealHistoryCoalescing()
+        val now = System.currentTimeMillis()
+        when (shortcut) {
+            is MarkdownShortcut.TurnInto -> modifyBlocks { list ->
+                mapBlockById(list, blockId) { b ->
+                    val spans = shiftSpansForEdit(b.inlineSpansOrEmpty(), literalText, shortcut.convertedText)
+                    blockOfType(shortcut.blockType, b, shortcut.convertedText, spans, now).withPin(b.isPinned, now)
+                }
+            }
+            MarkdownShortcut.Divider -> {
+                val newTextBlockId = UUID.randomUUID().toString()
+                modifyBlocks { list ->
+                    spliceAtBlock(list, blockId) { mutable, idx ->
+                        val b = mutable[idx]
+                        mutable[idx] = SolidDividerBlock(id = blockId, indentationLevel = b.indentationLevel, updatedAt = now).withPin(b.isPinned, now)
+                        mutable.add(idx + 1, TextBlock(newTextBlockId, "", b.indentationLevel, updatedAt = now).withPin(b.isPinned, now))
+                    }
+                }
+                _focusRequest.value = FocusRequest(id = newTextBlockId)
+            }
+            is MarkdownShortcut.InlineFormat -> modifyBlocks { list ->
+                mapBlockById(list, blockId) { b -> withInlineMarkdownShortcutApplied(b, literalText, shortcut, now) }
+            }
+        }
+        sealHistoryCoalescing()
+        scheduleAutosave()
+        return true
+    }
+
+    private fun withInlineMarkdownShortcutApplied(
+        b: NoteBlock,
+        literalText: String,
+        shortcut: MarkdownShortcut.InlineFormat,
+        now: Long
+    ): NoteBlock {
+        val markerLength = (literalText.length - shortcut.convertedText.length) / 2
+        val closingMarkerStart = shortcut.formattedEnd + markerLength
+        val textWithoutClosingMarker = literalText.removeRange(closingMarkerStart, closingMarkerStart + markerLength)
+        val spansWithoutClosingMarker = shiftSpansForEdit(b.inlineSpansOrEmpty(), literalText, textWithoutClosingMarker)
+        val spansWithoutMarkers = shiftSpansForEdit(spansWithoutClosingMarker, textWithoutClosingMarker, shortcut.convertedText)
+        val textLength = shortcut.convertedText.length
+        val spanBased = withWholeBlockFormatMovedIntoSpans(
+            withText(b, shortcut.convertedText, now, spansWithoutMarkers),
+            shortcut.format,
+            textLength,
+            now
+        )
+        val formattedSpans = setInlineSpanFormat(
+            spans = spanBased.inlineSpansOrEmpty(),
+            textLength = textLength,
+            start = shortcut.formattedStart,
+            end = shortcut.formattedEnd,
+            format = shortcut.format,
+            isOn = true
+        )
+        return spanBased.withInlineSpans(formattedSpans, now)
     }
 
     // Bulk conversion for a multi-block selection.
