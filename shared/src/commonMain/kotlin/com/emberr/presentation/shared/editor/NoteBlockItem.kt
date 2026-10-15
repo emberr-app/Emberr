@@ -34,6 +34,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
@@ -151,6 +152,20 @@ val DefaultBlockShape = RoundedCornerShape(12.dp)
 private const val NOTE_LINK_MARKER = "](emberr://note/"
 private val NoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)""".toRegex()
 private val TrailingNoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)$""".toRegex()
+private val EmptyLineSelectionWidth = 6.dp
+
+private fun storedOffsetBesideSkippingNoteLinks(text: String, storedOffset: Int, forward: Boolean): Int? {
+    val candidate = if (forward) storedOffset + 1 else storedOffset - 1
+    if (candidate !in 0..text.length) return null
+    val noteLinkAroundCandidate = NoteLinkRegex.findAll(text).firstOrNull { link ->
+        candidate > link.range.first && candidate <= link.range.last
+    }
+    return when {
+        noteLinkAroundCandidate == null -> candidate
+        forward -> noteLinkAroundCandidate.range.last + 1
+        else -> noteLinkAroundCandidate.range.first
+    }
+}
 
 private fun TextAlignment.toComposeTextAlign(): TextAlign = when (this) {
     TextAlignment.LEFT -> TextAlign.Left
@@ -1132,21 +1147,82 @@ fun IsolatedEditorTextField(
     var fieldCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val latestFieldText by rememberUpdatedState(tfv.text)
     val latestVisualTransformation by rememberUpdatedState(visualTransformation)
-    val textOffsetFinder = remember {
-        TextOffsetFinder { pointInWindow ->
-            val coordinates = fieldCoordinates?.takeIf { it.isAttached } ?: return@TextOffsetFinder null
-            val layout = localTextLayoutResult ?: return@TextOffsetFinder null
-            val displayedOffset = layout.getOffsetForPosition(coordinates.windowToLocal(pointInWindow))
-            latestVisualTransformation.filter(AnnotatedString(latestFieldText)).offsetMapping.transformedToOriginal(displayedOffset)
+    val selectableTextField = remember {
+        object : SelectableTextField {
+            private fun offsetMapping() = latestVisualTransformation.filter(AnnotatedString(latestFieldText)).offsetMapping
+            private fun attachedCoordinates() = fieldCoordinates?.takeIf { it.isAttached }
+            private fun displayedOffsetOf(storedOffset: Int, layout: TextLayoutResult) =
+                offsetMapping().originalToTransformed(storedOffset.coerceIn(0, latestFieldText.length)).coerceIn(0, layout.layoutInput.text.length)
+
+            override fun storedOffsetAt(pointInWindow: Offset): Int? {
+                val coordinates = attachedCoordinates() ?: return null
+                val layout = localTextLayoutResult ?: return null
+                val displayedOffset = layout.getOffsetForPosition(coordinates.windowToLocal(pointInWindow))
+                return offsetMapping().transformedToOriginal(displayedOffset)
+            }
+
+            override fun storedOffsetBeside(storedOffset: Int, forward: Boolean): Int? =
+                storedOffsetBesideSkippingNoteLinks(latestFieldText, storedOffset, forward)
+
+            override fun storedOffsetOnNextLine(storedOffset: Int, downward: Boolean): Int? {
+                val layout = localTextLayoutResult ?: return null
+                val displayedOffset = displayedOffsetOf(storedOffset, layout)
+                val targetLine = layout.getLineForOffset(displayedOffset) + if (downward) 1 else -1
+                if (targetLine !in 0 until layout.lineCount) return null
+                val pointOnTargetLine = Offset(
+                    layout.getHorizontalPosition(displayedOffset, usePrimaryDirection = true),
+                    (layout.getLineTop(targetLine) + layout.getLineBottom(targetLine)) / 2
+                )
+                return offsetMapping().transformedToOriginal(layout.getOffsetForPosition(pointOnTargetLine))
+            }
+
+            override fun storedOffsetOnOuterLine(onFirstLine: Boolean, windowX: Float?): Int? {
+                if (windowX == null) return if (onFirstLine) 0 else latestFieldText.length
+                val coordinates = attachedCoordinates() ?: return null
+                val layout = localTextLayoutResult ?: return null
+                val line = if (onFirstLine) 0 else layout.lineCount - 1
+                val pointOnLine = Offset(
+                    coordinates.windowToLocal(Offset(windowX, 0f)).x,
+                    (layout.getLineTop(line) + layout.getLineBottom(line)) / 2
+                )
+                return offsetMapping().transformedToOriginal(layout.getOffsetForPosition(pointOnLine))
+            }
+
+            override fun cursorRectInWindow(storedOffset: Int): Rect? {
+                val coordinates = attachedCoordinates() ?: return null
+                val layout = localTextLayoutResult ?: return null
+                val cursorRect = layout.getCursorRect(displayedOffsetOf(storedOffset, layout))
+                return Rect(coordinates.localToWindow(cursorRect.topLeft), cursorRect.size)
+            }
+
+            override fun selectionIfFocused(): TextRange? = if (isFieldFocused) tfv.selection else null
         }
     }
     DisposableEffect(crossBlockSelection, blockId) {
-        crossBlockSelection?.registerTextField(blockId, textOffsetFinder)
-        onDispose { crossBlockSelection?.forgetTextField(blockId, textOffsetFinder) }
+        crossBlockSelection?.registerTextField(blockId, selectableTextField)
+        onDispose { crossBlockSelection?.forgetTextField(blockId, selectableTextField) }
+    }
+
+    fun isSelectionFocusAtEdge(step: SelectionStep): Boolean {
+        val focusOffset = tfv.selection.end
+        val layout = localTextLayoutResult ?: return false
+        val displayedFocus = latestVisualTransformation.filter(AnnotatedString(tfv.text)).offsetMapping
+            .originalToTransformed(focusOffset)
+            .coerceIn(0, layout.layoutInput.text.length)
+        return when (step) {
+            SelectionStep.CharacterBack -> focusOffset == 0
+            SelectionStep.CharacterForward -> focusOffset == tfv.text.length
+            SelectionStep.LineUp -> layout.getLineForOffset(displayedFocus) == 0
+            SelectionStep.LineDown -> layout.getLineForOffset(displayedFocus) == layout.lineCount - 1
+        }
     }
     val crossBlockSelectedRange by remember(crossBlockSelection, blockId) {
         derivedStateOf { crossBlockSelection?.selectedTextRangeIn(blockId, tfv.text.length) }
     }
+    val showsEmptyLineSelected by remember(crossBlockSelection, blockId) {
+        derivedStateOf { tfv.text.isEmpty() && crossBlockSelection?.continuesPastBlock(blockId) == true }
+    }
+    val emptyLineSelectionWidth = with(LocalDensity.current) { EmptyLineSelectionWidth.toPx() }
     val displayedCrossBlockSelectedRange = remember(crossBlockSelectedRange, tfv.text, visualTransformation) {
         crossBlockSelectedRange?.let { range ->
             val offsetMapping = visualTransformation.filter(AnnotatedString(tfv.text)).offsetMapping
@@ -1406,8 +1482,17 @@ fun IsolatedEditorTextField(
                 .fillMaxWidth()
                 .onGloballyPositioned { fieldCoordinates = it }
                 .drawBehind {
-                    val range = displayedCrossBlockSelectedRange ?: return@drawBehind
                     val layout = localTextLayoutResult ?: return@drawBehind
+                    if (showsEmptyLineSelected) {
+                        val cursorRect = layout.getCursorRect(0)
+                        drawRect(
+                            color = crossBlockSelectionColor,
+                            topLeft = Offset(cursorRect.left, layout.getLineTop(0)),
+                            size = Size(emptyLineSelectionWidth, layout.getLineBottom(0) - layout.getLineTop(0))
+                        )
+                        return@drawBehind
+                    }
+                    val range = displayedCrossBlockSelectedRange ?: return@drawBehind
                     val textLength = layout.layoutInput.text.length
                     val start = range.start.coerceIn(0, textLength)
                     val end = range.end.coerceIn(start, textLength)
@@ -1421,6 +1506,18 @@ fun IsolatedEditorTextField(
                 .onPreviewKeyEvent { event ->
                     val isBackspace = event.key == Key.Backspace
                     val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
+
+                    val extendsSelectionPastBlock = crossBlockSelection != null &&
+                        event.type == KeyEventType.KeyDown &&
+                        event.isShiftPressed &&
+                        !event.isCtrlPressed
+                    if (extendsSelectionPastBlock) {
+                        val step = selectionStepFor(event.key)
+                        val startedSelectingAcrossBlocks = step != null &&
+                            isSelectionFocusAtEdge(step) &&
+                            crossBlockSelection?.startFromTextField(blockId, tfv.selection, step) == true
+                        if (startedSelectingAcrossBlocks) return@onPreviewKeyEvent true
+                    }
 
                     if (isSlashMenuOpen && event.type == KeyEventType.KeyDown) {
                         when (event.key) {
