@@ -731,6 +731,32 @@ fun NoteBlock.inlineSpansOrEmpty(): List<InlineSpan> = when (this) {
     else -> emptyList()
 }
 
+fun NoteBlock.editableTextOrNull(): String? = when (this) {
+    is TextBlock -> text
+    is HeadingBlock -> text
+    is QuoteBlock -> text
+    is CheckboxBlock -> text
+    is BulletedListBlock -> text
+    is NumberedListBlock -> text
+    is ToggleBlock -> text
+    is CalloutBlock -> text
+    is CodeBlock -> code
+    else -> null
+}
+
+fun NoteBlock.withEditableText(newText: String, spans: List<InlineSpan>, now: Long): NoteBlock = when (this) {
+    is TextBlock -> copy(text = newText, inlineSpans = spans, updatedAt = now)
+    is HeadingBlock -> copy(text = newText, inlineSpans = spans, updatedAt = now)
+    is QuoteBlock -> copy(text = newText, inlineSpans = spans, updatedAt = now)
+    is CheckboxBlock -> copy(text = newText, inlineSpans = spans, updatedAt = now)
+    is BulletedListBlock -> copy(text = newText, inlineSpans = spans, updatedAt = now)
+    is NumberedListBlock -> copy(text = newText, inlineSpans = spans, updatedAt = now)
+    is ToggleBlock -> copy(text = newText, inlineSpans = spans, updatedAt = now)
+    is CalloutBlock -> copy(text = newText, inlineSpans = spans, updatedAt = now)
+    is CodeBlock -> copy(code = newText, updatedAt = now)
+    else -> this
+}
+
 fun NoteBlock.highlightColorNameOrNull(): String? = when (this) {
     is TextBlock -> highlightColorName
     is HeadingBlock -> highlightColorName
