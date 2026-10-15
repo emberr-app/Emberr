@@ -261,6 +261,10 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         prefs.putFloat("KEY_DESKTOP_SIDEBAR_WIDTH", width)
         _desktopSidebarWidth.value = width
     }
+    override fun isDesktopSidebarVisible(): Boolean = prefs.getBoolean("KEY_DESKTOP_SIDEBAR_VISIBLE", true)
+    override fun saveDesktopSidebarVisible(visible: Boolean) {
+        prefs.putBoolean("KEY_DESKTOP_SIDEBAR_VISIBLE", visible)
+    }
 
     private val _calendarViewMode = MutableStateFlow(
         prefs.get(SyncConstants.KEY_CALENDAR_VIEW_MODE, SyncConstants.DEFAULT_CALENDAR_VIEW_MODE)

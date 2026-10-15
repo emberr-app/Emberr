@@ -216,7 +216,11 @@ fun EmberrApp(
         if (isBottomBarVisible) suppressBottomBarEnterAnimation = false
     }
 
-    var isSidebarVisible by remember { mutableStateOf(true) }
+    var isSidebarVisible by remember { mutableStateOf(settingsManager.isDesktopSidebarVisible()) }
+    val toggleSidebar: () -> Unit = {
+        isSidebarVisible = !isSidebarVisible
+        settingsManager.saveDesktopSidebarVisible(isSidebarVisible)
+    }
 
     val bottomBarScrollAccumulator = remember { FloatArray(1) }
     val bottomBarNestedScrollConnection = remember {
@@ -339,7 +343,7 @@ fun EmberrApp(
                         DesktopMainScreenWrapper(
                             isSidebarVisible = isSidebarVisible,
                             sidebarWidth = DESKTOP_SIDEBAR_WIDTH,
-                            onToggleSidebar = { isSidebarVisible = !isSidebarVisible },
+                            onToggleSidebar = toggleSidebar,
                             onSelectionModeChange = { isActive -> isSelectionActive = isActive },
                             onPickImage = onPickImage,
                             onTakePhoto = onTakePhoto,
@@ -487,7 +491,7 @@ fun EmberrApp(
                                 onNavigateToDocuments = { navController.navigate(Screen.Documents.route) },
                                 onNavigateToProperties = { navController.navigate("properties_route") },
                                 onNavigateToTrash = { navController.navigate("trash_route") },
-                                onToggleSidebar = { isSidebarVisible = !isSidebarVisible },
+                                onToggleSidebar = toggleSidebar,
                                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                             )
                         }
