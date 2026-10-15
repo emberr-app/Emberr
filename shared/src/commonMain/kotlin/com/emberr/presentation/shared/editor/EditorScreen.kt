@@ -167,7 +167,8 @@ private val DefaultCornerShape = RoundedCornerShape(12.dp)
 @OptIn(ExperimentalFoundationApi::class)
 private class ClearanceAwareBringIntoViewSpec(
     private val topInsetPx: Float,
-    private val bottomInsetPx: Float
+    private val bottomInsetPx: Float,
+    private val maxHeightShownWholePx: Float
 ) : BringIntoViewSpec {
     override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float {
         val visibleTop = topInsetPx
@@ -179,6 +180,7 @@ private class ClearanceAwareBringIntoViewSpec(
         return when {
             leadingEdge >= visibleTop && trailingEdge <= visibleBottom -> 0f
             leadingEdge < visibleTop && trailingEdge > visibleBottom -> 0f
+            size > maxHeightShownWholePx && leadingEdge < visibleBottom && trailingEdge > visibleTop -> 0f
             abs(topDelta) < abs(bottomDelta) -> topDelta
             else -> bottomDelta
         }
@@ -273,7 +275,6 @@ interface EditorActions {
     fun onToggleCheckbox(id: String, checked: Boolean)
     fun onToggleExpand(id: String)
     fun onFocusBlock(id: String)
-    fun onRequestCursorPosition(id: String, offset: Int)
     fun onChangeBlockType(type: String)
     fun onToggleFormat(format: String)
     fun onAdjustIndentation(increase: Boolean)
@@ -659,7 +660,8 @@ fun EditorScreen(
     val bringIntoViewSpec = remember(topBarClearancePx, density) {
         ClearanceAwareBringIntoViewSpec(
             topInsetPx = topBarClearancePx + with(density) { 16.dp.toPx() },
-            bottomInsetPx = with(density) { 64.dp.toPx() }
+            bottomInsetPx = with(density) { 64.dp.toPx() },
+            maxHeightShownWholePx = with(density) { 64.dp.toPx() }
         )
     }
 

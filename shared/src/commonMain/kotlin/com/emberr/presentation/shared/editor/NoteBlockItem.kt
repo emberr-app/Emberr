@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -42,6 +43,8 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -119,6 +122,7 @@ import com.emberr.presentation.shared.editor.blockViews.accentColor
 import com.emberr.presentation.shared.editor.blockViews.icon
 import com.emberr.presentation.shared.editor.blockViews.CanvasBlockView
 import com.emberr.presentation.shared.editor.blockViews.LinkedNoteBlockView
+import com.emberr.presentation.shared.editor.blockViews.ScrollOnlyWhenHiddenBringIntoViewSpec
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyBlockView
 import com.emberr.presentation.shared.editor.blockViews.TableBlockView
 import com.emberr.presentation.shared.editor.blockViews.UnknownBlockView
@@ -193,6 +197,7 @@ fun NoteBlockItem(
 
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     var isFocused by remember { mutableStateOf(false) }
+    var displayedCursorOffsetFromTap by remember { mutableStateOf<Int?>(null) }
     val scope = rememberCoroutineScope()
 
     val text = when (block) {
@@ -614,7 +619,10 @@ fun NoteBlockItem(
                                 currentTextLayout = { textLayoutResult }
                             )
                     ) {
-                        CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+                        CompositionLocalProvider(
+                            LocalTextSelectionColors provides customTextSelectionColors,
+                            LocalBringIntoViewSpec provides ScrollOnlyWhenHiddenBringIntoViewSpec
+                        ) {
 
                             TextFormatContextMenu(onToggleFormat = { actions.onToggleFormat(it) }) {
                                 IsolatedEditorTextField(
@@ -636,6 +644,8 @@ fun NoteBlockItem(
                                     selectionRequest = selectionRequest,
                                     focusRequest = focusRequest,
                                     onTextLayout = { textLayoutResult = it },
+                                    displayedCursorOffsetFromTap = displayedCursorOffsetFromTap,
+                                    onCursorFromTapPlaced = { displayedCursorOffsetFromTap = null },
                                     isSlashMenuOpen = isSlashMenuActiveHere,
                                     onSlashMenuNavigate = { delta ->
                                         val count = slashMenuFilteredItems.size
@@ -681,6 +691,7 @@ fun NoteBlockItem(
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
+                                    .pointerHoverIcon(PointerIcon.Text)
                                     .pointerInput(block.id) {
                                         detectTapGestures(
                                             onTap = { pos ->
@@ -692,19 +703,8 @@ fun NoteBlockItem(
                                                     is HoveredLink.Email -> webLinkActions.openEmail(tappedLink.email)
                                                     is HoveredLink.Phone -> webLinkActions.openPhone(tappedLink.phone)
                                                     is HoveredLink.Note -> actions.onNoteLinkClick(tappedLink.noteId)
-                                                    null -> {
-                                                        focusRequester.requestFocus()
-                                                        keyboardController?.show()
-                                                        layoutResult?.getOffsetForPosition(pos)?.let {
-                                                            actions.onRequestCursorPosition(block.id, it)
-                                                        }
-                                                    }
+                                                    null -> layoutResult?.let { displayedCursorOffsetFromTap = it.getOffsetForPosition(pos) }
                                                 }
-                                            },
-                                            onDoubleTap = { pos ->
-                                                focusRequester.requestFocus()
-                                                keyboardController?.show()
-                                                textLayoutResult?.getOffsetForPosition(pos)?.let { actions.onRequestCursorPosition(block.id, it) }
                                             },
                                             onLongPress = { pos ->
                                                 when (val pressedLink = textLayoutResult?.hoveredLinkAt(pos, validNoteIds)) {
@@ -1084,6 +1084,8 @@ fun IsolatedEditorTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     selectionRequest: SelectionRequest? = null,
     focusRequest: FocusRequest? = null,
+    displayedCursorOffsetFromTap: Int? = null,
+    onCursorFromTapPlaced: () -> Unit = {},
     isSlashMenuOpen: Boolean = false,
     onSlashMenuNavigate: (delta: Int) -> Unit = {},
     onSlashMenuConfirm: () -> Unit = {},
@@ -1099,7 +1101,9 @@ fun IsolatedEditorTextField(
 
     var localTextLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     var isFieldFocused by remember { mutableStateOf(false) }
+    var isFocusRequestedByTap by remember { mutableStateOf(false) }
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     val density = LocalDensity.current
     val imeBottom = WindowInsets.ime.getBottom(density)
 
@@ -1159,6 +1163,21 @@ fun IsolatedEditorTextField(
         if (focusRequest?.id == blockId && focusRequest.placeCursorAtEnd) {
             tfv = tfv.copy(selection = TextRange(tfv.text.length), composition = null)
         }
+    }
+
+    LaunchedEffect(displayedCursorOffsetFromTap) {
+        val displayedOffset = displayedCursorOffsetFromTap ?: return@LaunchedEffect
+        val cursorOffset = visualTransformation.filter(AnnotatedString(tfv.text)).offsetMapping.transformedToOriginal(displayedOffset)
+        tfv = tfv.copy(selection = TextRange(cursorOffset), composition = null)
+        isFocusRequestedByTap = true
+        onCursorFromTapPlaced()
+    }
+
+    LaunchedEffect(isFocusRequestedByTap) {
+        if (!isFocusRequestedByTap) return@LaunchedEffect
+        runCatching { focusRequester.requestFocus() }
+        keyboardController?.show()
+        isFocusRequestedByTap = false
     }
 
     LaunchedEffect(selectionRequest?.nonce) {

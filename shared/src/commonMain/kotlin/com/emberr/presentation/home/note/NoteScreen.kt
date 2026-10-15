@@ -387,7 +387,6 @@ fun NoteScreen(
             override fun onToggleCheckbox(id: String, checked: Boolean) = viewModel.toggleCheckbox(id, checked)
             override fun onToggleExpand(id: String) = viewModel.toggleFoldedState(id)
             override fun onFocusBlock(id: String) = viewModel.setFocusedBlock(id)
-            override fun onRequestCursorPosition(id: String, offset: Int) = viewModel.requestCursorPosition(id, offset)
             override fun onChangeBlockType(type: String) = viewModel.changeFocusedBlockType(type)
             override fun onToggleFormat(format: String) = viewModel.toggleFormat(format)
             override fun onAdjustIndentation(increase: Boolean) = viewModel.adjustIndentation(increase)

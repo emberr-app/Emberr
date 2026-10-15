@@ -1735,16 +1735,6 @@ abstract class BaseEditorViewModel(
         currentlyFocusedBlockId = id
     }
 
-    // Tapping an unfocused block's text goes through a separate tap-detection overlay first (to
-    // distinguish tapping a note-link from tapping plain text - see NoteBlockItem), which already
-    // grants focus directly via its own FocusRequester for instant response. That path alone never
-    // touches the field's TextFieldValue.selection though, so the cursor stayed wherever it last
-    // was (usually the end) instead of where the tap landed. This rides the same SelectionRequest
-    // channel toggleInlineFormat uses to fix that, in parallel with (not instead of) the direct focus.
-    fun requestCursorPosition(blockId: String, offset: Int) {
-        currentlyFocusedBlockId = blockId
-        _selectionRequest.value = SelectionRequest(blockId, TextRange(offset))
-    }
     fun clearFocusRequest() { _focusRequest.value = null }
     fun toggleSelection(id: String) { _selectedBlockIds.update { if (it.contains(id)) it - id else it + id } }
     fun clearSelection() { _selectedBlockIds.value = emptySet() }

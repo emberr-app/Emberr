@@ -2055,7 +2055,6 @@ fun DesktopMainScreen(
                             override fun onToggleCheckbox(id: String, checked: Boolean) = dailyViewModel.toggleCheckbox(id, checked)
                             override fun onToggleExpand(id: String) = dailyViewModel.toggleFoldedState(id)
                             override fun onFocusBlock(id: String) = dailyViewModel.setFocusedBlock(id)
-                            override fun onRequestCursorPosition(id: String, offset: Int) = dailyViewModel.requestCursorPosition(id, offset)
                             override fun onChangeBlockType(type: String) = dailyViewModel.changeFocusedBlockType(type)
                             override fun onToggleFormat(format: String) = dailyViewModel.toggleFormat(format)
                             override fun onAdjustIndentation(increase: Boolean) = dailyViewModel.adjustIndentation(increase)
