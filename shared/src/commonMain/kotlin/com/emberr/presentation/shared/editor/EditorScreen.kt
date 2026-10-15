@@ -229,6 +229,8 @@ object GlobalEditorState {
 
     var lastCopiedMarkdown: String? = null
 
+    var lastCopiedBlocks: List<NoteBlock>? = null
+
     var currentlyFocusedTableCellKey: String? = null
 
     var focusedCanvasBlockId: String? = null
@@ -289,6 +291,8 @@ interface EditorActions {
     fun onSetBlockAlignment(alignment: TextAlignment)
     fun onEnterPressed(id: String, before: String, after: String)
     fun onBackspaceOnEmpty(id: String)
+    val canEditTextAcrossBlocks: Boolean get() = false
+    fun onBlocksToCopy(range: CrossBlockTextRange, visibleBlocksInRange: List<NoteBlock>): List<NoteBlock> = visibleBlocksInRange
     fun onReplaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String): TextCaret? = null
     fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String): TextCaret? = null
     fun onMarkdownShortcut(blockId: String, literalText: String, shortcut: MarkdownShortcut): Boolean = false
@@ -794,10 +798,11 @@ fun EditorScreen(
             override fun copy() {
                 val range = crossBlockSelection.range ?: return
                 val idsInSelection = crossBlockSelection.blockIdsInSelection().toSet()
-                val blocksInSelection = latestBlocks.filter { it.id in idsInSelection }
+                val blocksInSelection = latestWrappedActions.onBlocksToCopy(range, latestBlocks.filter { it.id in idsInSelection })
+                val copiedBlocks = blocksCutToRange(blocksInSelection, range)
                 val noteTitlesById = latestAllLinkableNotes.associate { it.noteId to it.title }
-                val markdown = NoteMarkdownWriter.writeMarkdown(blocksCutToRange(blocksInSelection, range), noteTitlesById = noteTitlesById)
-                clipboardManager.copyEmberrMarkdown(markdown)
+                val markdown = NoteMarkdownWriter.writeMarkdown(copiedBlocks, noteTitlesById = noteTitlesById)
+                clipboardManager.copyEmberrMarkdown(markdown, copiedBlocks)
             }
 
             override fun cut() {
@@ -1195,9 +1200,17 @@ fun EditorScreen(
 
         val crossBlockMenuPosition = crossBlockMenuPositionInEditor?.takeIf { crossBlockSelection.isActive }
         if (crossBlockMenuPosition != null) {
-            CrossBlockSelectionMenu(
-                positionInEditor = crossBlockMenuPosition,
-                commands = crossBlockCommands,
+            val canEditText = wrappedActions.canEditTextAcrossBlocks
+            TextSelectionMenu(
+                positionInParent = crossBlockMenuPosition,
+                actions = TextSelectionMenuActions(
+                    copy = { crossBlockCommands.copy() },
+                    cut = if (canEditText) ({ crossBlockCommands.cut() }) else null,
+                    paste = if (canEditText) ({ crossBlockCommands.paste() }) else null,
+                    delete = if (canEditText) ({ crossBlockCommands.replaceWith("") }) else null,
+                    selectAll = { crossBlockSelection.selectWholeNote() },
+                    toggleFormat = if (canEditText) ({ format -> crossBlockCommands.toggleFormat(format) }) else null
+                ),
                 onClose = {
                     crossBlockMenuPositionInEditor = null
                     runCatching { selectionShortcutFocusRequester.requestFocus() }

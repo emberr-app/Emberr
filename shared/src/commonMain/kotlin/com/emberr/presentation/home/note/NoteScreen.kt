@@ -395,6 +395,9 @@ fun NoteScreen(
             override fun onSetBlockAlignment(alignment: TextAlignment) = viewModel.setFocusedBlockAlignment(alignment)
             override fun onEnterPressed(id: String, before: String, after: String) = viewModel.handleEnter(id, before, after)
             override fun onBackspaceOnEmpty(id: String) = viewModel.handleBackspaceOnEmpty(id)
+            override val canEditTextAcrossBlocks = true
+            override fun onBlocksToCopy(range: CrossBlockTextRange, visibleBlocksInRange: List<NoteBlock>) =
+                viewModel.blocksToCopy(range, visibleBlocksInRange)
             override fun onReplaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String) =
                 viewModel.replaceTextAcrossBlocks(range, blockIdsInRange, replacement)
             override fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String) =

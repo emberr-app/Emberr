@@ -873,6 +873,30 @@ fun NoteContent.deepCopyWithNewIds(): NoteContent = copy(blocks = blocks.map { i
 // Gives a single block a new id.
 fun NoteBlock.deepCopyWithNewIds(): NoteBlock = withId(UUID.randomUUID().toString())
 
+fun NoteBlock.withIndentationLevel(level: Int): NoteBlock = when (this) {
+    is TextBlock -> copy(indentationLevel = level)
+    is HeadingBlock -> copy(indentationLevel = level)
+    is QuoteBlock -> copy(indentationLevel = level)
+    is CheckboxBlock -> copy(indentationLevel = level)
+    is BulletedListBlock -> copy(indentationLevel = level)
+    is NumberedListBlock -> copy(indentationLevel = level)
+    is ToggleBlock -> copy(indentationLevel = level)
+    is CalloutBlock -> copy(indentationLevel = level)
+    is CodeBlock -> copy(indentationLevel = level)
+    is BookmarkBlock -> copy(indentationLevel = level)
+    is LinkedNoteBlock -> copy(indentationLevel = level)
+    is ImageBlock -> copy(indentationLevel = level)
+    is DocumentBlock -> copy(indentationLevel = level)
+    is TableBlock -> copy(indentationLevel = level)
+    is VoiceBlock -> copy(indentationLevel = level)
+    is CanvasBlock -> copy(indentationLevel = level)
+    is PropertyBlock -> copy(indentationLevel = level)
+    is DatabaseBlock -> copy(indentationLevel = level)
+    is SolidDividerBlock -> copy(indentationLevel = level)
+    is ThreeDotDividerBlock -> copy(indentationLevel = level)
+    is UnknownBlock -> copy(indentationLevel = level)
+}
+
 fun NoteBlock.withId(newId: String): NoteBlock {
     return when (this) {
         is TextBlock -> copy(id = newId)

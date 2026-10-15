@@ -1897,7 +1897,7 @@ abstract class BaseEditorViewModel(
         if (touchesRecurringTask(blockIdsInRange)) return null
         val firstBlock = _blocks.value.firstOrNull { it.id == range.start.blockId } ?: return null
         val now = System.currentTimeMillis()
-        val pastedBlocks = blocksFromPastedMarkdown(pastedText, firstBlock.indentationLevel, now)
+        val pastedBlocks = blocksToPaste(pastedText, firstBlock.indentationLevel, now)
 
         var caret: TextCaret? = null
         modifyBlocks { list ->
@@ -2004,16 +2004,24 @@ abstract class BaseEditorViewModel(
 
     private fun withHiddenChildrenOfMiddleBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>): List<String> {
         val middleBlockIds = visibleBlockIdsInRange.toSet() - range.start.blockId - range.end.blockId
-        val allBlocks = _blocks.value
-        val hiddenChildIds = allBlocks.withIndex().flatMap { (index, block) ->
-            val hidesItsChildren = (block is ToggleBlock && !block.isExpanded) || (block is CalloutBlock && !block.showsBody)
-            if (block.id !in middleBlockIds || !hidesItsChildren) return@flatMap emptyList()
-            allBlocks.drop(index + 1)
-                .takeWhile { it.indentationLevel > block.indentationLevel }
-                .filter { !it.isDeleted }
-                .map { it.id }
+        return visibleBlockIdsInRange + middleBlockIds.flatMap { hiddenChildrenOf(it) }.map { it.id }
+    }
+
+    fun blocksToCopy(range: CrossBlockTextRange, visibleBlocksInRange: List<NoteBlock>): List<NoteBlock> =
+        visibleBlocksInRange.flatMap { block ->
+            val isMiddleBlock = block.id != range.start.blockId && block.id != range.end.blockId
+            if (isMiddleBlock) listOf(block) + hiddenChildrenOf(block.id) else listOf(block)
         }
-        return visibleBlockIdsInRange + hiddenChildIds
+
+    private fun hiddenChildrenOf(blockId: String): List<NoteBlock> {
+        val allBlocks = _blocks.value
+        val index = allBlocks.indexOfFirst { it.id == blockId }
+        val block = allBlocks.getOrNull(index) ?: return emptyList()
+        val hidesItsChildren = (block is ToggleBlock && !block.isExpanded) || (block is CalloutBlock && !block.showsBody)
+        if (!hidesItsChildren) return emptyList()
+        return allBlocks.drop(index + 1)
+            .takeWhile { it.indentationLevel > block.indentationLevel }
+            .filter { !it.isDeleted }
     }
 
     private fun touchesRecurringTask(blockIds: List<String>): Boolean = blockIds.any { id ->
@@ -2024,7 +2032,7 @@ abstract class BaseEditorViewModel(
         if (isVirtualOccurrence(blockId)) return null
         val target = _blocks.value.firstOrNull { it.id == blockId } ?: return null
         val now = System.currentTimeMillis()
-        val pastedBlocks = blocksFromPastedMarkdown(markdown, target.indentationLevel, now)
+        val pastedBlocks = blocksToPaste(markdown, target.indentationLevel, now)
 
         var caret: TextCaret? = null
         modifyBlocks { list ->
@@ -2045,6 +2053,10 @@ abstract class BaseEditorViewModel(
         if (caret != null) scheduleAutosave()
         return caret
     }
+
+    private fun blocksToPaste(pastedText: String, indentation: Int, now: Long): List<NoteBlock> =
+        blocksEmberrCopiedAs(pastedText)?.let { copiedBlocksReadyToPaste(it, indentation, now) }
+            ?: blocksFromPastedMarkdown(pastedText, indentation, now)
 
     private fun blocksFromPastedMarkdown(markdown: String, indentation: Int, now: Long): List<NoteBlock> =
         MarkdownToBlocks.convert(
