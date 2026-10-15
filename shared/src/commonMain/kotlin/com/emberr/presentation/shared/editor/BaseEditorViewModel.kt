@@ -15,6 +15,8 @@ import com.emberr.domain.database.LinkableDatabase
 import com.emberr.domain.database.changedThroughView
 import com.emberr.domain.database.combinedWith
 import com.emberr.domain.database.mergedWith
+import com.emberr.domain.importer.ImportLinkResolver
+import com.emberr.domain.importer.markdown.MarkdownToBlocks
 import com.emberr.domain.database.withSharedSettingsFrom
 import com.emberr.domain.database.withSettingTimesStamped
 import com.emberr.domain.table.DeviceTableLayoutStore
@@ -1793,6 +1795,143 @@ abstract class BaseEditorViewModel(
         val text = getSelectedText()
         deleteSelectedBlocks()
         return text
+    }
+
+    fun replaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String): TextCaret? {
+        if (touchesRecurringTask(blockIdsInRange)) return null
+
+        val newBlockId = UUID.randomUUID().toString()
+        val now = System.currentTimeMillis()
+        var caret: TextCaret? = null
+        modifyBlocks { list ->
+            val edit = replaceTextInRange(list, range, blockIdsInRange, replacement, newBlockId, now) ?: return@modifyBlocks list
+            caret = edit.caret
+            edit.blocks
+        }
+        if (caret != null) scheduleAutosave()
+        return caret
+    }
+
+    fun pasteOverTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, pastedText: String): TextCaret? {
+        if (!readsAsMarkdown(pastedText, GlobalEditorState.lastCopiedMarkdown)) {
+            return replaceTextAcrossBlocks(range, blockIdsInRange, pastedText.replace("\r", "").trimEnd('\n'))
+        }
+        if (touchesRecurringTask(blockIdsInRange)) return null
+        val firstBlock = _blocks.value.firstOrNull { it.id == range.start.blockId } ?: return null
+        val now = System.currentTimeMillis()
+        val pastedBlocks = blocksFromPastedMarkdown(pastedText, firstBlock.indentationLevel, now)
+
+        var caret: TextCaret? = null
+        modifyBlocks { list ->
+            val cleared = replaceTextInRange(list, range, blockIdsInRange, "", UUID.randomUUID().toString(), now)
+                ?: return@modifyBlocks list
+            val caretOffset = cleared.caret.position.offset
+            val pasted = pasteBlocksIntoBlock(
+                blocks = cleared.blocks,
+                blockId = cleared.caret.position.blockId,
+                replacedStart = caretOffset,
+                replacedEnd = caretOffset,
+                pastedBlocks = pastedBlocks,
+                keepsHeadSeparate = startsOnNewLine(pastedText),
+                keepsTailSeparate = endsOnNewLine(pastedText),
+                newBlockId = { UUID.randomUUID().toString() },
+                now = now
+            ) ?: cleared
+            caret = pasted.caret
+            pasted.blocks
+        }
+        if (caret != null) scheduleAutosave()
+        return caret
+    }
+
+    fun toggleFormatAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, format: String) {
+        val request = parseFormatRequest(format)
+        val idsInRange = blockIdsInRange.toSet()
+        val now = System.currentTimeMillis()
+
+        fun selectedPartOf(block: NoteBlock): IntRange? {
+            if (block.id !in idsInRange || block is CodeBlock || isVirtualOccurrence(block.id)) return null
+            val text = block.editableTextOrNull() ?: return null
+            val start = if (block.id == range.start.blockId) range.start.offset.coerceIn(0, text.length) else 0
+            val end = if (block.id == range.end.blockId) range.end.offset.coerceIn(start, text.length) else text.length
+            return if (start < end) start until end else null
+        }
+
+        fun spanBasedCopyOf(block: NoteBlock): NoteBlock =
+            withWholeBlockFormatMovedIntoSpans(block, request.name, block.editableTextOrNull().orEmpty().length, now)
+
+        val isAlreadyFullyOn = _blocks.value.all { block ->
+            val selectedPart = selectedPartOf(block) ?: return@all true
+            val flags = spanBasedCopyOf(block).inlineSpansOrEmpty().toFlagsArray(block.editableTextOrNull().orEmpty().length)
+            selectedPart.all { index ->
+                flags[index].hasFormat(request.name) &&
+                    (request.highlightColorName == null || effectiveColorNameOf(flags[index]) == request.highlightColorName)
+            }
+        }
+        val turnsFormatOn = !request.removesHighlight && !isAlreadyFullyOn
+
+        modifyBlocks { list ->
+            list.map { block ->
+                val selectedPart = selectedPartOf(block) ?: return@map block
+                val spanBased = spanBasedCopyOf(block)
+                val newSpans = setInlineSpanFormat(
+                    spans = spanBased.inlineSpansOrEmpty(),
+                    textLength = block.editableTextOrNull().orEmpty().length,
+                    start = selectedPart.first,
+                    end = selectedPart.last + 1,
+                    format = request.name,
+                    isOn = turnsFormatOn,
+                    chosenHighlightColorName = request.highlightColorName
+                )
+                spanBased.withInlineSpans(newSpans, now)
+            }
+        }
+        scheduleAutosave()
+    }
+
+    private fun touchesRecurringTask(blockIds: List<String>): Boolean = blockIds.any { id ->
+        isVirtualOccurrence(id) || (_blocks.value.firstOrNull { it.id == id } as? CheckboxBlock)?.recurrenceRule != null
+    }
+
+    fun pasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String): TextCaret? {
+        if (isVirtualOccurrence(blockId)) return null
+        val target = _blocks.value.firstOrNull { it.id == blockId } ?: return null
+        val now = System.currentTimeMillis()
+        val pastedBlocks = blocksFromPastedMarkdown(markdown, target.indentationLevel, now)
+
+        var caret: TextCaret? = null
+        modifyBlocks { list ->
+            val edit = pasteBlocksIntoBlock(
+                blocks = list,
+                blockId = blockId,
+                replacedStart = replacedStart,
+                replacedEnd = replacedEnd,
+                pastedBlocks = pastedBlocks,
+                keepsHeadSeparate = startsOnNewLine(markdown),
+                keepsTailSeparate = endsOnNewLine(markdown),
+                newBlockId = { UUID.randomUUID().toString() },
+                now = now
+            ) ?: return@modifyBlocks list
+            caret = edit.caret
+            edit.blocks
+        }
+        if (caret != null) scheduleAutosave()
+        return caret
+    }
+
+    private fun blocksFromPastedMarkdown(markdown: String, indentation: Int, now: Long): List<NoteBlock> =
+        MarkdownToBlocks.convert(
+            markdown = markdown,
+            linkResolver = pastedMarkdownLinkResolver,
+            now = now,
+            newBlockId = { UUID.randomUUID().toString() },
+            baseIndentation = indentation,
+            keepsEmberrNoteLinks = true
+        ).blocks.filterNot { it is ImageBlock && it.localFilePath == null }
+
+    private val pastedMarkdownLinkResolver = object : ImportLinkResolver {
+        override fun noteIdFor(linkTarget: String): String? = null
+        override fun attachmentPathFor(linkTarget: String): String? = null
     }
 
     fun addBlockAboveSelection() {

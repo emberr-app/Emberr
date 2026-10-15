@@ -46,8 +46,10 @@ import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -334,9 +336,11 @@ fun NoteBlockItem(
         else -> 4.dp
     }
 
+    val clipboardManager = LocalClipboardManager.current
+    val markdownClipboardActions = remember { MarkdownClipboardActions() }
     val customTextSelectionColors = TextSelectionColors(
         handleColor = MaterialTheme.colorScheme.primary,
-        backgroundColor = MaterialTheme.colorScheme.surface
+        backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
     )
 
     val desktopExtraPadding = if (isDesktopPlatform) 16.dp else 0.dp
@@ -624,7 +628,10 @@ fun NoteBlockItem(
                             LocalBringIntoViewSpec provides ScrollOnlyWhenHiddenBringIntoViewSpec
                         ) {
 
-                            TextFormatContextMenu(onToggleFormat = { actions.onToggleFormat(it) }) {
+                            TextFormatContextMenu(
+                                onToggleFormat = { actions.onToggleFormat(it) },
+                                markdownClipboardActions = markdownClipboardActions
+                            ) {
                                 IsolatedEditorTextField(
                                     initialText = text,
                                     placeholderText = placeholderText,
@@ -637,6 +644,15 @@ fun NoteBlockItem(
                                     onUpdateText = { id, newText -> actions.onUpdateText(id, newText) },
                                     onEnterPressed = { id, before, after -> actions.onEnterPressed(id, before, after) },
                                     onBackspaceOnEmpty = { id -> actions.onBackspaceOnEmpty(id) },
+                                    onPasteMarkdown = { id, pasted ->
+                                        actions.onPasteMarkdown(id, pasted.replacedStart, pasted.replacedEnd, pasted.text) != null
+                                    },
+                                    markdownClipboardActions = markdownClipboardActions,
+                                    onCopyAsMarkdown = if (isDesktopPlatform && block !is CodeBlock) {
+                                        { start, end -> clipboardManager.copyEmberrMarkdown(inlineMarkdownOf(block, start, end)) }
+                                    } else {
+                                        null
+                                    },
                                     allLinkableNotes = allLinkableNotes,
                                     onCreateLinkedNote = { actions.onCreateLinkedNote(it) },
                                     onOpenNote = { actions.onNoteLinkClick(it) },
@@ -1077,6 +1093,9 @@ fun IsolatedEditorTextField(
     onUpdateText: (String, String) -> Unit,
     onEnterPressed: (String, String, String) -> Unit,
     onBackspaceOnEmpty: (String) -> Unit,
+    onPasteMarkdown: (blockId: String, pastedText: PastedText) -> Boolean = { _, _ -> false },
+    onCopyAsMarkdown: ((start: Int, end: Int) -> Unit)? = null,
+    markdownClipboardActions: MarkdownClipboardActions? = null,
     onTextLayout: (TextLayoutResult) -> Unit,
     allLinkableNotes: List<NoteMetadataEntity>,
     onCreateLinkedNote: (String) -> String,
@@ -1108,6 +1127,57 @@ fun IsolatedEditorTextField(
     val imeBottom = WindowInsets.ime.getBottom(density)
 
     var mentionSelectedIndex by remember(mentionQuery) { mutableIntStateOf(0) }
+
+    val crossBlockSelection = LocalCrossBlockSelection.current
+    var fieldCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val latestFieldText by rememberUpdatedState(tfv.text)
+    val latestVisualTransformation by rememberUpdatedState(visualTransformation)
+    val textOffsetFinder = remember {
+        TextOffsetFinder { pointInWindow ->
+            val coordinates = fieldCoordinates?.takeIf { it.isAttached } ?: return@TextOffsetFinder null
+            val layout = localTextLayoutResult ?: return@TextOffsetFinder null
+            val displayedOffset = layout.getOffsetForPosition(coordinates.windowToLocal(pointInWindow))
+            latestVisualTransformation.filter(AnnotatedString(latestFieldText)).offsetMapping.transformedToOriginal(displayedOffset)
+        }
+    }
+    DisposableEffect(crossBlockSelection, blockId) {
+        crossBlockSelection?.registerTextField(blockId, textOffsetFinder)
+        onDispose { crossBlockSelection?.forgetTextField(blockId, textOffsetFinder) }
+    }
+    val crossBlockSelectedRange by remember(crossBlockSelection, blockId) {
+        derivedStateOf { crossBlockSelection?.selectedTextRangeIn(blockId, tfv.text.length) }
+    }
+    val displayedCrossBlockSelectedRange = remember(crossBlockSelectedRange, tfv.text, visualTransformation) {
+        crossBlockSelectedRange?.let { range ->
+            val offsetMapping = visualTransformation.filter(AnnotatedString(tfv.text)).offsetMapping
+            TextRange(offsetMapping.originalToTransformed(range.start), offsetMapping.originalToTransformed(range.end))
+        }
+    }
+    val crossBlockSelectionColor = LocalTextSelectionColors.current.backgroundColor
+
+    fun copySelectionAsMarkdown(): Boolean {
+        val copySelectedText = onCopyAsMarkdown ?: return false
+        if (tfv.selection.collapsed) return false
+        copySelectedText(tfv.selection.min, tfv.selection.max)
+        return true
+    }
+
+    fun cutSelectionAsMarkdown(): Boolean {
+        val selectionStart = tfv.selection.min
+        val selectionEnd = tfv.selection.max
+        if (!copySelectionAsMarkdown()) return false
+        val newText = tfv.text.removeRange(selectionStart, selectionEnd)
+        tfv = tfv.copy(text = newText, selection = TextRange(selectionStart), composition = null)
+        lastSentText = newText
+        textsSentButNotYetEchoed += newText
+        onUpdateText(blockId, newText)
+        return true
+    }
+
+    SideEffect {
+        markdownClipboardActions?.copySelection = { copySelectionAsMarkdown() }
+        markdownClipboardActions?.cutSelection = { cutSelectionAsMarkdown() }
+    }
 
     LaunchedEffect(isFieldFocused, imeBottom, tfv.selection.end) {
         if (!isFieldFocused || imeBottom <= 0) return@LaunchedEffect
@@ -1312,7 +1382,11 @@ fun IsolatedEditorTextField(
                     mentionStartIndex = -1
                 }
 
-                if (!isCodeBlock && newText.contains('\n')) {
+                val pastedText = if (!isCodeBlock) pastedTextToReadAsMarkdown(tfv.text, newText, GlobalEditorState.lastCopiedMarkdown) else null
+                if (pastedText != null && onPasteMarkdown(blockId, pastedText)) {
+                    mentionQuery = null
+                    mentionStartIndex = -1
+                } else if (!isCodeBlock && newText.contains('\n')) {
                     val splitIndex = newText.indexOf('\n')
                     val textBefore = newText.substring(0, splitIndex)
                     val textAfter = newText.substring(splitIndex + 1).replace("\n", "")
@@ -1330,6 +1404,15 @@ fun IsolatedEditorTextField(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .onGloballyPositioned { fieldCoordinates = it }
+                .drawBehind {
+                    val range = displayedCrossBlockSelectedRange ?: return@drawBehind
+                    val layout = localTextLayoutResult ?: return@drawBehind
+                    val textLength = layout.layoutInput.text.length
+                    val start = range.start.coerceIn(0, textLength)
+                    val end = range.end.coerceIn(start, textLength)
+                    if (start < end) drawPath(layout.getPathForRange(start, end), crossBlockSelectionColor)
+                }
                 .focusRequester(focusRequester)
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .onFocusChanged {
@@ -1383,6 +1466,14 @@ fun IsolatedEditorTextField(
                             }
                             else -> {}
                         }
+                    }
+
+                    val isCopyShortcut = event.type == KeyEventType.KeyDown &&
+                        event.isCtrlPressed &&
+                        (event.key == Key.C || event.key == Key.X)
+                    if (isCopyShortcut) {
+                        val copiedAsMarkdown = if (event.key == Key.X) cutSelectionAsMarkdown() else copySelectionAsMarkdown()
+                        if (copiedAsMarkdown) return@onPreviewKeyEvent true
                     }
 
                     if (isBackspace && event.type == KeyEventType.KeyDown) {
