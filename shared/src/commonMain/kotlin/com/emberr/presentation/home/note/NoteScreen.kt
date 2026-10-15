@@ -402,6 +402,10 @@ fun NoteScreen(
                 viewModel.pasteOverTextAcrossBlocks(range, blockIdsInRange, pastedText)
             override fun onToggleFormatAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, format: String) =
                 viewModel.toggleFormatAcrossBlocks(range, blockIdsInRange, format)
+            override fun onSplitAtTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>) =
+                viewModel.splitAtTextAcrossBlocks(range, blockIdsInRange)
+            override fun onAdjustIndentationOfBlocks(blockIds: Set<String>, increase: Boolean) =
+                viewModel.adjustIndentationOfBlocks(blockIds, increase)
             override fun onToggleSelection(id: String) = viewModel.toggleSelection(id)
             override fun onUpdateReminder(id: String, timestamp: Long?) = viewModel.updateReminder(id, timestamp)
             override fun onOpenEventOptions(blockId: String, occurrenceDate: String?) {

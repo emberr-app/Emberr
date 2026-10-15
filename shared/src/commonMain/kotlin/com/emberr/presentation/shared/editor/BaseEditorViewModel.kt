@@ -1401,8 +1401,9 @@ abstract class BaseEditorViewModel(
         scheduleAutosave()
     }
 
-    fun adjustIndentationForSelectedBlocks(increment: Boolean) {
-        val ids = _selectedBlockIds.value
+    fun adjustIndentationForSelectedBlocks(increment: Boolean) = adjustIndentationOfBlocks(_selectedBlockIds.value, increment)
+
+    fun adjustIndentationOfBlocks(ids: Set<String>, increment: Boolean) {
         if (ids.isEmpty()) return
         val now = System.currentTimeMillis()
         modifyBlocks { list ->
@@ -1544,25 +1545,6 @@ abstract class BaseEditorViewModel(
         else -> ""
     }
 
-    // Splits a block's existing InlineSpans at [splitPoint] (the cursor position where Enter was
-    // pressed) so the "before" half keeps spans in their original coordinates and the "after" half
-    // gets spans clipped to the tail and rebased to start at 0 in the new block's own text.
-    private fun splitSpansAt(spans: List<InlineSpan>, splitPoint: Int): Pair<List<InlineSpan>, List<InlineSpan>> {
-        val before = mutableListOf<InlineSpan>()
-        val after = mutableListOf<InlineSpan>()
-        for (span in spans) {
-            when {
-                span.end <= splitPoint -> before.add(span)
-                span.start >= splitPoint -> after.add(span.copy(start = span.start - splitPoint, end = span.end - splitPoint))
-                else -> {
-                    before.add(span.copy(end = splitPoint))
-                    after.add(span.copy(start = 0, end = span.end - splitPoint))
-                }
-            }
-        }
-        return before to after
-    }
-
     fun handleEnter(id: String, textBefore: String, textAfter: String) {
         if (isVirtualOccurrence(id)) {
             val firstUnpinned = _blocks.value.firstOrNull { !it.isDeleted && !it.isPinned }
@@ -1583,54 +1565,74 @@ abstract class BaseEditorViewModel(
         var blockToFocusId = ""
         val now = System.currentTimeMillis()
         modifyBlocks { list ->
-            spliceAtBlock(list, id) { mutable, idx ->
-                val cur = mutable[idx]
-                val newId = UUID.randomUUID().toString()
-                blockToFocusId = newId
-                var insertIdx = idx + 1
-
-                val (spansBefore, spansAfter) = splitSpansAt(cur.inlineSpansOrEmpty(), textBefore.length)
-                val updatedCurrent = withText(cur, textBefore, now, spansBefore)
-
-                val inheritedAlignment = cur.textAlignmentOrNull() ?: TextAlignment.LEFT
-                val newBlock = when (cur) {
-                    is CheckboxBlock -> CheckboxBlock(newId, textAfter, false, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                    is BulletedListBlock -> BulletedListBlock(newId, textAfter, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                    is NumberedListBlock -> NumberedListBlock(newId, textAfter, cur.number + 1, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                    is HeadingBlock -> TextBlock(newId, textAfter, 0, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                    is QuoteBlock -> QuoteBlock(newId, textAfter, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                    is ToggleBlock -> {
-                        if (cur.isExpanded) {
-                            TextBlock(newId, textAfter, cur.indentationLevel + 1, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                        } else {
-                            var i = idx + 1
-                            while (i < mutable.size && mutable[i].indentationLevel > cur.indentationLevel) i++
-                            insertIdx = i
-                            ToggleBlock(newId, textAfter, false, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                        }
-                    }
-                    is CalloutBlock -> {
-                        if (cur.showsBody) {
-                            TextBlock(newId, textAfter, cur.indentationLevel + 1, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                        } else {
-                            var i = idx + 1
-                            while (i < mutable.size && mutable[i].indentationLevel > cur.indentationLevel) i++
-                            insertIdx = i
-                            TextBlock(newId, textAfter, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                        }
-                    }
-                    else -> TextBlock(newId, textAfter, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
-                }
-
-                mutable[idx] = updatedCurrent
-                mutable.add(insertIdx, newBlock)
-            }
+            val (splitBlocks, newBlockId) = blocksWithBlockSplit(list, id, textBefore, textAfter, now)
+            blockToFocusId = newBlockId.orEmpty()
+            splitBlocks
         }
 
         if (blockToFocusId.isNotEmpty()) {
             _focusRequest.value = FocusRequest(id = blockToFocusId)
             scheduleAutosave()
         }
+    }
+
+    private fun blocksWithBlockSplit(
+        blocks: List<NoteBlock>,
+        id: String,
+        textBefore: String,
+        textAfter: String,
+        now: Long
+    ): Pair<List<NoteBlock>, String?> {
+        var newBlockId: String? = null
+        val splitBlocks = spliceAtBlock(blocks, id) { mutable, idx ->
+            val cur = mutable[idx]
+            val newId = UUID.randomUUID().toString()
+            newBlockId = newId
+            var insertIdx = idx + 1
+
+            val currentText = getBlockText(cur)
+            val selectedTextWasRemoved = currentText.length >= textBefore.length + textAfter.length &&
+                currentText.startsWith(textBefore) &&
+                currentText.endsWith(textAfter)
+            val afterStart = if (selectedTextWasRemoved) currentText.length - textAfter.length else textBefore.length
+            val spansBefore = spansMovedFrom(cur.inlineSpansOrEmpty(), 0, textBefore.length, newStart = 0)
+            val spansAfter = spansMovedFrom(cur.inlineSpansOrEmpty(), afterStart, currentText.length, newStart = 0)
+            val updatedCurrent = withText(cur, textBefore, now, spansBefore)
+
+            val inheritedAlignment = cur.textAlignmentOrNull() ?: TextAlignment.LEFT
+            val newBlock = when (cur) {
+                is CheckboxBlock -> CheckboxBlock(newId, textAfter, false, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                is BulletedListBlock -> BulletedListBlock(newId, textAfter, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                is NumberedListBlock -> NumberedListBlock(newId, textAfter, cur.number + 1, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                is HeadingBlock -> TextBlock(newId, textAfter, 0, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                is QuoteBlock -> QuoteBlock(newId, textAfter, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                is ToggleBlock -> {
+                    if (cur.isExpanded) {
+                        TextBlock(newId, textAfter, cur.indentationLevel + 1, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                    } else {
+                        var i = idx + 1
+                        while (i < mutable.size && mutable[i].indentationLevel > cur.indentationLevel) i++
+                        insertIdx = i
+                        ToggleBlock(newId, textAfter, false, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                    }
+                }
+                is CalloutBlock -> {
+                    if (cur.showsBody) {
+                        TextBlock(newId, textAfter, cur.indentationLevel + 1, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                    } else {
+                        var i = idx + 1
+                        while (i < mutable.size && mutable[i].indentationLevel > cur.indentationLevel) i++
+                        insertIdx = i
+                        TextBlock(newId, textAfter, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+                    }
+                }
+                else -> TextBlock(newId, textAfter, cur.indentationLevel, inheritedAlignment, spansAfter, isPinned = cur.isPinned, updatedAt = now)
+            }
+
+            mutable[idx] = updatedCurrent
+            mutable.add(insertIdx, newBlock)
+        }
+        return splitBlocks to newBlockId
     }
 
     fun handleBackspaceOnEmpty(id: String) {
@@ -1797,7 +1799,8 @@ abstract class BaseEditorViewModel(
         return text
     }
 
-    fun replaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String): TextCaret? {
+    fun replaceTextAcrossBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>, replacement: String): TextCaret? {
+        val blockIdsInRange = withHiddenChildrenOfMiddleBlocks(range, visibleBlockIdsInRange)
         if (touchesRecurringTask(blockIdsInRange)) return null
 
         val newBlockId = UUID.randomUUID().toString()
@@ -1812,10 +1815,11 @@ abstract class BaseEditorViewModel(
         return caret
     }
 
-    fun pasteOverTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, pastedText: String): TextCaret? {
+    fun pasteOverTextAcrossBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>, pastedText: String): TextCaret? {
         if (!readsAsMarkdown(pastedText, GlobalEditorState.lastCopiedMarkdown)) {
-            return replaceTextAcrossBlocks(range, blockIdsInRange, pastedText.replace("\r", "").trimEnd('\n'))
+            return replaceTextAcrossBlocks(range, visibleBlockIdsInRange, pastedText.replace("\r", "").trimEnd('\n'))
         }
+        val blockIdsInRange = withHiddenChildrenOfMiddleBlocks(range, visibleBlockIdsInRange)
         if (touchesRecurringTask(blockIdsInRange)) return null
         val firstBlock = _blocks.value.firstOrNull { it.id == range.start.blockId } ?: return null
         val now = System.currentTimeMillis()
@@ -1839,6 +1843,41 @@ abstract class BaseEditorViewModel(
             ) ?: cleared
             caret = pasted.caret
             pasted.blocks
+        }
+        if (caret != null) scheduleAutosave()
+        return caret
+    }
+
+    fun splitAtTextAcrossBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>): TextCaret? {
+        val blockIdsInRange = withHiddenChildrenOfMiddleBlocks(range, visibleBlockIdsInRange)
+        if (touchesRecurringTask(blockIdsInRange)) return null
+        val now = System.currentTimeMillis()
+        var caret: TextCaret? = null
+        modifyBlocks { list ->
+            val cleared = replaceTextInRange(list, range, blockIdsInRange, "", UUID.randomUUID().toString(), now)
+                ?: return@modifyBlocks list
+            val caretPosition = cleared.caret.position
+            if (cleared.blocks.firstOrNull { it.id == caretPosition.blockId } is CodeBlock) {
+                val withLineBreak = replaceTextInRange(list, range, blockIdsInRange, "\n", UUID.randomUUID().toString(), now)
+                    ?: return@modifyBlocks list
+                caret = withLineBreak.caret
+                return@modifyBlocks withLineBreak.blocks
+            }
+            val caretBlockText = cleared.caret.blockText
+            val (splitBlocks, newBlockId) = blocksWithBlockSplit(
+                blocks = cleared.blocks,
+                id = caretPosition.blockId,
+                textBefore = caretBlockText.substring(0, caretPosition.offset),
+                textAfter = caretBlockText.substring(caretPosition.offset),
+                now = now
+            )
+            val newBlockText = splitBlocks.firstOrNull { it.id == newBlockId }?.editableTextOrNull()
+            caret = if (newBlockId != null && newBlockText != null) {
+                TextCaret(BlockTextPosition(newBlockId, 0), newBlockText)
+            } else {
+                cleared.caret
+            }
+            splitBlocks
         }
         if (caret != null) scheduleAutosave()
         return caret
@@ -1887,6 +1926,20 @@ abstract class BaseEditorViewModel(
             }
         }
         scheduleAutosave()
+    }
+
+    private fun withHiddenChildrenOfMiddleBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>): List<String> {
+        val middleBlockIds = visibleBlockIdsInRange.toSet() - range.start.blockId - range.end.blockId
+        val allBlocks = _blocks.value
+        val hiddenChildIds = allBlocks.withIndex().flatMap { (index, block) ->
+            val hidesItsChildren = (block is ToggleBlock && !block.isExpanded) || (block is CalloutBlock && !block.showsBody)
+            if (block.id !in middleBlockIds || !hidesItsChildren) return@flatMap emptyList()
+            allBlocks.drop(index + 1)
+                .takeWhile { it.indentationLevel > block.indentationLevel }
+                .filter { !it.isDeleted }
+                .map { it.id }
+        }
+        return visibleBlockIdsInRange + hiddenChildIds
     }
 
     private fun touchesRecurringTask(blockIds: List<String>): Boolean = blockIds.any { id ->

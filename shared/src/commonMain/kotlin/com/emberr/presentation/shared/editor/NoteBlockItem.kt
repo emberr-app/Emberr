@@ -659,6 +659,7 @@ fun NoteBlockItem(
                                     onUpdateText = { id, newText -> actions.onUpdateText(id, newText) },
                                     onEnterPressed = { id, before, after -> actions.onEnterPressed(id, before, after) },
                                     onBackspaceOnEmpty = { id -> actions.onBackspaceOnEmpty(id) },
+                                    onIndentRequested = { increase -> actions.onAdjustIndentation(increase) },
                                     onPasteMarkdown = { id, pasted ->
                                         actions.onPasteMarkdown(id, pasted.replacedStart, pasted.replacedEnd, pasted.text) != null
                                     },
@@ -1108,6 +1109,7 @@ fun IsolatedEditorTextField(
     onUpdateText: (String, String) -> Unit,
     onEnterPressed: (String, String, String) -> Unit,
     onBackspaceOnEmpty: (String) -> Unit,
+    onIndentRequested: (increase: Boolean) -> Unit = {},
     onPasteMarkdown: (blockId: String, pastedText: PastedText) -> Boolean = { _, _ -> false },
     onCopyAsMarkdown: ((start: Int, end: Int) -> Unit)? = null,
     markdownClipboardActions: MarkdownClipboardActions? = null,
@@ -1507,6 +1509,14 @@ fun IsolatedEditorTextField(
                     val isBackspace = event.key == Key.Backspace
                     val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
 
+                    val selectsWholeNote = crossBlockSelection != null &&
+                        event.type == KeyEventType.KeyDown &&
+                        (event.isCtrlPressed || event.isMetaPressed) &&
+                        event.key == Key.A &&
+                        tfv.selection.min == 0 &&
+                        tfv.selection.max == tfv.text.length
+                    if (selectsWholeNote && crossBlockSelection?.selectWholeNote() == true) return@onPreviewKeyEvent true
+
                     val extendsSelectionPastBlock = crossBlockSelection != null &&
                         event.type == KeyEventType.KeyDown &&
                         event.isShiftPressed &&
@@ -1600,11 +1610,14 @@ fun IsolatedEditorTextField(
                     }
                     if (isEnter && !isCodeBlock) {
                         if (event.type == KeyEventType.KeyDown) {
-                            val cursor = tfv.selection.start
-                            val textBefore = tfv.text.substring(0, cursor)
-                            val textAfter = tfv.text.substring(cursor)
+                            val textBefore = tfv.text.substring(0, tfv.selection.min)
+                            val textAfter = tfv.text.substring(tfv.selection.max)
                             onEnterPressed(blockId, textBefore, textAfter)
                         }
+                        return@onPreviewKeyEvent true
+                    }
+                    if (event.key == Key.Tab && !isCodeBlock) {
+                        if (event.type == KeyEventType.KeyDown) onIndentRequested(!event.isShiftPressed)
                         return@onPreviewKeyEvent true
                     }
                     false

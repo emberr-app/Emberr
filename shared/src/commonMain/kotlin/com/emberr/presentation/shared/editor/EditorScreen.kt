@@ -292,6 +292,8 @@ interface EditorActions {
     fun onReplaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String): TextCaret? = null
     fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String): TextCaret? = null
     fun onPasteOverTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, pastedText: String): TextCaret? = null
+    fun onSplitAtTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>): TextCaret? = null
+    fun onAdjustIndentationOfBlocks(blockIds: Set<String>, increase: Boolean) {}
     fun onToggleFormatAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, format: String) {}
     fun onToggleSelection(id: String)
     fun onUpdateReminder(id: String, timestamp: Long?)
@@ -815,6 +817,17 @@ fun EditorScreen(
                 val caret = latestWrappedActions.onReplaceTextAcrossBlocks(range, crossBlockSelection.blockIdsInSelection(), text) ?: return
                 crossBlockSelection.clear()
                 pendingCaretAfterEdit = caret
+            }
+
+            override fun splitAtSelection() {
+                val range = crossBlockSelection.range ?: return
+                val caret = latestWrappedActions.onSplitAtTextAcrossBlocks(range, crossBlockSelection.blockIdsInSelection()) ?: return
+                crossBlockSelection.clear()
+                pendingCaretAfterEdit = caret
+            }
+
+            override fun adjustIndentation(increase: Boolean) {
+                latestWrappedActions.onAdjustIndentationOfBlocks(crossBlockSelection.blockIdsInSelection().toSet(), increase)
             }
 
             override fun toggleFormat(format: String) {
