@@ -45,8 +45,10 @@ fun FollowLiveDisplayScale(windowState: WindowState, content: @Composable () -> 
     }
 
     val windowDensity = LocalDensity.current
+    @Suppress("RestrictedApi")
+    val windowFontScale = windowDensity.fontScale
     val liveDensity = remember(windowDensity, scaleChangeSinceStartup) {
-        Density(windowDensity.density * scaleChangeSinceStartup, windowDensity.fontScale)
+        Density(windowDensity.density * scaleChangeSinceStartup, windowFontScale)
     }
     CompositionLocalProvider(LocalDensity provides liveDensity, content = content)
 }
