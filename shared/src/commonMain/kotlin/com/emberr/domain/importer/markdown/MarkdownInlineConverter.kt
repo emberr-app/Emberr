@@ -7,6 +7,8 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 
+private const val EMBERR_NOTE_LINK_PREFIX = "emberr://note/"
+
 private val htmlTagPattern = Regex("""^<(/?)([a-zA-Z][a-zA-Z0-9]*)([^>]*)>$""")
 private val classAttributePattern = Regex("""class\s*=\s*["']([^"']*)["']""")
 private val htmlAttributePattern = Regex("""([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))""")
@@ -56,7 +58,8 @@ internal class MarkdownInlineConverter(
     private val document: MarkdownDocument,
     private val linkResolver: ImportLinkResolver,
     private val inlineTags: MutableCollection<String>,
-    private val keepsMediaAsText: Boolean = false
+    private val keepsMediaAsText: Boolean = false,
+    private val keepsEmberrNoteLinks: Boolean = false
 ) {
 
     private val parts = mutableListOf<InlinePart>()
@@ -99,6 +102,11 @@ internal class MarkdownInlineConverter(
         val destination = document.destinationOf(linkNode)
         if (destination == null) {
             appendSourceText(linkNode, style)
+            return
+        }
+
+        if (keepsEmberrNoteLinks && destination.startsWith(EMBERR_NOTE_LINK_PREFIX)) {
+            appendLiteral(document.textOf(linkNode), style)
             return
         }
 
