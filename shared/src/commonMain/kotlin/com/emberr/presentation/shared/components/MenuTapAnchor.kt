@@ -17,7 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -39,7 +40,7 @@ internal val LocalMenuAtTapPlacement = compositionLocalOf<MenuAtTapPlacement?> {
 @Stable
 class MenuTapAnchor {
     var tapPosition by mutableStateOf(Offset.Zero)
-    internal var tapXInWindow: Float = 0f
+    internal var coordinates: LayoutCoordinates? = null
 }
 
 @Composable
@@ -60,7 +61,8 @@ fun MenuAtTap(anchor: MenuTapAnchor, menuWidth: Dp, menu: @Composable () -> Unit
         menuWidth = menuWidth,
         direction = direction,
         onMenuPositioned = { menuLeftInWindow ->
-            direction = if (menuLeftInWindow + 1f < anchor.tapXInWindow) MenuCascadeDirection.LEFT else MenuCascadeDirection.RIGHT
+            val tapXInWindow = anchor.coordinates?.takeIf { it.isAttached }?.positionInWindow()?.x ?: 0f
+            direction = if (menuLeftInWindow + 1f < tapXInWindow) MenuCascadeDirection.LEFT else MenuCascadeDirection.RIGHT
         }
     )
 
@@ -68,7 +70,7 @@ fun MenuAtTap(anchor: MenuTapAnchor, menuWidth: Dp, menu: @Composable () -> Unit
         modifier = Modifier
             .offset { anchor.tapPosition.round() }
             .size(0.dp)
-            .onGloballyPositioned { anchor.tapXInWindow = it.positionInWindow().x }
+            .onPlaced { anchor.coordinates = it }
     ) {
         CompositionLocalProvider(LocalMenuAtTapPlacement provides placement) {
             menu()

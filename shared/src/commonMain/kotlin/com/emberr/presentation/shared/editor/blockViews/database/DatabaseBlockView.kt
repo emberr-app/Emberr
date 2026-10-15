@@ -34,6 +34,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -64,6 +65,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LocalPinnableContainer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -171,6 +173,12 @@ fun DatabaseBlockView(
     val settingsState by remember(block.databaseId) { editor.settingsShownFor(block.databaseId) }
         .collectAsState(initial = editor.currentSettingsShownFor(block.databaseId))
     val savedRows by remember(block.databaseId) { editor.rowsOf(block.databaseId) }.collectAsState()
+    val pinnableContainer = LocalPinnableContainer.current
+
+    DisposableEffect(pinnableContainer) {
+        val keepComposedWhileOffScreen = pinnableContainer?.pin()
+        onDispose { keepComposedWhileOffScreen?.release() }
+    }
 
     when (val shownSettings = settingsState) {
         DatabaseSettingsState.Loading -> Unit

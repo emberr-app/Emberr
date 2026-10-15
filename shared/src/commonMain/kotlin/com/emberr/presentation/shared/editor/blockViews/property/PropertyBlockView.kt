@@ -52,7 +52,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
@@ -321,7 +321,7 @@ internal fun PropertyTextValue(
                         modifier = Modifier
                             .weight(1f, fill = alignment != null)
                             .padding(horizontal = PropertyValueHorizontalPadding, vertical = PropertyValueVerticalPadding)
-                            .onGloballyPositioned { tapToCursor.textAreaCoordinates = it },
+                            .onPlaced { tapToCursor.textAreaCoordinates = it },
                         propagateMinConstraints = true
                     ) {
                         if (fieldValue.text.isEmpty()) {
@@ -358,7 +358,7 @@ internal fun PropertyTextValue(
                     .matchParentSize()
                     .padding(end = if (showsOpenIcon) OpenValueIconWidth else 0.dp)
                     .pointerHoverIcon(PointerIcon.Text)
-                    .onGloballyPositioned { tapToCursor.tapAreaCoordinates = it }
+                    .onPlaced { tapToCursor.tapAreaCoordinates = it }
                     .pointerInput(wrapsText, textStyle) {
                         detectTapGestures(onTap = { tapPosition ->
                             tapToCursor.cursorOffsetAt(tapPosition, AnnotatedString(fieldValue.text), textStyle, wrapsText, textMeasurer)?.let { cursorOffset ->
