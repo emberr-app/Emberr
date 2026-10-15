@@ -101,6 +101,7 @@ import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.scrollBy
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.ui.platform.LocalDensity
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -829,20 +830,41 @@ fun EditorScreen(
         }
     }
 
-    val crossBlockDragModifier = if (isDesktopPlatform) {
-        Modifier.selectTextAcrossBlocksByDragging(
-            selection = crossBlockSelection,
-            isBlockSelectionActive = { latestSelectedBlockIds.isNotEmpty() },
-            focusedBlockId = { latestActiveBlockId },
-            onPress = { pendingCaretAfterEdit = null },
-            onRightClickInsideSelection = { pressInWindow -> crossBlockMenuPositionInEditor = pressInWindow - editorTopLeftInWindow },
-            onSelectingStarted = {
+    val crossBlockScrollScope = rememberCoroutineScope()
+    val latestTopBarClearancePx by rememberUpdatedState(topBarClearancePx)
+    val crossBlockRevealMarginPx = with(LocalDensity.current) { 48.dp.toPx() }
+    DisposableEffect(crossBlockSelection) {
+        crossBlockSelection.host = object : CrossBlockSelectionHost {
+            override fun onSelectingStarted() {
                 runCatching { selectionShortcutFocusRequester.requestFocus() }
                 activeBlockId = null
                 GlobalEditorState.currentlyFocusedBlockId = null
                 localFocusRequest = null
                 showSlashMenu = false
-            },
+            }
+
+            override fun textLengthOf(blockId: String): Int? =
+                latestBlocks.firstOrNull { it.id == blockId }?.editableTextOrNull()?.length
+
+            override fun revealFocus(step: SelectionStep) {
+                val movesDown = step == SelectionStep.LineDown || step == SelectionStep.CharacterForward
+                val scrollDistance = crossBlockSelection.scrollNeededToShowFocus(latestTopBarClearancePx, crossBlockRevealMarginPx)
+                    ?: if (movesDown) crossBlockRevealMarginPx else -crossBlockRevealMarginPx
+                if (scrollDistance != 0f) crossBlockScrollScope.launch { listState.scrollBy(scrollDistance) }
+            }
+        }
+        onDispose { crossBlockSelection.host = null }
+    }
+
+    val crossBlockDragModifier = if (isDesktopPlatform) {
+        Modifier.selectTextAcrossBlocksByDragging(
+            selection = crossBlockSelection,
+            scrollableState = listState,
+            topInsetPx = topBarClearancePx,
+            isBlockSelectionActive = { latestSelectedBlockIds.isNotEmpty() },
+            focusedBlockId = { latestActiveBlockId },
+            onPress = { pendingCaretAfterEdit = null },
+            onRightClickInsideSelection = { pressInWindow -> crossBlockMenuPositionInEditor = pressInWindow - editorTopLeftInWindow },
             onDragEndedInsideOneBlock = { blockId, selectedRange -> placeCaretInBlock(blockId, selectedRange) }
         )
     } else {
