@@ -2,7 +2,6 @@ package com.emberr.presentation.shared.editor
 
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -16,9 +15,12 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.utf16CodePoint
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
@@ -60,7 +62,7 @@ fun Modifier.selectTextAcrossBlocksByDragging(
         coroutineScope {
             val autoScroll = AutoScrollWhileSelecting(this, scrollableState, selection)
             awaitEachGesture {
-                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                val down = awaitPressOfAnyMouseButton()
                 val isMousePress = down.type == PointerType.Mouse
                 val buttons = currentEvent.buttons
                 val pressInWindow = selection.windowPointOf(down.position)
@@ -135,6 +137,14 @@ fun Modifier.selectTextAcrossBlocksByDragging(
             }
         }
     }
+
+private suspend fun AwaitPointerEventScope.awaitPressOfAnyMouseButton(): PointerInputChange {
+    while (true) {
+        val event = awaitPointerEvent(PointerEventPass.Initial)
+        val press = event.changes.firstOrNull { it.changedToDownIgnoreConsumed() }
+        if (press != null) return press
+    }
+}
 
 private fun PointerInputScope.autoScrollStepFor(pointerY: Float, topInsetPx: Float): Float {
     val edgeZone = AutoScrollEdgeZone.toPx()

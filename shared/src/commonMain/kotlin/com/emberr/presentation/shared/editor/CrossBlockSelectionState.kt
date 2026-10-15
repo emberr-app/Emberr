@@ -148,6 +148,7 @@ class CrossBlockSelectionState {
     fun windowPointOf(pointInList: Offset): Offset? = listCoordinates?.takeIf { it.isAttached }?.localToWindow(pointInList)
 
     fun rememberBlockCoordinates(blockId: String, coordinates: LayoutCoordinates) {
+        blockCoordinates.entries.removeAll { (otherBlockId, otherCoordinates) -> otherCoordinates === coordinates && otherBlockId != blockId }
         blockCoordinates[blockId] = coordinates
     }
 
@@ -164,8 +165,9 @@ class CrossBlockSelectionState {
     }
 
     fun positionAt(pointInWindow: Offset, mustBeInsideBlock: Boolean): BlockTextPosition? {
+        val blockIdsInNote = blockIdsInOrder.toSet()
         val closestBlock = blockCoordinates.entries
-            .filter { it.value.isAttached }
+            .filter { it.value.isAttached && it.key in blockIdsInNote }
             .map { (blockId, coordinates) -> blockId to verticalDistance(coordinates, pointInWindow.y) }
             .minByOrNull { it.second }
             ?: return null
