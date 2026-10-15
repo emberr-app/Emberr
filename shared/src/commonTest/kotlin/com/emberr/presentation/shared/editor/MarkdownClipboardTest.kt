@@ -7,6 +7,8 @@ import com.emberr.domain.model.TextBlock
 import com.emberr.domain.util.export.NoteMarkdownWriter
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class MarkdownClipboardTest {
 
@@ -45,10 +47,18 @@ class MarkdownClipboardTest {
     }
 
     @Test
-    fun aSingleLineIsReadAsMarkdownOnlyWhenEmberrCopiedIt() {
+    fun aSingleLineCopiedFromEmberrIsReadAsMarkdown() {
         val copied = inlineMarkdownOf(TextBlock(id = "a", text = "very bold", inlineSpans = listOf(InlineSpan(start = 5, end = 9, bold = true))), 0, 9)
 
         assertEquals(PastedText(3, 3, copied), pastedTextToReadAsMarkdown("abc", "abc$copied", lastCopiedMarkdown = copied))
-        assertEquals(null, pastedTextToReadAsMarkdown("abc", "abc**x**", lastCopiedMarkdown = copied))
+        assertEquals(null, pastedTextToReadAsMarkdown("abc", "abc plain words", lastCopiedMarkdown = copied))
+    }
+
+    @Test
+    fun aSingleLineFromAnotherAppIsReadAsMarkdownOnlyWhenItsFormattingIsClear() {
+        assertTrue(readsAsMarkdown("The **butler** did it.", lastCopiedMarkdown = null))
+        assertTrue(readsAsMarkdown("an *odd* clue", lastCopiedMarkdown = null))
+        assertFalse(readsAsMarkdown("2*3*4", lastCopiedMarkdown = null))
+        assertFalse(readsAsMarkdown("rename my_var_name", lastCopiedMarkdown = null))
     }
 }

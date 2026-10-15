@@ -37,10 +37,21 @@ fun pastedTextToReadAsMarkdown(oldText: String, newText: String, lastCopiedMarkd
     return PastedText(prefixLength, oldText.length - suffixLength, insertedText)
 }
 
+private val clearInlineMarkdownPatterns = listOf(
+    Regex("""\*\*(?=\S)[^*]+?(?<=\S)\*\*"""),
+    Regex("""__(?=\S)[^_]+?(?<=\S)__"""),
+    Regex("""~~(?=\S)[^~]+?(?<=\S)~~"""),
+    Regex("""==(?=\S)[^=]+?(?<=\S)=="""),
+    Regex("""(?<![\w*])\*(?=[^\s*])[^*]+?(?<=[^\s*])\*(?![\w*])"""),
+    Regex("""(?<![\w_])_(?=[^\s_])[^_]+?(?<=[^\s_])_(?![\w_])""")
+)
+
 fun readsAsMarkdown(pastedText: String, lastCopiedMarkdown: String?): Boolean {
+    if (pastedText.length < 2) return false
     val spansSeveralLines = '\n' in pastedText.trimEnd('\r', '\n')
-    val isCopiedFromEmberr = pastedText.length > 1 && pastedText.replace("\r", "") == lastCopiedMarkdown?.replace("\r", "")
-    return spansSeveralLines || isCopiedFromEmberr
+    val isCopiedFromEmberr = pastedText.replace("\r", "") == lastCopiedMarkdown?.replace("\r", "")
+    val hasClearInlineFormatting = clearInlineMarkdownPatterns.any { it.containsMatchIn(pastedText) }
+    return spansSeveralLines || isCopiedFromEmberr || hasClearInlineFormatting
 }
 
 fun startsOnNewLine(pastedText: String): Boolean = pastedText.trimStart(' ', '\t', '\r').startsWith('\n')
