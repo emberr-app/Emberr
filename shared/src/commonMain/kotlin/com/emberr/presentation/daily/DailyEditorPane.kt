@@ -33,6 +33,7 @@ import com.emberr.presentation.shared.editor.BlockSelectionMenuContent
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
+import com.emberr.presentation.shared.editor.CrossBlockTextRange
 import com.emberr.presentation.shared.editor.EditorScreen
 import com.emberr.presentation.shared.editor.EditorToolbar
 import com.emberr.presentation.shared.editor.GlobalEditorState
@@ -170,6 +171,14 @@ fun DailyEditorPane(
             override fun onSetBlockAlignment(alignment: TextAlignment) = viewModel.setFocusedBlockAlignment(alignment)
             override fun onEnterPressed(id: String, before: String, after: String) = viewModel.handleEnter(id, before, after)
             override fun onBackspaceOnEmpty(id: String) = viewModel.handleBackspaceOnEmpty(id)
+            override fun onReplaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String) =
+                viewModel.replaceTextAcrossBlocks(range, blockIdsInRange, replacement)
+            override fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String) =
+                viewModel.pasteMarkdown(blockId, replacedStart, replacedEnd, markdown)
+            override fun onPasteOverTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, pastedText: String) =
+                viewModel.pasteOverTextAcrossBlocks(range, blockIdsInRange, pastedText)
+            override fun onToggleFormatAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, format: String) =
+                viewModel.toggleFormatAcrossBlocks(range, blockIdsInRange, format)
             override fun onToggleSelection(id: String) = viewModel.toggleSelection(id)
             override fun onUpdateReminder(id: String, timestamp: Long?) = viewModel.updateReminder(id, timestamp)
             override fun onOpenEventOptions(blockId: String, occurrenceDate: String?) {

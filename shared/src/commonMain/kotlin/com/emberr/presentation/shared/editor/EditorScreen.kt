@@ -29,6 +29,11 @@ import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.platform.LocalClipboardManager
+import com.emberr.domain.util.export.NoteMarkdownWriter
+import com.emberr.domain.model.editableTextOrNull
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
@@ -221,6 +226,8 @@ enum class MobileMenuState { MAIN, SLASH, MENU, MENTION, LINK_TO_NOTE, LINK_TO_C
 object GlobalEditorState {
     var currentlyFocusedBlockId: String? = null
 
+    var lastCopiedMarkdown: String? = null
+
     var currentlyFocusedTableCellKey: String? = null
 
     var focusedCanvasBlockId: String? = null
@@ -281,6 +288,10 @@ interface EditorActions {
     fun onSetBlockAlignment(alignment: TextAlignment)
     fun onEnterPressed(id: String, before: String, after: String)
     fun onBackspaceOnEmpty(id: String)
+    fun onReplaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String): TextCaret? = null
+    fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String): TextCaret? = null
+    fun onPasteOverTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, pastedText: String): TextCaret? = null
+    fun onToggleFormatAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, format: String) {}
     fun onToggleSelection(id: String)
     fun onUpdateReminder(id: String, timestamp: Long?)
     // occurrenceDate is derived from the tapped block's own reminderTimestamp (not the screen's
@@ -473,8 +484,13 @@ fun EditorScreen(
         executionBlock()
     }
 
+    var pendingCaretAfterEdit by remember { mutableStateOf<TextCaret?>(null) }
+    var crossBlockMenuPositionInEditor by remember { mutableStateOf<Offset?>(null) }
+
     val wrappedActions = remember(actions) {
         object : EditorActions by actions {
+            override fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String): TextCaret? =
+                actions.onPasteMarkdown(blockId, replacedStart, replacedEnd, markdown)?.also { pendingCaretAfterEdit = it }
             override fun onToggleSelection(id: String) {
                 selectionAnchorBlockId = id
                 actions.onToggleSelection(id)
@@ -743,6 +759,96 @@ fun EditorScreen(
         }
     }
 
+    val crossBlockSelection = remember { CrossBlockSelectionState() }
+    val blockIdsInOrder = remember(blocks) { blocks.map { it.id } }
+    SideEffect { crossBlockSelection.blockIdsInOrder = blockIdsInOrder }
+    var localSelectionRequest by remember { mutableStateOf<SelectionRequest?>(null) }
+    LaunchedEffect(selectionRequest?.nonce) { localSelectionRequest = null }
+    val clipboardManager = LocalClipboardManager.current
+    val latestWrappedActions by rememberUpdatedState(wrappedActions)
+    val latestAllLinkableNotes by rememberUpdatedState(allLinkableNotes)
+    val wholeBlockSelectionTint = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+
+    fun placeCaretInBlock(blockId: String, selection: TextRange) {
+        activeBlockId = blockId
+        GlobalEditorState.currentlyFocusedBlockId = blockId
+        latestWrappedActions.onFocusBlock(blockId)
+        localFocusRequest = FocusRequest(id = blockId)
+        localSelectionRequest = SelectionRequest(blockId = blockId, selection = selection)
+    }
+
+    LaunchedEffect(blocks, pendingCaretAfterEdit) {
+        val caret = pendingCaretAfterEdit ?: return@LaunchedEffect
+        val caretBlock = blocks.firstOrNull { it.id == caret.position.blockId } ?: return@LaunchedEffect
+        if (caretBlock.editableTextOrNull() != caret.blockText) return@LaunchedEffect
+        pendingCaretAfterEdit = null
+        placeCaretInBlock(caret.position.blockId, TextRange(caret.position.offset))
+    }
+
+    val crossBlockCommands = remember {
+        object : CrossBlockSelectionCommands {
+            override fun copy() {
+                val range = crossBlockSelection.range ?: return
+                val idsInSelection = crossBlockSelection.blockIdsInSelection().toSet()
+                val blocksInSelection = latestBlocks.filter { it.id in idsInSelection }
+                val noteTitlesById = latestAllLinkableNotes.associate { it.noteId to it.title }
+                val markdown = NoteMarkdownWriter.writeMarkdown(blocksCutToRange(blocksInSelection, range), noteTitlesById = noteTitlesById)
+                clipboardManager.copyEmberrMarkdown(markdown)
+            }
+
+            override fun cut() {
+                copy()
+                replaceWith("")
+            }
+
+            override fun paste() {
+                val range = crossBlockSelection.range ?: return
+                val pastedText = clipboardManager.getText()?.text?.takeIf { it.isNotEmpty() } ?: return
+                val caret = latestWrappedActions.onPasteOverTextAcrossBlocks(range, crossBlockSelection.blockIdsInSelection(), pastedText) ?: return
+                crossBlockSelection.clear()
+                pendingCaretAfterEdit = caret
+            }
+
+            override fun replaceWith(text: String) {
+                val range = crossBlockSelection.range ?: return
+                val caret = latestWrappedActions.onReplaceTextAcrossBlocks(range, crossBlockSelection.blockIdsInSelection(), text) ?: return
+                crossBlockSelection.clear()
+                pendingCaretAfterEdit = caret
+            }
+
+            override fun toggleFormat(format: String) {
+                val range = crossBlockSelection.range ?: return
+                latestWrappedActions.onToggleFormatAcrossBlocks(range, crossBlockSelection.blockIdsInSelection(), format)
+            }
+
+            override fun collapseTo(position: BlockTextPosition) {
+                crossBlockSelection.clear()
+                val block = latestBlocks.firstOrNull { it.id == position.blockId }
+                if (block?.editableTextOrNull() != null) placeCaretInBlock(position.blockId, TextRange(position.offset))
+            }
+        }
+    }
+
+    val crossBlockDragModifier = if (isDesktopPlatform) {
+        Modifier.selectTextAcrossBlocksByDragging(
+            selection = crossBlockSelection,
+            isBlockSelectionActive = { latestSelectedBlockIds.isNotEmpty() },
+            focusedBlockId = { latestActiveBlockId },
+            onPress = { pendingCaretAfterEdit = null },
+            onRightClickInsideSelection = { pressInWindow -> crossBlockMenuPositionInEditor = pressInWindow - editorTopLeftInWindow },
+            onSelectingStarted = {
+                runCatching { selectionShortcutFocusRequester.requestFocus() }
+                activeBlockId = null
+                GlobalEditorState.currentlyFocusedBlockId = null
+                localFocusRequest = null
+                showSlashMenu = false
+            },
+            onDragEndedInsideOneBlock = { blockId, selectedRange -> placeCaretInBlock(blockId, selectedRange) }
+        )
+    } else {
+        Modifier
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -770,6 +876,7 @@ fun EditorScreen(
                         .focusRequester(selectionShortcutFocusRequester)
                         .focusTarget()
                         .onPreviewKeyEvent { keyEvent ->
+                            if (handleCrossBlockSelectionKey(keyEvent, crossBlockSelection, crossBlockCommands)) return@onPreviewKeyEvent true
                             if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                             if (keyEvent.key == Key.Escape) {
                                 if (!isSelectionMode) return@onPreviewKeyEvent false
@@ -816,13 +923,17 @@ fun EditorScreen(
     ) {
         val calloutFrames = remember(blocks) { calloutFramesByRow(blocks) }
         val idsOfChildBlocks = remember(blocks) { blocks.idsOfBlocksInsideAToggleOrCallout() }
-        CompositionLocalProvider(LocalBringIntoViewSpec provides bringIntoViewSpec) {
+        CompositionLocalProvider(
+            LocalBringIntoViewSpec provides bringIntoViewSpec,
+            LocalCrossBlockSelection provides if (isDesktopPlatform) crossBlockSelection else null
+        ) {
         LazyColumn(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
                     .smoothWheelScroll(listState)
+                    .then(crossBlockDragModifier)
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = {
@@ -923,7 +1034,28 @@ fun EditorScreen(
                         }
                     }
 
-                    Box(modifier = Modifier.fillMaxWidth().drawCalloutFrames(calloutFrames[index], MaterialTheme.colorScheme.surface)) {
+                    val blockHasNoText = block.editableTextOrNull() == null
+                    DisposableEffect(block.id) {
+                        onDispose { crossBlockSelection.forgetBlockCoordinates(block.id) }
+                    }
+                    val crossBlockSelectionModifier = if (isDesktopPlatform) {
+                        Modifier
+                            .onGloballyPositioned { crossBlockSelection.rememberBlockCoordinates(block.id, it) }
+                            .drawWithContent {
+                                drawContent()
+                                if (blockHasNoText && crossBlockSelection.isBlockInRange(block.id)) {
+                                    drawRoundRect(wholeBlockSelectionTint, cornerRadius = CornerRadius(8.dp.toPx()))
+                                }
+                            }
+                    } else {
+                        Modifier
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .drawCalloutFrames(calloutFrames[index], MaterialTheme.colorScheme.surface)
+                            .then(crossBlockSelectionModifier)
+                    ) {
                         NoteBlockItem(
                             block = block,
                             displayedIndentationLevel = displayedIndentationLevelOf(block, calloutFrames[index]),
@@ -948,7 +1080,7 @@ fun EditorScreen(
                             onDismissDatabaseLinkMenu = onDismissDatabaseLinkMenu,
                             isFirstChildOfToggleOrCallout = isFirstChildOfToggleOrCallout,
                             emptyNotePlaceholder = if (blocks.size == 1) emptyNotePlaceholder else "",
-                            selectionRequest = selectionRequest,
+                            selectionRequest = localSelectionRequest ?: selectionRequest,
                             validNoteIds = validNoteIds,
                             onRightClick = if (showsSelectionMenuOnRightClick) openSelectionMenuAt else null,
                             onShiftClick = selectBlockRangeTo
@@ -1024,6 +1156,18 @@ fun EditorScreen(
                 .fillMaxHeight()
                 .padding(top = topContentPadding, bottom = bottomContentPadding)
         )
+
+        val crossBlockMenuPosition = crossBlockMenuPositionInEditor?.takeIf { crossBlockSelection.isActive }
+        if (crossBlockMenuPosition != null) {
+            CrossBlockSelectionMenu(
+                positionInEditor = crossBlockMenuPosition,
+                commands = crossBlockCommands,
+                onClose = {
+                    crossBlockMenuPositionInEditor = null
+                    runCatching { selectionShortcutFocusRequester.requestFocus() }
+                }
+            )
+        }
 
         val selectionMenuPosition = selectionMenuPositionInEditor
         if (selectionMenuContent != null && selectionMenuPosition != null) {
