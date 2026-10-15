@@ -108,7 +108,8 @@ internal object MarkdownToBlocks {
         linkResolver: ImportLinkResolver,
         now: Long,
         newBlockId: () -> String,
-        baseIndentation: Int = 0
+        baseIndentation: Int = 0,
+        keepsEmberrNoteLinks: Boolean = false
     ): ConvertedMarkdown {
         val markdownText: CharSequence = withBlockCommentsFenced(markdown)
         val parsed = try {
@@ -123,7 +124,7 @@ internal object MarkdownToBlocks {
         }
 
         val (root, linkMap) = parsed
-        return MarkdownBlockBuilder(MarkdownDocument(markdownText, linkMap), linkResolver, now, newBlockId).build(root, baseIndentation)
+        return MarkdownBlockBuilder(MarkdownDocument(markdownText, linkMap), linkResolver, now, newBlockId, keepsEmberrNoteLinks).build(root, baseIndentation)
     }
 
     private fun withBlockCommentsFenced(markdown: String): String {
@@ -176,7 +177,8 @@ private class MarkdownBlockBuilder(
     private val document: MarkdownDocument,
     private val linkResolver: ImportLinkResolver,
     private val now: Long,
-    private val newBlockId: () -> String
+    private val newBlockId: () -> String,
+    private val keepsEmberrNoteLinks: Boolean
 ) {
 
     private val blocks = mutableListOf<NoteBlock>()
@@ -575,7 +577,7 @@ private class MarkdownBlockBuilder(
     }
 
     private fun inlinePartsOf(nodes: List<ASTNode>): List<InlinePart> =
-        MarkdownInlineConverter(document, linkResolver, inlineTags).convert(nodes)
+        MarkdownInlineConverter(document, linkResolver, inlineTags, keepsEmberrNoteLinks = keepsEmberrNoteLinks).convert(nodes)
 
     private fun textBlock(styledText: StyledText, indentation: Int): NoteBlock = TextBlock(
         id = newBlockId(),
