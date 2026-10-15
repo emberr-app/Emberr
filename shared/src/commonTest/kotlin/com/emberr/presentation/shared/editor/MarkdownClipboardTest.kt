@@ -2,12 +2,16 @@ package com.emberr.presentation.shared.editor
 
 import com.emberr.domain.importer.ImportLinkResolver
 import com.emberr.domain.importer.markdown.MarkdownToBlocks
+import com.emberr.domain.model.BulletedListBlock
+import com.emberr.domain.model.CheckboxBlock
+import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.InlineSpan
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.util.export.NoteMarkdownWriter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class MarkdownClipboardTest {
@@ -60,5 +64,21 @@ class MarkdownClipboardTest {
         assertTrue(readsAsMarkdown("an *odd* clue", lastCopiedMarkdown = null))
         assertFalse(readsAsMarkdown("2*3*4", lastCopiedMarkdown = null))
         assertFalse(readsAsMarkdown("rename my_var_name", lastCopiedMarkdown = null))
+    }
+
+    @Test
+    fun copiedBlocksArePastedWithNewIdsAtTheTargetIndentationAndWithoutReminders() {
+        val copied = listOf(
+            BulletedListBlock(id = "bullet", text = "Pack", indentationLevel = 2),
+            ImageBlock(id = "photo", localFilePath = "photo.jpg", indentationLevel = 3),
+            CheckboxBlock(id = "task", text = "Call", indentationLevel = 2, reminderTimestamp = 5L)
+        )
+
+        val pasted = copiedBlocksReadyToPaste(copied, baseIndentation = 0, now = 1L)
+
+        assertEquals(listOf(0, 1, 0), pasted.map { it.indentationLevel })
+        assertEquals("photo.jpg", (pasted[1] as ImageBlock).localFilePath)
+        assertNull((pasted[2] as CheckboxBlock).reminderTimestamp)
+        assertTrue(pasted.none { it.id in setOf("bullet", "photo", "task") })
     }
 }

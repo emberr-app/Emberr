@@ -1242,11 +1242,10 @@ fun IsolatedEditorTextField(
         return true
     }
 
-    fun cutSelectionAsMarkdown(): Boolean {
+    fun deleteSelection(): Boolean {
+        if (tfv.selection.collapsed) return false
         val selectionStart = tfv.selection.min
-        val selectionEnd = tfv.selection.max
-        if (!copySelectionAsMarkdown()) return false
-        val newText = tfv.text.removeRange(selectionStart, selectionEnd)
+        val newText = tfv.text.removeRange(selectionStart, tfv.selection.max)
         tfv = tfv.copy(text = newText, selection = TextRange(selectionStart), composition = null)
         lastSentText = newText
         textsSentButNotYetEchoed += newText
@@ -1254,9 +1253,12 @@ fun IsolatedEditorTextField(
         return true
     }
 
+    fun cutSelectionAsMarkdown(): Boolean = copySelectionAsMarkdown() && deleteSelection()
+
     SideEffect {
         markdownClipboardActions?.copySelection = { copySelectionAsMarkdown() }
         markdownClipboardActions?.cutSelection = { cutSelectionAsMarkdown() }
+        markdownClipboardActions?.deleteSelection = { deleteSelection() }
     }
 
     LaunchedEffect(isFieldFocused, imeBottom, tfv.selection.end) {
