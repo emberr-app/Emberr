@@ -291,6 +291,7 @@ interface EditorActions {
     fun onBackspaceOnEmpty(id: String)
     fun onReplaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String): TextCaret? = null
     fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String): TextCaret? = null
+    fun onMarkdownShortcut(blockId: String, literalText: String, shortcut: MarkdownShortcut): Boolean = false
     fun onPasteOverTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, pastedText: String): TextCaret? = null
     fun onSplitAtTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>): TextCaret? = null
     fun onAdjustIndentationOfBlocks(blockIds: Set<String>, increase: Boolean) {}

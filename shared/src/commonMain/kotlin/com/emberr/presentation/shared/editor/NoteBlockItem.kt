@@ -660,6 +660,7 @@ fun NoteBlockItem(
                                     onEnterPressed = { id, before, after -> actions.onEnterPressed(id, before, after) },
                                     onBackspaceOnEmpty = { id -> actions.onBackspaceOnEmpty(id) },
                                     onIndentRequested = { increase -> actions.onAdjustIndentation(increase) },
+                                    onMarkdownShortcut = { id, literalText, shortcut -> actions.onMarkdownShortcut(id, literalText, shortcut) },
                                     onPasteMarkdown = { id, pasted ->
                                         actions.onPasteMarkdown(id, pasted.replacedStart, pasted.replacedEnd, pasted.text) != null
                                     },
@@ -1110,6 +1111,7 @@ fun IsolatedEditorTextField(
     onEnterPressed: (String, String, String) -> Unit,
     onBackspaceOnEmpty: (String) -> Unit,
     onIndentRequested: (increase: Boolean) -> Unit = {},
+    onMarkdownShortcut: (blockId: String, literalText: String, shortcut: MarkdownShortcut) -> Boolean = { _, _, _ -> false },
     onPasteMarkdown: (blockId: String, pastedText: PastedText) -> Boolean = { _, _ -> false },
     onCopyAsMarkdown: ((start: Int, end: Int) -> Unit)? = null,
     markdownClipboardActions: MarkdownClipboardActions? = null,
@@ -1461,7 +1463,16 @@ fun IsolatedEditorTextField(
                 }
 
                 val pastedText = if (!isCodeBlock) pastedTextToReadAsMarkdown(tfv.text, newText, GlobalEditorState.lastCopiedMarkdown) else null
+                val isPlainTyping = !isCodeBlock && newValue.composition == null && newValue.selection.collapsed
+                val markdownShortcut = if (isPlainTyping) markdownShortcutAfterTyping(tfv.text, newText, newValue.selection.start) else null
                 if (pastedText != null && onPasteMarkdown(blockId, pastedText)) {
+                    mentionQuery = null
+                    mentionStartIndex = -1
+                } else if (markdownShortcut != null && onMarkdownShortcut(blockId, newText, markdownShortcut)) {
+                    tfv = TextFieldValue(markdownShortcut.convertedText, TextRange(markdownShortcut.cursorAfter))
+                    lastSentText = markdownShortcut.convertedText
+                    textsSentButNotYetEchoed += newText
+                    textsSentButNotYetEchoed += markdownShortcut.convertedText
                     mentionQuery = null
                     mentionStartIndex = -1
                 } else if (!isCodeBlock && newText.contains('\n')) {

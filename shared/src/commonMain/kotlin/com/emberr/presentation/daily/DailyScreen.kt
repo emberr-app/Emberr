@@ -35,6 +35,7 @@ import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.CrossBlockTextRange
+import com.emberr.presentation.shared.editor.MarkdownShortcut
 import com.emberr.presentation.shared.editor.EditorScreen
 import com.emberr.presentation.shared.editor.SelectionModeObserver
 import com.emberr.presentation.shared.editor.MobileMenuState
@@ -250,6 +251,8 @@ fun DailyScreen(
                 viewModel.replaceTextAcrossBlocks(range, blockIdsInRange, replacement)
             override fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String) =
                 viewModel.pasteMarkdown(blockId, replacedStart, replacedEnd, markdown)
+            override fun onMarkdownShortcut(blockId: String, literalText: String, shortcut: MarkdownShortcut) =
+                viewModel.applyMarkdownShortcut(blockId, literalText, shortcut)
             override fun onPasteOverTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, pastedText: String) =
                 viewModel.pasteOverTextAcrossBlocks(range, blockIdsInRange, pastedText)
             override fun onToggleFormatAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, format: String) =
