@@ -17,7 +17,6 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.prefs.SettingsManager
@@ -29,6 +28,7 @@ import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.TableCellStyle
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.editor.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.BlockSelectionMenuContent
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
@@ -295,10 +295,13 @@ fun DailyEditorPane(
                     selectedCount = selectedBlockIds.size,
                     onCloseMenu = closeMenu,
                     onCopy = {
-                        clipboardManager.setText(AnnotatedString(viewModel.getSelectedText()))
+                        clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
                         viewModel.clearSelection()
                     },
-                    onCut = { clipboardManager.setText(AnnotatedString(viewModel.cutSelectedBlocks())) },
+                    onCut = {
+                        clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
+                        viewModel.deleteSelectedBlocks()
+                    },
                     onDelete = { viewModel.deleteSelectedBlocks() },
                     onSelectAll = { viewModel.selectAllBlocks() },
                     onClearSelection = { viewModel.clearSelection() },
@@ -440,11 +443,12 @@ fun DailyEditorPane(
                 onClearSelection = { viewModel.clearSelection() },
                 onSelectAll = { viewModel.selectAllBlocks() },
                 onCopy = {
-                    clipboardManager.setText(AnnotatedString(viewModel.getSelectedText()))
+                    clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
                     viewModel.clearSelection()
                 },
                 onCut = {
-                    clipboardManager.setText(AnnotatedString(viewModel.cutSelectedBlocks()))
+                    clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
+                    viewModel.deleteSelectedBlocks()
                 },
                 onAddBlockAbove = { viewModel.addBlockAboveSelection() },
                 onAddBlockBelow = { viewModel.addBlockBelowSelection() },

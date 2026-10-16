@@ -2,6 +2,7 @@ package com.emberr.presentation.shared.editor
 
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -28,15 +29,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
+import com.emberr.domain.util.system.triggerHapticFeedback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 interface CrossBlockSelectionCommands {
     fun copy()
     fun cut()
     fun paste()
+    fun pasteText(text: String)
     fun replaceWith(text: String)
     fun splitAtSelection()
     fun adjustIndentation(increase: Boolean)
@@ -133,6 +137,113 @@ fun Modifier.selectTextAcrossBlocksByDragging(
                     }
                 } finally {
                     autoScroll.stop()
+                }
+            }
+        }
+    }
+
+fun Modifier.selectTextAcrossBlocksByTouch(
+    selection: CrossBlockSelectionState,
+    scrollableState: ScrollableState,
+    topInsetPx: Float,
+    isBlockSelectionActive: () -> Boolean
+): Modifier = this
+    .onGloballyPositioned { selection.rememberListCoordinates(it) }
+    .pointerInput(selection, scrollableState) {
+        coroutineScope {
+            val gestureScope = this
+            val autoScroll = AutoScrollWhileSelecting(gestureScope, scrollableState, selection)
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                if (isBlockSelectionActive()) return@awaitEachGesture
+                val pressInWindow = selection.windowPointOf(down.position) ?: return@awaitEachGesture
+                selection.isBeingTouched = true
+
+                val grabbedEdge = selection.edgeHandleAt(pressInWindow, SelectionHandleRadius.toPx(), SelectionHandleTouchRadius.toPx())
+                val grabbedEdgeRect = grabbedEdge?.let { selection.cursorRectOf(it) }
+                if (grabbedEdge != null && grabbedEdgeRect != null) {
+                    down.consume()
+                    selection.startMovingEdge(movesStart = grabbedEdge == SelectionEdge.Start)
+                    val fingerOffsetFromEdge = pressInWindow - grabbedEdgeRect.center
+                    try {
+                        while (true) {
+                            val change = awaitPointerEvent(PointerEventPass.Initial).changes
+                                .firstOrNull { it.id == down.id } ?: return@awaitEachGesture
+                            change.consume()
+                            if (!change.pressed) return@awaitEachGesture
+                            val edgeInList = change.position - fingerOffsetFromEdge
+                            val edgeInWindow = selection.windowPointOf(edgeInList)
+                            edgeInWindow
+                                ?.let { selection.positionAt(it, mustBeInsideBlock = false) }
+                                ?.let { selection.extendTo(it) }
+                            edgeInWindow?.let { selection.magnifyFocusLineAt(it) }
+                            autoScroll.follow(edgeInList, autoScrollStepFor(change.position.y, topInsetPx))
+                        }
+                    } finally {
+                        autoScroll.stop()
+                        selection.hideMagnifier()
+                        selection.isBeingTouched = false
+                    }
+                }
+
+                selection.forgetLongPressedWord()
+                val wasSelecting = selection.isActive
+                val pressedBlockId = selection.positionAt(pressInWindow, mustBeInsideBlock = true)?.blockId
+                val longPressTime = down.uptimeMillis + viewConfiguration.longPressTimeoutMillis
+                var isLongPress = false
+                var isSelectingAcrossBlocks = false
+                val vibrationOnLongPress = gestureScope.launch {
+                    delay(viewConfiguration.longPressTimeoutMillis)
+                    if (pressedBlockId != null) triggerHapticFeedback()
+                }
+                try {
+                    while (true) {
+                        val change = awaitPointerEvent(PointerEventPass.Initial).changes
+                            .firstOrNull { it.id == down.id } ?: return@awaitEachGesture
+                        if (change.uptimeMillis >= longPressTime) isLongPress = true
+                        if (!change.pressed) {
+                            if (isSelectingAcrossBlocks) {
+                                change.consume()
+                                return@awaitEachGesture
+                            }
+                            if (!isLongPress && wasSelecting) selection.clear()
+                            gestureScope.launch {
+                                withFrameNanos { }
+                                selection.takeOverFocusedTextSelection()
+                            }
+                            return@awaitEachGesture
+                        }
+                        if (!isLongPress) {
+                            val isScrolling = (change.position - down.position).getDistance() > viewConfiguration.touchSlop
+                            if (isScrolling) return@awaitEachGesture
+                            continue
+                        }
+                        if (isBlockSelectionActive()) return@awaitEachGesture
+
+                        val pointerInWindow = selection.windowPointOf(change.position) ?: continue
+                        val pointerPosition = selection.positionAt(pointerInWindow, mustBeInsideBlock = false) ?: continue
+                        if (selection.longPressedWord != null) {
+                            change.consume()
+                            selection.extendLongPressedWordTo(pointerPosition)
+                            selection.magnifyFocusLineAt(pointerInWindow)
+                            autoScroll.follow(change.position, autoScrollStepFor(change.position.y, topInsetPx))
+                            continue
+                        }
+                        if (!isSelectingAcrossBlocks) {
+                            if (pressedBlockId == null || pointerPosition.blockId == pressedBlockId) continue
+                            isSelectingAcrossBlocks = selection.startFromFocusedTextSelection(pressedBlockId, towards = pointerPosition)
+                            if (!isSelectingAcrossBlocks) continue
+                        }
+                        change.consume()
+                        selection.extendTo(pointerPosition)
+                        selection.magnifyFocusLineAt(pointerInWindow)
+                        autoScroll.follow(change.position, autoScrollStepFor(change.position.y, topInsetPx))
+                    }
+                } finally {
+                    vibrationOnLongPress.cancel()
+                    autoScroll.stop()
+                    selection.hideMagnifier()
+                    selection.isBeingTouched = false
                 }
             }
         }

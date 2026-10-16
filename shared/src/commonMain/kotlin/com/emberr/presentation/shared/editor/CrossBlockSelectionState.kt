@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.TextRange
@@ -19,12 +20,15 @@ interface SelectableTextField {
     fun storedOffsetOnOuterLine(onFirstLine: Boolean, windowX: Float?): Int?
     fun cursorRectInWindow(storedOffset: Int): Rect?
     fun selectionIfFocused(): TextRange?
+    fun collapseSelectionIfFocused()
 }
 
 interface CrossBlockSelectionHost {
     fun onSelectingStarted()
     fun textLengthOf(blockId: String): Int?
     fun revealFocus(step: SelectionStep)
+    fun handleKeyDuringSelection(keyEvent: KeyEvent): Boolean
+    fun replaceSelectionWithTypedText(typedText: String)
 }
 
 enum class SelectionStep { CharacterBack, CharacterForward, LineUp, LineDown }
@@ -37,6 +41,11 @@ class CrossBlockSelectionState {
     private var focus by mutableStateOf<BlockTextPosition?>(null)
     var blockIdsInOrder by mutableStateOf<List<String>>(emptyList())
     var host: CrossBlockSelectionHost? = null
+    var longPressedWord: CrossBlockTextRange? = null
+        private set
+    var isBeingTouched by mutableStateOf(false)
+    var magnifiedPointInWindow by mutableStateOf<Offset?>(null)
+        private set
 
     private var listCoordinates: LayoutCoordinates? = null
     private val blockCoordinates = mutableMapOf<String, LayoutCoordinates>()
@@ -75,6 +84,72 @@ class CrossBlockSelectionState {
         return true
     }
 
+    fun selectWord(blockId: String, word: TextRange) {
+        val wordStart = BlockTextPosition(blockId, word.start)
+        val wordEnd = BlockTextPosition(blockId, word.end)
+        startAt(wordStart)
+        focus = wordEnd
+        longPressedWord = CrossBlockTextRange(wordStart, wordEnd)
+    }
+
+    fun extendLongPressedWordTo(position: BlockTextPosition) {
+        val word = longPressedWord ?: return
+        when {
+            position.comesBefore(word.start) -> {
+                anchor = word.end
+                focus = position
+            }
+            word.end.comesBefore(position) -> {
+                anchor = word.start
+                focus = position
+            }
+            else -> {
+                anchor = word.start
+                focus = word.end
+            }
+        }
+    }
+
+    fun forgetLongPressedWord() {
+        longPressedWord = null
+    }
+
+    fun startFromFocusedTextSelection(blockId: String, towards: BlockTextPosition): Boolean {
+        val fieldSelection = selectableTextFields[blockId]?.selectionIfFocused()?.takeIf { !it.collapsed } ?: return false
+        val movesForward = blockIdsInOrder.indexOf(towards.blockId) > blockIdsInOrder.indexOf(blockId)
+        startAt(BlockTextPosition(blockId, if (movesForward) fieldSelection.min else fieldSelection.max))
+        return true
+    }
+
+    fun takeOverFocusedTextSelection() {
+        val (blockId, fieldSelection) = selectableTextFields.entries.firstNotNullOfOrNull { (blockId, field) ->
+            field.selectionIfFocused()?.takeIf { !it.collapsed }?.let { blockId to it }
+        } ?: return
+        startAt(BlockTextPosition(blockId, fieldSelection.start))
+        focus = BlockTextPosition(blockId, fieldSelection.end)
+    }
+
+    fun collapseFocusedTextSelection() {
+        selectableTextFields.values.forEach { it.collapseSelectionIfFocused() }
+    }
+
+    fun magnifyFocusLineAt(pointInWindow: Offset) {
+        val focus = focus ?: return
+        val focusLine = selectableTextFields[focus.blockId]?.cursorRectInWindow(focus.offset)
+        magnifiedPointInWindow = focusLine?.let { Offset(pointInWindow.x, it.center.y) }
+    }
+
+    fun hideMagnifier() {
+        magnifiedPointInWindow = null
+    }
+
+    fun startMovingEdge(movesStart: Boolean) {
+        val range = range ?: return
+        longPressedWord = null
+        anchor = if (movesStart) range.end else range.start
+        focus = if (movesStart) range.start else range.end
+    }
+
     fun selectWholeNote(): Boolean {
         val firstBlockId = blockIdsInOrder.firstOrNull() ?: return false
         val lastBlockId = blockIdsInOrder.last()
@@ -95,6 +170,7 @@ class CrossBlockSelectionState {
     fun clear() {
         anchor = null
         focus = null
+        longPressedWord = null
     }
 
     fun selectedTextRangeIn(blockId: String, textLength: Int): TextRange? {
@@ -129,9 +205,7 @@ class CrossBlockSelectionState {
     fun scrollNeededToShowFocus(topInsetPx: Float, bottomInsetPx: Float): Float? {
         val focus = focus ?: return null
         val list = listCoordinates?.takeIf { it.isAttached } ?: return null
-        val focusRect = selectableTextFields[focus.blockId]?.cursorRectInWindow(focus.offset)
-            ?: blockCoordinates[focus.blockId]?.takeIf { it.isAttached }?.let { Rect(it.positionInWindow(), it.size.toSize()) }
-            ?: return null
+        val focusRect = cursorRectInWindow(focus) ?: return null
         val visibleTop = list.positionInWindow().y + topInsetPx
         val visibleBottom = list.positionInWindow().y + list.size.height - bottomInsetPx
         return when {
@@ -140,6 +214,10 @@ class CrossBlockSelectionState {
             else -> 0f
         }
     }
+
+    fun cursorRectInWindow(position: BlockTextPosition): Rect? =
+        selectableTextFields[position.blockId]?.cursorRectInWindow(position.offset)
+            ?: blockCoordinates[position.blockId]?.takeIf { it.isAttached }?.let { Rect(it.positionInWindow(), it.size.toSize()) }
 
     fun rememberListCoordinates(coordinates: LayoutCoordinates) {
         listCoordinates = coordinates
@@ -201,6 +279,12 @@ class CrossBlockSelectionState {
             SelectionStep.LineUp -> neighbourField?.storedOffsetOnOuterLine(onFirstLine = false, windowX = cursorX) ?: neighbourLength
         }
         return BlockTextPosition(neighbourId, offsetInNeighbour)
+    }
+
+    private fun BlockTextPosition.comesBefore(other: BlockTextPosition): Boolean {
+        val index = blockIdsInOrder.indexOf(blockId)
+        val otherIndex = blockIdsInOrder.indexOf(other.blockId)
+        return index < otherIndex || (index == otherIndex && offset < other.offset)
     }
 
     private fun verticalDistance(coordinates: LayoutCoordinates, y: Float): Float {

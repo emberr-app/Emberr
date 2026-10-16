@@ -8,6 +8,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -16,6 +18,7 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.contextmenu.modifier.filterTextContextMenuComponents
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
@@ -216,6 +219,7 @@ fun NoteBlockItem(
     var isFocused by remember { mutableStateOf(false) }
     var displayedCursorOffsetFromTap by remember { mutableStateOf<Int?>(null) }
     val scope = rememberCoroutineScope()
+    val crossBlockSelection = LocalCrossBlockSelection.current
 
     val text = when (block) {
         is CodeBlock -> block.code
@@ -621,6 +625,8 @@ fun NoteBlockItem(
                 if (block is CodeBlock) VisualTransformation.None
                 else RichTextVisualTransformation(linkColor, fadedLinkColor, isDarkTheme, validNoteIds, inlineSpans, linkHoverState.hoveredLink, noteTitlesById)
             }
+            val latestText by rememberUpdatedState(text)
+            val latestRichTextTransformation by rememberUpdatedState(richTextTransformation)
 
             Column(modifier = textFieldWrapperModifier) {
                 if (isTextBased) {
@@ -665,7 +671,7 @@ fun NoteBlockItem(
                                         actions.onPasteMarkdown(id, pasted.replacedStart, pasted.replacedEnd, pasted.text) != null
                                     },
                                     markdownClipboardActions = markdownClipboardActions,
-                                    onCopyAsMarkdown = if (isDesktopPlatform && block !is CodeBlock) {
+                                    onCopyAsMarkdown = if (block !is CodeBlock) {
                                         { start, end -> clipboardManager.copyEmberrMarkdown(inlineMarkdownOf(block, start, end)) }
                                     } else {
                                         null
@@ -744,7 +750,14 @@ fun NoteBlockItem(
                                                     is HoveredLink.Web -> webLinkActions.copyLink(pressedLink.url)
                                                     is HoveredLink.Email -> webLinkActions.copyLink(pressedLink.email)
                                                     is HoveredLink.Phone -> webLinkActions.copyLink(pressedLink.phone)
-                                                    else -> if (!isDesktopPlatform) actions.onToggleSelection(block.id)
+                                                    else -> if (!isDesktopPlatform) {
+                                                        val pressedWord = storedWordAt(pos, latestText, latestRichTextTransformation, textLayoutResult)
+                                                        if (crossBlockSelection != null && pressedWord != null) {
+                                                            crossBlockSelection.selectWord(block.id, pressedWord)
+                                                        } else {
+                                                            actions.onToggleSelection(block.id)
+                                                        }
+                                                    }
                                                 }
                                             }
                                         )
@@ -1132,6 +1145,7 @@ fun IsolatedEditorTextField(
     var tfv by remember { mutableStateOf(TextFieldValue(initialText, TextRange.Zero)) }
     var lastSentText by remember { mutableStateOf(initialText) }
     val textsSentButNotYetEchoed = remember { mutableListOf<String>() }
+    var keyboardTextHandedToEditor by remember { mutableStateOf<String?>(null) }
 
     var mentionQuery by remember { mutableStateOf<String?>(null) }
     var mentionStartIndex by remember { mutableIntStateOf(-1) }
@@ -1200,6 +1214,12 @@ fun IsolatedEditorTextField(
             }
 
             override fun selectionIfFocused(): TextRange? = if (isFieldFocused) tfv.selection else null
+
+            override fun collapseSelectionIfFocused() {
+                if (!isFieldFocused || tfv.selection.collapsed) return
+                tfv = tfv.copy(selection = TextRange(tfv.selection.max), composition = null)
+                GlobalEditorState.currentSelection = tfv.selection
+            }
         }
     }
     DisposableEffect(crossBlockSelection, blockId) {
@@ -1234,6 +1254,13 @@ fun IsolatedEditorTextField(
         }
     }
     val crossBlockSelectionColor = LocalTextSelectionColors.current.backgroundColor
+    val isTextSelectedAcrossBlocks by remember(crossBlockSelection) {
+        derivedStateOf { crossBlockSelection?.isActive == true }
+    }
+    var hidesTextMenuUntilTouched by remember { mutableStateOf(false) }
+    LaunchedEffect(isTextSelectedAcrossBlocks) {
+        if (isTextSelectedAcrossBlocks) hidesTextMenuUntilTouched = true
+    }
 
     fun copySelectionAsMarkdown(): Boolean {
         val copySelectedText = onCopyAsMarkdown ?: return false
@@ -1443,7 +1470,19 @@ fun IsolatedEditorTextField(
                 onTextLayout(result)
             },
             onValueChange = { newValue ->
-                GlobalEditorState.currentSelection = newValue.selection
+                if (newValue.text == keyboardTextHandedToEditor) return@BasicTextField
+                keyboardTextHandedToEditor = null
+                if (isTextSelectedAcrossBlocks) {
+                    if (newValue.text == tfv.text) {
+                        tfv = newValue
+                    } else {
+                        keyboardTextHandedToEditor = newValue.text
+                        crossBlockSelection?.host?.replaceSelectionWithTypedText(textInsertedBetween(tfv.text, newValue.text))
+                    }
+                    return@BasicTextField
+                }
+                val isSelectingByTouch = crossBlockSelection?.isBeingTouched == true && !newValue.selection.collapsed
+                GlobalEditorState.currentSelection = if (isSelectingByTouch) TextRange(newValue.selection.end) else newValue.selection
                 val newText = newValue.text
                 val cursor = newValue.selection.start
 
@@ -1468,6 +1507,7 @@ fun IsolatedEditorTextField(
                 val isPlainTyping = !isCodeBlock && newValue.composition == null && newValue.selection.collapsed
                 val markdownShortcut = if (isPlainTyping) markdownShortcutAfterTyping(tfv.text, newText, newValue.selection.start) else null
                 if (pastedText != null && onPasteMarkdown(blockId, pastedText)) {
+                    keyboardTextHandedToEditor = newText
                     mentionQuery = null
                     mentionStartIndex = -1
                 } else if (markdownShortcut != null && onMarkdownShortcut(blockId, newText, markdownShortcut)) {
@@ -1496,6 +1536,22 @@ fun IsolatedEditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { fieldCoordinates = it }
+                .then(
+                    if (isDesktopPlatform) {
+                        Modifier
+                    } else {
+                        Modifier
+                            .pointerInput(Unit) {
+                                awaitEachGesture {
+                                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                                    hidesTextMenuUntilTouched = false
+                                }
+                            }
+                            .filterTextContextMenuComponents {
+                                !isTextSelectedAcrossBlocks && !hidesTextMenuUntilTouched && tfv.selection.collapsed
+                            }
+                    }
+                )
                 .drawBehind {
                     val layout = localTextLayoutResult ?: return@drawBehind
                     if (showsEmptyLineSelected) {
@@ -1519,6 +1575,9 @@ fun IsolatedEditorTextField(
                     isFieldFocused = it.isFocused
                 }
                 .onPreviewKeyEvent { event ->
+                    if (isTextSelectedAcrossBlocks && crossBlockSelection?.host?.handleKeyDuringSelection(event) == true) {
+                        return@onPreviewKeyEvent true
+                    }
                     val isBackspace = event.key == Key.Backspace
                     val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
 
@@ -1636,7 +1695,7 @@ fun IsolatedEditorTextField(
                     false
                 },
             textStyle = textStyle,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(if (isTextSelectedAcrossBlocks) Color.Transparent else MaterialTheme.colorScheme.primary),
             enabled = !inSelectionMode
         )
 
@@ -1665,6 +1724,24 @@ fun IsolatedEditorTextField(
             }
         }
     }
+}
+
+private fun storedWordAt(
+    position: Offset,
+    text: String,
+    visualTransformation: VisualTransformation,
+    textLayout: TextLayoutResult?
+): TextRange? {
+    if (textLayout == null) return null
+    val line = textLayout.getLineForVerticalPosition(position.y)
+    val isOnText = position.y <= textLayout.getLineBottom(line) &&
+        position.x >= textLayout.getLineLeft(line) &&
+        position.x <= textLayout.getLineRight(line)
+    if (!isOnText) return null
+    val displayedWord = textLayout.getWordBoundary(textLayout.getOffsetForPosition(position))
+    if (displayedWord.collapsed) return null
+    val offsetMapping = visualTransformation.filter(AnnotatedString(text)).offsetMapping
+    return TextRange(offsetMapping.transformedToOriginal(displayedWord.start), offsetMapping.transformedToOriginal(displayedWord.end))
 }
 
 private fun displayedCharacterRect(

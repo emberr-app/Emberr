@@ -102,3 +102,10 @@ internal fun spansMovedFrom(spans: List<InlineSpan>, from: Int, to: Int, newStar
         val end = minOf(span.end, to)
         if (start >= end) null else span.copy(start = start - from + newStart, end = end - from + newStart)
     }
+
+fun textInsertedBetween(oldText: String, newText: String): String {
+    val sharedStartLength = oldText.commonPrefixWith(newText).length
+    val maxSharedEndLength = minOf(oldText.length, newText.length) - sharedStartLength
+    val sharedEndLength = oldText.commonSuffixWith(newText).length.coerceAtMost(maxSharedEndLength)
+    return newText.substring(sharedStartLength, newText.length - sharedEndLength)
+}

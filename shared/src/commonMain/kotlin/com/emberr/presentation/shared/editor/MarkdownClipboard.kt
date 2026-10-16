@@ -2,6 +2,7 @@ package com.emberr.presentation.shared.editor
 
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
@@ -20,6 +21,7 @@ import com.emberr.domain.model.withIndentationLevel
 import com.emberr.domain.model.withPin
 import com.emberr.domain.model.withUpdatedAt
 import com.emberr.domain.util.export.InlineMarkdownFormatter
+import com.emberr.domain.util.export.NoteMarkdownWriter
 
 class MarkdownClipboardActions {
     var copySelection: (() -> Boolean)? = null
@@ -31,6 +33,11 @@ fun ClipboardManager.copyEmberrMarkdown(markdown: String, copiedBlocks: List<Not
     GlobalEditorState.lastCopiedMarkdown = markdown
     GlobalEditorState.lastCopiedBlocks = copiedBlocks
     setText(AnnotatedString(markdown))
+}
+
+fun ClipboardManager.copyEmberrBlocks(blocks: List<NoteBlock>, linkableNotes: List<NoteMetadataEntity>) {
+    val noteTitlesById = linkableNotes.associate { it.noteId to it.title }
+    copyEmberrMarkdown(NoteMarkdownWriter.writeMarkdown(blocks, noteTitlesById = noteTitlesById), blocks)
 }
 
 fun blocksEmberrCopiedAs(pastedText: String): List<NoteBlock>? {

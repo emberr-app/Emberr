@@ -1818,11 +1818,6 @@ abstract class BaseEditorViewModel(
     fun clearSelection() { _selectedBlockIds.value = emptySet() }
     fun selectAllBlocks() { _selectedBlockIds.value = _blocks.value.map { it.id }.toSet() }
 
-    fun getSelectedText(): String {
-        val ids = _selectedBlockIds.value
-        return _blocks.value.filter { it.id in ids }.joinToString("\n") { getBlockText(it) }
-    }
-
     fun deleteSelectedBlocks() {
         val toDelete = _selectedBlockIds.value
         val currentBlocks = _blocks.value
@@ -1865,12 +1860,6 @@ abstract class BaseEditorViewModel(
         }
 
         scheduleAutosave()
-    }
-
-    fun cutSelectedBlocks(): String {
-        val text = getSelectedText()
-        deleteSelectedBlocks()
-        return text
     }
 
     fun replaceTextAcrossBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>, replacement: String): TextCaret? {

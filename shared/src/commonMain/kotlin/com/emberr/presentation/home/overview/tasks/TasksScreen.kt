@@ -13,7 +13,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -34,6 +33,7 @@ import com.emberr.domain.util.eventbus.WidgetComposeRequestBus
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.KmpBackHandler
+import com.emberr.presentation.shared.editor.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.BlockSelectionMenuContent
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.EditorScreen
@@ -64,6 +64,7 @@ fun TasksScreen(
 
     val selectedBlockIds: Set<String> by viewModel.selectedBlockIds.collectAsState()
     val isSelectionMode = selectedBlockIds.isNotEmpty()
+    val selectedBlocksList = blocks.filter { it.id in selectedBlockIds }
     val clipboardManager = LocalClipboardManager.current
     val focusRequest: FocusRequest? by viewModel.focusRequest.collectAsState()
     val allLinkableNotes by viewModel.allLinkableNotes.collectAsState(emptyList())
@@ -265,10 +266,13 @@ fun TasksScreen(
                             selectedCount = selectedBlockIds.size,
                             onCloseMenu = closeMenu,
                             onCopy = {
-                                clipboardManager.setText(AnnotatedString(viewModel.getSelectedText()))
+                                clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
                                 viewModel.clearSelection()
                             },
-                            onCut = { clipboardManager.setText(AnnotatedString(viewModel.cutSelectedBlocks())) },
+                            onCut = {
+                                clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
+                                viewModel.deleteSelectedBlocks()
+                            },
                             onDelete = { viewModel.deleteSelectedBlocks() },
                             onSelectAll = { viewModel.selectAllBlocks() },
                             onClearSelection = { viewModel.clearSelection() }
@@ -340,10 +344,13 @@ fun TasksScreen(
                 onSelectAll = { viewModel.selectAllBlocks() },
                 hazeState = hazeState,
                 onCopy = {
-                    clipboardManager.setText(AnnotatedString(viewModel.getSelectedText()))
+                    clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
                     viewModel.clearSelection()
                 },
-                onCut = { clipboardManager.setText(AnnotatedString(viewModel.cutSelectedBlocks())) },
+                onCut = {
+                    clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
+                    viewModel.deleteSelectedBlocks()
+                },
                 onAddBlockAbove = {},
                 onAddBlockBelow = {},
                 onTogglePin = {},
