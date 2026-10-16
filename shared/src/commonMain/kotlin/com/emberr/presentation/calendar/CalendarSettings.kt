@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -69,6 +68,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.MenuAtTap
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
@@ -156,6 +156,7 @@ fun CalendarSidebar(
                     )
                     .width(sidebarWidth)
                     .fillMaxHeight()
+                    .emberrBorder(SidebarShape)
                     .clip(SidebarShape)
                     .emberrBlur(
                         hazeState,
@@ -164,11 +165,6 @@ fun CalendarSidebar(
                             tints = listOf(HazeTint(MaterialTheme.colorScheme.background.copy(alpha = 0.85f))),
                             fallbackTint = HazeTint(MaterialTheme.colorScheme.background)
                         )
-                    )
-                    .border(
-                        width = 0.5.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        shape = SidebarShape
                     )
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },

@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import androidx.compose.ui.Alignment
@@ -1373,14 +1374,10 @@ fun EditorToolbar(
             color = Color.Transparent,
             modifier = Modifier
                 .fillMaxWidth()
+                .emberrBorder(DefaultCornerShape)
                 .customEmberrShadow(DefaultCornerShape)
                 .clip(DefaultCornerShape)
                 .emberrBlur(hazeState, EmberrBlur.Regular)
-                .border(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    shape = DefaultCornerShape
-                )
         ) {
             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 36.dp) {
                 Column(modifier = Modifier.fillMaxWidth().animateContentSize()) {
@@ -2388,14 +2385,10 @@ fun BlockSelectionPill(
             color = Color.Transparent,
             modifier = Modifier
                 .padding(bottom = if (isDesktopPlatform) 32.dp else BOTTOM_BAR_BOTTOM_PADDING)
+                .emberrBorder(DefaultCornerShape)
                 .customEmberrShadow(DefaultCornerShape)
                 .clip(DefaultCornerShape)
                 .emberrBlur(hazeState, EmberrBlur.Regular)
-                .border(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    shape = DefaultCornerShape
-                )
         ) {
             val scrollState = rememberScrollState()
             val divider = @Composable {
@@ -2513,14 +2506,10 @@ fun BlockStyleBar(
                 color = Color.Transparent,
                 modifier = Modifier
                     .padding(bottom = 8.dp)
+                    .emberrBorder(DefaultCornerShape)
                     .customEmberrShadow(DefaultCornerShape)
                     .clip(DefaultCornerShape)
                     .emberrBlur(hazeState, EmberrBlur.Regular)
-                    .border(
-                        width = 0.5.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        shape = DefaultCornerShape
-                    )
             ) {
                 CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 36.dp) {
                     Row(

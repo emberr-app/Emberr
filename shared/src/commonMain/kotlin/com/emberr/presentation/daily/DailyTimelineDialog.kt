@@ -1,7 +1,6 @@
 package com.emberr.presentation.daily
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -95,6 +94,7 @@ import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.blockViews.AudioBlockView
@@ -297,12 +297,8 @@ private fun TimelineHeader(
         actions = {
             Box(
                 modifier = Modifier
+                    .emberrBorder(CircleShape)
                     .clip(CircleShape)
-                    .border(
-                        width = 0.5.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        shape = CircleShape
-                    )
             ) {
                 TopBarIconButton(
                     icon = Icons.Default.Close,
@@ -338,13 +334,9 @@ private fun TimelineSearchBar(
             .fillMaxWidth()
             .padding(horizontal = 14.dp, vertical = 14.dp)
             .height(50.dp)
+            .emberrBorder(CircleShape)
             .clip(CircleShape)
             .emberrBlur(hazeState, EmberrBlur.Regular)
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = CircleShape
-            )
     ) {
         Row(
             modifier = Modifier

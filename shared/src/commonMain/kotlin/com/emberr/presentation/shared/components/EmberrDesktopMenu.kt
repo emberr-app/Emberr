@@ -1,7 +1,7 @@
 package com.emberr.presentation.shared.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,8 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 
 private val DefaultMenuShape = RoundedCornerShape(18.dp)
-private val MenuEdgeWidth = 0.5.dp
-private const val MenuEdgeAlpha = 0.2f
 private val MenuHorizontalPadding = 6.dp
 
 @Composable
@@ -41,7 +39,7 @@ fun EmberrDesktopMenu(
 ) {
     val blurSource = LocalEmberrBlurSource.current
     val surfaceColor = MaterialTheme.colorScheme.surface
-    val edgeColor = MaterialTheme.colorScheme.outline.copy(alpha = MenuEdgeAlpha)
+    val edgeColor = emberrSoftBorderColor
     val atTapPlacement = LocalMenuAtTapPlacement.current
     val density = LocalDensity.current
     var measuredMenuWidth by remember { mutableStateOf<Dp?>(null) }
@@ -74,11 +72,11 @@ fun EmberrDesktopMenu(
         shape = DefaultMenuShape,
         containerColor = if (blurSource != null) Color.Transparent else surfaceColor,
         shadowElevation = if (blurSource != null) EmberrShadowElevation.None else MenuDefaults.ShadowElevation,
+        border = if (blurSource != null) BorderStroke(EmberrBorderWidth, edgeColor) else null,
         modifier = if (blurSource != null) {
             modifier
                 .then(placementModifier)
                 .emberrBlur(blurSource, EmberrBlur.Thick)
-                .border(width = MenuEdgeWidth, color = edgeColor, shape = DefaultMenuShape)
                 .padding(horizontal = MenuHorizontalPadding)
         } else {
             modifier

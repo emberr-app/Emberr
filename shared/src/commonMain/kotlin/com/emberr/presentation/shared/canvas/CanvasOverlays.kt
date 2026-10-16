@@ -102,6 +102,7 @@ import com.emberr.presentation.shared.components.TopBarIconButtonGroup
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import dev.chrisbanes.haze.HazeState
@@ -374,14 +375,10 @@ fun CanvasTitlePill(title: String, hazeState: HazeState, modifier: Modifier = Mo
         color = Color.Transparent,
         modifier = modifier
             .height(44.dp)
+            .emberrBorder(TitlePillShape)
             .customEmberrShadow(TitlePillShape)
             .clip(TitlePillShape)
             .emberrBlur(hazeState, EmberrBlur.Regular)
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = TitlePillShape
-            )
     ) {
         Box(modifier = Modifier.padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) {
             Text(
@@ -519,14 +516,10 @@ fun CanvasSelectionActionBar(
             color = Color.Transparent,
             modifier = Modifier
                 .padding(bottom = 32.dp)
+                .emberrBorder(SelectionBarShape)
                 .customEmberrShadow(SelectionBarShape)
                 .clip(SelectionBarShape)
                 .emberrBlur(hazeState, EmberrBlur.Regular)
-                .border(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    shape = SelectionBarShape
-                )
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
@@ -926,10 +919,10 @@ private fun CanvasToolPanelSurface(
         color = Color.Transparent,
         modifier = modifier
             .width(ToolPanelWidth)
+            .emberrBorder(ToolPanelShape)
             .customEmberrShadow(ToolPanelShape)
             .clip(ToolPanelShape)
             .emberrBlur(hazeState, EmberrBlur.Regular)
-            .border(width = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), shape = ToolPanelShape)
     ) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
@@ -1280,10 +1273,10 @@ private fun CanvasMobilePill(hazeState: HazeState, isScrollable: Boolean = false
         color = Color.Transparent,
         modifier = Modifier
             .height(44.dp)
+            .emberrBorder(CircleShape)
             .customEmberrShadow(CircleShape)
             .clip(CircleShape)
             .emberrBlur(hazeState, EmberrBlur.Regular)
-            .border(width = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), shape = CircleShape)
     ) {
         Row(
             modifier = Modifier

@@ -7,7 +7,6 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -45,6 +44,7 @@ import coil3.compose.AsyncImage
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.editor.DefaultBlockShape
@@ -342,14 +342,10 @@ fun FullScreenImageScreen(
                 .graphicsLayer { alpha = currentExpansion() }
                 .navigationBarsPadding()
                 .padding(bottom = 32.dp, start = 24.dp, end = 24.dp)
+                .emberrBorder(DefaultBlockShape)
                 .clip(DefaultBlockShape)
                 .emberrBlur(hazeState, EmberrBlur.Regular)
                 .background(Color.Transparent)
-                .border(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    shape = DefaultBlockShape
-                )
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),

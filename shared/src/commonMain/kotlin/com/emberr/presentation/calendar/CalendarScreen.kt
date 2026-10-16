@@ -83,6 +83,7 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopEdgeBlurHeight
 import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.KmpBackHandler
@@ -1453,14 +1454,10 @@ private fun CalendarViewModeSwitcher(
         color = Color.Transparent,
         modifier = Modifier
             .height(TopHeaderBarButtonSize)
+            .emberrBorder(CircleShape)
             .customEmberrShadow(CircleShape, elevation = EmberrShadowElevation.Standard)
             .clip(CircleShape)
             .emberrBlur(hazeState, EmberrBlur.Regular)
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = CircleShape
-            )
     ) {
         Row(
             modifier = Modifier.padding(4.dp),

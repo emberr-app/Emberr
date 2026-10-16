@@ -1,7 +1,6 @@
 package com.emberr.presentation.shared.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -76,6 +75,7 @@ fun TopBarPillButton(
         contentColor = tint,
         modifier = modifier
             .height(height)
+            .emberrBorder(shape)
             .customEmberrShadow(shape)
             .clip(shape)
             .emberrBlur(hazeState, resolvedStyle)
@@ -84,11 +84,6 @@ fun TopBarPillButton(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = NoRippleIndicationNodeFactory,
                 onClick = onClick
-            )
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = shape
             )
     ) {
         Box(
@@ -128,6 +123,7 @@ fun TopBarIconButton(
         contentColor = tint,
         modifier = Modifier
             .size(size)
+            .emberrBorder(CircleShape)
             .customEmberrShadow(CircleShape, shadowElevation)
             .clip(CircleShape)
             .emberrBlur(hazeState, resolvedStyle)
@@ -135,11 +131,6 @@ fun TopBarIconButton(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = NoRippleIndicationNodeFactory,
                 onClick = onClick
-            )
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = CircleShape
             )
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -213,14 +204,10 @@ fun TopBarIconButtonGroup(
         contentColor = tint,
         modifier = Modifier
             .then(if (isVertical) Modifier.width(44.dp) else Modifier.height(44.dp))
+            .emberrBorder(CircleShape)
             .customEmberrShadow(CircleShape, shadowElevation, shadowSpotColor, shadowAmbientColor)
             .clip(CircleShape)
             .emberrBlur(hazeState, resolvedStyle)
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = CircleShape
-            )
     ) {
         if (isVertical) {
             Column(

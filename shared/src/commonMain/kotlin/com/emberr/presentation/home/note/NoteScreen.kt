@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.emberr.presentation.shared.components.emberrBorder
 import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import com.emberr.presentation.shared.editor.copyEmberrBlocks
@@ -97,7 +98,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.graphics.painter.Painter
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -677,13 +677,9 @@ fun NoteScreen(
                 ) {
                     Box(
                         modifier = Modifier
+                            .emberrBorder(WordCountPillShape)
                             .clip(WordCountPillShape)
                             .emberrBlur(hazeState, EmberrBlur.Regular)
-                            .border(
-                                width = 0.5.dp,
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                shape = WordCountPillShape
-                            )
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
                         Text(
@@ -1272,13 +1268,9 @@ private fun EditingTemplatePill(hazeState: HazeState?, modifier: Modifier = Modi
         color = MaterialTheme.colorScheme.background.copy(alpha = 0.65f),
         contentColor = MaterialTheme.colorScheme.primary,
         modifier = modifier
+            .emberrBorder(shape)
             .clip(shape)
             .emberrBlur(hazeState, EmberrBlur.Regular)
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = shape
-            )
     ) {
         Text(
             text = "Editing Template",

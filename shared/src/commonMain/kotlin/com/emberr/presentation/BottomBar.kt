@@ -15,7 +15,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -68,6 +67,7 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.emberrBorder
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.first
 import emberr.shared.generated.resources.Res
@@ -213,14 +213,10 @@ fun EmberrBottomBar(
                                 )
                             }
                         )
+                        .emberrBorder(CircleShape)
                         .customEmberrShadow(CircleShape, elevation = shadowElevation)
                         .clip(CircleShape)
                         .emberrBlur(hazeState, EmberrBlur.Regular)
-                        .border(
-                            width = 0.5.dp,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                            shape = CircleShape
-                        )
                 ) {
                     AnimatedContent(
                         targetState = isSearchMode,

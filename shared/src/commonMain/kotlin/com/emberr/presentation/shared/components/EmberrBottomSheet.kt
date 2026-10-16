@@ -3,7 +3,6 @@ package com.emberr.presentation.shared.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.Orientation
@@ -19,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
@@ -39,8 +37,6 @@ import kotlin.math.abs
 private val BottomSheetCornerRadius = 26.dp
 private val BottomSheetShape = RoundedCornerShape(topEnd = BottomSheetCornerRadius, topStart = BottomSheetCornerRadius)
 private val FloatingDialogShape = RoundedCornerShape(22.dp)
-private val SheetEdgeWidth = 0.5.dp
-private const val SheetEdgeAlpha = 0.2f
 private val SheetHorizontalPadding = 20.dp
 private val SheetIconSpacing = 8.dp
 
@@ -72,25 +68,14 @@ private val KeepLeftoverUpwardFlingAwayFromSheet = object : NestedScrollConnecti
 }
 
 @Composable
-private fun Modifier.sheetCardBackground(edgeShape: Shape? = null): Modifier {
+private fun Modifier.sheetCardBackground(): Modifier {
     val backgroundColor = if (LocalAppIsDark.current) {
         MaterialTheme.colorScheme.surface
     } else {
         MaterialTheme.colorScheme.background
     }
 
-    var modifierWithBackground = this.background(backgroundColor)
-
-    if (edgeShape != null) {
-        val edgeColor = MaterialTheme.colorScheme.outline.copy(alpha = SheetEdgeAlpha)
-        modifierWithBackground = modifierWithBackground.border(
-            width = SheetEdgeWidth,
-            color = edgeColor,
-            shape = edgeShape
-        )
-    }
-
-    return modifierWithBackground
+    return this.background(backgroundColor)
 }
 
 class EmberrBottomSheetAction(
@@ -168,8 +153,9 @@ private fun EmberrFloatingDialog(
             modifier = Modifier
                 .widthIn(max = 480.dp)
                 .fillMaxWidth(0.9f)
+                .emberrBorder(FloatingDialogShape, color = emberrSoftBorderColor)
                 .clip(FloatingDialogShape)
-                .sheetCardBackground(FloatingDialogShape)
+                .sheetCardBackground()
         ) {
             Column(
                 modifier = Modifier

@@ -9,7 +9,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +56,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.emberrBorder
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.cog
@@ -141,16 +141,12 @@ internal fun ChatInputBar(
             .padding(horizontal = horizontalInset)
             .heightIn(min = minHeight)
             .then(sharedPillModifier)
+            .emberrBorder(barShape)
             .customEmberrShadow(barShape, elevation = shadowElevation)
             .animateContentSize(animationSpec = tween(150))
             .clip(barShape)
             .emberrBlur(hazeState, EmberrBlur.Regular)
             .background(Color.Transparent)
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = barShape
-            )
     ) {
         Column(modifier = innerColumnModifier) {
             Box(
