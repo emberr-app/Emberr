@@ -31,7 +31,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.util.time.daysOfWeekStartingFrom
+import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.ui.theme.LocalEmberrFontStyle
+import com.emberr.ui.theme.LocalFirstDayOfWeek
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.fontFamilyFor
 import emberr.shared.generated.resources.Res
@@ -47,6 +50,8 @@ import emberr.shared.generated.resources.moon_cloud
 import emberr.shared.generated.resources.sofa
 import emberr.shared.generated.resources.square_arrows_right
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
 import java.util.Calendar
 import kotlin.math.abs
@@ -307,12 +312,8 @@ private fun daysInMonth(year: Int, month: Int): Int {
     return cal.getActualMaximum(Calendar.DAY_OF_MONTH)
 }
 
-private fun firstWeekdayOfMonth(year: Int, month: Int): Int {
-    // 0 = Sunday ... 6 = Saturday
-    val cal = Calendar.getInstance()
-    cal.set(year, month, 1)
-    return cal.get(Calendar.DAY_OF_WEEK) - 1
-}
+private fun leadingBlankDaysInMonth(year: Int, month: Int, firstDayOfWeek: DayOfWeek): Int =
+    daysSinceStartOfWeek(LocalDate(year, month + 1, 1).dayOfWeek, firstDayOfWeek)
 
 private class CustomDatePickerState(initialTimestamp: Long?) {
     private val initial = (initialTimestamp ?: System.currentTimeMillis()).toCalendarDate()
@@ -404,7 +405,7 @@ private fun CustomCalendarHeader(
 
 @Composable
 private fun CalendarWeekdayRow() {
-    val weekdays = listOf("S", "M", "T", "W", "T", "F", "S")
+    val weekdays = daysOfWeekStartingFrom(LocalFirstDayOfWeek.current).map { day -> day.name.take(1) }
     Row(modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
         weekdays.forEach { label ->
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
@@ -427,9 +428,10 @@ private fun CustomCalendarGrid(
     onDaySelected: (Int) -> Unit
 ) {
     val today = remember { System.currentTimeMillis().toCalendarDate() }
-    val cells = remember(viewYear, viewMonth) {
+    val firstDayOfWeek = LocalFirstDayOfWeek.current
+    val cells = remember(viewYear, viewMonth, firstDayOfWeek) {
         val daysCount = daysInMonth(viewYear, viewMonth)
-        val startOffset = firstWeekdayOfMonth(viewYear, viewMonth)
+        val startOffset = leadingBlankDaysInMonth(viewYear, viewMonth, firstDayOfWeek)
         buildList {
             repeat(startOffset) { add(null) }
             for (day in 1..daysCount) add(day)

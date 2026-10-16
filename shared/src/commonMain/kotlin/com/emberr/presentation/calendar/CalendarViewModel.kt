@@ -13,6 +13,8 @@ import com.emberr.domain.model.markDeleted
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.ActiveSpaceStore
+import com.emberr.domain.util.time.FirstDayOfWeekPreference
+import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.reminders.ReminderScheduler
@@ -43,6 +45,18 @@ class CalendarViewModel(
 
     fun setViewMode(mode: CalendarViewMode) {
         settingsManager.saveCalendarViewMode(mode.name)
+    }
+
+    val firstDayOfWeekPreference: StateFlow<FirstDayOfWeekPreference> = settingsManager.firstDayOfWeekPreferenceFlow
+        .map { stored -> firstDayOfWeekPreferenceNamed(stored) }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            firstDayOfWeekPreferenceNamed(settingsManager.getFirstDayOfWeekPreference())
+        )
+
+    fun setFirstDayOfWeekPreference(preference: FirstDayOfWeekPreference) {
+        settingsManager.saveFirstDayOfWeekPreference(preference.name)
     }
 
     init {

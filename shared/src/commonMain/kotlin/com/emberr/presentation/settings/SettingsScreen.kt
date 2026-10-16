@@ -1480,6 +1480,7 @@ internal fun SettingsDivider() {
 @Composable
 fun SettingsGroup(
     title: String,
+    cardColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
@@ -1494,7 +1495,7 @@ fun SettingsGroup(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SettingsCardShape)
-                .background(MaterialTheme.colorScheme.surface),
+                .background(cardColor),
             content = content
         )
     }

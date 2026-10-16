@@ -3,11 +3,15 @@ package com.emberr.presentation.widget.calendar
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.CategoryDao
+import com.emberr.domain.util.time.daysOfWeekStartingFrom
+import com.emberr.domain.util.time.daysSinceStartOfWeek
+import com.emberr.presentation.widget.WidgetFirstDayOfWeek
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
@@ -23,12 +27,14 @@ private const val neutralDotColorHex = "#848484"
 class CalendarWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
     private val categoryDao: CategoryDao,
+    private val firstDayOfWeek: WidgetFirstDayOfWeek,
 ) {
     suspend fun readContentOnce(spaceId: String, shownMonth: String?): CalendarWidgetContent? =
         withContext(Dispatchers.IO) {
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
             val firstOfMonth = parseFirstOfMonth(shownMonth) ?: firstOfMonthFor(today)
             val monthKey = monthKeyOf(firstOfMonth)
+            val weekStartsOn = firstDayOfWeek.firstDayOfWeek()
 
             val tasks = try {
                 calendarTaskDao.getTasksInMonth(spaceId, monthKey)
@@ -59,17 +65,20 @@ class CalendarWidgetContentReader(
             CalendarWidgetContent(
                 shownMonth = monthKey,
                 monthLabel = formatMonthLabel(firstOfMonth),
-                weekdayLabels = weekdayLabels,
-                weeks = buildWeeks(firstOfMonth, today, dotsByDate)
+                weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day ->
+                    day.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+                },
+                weeks = buildWeeks(firstOfMonth, today, weekStartsOn, dotsByDate)
             )
         }
 
     private fun buildWeeks(
         firstOfMonth: LocalDate,
         today: LocalDate,
+        weekStartsOn: DayOfWeek,
         dotsByDate: Map<String, List<String>>
     ): List<List<CalendarDayCell>> {
-        val leadingBlanks = firstOfMonth.dayOfWeek.ordinal
+        val leadingBlanks = daysSinceStartOfWeek(firstOfMonth.dayOfWeek, weekStartsOn)
         val gridStart = firstOfMonth.minus(DatePeriod(days = leadingBlanks))
 
         val allWeeks = (0 until weeksShown).map { weekIndex ->
@@ -98,8 +107,6 @@ class CalendarWidgetContentReader(
         return allWeeks.dropLastWhile { week -> week.all { cell -> cell.dayNumber == null } }
     }
 }
-
-private val weekdayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
 private val monthNames = listOf(
     "January", "February", "March", "April", "May", "June",

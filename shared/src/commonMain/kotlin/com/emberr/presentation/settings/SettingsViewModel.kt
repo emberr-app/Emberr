@@ -118,6 +118,12 @@ class SettingsViewModel(
         settingsManager.saveTimeFormatPreference(preference)
     }
 
+    val firstDayOfWeekPreference: StateFlow<String> = settingsManager.firstDayOfWeekPreferenceFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.getFirstDayOfWeekPreference()
+    )
+
     val topBarFadeStyle: StateFlow<String> = settingsManager.topBarFadeStyleFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

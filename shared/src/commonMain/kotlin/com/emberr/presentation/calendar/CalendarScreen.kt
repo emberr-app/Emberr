@@ -3,20 +3,16 @@ package com.emberr.presentation.calendar
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.IndicationNodeFactory
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,12 +27,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -49,17 +43,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -72,14 +61,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -90,32 +73,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
-import com.emberr.presentation.COMPACT_BOTTOM_BAR_PILL_HEIGHT
-import com.emberr.presentation.EXPANDED_BOTTOM_BAR_PILL_HEIGHT
-import com.emberr.presentation.COMPACT_BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
-import com.emberr.presentation.shared.components.EmberrBottomSheetOption
-import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
-import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopEdgeBlurHeight
-import com.emberr.presentation.shared.components.customEmberrShadow
-import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.topHeaderBarPadding
-import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.cog
 import emberr.shared.generated.resources.plus
-import emberr.shared.generated.resources.tablet
-import emberr.shared.generated.resources.widget2
+import emberr.shared.generated.resources.sidebar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlin.time.Clock
@@ -125,7 +98,6 @@ import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
-import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.toLocalDateTime
@@ -136,23 +108,20 @@ import kotlin.time.Duration.Companion.milliseconds
 import com.emberr.domain.util.time.formatHourLabel
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
+import com.emberr.ui.theme.LocalFirstDayOfWeek
+import com.emberr.domain.util.time.daysOfWeekStartingFrom
+import com.emberr.domain.util.time.daysSinceStartOfWeek
+import com.emberr.domain.util.time.startOfWeek
 
 enum class CalendarViewMode { DAY, THREE_DAY, WEEK, MONTH }
 
-private val calendarViewModeLabels = listOf(
+internal val calendarViewModeLabels = listOf(
     CalendarViewMode.DAY to "Day",
     CalendarViewMode.THREE_DAY to "3 Day",
     CalendarViewMode.WEEK to "Week",
     CalendarViewMode.MONTH to "Month"
 )
 
-private object NoRippleIndicationNodeFactory : IndicationNodeFactory {
-    override fun create(interactionSource: InteractionSource): DelegatableNode = object : Modifier.Node() {}
-    override fun equals(other: Any?) = other === this
-    override fun hashCode(): Int = -1
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
     onNavigateBack: () -> Unit = {},
@@ -161,12 +130,14 @@ fun CalendarScreen(
 ) {
     val internalHazeState = remember { HazeState() }
 
-    var showViewsSheet by remember { mutableStateOf(false) }
-    var showCategoriesSheet by remember { mutableStateOf(false) }
+    var showSidebar by remember { mutableStateOf(false) }
+    var showSettingsSheet by remember { mutableStateOf(false) }
     var showCalendarOptionsMenu by remember { mutableStateOf(false) }
     val viewMode by viewModel.viewMode.collectAsState()
     var selectedDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     val categories by viewModel.categories.collectAsState()
+    val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
+    val firstDayOfWeek = LocalFirstDayOfWeek.current
     val events by remember(selectedDate) { viewModel.eventsForDate(selectedDate.toString()) }
         .collectAsState(initial = emptyList())
     var eventEditorState by remember { mutableStateOf<EventEditorState?>(null) }
@@ -224,36 +195,9 @@ fun CalendarScreen(
     }
 
     val dayCount = if (viewMode == CalendarViewMode.THREE_DAY) 3 else 7
-    val multiDayDates = remember(selectedDate, dayCount) {
-        val anchor = if (dayCount == 7) selectedDate.startOfWeek() else selectedDate
+    val multiDayDates = remember(selectedDate, dayCount, firstDayOfWeek) {
+        val anchor = if (dayCount == 7) selectedDate.startOfWeek(firstDayOfWeek) else selectedDate
         (0 until dayCount).map { offset -> anchor.plus(offset.toLong(), DateTimeUnit.DAY) }
-    }
-
-    var isBottomBarCompact by remember { mutableStateOf(false) }
-    val bottomBarScrollAccumulator = remember { FloatArray(1) }
-    val bottomBarNestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val delta = available.y
-                if (delta == 0f) return Offset.Zero
-
-                val accumulated = bottomBarScrollAccumulator[0]
-                if ((delta < 0f && accumulated > 0f) || (delta > 0f && accumulated < 0f)) {
-                    bottomBarScrollAccumulator[0] = 0f
-                }
-                bottomBarScrollAccumulator[0] += delta
-
-                val toggleThresholdPx = 60f
-                if (bottomBarScrollAccumulator[0] <= -toggleThresholdPx && !isBottomBarCompact) {
-                    isBottomBarCompact = true
-                    bottomBarScrollAccumulator[0] = 0f
-                } else if (bottomBarScrollAccumulator[0] >= toggleThresholdPx && isBottomBarCompact) {
-                    isBottomBarCompact = false
-                    bottomBarScrollAccumulator[0] = 0f
-                }
-                return Offset.Zero
-            }
-        }
     }
 
     Scaffold(
@@ -265,7 +209,6 @@ fun CalendarScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .consumeWindowInsets(paddingValues)
-                .nestedScroll(bottomBarNestedScrollConnection)
         ) {
             Column(
                 modifier = Modifier
@@ -456,24 +399,21 @@ fun CalendarScreen(
                                                     showCalendarOptionsMenu = false
                                                 }
                                             )
-
-                                            HorizontalDivider(
-                                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
-                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                                            )
-
-                                            CategorySection(
-                                                categories = categories,
-                                                onAddCategory = viewModel::addCategory,
-                                                onUpdateCategory = viewModel::updateCategory,
-                                                onDeleteCategory = viewModel::deleteCategory
-                                            )
                                         }
                                     }
                                 }
-                            } else if (viewMode != CalendarViewMode.MONTH) {
-                                Box(modifier = Modifier.size(TopHeaderBarButtonSize))
                             }
+                            TopBarIconButton(
+                                icon = painterResource(if (isDesktopPlatform) Res.drawable.cog else Res.drawable.sidebar),
+                                contentDescription = if (isDesktopPlatform) "Calendar settings" else "Calendar sidebar",
+                                bgColor = Color.Transparent,
+                                tint = MaterialTheme.colorScheme.primary,
+                                hazeState = internalHazeState,
+                                hazeStyle = EmberrBlur.Regular,
+                                onClick = {
+                                    if (isDesktopPlatform) showSettingsSheet = true else showSidebar = true
+                                }
+                            )
                         }
                     }
                 )
@@ -492,74 +432,46 @@ fun CalendarScreen(
             }
 
             if (!isDesktopPlatform) {
-                CalendarBottomBar(
+                CalendarSidebar(
+                    title = "Settings",
+                    isOpen = showSidebar,
+                    onClose = { showSidebar = false },
                     hazeState = internalHazeState,
-                    isCompact = isBottomBarCompact,
-                    onViewsClick = { showViewsSheet = true },
-                    onCategoriesClick = { showCategoriesSheet = true },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .zIndex(11f)
-                )
+                    modifier = Modifier.zIndex(30f)
+                ) {
+                    CalendarSettingsContent(
+                        viewMode = viewMode,
+                        onViewModeChange = { mode ->
+                            viewModel.setViewMode(mode)
+                            showSidebar = false
+                        },
+                        firstDayOfWeekPreference = firstDayOfWeekPreference,
+                        onFirstDayOfWeekPreferenceChange = viewModel::setFirstDayOfWeekPreference,
+                        categories = categories,
+                        onAddCategory = viewModel::addCategory,
+                        onUpdateCategory = viewModel::updateCategory,
+                        onDeleteCategory = viewModel::deleteCategory
+                    )
+                }
             }
         }
     }
 
     EmberrBottomSheet(
-        expanded = showViewsSheet,
-        onDismiss = { showViewsSheet = false },
-        title = "View",
+        expanded = showSettingsSheet,
+        onDismiss = { showSettingsSheet = false },
+        title = "Calendar Settings",
         contentHorizontalPadding = 0.dp
     ) {
-      CompositionLocalProvider(
-        LocalIndication provides NoRippleIndicationNodeFactory,
-        LocalRippleConfiguration provides null
-      ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-            ViewModeSection(
-                viewMode = viewMode,
-                onViewModeChange = { mode ->
-                    viewModel.setViewMode(mode)
-                    showViewsSheet = false
-                }
-            )
-
-            EmberrButtonPrimary(
-                text = "Close",
-                onClick = { showViewsSheet = false },
-                modifier = Modifier.fillMaxWidth()
-                    .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-            )
-        }
-      }
-    }
-
-    EmberrBottomSheet(
-        expanded = showCategoriesSheet,
-        onDismiss = { showCategoriesSheet = false },
-        title = "Categories",
-        contentHorizontalPadding = 0.dp
-    ) {
-      CompositionLocalProvider(
-        LocalIndication provides NoRippleIndicationNodeFactory,
-        LocalRippleConfiguration provides null
-      ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-            CategorySection(
-                categories = categories,
-                onAddCategory = viewModel::addCategory,
-                onUpdateCategory = viewModel::updateCategory,
-                onDeleteCategory = viewModel::deleteCategory
-            )
-
-            EmberrButtonPrimary(
-                text = "Close",
-                onClick = { showCategoriesSheet = false },
-                modifier = Modifier.fillMaxWidth()
-                    .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-            )
-        }
-      }
+        CalendarSettingsContent(
+            firstDayOfWeekPreference = firstDayOfWeekPreference,
+            onFirstDayOfWeekPreferenceChange = viewModel::setFirstDayOfWeekPreference,
+            categories = categories,
+            onAddCategory = viewModel::addCategory,
+            onUpdateCategory = viewModel::updateCategory,
+            onDeleteCategory = viewModel::deleteCategory,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
     }
 
     EventEditorSheet(
@@ -1007,11 +919,6 @@ private fun formatSingleLetterDayLabel(date: LocalDate): String {
     return "$initial ${date.day}"
 }
 
-private fun LocalDate.startOfWeek(): LocalDate {
-    val daysSinceSunday = dayOfWeek.isoDayNumber % 7
-    return this.plus(-daysSinceSunday.toLong(), DateTimeUnit.DAY)
-}
-
 @Composable
 private fun MultiDayTimeGrid(
     startDate: LocalDate,
@@ -1090,8 +997,9 @@ private fun MultiDayGridContent(
     onHourClick: (date: LocalDate, hour: Int) -> Unit,
     onEventClick: (event: CalendarEvent) -> Unit
 ) {
-    val dates = remember(windowStart, dayCount) {
-        val anchor = if (dayCount == 7) windowStart.startOfWeek() else windowStart
+    val firstDayOfWeek = LocalFirstDayOfWeek.current
+    val dates = remember(windowStart, dayCount, firstDayOfWeek) {
+        val anchor = if (dayCount == 7) windowStart.startOfWeek(firstDayOfWeek) else windowStart
         (0 until dayCount).map { offset -> anchor.plus(offset.toLong(), DateTimeUnit.DAY) }
     }
     val eventsByDate = dates.associateWith { date ->
@@ -1153,10 +1061,10 @@ private fun MultiDayGridContent(
     }
 }
 
-private fun buildMonthGridDates(anchorMonth: LocalDate): List<LocalDate> {
+private fun buildMonthGridDates(anchorMonth: LocalDate, firstDayOfWeek: DayOfWeek): List<LocalDate> {
     val firstOfMonth = LocalDate(anchorMonth.year, anchorMonth.month, 1)
-    val leadingBlanks = firstOfMonth.dayOfWeek.isoDayNumber % 7
-    val gridStart = firstOfMonth.plus(-leadingBlanks.toLong(), DateTimeUnit.DAY)
+    val leadingBlanks = daysSinceStartOfWeek(firstOfMonth.dayOfWeek, firstDayOfWeek)
+    val gridStart = firstOfMonth.startOfWeek(firstDayOfWeek)
     val nextMonthFirst = firstOfMonth.plus(1, DateTimeUnit.MONTH)
     val daysInMonth = firstOfMonth.daysUntil(nextMonthFirst)
     val totalCells = ((leadingBlanks + daysInMonth + 6) / 7) * 7
@@ -1284,7 +1192,10 @@ private fun MonthGridContent(
     onDayClick: (LocalDate) -> Unit
 ) {
     val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()) }
-    val gridDates = remember(selectedDate.year, selectedDate.month) { buildMonthGridDates(selectedDate) }
+    val firstDayOfWeek = LocalFirstDayOfWeek.current
+    val gridDates = remember(selectedDate.year, selectedDate.month, firstDayOfWeek) {
+        buildMonthGridDates(selectedDate, firstDayOfWeek)
+    }
     val yearMonth = remember(selectedDate.year, selectedDate.month) {
         "${selectedDate.year}-${selectedDate.month.number.toString().padStart(2, '0')}"
     }
@@ -1295,12 +1206,12 @@ private fun MonthGridContent(
 
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp).padding(bottom = 8.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-            listOf("S", "M", "T", "W", "T", "F", "S").forEachIndexed { index, label ->
+            daysOfWeekStartingFrom(firstDayOfWeek).forEach { day ->
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     Text(
-                        text = label,
+                        text = day.name.take(1),
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (index == 0) {
+                        color = if (day == DayOfWeek.SUNDAY) {
                             MaterialTheme.colorScheme.error
                         } else {
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -1349,8 +1260,7 @@ private fun MonthEventList(
     val bottomPadding = if (isDesktopPlatform) {
         16.dp
     } else {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-            EXPANDED_BOTTOM_BAR_PILL_HEIGHT + BOTTOM_BAR_BOTTOM_PADDING + 16.dp
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp
     }
 
     Box(modifier = modifier) {
@@ -1501,98 +1411,6 @@ private fun MonthDayCell(
 }
 
 @Composable
-private fun CalendarBottomBar(
-    hazeState: HazeState,
-    isCompact: Boolean,
-    onViewsClick: () -> Unit,
-    onCategoriesClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val contentColor = MaterialTheme.colorScheme.primary
-
-    val barAnimationSpec = tween<Dp>(durationMillis = 350, easing = FastOutSlowInEasing)
-    val barSize by animateDpAsState(
-        targetValue = if (isCompact) COMPACT_BOTTOM_BAR_PILL_HEIGHT else EXPANDED_BOTTOM_BAR_PILL_HEIGHT,
-        animationSpec = barAnimationSpec
-    )
-    val bottomGap by animateDpAsState(
-        targetValue = if (isCompact) COMPACT_BOTTOM_BAR_BOTTOM_PADDING else BOTTOM_BAR_BOTTOM_PADDING,
-        animationSpec = barAnimationSpec
-    )
-    val topGap = EXPANDED_BOTTOM_BAR_PILL_HEIGHT + BOTTOM_BAR_BOTTOM_PADDING - barSize - bottomGap
-    val navItemHeight = barSize - 12.dp
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(
-                top = topGap,
-                bottom = bottomGap,
-                start = 16.dp,
-                end = 16.dp
-            ),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Surface(
-            shape = CircleShape,
-            color = Color.Transparent,
-            modifier = Modifier
-                .wrapContentWidth()
-                .height(barSize)
-                .customEmberrShadow(CircleShape, elevation = EmberrShadowElevation.Standard)
-                .clip(CircleShape)
-                .emberrBlur(hazeState, EmberrBlur.Regular)
-                .border(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    shape = CircleShape
-                )
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CalendarBottomBarItem(
-                    icon = painterResource(Res.drawable.tablet),
-                    contentDescription = "Views",
-                    contentColor = contentColor,
-                    modifier = Modifier.size(navItemHeight),
-                    onClick = onViewsClick
-                )
-                CalendarBottomBarItem(
-                    icon = painterResource(Res.drawable.widget2),
-                    contentDescription = "Categories",
-                    contentColor = contentColor,
-                    modifier = Modifier.size(navItemHeight),
-                    onClick = onCategoriesClick
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun CalendarBottomBarItem(
-    icon: Painter,
-    contentDescription: String,
-    contentColor: Color,
-    modifier: Modifier = Modifier,
-    iconSize: Dp = 20.dp,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .clip(CircleShape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(icon, contentDescription = contentDescription, tint = contentColor, modifier = Modifier.size(iconSize))
-    }
-}
-
-@Composable
 private fun ViewModeSection(
     viewMode: CalendarViewMode,
     onViewModeChange: (CalendarViewMode) -> Unit,
@@ -1602,33 +1420,21 @@ private fun ViewModeSection(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        if (isDesktopPlatform) {
-            Text(
-                text = "View",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(bottom = 12.dp).padding(horizontal = 12.dp)
-            )
-        }
+        Text(
+            text = "View",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier.padding(bottom = 12.dp).padding(horizontal = 12.dp)
+        )
 
         calendarViewModeLabels.forEach { (mode, label) ->
-            val isSelectedMode = viewMode == mode
-
-            if (isDesktopPlatform) {
-                EmberrDesktopMenuOption(
-                    label = label,
-                    isSelected = isSelectedMode,
-                    onClick = { onViewModeChange(mode) },
-                    outerHorizontalPadding = 0.dp
-                )
-            } else {
-                EmberrBottomSheetOption(
-                    label = label,
-                    isSelected = isSelectedMode,
-                    onClick = { onViewModeChange(mode) }
-                )
-            }
+            EmberrDesktopMenuOption(
+                label = label,
+                isSelected = viewMode == mode,
+                onClick = { onViewModeChange(mode) },
+                outerHorizontalPadding = 0.dp
+            )
         }
     }
 }
