@@ -38,7 +38,7 @@ import kotlin.math.abs
 
 private val BottomSheetCornerRadius = 26.dp
 private val BottomSheetShape = RoundedCornerShape(topEnd = BottomSheetCornerRadius, topStart = BottomSheetCornerRadius)
-private val FloatingDialogShape = RoundedCornerShape(12.dp)
+private val FloatingDialogShape = RoundedCornerShape(22.dp)
 private val SheetEdgeWidth = 0.5.dp
 private const val SheetEdgeAlpha = 0.2f
 private val SheetHorizontalPadding = 20.dp
