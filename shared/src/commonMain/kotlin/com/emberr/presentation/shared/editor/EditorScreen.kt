@@ -37,13 +37,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isShiftPressed
@@ -853,6 +853,7 @@ fun EditorScreen(
     }
 
     val crossBlockScrollScope = rememberCoroutineScope()
+    var hasFocusInsideEditor by remember { mutableStateOf(false) }
     val latestTopBarClearancePx by rememberUpdatedState(topBarClearancePx)
     val crossBlockRevealMarginPx = with(LocalDensity.current) { 48.dp.toPx() }
     DisposableEffect(crossBlockSelection) {
@@ -865,12 +866,10 @@ fun EditorScreen(
                     localFocusRequest = null
                 } else {
                     crossBlockSelection.collapseFocusedTextSelection()
+                    if (!hasFocusInsideEditor) runCatching { selectionShortcutFocusRequester.requestFocus() }
                 }
                 showSlashMenu = false
             }
-
-            override fun handleKeyDuringSelection(keyEvent: KeyEvent): Boolean =
-                handleCrossBlockSelectionKey(keyEvent, crossBlockSelection, crossBlockCommands)
 
             override fun replaceSelectionWithTypedText(typedText: String) {
                 when {
@@ -996,6 +995,10 @@ fun EditorScreen(
                             }
                         }
                     }
+                        .onFocusChanged { hasFocusInsideEditor = it.hasFocus }
+                        .focusRequester(selectionShortcutFocusRequester)
+                        .focusTarget()
+                        .onPreviewKeyEvent { keyEvent -> handleCrossBlockSelectionKey(keyEvent, crossBlockSelection, crossBlockCommands) }
                 }
             )
     ) {

@@ -1575,9 +1575,6 @@ fun IsolatedEditorTextField(
                     isFieldFocused = it.isFocused
                 }
                 .onPreviewKeyEvent { event ->
-                    if (isTextSelectedAcrossBlocks && crossBlockSelection?.host?.handleKeyDuringSelection(event) == true) {
-                        return@onPreviewKeyEvent true
-                    }
                     val isBackspace = event.key == Key.Backspace
                     val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
 

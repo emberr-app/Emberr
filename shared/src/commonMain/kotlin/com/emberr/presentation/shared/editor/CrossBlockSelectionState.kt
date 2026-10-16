@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.TextRange
@@ -27,7 +26,6 @@ interface CrossBlockSelectionHost {
     fun onSelectingStarted()
     fun textLengthOf(blockId: String): Int?
     fun revealFocus(step: SelectionStep)
-    fun handleKeyDuringSelection(keyEvent: KeyEvent): Boolean
     fun replaceSelectionWithTypedText(typedText: String)
 }
 
