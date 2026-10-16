@@ -20,14 +20,21 @@ import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.reminders.ReminderScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import java.util.UUID
+import kotlin.time.Clock
 
 class CalendarViewModel(
     private val repository: NoteRepository,
@@ -57,6 +64,29 @@ class CalendarViewModel(
 
     fun setFirstDayOfWeekPreference(preference: FirstDayOfWeekPreference) {
         settingsManager.saveFirstDayOfWeekPreference(preference.name)
+    }
+
+    private val todayWhenCalendarOpened = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    private val searchQueryState = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = searchQueryState.asStateFlow()
+
+    val searchResults: StateFlow<CalendarSearchResults?> = combine(
+        searchQueryState,
+        repository.getCalendarTasksForSearch(todayWhenCalendarOpened)
+            .map { tasks -> tasks.mapNotNull { it.toCalendarEvent() } },
+        categories
+    ) { query, events, currentCategories ->
+        if (query.isBlank()) {
+            CalendarSearchResults(upcomingEvents = emptyList(), pastEvents = emptyList())
+        } else {
+            searchCalendarEvents(events, currentCategories, query.trim(), todayWhenCalendarOpened)
+        }
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun onSearchQueryChange(query: String) {
+        searchQueryState.value = query
     }
 
     init {
@@ -270,7 +300,7 @@ class CalendarViewModel(
 
 private fun defaultCategoryIdInSpace(categoryId: String, spaceId: String) = "${categoryId}_$spaceId"
 
-private fun CategoryEntity.toCalendarCategory() = CalendarCategory(
+internal fun CategoryEntity.toCalendarCategory() = CalendarCategory(
     id = categoryId,
     name = name,
     colorHex = colorHex

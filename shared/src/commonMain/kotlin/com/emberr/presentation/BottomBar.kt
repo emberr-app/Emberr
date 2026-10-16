@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -236,7 +237,9 @@ fun EmberrBottomBar(
                             BottomBarSearchField(
                                 query = searchQuery,
                                 onQueryChange = onSearchQueryChange,
-                                onClose = onCloseSearch
+                                onCloseClick = {
+                                    if (searchQuery.isEmpty()) onCloseSearch() else onSearchQueryChange("")
+                                }
                             )
                         } else {
                             Row(
@@ -315,10 +318,12 @@ fun EmberrBottomBar(
 }
 
 @Composable
-private fun BottomBarSearchField(
+internal fun BottomBarSearchField(
     query: String,
     onQueryChange: (String) -> Unit,
-    onClose: () -> Unit
+    onCloseClick: () -> Unit,
+    placeholder: String = "Search anything",
+    isSearchIconVisible: Boolean = true
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -338,7 +343,7 @@ private fun BottomBarSearchField(
             painter = painterResource(Res.drawable.search),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(18.dp).alpha(if (isSearchIconVisible) 1f else 0f)
         )
         Spacer(modifier = Modifier.width(10.dp))
         BasicTextField(
@@ -352,7 +357,7 @@ private fun BottomBarSearchField(
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (query.isEmpty()) {
                         Text(
-                            text = "Search all notes",
+                            text = placeholder,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                         )
@@ -365,9 +370,7 @@ private fun BottomBarSearchField(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .clickable(remember { MutableInteractionSource() }, null) {
-                    if (query.isEmpty()) onClose() else onQueryChange("")
-                },
+                .clickable(remember { MutableInteractionSource() }, null, onClick = onCloseClick),
             contentAlignment = Alignment.Center
         ) {
             Icon(

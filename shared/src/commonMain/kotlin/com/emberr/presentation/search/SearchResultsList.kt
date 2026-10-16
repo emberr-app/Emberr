@@ -2,6 +2,7 @@ package com.emberr.presentation.search
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -41,17 +43,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.NoteSearchResult
+import com.emberr.presentation.calendar.CalendarEvent
+import com.emberr.presentation.calendar.CalendarEventSearchResult
+import com.emberr.presentation.calendar.matchingDetail
+import com.emberr.presentation.calendar.searchResultDateLabel
+import com.emberr.presentation.calendar.toCategoryColor
 import com.emberr.presentation.home.RenameBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar_day
 import emberr.shared.generated.resources.pen
+import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.trash
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 
 private const val EMPTY_MESSAGE_DELAY_MILLIS = 350L
+private const val COLLAPSED_EVENT_RESULT_COUNT = 3
 private val ResultShape = RoundedCornerShape(topStart = 6.dp, topEnd = 18.dp, bottomEnd = 18.dp, bottomStart = 18.dp)
 
 /**
@@ -63,8 +73,10 @@ private val ResultShape = RoundedCornerShape(topStart = 6.dp, topEnd = 18.dp, bo
 fun SearchResultsList(
     query: String,
     results: List<NoteSearchResult>,
+    eventResults: List<CalendarEventSearchResult>,
     onNoteClick: (String) -> Unit,
     onDailyNoteClick: (String) -> Unit,
+    onEventClick: (CalendarEvent) -> Unit,
     onRenameNote: (noteId: String, newTitle: String) -> Unit,
     onSetNoteFavorite: (noteId: String, isFavorite: Boolean) -> Unit,
     onTrashNote: (noteId: String) -> Unit,
@@ -75,10 +87,11 @@ fun SearchResultsList(
     var resultWithOptions by remember { mutableStateOf<NoteSearchResult?>(null) }
     var showOptionsSheet by remember { mutableStateOf(false) }
     var showRenameSheet by remember { mutableStateOf(false) }
+    var areAllEventsShown by remember(query) { mutableStateOf(false) }
 
-    LaunchedEffect(query, results) {
+    LaunchedEffect(query, results, eventResults) {
         hasSettledOnNoResults = false
-        if (results.isEmpty()) {
+        if (results.isEmpty() && eventResults.isEmpty()) {
             delay(EMPTY_MESSAGE_DELAY_MILLIS)
             hasSettledOnNoResults = true
         }
@@ -87,19 +100,51 @@ fun SearchResultsList(
     Box(modifier = modifier) {
         when {
             query.isBlank() -> SearchMessage("Start typing to search titles, snippets, and note content.")
-            results.isEmpty() -> if (hasSettledOnNoResults) SearchMessage("No matching notes found.")
+            results.isEmpty() && eventResults.isEmpty() ->
+                if (hasSettledOnNoResults) SearchMessage("No matching notes or events found.")
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                if (eventResults.isNotEmpty()) {
+                    item(key = "events_header") { SearchSectionHeader("Events") }
+                    val shownEventResults = if (areAllEventsShown) {
+                        eventResults
+                    } else {
+                        eventResults.take(COLLAPSED_EVENT_RESULT_COUNT)
+                    }
+                    items(shownEventResults, key = { "event_${it.event.blockId}_${it.event.dateString}" }) { eventResult ->
+                        EventSearchResultRow(
+                            result = eventResult,
+                            query = query,
+                            onClick = { onEventClick(eventResult.event) }
+                        )
+                    }
+                    if (shownEventResults.size < eventResults.size) {
+                        item(key = "events_show_all") {
+                            Text(
+                                text = "Show all ${eventResults.size} events",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { areAllEventsShown = true }
+                                    .padding(horizontal = 4.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                    if (results.isNotEmpty()) {
+                        item(key = "notes_header") { SearchSectionHeader("Notes", modifier = Modifier.padding(top = 8.dp)) }
+                    }
+                }
                 items(results, key = { it.note.noteId }) { result ->
                     SearchResultRow(
                         result = result,
                         query = query,
                         onClick = {
                             if (result.note.isDaily) {
-                                result.note.dateString?.let(onDailyNoteClick)
+                                result.dailyDateToOpen?.let(onDailyNoteClick)
                             } else {
                                 onNoteClick(result.note.noteId)
                             }
@@ -194,6 +239,96 @@ private fun SearchResultOptionIcon(icon: Painter, tint: Color) {
 }
 
 @Composable
+private fun SearchSectionHeader(title: String, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        modifier = modifier.padding(start = 4.dp)
+    )
+}
+
+@Composable
+private fun EventSearchResultRow(
+    result: CalendarEventSearchResult,
+    query: String,
+    onClick: () -> Unit
+) {
+    val event = result.event
+    val trimmedQuery = query.trim()
+    val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+    val matchingDetail = event.matchingDetail(trimmedQuery)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(ResultShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(
+                        result.category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.outline,
+                        CircleShape
+                    )
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = highlightMatches(event.text.ifBlank { "Untitled event" }, trimmedQuery, highlightStyle),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        matchingDetail?.let { detail ->
+            Text(
+                text = highlightMatches(detail, trimmedQuery, highlightStyle),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 6.dp)
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.calendar_day),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = event.searchResultDateLabel(LocalUsesTwentyFourHourClock.current),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (event.recurrenceRule != null) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    painter = painterResource(Res.drawable.refresh_cw),
+                    contentDescription = "Repeats",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier.size(12.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun SearchMessage(text: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
@@ -220,7 +355,7 @@ private fun SearchResultRow(
     // A daily note is stored with the title "Daily: <date>", which the calendar chip below already
     // says - so the title line shows the bare date and the chip carries the "Daily" part.
     val dailyDateString = note.dateString?.takeIf { note.isDaily }
-    val titleText = dailyDateString ?: note.title.ifBlank { "Untitled" }
+    val titleText = if (result.isPinnedBlocks) "Pinned" else dailyDateString ?: note.title.ifBlank { "Untitled" }
 
     Column(
         modifier = Modifier

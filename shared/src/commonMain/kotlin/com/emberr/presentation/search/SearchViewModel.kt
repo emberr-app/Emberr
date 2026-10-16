@@ -6,6 +6,10 @@ import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.model.NoteSearchResult
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.ActiveSpaceStore
+import com.emberr.presentation.calendar.CalendarEventSearchResult
+import com.emberr.presentation.calendar.searchCalendarEvents
+import com.emberr.presentation.calendar.toCalendarCategory
+import com.emberr.presentation.calendar.toCalendarEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -20,8 +24,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 private const val QUERY_SETTLE_MILLIS = 90L
 
@@ -79,6 +87,31 @@ class SearchViewModel(
             }
         }
         .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val eventResults: StateFlow<List<CalendarEventSearchResult>> = _query
+        .debounce(QUERY_SETTLE_MILLIS)
+        .map { query -> query.trim() }
+        .distinctUntilChanged()
+        .flatMapLatest { query ->
+            if (query.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                combine(
+                    repository.getCalendarTasksForSearch(today),
+                    repository.getAllCategories()
+                ) { tasks, categoryEntities ->
+                    val categories = categoryEntities.map { it.toCalendarCategory() }
+                    val matches = searchCalendarEvents(tasks.mapNotNull { it.toCalendarEvent() }, categories, query, today)
+                    (matches.upcomingEvents + matches.pastEvents).map { event ->
+                        CalendarEventSearchResult(event, categories.firstOrNull { it.id == event.categoryId })
+                    }
+                }
+            }
+        }
+        .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun onQueryChange(newQuery: String) {

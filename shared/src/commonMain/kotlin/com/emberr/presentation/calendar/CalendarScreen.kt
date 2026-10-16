@@ -1,6 +1,7 @@
 package com.emberr.presentation.calendar
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -13,6 +14,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,13 +22,11 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,11 +41,10 @@ import com.emberr.domain.util.eventbus.WidgetComposeRequestBus
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -57,6 +56,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +66,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -74,14 +75,17 @@ import androidx.compose.ui.zIndex
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.EmberrShadowElevation
+import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
+import com.emberr.presentation.shared.components.customEmberrShadow
+import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
-import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
-import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopEdgeBlurHeight
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
+import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -132,7 +136,6 @@ fun CalendarScreen(
 
     var showSidebar by remember { mutableStateOf(false) }
     var showSettingsSheet by remember { mutableStateOf(false) }
-    var showCalendarOptionsMenu by remember { mutableStateOf(false) }
     val viewMode by viewModel.viewMode.collectAsState()
     var selectedDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     val categories by viewModel.categories.collectAsState()
@@ -146,6 +149,17 @@ fun CalendarScreen(
     var pendingScopeAction by remember { mutableStateOf<((RecurrenceEditScope) -> Unit)?>(null) }
     var slideDirection by remember { mutableStateOf(AnimatedContentTransitionScope.SlideDirection.Left) }
 
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
+    var isSearchOpen by rememberSaveable { mutableStateOf(false) }
+    val areSearchResultsVisible = isSearchOpen && searchQuery.isNotBlank()
+    val focusManager = LocalFocusManager.current
+    val closeSearch: () -> Unit = {
+        focusManager.clearFocus()
+        viewModel.onSearchQueryChange("")
+        isSearchOpen = false
+    }
+
     val scrollState = remember(viewMode) { ScrollState(0) }
     val topEdgeFadeAlpha by remember(scrollState) {
         derivedStateOf { if (scrollState.value > 0) 1f else 0f }
@@ -156,9 +170,9 @@ fun CalendarScreen(
     val topBarHeightDp = with(density) { topBarHeightPx.toDp() }
 
     LaunchedEffect(Unit) {
-        WidgetCalendarEventBus.requestedEvents.collect { requestedBlockId ->
+        WidgetCalendarEventBus.requestedEvents.collect { request ->
             WidgetCalendarEventBus.consumeRequestedEvent()
-            val event = viewModel.eventForBlock(requestedBlockId).first()
+            val event = viewModel.eventForBlock(request.blockId, request.occurrenceDate).first()
             if (event != null) {
                 selectedDate = LocalDate.parse(event.dateString)
                 eventEditorState = event.toEditorState()
@@ -323,6 +337,33 @@ fun CalendarScreen(
                 }
             }
 
+            if (!isDesktopPlatform) {
+                AnimatedVisibility(
+                    visible = areSearchResultsVisible,
+                    enter = fadeIn(tween(150)),
+                    exit = fadeOut(tween(150)),
+                    modifier = Modifier.fillMaxSize().zIndex(5f)
+                ) {
+                    CalendarSearchResultsList(
+                        query = searchQuery,
+                        results = searchResults,
+                        categories = categories,
+                        hazeState = internalHazeState,
+                        topPadding = topBarHeightDp,
+                        onEventClick = { event ->
+                            closeSearch()
+                            val eventDate = LocalDate.parse(event.dateString)
+                            slideDirection = if (eventDate < selectedDate) {
+                                AnimatedContentTransitionScope.SlideDirection.Right
+                            } else {
+                                AnimatedContentTransitionScope.SlideDirection.Left
+                            }
+                            selectedDate = eventDate
+                            eventEditorState = event.toEditorState()
+                        }
+                    )
+                }
+            }
 
             Box(
                 modifier = Modifier
@@ -352,7 +393,7 @@ fun CalendarScreen(
                         )
                     },
                     actions = {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) 12.dp else 8.dp)) {
                             if (viewMode == CalendarViewMode.MONTH) {
                                 TopBarIconButton(
                                     icon = painterResource(Res.drawable.plus),
@@ -375,33 +416,11 @@ fun CalendarScreen(
                                 )
                             }
                             if (isDesktopPlatform) {
-                                Box {
-                                    TopBarIconButton(
-                                        icon = Icons.Default.MoreVert,
-                                        contentDescription = "Options",
-                                        bgColor = Color.Transparent,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        hazeState = internalHazeState,
-                                        hazeStyle = EmberrBlur.Regular,
-                                        onClick = { showCalendarOptionsMenu = true }
-                                    )
-
-                                    EmberrDesktopMenu(
-                                        expanded = showCalendarOptionsMenu,
-                                        onDismissRequest = { showCalendarOptionsMenu = false },
-                                        modifier = Modifier.width(260.dp)
-                                    ) {
-                                        Column(modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp).padding(top = 6.dp)) {
-                                            ViewModeSection(
-                                                viewMode = viewMode,
-                                                onViewModeChange = {
-                                                    viewModel.setViewMode(it)
-                                                    showCalendarOptionsMenu = false
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
+                                CalendarViewModeSwitcher(
+                                    viewMode = viewMode,
+                                    onViewModeChange = viewModel::setViewMode,
+                                    hazeState = internalHazeState
+                                )
                             }
                             TopBarIconButton(
                                 icon = painterResource(if (isDesktopPlatform) Res.drawable.cog else Res.drawable.sidebar),
@@ -419,7 +438,7 @@ fun CalendarScreen(
                 )
             }
 
-            if (viewMode == CalendarViewMode.THREE_DAY || viewMode == CalendarViewMode.WEEK) {
+            if ((viewMode == CalendarViewMode.THREE_DAY || viewMode == CalendarViewMode.WEEK) && !areSearchResultsVisible) {
                 MultiDayHeaderBar(
                     dates = multiDayDates,
                     slideDirection = slideDirection,
@@ -432,6 +451,19 @@ fun CalendarScreen(
             }
 
             if (!isDesktopPlatform) {
+                CalendarSearchBar(
+                    isOpen = isSearchOpen,
+                    query = searchQuery,
+                    onQueryChange = viewModel::onSearchQueryChange,
+                    onOpenClick = { isSearchOpen = true },
+                    onCloseClick = closeSearch,
+                    hazeState = internalHazeState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .zIndex(20f)
+                )
+                KmpBackHandler(enabled = isSearchOpen, onBack = closeSearch)
+
                 CalendarSidebar(
                     title = "Settings",
                     isOpen = showSidebar,
@@ -754,7 +786,7 @@ private fun DayHourGrid(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .smoothWheelScroll(scrollState)
-            .padding(top = topBarHeightDp, bottom = if (isDesktopPlatform) 0.dp else 56.dp)
+            .padding(top = topBarHeightDp, bottom = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding())
     ) {
         HourLabelColumn(hours = hours, hourHeight = hourHeight)
 
@@ -778,7 +810,7 @@ private fun DayHourGrid(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = topBarHeightDp, bottom = if (isDesktopPlatform) 0.dp else 56.dp)
+                .padding(top = topBarHeightDp, bottom = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding())
         )
     }
 }
@@ -1020,7 +1052,7 @@ private fun MultiDayGridContent(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .smoothWheelScroll(scrollState)
-            .padding(top = topBarHeightDp + headerHeight)
+            .padding(top = topBarHeightDp + headerHeight, bottom = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding())
     ) {
         HourLabelColumn(hours = hours, hourHeight = hourHeight)
 
@@ -1056,7 +1088,7 @@ private fun MultiDayGridContent(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = topBarHeightDp + headerHeight)
+                .padding(top = topBarHeightDp + headerHeight, bottom = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding())
         )
     }
 }
@@ -1260,7 +1292,7 @@ private fun MonthEventList(
     val bottomPadding = if (isDesktopPlatform) {
         16.dp
     } else {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp
+        calendarSearchBarBottomPadding() + 4.dp
     }
 
     Box(modifier = modifier) {
@@ -1411,30 +1443,56 @@ private fun MonthDayCell(
 }
 
 @Composable
-private fun ViewModeSection(
+private fun CalendarViewModeSwitcher(
     viewMode: CalendarViewMode,
     onViewModeChange: (CalendarViewMode) -> Unit,
-    modifier: Modifier = Modifier
+    hazeState: HazeState
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        Text(
-            text = "View",
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.padding(bottom = 12.dp).padding(horizontal = 12.dp)
-        )
-
-        calendarViewModeLabels.forEach { (mode, label) ->
-            EmberrDesktopMenuOption(
-                label = label,
-                isSelected = viewMode == mode,
-                onClick = { onViewModeChange(mode) },
-                outerHorizontalPadding = 0.dp
+    Surface(
+        shape = CircleShape,
+        color = Color.Transparent,
+        modifier = Modifier
+            .height(TopHeaderBarButtonSize)
+            .customEmberrShadow(CircleShape, elevation = EmberrShadowElevation.Standard)
+            .clip(CircleShape)
+            .emberrBlur(hazeState, EmberrBlur.Regular)
+            .border(
+                width = 0.5.dp,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                shape = CircleShape
             )
+    ) {
+        Row(
+            modifier = Modifier.padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            calendarViewModeLabels.forEach { (mode, label) ->
+                val isSelected = viewMode == mode
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onViewModeChange(mode) }
+                        .padding(horizontal = 14.dp)
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        },
+                        maxLines = 1
+                    )
+                }
+            }
         }
     }
 }

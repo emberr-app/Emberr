@@ -1912,6 +1912,28 @@ class NoteRepositoryImpl(
     override fun getAllTasksFlow(): Flow<List<CalendarTaskEntity>> =
         inActiveSpace { calendarTaskDao.getAllTasksFlow(it) }
 
+    override fun getCalendarTasksForSearch(today: LocalDate): Flow<List<CalendarTaskEntity>> =
+        inActiveSpace { spaceId ->
+            combine(
+                calendarTaskDao.getAllTasksFlow(spaceId),
+                calendarEventExceptionDao.getAllExceptionsFlow()
+            ) { tasks, exceptions ->
+                val cancelledOccurrences = exceptions
+                    .filter { it.isCancelled }
+                    .map { it.blockId to it.occurrenceDate }
+                    .toSet()
+                tasks.flatMap { task ->
+                    val rule = task.toRecurrenceRule() ?: return@flatMap listOf(task)
+                    val anchor = task.targetDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                        ?: return@flatMap emptyList()
+                    val occurrenceDate = RecurrenceEngine.nextOrLastOccurrence(rule, anchor, today) { date ->
+                        (task.blockId to date.toString()) in cancelledOccurrences
+                    } ?: return@flatMap emptyList()
+                    expandOccurrences(listOf(task), exceptions, occurrenceDate, occurrenceDate)
+                }
+            }
+        }
+
     override suspend fun upsertOccurrenceCompletion(blockId: String, occurrenceDate: String, isChecked: Boolean) =
         withContext(Dispatchers.IO) {
             val now = System.currentTimeMillis()
