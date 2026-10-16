@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor.blockViews
+package com.emberr.presentation.shared.editor.blockViews.media
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor.blockViews
+package com.emberr.presentation.shared.editor.blockViews.callout
 
 import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CalloutType

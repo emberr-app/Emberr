@@ -97,10 +97,10 @@ import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import com.emberr.presentation.shared.editor.EditorActions
-import com.emberr.presentation.shared.editor.blockViews.AudioBlockView
-import com.emberr.presentation.shared.editor.blockViews.BookmarkBlockView
-import com.emberr.presentation.shared.editor.blockViews.DocumentBlockView
-import com.emberr.presentation.shared.editor.blockViews.ImageBlockView
+import com.emberr.presentation.shared.editor.blockViews.media.AudioBlockView
+import com.emberr.presentation.shared.editor.blockViews.media.BookmarkBlockView
+import com.emberr.presentation.shared.editor.blockViews.media.DocumentBlockView
+import com.emberr.presentation.shared.editor.blockViews.media.ImageBlockView
 import com.emberr.presentation.shared.editor.blockViews.LinkedNoteBlockView
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyBlockView
 import com.emberr.presentation.shared.editor.blockViews.TableBlockView

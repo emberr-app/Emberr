@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor.blockViews
+package com.emberr.presentation.shared.editor.blockViews.callout
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier

@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor.blockViews
+package com.emberr.presentation.shared.editor.blockViews.media
 
 import java.io.File
 import javax.imageio.ImageIO

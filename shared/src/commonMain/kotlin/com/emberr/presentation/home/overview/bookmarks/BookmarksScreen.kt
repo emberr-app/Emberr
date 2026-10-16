@@ -62,7 +62,7 @@ import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.FocusRequest
-import com.emberr.presentation.shared.editor.blockViews.BookmarkBlockView
+import com.emberr.presentation.shared.editor.blockViews.media.BookmarkBlockView
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res

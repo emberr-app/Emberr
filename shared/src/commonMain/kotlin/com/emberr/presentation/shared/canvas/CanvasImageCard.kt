@@ -29,8 +29,8 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.domain.util.media.MediaStorageHelper
-import com.emberr.presentation.shared.editor.blockViews.MediaAvailability
-import com.emberr.presentation.shared.editor.blockViews.rememberMediaAvailability
+import com.emberr.presentation.shared.editor.blockViews.media.MediaAvailability
+import com.emberr.presentation.shared.editor.blockViews.media.rememberMediaAvailability
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.roundToInt
