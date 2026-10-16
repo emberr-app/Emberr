@@ -17,7 +17,6 @@ import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.eye3
 import emberr.shared.generated.resources.format_bold
-import emberr.shared.generated.resources.highlight
 import emberr.shared.generated.resources.indent_left
 import emberr.shared.generated.resources.indent_right
 import emberr.shared.generated.resources.card_edit2
@@ -26,6 +25,7 @@ import emberr.shared.generated.resources.mouse_square2
 import emberr.shared.generated.resources.ordered_list
 import emberr.shared.generated.resources.quote_down2
 import emberr.shared.generated.resources.scissor2
+import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.textalign_center2
 import emberr.shared.generated.resources.textalign_justifycenter2
@@ -155,7 +155,7 @@ fun BlockSelectionMenuContent(
                         SlashMenuItemData("Italic", Res.drawable.italic, 13.dp, closeThen { onToggleFormat("italic") }),
                         SlashMenuItemData("Underline", Res.drawable.underline, 15.dp, closeThen { onToggleFormat("underline") }),
                         SlashMenuItemData("Strikethrough", Res.drawable.text_x, 15.dp, closeThen { onToggleFormat("strike") }),
-                        SlashMenuItemData("Highlight", Res.drawable.highlight, 15.dp, closeThen { onToggleFormat("highlight") })
+                        SlashMenuItemData("Highlight", Res.drawable.text_highlight, 19.dp, closeThen { onToggleFormat("highlight") })
                     )
                 )
             )

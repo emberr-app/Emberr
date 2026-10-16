@@ -114,7 +114,6 @@ import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.fuzzybubbles_bold
 import emberr.shared.generated.resources.fuzzybubbles_regular
 import emberr.shared.generated.resources.eraser
-import emberr.shared.generated.resources.highlight
 import emberr.shared.generated.resources.image
 import emberr.shared.generated.resources.line_tool
 import emberr.shared.generated.resources.maximize_2
