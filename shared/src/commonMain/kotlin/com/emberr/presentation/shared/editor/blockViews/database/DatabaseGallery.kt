@@ -73,6 +73,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.roundToInt
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 private val CardGap = 12.dp
 private val CardShape = RoundedCornerShape(10.dp)
@@ -410,7 +411,7 @@ private fun DatabaseCardValue(cell: PropertyBlock, numberFormat: DatabaseNumberF
             }
         }
         cell.valueType.holdsDate -> if (cell.date != null) {
-            Text(text = formatPropertyDateRange(cell.dateRange), style = MaterialTheme.typography.bodyMedium, color = valueColor, maxLines = 1)
+            Text(text = formatPropertyDateRange(cell.dateRange, LocalUsesTwentyFourHourClock.current), style = MaterialTheme.typography.bodyMedium, color = valueColor, maxLines = 1)
         }
         else -> {
             Text(

@@ -24,6 +24,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 internal enum class PropertyDatePart { START_DATE, START_TIME, END_DATE, END_TIME }
 
@@ -94,7 +95,7 @@ private fun PropertyDatePartOptions(
     )
     if (time != null) {
         DatabaseMenuOption(
-            label = formatPropertyTime(time),
+            label = formatPropertyTime(time, LocalUsesTwentyFourHourClock.current),
             icon = { DatabaseOptionIcon(Res.drawable.clock_circle) },
             onClick = onPickTime
         )

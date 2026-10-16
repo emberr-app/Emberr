@@ -12,13 +12,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
-import kotlinx.datetime.toLocalDateTime
+import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
 
 private const val maximumTasksShown = 40
@@ -27,7 +26,8 @@ private const val inboxNoteTitle = "Inbox"
 
 class TasksWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
-    private val noteDao: NoteDao
+    private val noteDao: NoteDao,
+    private val clockFormat: WidgetClockFormat
 ) {
     fun observeTasks(): Flow<List<CalendarTaskEntity>> =
         calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow()
@@ -94,7 +94,7 @@ class TasksWidgetContentReader(
                 blockId = task.blockId,
                 text = task.text.trim().take(maximumCharactersPerTask).ifBlank { "Untitled task" },
                 isChecked = task.isChecked,
-                timeLabel = task.reminderTimestamp?.let { timestamp -> formatClockTime(timestamp) }
+                timeLabel = task.reminderTimestamp?.let { timestamp -> clockFormat.clockTimeOf(timestamp) }
             )
         }
 
@@ -158,10 +158,4 @@ private fun dailyDateLabel(dateString: String): String {
             "$shortDay, $shortMonth ${date.day}"
         }
     }
-}
-
-private fun formatClockTime(timestamp: Long): String {
-    val localTime = Instant.fromEpochMilliseconds(timestamp)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${localTime.hour.toString().padStart(2, '0')}:${localTime.minute.toString().padStart(2, '0')}"
 }

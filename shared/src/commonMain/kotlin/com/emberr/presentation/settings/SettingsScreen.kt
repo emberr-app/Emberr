@@ -76,6 +76,10 @@ import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.fontFamilyFor
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
+import com.emberr.domain.util.time.TimeFormatPreference
+import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.domain.util.time.timeFormatPreferenceNamed
 import com.emberr.presentation.home.overview.OverviewSection
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.astroid
@@ -102,6 +106,7 @@ import emberr.shared.generated.resources.shield_alert
 import emberr.shared.generated.resources.sidebar
 import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.text_type
+import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.timer_reset
 import emberr.shared.generated.resources.triangle_alert
 import com.emberr.presentation.shared.SubNoteOpenMode
@@ -176,6 +181,9 @@ fun SettingsScreen(
     val fontStylePreference by viewModel.fontStylePreference.collectAsState()
     var showFontSizeSheet by remember { mutableStateOf(false) }
     var showFontStyleSheet by remember { mutableStateOf(false) }
+
+    val timeFormatPreference by viewModel.timeFormatPreference.collectAsState()
+    var showTimeFormatSheet by remember { mutableStateOf(false) }
 
     val topBarFadeStyle by viewModel.topBarFadeStyle.collectAsState()
     var showTopBarFadeStyleSheet by remember { mutableStateOf(false) }
@@ -299,6 +307,7 @@ fun SettingsScreen(
                     fontSizeLabel = fontSizeDisplayNameFor(fontSizePreference),
                     fontStyleLabel = runCatching { FontStylePreference.valueOf(fontStylePreference) }
                         .getOrDefault(FontStylePreference.POPPINS).displayName,
+                    timeFormatLabel = timeFormatPreferenceNamed(timeFormatPreference).displayName,
                     subNoteOpenModeLabel = runCatching { SubNoteOpenMode.valueOf(subNoteOpenMode) }
                         .getOrDefault(SubNoteOpenMode.SIDE_PANEL).displayName,
                     topBarFadeStyleLabel = topBarFadeStyleFor(topBarFadeStyle).displayName,
@@ -312,6 +321,7 @@ fun SettingsScreen(
                     onThemeClick = { showThemeSheet = true },
                     onFontSizeClick = { showFontSizeSheet = true },
                     onFontStyleClick = { showFontStyleSheet = true },
+                    onTimeFormatClick = { showTimeFormatSheet = true },
                     onSubNoteOpenModeClick = { showSubNoteOpenModeSheet = true },
                     onTopBarFadeStyleClick = { showTopBarFadeStyleSheet = true },
                     onShowScrollbarChange = { viewModel.setShowScrollbar(it) },
@@ -588,6 +598,37 @@ fun SettingsScreen(
                 EmberrButtonPrimary(
                     text = "Close",
                     onClick = { showFontStyleSheet = false },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
+                )
+            }
+        }
+    }
+
+    if (showTimeFormatSheet) {
+        EmberrBottomSheet(
+            expanded = true,
+            onDismiss = { showTimeFormatSheet = false },
+            title = "Time Format",
+            contentHorizontalPadding = 0.dp
+        ) {
+            val selectedTimeFormat = timeFormatPreferenceNamed(timeFormatPreference)
+
+            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+                TimeFormatPreference.entries.forEach { option ->
+                    EmberrBottomSheetOption(
+                        label = option.displayName,
+                        isSelected = option == selectedTimeFormat,
+                        onClick = {
+                            viewModel.setTimeFormatPreference(option.name)
+                            showTimeFormatSheet = false
+                        }
+                    )
+                }
+
+                EmberrButtonPrimary(
+                    text = "Close",
+                    onClick = { showTimeFormatSheet = false },
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 12.dp, start = 20.dp, end = 20.dp)
                 )
@@ -1011,7 +1052,7 @@ private fun DataSettingsSection(
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.timer_reset),
                         title = "Backup Time",
-                        trailingLabel = backupTime,
+                        trailingLabel = backupTimeLabel(backupTime, LocalUsesTwentyFourHourClock.current),
                         onClick = onPickBackupTime
                     )
 
@@ -1139,6 +1180,7 @@ private fun AppearanceSettingsSection(
     themeLabel: String,
     fontSizeLabel: String,
     fontStyleLabel: String,
+    timeFormatLabel: String,
     subNoteOpenModeLabel: String,
     topBarFadeStyleLabel: String,
     showScrollbar: Boolean,
@@ -1151,6 +1193,7 @@ private fun AppearanceSettingsSection(
     onThemeClick: () -> Unit,
     onFontSizeClick: () -> Unit,
     onFontStyleClick: () -> Unit,
+    onTimeFormatClick: () -> Unit,
     onSubNoteOpenModeClick: () -> Unit,
     onTopBarFadeStyleClick: () -> Unit,
     onShowScrollbarChange: (Boolean) -> Unit,
@@ -1181,6 +1224,13 @@ private fun AppearanceSettingsSection(
             title = "Font Style",
             trailingLabel = fontStyleLabel,
             onClick = onFontStyleClick
+        )
+        SettingsDivider()
+        SettingsActionRow(
+            icon = painterResource(Res.drawable.clock_circle),
+            title = "Time Format",
+            trailingLabel = timeFormatLabel,
+            onClick = onTimeFormatClick
         )
 
         if (!isDesktopPlatform) {
@@ -1657,3 +1707,10 @@ private fun fontSizeDisplayNameFor(preferenceName: String): String =
 
 private fun topBarFadeStyleFor(styleName: String): TopBarFadeStyle =
     runCatching { TopBarFadeStyle.valueOf(styleName) }.getOrDefault(TopBarFadeStyle.BLUR)
+
+private fun backupTimeLabel(backupTime: String, usesTwentyFourHourClock: Boolean): String {
+    val hour = backupTime.substringBefore(":").toIntOrNull()
+    val minute = backupTime.substringAfter(":").toIntOrNull()
+    if (hour == null || minute == null) return backupTime
+    return formatTimeOfDay(hour, minute, usesTwentyFourHourClock)
+}

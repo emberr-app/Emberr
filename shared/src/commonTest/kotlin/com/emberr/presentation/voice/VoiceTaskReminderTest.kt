@@ -17,7 +17,7 @@ class VoiceTaskReminderTest {
     @Test
     fun aTaskWithoutAReminderIsForTodayWithNoTime() {
         assertEquals("Today", voiceTaskDayLabel(null, today, TimeZone.UTC))
-        assertEquals("Add time", voiceTaskTimeLabel(null, TimeZone.UTC))
+        assertEquals("Add time", voiceTaskTimeLabel(null, TimeZone.UTC, usesTwentyFourHourClock = false))
     }
 
     @Test
@@ -25,7 +25,7 @@ class VoiceTaskReminderTest {
         val reminder = timestampAt(2026, 9, 23, 18, 30)
 
         assertEquals("Today", voiceTaskDayLabel(reminder, today, TimeZone.UTC))
-        assertEquals("6:30 PM", voiceTaskTimeLabel(reminder, TimeZone.UTC))
+        assertEquals("6:30 PM", voiceTaskTimeLabel(reminder, TimeZone.UTC, usesTwentyFourHourClock = false))
     }
 
     @Test
@@ -40,7 +40,7 @@ class VoiceTaskReminderTest {
         val reminder = timestampAt(2026, 9, 25, 14, 5)
 
         assertEquals("Fri, Sep 25", voiceTaskDayLabel(reminder, today, TimeZone.UTC))
-        assertEquals("2:05 PM", voiceTaskTimeLabel(reminder, TimeZone.UTC))
+        assertEquals("2:05 PM", voiceTaskTimeLabel(reminder, TimeZone.UTC, usesTwentyFourHourClock = false))
     }
 
     @Test

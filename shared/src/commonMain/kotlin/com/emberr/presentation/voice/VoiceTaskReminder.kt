@@ -1,6 +1,6 @@
 package com.emberr.presentation.voice
 
-import com.emberr.presentation.calendar.formatTimeOfDay
+import com.emberr.domain.util.time.formatTimeOfDay
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -26,10 +26,10 @@ internal fun voiceTaskDayLabel(reminder: Long?, today: LocalDate, timeZone: Time
     }
 }
 
-internal fun voiceTaskTimeLabel(reminder: Long?, timeZone: TimeZone): String {
+internal fun voiceTaskTimeLabel(reminder: Long?, timeZone: TimeZone, usesTwentyFourHourClock: Boolean): String {
     if (reminder == null) return "Add time"
     val dateTime = Instant.fromEpochMilliseconds(reminder).toLocalDateTime(timeZone)
-    return formatTimeOfDay(dateTime.hour, dateTime.minute)
+    return formatTimeOfDay(dateTime.hour, dateTime.minute, usesTwentyFourHourClock)
 }
 
 internal fun reminderMovedToDate(currentReminder: Long?, pickedDate: Long, timeZone: TimeZone): Long {

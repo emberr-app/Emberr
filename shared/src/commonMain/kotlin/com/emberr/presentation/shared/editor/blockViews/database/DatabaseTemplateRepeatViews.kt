@@ -35,10 +35,11 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toInstant
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 private val RepeatDayButtonSize = 34.dp
 
-internal fun DatabaseTemplateRepeat.summary(): String {
+internal fun DatabaseTemplateRepeat.summary(usesTwentyFourHourClock: Boolean): String {
     val daysText = when (frequency) {
         DatabaseRepeatFrequency.WEEKLY -> {
             val dayNames = isoDaysOfWeek.sorted().mapNotNull { isoDayNumberToDayOfWeek(it)?.shortName() }
@@ -48,7 +49,7 @@ internal fun DatabaseTemplateRepeat.summary(): String {
         else -> frequency.label
     }
     val repeatTime = time ?: return daysText
-    return "$daysText at ${formatPropertyTime(repeatTime)}"
+    return "$daysText at ${formatPropertyTime(repeatTime, usesTwentyFourHourClock)}"
 }
 
 private fun DayOfWeek.shortName(): String = name.take(3).lowercase().replaceFirstChar { it.uppercase() }
@@ -95,7 +96,7 @@ internal fun DatabaseTemplateRepeatChoices(
             onClick = { onRepeatChange(repeat.withTime(null, localNow())) }
         )
         DatabaseMenuOption(
-            label = repeat.time?.let { "At ${formatPropertyTime(it)}" } ?: "At a set time",
+            label = repeat.time?.let { "At ${formatPropertyTime(it, LocalUsesTwentyFourHourClock.current)}" } ?: "At a set time",
             isSelected = repeat.time != null,
             onClick = { showsTimePicker = true }
         )

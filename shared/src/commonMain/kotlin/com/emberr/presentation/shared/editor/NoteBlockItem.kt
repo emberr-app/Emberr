@@ -149,6 +149,8 @@ import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.flow.first
+import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 val DefaultBlockShape = RoundedCornerShape(12.dp)
 
@@ -895,13 +897,12 @@ fun NoteBlockItem(
                                     )
                                 }
                                 if (hasReminder) {
-                                    val timeText = remember(block.reminderTimestamp) {
+                                    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
+                                    val timeText = remember(block.reminderTimestamp, usesTwentyFourHourClock) {
                                         val instant = Instant.fromEpochMilliseconds(block.reminderTimestamp)
                                         val dt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                                        val amPm = if (dt.hour >= 12) "PM" else "AM"
-                                        val hour12 = if (dt.hour % 12 == 0) 12 else dt.hour % 12
-                                        val minStr = dt.minute.toString().padStart(2, '0')
-                                        "${dt.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${dt.day}, $hour12:$minStr $amPm"
+                                        val clockTime = formatTimeOfDay(dt.hour, dt.minute, usesTwentyFourHourClock)
+                                        "${dt.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${dt.day}, $clockTime"
                                     }
                                     val timeZone = TimeZone.currentSystemDefault()
                                     val reminderDate = Instant.fromEpochMilliseconds(block.reminderTimestamp)

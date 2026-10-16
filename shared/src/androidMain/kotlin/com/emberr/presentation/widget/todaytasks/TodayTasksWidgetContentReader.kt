@@ -3,23 +3,22 @@ package com.emberr.presentation.widget.todaytasks
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.entity.CalendarTaskEntity
+import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.number
 
 private const val maximumTasksShown = 12
 private const val maximumCharactersPerTitle = 120
 
 class TodayTasksWidgetContentReader(
-    private val calendarTaskDao: CalendarTaskDao
+    private val calendarTaskDao: CalendarTaskDao,
+    private val clockFormat: WidgetClockFormat
 ) {
 
     suspend fun readContentOnce(spaceId: String): TodayTasksWidgetContent? = withContext(Dispatchers.IO) {
@@ -59,7 +58,7 @@ class TodayTasksWidgetContentReader(
                     scheduleLabel = when {
                         scheduledAt == null -> null
                         isOverdue -> formatOverdueLabel(now - scheduledAt)
-                        else -> formatClockTime(toLocalTime(scheduledAt))
+                        else -> clockFormat.clockTimeOf(scheduledAt)
                     },
                     isOverdue = isOverdue
                 )
@@ -79,19 +78,6 @@ private fun formatDateHeading(date: LocalDate): String {
     val month = monthNames.getOrNull(date.month.number - 1) ?: date.month.name
     val day = dayNames.getOrNull(date.dayOfWeek.ordinal) ?: date.dayOfWeek.name
     return "$month ${date.day}, $day"
-}
-
-private fun toLocalTime(timestamp: Long): LocalDateTime =
-    Instant.fromEpochMilliseconds(timestamp).toLocalDateTime(TimeZone.currentSystemDefault())
-
-private fun formatClockTime(moment: LocalDateTime): String {
-    val hourOfDay = when {
-        moment.hour == 0 -> 12
-        moment.hour > 12 -> moment.hour - 12
-        else -> moment.hour
-    }
-    val suffix = if (moment.hour < 12) "am" else "pm"
-    return "$hourOfDay:${moment.minute.toString().padStart(2, '0')} $suffix"
 }
 
 private fun formatOverdueLabel(elapsedMillis: Long): String {

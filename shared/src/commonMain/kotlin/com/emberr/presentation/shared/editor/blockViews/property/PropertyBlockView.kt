@@ -74,7 +74,7 @@ import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.isNumberBeingTyped
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.presentation.calendar.formatTimeOfDay
+import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
@@ -103,6 +103,7 @@ import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Clock
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 private val PropertyValueHorizontalPadding = 12.dp
 private val PropertyValueVerticalPadding = 9.dp
@@ -405,7 +406,7 @@ internal fun PropertyDateValue(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = formatPropertyDateRange(range).ifEmpty { "Empty" },
+                text = formatPropertyDateRange(range, LocalUsesTwentyFourHourClock.current).ifEmpty { "Empty" },
                 style = MaterialTheme.typography.bodyLarge,
                 color = when {
                     range.start == null -> MaterialTheme.colorScheme.outline
@@ -549,16 +550,17 @@ internal fun PropertyCheckboxValue(
 
 internal fun formatPropertyDate(date: LocalDate): String = shortDateText(date)
 
-internal fun formatPropertyTime(time: LocalTime): String = formatTimeOfDay(time.hour, time.minute)
+internal fun formatPropertyTime(time: LocalTime, usesTwentyFourHourClock: Boolean): String =
+    formatTimeOfDay(time.hour, time.minute, usesTwentyFourHourClock)
 
-internal fun formatPropertyDateRange(range: PropertyDateRange): String {
+internal fun formatPropertyDateRange(range: PropertyDateRange, usesTwentyFourHourClock: Boolean): String {
     val start = range.start ?: return ""
     fun dateAndTimeText(date: LocalDate, time: LocalTime?) =
-        if (time == null) formatPropertyDate(date) else "${formatPropertyDate(date)} ${formatPropertyTime(time)}"
+        if (time == null) formatPropertyDate(date) else "${formatPropertyDate(date)} ${formatPropertyTime(time, usesTwentyFourHourClock)}"
 
     val startText = dateAndTimeText(start, range.startTime)
     val end = range.end ?: return startText
     val endTime = range.endTime
-    val endText = if (end == start && endTime != null) formatPropertyTime(endTime) else dateAndTimeText(end, endTime)
+    val endText = if (end == start && endTime != null) formatPropertyTime(endTime, usesTwentyFourHourClock) else dateAndTimeText(end, endTime)
     return "$startText → $endText"
 }
