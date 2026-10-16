@@ -33,11 +33,11 @@ import com.emberr.domain.util.eventbus.WidgetComposeRequestBus
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.KmpBackHandler
-import com.emberr.presentation.shared.editor.copyEmberrBlocks
-import com.emberr.presentation.shared.editor.BlockSelectionMenuContent
+import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
+import com.emberr.presentation.shared.editor.selection.BlockSelectionMenuContent
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.EditorScreen
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.FocusRequest
 import dev.chrisbanes.haze.HazeState

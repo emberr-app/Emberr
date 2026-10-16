@@ -1,0 +1,189 @@
+package com.emberr.presentation.shared.editor.markdown
+
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.model.CanvasBlock
+import com.emberr.domain.model.CheckboxBlock
+import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.DatabaseBlock
+import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.model.PropertyBlock
+import com.emberr.domain.model.TextBlock
+import com.emberr.domain.model.deepCopyWithNewIds
+import com.emberr.domain.model.editableTextOrNull
+import com.emberr.domain.model.highlightColorNameOrNull
+import com.emberr.domain.model.inlineSpansOrEmpty
+import com.emberr.domain.model.markDeleted
+import com.emberr.domain.model.withEditableText
+import com.emberr.domain.model.withId
+import com.emberr.domain.model.withIndentationLevel
+import com.emberr.domain.model.withPin
+import com.emberr.domain.model.withUpdatedAt
+import com.emberr.domain.util.export.InlineMarkdownFormatter
+import com.emberr.domain.util.export.NoteMarkdownWriter
+import com.emberr.presentation.shared.editor.GlobalEditorState
+import com.emberr.presentation.shared.editor.selection.BlockEditResult
+import com.emberr.presentation.shared.editor.selection.BlockTextPosition
+import com.emberr.presentation.shared.editor.selection.TextCaret
+import com.emberr.presentation.shared.editor.selection.spansMovedFrom
+
+class MarkdownClipboardActions {
+    var copySelection: (() -> Boolean)? = null
+    var cutSelection: (() -> Boolean)? = null
+    var deleteSelection: (() -> Boolean)? = null
+}
+
+fun ClipboardManager.copyEmberrMarkdown(markdown: String, copiedBlocks: List<NoteBlock>? = null) {
+    GlobalEditorState.lastCopiedMarkdown = markdown
+    GlobalEditorState.lastCopiedBlocks = copiedBlocks
+    setText(AnnotatedString(markdown))
+}
+
+fun ClipboardManager.copyEmberrBlocks(blocks: List<NoteBlock>, linkableNotes: List<NoteMetadataEntity>) {
+    val noteTitlesById = linkableNotes.associate { it.noteId to it.title }
+    copyEmberrMarkdown(NoteMarkdownWriter.writeMarkdown(blocks, noteTitlesById = noteTitlesById), blocks)
+}
+
+fun blocksEmberrCopiedAs(pastedText: String): List<NoteBlock>? {
+    val copiedMarkdown = GlobalEditorState.lastCopiedMarkdown ?: return null
+    if (pastedText.replace("\r", "") != copiedMarkdown.replace("\r", "")) return null
+    return GlobalEditorState.lastCopiedBlocks
+}
+
+fun copiedBlocksReadyToPaste(copiedBlocks: List<NoteBlock>, baseIndentation: Int, now: Long): List<NoteBlock> {
+    val pastableBlocks = copiedBlocks.filterNot { it is DatabaseBlock || it is CanvasBlock || it is PropertyBlock }
+    val shallowestIndentation = pastableBlocks.minOfOrNull { it.indentationLevel } ?: 0
+    return pastableBlocks.map { block ->
+        val withoutReminder = if (block is CheckboxBlock) block.copy(reminderTimestamp = null, recurrenceRule = null) else block
+        withoutReminder
+            .deepCopyWithNewIds()
+            .withIndentationLevel(block.indentationLevel - shallowestIndentation + baseIndentation)
+            .withPin(false, now)
+            .withUpdatedAt(now)
+    }
+}
+
+data class PastedText(val replacedStart: Int, val replacedEnd: Int, val text: String)
+
+fun pastedTextToReadAsMarkdown(oldText: String, newText: String, lastCopiedMarkdown: String?): PastedText? {
+    val prefixLength = oldText.commonPrefixWith(newText).length
+    val longestPossibleSuffix = minOf(oldText.length, newText.length) - prefixLength
+    var suffixLength = 0
+    while (suffixLength < longestPossibleSuffix && oldText[oldText.length - 1 - suffixLength] == newText[newText.length - 1 - suffixLength]) {
+        suffixLength++
+    }
+    val insertedText = newText.substring(prefixLength, newText.length - suffixLength)
+    if (!readsAsMarkdown(insertedText, lastCopiedMarkdown)) return null
+    return PastedText(prefixLength, oldText.length - suffixLength, insertedText)
+}
+
+private val clearInlineMarkdownPatterns = listOf(
+    Regex("""\*\*(?=\S)[^*]+?(?<=\S)\*\*"""),
+    Regex("""__(?=\S)[^_]+?(?<=\S)__"""),
+    Regex("""~~(?=\S)[^~]+?(?<=\S)~~"""),
+    Regex("""==(?=\S)[^=]+?(?<=\S)=="""),
+    Regex("""(?<![\w*])\*(?=[^\s*])[^*]+?(?<=[^\s*])\*(?![\w*])"""),
+    Regex("""(?<![\w_])_(?=[^\s_])[^_]+?(?<=[^\s_])_(?![\w_])""")
+)
+
+fun readsAsMarkdown(pastedText: String, lastCopiedMarkdown: String?): Boolean {
+    if (pastedText.length < 2) return false
+    val spansSeveralLines = '\n' in pastedText.trimEnd('\r', '\n')
+    val isCopiedFromEmberr = pastedText.replace("\r", "") == lastCopiedMarkdown?.replace("\r", "")
+    val hasClearInlineFormatting = clearInlineMarkdownPatterns.any { it.containsMatchIn(pastedText) }
+    return spansSeveralLines || isCopiedFromEmberr || hasClearInlineFormatting
+}
+
+fun startsOnNewLine(pastedText: String): Boolean = pastedText.trimStart(' ', '\t', '\r').startsWith('\n')
+
+fun endsOnNewLine(pastedText: String): Boolean = pastedText.trimEnd(' ', '\t', '\r').endsWith('\n')
+
+fun inlineMarkdownOf(block: NoteBlock, start: Int, end: Int): String {
+    val text = block.editableTextOrNull() ?: return ""
+    val from = start.coerceIn(0, text.length)
+    val to = end.coerceIn(from, text.length)
+    return InlineMarkdownFormatter.toMarkdown(
+        text = text.substring(from, to),
+        spans = spansMovedFrom(block.inlineSpansOrEmpty(), from, to, newStart = 0),
+        isWholeBlockBold = block.isBold,
+        isWholeBlockItalic = block.isItalic,
+        isWholeBlockStrikeThrough = block.isStrikeThrough,
+        isWholeBlockUnderlined = block.isUnderlined,
+        isWholeBlockHighlighted = block.isHighlighted,
+        wholeBlockHighlightColorName = block.highlightColorNameOrNull()
+    )
+}
+
+fun pasteBlocksIntoBlock(
+    blocks: List<NoteBlock>,
+    blockId: String,
+    replacedStart: Int,
+    replacedEnd: Int,
+    pastedBlocks: List<NoteBlock>,
+    keepsHeadSeparate: Boolean,
+    keepsTailSeparate: Boolean,
+    newBlockId: () -> String,
+    now: Long
+): BlockEditResult? {
+    val target = blocks.firstOrNull { it.id == blockId } ?: return null
+    val text = target.editableTextOrNull() ?: return null
+    val pasted = pastedBlocks.flatMap { it.splitAtLineBreaks(newBlockId, now) }.toMutableList()
+    if (pasted.isEmpty()) return null
+
+    val start = replacedStart.coerceIn(0, text.length)
+    val end = replacedEnd.coerceIn(start, text.length)
+    val targetSpans = target.inlineSpansOrEmpty()
+    val head = text.substring(0, start)
+    val headSpans = spansMovedFrom(targetSpans, 0, start, newStart = 0)
+    val tail = text.substring(end)
+    val tailSpans = spansMovedFrom(targetSpans, end, text.length, newStart = 0)
+
+    val firstPasted = pasted.first()
+    val headBlock = when {
+        keepsHeadSeparate -> target.withEditableText(head, headSpans, now)
+        firstPasted is TextBlock -> {
+            pasted.removeAt(0)
+            val firstPastedSpans = spansMovedFrom(firstPasted.inlineSpans, 0, firstPasted.text.length, newStart = head.length)
+            target.withEditableText(head + firstPasted.text, headSpans + firstPastedSpans, now)
+        }
+        head.isEmpty() && target is TextBlock -> null
+        else -> target.withEditableText(head, headSpans, now)
+    }
+
+    val pieces = (listOfNotNull(headBlock) + pasted).toMutableList()
+    val lastPiece = pieces.last()
+    val lastPieceText = lastPiece.editableTextOrNull()
+    val caret = if (lastPieceText != null && lastPiece !is CodeBlock && !keepsTailSeparate) {
+        val movedTailSpans = spansMovedFrom(tailSpans, 0, tail.length, newStart = lastPieceText.length)
+        val joinedText = lastPieceText + tail
+        pieces[pieces.lastIndex] = lastPiece.withEditableText(joinedText, lastPiece.inlineSpansOrEmpty() + movedTailSpans, now)
+        TextCaret(BlockTextPosition(lastPiece.id, lastPieceText.length), joinedText)
+    } else {
+        val tailBlock = TextBlock(
+            id = newBlockId(),
+            text = tail,
+            inlineSpans = tailSpans,
+            indentationLevel = target.indentationLevel,
+            updatedAt = now
+        )
+        pieces += tailBlock
+        TextCaret(BlockTextPosition(tailBlock.id, 0), tail)
+    }
+
+    val replacementForTarget = if (headBlock == null) listOf(target.markDeleted()) + pieces else pieces
+    val updatedBlocks = blocks.flatMap { block -> if (block.id == blockId) replacementForTarget else listOf(block) }
+    return BlockEditResult(updatedBlocks, caret)
+}
+
+private fun NoteBlock.splitAtLineBreaks(newBlockId: () -> String, now: Long): List<NoteBlock> {
+    val text = editableTextOrNull()
+    if (text == null || this is CodeBlock || '\n' !in text) return listOf(this)
+    var lineStart = 0
+    return text.split('\n').mapIndexed { index, line ->
+        val from = lineStart
+        lineStart += line.length + 1
+        val piece = withEditableText(line, spansMovedFrom(inlineSpansOrEmpty(), from, from + line.length, newStart = 0), now)
+        if (index == 0) piece else piece.withId(newBlockId())
+    }
+}

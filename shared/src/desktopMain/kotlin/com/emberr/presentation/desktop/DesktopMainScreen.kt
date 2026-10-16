@@ -55,9 +55,9 @@ import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.LocalCanvasFullScreenOverlay
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
-import com.emberr.presentation.shared.editor.MarkdownShortcut
+import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
 import com.emberr.presentation.settings.SettingsScreen
 import com.emberr.presentation.settings.SettingsSubPage
 import com.emberr.presentation.shared.UserSettings

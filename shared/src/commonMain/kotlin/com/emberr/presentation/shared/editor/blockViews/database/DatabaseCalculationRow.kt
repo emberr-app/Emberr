@@ -32,7 +32,6 @@ import com.emberr.domain.model.DatabaseNumberFormat
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.columnKey
 import com.emberr.domain.model.valueTypeOf
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_right

@@ -40,6 +40,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.circle_x
+import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.pause
 import emberr.shared.generated.resources.play
 import emberr.shared.generated.resources.square
@@ -47,7 +48,6 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
-import emberr.shared.generated.resources.microphone
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

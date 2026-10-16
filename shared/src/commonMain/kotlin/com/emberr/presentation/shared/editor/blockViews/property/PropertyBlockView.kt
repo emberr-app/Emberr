@@ -58,21 +58,21 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyDateRange
-import com.emberr.domain.model.shortDateText
 import com.emberr.domain.model.PropertyType
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.isNumberBeingTyped
+import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.shared.components.MenuAtTap
@@ -80,7 +80,9 @@ import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.presentation.shared.editor.blockViews.database.DesktopDatabaseMenuMaxWidth
-import com.emberr.presentation.shared.editor.rememberWebLinkActions
+import com.emberr.presentation.shared.editor.links.rememberWebLinkActions
+import com.emberr.presentation.shared.editor.text.TapToCursorPosition
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar_clock
 import emberr.shared.generated.resources.calendar_day
@@ -103,7 +105,6 @@ import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Clock
-import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 private val PropertyValueHorizontalPadding = 12.dp
 private val PropertyValueVerticalPadding = 9.dp

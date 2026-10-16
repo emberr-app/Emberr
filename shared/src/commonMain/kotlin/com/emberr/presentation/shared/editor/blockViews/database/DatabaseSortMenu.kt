@@ -18,9 +18,8 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.database.activeView
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseColumnTarget
-import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.DatabaseSort
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
+import com.emberr.domain.model.labelOf
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_up

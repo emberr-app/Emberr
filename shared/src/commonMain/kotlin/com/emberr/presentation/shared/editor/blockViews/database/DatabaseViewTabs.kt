@@ -50,7 +50,6 @@ import com.emberr.domain.model.DatabaseView
 import com.emberr.domain.model.DatabaseViewType
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextField
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.kanban

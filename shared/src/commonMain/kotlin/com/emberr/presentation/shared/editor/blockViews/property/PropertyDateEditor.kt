@@ -12,6 +12,7 @@ import com.emberr.presentation.shared.editor.blockViews.database.DatabaseMenuOpt
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseMenuSectionDivider
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseMenuSectionLabel
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseOptionIcon
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar_day
 import emberr.shared.generated.resources.clock_circle
@@ -24,7 +25,6 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
-import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 internal enum class PropertyDatePart { START_DATE, START_TIME, END_DATE, END_TIME }
 
