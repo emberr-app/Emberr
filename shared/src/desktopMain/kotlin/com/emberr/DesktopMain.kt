@@ -45,6 +45,8 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.update.AppUpdateController
 import com.emberr.domain.update.detectStagedUpdateInstallation
 import com.emberr.domain.util.system.appVersionName
+import com.emberr.domain.util.time.desktopSystemUsesTwentyFourHourClock
+import com.emberr.domain.util.time.timeFormatPreferenceNamed
 import com.emberr.presentation.EmberrApp
 import com.emberr.presentation.LocalImagePicker
 import com.emberr.presentation.settings.PlainTextSecretWarningDialog
@@ -305,6 +307,12 @@ private fun runEmberrDesktopApp() = application {
         val fontStylePreference = runCatching { FontStylePreference.valueOf(fontStylePreferenceName) }
             .getOrDefault(FontStylePreference.POPPINS)
 
+        val timeFormatPreferenceName by settingsManager.timeFormatPreferenceFlow.collectAsState(
+            initial = settingsManager.getTimeFormatPreference()
+        )
+        val usesTwentyFourHourClock = timeFormatPreferenceNamed(timeFormatPreferenceName)
+            .usesTwentyFourHourClock(desktopSystemUsesTwentyFourHourClock())
+
         val themePreferenceName by settingsManager.themePreferenceFlow.collectAsState(
             initial = SyncConstants.DEFAULT_THEME_PREFERENCE
         )
@@ -319,7 +327,12 @@ private fun runEmberrDesktopApp() = application {
         }
 
         FollowLiveDisplayScale(mainWindowState) {
-        EmberrTheme(darkTheme = darkTheme, fontSizePreference = fontSizePreference, fontStylePreference = fontStylePreference) {
+        EmberrTheme(
+            darkTheme = darkTheme,
+            fontSizePreference = fontSizePreference,
+            fontStylePreference = fontStylePreference,
+            usesTwentyFourHourClock = usesTwentyFourHourClock
+        ) {
             MatchWindowsTitleBarToAppTheme(currentWindow)
 
             EmberrWindowFrame(
@@ -430,6 +443,12 @@ private fun runEmberrDesktopApp() = application {
                 val fontStylePreference = runCatching { FontStylePreference.valueOf(fontStylePreferenceName) }
                     .getOrDefault(FontStylePreference.POPPINS)
 
+                val timeFormatPreferenceName by settingsManager.timeFormatPreferenceFlow.collectAsState(
+                    initial = settingsManager.getTimeFormatPreference()
+                )
+                val usesTwentyFourHourClock = timeFormatPreferenceNamed(timeFormatPreferenceName)
+                    .usesTwentyFourHourClock(desktopSystemUsesTwentyFourHourClock())
+
                 val themePreferenceName by settingsManager.themePreferenceFlow.collectAsState(
                     initial = SyncConstants.DEFAULT_THEME_PREFERENCE
                 )
@@ -446,7 +465,12 @@ private fun runEmberrDesktopApp() = application {
                 val stickyWindow = this.window as Frame
 
                 FollowLiveDisplayScale(stickyNoteWindowState) {
-                EmberrTheme(darkTheme = darkTheme, fontSizePreference = fontSizePreference, fontStylePreference = fontStylePreference) {
+                EmberrTheme(
+                    darkTheme = darkTheme,
+                    fontSizePreference = fontSizePreference,
+                    fontStylePreference = fontStylePreference,
+                    usesTwentyFourHourClock = usesTwentyFourHourClock
+                ) {
                     MatchWindowsTitleBarToAppTheme(stickyWindow)
 
                     EmberrWindowFrame(

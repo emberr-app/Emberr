@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.ui.theme.LocalEmberrFontStyle
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.fontFamilyFor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.bell_off2
@@ -668,11 +669,10 @@ fun MinimalTimePickerDialog(
     onConfirm: (hour: Int, minute: Int) -> Unit
 ) {
     val cal = Calendar.getInstance().apply { if (initialTimestamp != null) timeInMillis = initialTimestamp }
-    val initialHour24 = cal.get(Calendar.HOUR_OF_DAY)
     val initialMinute = cal.get(Calendar.MINUTE)
-    var isAm by remember { mutableStateOf(initialHour24 < 12) }
-    var hour by remember { mutableIntStateOf(if (initialHour24 % 12 == 0) 12 else initialHour24 % 12) }
+    var hourOfDay by remember { mutableIntStateOf(cal.get(Calendar.HOUR_OF_DAY)) }
     var minute by remember { mutableIntStateOf(initialMinute) }
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
 
     val pickerItemHeight = if (isDesktopPlatform) 40.dp else 44.dp
 
@@ -686,19 +686,28 @@ fun MinimalTimePickerDialog(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                WheelPicker(
-                    items = listOf("AM", "PM"),
-                    selectedIndex = if (isAm) 0 else 1,
-                    onItemSelected = { isAm = (it == 0) },
-                    itemHeight = pickerItemHeight
-                )
-                Spacer(Modifier.width(16.dp))
-                WheelPicker(
-                    items = (1..12).map { it.toString().padStart(2, '0') },
-                    selectedIndex = hour - 1,
-                    onItemSelected = { hour = it + 1 },
-                    itemHeight = pickerItemHeight
-                )
+                if (usesTwentyFourHourClock) {
+                    WheelPicker(
+                        items = (0..23).map { it.toString().padStart(2, '0') },
+                        selectedIndex = hourOfDay,
+                        onItemSelected = { hourOfDay = it },
+                        itemHeight = pickerItemHeight
+                    )
+                } else {
+                    WheelPicker(
+                        items = listOf("AM", "PM"),
+                        selectedIndex = if (hourOfDay < 12) 0 else 1,
+                        onItemSelected = { hourOfDay = hourOfDay % 12 + if (it == 1) 12 else 0 },
+                        itemHeight = pickerItemHeight
+                    )
+                    Spacer(Modifier.width(16.dp))
+                    WheelPicker(
+                        items = (1..12).map { it.toString().padStart(2, '0') },
+                        selectedIndex = (hourOfDay + 11) % 12,
+                        onItemSelected = { hourOfDay = (it + 1) % 12 + if (hourOfDay >= 12) 12 else 0 },
+                        itemHeight = pickerItemHeight
+                    )
+                }
                 Text(
                     text = ":",
                     fontFamily = fontFamilyFor(LocalEmberrFontStyle.current),
@@ -737,7 +746,7 @@ fun MinimalTimePickerDialog(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
-                    EmberrButtonPrimary(text = "Save", onClick = { val finalHour = when { isAm && hour == 12 -> 0; !isAm && hour < 12 -> hour + 12; else -> hour }; onConfirm(finalHour, minute); onDismiss() }, modifier = Modifier.weight(1f))
+                    EmberrButtonPrimary(text = "Save", onClick = { onConfirm(hourOfDay, minute); onDismiss() }, modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -758,12 +767,7 @@ fun MinimalTimePickerDialog(
                 EmberrButtonPrimary(
                     text = "Save",
                     onClick = {
-                        val finalHour = when {
-                            isAm && hour == 12 -> 0
-                            !isAm && hour < 12 -> hour + 12
-                            else -> hour
-                        }
-                        onConfirm(finalHour, minute)
+                        onConfirm(hourOfDay, minute)
                         onDismiss()
                     },
                     modifier = Modifier.weight(1f)

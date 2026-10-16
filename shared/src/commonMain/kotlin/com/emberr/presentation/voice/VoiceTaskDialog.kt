@@ -95,6 +95,7 @@ import kotlin.math.sin
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.painterResource
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 private val VoiceTaskDialogShape = RoundedCornerShape(24.dp)
 private const val EMBERR_GHOST_SIZE_FRACTION = 0.5f
@@ -312,7 +313,7 @@ private fun EditableVoiceTaskRow(
                 )
                 ReminderChip(
                     icon = painterResource(Res.drawable.clock_circle),
-                    label = voiceTaskTimeLabel(reminder, timeZone),
+                    label = voiceTaskTimeLabel(reminder, timeZone, LocalUsesTwentyFourHourClock.current),
                     onClick = { openPickerOnceKeyboardCloses { isTimeMenuOpen = true } }
                 )
             }

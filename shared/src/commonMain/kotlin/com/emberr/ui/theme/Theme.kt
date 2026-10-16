@@ -47,6 +47,8 @@ private val DarkColorScheme = darkColorScheme(
 
 val LocalAppIsDark = staticCompositionLocalOf { false }
 
+val LocalUsesTwentyFourHourClock = staticCompositionLocalOf { false }
+
 val highlightBackgroundColor: Color
     @Composable get() = if (LocalAppIsDark.current) HighlightLimeDark else HighlightLime
 
@@ -65,6 +67,7 @@ fun EmberrTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     fontSizePreference: FontSizePreference = FontSizePreference.DEFAULT,
     fontStylePreference: FontStylePreference = FontStylePreference.POPPINS,
+    usesTwentyFourHourClock: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val baseColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
@@ -99,7 +102,8 @@ fun EmberrTheme(
     CompositionLocalProvider(
         LocalAppIsDark provides darkTheme,
         LocalEmberrFontSizes provides currentFontSizes,
-        LocalEmberrFontStyle provides fontStylePreference
+        LocalEmberrFontStyle provides fontStylePreference,
+        LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

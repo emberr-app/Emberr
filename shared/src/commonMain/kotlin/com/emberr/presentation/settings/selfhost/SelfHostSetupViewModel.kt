@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.emberr.domain.util.time.formatTimeOfDay
 
 enum class ConnectionTestStatus { NOT_TESTED, TESTING, VERIFIED, FAILED }
 
@@ -95,13 +96,11 @@ private fun waitingForNetworkMessage(syncNetwork: SelfHostSyncNetwork): String =
     SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA -> "Sync will run when you are back online."
 }
 
-fun formatLastSynced(epochMillis: Long?): String {
+fun formatLastSynced(epochMillis: Long?, usesTwentyFourHourClock: Boolean): String {
     if (epochMillis == null || epochMillis == 0L) return "Never synced"
     val local = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(TimeZone.currentSystemDefault())
     val month = local.month.name.lowercase().replaceFirstChar { it.uppercase() }.take(3)
-    val hour = local.hour.toString().padStart(2, '0')
-    val minute = local.minute.toString().padStart(2, '0')
-    return "Last synced: $month ${local.day}, $hour:$minute"
+    return "Last synced: $month ${local.day}, ${formatTimeOfDay(local.hour, local.minute, usesTwentyFourHourClock)}"
 }
 
 class SelfHostSetupViewModel(

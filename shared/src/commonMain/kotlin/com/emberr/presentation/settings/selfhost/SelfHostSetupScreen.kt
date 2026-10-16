@@ -84,6 +84,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 @Composable
 fun SelfHostSetupScreen(
@@ -353,7 +354,7 @@ private fun ConnectedDashboard(
                             text = if (isSyncRunning) {
                                 "Syncing..."
                             } else {
-                                formatLastSynced(state.lastSyncedAtMillis)
+                                formatLastSynced(state.lastSyncedAtMillis, LocalUsesTwentyFourHourClock.current)
                             },
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)

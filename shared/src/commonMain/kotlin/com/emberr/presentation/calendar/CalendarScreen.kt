@@ -133,6 +133,9 @@ import kotlinx.datetime.number
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
+import com.emberr.domain.util.time.formatHourLabel
+import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 enum class CalendarViewMode { DAY, THREE_DAY, WEEK, MONTH }
 
@@ -870,6 +873,7 @@ private fun DayHourGrid(
 
 @Composable
 private fun HourLabelColumn(hours: IntRange, hourHeight: Dp) {
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
     Column(modifier = Modifier.width(56.dp)) {
         hours.forEach { hour ->
             Box(
@@ -879,7 +883,7 @@ private fun HourLabelColumn(hours: IntRange, hourHeight: Dp) {
                 contentAlignment = Alignment.TopCenter
             ) {
                 Text(
-                    text = formatHourLabel(hour),
+                    text = formatHourLabel(hour, usesTwentyFourHourClock),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     textAlign = TextAlign.Center,
@@ -991,16 +995,6 @@ private fun CurrentTimeLine(modifier: Modifier = Modifier) {
                 .background(MaterialTheme.colorScheme.primary)
         )
     }
-}
-
-private fun formatHourLabel(hour: Int): String {
-    val displayHour = when {
-        hour == 0 -> 12
-        hour > 12 -> hour - 12
-        else -> hour
-    }
-    val period = if (hour < 12) "AM" else "PM"
-    return "$displayHour $period"
 }
 
 private fun formatShortDayLabel(date: LocalDate): String {
@@ -1429,7 +1423,7 @@ private fun MonthEventRow(
             modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
         )
         Text(
-            text = formatTimeOfDay(startTime.hour, startTime.minute),
+            text = formatTimeOfDay(startTime.hour, startTime.minute, LocalUsesTwentyFourHourClock.current),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )

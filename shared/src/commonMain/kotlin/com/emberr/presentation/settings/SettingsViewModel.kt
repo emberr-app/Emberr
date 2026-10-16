@@ -108,6 +108,16 @@ class SettingsViewModel(
         settingsManager.saveFontStylePreference(preference)
     }
 
+    val timeFormatPreference: StateFlow<String> = settingsManager.timeFormatPreferenceFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.getTimeFormatPreference()
+    )
+
+    fun setTimeFormatPreference(preference: String) {
+        settingsManager.saveTimeFormatPreference(preference)
+    }
+
     val topBarFadeStyle: StateFlow<String> = settingsManager.topBarFadeStyleFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

@@ -37,6 +37,7 @@ import emberr.shared.generated.resources.star_outline
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 @Composable
 internal fun DatabaseTemplateMenu(
@@ -126,7 +127,7 @@ private fun DatabaseTemplateOption(
                         if (repeat != null) {
                             Icon(
                                 painter = painterResource(Res.drawable.refresh_cw),
-                                contentDescription = repeat.summary(),
+                                contentDescription = repeat.summary(LocalUsesTwentyFourHourClock.current),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(end = 10.dp).size(14.dp)
                             )
@@ -169,7 +170,7 @@ private fun DatabaseTemplateOption(
                         icon = { DatabaseOptionIcon(Res.drawable.refresh_cw) },
                         trailing = {
                             Text(
-                                text = repeat?.summary() ?: "Off",
+                                text = repeat?.summary(LocalUsesTwentyFourHourClock.current) ?: "Off",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.outline,
                                 maxLines = 1

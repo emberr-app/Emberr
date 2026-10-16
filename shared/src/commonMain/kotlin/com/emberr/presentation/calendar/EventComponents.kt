@@ -85,6 +85,8 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.number
 import org.jetbrains.compose.resources.painterResource
+import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 private val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
@@ -168,16 +170,6 @@ fun EventEditorState.endHour(): Int {
 }
 
 fun EventEditorState.endMinute(): Int = (minute + durationMinutes) % 60
-
-fun formatTimeOfDay(hour: Int, minute: Int): String {
-    val displayHour = when {
-        hour == 0 -> 12
-        hour > 12 -> hour - 12
-        else -> hour
-    }
-    val period = if (hour < 12) "AM" else "PM"
-    return "$displayHour:${minute.toString().padStart(2, '0')} $period"
-}
 
 fun formatRecurrenceSummary(rule: RecurrenceRule): String {
     val base = when (rule.frequency) {
@@ -373,7 +365,7 @@ private fun EventEditorFields(
                 Box(modifier = Modifier.weight(1f)) {
                     EventFieldRow(
                         icon = painterResource(Res.drawable.clock_circle),
-                        label = formatTimeOfDay(state.hour, state.minute),
+                        label = formatTimeOfDay(state.hour, state.minute, LocalUsesTwentyFourHourClock.current),
                         onClick = { showStartTimePicker = true },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -388,7 +380,7 @@ private fun EventEditorFields(
                 Box(modifier = Modifier.weight(1f)) {
                     EventFieldRow(
                         icon = painterResource(Res.drawable.clock_circle),
-                        label = formatTimeOfDay(state.endHour(), state.endMinute()),
+                        label = formatTimeOfDay(state.endHour(), state.endMinute(), LocalUsesTwentyFourHourClock.current),
                         onClick = { showEndTimePicker = true },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -502,6 +494,7 @@ private fun EventViewFields(
     val category = categories.firstOrNull { it.id == state.categoryId }
     val accentColor = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.primary
     val hazeState = remember { HazeState() }
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
 
     Column(
         modifier = Modifier
@@ -560,8 +553,8 @@ private fun EventViewFields(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "${formatFullDate(state.date)}, ${formatTimeOfDay(state.hour, state.minute)} – " +
-                            formatTimeOfDay(state.endHour(), state.endMinute()),
+                    text = "${formatFullDate(state.date)}, ${formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock)} – " +
+                            formatTimeOfDay(state.endHour(), state.endMinute(), usesTwentyFourHourClock),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )

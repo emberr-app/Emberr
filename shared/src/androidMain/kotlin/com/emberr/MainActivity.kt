@@ -36,6 +36,7 @@ import com.emberr.presentation.widget.note.refreshNoteWidgets
 import com.emberr.presentation.widget.notelist.refreshNoteListWidgets
 import com.emberr.presentation.widget.noteshortcut.refreshNoteShortcutWidgets
 import com.emberr.presentation.widget.todaytasks.refreshTodayTasksWidgets
+import com.emberr.presentation.widget.upcomingevents.refreshUpcomingEventsWidgets
 import com.emberr.presentation.widget.tasks.refreshTaskWidgets
 import com.emberr.presentation.widget.calendarDateUriScheme
 import com.emberr.presentation.widget.calendarEventUriScheme
@@ -60,6 +61,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import java.util.UUID
+import android.text.format.DateFormat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.emberr.domain.media.LocalMediaGarbageCollector
@@ -78,6 +80,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.emberr.domain.util.time.timeFormatPreferenceNamed
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
@@ -116,6 +119,7 @@ class MainActivity : ComponentActivity() {
     private var documentPickerCallback: ((String) -> Unit)? = null
     private var takePhotoCallback: ((String) -> Unit)? = null
     private var currentPhotoUri: Uri? = null
+    private var systemUsesTwentyFourHourClock by mutableStateOf(false)
 
     private val mediaStorageHelper: com.emberr.domain.util.media.MediaStorageHelper by inject()
     private val manualBackupExporter: com.emberr.domain.backup.manual.AndroidManualBackupExporter by inject()
@@ -176,10 +180,12 @@ class MainActivity : ComponentActivity() {
 
         var hasResumedBefore = false
         var pendingLanSyncStart: Job? = null
+        systemUsesTwentyFourHourClock = DateFormat.is24HourFormat(this)
 
         lifecycle.addObserver(LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
+                    systemUsesTwentyFourHourClock = DateFormat.is24HourFormat(this@MainActivity)
                     val waitBeforeLanSync = if (hasResumedBefore) Duration.ZERO else lanSyncDelayAfterOpening
                     hasResumedBefore = true
                     pendingLanSyncStart = lifecycleScope.launch {
@@ -200,6 +206,7 @@ class MainActivity : ComponentActivity() {
                         refreshTodayTasksWidgets(this@MainActivity)
                         refreshCalendarWidgets(this@MainActivity)
                         refreshCalendarAgendaWidgets(this@MainActivity)
+                        refreshUpcomingEventsWidgets(this@MainActivity)
                     }
                 }
                 else -> {}
@@ -249,6 +256,10 @@ class MainActivity : ComponentActivity() {
             val fontStylePreference = runCatching { FontStylePreference.valueOf(fontStylePreferenceName) }
                 .getOrDefault(FontStylePreference.POPPINS)
 
+            val timeFormatPreferenceName by settingsViewModel.timeFormatPreference.collectAsState()
+            val usesTwentyFourHourClock = timeFormatPreferenceNamed(timeFormatPreferenceName)
+                .usesTwentyFourHourClock(systemUsesTwentyFourHourClock)
+
             val themePreferenceName by settingsViewModel.themePreference.collectAsState()
             val themePreference = runCatching { ThemePreference.valueOf(themePreferenceName) }
                 .getOrDefault(ThemePreference.SYSTEM)
@@ -258,7 +269,12 @@ class MainActivity : ComponentActivity() {
                 ThemePreference.SYSTEM -> isSystemInDarkTheme()
             }
 
-            EmberrTheme(darkTheme = darkTheme, fontSizePreference = fontSizePreference, fontStylePreference = fontStylePreference) {
+            EmberrTheme(
+                darkTheme = darkTheme,
+                fontSizePreference = fontSizePreference,
+                fontStylePreference = fontStylePreference,
+                usesTwentyFourHourClock = usesTwentyFourHourClock
+            ) {
                 Surface(color = Color.Transparent, modifier = Modifier.fillMaxSize()) {
                     val context = LocalContext.current
 

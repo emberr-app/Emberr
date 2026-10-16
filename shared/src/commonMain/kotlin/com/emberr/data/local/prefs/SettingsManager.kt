@@ -106,6 +106,10 @@ interface SettingsManager {
     val fontStylePreferenceFlow: Flow<String>
     fun saveFontStylePreference(preference: String)
 
+    val timeFormatPreferenceFlow: Flow<String>
+    fun getTimeFormatPreference(): String
+    fun saveTimeFormatPreference(preference: String)
+
     val topBarFadeStyleFlow: Flow<String>
     fun getTopBarFadeStyle(): String
     fun saveTopBarFadeStyle(style: String)

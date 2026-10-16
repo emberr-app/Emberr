@@ -306,6 +306,18 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _fontStylePreference.value = preference
     }
 
+    private val _timeFormatPreference = MutableStateFlow(
+        prefs.get(SyncConstants.KEY_TIME_FORMAT_PREFERENCE, SyncConstants.DEFAULT_TIME_FORMAT_PREFERENCE)
+    )
+    override val timeFormatPreferenceFlow: Flow<String> = _timeFormatPreference
+
+    override fun getTimeFormatPreference(): String = _timeFormatPreference.value
+
+    override fun saveTimeFormatPreference(preference: String) {
+        prefs.put(SyncConstants.KEY_TIME_FORMAT_PREFERENCE, preference)
+        _timeFormatPreference.value = preference
+    }
+
     private val _topBarFadeStyle = MutableStateFlow(
         prefs.get(SyncConstants.KEY_TOP_BAR_FADE_STYLE, SyncConstants.DEFAULT_TOP_BAR_FADE_STYLE)
     )
