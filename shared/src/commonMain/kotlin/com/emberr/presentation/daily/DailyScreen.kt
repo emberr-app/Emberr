@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -31,6 +30,7 @@ import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.shared.components.KmpBackHandler
+import com.emberr.presentation.shared.editor.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
@@ -197,7 +197,7 @@ fun DailyScreen(
     var eventOptionsTargetBlockId by remember { mutableStateOf<String?>(null) }
     var eventOptionsOccurrenceDate by remember { mutableStateOf<String?>(null) }
 
-    SelectionModeObserver(isSelectionMode, onSelectionModeChange)
+    SelectionModeObserver(isSelectionMode || GlobalEditorState.clearTextSelectionAcrossBlocks != null, onSelectionModeChange)
 
     KmpBackHandler(enabled = showSettingsMenu) {
         showSettingsMenu = false
@@ -556,11 +556,12 @@ fun DailyScreen(
                     onClearSelection = { viewModel.clearSelection() },
                     onSelectAll = { viewModel.selectAllBlocks() },
                     onCopy = {
-                        clipboardManager.setText(AnnotatedString(viewModel.getSelectedText()))
+                        clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
                         viewModel.clearSelection()
                     },
                     onCut = {
-                        clipboardManager.setText(AnnotatedString(viewModel.cutSelectedBlocks()))
+                        clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
+                        viewModel.deleteSelectedBlocks()
                     },
                     onAddBlockAbove = { viewModel.addBlockAboveSelection() },
                     onAddBlockBelow = { viewModel.addBlockBelowSelection() },

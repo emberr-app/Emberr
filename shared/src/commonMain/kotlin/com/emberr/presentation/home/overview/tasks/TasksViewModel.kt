@@ -766,17 +766,6 @@ class TasksViewModel(
     fun clearSelection() { _selectedBlockIds.value = emptySet() }
     fun clearFocusRequest() { _focusRequest.value = null }
 
-    fun getSelectedText(): String {
-        val currentBlocks = if (_isShowingCompleted.value) _completedBlocks.value else _activeBlocks.value
-        return currentBlocks.filter { it.id in _selectedBlockIds.value }.joinToString("\n") { (it as? CheckboxBlock)?.text ?: "" }
-    }
-
-    fun cutSelectedBlocks(): String {
-        val text = getSelectedText()
-        deleteSelectedBlocks()
-        return text
-    }
-
     fun setFocusedBlock() {}
 
     fun selectAllBlocks() {
