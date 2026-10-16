@@ -124,6 +124,10 @@ class SettingsViewModel(
         initialValue = settingsManager.getFirstDayOfWeekPreference()
     )
 
+    fun setFirstDayOfWeekPreference(preference: String) {
+        settingsManager.saveFirstDayOfWeekPreference(preference)
+    }
+
     val topBarFadeStyle: StateFlow<String> = settingsManager.topBarFadeStyleFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

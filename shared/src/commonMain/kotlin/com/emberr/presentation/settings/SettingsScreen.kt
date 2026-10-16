@@ -78,14 +78,17 @@ import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.fontFamilyFor
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.domain.util.time.TimeFormatPreference
+import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.domain.util.time.timeFormatPreferenceNamed
+import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.presentation.home.overview.OverviewSection
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.astroid
 import emberr.shared.generated.resources.badge_plus
 import emberr.shared.generated.resources.badge_question_mark
 import emberr.shared.generated.resources.bell
+import emberr.shared.generated.resources.calendar
 import emberr.shared.generated.resources.calendar_clock
 import emberr.shared.generated.resources.daily
 import emberr.shared.generated.resources.download
@@ -184,6 +187,9 @@ fun SettingsScreen(
 
     val timeFormatPreference by viewModel.timeFormatPreference.collectAsState()
     var showTimeFormatSheet by remember { mutableStateOf(false) }
+
+    val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
+    var showFirstDayOfWeekSheet by remember { mutableStateOf(false) }
 
     val topBarFadeStyle by viewModel.topBarFadeStyle.collectAsState()
     var showTopBarFadeStyleSheet by remember { mutableStateOf(false) }
@@ -308,6 +314,7 @@ fun SettingsScreen(
                     fontStyleLabel = runCatching { FontStylePreference.valueOf(fontStylePreference) }
                         .getOrDefault(FontStylePreference.POPPINS).displayName,
                     timeFormatLabel = timeFormatPreferenceNamed(timeFormatPreference).displayName,
+                    firstDayOfWeekLabel = firstDayOfWeekPreferenceNamed(firstDayOfWeekPreference).displayName,
                     subNoteOpenModeLabel = runCatching { SubNoteOpenMode.valueOf(subNoteOpenMode) }
                         .getOrDefault(SubNoteOpenMode.SIDE_PANEL).displayName,
                     topBarFadeStyleLabel = topBarFadeStyleFor(topBarFadeStyle).displayName,
@@ -322,6 +329,7 @@ fun SettingsScreen(
                     onFontSizeClick = { showFontSizeSheet = true },
                     onFontStyleClick = { showFontStyleSheet = true },
                     onTimeFormatClick = { showTimeFormatSheet = true },
+                    onFirstDayOfWeekClick = { showFirstDayOfWeekSheet = true },
                     onSubNoteOpenModeClick = { showSubNoteOpenModeSheet = true },
                     onTopBarFadeStyleClick = { showTopBarFadeStyleSheet = true },
                     onShowScrollbarChange = { viewModel.setShowScrollbar(it) },
@@ -629,6 +637,37 @@ fun SettingsScreen(
                 EmberrButtonPrimary(
                     text = "Close",
                     onClick = { showTimeFormatSheet = false },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
+                )
+            }
+        }
+    }
+
+    if (showFirstDayOfWeekSheet) {
+        EmberrBottomSheet(
+            expanded = true,
+            onDismiss = { showFirstDayOfWeekSheet = false },
+            title = "First Day of Week",
+            contentHorizontalPadding = 0.dp
+        ) {
+            val selectedFirstDayOfWeek = firstDayOfWeekPreferenceNamed(firstDayOfWeekPreference)
+
+            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+                FirstDayOfWeekPreference.entries.forEach { option ->
+                    EmberrBottomSheetOption(
+                        label = option.displayName,
+                        isSelected = option == selectedFirstDayOfWeek,
+                        onClick = {
+                            viewModel.setFirstDayOfWeekPreference(option.name)
+                            showFirstDayOfWeekSheet = false
+                        }
+                    )
+                }
+
+                EmberrButtonPrimary(
+                    text = "Close",
+                    onClick = { showFirstDayOfWeekSheet = false },
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 12.dp, start = 20.dp, end = 20.dp)
                 )
@@ -1181,6 +1220,7 @@ private fun AppearanceSettingsSection(
     fontSizeLabel: String,
     fontStyleLabel: String,
     timeFormatLabel: String,
+    firstDayOfWeekLabel: String,
     subNoteOpenModeLabel: String,
     topBarFadeStyleLabel: String,
     showScrollbar: Boolean,
@@ -1194,6 +1234,7 @@ private fun AppearanceSettingsSection(
     onFontSizeClick: () -> Unit,
     onFontStyleClick: () -> Unit,
     onTimeFormatClick: () -> Unit,
+    onFirstDayOfWeekClick: () -> Unit,
     onSubNoteOpenModeClick: () -> Unit,
     onTopBarFadeStyleClick: () -> Unit,
     onShowScrollbarChange: (Boolean) -> Unit,
@@ -1225,13 +1266,6 @@ private fun AppearanceSettingsSection(
             trailingLabel = fontStyleLabel,
             onClick = onFontStyleClick
         )
-        SettingsDivider()
-        SettingsActionRow(
-            icon = painterResource(Res.drawable.clock_circle),
-            title = "Time Format",
-            trailingLabel = timeFormatLabel,
-            onClick = onTimeFormatClick
-        )
 
         if (!isDesktopPlatform) {
             SettingsDivider()
@@ -1242,6 +1276,24 @@ private fun AppearanceSettingsSection(
                 onClick = onTopBarFadeStyleClick
             )
         }
+    }
+
+    SettingsGroup(title = "Date & Time") {
+        SettingsActionRow(
+            icon = painterResource(Res.drawable.clock_circle),
+            title = "Time Format",
+            trailingLabel = timeFormatLabel,
+            onClick = onTimeFormatClick
+        )
+        SettingsDivider()
+        SettingsActionRow(
+            icon = painterResource(Res.drawable.calendar),
+            title = "First Day of Week",
+            trailingLabel = firstDayOfWeekLabel,
+            onClick = onFirstDayOfWeekClick
+        )
+
+        SettingsFootnote(text = "Same setting as First Day of Week in Calendar settings.")
     }
 
     SettingsGroup(title = "Layout") {
