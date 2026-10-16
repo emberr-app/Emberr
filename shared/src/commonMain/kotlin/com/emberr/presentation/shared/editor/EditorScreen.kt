@@ -109,6 +109,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
@@ -121,7 +122,6 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_right2
 import emberr.shared.generated.resources.arrow_up
-import emberr.shared.generated.resources.at
 import emberr.shared.generated.resources.bookmark
 import emberr.shared.generated.resources.check_square
 import emberr.shared.generated.resources.code
@@ -138,12 +138,9 @@ import emberr.shared.generated.resources.keyboard
 import emberr.shared.generated.resources.link
 import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.minus
-import emberr.shared.generated.resources.mouse_square2
 import emberr.shared.generated.resources.ordered_list
-import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.quote_down2
 import emberr.shared.generated.resources.card_edit2
-import emberr.shared.generated.resources.redo_circle
 import emberr.shared.generated.resources.scissor2
 import emberr.shared.generated.resources.table
 import emberr.shared.generated.resources.database
@@ -158,7 +155,6 @@ import emberr.shared.generated.resources.textalign_right2
 import emberr.shared.generated.resources.thumbtack
 import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.underline
-import emberr.shared.generated.resources.undo_circle
 import emberr.shared.generated.resources.unordered_list
 import emberr.shared.generated.resources.x
 import kotlinx.collections.immutable.toImmutableSet
@@ -1348,7 +1344,6 @@ fun EditorToolbar(
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val tint = MaterialTheme.colorScheme.primary
-    val iconSize = 19.dp
     val customIconSize = 18.dp
     var isChoosingHighlightColor by remember { mutableStateOf(false) }
 
@@ -1356,6 +1351,74 @@ fun EditorToolbar(
     LaunchedEffect(mobileMenuState, isTextSelectedAcrossBlocks) { isChoosingHighlightColor = false }
     val isEnabled = !isTextSelectedAcrossBlocks
     val buttonTint = if (isEnabled) tint else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+
+    val settingsManager: SettingsManager = koinInject()
+    val savedToolbarItems by settingsManager.keyboardToolbarItemsFlow.collectAsState(
+        initial = settingsManager.getKeyboardToolbarItems()
+    )
+    val toolbarItems = remember(savedToolbarItems, showHistory) {
+        keyboardToolbarItemsToShow(keyboardToolbarItemsFrom(savedToolbarItems), showHistory)
+    }
+    val insertBlockFromToolbar: (String) -> Unit = { type ->
+        onInsertMediaBlock(type)
+        onMenuStateChange(mobileMenuStateAfterInserting(type))
+    }
+    val onToolbarItemClick: (KeyboardToolbarItem) -> Unit = { item ->
+        when (item) {
+            KeyboardToolbarItem.UNDO -> {
+                GlobalEditorState.clearTextSelectionAcrossBlocks?.invoke()
+                onUndo()
+            }
+            KeyboardToolbarItem.REDO -> {
+                GlobalEditorState.clearTextSelectionAcrossBlocks?.invoke()
+                onRedo()
+            }
+            KeyboardToolbarItem.LINK_TO_NOTE -> GlobalEditorState.currentlyFocusedBlockId?.let {
+                EditorEventBus.requestInsertMention(it)
+            }
+            KeyboardToolbarItem.SELECT_BLOCK -> {
+                keyboardController?.hide()
+                onSelectCurrentBlock()
+            }
+            KeyboardToolbarItem.TEXT -> onChangeBlockType("text")
+            KeyboardToolbarItem.HEADING_1 -> onChangeBlockType("h1")
+            KeyboardToolbarItem.HEADING_2 -> onChangeBlockType("h2")
+            KeyboardToolbarItem.CHECKBOX -> onChangeBlockType("checkbox")
+            KeyboardToolbarItem.BULLETED_LIST -> onChangeBlockType("bullet")
+            KeyboardToolbarItem.NUMBERED_LIST -> onChangeBlockType("number")
+            KeyboardToolbarItem.TOGGLE_LIST -> onChangeBlockType("toggle")
+            KeyboardToolbarItem.QUOTE -> onChangeBlockType("quote")
+            KeyboardToolbarItem.CALLOUT -> onChangeBlockType("callout")
+            KeyboardToolbarItem.CODE -> onChangeBlockType("code")
+            KeyboardToolbarItem.VOICE_NOTE -> onChangeBlockType("voice")
+            KeyboardToolbarItem.IMAGE -> insertBlockFromToolbar("image")
+            KeyboardToolbarItem.DOCUMENT -> insertBlockFromToolbar("document")
+            KeyboardToolbarItem.WEB_BOOKMARK -> insertBlockFromToolbar("bookmark")
+            KeyboardToolbarItem.SIMPLE_TABLE -> insertBlockFromToolbar("table")
+            KeyboardToolbarItem.DATABASE -> insertBlockFromToolbar("database")
+            KeyboardToolbarItem.CANVAS -> insertBlockFromToolbar("canvas")
+            KeyboardToolbarItem.LINKED_NOTE -> insertBlockFromToolbar("linked_note")
+            KeyboardToolbarItem.LINKED_CANVAS -> insertBlockFromToolbar("linked_canvas")
+            KeyboardToolbarItem.LINKED_DATABASE -> insertBlockFromToolbar("linked_database")
+            KeyboardToolbarItem.SOLID_LINE_DIVIDER -> onChangeBlockType("divider_solid")
+            KeyboardToolbarItem.THREE_DOTS_DIVIDER -> onChangeBlockType("divider_dots")
+            KeyboardToolbarItem.BOLD -> onToggleFormat("bold")
+            KeyboardToolbarItem.ITALIC -> onToggleFormat("italic")
+            KeyboardToolbarItem.STRIKETHROUGH -> onToggleFormat("strike")
+            KeyboardToolbarItem.UNDERLINE -> onToggleFormat("underline")
+            KeyboardToolbarItem.HIGHLIGHT -> {
+                isChoosingHighlightColor = !isChoosingHighlightColor
+            }
+            KeyboardToolbarItem.ALIGN_LEFT -> onSetAlignment(TextAlignment.LEFT)
+            KeyboardToolbarItem.ALIGN_RIGHT -> onSetAlignment(TextAlignment.RIGHT)
+            KeyboardToolbarItem.ALIGN_CENTER -> onSetAlignment(TextAlignment.CENTER)
+            KeyboardToolbarItem.JUSTIFY -> onSetAlignment(TextAlignment.JUSTIFY)
+            KeyboardToolbarItem.DECREASE_INDENT -> onAdjustIndentation(false)
+            KeyboardToolbarItem.INCREASE_INDENT -> onAdjustIndentation(true)
+            KeyboardToolbarItem.MORE_BLOCKS -> EditorEventBus.insertSlashEvent.tryEmit(Unit)
+            KeyboardToolbarItem.DIVIDER -> Unit
+        }
+    }
 
     KmpBackHandler(enabled = mobileMenuState != MobileMenuState.MAIN) {
         onMenuStateChange(MobileMenuState.MAIN)
@@ -1414,108 +1477,28 @@ fun EditorToolbar(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
-                                    if (showHistory) {
-                                        ToolbarButton(enabled = canUndo, onClick = {
-                                            GlobalEditorState.clearTextSelectionAcrossBlocks?.invoke()
-                                            onUndo()
-                                        }) {
-                                            Icon(painterResource(Res.drawable.undo_circle), "Undo", tint = if (canUndo) tint else tint.copy(alpha = 0.3f), modifier = Modifier.size(customIconSize))
+                                    toolbarItems.forEach { item ->
+                                        if (item == KeyboardToolbarItem.DIVIDER) {
+                                            ToolbarDivider(tint)
+                                        } else {
+                                            val isItemEnabled = when (item) {
+                                                KeyboardToolbarItem.UNDO -> canUndo
+                                                KeyboardToolbarItem.REDO -> canRedo
+                                                else -> isEnabled
+                                            }
+                                            val itemTint = when (item) {
+                                                KeyboardToolbarItem.UNDO, KeyboardToolbarItem.REDO ->
+                                                    if (isItemEnabled) tint else tint.copy(alpha = 0.3f)
+                                                else -> buttonTint
+                                            }
+                                            ToolbarButton(enabled = isItemEnabled, onClick = { onToolbarItemClick(item) }) {
+                                                KeyboardToolbarItemIcon(item, itemTint)
+                                            }
                                         }
-                                        ToolbarButton(enabled = canRedo, onClick = {
-                                            GlobalEditorState.clearTextSelectionAcrossBlocks?.invoke()
-                                            onRedo()
-                                        }) {
-                                            Icon(painterResource(Res.drawable.redo_circle), "Redo", tint = if (canRedo) tint else tint.copy(alpha = 0.3f), modifier = Modifier.size(customIconSize))
-                                        }
-                                        ToolbarDivider(tint)
-                                    }
-
-                                    ToolbarButton(enabled = isEnabled, onClick = {
-                                        GlobalEditorState.currentlyFocusedBlockId?.let {
-                                            EditorEventBus.requestInsertMention(it)
-                                        }
-                                    }) {
-                                        Icon(painterResource(Res.drawable.at), "Link to note", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-
-                                    ToolbarButton(enabled = isEnabled, onClick = {
-                                        keyboardController?.hide()
-                                        onSelectCurrentBlock()
-                                    }) {
-                                        Icon(painterResource(Res.drawable.mouse_square2), "Select Block", tint = buttonTint, modifier = Modifier.size(customIconSize - 2.dp))
-                                    }
-
-                                    ToolbarDivider(tint)
-
-                                    ToolbarButton(enabled = isEnabled, onClick = { onChangeBlockType("text") }) {
-                                        Icon(Icons.AutoMirrored.Filled.Subject, "Text", tint = buttonTint, modifier = Modifier.size(iconSize))
-                                    }
-                                    ToolbarLabel("H1", buttonTint, enabled = isEnabled) { onChangeBlockType("h1") }
-                                    ToolbarLabel("H2", buttonTint, enabled = isEnabled) { onChangeBlockType("h2") }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onChangeBlockType("checkbox") }) {
-                                        Icon(painterResource(Res.drawable.check_square), "Checkbox", tint = buttonTint, modifier = Modifier.size(customIconSize - 2.dp))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onChangeBlockType("bullet") }) {
-                                        Icon(painterResource(Res.drawable.unordered_list), "Bulleted list", tint = buttonTint, modifier = Modifier.size(customIconSize - 2.dp))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onChangeBlockType("number") }) {
-                                        Icon(painterResource(Res.drawable.ordered_list), "Numbered list", tint = buttonTint, modifier = Modifier.size(customIconSize - 3.dp))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onChangeBlockType("toggle") }) {
-                                        Icon(painterResource(Res.drawable.arrow_right2), "Toggle list", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onChangeBlockType("quote") }) {
-                                        Icon(painterResource(Res.drawable.quote_down2), "Quote", tint = buttonTint, modifier = Modifier.size(customIconSize - 3.dp))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onChangeBlockType("callout") }) {
-                                        Icon(painterResource(Res.drawable.card_edit2), "Callout", tint = buttonTint, modifier = Modifier.size(customIconSize - 2.dp))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onChangeBlockType("code") }) {
-                                        Icon(painterResource(Res.drawable.code), "Code", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-
-                                    ToolbarDivider(tint)
-
-                                    InlineFormatButtons(
-                                        tint = buttonTint,
-                                        iconSize = customIconSize,
-                                        enabled = isEnabled,
-                                        onToggleFormat = onToggleFormat,
-                                        onHighlightClick = { isChoosingHighlightColor = !isChoosingHighlightColor }
-                                    )
-
-                                    ToolbarDivider(tint)
-
-                                    ToolbarButton(enabled = isEnabled, onClick = { onSetAlignment(TextAlignment.LEFT) }) {
-                                        Icon(painterResource(Res.drawable.textalign_left2), "Align left", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onSetAlignment(TextAlignment.RIGHT) }) {
-                                        Icon(painterResource(Res.drawable.textalign_right2), "Align right", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onSetAlignment(TextAlignment.CENTER) }) {
-                                        Icon(painterResource(Res.drawable.textalign_center2), "Align center", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onSetAlignment(TextAlignment.JUSTIFY) }) {
-                                        Icon(painterResource(Res.drawable.textalign_justifycenter2), "Justify", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-
-                                    ToolbarDivider(tint)
-
-                                    ToolbarButton(enabled = isEnabled, onClick = { onAdjustIndentation(false) }) {
-                                        Icon(painterResource(Res.drawable.indent_right), "Decrease indent", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-                                    ToolbarButton(enabled = isEnabled, onClick = { onAdjustIndentation(true) }) {
-                                        Icon(painterResource(Res.drawable.indent_left), "Increase indent", tint = buttonTint, modifier = Modifier.size(customIconSize))
-                                    }
-
-                                    ToolbarDivider(tint)
-
-                                    ToolbarButton(enabled = isEnabled, onClick = { EditorEventBus.insertSlashEvent.tryEmit(Unit) }) {
-                                        Icon(painterResource(Res.drawable.plus), "More blocks", tint = buttonTint, modifier = Modifier.size(customIconSize - 1.dp))
                                     }
                                 }
 
-                                ToolbarDivider(tint)
+                                if (toolbarItems.isNotEmpty()) ToolbarDivider(tint)
                                 ToolbarButton(onClick = { keyboardController?.hide() }) {
                                     Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
                                 }

@@ -477,6 +477,19 @@ class AndroidSettingsManager(
         _hiddenOverviewSections.value = storageKeys
     }
 
+    private val _keyboardToolbarItems = MutableStateFlow(
+        sharedPreferences.getString(SyncConstants.KEY_KEYBOARD_TOOLBAR_ITEMS, SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS)
+            ?: SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS
+    )
+    override val keyboardToolbarItemsFlow: Flow<String> = _keyboardToolbarItems
+
+    override fun getKeyboardToolbarItems(): String = _keyboardToolbarItems.value
+
+    override fun saveKeyboardToolbarItems(savedValue: String) {
+        sharedPreferences.edit { putString(SyncConstants.KEY_KEYBOARD_TOOLBAR_ITEMS, savedValue) }
+        _keyboardToolbarItems.value = savedValue
+    }
+
     private val _customWindowFrameEnabled = MutableStateFlow(
         sharedPreferences.getBoolean(
             SyncConstants.KEY_CUSTOM_WINDOW_FRAME,

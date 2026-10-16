@@ -415,6 +415,18 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _hiddenOverviewSections.value = storageKeys
     }
 
+    private val _keyboardToolbarItems = MutableStateFlow(
+        prefs.get(SyncConstants.KEY_KEYBOARD_TOOLBAR_ITEMS, SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS)
+    )
+    override val keyboardToolbarItemsFlow: Flow<String> = _keyboardToolbarItems
+
+    override fun getKeyboardToolbarItems(): String = _keyboardToolbarItems.value
+
+    override fun saveKeyboardToolbarItems(savedValue: String) {
+        prefs.put(SyncConstants.KEY_KEYBOARD_TOOLBAR_ITEMS, savedValue)
+        _keyboardToolbarItems.value = savedValue
+    }
+
     private val _customWindowFrameEnabled = MutableStateFlow(
         prefs.getBoolean(
             SyncConstants.KEY_CUSTOM_WINDOW_FRAME,
