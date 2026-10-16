@@ -26,6 +26,7 @@ import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.RecurrenceEditScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 
 /**
  * The single source of truth for accessing and modifying note data.
@@ -36,6 +37,7 @@ interface NoteRepository {
     fun getCalendarTasksForMonth(yearMonth: String): Flow<List<CalendarTaskEntity>>
     fun getCalendarTasksForDate(dateString: String): Flow<List<CalendarTaskEntity>>
     fun getAllTasksFlow(): Flow<List<CalendarTaskEntity>>
+    fun getCalendarTasksForSearch(today: LocalDate): Flow<List<CalendarTaskEntity>>
 
     // Marks a single occurrence of a recurring checkbox as done/undone without touching the
     // base block or any other occurrence - see CalendarEventExceptionEntity.

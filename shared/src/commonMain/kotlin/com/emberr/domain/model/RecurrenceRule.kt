@@ -126,4 +126,19 @@ object RecurrenceEngine {
         }
         return null
     }
+
+    fun nextOrLastOccurrence(
+        rule: RecurrenceRule,
+        anchor: LocalDate,
+        today: LocalDate,
+        isCancelled: (LocalDate) -> Boolean
+    ): LocalDate? {
+        var upcoming = if (occursOn(rule, anchor, today)) today else nextOccurrence(rule, anchor, today)
+        while (upcoming != null && isCancelled(upcoming)) upcoming = nextOccurrence(rule, anchor, upcoming)
+        if (upcoming != null) return upcoming
+
+        var past = previousOccurrence(rule, anchor, today)
+        while (past != null && isCancelled(past)) past = previousOccurrence(rule, anchor, past)
+        return past
+    }
 }

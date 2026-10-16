@@ -72,7 +72,14 @@ import com.emberr.presentation.shared.canvas.CanvasScreen
 import com.emberr.presentation.shared.components.NoteKindTabs
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.sync.SyncViewModel
+import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
+import com.emberr.presentation.calendar.CalendarEvent
+import com.emberr.presentation.calendar.CalendarEventSearchResult
 import com.emberr.presentation.calendar.CalendarScreen
+import com.emberr.presentation.calendar.matchingDetail
+import com.emberr.presentation.calendar.searchResultDateLabel
+import com.emberr.presentation.calendar.toCategoryColor
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.presentation.daily.CollapsedWeekStrip
 import com.emberr.presentation.daily.DailyEditorPane
 import com.emberr.presentation.daily.DailyEditorViewModel
@@ -103,6 +110,8 @@ import com.emberr.domain.model.PropertyDateRange
 import com.emberr.presentation.search.SearchViewModel
 import com.emberr.presentation.search.canBeFavoritedOrTrashed
 import com.emberr.presentation.search.canBeRenamed
+import com.emberr.presentation.search.dailyDateToOpen
+import com.emberr.presentation.search.isPinnedBlocks
 import com.emberr.presentation.search.favoriteOptionLabel
 import com.emberr.presentation.search.defaultHighlightStyle
 import com.emberr.presentation.search.highlightMatches
@@ -161,6 +170,7 @@ import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.history2
 import emberr.shared.generated.resources.pen_square
 import emberr.shared.generated.resources.folder_plus
+import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.template
 import emberr.shared.generated.resources.x
@@ -261,6 +271,7 @@ private fun Modifier.noRippleClickable(interactionSource: MutableInteractionSour
 
 private const val SEARCH_EMPTY_MESSAGE_DELAY_MS = 350L
 private val SidebarSearchResultShape = RoundedCornerShape(10.dp)
+private const val COLLAPSED_EVENT_RESULT_COUNT = 3
 
 @Composable
 private fun SidebarSearchBar(
@@ -317,7 +328,7 @@ private fun SidebarSearchBar(
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (query.isEmpty()) {
                         Text(
-                            text = "Search notes",
+                            text = "Search anything",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                         )
@@ -350,7 +361,9 @@ private fun SidebarSearchBar(
 private fun SidebarSearchResults(
     query: String,
     results: List<NoteSearchResult>,
+    eventResults: List<CalendarEventSearchResult>,
     onResultClick: (NoteSearchResult) -> Unit,
+    onEventClick: (CalendarEvent) -> Unit,
     openInSplitViewActionFor: (NoteSearchResult) -> (() -> Unit)?,
     onRenameNote: (noteId: String, newTitle: String) -> Unit,
     onSetNoteFavorite: (noteId: String, isFavorite: Boolean) -> Unit,
@@ -362,10 +375,18 @@ private fun SidebarSearchResults(
 ) {
     val resultsListState = rememberLazyListState()
     var hasSettledOnNoResults by remember { mutableStateOf(false) }
+    var areAllEventsShown by remember(query) { mutableStateOf(false) }
+    val shownEventResults = if (areAllEventsShown) eventResults else eventResults.take(COLLAPSED_EVENT_RESULT_COUNT)
+    val isShowAllEventsVisible = shownEventResults.size < eventResults.size
+    val rowCountBeforeNotes = if (eventResults.isEmpty()) {
+        0
+    } else {
+        1 + shownEventResults.size + (if (isShowAllEventsVisible) 1 else 0) + (if (results.isNotEmpty()) 1 else 0)
+    }
 
-    LaunchedEffect(query, results) {
+    LaunchedEffect(query, results, eventResults) {
         hasSettledOnNoResults = false
-        if (results.isEmpty()) {
+        if (results.isEmpty() && eventResults.isEmpty()) {
             delay(SEARCH_EMPTY_MESSAGE_DELAY_MS)
             hasSettledOnNoResults = true
         }
@@ -376,10 +397,10 @@ private fun SidebarSearchResults(
     }
 
     Box(modifier = modifier) {
-        if (results.isEmpty()) {
+        if (results.isEmpty() && eventResults.isEmpty()) {
             if (hasSettledOnNoResults) {
                 Text(
-                    text = "No notes match \"$query\"",
+                    text = "No notes or events match \"$query\"",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     textAlign = TextAlign.Center,
@@ -396,7 +417,8 @@ private fun SidebarSearchResults(
                     .desktopListDragTracker(
                         dragState = dragState,
                         listState = resultsListState,
-                        rowKeys = results.map { result -> HomeItemKey.forNote(result.note.noteId) },
+                        rowKeys = List(rowCountBeforeNotes) { null } +
+                            results.map { result -> HomeItemKey.forNote(result.note.noteId) },
                         payloadForKey = { key -> key?.let { "$DRAG_PREFIX_NOTE${HomeItemKey.noteIdOf(it)}" } },
                         isDropTarget = { _, _ -> false },
                         onDrop = { _, _, _ -> },
@@ -406,6 +428,46 @@ private fun SidebarSearchResults(
                     .smoothWheelScroll(resultsListState),
                 contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 16.dp)
             ) {
+                if (eventResults.isNotEmpty()) {
+                    item(key = "events_header") { SidebarSearchSectionTitle("Events") }
+                    itemsIndexed(
+                        shownEventResults,
+                        key = { _, eventResult -> "event_${eventResult.event.blockId}_${eventResult.event.dateString}" }
+                    ) { index, eventResult ->
+                        Column {
+                            SidebarEventSearchResultRow(
+                                result = eventResult,
+                                query = query,
+                                onClick = { onEventClick(eventResult.event) }
+                            )
+                            if (index < shownEventResults.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 10.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                )
+                            }
+                        }
+                    }
+                    if (isShowAllEventsVisible) {
+                        item(key = "events_show_all") {
+                            Text(
+                                text = "Show all ${eventResults.size} events",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .noRippleClickable { areAllEventsShown = true }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                    if (results.isNotEmpty()) {
+                        item(key = "notes_header") {
+                            SidebarSearchSectionTitle("Notes", modifier = Modifier.padding(top = 12.dp))
+                        }
+                    }
+                }
                 itemsIndexed(results, key = { _, result -> result.note.noteId }) { index, result ->
                     Column {
                         SidebarSearchResultRow(
@@ -435,6 +497,92 @@ private fun SidebarSearchResults(
     }
 }
 
+@Composable
+private fun SidebarSearchSectionTitle(title: String, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        modifier = modifier.padding(start = 10.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
+private fun SidebarEventSearchResultRow(
+    result: CalendarEventSearchResult,
+    query: String,
+    onClick: () -> Unit
+) {
+    val event = result.event
+    val trimmedQuery = query.trim()
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val rowBackground by animateColorAsState(
+        sidebarRowBackground(isActive = false, isSelected = false, isHovered = isHovered),
+        tween(180, easing = FastOutSlowInEasing),
+        label = "event_search_result_bg"
+    )
+    val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+    val matchingDetail = event.matchingDetail(trimmedQuery)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SidebarSearchResultShape)
+            .background(rowBackground)
+            .noRippleClickable(interactionSource, onClick)
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(
+                        result.category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.outline,
+                        CircleShape
+                    )
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = highlightMatches(event.text.ifBlank { "Untitled event" }, trimmedQuery, highlightStyle),
+                style = sidebarRowTextStyle,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        matchingDetail?.let { detail ->
+            Text(
+                text = highlightMatches(detail, trimmedQuery, highlightStyle),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 2.dp)
+        ) {
+            Text(
+                text = event.searchResultDateLabel(LocalUsesTwentyFourHourClock.current),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+            )
+            if (event.recurrenceRule != null) {
+                Spacer(Modifier.width(6.dp))
+                Icon(
+                    painter = painterResource(Res.drawable.refresh_cw),
+                    contentDescription = "Repeats",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                    modifier = Modifier.size(11.dp)
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SidebarSearchResultRow(
@@ -460,7 +608,7 @@ private fun SidebarSearchResultRow(
     )
     val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
     val dailyDateString = result.note.dateString?.takeIf { result.note.isDaily }
-    val titleText = dailyDateString ?: result.note.title.ifBlank { "Untitled" }
+    val titleText = if (result.isPinnedBlocks) "Pinned" else dailyDateString ?: result.note.title.ifBlank { "Untitled" }
     val snippetText = result.matchedText.takeIf { it.isNotBlank() && it != result.note.title }
 
     Box {
@@ -801,6 +949,7 @@ fun DesktopMainScreen(
     // Sidebar search
     val searchQuery by searchViewModel.query.collectAsState()
     val searchResults by searchViewModel.results.collectAsState()
+    val eventSearchResults by searchViewModel.eventResults.collectAsState()
     val isSearchActive = searchQuery.isNotBlank()
     val searchFieldFocusRequester = remember { FocusRequester() }
     var shouldFocusSearchField by remember { mutableStateOf(false) }
@@ -956,7 +1105,7 @@ fun DesktopMainScreen(
     }
 
     fun paneForSearchResult(result: NoteSearchResult): DetailPane {
-        val dailyDateString = result.note.dateString?.takeIf { result.note.isDaily }
+        val dailyDateString = result.dailyDateToOpen
         return if (dailyDateString != null) DetailPane.Daily(LocalDate.parse(dailyDateString)) else DetailPane.Note(result.note.noteId)
     }
 
@@ -1134,9 +1283,15 @@ fun DesktopMainScreen(
                     SidebarSearchResults(
                         query = searchQuery,
                         results = searchResults,
+                        eventResults = eventSearchResults,
                         onResultClick = { result ->
-                            if (result.note.isDaily) result.note.dateString?.let { openDaily(LocalDate.parse(it)) }
+                            if (result.note.isDaily) result.dailyDateToOpen?.let { openDaily(LocalDate.parse(it)) }
                             else openNote(result.note.noteId)
+                        },
+                        onEventClick = { event ->
+                            WidgetCalendarEventBus.requestEvent(event.blockId, event.dateString)
+                            detail = DetailPane.Calendar
+                            isPeeking = false
                         },
                         openInSplitViewActionFor = { result -> openInSplitViewActionFor(paneForSearchResult(result)) },
                         onRenameNote = { noteId, newTitle ->

@@ -32,6 +32,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.emberr.domain.util.eventbus.AiEventBus
+import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.daily.DailyScreen
@@ -173,6 +174,7 @@ fun EmberrApp(
     val searchViewModel: SearchViewModel = koinViewModel()
     val searchQuery by searchViewModel.query.collectAsState()
     val searchResults by searchViewModel.results.collectAsState()
+    val eventSearchResults by searchViewModel.eventResults.collectAsState()
     var isSearchBarOpen by remember { mutableStateOf(false) }
     val areSearchResultsVisible = isSearchBarOpen && searchQuery.isNotBlank()
     val closeSearchBar: () -> Unit = {
@@ -1076,6 +1078,7 @@ fun EmberrApp(
                             SearchResultsList(
                                 query = searchQuery,
                                 results = searchResults,
+                                eventResults = eventSearchResults,
                                 onNoteClick = { noteId ->
                                     closeSearchBar()
                                     navController.navigate(Screen.Note.createRoute(noteId))
@@ -1086,6 +1089,11 @@ fun EmberrApp(
                                         popUpTo(navController.graph.id) { inclusive = true }
                                         launchSingleTop = true
                                     }
+                                },
+                                onEventClick = { event ->
+                                    closeSearchBar()
+                                    WidgetCalendarEventBus.requestEvent(event.blockId, event.dateString)
+                                    navController.navigate(Screen.Calendar.route) { launchSingleTop = true }
                                 },
                                 onRenameNote = { noteId, newTitle ->
                                     HomeViewModel.renameNote(noteId, newTitle, onDone = searchViewModel::refreshResults)

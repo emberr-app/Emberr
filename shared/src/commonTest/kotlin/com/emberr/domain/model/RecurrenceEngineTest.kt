@@ -29,6 +29,28 @@ class RecurrenceEngineTest {
         RecurrenceRule(RecurrenceFrequency.YEARLY, interval)
 
     @Test
+    fun nextOrLastOccurrenceSkipsCancelledUpcomingDates() {
+        val anchor = LocalDate(2026, 1, 1)
+        val today = LocalDate(2026, 1, 10)
+        val cancelledDates = setOf(LocalDate(2026, 1, 10), LocalDate(2026, 1, 11))
+
+        val occurrence = RecurrenceEngine.nextOrLastOccurrence(dailyRule(), anchor, today) { it in cancelledDates }
+
+        assertEquals(LocalDate(2026, 1, 12), occurrence)
+    }
+
+    @Test
+    fun nextOrLastOccurrenceFallsBackToTheLastNonCancelledDateOfAnEndedSeries() {
+        val anchor = LocalDate(2026, 1, 1)
+        val today = LocalDate(2026, 1, 10)
+        val rule = dailyRule(untilDateString = "2026-01-05")
+
+        val occurrence = RecurrenceEngine.nextOrLastOccurrence(rule, anchor, today) { it == LocalDate(2026, 1, 5) }
+
+        assertEquals(LocalDate(2026, 1, 4), occurrence)
+    }
+
+    @Test
     fun aDateBeforeTheAnchorNeverCounts() {
         val anchor = LocalDate(2026, 1, 10)
 
