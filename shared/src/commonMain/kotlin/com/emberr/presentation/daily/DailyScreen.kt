@@ -556,12 +556,12 @@ fun DailyScreen(
                     onClearSelection = { viewModel.clearSelection() },
                     onSelectAll = { viewModel.selectAllBlocks() },
                     onCopy = {
-                        clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
+                        clipboardManager.copyEmberrBlocks(viewModel.selectedBlocksWithHiddenChildren(), allLinkableNotes)
                         viewModel.clearSelection()
                     },
                     onCut = {
-                        clipboardManager.copyEmberrBlocks(selectedBlocksList, allLinkableNotes)
-                        viewModel.deleteSelectedBlocks()
+                        clipboardManager.copyEmberrBlocks(viewModel.selectedBlocksWithHiddenChildren(), allLinkableNotes)
+                        viewModel.deleteSelectedBlocksWithHiddenChildren()
                     },
                     onAddBlockAbove = { viewModel.addBlockAboveSelection() },
                     onAddBlockBelow = { viewModel.addBlockBelowSelection() },

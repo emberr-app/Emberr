@@ -1818,6 +1818,17 @@ abstract class BaseEditorViewModel(
     fun clearSelection() { _selectedBlockIds.value = emptySet() }
     fun selectAllBlocks() { _selectedBlockIds.value = _blocks.value.map { it.id }.toSet() }
 
+    fun selectedBlocksWithHiddenChildren(): List<NoteBlock> {
+        val selectedIds = _selectedBlockIds.value
+        val idsToCopy = selectedIds + selectedIds.flatMap { id -> hiddenChildrenOf(id).map { it.id } }
+        return _blocks.value.filter { it.id in idsToCopy }
+    }
+
+    fun deleteSelectedBlocksWithHiddenChildren() {
+        _selectedBlockIds.value = selectedBlocksWithHiddenChildren().map { it.id }.toSet()
+        deleteSelectedBlocks()
+    }
+
     fun deleteSelectedBlocks() {
         val toDelete = _selectedBlockIds.value
         val currentBlocks = _blocks.value
