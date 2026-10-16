@@ -24,7 +24,7 @@ import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseTemplateRepeat
 import com.emberr.presentation.shared.components.EmberrTextField
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.ellipsis
@@ -37,7 +37,6 @@ import emberr.shared.generated.resources.star_outline
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 @Composable
 internal fun DatabaseTemplateMenu(

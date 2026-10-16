@@ -20,7 +20,6 @@ import com.emberr.domain.model.DatabaseFilterCondition
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.valueTypeOf
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.palette

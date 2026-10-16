@@ -30,12 +30,12 @@ import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.shared.components.KmpBackHandler
-import com.emberr.presentation.shared.editor.copyEmberrBlocks
+import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.BlockSelectionPill
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
-import com.emberr.presentation.shared.editor.CrossBlockTextRange
-import com.emberr.presentation.shared.editor.MarkdownShortcut
+import com.emberr.presentation.shared.editor.selection.CrossBlockTextRange
+import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
 import com.emberr.presentation.shared.editor.EditorScreen
 import com.emberr.presentation.shared.editor.SelectionModeObserver
 import com.emberr.presentation.shared.editor.MobileMenuState

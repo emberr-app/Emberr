@@ -42,13 +42,12 @@ import com.emberr.domain.database.formulaOf
 import com.emberr.domain.database.formulaProblem
 import com.emberr.domain.database.formulaTextLiteral
 import com.emberr.domain.model.DatabaseBlock
-import com.emberr.domain.model.DatabaseNumberFormat
 import com.emberr.domain.model.DatabaseColumnTarget
+import com.emberr.domain.model.DatabaseNumberFormat
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.labelOf
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextField
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
 import com.emberr.presentation.shared.editor.blockViews.property.toTextAlign
 import emberr.shared.generated.resources.Res

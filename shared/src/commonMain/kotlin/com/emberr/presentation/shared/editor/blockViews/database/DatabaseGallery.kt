@@ -67,13 +67,13 @@ import com.emberr.domain.model.numberOrNull
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagChip
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDateRange
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.roundToInt
-import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 
 private val CardGap = 12.dp
 private val CardShape = RoundedCornerShape(10.dp)

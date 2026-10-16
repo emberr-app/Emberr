@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.builtInPropertiesNotYetAdded
-import com.emberr.domain.database.canGroupBy
 import com.emberr.domain.database.calculationsFor
+import com.emberr.domain.database.canGroupBy
 import com.emberr.domain.database.columnWithKey
 import com.emberr.domain.database.customPropertiesNotShown
 import com.emberr.domain.database.groupByColumn
@@ -28,7 +28,6 @@ import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.presentation.shared.components.EmberrSwitch
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
 import com.emberr.presentation.shared.editor.blockViews.rememberDeviceTableLayout
 import emberr.shared.generated.resources.Res

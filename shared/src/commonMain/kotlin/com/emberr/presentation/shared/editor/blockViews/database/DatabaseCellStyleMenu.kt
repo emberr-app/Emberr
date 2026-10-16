@@ -29,8 +29,7 @@ import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseCellStyle
 import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.TextAlignment
-import com.emberr.presentation.shared.editor.DatabaseBlockEditor
-import com.emberr.presentation.shared.editor.removeHighlightMark
+import com.emberr.presentation.shared.editor.formatting.removeHighlightMark
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import emberr.shared.generated.resources.Res
