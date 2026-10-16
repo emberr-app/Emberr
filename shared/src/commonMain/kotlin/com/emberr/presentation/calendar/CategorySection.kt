@@ -35,11 +35,16 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.MenuAtTap
+import com.emberr.presentation.shared.components.menuTapAnchor
+import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.EmberrTextField
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.plus
 import org.jetbrains.compose.resources.painterResource
+
+private val CategoryMenuWidth = 300.dp
 
 private data class CategoryEditorState(
     val categoryId: String?,
@@ -143,6 +148,13 @@ fun CategorySection(
 }
 
 @Composable
+private fun keepShowingWhileClosing(editorState: CategoryEditorState?): CategoryEditorState? {
+    val lastOpenEditorState = remember { arrayOfNulls<CategoryEditorState>(1) }
+    if (editorState != null) lastOpenEditorState[0] = editorState
+    return editorState ?: lastOpenEditorState[0]
+}
+
+@Composable
 private fun CategoryRow(
     category: CalendarCategory,
     isEditorOpen: Boolean,
@@ -155,7 +167,10 @@ private fun CategoryRow(
     onSave: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    val tapAnchor = rememberMenuTapAnchor()
+    val shownEditorState = keepShowingWhileClosing(editorState)
+
+    Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(tapAnchor)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -188,28 +203,32 @@ private fun CategoryRow(
             )
         }
 
-        EmberrDesktopMenu(
-            expanded = isEditorOpen,
-            onDismissRequest = onDismissEditor,
-            modifier = Modifier.width(300.dp)
-        ) {
-            if (editorState != null) {
-                Text(
-                    text = "Edit Category",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                )
-                CategoryEditor(
-                    state = editorState,
-                    isNew = false,
-                    onNameChange = onNameChange,
-                    onColorChange = onColorChange,
-                    onCancel = onCancel,
-                    onSave = onSave,
-                    onDelete = onDelete
-                )
+        MenuAtTap(tapAnchor, menuWidth = CategoryMenuWidth) {
+            EmberrDesktopMenu(
+                expanded = isEditorOpen,
+                onDismissRequest = onDismissEditor,
+                modifier = Modifier.width(CategoryMenuWidth)
+            ) {
+                if (shownEditorState != null) {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                        Text(
+                            text = "Edit Category",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(bottom = 18.dp)
+                        )
+                        CategoryEditor(
+                            state = shownEditorState,
+                            isNew = false,
+                            onNameChange = onNameChange,
+                            onColorChange = onColorChange,
+                            onCancel = onCancel,
+                            onSave = onSave,
+                            onDelete = onDelete
+                        )
+                    }
+                }
             }
         }
     }
@@ -226,35 +245,42 @@ private fun AddCategoryRow(
     onCancel: () -> Unit,
     onSave: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    val tapAnchor = rememberMenuTapAnchor()
+    val shownEditorState = keepShowingWhileClosing(editorState)
+
+    Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(tapAnchor)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.plus),
             title = "Add Category",
             onClick = onClick
         )
 
-        EmberrDesktopMenu(
-            expanded = isEditorOpen,
-            onDismissRequest = onDismissEditor,
-            modifier = Modifier.width(300.dp)
-        ) {
-            if (editorState != null) {
-                Text(
-                    text = "Add Category",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                )
-                CategoryEditor(
-                    state = editorState,
-                    isNew = true,
-                    onNameChange = onNameChange,
-                    onColorChange = onColorChange,
-                    onCancel = onCancel,
-                    onSave = onSave,
-                    onDelete = null
-                )
+        MenuAtTap(tapAnchor, menuWidth = CategoryMenuWidth) {
+            EmberrDesktopMenu(
+                expanded = isEditorOpen,
+                onDismissRequest = onDismissEditor,
+                modifier = Modifier.width(CategoryMenuWidth)
+            ) {
+                if (shownEditorState != null) {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                        Text(
+                            text = "Add Category",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(bottom = 18.dp)
+                        )
+                        CategoryEditor(
+                            state = shownEditorState,
+                            isNew = true,
+                            onNameChange = onNameChange,
+                            onColorChange = onColorChange,
+                            onCancel = onCancel,
+                            onSave = onSave,
+                            onDelete = null
+                        )
+                    }
+                }
             }
         }
     }
