@@ -99,6 +99,7 @@ import emberr.shared.generated.resources.folder_input
 import emberr.shared.generated.resources.folder_sync
 import emberr.shared.generated.resources.house
 import emberr.shared.generated.resources.info
+import emberr.shared.generated.resources.keyboard
 import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.qr_code
@@ -151,6 +152,7 @@ fun SettingsScreen(
     onNavigateToSelfHostSetup: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
     onNavigateToImportNotes: () -> Unit = {},
+    onNavigateToKeyboardToolbarSettings: () -> Unit = {},
     desktopSubPage: SettingsSubPage? = null,
     onDesktopSubPageChange: (SettingsSubPage?) -> Unit = {},
     showBackButton: Boolean = true,
@@ -301,6 +303,14 @@ fun SettingsScreen(
             add(
                 SettingsCategory(title = "Security", icon = Res.drawable.shield_alert) {
                     SecretStorageSettingsSection()
+                }
+            )
+        }
+
+        if (!isDesktopPlatform) {
+            add(
+                SettingsCategory(title = "Editor", icon = Res.drawable.keyboard) {
+                    EditorSettingsSection(onKeyboardToolbarClick = onNavigateToKeyboardToolbarSettings)
                 }
             )
         }
@@ -1468,6 +1478,17 @@ private fun AiSettingsSection(
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun EditorSettingsSection(onKeyboardToolbarClick: () -> Unit) {
+    SettingsGroup(title = "Editor") {
+        SettingsActionRow(
+            icon = painterResource(Res.drawable.keyboard),
+            title = "Keyboard Toolbar",
+            onClick = onKeyboardToolbarClick
+        )
     }
 }
 

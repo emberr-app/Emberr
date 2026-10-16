@@ -820,7 +820,7 @@ fun EmberrApp(
                                 )
                             },
                             exitTransition = {
-                                if (targetState.destination.route in listOf(Screen.SelfHostSetup.route, Screen.About.route, Screen.ImportNotes.route)) {
+                                if (targetState.destination.route in listOf(Screen.SelfHostSetup.route, Screen.About.route, Screen.ImportNotes.route, Screen.KeyboardToolbarSettings.route)) {
                                     ExitTransition.None
                                 } else {
                                     slideOutOfContainer(
@@ -830,7 +830,7 @@ fun EmberrApp(
                                 }
                             },
                             popEnterTransition = {
-                                if (initialState.destination.route in listOf(Screen.SelfHostSetup.route, Screen.About.route, Screen.ImportNotes.route)) {
+                                if (initialState.destination.route in listOf(Screen.SelfHostSetup.route, Screen.About.route, Screen.ImportNotes.route, Screen.KeyboardToolbarSettings.route)) {
                                     EnterTransition.None
                                 } else {
                                     slideIntoContainer(
@@ -865,7 +865,40 @@ fun EmberrApp(
                                 onRequestBackupFolder = onRequestBackupFolder,
                                 onNavigateToSelfHostSetup = { navController.navigate(Screen.SelfHostSetup.route) },
                                 onNavigateToAbout = { navController.navigate(Screen.About.route) },
-                                onNavigateToImportNotes = { navController.navigate(Screen.ImportNotes.route) }
+                                onNavigateToImportNotes = { navController.navigate(Screen.ImportNotes.route) },
+                                onNavigateToKeyboardToolbarSettings = { navController.navigate(Screen.KeyboardToolbarSettings.route) }
+                            )
+                        }
+
+                        composable(
+                            route = Screen.KeyboardToolbarSettings.route,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    tween(300)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    tween(300)
+                                )
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    tween(300)
+                                )
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    tween(300)
+                                )
+                            }
+                        ) {
+                            com.emberr.presentation.settings.KeyboardToolbarSettingsScreen(
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
 

@@ -141,6 +141,10 @@ interface SettingsManager {
     fun getHiddenOverviewSections(): Set<String>
     fun saveHiddenOverviewSections(storageKeys: Set<String>)
 
+    val keyboardToolbarItemsFlow: Flow<String>
+    fun getKeyboardToolbarItems(): String
+    fun saveKeyboardToolbarItems(savedValue: String)
+
     val customWindowFrameEnabledFlow: Flow<Boolean>
     fun isCustomWindowFrameEnabled(): Boolean
     fun saveCustomWindowFrameEnabled(enabled: Boolean)
