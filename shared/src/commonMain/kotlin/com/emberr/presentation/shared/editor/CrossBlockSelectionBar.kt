@@ -41,9 +41,9 @@ import com.emberr.presentation.shared.components.emberrBorder
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.format_bold
-import emberr.shared.generated.resources.highlight
 import emberr.shared.generated.resources.italic
 import emberr.shared.generated.resources.scissor2
+import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.underline
@@ -152,7 +152,7 @@ private fun SelectionBarContent(
                     SelectionBarButton(Res.drawable.italic, "Italic", 14.dp) { toggleFormat("italic") }
                     SelectionBarButton(Res.drawable.text_x, "Strikethrough", 16.dp) { toggleFormat("strike") }
                     SelectionBarButton(Res.drawable.underline, "Underline", 16.dp) { toggleFormat("underline") }
-                    SelectionBarButton(Res.drawable.highlight, "Highlight", 16.dp) { onChoosingHighlightColorChange(true) }
+                    SelectionBarButton(Res.drawable.text_highlight, "Highlight", 19.dp) { onChoosingHighlightColorChange(true) }
                 }
             }
         }

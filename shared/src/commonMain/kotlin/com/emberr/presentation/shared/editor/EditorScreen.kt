@@ -130,7 +130,6 @@ import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.eye3
 import emberr.shared.generated.resources.document_text_12
 import emberr.shared.generated.resources.format_bold
-import emberr.shared.generated.resources.highlight
 import emberr.shared.generated.resources.image
 import emberr.shared.generated.resources.indent_left
 import emberr.shared.generated.resources.indent_right
@@ -149,6 +148,7 @@ import emberr.shared.generated.resources.scissor2
 import emberr.shared.generated.resources.table
 import emberr.shared.generated.resources.database
 import emberr.shared.generated.resources.group
+import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_tool_2
 import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.textalign_center2
@@ -1501,6 +1501,15 @@ fun EditorToolbar(
 
                                     ToolbarDivider(tint)
 
+                                    ToolbarButton(enabled = isEnabled, onClick = { onAdjustIndentation(false) }) {
+                                        Icon(painterResource(Res.drawable.indent_right), "Decrease indent", tint = buttonTint, modifier = Modifier.size(customIconSize))
+                                    }
+                                    ToolbarButton(enabled = isEnabled, onClick = { onAdjustIndentation(true) }) {
+                                        Icon(painterResource(Res.drawable.indent_left), "Increase indent", tint = buttonTint, modifier = Modifier.size(customIconSize))
+                                    }
+
+                                    ToolbarDivider(tint)
+
                                     ToolbarButton(enabled = isEnabled, onClick = { EditorEventBus.insertSlashEvent.tryEmit(Unit) }) {
                                         Icon(painterResource(Res.drawable.plus), "More blocks", tint = buttonTint, modifier = Modifier.size(customIconSize - 1.dp))
                                     }
@@ -1692,7 +1701,7 @@ private fun InlineFormatButtons(
         Icon(painterResource(Res.drawable.underline), "Underline", tint = tint, modifier = Modifier.size(iconSize - 2.dp))
     }
     ToolbarButton(enabled = enabled, onClick = onHighlightClick) {
-        Icon(painterResource(Res.drawable.highlight), "Highlight", tint = tint, modifier = Modifier.size(iconSize - 2.dp))
+        Icon(painterResource(Res.drawable.text_highlight), "Highlight", tint = tint, modifier = Modifier.size(iconSize + 1.dp))
     }
 }
 
@@ -1887,7 +1896,7 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Italic Text", Res.drawable.italic, 13.dp) { onToggleFormat("italic") },
         SlashMenuItemData("Underline Text", Res.drawable.underline, 15.dp) { onToggleFormat("underline") },
         SlashMenuItemData("Strikethrough Text", Res.drawable.text_x, 15.dp) { onToggleFormat("strike") },
-        SlashMenuItemData("Highlight Text", Res.drawable.highlight, 15.dp) { onToggleFormat("highlight") }
+        SlashMenuItemData("Highlight Text", Res.drawable.text_highlight, 19.dp) { onToggleFormat("highlight") }
     )),
     SlashMenuSectionData("Alignment", listOf(
         SlashMenuItemData("Align Left", Res.drawable.textalign_left2) { onSetAlignment(TextAlignment.LEFT) },

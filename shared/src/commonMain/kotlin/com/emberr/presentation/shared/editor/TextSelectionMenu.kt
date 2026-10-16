@@ -21,9 +21,9 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.format_bold
-import emberr.shared.generated.resources.highlight
 import emberr.shared.generated.resources.italic
 import emberr.shared.generated.resources.scissor2
+import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.underline
@@ -90,7 +90,7 @@ fun TextSelectionMenu(
                         SlashMenuItemData("Italic", Res.drawable.italic, 13.dp, closeThen { toggleFormat("italic") }),
                         SlashMenuItemData("Underline", Res.drawable.underline, 15.dp, closeThen { toggleFormat("underline") }),
                         SlashMenuItemData("Strikethrough", Res.drawable.text_x, 15.dp, closeThen { toggleFormat("strike") }),
-                        SlashMenuItemData("Highlight", Res.drawable.highlight, 15.dp) { isChoosingHighlightColor = true }
+                        SlashMenuItemData("Highlight", Res.drawable.text_highlight, 19.dp) { isChoosingHighlightColor = true }
                     )
                 }
                 SlashMenuList(
