@@ -110,6 +110,10 @@ interface SettingsManager {
     fun getTimeFormatPreference(): String
     fun saveTimeFormatPreference(preference: String)
 
+    val firstDayOfWeekPreferenceFlow: Flow<String>
+    fun getFirstDayOfWeekPreference(): String
+    fun saveFirstDayOfWeekPreference(preference: String)
+
     val topBarFadeStyleFlow: Flow<String>
     fun getTopBarFadeStyle(): String
     fun saveTopBarFadeStyle(style: String)

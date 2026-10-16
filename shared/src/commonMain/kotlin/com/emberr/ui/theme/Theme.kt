@@ -10,6 +10,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextContextMenu
+import kotlinx.datetime.DayOfWeek
 
 // Base color palette
 
@@ -49,6 +50,8 @@ val LocalAppIsDark = staticCompositionLocalOf { false }
 
 val LocalUsesTwentyFourHourClock = staticCompositionLocalOf { false }
 
+val LocalFirstDayOfWeek = staticCompositionLocalOf { DayOfWeek.SUNDAY }
+
 val highlightBackgroundColor: Color
     @Composable get() = if (LocalAppIsDark.current) HighlightLimeDark else HighlightLime
 
@@ -68,6 +71,7 @@ fun EmberrTheme(
     fontSizePreference: FontSizePreference = FontSizePreference.DEFAULT,
     fontStylePreference: FontStylePreference = FontStylePreference.POPPINS,
     usesTwentyFourHourClock: Boolean = false,
+    firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
     content: @Composable () -> Unit
 ) {
     val baseColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
@@ -103,7 +107,8 @@ fun EmberrTheme(
         LocalAppIsDark provides darkTheme,
         LocalEmberrFontSizes provides currentFontSizes,
         LocalEmberrFontStyle provides fontStylePreference,
-        LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock
+        LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock,
+        LocalFirstDayOfWeek provides firstDayOfWeek
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

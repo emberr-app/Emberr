@@ -81,6 +81,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.emberr.domain.util.time.timeFormatPreferenceNamed
+import com.emberr.domain.util.time.androidSystemFirstDayOfWeek
+import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
@@ -120,6 +122,7 @@ class MainActivity : ComponentActivity() {
     private var takePhotoCallback: ((String) -> Unit)? = null
     private var currentPhotoUri: Uri? = null
     private var systemUsesTwentyFourHourClock by mutableStateOf(false)
+    private var systemFirstDayOfWeek by mutableStateOf(androidSystemFirstDayOfWeek())
 
     private val mediaStorageHelper: com.emberr.domain.util.media.MediaStorageHelper by inject()
     private val manualBackupExporter: com.emberr.domain.backup.manual.AndroidManualBackupExporter by inject()
@@ -186,6 +189,7 @@ class MainActivity : ComponentActivity() {
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     systemUsesTwentyFourHourClock = DateFormat.is24HourFormat(this@MainActivity)
+                    systemFirstDayOfWeek = androidSystemFirstDayOfWeek()
                     val waitBeforeLanSync = if (hasResumedBefore) Duration.ZERO else lanSyncDelayAfterOpening
                     hasResumedBefore = true
                     pendingLanSyncStart = lifecycleScope.launch {
@@ -260,6 +264,10 @@ class MainActivity : ComponentActivity() {
             val usesTwentyFourHourClock = timeFormatPreferenceNamed(timeFormatPreferenceName)
                 .usesTwentyFourHourClock(systemUsesTwentyFourHourClock)
 
+            val firstDayOfWeekPreferenceName by settingsViewModel.firstDayOfWeekPreference.collectAsState()
+            val firstDayOfWeek = firstDayOfWeekPreferenceNamed(firstDayOfWeekPreferenceName)
+                .firstDayOfWeek(systemFirstDayOfWeek)
+
             val themePreferenceName by settingsViewModel.themePreference.collectAsState()
             val themePreference = runCatching { ThemePreference.valueOf(themePreferenceName) }
                 .getOrDefault(ThemePreference.SYSTEM)
@@ -273,7 +281,8 @@ class MainActivity : ComponentActivity() {
                 darkTheme = darkTheme,
                 fontSizePreference = fontSizePreference,
                 fontStylePreference = fontStylePreference,
-                usesTwentyFourHourClock = usesTwentyFourHourClock
+                usesTwentyFourHourClock = usesTwentyFourHourClock,
+                firstDayOfWeek = firstDayOfWeek
             ) {
                 Surface(color = Color.Transparent, modifier = Modifier.fillMaxSize()) {
                     val context = LocalContext.current

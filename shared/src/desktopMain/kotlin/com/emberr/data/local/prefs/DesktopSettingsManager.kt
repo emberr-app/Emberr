@@ -318,6 +318,18 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _timeFormatPreference.value = preference
     }
 
+    private val _firstDayOfWeekPreference = MutableStateFlow(
+        prefs.get(SyncConstants.KEY_FIRST_DAY_OF_WEEK_PREFERENCE, SyncConstants.DEFAULT_FIRST_DAY_OF_WEEK_PREFERENCE)
+    )
+    override val firstDayOfWeekPreferenceFlow: Flow<String> = _firstDayOfWeekPreference
+
+    override fun getFirstDayOfWeekPreference(): String = _firstDayOfWeekPreference.value
+
+    override fun saveFirstDayOfWeekPreference(preference: String) {
+        prefs.put(SyncConstants.KEY_FIRST_DAY_OF_WEEK_PREFERENCE, preference)
+        _firstDayOfWeekPreference.value = preference
+    }
+
     private val _topBarFadeStyle = MutableStateFlow(
         prefs.get(SyncConstants.KEY_TOP_BAR_FADE_STYLE, SyncConstants.DEFAULT_TOP_BAR_FADE_STYLE)
     )

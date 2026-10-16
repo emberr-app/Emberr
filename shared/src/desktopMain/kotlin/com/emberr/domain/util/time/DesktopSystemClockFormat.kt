@@ -17,7 +17,7 @@ private val systemUsesTwentyFourHourClockOncePerProcess: Boolean by lazy {
 
 fun desktopSystemUsesTwentyFourHourClock(): Boolean = systemUsesTwentyFourHourClockOncePerProcess
 
-private fun timeLocaleFromEnvironment(): Locale? {
+internal fun timeLocaleFromEnvironment(): Locale? {
     val localeName = listOf("LC_ALL", "LC_TIME")
         .firstNotNullOfOrNull { variable -> System.getenv(variable)?.takeIf { it.isNotBlank() } }
         ?: return null

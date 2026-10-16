@@ -7,13 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,17 +24,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.settings.SettingsActionRow
+import com.emberr.presentation.settings.SettingsDivider
+import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrTextField
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.pen
+import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.plus
 import org.jetbrains.compose.resources.painterResource
 
@@ -51,7 +53,7 @@ fun CategorySection(
     onAddCategory: (name: String, colorHex: String) -> Unit,
     onUpdateCategory: (id: String, name: String, colorHex: String) -> Unit,
     onDeleteCategory: (id: String) -> Unit,
-    modifier: Modifier = Modifier
+    cardColor: Color = MaterialTheme.colorScheme.surface
 ) {
     var editorState by remember { mutableStateOf<CategoryEditorState?>(null) }
 
@@ -68,20 +70,7 @@ fun CategorySection(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        if (isDesktopPlatform) {
-            Text(
-                text = "Categories",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(bottom = 12.dp).padding(horizontal = 12.dp)
-            )
-        }
-
+    SettingsGroup(title = "Categories", cardColor = cardColor) {
         categories.forEach { category ->
             val state = editorState
             CategoryRow(
@@ -102,6 +91,7 @@ fun CategorySection(
                 onSave = { performSave(); editorState = null },
                 onDelete = { onDeleteCategory(category.id); editorState = null }
             )
+            SettingsDivider()
         }
 
         val addState = editorState
@@ -169,21 +159,11 @@ private fun CategoryRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    horizontal = if (isDesktopPlatform) 0.dp else 12.dp,
-                    vertical = 2.dp
-                )
-                .then(if (!isDesktopPlatform) Modifier.heightIn(min = 48.dp) else Modifier)
-                .clip(RoundedCornerShape(14.dp))
                 .clickable(onClick = onClick)
-                .padding(
-                    horizontal = if (isDesktopPlatform) 12.dp else 14.dp,
-                    vertical = if (isDesktopPlatform) 10.dp else 14.dp
-                )
-                .padding(end = if (isDesktopPlatform) 12.dp else 0.dp),
+                .padding(horizontal = 14.dp, vertical = 17.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (isDesktopPlatform) {
+            Box(modifier = Modifier.size(20.dp), contentAlignment = Alignment.Center) {
                 Box(
                     modifier = Modifier
                         .size(14.dp)
@@ -191,29 +171,21 @@ private fun CategoryRow(
                 )
             }
 
+            Spacer(modifier = Modifier.width(16.dp))
+
             Text(
                 text = category.name,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = if (isDesktopPlatform) 12.dp else 0.dp)
+                modifier = Modifier.weight(1f)
             )
 
-            if (isDesktopPlatform) {
-                Icon(
-                    painter = painterResource(Res.drawable.pen),
-                    contentDescription = "Edit ${category.name}",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .background(category.colorHex.toCategoryColor(), CircleShape)
-                )
-            }
+            Icon(
+                painter = painterResource(Res.drawable.chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                modifier = Modifier.size(18.dp)
+            )
         }
 
         EmberrDesktopMenu(
@@ -255,35 +227,11 @@ private fun AddCategoryRow(
     onSave: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = if (isDesktopPlatform) 0.dp else 12.dp,
-                    vertical = 2.dp
-                )
-                .then(if (!isDesktopPlatform) Modifier.heightIn(min = 48.dp) else Modifier)
-                .clip(RoundedCornerShape(14.dp))
-                .clickable(onClick = onClick)
-                .padding(
-                    horizontal = if (isDesktopPlatform) 10.dp else 14.dp,
-                    vertical = if (isDesktopPlatform) 10.dp else 14.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.plus),
-                contentDescription = "Add category",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
-            )
-            Text(
-                text = "Add category",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 12.dp)
-            )
-        }
+        SettingsActionRow(
+            icon = painterResource(Res.drawable.plus),
+            title = "Add Category",
+            onClick = onClick
+        )
 
         EmberrDesktopMenu(
             expanded = isEditorOpen,

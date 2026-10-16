@@ -86,7 +86,9 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.number
 import org.jetbrains.compose.resources.painterResource
 import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
+import com.emberr.ui.theme.LocalFirstDayOfWeek
 
 private val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
@@ -239,7 +241,7 @@ fun EventEditorSheet(
         LocalIndication provides NoRippleIndicationNodeFactory,
         LocalRippleConfiguration provides null
       ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(bottom = if (isDesktopPlatform) 20.dp else 6.dp)) {
             if (state != null) {
                 EventEditorFields(
                     state = state,
@@ -688,11 +690,6 @@ private fun CategoryChip(
     }
 }
 
-private val WeekdayOrder = listOf(
-    DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY,
-    DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
-)
-
 @Composable
 private fun SheetOptionRow(label: String, onClick: () -> Unit) {
     Row(
@@ -795,6 +792,7 @@ private fun buildRepeatSummary(
     frequency: RecurrenceFrequency,
     interval: Int,
     daysOfWeek: Set<DayOfWeek>,
+    weekdayOrder: List<DayOfWeek>,
     anchorDate: LocalDate,
     untilDateString: String?
 ): String {
@@ -807,7 +805,7 @@ private fun buildRepeatSummary(
     val base = if (interval == 1) "Every $unit" else "Every $interval ${unit}s"
     val detail = when (frequency) {
         RecurrenceFrequency.WEEKLY -> daysOfWeek
-            .sortedBy { WeekdayOrder.indexOf(it) }
+            .sortedBy { weekdayOrder.indexOf(it) }
             .joinToString(", ") { it.shortLabel() }
             .let { if (it.isBlank()) "" else " on $it" }
         RecurrenceFrequency.MONTHLY -> " on day ${anchorDate.day}"
@@ -834,12 +832,14 @@ private fun CustomRepeatDialog(
     var hasEndDate by remember { mutableStateOf(initialRule?.untilDateString != null) }
     var untilDateString by remember { mutableStateOf(initialRule?.untilDateString) }
     var showEndDatePicker by remember { mutableStateOf(false) }
+    val weekdayOrder = daysOfWeekStartingFrom(LocalFirstDayOfWeek.current)
 
-    val summary = remember(frequency, interval, daysOfWeek, hasEndDate, untilDateString) {
+    val summary = remember(frequency, interval, daysOfWeek, weekdayOrder, hasEndDate, untilDateString) {
         buildRepeatSummary(
             frequency = frequency,
             interval = interval,
             daysOfWeek = daysOfWeek,
+            weekdayOrder = weekdayOrder,
             anchorDate = anchorDate,
             untilDateString = if (hasEndDate) untilDateString else null
         )
@@ -932,7 +932,7 @@ private fun CustomRepeatDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            WeekdayOrder.forEach { day ->
+                            weekdayOrder.forEach { day ->
                                 val isSelected = day in daysOfWeek
                                 Box(
                                     modifier = Modifier

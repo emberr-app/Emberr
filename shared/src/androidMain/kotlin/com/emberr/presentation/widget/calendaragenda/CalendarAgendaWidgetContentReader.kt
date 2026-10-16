@@ -4,12 +4,16 @@ package com.emberr.presentation.widget.calendaragenda
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.entity.CalendarTaskEntity
+import com.emberr.domain.util.time.daysOfWeekStartingFrom
+import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.widget.WidgetClockFormat
+import com.emberr.presentation.widget.WidgetFirstDayOfWeek
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.DayOfWeek
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -28,12 +32,14 @@ class CalendarAgendaWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
     private val categoryDao: CategoryDao,
     private val clockFormat: WidgetClockFormat,
+    private val firstDayOfWeek: WidgetFirstDayOfWeek,
 ) {
     suspend fun readContentOnce(spaceId: String, shownMonth: String?): CalendarAgendaWidgetContent? =
         withContext(Dispatchers.IO) {
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
             val firstOfMonth = parseFirstOfMonth(shownMonth) ?: firstOfMonthFor(today)
             val monthKey = monthKeyOf(firstOfMonth)
+            val weekStartsOn = firstDayOfWeek.firstDayOfWeek()
 
             val tasks = try {
                 calendarTaskDao.getTasksInMonth(spaceId, monthKey)
@@ -52,8 +58,8 @@ class CalendarAgendaWidgetContentReader(
             CalendarAgendaWidgetContent(
                 shownMonth = monthKey,
                 monthLabel = formatMonthLabel(firstOfMonth),
-                weekdayLabels = weekdayLabels,
-                weeks = buildWeeks(firstOfMonth, today, tasks),
+                weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> day.name.take(1) },
+                weeks = buildWeeks(firstOfMonth, today, weekStartsOn, tasks),
                 events = buildEvents(tasks, colorsByCategoryId)
             )
         }
@@ -61,6 +67,7 @@ class CalendarAgendaWidgetContentReader(
     private fun buildWeeks(
         firstOfMonth: LocalDate,
         today: LocalDate,
+        weekStartsOn: DayOfWeek,
         tasks: List<CalendarTaskEntity>
     ): List<List<AgendaDayCell>> {
         val datesWithEvents = tasks
@@ -68,7 +75,7 @@ class CalendarAgendaWidgetContentReader(
             .mapNotNull { task -> task.targetDate }
             .toSet()
 
-        val leadingBlanks = firstOfMonth.dayOfWeek.ordinal
+        val leadingBlanks = daysSinceStartOfWeek(firstOfMonth.dayOfWeek, weekStartsOn)
         val gridStart = firstOfMonth.minus(DatePeriod(days = leadingBlanks))
 
         val allWeeks = (0 until weeksShown).map { weekIndex ->
@@ -108,8 +115,6 @@ class CalendarAgendaWidgetContentReader(
                 )
             }
 }
-
-private val weekdayLabels = listOf("M", "T", "W", "T", "F", "S", "S")
 
 private val monthNames = listOf(
     "January", "February", "March", "April", "May", "June",

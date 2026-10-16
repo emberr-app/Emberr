@@ -47,6 +47,8 @@ import com.emberr.domain.update.detectStagedUpdateInstallation
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.time.desktopSystemUsesTwentyFourHourClock
 import com.emberr.domain.util.time.timeFormatPreferenceNamed
+import com.emberr.domain.util.time.desktopSystemFirstDayOfWeek
+import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.presentation.EmberrApp
 import com.emberr.presentation.LocalImagePicker
 import com.emberr.presentation.settings.PlainTextSecretWarningDialog
@@ -313,6 +315,12 @@ private fun runEmberrDesktopApp() = application {
         val usesTwentyFourHourClock = timeFormatPreferenceNamed(timeFormatPreferenceName)
             .usesTwentyFourHourClock(desktopSystemUsesTwentyFourHourClock())
 
+        val firstDayOfWeekPreferenceName by settingsManager.firstDayOfWeekPreferenceFlow.collectAsState(
+            initial = settingsManager.getFirstDayOfWeekPreference()
+        )
+        val firstDayOfWeek = firstDayOfWeekPreferenceNamed(firstDayOfWeekPreferenceName)
+            .firstDayOfWeek(desktopSystemFirstDayOfWeek())
+
         val themePreferenceName by settingsManager.themePreferenceFlow.collectAsState(
             initial = SyncConstants.DEFAULT_THEME_PREFERENCE
         )
@@ -331,7 +339,8 @@ private fun runEmberrDesktopApp() = application {
             darkTheme = darkTheme,
             fontSizePreference = fontSizePreference,
             fontStylePreference = fontStylePreference,
-            usesTwentyFourHourClock = usesTwentyFourHourClock
+            usesTwentyFourHourClock = usesTwentyFourHourClock,
+            firstDayOfWeek = firstDayOfWeek
         ) {
             MatchWindowsTitleBarToAppTheme(currentWindow)
 
@@ -449,6 +458,12 @@ private fun runEmberrDesktopApp() = application {
                 val usesTwentyFourHourClock = timeFormatPreferenceNamed(timeFormatPreferenceName)
                     .usesTwentyFourHourClock(desktopSystemUsesTwentyFourHourClock())
 
+                val firstDayOfWeekPreferenceName by settingsManager.firstDayOfWeekPreferenceFlow.collectAsState(
+                    initial = settingsManager.getFirstDayOfWeekPreference()
+                )
+                val firstDayOfWeek = firstDayOfWeekPreferenceNamed(firstDayOfWeekPreferenceName)
+                    .firstDayOfWeek(desktopSystemFirstDayOfWeek())
+
                 val themePreferenceName by settingsManager.themePreferenceFlow.collectAsState(
                     initial = SyncConstants.DEFAULT_THEME_PREFERENCE
                 )
@@ -469,7 +484,8 @@ private fun runEmberrDesktopApp() = application {
                     darkTheme = darkTheme,
                     fontSizePreference = fontSizePreference,
                     fontStylePreference = fontStylePreference,
-                    usesTwentyFourHourClock = usesTwentyFourHourClock
+                    usesTwentyFourHourClock = usesTwentyFourHourClock,
+                    firstDayOfWeek = firstDayOfWeek
                 ) {
                     MatchWindowsTitleBarToAppTheme(stickyWindow)
 

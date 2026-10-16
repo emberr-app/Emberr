@@ -27,10 +27,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.util.time.daysOfWeekStartingFrom
+import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
+import com.emberr.ui.theme.LocalFirstDayOfWeek
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
@@ -261,6 +264,7 @@ fun BottomSheetMonthCalendar(
     onGoToToday: () -> Unit
 ) {
     var currentMonth by remember(selectedDate) { mutableStateOf(LocalDate(selectedDate.year, selectedDate.month, 1)) }
+    val firstDayOfWeek = LocalFirstDayOfWeek.current
     val months = arrayOf("", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).padding(top = 12.dp)) {
@@ -293,9 +297,9 @@ fun BottomSheetMonthCalendar(
         Spacer(modifier = Modifier.height(22.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            listOf("M", "T", "W", "T", "F", "S", "S").forEach { day ->
+            daysOfWeekStartingFrom(firstDayOfWeek).forEach { day ->
                 Text(
-                    text = day, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
+                    text = day.name.take(1), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     modifier = Modifier.weight(1f), textAlign = TextAlign.Center
                 )
@@ -305,7 +309,7 @@ fun BottomSheetMonthCalendar(
         Spacer(modifier = Modifier.height(12.dp))
 
         val daysInMonth = remember(currentMonth) { currentMonth.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY).day }
-        val startOffset = currentMonth.dayOfWeek.ordinal
+        val startOffset = daysSinceStartOfWeek(currentMonth.dayOfWeek, firstDayOfWeek)
         val totalCells = daysInMonth + startOffset
         val rows = if (totalCells % 7 == 0) totalCells / 7 else totalCells / 7 + 1
 
