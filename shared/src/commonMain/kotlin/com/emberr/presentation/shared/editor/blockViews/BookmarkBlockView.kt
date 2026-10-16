@@ -51,6 +51,7 @@ import coil3.request.crossfade
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showNativeToast
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.editor.rememberWebLinkActions
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.emberrBlur
@@ -253,12 +254,8 @@ fun BookmarkBlockView(
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
                                     .padding(8.dp)
+                                    .emberrBorder(CircleShape)
                                     .clip(CircleShape)
-                                    .border(
-                                        width = 0.5.dp,
-                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                        shape = CircleShape
-                                    )
                                     .emberrBlur(imageHazeState, EmberrBlur.OnImage)
                                     .padding(8.dp)
                                     .size(16.dp)

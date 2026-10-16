@@ -8,7 +8,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -35,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.rememberStableStatusBarsPadding
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
@@ -1509,14 +1509,10 @@ fun NotesSelectionPill(
             color = Color.Transparent,
             modifier = Modifier
                 .padding(bottom = 32.dp)
+                .emberrBorder(DefaultCornerShape)
                 .customEmberrShadow(DefaultCornerShape)
                 .clip(DefaultCornerShape)
                 .emberrBlur(hazeState, EmberrBlur.Regular)
-                .border(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    shape = DefaultCornerShape
-                )
         ) {
             val pillScroll = rememberScrollState()
             Row(

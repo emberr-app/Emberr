@@ -39,6 +39,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -66,15 +67,18 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.desktop.window.keepTitleBarHiddenWhileHovered
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.EmberrBorderWidth
 import com.emberr.presentation.shared.components.EmberrShadowAmbientColor
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrShadowSpotColor
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.emberrBorderColor
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.x
+import kotlin.math.ceil
 import org.jetbrains.compose.resources.painterResource
 import java.awt.Cursor
 import kotlinx.datetime.LocalDate
@@ -91,8 +95,6 @@ private val SPLIT_PILL_BUTTON_SIZE = 28.dp
 private val SPLIT_PILL_ICON_SIZE = 16.dp
 private val SPLIT_PILL_WIDTH = SPLIT_PILL_BUTTON_SIZE * 2 + 8.dp
 private val SPLIT_PILL_HEIGHT = 30.dp
-private val SPLIT_PILL_BORDER_WIDTH = 0.5.dp
-private const val SPLIT_PILL_BORDER_ALPHA = 0.5f
 private const val NOTCH_SPRING_DAMPING = 0.9f
 private const val NOTCH_SPRING_STIFFNESS = 380f
 private const val NOTCH_COLOR_MILLIS = 180
@@ -566,7 +568,7 @@ private fun SplitPaneHandle(
     val lineColor =
         if (isFocused) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-    val pillBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = SPLIT_PILL_BORDER_ALPHA)
+    val pillBorderColor = emberrBorderColor
     val iconTint =
         if (isFocused) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -601,6 +603,20 @@ private fun SplitPaneHandle(
         Box(
             Modifier
                 .matchParentSize()
+                .drawWithContent {
+                    drawContent()
+                    val shapeSize = Size(handleWidth.toPx(), handleHeight.toPx())
+                    val shapeTopLeft = Offset((size.width - shapeSize.width) / 2f, 0f)
+                    val borderWidth = ceil(EmberrBorderWidth.toPx())
+                    val halfBorderWidth = borderWidth / 2f
+                    drawRoundRect(
+                        color = pillBorderColor.copy(alpha = pillBorderColor.alpha * buttonsAlpha),
+                        topLeft = shapeTopLeft + Offset(halfBorderWidth, halfBorderWidth),
+                        size = Size(shapeSize.width - borderWidth, shapeSize.height - borderWidth),
+                        cornerRadius = CornerRadius((shapeSize.height - borderWidth) / 2f),
+                        style = Stroke(width = borderWidth)
+                    )
+                }
                 .graphicsLayer {
                     shape = NotchShape(widthPx = handleWidth.toPx(), heightPx = handleHeight.toPx())
                     clip = true
@@ -618,15 +634,6 @@ private fun SplitPaneHandle(
                         topLeft = shapeTopLeft,
                         size = shapeSize,
                         cornerRadius = shapeCornerRadius
-                    )
-                    val borderWidth = SPLIT_PILL_BORDER_WIDTH.toPx()
-                    val halfBorderWidth = borderWidth / 2f
-                    drawRoundRect(
-                        color = pillBorderColor.copy(alpha = pillBorderColor.alpha * buttonsAlpha),
-                        topLeft = shapeTopLeft + Offset(halfBorderWidth, halfBorderWidth),
-                        size = Size(shapeSize.width - borderWidth, shapeSize.height - borderWidth),
-                        cornerRadius = CornerRadius((shapeSize.height - borderWidth) / 2f),
-                        style = Stroke(width = borderWidth)
                     )
                 }
         )

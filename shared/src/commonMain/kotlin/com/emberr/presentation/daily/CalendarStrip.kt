@@ -1,7 +1,6 @@
 package com.emberr.presentation.daily
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -32,6 +31,7 @@ import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
 import com.emberr.ui.theme.LocalFirstDayOfWeek
 import dev.chrisbanes.haze.HazeState
@@ -216,6 +216,7 @@ private fun WeekStripChip(
         modifier = Modifier
             .width(width)
             .height(height)
+            .emberrBorder(shape)
             .clip(shape)
             .then(if (hazeState != null) Modifier.emberrBlur(hazeState, EmberrBlur.Regular) else Modifier)
             .background(
@@ -225,7 +226,6 @@ private fun WeekStripChip(
                     else -> Color.Transparent
                 }
             )
-            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), shape)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = NoRippleIndicationNodeFactory

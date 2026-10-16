@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.emberr.presentation.shared.components.emberrBorder
 import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.util.system.isDesktopPlatform
@@ -336,14 +337,10 @@ fun BookmarksScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(barSize)
+                            .emberrBorder(CircleShape)
                             .customEmberrShadow(CircleShape)
                             .clip(CircleShape)
                             .emberrBlur(hazeState, EmberrBlur.Regular)
-                            .border(
-                                width = 0.5.dp,
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                shape = CircleShape
-                            )
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

@@ -1,7 +1,6 @@
 package com.emberr.presentation.shared.editor
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
@@ -38,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.customEmberrShadow
+import com.emberr.presentation.shared.components.emberrBorder
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.format_bold
@@ -110,10 +110,10 @@ private fun SelectionBarContent(
     val toggleFormat = actions.toggleFormat
     Box(
         modifier = Modifier
+            .emberrBorder(SelectionBarShape)
             .customEmberrShadow(SelectionBarShape)
             .clip(SelectionBarShape)
             .background(MaterialTheme.colorScheme.surface)
-            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), SelectionBarShape)
             .pointerInput(Unit) { detectTapGestures { } }
     ) {
         if (isChoosingHighlightColor && toggleFormat != null) {
