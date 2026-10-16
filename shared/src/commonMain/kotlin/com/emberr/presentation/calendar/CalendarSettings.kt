@@ -68,6 +68,9 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.KmpBackHandler
+import com.emberr.presentation.shared.components.MenuAtTap
+import com.emberr.presentation.shared.components.menuTapAnchor
+import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -93,6 +96,7 @@ private val SidebarSwipeCloseDistance = 80.dp
 private const val SidebarScrimAlpha = 0.25f
 private val SidebarContentHorizontalPadding = 8.dp
 private val SidebarHeaderFadeTail = 16.dp
+private val FirstDayOfWeekMenuWidth = 220.dp
 
 @Composable
 fun CalendarSidebar(
@@ -264,6 +268,7 @@ fun CalendarSettingsContent(
     onViewModeChange: (CalendarViewMode) -> Unit = {}
 ) {
     var showFirstDayOfWeekOptions by remember { mutableStateOf(false) }
+    val firstDayOfWeekTapAnchor = rememberMenuTapAnchor()
     val cardColor = if (isDesktopPlatform && LocalAppIsDark.current) {
         MaterialTheme.colorScheme.surfaceVariant
     } else {
@@ -299,7 +304,7 @@ fun CalendarSettingsContent(
         )
 
         SettingsGroup(title = "General", cardColor = cardColor) {
-            Box {
+            Box(modifier = Modifier.menuTapAnchor(firstDayOfWeekTapAnchor)) {
                 if (isDesktopPlatform) {
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.calendar),
@@ -315,22 +320,24 @@ fun CalendarSettingsContent(
                 }
 
                 if (isDesktopPlatform) {
-                    EmberrDesktopMenu(
-                        expanded = showFirstDayOfWeekOptions,
-                        onDismissRequest = { showFirstDayOfWeekOptions = false },
-                        modifier = Modifier.width(220.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            FirstDayOfWeekPreference.entries.forEach { option ->
-                                EmberrDesktopMenuOption(
-                                    label = option.displayName,
-                                    isSelected = option == firstDayOfWeekPreference,
-                                    onClick = {
-                                        onFirstDayOfWeekPreferenceChange(option)
-                                        showFirstDayOfWeekOptions = false
-                                    },
-                                    outerHorizontalPadding = 0.dp
-                                )
+                    MenuAtTap(firstDayOfWeekTapAnchor, menuWidth = FirstDayOfWeekMenuWidth) {
+                        EmberrDesktopMenu(
+                            expanded = showFirstDayOfWeekOptions,
+                            onDismissRequest = { showFirstDayOfWeekOptions = false },
+                            modifier = Modifier.width(FirstDayOfWeekMenuWidth)
+                        ) {
+                            Column(modifier = Modifier.padding(8.dp)) {
+                                FirstDayOfWeekPreference.entries.forEach { option ->
+                                    EmberrDesktopMenuOption(
+                                        label = option.displayName,
+                                        isSelected = option == firstDayOfWeekPreference,
+                                        onClick = {
+                                            onFirstDayOfWeekPreferenceChange(option)
+                                            showFirstDayOfWeekOptions = false
+                                        },
+                                        outerHorizontalPadding = 0.dp
+                                    )
+                                }
                             }
                         }
                     }
