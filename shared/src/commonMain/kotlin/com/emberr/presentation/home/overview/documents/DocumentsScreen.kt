@@ -30,9 +30,8 @@ import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
-import com.emberr.presentation.shared.editor.blockViews.DocumentBlockView
+import com.emberr.presentation.shared.editor.blockViews.media.DocumentBlockView
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.circle_plus

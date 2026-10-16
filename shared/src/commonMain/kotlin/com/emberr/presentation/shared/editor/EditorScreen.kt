@@ -161,11 +161,11 @@ import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.shared.editor.blockViews.LinkedNoteOptionsMenu
-import com.emberr.presentation.shared.editor.blockViews.calloutContentPadding
-import com.emberr.presentation.shared.editor.blockViews.calloutFramesByRow
+import com.emberr.presentation.shared.editor.blockViews.callout.calloutContentPadding
+import com.emberr.presentation.shared.editor.blockViews.callout.calloutFramesByRow
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
-import com.emberr.presentation.shared.editor.blockViews.displayedIndentationLevelOf
-import com.emberr.presentation.shared.editor.blockViews.drawCalloutFrames
+import com.emberr.presentation.shared.editor.blockViews.callout.displayedIndentationLevelOf
+import com.emberr.presentation.shared.editor.blockViews.callout.drawCalloutFrames
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
 import com.emberr.presentation.shared.editor.formatting.removeHighlightMark
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut

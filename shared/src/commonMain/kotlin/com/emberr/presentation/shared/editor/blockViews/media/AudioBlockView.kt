@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor.blockViews
+package com.emberr.presentation.shared.editor.blockViews.media
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
