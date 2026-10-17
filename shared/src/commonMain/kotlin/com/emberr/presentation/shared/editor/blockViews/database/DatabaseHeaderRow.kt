@@ -578,7 +578,8 @@ internal fun DatabaseAddColumnChoices(
                                     closePickerAnd { editor.addColumn(block.id, DatabaseColumnTarget.CustomProperty(property.id), beforeColumn = beforeColumn) }
                                 }
                             )
-                        }
+                        },
+                        anchorIsMenuRow = false
                     ) { closeLayerAnd ->
                         DatabaseEditPropertyPage(
                             block = block,
@@ -752,7 +753,8 @@ private fun DatabaseEditPropertyPage(
                     }
                 )
             }
-        }
+        },
+        anchorIsMenuRow = false
     ) { closeConfirmationAnd ->
         DatabaseDeletePropertyConfirmation(
             name = property.name,

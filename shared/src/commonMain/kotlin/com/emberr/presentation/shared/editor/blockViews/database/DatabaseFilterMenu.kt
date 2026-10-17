@@ -137,7 +137,8 @@ internal fun DatabaseFilterEditor(
                 title = columnLabel,
                 anchor = { openLayer ->
                     DatabaseChoiceButton(text = filter.condition.label, onClick = openLayer)
-                }
+                },
+                anchorIsMenuRow = false
             ) { closeLayerAnd ->
                 DatabaseConditionChoices(
                     valueType = valueType,
@@ -177,7 +178,8 @@ internal fun DatabaseFilterEditor(
                 )
                 valueType.holdsTags -> DatabaseMenuLayer(
                     title = columnLabel,
-                    anchor = { openLayer -> DatabaseFilterOptionValue(tagName = filter.tagName, tagPoolKey = filter.target.tagPoolKey, onClick = openLayer) }
+                    anchor = { openLayer -> DatabaseFilterOptionValue(tagName = filter.tagName, tagPoolKey = filter.target.tagPoolKey, onClick = openLayer) },
+                    anchorIsMenuRow = false
                 ) { closeLayerAnd ->
                     DatabaseOptionChoices(
                         filter = filter,
@@ -229,7 +231,8 @@ private fun DatabaseFilterDateValue(
             DatabaseFilterValueBox(onClick = openLayer) {
                 DatabaseFilterValueText(text = shownValue ?: "Pick a date", isPlaceholder = shownValue == null)
             }
-        }
+        },
+        anchorIsMenuRow = false
     ) { closeLayerAnd ->
         DatabaseRelativeDate.entries.forEach { option ->
             DatabaseMenuOption(
@@ -270,7 +273,8 @@ private fun DatabaseFilterDateRangeValue(
             DatabaseFilterValueBox(onClick = openLayer) {
                 DatabaseFilterValueText(text = dateRange?.label ?: "Pick a range", isPlaceholder = dateRange == null)
             }
-        }
+        },
+        anchorIsMenuRow = false
     ) { closeLayerAnd ->
         DatabaseDateRange.entries.forEach { option ->
             DatabaseMenuOption(
