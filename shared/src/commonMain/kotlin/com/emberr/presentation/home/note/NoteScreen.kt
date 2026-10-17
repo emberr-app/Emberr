@@ -87,6 +87,8 @@ import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.repository.EmojiRepository
 import com.emberr.domain.util.system.showFeedback
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
+import com.emberr.presentation.shared.components.LocalShowsSubmenuChevron
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -94,10 +96,6 @@ import com.emberr.presentation.shared.StickyNoteWindowBus
 import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.prefs.SyncConstants
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.graphics.painter.Painter
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -106,7 +104,7 @@ import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.editor.BlockStyleBar
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.chevron_left
+import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.ellipsis
@@ -1308,131 +1306,99 @@ fun NoteOptionsDesktopMenu(
     showStickyNoteOption: Boolean = true,
     onOpenAsStickyNote: () -> Unit = {}
 ) {
-    var currentMenu by remember { mutableStateOf(MenuLevel.MAIN) }
-
     Column(modifier = Modifier.width(240.dp).padding(vertical = 4.dp)) {
-        AnimatedContent(
-            targetState = currentMenu,
-            transitionSpec = {
-                if (targetState != MenuLevel.MAIN && initialState == MenuLevel.MAIN) {
-                    (slideInHorizontally(tween(200)) { it } + fadeIn(tween(200))) togetherWith
-                            (slideOutHorizontally(tween(200)) { -it / 2 } + fadeOut(tween(200)))
-                } else {
-                    (slideInHorizontally(tween(200)) { -it / 2 } + fadeIn(tween(200))) togetherWith
-                            (slideOutHorizontally(tween(200)) { it } + fadeOut(tween(200)))
-                }
-            },
-            label = "DesktopMenuTransition"
-        ) { targetMenu ->
-            Column(modifier = Modifier.fillMaxWidth()) {
-                when (targetMenu) {
-                    MenuLevel.MAIN -> {
-                        DesktopMenuItem(
-                            painterResource(Res.drawable.ghost_smile),
-                            "Icon Options"
-                        ) { currentMenu = MenuLevel.ICON }
-                        DesktopMenuItem(
-                            painterResource(Res.drawable.image),
-                            "Cover Options"
-                        ) { currentMenu = MenuLevel.COVER }
-
-                        if (showStickyNoteOption) {
-                            DesktopMenuItem(
-                                painterResource(Res.drawable.square_arrow_out_up_right),
-                                "Open as Sticky Note"
-                            ) { onOpenAsStickyNote() }
-                        }
-
-                        val favIcon =
-                            if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder
-                        val favText =
-                            if (isFavorite) "Remove from Favorites" else "Add to Favorites"
-
-                        if (!isEditingTemplate) {
-                        DesktopMenuItem(favIcon, favText) { onDismiss(); onToggleFavorite() }}
-
-                        val wordCountText =
-                            if (showWordCount) "Hide Word Count" else "Show Word Count"
-                        DesktopMenuItem(
-                            Icons.Default.FormatSize,
-                            wordCountText
-                        ) { onDismiss(); onToggleWordCount() }
-
-                        AlignmentIconRow(
-                            currentAlignment = blockAlignment,
-                            onSelect = onSetAlignment,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-
-                        if (!isEditingTemplate) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                            )
-
-                            DesktopMenuItem(
-                                painterResource(Res.drawable.share),
-                                "Export Note"
-                            ) { currentMenu = MenuLevel.EXPORT }
-
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                            )
-
-                            DesktopMenuItem(
-                                painterResource(Res.drawable.trash),
-                                "Move to Trash",
-                                isDestructive = true
-                            ) {
-                                onDismiss(); onMoveToTrash()
-                            }
-                        }
-                    }
-
-                    MenuLevel.EXPORT -> {
-                        DesktopMenuItem(painterResource(Res.drawable.chevron_left), "Back to Options") { currentMenu = MenuLevel.MAIN }
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                        )
-                        DesktopMenuItem(painterResource(Res.drawable.copy), "Copy Text") { onDismiss(); onCopyPlain() }
-                        DesktopMenuItem(painterResource(Res.drawable.code), "Copy as Markdown") { onDismiss(); onCopyMarkdown() }
-                        DesktopMenuItem(painterResource(Res.drawable.file_code_corner), "Download .md") { onDismiss(); onDownloadMarkdown() }
-                        DesktopMenuItem(painterResource(Res.drawable.file_pdf), "Download PDF") { onDismiss(); onDownloadPdf() }
-                    }
-
-                    MenuLevel.ICON -> {
-                        DesktopMenuItem(painterResource(Res.drawable.chevron_left), "Back to Options") { currentMenu = MenuLevel.MAIN }
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                        )
-                        DesktopMenuItem(painterResource(Res.drawable.ghost_smile), if (hasIcon) "Change Icon" else "Add Icon") {
-                            onDismiss()
-                            onAddIcon()
-                        }
-                        if (hasIcon) {
-                            DesktopMenuItem(painterResource(Res.drawable.trash), "Remove Icon", isDestructive = true) {
-                                onDismiss()
-                                onRemoveIcon()
-                            }
-                        }
-                    }
-
-                    MenuLevel.COVER -> {
-                        DesktopMenuItem(painterResource(Res.drawable.chevron_left), "Back to Options") { currentMenu = MenuLevel.MAIN }
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                        )
-                        DesktopMenuItem(painterResource(Res.drawable.image), if (hasCover) "Change Cover" else "Add Cover") { onDismiss(); onAddCover() }
-                        if (hasCover) {
-                            DesktopMenuItem(painterResource(Res.drawable.trash), "Remove Cover", isDestructive = true) { onDismiss(); onRemoveCover() }
-                        }
-                    }
+        DesktopSubmenuItem(painterResource(Res.drawable.ghost_smile), "Icon Options") {
+            DesktopMenuItem(painterResource(Res.drawable.ghost_smile), if (hasIcon) "Change Icon" else "Add Icon") {
+                onDismiss()
+                onAddIcon()
+            }
+            if (hasIcon) {
+                DesktopMenuItem(painterResource(Res.drawable.trash), "Remove Icon", isDestructive = true) {
+                    onDismiss()
+                    onRemoveIcon()
                 }
             }
+        }
+        DesktopSubmenuItem(painterResource(Res.drawable.image), "Cover Options") {
+            DesktopMenuItem(painterResource(Res.drawable.image), if (hasCover) "Change Cover" else "Add Cover") { onDismiss(); onAddCover() }
+            if (hasCover) {
+                DesktopMenuItem(painterResource(Res.drawable.trash), "Remove Cover", isDestructive = true) { onDismiss(); onRemoveCover() }
+            }
+        }
+
+        if (showStickyNoteOption) {
+            DesktopMenuItem(
+                painterResource(Res.drawable.square_arrow_out_up_right),
+                "Open as Sticky Note"
+            ) { onOpenAsStickyNote() }
+        }
+
+        val favIcon =
+            if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder
+        val favText =
+            if (isFavorite) "Remove from Favorites" else "Add to Favorites"
+
+        if (!isEditingTemplate) {
+        DesktopMenuItem(favIcon, favText) { onDismiss(); onToggleFavorite() }}
+
+        val wordCountText =
+            if (showWordCount) "Hide Word Count" else "Show Word Count"
+        DesktopMenuItem(
+            Icons.Default.FormatSize,
+            wordCountText
+        ) { onDismiss(); onToggleWordCount() }
+
+        AlignmentIconRow(
+            currentAlignment = blockAlignment,
+            onSelect = onSetAlignment,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+
+        if (!isEditingTemplate) {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            )
+
+            DesktopSubmenuItem(painterResource(Res.drawable.share), "Export Note") {
+                DesktopMenuItem(painterResource(Res.drawable.copy), "Copy Text") { onDismiss(); onCopyPlain() }
+                DesktopMenuItem(painterResource(Res.drawable.code), "Copy as Markdown") { onDismiss(); onCopyMarkdown() }
+                DesktopMenuItem(painterResource(Res.drawable.file_code_corner), "Download .md") { onDismiss(); onDownloadMarkdown() }
+                DesktopMenuItem(painterResource(Res.drawable.file_pdf), "Download PDF") { onDismiss(); onDownloadPdf() }
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            )
+
+            DesktopMenuItem(
+                painterResource(Res.drawable.trash),
+                "Move to Trash",
+                isDestructive = true
+            ) {
+                onDismiss(); onMoveToTrash()
+            }
+        }
+    }
+}
+
+@Composable
+private fun DesktopSubmenuItem(
+    icon: Painter,
+    text: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    EmberrDesktopSubmenu(
+        menuWidthEstimate = 240.dp,
+        anchor = { openSubmenu, _ -> DesktopMenuItem(icon, text, onClick = openSubmenu) }
+    ) { isOpen, closeSubmenu ->
+        EmberrDesktopMenu(
+            expanded = isOpen,
+            onDismissRequest = closeSubmenu,
+            modifier = Modifier.width(240.dp)
+        ) {
+            Column(modifier = Modifier.padding(vertical = 4.dp), content = content)
         }
     }
 }
@@ -1463,11 +1429,21 @@ internal fun DesktopMenuItem(
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
+        val showsSubmenuChevron = LocalShowsSubmenuChevron.current
         Text(
             text,
             style = MaterialTheme.typography.bodyLarge,
-            color = textColor
+            color = textColor,
+            modifier = if (showsSubmenuChevron) Modifier.weight(1f) else Modifier
         )
+        if (showsSubmenuChevron) {
+            Icon(
+                painter = painterResource(Res.drawable.chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 
