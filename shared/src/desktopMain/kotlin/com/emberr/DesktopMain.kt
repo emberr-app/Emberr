@@ -81,6 +81,7 @@ import com.emberr.domain.util.export.handleExportMarkdown
 import com.emberr.domain.util.export.handleExportPdf
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
+import com.emberr.presentation.shared.editor.GlobalEditorState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.FlowPreview
@@ -274,7 +275,7 @@ private fun runEmberrDesktopApp() = application {
         },
         onKeyEvent = { event ->
             if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) DesktopEscapeKeyBus.notifyPressed()
-            false
+            GlobalEditorState.undoOrRedoShortcutOfLastUsedEditor?.invoke(event) ?: false
         }
     ) {
         val currentWindow = this.window as Frame

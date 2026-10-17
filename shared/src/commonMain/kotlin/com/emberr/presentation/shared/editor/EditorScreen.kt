@@ -326,6 +326,8 @@ object GlobalEditorState {
 
     var tapsOutsideNewDatabaseRows by mutableIntStateOf(0)
 
+    var undoOrRedoShortcutOfLastUsedEditor: ((KeyEvent) -> Boolean)? = null
+
     var hasTextSelection by mutableStateOf(false)
         private set
 
@@ -562,6 +564,36 @@ fun EditorScreen(
     val latestOnClearSelection by rememberUpdatedState(onClearSelection)
     val latestOnDeleteSelectedBlocks by rememberUpdatedState(onDeleteSelectedBlocks)
     val latestSelectedBlockIds by rememberUpdatedState(selectedBlockIds)
+
+    val undoOrRedoOnShortcut: (KeyEvent) -> Boolean = remember {
+        { keyEvent ->
+            val isUsableShortcut = keyEvent.type == KeyEventType.KeyDown &&
+                keyEvent.isCtrlPressed &&
+                GlobalEditorState.focusedCanvasBlockId == null
+            when {
+                !isUsableShortcut -> false
+                keyEvent.key == Key.Z -> {
+                    if (keyEvent.isShiftPressed) latestOnRedo() else latestOnUndo()
+                    true
+                }
+                keyEvent.key == Key.Y -> {
+                    latestOnRedo()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+    if (isDesktopPlatform) {
+        DisposableEffect(undoOrRedoOnShortcut) {
+            GlobalEditorState.undoOrRedoShortcutOfLastUsedEditor = undoOrRedoOnShortcut
+            onDispose {
+                if (GlobalEditorState.undoOrRedoShortcutOfLastUsedEditor === undoOrRedoOnShortcut) {
+                    GlobalEditorState.undoOrRedoShortcutOfLastUsedEditor = null
+                }
+            }
+        }
+    }
 
     fun deleteSelectedBlocksOnDeleteKey(keyEvent: KeyEvent): Boolean {
         val isDeleteKey = keyEvent.key == Key.Delete || keyEvent.key == Key.Backspace
@@ -1023,6 +1055,7 @@ fun EditorScreen(
             .pointerInput(Unit) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    if (isDesktopPlatform) GlobalEditorState.undoOrRedoShortcutOfLastUsedEditor = undoOrRedoOnShortcut
                     GlobalEditorState.pressStartedOnNewDatabaseRow = false
                     GlobalEditorState.pressStartedOnDatabaseViewPill = false
                     while (true) {
@@ -1051,18 +1084,7 @@ fun EditorScreen(
                                 return@onPreviewKeyEvent true
                             }
                             if (deleteSelectedBlocksOnDeleteKey(keyEvent)) return@onPreviewKeyEvent true
-                            if (!keyEvent.isCtrlPressed || GlobalEditorState.focusedCanvasBlockId != null) return@onPreviewKeyEvent false
-                            when (keyEvent.key) {
-                                Key.Z -> {
-                                    if (keyEvent.isShiftPressed) latestOnRedo() else latestOnUndo()
-                                    true
-                                }
-                                Key.Y -> {
-                                    latestOnRedo()
-                                    true
-                                }
-                                else -> false
-                            }
+                            undoOrRedoOnShortcut(keyEvent)
                         }
                 } else {
                     Modifier.pointerInput(Unit) {
