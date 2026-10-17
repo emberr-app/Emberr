@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.chevron_right
+import org.jetbrains.compose.resources.painterResource
 
 private val DESKTOP_OPTION_SHAPE = RoundedCornerShape(12.dp)
 private val DESKTOP_OPTION_VERTICAL_SPACING = 2.dp
@@ -32,6 +36,7 @@ private val DESKTOP_OPTION_INNER_VERTICAL_PADDING = 10.dp
 private val DESKTOP_ICON_GAP = 12.dp
 private val DESKTOP_TRAILING_GAP = 12.dp
 private val DESKTOP_SELECTED_DOT_SIZE = 8.dp
+private val DESKTOP_SUBMENU_CHEVRON_SIZE = 16.dp
 
 @Composable
 fun EmberrDesktopMenuOption(
@@ -101,6 +106,16 @@ fun EmberrDesktopMenuOption(
         if (trailing != null) {
             Spacer(modifier = Modifier.width(DESKTOP_TRAILING_GAP))
             trailing()
+        }
+
+        if (LocalShowsSubmenuChevron.current) {
+            Spacer(modifier = Modifier.width(DESKTOP_TRAILING_GAP))
+            Icon(
+                painter = painterResource(Res.drawable.chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(DESKTOP_SUBMENU_CHEVRON_SIZE)
+            )
         }
     }
 }
