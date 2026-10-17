@@ -156,7 +156,8 @@ private fun DatabaseTemplateOption(
                 },
                 onClick = onUse
             )
-        }
+        },
+        anchorIsMenuRow = false
     ) { closeLayerAnd ->
         DatabaseMenuOption(
             label = if (isDefault) "Default for new rows" else "Set as default",

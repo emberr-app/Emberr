@@ -123,7 +123,8 @@ private fun DatabaseSortEditor(
     ) {
         DatabaseMenuLayer(
             title = "Sort by",
-            anchor = { openLayer -> DatabaseChoiceButton(text = block.labelOf(sort.target), onClick = openLayer) }
+            anchor = { openLayer -> DatabaseChoiceButton(text = block.labelOf(sort.target), onClick = openLayer) },
+            anchorIsMenuRow = false
         ) { closeLayerAnd ->
             DatabaseColumnChoices(
                 block = block,
@@ -137,7 +138,8 @@ private fun DatabaseSortEditor(
             title = "Order",
             anchor = { openLayer ->
                 DatabaseChoiceButton(text = if (sort.isDescending) "Descending" else "Ascending", onClick = openLayer)
-            }
+            },
+            anchorIsMenuRow = false
         ) { closeLayerAnd ->
             DatabaseMenuOption(
                 label = "Ascending",
