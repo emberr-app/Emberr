@@ -25,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -52,17 +53,22 @@ import emberr.shared.generated.resources.square_arrows_right
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import java.util.Calendar
 import kotlin.math.abs
 
 private val DesktopMenuWidth = 240.dp
+private val DesktopDatePickerMenuWidth = 312.dp
+private val DesktopTimePickerMenuWidth = 292.dp
 @Composable
 fun ReminderPresetMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     onPresetSelected: (Long) -> Unit,
     onCustomSelected: () -> Unit,
+    customDateInitialTimestamp: Long?,
+    onCustomDateChosen: (Long) -> Unit,
     onRemove: (() -> Unit)? = null
 ) {
     if (isDesktopPlatform) {
@@ -71,51 +77,54 @@ fun ReminderPresetMenu(
             onDismissRequest = onDismiss,
             modifier = Modifier.width(DesktopMenuWidth)
         ) {
-            DropdownMenuItem(
-                text = { Text("Later today", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.calendar_day), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onPresetSelected(getDatePresetTime(DatePresetType.LATER_TODAY)); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            DropdownMenuItem(
-                text = { Text("Tomorrow", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.calendar_day), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onPresetSelected(getDatePresetTime(DatePresetType.TOMORROW)); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            DropdownMenuItem(
-                text = { Text("This weekend", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.sofa), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onPresetSelected(getDatePresetTime(DatePresetType.THIS_WEEKEND)); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            DropdownMenuItem(
-                text = { Text("Next week", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.square_arrows_right), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onPresetSelected(getDatePresetTime(DatePresetType.NEXT_WEEK)); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
-            DropdownMenuItem(
-                text = { Text("Custom date...", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.calendar_add3), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onCustomSelected(); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            if (onRemove != null) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
-                DropdownMenuItem(
-                    text = { Text("Remove reminder", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error) },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(Res.drawable.bell_off2),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    },
-                    onClick = { onRemove(); onDismiss() },
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
+            Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                EmberrDesktopMenuOption(
+                    label = "Later today",
+                    icon = { ReminderMenuIcon(Res.drawable.calendar_day) },
+                    onClick = { onPresetSelected(getDatePresetTime(DatePresetType.LATER_TODAY)); onDismiss() }
                 )
+                EmberrDesktopMenuOption(
+                    label = "Tomorrow",
+                    icon = { ReminderMenuIcon(Res.drawable.calendar_day) },
+                    onClick = { onPresetSelected(getDatePresetTime(DatePresetType.TOMORROW)); onDismiss() }
+                )
+                EmberrDesktopMenuOption(
+                    label = "This weekend",
+                    icon = { ReminderMenuIcon(Res.drawable.sofa) },
+                    onClick = { onPresetSelected(getDatePresetTime(DatePresetType.THIS_WEEKEND)); onDismiss() }
+                )
+                EmberrDesktopMenuOption(
+                    label = "Next week",
+                    icon = { ReminderMenuIcon(Res.drawable.square_arrows_right) },
+                    onClick = { onPresetSelected(getDatePresetTime(DatePresetType.NEXT_WEEK)); onDismiss() }
+                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
+                EmberrDesktopSubmenu(
+                    menuWidthEstimate = DesktopDatePickerMenuWidth,
+                    anchor = { openPicker, _ ->
+                        EmberrDesktopMenuOption(
+                            label = "Custom date...",
+                            icon = { ReminderMenuIcon(Res.drawable.calendar_add3) },
+                            onClick = openPicker
+                        )
+                    }
+                ) { isPickerOpen, closePicker ->
+                    MinimalDatePickerDialog(
+                        expanded = isPickerOpen,
+                        initialTimestamp = customDateInitialTimestamp,
+                        onDismiss = closePicker,
+                        onConfirm = { millis -> onCustomDateChosen(millis); onDismiss() }
+                    )
+                }
+                if (onRemove != null) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
+                    EmberrDesktopMenuOption(
+                        label = "Remove reminder",
+                        icon = { ReminderMenuIcon(Res.drawable.bell_off2, tint = MaterialTheme.colorScheme.error) },
+                        labelColor = MaterialTheme.colorScheme.error,
+                        onClick = { onRemove(); onDismiss() }
+                    )
+                }
             }
         }
     } else {
@@ -180,7 +189,9 @@ fun TimePresetMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     onPresetSelected: (Long) -> Unit,
-    onCustomSelected: () -> Unit
+    onCustomSelected: () -> Unit,
+    customTimeInitialTimestamp: Long?,
+    onCustomTimeChosen: (hour: Int, minute: Int) -> Unit
 ) {
     if (isDesktopPlatform) {
         EmberrDesktopMenu(
@@ -188,37 +199,46 @@ fun TimePresetMenu(
             onDismissRequest = onDismiss,
             modifier = Modifier.width(DesktopMenuWidth)
         ) {
-            DropdownMenuItem(
-                text = { Text("In 15 mins", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.history2), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_15_MINS)); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            DropdownMenuItem(
-                text = { Text("In 1 hour", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.history2), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_1_HOUR)); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            DropdownMenuItem(
-                text = { Text("In 3 hours", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.history3), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_3_HOURS)); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            DropdownMenuItem(
-                text = { Text("This evening", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.moon_cloud), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onPresetSelected(getTimePreset(TimePresetType.THIS_EVENING)); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
-            DropdownMenuItem(
-                text = { Text("Custom time...", style = MaterialTheme.typography.bodyLarge) },
-                leadingIcon = { Icon(painter = painterResource(Res.drawable.clock_circle), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) },
-                onClick = { onCustomSelected(); onDismiss() },
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp).clip(RoundedCornerShape(12.dp))
-            )
+            Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                EmberrDesktopMenuOption(
+                    label = "In 15 mins",
+                    icon = { ReminderMenuIcon(Res.drawable.history2) },
+                    onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_15_MINS)); onDismiss() }
+                )
+                EmberrDesktopMenuOption(
+                    label = "In 1 hour",
+                    icon = { ReminderMenuIcon(Res.drawable.history2) },
+                    onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_1_HOUR)); onDismiss() }
+                )
+                EmberrDesktopMenuOption(
+                    label = "In 3 hours",
+                    icon = { ReminderMenuIcon(Res.drawable.history3) },
+                    onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_3_HOURS)); onDismiss() }
+                )
+                EmberrDesktopMenuOption(
+                    label = "This evening",
+                    icon = { ReminderMenuIcon(Res.drawable.moon_cloud) },
+                    onClick = { onPresetSelected(getTimePreset(TimePresetType.THIS_EVENING)); onDismiss() }
+                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
+                EmberrDesktopSubmenu(
+                    menuWidthEstimate = DesktopTimePickerMenuWidth,
+                    anchor = { openPicker, _ ->
+                        EmberrDesktopMenuOption(
+                            label = "Custom time...",
+                            icon = { ReminderMenuIcon(Res.drawable.clock_circle) },
+                            onClick = openPicker
+                        )
+                    }
+                ) { isPickerOpen, closePicker ->
+                    MinimalTimePickerDialog(
+                        expanded = isPickerOpen,
+                        initialTimestamp = customTimeInitialTimestamp,
+                        onDismiss = closePicker,
+                        onConfirm = { hour, minute -> onCustomTimeChosen(hour, minute); onDismiss() }
+                    )
+                }
+            }
         }
     } else {
         EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "Time") {
@@ -266,6 +286,16 @@ fun TimePresetMenu(
           }
         }
     }
+}
+
+@Composable
+private fun ReminderMenuIcon(icon: DrawableResource, tint: Color = MaterialTheme.colorScheme.onSurface) {
+    Icon(
+        painter = painterResource(icon),
+        contentDescription = null,
+        tint = tint,
+        modifier = Modifier.size(20.dp)
+    )
 }
 
 @Composable

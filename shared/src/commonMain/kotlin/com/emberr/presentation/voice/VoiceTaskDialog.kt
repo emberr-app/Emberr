@@ -360,6 +360,8 @@ private fun EditableVoiceTaskRow(
         onDismiss = { isDateMenuOpen = false },
         onPresetSelected = onReminderChange,
         onCustomSelected = { isCustomDatePickerOpen = true },
+        customDateInitialTimestamp = reminder,
+        onCustomDateChosen = { pickedDate -> onReminderChange(reminderMovedToDate(reminder, pickedDate, timeZone)) },
         onRemove = if (reminder != null) {
             { onReminderChange(null) }
         } else null
@@ -368,7 +370,9 @@ private fun EditableVoiceTaskRow(
         expanded = isTimeMenuOpen,
         onDismiss = { isTimeMenuOpen = false },
         onPresetSelected = onReminderChange,
-        onCustomSelected = { isCustomTimePickerOpen = true }
+        onCustomSelected = { isCustomTimePickerOpen = true },
+        customTimeInitialTimestamp = reminder,
+        onCustomTimeChosen = { hour, minute -> onReminderChange(reminderMovedToTime(reminder, hour, minute, today, timeZone)) }
     )
     if (isCustomDatePickerOpen) {
         MinimalDatePickerDialog(

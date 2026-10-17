@@ -933,6 +933,8 @@ fun NoteBlockItem(
                                             )
                                         },
                                         onCustomSelected = { showDatePicker = true },
+                                        customDateInitialTimestamp = block.reminderTimestamp,
+                                        onCustomDateChosen = { timestamp -> actions.onUpdateReminder(block.id, timestamp) },
                                         onRemove = if (hasReminder) {
                                             { actions.onUpdateReminder(block.id, null) }
                                         } else null
@@ -975,7 +977,11 @@ fun NoteBlockItem(
                                                 it
                                             )
                                         },
-                                        onCustomSelected = { showTimePicker = true }
+                                        onCustomSelected = { showTimePicker = true },
+                                        customTimeInitialTimestamp = block.reminderTimestamp,
+                                        onCustomTimeChosen = { hour, minute ->
+                                            actions.onUpdateReminder(block.id, reminderTimestampAtTime(block.reminderTimestamp, hour, minute))
+                                        }
                                     )
                                 }
                                 if (hasReminder) {
@@ -1160,19 +1166,7 @@ fun NoteBlockItem(
                     initialTimestamp = block.reminderTimestamp,
                     onDismiss = { showTimePicker = false },
                     onConfirm = { hour, minute ->
-                        val tz = TimeZone.currentSystemDefault()
-                        val currentInstant = block.reminderTimestamp?.let {
-                            Instant.fromEpochMilliseconds(it)
-                        } ?: Clock.System.now()
-                        val currentDt = currentInstant.toLocalDateTime(tz)
-                        val newDt = LocalDateTime(
-                            currentDt.year, currentDt.month.number, currentDt.day,
-                            hour, minute, 0, 0
-                        )
-                        actions.onUpdateReminder(
-                            block.id,
-                            newDt.toInstant(tz).toEpochMilliseconds()
-                        )
+                        actions.onUpdateReminder(block.id, reminderTimestampAtTime(block.reminderTimestamp, hour, minute))
                         showTimePicker = false
                     }
                 )
@@ -1966,4 +1960,15 @@ data class RichTextVisualTransformation(
             }
         )
     }
+}
+
+private fun reminderTimestampAtTime(currentTimestamp: Long?, hour: Int, minute: Int): Long {
+    val timeZone = TimeZone.currentSystemDefault()
+    val currentInstant = currentTimestamp?.let { Instant.fromEpochMilliseconds(it) } ?: Clock.System.now()
+    val currentDateTime = currentInstant.toLocalDateTime(timeZone)
+    val newDateTime = LocalDateTime(
+        currentDateTime.year, currentDateTime.month.number, currentDateTime.day,
+        hour, minute, 0, 0
+    )
+    return newDateTime.toInstant(timeZone).toEpochMilliseconds()
 }
