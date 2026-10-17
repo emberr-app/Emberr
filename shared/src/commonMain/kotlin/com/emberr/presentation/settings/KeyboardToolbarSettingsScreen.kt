@@ -424,7 +424,7 @@ private fun AvailableToolbarItemRow(item: KeyboardToolbarItem, onAdd: () -> Unit
             .fillMaxWidth()
             .clickable(onClick = onAdd)
             .height(ToolbarEntryRowHeight)
-            .padding(start = DragHandleWidth, end = 16.dp),
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ToolbarItemPreview(item)
