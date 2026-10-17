@@ -59,6 +59,7 @@ import com.emberr.domain.model.NoteContent
 import com.emberr.domain.util.eventbus.WidgetComposeRequest
 import com.emberr.domain.util.eventbus.WidgetComposeRequestBus
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.home.overview.OverviewSection
 import com.emberr.presentation.shared.UserSettings
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -1532,7 +1533,8 @@ fun NotesSelectionPill(
             shape = DefaultCornerShape,
             color = Color.Transparent,
             modifier = Modifier
-                .padding(bottom = 32.dp)
+                .navigationBarsPadding()
+                .padding(bottom = BOTTOM_BAR_BOTTOM_PADDING)
                 .emberrBorder(DefaultCornerShape)
                 .customEmberrShadow(DefaultCornerShape)
                 .clip(DefaultCornerShape)
