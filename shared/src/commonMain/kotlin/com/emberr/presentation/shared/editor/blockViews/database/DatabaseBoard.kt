@@ -83,6 +83,7 @@ import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.tagPoolKey
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.MenuAtTap
@@ -95,13 +96,11 @@ import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyD
 import com.emberr.presentation.shared.editor.blockViews.property.rememberPropertyTagColor
 import com.emberr.presentation.shared.editor.blockViews.property.rememberPropertyTagColorName
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.check_square
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.eye3
 import emberr.shared.generated.resources.minimize_2
 import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.plus
-import emberr.shared.generated.resources.square
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
@@ -782,12 +781,7 @@ private fun DatabaseBoardGroupLabel(value: DatabaseBoardGroupValue, columnLabel:
             textStyle = MaterialTheme.typography.bodyMedium
         )
         is DatabaseBoardGroupValue.Checkbox -> Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(if (value.isChecked) Res.drawable.check_square else Res.drawable.square),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(16.dp)
-            )
+            EmberrCheckbox(checked = value.isChecked, onCheckedChange = null)
             Spacer(modifier = Modifier.width(6.dp))
             Text(text = value.labelText(columnLabel), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
         }

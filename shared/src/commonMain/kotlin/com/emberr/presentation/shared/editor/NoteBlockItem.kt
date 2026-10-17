@@ -47,10 +47,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,7 +72,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -158,6 +154,7 @@ import com.emberr.domain.model.textAlignmentOrNull
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.triggerHapticFeedback
 import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
@@ -622,23 +619,13 @@ fun NoteBlockItem(
                     contentAlignment = Alignment.Center
                 ) {
                     when (block) {
-                        is CheckboxBlock -> CompositionLocalProvider(
-                            LocalMinimumInteractiveComponentSize provides 0.dp
-                        ) {
-                            Checkbox(
-                                checked = block.isChecked,
-                                onCheckedChange = {
-                                    triggerHapticFeedback()
-                                    actions.onToggleCheckbox(block.id, it)
-                                },
-                                modifier = Modifier.scale(0.9f).size(16.dp),
-                                colors = CheckboxDefaults.colors(
-                                    checkedColor = MaterialTheme.colorScheme.surface,
-                                    checkmarkColor = MaterialTheme.colorScheme.primary,
-                                    uncheckedColor = MaterialTheme.colorScheme.outline
-                                )
-                            )
-                        }
+                        is CheckboxBlock -> EmberrCheckbox(
+                            checked = block.isChecked,
+                            onCheckedChange = {
+                                triggerHapticFeedback()
+                                actions.onToggleCheckbox(block.id, it)
+                            }
+                        )
                         is BulletedListBlock -> Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(textStyle.color))
                         is NumberedListBlock -> Text("${block.number}.", style = textStyle.copy(fontSize = 17.sp))
                         is ToggleBlock -> {

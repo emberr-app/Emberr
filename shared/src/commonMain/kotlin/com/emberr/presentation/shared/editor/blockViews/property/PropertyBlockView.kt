@@ -20,14 +20,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -66,6 +61,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyDateRange
@@ -537,20 +533,7 @@ internal fun PropertyCheckboxValue(
             .padding(horizontal = PropertyValueHorizontalPadding, vertical = PropertyValueVerticalPadding),
         contentAlignment = alignment.toBoxAlignment()
     ) {
-        Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-                Checkbox(
-                    checked = block.isChecked,
-                    onCheckedChange = null,
-                    modifier = Modifier.scale(0.9f).size(16.dp),
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.surface,
-                        checkmarkColor = MaterialTheme.colorScheme.primary,
-                        uncheckedColor = MaterialTheme.colorScheme.outline
-                    )
-                )
-            }
-        }
+        EmberrCheckbox(checked = block.isChecked, onCheckedChange = null)
     }
 }
 

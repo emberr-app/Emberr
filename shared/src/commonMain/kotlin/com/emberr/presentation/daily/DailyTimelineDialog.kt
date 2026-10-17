@@ -90,6 +90,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.LocalImageOverlay
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
@@ -115,8 +116,6 @@ import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_up
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.search
-import emberr.shared.generated.resources.square
-import emberr.shared.generated.resources.square_check
 import emberr.shared.generated.resources.x
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.DateTimeUnit
@@ -601,12 +600,7 @@ private fun TimelineBlockContent(
         }
 
         is CheckboxBlock -> Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(if (block.isChecked) Res.drawable.square_check else Res.drawable.square),
-                contentDescription = if (block.isChecked) "Completed" else "Not completed",
-                tint = if (block.isChecked) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(18.dp)
-            )
+            EmberrCheckbox(checked = block.isChecked, onCheckedChange = null)
             Spacer(modifier = Modifier.width(10.dp))
             TimelineText(
                 block = block,
