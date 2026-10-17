@@ -54,6 +54,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.presentation.settings.SettingsActionRow
@@ -226,22 +227,24 @@ fun CalendarSidebar(
                             bottom = 8.dp
                         ),
                         actions = {
-                            Box(
-                                modifier = Modifier
-                                    .size(TopHeaderBarButtonSize)
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null,
-                                        onClick = onClose
-                                    ),
-                                contentAlignment = Alignment.CenterEnd
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.sidebar),
-                                    contentDescription = "Close sidebar",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
+                            IconTooltip(text = "Close sidebar") {
+                                Box(
+                                    modifier = Modifier
+                                        .size(TopHeaderBarButtonSize)
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null,
+                                            onClick = onClose
+                                        ),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.sidebar),
+                                        contentDescription = "Close sidebar",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
                             }
                         }
                     )

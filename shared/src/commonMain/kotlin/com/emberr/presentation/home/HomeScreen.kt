@@ -60,6 +60,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.home.overview.OverviewSection
 import com.emberr.presentation.shared.UserSettings
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
@@ -706,16 +707,18 @@ fun HomeScreen(
                                                                 fontWeight = FontWeight.Bold,
                                                                 color = MaterialTheme.colorScheme.onSurface
                                                             )
-                                                            Icon(
-                                                                painter = painterResource(Res.drawable.template),
-                                                                contentDescription = "Templates",
-                                                                tint = MaterialTheme.colorScheme.onSurface,
-                                                                modifier = Modifier.size(24.dp)
-                                                                    .noRippleClickable {
-                                                                        showAddNotePopup = false
-                                                                        handleOpenTemplates()
-                                                                    }
-                                                            )
+                                                            IconTooltip(text = "Templates") {
+                                                                Icon(
+                                                                    painter = painterResource(Res.drawable.template),
+                                                                    contentDescription = "Templates",
+                                                                    tint = MaterialTheme.colorScheme.onSurface,
+                                                                    modifier = Modifier.size(24.dp)
+                                                                        .noRippleClickable {
+                                                                            showAddNotePopup = false
+                                                                            handleOpenTemplates()
+                                                                        }
+                                                                )
+                                                            }
                                                         }
                                                         EmberrTextField(
                                                             value = addNoteInput,
@@ -785,7 +788,8 @@ fun HomeScreen(
                                             TopBarIconButtonItem(
                                                 icon = painterResource(Res.drawable.arrow_up_down),
                                                 contentDescription = "Sort",
-                                                onClick = { showSortMenu = true }
+                                                onClick = { showSortMenu = true },
+                                                tooltip = "Sort notes"
                                             ),
                                             TopBarIconButtonItem(
                                                 icon = painterResource(Res.drawable.folder_plus),
@@ -793,7 +797,8 @@ fun HomeScreen(
                                                 onClick = {
                                                     addFolderParentId = null
                                                     showAddFolderDialog = true
-                                                }
+                                                },
+                                                tooltip = "New folder"
                                             ),
                                             TopBarIconButtonItem(
                                                 icon = painterResource(Res.drawable.pen_square),
@@ -801,7 +806,8 @@ fun HomeScreen(
                                                 onClick = {
                                                     addNoteTargetFolderId = null
                                                     showAddNoteDialog = true
-                                                }
+                                                },
+                                                tooltip = "New note"
                                             )
                                         )
                                     )
@@ -1074,12 +1080,14 @@ fun HomeScreen(
                                 TopBarIconButtonItem(
                                     icon = painterResource(Res.drawable.calendar),
                                     contentDescription = "Open Calendar",
-                                    onClick = onNavigateToCalendar
+                                    onClick = onNavigateToCalendar,
+                                    tooltip = "Calendar"
                                 ),
                                 TopBarIconButtonItem(
                                     icon = painterResource(Res.drawable.ellipsis),
                                     contentDescription = "Settings",
-                                    onClick = { showUserSettingsMenu = true }
+                                    onClick = { showUserSettingsMenu = true },
+                                    tooltip = "More settings"
                                 )
                             )
                         )
@@ -1666,6 +1674,7 @@ fun AddNoteBottomSheet(
         headerAction = EmberrBottomSheetAction(
             icon = painterResource(Res.drawable.template),
             contentDescription = "Templates",
+            tooltip = "Templates",
             onClick = onOpenTemplates
         )
     ) { closeAnd ->
@@ -1853,19 +1862,23 @@ private fun TemplateRow(
             )
         }
         Spacer(Modifier.width(12.dp))
-        Icon(
-            painter = painterResource(Res.drawable.pen),
-            contentDescription = "Edit template",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-            modifier = Modifier.size(15.dp).noRippleClickable(onEdit)
-        )
+        IconTooltip(text = "Edit template") {
+            Icon(
+                painter = painterResource(Res.drawable.pen),
+                contentDescription = "Edit template",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                modifier = Modifier.size(15.dp).noRippleClickable(onEdit)
+            )
+        }
         Spacer(Modifier.width(14.dp))
-        Icon(
-            painter = painterResource(Res.drawable.trash),
-            contentDescription = "Delete template",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-            modifier = Modifier.size(16.dp).noRippleClickable(onDelete)
-        )
+        IconTooltip(text = "Delete template") {
+            Icon(
+                painter = painterResource(Res.drawable.trash),
+                contentDescription = "Delete template",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                modifier = Modifier.size(16.dp).noRippleClickable(onDelete)
+            )
+        }
     }
 }
 

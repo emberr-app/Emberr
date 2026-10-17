@@ -132,6 +132,7 @@ fun SelfHostSetupScreen(
                     title = "Self-Host",
                     hazeState = internalHazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    backTooltip = "Back",
                     onBackClick = onNavigateBack
                 )
             }

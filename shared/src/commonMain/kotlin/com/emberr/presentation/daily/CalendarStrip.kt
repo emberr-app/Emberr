@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
@@ -273,8 +274,10 @@ fun BottomSheetMonthCalendar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { currentMonth = currentMonth.minus(1, DateTimeUnit.MONTH) }) {
-                Icon(painterResource(Res.drawable.chevron_left), contentDescription = "Previous", tint = MaterialTheme.colorScheme.onSurface)
+            IconTooltip(text = "Previous month") {
+                IconButton(onClick = { currentMonth = currentMonth.minus(1, DateTimeUnit.MONTH) }) {
+                    Icon(painterResource(Res.drawable.chevron_left), contentDescription = "Previous", tint = MaterialTheme.colorScheme.onSurface)
+                }
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -289,8 +292,10 @@ fun BottomSheetMonthCalendar(
                 )
             }
 
-            IconButton(onClick = { currentMonth = currentMonth.plus(1, DateTimeUnit.MONTH) }) {
-                Icon(painterResource(Res.drawable.chevron_right), contentDescription = "Next", tint = MaterialTheme.colorScheme.onSurface)
+            IconTooltip(text = "Next month") {
+                IconButton(onClick = { currentMonth = currentMonth.plus(1, DateTimeUnit.MONTH) }) {
+                    Icon(painterResource(Res.drawable.chevron_right), contentDescription = "Next", tint = MaterialTheme.colorScheme.onSurface)
+                }
             }
         }
 

@@ -549,14 +549,16 @@ fun CanvasSelectionActionBar(
 
 @Composable
 private fun SelectionBarIcon(icon: Painter, contentDescription: String, tint: Color, onClick: () -> Unit) {
-    Icon(
-        painter = icon,
-        contentDescription = contentDescription,
-        tint = tint,
-        modifier = Modifier
-            .size(18.dp)
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick)
-    )
+    IconTooltip(text = contentDescription, position = IconTooltipPosition.Above) {
+        Icon(
+            painter = icon,
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier
+                .size(18.dp)
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick)
+        )
+    }
 }
 
 @Composable
@@ -1304,21 +1306,23 @@ private fun CanvasMobilePill(hazeState: HazeState, isScrollable: Boolean = false
 @Composable
 private fun MobilePillItem(label: String, isSelected: Boolean, onClick: () -> Unit, content: @Composable (Color) -> Unit) {
     val tint = MaterialTheme.colorScheme.primary
-    Box(
-        modifier = Modifier
-            .size(44.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = NoRippleIndicationNodeFactory,
-                onClick = onClick
-            )
-            .semantics { contentDescription = label },
-        contentAlignment = Alignment.Center
-    ) {
-        if (isSelected) {
-            Box(Modifier.requiredSize(width = MobilePillSelectedBackgroundWidth, height = 36.dp).background(tint.copy(alpha = 0.15f), CircleShape))
+    IconTooltip(text = label, position = IconTooltipPosition.Above) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = NoRippleIndicationNodeFactory,
+                    onClick = onClick
+                )
+                .semantics { contentDescription = label },
+            contentAlignment = Alignment.Center
+        ) {
+            if (isSelected) {
+                Box(Modifier.requiredSize(width = MobilePillSelectedBackgroundWidth, height = 36.dp).background(tint.copy(alpha = 0.15f), CircleShape))
+            }
+            content(tint)
         }
-        content(tint)
     }
 }
 

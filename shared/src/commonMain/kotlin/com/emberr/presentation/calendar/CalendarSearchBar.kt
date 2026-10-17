@@ -54,6 +54,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltipPosition
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.BottomBarSearchField
@@ -182,15 +184,19 @@ internal fun CalendarSearchBar(
                 )
 
                 if (!isOpen) {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = NoRippleIndicationNodeFactory,
-                                onClick = onOpenClick
+                    Box(modifier = Modifier.matchParentSize()) {
+                        IconTooltip(text = "Search events", position = IconTooltipPosition.Above) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = NoRippleIndicationNodeFactory,
+                                        onClick = onOpenClick
+                                    )
                             )
-                    )
+                        }
+                    }
                 }
             }
         }

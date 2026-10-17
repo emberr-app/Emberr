@@ -60,6 +60,7 @@ import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.prefs.SyncConstants
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.editor.DefaultKeyboardToolbarItems
 import com.emberr.presentation.shared.editor.KeyboardToolbarItem
@@ -196,6 +197,7 @@ fun KeyboardToolbarSettingsScreen(
                 title = "Keyboard Toolbar",
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                backTooltip = "Back",
                 onBackClick = onNavigateBack
             )
         }
@@ -399,19 +401,21 @@ private fun ToolbarEntryRow(
                 modifier = Modifier.weight(1f)
             )
 
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onRemove),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painterResource(Res.drawable.circle_minus),
-                    contentDescription = "Remove ${item.title}",
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
-                    modifier = Modifier.size(20.dp)
-                )
+            IconTooltip(text = "Remove") {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onRemove),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painterResource(Res.drawable.circle_minus),
+                        contentDescription = "Remove ${item.title}",
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

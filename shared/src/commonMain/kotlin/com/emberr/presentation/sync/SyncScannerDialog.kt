@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.emberr.domain.sync.SyncPairingData
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import kotlinx.serialization.json.Json
 
@@ -42,18 +43,21 @@ fun SyncScannerDialog(
                 modifier = Modifier.fillMaxSize()
             )
 
-            IconButton(
-                onClick = onDismiss,
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(16.dp)
                     .stableStatusBarsPadding()
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close Camera",
-                    tint = Color.White
-                )
+                IconTooltip(text = "Close camera") {
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close Camera",
+                            tint = Color.White
+                        )
+                    }
+                }
             }
         }
     }

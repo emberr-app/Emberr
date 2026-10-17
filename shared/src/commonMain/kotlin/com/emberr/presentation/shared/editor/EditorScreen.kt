@@ -155,6 +155,8 @@ import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrShadowSpotColorSoft
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
@@ -1538,7 +1540,7 @@ fun EditorToolbar(
                                     onToggleFormat = onToggleFormat,
                                     onHighlightClick = { isChoosingHighlightColor = !isChoosingHighlightColor }
                                 )
-                                ToolbarButton(onClick = { keyboardController?.hide() }) {
+                                ToolbarButton(tooltip = "Close keyboard", onClick = { keyboardController?.hide() }) {
                                     Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
                                 }
                             }
@@ -1570,7 +1572,7 @@ fun EditorToolbar(
                                                     if (isItemEnabled) tint else tint.copy(alpha = 0.3f)
                                                 else -> buttonTint
                                             }
-                                            ToolbarButton(enabled = isItemEnabled, onClick = { onToolbarItemClick(item) }) {
+                                            ToolbarButton(enabled = isItemEnabled, tooltip = item.title, onClick = { onToolbarItemClick(item) }) {
                                                 KeyboardToolbarItemIcon(item, itemTint)
                                             }
                                         }
@@ -1578,7 +1580,7 @@ fun EditorToolbar(
                                 }
 
                                 if (toolbarItems.isNotEmpty()) ToolbarDivider(tint)
-                                ToolbarButton(onClick = { keyboardController?.hide() }) {
+                                ToolbarButton(tooltip = "Close keyboard", onClick = { keyboardController?.hide() }) {
                                     Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
                                 }
                             }
@@ -1750,19 +1752,19 @@ private fun InlineFormatButtons(
     onHighlightClick: () -> Unit,
     enabled: Boolean = true
 ) {
-    ToolbarButton(enabled = enabled, onClick = { onToggleFormat("bold") }) {
+    ToolbarButton(enabled = enabled, tooltip = "Bold", onClick = { onToggleFormat("bold") }) {
         Icon(painterResource(Res.drawable.format_bold), "Bold", tint = tint, modifier = Modifier.size(iconSize - 4.dp))
     }
-    ToolbarButton(enabled = enabled, onClick = { onToggleFormat("italic") }) {
+    ToolbarButton(enabled = enabled, tooltip = "Italic", onClick = { onToggleFormat("italic") }) {
         Icon(painterResource(Res.drawable.italic), "Italic", tint = tint, modifier = Modifier.size(iconSize - 4.dp))
     }
-    ToolbarButton(enabled = enabled, onClick = { onToggleFormat("strike") }) {
+    ToolbarButton(enabled = enabled, tooltip = "Strikethrough", onClick = { onToggleFormat("strike") }) {
         Icon(painterResource(Res.drawable.text_x), "Strikethrough", tint = tint, modifier = Modifier.size(iconSize - 2.dp))
     }
-    ToolbarButton(enabled = enabled, onClick = { onToggleFormat("underline") }) {
+    ToolbarButton(enabled = enabled, tooltip = "Underline", onClick = { onToggleFormat("underline") }) {
         Icon(painterResource(Res.drawable.underline), "Underline", tint = tint, modifier = Modifier.size(iconSize - 2.dp))
     }
-    ToolbarButton(enabled = enabled, onClick = onHighlightClick) {
+    ToolbarButton(enabled = enabled, tooltip = "Highlight", onClick = onHighlightClick) {
         Icon(painterResource(Res.drawable.text_highlight), "Highlight", tint = tint, modifier = Modifier.size(iconSize + 1.dp))
     }
 }
@@ -1834,17 +1836,20 @@ private val FloatingSwatchSize = 30.dp
 @Composable
 private fun ToolbarButton(
     enabled: Boolean = true,
+    tooltip: String? = null,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .size(ToolbarButtonSize)
-            .clip(CircleShape)
-            .clickable(enabled = enabled) { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        content()
+    IconTooltip(text = tooltip, position = IconTooltipPosition.Above) {
+        Box(
+            modifier = Modifier
+                .size(ToolbarButtonSize)
+                .clip(CircleShape)
+                .clickable(enabled = enabled) { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            content()
+        }
     }
 }
 
@@ -2474,35 +2479,41 @@ fun BlockSelectionPill(
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 val iconSize = 18.dp
-                Icon(painterResource(Res.drawable.x), null, modifier = Modifier.size(iconSize).clickable { onClearSelection() }, tint = tint)
+                IconTooltip(text = "Clear selection", position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.x), null, modifier = Modifier.size(iconSize).clickable { onClearSelection() }, tint = tint)
+                }
                 Text("$selectedCount", style = MaterialTheme.typography.bodyLarge, color = tint)
                 divider()
 
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(if (isSelectionPinned) tint.copy(alpha = 0.15f) else Color.Transparent)
-                        .clickable { onTogglePin() }
-                        .padding(4.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painterResource(Res.drawable.thumbtack),
-                        if (isSelectionPinned) "Unpin Block" else "Pin Block",
-                        modifier = Modifier.size(iconSize),
-                        tint = tint
-                    )
+                IconTooltip(text = if (isSelectionPinned) "Unpin" else "Pin", position = IconTooltipPosition.Above) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(if (isSelectionPinned) tint.copy(alpha = 0.15f) else Color.Transparent)
+                            .clickable { onTogglePin() }
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painterResource(Res.drawable.thumbtack),
+                            if (isSelectionPinned) "Unpin Block" else "Pin Block",
+                            modifier = Modifier.size(iconSize),
+                            tint = tint
+                        )
+                    }
                 }
                 divider()
 
                 if (selectedLinkedNoteBlock != null) {
                     Box {
-                        Icon(
-                            painterResource(Res.drawable.eye3),
-                            "Preview",
-                            modifier = Modifier.size(iconSize + 3.dp).clickable { showLinkedNoteOptions = true },
-                            tint = tint
-                        )
+                        IconTooltip(text = "Preview", position = IconTooltipPosition.Above) {
+                            Icon(
+                                painterResource(Res.drawable.eye3),
+                                "Preview",
+                                modifier = Modifier.size(iconSize + 3.dp).clickable { showLinkedNoteOptions = true },
+                                tint = tint
+                            )
+                        }
                         LinkedNoteOptionsMenu(
                             expanded = showLinkedNoteOptions,
                             onDismiss = { showLinkedNoteOptions = false },
@@ -2516,27 +2527,41 @@ fun BlockSelectionPill(
                 }
 
                 if (showStyleButton) {
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(if (isStyleBarOpen) tint.copy(alpha = 0.15f) else Color.Transparent)
-                            .clickable { onToggleStyleBar() }
-                            .padding(4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(painterResource(Res.drawable.text_tool_2), "Style Selected Blocks", modifier = Modifier.size(iconSize + 3.dp), tint = tint)
+                    IconTooltip(text = "Style blocks", position = IconTooltipPosition.Above) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(if (isStyleBarOpen) tint.copy(alpha = 0.15f) else Color.Transparent)
+                                .clickable { onToggleStyleBar() }
+                                .padding(4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(painterResource(Res.drawable.text_tool_2), "Style Selected Blocks", modifier = Modifier.size(iconSize + 3.dp), tint = tint)
+                        }
                     }
                     divider()
                 }
 
-                Icon(Icons.Default.SelectAll, "Select All", modifier = Modifier.size(iconSize + 3.dp).clickable { onSelectAll() }, tint = tint)
-                Icon(painterResource(Res.drawable.copy), "Copy", modifier = Modifier.size(iconSize).clickable { onCopy() }, tint = tint)
-                Icon(painterResource(Res.drawable.scissor2), "Cut", modifier = Modifier.size(iconSize).clickable { onCut() }, tint = tint)
+                IconTooltip(text = "Select all", position = IconTooltipPosition.Above) {
+                    Icon(Icons.Default.SelectAll, "Select All", modifier = Modifier.size(iconSize + 3.dp).clickable { onSelectAll() }, tint = tint)
+                }
+                IconTooltip(text = "Copy", position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.copy), "Copy", modifier = Modifier.size(iconSize).clickable { onCopy() }, tint = tint)
+                }
+                IconTooltip(text = "Cut", position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.scissor2), "Cut", modifier = Modifier.size(iconSize).clickable { onCut() }, tint = tint)
+                }
                 divider()
-                Icon(painterResource(Res.drawable.arrow_up), "Add above", modifier = Modifier.size(iconSize).clickable { onAddBlockAbove() }, tint = tint)
-                Icon(painterResource(Res.drawable.arrow_down), "Add below", modifier = Modifier.size(iconSize).clickable { onAddBlockBelow() }, tint = tint)
+                IconTooltip(text = "Add block above", position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.arrow_up), "Add above", modifier = Modifier.size(iconSize).clickable { onAddBlockAbove() }, tint = tint)
+                }
+                IconTooltip(text = "Add block below", position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.arrow_down), "Add below", modifier = Modifier.size(iconSize).clickable { onAddBlockBelow() }, tint = tint)
+                }
                 divider()
-                Icon(painterResource(Res.drawable.trash), "Delete", modifier = Modifier.size(iconSize).clickable { onDelete() }, tint = tint)
+                IconTooltip(text = "Delete", position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.trash), "Delete", modifier = Modifier.size(iconSize).clickable { onDelete() }, tint = tint)
+                }
             }
         }
     }
@@ -2590,30 +2615,30 @@ fun BlockStyleBar(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        ToolbarButton(onClick = { onChangeBlockType("text") }) {
+                        ToolbarButton(tooltip = "Text", onClick = { onChangeBlockType("text") }) {
                             Icon(Icons.AutoMirrored.Filled.Subject, "Text", tint = tint, modifier = Modifier.size(iconSize))
                         }
                         ToolbarLabel("H1", tint) { onChangeBlockType("h1") }
                         ToolbarLabel("H2", tint) { onChangeBlockType("h2") }
-                        ToolbarButton(onClick = { onChangeBlockType("checkbox") }) {
+                        ToolbarButton(tooltip = "Checkbox", onClick = { onChangeBlockType("checkbox") }) {
                             Icon(painterResource(Res.drawable.check_square), "Checkbox", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
                         }
-                        ToolbarButton(onClick = { onChangeBlockType("bullet") }) {
+                        ToolbarButton(tooltip = "Bulleted list", onClick = { onChangeBlockType("bullet") }) {
                             Icon(painterResource(Res.drawable.unordered_list), "Bulleted list", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
                         }
-                        ToolbarButton(onClick = { onChangeBlockType("number") }) {
+                        ToolbarButton(tooltip = "Numbered list", onClick = { onChangeBlockType("number") }) {
                             Icon(painterResource(Res.drawable.ordered_list), "Numbered list", tint = tint, modifier = Modifier.size(customIconSize - 3.dp))
                         }
-                        ToolbarButton(onClick = { onChangeBlockType("toggle") }) {
+                        ToolbarButton(tooltip = "Toggle list", onClick = { onChangeBlockType("toggle") }) {
                             Icon(painterResource(Res.drawable.arrow_right2), "Toggle list", tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(onClick = { onChangeBlockType("quote") }) {
+                        ToolbarButton(tooltip = "Quote", onClick = { onChangeBlockType("quote") }) {
                             Icon(painterResource(Res.drawable.quote_down2), "Quote", tint = tint, modifier = Modifier.size(customIconSize - 3.dp))
                         }
-                        ToolbarButton(onClick = { onChangeBlockType("callout") }) {
+                        ToolbarButton(tooltip = "Callout", onClick = { onChangeBlockType("callout") }) {
                             Icon(painterResource(Res.drawable.card_edit2), "Callout", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
                         }
-                        ToolbarButton(onClick = { onChangeBlockType("code") }) {
+                        ToolbarButton(tooltip = "Code", onClick = { onChangeBlockType("code") }) {
                             Icon(painterResource(Res.drawable.code), "Code", tint = tint, modifier = Modifier.size(customIconSize))
                         }
 
@@ -2628,25 +2653,25 @@ fun BlockStyleBar(
 
                         ToolbarDivider(tint)
 
-                        ToolbarButton(onClick = { onSetAlignment(TextAlignment.LEFT) }) {
+                        ToolbarButton(tooltip = "Align left", onClick = { onSetAlignment(TextAlignment.LEFT) }) {
                             Icon(painterResource(Res.drawable.textalign_left2), "Align left", tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(onClick = { onSetAlignment(TextAlignment.RIGHT) }) {
+                        ToolbarButton(tooltip = "Align right", onClick = { onSetAlignment(TextAlignment.RIGHT) }) {
                             Icon(painterResource(Res.drawable.textalign_right2), "Align right", tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(onClick = { onSetAlignment(TextAlignment.CENTER) }) {
+                        ToolbarButton(tooltip = "Align center", onClick = { onSetAlignment(TextAlignment.CENTER) }) {
                             Icon(painterResource(Res.drawable.textalign_center2), "Align center", tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(onClick = { onSetAlignment(TextAlignment.JUSTIFY) }) {
+                        ToolbarButton(tooltip = "Justify", onClick = { onSetAlignment(TextAlignment.JUSTIFY) }) {
                             Icon(painterResource(Res.drawable.textalign_justifycenter2), "Justify", tint = tint, modifier = Modifier.size(customIconSize))
                         }
 
                         ToolbarDivider(tint)
 
-                        ToolbarButton(onClick = { onAdjustIndentation(false) }) {
+                        ToolbarButton(tooltip = "Decrease indent", onClick = { onAdjustIndentation(false) }) {
                             Icon(painterResource(Res.drawable.indent_right), "Decrease indent", tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(onClick = { onAdjustIndentation(true) }) {
+                        ToolbarButton(tooltip = "Increase indent", onClick = { onAdjustIndentation(true) }) {
                             Icon(painterResource(Res.drawable.indent_left), "Increase indent", tint = tint, modifier = Modifier.size(customIconSize))
                         }
                     }
