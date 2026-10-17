@@ -1,4 +1,6 @@
+<p  align="center">
 <img src=".github/assets/emberr_icon.png" width="128" alt="Emberr icon" />
+</p>
 
 # Emberr: Private Productivity
 
