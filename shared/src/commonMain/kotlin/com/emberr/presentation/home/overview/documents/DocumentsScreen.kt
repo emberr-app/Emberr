@@ -195,6 +195,7 @@ fun DocumentsScreen(
                 titleVisibility = titleCollapseProgress,
                 onTitleClick = onCollapsedTitleClick,
                 hazeState = hazeState,
+                backTooltip = "Back",
                 onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                 onBackClick = {
                     if (isSelectionMode) viewModel.clearSelection() else onNavigateBack()
@@ -208,6 +209,7 @@ fun DocumentsScreen(
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
+                            tooltip = "Add document",
                             onClick = onTriggerDocumentPicker
                         )
                     }

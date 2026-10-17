@@ -76,6 +76,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.database.DatabaseRow
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.applyFiltersAndSort
@@ -749,16 +750,18 @@ private fun DatabaseSearchField(
                 }
             }
         )
-        Icon(
-            painter = painterResource(Res.drawable.x),
-            contentDescription = "Close search",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(onClick = onClose)
-                .padding(4.dp)
-                .size(14.dp)
-        )
+        IconTooltip(text = "Close search") {
+            Icon(
+                painter = painterResource(Res.drawable.x),
+                contentDescription = "Close search",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onClose)
+                    .padding(4.dp)
+                    .size(14.dp)
+            )
+        }
     }
 }
 
@@ -811,24 +814,28 @@ private fun DatabaseNewRowButton(
                 .background(NewRowButtonColor),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(Res.drawable.plus),
-                contentDescription = "New row",
-                tint = Color.White,
-                modifier = Modifier
-                    .clickable(enabled = enabled, onClick = onNewRow)
-                    .padding(horizontal = 7.dp, vertical = 5.dp)
-                    .size(18.dp)
-            )
-            Icon(
-                painter = painterResource(Res.drawable.chevron_down),
-                contentDescription = "Templates",
-                tint = Color.White,
-                modifier = Modifier
-                    .clickable(enabled = enabled, onClick = onOpenTemplates)
-                    .padding(start = 5.dp, end = 4.dp, top = 6.dp)
-                    .size(22.dp)
-            )
+            IconTooltip(text = "New note") {
+                Icon(
+                    painter = painterResource(Res.drawable.plus),
+                    contentDescription = "New row",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .clickable(enabled = enabled, onClick = onNewRow)
+                        .padding(horizontal = 7.dp, vertical = 5.dp)
+                        .size(18.dp)
+                )
+            }
+            IconTooltip(text = "Templates") {
+                Icon(
+                    painter = painterResource(Res.drawable.chevron_down),
+                    contentDescription = "Templates",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .clickable(enabled = enabled, onClick = onOpenTemplates)
+                        .padding(start = 5.dp, end = 4.dp, top = 6.dp)
+                        .size(22.dp)
+                )
+            }
         }
         menu()
     }

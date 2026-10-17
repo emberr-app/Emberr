@@ -304,6 +304,7 @@ fun TasksScreen(
                 titleSideInset = 112.dp,
                 onTitleClick = onCollapsedTitleClick,
                 hazeState = hazeState,
+                backTooltip = "Back",
                 onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                 onBackClick = {
                     if (isSelectionMode) viewModel.clearSelection()
@@ -320,6 +321,7 @@ fun TasksScreen(
                                 tint = if (isShowingCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                 hazeState = hazeState,
                                 hazeStyle = EmberrBlur.Regular,
+                                tooltip = if (isShowingCompleted) "Hide completed" else "Show completed",
                                 onClick = { viewModel.toggleCompletedView() }
                             )
 
@@ -330,6 +332,7 @@ fun TasksScreen(
                                 tint = MaterialTheme.colorScheme.primary,
                                 hazeState = hazeState,
                                 hazeStyle = EmberrBlur.Regular,
+                                tooltip = "Add task",
                                 onClick = { viewModel.insertNewReminder() }
                             )
                         }

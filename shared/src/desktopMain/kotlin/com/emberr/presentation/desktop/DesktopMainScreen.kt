@@ -131,6 +131,8 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.EmberrPillShadowAmbientColor
 import com.emberr.presentation.shared.components.EmberrPillShadowSpotColor
@@ -340,19 +342,21 @@ private fun SidebarSearchBar(
         )
         if (query.isNotEmpty()) {
             val clearInteractionSource = remember { MutableInteractionSource() }
-            Box(
-                modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
-                    .noRippleClickable(clearInteractionSource) { onQueryChange("") },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.x),
-                    contentDescription = "Clear search",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                    modifier = Modifier.size(14.dp)
-                )
+            IconTooltip(text = "Clear search") {
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .noRippleClickable(clearInteractionSource) { onQueryChange("") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.x),
+                        contentDescription = "Clear search",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
             }
         }
     }
@@ -1232,8 +1236,10 @@ fun DesktopMainScreen(
                     modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, top = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onToggleSidebar) {
-                        Icon(painterResource(Res.drawable.sidebar), "Collapse sidebar", tint = MaterialTheme.colorScheme.onSurface)
+                    IconTooltip(text = "Hide sidebar") {
+                        IconButton(onClick = onToggleSidebar) {
+                            Icon(painterResource(Res.drawable.sidebar), "Collapse sidebar", tint = MaterialTheme.colorScheme.onSurface)
+                        }
                     }
                     Spacer(Modifier.weight(1f))
                     if (isDailyNotesEnabled) {
@@ -1243,6 +1249,7 @@ fun DesktopMainScreen(
                                 contentDescription = "Open timeline",
                                 bgColor = MaterialTheme.colorScheme.background,
                                 tint = MaterialTheme.colorScheme.primary,
+                                tooltip = "Timeline",
                                 onClick = {
                                     dailyViewModel.loadTimeline()
                                     showTimelineDialog = true
@@ -1258,12 +1265,14 @@ fun DesktopMainScreen(
                                 TopBarIconButtonItem(
                                     icon = painterResource(Res.drawable.calendar),
                                     contentDescription = "Calendar",
-                                    onClick = { detail = DetailPane.Calendar; isPeeking = false }
+                                    onClick = { detail = DetailPane.Calendar; isPeeking = false },
+                                    tooltip = "Calendar"
                                 ),
                                 TopBarIconButtonItem(
                                     icon = painterResource(Res.drawable.ellipsis),
                                     contentDescription = "Settings",
-                                    onClick = { showSettingsMenu = true }
+                                    onClick = { showSettingsMenu = true },
+                                    tooltip = "More settings"
                                 )
                             )
                         )
@@ -1497,17 +1506,20 @@ fun DesktopMainScreen(
                                                         TopBarIconButtonItem(
                                                             icon = painterResource(Res.drawable.arrow_up_down),
                                                             contentDescription = "Sort",
-                                                            onClick = { showSortMenu = true }
+                                                            onClick = { showSortMenu = true },
+                                                            tooltip = "Sort notes"
                                                         ),
                                                         TopBarIconButtonItem(
                                                             icon = painterResource(Res.drawable.folder_plus),
                                                             contentDescription = "New folder",
-                                                            onClick = { addFolderInput = ""; showAddFolderPopup = true }
+                                                            onClick = { addFolderInput = ""; showAddFolderPopup = true },
+                                                            tooltip = "New folder"
                                                         ),
                                                         TopBarIconButtonItem(
                                                             icon = painterResource(Res.drawable.pen_square),
                                                             contentDescription = "New note",
-                                                            onClick = { addNoteInput = ""; addNoteKind = NoteKind.NOTE; showAddNotePopup = true }
+                                                            onClick = { addNoteInput = ""; addNoteKind = NoteKind.NOTE; showAddNotePopup = true },
+                                                            tooltip = "New note"
                                                         )
                                                     )
                                                 )
@@ -1549,13 +1561,15 @@ fun DesktopMainScreen(
                                                                 ),
                                                                 color = MaterialTheme.colorScheme.onSurface
                                                             )
-                                                            Icon(
-                                                                painter = painterResource(Res.drawable.template),
-                                                                contentDescription = "Templates",
-                                                                tint = MaterialTheme.colorScheme.onSurface,
-                                                                modifier = Modifier.size(22.dp)
-                                                                    .noRippleClickable { handleOpenTemplates() }
-                                                            )
+                                                            IconTooltip(text = "Templates") {
+                                                                Icon(
+                                                                    painter = painterResource(Res.drawable.template),
+                                                                    contentDescription = "Templates",
+                                                                    tint = MaterialTheme.colorScheme.onSurface,
+                                                                    modifier = Modifier.size(22.dp)
+                                                                        .noRippleClickable { handleOpenTemplates() }
+                                                                )
+                                                            }
                                                         }
                                                         NoteKindTabs(
                                                             selectedKind = addNoteKind,
@@ -1850,6 +1864,8 @@ fun DesktopMainScreen(
                         contentDescription = "Ask AI",
                         bgColor = MaterialTheme.colorScheme.background,
                         tint = MaterialTheme.colorScheme.primary,
+                        tooltip = "Ask AI",
+                        tooltipPosition = IconTooltipPosition.Above,
                         onClick = onAiIconTap
                     )
                 }
@@ -2031,6 +2047,7 @@ fun DesktopMainScreen(
                                     tint = MaterialTheme.colorScheme.primary,
                                     hazeState = hazeState,
                                     hazeStyle = EmberrBlur.Regular,
+                                    tooltip = "Show sidebar",
                                     onClick = onToggleSidebar
                                 )
                             }

@@ -437,6 +437,7 @@ fun SettingsScreen(
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 showBackButton = showBackButton,
+                backTooltip = "Back",
                 onBackClick = {
                     val openSubPage = desktopSubPage
                     if (openSubPage != null) onDesktopSubPageChange(openSubPage.parentPage) else onNavigateBack()
@@ -964,6 +965,7 @@ private fun SettingsSubPageBackButton(onClick: () -> Unit) {
             bgColor = Color.Transparent,
             tint = MaterialTheme.colorScheme.primary,
             size = TopHeaderBarButtonSize,
+            tooltip = "Back",
             onClick = onClick
         )
     }

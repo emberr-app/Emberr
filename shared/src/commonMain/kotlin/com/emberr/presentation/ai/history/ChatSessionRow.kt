@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.ai.chat.ChatSession
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.ai.components.ModelOptionCard
@@ -55,14 +56,16 @@ internal fun ChatSessionRow(
 
     val chatOptionsButton: @Composable () -> Unit = {
         Box {
-            Icon(
-                Icons.Default.MoreVert,
-                contentDescription = "Chat options",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickableWithoutMobileRipple { showMenu = true }
-            )
+            IconTooltip(text = "Chat options") {
+                Icon(
+                    Icons.Default.MoreVert,
+                    contentDescription = "Chat options",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickableWithoutMobileRipple { showMenu = true }
+                )
+            }
 
             if (isDesktopPlatform) {
                 EmberrDesktopMenu(

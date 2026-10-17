@@ -71,6 +71,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.NoteKindTabs
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
@@ -173,15 +174,17 @@ internal fun DesktopNamePopup(
         ) {
             Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f, fill = false))
             if (onOpenTemplates != null) {
-                Icon(
-                    painter = painterResource(Res.drawable.template),
-                    contentDescription = "Templates",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(22.dp)
-                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onOpenTemplates)
-                )
+                IconTooltip(text = "Templates") {
+                    Icon(
+                        painter = painterResource(Res.drawable.template),
+                        contentDescription = "Templates",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(22.dp)
+                            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onOpenTemplates)
+                    )
+                }
             }
         }
         if (noteKind != null) {
@@ -351,7 +354,9 @@ fun SidebarFolderRow(
             when {
                 isSelected -> SidebarTrailingCheck()
                 isHovered && !dragState.dragging -> {
-                    SidebarHoverAction(painterResource(Res.drawable.plus), "New note here") { addNoteKind = NoteKind.NOTE; showAddNotePopup = true }
+                    IconTooltip(text = "New note in folder") {
+                        SidebarHoverAction(painterResource(Res.drawable.plus), "New note here") { addNoteKind = NoteKind.NOTE; showAddNotePopup = true }
+                    }
                     Spacer(Modifier.width(2.dp))
                 }
             }

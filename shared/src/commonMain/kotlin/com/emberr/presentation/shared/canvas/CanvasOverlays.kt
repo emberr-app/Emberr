@@ -97,6 +97,8 @@ import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.TopBarIconButtonGroup
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
@@ -208,6 +210,8 @@ fun CanvasOptionsButton(
             tint = MaterialTheme.colorScheme.primary,
             hazeState = hazeState,
             hazeStyle = EmberrBlur.Regular,
+            tooltip = "More options",
+            tooltipPosition = IconTooltipPosition.Start,
             onClick = { showOptionsMenu = true }
         )
         if (!isDesktopPlatform) {
@@ -402,6 +406,7 @@ fun CanvasBackButton(hazeState: HazeState, onClick: () -> Unit, modifier: Modifi
             tint = MaterialTheme.colorScheme.primary,
             hazeState = hazeState,
             hazeStyle = EmberrBlur.Regular,
+            tooltip = "Back",
             onClick = onClick
         )
     }
@@ -423,16 +428,18 @@ private fun CanvasShapeGrid(tint: Color, onShapeSelected: (CanvasNodeShape) -> U
 @Composable
 private fun CanvasShapeOption(shape: CanvasNodeShape, tint: Color, onClick: () -> Unit) {
     val label = shape.label
-    Box(
-        modifier = Modifier
-            .size(ShapeOptionSize)
-            .clip(ShapeOptionShape)
-            .focusProperties { canFocus = false }
-            .clickable(onClick = onClick)
-            .semantics { contentDescription = label },
-        contentAlignment = Alignment.Center
-    ) {
-        ShapeIcon(shape = shape, tint = tint)
+    IconTooltip(text = label) {
+        Box(
+            modifier = Modifier
+                .size(ShapeOptionSize)
+                .clip(ShapeOptionShape)
+                .focusProperties { canFocus = false }
+                .clickable(onClick = onClick)
+                .semantics { contentDescription = label },
+            contentAlignment = Alignment.Center
+        ) {
+            ShapeIcon(shape = shape, tint = tint)
+        }
     }
 }
 
@@ -561,15 +568,16 @@ fun CanvasZoomButtons(
 ) {
     TopBarIconButtonGroup(
         items = listOf(
-            TopBarIconButtonItem(painterResource(Res.drawable.plus), "Zoom in", onZoomIn),
-            TopBarIconButtonItem(painterResource(Res.drawable.scan_line), "Go to boxes", onShowBusiestArea),
-            TopBarIconButtonItem(painterResource(Res.drawable.minus), "Zoom out", onZoomOut)
+            TopBarIconButtonItem(painterResource(Res.drawable.plus), "Zoom in", onZoomIn, tooltip = "Zoom in"),
+            TopBarIconButtonItem(painterResource(Res.drawable.scan_line), "Go to boxes", onShowBusiestArea, tooltip = "Go to boxes"),
+            TopBarIconButtonItem(painterResource(Res.drawable.minus), "Zoom out", onZoomOut, tooltip = "Zoom out")
         ),
         bgColor = Color.Transparent,
         tint = MaterialTheme.colorScheme.primary,
         hazeState = hazeState,
         hazeStyle = EmberrBlur.Regular,
-        isVertical = true
+        isVertical = true,
+        tooltipPosition = IconTooltipPosition.Start
     )
 }
 
@@ -577,14 +585,15 @@ fun CanvasZoomButtons(
 fun CanvasUndoRedoButtons(hazeState: HazeState, onUndo: () -> Unit, onRedo: () -> Unit) {
     TopBarIconButtonGroup(
         items = listOf(
-            TopBarIconButtonItem(painterResource(Res.drawable.undo_circle), "Undo", onUndo),
-            TopBarIconButtonItem(painterResource(Res.drawable.redo_circle), "Redo", onRedo)
+            TopBarIconButtonItem(painterResource(Res.drawable.undo_circle), "Undo", onUndo, tooltip = "Undo"),
+            TopBarIconButtonItem(painterResource(Res.drawable.redo_circle), "Redo", onRedo, tooltip = "Redo")
         ),
         bgColor = Color.Transparent,
         tint = MaterialTheme.colorScheme.primary,
         hazeState = hazeState,
         hazeStyle = EmberrBlur.Regular,
-        isVertical = true
+        isVertical = true,
+        tooltipPosition = IconTooltipPosition.Start
     )
 }
 
@@ -632,7 +641,8 @@ fun CanvasToolbar(hazeState: HazeState, activeTool: CanvasTool?, onToolClick: (C
                 contentDescription = tool.label,
                 onClick = { onToolClick(tool) },
                 isSelected = tool == activeTool,
-                iconSize = tool.iconSize
+                iconSize = tool.iconSize,
+                tooltip = tool.label
             )
         },
         bgColor = Color.Transparent,
@@ -641,7 +651,8 @@ fun CanvasToolbar(hazeState: HazeState, activeTool: CanvasTool?, onToolClick: (C
         hazeStyle = EmberrBlur.Regular,
         horizontalPadding = 8.dp,
         horizontalItemSpacing = 4.dp,
-        isHorizontallyScrollable = true
+        isHorizontallyScrollable = true,
+        tooltipPosition = IconTooltipPosition.Above
     )
 }
 
@@ -974,17 +985,19 @@ private fun ToolPanelOptionButton(
 ) {
     val tint = MaterialTheme.colorScheme.primary
     val contentColor = if (isSelected) tint else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-    Box(
-        modifier = Modifier
-            .size(width = width, height = 36.dp)
-            .clip(ToolPanelOptionShape)
-            .background(if (isSelected) tint.copy(alpha = 0.15f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            .focusProperties { canFocus = false }
-            .clickable(onClick = onClick)
-            .semantics { contentDescription = label },
-        contentAlignment = Alignment.Center
-    ) {
-        content(contentColor)
+    IconTooltip(text = label) {
+        Box(
+            modifier = Modifier
+                .size(width = width, height = 36.dp)
+                .clip(ToolPanelOptionShape)
+                .background(if (isSelected) tint.copy(alpha = 0.15f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                .focusProperties { canFocus = false }
+                .clickable(onClick = onClick)
+                .semantics { contentDescription = label },
+            contentAlignment = Alignment.Center
+        ) {
+            content(contentColor)
+        }
     }
 }
 
@@ -1506,6 +1519,8 @@ fun CanvasDotGridButton(hazeState: HazeState, isDotGridVisible: Boolean, onToggl
         tint = MaterialTheme.colorScheme.primary,
         hazeState = hazeState,
         hazeStyle = EmberrBlur.Regular,
+        tooltip = if (isDotGridVisible) "Hide dots" else "Show dots",
+        tooltipPosition = IconTooltipPosition.Start,
         onClick = onToggle
     )
 }
@@ -1520,6 +1535,8 @@ fun CanvasFullScreenButton(hazeState: HazeState, isFullScreen: Boolean, onToggle
         hazeState = hazeState,
         hazeStyle = EmberrBlur.Regular,
         iconSize = 18.dp,
+        tooltip = if (isFullScreen) "Exit full screen" else "Full screen",
+        tooltipPosition = IconTooltipPosition.Start,
         onClick = onToggle
     )
 }
@@ -1683,19 +1700,21 @@ fun CanvasAddingImageOverlay() {
 
 @Composable
 private fun SelectionPillButton(icon: Painter, contentDescription: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(18.dp)
-        )
+    IconTooltip(text = contentDescription, position = IconTooltipPosition.Above) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 

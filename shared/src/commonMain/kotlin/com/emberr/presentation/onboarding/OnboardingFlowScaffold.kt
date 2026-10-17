@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrGhost
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
@@ -431,20 +432,22 @@ private fun OnboardingStepBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .size(ControlHeight)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.chevron_left),
-            contentDescription = "Go back",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-            modifier = Modifier.size(20.dp)
-        )
+    IconTooltip(text = "Back") {
+        Box(
+            modifier = modifier
+                .size(ControlHeight)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.chevron_left),
+                contentDescription = "Go back",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
 

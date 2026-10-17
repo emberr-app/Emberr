@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.cleanPropertyTagName
 import com.emberr.domain.model.withPropertyTagReplaced
 import com.emberr.domain.repository.NoteRepository
@@ -354,17 +355,19 @@ private fun PropertyTagOptionRow(tagName: String, tagPoolKey: String, isSelected
                 modifier = Modifier.size(16.dp)
             )
         }
-        Icon(
-            painter = painterResource(Res.drawable.pen),
-            contentDescription = "Edit $tagName",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .clip(CircleShape)
-                .clickable(onClick = onEdit)
-                .padding(4.dp)
-                .size(16.dp)
-        )
+        IconTooltip(text = "Edit tag") {
+            Icon(
+                painter = painterResource(Res.drawable.pen),
+                contentDescription = "Edit $tagName",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = onEdit)
+                    .padding(4.dp)
+                    .size(16.dp)
+            )
+        }
     }
 }
 

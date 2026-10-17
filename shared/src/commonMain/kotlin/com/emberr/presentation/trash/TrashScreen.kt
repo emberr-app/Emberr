@@ -149,6 +149,7 @@ fun TrashScreen(
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 topEdgeFadeAlpha = topEdgeFadeAlpha,
+                backTooltip = "Back",
                 onBackClick = onNavigateBack,
                 actions = {
                     if (trashedNotes.isNotEmpty()) {
@@ -159,6 +160,7 @@ fun TrashScreen(
                             tint = MaterialTheme.colorScheme.error,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
+                            tooltip = "Empty trash",
                             onClick = { showEmptyTrashConfirm = true }
                         )
                     }

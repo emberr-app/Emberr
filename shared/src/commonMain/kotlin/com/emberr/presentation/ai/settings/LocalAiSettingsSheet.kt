@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.ai.models.ModelDownloadProgress
 import com.emberr.domain.ai.models.ModelFileNames
 import com.emberr.presentation.ai.LocalModelUploadState
@@ -221,25 +222,29 @@ internal fun LocalAiSettingsSheet(
                         trailing = {
                             if (isPendingDeletion) {
                                 Spacer(Modifier.width(6.dp))
-                                Icon(
-                                    Icons.Default.Restore,
-                                    contentDescription = "Restore model",
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .clickable { viewModel.restoreLocalModel(model.fileName) }
-                                )
+                                IconTooltip(text = "Restore model") {
+                                    Icon(
+                                        Icons.Default.Restore,
+                                        contentDescription = "Restore model",
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clickable { viewModel.restoreLocalModel(model.fileName) }
+                                    )
+                                }
                                 Spacer(Modifier.width(5.dp))
                             } else {
                                 Spacer(Modifier.width(6.dp))
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = "Delete model",
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .clickable { viewModel.deleteLocalModel(model.fileName) }
-                                )
+                                IconTooltip(text = "Delete model") {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Delete model",
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clickable { viewModel.deleteLocalModel(model.fileName) }
+                                    )
+                                }
                                 Spacer(Modifier.width(5.dp))
                             }
                         }

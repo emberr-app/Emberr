@@ -114,32 +114,36 @@ fun TopBarIconButton(
     size: Dp = 44.dp,
     iconSize: Dp = 22.dp,
     shadowElevation: Dp = EmberrShadowElevation.Standard,
+    tooltip: String? = null,
+    tooltipPosition: IconTooltipPosition = IconTooltipPosition.Below,
     onClick: () -> Unit
 ) {
     val resolvedStyle = hazeStyle ?: EmberrBlur.Regular
-    Surface(
-        shape = CircleShape,
-        color = bgColor,
-        contentColor = tint,
-        modifier = Modifier
-            .size(size)
-            .emberrBorder(CircleShape)
-            .customEmberrShadow(CircleShape, shadowElevation)
-            .clip(CircleShape)
-            .emberrBlur(hazeState, resolvedStyle)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = NoRippleIndicationNodeFactory,
-                onClick = onClick
-            )
-    ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            Icon(
-                painter = icon,
-                contentDescription = contentDescription,
-                tint = tint,
-                modifier = Modifier.size(iconSize)
-            )
+    IconTooltip(text = tooltip, position = tooltipPosition) {
+        Surface(
+            shape = CircleShape,
+            color = bgColor,
+            contentColor = tint,
+            modifier = Modifier
+                .size(size)
+                .emberrBorder(CircleShape)
+                .customEmberrShadow(CircleShape, shadowElevation)
+                .clip(CircleShape)
+                .emberrBlur(hazeState, resolvedStyle)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = NoRippleIndicationNodeFactory,
+                    onClick = onClick
+                )
+        ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Icon(
+                    painter = icon,
+                    contentDescription = contentDescription,
+                    tint = tint,
+                    modifier = Modifier.size(iconSize)
+                )
+            }
         }
     }
 }
@@ -155,6 +159,8 @@ fun TopBarIconButton(
     size: Dp = 44.dp,
     iconSize: Dp = 22.dp,
     shadowElevation: Dp = EmberrShadowElevation.Standard,
+    tooltip: String? = null,
+    tooltipPosition: IconTooltipPosition = IconTooltipPosition.Below,
     onClick: () -> Unit
 ) {
     TopBarIconButton(
@@ -167,6 +173,8 @@ fun TopBarIconButton(
         size = size,
         iconSize = iconSize,
         shadowElevation = shadowElevation,
+        tooltip = tooltip,
+        tooltipPosition = tooltipPosition,
         onClick = onClick
     )
 }
@@ -176,7 +184,8 @@ data class TopBarIconButtonItem(
     val contentDescription: String,
     val onClick: () -> Unit,
     val isSelected: Boolean = false,
-    val iconSize: Dp? = null
+    val iconSize: Dp? = null,
+    val tooltip: String? = null
 )
 
 // Wraps multiple icons in a single pill Surface - shares one bg/shadow/border/haze instead of
@@ -195,7 +204,8 @@ fun TopBarIconButtonGroup(
     shadowAmbientColor: Color = EmberrShadowAmbientColor,
     isVertical: Boolean = false,
     horizontalItemSpacing: Dp = 0.dp,
-    isHorizontallyScrollable: Boolean = false
+    isHorizontallyScrollable: Boolean = false,
+    tooltipPosition: IconTooltipPosition = IconTooltipPosition.Below
 ) {
     val resolvedStyle = hazeStyle ?: EmberrBlur.Regular
     Surface(
@@ -215,7 +225,7 @@ fun TopBarIconButtonGroup(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 items.forEach { item ->
-                    TopBarIconButtonGroupItem(item, tint, iconSize, selectedBackgroundWidth = 36.dp)
+                    TopBarIconButtonGroupItem(item, tint, iconSize, selectedBackgroundWidth = 36.dp, tooltipPosition = tooltipPosition)
                 }
             }
         } else {
@@ -227,7 +237,7 @@ fun TopBarIconButtonGroup(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 items.forEach { item ->
-                    TopBarIconButtonGroupItem(item, tint, iconSize, selectedBackgroundWidth = 36.dp + horizontalPadding * 2)
+                    TopBarIconButtonGroupItem(item, tint, iconSize, selectedBackgroundWidth = 36.dp + horizontalPadding * 2, tooltipPosition = tooltipPosition)
                 }
             }
         }
@@ -239,26 +249,29 @@ private fun TopBarIconButtonGroupItem(
     item: TopBarIconButtonItem,
     tint: Color,
     iconSize: Dp,
-    selectedBackgroundWidth: Dp
+    selectedBackgroundWidth: Dp,
+    tooltipPosition: IconTooltipPosition
 ) {
-    Box(
-        modifier = Modifier
-            .size(44.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = NoRippleIndicationNodeFactory,
-                onClick = item.onClick
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        if (item.isSelected) {
-            Box(Modifier.requiredSize(width = selectedBackgroundWidth, height = 36.dp).background(tint.copy(alpha = 0.15f), CircleShape))
+    IconTooltip(text = item.tooltip, position = tooltipPosition) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = NoRippleIndicationNodeFactory,
+                    onClick = item.onClick
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (item.isSelected) {
+                Box(Modifier.requiredSize(width = selectedBackgroundWidth, height = 36.dp).background(tint.copy(alpha = 0.15f), CircleShape))
+            }
+            Icon(
+                painter = item.icon,
+                contentDescription = item.contentDescription,
+                tint = tint,
+                modifier = Modifier.size(item.iconSize ?: iconSize)
+            )
         }
-        Icon(
-            painter = item.icon,
-            contentDescription = item.contentDescription,
-            tint = tint,
-            modifier = Modifier.size(item.iconSize ?: iconSize)
-        )
     }
 }

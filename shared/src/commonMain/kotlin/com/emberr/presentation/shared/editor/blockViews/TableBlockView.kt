@@ -81,6 +81,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.InlineSpan
 import com.emberr.domain.model.TableBlock
 import com.emberr.domain.model.TableCellContentType
@@ -587,7 +588,9 @@ fun TableBlockView(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (rowIndex == 0 && !inSelectionMode) {
-                                            Icon(painterResource(Res.drawable.plus), contentDescription = "Add column", modifier = Modifier.size(17.dp), tint = MaterialTheme.colorScheme.outline)
+                                            IconTooltip(text = "Add column") {
+                                                Icon(painterResource(Res.drawable.plus), contentDescription = "Add column", modifier = Modifier.size(17.dp), tint = MaterialTheme.colorScheme.outline)
+                                            }
                                         }
                                     }
                                 }
