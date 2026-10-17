@@ -608,8 +608,12 @@ fun TableBlockView(
             }
 
             if (!inSelectionMode) {
+                val tableWidth = (0 until columnCount).sumOf { columnWidthFor(it) }.dp + GutterSize
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = SidePadding),
+                    modifier = Modifier
+                        .padding(horizontal = SidePadding)
+                        .widthIn(max = tableWidth)
+                        .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
