@@ -84,6 +84,7 @@ fun MobileTreeFolderRow(
     onAddNote: () -> Unit,
     showAddSubfolderAction: Boolean = false,
     onAddSubfolder: () -> Unit = {},
+    addNoteActionModifier: Modifier = Modifier,
     modifier: Modifier = Modifier
 ) {
     val rowKey = HomeItemKey.forFolder(folder.folderId)
@@ -138,7 +139,8 @@ fun MobileTreeFolderRow(
                 MobileTreeRowAction(
                     painter = painterResource(Res.drawable.plus),
                     description = "New note in ${folder.name}",
-                    onClick = onAddNote
+                    onClick = onAddNote,
+                    modifier = addNoteActionModifier
                 )
             }
         }
@@ -327,9 +329,9 @@ private fun MobileTreeInsertLine(alpha: Float, startPadding: Dp, modifier: Modif
 }
 
 @Composable
-private fun MobileTreeRowAction(painter: Painter, description: String, onClick: () -> Unit) {
+private fun MobileTreeRowAction(painter: Painter, description: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(36.dp)
             .clip(CircleShape)
             .clickable(onClick = onClick),
