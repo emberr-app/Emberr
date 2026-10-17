@@ -142,6 +142,9 @@ private fun EmberrFloatingDialog(
         onDismiss()
     }
 
+    val blurSource = LocalEmberrBlurSource.current
+    val surfaceColor = MaterialTheme.colorScheme.surface
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -156,7 +159,10 @@ private fun EmberrFloatingDialog(
                 .fillMaxWidth(0.9f)
                 .emberrBorder(FloatingDialogShape, color = emberrSoftBorderColor)
                 .clip(FloatingDialogShape)
-                .sheetCardBackground()
+                .then(
+                    if (blurSource != null) Modifier.emberrBlur(blurSource, EmberrBlur.Thick)
+                    else Modifier.background(surfaceColor)
+                )
         ) {
             Column(
                 modifier = Modifier
