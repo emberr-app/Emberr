@@ -93,6 +93,7 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
+import com.emberr.presentation.shared.components.LocalShowsSubmenuChevron
 import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
 import com.emberr.presentation.shared.components.menuTapAnchor
@@ -129,6 +130,7 @@ import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_left
 import emberr.shared.generated.resources.arrow_right
 import emberr.shared.generated.resources.arrow_up
+import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.format_bold
 import emberr.shared.generated.resources.italic
@@ -1011,5 +1013,13 @@ private fun SheetMenuRow(
         Icon(icon, null, tint = color, modifier = Modifier.size(if (isDesktopPlatform) 18.dp else 20.dp))
         Spacer(Modifier.width(12.dp))
         Text(text, style = MaterialTheme.typography.bodyLarge, color = color, modifier = Modifier.weight(1f))
+        if (LocalShowsSubmenuChevron.current) {
+            Icon(
+                painter = painterResource(Res.drawable.chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }

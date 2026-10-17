@@ -153,6 +153,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrShadowSpotColorSoft
 import com.emberr.presentation.shared.components.EmberrTextField
@@ -160,12 +161,9 @@ import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.KmpBackHandler
-import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
-import com.emberr.presentation.shared.components.menuTapAnchor
-import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.shared.editor.blockViews.LinkedNoteOptionsMenu
 import com.emberr.presentation.shared.editor.blockViews.callout.calloutContentPadding
@@ -2188,25 +2186,25 @@ private fun SlashMenuItemWithSubmenu(
     submenuMaxHeight: Dp,
     modifier: Modifier = Modifier
 ) {
-    var isSubmenuOpen by remember { mutableStateOf(false) }
-    val tapAnchor = rememberMenuTapAnchor()
-
-    Box(modifier = modifier.menuTapAnchor(tapAnchor)) {
-        SlashMenuItem(
-            text = item.label,
-            icon = item.icon,
-            isSelected = isSelected || isSubmenuOpen,
-            onClick = { isSubmenuOpen = true },
-            showsSubmenuChevron = true
-        )
-        MenuAtTap(tapAnchor, menuWidth = SlashSubmenuWidth) {
-            EmberrDesktopMenu(
-                expanded = isSubmenuOpen,
-                onDismissRequest = { isSubmenuOpen = false },
-                modifier = Modifier.width(SlashSubmenuWidth)
-            ) {
-                SlashMenuList(sections = submenuSections, maxHeight = submenuMaxHeight)
-            }
+    EmberrDesktopSubmenu(
+        modifier = modifier,
+        menuWidthEstimate = SlashSubmenuWidth,
+        anchor = { openSubmenu, isSubmenuOpen ->
+            SlashMenuItem(
+                text = item.label,
+                icon = item.icon,
+                isSelected = isSelected || isSubmenuOpen,
+                onClick = openSubmenu,
+                showsSubmenuChevron = true
+            )
+        }
+    ) { isSubmenuOpen, closeSubmenu ->
+        EmberrDesktopMenu(
+            expanded = isSubmenuOpen,
+            onDismissRequest = closeSubmenu,
+            modifier = Modifier.width(SlashSubmenuWidth)
+        ) {
+            SlashMenuList(sections = submenuSections, maxHeight = submenuMaxHeight)
         }
     }
 }
