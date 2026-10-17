@@ -91,7 +91,8 @@ class StarterContentSyncTest {
             noteId = "sample_note_welcome",
             localBlocks = listOf(blockEntity(welcomeLine("Welcome to Emberr", STARTER_CONTENT_UPDATED_AT))),
             remoteUpserts = listOf(blockEntity(welcomeLine("My own notes", laptopEditedAt))),
-            remoteDeletions = emptyList()
+            remoteDeletions = emptyList(),
+            remoteIsNewer = true
         )
 
         assertEquals(laptopEditedAt, merged.single().updatedAt)
@@ -103,7 +104,8 @@ class StarterContentSyncTest {
             noteId = "sample_note_welcome",
             localBlocks = listOf(blockEntity(welcomeLine("Welcome to Emberr", STARTER_CONTENT_UPDATED_AT))),
             remoteUpserts = emptyList(),
-            remoteDeletions = listOf(BlockTombstone(blockId = "sample_note_welcome_line", deletedAt = laptopEditedAt))
+            remoteDeletions = listOf(BlockTombstone(blockId = "sample_note_welcome_line", deletedAt = laptopEditedAt)),
+            remoteIsNewer = true
         )
 
         assertTrue(merged.single().isDeleted)
