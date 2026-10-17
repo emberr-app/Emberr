@@ -1501,6 +1501,7 @@ private fun HelpSettingsSection(onAboutClick: () -> Unit) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.badge_question_mark),
             title = "FAQ",
+            isEnabled = false,
             onClick = {}
         )
         SettingsDivider()
