@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -83,6 +84,7 @@ import com.emberr.domain.database.frozenColumns
 import com.emberr.domain.database.inManualOrder
 import com.emberr.domain.database.loadedRows
 import com.emberr.domain.database.matchingSearch
+import com.emberr.domain.database.visibleColumns
 import com.emberr.domain.database.visibleColumnsInTableOrder
 import com.emberr.domain.database.withFormulaResults
 import com.emberr.domain.database.withSharedSettingsFrom
@@ -110,7 +112,6 @@ import emberr.shared.generated.resources.lock
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.sliders_horizontal
-import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.x
 import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.DrawableResource
@@ -258,6 +259,9 @@ private fun DatabaseBlockContent(
         tableLayoutStore.setColumnWidth(block.id, target.columnKey, width)
     }
 
+    val selectionColumnWidth = if (rowSelection.isSelecting) DatabaseSelectionColumnWidth else 0.dp
+    val tableWidth = (columnWidth(DatabaseColumnTarget.NotesTitle) + block.visibleColumns().sumOf { columnWidth(it) }).dp +
+        DatabaseGutterWidth + selectionColumnWidth
     var loadedRowCount by remember(block.databaseId, activeView.id, activeView.loadLimit) { mutableIntStateOf(activeView.loadLimit) }
     val frozenColumns = block.frozenColumns(deviceLayout.freezesTitleColumn(activeView))
     val blocksEdits = inSelectionMode || block.isLocked
@@ -408,6 +412,7 @@ private fun DatabaseBlockContent(
                             expanded = showSettingsMenu,
                             block = block,
                             editor = editor,
+                            onDelete = onDelete,
                             onDismiss = { showSettingsMenu = false }
                         )
                     }
@@ -470,7 +475,6 @@ private fun DatabaseBlockContent(
                         showsNewButton = !blocksEdits,
                         rowCountCaption = rowCountCaption,
                         onNewRow = { editor.addRow(block.id) },
-                        onDelete = onDelete.takeUnless { blocksEdits },
                         modifier = Modifier.fillMaxWidth().padding(horizontal = DatabaseSidePadding)
                     )
                 }
@@ -487,12 +491,11 @@ private fun DatabaseBlockContent(
                         runAfterKeyboardCloses = runAfterKeyboardCloses,
                         modifier = Modifier.padding(horizontal = DatabaseSidePadding - BoardSidePaddingInset)
                     )
-                    if (rowCountCaption != null || !blocksEdits) {
+                    if (rowCountCaption != null) {
                         DatabaseNewRowLine(
                             showsNewButton = false,
                             rowCountCaption = rowCountCaption,
                             onNewRow = {},
-                            onDelete = onDelete.takeUnless { blocksEdits },
                             modifier = Modifier.fillMaxWidth().padding(horizontal = DatabaseSidePadding)
                         )
                     }
@@ -609,8 +612,10 @@ private fun DatabaseBlockContent(
                         showsNewButton = !blocksEdits,
                         rowCountCaption = rowCountCaption,
                         onNewRow = { editor.addRow(block.id) },
-                        onDelete = onDelete.takeUnless { blocksEdits },
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = DatabaseSidePadding)
+                        modifier = Modifier
+                            .padding(horizontal = DatabaseSidePadding)
+                            .widthIn(max = tableWidth)
+                            .fillMaxWidth()
                     )
 
                     EmberrHorizontalScrollbar(
@@ -847,36 +852,20 @@ private fun DatabaseNewRowLine(
     showsNewButton: Boolean,
     rowCountCaption: String?,
     onNewRow: () -> Unit,
-    onDelete: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         if (showsNewButton) {
             DatabaseAddRowButton(onClick = onNewRow)
         }
-        Spacer(modifier = Modifier.weight(1f))
         if (rowCountCaption != null) {
+            Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = rowCountCaption,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(top = 6.dp, end = 8.dp)
             )
-        }
-        if (onDelete != null) {
-            IconTooltip(text = "Delete database") {
-                Icon(
-                    painter = painterResource(Res.drawable.trash),
-                    contentDescription = "Delete database",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .padding(top = 6.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(onClick = onDelete)
-                        .padding(horizontal = 8.dp, vertical = 7.dp)
-                        .size(16.dp)
-                )
-            }
         }
     }
 }

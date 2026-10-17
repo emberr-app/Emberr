@@ -44,6 +44,7 @@ import emberr.shared.generated.resources.pin_tack
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.sigma
 import emberr.shared.generated.resources.textalign_justifycenter2
+import emberr.shared.generated.resources.trash
 import org.koin.compose.koinInject
 
 @Composable
@@ -51,6 +52,7 @@ internal fun DatabaseSettingsMenu(
     expanded: Boolean,
     block: DatabaseBlock,
     editor: DatabaseBlockEditor,
+    onDelete: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val activeView = block.activeView()
@@ -190,6 +192,12 @@ internal fun DatabaseSettingsMenu(
             icon = { DatabaseOptionIcon(Res.drawable.lock) },
             trailing = { EmberrSwitch(isOn = block.isLocked) },
             onClick = { closeAnd { editor.setLocked(block.id, true) } }
+        )
+        DatabaseMenuOption(
+            label = "Delete database",
+            icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
+            labelColor = MaterialTheme.colorScheme.error,
+            onClick = { closeAnd(onDelete) }
         )
     }
 }
