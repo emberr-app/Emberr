@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.TextAlignment
+import com.emberr.domain.model.textAlignmentOrNull
 import com.emberr.presentation.shared.editor.SlashMenuIcon
 import com.emberr.presentation.shared.editor.SlashMenuItemData
 import com.emberr.presentation.shared.editor.SlashMenuList
@@ -28,6 +29,7 @@ import emberr.shared.generated.resources.italic
 import emberr.shared.generated.resources.mouse_square2
 import emberr.shared.generated.resources.ordered_list
 import emberr.shared.generated.resources.quote_down2
+import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.scissor2
 import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_x
@@ -67,6 +69,21 @@ fun BlockSelectionMenuContent(
     }
 
     val selectedLinkedNote = selectedBlocks.singleOrNull() as? LinkedNoteBlock
+    val hasTextBlockSelected = selectedBlocks.any { it.textAlignmentOrNull() != null }
+
+    val addBlockItems = buildList {
+        if (onAddBlockAbove != null) {
+            add(SlashMenuItemData("Add Block Above", Res.drawable.arrow_up, action = closeThen(onAddBlockAbove)))
+        }
+        if (onAddBlockBelow != null) {
+            add(SlashMenuItemData("Add Block Below", Res.drawable.arrow_down, action = closeThen(onAddBlockBelow)))
+        }
+    }
+    val selectionItems = listOf(
+        SlashMenuItemData("Select More Blocks", Res.drawable.mouse_square2, action = onCloseMenu),
+        SlashMenuItemData("Select All Blocks", Icons.Default.SelectAll, action = closeThen(onSelectAll)),
+        SlashMenuItemData("Clear Selection", Res.drawable.x, 14.dp, action = closeThen(onClearSelection))
+    )
 
     val sections = buildList {
         add(
@@ -84,19 +101,18 @@ fun BlockSelectionMenuContent(
                             )
                         )
                     }
-                    if (onAddBlockAbove != null) {
-                        add(SlashMenuItemData("Add Block Above", Res.drawable.arrow_up, action = closeThen(onAddBlockAbove)))
-                    }
-                    if (onAddBlockBelow != null) {
-                        add(SlashMenuItemData("Add Block Below", Res.drawable.arrow_down, action = closeThen(onAddBlockBelow)))
-                    }
-                    add(SlashMenuItemData("Select More Blocks", Res.drawable.mouse_square2, action = onCloseMenu))
-                    add(SlashMenuItemData("Select All Blocks", Icons.Default.SelectAll, action = closeThen(onSelectAll)))
-                    add(SlashMenuItemData("Clear Selection", Res.drawable.x, 14.dp, action = closeThen(onClearSelection)))
                     add(SlashMenuItemData("Delete", Res.drawable.trash, action = closeThen(onDelete)))
+                    if (addBlockItems.isEmpty()) {
+                        addAll(selectionItems)
+                    }
                 }
             )
         )
+
+        if (addBlockItems.isNotEmpty()) {
+            add(SlashMenuSectionData(title = "", items = addBlockItems))
+            add(SlashMenuSectionData(title = "", items = selectionItems))
+        }
 
         if (selectedLinkedNote != null && onUpdateLinkedNoteOptions != null) {
             add(
@@ -130,67 +146,87 @@ fun BlockSelectionMenuContent(
             )
         }
 
-        if (onChangeBlockType != null) {
-            add(
-                SlashMenuSectionData(
-                    title = "Turn Into",
-                    items = listOf(
-                        SlashMenuItemData("Text", Icons.AutoMirrored.Filled.Subject, action = closeThen { onChangeBlockType("text") }),
-                        SlashMenuItemData("Heading 1", SlashMenuIcon.Label("H1"), closeThen { onChangeBlockType("h1") }),
-                        SlashMenuItemData("Heading 2", SlashMenuIcon.Label("H2"), closeThen { onChangeBlockType("h2") }),
-                        SlashMenuItemData("To-do List", Res.drawable.check_square, action = closeThen { onChangeBlockType("checkbox") }),
-                        SlashMenuItemData("Bulleted List", Res.drawable.unordered_list, 15.dp, closeThen { onChangeBlockType("bullet") }),
-                        SlashMenuItemData("Numbered List", Res.drawable.ordered_list, 14.dp, closeThen { onChangeBlockType("number") }),
-                        SlashMenuItemData("Toggle List", Res.drawable.arrow_right2, action = closeThen { onChangeBlockType("toggle") }),
-                        SlashMenuItemData("Quote", Res.drawable.quote_down2, 14.dp, closeThen { onChangeBlockType("quote") }),
-                        SlashMenuItemData("Callout", Res.drawable.card_edit2, action = closeThen { onChangeBlockType("callout") }),
-                        SlashMenuItemData("Code Block", Res.drawable.code, action = closeThen { onChangeBlockType("code") })
+        val optionsThatOpenAnotherMenu = buildList {
+            if (onChangeBlockType != null && hasTextBlockSelected) {
+                add(
+                    optionThatOpensMenu(
+                        label = "Turn Into",
+                        icon = SlashMenuIcon.Drawable(Res.drawable.refresh_cw),
+                        items = listOf(
+                            SlashMenuItemData("Text", Icons.AutoMirrored.Filled.Subject, action = closeThen { onChangeBlockType("text") }),
+                            SlashMenuItemData("Heading 1", SlashMenuIcon.Label("H1"), closeThen { onChangeBlockType("h1") }),
+                            SlashMenuItemData("Heading 2", SlashMenuIcon.Label("H2"), closeThen { onChangeBlockType("h2") }),
+                            SlashMenuItemData("To-do List", Res.drawable.check_square, action = closeThen { onChangeBlockType("checkbox") }),
+                            SlashMenuItemData("Bulleted List", Res.drawable.unordered_list, 15.dp, closeThen { onChangeBlockType("bullet") }),
+                            SlashMenuItemData("Numbered List", Res.drawable.ordered_list, 14.dp, closeThen { onChangeBlockType("number") }),
+                            SlashMenuItemData("Toggle List", Res.drawable.arrow_right2, action = closeThen { onChangeBlockType("toggle") }),
+                            SlashMenuItemData("Quote", Res.drawable.quote_down2, 14.dp, closeThen { onChangeBlockType("quote") }),
+                            SlashMenuItemData("Callout", Res.drawable.card_edit2, action = closeThen { onChangeBlockType("callout") }),
+                            SlashMenuItemData("Code Block", Res.drawable.code, action = closeThen { onChangeBlockType("code") })
+                        )
                     )
                 )
-            )
+            }
+
+            if (onToggleFormat != null && hasTextBlockSelected) {
+                add(
+                    optionThatOpensMenu(
+                        label = "Formatting",
+                        icon = SlashMenuIcon.Drawable(Res.drawable.format_bold, 13.dp),
+                        items = listOf(
+                            SlashMenuItemData("Bold", Res.drawable.format_bold, 13.dp, closeThen { onToggleFormat("bold") }),
+                            SlashMenuItemData("Italic", Res.drawable.italic, 13.dp, closeThen { onToggleFormat("italic") }),
+                            SlashMenuItemData("Underline", Res.drawable.underline, 15.dp, closeThen { onToggleFormat("underline") }),
+                            SlashMenuItemData("Strikethrough", Res.drawable.text_x, 15.dp, closeThen { onToggleFormat("strike") }),
+                            SlashMenuItemData("Highlight", Res.drawable.text_highlight, 19.dp, closeThen { onToggleFormat("highlight") })
+                        )
+                    )
+                )
+            }
+
+            if (onSetAlignment != null && hasTextBlockSelected) {
+                add(
+                    optionThatOpensMenu(
+                        label = "Alignment",
+                        icon = SlashMenuIcon.Drawable(Res.drawable.textalign_left2),
+                        items = listOf(
+                            SlashMenuItemData("Align Left", Res.drawable.textalign_left2, action = closeThen { onSetAlignment(TextAlignment.LEFT) }),
+                            SlashMenuItemData("Align Right", Res.drawable.textalign_right2, action = closeThen { onSetAlignment(TextAlignment.RIGHT) }),
+                            SlashMenuItemData("Align Center", Res.drawable.textalign_center2, action = closeThen { onSetAlignment(TextAlignment.CENTER) }),
+                            SlashMenuItemData("Justify", Res.drawable.textalign_justifycenter2, action = closeThen { onSetAlignment(TextAlignment.JUSTIFY) })
+                        )
+                    )
+                )
+            }
+
+            if (onAdjustIndentation != null) {
+                add(
+                    optionThatOpensMenu(
+                        label = "Indentation",
+                        icon = SlashMenuIcon.Drawable(Res.drawable.indent_left),
+                        items = listOf(
+                            SlashMenuItemData("Decrease Indent", Res.drawable.indent_right, action = closeThen { onAdjustIndentation(false) }),
+                            SlashMenuItemData("Increase Indent", Res.drawable.indent_left, action = closeThen { onAdjustIndentation(true) })
+                        )
+                    )
+                )
+            }
         }
 
-        if (onToggleFormat != null) {
-            add(
-                SlashMenuSectionData(
-                    title = "Formatting",
-                    items = listOf(
-                        SlashMenuItemData("Bold", Res.drawable.format_bold, 13.dp, closeThen { onToggleFormat("bold") }),
-                        SlashMenuItemData("Italic", Res.drawable.italic, 13.dp, closeThen { onToggleFormat("italic") }),
-                        SlashMenuItemData("Underline", Res.drawable.underline, 15.dp, closeThen { onToggleFormat("underline") }),
-                        SlashMenuItemData("Strikethrough", Res.drawable.text_x, 15.dp, closeThen { onToggleFormat("strike") }),
-                        SlashMenuItemData("Highlight", Res.drawable.text_highlight, 19.dp, closeThen { onToggleFormat("highlight") })
-                    )
-                )
-            )
-        }
-
-        if (onSetAlignment != null) {
-            add(
-                SlashMenuSectionData(
-                    title = "Alignment",
-                    items = listOf(
-                        SlashMenuItemData("Align Left", Res.drawable.textalign_left2, action = closeThen { onSetAlignment(TextAlignment.LEFT) }),
-                        SlashMenuItemData("Align Right", Res.drawable.textalign_right2, action = closeThen { onSetAlignment(TextAlignment.RIGHT) }),
-                        SlashMenuItemData("Align Center", Res.drawable.textalign_center2, action = closeThen { onSetAlignment(TextAlignment.CENTER) }),
-                        SlashMenuItemData("Justify", Res.drawable.textalign_justifycenter2, action = closeThen { onSetAlignment(TextAlignment.JUSTIFY) })
-                    )
-                )
-            )
-        }
-
-        if (onAdjustIndentation != null) {
-            add(
-                SlashMenuSectionData(
-                    title = "Indentation",
-                    items = listOf(
-                        SlashMenuItemData("Decrease Indent", Res.drawable.indent_right, action = closeThen { onAdjustIndentation(false) }),
-                        SlashMenuItemData("Increase Indent", Res.drawable.indent_left, action = closeThen { onAdjustIndentation(true) })
-                    )
-                )
-            )
+        if (optionsThatOpenAnotherMenu.isNotEmpty()) {
+            add(SlashMenuSectionData(title = "", items = optionsThatOpenAnotherMenu))
         }
     }
 
-    SlashMenuList(sections = sections)
+    SlashMenuList(sections = sections, maxHeight = BlockSelectionMenuMaxHeight)
 }
+
+private val BlockSelectionMenuMaxHeight = 520.dp
+
+private fun optionThatOpensMenu(label: String, icon: SlashMenuIcon, items: List<SlashMenuItemData>) =
+    SlashMenuItemData(
+        label = label,
+        icon = icon,
+        action = {},
+        submenuSections = listOf(SlashMenuSectionData(title = label, items = items))
+    )
