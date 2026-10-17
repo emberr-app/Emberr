@@ -59,6 +59,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
@@ -159,9 +160,12 @@ import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.KmpBackHandler
+import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.menuTapAnchor
+import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.shared.editor.blockViews.LinkedNoteOptionsMenu
 import com.emberr.presentation.shared.editor.blockViews.callout.calloutContentPadding
@@ -199,6 +203,7 @@ import emberr.shared.generated.resources.arrow_up
 import emberr.shared.generated.resources.bookmark
 import emberr.shared.generated.resources.card_edit2
 import emberr.shared.generated.resources.check_square
+import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.database
@@ -284,8 +289,11 @@ sealed interface SlashMenuIcon {
 data class SlashMenuItemData(
     val label: String,
     val icon: SlashMenuIcon,
-    val action: () -> Unit
-)
+    val action: () -> Unit,
+    val submenuSections: List<SlashMenuSectionData>?
+) {
+    constructor(label: String, icon: SlashMenuIcon, action: () -> Unit) : this(label, icon, action, null)
+}
 
 fun SlashMenuItemData(label: String, icon: DrawableResource, size: Dp = SlashMenuIconSize, action: () -> Unit) =
     SlashMenuItemData(label, SlashMenuIcon.Drawable(icon, size), action)
@@ -2072,18 +2080,21 @@ fun DesktopSlashMenuContent(
 }
 
 @Composable
-fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1) {
+fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1, maxHeight: Dp = 320.dp) {
     val rows = remember(sections) {
         buildList {
             var flatIndex = 0
             sections.forEachIndexed { sectionIndex, section ->
-                add(SlashMenuRow.SectionHeader(section.title))
+                if (section.title.isNotEmpty()) {
+                    add(SlashMenuRow.SectionHeader(section.title))
+                }
                 section.items.forEach { menuItem ->
                     add(SlashMenuRow.Entry(menuItem, flatIndex))
                     flatIndex++
                 }
-                if (sectionIndex < sections.lastIndex) {
-                    add(SlashMenuRow.SectionSpacer)
+                val nextSection = sections.getOrNull(sectionIndex + 1)
+                if (nextSection != null) {
+                    add(if (nextSection.title.isEmpty()) SlashMenuRow.SectionDivider else SlashMenuRow.SectionSpacer)
                 }
             }
         }
@@ -2108,7 +2119,7 @@ fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = 320.dp)
+            .heightIn(max = maxHeight)
             .onGloballyPositioned { viewportHeightPx = it.size.height.toFloat() }
             .verticalScroll(scrollState)
             .padding(vertical = 4.dp)
@@ -2124,18 +2135,36 @@ fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1)
             rows.forEach { row ->
                 when (row) {
                     is SlashMenuRow.SectionHeader -> SlashMenuHeader(row.title)
-                    is SlashMenuRow.Entry -> SlashMenuItem(
-                        text = row.item.label,
-                        icon = row.item.icon,
-                        isSelected = row.flatIndex == selectedIndex,
-                        onClick = row.item.action,
-                        modifier = Modifier.onGloballyPositioned { coordinates ->
+                    is SlashMenuRow.Entry -> {
+                        val boundsModifier = Modifier.onGloballyPositioned { coordinates ->
                             val top = coordinates.positionInParent().y
                             val bottom = top + coordinates.size.height
                             itemBoundsByFlatIndex[row.flatIndex] = top..bottom
                         }
-                    )
+                        val submenuSections = row.item.submenuSections
+                        if (submenuSections == null) {
+                            SlashMenuItem(
+                                text = row.item.label,
+                                icon = row.item.icon,
+                                isSelected = row.flatIndex == selectedIndex,
+                                onClick = row.item.action,
+                                modifier = boundsModifier
+                            )
+                        } else {
+                            SlashMenuItemWithSubmenu(
+                                item = row.item,
+                                submenuSections = submenuSections,
+                                isSelected = row.flatIndex == selectedIndex,
+                                submenuMaxHeight = maxHeight,
+                                modifier = boundsModifier
+                            )
+                        }
+                    }
                     SlashMenuRow.SectionSpacer -> Spacer(modifier = Modifier.height(12.dp))
+                    SlashMenuRow.SectionDivider -> HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    )
                 }
             }
         }
@@ -2146,6 +2175,40 @@ private sealed interface SlashMenuRow {
     data class SectionHeader(val title: String) : SlashMenuRow
     data class Entry(val item: SlashMenuItemData, val flatIndex: Int) : SlashMenuRow
     data object SectionSpacer : SlashMenuRow
+    data object SectionDivider : SlashMenuRow
+}
+
+private val SlashSubmenuWidth = 260.dp
+
+@Composable
+private fun SlashMenuItemWithSubmenu(
+    item: SlashMenuItemData,
+    submenuSections: List<SlashMenuSectionData>,
+    isSelected: Boolean,
+    submenuMaxHeight: Dp,
+    modifier: Modifier = Modifier
+) {
+    var isSubmenuOpen by remember { mutableStateOf(false) }
+    val tapAnchor = rememberMenuTapAnchor()
+
+    Box(modifier = modifier.menuTapAnchor(tapAnchor)) {
+        SlashMenuItem(
+            text = item.label,
+            icon = item.icon,
+            isSelected = isSelected || isSubmenuOpen,
+            onClick = { isSubmenuOpen = true },
+            showsSubmenuChevron = true
+        )
+        MenuAtTap(tapAnchor, menuWidth = SlashSubmenuWidth) {
+            EmberrDesktopMenu(
+                expanded = isSubmenuOpen,
+                onDismissRequest = { isSubmenuOpen = false },
+                modifier = Modifier.width(SlashSubmenuWidth)
+            ) {
+                SlashMenuList(sections = submenuSections, maxHeight = submenuMaxHeight)
+            }
+        }
+    }
 }
 
 @Composable
@@ -2154,7 +2217,8 @@ private fun SlashMenuItem(
     icon: SlashMenuIcon,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showsSubmenuChevron: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -2194,8 +2258,17 @@ private fun SlashMenuItem(
         Text(
             text,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = if (showsSubmenuChevron) Modifier.weight(1f) else Modifier
         )
+        if (showsSubmenuChevron) {
+            Icon(
+                painterResource(Res.drawable.chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 
@@ -2548,6 +2621,9 @@ fun BlockSelectionPill(
                         )
                     }
                 }
+                IconTooltip(text = "Delete", position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.trash), "Delete", modifier = Modifier.size(iconSize).clickable { onDelete() }, tint = tint)
+                }
                 divider()
 
                 if (selectedLinkedNoteBlock != null) {
@@ -2603,10 +2679,6 @@ fun BlockSelectionPill(
                 }
                 IconTooltip(text = "Add block below", position = IconTooltipPosition.Above) {
                     Icon(painterResource(Res.drawable.arrow_down), "Add below", modifier = Modifier.size(iconSize).clickable { onAddBlockBelow() }, tint = tint)
-                }
-                divider()
-                IconTooltip(text = "Delete", position = IconTooltipPosition.Above) {
-                    Icon(painterResource(Res.drawable.trash), "Delete", modifier = Modifier.size(iconSize).clickable { onDelete() }, tint = tint)
                 }
             }
         }
