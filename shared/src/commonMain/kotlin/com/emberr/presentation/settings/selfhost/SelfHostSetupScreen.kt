@@ -31,8 +31,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
@@ -75,6 +73,7 @@ import com.emberr.presentation.settings.desktopSettingsSidePadding
 import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
+import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
@@ -805,10 +804,10 @@ private fun ZeroKnowledgeWarningCard(acknowledged: Boolean, onAcknowledgedChange
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Checkbox(
+            EmberrCheckbox(
                 checked = acknowledged,
                 onCheckedChange = onAcknowledgedChanged,
-                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.error)
+                tickColor = MaterialTheme.colorScheme.error
             )
             Text(
                 text = "I understand this passphrase cannot be recovered if lost",

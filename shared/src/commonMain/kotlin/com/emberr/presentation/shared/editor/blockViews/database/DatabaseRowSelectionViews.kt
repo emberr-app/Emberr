@@ -15,14 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -32,9 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.isFormulaColumn
@@ -82,18 +78,7 @@ internal fun DatabaseRowCheckboxCell(
             .clickable(enabled = enabled, onClick = onToggle),
         contentAlignment = Alignment.Center
     ) {
-        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-            Checkbox(
-                checked = isChecked,
-                onCheckedChange = null,
-                modifier = Modifier.scale(0.9f).size(16.dp),
-                colors = CheckboxDefaults.colors(
-                    checkedColor = MaterialTheme.colorScheme.primary,
-                    checkmarkColor = MaterialTheme.colorScheme.surface,
-                    uncheckedColor = MaterialTheme.colorScheme.outline
-                )
-            )
-        }
+        EmberrCheckbox(checked = isChecked, onCheckedChange = null)
     }
 }
 
