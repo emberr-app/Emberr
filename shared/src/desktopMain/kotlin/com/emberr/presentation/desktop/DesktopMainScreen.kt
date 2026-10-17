@@ -2244,7 +2244,7 @@ fun DesktopMainScreen(
                             override fun onOutsideTap() {}
                             override fun onVoiceRecorded(id: String, filePath: String, duration: Int) = dailyViewModel.handleVoiceRecorded(id, filePath, duration)
                             override fun onRemoveVoice(id: String) = dailyViewModel.handleRemoveVoice(id)
-                            override fun onDeleteImageBlock(id: String) = dailyViewModel.deleteImageBlock(id)
+                            override fun onDeleteBlock(id: String) = dailyViewModel.deleteBlock(id)
                             override fun onImageLinkSubmitted(blockId: String, address: String) = dailyViewModel.handleImageLinkSubmitted(blockId, address)
                             override val imageLinkFetches get() = dailyViewModel.imageLinkFetches
                             override fun onRequestImagePicker(blockId: String) {

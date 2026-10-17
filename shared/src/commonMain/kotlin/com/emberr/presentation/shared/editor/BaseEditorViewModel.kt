@@ -62,6 +62,7 @@ import com.emberr.domain.model.withInlineSpans
 import com.emberr.domain.model.withPin
 import com.emberr.domain.model.withTextAlignment
 import com.emberr.domain.model.withUpdatedAt
+import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
@@ -1794,36 +1795,40 @@ abstract class BaseEditorViewModel(
         }
 
         if (cur !is TextBlock) {
+            val hiddenChildIds = hiddenChildrenOf(id).map { it.id }
+            if (touchesRecurringTask(hiddenChildIds)) return
             val inheritedAlignment = cur.textAlignmentOrNull() ?: TextAlignment.LEFT
             modifyBlocks { list ->
-                spliceAtBlock(list, id) { mutable, i ->
+                val withTextBlock = spliceAtBlock(list, id) { mutable, i ->
                     mutable[i] = TextBlock(cur.id, "", cur.indentationLevel, inheritedAlignment, isPinned = cur.isPinned, updatedAt = now)
                 }
+                withTextBlock.map { block -> if (block.id in hiddenChildIds) block.markDeleted() else block }
             }
+            announceDeletedBlocks(hiddenChildIds)
             scheduleAutosave()
             return
         }
 
-        if (currentBlocks.size <= 1) return
+        val shownBlocks = visibleBlocks.value
+        val shownIndex = shownBlocks.indexOfFirst { it.id == id }
+        if (shownIndex == -1 || shownBlocks.size <= 1) return
 
-        val prevBlock = currentBlocks.subList(0, idx).lastOrNull { !it.isDeleted }
+        val prevBlock = shownBlocks.getOrNull(shownIndex - 1)
+        val nextBlock = shownBlocks.getOrNull(shownIndex + 1)
 
         if ((prevBlock is ToggleBlock || prevBlock is CalloutBlock) && prevBlock.indentationLevel == cur.indentationLevel - 1) {
-            val nextBlock = currentBlocks.subList(idx + 1, currentBlocks.size).firstOrNull { !it.isDeleted }
             val isOnlyChild = nextBlock == null || nextBlock.indentationLevel < cur.indentationLevel
             if (isOnlyChild) return
         }
 
         if (prevBlock != null) {
-            val isMediaOrDivider = prevBlock is ImageBlock || prevBlock is DocumentBlock ||
-                    prevBlock is SolidDividerBlock ||
-                    prevBlock is ThreeDotDividerBlock || prevBlock is BookmarkBlock ||
-                    prevBlock is VoiceBlock
+            val previousBlockHasNoText = prevBlock.editableTextOrNull() == null
 
-            if (isMediaOrDivider) {
+            if (previousBlockHasNoText) {
                 modifyBlocks { list ->
                     deleteBlockEverywhereById(list, prevBlock.id)
                 }
+                announceDeletedBlocks(listOf(prevBlock.id))
                 scheduleAutosave()
             } else {
                 _focusRequest.value = FocusRequest(id = prevBlock.id, placeCursorAtEnd = true)
@@ -1835,17 +1840,14 @@ abstract class BaseEditorViewModel(
                     scheduleAutosave()
                 }
             }
-        } else {
-            val nextBlock = currentBlocks.subList(idx + 1, currentBlocks.size).firstOrNull { !it.isDeleted }
-            if (nextBlock != null) {
-                _focusRequest.value = FocusRequest(id = nextBlock.id, placeCursorAtEnd = false)
-                viewModelScope.launch {
-                    delay(50.milliseconds)
-                    modifyBlocks { list ->
-                        deleteBlockEverywhereById(list, id)
-                    }
-                    scheduleAutosave()
+        } else if (nextBlock != null) {
+            _focusRequest.value = FocusRequest(id = nextBlock.id, placeCursorAtEnd = false)
+            viewModelScope.launch {
+                delay(50.milliseconds)
+                modifyBlocks { list ->
+                    deleteBlockEverywhereById(list, id)
                 }
+                scheduleAutosave()
             }
         }
     }
@@ -1853,6 +1855,25 @@ abstract class BaseEditorViewModel(
     private fun deleteBlockEverywhereById(list: List<NoteBlock>, id: String): List<NoteBlock> {
         val spliced = spliceAtBlock(list, id) { mutable, i -> mutable[i] = mutable[i].markDeleted() }
         return mapBlockById(spliced, id) { it.markDeleted() }
+    }
+
+    private fun announceDeletedBlocks(blockIds: Collection<String>) {
+        val idsToCheck = blockIds.toSet()
+        val deletedBlocks = _blocks.value.filter { it.id in idsToCheck && it.isDeleted }
+        val namesOfDeletedBlocks = deletedBlocks.mapNotNull { nameShownWhenDeleted(it) }
+        if (namesOfDeletedBlocks.isEmpty()) return
+        val message = if (deletedBlocks.size == 1) "deleted ${namesOfDeletedBlocks.single()}" else "deleted ${deletedBlocks.size} blocks"
+        showNativeToast(message)
+    }
+
+    private fun nameShownWhenDeleted(block: NoteBlock): String? = when (block) {
+        is ImageBlock -> "image"
+        is DocumentBlock -> "document"
+        is VoiceBlock -> "voice note"
+        is BookmarkBlock -> "bookmark"
+        is TableBlock -> "table"
+        is DatabaseBlock -> "database"
+        else -> null
     }
 
     fun addBlankBlockBelowFocused() {
@@ -1934,12 +1955,13 @@ abstract class BaseEditorViewModel(
                 afterDelete
             }
         }
+        announceDeletedBlocks(toDelete)
 
         scheduleAutosave()
     }
 
     fun replaceTextAcrossBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>, replacement: String): TextCaret? {
-        val blockIdsInRange = withHiddenChildrenOfMiddleBlocks(range, visibleBlockIdsInRange)
+        val blockIdsInRange = withHiddenChildrenOfRemovedBlocks(range, visibleBlockIdsInRange)
         if (touchesRecurringTask(blockIdsInRange)) return null
 
         val newBlockId = UUID.randomUUID().toString()
@@ -1950,7 +1972,10 @@ abstract class BaseEditorViewModel(
             caret = edit.caret
             edit.blocks
         }
-        if (caret != null) scheduleAutosave()
+        if (caret != null) {
+            announceDeletedBlocks(blockIdsInRange)
+            scheduleAutosave()
+        }
         return caret
     }
 
@@ -1958,7 +1983,7 @@ abstract class BaseEditorViewModel(
         if (!readsAsMarkdown(pastedText, GlobalEditorState.lastCopiedMarkdown)) {
             return replaceTextAcrossBlocks(range, visibleBlockIdsInRange, pastedText.replace("\r", "").trimEnd('\n'))
         }
-        val blockIdsInRange = withHiddenChildrenOfMiddleBlocks(range, visibleBlockIdsInRange)
+        val blockIdsInRange = withHiddenChildrenOfRemovedBlocks(range, visibleBlockIdsInRange)
         if (touchesRecurringTask(blockIdsInRange)) return null
         val firstBlock = _blocks.value.firstOrNull { it.id == range.start.blockId } ?: return null
         val now = System.currentTimeMillis()
@@ -1983,12 +2008,15 @@ abstract class BaseEditorViewModel(
             caret = pasted.caret
             pasted.blocks
         }
-        if (caret != null) scheduleAutosave()
+        if (caret != null) {
+            announceDeletedBlocks(blockIdsInRange)
+            scheduleAutosave()
+        }
         return caret
     }
 
     fun splitAtTextAcrossBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>): TextCaret? {
-        val blockIdsInRange = withHiddenChildrenOfMiddleBlocks(range, visibleBlockIdsInRange)
+        val blockIdsInRange = withHiddenChildrenOfRemovedBlocks(range, visibleBlockIdsInRange)
         if (touchesRecurringTask(blockIdsInRange)) return null
         val now = System.currentTimeMillis()
         var caret: TextCaret? = null
@@ -2018,7 +2046,10 @@ abstract class BaseEditorViewModel(
             }
             splitBlocks
         }
-        if (caret != null) scheduleAutosave()
+        if (caret != null) {
+            announceDeletedBlocks(blockIdsInRange)
+            scheduleAutosave()
+        }
         return caret
     }
 
@@ -2067,15 +2098,25 @@ abstract class BaseEditorViewModel(
         scheduleAutosave()
     }
 
-    private fun withHiddenChildrenOfMiddleBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>): List<String> {
+    private fun withHiddenChildrenOfRemovedBlocks(range: CrossBlockTextRange, visibleBlockIdsInRange: List<String>): List<String> {
         val middleBlockIds = visibleBlockIdsInRange.toSet() - range.start.blockId - range.end.blockId
-        return visibleBlockIdsInRange + middleBlockIds.flatMap { hiddenChildrenOf(it) }.map { it.id }
+        val endBlockIds = if (selectionRemovesWholeEndBlock(range)) listOf(range.end.blockId) else emptyList()
+        return visibleBlockIdsInRange + (middleBlockIds + endBlockIds).flatMap { hiddenChildrenOf(it) }.map { it.id }
+    }
+
+    private fun selectionRemovesWholeEndBlock(range: CrossBlockTextRange): Boolean {
+        if (range.start.blockId == range.end.blockId) return false
+        val startBlock = _blocks.value.firstOrNull { it.id == range.start.blockId } ?: return false
+        if (startBlock.editableTextOrNull() == null) return false
+        val endBlockText = _blocks.value.firstOrNull { it.id == range.end.blockId }?.editableTextOrNull() ?: return false
+        return range.end.offset >= endBlockText.length
     }
 
     fun blocksToCopy(range: CrossBlockTextRange, visibleBlocksInRange: List<NoteBlock>): List<NoteBlock> =
         visibleBlocksInRange.flatMap { block ->
             val isMiddleBlock = block.id != range.start.blockId && block.id != range.end.blockId
-            if (isMiddleBlock) listOf(block) + hiddenChildrenOf(block.id) else listOf(block)
+            val isWholeEndBlock = block.id == range.end.blockId && selectionRemovesWholeEndBlock(range)
+            if (isMiddleBlock || isWholeEndBlock) listOf(block) + hiddenChildrenOf(block.id) else listOf(block)
         }
 
     private fun hiddenChildrenOf(blockId: String): List<NoteBlock> {
@@ -2085,8 +2126,8 @@ abstract class BaseEditorViewModel(
         val hidesItsChildren = (block is ToggleBlock && !block.isExpanded) || (block is CalloutBlock && !block.showsBody)
         if (!hidesItsChildren) return emptyList()
         return allBlocks.drop(index + 1)
-            .takeWhile { it.indentationLevel > block.indentationLevel }
             .filter { !it.isDeleted }
+            .takeWhile { it.indentationLevel > block.indentationLevel }
     }
 
     private fun touchesRecurringTask(blockIds: List<String>): Boolean = blockIds.any { id ->
@@ -2516,8 +2557,9 @@ abstract class BaseEditorViewModel(
         }
     }
 
-    fun deleteImageBlock(blockId: String) {
+    fun deleteBlock(blockId: String) {
         modifyBlocks { list -> mapBlockById(list, blockId) { it.markDeleted() } }
+        announceDeletedBlocks(listOf(blockId))
         scheduleAutosave()
     }
 

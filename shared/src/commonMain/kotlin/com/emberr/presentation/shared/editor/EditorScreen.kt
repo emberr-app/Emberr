@@ -97,6 +97,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isShiftPressed
@@ -398,7 +399,7 @@ interface EditorActions {
     fun onStopRecording(blockId: String, cancel: Boolean)
     fun onPlayAudio(filePath: String, onComplete: () -> Unit)
     fun onStopAudio()
-    fun onDeleteImageBlock(id: String)
+    fun onDeleteBlock(id: String)
     fun onRequestImagePicker(blockId: String)
     fun onImageLinkSubmitted(blockId: String, address: String) {}
     val imageLinkFetches: StateFlow<Map<String, ImageLinkFetch>> get() = noImageLinkFetches
@@ -443,6 +444,7 @@ fun EditorScreen(
     selectedBlockIds: Set<String>,
     selectionMenuContent: (@Composable (onCloseMenu: () -> Unit) -> Unit)? = null,
     onClearSelection: () -> Unit = {},
+    onDeleteSelectedBlocks: () -> Unit = {},
     bottomContentPadding: Dp = 0.dp,
     topContentPadding: Dp = 0.dp,
     toolbarOffset: Dp = 0.dp,
@@ -479,7 +481,7 @@ fun EditorScreen(
     LaunchedEffect(isSelectionMode) { if (!isSelectionMode) selectionMenuPositionInEditor = null }
     val selectionShortcutFocusRequester = remember { FocusRequester() }
     LaunchedEffect(isSelectionMode, selectionMenuPositionInEditor) {
-        val needsKeyFocus = isDesktopPlatform && isSelectionMode && selectionMenuPositionInEditor == null
+        val needsKeyFocus = isSelectionMode && selectionMenuPositionInEditor == null
         if (needsKeyFocus) {
             runCatching { selectionShortcutFocusRequester.requestFocus() }
         }
@@ -558,7 +560,16 @@ fun EditorScreen(
     val latestOnUndo by rememberUpdatedState(onUndo)
     val latestOnRedo by rememberUpdatedState(onRedo)
     val latestOnClearSelection by rememberUpdatedState(onClearSelection)
+    val latestOnDeleteSelectedBlocks by rememberUpdatedState(onDeleteSelectedBlocks)
     val latestSelectedBlockIds by rememberUpdatedState(selectedBlockIds)
+
+    fun deleteSelectedBlocksOnDeleteKey(keyEvent: KeyEvent): Boolean {
+        val isDeleteKey = keyEvent.key == Key.Delete || keyEvent.key == Key.Backspace
+        if (!isSelectionMode || !isDeleteKey || keyEvent.type != KeyEventType.KeyDown) return false
+        closeSelectionMenu()
+        latestOnDeleteSelectedBlocks()
+        return true
+    }
 
     val clearSelectionOnTap: () -> Unit = remember {
         { if (isDesktopPlatform) latestOnClearSelection() }
@@ -1039,6 +1050,7 @@ fun EditorScreen(
                                 latestOnClearSelection()
                                 return@onPreviewKeyEvent true
                             }
+                            if (deleteSelectedBlocksOnDeleteKey(keyEvent)) return@onPreviewKeyEvent true
                             if (!keyEvent.isCtrlPressed || GlobalEditorState.focusedCanvasBlockId != null) return@onPreviewKeyEvent false
                             when (keyEvent.key) {
                                 Key.Z -> {
@@ -1076,7 +1088,10 @@ fun EditorScreen(
                         .onFocusChanged { hasFocusInsideEditor = it.hasFocus }
                         .focusRequester(selectionShortcutFocusRequester)
                         .focusTarget()
-                        .onPreviewKeyEvent { keyEvent -> handleCrossBlockSelectionKey(keyEvent, crossBlockSelection, crossBlockCommands) }
+                        .onPreviewKeyEvent { keyEvent ->
+                            handleCrossBlockSelectionKey(keyEvent, crossBlockSelection, crossBlockCommands) ||
+                                deleteSelectedBlocksOnDeleteKey(keyEvent)
+                        }
                 }
             )
     ) {
@@ -1378,7 +1393,16 @@ fun EditorScreen(
                     },
                     modifier = Modifier.width(260.dp)
                 ) {
-                    selectionMenuContent(closeSelectionMenu)
+                    val menuKeyFocusRequester = remember { FocusRequester() }
+                    LaunchedEffect(Unit) { runCatching { menuKeyFocusRequester.requestFocus() } }
+                    Box(
+                        modifier = Modifier
+                            .focusRequester(menuKeyFocusRequester)
+                            .focusTarget()
+                            .onPreviewKeyEvent { keyEvent -> deleteSelectedBlocksOnDeleteKey(keyEvent) }
+                    ) {
+                        selectionMenuContent(closeSelectionMenu)
+                    }
                 }
             }
         }

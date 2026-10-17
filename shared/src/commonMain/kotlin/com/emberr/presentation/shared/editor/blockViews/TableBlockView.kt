@@ -190,6 +190,7 @@ private enum class TableStyleScope { CELL, ROW, COLUMN }
 fun TableBlockView(
     block: TableBlock,
     inSelectionMode: Boolean,
+    onDelete: () -> Unit,
     onUpdateTable: (rows: List<List<String>>) -> Unit,
     onUpdateTableStyle: (
         cellStyles: Map<String, TableCellStyle>,
@@ -601,20 +602,39 @@ fun TableBlockView(
                             }
                         }
                     }
+                }
+            }
 
-                    if (!inSelectionMode) {
-                        Row(
+            if (!inSelectionMode) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = SidePadding),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 6.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { addRow() }
+                            .padding(horizontal = 8.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(painterResource(Res.drawable.plus), contentDescription = "Add row", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface)
+                        Spacer(Modifier.width(7.dp))
+                        Text(text = "New Row", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                    Spacer(Modifier.weight(1f))
+                    IconTooltip(text = "Delete table") {
+                        Icon(
+                            painterResource(Res.drawable.trash),
+                            contentDescription = "Delete table",
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .padding(top = 6.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .clickable { addRow() }
-                                .padding(horizontal = 8.dp, vertical = 7.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(painterResource(Res.drawable.plus), contentDescription = "Add row", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface)
-                            Spacer(Modifier.width(7.dp))
-                            Text(text = "New Row", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-                        }
+                                .clickable(onClick = onDelete)
+                                .padding(horizontal = 8.dp, vertical = 7.dp)
+                                .size(16.dp)
+                        )
                     }
                 }
             }

@@ -1024,7 +1024,7 @@ fun NoteBlockItem(
                                     onRequestCamera = { actions.onRequestCamera(block.id) },
                                     imageLinkFetch = imageLinkFetches[block.id],
                                     onImageLinkSubmitted = { address -> actions.onImageLinkSubmitted(block.id, address) },
-                                    onDelete = { actions.onDeleteImageBlock(block.id) }
+                                    onDelete = { actions.onDeleteBlock(block.id) }
                                 )
                             }
                             is DocumentBlock -> DocumentBlockView(
@@ -1038,6 +1038,7 @@ fun NoteBlockItem(
                                 TableBlockView(
                                     block = block,
                                     inSelectionMode = inSelectionMode,
+                                    onDelete = { actions.onDeleteBlock(block.id) },
                                     onUpdateTable = { actions.onUpdateTable(block.id, it) },
                                     onUpdateTableStyle = { cellStyles, rowStyles, columnStyles ->
                                         actions.onUpdateTableStyle(block.id, cellStyles, rowStyles, columnStyles)
@@ -1065,6 +1066,7 @@ fun NoteBlockItem(
                                     inSelectionMode = inSelectionMode,
                                     onToggleSelection = { actions.onToggleSelection(block.id) },
                                     onOpenRow = { actions.onNoteLinkClick(it) },
+                                    onDelete = { actions.onDeleteBlock(block.id) },
                                     runAfterKeyboardCloses = afterKeyboardCloses
                                 )
                             }
@@ -1734,6 +1736,8 @@ fun IsolatedEditorTextField(
                         val copiedAsMarkdown = if (event.key == Key.X) cutSelectionAsMarkdown() else copySelectionAsMarkdown()
                         if (copiedAsMarkdown) return@onPreviewKeyEvent true
                     }
+
+                    if (isBackspace && event.type == KeyEventType.KeyUp) isPendingDeletion = false
 
                     if (isBackspace && event.type == KeyEventType.KeyDown) {
                         if (tfv.text.isEmpty()) {
