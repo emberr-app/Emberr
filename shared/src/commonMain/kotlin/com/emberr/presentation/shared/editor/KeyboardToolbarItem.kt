@@ -124,8 +124,8 @@ val DefaultKeyboardToolbarItems: List<KeyboardToolbarItem> = listOf(
     KeyboardToolbarItem.ALIGN_CENTER,
     KeyboardToolbarItem.JUSTIFY,
     KeyboardToolbarItem.DIVIDER,
-    KeyboardToolbarItem.DECREASE_INDENT,
     KeyboardToolbarItem.INCREASE_INDENT,
+    KeyboardToolbarItem.DECREASE_INDENT,
     KeyboardToolbarItem.DIVIDER,
     KeyboardToolbarItem.MORE_BLOCKS
 )
