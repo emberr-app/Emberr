@@ -402,11 +402,13 @@ private fun EmptyImageBlock(
                 )
             }
             if (!isDesktopPlatform) {
-                EmptyImageBlockButton(
-                    icon = Res.drawable.camera,
-                    contentDescription = "Take Photo",
-                    onClick = { if (inSelectionMode) onToggleSelection() else onRequestCamera() }
-                )
+                IconTooltip(text = "Take photo") {
+                    EmptyImageBlockButton(
+                        icon = Res.drawable.camera,
+                        contentDescription = "Take Photo",
+                        onClick = { if (inSelectionMode) onToggleSelection() else onRequestCamera() }
+                    )
+                }
             }
             Spacer(Modifier.width(EmptyImageButtonsEndSpace))
         }

@@ -121,6 +121,7 @@ fun OpenSourceLicensesScreen(onNavigateBack: () -> Unit, showTopBar: Boolean = t
                     title = "Open-Source Licenses",
                     hazeState = hazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    backTooltip = "Back",
                     onBackClick = onNavigateBack
                 )
             }

@@ -776,24 +776,26 @@ private fun DatabaseHeaderButton(
 ) {
     val color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
     Box {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .clickable(enabled = enabled, onClick = onClick)
-                .padding(horizontal = HeaderButtonInnerPadding, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (isDesktopPlatform) {
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = null,
-                    tint = if (isActive) color else databaseInlineIconTint(mobileTint = color),
-                    modifier = Modifier.size(DatabaseInlineIconSize)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(text = label, style = MaterialTheme.typography.bodyLarge, color = color, maxLines = 1)
-            } else {
-                Icon(painter = painterResource(icon), contentDescription = label, tint = color, modifier = Modifier.size(18.dp))
+        IconTooltip(text = if (isDesktopPlatform) null else label) {
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(enabled = enabled, onClick = onClick)
+                    .padding(horizontal = HeaderButtonInnerPadding, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isDesktopPlatform) {
+                    Icon(
+                        painter = painterResource(icon),
+                        contentDescription = null,
+                        tint = if (isActive) color else databaseInlineIconTint(mobileTint = color),
+                        modifier = Modifier.size(DatabaseInlineIconSize)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = label, style = MaterialTheme.typography.bodyLarge, color = color, maxLines = 1)
+                } else {
+                    Icon(painter = painterResource(icon), contentDescription = label, tint = color, modifier = Modifier.size(18.dp))
+                }
             }
         }
         menu()

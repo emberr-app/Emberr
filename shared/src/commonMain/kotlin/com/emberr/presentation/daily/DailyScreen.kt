@@ -633,6 +633,7 @@ fun DailyScreen(
                                 tint = MaterialTheme.colorScheme.primary,
                                 hazeState = hazeState,
                                 hazeStyle = EmberrBlur.Regular,
+                                tooltip = "Timeline",
                                 onClick = {
                                     viewModel.loadTimeline()
                                     showTimelineDialog = true
@@ -649,12 +650,14 @@ fun DailyScreen(
                                         TopBarIconButtonItem(
                                             icon = painterResource(Res.drawable.calendar),
                                             contentDescription = "Open Calendar",
-                                            onClick = onNavigateToCalendar
+                                            onClick = onNavigateToCalendar,
+                                            tooltip = "Calendar"
                                         ),
                                         TopBarIconButtonItem(
                                             icon = painterResource(Res.drawable.ellipsis),
                                             contentDescription = "Settings",
-                                            onClick = { showSettingsMenu = true }
+                                            onClick = { showSettingsMenu = true },
+                                            tooltip = "More settings"
                                         )
                                     )
                                 )

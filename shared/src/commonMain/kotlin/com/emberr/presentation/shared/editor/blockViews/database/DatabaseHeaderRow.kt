@@ -441,18 +441,20 @@ private fun widthOneStepWider(width: Int): Int =
 
 @Composable
 private fun DatabaseWidthStepButton(icon: DrawableResource, contentDescription: String, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
-        modifier = Modifier.clickable(onClick = onClick)
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(8.dp).size(18.dp)
-        )
+    IconTooltip(text = contentDescription) {
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+            modifier = Modifier.clickable(onClick = onClick)
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(8.dp).size(18.dp)
+            )
+        }
     }
 }
 

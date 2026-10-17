@@ -105,6 +105,7 @@ fun ImportScreen(
                     title = "Import",
                     hazeState = hazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    backTooltip = "Back",
                     onBackClick = onNavigateBack
                 )
             }

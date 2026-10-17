@@ -65,6 +65,8 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrShadowElevation
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
@@ -246,6 +248,7 @@ fun EmberrBottomBar(
                                 if (isDailyNotesEnabled) {
                                     BottomNavItem(
                                         icon = painterResource(Res.drawable.daily),
+                                        tooltip = "Daily notes",
                                         isSelected = activeTab == Screen.Daily.route,
                                         modifier = Modifier.weight(1f).height(navItemHeight)
                                     ) {
@@ -258,6 +261,7 @@ fun EmberrBottomBar(
                                 }
                                 BottomNavItem(
                                     icon = painterResource(Res.drawable.house),
+                                    tooltip = "Home",
                                     isSelected = activeTab == Screen.Home.route,
                                     modifier = Modifier.weight(1f).height(navItemHeight)
                                 ) {
@@ -270,6 +274,7 @@ fun EmberrBottomBar(
                                 if (isAiEnabled) {
                                     BottomNavItem(
                                         icon = painterResource(Res.drawable.astroid),
+                                        tooltip = "Ask AI",
                                         isSelected = false,
                                         modifier = Modifier.weight(1f).height(navItemHeight),
                                         iconModifier = with(sharedTransitionScope) {
@@ -284,6 +289,7 @@ fun EmberrBottomBar(
                                 }
                                 BottomNavItem(
                                     icon = painterResource(Res.drawable.search),
+                                    tooltip = "Search",
                                     isSelected = false,
                                     modifier = Modifier.weight(1f).height(navItemHeight),
                                     onClick = onSearchClick
@@ -299,8 +305,10 @@ fun EmberrBottomBar(
                                             .clip(CircleShape)
                                             .clickable { onMicClick() }
                                     ) {
-                                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                            Icon(painterResource(Res.drawable.microphone), "Mic", modifier = Modifier.size(20.dp))
+                                        IconTooltip(text = "Voice task", position = IconTooltipPosition.Above) {
+                                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                                Icon(painterResource(Res.drawable.microphone), "Mic", modifier = Modifier.size(20.dp))
+                                            }
                                         }
                                     }
                                 }
@@ -362,19 +370,21 @@ internal fun BottomBarSearchField(
                 }
             }
         )
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .clickable(remember { MutableInteractionSource() }, null, onClick = onCloseClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.x),
-                contentDescription = if (query.isEmpty()) "Close search" else "Clear search",
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                modifier = Modifier.size(17.dp)
-            )
+        IconTooltip(text = if (query.isEmpty()) "Close search" else "Clear search", position = IconTooltipPosition.Above) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .clickable(remember { MutableInteractionSource() }, null, onClick = onCloseClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.x),
+                    contentDescription = if (query.isEmpty()) "Close search" else "Clear search",
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    modifier = Modifier.size(17.dp)
+                )
+            }
         }
     }
 }
@@ -382,6 +392,7 @@ internal fun BottomBarSearchField(
 @Composable
 private fun BottomNavItem(
     icon: Painter,
+    tooltip: String,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     iconModifier: Modifier = Modifier,
@@ -402,8 +413,10 @@ private fun BottomNavItem(
             .clip(CircleShape)
             .clickable(remember { MutableInteractionSource() }, null, onClick = onClick)
     ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp).then(iconModifier))
+        IconTooltip(text = tooltip, position = IconTooltipPosition.Above) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp).then(iconModifier))
+            }
         }
     }
 }

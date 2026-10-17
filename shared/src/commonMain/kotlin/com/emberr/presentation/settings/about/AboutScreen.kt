@@ -117,6 +117,7 @@ fun AboutScreen(
                     title = "About",
                     hazeState = hazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    backTooltip = "Back",
                     onBackClick = onNavigateBack
                 )
             }

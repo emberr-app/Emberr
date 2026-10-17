@@ -431,18 +431,20 @@ fun TableBlockView(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
-                        modifier = Modifier.clickable { updateColumnWidthBy(colIndex, -20) }
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.minus),
-                            contentDescription = "Decrease column width",
-                            modifier = Modifier.padding(8.dp).size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                    IconTooltip(text = "Decrease column width") {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                            modifier = Modifier.clickable { updateColumnWidthBy(colIndex, -20) }
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.minus),
+                                contentDescription = "Decrease column width",
+                                modifier = Modifier.padding(8.dp).size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
 
                     Text(
@@ -453,18 +455,20 @@ fun TableBlockView(
                         textAlign = TextAlign.Center
                     )
 
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
-                        modifier = Modifier.clickable { updateColumnWidthBy(colIndex, 20) }
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.plus),
-                            contentDescription = "Increase column width",
-                            modifier = Modifier.padding(8.dp).size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                    IconTooltip(text = "Increase column width") {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                            modifier = Modifier.clickable { updateColumnWidthBy(colIndex, 20) }
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.plus),
+                                contentDescription = "Increase column width",
+                                modifier = Modifier.padding(8.dp).size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
             }

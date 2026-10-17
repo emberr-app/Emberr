@@ -36,6 +36,8 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.editor.formatting.HighlightColorCircles
@@ -137,13 +139,13 @@ private fun SelectionBarContent(
                 actions.copy?.let { SelectionBarButton(Res.drawable.copy, "Copy", 18.dp, it) }
                 actions.cut?.let { SelectionBarButton(Res.drawable.scissor2, "Cut", 18.dp, it) }
                 actions.paste?.let { paste ->
-                    SelectionBarButtonFrame(onClick = paste) {
+                    SelectionBarButtonFrame(tooltip = "Paste", onClick = paste) {
                         Icon(Icons.Default.ContentPaste, "Paste", modifier = Modifier.size(19.dp), tint = tint)
                     }
                 }
                 actions.delete?.let { SelectionBarButton(Res.drawable.trash, "Delete", 18.dp, it) }
                 actions.selectAll?.let { selectAll ->
-                    SelectionBarButtonFrame(onClick = selectAll) {
+                    SelectionBarButtonFrame(tooltip = "Select all", onClick = selectAll) {
                         Icon(Icons.Default.SelectAll, "Select All", modifier = Modifier.size(20.dp), tint = tint)
                     }
                 }
@@ -162,20 +164,22 @@ private fun SelectionBarContent(
 
 @Composable
 private fun SelectionBarButton(icon: DrawableResource, label: String, iconSize: Dp, onClick: () -> Unit) {
-    SelectionBarButtonFrame(onClick = onClick) {
+    SelectionBarButtonFrame(tooltip = label, onClick = onClick) {
         Icon(painterResource(icon), label, modifier = Modifier.size(iconSize), tint = MaterialTheme.colorScheme.primary)
     }
 }
 
 @Composable
-private fun SelectionBarButtonFrame(onClick: () -> Unit, content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        content()
+private fun SelectionBarButtonFrame(tooltip: String, onClick: () -> Unit, content: @Composable () -> Unit) {
+    IconTooltip(text = tooltip, position = IconTooltipPosition.Above) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            content()
+        }
     }
 }

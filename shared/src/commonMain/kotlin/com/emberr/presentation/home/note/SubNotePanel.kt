@@ -202,6 +202,7 @@ fun SubNotePanel(
                 modifier = Modifier.align(Alignment.TopStart),
                 backIcon = (if (isExpanded) painterResource(Res.drawable.minimize_2) else painterResource(Res.drawable.maximize_2)).scaledDown(0.8f),
                 backContentDescription = if (isExpanded) "Collapse panel" else "Expand panel",
+                backTooltip = if (isExpanded) "Collapse panel" else "Expand panel",
                 backButtonTint = MaterialTheme.colorScheme.primary,
                 hazeState = hazeState,
                 applyStatusBarPadding = false,
