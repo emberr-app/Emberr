@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.emberr.domain.util.system.appVersionName
+import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.ui.theme.LocalAppIsDark
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
@@ -66,35 +67,54 @@ private val CurrentUpdateNotes = listOf(
     UpdateNotesSection(
         heading = "Added",
         items = listOf(
-            "Import your notes from Markdown files or an Obsidian vault",
-            "A new callout block for tips and warnings",
-            "Write text on canvas arrows",
-            "Paste an image link to add a picture from the web",
-            "Back up only the spaces you pick, and restore them as new spaces",
-            "Use the same properties across all your databases",
-            "See how far your self-hosted sync has got, and cancel it anytime"
-        )
+            "Select, copy and paste text across several blocks",
+            "Typed and pasted Markdown turns into blocks and formatting",
+            "Search your calendar events, and see them in the main search",
+            "Choose your first day of the week, with new Calendar settings for categories",
+            "Choose a 12-hour, 24-hour or system time format",
+            "Rename, favorite and delete notes right from search results"
+        ) + if (isDesktopPlatform) {
+            listOf(
+                "Split view: open up to four screens side by side",
+                "Hover tooltips on icon buttons",
+                "Zoom full screen images with Ctrl and scroll",
+                "A calendar view switcher"
+            )
+        } else {
+            listOf(
+                "Customize the keyboard toolbar: add, remove and drag to reorder buttons",
+                "Long-press tooltips on icon buttons"
+            )
+        }
     ),
     UpdateNotesSection(
         heading = "Improved",
         items = listOf(
-            "Emberr opens faster and uses less memory",
-            "New rows in a filtered database fit the filter automatically",
-            "Database column widths stay the way you set them on each device",
-            "Images and Bookmarks look tidier",
-            "Voice notes take up less space on Android",
-            "Smoother sideways scrolling with a trackpad on Linux"
-        )
+            "The cursor lands exactly where you tap in text, tables and databases",
+            "Database blocks scroll smoothly, and each device remembers the open database view",
+            "Pasted blocks keep their images"
+        ) + if (isDesktopPlatform) {
+            listOf(
+                "Menus open submenus on hover",
+                "A new note menu with Note, Canvas and Templates",
+                "Ctrl+Z and Ctrl+Y work even without a cursor",
+                "The sidebar stays collapsed after a restart",
+                "Emberr follows display scale changes on Linux without a restart"
+            )
+        } else {
+            listOf(
+                "The new note menu opens right next to its button",
+                "Indent buttons added to the keyboard toolbar"
+            )
+        }
     ),
     UpdateNotesSection(
         heading = "Fixed",
         items = listOf(
-            "Self-hosted sync no longer restarts on its own or brings back deleted notes",
-            "Notes in the trash no longer show up in overviews, the calendar or widgets",
-            "Voice recordings on desktop are no longer silent",
-            "Scrolling over tables on desktop works again",
-            "Database changes are no longer lost while saving",
-            "Renaming a note now updates its title everywhere"
+            "Images no longer stretch when a note opens",
+            "Tapping a table cell no longer makes the page jump"
+        ) + (if (isDesktopPlatform) listOf("Right-click works on text selected across blocks") else emptyList()) + listOf(
+            "Fixed some more bugs and improved UI/UX"
         )
     )
 )
