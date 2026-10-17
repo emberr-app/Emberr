@@ -24,7 +24,8 @@ object NoteMergeHelper {
         noteId: String,
         localBlocks: List<NoteBlockEntity>,
         remoteUpserts: List<NoteBlockEntity>,
-        remoteDeletions: List<BlockTombstone>
+        remoteDeletions: List<BlockTombstone>,
+        remoteIsNewer: Boolean
     ): List<NoteBlockEntity> {
         val safeLocalBlocks = localBlocks.filterOwnedBy(noteId, "local")
         val safeRemoteUpserts = remoteUpserts.filterOwnedBy(noteId, "remote")
@@ -60,8 +61,31 @@ object NoteMergeHelper {
             }
         }
 
-        return merged.values.toList()
+        val newerSide = if (remoteIsNewer) safeRemoteUpserts else safeLocalBlocks
+        val olderSide = if (remoteIsNewer) safeLocalBlocks else safeRemoteUpserts
+        val renumberedLiveBlocks = blockIdsInMergedOrder(newerSide, olderSide)
+            .mapNotNull { blockId -> merged[blockId]?.takeUnless { it.isDeleted } }
+            .mapIndexed { index, block -> block.copy(displayOrder = index) }
+        val deletedBlocks = merged.values.filter { it.isDeleted }
+        return renumberedLiveBlocks + deletedBlocks
     }
+
+    private fun blockIdsInMergedOrder(newerSide: List<NoteBlockEntity>, olderSide: List<NoteBlockEntity>): List<String> {
+        val olderIds = olderSide.liveBlockIdsInOrder()
+        val result = newerSide.liveBlockIdsInOrder().toMutableList()
+        val placedIds = result.toHashSet()
+        olderIds.forEachIndexed { index, blockId ->
+            if (blockId in placedIds) return@forEachIndexed
+            val precedingId = olderIds.subList(0, index).lastOrNull { it in placedIds }
+            val insertAt = if (precedingId == null) 0 else result.indexOf(precedingId) + 1
+            result.add(insertAt, blockId)
+            placedIds += blockId
+        }
+        return result
+    }
+
+    private fun List<NoteBlockEntity>.liveBlockIdsInOrder(): List<String> =
+        filter { !it.isDeleted }.sortedBy { it.displayOrder }.map { it.blockId }
 
     private fun mergedDatabaseBlockOrNull(localBlock: NoteBlockEntity, remoteBlock: NoteBlockEntity): NoteBlockEntity? {
         val localDatabase = decodeDatabaseBlockOrNull(localBlock.blockDataJson) ?: return null

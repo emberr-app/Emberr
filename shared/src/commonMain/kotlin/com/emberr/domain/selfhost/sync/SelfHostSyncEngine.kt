@@ -1356,7 +1356,10 @@ class SelfHostSyncEngine(
                 noteId = noteId,
                 localBlocks = localBlocks,
                 remoteUpserts = remoteUpserts,
-                remoteDeletions = remoteDeletions
+                remoteDeletions = remoteDeletions,
+                remoteIsNewer = remoteOps?.metadataUpsert?.let { remoteMetadata ->
+                    localMetadata == null || remoteMetadata.updatedAt > localMetadata.updatedAt
+                } ?: false
             )
 
             spaceRepository.ensureSpaceExists(mergedMetadata.spaceId)
