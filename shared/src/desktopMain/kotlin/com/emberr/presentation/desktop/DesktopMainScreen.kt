@@ -64,11 +64,12 @@ import com.emberr.presentation.shared.UserSettings
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.EmberrPillShadowAmbientColor
+import com.emberr.presentation.shared.components.EmberrPillShadowSpotColor
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.EmberrUpdatePeek
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.canvas.CanvasScreen
-import com.emberr.presentation.shared.components.NoteKindTabs
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.sync.SyncViewModel
 import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
@@ -134,8 +135,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.TopBarIconButton
-import com.emberr.presentation.shared.components.EmberrPillShadowAmbientColor
-import com.emberr.presentation.shared.components.EmberrPillShadowSpotColor
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.TopBarIconButtonGroup
 import com.emberr.presentation.shared.components.customEmberrShadow
@@ -175,7 +174,6 @@ import emberr.shared.generated.resources.pen_square
 import emberr.shared.generated.resources.folder_plus
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.search
-import emberr.shared.generated.resources.template
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
 import java.awt.Cursor
@@ -937,10 +935,7 @@ fun DesktopMainScreen(
     var showSortMenu by remember { mutableStateOf(false) }
     var showAddNotePopup by remember { mutableStateOf(false) }
     var showAddFolderPopup by remember { mutableStateOf(false) }
-    var addNoteInput by remember { mutableStateOf("") }
-    var addNoteKind by remember { mutableStateOf(NoteKind.NOTE) }
     var addFolderInput by remember { mutableStateOf("") }
-    var showTemplatesMenu by remember { mutableStateOf(false) }
 
     var isFavoritesExpanded by remember { mutableStateOf(true) }
     var isNotesExpanded by remember { mutableStateOf(true) }
@@ -1010,17 +1005,11 @@ fun DesktopMainScreen(
 
     LaunchedEffect(isSelectionMode) { onSelectionModeChange(isSelectionMode) }
 
-    val handleCreateNote = { title: String ->
-        homeViewModel.createNewNote(title = title, forceHomeFolder = false, kind = addNoteKind) { newId -> openNote(newId) }
+    val handleCreateNote = { kind: NoteKind ->
+        homeViewModel.createNewNote(title = "", forceHomeFolder = false, kind = kind) { newId -> openNote(newId) }
     }
     val handleCreateFolder = { name: String -> homeViewModel.createNewFolder(name) }
 
-    // Re-seeds any missing predefined template every time the templates menu opens.
-    val handleOpenTemplates = {
-        homeViewModel.onTemplatesMenuOpened()
-        showAddNotePopup = false
-        showTemplatesMenu = true
-    }
     val handleTemplateClick = { templateId: String ->
         homeViewModel.createNoteFromTemplate(templateId) { newId -> openNote(newId) }
     }
@@ -1518,7 +1507,7 @@ fun DesktopMainScreen(
                                                         TopBarIconButtonItem(
                                                             icon = painterResource(Res.drawable.pen_square),
                                                             contentDescription = "New note",
-                                                            onClick = { addNoteInput = ""; addNoteKind = NoteKind.NOTE; showAddNotePopup = true },
+                                                            onClick = { showAddNotePopup = true },
                                                             tooltip = "New note"
                                                         )
                                                     )
@@ -1537,108 +1526,23 @@ fun DesktopMainScreen(
                                                             ); showSortMenu = false
                                                         })
                                                 }
-                                                EmberrDesktopMenu(
+                                                DesktopNewNoteMenu(
                                                     expanded = showAddNotePopup,
                                                     onDismissRequest = { showAddNotePopup = false },
-                                                    modifier = Modifier.width(280.dp)
-                                                ) {
-                                                    Column(
-                                                        Modifier.padding(
-                                                            horizontal = 16.dp,
-                                                            vertical = 12.dp
+                                                    onCreateNote = handleCreateNote,
+                                                    onTemplatesOpened = { homeViewModel.onTemplatesMenuOpened() },
+                                                    templatesMenu = { isExpanded, onDismiss ->
+                                                        TemplatesDesktopMenu(
+                                                            expanded = isExpanded,
+                                                            templates = templates,
+                                                            searchQuery = templateSearchQuery,
+                                                            onSearchQueryChange = { homeViewModel.updateTemplateSearchQuery(it) },
+                                                            onDismissRequest = onDismiss,
+                                                            onTemplateClick = { id -> onDismiss(); handleTemplateClick(id) },
+                                                            onEditTemplate = { id -> onDismiss(); handleEditTemplate(id) },
+                                                            onDeleteTemplate = { id -> homeViewModel.deleteTemplate(id) },
+                                                            onCreateNewTemplate = { onDismiss(); handleCreateNewTemplate() }
                                                         )
-                                                    ) {
-                                                        Row(
-                                                            Modifier.fillMaxWidth()
-                                                                .padding(bottom = 18.dp),
-                                                            verticalAlignment = Alignment.CenterVertically,
-                                                            horizontalArrangement = Arrangement.SpaceBetween
-                                                        ) {
-                                                            Text(
-                                                                "New Note",
-                                                                style = MaterialTheme.typography.bodyLarge.copy(
-                                                                    fontWeight = FontWeight.Bold
-                                                                ),
-                                                                color = MaterialTheme.colorScheme.onSurface
-                                                            )
-                                                            IconTooltip(text = "Templates") {
-                                                                Icon(
-                                                                    painter = painterResource(Res.drawable.template),
-                                                                    contentDescription = "Templates",
-                                                                    tint = MaterialTheme.colorScheme.onSurface,
-                                                                    modifier = Modifier.size(22.dp)
-                                                                        .noRippleClickable { handleOpenTemplates() }
-                                                                )
-                                                            }
-                                                        }
-                                                        NoteKindTabs(
-                                                            selectedKind = addNoteKind,
-                                                            onKindSelected = { addNoteKind = it },
-                                                            modifier = Modifier.padding(bottom = 12.dp)
-                                                        )
-                                                        EmberrTextField(
-                                                            value = addNoteInput,
-                                                            onValueChange = { addNoteInput = it },
-                                                            placeholder = "Note title...",
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            onSubmit = {
-                                                                if (addNoteInput.isNotBlank()) {
-                                                                    handleCreateNote(addNoteInput.trim())
-                                                                    showAddNotePopup = false
-                                                                }
-                                                            }
-                                                        )
-                                                        Row(
-                                                            Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                                                            horizontalArrangement = Arrangement.spacedBy(
-                                                                8.dp
-                                                            )
-                                                        ) {
-                                                            EmberrButtonSecondary(
-                                                                text = "Cancel",
-                                                                onClick = { showAddNotePopup = false },
-                                                                modifier = Modifier.weight(1f)
-                                                            )
-                                                            EmberrButtonPrimary(
-                                                                text = "Create",
-                                                                onClick = {
-                                                                    if (addNoteInput.isNotBlank()) {
-                                                                        handleCreateNote(addNoteInput.trim()); showAddNotePopup =
-                                                                            false
-                                                                    }
-                                                                },
-                                                                modifier = Modifier.weight(1f)
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                                TemplatesDesktopMenu(
-                                                    expanded = showTemplatesMenu,
-                                                    templates = templates,
-                                                    searchQuery = templateSearchQuery,
-                                                    onSearchQueryChange = {
-                                                        homeViewModel.updateTemplateSearchQuery(
-                                                            it
-                                                        )
-                                                    },
-                                                    onDismissRequest = { showTemplatesMenu = false },
-                                                    onTemplateClick = { id ->
-                                                        showTemplatesMenu = false; handleTemplateClick(
-                                                        id
-                                                    )
-                                                    },
-                                                    onEditTemplate = { id ->
-                                                        showTemplatesMenu =
-                                                            false; handleEditTemplate(id)
-                                                    },
-                                                    onDeleteTemplate = { id ->
-                                                        homeViewModel.deleteTemplate(
-                                                            id
-                                                        )
-                                                    },
-                                                    onCreateNewTemplate = {
-                                                        showTemplatesMenu =
-                                                            false; handleCreateNewTemplate()
                                                     }
                                                 )
                                                 EmberrDesktopMenu(
@@ -1707,7 +1611,7 @@ fun DesktopMainScreen(
                                 if (isNotesExpanded && treeRows.isEmpty()) {
                                     item(key = "sidebar_empty_notes") {
                                         SidebarEmptyNotesHint(
-                                            onCreateNote = { addNoteInput = ""; addNoteKind = NoteKind.NOTE; showAddNotePopup = true },
+                                            onCreateNote = { showAddNotePopup = true },
                                             onCreateFolder = { addFolderInput = ""; showAddFolderPopup = true }
                                         )
                                     }
@@ -1735,7 +1639,7 @@ fun DesktopMainScreen(
                                                         homeViewModel.toggleFolderExpansion(row.folder.folderId)
                                                     }
                                                 },
-                                                onAddNote = { title, kind -> homeViewModel.createNoteInParent(row.folder.folderId, title = title, autoExpand = true, kind = kind) { newId -> openNote(newId) } },
+                                                onAddNote = { kind -> homeViewModel.createNoteInParent(row.folder.folderId, autoExpand = true, kind = kind) { newId -> openNote(newId) } },
                                                 onOpenTemplates = { homeViewModel.onTemplatesMenuOpened() },
                                                 templatesMenu = { isExpanded, onDismiss ->
                                                     TemplatesDesktopMenu(
