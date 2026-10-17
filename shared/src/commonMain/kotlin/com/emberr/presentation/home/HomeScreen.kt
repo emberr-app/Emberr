@@ -39,8 +39,10 @@ import com.emberr.presentation.shared.rememberStableStatusBarsPadding
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -64,13 +66,17 @@ import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
-import com.emberr.presentation.shared.components.EmberrBottomSheetAction
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.KmpBackHandler
-import com.emberr.presentation.shared.components.NoteKindTabs
-import com.emberr.presentation.shared.canvas.CanvasPreview
+import com.emberr.presentation.shared.components.EmberrMobileMenu
+import com.emberr.presentation.shared.components.EmberrMobileMenuOption
 import com.emberr.presentation.shared.components.EmberrPillShadowAmbientColor
 import com.emberr.presentation.shared.components.EmberrPillShadowSpotColor
+import com.emberr.presentation.shared.components.MobileMenuAnchor
+import com.emberr.presentation.shared.components.mobileMenuArea
+import com.emberr.presentation.shared.components.mobileMenuTrigger
+import com.emberr.presentation.shared.components.rememberMobileMenuAnchor
+import com.emberr.presentation.shared.canvas.CanvasPreview
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.TopBarIconButtonGroup
@@ -81,6 +87,7 @@ import com.emberr.presentation.sync.SyncViewModel
 import com.emberr.domain.util.system.showNativeToast
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -106,6 +113,7 @@ import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.template
 import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.x
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 private val HORIZONTAL_PADDING = 16.dp
@@ -324,12 +332,19 @@ fun HomeScreen(
     var showTemplatesSheet by remember { mutableStateOf(false) }
     var showTemplatesMenu by remember { mutableStateOf(false) }
 
+    val newNoteMenuAnchor = rememberMobileMenuAnchor()
+    var rootWidthPx by remember { mutableIntStateOf(0) }
+    val widgetMenuEdgePx = with(LocalDensity.current) { 24.dp.toPx() }
+    val widgetMenuTopPx = with(LocalDensity.current) { 96.dp.toPx() }
+
     LaunchedEffect(Unit) {
         if (WidgetComposeRequestBus.consume(WidgetComposeRequest.NEW_NOTE)) {
             if (isDesktopPlatform) {
                 addNoteInput = ""
                 showAddNotePopup = true
             } else {
+                snapshotFlow { rootWidthPx }.first { it > 0 }
+                newNoteMenuAnchor.triggerBounds = Rect(Offset(rootWidthPx - widgetMenuEdgePx, widgetMenuTopPx), Size.Zero)
                 showAddNoteDialog = true
             }
         }
@@ -402,10 +417,6 @@ fun HomeScreen(
     }
 
     // Re-seeds any missing predefined template every time either Templates entry point opens.
-    // Also closes the mobile New Note sheet it's invoked from - closeAnd() only runs the hide
-    // animation, it doesn't flip showAddNoteDialog itself (see AddNoteBottomSheet's onCreate,
-    // which does that inline), so this has to be the one to reset it, or the sheet is left
-    // mounted (hidden but expanded = true) after the templates sheet opens on top of it.
     val handleOpenTemplates = {
         viewModel.onTemplatesMenuOpened()
         showAddNoteDialog = false
@@ -776,41 +787,43 @@ fun HomeScreen(
                                     }
                                 }
                                 if (!isSelectionMode && !isDesktopPlatform) {
-                                    TopBarIconButtonGroup(
-                                        bgColor = MaterialTheme.colorScheme.background,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        hazeState = hazeState,
-                                        hazeStyle = EmberrBlur.Regular,
-                                        iconSize = 20.dp,
-                                        shadowSpotColor = EmberrPillShadowSpotColor,
-                                        shadowAmbientColor = EmberrPillShadowAmbientColor,
-                                        items = listOf(
-                                            TopBarIconButtonItem(
-                                                icon = painterResource(Res.drawable.arrow_up_down),
-                                                contentDescription = "Sort",
-                                                onClick = { showSortMenu = true },
-                                                tooltip = "Sort notes"
-                                            ),
-                                            TopBarIconButtonItem(
-                                                icon = painterResource(Res.drawable.folder_plus),
-                                                contentDescription = "New Folder",
-                                                onClick = {
-                                                    addFolderParentId = null
-                                                    showAddFolderDialog = true
-                                                },
-                                                tooltip = "New folder"
-                                            ),
-                                            TopBarIconButtonItem(
-                                                icon = painterResource(Res.drawable.pen_square),
-                                                contentDescription = "New Note",
-                                                onClick = {
-                                                    addNoteTargetFolderId = null
-                                                    showAddNoteDialog = true
-                                                },
-                                                tooltip = "New note"
+                                    Box(modifier = Modifier.mobileMenuTrigger(newNoteMenuAnchor)) {
+                                        TopBarIconButtonGroup(
+                                            bgColor = MaterialTheme.colorScheme.background,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            hazeState = hazeState,
+                                            hazeStyle = EmberrBlur.Regular,
+                                            iconSize = 20.dp,
+                                            shadowSpotColor = EmberrPillShadowSpotColor,
+                                            shadowAmbientColor = EmberrPillShadowAmbientColor,
+                                            items = listOf(
+                                                TopBarIconButtonItem(
+                                                    icon = painterResource(Res.drawable.arrow_up_down),
+                                                    contentDescription = "Sort",
+                                                    onClick = { showSortMenu = true },
+                                                    tooltip = "Sort notes"
+                                                ),
+                                                TopBarIconButtonItem(
+                                                    icon = painterResource(Res.drawable.folder_plus),
+                                                    contentDescription = "New Folder",
+                                                    onClick = {
+                                                        addFolderParentId = null
+                                                        showAddFolderDialog = true
+                                                    },
+                                                    tooltip = "New folder"
+                                                ),
+                                                TopBarIconButtonItem(
+                                                    icon = painterResource(Res.drawable.pen_square),
+                                                    contentDescription = "New Note",
+                                                    onClick = {
+                                                        addNoteTargetFolderId = null
+                                                        showAddNoteDialog = true
+                                                    },
+                                                    tooltip = "New note"
+                                                )
                                             )
                                         )
-                                    )
+                                    }
                                 }
                             }
                         }
@@ -828,6 +841,7 @@ fun HomeScreen(
                                         addFolderParentId = null
                                         showAddFolderDialog = true
                                     },
+                                    newNoteActionModifier = Modifier.mobileMenuTrigger(newNoteMenuAnchor),
                                     modifier = Modifier.animateItem(
                                         fadeInSpec = if (areRowAnimationsEnabled) tween(200, easing = FastOutSlowInEasing) else null,
                                         fadeOutSpec = if (areRowAnimationsEnabled) tween(160, easing = FastOutSlowInEasing) else null,
@@ -889,6 +903,7 @@ fun HomeScreen(
                                             noteCount = noteCountsByFolder[row.folder.folderId] ?: 0,
                                             dragState = treeDragState,
                                             showAddNoteAction = !isSelectionMode && !treeDragState.isDragging,
+                                            addNoteActionModifier = Modifier.mobileMenuTrigger(newNoteMenuAnchor),
                                             onAddNote = {
                                                 addNoteTargetFolderId = row.folder.folderId
                                                 if (isDesktopPlatform) {
@@ -1119,6 +1134,8 @@ fun HomeScreen(
         Box(
             modifier = Modifier.fillMaxSize().padding(paddingValues)
                 .consumeWindowInsets(paddingValues)
+                .onSizeChanged { rootWidthPx = it.width }
+                .mobileMenuArea(newNoteMenuAnchor)
         ) {
 
             homeGridContent()
@@ -1158,13 +1175,11 @@ fun HomeScreen(
                         foldersByParent.values.flatten().find { it.folderId == folderId }?.name
                     }
                 )
-                AddNoteBottomSheet(
+                NewNoteMobileMenu(
+                    anchor = newNoteMenuAnchor,
                     expanded = showAddNoteDialog,
-                    destinationFolderName = addNoteTargetFolderId?.let { folderId ->
-                        foldersByParent.values.flatten().find { it.folderId == folderId }?.name
-                    },
-                    onDismiss = { showAddNoteDialog = false },
-                    onCreate = handleCreateNote,
+                    onDismissRequest = { showAddNoteDialog = false },
+                    onCreateNote = { kind -> handleCreateNote("", kind) },
                     onOpenTemplates = handleOpenTemplates
                 )
                 RenameBottomSheet(
@@ -1257,6 +1272,7 @@ fun DesktopSortMenu(currentSortType: SortType, currentSortOrder: SortOrder, onDi
 private fun HomeEmptyState(
     onCreateNote: () -> Unit,
     onCreateFolder: () -> Unit,
+    newNoteActionModifier: Modifier = Modifier,
     modifier: Modifier = Modifier
 ) {
     val mutedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -1285,7 +1301,7 @@ private fun HomeEmptyState(
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
                 color = actionColor,
-                modifier = Modifier.noRippleClickable(onCreateNote).padding(vertical = 6.dp, horizontal = 4.dp)
+                modifier = newNoteActionModifier.noRippleClickable(onCreateNote).padding(vertical = 6.dp, horizontal = 4.dp)
             )
             Text(
                 "or",
@@ -1656,58 +1672,44 @@ fun AddFolderBottomSheet(
 }
 
 @Composable
-fun AddNoteBottomSheet(
+private fun NewNoteMobileMenu(
+    anchor: MobileMenuAnchor,
     expanded: Boolean,
-    onDismiss: () -> Unit,
-    onCreate: (String, NoteKind) -> Unit,
-    onOpenTemplates: () -> Unit = {},
-    destinationFolderName: String? = null
+    onDismissRequest: () -> Unit,
+    onCreateNote: (NoteKind) -> Unit,
+    onOpenTemplates: () -> Unit
 ) {
-    var noteTitle by remember { mutableStateOf("") }
-    var noteKind by remember(expanded) { mutableStateOf(NoteKind.NOTE) }
-    EmberrBottomSheet(
-        expanded = expanded,
-        onDismiss = onDismiss,
-        title = "New Note",
-        subtitle = if (destinationFolderName != null) "Saving into $destinationFolderName."
-        else "Give your note a fresh title.",
-        headerAction = EmberrBottomSheetAction(
-            icon = painterResource(Res.drawable.template),
-            contentDescription = "Templates",
-            tooltip = "Templates",
+    EmberrMobileMenu(anchor = anchor, expanded = expanded, onDismissRequest = onDismissRequest) {
+        EmberrMobileMenuOption(
+            label = "Note",
+            icon = { NewNoteMenuIcon(Res.drawable.file_text) },
+            onClick = { onCreateNote(NoteKind.NOTE) }
+        )
+        EmberrMobileMenuOption(
+            label = "Canvas",
+            icon = { NewNoteMenuIcon(Res.drawable.group) },
+            onClick = { onCreateNote(NoteKind.CANVAS) }
+        )
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+        )
+        EmberrMobileMenuOption(
+            label = "Templates",
+            icon = { NewNoteMenuIcon(Res.drawable.template) },
             onClick = onOpenTemplates
         )
-    ) { closeAnd ->
-        Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp,bottom = 16.dp)) {
-            NoteKindTabs(
-                selectedKind = noteKind,
-                onKindSelected = { noteKind = it },
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-            EmberrTextField(
-                value = noteTitle,
-                onValueChange = { noteTitle = it },
-                placeholder = "Note title...",
-                modifier = Modifier.fillMaxWidth(),
-                onSubmit = { closeAnd { onCreate(noteTitle.trim(), noteKind) } }
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                EmberrButtonSecondary(
-                    text = "Cancel",
-                    onClick = { closeAnd(onDismiss) },
-                    modifier = Modifier.weight(1f)
-                )
-                EmberrButtonPrimary(
-                    text = "Create",
-                    onClick = { closeAnd { onCreate(noteTitle.trim(), noteKind) } },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
     }
+}
+
+@Composable
+private fun NewNoteMenuIcon(icon: DrawableResource) {
+    Icon(
+        painter = painterResource(icon),
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.size(20.dp)
+    )
 }
 
 @Composable
