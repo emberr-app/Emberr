@@ -293,7 +293,7 @@ fun DailyScreen(
             override fun onOutsideTap() {}
             override fun onVoiceRecorded(id: String, filePath: String, duration: Int) = viewModel.handleVoiceRecorded(id, filePath, duration)
             override fun onRemoveVoice(id: String) = viewModel.handleRemoveVoice(id)
-            override fun onDeleteImageBlock(id: String) = viewModel.deleteImageBlock(id)
+            override fun onDeleteBlock(id: String) = viewModel.deleteBlock(id)
             override fun onImageLinkSubmitted(blockId: String, address: String) = viewModel.handleImageLinkSubmitted(blockId, address)
             override val imageLinkFetches get() = viewModel.imageLinkFetches
             override fun onRequestImagePicker(blockId: String) {
@@ -426,6 +426,7 @@ fun DailyScreen(
                             topBarClearancePx = with(density) { editorTopContentPadding.toPx() },
                             listState = pageListState,
                             selectedBlockIds = selectedBlockIds,
+                            onDeleteSelectedBlocks = { viewModel.deleteSelectedBlocksWithHiddenChildren() },
                             mobileMenuState = mobileMenuState,
                             onMobileMenuStateChange = onMobileMenuStateChange,
                             slashQuery = slashQuery,
@@ -565,7 +566,7 @@ fun DailyScreen(
                     },
                     onAddBlockAbove = { viewModel.addBlockAboveSelection() },
                     onAddBlockBelow = { viewModel.addBlockBelowSelection() },
-                    onDelete = { viewModel.deleteSelectedBlocks() },
+                    onDelete = { viewModel.deleteSelectedBlocksWithHiddenChildren() },
                     onTogglePin = { sharedEditorActions.onTogglePin() },
                     isSelectionPinned = isSelectionPinned,
                     selectedBlocks = selectedBlocksList,

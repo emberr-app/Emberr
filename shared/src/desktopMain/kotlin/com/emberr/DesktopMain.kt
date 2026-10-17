@@ -55,6 +55,7 @@ import com.emberr.presentation.settings.PlainTextSecretWarningDialog
 import com.emberr.presentation.desktop.DesktopEscapeKeyBus
 import com.emberr.presentation.desktop.DesktopSearchShortcutBus
 import com.emberr.presentation.desktop.DesktopRestartBus
+import com.emberr.presentation.desktop.DesktopToastHost
 import com.emberr.presentation.desktop.EmberrSystemTray
 import com.emberr.presentation.desktop.TrayMenuAction
 import com.emberr.presentation.desktop.update.AppUpdatePromptDialog
@@ -421,6 +422,7 @@ private fun runEmberrDesktopApp() = application {
                 PlainTextSecretWarningDialog()
                 AppUpdatePromptDialog()
                 SelfHostUpdateRequiredPrompt()
+                DesktopToastHost()
             }
         }
         }

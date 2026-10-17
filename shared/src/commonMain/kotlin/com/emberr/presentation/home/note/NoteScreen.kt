@@ -442,7 +442,7 @@ fun NoteScreen(
             override fun onOutsideTap() {}
             override fun onVoiceRecorded(id: String, filePath: String, duration: Int) = viewModel.handleVoiceRecorded(id, filePath, duration)
             override fun onRemoveVoice(id: String) = viewModel.handleRemoveVoice(id)
-            override fun onDeleteImageBlock(id: String) = viewModel.deleteImageBlock(id)
+            override fun onDeleteBlock(id: String) = viewModel.deleteBlock(id)
             override fun onImageLinkSubmitted(blockId: String, address: String) = viewModel.handleImageLinkSubmitted(blockId, address)
             override val imageLinkFetches get() = viewModel.imageLinkFetches
             override fun onRequestImagePicker(blockId: String) {
@@ -519,6 +519,7 @@ fun NoteScreen(
                     topBarClearancePx = topBarBottomPx,
                     selectedBlockIds = selectedBlockIds,
                     onClearSelection = { viewModel.clearSelection() },
+                    onDeleteSelectedBlocks = { viewModel.deleteSelectedBlocksWithHiddenChildren() },
                     selectionMenuContent = { closeMenu ->
                         BlockSelectionMenuContent(
                             selectedCount = selectedBlockIds.size,
@@ -531,7 +532,7 @@ fun NoteScreen(
                                 clipboardManager.copyEmberrBlocks(viewModel.selectedBlocksWithHiddenChildren(), allLinkableNotes)
                                 viewModel.deleteSelectedBlocksWithHiddenChildren()
                             },
-                            onDelete = { viewModel.deleteSelectedBlocks() },
+                            onDelete = { viewModel.deleteSelectedBlocksWithHiddenChildren() },
                             onSelectAll = { viewModel.selectAllBlocks() },
                             onClearSelection = { viewModel.clearSelection() },
                             selectedBlocks = selectedBlocksList,
@@ -802,7 +803,7 @@ fun NoteScreen(
                         },
                         onAddBlockAbove = { viewModel.addBlockAboveSelection() },
                         onAddBlockBelow = { viewModel.addBlockBelowSelection() },
-                        onDelete = { viewModel.deleteSelectedBlocks() },
+                        onDelete = { viewModel.deleteSelectedBlocksWithHiddenChildren() },
                         onTogglePin = { viewModel.togglePinSelectedBlocks() },
                         isSelectionPinned = isSelectionPinned,
                         selectedBlocks = selectedBlocksList,

@@ -713,6 +713,7 @@ private fun TimelineBlockContent(
             TableBlockView(
                 block = block,
                 inSelectionMode = true,
+                onDelete = {},
                 onUpdateTable = { editorActions.onUpdateTable(block.id, it) },
                 onUpdateTableStyle = { cellStyles, rowStyles, columnStyles ->
                     editorActions.onUpdateTableStyle(block.id, cellStyles, rowStyles, columnStyles)

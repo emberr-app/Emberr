@@ -224,7 +224,7 @@ fun TasksScreen(
                         override fun onStopRecording(blockId: String, cancel: Boolean) {}
                         override fun onPlayAudio(filePath: String, onComplete: () -> Unit) {}
                         override fun onStopAudio() {}
-                        override fun onDeleteImageBlock(id: String) {}
+                        override fun onDeleteBlock(id: String) {}
                         override fun onRequestImagePicker(blockId: String) {}
                         override fun onRequestDocumentPicker(blockId: String) {}
                         override fun onTogglePin() {}
@@ -261,6 +261,7 @@ fun TasksScreen(
                     focusRequest = focusRequest,
                     selectedBlockIds = selectedBlockIds,
                     onClearSelection = { viewModel.clearSelection() },
+                    onDeleteSelectedBlocks = { viewModel.deleteSelectedBlocks() },
                     selectionMenuContent = { closeMenu ->
                         BlockSelectionMenuContent(
                             selectedCount = selectedBlockIds.size,
