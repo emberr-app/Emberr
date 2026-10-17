@@ -54,12 +54,11 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
+import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
+import com.emberr.presentation.shared.components.EmberrDesktopSubmenuPlacement
 import com.emberr.presentation.shared.components.EmberrTextField
-import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.SheetBringIntoViewSpec
-import com.emberr.presentation.shared.components.menuTapAnchor
-import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
 import com.emberr.ui.theme.HighlightColor
 import emberr.shared.generated.resources.Res
@@ -232,34 +231,38 @@ fun PropertyTagPicker(
             Spacer(modifier = Modifier.height(8.dp))
 
             matchingTagNames.forEach { tagName ->
-                val tapAnchor = rememberMenuTapAnchor()
-                Box(modifier = Modifier.menuTapAnchor(tapAnchor)) {
-                    PropertyTagOptionRow(
-                        tagName = tagName,
-                        tagPoolKey = tagPoolKey,
-                        isSelected = isSelected(tagName),
-                        onClick = { toggleTag(tagName) },
-                        onEdit = { openTagEditor(tagName) }
-                    )
+                EmberrDesktopSubmenuPlacement(
+                    isFocusable = true,
+                    onPressedInside = {},
+                    onPointerInside = {},
+                    menuWidthEstimate = DesktopTagMenuWidth,
+                    anchor = {
+                        PropertyTagOptionRow(
+                            tagName = tagName,
+                            tagPoolKey = tagPoolKey,
+                            isSelected = isSelected(tagName),
+                            onClick = { toggleTag(tagName) },
+                            onEdit = { openTagEditor(tagName) }
+                        )
+                    }
+                ) {
                     if (tagName == tagBeingEdited) {
-                        MenuAtTap(tapAnchor, menuWidth = DesktopTagMenuWidth) {
-                            PropertyTagLayer(
-                                title = "Edit tag",
-                                onDismiss = { closeTagEditor() }
-                            ) { closeEditorAnd ->
-                                EditTagContent(
-                                    originalTagName = tagName,
-                                    colorName = savedTags.firstOrNull { it.name.equals(tagName, ignoreCase = true) }?.colorName,
-                                    onColorChosen = { colorName -> chooseTagColor(tagName, colorName) },
-                                    tagName = editedTagName,
-                                    onTagNameChange = { editedTagName = it },
-                                    isNameTaken = editedNameIsTaken,
-                                    canSave = canSaveRename,
-                                    onSave = { saveRename(closeEditorAnd) },
-                                    onCancel = { closeEditorAnd { } },
-                                    onDeleteConfirmed = { deleteEditedTag(closeEditorAnd) }
-                                )
-                            }
+                        PropertyTagLayer(
+                            title = "Edit tag",
+                            onDismiss = { closeTagEditor() }
+                        ) { closeEditorAnd ->
+                            EditTagContent(
+                                originalTagName = tagName,
+                                colorName = savedTags.firstOrNull { it.name.equals(tagName, ignoreCase = true) }?.colorName,
+                                onColorChosen = { colorName -> chooseTagColor(tagName, colorName) },
+                                tagName = editedTagName,
+                                onTagNameChange = { editedTagName = it },
+                                isNameTaken = editedNameIsTaken,
+                                canSave = canSaveRename,
+                                onSave = { saveRename(closeEditorAnd) },
+                                onCancel = { closeEditorAnd { } },
+                                onDeleteConfirmed = { deleteEditedTag(closeEditorAnd) }
+                            )
                         }
                     }
                 }
@@ -385,7 +388,6 @@ private fun EditTagContent(
     onDeleteConfirmed: () -> Unit
 ) {
     val nameFocusRequester = remember { FocusRequester() }
-    var isConfirmingDelete by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         EmberrTextField(
@@ -415,21 +417,21 @@ private fun EditTagContent(
             onColorChosen = onColorChosen,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
-        val deleteTapAnchor = rememberMenuTapAnchor()
-        Box(modifier = Modifier.padding(top = 8.dp).menuTapAnchor(deleteTapAnchor)) {
-            DeleteTagOption(onClick = { isConfirmingDelete = true })
+        EmberrDesktopSubmenu(
+            modifier = Modifier.padding(top = 8.dp),
+            menuWidthEstimate = DesktopTagMenuWidth,
+            anchor = { openConfirmation, _ -> DeleteTagOption(onClick = openConfirmation) }
+        ) { isConfirmingDelete, closeConfirmation ->
             if (isConfirmingDelete) {
-                MenuAtTap(deleteTapAnchor, menuWidth = DesktopTagMenuWidth) {
-                    PropertyTagLayer(
-                        title = "Delete tag",
-                        onDismiss = { isConfirmingDelete = false }
-                    ) { closeConfirmationAnd ->
-                        DeleteTagConfirmation(
-                            tagName = originalTagName,
-                            onCancel = { closeConfirmationAnd { } },
-                            onDelete = { closeConfirmationAnd(onDeleteConfirmed) }
-                        )
-                    }
+                PropertyTagLayer(
+                    title = "Delete tag",
+                    onDismiss = closeConfirmation
+                ) { closeConfirmationAnd ->
+                    DeleteTagConfirmation(
+                        tagName = originalTagName,
+                        onCancel = { closeConfirmationAnd { } },
+                        onDelete = { closeConfirmationAnd(onDeleteConfirmed) }
+                    )
                 }
             }
         }
