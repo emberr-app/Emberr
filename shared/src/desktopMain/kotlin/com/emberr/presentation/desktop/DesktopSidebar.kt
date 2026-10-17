@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -70,15 +71,17 @@ import com.emberr.presentation.shared.components.AnimatedFolderIcon
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
+import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
-import com.emberr.presentation.shared.components.NoteKindTabs
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.star
 import emberr.shared.generated.resources.template
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 private val INDENT_STEP          = 32.dp
@@ -159,43 +162,88 @@ internal fun DesktopNamePopup(
     confirmLabel: String,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
-    placeholder: String = "Name...",
-    onOpenTemplates: (() -> Unit)? = null,
-    noteKind: NoteKind? = null,
-    onNoteKindChange: (NoteKind) -> Unit = {}
+    placeholder: String = "Name..."
 ) {
     var input by remember(initialValue) { mutableStateOf(initialValue) }
     val onSubmit: () -> Unit = { if (input.isNotBlank()) onConfirm(input.trim()) }
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f, fill = false))
-            if (onOpenTemplates != null) {
-                IconTooltip(text = "Templates") {
-                    Icon(
-                        painter = painterResource(Res.drawable.template),
-                        contentDescription = "Templates",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .size(22.dp)
-                            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onOpenTemplates)
-                    )
-                }
-            }
-        }
-        if (noteKind != null) {
-            NoteKindTabs(selectedKind = noteKind, onKindSelected = onNoteKindChange, modifier = Modifier.padding(bottom = 12.dp))
-        }
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 18.dp)
+        )
         EmberrTextField(value = input, onValueChange = { input = it }, placeholder = placeholder, modifier = Modifier.fillMaxWidth(), onSubmit = onSubmit)
         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
             EmberrButtonPrimary(text = confirmLabel, onClick = onSubmit, modifier = Modifier.weight(1f))
         }
     }
+}
+
+private val NewNoteMenuWidth = 220.dp
+private val TemplatesMenuWidthEstimate = 300.dp
+private val NewNoteMenuIconSize = 20.dp
+
+@Composable
+internal fun DesktopNewNoteMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onCreateNote: (NoteKind) -> Unit,
+    onTemplatesOpened: () -> Unit,
+    templatesMenu: @Composable (isExpanded: Boolean, onDismiss: () -> Unit) -> Unit
+) {
+    EmberrDesktopMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.width(NewNoteMenuWidth)
+    ) {
+        Column(modifier = Modifier.padding(vertical = 4.dp)) {
+            EmberrDesktopMenuOption(
+                label = "Note",
+                icon = { NewNoteMenuIcon(Res.drawable.file_text) },
+                onClick = { onDismissRequest(); onCreateNote(NoteKind.NOTE) }
+            )
+            EmberrDesktopMenuOption(
+                label = "Canvas",
+                icon = { NewNoteMenuIcon(Res.drawable.group) },
+                onClick = { onDismissRequest(); onCreateNote(NoteKind.CANVAS) }
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            )
+            EmberrDesktopSubmenu(
+                menuWidthEstimate = TemplatesMenuWidthEstimate,
+                anchor = { openTemplates, _ ->
+                    EmberrDesktopMenuOption(
+                        label = "Templates",
+                        icon = { NewNoteMenuIcon(Res.drawable.template) },
+                        onClick = openTemplates
+                    )
+                }
+            ) { isTemplatesOpen, closeTemplates ->
+                LaunchedEffect(isTemplatesOpen) {
+                    if (isTemplatesOpen) onTemplatesOpened()
+                }
+                templatesMenu(isTemplatesOpen) {
+                    closeTemplates()
+                    onDismissRequest()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NewNoteMenuIcon(icon: DrawableResource) {
+    Icon(
+        painter = painterResource(icon),
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.size(NewNoteMenuIconSize)
+    )
 }
 
 // Row composables
@@ -211,7 +259,7 @@ fun SidebarFolderRow(
     menu: TreeSelectionMenu = SINGLE_ITEM_TREE_MENU,
     onClick: (SidebarClickModifiers) -> Unit,
     onToggleFavorite: () -> Unit = {},
-    onAddNote: (String, NoteKind) -> Unit,
+    onAddNote: (NoteKind) -> Unit,
     onOpenTemplates: () -> Unit,
     templatesMenu: @Composable (isExpanded: Boolean, onDismiss: () -> Unit) -> Unit,
     onAddSubfolder: (String) -> Unit,
@@ -225,8 +273,6 @@ fun SidebarFolderRow(
     var showContextMenu by remember { mutableStateOf(false) }
     var contextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
     var showAddNotePopup by remember { mutableStateOf(false) }
-    var addNoteKind by remember { mutableStateOf(NoteKind.NOTE) }
-    var showTemplatesMenu by remember { mutableStateOf(false) }
     var showAddSubfolderPopup by remember { mutableStateOf(false) }
     var showRenamePopup by remember { mutableStateOf(false) }
     val density = LocalDensity.current
@@ -355,31 +401,20 @@ fun SidebarFolderRow(
                 isSelected -> SidebarTrailingCheck()
                 isHovered && !dragState.dragging -> {
                     IconTooltip(text = "New note in folder") {
-                        SidebarHoverAction(painterResource(Res.drawable.plus), "New note here") { addNoteKind = NoteKind.NOTE; showAddNotePopup = true }
+                        SidebarHoverAction(painterResource(Res.drawable.plus), "New note here") { showAddNotePopup = true }
                     }
                     Spacer(Modifier.width(2.dp))
                 }
             }
 
             Box {
-                EmberrDesktopMenu(expanded = showAddNotePopup, onDismissRequest = { showAddNotePopup = false }, modifier = Modifier.width(280.dp)) {
-                    DesktopNamePopup(
-                        title = "New Note in ${folder.name}",
-                        initialValue = "",
-                        confirmLabel = "Create",
-                        onConfirm = { title -> onAddNote(title, addNoteKind); showAddNotePopup = false },
-                        onDismiss = { showAddNotePopup = false },
-                        placeholder = "Note title...",
-                        noteKind = addNoteKind,
-                        onNoteKindChange = { addNoteKind = it },
-                        onOpenTemplates = {
-                            showAddNotePopup = false
-                            onOpenTemplates()
-                            showTemplatesMenu = true
-                        }
-                    )
-                }
-                templatesMenu(showTemplatesMenu) { showTemplatesMenu = false }
+                DesktopNewNoteMenu(
+                    expanded = showAddNotePopup,
+                    onDismissRequest = { showAddNotePopup = false },
+                    onCreateNote = onAddNote,
+                    onTemplatesOpened = onOpenTemplates,
+                    templatesMenu = templatesMenu
+                )
                 EmberrDesktopMenu(expanded = showAddSubfolderPopup, onDismissRequest = { showAddSubfolderPopup = false }, modifier = Modifier.width(280.dp)) {
                     DesktopNamePopup(
                         title = "New Subfolder",
