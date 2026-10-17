@@ -394,11 +394,15 @@ private fun CustomCalendarHeader(
             )
         }
         Spacer(modifier = Modifier.weight(1f).padding(end = 2.dp))
-        IconButton(onClick = onPreviousMonth, modifier = Modifier.size(32.dp)) {
-            Icon(painterResource(Res.drawable.chevron_left), contentDescription = "Previous month")
+        IconTooltip(text = "Previous month") {
+            IconButton(onClick = onPreviousMonth, modifier = Modifier.size(32.dp)) {
+                Icon(painterResource(Res.drawable.chevron_left), contentDescription = "Previous month")
+            }
         }
-        IconButton(onClick = onNextMonth, modifier = Modifier.size(32.dp).padding(end = 2.dp)) {
-            Icon(painterResource(Res.drawable.chevron_right), contentDescription = "Next month")
+        IconTooltip(text = "Next month") {
+            IconButton(onClick = onNextMonth, modifier = Modifier.size(32.dp).padding(end = 2.dp)) {
+                Icon(painterResource(Res.drawable.chevron_right), contentDescription = "Next month")
+            }
         }
     }
 }

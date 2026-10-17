@@ -88,6 +88,7 @@ import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.model.valueAsText
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.LocalImageOverlay
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
@@ -308,6 +309,7 @@ private fun TimelineHeader(
                     hazeState = hazeState,
                     hazeStyle = EmberrBlur.Regular,
                     shadowElevation = EmberrShadowElevation.None,
+                    tooltip = "Close timeline",
                     onClick = onDismiss
                 )
             }
@@ -410,23 +412,25 @@ private fun SearchBarActionIcon(
     contentDescription: String,
     onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .clip(CircleShape)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-            modifier = Modifier.size(17.dp)
-        )
+    IconTooltip(text = contentDescription) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onClick
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                modifier = Modifier.size(17.dp)
+            )
+        }
     }
 }
 

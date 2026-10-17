@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.isFormulaColumn
 import com.emberr.domain.model.DatabaseBlock
@@ -155,16 +156,18 @@ internal fun DatabaseSelectionBar(
                 onClearSelection()
             }
         )
-        Icon(
-            painter = painterResource(Res.drawable.x),
-            contentDescription = "Clear selection",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(onClick = onClearSelection)
-                .padding(6.dp)
-                .size(14.dp)
-        )
+        IconTooltip(text = "Clear selection") {
+            Icon(
+                painter = painterResource(Res.drawable.x),
+                contentDescription = "Clear selection",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onClearSelection)
+                    .padding(6.dp)
+                    .size(14.dp)
+            )
+        }
     }
 }
 

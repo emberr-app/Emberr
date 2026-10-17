@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.database.activeView
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseColumnTarget
@@ -152,16 +153,18 @@ private fun DatabaseSortEditor(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            painter = painterResource(Res.drawable.x),
-            contentDescription = "Remove sort",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(onClick = onRemove)
-                .padding(4.dp)
-                .size(14.dp)
-        )
+        IconTooltip(text = "Remove sort") {
+            Icon(
+                painter = painterResource(Res.drawable.x),
+                contentDescription = "Remove sort",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onRemove)
+                    .padding(4.dp)
+                    .size(14.dp)
+            )
+        }
     }
 }
 

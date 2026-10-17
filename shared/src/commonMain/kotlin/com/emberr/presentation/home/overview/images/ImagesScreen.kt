@@ -198,6 +198,7 @@ fun ImagesScreen(
                 titleVisibility = titleCollapseProgress,
                 onTitleClick = onCollapsedTitleClick,
                 hazeState = hazeState,
+                backTooltip = "Back",
                 onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                 onBackClick = {
                     if (isSelectionMode) viewModel.clearSelection() else onNavigateBack()
@@ -211,6 +212,7 @@ fun ImagesScreen(
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
+                            tooltip = "Add image",
                             onClick = onTriggerImagePicker
                         )
                     }

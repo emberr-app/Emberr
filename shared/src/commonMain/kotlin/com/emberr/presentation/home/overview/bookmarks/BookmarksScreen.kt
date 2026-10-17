@@ -57,6 +57,8 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
@@ -294,6 +296,7 @@ fun BookmarksScreen(
                 titleVisibility = titleCollapseProgress,
                 onTitleClick = onCollapsedTitleClick,
                 hazeState = hazeState,
+                backTooltip = "Back",
                 onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                 onBackClick = {
                     if (isSelectionMode) viewModel.clearSelection() else onNavigateBack()
@@ -307,6 +310,7 @@ fun BookmarksScreen(
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
+                            tooltip = "Add bookmark",
                             onClick = { showAddUrlInput = true }
                         )
                     }
@@ -386,26 +390,28 @@ fun BookmarksScreen(
                                     }
                                 }
                             )
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .clickable(remember { MutableInteractionSource() }, null) {
-                                        if (newUrlInput.isNotEmpty()) {
-                                            newUrlInput = ""
-                                        } else {
-                                            showAddUrlInput = false
-                                            localFocusManager.clearFocus()
-                                        }
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.x),
-                                    contentDescription = if (newUrlInput.isEmpty()) "Close" else "Clear link",
-                                    modifier = Modifier.size(17.dp),
-                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                                )
+                            IconTooltip(text = if (newUrlInput.isEmpty()) "Close" else "Clear link", position = IconTooltipPosition.Above) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .clickable(remember { MutableInteractionSource() }, null) {
+                                            if (newUrlInput.isNotEmpty()) {
+                                                newUrlInput = ""
+                                            } else {
+                                                showAddUrlInput = false
+                                                localFocusManager.clearFocus()
+                                            }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.x),
+                                        contentDescription = if (newUrlInput.isEmpty()) "Close" else "Clear link",
+                                        modifier = Modifier.size(17.dp),
+                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                    )
+                                }
                             }
                         }
                     }

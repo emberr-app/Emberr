@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.toSize
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.sync.MediaRetryCoordinator
 import com.emberr.domain.util.media.ImageClipboard
@@ -393,11 +394,13 @@ private fun EmptyImageBlock(
                     .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             )
             Spacer(Modifier.width(EmptyImageButtonSidePadding))
-            EmptyImageBlockButton(
-                icon = Res.drawable.upload2,
-                contentDescription = "Upload Image",
-                onClick = { if (inSelectionMode) onToggleSelection() else onRequestPicker() }
-            )
+            IconTooltip(text = "Upload image") {
+                EmptyImageBlockButton(
+                    icon = Res.drawable.upload2,
+                    contentDescription = "Upload Image",
+                    onClick = { if (inSelectionMode) onToggleSelection() else onRequestPicker() }
+                )
+            }
             if (!isDesktopPlatform) {
                 EmptyImageBlockButton(
                     icon = Res.drawable.camera,

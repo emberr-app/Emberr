@@ -299,6 +299,7 @@ private fun AiChatContent(
                 horizontal = if (isDesktopPlatform) DesktopPanelContentInset else 16.dp,
                 bottom = 8.dp
             ),
+            backTooltip = "Back",
             onBackClick = onDismiss,
             actions = {
                 if (isChatReady) {
@@ -310,6 +311,7 @@ private fun AiChatContent(
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
+                            tooltip = "Chat history",
                             onClick = { showChatHistorySheet = true }
                         )
 

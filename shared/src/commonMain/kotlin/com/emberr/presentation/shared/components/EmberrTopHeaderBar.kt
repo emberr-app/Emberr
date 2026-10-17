@@ -99,6 +99,7 @@ fun EmberrTopHeaderBar(
     reserveBackButtonSpace: Boolean = true,
     backIcon: Painter = painterResource(Res.drawable.chevron_left),
     backContentDescription: String = "Back",
+    backTooltip: String? = null,
     backButtonTint: Color = MaterialTheme.colorScheme.primary,
     backButtonBackground: Color = Color.Transparent,
     onBackClick: () -> Unit = {},
@@ -172,6 +173,7 @@ fun EmberrTopHeaderBar(
                         hazeState = hazeState,
                         hazeStyle = hazeStyle,
                         size = TopHeaderBarButtonSize,
+                        tooltip = backTooltip,
                         onClick = onBackClick
                     )
 

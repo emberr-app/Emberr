@@ -232,6 +232,7 @@ fun PropertiesScreen(
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 topEdgeFadeAlpha = topEdgeFadeAlpha,
+                backTooltip = "Back",
                 onBackClick = onNavigateBack
             )
         }

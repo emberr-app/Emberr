@@ -82,6 +82,7 @@ class EmberrBottomSheetAction(
     val icon: Painter,
     val contentDescription: String,
     val tint: Color? = null,
+    val tooltip: String? = null,
     val onClick: () -> Unit
 )
 
@@ -183,6 +184,7 @@ private fun EmberrFloatingDialog(
                                     bgColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background,
                                     tint = headerAction.tint ?: MaterialTheme.colorScheme.onSurface,
                                     shadowElevation = EmberrShadowElevation.None,
+                                    tooltip = headerAction.tooltip,
                                     onClick = headerAction.onClick
                                 )
                             }
@@ -321,6 +323,7 @@ private fun EmberrModalBottomSheet(
                                     bgColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background,
                                     tint = headerAction.tint ?: MaterialTheme.colorScheme.onSurface,
                                     shadowElevation = EmberrShadowElevation.None,
+                                    tooltip = headerAction.tooltip,
                                     onClick = headerAction.onClick
                                 )
                             }

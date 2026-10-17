@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.VoiceBlock
 import com.emberr.domain.sync.MediaRetryCoordinator
 import com.emberr.domain.util.media.MediaStorageHelper
@@ -123,24 +124,26 @@ fun AudioBlockView(
         ) {
             if (block.localFilePath == null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        if (isRecording) painterResource(Res.drawable.square) else painterResource(Res.drawable.microphone),
-                        contentDescription = if (isRecording) "Stop Recording" else "Start Recording",
-                        tint = if (isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
-                        modifier = Modifier
-                            .size(if (isRecording) 18.dp else 20.dp)
-                            .clickable {
-                                if (!inSelectionMode) {
-                                    if (isRecording) {
-                                        isRecording = false
-                                        onStopRecording(false)
-                                    } else {
-                                        isRecording = true
-                                        onStartRecording()
+                    IconTooltip(text = if (isRecording) "Stop recording" else "Record audio") {
+                        Icon(
+                            if (isRecording) painterResource(Res.drawable.square) else painterResource(Res.drawable.microphone),
+                            contentDescription = if (isRecording) "Stop Recording" else "Start Recording",
+                            tint = if (isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                            modifier = Modifier
+                                .size(if (isRecording) 18.dp else 20.dp)
+                                .clickable {
+                                    if (!inSelectionMode) {
+                                        if (isRecording) {
+                                            isRecording = false
+                                            onStopRecording(false)
+                                        } else {
+                                            isRecording = true
+                                            onStartRecording()
+                                        }
                                     }
                                 }
-                            }
-                    )
+                        )
+                    }
 
                     Spacer(modifier = Modifier.width(10.dp))
 
@@ -200,29 +203,31 @@ fun AudioBlockView(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        if (isPlaying) painterResource(Res.drawable.pause) else painterResource(Res.drawable.play),
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clickable {
-                                if (!inSelectionMode) {
-                                    if (isPlaying) {
-                                        isPlaying = false
-                                        onStopAudio()
-                                    } else {
-                                        isPlaying = true
-                                        block.localFilePath.let { path ->
-                                            onPlayAudio(path) {
-                                                isPlaying = false
-                                                playProgress = 0f
+                    IconTooltip(text = if (isPlaying) "Pause" else "Play") {
+                        Icon(
+                            if (isPlaying) painterResource(Res.drawable.pause) else painterResource(Res.drawable.play),
+                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clickable {
+                                    if (!inSelectionMode) {
+                                        if (isPlaying) {
+                                            isPlaying = false
+                                            onStopAudio()
+                                        } else {
+                                            isPlaying = true
+                                            block.localFilePath.let { path ->
+                                                onPlayAudio(path) {
+                                                    isPlaying = false
+                                                    playProgress = 0f
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                    )
+                        )
+                    }
 
                     Spacer(modifier = Modifier.width(12.dp))
 
@@ -268,15 +273,17 @@ fun AudioBlockView(
                     )
                 }
 
-                Icon(
-                    painterResource(Res.drawable.circle_x),
-                    contentDescription = "Remove",
-                    tint = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier
-                        .padding(start = 12.dp)
-                        .size(20.dp)
-                        .clickable { if (!inSelectionMode) onRemoveVoice() }
-                )
+                IconTooltip(text = "Remove audio") {
+                    Icon(
+                        painterResource(Res.drawable.circle_x),
+                        contentDescription = "Remove",
+                        tint = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier
+                            .padding(start = 12.dp)
+                            .size(20.dp)
+                            .clickable { if (!inSelectionMode) onRemoveVoice() }
+                    )
+                }
             }
         }
     }

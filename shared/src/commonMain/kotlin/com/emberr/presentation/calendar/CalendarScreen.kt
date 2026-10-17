@@ -385,6 +385,7 @@ fun CalendarScreen(
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
                     verticalAlignment = Alignment.Top,
                     showBackButton = showBackButton,
+                    backTooltip = "Back",
                     onBackClick = onNavigateBack,
                     centerContent = {
                         CalendarTitle(
@@ -403,6 +404,7 @@ fun CalendarScreen(
                                     tint = MaterialTheme.colorScheme.primary,
                                     hazeState = internalHazeState,
                                     hazeStyle = EmberrBlur.Regular,
+                                    tooltip = "Add event",
                                     onClick = {
                                         eventEditorState = EventEditorState(
                                             original = null,
@@ -430,6 +432,7 @@ fun CalendarScreen(
                                 tint = MaterialTheme.colorScheme.primary,
                                 hazeState = internalHazeState,
                                 hazeStyle = EmberrBlur.Regular,
+                                tooltip = "Calendar settings",
                                 onClick = {
                                     if (isDesktopPlatform) showSettingsSheet = true else showSidebar = true
                                 }

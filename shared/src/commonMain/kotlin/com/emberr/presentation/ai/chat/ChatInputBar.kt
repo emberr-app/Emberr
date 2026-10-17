@@ -54,6 +54,8 @@ import com.emberr.presentation.ai.settings.AiSettingsMenuContent
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
@@ -202,22 +204,24 @@ internal fun ChatInputBar(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Box {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surface)
-                                .clickable(enabled = true, onClick = onSettingsClick),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painterResource(Res.drawable.cog),
-                                contentDescription = "AI settings",
-                                tint = MaterialTheme.colorScheme.onSurface,
+                        IconTooltip(text = "AI settings", position = IconTooltipPosition.Above) {
+                            Box(
                                 modifier = Modifier
-                                    .size(18.dp)
-                                    .then(aiIconModifier)
-                            )
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .clickable(enabled = true, onClick = onSettingsClick),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painterResource(Res.drawable.cog),
+                                    contentDescription = "AI settings",
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .then(aiIconModifier)
+                                )
+                            }
                         }
 
                         if (isDesktopPlatform) {
@@ -237,24 +241,26 @@ internal fun ChatInputBar(
                     ModelPickerPill(viewModel = viewModel)
                 }
 
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(if (isGenerating) MaterialTheme.colorScheme.primary else sendColor)
-                        .clickable(
-                            enabled = isGenerating || canSend,
-                            onClick = if (isGenerating) onStopGeneration else onSubmit
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (isGenerating) Icons.Default.Pause else Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = if (isGenerating) "Stop generating" else "Send",
-                        tint = if (isGenerating || canSend) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(18.dp)
-                    )
+                IconTooltip(text = if (isGenerating) "Stop generating" else "Send", position = IconTooltipPosition.Above) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(if (isGenerating) MaterialTheme.colorScheme.primary else sendColor)
+                            .clickable(
+                                enabled = isGenerating || canSend,
+                                onClick = if (isGenerating) onStopGeneration else onSubmit
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (isGenerating) Icons.Default.Pause else Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = if (isGenerating) "Stop generating" else "Send",
+                            tint = if (isGenerating || canSend) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }

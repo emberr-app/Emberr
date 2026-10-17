@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseTemplateRepeat
@@ -139,16 +140,18 @@ private fun DatabaseTemplateOption(
                                 modifier = Modifier.padding(end = 10.dp)
                             )
                         }
-                        Icon(
-                            painter = painterResource(Res.drawable.ellipsis),
-                            contentDescription = "$label options",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable(onClick = openLayer)
-                                .padding(4.dp)
-                                .size(16.dp)
-                        )
+                        IconTooltip(text = "Template options") {
+                            Icon(
+                                painter = painterResource(Res.drawable.ellipsis),
+                                contentDescription = "$label options",
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .clickable(onClick = openLayer)
+                                    .padding(4.dp)
+                                    .size(16.dp)
+                            )
+                        }
                     }
                 },
                 onClick = onUse

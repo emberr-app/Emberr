@@ -705,6 +705,7 @@ fun NoteScreen(
                     ),
                     showBackButton = showBackButton,
                     reserveBackButtonSpace = false,
+                    backTooltip = "Back",
                     onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                     onBackClick = {
                         if (isSelectionMode) {
@@ -730,6 +731,7 @@ fun NoteScreen(
                                 tint = MaterialTheme.colorScheme.primary,
                                 hazeState = hazeState,
                                 hazeStyle = topBarButtonHazeStyle ?: EmberrBlur.Regular,
+                                tooltip = "More options",
                                 onClick = { showOptionsMenu = true }
                             )
 

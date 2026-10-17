@@ -55,6 +55,7 @@ import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.model.RecurrenceFrequency
 import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBlur
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.isoDayNumber
@@ -233,6 +234,7 @@ fun EventEditorSheet(
                 icon = painterResource(Res.drawable.trash),
                 contentDescription = "Delete",
                 tint = MaterialTheme.colorScheme.error,
+                tooltip = "Delete event",
                 onClick = onDelete
             )
         } else null,
@@ -521,6 +523,7 @@ private fun EventViewFields(
                     hazeState = hazeState,
                     hazeStyle = EmberrBlur.Regular,
                     shadowElevation = EmberrShadowElevation.None,
+                    tooltip = "Edit",
                     onClick = onEditClick
                 )
                 if (onDelete != null) {
@@ -532,6 +535,7 @@ private fun EventViewFields(
                         hazeState = hazeState,
                         hazeStyle = EmberrBlur.Regular,
                         shadowElevation = EmberrShadowElevation.None,
+                        tooltip = "Delete",
                         onClick = onDelete
                     )
                 }
@@ -768,20 +772,22 @@ private fun StepperButton(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .size(30.dp)
-            .clip(EmberrCorner)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(enabled = enabled, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.3f),
-            modifier = Modifier.size(16.dp)
-        )
+    IconTooltip(text = contentDescription) {
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(EmberrCorner)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clickable(enabled = enabled, onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.3f),
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 

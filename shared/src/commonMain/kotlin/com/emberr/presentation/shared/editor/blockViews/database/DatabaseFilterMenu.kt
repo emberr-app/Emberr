@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.filterConditionsFor
 import com.emberr.domain.model.DatabaseBlock
@@ -145,16 +146,18 @@ internal fun DatabaseFilterEditor(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                painter = painterResource(Res.drawable.x),
-                contentDescription = removeLabel,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable(onClick = onRemove)
-                    .padding(4.dp)
-                    .size(14.dp)
-            )
+            IconTooltip(text = removeLabel) {
+                Icon(
+                    painter = painterResource(Res.drawable.x),
+                    contentDescription = removeLabel,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(onClick = onRemove)
+                        .padding(4.dp)
+                        .size(14.dp)
+                )
+            }
         }
 
         if (filter.condition.needsValue) {

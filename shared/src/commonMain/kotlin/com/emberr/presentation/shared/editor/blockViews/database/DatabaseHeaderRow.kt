@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.builtInPropertiesNotYetAdded
 import com.emberr.domain.database.canFormatNumbersIn
@@ -479,12 +480,14 @@ private fun DatabaseAddColumnButton(
         contentAlignment = Alignment.Center
     ) {
         if (!inSelectionMode) {
-            Icon(
-                painter = painterResource(Res.drawable.plus),
-                contentDescription = "Add column",
-                tint = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(17.dp)
-            )
+            IconTooltip(text = "Add column") {
+                Icon(
+                    painter = painterResource(Res.drawable.plus),
+                    contentDescription = "Add column",
+                    tint = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.size(17.dp)
+                )
+            }
         }
 
         DatabaseMenu(expanded = showPicker, title = "Add property", onDismiss = { showPicker = false }) { closePickerAnd ->
@@ -556,16 +559,18 @@ internal fun DatabaseAddColumnChoices(
                                 label = property.name,
                                 icon = { DatabaseOptionIcon(property.valueType.iconResource()) },
                                 trailing = {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.pen),
-                                        contentDescription = "Edit ${property.name}",
-                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                        modifier = Modifier
-                                            .clip(CircleShape)
-                                            .clickable(onClick = openLayer)
-                                            .padding(4.dp)
-                                            .size(16.dp)
-                                    )
+                                    IconTooltip(text = "Edit property") {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.pen),
+                                            contentDescription = "Edit ${property.name}",
+                                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .clickable(onClick = openLayer)
+                                                .padding(4.dp)
+                                                .size(16.dp)
+                                        )
+                                    }
                                 },
                                 onClick = {
                                     closePickerAnd { editor.addColumn(block.id, DatabaseColumnTarget.CustomProperty(property.id), beforeColumn = beforeColumn) }

@@ -76,6 +76,7 @@ import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.ui.theme.LocalEmberrFontStyle
@@ -608,12 +609,14 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             trailingIcon = {
-                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                    Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
+                IconTooltip(text = if (isPasswordVisible) "Hide password" else "Show password") {
+                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                        Icon(
+                            imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -693,12 +696,14 @@ private fun RestorePassphraseCard(
             visualTransformation = if (isPassphraseVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             trailingIcon = {
-                IconButton(onClick = { isPassphraseVisible = !isPassphraseVisible }) {
-                    Icon(
-                        imageVector = if (isPassphraseVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
+                IconTooltip(text = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase") {
+                    IconButton(onClick = { isPassphraseVisible = !isPassphraseVisible }) {
+                        Icon(
+                            imageVector = if (isPassphraseVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -744,19 +749,23 @@ private fun PassphraseCard(passphrase: String, onRegenerate: () -> Unit) {
         Spacer(modifier = Modifier.height(14.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            IconButton(onClick = { clipboardManager.setText(AnnotatedString(passphrase)) }) {
-                Icon(
-                    imageVector = Icons.Default.ContentCopy,
-                    contentDescription = "Copy passphrase",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
+            IconTooltip(text = "Copy passphrase") {
+                IconButton(onClick = { clipboardManager.setText(AnnotatedString(passphrase)) }) {
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = "Copy passphrase",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             }
-            IconButton(onClick = onRegenerate) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Generate a new passphrase",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
+            IconTooltip(text = "New passphrase") {
+                IconButton(onClick = onRegenerate) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Generate a new passphrase",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             }
         }
     }

@@ -55,6 +55,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.database.DatabaseRow
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.effectiveStyleOf
@@ -342,17 +343,19 @@ private fun DatabaseTitleCell(
             }
 
             if (canOpen) {
-                Icon(
-                    painter = painterResource(Res.drawable.square_arrow_out_up_right),
-                    contentDescription = "Open row",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .clip(CircleShape)
-                        .clickable(onClick = onOpen)
-                        .padding(4.dp)
-                        .size(16.dp)
-                )
+                IconTooltip(text = "Open note") {
+                    Icon(
+                        painter = painterResource(Res.drawable.square_arrow_out_up_right),
+                        contentDescription = "Open row",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier
+                            .padding(start = 4.dp)
+                            .clip(CircleShape)
+                            .clickable(onClick = onOpen)
+                            .padding(4.dp)
+                            .size(16.dp)
+                    )
+                }
             }
         }
     }
@@ -475,16 +478,18 @@ private fun DatabaseRowMenuButton(
         contentAlignment = Alignment.Center
     ) {
         if (!inSelectionMode) {
-            Icon(
-                painter = painterResource(Res.drawable.ellipsis),
-                contentDescription = "Row options",
-                tint = MaterialTheme.colorScheme.outline,
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable { runAfterKeyboardCloses { showMenu = true } }
-                    .padding(6.dp)
-                    .size(16.dp)
-            )
+            IconTooltip(text = "Row options") {
+                Icon(
+                    painter = painterResource(Res.drawable.ellipsis),
+                    contentDescription = "Row options",
+                    tint = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable { runAfterKeyboardCloses { showMenu = true } }
+                        .padding(6.dp)
+                        .size(16.dp)
+                )
+            }
         }
 
         DatabaseMenu(expanded = showMenu, title = "Row", onDismiss = { showMenu = false }) { closeAnd ->

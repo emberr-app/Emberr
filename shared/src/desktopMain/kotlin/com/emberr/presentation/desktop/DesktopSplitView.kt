@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.desktop.window.keepTitleBarHiddenWhileHovered
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBorderWidth
@@ -642,7 +643,9 @@ private fun SplitPaneHandle(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SplitPillDragHandle(tint = iconTint, isEnabled = isExpanded, paneIndex = paneIndex, splitState = splitState)
-            SplitPillButton(painterResource(Res.drawable.x), "Close this screen", iconTint, isExpanded) { splitState.closePane(paneIndex) }
+            IconTooltip(text = "Close pane") {
+                SplitPillButton(painterResource(Res.drawable.x), "Close this screen", iconTint, isExpanded) { splitState.closePane(paneIndex) }
+            }
         }
     }
 }

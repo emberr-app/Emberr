@@ -159,6 +159,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.triggerHapticFeedback
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
 import com.emberr.presentation.shared.components.MinimalTimePickerDialog
 import com.emberr.presentation.shared.components.ReminderPresetMenu
@@ -870,53 +871,57 @@ fun NoteBlockItem(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 if (hasReminder) {
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(5.dp))
-                                            .background(MaterialTheme.colorScheme.surface)
-                                        .clickable {
-                                            val occurrenceDate = block.reminderTimestamp.let {
-                                                Instant.fromEpochMilliseconds(it)
-                                                    .toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+                                    IconTooltip(text = "More details") {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(5.dp))
+                                                .background(MaterialTheme.colorScheme.surface)
+                                            .clickable {
+                                                val occurrenceDate = block.reminderTimestamp.let {
+                                                    Instant.fromEpochMilliseconds(it)
+                                                        .toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+                                                }
+                                                afterKeyboardCloses {
+                                                    actions.onOpenEventOptions(block.id, occurrenceDate)
+                                                }
                                             }
-                                            afterKeyboardCloses {
-                                                actions.onOpenEventOptions(block.id, occurrenceDate)
-                                            }
+                                                .padding(horizontal = 8.dp, vertical = 6.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.MoreVert, "Event options",
+                                                modifier = Modifier.size(15.dp),
+                                                tint = MaterialTheme.colorScheme.onBackground
+                                            )
                                         }
-                                            .padding(horizontal = 8.dp, vertical = 6.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.MoreVert, "Event options",
-                                            modifier = Modifier.size(15.dp),
-                                            tint = MaterialTheme.colorScheme.onBackground
-                                        )
                                     }
                                 }
                                 Box {
-                                    Row(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(5.dp))
-                                            .background(MaterialTheme.colorScheme.surface)
-                                            .clickable {
-                                                isReminderPickerOpening = true
-                                                focusManager.clearFocus()
-                                                keyboardController?.hide()
-                                                scope.launch {
-                                                    if (isKeyboardOpen) delay(500L.milliseconds) else delay(
-                                                        50L.milliseconds
-                                                    )
-                                                    showPresetMenu = true
-                                                    isReminderPickerOpening = false
+                                    IconTooltip(text = "Date") {
+                                        Row(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(5.dp))
+                                                .background(MaterialTheme.colorScheme.surface)
+                                                .clickable {
+                                                    isReminderPickerOpening = true
+                                                    focusManager.clearFocus()
+                                                    keyboardController?.hide()
+                                                    scope.launch {
+                                                        if (isKeyboardOpen) delay(500L.milliseconds) else delay(
+                                                            50L.milliseconds
+                                                        )
+                                                        showPresetMenu = true
+                                                        isReminderPickerOpening = false
+                                                    }
                                                 }
-                                            }
-                                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painterResource(Res.drawable.calendar_add), "Date",
-                                            modifier = Modifier.size(15.dp),
-                                            tint = if (hasReminder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface
-                                        )
+                                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                painterResource(Res.drawable.calendar_add), "Date",
+                                                modifier = Modifier.size(15.dp),
+                                                tint = if (hasReminder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
                                     }
                                     ReminderPresetMenu(
                                         expanded = showPresetMenu,
@@ -934,30 +939,32 @@ fun NoteBlockItem(
                                     )
                                 }
                                 Box {
-                                    Row(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(5.dp))
-                                            .background(MaterialTheme.colorScheme.surface)
-                                            .clickable {
-                                                isReminderPickerOpening = true
-                                                focusManager.clearFocus()
-                                                keyboardController?.hide()
-                                                scope.launch {
-                                                    if (isKeyboardOpen) delay(500L.milliseconds) else delay(
-                                                        50L.milliseconds
-                                                    )
-                                                    showTimePresetMenu = true
-                                                    isReminderPickerOpening = false
+                                    IconTooltip(text = "Time") {
+                                        Row(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(5.dp))
+                                                .background(MaterialTheme.colorScheme.surface)
+                                                .clickable {
+                                                    isReminderPickerOpening = true
+                                                    focusManager.clearFocus()
+                                                    keyboardController?.hide()
+                                                    scope.launch {
+                                                        if (isKeyboardOpen) delay(500L.milliseconds) else delay(
+                                                            50L.milliseconds
+                                                        )
+                                                        showTimePresetMenu = true
+                                                        isReminderPickerOpening = false
+                                                    }
                                                 }
-                                            }
-                                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painterResource(Res.drawable.clock_circle), "Time",
-                                            modifier = Modifier.size(16.dp),
-                                            tint = if (hasReminder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface
-                                        )
+                                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                painterResource(Res.drawable.clock_circle), "Time",
+                                                modifier = Modifier.size(16.dp),
+                                                tint = if (hasReminder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
                                     }
                                     TimePresetMenu(
                                         expanded = showTimePresetMenu,

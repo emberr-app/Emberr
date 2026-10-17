@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.allViews
 import com.emberr.domain.model.DatabaseBlock
@@ -278,16 +279,18 @@ private fun DatabaseAddViewButton(
     var showMenu by remember { mutableStateOf(false) }
 
     Box {
-        Icon(
-            painter = painterResource(Res.drawable.plus),
-            contentDescription = "Add view",
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .clickable(enabled = enabled) { runAfterKeyboardCloses { showMenu = true } }
-                .padding(6.dp)
-                .size(16.dp)
-        )
+        IconTooltip(text = "Add view") {
+            Icon(
+                painter = painterResource(Res.drawable.plus),
+                contentDescription = "Add view",
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(enabled = enabled) { runAfterKeyboardCloses { showMenu = true } }
+                    .padding(6.dp)
+                    .size(16.dp)
+            )
+        }
 
         DatabaseMenu(expanded = showMenu, title = "Add view", onDismiss = { showMenu = false }) { closeAnd ->
             DatabaseViewType.entries.forEach { type ->

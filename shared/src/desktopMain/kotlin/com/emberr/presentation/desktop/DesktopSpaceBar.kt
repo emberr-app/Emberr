@@ -58,6 +58,8 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.IconTooltipPosition
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.plus
 import kotlin.math.abs
@@ -108,7 +110,9 @@ fun DesktopSpaceBar(
         )
 
         Box(modifier = Modifier.align(Alignment.CenterEnd).padding(end = PLUS_BUTTON_END_PADDING)) {
-            AddSpaceButton(onClick = { showAddMenu = true })
+            IconTooltip(text = "Create space", position = IconTooltipPosition.Above) {
+                AddSpaceButton(onClick = { showAddMenu = true })
+            }
 
             EmberrDesktopMenu(
                 expanded = showAddMenu,
@@ -205,14 +209,16 @@ private fun SpaceDotsRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         displayedSpaces.forEachIndexed { index, space ->
-            Box(
-                modifier = Modifier.width(DOT_SLOT_WIDTH).height(BAR_HEIGHT),
-                contentAlignment = Alignment.Center
-            ) {
-                SpaceDot(
-                    isActive = space.spaceId == activeSpaceId,
-                    isBeingMoved = draggedFromIndex >= 0 && index == draggedToIndex
-                )
+            IconTooltip(text = space.displayName, position = IconTooltipPosition.Above) {
+                Box(
+                    modifier = Modifier.width(DOT_SLOT_WIDTH).height(BAR_HEIGHT),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SpaceDot(
+                        isActive = space.spaceId == activeSpaceId,
+                        isBeingMoved = draggedFromIndex >= 0 && index == draggedToIndex
+                    )
+                }
             }
         }
     }

@@ -66,6 +66,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.PropertyType
@@ -338,17 +339,19 @@ internal fun PropertyTextValue(
                     }
 
                     if (openValue != null && showsOpenIcon) {
-                        Icon(
-                            painter = painterResource(openIcon),
-                            contentDescription = "Open ${block.label.lowercase()}",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .clip(CircleShape)
-                                .clickable { openValue(block.text.trim()) }
-                                .padding(4.dp)
-                                .size(16.dp)
-                        )
+                        IconTooltip(text = "Open ${block.label.lowercase()}") {
+                            Icon(
+                                painter = painterResource(openIcon),
+                                contentDescription = "Open ${block.label.lowercase()}",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .clip(CircleShape)
+                                    .clickable { openValue(block.text.trim()) }
+                                    .padding(4.dp)
+                                    .size(16.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -420,17 +423,19 @@ internal fun PropertyDateValue(
                 modifier = Modifier.weight(1f, fill = alignment != null)
             )
             if (range.start != null && !inSelectionMode) {
-                Icon(
-                    painter = painterResource(Res.drawable.x),
-                    contentDescription = "Clear date",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .clip(CircleShape)
-                        .clickable { onUpdateDate(PropertyDateRange()) }
-                        .padding(4.dp)
-                        .size(14.dp)
-                )
+                IconTooltip(text = "Clear date") {
+                    Icon(
+                        painter = painterResource(Res.drawable.x),
+                        contentDescription = "Clear date",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .clip(CircleShape)
+                            .clickable { onUpdateDate(PropertyDateRange()) }
+                            .padding(4.dp)
+                            .size(14.dp)
+                    )
+                }
             }
         }
 

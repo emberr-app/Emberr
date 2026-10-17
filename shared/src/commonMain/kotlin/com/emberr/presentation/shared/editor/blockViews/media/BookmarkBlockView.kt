@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.network.httpHeaders
 import coil3.request.crossfade
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showNativeToast
@@ -168,17 +169,19 @@ fun BookmarkBlockView(
 
                         if (block.url.isNotEmpty() && block.previewImageUrl == null) {
                             Spacer(modifier = Modifier.width(8.dp))
-                            Icon(
-                                painterResource(Res.drawable.copy),
-                                contentDescription = "Copy URL",
-                                tint = MaterialTheme.colorScheme.outline,
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .clickable {
-                                        clipboardManager.setText(AnnotatedString(block.url))
-                                        showNativeToast("copied url")
-                                    }
-                            )
+                            IconTooltip(text = "Copy link") {
+                                Icon(
+                                    painterResource(Res.drawable.copy),
+                                    contentDescription = "Copy URL",
+                                    tint = MaterialTheme.colorScheme.outline,
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .clickable {
+                                            clipboardManager.setText(AnnotatedString(block.url))
+                                            showNativeToast("copied url")
+                                        }
+                                )
+                            }
                         }
                     }
 
@@ -247,23 +250,26 @@ fun BookmarkBlockView(
                         )
 
                         if (block.url.isNotEmpty()) {
-                            Icon(
-                                painterResource(Res.drawable.copy),
-                                contentDescription = "Copy URL",
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(8.dp)
-                                    .emberrBorder(CircleShape)
-                                    .clip(CircleShape)
-                                    .emberrBlur(imageHazeState, EmberrBlur.OnImage)
-                                    .padding(8.dp)
-                                    .size(16.dp)
-                                    .clickable {
-                                        clipboardManager.setText(AnnotatedString(block.url))
-                                        showNativeToast("copied url")
-                                    }
-                            )
+                            Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                                IconTooltip(text = "Copy link") {
+                                    Icon(
+                                        painterResource(Res.drawable.copy),
+                                        contentDescription = "Copy URL",
+                                        tint = Color.White,
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .emberrBorder(CircleShape)
+                                            .clip(CircleShape)
+                                            .emberrBlur(imageHazeState, EmberrBlur.OnImage)
+                                            .padding(8.dp)
+                                            .size(16.dp)
+                                            .clickable {
+                                                clipboardManager.setText(AnnotatedString(block.url))
+                                                showNativeToast("copied url")
+                                            }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
