@@ -2,6 +2,7 @@ package com.emberr.presentation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -1145,6 +1146,14 @@ fun EmberrApp(
                     KmpBackHandler(enabled = isSearchBarOpen) { closeSearchBar() }
 
                     if (!isDesktopPlatform) {
+                        val updatePeekBottomGap by animateDpAsState(
+                            targetValue = if (isBottomBarCompact) {
+                                COMPACT_BOTTOM_BAR_PILL_HEIGHT + COMPACT_BOTTOM_BAR_BOTTOM_PADDING
+                            } else {
+                                EXPANDED_BOTTOM_BAR_PILL_HEIGHT + BOTTOM_BAR_BOTTOM_PADDING
+                            },
+                            animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)
+                        )
                         EmberrUpdatePeek(
                             isDue = isUpdatePeekDue,
                             canShow = isBottomBarVisible &&
@@ -1155,7 +1164,7 @@ fun EmberrApp(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .navigationBarsPadding()
-                                .padding(bottom = EXPANDED_BOTTOM_BAR_PILL_HEIGHT + BOTTOM_BAR_BOTTOM_PADDING)
+                                .padding(bottom = updatePeekBottomGap)
                         )
 
                         AnimatedVisibility(
