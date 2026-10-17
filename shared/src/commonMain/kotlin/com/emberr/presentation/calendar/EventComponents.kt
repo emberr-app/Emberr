@@ -63,12 +63,19 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetAction
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
+import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
+import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.MenuAtTap
+import com.emberr.presentation.shared.components.MenuTapAnchor
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
 import com.emberr.presentation.shared.components.MinimalTimePickerDialog
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.menuTapAnchor
+import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar
@@ -342,23 +349,27 @@ private fun EventEditorFields(
         }
 
         var showRepeatDialog by remember { mutableStateOf(false) }
+        val repeatTapAnchor = rememberMenuTapAnchor()
         val canEditRecurrence = state.editScope == RecurrenceEditScope.ALL_EVENTS
-        EventFieldRow(
-            icon = painterResource(Res.drawable.clock_circle),
-            label = state.recurrenceRule?.let(::formatRecurrenceSummary) ?: "Does not repeat",
-            onClick = { if (canEditRecurrence) showRepeatDialog = true },
-            modifier = Modifier.fillMaxWidth().let { if (canEditRecurrence) it else it.alpha(0.5f) }
-        )
-        if (showRepeatDialog) {
-            RepeatOptionsDialog(
-                initialRule = state.recurrenceRule,
-                anchorDate = state.date,
-                onDismiss = { showRepeatDialog = false },
-                onConfirm = { rule ->
-                    onRecurrenceChange(rule)
-                    showRepeatDialog = false
-                }
+        Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(repeatTapAnchor)) {
+            EventFieldRow(
+                icon = painterResource(Res.drawable.clock_circle),
+                label = state.recurrenceRule?.let(::formatRecurrenceSummary) ?: "Does not repeat",
+                onClick = { if (canEditRecurrence) showRepeatDialog = true },
+                modifier = Modifier.fillMaxWidth().let { if (canEditRecurrence) it else it.alpha(0.5f) }
             )
+            if (showRepeatDialog) {
+                RepeatOptionsDialog(
+                    initialRule = state.recurrenceRule,
+                    anchorDate = state.date,
+                    tapAnchor = repeatTapAnchor,
+                    onDismiss = { showRepeatDialog = false },
+                    onConfirm = { rule ->
+                        onRecurrenceChange(rule)
+                        showRepeatDialog = false
+                    }
+                )
+            }
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -709,13 +720,74 @@ private fun SheetOptionRow(label: String, onClick: () -> Unit) {
     }
 }
 
+private val RepeatMenuWidth = 220.dp
+private val CustomRepeatMenuWidth = 340.dp
+
+@Composable
+private fun RepeatDesktopMenu(
+    initialRule: RecurrenceRule?,
+    anchorDate: LocalDate,
+    tapAnchor: MenuTapAnchor,
+    onDismiss: () -> Unit,
+    onConfirm: (RecurrenceRule?) -> Unit
+) {
+    MenuAtTap(tapAnchor, menuWidth = RepeatMenuWidth) {
+        EmberrDesktopMenu(
+            expanded = true,
+            onDismissRequest = onDismiss,
+            modifier = Modifier.width(RepeatMenuWidth)
+        ) {
+            Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                EmberrDesktopMenuOption(label = "Never", onClick = { onConfirm(null) })
+                EmberrDesktopMenuOption(label = "Daily", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.DAILY)) })
+                EmberrDesktopMenuOption(
+                    label = "Weekly",
+                    onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.WEEKLY, daysOfWeek = setOf(anchorDate.dayOfWeek))) }
+                )
+                EmberrDesktopMenuOption(label = "Monthly", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.MONTHLY)) })
+                EmberrDesktopMenuOption(label = "Yearly", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.YEARLY)) })
+                EmberrDesktopSubmenu(
+                    menuWidthEstimate = CustomRepeatMenuWidth,
+                    anchor = { openCustom, _ -> EmberrDesktopMenuOption(label = "Custom…", onClick = openCustom) }
+                ) { isCustomOpen, closeCustom ->
+                    EmberrDesktopMenu(
+                        expanded = isCustomOpen,
+                        onDismissRequest = closeCustom,
+                        modifier = Modifier.width(CustomRepeatMenuWidth)
+                    ) {
+                        CustomRepeatForm(
+                            initialRule = initialRule,
+                            anchorDate = anchorDate,
+                            onCancel = closeCustom,
+                            onDone = onConfirm,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun RepeatOptionsDialog(
     initialRule: RecurrenceRule?,
     anchorDate: LocalDate,
+    tapAnchor: MenuTapAnchor,
     onDismiss: () -> Unit,
     onConfirm: (RecurrenceRule?) -> Unit
 ) {
+    if (isDesktopPlatform) {
+        RepeatDesktopMenu(
+            initialRule = initialRule,
+            anchorDate = anchorDate,
+            tapAnchor = tapAnchor,
+            onDismiss = onDismiss,
+            onConfirm = onConfirm
+        )
+        return
+    }
+
     var showCustom by remember { mutableStateOf(false) }
 
     if (showCustom) {
@@ -830,6 +902,25 @@ private fun CustomRepeatDialog(
     onDismiss: () -> Unit,
     onConfirm: (RecurrenceRule?) -> Unit
 ) {
+    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = "Custom Repeat") { closeAnd ->
+        CustomRepeatForm(
+            initialRule = initialRule,
+            anchorDate = anchorDate,
+            onCancel = { closeAnd(onDismiss) },
+            onDone = { rule -> closeAnd { onConfirm(rule) } },
+            modifier = Modifier.padding(bottom = 30.dp)
+        )
+    }
+}
+
+@Composable
+private fun CustomRepeatForm(
+    initialRule: RecurrenceRule?,
+    anchorDate: LocalDate,
+    onCancel: () -> Unit,
+    onDone: (RecurrenceRule) -> Unit,
+    modifier: Modifier = Modifier
+) {
     var frequency by remember { mutableStateOf(initialRule?.frequency ?: RecurrenceFrequency.WEEKLY) }
     var interval by remember { mutableIntStateOf(initialRule?.interval ?: 1) }
     var daysOfWeek by remember {
@@ -855,202 +946,198 @@ private fun CustomRepeatDialog(
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
     }
 
-    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = "Custom Repeat") { closeAnd ->
-        CompositionLocalProvider(
-            LocalIndication provides NoRippleIndicationNodeFactory,
-            LocalRippleConfiguration provides null
+    CompositionLocalProvider(
+        LocalIndication provides NoRippleIndicationNodeFactory,
+        LocalRippleConfiguration provides null
+    ) {
+        Column(
+            modifier = modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 30.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+
+            divider()
+
+            // Interval
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = summary,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    text = "Repeat every",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    StepperButton(
+                        icon = Icons.Default.Remove,
+                        contentDescription = "Decrease",
+                        enabled = interval > 1
+                    ) { interval = (interval - 1).coerceAtLeast(1) }
+                    Text(
+                        text = interval.toString(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.widthIn(min = 36.dp)
+                    )
+                    StepperButton(
+                        icon = Icons.Default.Add,
+                        contentDescription = "Increase",
+                        enabled = interval < 99
+                    ) { interval = (interval + 1).coerceAtMost(99) }
+                }
+            }
 
+            // Frequency
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                RecurrenceFrequency.entries.forEach { option ->
+                    CategoryChip(
+                        label = when (option) {
+                            RecurrenceFrequency.DAILY -> "Days"
+                            RecurrenceFrequency.WEEKLY -> "Weeks"
+                            RecurrenceFrequency.MONTHLY -> "Months"
+                            RecurrenceFrequency.YEARLY -> "Years"
+                        },
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        hasCategory = false,
+                        isSelected = frequency == option,
+                        onClick = { frequency = option }
+                    )
+                }
+            }
+
+            // Weekdays
+            if (frequency == RecurrenceFrequency.WEEKLY) {
                 divider()
 
-                // Interval
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Repeat every",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    SectionLabel("On these days")
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        StepperButton(
-                            icon = Icons.Default.Remove,
-                            contentDescription = "Decrease",
-                            enabled = interval > 1
-                        ) { interval = (interval - 1).coerceAtLeast(1) }
-                        Text(
-                            text = interval.toString(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.widthIn(min = 36.dp)
-                        )
-                        StepperButton(
-                            icon = Icons.Default.Add,
-                            contentDescription = "Increase",
-                            enabled = interval < 99
-                        ) { interval = (interval + 1).coerceAtMost(99) }
-                    }
-                }
-
-                // Frequency
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    RecurrenceFrequency.entries.forEach { option ->
-                        CategoryChip(
-                            label = when (option) {
-                                RecurrenceFrequency.DAILY -> "Days"
-                                RecurrenceFrequency.WEEKLY -> "Weeks"
-                                RecurrenceFrequency.MONTHLY -> "Months"
-                                RecurrenceFrequency.YEARLY -> "Years"
-                            },
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            hasCategory = false,
-                            isSelected = frequency == option,
-                            onClick = { frequency = option }
-                        )
-                    }
-                }
-
-                // Weekdays
-                if (frequency == RecurrenceFrequency.WEEKLY) {
-                    divider()
-
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        SectionLabel("On these days")
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            weekdayOrder.forEach { day ->
-                                val isSelected = day in daysOfWeek
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(36.dp)
-                                        .clip(EmberrCorner)
-                                        .background(
-                                            if (isSelected) MaterialTheme.colorScheme.primary
-                                            else MaterialTheme.colorScheme.surfaceVariant
-                                        )
-                                        .clickable {
-                                            daysOfWeek = if (isSelected) {
-                                                (daysOfWeek - day).ifEmpty { setOf(day) }
-                                            } else {
-                                                daysOfWeek + day
-                                            }
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = day.name.take(1),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                        else MaterialTheme.colorScheme.onSurface
+                        weekdayOrder.forEach { day ->
+                            val isSelected = day in daysOfWeek
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(36.dp)
+                                    .clip(EmberrCorner)
+                                    .background(
+                                        if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.surfaceVariant
                                     )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                divider()
-
-                // End condition
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Ends",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        CategoryChip(
-                            label = "Never",
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            hasCategory = false,
-                            isSelected = !hasEndDate,
-                            onClick = { hasEndDate = false }
-                        )
-                        CategoryChip(
-                            label = "On date",
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            hasCategory = false,
-                            isSelected = hasEndDate,
-                            onClick = {
-                                hasEndDate = true
-                                if (untilDateString == null) showEndDatePicker = true
-                            }
-                        )
-                    }
-                }
-
-                if (hasEndDate) {
-                    EventFieldRow(
-                        icon = painterResource(Res.drawable.calendar),
-                        label = untilDateString?.let { formatFullDate(LocalDate.parse(it)) }
-                            ?: "Choose end date",
-                        onClick = { showEndDatePicker = true },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                if (showEndDatePicker) {
-                    val initialMillis = untilDateString?.let { LocalDate.parse(it) }
-                        ?.let {
-                            LocalDateTime(it.year, it.month.number, it.day, 0, 0)
-                                .toInstant(TimeZone.UTC).toEpochMilliseconds()
-                        }
-                        ?: System.currentTimeMillis()
-                    MinimalDatePickerDialog(
-                        initialTimestamp = initialMillis,
-                        onDismiss = { showEndDatePicker = false },
-                        onConfirm = { millis ->
-                            untilDateString = Instant.fromEpochMilliseconds(millis)
-                                .toLocalDateTime(TimeZone.UTC).date.toString()
-                            showEndDatePicker = false
-                        }
-                    )
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    EmberrButtonSecondary(text = "Cancel", onClick = { closeAnd(onDismiss) }, modifier = Modifier.weight(1f))
-                    EmberrButtonPrimary(
-                        text = "Done",
-                        onClick = {
-                            closeAnd {
-                                onConfirm(
-                                    RecurrenceRule(
-                                        frequency = frequency,
-                                        interval = interval,
-                                        daysOfWeek = if (frequency == RecurrenceFrequency.WEEKLY) daysOfWeek else emptySet(),
-                                        untilDateString = if (hasEndDate) untilDateString else null
-                                    )
+                                    .clickable {
+                                        daysOfWeek = if (isSelected) {
+                                            (daysOfWeek - day).ifEmpty { setOf(day) }
+                                        } else {
+                                            daysOfWeek + day
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = day.name.take(1),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurface
                                 )
                             }
-                        },
-                        modifier = Modifier.weight(1f)
+                        }
+                    }
+                }
+            }
+
+            divider()
+
+            // End condition
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Ends",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CategoryChip(
+                        label = "Never",
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        hasCategory = false,
+                        isSelected = !hasEndDate,
+                        onClick = { hasEndDate = false }
+                    )
+                    CategoryChip(
+                        label = "On date",
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        hasCategory = false,
+                        isSelected = hasEndDate,
+                        onClick = {
+                            hasEndDate = true
+                            if (untilDateString == null) showEndDatePicker = true
+                        }
                     )
                 }
+            }
+
+            if (hasEndDate) {
+                EventFieldRow(
+                    icon = painterResource(Res.drawable.calendar),
+                    label = untilDateString?.let { formatFullDate(LocalDate.parse(it)) }
+                        ?: "Choose end date",
+                    onClick = { showEndDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            if (showEndDatePicker) {
+                val initialMillis = untilDateString?.let { LocalDate.parse(it) }
+                    ?.let {
+                        LocalDateTime(it.year, it.month.number, it.day, 0, 0)
+                            .toInstant(TimeZone.UTC).toEpochMilliseconds()
+                    }
+                    ?: System.currentTimeMillis()
+                MinimalDatePickerDialog(
+                    initialTimestamp = initialMillis,
+                    onDismiss = { showEndDatePicker = false },
+                    onConfirm = { millis ->
+                        untilDateString = Instant.fromEpochMilliseconds(millis)
+                            .toLocalDateTime(TimeZone.UTC).date.toString()
+                        showEndDatePicker = false
+                    }
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                EmberrButtonSecondary(text = "Cancel", onClick = onCancel, modifier = Modifier.weight(1f))
+                EmberrButtonPrimary(
+                    text = "Done",
+                    onClick = {
+                        onDone(
+                            RecurrenceRule(
+                                frequency = frequency,
+                                interval = interval,
+                                daysOfWeek = if (frequency == RecurrenceFrequency.WEEKLY) daysOfWeek else emptySet(),
+                                untilDateString = if (hasEndDate) untilDateString else null
+                            )
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
