@@ -144,6 +144,7 @@ internal fun CalendarSearchBar(
             shape = CircleShape,
             color = Color.Transparent,
             modifier = Modifier
+                .padding(bottom = (EXPANDED_BOTTOM_BAR_PILL_HEIGHT - barHeight) / 2)
                 .size(width = barWidth, height = barHeight)
                 .emberrBorder(CircleShape)
                 .customEmberrShadow(CircleShape, elevation = EmberrShadowElevation.Standard)
