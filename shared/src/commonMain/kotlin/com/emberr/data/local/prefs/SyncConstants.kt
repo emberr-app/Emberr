@@ -114,4 +114,8 @@ object SyncConstants {
     const val KEY_CANVAS_DOT_GRID_VISIBLE_PREFIX = "canvas_dot_grid_visible_"
     const val KEY_CANVAS_TOOL_SETTINGS_PREFIX = "canvas_tool_settings_"
     const val KEY_TABLE_LAYOUT_PREFIX = "table_layout_"
+    const val KEY_COVER_IMAGE_POSITION_PREFIX = "cover_image_position_"
+
+    fun coverImagePositionKey(noteId: String, coverImagePath: String): String =
+        KEY_COVER_IMAGE_POSITION_PREFIX + noteId + "_" + coverImagePath
 }
