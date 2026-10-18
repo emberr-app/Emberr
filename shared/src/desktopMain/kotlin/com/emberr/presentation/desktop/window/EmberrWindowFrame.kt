@@ -39,13 +39,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.IntSize
 import java.awt.Cursor
-import javax.swing.SwingUtilities
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -272,6 +272,15 @@ private fun WindowScope.EmberrTitleBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(frameSize.titleBarHeight)
+            .onPointerEvent(PointerEventType.Press) { event ->
+                if (!event.buttons.isSecondaryPressed) return@onPointerEvent
+                val mouseEvent = event.awtEventOrNull ?: return@onPointerEvent
+                NativeWindowActions.showWindowMenu(
+                    window = window,
+                    screenX = mouseEvent.xOnScreen,
+                    screenY = mouseEvent.yOnScreen
+                )
+            }
             .pointerInput(window) {
                 val doubleTapSlopPx = DoubleTapSlop.toPx()
                 val dragThresholdPx = DragThreshold.toPx()
@@ -279,15 +288,6 @@ private fun WindowScope.EmberrTitleBar(
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = true)
                     val downMouseEvent = currentEvent.awtEventOrNull
-
-                    if (downMouseEvent != null && SwingUtilities.isRightMouseButton(downMouseEvent)) {
-                        NativeWindowActions.showWindowMenu(
-                            window = window,
-                            screenX = downMouseEvent.xOnScreen,
-                            screenY = downMouseEvent.yOnScreen
-                        )
-                        return@awaitEachGesture
-                    }
 
                     val tapTimeMillis = downMouseEvent?.`when` ?: 0L
                     val isDoubleTap =
