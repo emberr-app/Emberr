@@ -33,3 +33,8 @@
 -keep class * extends androidx.work.InputMerger {
     <init>();
 }
+
+-dontwarn java.awt.*
+-keep class com.sun.jna.* { *; }
+-keep class * extends com.sun.jna.* { *; }
+-keepclassmembers class * extends com.sun.jna.* { public *; }

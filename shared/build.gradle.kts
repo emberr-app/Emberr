@@ -137,6 +137,7 @@ kotlin {
                 implementation(libs.sqldelight.coroutines.extensions)
                 implementation(libs.kotlinx.collections.immutable)
                 implementation(libs.aboutlibraries.core)
+                implementation(libs.libsodium.bindings)
             }
         }
 
@@ -192,6 +193,7 @@ kotlin {
 
                 implementation(libs.androidx.core.splashscreen)
                 implementation(libs.sqldelight.android.driver)
+                compileOnly(libs.jna)
             }
         }
 

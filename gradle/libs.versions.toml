@@ -43,7 +43,7 @@ jsoup = "1.23.2"
 jetbrainsMarkdown = "0.7.14"
 dbusJava = "5.2.0"
 jmdns = "3.6.3"
-jna = "5.13.0"
+jna = "5.18.1"
 
 # Local storage and encryption
 room = "2.8.4"
@@ -51,6 +51,7 @@ sqldelight = "2.3.2"
 sqlcipher = "4.19.0"
 sqlite = "2.7.0"
 tink = "1.23.0"
+libsodiumBindings = "0.9.5"
 
 # On-device AI inference
 llamatik = "1.10.1"
@@ -127,6 +128,7 @@ jetbrains-markdown = { group = "org.jetbrains", name = "markdown", version.ref =
 dbus-java-core = { group = "com.github.hypfvieh", name = "dbus-java-core", version.ref = "dbusJava" }
 dbus-java-transport-native-unixsocket = { group = "com.github.hypfvieh", name = "dbus-java-transport-native-unixsocket", version.ref = "dbusJava" }
 jmdns = { group = "org.jmdns", name = "jmdns", version.ref = "jmdns" }
+jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
 jna-platform = { group = "net.java.dev.jna", name = "jna-platform", version.ref = "jna" }
 
 # Room
@@ -145,6 +147,7 @@ sqlcipher = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "
 androidx-sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version.ref = "sqlite" }
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 tink-android = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
+libsodium-bindings = { group = "com.ionspin.kotlin", name = "multiplatform-crypto-libsodium-bindings", version.ref = "libsodiumBindings" }
 
 # On-device AI inference
 llamatik-library = { group = "com.llamatik", name = "library", version.ref = "llamatik" }
