@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
+import com.emberr.presentation.shared.cover.coverAlignmentFor
+import com.emberr.presentation.shared.cover.rememberSavedCoverPosition
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.emberr.domain.database.DatabaseRow
@@ -293,7 +295,7 @@ internal fun DatabaseRowCard(
             .then(gestureModifier)
     ) {
         if (view.showsCoverImage) {
-            DatabaseCardCover(coverImagePath = row.coverImagePath, height = dimensions.coverHeight)
+            DatabaseCardCover(noteId = row.noteId, coverImagePath = row.coverImagePath, height = dimensions.coverHeight)
         }
         Column(
             modifier = Modifier
@@ -330,7 +332,7 @@ internal fun DatabaseRowCard(
 }
 
 @Composable
-private fun DatabaseCardCover(coverImagePath: String?, height: Dp) {
+private fun DatabaseCardCover(noteId: String, coverImagePath: String?, height: Dp) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -348,11 +350,13 @@ private fun DatabaseCardCover(coverImagePath: String?, height: Dp) {
                     .diskCacheKey(absolutePath)
                     .build()
             }
+            val coverPosition by rememberSavedCoverPosition(noteId, coverImagePath)
             AsyncImage(
                 model = request,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                alignment = coverAlignmentFor(coverPosition)
             )
         }
     }

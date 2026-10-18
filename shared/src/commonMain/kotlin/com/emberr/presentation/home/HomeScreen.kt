@@ -41,6 +41,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
+import com.emberr.presentation.shared.editor.blockViews.media.AnimatedGifLayer
+import com.emberr.presentation.shared.cover.coverAlignmentFor
+import com.emberr.presentation.shared.cover.rememberSavedCoverPosition
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
@@ -1420,12 +1423,16 @@ fun NoteCard(
                             coil3.request.ImageRequest.Builder(context).data(absolutePath)
                                 .memoryCacheKey(absolutePath).diskCacheKey(absolutePath).build()
                         }
+                        val coverPosition by rememberSavedCoverPosition(note.noteId, note.coverImagePath)
+                        val coverAlignment = coverAlignmentFor(coverPosition)
                         AsyncImage(
                             model = request,
                             contentDescription = "Cover",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
+                            alignment = coverAlignment
                         )
+                        AnimatedGifLayer(absolutePath, ContentScale.Crop, Modifier.fillMaxSize(), coverAlignment)
                     } else if (isCanvas) {
                         CanvasPreview(
                             canvasNoteId = note.noteId,
