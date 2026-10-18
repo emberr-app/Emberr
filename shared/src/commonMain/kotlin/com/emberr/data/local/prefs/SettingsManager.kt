@@ -27,6 +27,9 @@ interface SettingsManager {
     fun getTableLayoutJson(blockId: String): String?
     fun saveTableLayoutJson(blockId: String, json: String)
 
+    fun getCoverImagePosition(noteId: String, coverImagePath: String): Float?
+    fun saveCoverImagePosition(noteId: String, coverImagePath: String, position: Float)
+
     fun getCanvasViewPositionJson(canvasNoteId: String): String?
     fun saveCanvasViewPositionJson(canvasNoteId: String, json: String)
     fun getCanvasIdsWithSavedViewPosition(): Set<String>

@@ -69,6 +69,7 @@ val sharedModule = module {
     single { com.emberr.domain.canvas.CanvasViewPositionStore(settingsManager = get()) }
     single { com.emberr.domain.canvas.CanvasToolSettingsStore(settingsManager = get()) }
     single { com.emberr.domain.table.DeviceTableLayoutStore(settingsManager = get()) }
+    single { com.emberr.domain.cover.DeviceCoverPositionStore(settingsManager = get()) }
     single {
         com.emberr.domain.repository.FavoriteNoteOrderStore(
             settingsManager = get(),

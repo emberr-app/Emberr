@@ -127,6 +127,15 @@ class AndroidSettingsManager(
         sharedPreferences.edit { putString(SyncConstants.KEY_TABLE_LAYOUT_PREFIX + blockId, json) }
     }
 
+    override fun getCoverImagePosition(noteId: String, coverImagePath: String): Float? {
+        val key = SyncConstants.coverImagePositionKey(noteId, coverImagePath)
+        return if (sharedPreferences.contains(key)) sharedPreferences.getFloat(key, 0f) else null
+    }
+
+    override fun saveCoverImagePosition(noteId: String, coverImagePath: String, position: Float) {
+        sharedPreferences.edit { putFloat(SyncConstants.coverImagePositionKey(noteId, coverImagePath), position) }
+    }
+
     override fun getCanvasViewPositionJson(canvasNoteId: String): String? =
         sharedPreferences.getString(SyncConstants.KEY_CANVAS_VIEW_POSITION_PREFIX + canvasNoteId, null)
 
