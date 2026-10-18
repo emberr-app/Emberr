@@ -179,6 +179,7 @@ kotlin {
                 implementation(libs.androidx.glance.appwidget)
                 implementation(libs.jsoup)
                 implementation(libs.ktor.client.okhttp)
+                implementation(libs.coil.gif)
                 implementation(libs.androidx.documentfile)
                 implementation(libs.koin.androidx.workmanager)
 

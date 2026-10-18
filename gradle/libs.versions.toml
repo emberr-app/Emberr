@@ -84,6 +84,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 # Image loading and visual effects
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil3" }
 coil-network-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil3" }
+coil-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil3" }
 haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haze" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 

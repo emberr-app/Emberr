@@ -357,7 +357,7 @@ private fun runEmberrDesktopApp() = application {
                     startRoute = Screen.Splash.route,
                     onPickImage = { onPathSelected ->
                         val dialog = java.awt.FileDialog(currentWindow, "Select Image", java.awt.FileDialog.LOAD)
-                        dialog.file = "*.png;*.jpg;*.jpeg;*.webp"
+                        dialog.file = "*.png;*.jpg;*.jpeg;*.webp;*.gif"
                         dialog.isVisible = true
                         dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
                     },
@@ -505,7 +505,7 @@ private fun runEmberrDesktopApp() = application {
                     }
                     val pickStickyImage: (onPathSelected: (String) -> Unit) -> Unit = { onPathSelected ->
                         val dialog = java.awt.FileDialog(stickyWindow, "Select Image", java.awt.FileDialog.LOAD)
-                        dialog.file = "*.png;*.jpg;*.jpeg;*.webp"
+                        dialog.file = "*.png;*.jpg;*.jpeg;*.webp;*.gif"
                         dialog.isVisible = true
                         dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
                     }
