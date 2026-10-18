@@ -151,7 +151,7 @@ private data class FormatRequest(
 abstract class BaseEditorViewModel(
     protected val repository: NoteRepository,
     protected val mediaStorageHelper: MediaStorageHelper,
-    private val webImageFetcher: WebImageFetcher,
+    protected val webImageFetcher: WebImageFetcher,
     protected val reminderScheduler: ReminderScheduler,
     protected val audioRecorder: AudioRecorder,
     private val appScope: CoroutineScope,

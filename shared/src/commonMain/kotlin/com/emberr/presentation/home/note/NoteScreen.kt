@@ -23,12 +23,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.node.DelegatableNode
@@ -47,6 +47,7 @@ import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.selection.BlockSelectionMenuContent
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.EditorScreen
+import com.emberr.presentation.shared.editor.ImageLinkFetch
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.selection.CrossBlockTextRange
@@ -59,7 +60,6 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.editor.EditorToolbar
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
-import coil3.compose.AsyncImage
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import com.emberr.presentation.shared.editor.MobileMenuState
@@ -166,6 +166,7 @@ fun NoteScreen(
     val noteIcon by viewModel.noteIcon.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
     val coverImagePath by viewModel.coverImagePath.collectAsState()
+    val coverLinkFetch by viewModel.coverLinkFetch.collectAsState()
     val isEditingTemplate by viewModel.isTemplate.collectAsState()
 
     // Word Count States
@@ -233,6 +234,7 @@ fun NoteScreen(
     val imeBottom = WindowInsets.ime.getBottom(density)
 
     var isKeyboardOpen by remember { mutableStateOf(false) }
+    var isEditorFocused by remember { mutableStateOf(false) }
     var previousImeBottom by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(isKeyboardOpen) {
@@ -569,6 +571,8 @@ fun NoteScreen(
                     },
                     headerContent = {
                         NoteHeader(
+                            noteId = noteId,
+                            isEditorFocused = isEditorFocused,
                             noteIcon = noteIcon,
                             noteTitle = noteTitle,
                             coverImagePath = coverImagePath,
@@ -582,6 +586,7 @@ fun NoteScreen(
                     },
                     modifier = Modifier
                         .fillMaxSize()
+                        .onFocusChanged { isEditorFocused = it.hasFocus }
                         .hazeSource(state = hazeState),
                     listState = editorListState,
                     onUndo = { viewModel.undo() },
@@ -700,7 +705,7 @@ fun NoteScreen(
                     hazeStyle = topBarButtonHazeStyle ?: EmberrBlur.Regular,
                     contentPadding = topHeaderBarPadding(
                         top = desktopTopMargin + if (isDesktopPlatform) 20.dp else 10.dp,
-                        horizontal = if (isDesktopPlatform) 22.dp else 16.dp
+                        horizontal = NoteTopBarSidePadding
                     ),
                     showBackButton = showBackButton,
                     reserveBackButtonSpace = false,
@@ -752,6 +757,8 @@ fun NoteScreen(
                                         isEditingTemplate = isEditingTemplate,
                                         onAddCover = handleAddCover,
                                         onRemoveCover = handleRemoveCover,
+                                        coverLinkFetch = coverLinkFetch,
+                                        onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                                         onToggleWordCount = handleToggleWordCount,
                                         onSetAlignment = handleSetAlignment,
                                         onMoveToTrash = handleMoveToTrash,
@@ -828,6 +835,8 @@ fun NoteScreen(
                         isEditingTemplate = isEditingTemplate,
                         onAddCover = handleAddCover,
                         onRemoveCover = handleRemoveCover,
+                        coverLinkFetch = coverLinkFetch,
+                        onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                         onToggleWordCount = handleToggleWordCount,
                         onSetAlignment = handleSetAlignment,
                         onMoveToTrash = handleMoveToTrash,
@@ -911,9 +920,13 @@ fun NoteScreen(
     }
 }
 
+private val NoteTopBarSidePadding = if (isDesktopPlatform) 22.dp else 16.dp
+
 // Note header — cover image, icon, title
 @Composable
 private fun NoteHeader(
+    noteId: String,
+    isEditorFocused: Boolean,
     noteIcon: String?,
     noteTitle: String,
     coverImagePath: String?,
@@ -924,8 +937,6 @@ private fun NoteHeader(
     onIconClick: () -> Unit,
     onTitlePositioned: (androidx.compose.ui.layout.LayoutCoordinates) -> Unit = {}
 ) {
-    val mediaStorageHelper: com.emberr.domain.util.media.MediaStorageHelper = org.koin.compose.koinInject()
-
     val topPadding by animateDpAsState(
         targetValue = if (noteIcon != null) 48.dp else 16.dp,
         label = "TopPadding"
@@ -938,23 +949,12 @@ private fun NoteHeader(
             if (coverImagePath != null || noteIcon != null) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (coverImagePath != null) {
-                        val absolutePath = mediaStorageHelper.getAbsoluteMediaPath(coverImagePath)
-                        val file = java.io.File(absolutePath)
-
-                        val context = coil3.compose.LocalPlatformContext.current
-                        val request = remember(absolutePath) {
-                            coil3.request.ImageRequest.Builder(context)
-                                .data(file)
-                                .memoryCacheKey(absolutePath)
-                                .diskCacheKey(absolutePath)
-                                .build()
-                        }
-
-                        AsyncImage(
-                            model = request,
-                            contentDescription = "Cover Image",
-                            modifier = Modifier.fillMaxWidth().height(210.dp),
-                            contentScale = ContentScale.Crop
+                        NoteCoverImage(
+                            noteId = noteId,
+                            coverImagePath = coverImagePath,
+                            isEditorFocused = isEditorFocused,
+                            actionsEndPadding = NoteTopBarSidePadding,
+                            modifier = Modifier.fillMaxWidth().height(if (isDesktopPlatform) 260.dp else 210.dp)
                         )
                     } else {
                         Spacer(
@@ -1295,6 +1295,8 @@ fun NoteOptionsDesktopMenu(
     onRemoveIcon: () -> Unit,
     onAddCover: () -> Unit,
     onRemoveCover: () -> Unit,
+    coverLinkFetch: ImageLinkFetch?,
+    onCoverLinkSubmitted: (address: String) -> Unit,
     onToggleWordCount: () -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onMoveToTrash: () -> Unit,
@@ -1320,7 +1322,13 @@ fun NoteOptionsDesktopMenu(
             }
         }
         DesktopSubmenuItem(painterResource(Res.drawable.image), "Cover Options") {
-            DesktopMenuItem(painterResource(Res.drawable.image), if (hasCover) "Change Cover" else "Add Cover") { onDismiss(); onAddCover() }
+            CoverLinkField(
+                coverLinkFetch = coverLinkFetch,
+                onCoverLinkSubmitted = onCoverLinkSubmitted,
+                onCoverLinkApplied = onDismiss,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+            )
+            DesktopMenuItem(painterResource(Res.drawable.image), "Upload Cover") { onDismiss(); onAddCover() }
             if (hasCover) {
                 DesktopMenuItem(painterResource(Res.drawable.trash), "Remove Cover", isDestructive = true) { onDismiss(); onRemoveCover() }
             }
@@ -1534,6 +1542,8 @@ fun NoteOptionsBottomSheet(
     onRemoveIcon: () -> Unit,
     onAddCover: () -> Unit,
     onRemoveCover: () -> Unit,
+    coverLinkFetch: ImageLinkFetch?,
+    onCoverLinkSubmitted: (address: String) -> Unit,
     onToggleWordCount: () -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onMoveToTrash: () -> Unit,
@@ -1702,9 +1712,16 @@ fun NoteOptionsBottomSheet(
         LocalRippleConfiguration provides null
       ) {
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            CoverLinkField(
+                coverLinkFetch = coverLinkFetch,
+                onCoverLinkSubmitted = onCoverLinkSubmitted,
+                onCoverLinkApplied = { closeAnd { onDismiss() } },
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
             BottomSheetOptionItem(
                 painterResource(Res.drawable.image),
-                if (hasCover) "Change Cover" else "Add Cover"
+                "Upload Cover"
             ) { closeAnd { onAddCover(); onDismiss() } }
 
             if (hasCover) {

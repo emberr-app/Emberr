@@ -12,6 +12,7 @@ import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.presentation.shared.editor.BaseEditorViewModel
+import com.emberr.presentation.shared.editor.ImageLinkFetch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +54,9 @@ class NoteEditorViewModel(
 
     private val _coverImagePath = MutableStateFlow<String?>(null)
     val coverImagePath: StateFlow<String?> = _coverImagePath.asStateFlow()
+
+    private val _coverLinkFetch = MutableStateFlow<ImageLinkFetch?>(null)
+    val coverLinkFetch: StateFlow<ImageLinkFetch?> = _coverLinkFetch.asStateFlow()
 
     // True when the currently loaded note is a template - drives the "Editing Template" pill
     // in NoteScreen's top bar so it's obvious this note won't show up in the regular notes list.
@@ -347,6 +351,22 @@ class NoteEditorViewModel(
                 _coverImagePath.value = mediaInfo.localFileName
                 if (!performSave()) _coverImagePath.value = previous
             }
+        }
+    }
+
+    fun handleCoverLinkSubmitted(address: String) {
+        if (_coverLinkFetch.value?.hasFailed == false) return
+        _coverLinkFetch.value = ImageLinkFetch(address, hasFailed = false)
+        viewModelScope.launch {
+            val mediaInfo = webImageFetcher.fetchIntoMedia(address)
+            if (mediaInfo == null) {
+                _coverLinkFetch.value = ImageLinkFetch(address, hasFailed = true)
+                return@launch
+            }
+            val previous = _coverImagePath.value
+            _coverImagePath.value = mediaInfo.localFileName
+            if (!performSave()) _coverImagePath.value = previous
+            _coverLinkFetch.value = null
         }
     }
 
