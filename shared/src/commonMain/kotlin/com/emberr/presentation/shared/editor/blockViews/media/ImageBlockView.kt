@@ -249,6 +249,7 @@ fun ImageBlockView(
                             }
                         }
                     )
+                    AnimatedGifLayer(absolutePath, ContentScale.Crop, Modifier.fillMaxSize())
                 }
             }
 
@@ -257,6 +258,7 @@ fun ImageBlockView(
                     setFullScreenOverlay?.invoke {
                         com.emberr.presentation.shared.editor.components.FullScreenImageScreen(
                             request = request,
+                            localImagePath = absolutePath,
                             hasLocalFile = true,
                             thumbnailBoundsInRoot = thumbnailBoundsInRoot,
                             imageWidthToHeightRatio = widthToHeightRatio,

@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import coil3.compose.AsyncImage
+import com.emberr.presentation.shared.editor.blockViews.media.AnimatedGifLayer
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -88,6 +89,7 @@ private const val DismissShrinkAmount = 0.15f
 @Composable
 fun FullScreenImageScreen(
     request: Any?,
+    localImagePath: String?,
     hasLocalFile: Boolean,
     thumbnailBoundsInRoot: Rect?,
     imageWidthToHeightRatio: Float?,
@@ -255,6 +257,7 @@ fun FullScreenImageScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
+                localImagePath?.let { AnimatedGifLayer(it, ContentScale.Fit, Modifier.fillMaxSize()) }
             }
         }
 

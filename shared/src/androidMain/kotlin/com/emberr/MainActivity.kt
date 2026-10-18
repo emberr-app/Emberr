@@ -18,6 +18,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
+import coil3.gif.AnimatedImageDecoder
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import com.emberr.domain.model.PendingShare
@@ -247,6 +248,7 @@ class MainActivity : ComponentActivity() {
                 ImageLoader.Builder(context)
                     .components {
                         add(KtorNetworkFetcherFactory(HttpClient(OkHttp)))
+                        add(AnimatedImageDecoder.Factory())
                     }
                     .crossfade(true)
                     .build()
