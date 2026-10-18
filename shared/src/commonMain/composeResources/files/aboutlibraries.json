@@ -2614,18 +2614,21 @@
         },
         {
             "uniqueId": "androidx.vectordrawable:vectordrawable",
-            "artifactVersion": "1.1.0",
-            "name": "Support VectorDrawable",
+            "artifactVersion": "1.2.0",
+            "name": "VectorDrawable",
             "description": "Android Support VectorDrawable",
-            "website": "https://developer.android.com/jetpack/androidx",
+            "website": "https://developer.android.com/jetpack/androidx/releases/vectordrawable#1.2.0",
             "developers": [
                 {
                     "name": "The Android Open Source Project"
                 }
             ],
+            "organization": {
+                "name": "The Android Open Source Project"
+            },
             "scm": {
                 "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
-                "url": "http://source.android.com"
+                "url": "https://cs.android.com/androidx/platform/frameworks/support"
             },
             "licenses": [
                 "Apache-2.0"
@@ -2636,18 +2639,21 @@
         },
         {
             "uniqueId": "androidx.vectordrawable:vectordrawable-animated",
-            "artifactVersion": "1.1.0",
-            "name": "Support AnimatedVectorDrawable",
+            "artifactVersion": "1.2.0",
+            "name": "AnimatedVectorDrawable",
             "description": "Android Support AnimatedVectorDrawable",
-            "website": "https://developer.android.com/jetpack/androidx",
+            "website": "https://developer.android.com/jetpack/androidx/releases/vectordrawable#1.2.0",
             "developers": [
                 {
                     "name": "The Android Open Source Project"
                 }
             ],
+            "organization": {
+                "name": "The Android Open Source Project"
+            },
             "scm": {
                 "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
-                "url": "http://source.android.com"
+                "url": "https://cs.android.com/androidx/platform/frameworks/support"
             },
             "licenses": [
                 "Apache-2.0"
@@ -3394,6 +3400,52 @@
             ]
         },
         {
+            "uniqueId": "com.goterl:resource-loader",
+            "artifactVersion": "2.0.2",
+            "name": "resource-loader",
+            "description": "Resource Loader gives you the functions to load resource files inside or outside JARs.",
+            "website": "https://github.com/terl/resource-loader",
+            "developers": [
+                {
+                    "name": "Terl Tech Ltd"
+                }
+            ],
+            "scm": {
+                "connection": "scm:git:git://github.com/terl/resource-loader.git",
+                "developerConnection": "scm:git:ssh://github.com/terl/resource-loader",
+                "url": "http://github.com/terl/resource-loader"
+            },
+            "licenses": [
+                "MIT"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
+            "uniqueId": "com.ionspin.kotlin:multiplatform-crypto-libsodium-bindings",
+            "artifactVersion": "0.9.5",
+            "name": "Kotlin Multiplatform Crypto",
+            "description": "Kotlin Multiplatform Libsodium Wrapper",
+            "website": "https://github.com/ionspin/kotlin-multiplatform-crypto",
+            "developers": [
+                {
+                    "name": "Ugljesa Jovanovic"
+                }
+            ],
+            "scm": {
+                "connection": "scm:git:git://git@github.com:ionspin/kotlin-multiplatform-libsodium.git",
+                "developerConnection": "scm:git:ssh://git@github.com:ionspin/kotlin-multiplatform-libsodium.git",
+                "url": "https://github.com/ionspin/kotlin-multiplatform-libsodium"
+            },
+            "licenses": [
+                "Apache-2.0"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
             "uniqueId": "com.llamatik:library",
             "artifactVersion": "1.10.1",
             "name": "Llamatik",
@@ -3897,6 +3949,29 @@
             "uniqueId": "io.coil-kt.coil3:coil-core",
             "artifactVersion": "3.6.2",
             "name": "coil-core",
+            "description": "An image loading library for Android and Compose Multiplatform.",
+            "website": "https://github.com/coil-kt/coil",
+            "developers": [
+                {
+                    "name": "Coil Contributors"
+                }
+            ],
+            "scm": {
+                "connection": "scm:git:git://github.com/coil-kt/coil.git",
+                "developerConnection": "scm:git:ssh://git@github.com/coil-kt/coil.git",
+                "url": "https://github.com/coil-kt/coil"
+            },
+            "licenses": [
+                "Apache-2.0"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
+            "uniqueId": "io.coil-kt.coil3:coil-gif",
+            "artifactVersion": "3.6.2",
+            "name": "coil-gif",
             "description": "An image loading library for Android and Compose Multiplatform.",
             "website": "https://github.com/coil-kt/coil",
             "developers": [
@@ -5132,6 +5207,24 @@
             ]
         },
         {
+            "uniqueId": "jedisct1:libsodium",
+            "name": "libsodium",
+            "description": "Encryption library, bundled as native code inside the libsodium bindings.",
+            "website": "https://libsodium.org",
+            "developers": [
+                
+            ],
+            "scm": {
+                "url": "https://github.com/jedisct1/libsodium"
+            },
+            "licenses": [
+                "libsodium-isc"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
             "uniqueId": "leejet:stable-diffusion.cpp",
             "name": "stable-diffusion.cpp",
             "description": "Image generation engine, bundled as native code inside Llamatik on desktop.",
@@ -5169,7 +5262,7 @@
         },
         {
             "uniqueId": "net.java.dev.jna:jna",
-            "artifactVersion": "5.13.0",
+            "artifactVersion": "5.18.1",
             "name": "Java Native Access",
             "description": "Java Native Access",
             "website": "https://github.com/java-native-access/jna",
@@ -5196,7 +5289,7 @@
         },
         {
             "uniqueId": "net.java.dev.jna:jna-platform",
-            "artifactVersion": "5.13.0",
+            "artifactVersion": "5.18.1",
             "name": "Java Native Access Platform",
             "description": "Java Native Access Platform",
             "website": "https://github.com/java-native-access/jna",
@@ -6700,6 +6793,54 @@
             ]
         },
         {
+            "uniqueId": "org.jetbrains.kotlin:kotlin-stdlib-jdk7",
+            "artifactVersion": "2.4.0",
+            "name": "Kotlin Stdlib Jdk7",
+            "description": "Kotlin Standard Library JDK 7 extension",
+            "website": "https://kotlinlang.org/",
+            "developers": [
+                {
+                    "name": "Kotlin Team",
+                    "organisationUrl": "https://www.jetbrains.com"
+                }
+            ],
+            "scm": {
+                "connection": "scm:git:https://github.com/JetBrains/kotlin.git",
+                "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
+                "url": "https://github.com/JetBrains/kotlin"
+            },
+            "licenses": [
+                "Apache-2.0"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
+            "uniqueId": "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
+            "artifactVersion": "2.4.0",
+            "name": "Kotlin Stdlib Jdk8",
+            "description": "Kotlin Standard Library JDK 8 extension",
+            "website": "https://kotlinlang.org/",
+            "developers": [
+                {
+                    "name": "Kotlin Team",
+                    "organisationUrl": "https://www.jetbrains.com"
+                }
+            ],
+            "scm": {
+                "connection": "scm:git:https://github.com/JetBrains/kotlin.git",
+                "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
+                "url": "https://github.com/JetBrains/kotlin"
+            },
+            "licenses": [
+                "Apache-2.0"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
             "uniqueId": "org.jetbrains.kotlinx:atomicfu",
             "artifactVersion": "0.28.0",
             "name": "atomicfu",
@@ -7479,6 +7620,14 @@
             "internalHash": "jsoup-mit",
             "spdxId": "MIT",
             "hash": "jsoup-mit"
+        },
+        "libsodium-isc": {
+            "name": "ISC License",
+            "url": "https://github.com/jedisct1/libsodium/blob/master/LICENSE",
+            "content": "ISC License\n\nCopyright (c) 2013-2026\nFrank Denis <j at pureftpd dot org>\n\nPermission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF\nOR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.",
+            "internalHash": "libsodium-isc",
+            "spdxId": "ISC",
+            "hash": "libsodium-isc"
         },
         "libyuv-bsd-3": {
             "name": "BSD 3-Clause License (libyuv)",

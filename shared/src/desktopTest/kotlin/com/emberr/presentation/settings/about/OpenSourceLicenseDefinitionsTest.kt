@@ -31,7 +31,8 @@ class OpenSourceLicenseDefinitionsTest {
             "ggml-org:llama.cpp",
             "ggml-org:whisper.cpp",
             "leejet:stable-diffusion.cpp",
-            "llvm:openmp"
+            "llvm:openmp",
+            "jedisct1:libsodium"
         )
 
         handAddedIds.forEach { uniqueId ->

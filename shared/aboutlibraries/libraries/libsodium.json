@@ -1,0 +1,13 @@
+{
+  "uniqueId": "jedisct1:libsodium",
+  "name": "libsodium",
+  "description": "Encryption library, bundled as native code inside the libsodium bindings.",
+  "website": "https://libsodium.org",
+  "developers": [],
+  "scm": {
+    "url": "https://github.com/jedisct1/libsodium"
+  },
+  "licenses": [
+    "libsodium-isc"
+  ]
+}
