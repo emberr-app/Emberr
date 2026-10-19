@@ -174,6 +174,18 @@ class CloudAccountRepository(
         return recoveryWords.wordsFromRecoveryKey(accountKeyManager.readRecoveryKey(masterKey, accountKeys))
     }
 
+    suspend fun readRecoveryWordsWithPassword(password: String): String {
+        val accountKeys = withStoredSessionToken { sessionToken -> apiClient.fetchAccountDetails(sessionToken).keys }
+        val passwordKey = derivePasswordKeyOffMainThread(
+            password,
+            accountKeys.salt,
+            accountKeys.memLimit,
+            accountKeys.opsLimit
+        )
+        val masterKey = accountKeyManager.unlockMasterKeyWithPasswordKey(passwordKey, accountKeys)
+        return recoveryWords.wordsFromRecoveryKey(accountKeyManager.readRecoveryKey(masterKey, accountKeys))
+    }
+
     suspend fun sendDeleteAccountCode() {
         withStoredSessionToken { sessionToken -> apiClient.sendDeleteAccountCode(sessionToken) }
     }
