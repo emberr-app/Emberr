@@ -59,6 +59,9 @@ interface SettingsManager {
     fun getSelfHostSyncNetwork(): String
     fun saveSelfHostSyncNetwork(choice: String)
 
+    fun getCloudServerAddress(): String
+    fun saveCloudServerAddress(address: String)
+
     fun getSyncAuthToken(): String
     fun saveSyncAuthToken(token: String)
 

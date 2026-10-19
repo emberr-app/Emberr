@@ -80,6 +80,7 @@ object SyncConstants {
     const val KEY_SELF_HOST_SUPPORTS_ETAGS = "self_host_supports_etags"
     const val KEY_SELF_HOST_MANIFEST_ETAG = "self_host_manifest_etag"
     const val KEY_SELF_HOST_SYNC_NETWORK = "self_host_sync_network"
+    const val KEY_CLOUD_SERVER_ADDRESS = "cloud_server_address"
     const val KEY_SYNC_AUTH_TOKEN = "sync_auth_token"
     const val KEY_SYNC_IP_ADDRESS = "sync_ip_address"
     const val KEY_SYNC_PORT = "sync_port"
@@ -87,6 +88,8 @@ object SyncConstants {
     const val KEY_SYNC_PAIRING_CONFIRMED = "sync_pairing_confirmed"
     // Defaults
     const val DEFAULT_PORT = 8080
+    const val DEFAULT_DESKTOP_CLOUD_SERVER_ADDRESS = "http://localhost:8080"
+    const val DEFAULT_ANDROID_CLOUD_SERVER_ADDRESS = "http://10.0.2.2:8080"
     const val DEFAULT_SORT_TYPE = "LAST_EDITED"
     const val DEFAULT_SORT_ORDER = "DESCENDING"
     // API Routes

@@ -57,14 +57,17 @@ class CloudApiClient(
     }
 
     suspend fun fetchPasswordParams(email: String): CloudPasswordParams {
-        val answer = send(HttpMethod.Get, "auth", "params") {
+        val response = send(HttpMethod.Get, "auth", "params") {
             parameter("email", email)
-        }.readAnswer<PasswordParamsResponse>()
-        return CloudPasswordParams(
-            salt = answer.salt.fromBase64(),
-            memLimit = answer.memLimit,
-            opsLimit = answer.opsLimit
-        )
+        }
+        val answer = response.readAnswer<PasswordParamsResponse>()
+        return response.decodeBase64Fields {
+            CloudPasswordParams(
+                salt = answer.salt.fromBase64(),
+                memLimit = answer.memLimit,
+                opsLimit = answer.opsLimit
+            )
+        }
     }
 
     suspend fun signUp(
@@ -101,7 +104,7 @@ class CloudApiClient(
         code: String,
         deviceName: String
     ): CloudSignedInDevice {
-        val answer = send(HttpMethod.Post, "auth", "verify-device") {
+        val response = send(HttpMethod.Post, "auth", "verify-device") {
             jsonBody(
                 VerifyDeviceRequest(
                     email = email,
@@ -110,18 +113,24 @@ class CloudApiClient(
                     deviceName = deviceName
                 )
             )
-        }.readAnswer<VerifyDeviceResponse>()
-        return CloudSignedInDevice(token = answer.token, keys = answer.keys.toCloudAccountKeys())
+        }
+        val answer = response.readAnswer<VerifyDeviceResponse>()
+        return response.decodeBase64Fields {
+            CloudSignedInDevice(token = answer.token, keys = answer.keys.toCloudAccountKeys())
+        }
     }
 
     suspend fun recover(email: String, code: String, deviceName: String): CloudRecoveryStart {
-        val answer = send(HttpMethod.Post, "auth", "recover") {
+        val response = send(HttpMethod.Post, "auth", "recover") {
             jsonBody(RecoverRequest(email = email, code = code, deviceName = deviceName))
-        }.readAnswer<RecoverResponse>()
-        return CloudRecoveryStart(
-            encryptedToken = answer.encryptedToken.fromBase64(),
-            keys = answer.keys.toCloudRecoveryKeys()
-        )
+        }
+        val answer = response.readAnswer<RecoverResponse>()
+        return response.decodeBase64Fields {
+            CloudRecoveryStart(
+                encryptedToken = answer.encryptedToken.fromBase64(),
+                keys = answer.keys.toCloudRecoveryKeys()
+            )
+        }
     }
 
     suspend fun listSessions(sessionToken: String): List<CloudSession> {
@@ -135,13 +144,15 @@ class CloudApiClient(
     }
 
     suspend fun fetchAccountDetails(sessionToken: String): CloudAccountDetails {
-        val answer = send(HttpMethod.Get, "account", sessionToken = sessionToken)
-            .readAnswer<AccountDetailsResponse>()
-        return CloudAccountDetails(
-            email = answer.email,
-            storageUsedBytes = answer.storageUsedBytes,
-            keys = answer.keys.toCloudAccountKeys()
-        )
+        val response = send(HttpMethod.Get, "account", sessionToken = sessionToken)
+        val answer = response.readAnswer<AccountDetailsResponse>()
+        return response.decodeBase64Fields {
+            CloudAccountDetails(
+                email = answer.email,
+                storageUsedBytes = answer.storageUsedBytes,
+                keys = answer.keys.toCloudAccountKeys()
+            )
+        }
     }
 
     suspend fun deleteAccount(sessionToken: String, loginKey: ByteArray, code: String) {
@@ -223,6 +234,13 @@ class CloudApiClient(
         try {
             cloudApiJson.decodeFromString<Answer>(bodyAsText())
         } catch (_: SerializationException) {
+            throw CloudApiException(CloudApiErrorCode.UNKNOWN, status.value)
+        }
+
+    private inline fun <Decoded> HttpResponse.decodeBase64Fields(decode: () -> Decoded): Decoded =
+        try {
+            decode()
+        } catch (_: IllegalArgumentException) {
             throw CloudApiException(CloudApiErrorCode.UNKNOWN, status.value)
         }
 }

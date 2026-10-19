@@ -234,6 +234,15 @@ class AndroidSettingsManager(
         sharedPreferences.edit { putString(SyncConstants.KEY_SELF_HOST_SYNC_NETWORK, choice) }
     }
 
+    override fun getCloudServerAddress(): String {
+        return sharedPreferences.getString(SyncConstants.KEY_CLOUD_SERVER_ADDRESS, null)
+            ?: SyncConstants.DEFAULT_ANDROID_CLOUD_SERVER_ADDRESS
+    }
+
+    override fun saveCloudServerAddress(address: String) {
+        sharedPreferences.edit { putString(SyncConstants.KEY_CLOUD_SERVER_ADDRESS, address) }
+    }
+
     override fun getSyncAuthToken(): String {
         return secretStore.readSecret(SyncConstants.KEY_SYNC_AUTH_TOKEN) ?: ""
     }

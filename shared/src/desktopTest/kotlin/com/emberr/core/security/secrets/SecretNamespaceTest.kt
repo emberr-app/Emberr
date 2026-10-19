@@ -10,6 +10,7 @@ class SecretNamespaceTest {
         assertEquals("EmberrAiKeyVault", SecretNamespace.AiProviders.keyringServiceNameFor(isDebugBuild = false))
         assertEquals("EmberrSelfHostSyncVault", SecretNamespace.SelfHostSync.keyringServiceNameFor(isDebugBuild = false))
         assertEquals("EmberrAppVault", SecretNamespace.AppSettings.keyringServiceNameFor(isDebugBuild = false))
+        assertEquals("EmberrCloudVault", SecretNamespace.EmberrCloud.keyringServiceNameFor(isDebugBuild = false))
     }
 
     @Test
@@ -17,6 +18,7 @@ class SecretNamespaceTest {
         assertEquals("EmberrAiKeyVaultDebug", SecretNamespace.AiProviders.keyringServiceNameFor(isDebugBuild = true))
         assertEquals("EmberrSelfHostSyncVaultDebug", SecretNamespace.SelfHostSync.keyringServiceNameFor(isDebugBuild = true))
         assertEquals("EmberrAppVaultDebug", SecretNamespace.AppSettings.keyringServiceNameFor(isDebugBuild = true))
+        assertEquals("EmberrCloudVaultDebug", SecretNamespace.EmberrCloud.keyringServiceNameFor(isDebugBuild = true))
     }
 
     @Test
