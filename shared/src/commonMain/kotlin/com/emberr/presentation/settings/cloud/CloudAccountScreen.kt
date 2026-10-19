@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -47,6 +48,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -59,7 +61,6 @@ import com.emberr.domain.cloud.api.CloudSession
 import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.format.formatByteSize
 import com.emberr.domain.util.system.DeviceLockConfirmation
-import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.rememberDeviceLockPrompt
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.util.time.formatTimeOfDay
@@ -195,12 +196,12 @@ private fun CloudAccountContent(
                 CloudAccountStep.SIGN_UP_DETAILS -> SignUpDetailsStep(state = state, viewModel = viewModel)
                 CloudAccountStep.SIGN_UP_RECOVERY_WORDS -> SignUpRecoveryWordsStep(state = state, viewModel = viewModel)
                 CloudAccountStep.LOG_IN -> LogInStep(state = state, viewModel = viewModel)
-                CloudAccountStep.LOG_IN_CODE -> LogInCodeStep(state = state, viewModel = viewModel)
                 CloudAccountStep.RECOVERY_EMAIL -> RecoveryEmailStep(state = state, viewModel = viewModel)
                 CloudAccountStep.RECOVERY_WORDS -> RecoveryWordsStep(state = state, viewModel = viewModel)
                 CloudAccountStep.RECOVERY_NEW_PASSWORD -> RecoveryNewPasswordStep(state = state, viewModel = viewModel)
                 CloudAccountStep.SIGNED_IN -> SignedInStep(state = state, viewModel = viewModel)
                 CloudAccountStep.CHANGE_PASSWORD -> ChangePasswordStep(state = state, viewModel = viewModel)
+                CloudAccountStep.CHANGE_PASSWORD_CODE -> ChangePasswordCodeStep(state = state, viewModel = viewModel)
                 CloudAccountStep.CHANGE_EMAIL -> ChangeEmailStep(state = state, viewModel = viewModel)
                 CloudAccountStep.CHANGE_EMAIL_CODE -> ChangeEmailCodeStep(state = state, viewModel = viewModel)
                 CloudAccountStep.RECOVERY_WORDS_PASSWORD -> RecoveryWordsPasswordStep(state = state, viewModel = viewModel)
@@ -303,7 +304,7 @@ private fun SignUpRecoveryWordsStep(state: CloudAccountScreenState, viewModel: C
                 "We don't store them, so save them somewhere safe."
         )
         WarningText(text = "Without your password and these words, your cloud notes can't be recovered.")
-        NumberedRecoveryWords(words = state.newRecoveryWords)
+        RecoveryWordsParagraph(words = state.newRecoveryWords)
         CopyRecoveryWordsButton(words = state.newRecoveryWords)
         CheckboxRow(
             text = "I have saved these words somewhere safe",
@@ -341,22 +342,6 @@ private fun LogInStep(state: CloudAccountScreenState, viewModel: CloudAccountVie
             onClick = viewModel::startRecovery,
             enabled = !state.isWorking,
             modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun LogInCodeStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Log in") {
-        CodeSentText(email = state.email)
-        CodeField(code = state.code, onCodeChanged = viewModel::onCodeChanged, onSubmit = viewModel::verifyLoginCode)
-        StepActions(
-            state = state,
-            primaryText = "Verify",
-            isPrimaryEnabled = state.canVerifyLoginCode,
-            onPrimaryClick = viewModel::verifyLoginCode,
-            onSendNewCode = viewModel::logIn,
-            onBack = viewModel::goBack
         )
     }
 }
@@ -678,6 +663,22 @@ private fun ConfirmActionDialog(
 @Composable
 private fun ChangePasswordStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
     StepGroup(title = "Change password") {
+        HintText(text = "We'll send a code to ${state.signedInEmail} to confirm.")
+        StepActions(
+            state = state,
+            primaryText = "Send code",
+            isPrimaryEnabled = !state.isWorking,
+            onPrimaryClick = viewModel::sendPasswordChangeCode,
+            onBack = viewModel::goBack
+        )
+    }
+}
+
+@Composable
+private fun ChangePasswordCodeStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
+    StepGroup(title = "Change password") {
+        CodeSentText(email = state.email)
+        CodeField(code = state.code, onCodeChanged = viewModel::onCodeChanged)
         HintText(text = "Enter a new password we can use to encrypt your notes.")
         NewPasswordFields(state = state, viewModel = viewModel, onSubmit = viewModel::changePassword)
         SwitchRow(
@@ -688,8 +689,9 @@ private fun ChangePasswordStep(state: CloudAccountScreenState, viewModel: CloudA
         StepActions(
             state = state,
             primaryText = "Change password",
-            isPrimaryEnabled = state.canSetNewPassword,
+            isPrimaryEnabled = state.canChangePassword,
             onPrimaryClick = viewModel::changePassword,
+            onSendNewCode = viewModel::sendPasswordChangeCode,
             onBack = viewModel::goBack
         )
     }
@@ -753,7 +755,7 @@ private fun ShowRecoveryWordsStep(state: CloudAccountScreenState, viewModel: Clo
             text = "If you forget your password, these 24 words are the only way back into your account. " +
                 "We don't store them, so save them somewhere safe."
         )
-        NumberedRecoveryWords(words = state.recoveryWordsToShow)
+        RecoveryWordsParagraph(words = state.recoveryWordsToShow)
         CopyRecoveryWordsButton(words = state.recoveryWordsToShow)
         EmberrButtonPrimary(
             text = "Done",
@@ -914,48 +916,30 @@ private fun PasswordStrengthText(strength: CloudPasswordStrength) {
 }
 
 @Composable
-private fun NumberedRecoveryWords(words: List<String>) {
-    val wordsPerRow = if (isDesktopPlatform) 3 else 2
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        words.chunked(wordsPerRow).forEachIndexed { rowIndex, rowWords ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                rowWords.forEachIndexed { columnIndex, word ->
-                    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "${rowIndex * wordsPerRow + columnIndex + 1}.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                            modifier = Modifier.width(28.dp)
-                        )
-                        Text(
-                            text = word,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-                repeat(wordsPerRow - rowWords.size) { Spacer(modifier = Modifier.weight(1f)) }
-            }
-        }
+private fun RecoveryWordsParagraph(words: String) {
+    SelectionContainer {
+        Text(
+            text = words,
+            style = MaterialTheme.typography.bodyLarge,
+            fontFamily = FontFamily.Monospace,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+        )
     }
 }
 
 @Composable
-private fun CopyRecoveryWordsButton(words: List<String>) {
+private fun CopyRecoveryWordsButton(words: String) {
     val clipboardManager = LocalClipboardManager.current
 
     EmberrButtonSecondary(
         text = "Copy words",
         onClick = {
-            clipboardManager.setText(AnnotatedString(words.joinToString(" ")))
+            clipboardManager.setText(AnnotatedString(words))
             showNativeToast("Recovery words copied")
         },
         modifier = Modifier.fillMaxWidth()

@@ -62,18 +62,7 @@ internal class SignupResponse(val token: String)
 internal class LoginRequest(val email: String, val loginKey: String, val deviceName: String)
 
 @Serializable
-internal class LoginResponse(val emailCodeNeeded: Boolean)
-
-@Serializable
-internal class VerifyDeviceRequest(
-    val email: String,
-    val loginKey: String,
-    val code: String,
-    val deviceName: String
-)
-
-@Serializable
-internal class VerifyDeviceResponse(val token: String, val keys: AccountKeysJson)
+internal class LoginResponse(val token: String, val keys: AccountKeysJson)
 
 @Serializable
 internal class RecoverRequest(val email: String, val code: String, val deviceName: String)
@@ -113,7 +102,8 @@ internal class ChangeEmailRequest(val email: String, val code: String)
 internal class ChangePasswordRequest(
     val loginKey: String,
     val keys: PasswordKeysJson,
-    val logOutOtherDevices: Boolean
+    val logOutOtherDevices: Boolean,
+    val code: String? = null
 )
 
 @Serializable

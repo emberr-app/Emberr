@@ -91,30 +91,11 @@ class CloudApiClient(
         return answer.token
     }
 
-    suspend fun logIn(email: String, loginKey: ByteArray, deviceName: String): Boolean {
-        val answer = send(HttpMethod.Post, "auth", "login") {
+    suspend fun logIn(email: String, loginKey: ByteArray, deviceName: String): CloudSignedInDevice {
+        val response = send(HttpMethod.Post, "auth", "login") {
             jsonBody(LoginRequest(email = email, loginKey = loginKey.toBase64(), deviceName = deviceName))
-        }.readAnswer<LoginResponse>()
-        return answer.emailCodeNeeded
-    }
-
-    suspend fun verifyDevice(
-        email: String,
-        loginKey: ByteArray,
-        code: String,
-        deviceName: String
-    ): CloudSignedInDevice {
-        val response = send(HttpMethod.Post, "auth", "verify-device") {
-            jsonBody(
-                VerifyDeviceRequest(
-                    email = email,
-                    loginKey = loginKey.toBase64(),
-                    code = code,
-                    deviceName = deviceName
-                )
-            )
         }
-        val answer = response.readAnswer<VerifyDeviceResponse>()
+        val answer = response.readAnswer<LoginResponse>()
         return response.decodeBase64Fields {
             CloudSignedInDevice(token = answer.token, keys = answer.keys.toCloudAccountKeys())
         }
@@ -173,6 +154,12 @@ class CloudApiClient(
         }
     }
 
+    suspend fun sendPasswordChangeCode(sessionToken: String) {
+        send(HttpMethod.Post, "account", "email-code", sessionToken = sessionToken) {
+            jsonBody(AccountEmailCodeRequest(purpose = "password"))
+        }
+    }
+
     suspend fun changeEmail(sessionToken: String, newEmail: String, code: String) {
         send(HttpMethod.Post, "auth", "change-email", sessionToken = sessionToken) {
             jsonBody(ChangeEmailRequest(email = newEmail, code = code))
@@ -183,6 +170,7 @@ class CloudApiClient(
         sessionToken: String,
         loginKey: ByteArray,
         keys: CloudPasswordKeys,
+        code: String?,
         logOutOtherDevices: Boolean = true
     ) {
         send(HttpMethod.Post, "auth", "change-password", sessionToken = sessionToken) {
@@ -190,7 +178,8 @@ class CloudApiClient(
                 ChangePasswordRequest(
                     loginKey = loginKey.toBase64(),
                     keys = keys.toJson(),
-                    logOutOtherDevices = logOutOtherDevices
+                    logOutOtherDevices = logOutOtherDevices,
+                    code = code
                 )
             )
         }
