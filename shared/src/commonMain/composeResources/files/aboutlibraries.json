@@ -3492,6 +3492,30 @@
             ]
         },
         {
+            "uniqueId": "com.nulab-inc:zxcvbn",
+            "artifactVersion": "1.9.0",
+            "name": "zxcvbn4j",
+            "description": "This is a java port of zxcvbn, which is a JavaScript password strength generator.",
+            "website": "https://github.com/nulab/zxcvbn4j",
+            "developers": [
+                {
+                    "name": "Yuichi Watanabe"
+                }
+            ],
+            "scm": {
+                "connection": "https://github.com/nulab/zxcvbn4j.git",
+                "developerConnection": "https://github.com/nulab/zxcvbn4j.git",
+                "url": "https://github.com/nulab/zxcvbn4j.git"
+            },
+            "licenses": [
+                "zxcvbn-mit",
+                "MIT"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
             "uniqueId": "com.squareup.okhttp3:okhttp",
             "artifactVersion": "5.3.2",
             "name": "okhttp",
@@ -7779,6 +7803,14 @@
             "internalHash": "whisper-cpp-mit",
             "spdxId": "MIT",
             "hash": "whisper-cpp-mit"
+        },
+        "zxcvbn-mit": {
+            "name": "MIT License",
+            "url": "https://github.com/nulab/zxcvbn4j/blob/1.9.0/LICENSE.txt",
+            "content": "The MIT License (MIT)\n\nCopyright (c) 2014 Nulab Inc\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+            "internalHash": "zxcvbn-mit",
+            "spdxId": "MIT",
+            "hash": "zxcvbn-mit"
         }
     }
 }

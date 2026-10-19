@@ -100,6 +100,9 @@ kotlin {
     sourceSets {
         val jvmSharedMain = create("jvmSharedMain") {
             dependsOn(getByName("commonMain"))
+            dependencies {
+                implementation(libs.zxcvbn)
+            }
         }
 
         getByName("commonMain") {

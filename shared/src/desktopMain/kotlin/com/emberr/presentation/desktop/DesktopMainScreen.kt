@@ -73,6 +73,7 @@ import com.emberr.presentation.shared.canvas.CanvasScreen
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.sync.SyncViewModel
 import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
+import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.presentation.calendar.CalendarEvent
 import com.emberr.presentation.calendar.CalendarEventSearchResult
 import com.emberr.presentation.calendar.CalendarScreen
@@ -189,6 +190,7 @@ sealed interface DetailPane {
     data class Note(val noteId: String) : DetailPane
     data object Settings : DetailPane
     data object SelfHostSetup : DetailPane
+    data object EmberrCloud : DetailPane
     data object About : DetailPane
     data object ImportNotes : DetailPane
     data object OpenSourceLicenses : DetailPane
@@ -203,6 +205,7 @@ sealed interface DetailPane {
 
 private fun DetailPane?.settingsSubPage(): SettingsSubPage? = when (this) {
     DetailPane.SelfHostSetup -> SettingsSubPage.SELF_HOST
+    DetailPane.EmberrCloud -> if (isDebugBuild) SettingsSubPage.EMBERR_CLOUD else null
     DetailPane.ImportNotes -> SettingsSubPage.IMPORT
     DetailPane.About -> SettingsSubPage.ABOUT
     DetailPane.OpenSourceLicenses -> SettingsSubPage.OPEN_SOURCE_LICENSES
@@ -212,6 +215,7 @@ private fun DetailPane?.settingsSubPage(): SettingsSubPage? = when (this) {
 private fun SettingsSubPage?.toDetailPane(): DetailPane = when (this) {
     null -> DetailPane.Settings
     SettingsSubPage.SELF_HOST -> DetailPane.SelfHostSetup
+    SettingsSubPage.EMBERR_CLOUD -> if (isDebugBuild) DetailPane.EmberrCloud else DetailPane.Settings
     SettingsSubPage.IMPORT -> DetailPane.ImportNotes
     SettingsSubPage.ABOUT -> DetailPane.About
     SettingsSubPage.OPEN_SOURCE_LICENSES -> DetailPane.OpenSourceLicenses
@@ -223,6 +227,7 @@ internal fun DetailPane.encode(): String = when (this) {
     is DetailPane.Note -> "NOTE:${noteId}"
     DetailPane.Settings -> "PANEL:SETTINGS"
     DetailPane.SelfHostSetup -> "PANEL:SELFHOST"
+    DetailPane.EmberrCloud -> "PANEL:EMBERR_CLOUD"
     DetailPane.About -> "PANEL:ABOUT"
     DetailPane.ImportNotes -> "PANEL:IMPORT_NOTES"
     DetailPane.OpenSourceLicenses -> "PANEL:LICENSES"
@@ -242,6 +247,7 @@ internal fun decodeDetailPane(raw: String, today: LocalDate): DetailPane = when 
     raw == "PANEL:EMPTY" -> DetailPane.Empty
     raw == "PANEL:SETTINGS" -> DetailPane.Settings
     raw == "PANEL:SELFHOST" -> DetailPane.SelfHostSetup
+    raw == "PANEL:EMBERR_CLOUD" -> if (isDebugBuild) DetailPane.EmberrCloud else DetailPane.Settings
     raw == "PANEL:ABOUT" -> DetailPane.About
     raw == "PANEL:IMPORT_NOTES" -> DetailPane.ImportNotes
     raw == "PANEL:LICENSES" -> DetailPane.OpenSourceLicenses
@@ -1829,6 +1835,7 @@ fun DesktopMainScreen(
             }
             DetailPane.Settings,
             DetailPane.SelfHostSetup,
+            DetailPane.EmberrCloud,
             DetailPane.About,
             DetailPane.ImportNotes,
             DetailPane.OpenSourceLicenses -> key("settings") {
@@ -1843,6 +1850,7 @@ fun DesktopMainScreen(
                         onNavigateBack = closeDetailPane,
                         onExportReady = onExportBackup,
                         onNavigateToSelfHostSetup = { detail = DetailPane.SelfHostSetup },
+                        onNavigateToEmberrCloud = { if (isDebugBuild) detail = DetailPane.EmberrCloud },
                         onNavigateToAbout = { detail = DetailPane.About },
                         onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
                         desktopSubPage = d.settingsSubPage(),
