@@ -193,6 +193,11 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
 
     override fun saveSelfHostSyncNetwork(choice: String) = prefs.put(SyncConstants.KEY_SELF_HOST_SYNC_NETWORK, choice)
 
+    override fun getCloudServerAddress(): String =
+        prefs.get(SyncConstants.KEY_CLOUD_SERVER_ADDRESS, SyncConstants.DEFAULT_DESKTOP_CLOUD_SERVER_ADDRESS)
+
+    override fun saveCloudServerAddress(address: String) = prefs.put(SyncConstants.KEY_CLOUD_SERVER_ADDRESS, address)
+
     private fun saveSecureString(account: String, secret: String) {
         secretStore.writeSecret(SecretNamespace.AppSettings, account, secret)
     }

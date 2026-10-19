@@ -1,5 +1,16 @@
 package com.emberr.di
 
+import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.domain.cloud.account.CloudAccountRepository
+import com.emberr.domain.cloud.account.cloudDeviceName
+import com.emberr.domain.cloud.api.CloudApiClient
+import com.emberr.domain.cloud.api.configureForEmberrCloud
+import com.emberr.domain.cloud.crypto.CloudCrypto
+import com.emberr.domain.cloud.keys.CloudAccountKeyManager
+import com.emberr.domain.cloud.keys.CloudItemKeyManager
+import com.emberr.domain.cloud.keys.CloudRecoveryWords
+import com.emberr.domain.util.system.appVersionName
+import io.ktor.client.HttpClient
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -443,6 +454,29 @@ val sharedModule = module {
     }
 
     single { VaultKeyLock(keyDerivationManager = get(), syncEncryptionManager = get()) }
+
+    single { CloudCrypto() }
+    single { CloudAccountKeyManager(cloudCrypto = get()) }
+    single { CloudItemKeyManager(cloudCrypto = get()) }
+    single { CloudRecoveryWords(cloudCrypto = get()) }
+    single {
+        val settingsManager = get<SettingsManager>()
+        CloudApiClient(
+            httpClient = HttpClient { configureForEmberrCloud() },
+            serverAddress = { settingsManager.getCloudServerAddress() },
+            appVersion = appVersionName.orEmpty()
+        )
+    }
+    single {
+        CloudAccountRepository(
+            apiClient = get(),
+            accountKeyManager = get(),
+            recoveryWords = get(),
+            cloudCrypto = get(),
+            accountStorage = get(),
+            deviceName = cloudDeviceName()
+        )
+    }
 
     viewModel {
         SelfHostSetupViewModel(

@@ -30,6 +30,8 @@ import com.emberr.domain.ai.RagRepository
 import com.emberr.domain.selfhost.crypto.KeyDerivationManager
 import com.emberr.domain.selfhost.crypto.Pbkdf2KeyDerivationManager
 import com.emberr.domain.selfhost.crypto.SecureSyncKeyStorage
+import com.emberr.domain.cloud.account.CloudAccountStorage
+import com.emberr.domain.cloud.account.DesktopCloudAccountStorage
 import com.emberr.domain.selfhost.sync.DesktopMeteredNetworkChecker
 import com.emberr.domain.selfhost.sync.MeteredNetworkChecker
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
@@ -127,6 +129,9 @@ val desktopModule = module {
     single<SecureSyncKeyStorage> { SecureSyncKeyStorage(get()) }
     single<MeteredNetworkChecker> { DesktopMeteredNetworkChecker() }
     single { SelfHostSyncScheduler(selfHostSyncEngine = get()) }
+
+    // Emberr Cloud
+    single<CloudAccountStorage> { DesktopCloudAccountStorage(get()) }
 
     // Sync
     single<SyncEncryptionManager> { AesGcmEncryptionManager() }
