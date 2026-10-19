@@ -8,6 +8,7 @@ import com.emberr.domain.backup.automatic.BackupRescheduler
 import com.emberr.domain.ai.AiPurgeReport
 import com.emberr.domain.ai.DisableAiFeaturesUseCase
 import com.emberr.domain.space.SpaceRepository
+import com.emberr.domain.util.format.formatByteSize
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.home.overview.OverviewSection
@@ -275,12 +276,5 @@ class SettingsViewModel(
             report.bytesFreed > 0L -> "Freed ${formatByteSize(report.bytesFreed)} of model files."
             else -> "No model files were on disk to remove."
         }
-    }
-
-    private fun formatByteSize(bytes: Long): String = when {
-        bytes >= 1_000_000_000L -> "${(bytes / 100_000_000L) / 10.0} GB"
-        bytes >= 1_000_000L -> "${bytes / 1_000_000L} MB"
-        bytes >= 1_000L -> "${bytes / 1_000L} KB"
-        else -> "$bytes B"
     }
 }
