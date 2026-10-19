@@ -5,12 +5,6 @@ sealed interface CloudSignInState {
     data class SignedIn(val email: String) : CloudSignInState
 }
 
-class CloudPendingLogin(
-    val email: String,
-    val passwordKey: ByteArray,
-    val loginKey: ByteArray
-)
-
 class CloudPendingRecovery(
     val email: String,
     val sessionToken: String,

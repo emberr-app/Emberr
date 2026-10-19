@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.cloud.account.CloudAccountRepository
 import com.emberr.domain.cloud.account.CloudPasswordStrength
-import com.emberr.domain.cloud.account.CloudPendingLogin
 import com.emberr.domain.cloud.account.CloudPendingRecovery
 import com.emberr.domain.cloud.account.CloudSignInState
 import com.emberr.domain.cloud.account.estimateCloudPasswordStrength
@@ -36,12 +35,12 @@ enum class CloudAccountStep {
     SIGN_UP_DETAILS,
     SIGN_UP_RECOVERY_WORDS,
     LOG_IN,
-    LOG_IN_CODE,
     RECOVERY_EMAIL,
     RECOVERY_WORDS,
     RECOVERY_NEW_PASSWORD,
     SIGNED_IN,
     CHANGE_PASSWORD,
+    CHANGE_PASSWORD_CODE,
     CHANGE_EMAIL,
     CHANGE_EMAIL_CODE,
     RECOVERY_WORDS_PASSWORD,
@@ -60,7 +59,7 @@ data class CloudAccountScreenState(
     val passwordStrength: CloudPasswordStrength = CloudPasswordStrength.WEAK,
     val passwordStrengthCheckedFor: String = "",
     val recoveryWordsInput: String = "",
-    val newRecoveryWords: List<String> = emptyList(),
+    val newRecoveryWords: String = "",
     val hasSavedRecoveryWords: Boolean = false,
     val signedInEmail: String = "",
     val storageUsedBytes: Long? = null,
@@ -68,7 +67,7 @@ data class CloudAccountScreenState(
     val sessions: List<CloudSession>? = null,
     val sessionsError: String? = null,
     val logOutOtherDevices: Boolean = true,
-    val recoveryWordsToShow: List<String> = emptyList(),
+    val recoveryWordsToShow: String = "",
     val clearNotesOnThisDevice: Boolean = false,
     val isWorking: Boolean = false,
     val errorMessage: String? = null,
@@ -95,9 +94,6 @@ data class CloudAccountScreenState(
     val canLogIn: Boolean
         get() = email.isNotBlank() && password.isNotEmpty() && !isWorking
 
-    val canVerifyLoginCode: Boolean
-        get() = code.length == EMAIL_CODE_LENGTH && !isWorking
-
     val canCheckRecoveryWords: Boolean
         get() = code.length == EMAIL_CODE_LENGTH && recoveryWordsInput.isNotBlank() && !isWorking
 
@@ -106,6 +102,9 @@ data class CloudAccountScreenState(
 
     val canFinishSignUp: Boolean
         get() = hasSavedRecoveryWords && !isWorking
+
+    val canChangePassword: Boolean
+        get() = code.length == EMAIL_CODE_LENGTH && isNewPasswordAccepted && !isWorking
 
     val canChangeEmail: Boolean
         get() = code.length == EMAIL_CODE_LENGTH && !isWorking
@@ -125,12 +124,18 @@ private const val EMAIL_CODE_LENGTH = 6
 private val stepsThatPickANewPassword = setOf(
     CloudAccountStep.SIGN_UP_DETAILS,
     CloudAccountStep.RECOVERY_NEW_PASSWORD,
-    CloudAccountStep.CHANGE_PASSWORD
+    CloudAccountStep.CHANGE_PASSWORD_CODE
+)
+
+private val stepsThatSendAPasswordChange = setOf(
+    CloudAccountStep.RECOVERY_NEW_PASSWORD,
+    CloudAccountStep.CHANGE_PASSWORD_CODE
 )
 
 private val signedInSteps = setOf(
     CloudAccountStep.SIGNED_IN,
     CloudAccountStep.CHANGE_PASSWORD,
+    CloudAccountStep.CHANGE_PASSWORD_CODE,
     CloudAccountStep.CHANGE_EMAIL,
     CloudAccountStep.CHANGE_EMAIL_CODE,
     CloudAccountStep.RECOVERY_WORDS_PASSWORD,
@@ -142,7 +147,6 @@ private fun previousStepOf(step: CloudAccountStep): CloudAccountStep? = when (st
     CloudAccountStep.SIGN_UP_EMAIL -> CloudAccountStep.WELCOME
     CloudAccountStep.SIGN_UP_DETAILS -> CloudAccountStep.SIGN_UP_EMAIL
     CloudAccountStep.LOG_IN -> CloudAccountStep.WELCOME
-    CloudAccountStep.LOG_IN_CODE -> CloudAccountStep.LOG_IN
     CloudAccountStep.RECOVERY_EMAIL -> CloudAccountStep.LOG_IN
     CloudAccountStep.RECOVERY_WORDS -> CloudAccountStep.RECOVERY_EMAIL
     CloudAccountStep.RECOVERY_NEW_PASSWORD -> CloudAccountStep.RECOVERY_WORDS
@@ -151,6 +155,7 @@ private fun previousStepOf(step: CloudAccountStep): CloudAccountStep? = when (st
     CloudAccountStep.RECOVERY_WORDS_PASSWORD,
     CloudAccountStep.SHOW_RECOVERY_WORDS,
     CloudAccountStep.DELETE_ACCOUNT -> CloudAccountStep.SIGNED_IN
+    CloudAccountStep.CHANGE_PASSWORD_CODE -> CloudAccountStep.CHANGE_PASSWORD
     CloudAccountStep.CHANGE_EMAIL_CODE -> CloudAccountStep.CHANGE_EMAIL
     CloudAccountStep.LOADING,
     CloudAccountStep.WELCOME,
@@ -164,9 +169,14 @@ private const val SIGNED_OUT_MESSAGE = "You were signed out. Log in again."
 
 private const val INCORRECT_PASSWORD_MESSAGE = "Incorrect password. Try again."
 
-private fun cloudAccountErrorMessage(error: Exception, serverAddress: String, isSignedIn: Boolean): String = when (error) {
+private fun cloudAccountErrorMessage(
+    error: Exception,
+    serverAddress: String,
+    isSignedIn: Boolean,
+    isPasswordChange: Boolean = false
+): String = when (error) {
     is CloudApiException -> when (error.code) {
-        CloudApiErrorCode.BAD_REQUEST -> "Enter a valid email address."
+        CloudApiErrorCode.BAD_REQUEST -> if (isPasswordChange) SOMETHING_WENT_WRONG_MESSAGE else "Enter a valid email address."
         CloudApiErrorCode.INVALID_PASSWORD -> if (isSignedIn) INCORRECT_PASSWORD_MESSAGE else "Wrong email or password."
         CloudApiErrorCode.INCORRECT_CODE -> "That code is not right."
         CloudApiErrorCode.EXPIRED_CODE -> "That code has expired. Ask for a new one."
@@ -195,7 +205,6 @@ class CloudAccountViewModel(
     )
     val screenState: StateFlow<CloudAccountScreenState> = _screenState.asStateFlow()
 
-    private var pendingLogin: CloudPendingLogin? = null
     private var pendingRecovery: CloudPendingRecovery? = null
     private var passwordStrengthJob: Job? = null
     private var accountOverviewJob: Job? = null
@@ -285,7 +294,6 @@ class CloudAccountViewModel(
             returnToSignedIn()
             return
         }
-        if (current.step == CloudAccountStep.LOG_IN_CODE) pendingLogin = null
         if (current.step == CloudAccountStep.RECOVERY_NEW_PASSWORD) pendingRecovery = null
         _screenState.update {
             it.copy(
@@ -320,7 +328,7 @@ class CloudAccountViewModel(
                     code = "",
                     password = "",
                     passwordAgain = "",
-                    newRecoveryWords = words.split(" "),
+                    newRecoveryWords = words,
                     hasSavedRecoveryWords = false
                 )
             }
@@ -338,18 +346,8 @@ class CloudAccountViewModel(
         runAccountTask {
             val current = _screenState.value
             val email = current.email.trim()
-            pendingLogin = cloudAccountRepository.logIn(email, current.password)
-            showCodeSent(email, codeStep = CloudAccountStep.LOG_IN_CODE)
-        }
-    }
-
-    fun verifyLoginCode() {
-        if (!_screenState.value.canVerifyLoginCode) return
-        val login = pendingLogin ?: return
-        runAccountTask {
-            cloudAccountRepository.finishLogin(login, _screenState.value.code)
-            pendingLogin = null
-            showSignedIn(login.email)
+            cloudAccountRepository.logIn(email, current.password)
+            showSignedIn(email)
         }
     }
 
@@ -417,11 +415,18 @@ class CloudAccountViewModel(
         }
     }
 
+    fun sendPasswordChangeCode() {
+        runAccountTask {
+            cloudAccountRepository.sendPasswordChangeCode()
+            showCodeSent(_screenState.value.signedInEmail, codeStep = CloudAccountStep.CHANGE_PASSWORD_CODE)
+        }
+    }
+
     fun changePassword() {
-        if (!_screenState.value.canSetNewPassword) return
+        if (!_screenState.value.canChangePassword) return
         runAccountTask {
             val current = _screenState.value
-            cloudAccountRepository.changePassword(current.password, current.logOutOtherDevices)
+            cloudAccountRepository.changePassword(current.password, current.code, current.logOutOtherDevices)
             showNativeToast("Password changed successfully")
             returnToSignedIn()
             if (current.logOutOtherDevices) loadSessions()
@@ -506,7 +511,7 @@ class CloudAccountViewModel(
                 password = "",
                 passwordAgain = "",
                 logOutOtherDevices = true,
-                recoveryWordsToShow = emptyList(),
+                recoveryWordsToShow = "",
                 clearNotesOnThisDevice = false,
                 errorMessage = null,
                 newCodeSentMessage = null
@@ -516,7 +521,7 @@ class CloudAccountViewModel(
 
     private fun showRecoveryWordsStep(words: String) {
         _screenState.update {
-            it.copy(step = CloudAccountStep.SHOW_RECOVERY_WORDS, password = "", recoveryWordsToShow = words.split(" "))
+            it.copy(step = CloudAccountStep.SHOW_RECOVERY_WORDS, password = "", recoveryWordsToShow = words)
         }
     }
 
@@ -647,6 +652,7 @@ class CloudAccountViewModel(
     private fun runAccountTask(task: suspend () -> Unit) {
         if (_screenState.value.isWorking) return
         val isSignedInTask = _screenState.value.step in signedInSteps
+        val isPasswordChangeTask = _screenState.value.step in stepsThatSendAPasswordChange
         _screenState.update { it.copy(isWorking = true, errorMessage = null, newCodeSentMessage = null) }
         viewModelScope.launch {
             try {
@@ -654,7 +660,12 @@ class CloudAccountViewModel(
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (error: Exception) {
-                val message = cloudAccountErrorMessage(error, settingsManager.getCloudServerAddress(), isSignedInTask)
+                val message = cloudAccountErrorMessage(
+                    error,
+                    settingsManager.getCloudServerAddress(),
+                    isSignedInTask,
+                    isPasswordChangeTask
+                )
                 _screenState.update { it.copy(errorMessage = message) }
             } finally {
                 _screenState.update { it.copy(isWorking = false) }

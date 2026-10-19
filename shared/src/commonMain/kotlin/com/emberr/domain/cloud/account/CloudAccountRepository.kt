@@ -51,7 +51,7 @@ class CloudAccountRepository(
         return words
     }
 
-    suspend fun logIn(email: String, password: String): CloudPendingLogin {
+    suspend fun logIn(email: String, password: String) {
         val passwordParams = apiClient.fetchPasswordParams(email)
         val passwordKey = derivePasswordKeyOffMainThread(
             password,
@@ -60,20 +60,15 @@ class CloudAccountRepository(
             passwordParams.opsLimit
         )
         val loginKey = accountKeyManager.deriveLoginKey(passwordKey)
-        apiClient.logIn(email, loginKey, deviceName)
-        return CloudPendingLogin(email = email, passwordKey = passwordKey, loginKey = loginKey)
-    }
-
-    suspend fun finishLogin(pendingLogin: CloudPendingLogin, code: String) {
-        val signedInDevice = apiClient.verifyDevice(pendingLogin.email, pendingLogin.loginKey, code, deviceName)
+        val signedInDevice = apiClient.logIn(email, loginKey, deviceName)
         val accountKeys = signedInDevice.keys
-        val masterKey = accountKeyManager.unlockMasterKeyWithPasswordKey(pendingLogin.passwordKey, accountKeys)
+        val masterKey = accountKeyManager.unlockMasterKeyWithPasswordKey(passwordKey, accountKeys)
         val privateKey = accountKeyManager.unlockPrivateKey(
             masterKey,
             accountKeys.encryptedPrivateKey,
             accountKeys.encryptedPrivateKeyNonce
         )
-        saveSignedInAccount(pendingLogin.email, signedInDevice.token, masterKey, privateKey)
+        saveSignedInAccount(email, signedInDevice.token, masterKey, privateKey)
     }
 
     suspend fun sendRecoveryCode(email: String) {
@@ -111,7 +106,8 @@ class CloudAccountRepository(
             pendingRecovery.sessionToken,
             newPasswordKeys.loginKey,
             newPasswordKeys.passwordKeys,
-            logOutOtherDevices
+            code = null,
+            logOutOtherDevices = logOutOtherDevices
         )
         saveSignedInAccount(
             pendingRecovery.email,
@@ -121,7 +117,11 @@ class CloudAccountRepository(
         )
     }
 
-    suspend fun changePassword(newPassword: String, logOutOtherDevices: Boolean = true) {
+    suspend fun sendPasswordChangeCode() {
+        withStoredSessionToken { sessionToken -> apiClient.sendPasswordChangeCode(sessionToken) }
+    }
+
+    suspend fun changePassword(newPassword: String, code: String, logOutOtherDevices: Boolean = true) {
         withStoredSessionToken { sessionToken ->
             val masterKey = checkNotNull(accountStorage.getMasterKey()) { MISSING_ACCOUNT_MESSAGE }
             val newPasswordKeys = withContext(Dispatchers.Default) {
@@ -131,7 +131,8 @@ class CloudAccountRepository(
                 sessionToken,
                 newPasswordKeys.loginKey,
                 newPasswordKeys.passwordKeys,
-                logOutOtherDevices
+                code = code,
+                logOutOtherDevices = logOutOtherDevices
             )
         }
     }

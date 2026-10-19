@@ -1,6 +1,7 @@
 package com.emberr.domain.cloud.api
 
 import com.emberr.domain.cloud.keys.CloudAccountKeys
+import com.emberr.domain.cloud.keys.CloudPasswordKeys
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandler
@@ -114,7 +115,7 @@ class CloudApiClientTest {
             )
         }
         val wrongCode = assertFailsWith<CloudApiException> {
-            wrongCodeClient.verifyDevice("a@example.com", ByteArray(32), "000000", "Laptop")
+            wrongCodeClient.changeEmail("session-token", "b@example.com", "000000")
         }
         assertEquals(CloudApiErrorCode.INCORRECT_CODE, wrongCode.code)
         assertEquals(401, wrongCode.httpStatus)
@@ -134,7 +135,7 @@ class CloudApiClientTest {
     }
 
     @Test
-    fun paramsKeepsAPlusInTheEmailAndSignedInCallsSendTheToken() = runTest {
+    fun paramsKeepsAPlusSignedInCallsSendTheTokenAndAMissingCodeIsLeftOut() = runTest {
         var emailTheServerReads: String? = null
         var paramsPathSent: String? = null
         val paramsClient = clientAnswering { request ->
@@ -170,5 +171,26 @@ class CloudApiClientTest {
         assertEquals(HttpMethod.Delete, signOutMethodSent)
         assertEquals("/v1/auth/sessions/AbC-_123", signOutPathSent)
         assertEquals("session-token", tokenSent)
+
+        var changePasswordBodySent: JsonObject? = null
+        val changePasswordClient = clientAnswering { request ->
+            changePasswordBodySent = Json.parseToJsonElement(request.body.toByteArray().decodeToString()).jsonObject
+            respondOk()
+        }
+
+        changePasswordClient.changePassword(
+            sessionToken = "recovered-session-token",
+            loginKey = ByteArray(32),
+            keys = CloudPasswordKeys(
+                salt = ByteArray(16),
+                memLimit = 67108864,
+                opsLimit = 3,
+                encryptedMasterKey = ByteArray(48),
+                encryptedMasterKeyNonce = ByteArray(24)
+            ),
+            code = null
+        )
+
+        assertEquals(setOf("loginKey", "keys", "logOutOtherDevices"), changePasswordBodySent!!.keys)
     }
 }

@@ -30,6 +30,7 @@ import java.util.Base64
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 class CloudAccountRepositoryTest {
@@ -59,14 +60,13 @@ class CloudAccountRepositoryTest {
         val deviceB = deviceUsing(server, deviceBStorage)
 
         val words = deviceA.signUp("a@example.com", "123456", "correct horse")
-        val pendingLogin = deviceB.logIn("a@example.com", "correct horse")
-        deviceB.finishLogin(pendingLogin, "654321")
+        deviceB.logIn("a@example.com", "correct horse")
 
         assertEquals(24, words.split(" ").size)
-        assertEquals(server.loginKeySentAtSignup, server.loginKeySentAtVerifyDevice)
+        assertEquals(server.loginKeySentAtSignup, server.loginKeySentAtLogin)
         assertContentEquals(deviceAStorage.storedMasterKey, deviceBStorage.storedMasterKey)
         assertContentEquals(deviceAStorage.storedPrivateKey, deviceBStorage.storedPrivateKey)
-        assertEquals(FakeCloudServer.VERIFY_DEVICE_TOKEN, deviceBStorage.storedSessionToken)
+        assertEquals(FakeCloudServer.LOGIN_TOKEN, deviceBStorage.storedSessionToken)
         assertEquals(CloudSignInState.SignedIn("a@example.com"), deviceB.signInState.value)
     }
 
@@ -87,6 +87,7 @@ class CloudAccountRepositoryTest {
         val expectedToken = Base64.getUrlEncoder().encodeToString(server.recoveredTokenBytes)
         assertEquals(expectedToken, recoveringDeviceStorage.storedSessionToken)
         assertEquals(expectedToken, server.tokenSentAtChangePassword)
+        assertFalse(server.wasCodeSentAtChangePassword)
         val keysAfterChange = cloudApiJson.decodeFromJsonElement(AccountKeysJson.serializer(), server.accountKeys!!)
             .toCloudAccountKeys()
         val newPasswordKey = accountKeyManager.derivePasswordKey(
@@ -105,8 +106,9 @@ class CloudAccountRepositoryTest {
 private class FakeCloudServer {
     var accountKeys: JsonObject? = null
     var loginKeySentAtSignup: String? = null
-    var loginKeySentAtVerifyDevice: String? = null
+    var loginKeySentAtLogin: String? = null
     var tokenSentAtChangePassword: String? = null
+    var wasCodeSentAtChangePassword = false
     var recoveredTokenBytes = ByteArray(0)
 
     private val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
@@ -135,13 +137,9 @@ private class FakeCloudServer {
                 )
             }
             "/v1/auth/login" -> {
-                if (bodyText("loginKey") != loginKeySentAtSignup) wrongLoginKey()
-                else answer("""{"emailCodeNeeded":true}""")
-            }
-            "/v1/auth/verify-device" -> {
-                loginKeySentAtVerifyDevice = bodyText("loginKey")
-                if (loginKeySentAtVerifyDevice != loginKeySentAtSignup) wrongLoginKey()
-                else answer("""{"token":"$VERIFY_DEVICE_TOKEN","keys":${accountKeys}}""")
+                loginKeySentAtLogin = bodyText("loginKey")
+                if (loginKeySentAtLogin != loginKeySentAtSignup) wrongLoginKey()
+                else answer("""{"token":"$LOGIN_TOKEN","keys":${accountKeys}}""")
             }
             "/v1/auth/recover" -> {
                 val keys = accountKeys!!
@@ -163,6 +161,7 @@ private class FakeCloudServer {
             }
             "/v1/auth/change-password" -> {
                 tokenSentAtChangePassword = request.headers["X-Auth-Token"]
+                wasCodeSentAtChangePassword = "code" in bodyJson
                 accountKeys = JsonObject(accountKeys!! + bodyJson.getValue("keys").jsonObject)
                 answer("")
             }
@@ -172,7 +171,7 @@ private class FakeCloudServer {
 
     companion object {
         const val SIGNUP_TOKEN = "signup-token"
-        const val VERIFY_DEVICE_TOKEN = "verify-device-token"
+        const val LOGIN_TOKEN = "login-token"
     }
 }
 
