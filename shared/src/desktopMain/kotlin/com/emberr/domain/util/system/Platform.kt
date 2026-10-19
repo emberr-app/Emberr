@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import org.koin.mp.KoinPlatform
 
 actual val isDesktopPlatform = true
+actual val isDebugBuild: Boolean = DesktopAppStorage.isDebugBuild
 actual val appVersionName: String?
     get() = System.getProperty("jpackage.app-version")
 

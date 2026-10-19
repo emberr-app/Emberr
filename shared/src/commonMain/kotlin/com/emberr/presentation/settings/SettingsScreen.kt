@@ -46,12 +46,14 @@ import com.emberr.domain.sync.SyncServerStatus
 import com.emberr.domain.update.LATEST_RELEASE_PAGE_URL
 import com.emberr.domain.util.system.AppPermission
 import com.emberr.domain.util.system.appVersionName
+import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.restartApplication
 import com.emberr.domain.util.system.rememberAppPermissionCoordinator
 import com.emberr.presentation.settings.about.AboutScreen
 import com.emberr.presentation.settings.about.OpenSourceLicensesScreen
 import com.emberr.presentation.settings.importer.ImportScreen
+import com.emberr.presentation.settings.cloud.CloudAccountScreen
 import com.emberr.presentation.settings.selfhost.SelfHostSetupScreen
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrAlertDialog
@@ -100,6 +102,7 @@ import emberr.shared.generated.resources.folder_sync
 import emberr.shared.generated.resources.house
 import emberr.shared.generated.resources.info
 import emberr.shared.generated.resources.keyboard
+import emberr.shared.generated.resources.lock
 import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.qr_code
@@ -150,6 +153,7 @@ fun SettingsScreen(
     onExportReady: (spaceIds: Set<String>) -> Unit = {},
     onRequestBackupFolder: () -> Unit = {},
     onNavigateToSelfHostSetup: () -> Unit = {},
+    onNavigateToEmberrCloud: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
     onNavigateToImportNotes: () -> Unit = {},
     onNavigateToKeyboardToolbarSettings: () -> Unit = {},
@@ -287,6 +291,7 @@ fun SettingsScreen(
                         }
                     },
                     onOpenSelfHostSetup = onNavigateToSelfHostSetup,
+                    onOpenEmberrCloud = onNavigateToEmberrCloud,
                     onSyncNow = { syncViewModel.triggerManualSync() },
                     onPairMobileDevice = {
                         syncViewModel.startServerForPairing()
@@ -402,6 +407,9 @@ fun SettingsScreen(
                     val goBack = { onDesktopSubPageChange(page.parentPage) }
                     when (page) {
                         SettingsSubPage.SELF_HOST -> SelfHostSetupScreen(onNavigateBack = goBack, showTopBar = false)
+                        SettingsSubPage.EMBERR_CLOUD -> if (isDebugBuild) {
+                            CloudAccountScreen(onNavigateBack = goBack, showTopBar = false)
+                        }
                         SettingsSubPage.IMPORT -> ImportScreen(
                             onNavigateBack = goBack,
                             showTopBar = false
@@ -1129,6 +1137,7 @@ private fun SyncSettingsSection(
     syncPortInput: String,
     onSyncPortChange: (String) -> Unit,
     onOpenSelfHostSetup: () -> Unit,
+    onOpenEmberrCloud: () -> Unit,
     onSyncNow: () -> Unit,
     onPairMobileDevice: () -> Unit,
     onPairWithDesktop: () -> Unit,
@@ -1143,6 +1152,14 @@ private fun SyncSettingsSection(
         )
         if (isPaired) {
             SettingsFootnote(text = "Unpair LAN Sync to use Self-Host.")
+        }
+        if (isDebugBuild) {
+            SettingsDivider()
+            SettingsActionRow(
+                icon = painterResource(Res.drawable.lock),
+                title = "Emberr Cloud",
+                onClick = onOpenEmberrCloud
+            )
         }
     }
 

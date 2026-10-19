@@ -52,6 +52,7 @@ sqlcipher = "4.19.0"
 sqlite = "2.7.0"
 tink = "1.23.0"
 libsodiumBindings = "0.9.5"
+zxcvbn = "1.9.0"
 
 # On-device AI inference
 llamatik = "1.10.1"
@@ -148,6 +149,7 @@ androidx-sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version.
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 tink-android = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
 libsodium-bindings = { group = "com.ionspin.kotlin", name = "multiplatform-crypto-libsodium-bindings", version.ref = "libsodiumBindings" }
+zxcvbn = { group = "com.nulab-inc", name = "zxcvbn", version.ref = "zxcvbn" }
 
 # On-device AI inference
 llamatik-library = { group = "com.llamatik", name = "library", version.ref = "llamatik" }

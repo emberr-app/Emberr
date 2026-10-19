@@ -25,6 +25,7 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncEngine
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import com.emberr.domain.util.task.HeuristicTaskExtractor
 import com.emberr.domain.util.task.TaskExtractor
+import com.emberr.presentation.settings.cloud.CloudAccountViewModel
 import com.emberr.presentation.settings.selfhost.SelfHostSetupViewModel
 import com.emberr.presentation.daily.DailyEditorViewModel
 import com.emberr.presentation.search.SearchViewModel
@@ -475,6 +476,12 @@ val sharedModule = module {
             cloudCrypto = get(),
             accountStorage = get(),
             deviceName = cloudDeviceName()
+        )
+    }
+    viewModel {
+        CloudAccountViewModel(
+            cloudAccountRepository = get(),
+            settingsManager = get()
         )
     }
 

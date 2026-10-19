@@ -32,6 +32,8 @@ sealed class Screen(val route: String, val title: String? = null, val icon: Imag
 
     object SelfHostSetup : Screen("self_host_setup")
 
+    object EmberrCloud : Screen("emberr_cloud")
+
     object About : Screen("about")
 
     object KeyboardToolbarSettings : Screen("keyboard_toolbar_settings")

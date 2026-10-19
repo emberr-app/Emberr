@@ -1,0 +1,9 @@
+{
+  "uniqueId": "com.nulab-inc:zxcvbn",
+  "name": "zxcvbn4j",
+  "website": "https://github.com/nulab/zxcvbn4j",
+  "developers": [],
+  "licenses": [
+    "zxcvbn-mit"
+  ]
+}

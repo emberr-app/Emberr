@@ -112,6 +112,7 @@ private const val SAVED_FRACTION_SEPARATOR = ","
 private val settingsScreenPanes = setOf(
     DetailPane.Settings,
     DetailPane.SelfHostSetup,
+    DetailPane.EmberrCloud,
     DetailPane.About,
     DetailPane.ImportNotes,
     DetailPane.OpenSourceLicenses
