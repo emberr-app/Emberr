@@ -3,6 +3,7 @@ package com.emberr.presentation.daily
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
+import com.emberr.data.local.room.entity.shownOnDateString
 import com.emberr.data.local.room.entity.toRecurrenceRule
 import com.emberr.domain.model.*
 import com.emberr.domain.repository.NoteRepository
@@ -686,7 +687,7 @@ class DailyEditorViewModel(
         }
     }
 
-    private val _virtualOccurrenceIds = MutableStateFlow<Set<String>>(emptySet())
+    private val _virtualOccurrenceDates = MutableStateFlow<Map<String, String>>(emptyMap())
     override fun orderForDisplay(
         pinned: List<NoteBlock>,
         extra: List<NoteBlock>,
@@ -710,8 +711,8 @@ class DailyEditorViewModel(
         return pinned + recurring + everythingElse
     }
 
-    override fun isVirtualOccurrence(blockId: String): Boolean = blockId in _virtualOccurrenceIds.value
-    override fun virtualOccurrenceDate(blockId: String): String? = currentDateString
+    override fun isVirtualOccurrence(blockId: String): Boolean = blockId in _virtualOccurrenceDates.value
+    override fun virtualOccurrenceDate(blockId: String): String? = _virtualOccurrenceDates.value[blockId]
 
     private fun CalendarTaskEntity.toVirtualCheckboxBlock(): CheckboxBlock = CheckboxBlock(
         id = blockId,
@@ -734,10 +735,13 @@ class DailyEditorViewModel(
         .filterNotNull()
         .flatMapLatest { date ->
             repository.getCalendarTasksForDate(date).map { tasks ->
-                tasks.filter { it.noteId != date }.map { it.toVirtualCheckboxBlock() }
+                tasks.filter { it.noteId != date || it.targetDate != date }.distinctBy { it.blockId }
             }
         }
-        .onEach { blocks -> _virtualOccurrenceIds.value = blocks.mapTo(mutableSetOf()) { it.id } }
+        .onEach { tasks ->
+            _virtualOccurrenceDates.value = tasks.mapNotNull { task -> task.targetDate?.let { task.blockId to it } }.toMap()
+        }
+        .map { tasks -> tasks.map { it.toVirtualCheckboxBlock() } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // A non-recurring checkbox only ever has one occurrence, so its base block IS the sole
@@ -746,7 +750,7 @@ class DailyEditorViewModel(
     // for a non-recurring row, silently discarding the toggle/edit. Only truly recurring series use
     // the per-occurrence exception mechanism.
     override fun onVirtualOccurrenceToggled(blockId: String, isChecked: Boolean) {
-        val date = currentDateString ?: return
+        val date = virtualOccurrenceDate(blockId) ?: return
         val current = extraVisibleBlocks.value.firstOrNull { it.id == blockId } as? CheckboxBlock ?: return
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -762,7 +766,7 @@ class DailyEditorViewModel(
     }
 
     override fun onVirtualOccurrenceTextEdited(blockId: String, text: String) {
-        val date = currentDateString ?: return
+        val date = virtualOccurrenceDate(blockId) ?: return
         val current = extraVisibleBlocks.value.firstOrNull { it.id == blockId } as? CheckboxBlock ?: return
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -797,7 +801,7 @@ class DailyEditorViewModel(
             repository.getCalendarTasksForMonth(yearMonth)
         }
         .map { tasks ->
-            tasks.groupBy { LocalDate.parse(it.targetDate!!) }
+            tasks.groupBy { LocalDate.parse(it.shownOnDateString()!!) }
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
