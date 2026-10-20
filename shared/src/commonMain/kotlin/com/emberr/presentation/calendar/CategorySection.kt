@@ -428,8 +428,6 @@ private fun CategoryEditor(
     onCancel: () -> Unit,
     onSave: () -> Unit
 ) {
-    val contentInset = if (isDesktopPlatform) CategoryMenuContentInset else 0.dp
-
     Column(modifier = Modifier.fillMaxWidth()) {
         EmberrTextField(
             value = state.name,
@@ -444,7 +442,7 @@ private fun CategoryEditor(
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.padding(
-                start = contentInset,
+                start = CategoryMenuContentInset,
                 top = CategoryEditorSectionSpacing,
                 bottom = CategoryEditorLabelSpacing
             )
@@ -454,7 +452,7 @@ private fun CategoryEditor(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = contentInset, vertical = CategorySwatchRingRoom)
+                .padding(horizontal = CategoryMenuContentInset, vertical = CategorySwatchRingRoom)
         ) {
             CategoryPastelPalette.forEach { colorHex ->
                 CategoryColorSwatch(
