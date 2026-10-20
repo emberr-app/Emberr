@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.NoteKind
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
@@ -2150,7 +2151,7 @@ fun DesktopMainScreen(
                             override fun onMarkdownShortcut(blockId: String, literalText: String, shortcut: MarkdownShortcut) =
                                 dailyViewModel.applyMarkdownShortcut(blockId, literalText, shortcut)
                             override fun onToggleSelection(id: String) = dailyViewModel.toggleSelection(id)
-                            override fun onUpdateReminder(id: String, timestamp: Long?) = dailyViewModel.updateReminder(id, timestamp)
+                            override fun onUpdateReminder(id: String, timestamp: Long?, allDay: AllDaySpan?) = dailyViewModel.updateReminder(id, timestamp, allDay)
                             override fun onUrlSubmit(id: String, url: String) = dailyViewModel.handleUrlSubmit(id, url)
                             override fun onImagePicked(id: String, uri: String) = dailyViewModel.handleImagePicked(id, uri)
                             override fun onDocumentPicked(id: String, uri: String) = dailyViewModel.handleDocumentPicked(id, uri)

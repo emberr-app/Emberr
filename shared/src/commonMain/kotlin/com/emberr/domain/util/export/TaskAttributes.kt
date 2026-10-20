@@ -12,6 +12,8 @@ import kotlin.time.Instant
 const val DEFAULT_TASK_DURATION_MINUTES = 30
 
 private const val DUE_KEY = "due"
+private const val ENDS_KEY = "ends"
+private const val REMIND_KEY = "remind"
 private const val DURATION_KEY = "for"
 private const val CATEGORY_KEY = "category"
 private const val REPEAT_KEY = "repeat"
@@ -20,6 +22,8 @@ private const val DETAILS_KEY = "details"
 
 data class TaskAttributes(
     val dueText: String? = null,
+    val endDateText: String? = null,
+    val reminderTimeText: String? = null,
     val durationMinutes: Int? = null,
     val categoryName: String? = null,
     val repeatText: String? = null,
@@ -27,7 +31,8 @@ data class TaskAttributes(
     val details: String? = null
 ) {
     val isEmpty: Boolean
-        get() = dueText == null && durationMinutes == null && categoryName == null &&
+        get() = dueText == null && endDateText == null && reminderTimeText == null &&
+            durationMinutes == null && categoryName == null &&
             repeatText == null && link == null && details == null
 }
 
@@ -38,6 +43,8 @@ object TaskAttributesFormat {
 
         val fields = mutableListOf<String>()
         attributes.dueText?.let { fields.add("$DUE_KEY: ${escapeValue(it)}") }
+        attributes.endDateText?.let { fields.add("$ENDS_KEY: ${escapeValue(it)}") }
+        attributes.reminderTimeText?.let { fields.add("$REMIND_KEY: ${escapeValue(it)}") }
         attributes.durationMinutes?.let { fields.add("$DURATION_KEY: ${it}m") }
         attributes.categoryName?.let { fields.add("$CATEGORY_KEY: ${escapeValue(it)}") }
         attributes.repeatText?.let { fields.add("$REPEAT_KEY: ${escapeValue(it)}") }
@@ -70,6 +77,11 @@ object TaskDueTimeFormat {
         val time = "${pad(local.hour, 2)}:${pad(local.minute, 2)}"
 
         return if (local.second == 0) "$date $time" else "$date $time:${pad(local.second, 2)}"
+    }
+
+    fun renderTime(epochMilliseconds: Long, timeZone: TimeZone): String {
+        val local = Instant.fromEpochMilliseconds(epochMilliseconds).toLocalDateTime(timeZone)
+        return "${pad(local.hour, 2)}:${pad(local.minute, 2)}"
     }
 
     private fun pad(value: Int, width: Int): String = value.toString().padStart(width, '0')

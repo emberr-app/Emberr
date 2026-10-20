@@ -85,7 +85,9 @@ import com.emberr.presentation.shared.editor.GlobalEditorState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.FlowPreview
+import com.emberr.domain.reminders.DesktopReminderShownBus
 import com.emberr.domain.reminders.ReminderClickBus
+import com.emberr.domain.reminders.ReminderRescheduler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterNotNull
@@ -150,6 +152,15 @@ private fun runEmberrDesktopApp() = application {
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             GlobalContext.get().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
+        }
+    }
+
+    LaunchedEffect(isBackgroundStartupAllowed) {
+        if (!isBackgroundStartupAllowed) return@LaunchedEffect
+        val reminderRescheduler = GlobalContext.get().get<ReminderRescheduler>()
+        withContext(Dispatchers.IO) { reminderRescheduler.rescheduleUpcomingReminders() }
+        DesktopReminderShownBus.remindersShown.collect {
+            withContext(Dispatchers.IO) { reminderRescheduler.rescheduleUpcomingReminders() }
         }
     }
 

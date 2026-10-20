@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.TaskSource
+import com.emberr.domain.model.AllDaySpan
+import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
@@ -14,6 +16,7 @@ import com.emberr.domain.sync.AutoSyncTrigger
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.reminders.ReminderScheduler
+import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.presentation.shared.editor.FocusRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -367,17 +370,19 @@ class TasksViewModel(
         AutoSyncTrigger.requestSync()
     }
 
-    fun updateReminder(blockId: String, timestamp: Long?) {
+    fun updateReminder(blockId: String, timestamp: Long?, allDay: AllDaySpan?) {
         val loc = blockSourceMap[blockId] ?: return
         var blockText = ""
         var previousTimestamp: Long? = null
+        var recurrenceRule: RecurrenceRule? = null
 
         _activeBlocks.update { list ->
             list.map {
                 if (it.id == blockId && it is CheckboxBlock) {
                     blockText = it.text
                     previousTimestamp = it.reminderTimestamp
-                    it.copy(reminderTimestamp = timestamp)
+                    recurrenceRule = it.recurrenceRule
+                    it.copy(reminderTimestamp = timestamp, allDay = allDay)
                 } else it
             }
         }
@@ -386,7 +391,8 @@ class TasksViewModel(
                 if (it.id == blockId && it is CheckboxBlock) {
                     blockText = it.text
                     previousTimestamp = it.reminderTimestamp
-                    it.copy(reminderTimestamp = timestamp)
+                    recurrenceRule = it.recurrenceRule
+                    it.copy(reminderTimestamp = timestamp, allDay = allDay)
                 } else it
             }
         }
@@ -403,7 +409,7 @@ class TasksViewModel(
                     val homeContent = repository.getDailyNote(loc.noteId)
                     val homeBlock = homeContent?.blocks?.firstOrNull { it.id == blockId } as? CheckboxBlock
                     val updatedBlock = (homeBlock ?: CheckboxBlock(id = blockId))
-                        .copy(reminderTimestamp = timestamp, updatedAt = System.currentTimeMillis())
+                        .copy(reminderTimestamp = timestamp, allDay = allDay, updatedAt = System.currentTimeMillis())
 
                     SyncCoordinator.mutex.withLock {
                         val targetBlocks = repository.getDailyNote(targetDateString)?.blocks ?: emptyList()
@@ -436,7 +442,7 @@ class TasksViewModel(
                     SyncCoordinator.mutex.withLock {
                         val content = repository.getDailyNote(loc.noteId) ?: return@withLock
                         val updatedBlocks = updateBlockInList(content.blocks, blockId) {
-                            it.copy(reminderTimestamp = timestamp)
+                            it.copy(reminderTimestamp = timestamp, allDay = allDay)
                         }
                         val updatedContent = NoteContent(blocks = updatedBlocks)
                         repository.saveDailyNote(loc.noteId, updatedContent)
@@ -453,7 +459,7 @@ class TasksViewModel(
                         val meta = repository.getNoteById(loc.noteId) ?: return@withLock
                         val content = repository.getNoteContent(loc.noteId) ?: return@withLock
                         val updatedBlocks = updateBlockInList(content.blocks, blockId) {
-                            it.copy(reminderTimestamp = timestamp)
+                            it.copy(reminderTimestamp = timestamp, allDay = allDay)
                         }
                         val updatedMeta = meta.copy(updatedAt = System.currentTimeMillis())
                         val updatedContent = NoteContent(blocks = updatedBlocks)
@@ -466,7 +472,9 @@ class TasksViewModel(
                 }
 
                 if (timestamp != null) {
-                    reminderScheduler.schedule(blockId, notificationTitle, blockText.ifBlank { "Unfinished task" }, timestamp)
+                    reminderScheduler.scheduleEventReminder(
+                        blockId, notificationTitle, blockText.ifBlank { "Unfinished task" }, timestamp, allDay, recurrenceRule
+                    )
                 } else {
                     reminderScheduler.cancel(blockId)
                 }

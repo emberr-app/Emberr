@@ -51,6 +51,7 @@ class DesktopReminderScheduler : ReminderScheduler {
         val task = scheduler.schedule({
             triggerNativeNotification(blockId, noteTitle, text)
             activeTasks.remove(blockId)
+            DesktopReminderShownBus.reminderShown()
         }, delay, TimeUnit.MILLISECONDS)
 
         activeTasks[blockId] = task

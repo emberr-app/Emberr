@@ -24,6 +24,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.koin.compose.viewmodel.koinViewModel
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyDateRange
@@ -205,7 +206,7 @@ fun TasksScreen(
                         override fun onEnterPressed(id: String, before: String, after: String) = viewModel.handleEnter(id, before, after)
                         override fun onBackspaceOnEmpty(id: String) = viewModel.handleBackspaceOnEmpty(id)
                         override fun onToggleSelection(id: String) = viewModel.toggleSelection(id)
-                        override fun onUpdateReminder(id: String, timestamp: Long?) = viewModel.updateReminder(id, timestamp)
+                        override fun onUpdateReminder(id: String, timestamp: Long?, allDay: AllDaySpan?) = viewModel.updateReminder(id, timestamp, allDay)
                         override fun onOpenFile(filePath: String, mimeType: String) { onOpenFile(filePath, mimeType) }
                         override fun onChangeBlockType(type: String) {}
                         override fun onToggleFormat(format: String) {}

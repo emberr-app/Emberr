@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyDateRange
@@ -268,7 +269,7 @@ fun DailyScreen(
             override fun onAdjustIndentationOfBlocks(blockIds: Set<String>, increase: Boolean) =
                 viewModel.adjustIndentationOfBlocks(blockIds, increase)
             override fun onToggleSelection(id: String) = viewModel.toggleSelection(id)
-            override fun onUpdateReminder(id: String, timestamp: Long?) = viewModel.updateReminder(id, timestamp)
+            override fun onUpdateReminder(id: String, timestamp: Long?, allDay: AllDaySpan?) = viewModel.updateReminder(id, timestamp, allDay)
             override fun onOpenEventOptions(blockId: String, occurrenceDate: String?) {
                 eventOptionsTargetBlockId = blockId
                 eventOptionsOccurrenceDate = occurrenceDate

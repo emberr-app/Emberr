@@ -127,12 +127,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -153,6 +155,7 @@ import com.emberr.domain.model.UnknownBlock
 import com.emberr.domain.model.VoiceBlock
 import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
+import com.emberr.domain.model.lastDate
 import com.emberr.domain.model.textAlignmentOrNull
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.triggerHapticFeedback
@@ -218,6 +221,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
@@ -952,14 +956,17 @@ fun NoteBlockItem(
                                         onPresetSelected = {
                                             actions.onUpdateReminder(
                                                 block.id,
-                                                it
+                                                block.reminderTimestampOnNewDate(it),
+                                                block.allDay
                                             )
                                         },
                                         onCustomSelected = { showDatePicker = true },
                                         customDateInitialTimestamp = block.reminderTimestamp,
-                                        onCustomDateChosen = { timestamp -> actions.onUpdateReminder(block.id, timestamp) },
+                                        onCustomDateChosen = { timestamp ->
+                                            actions.onUpdateReminder(block.id, block.reminderTimestampOnNewDate(timestamp), block.allDay)
+                                        },
                                         onRemove = if (hasReminder) {
-                                            { actions.onUpdateReminder(block.id, null) }
+                                            { actions.onUpdateReminder(block.id, null, null) }
                                         } else null
                                     )
                                 }
@@ -997,28 +1004,44 @@ fun NoteBlockItem(
                                         onPresetSelected = {
                                             actions.onUpdateReminder(
                                                 block.id,
-                                                it
+                                                it,
+                                                null
                                             )
                                         },
                                         onCustomSelected = { showTimePicker = true },
                                         customTimeInitialTimestamp = block.reminderTimestamp,
                                         onCustomTimeChosen = { hour, minute ->
-                                            actions.onUpdateReminder(block.id, reminderTimestampAtTime(block.reminderTimestamp, hour, minute))
+                                            actions.onUpdateReminder(block.id, reminderTimestampAtTime(block.reminderTimestamp, hour, minute), null)
+                                        },
+                                        isAllDay = block.allDay != null,
+                                        onAllDaySelected = {
+                                            if (block.allDay == null) {
+                                                actions.onUpdateReminder(
+                                                    block.id,
+                                                    reminderTimestampAtTime(block.reminderTimestamp, DEFAULT_ALL_DAY_REMINDER_HOUR, 0),
+                                                    AllDaySpan()
+                                                )
+                                            }
                                         }
                                     )
                                 }
                                 if (hasReminder) {
                                     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
-                                    val timeText = remember(block.reminderTimestamp, usesTwentyFourHourClock) {
+                                    val timeText = remember(block.reminderTimestamp, block.allDay, usesTwentyFourHourClock) {
                                         val instant = Instant.fromEpochMilliseconds(block.reminderTimestamp)
                                         val dt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                                        val clockTime = formatTimeOfDay(dt.hour, dt.minute, usesTwentyFourHourClock)
-                                        "${dt.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${dt.day}, $clockTime"
+                                        val allDay = block.allDay
+                                        when {
+                                            allDay == null -> "${shortDateLabel(dt.date)}, ${formatTimeOfDay(dt.hour, dt.minute, usesTwentyFourHourClock)}"
+                                            allDay.lengthInDays > 1 -> "${shortDateLabel(dt.date)} – ${shortDateLabel(allDay.lastDate(dt.date))}, All day"
+                                            else -> "${shortDateLabel(dt.date)}, All day"
+                                        }
                                     }
                                     val timeZone = TimeZone.currentSystemDefault()
                                     val reminderDate = Instant.fromEpochMilliseconds(block.reminderTimestamp)
                                         .toLocalDateTime(timeZone).date
-                                    val isOverdue = !block.isChecked && reminderDate < Clock.System.todayIn(timeZone)
+                                    val lastReminderDate = block.allDay?.lastDate(reminderDate) ?: reminderDate
+                                    val isOverdue = !block.isChecked && lastReminderDate < Clock.System.todayIn(timeZone)
                                     Text(
                                         text = timeText,
                                         style = MaterialTheme.typography.labelSmall,
@@ -1179,7 +1202,7 @@ fun NoteBlockItem(
                     initialTimestamp = block.reminderTimestamp,
                     onDismiss = { showDatePicker = false },
                     onConfirm = { timestamp ->
-                        actions.onUpdateReminder(block.id, timestamp)
+                        actions.onUpdateReminder(block.id, block.reminderTimestampOnNewDate(timestamp), block.allDay)
                         showDatePicker = false
                     }
                 )
@@ -1189,7 +1212,7 @@ fun NoteBlockItem(
                     initialTimestamp = block.reminderTimestamp,
                     onDismiss = { showTimePicker = false },
                     onConfirm = { hour, minute ->
-                        actions.onUpdateReminder(block.id, reminderTimestampAtTime(block.reminderTimestamp, hour, minute))
+                        actions.onUpdateReminder(block.id, reminderTimestampAtTime(block.reminderTimestamp, hour, minute), null)
                         showTimePicker = false
                     }
                 )
@@ -2118,6 +2141,16 @@ data class RichTextVisualTransformation(
             }
         )
     }
+}
+
+private fun shortDateLabel(date: LocalDate): String =
+    "${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.day}"
+
+private fun CheckboxBlock.reminderTimestampOnNewDate(newTimestamp: Long): Long {
+    val currentTimestamp = reminderTimestamp
+    if (allDay == null || currentTimestamp == null) return newTimestamp
+    val currentTime = Instant.fromEpochMilliseconds(currentTimestamp).toLocalDateTime(TimeZone.currentSystemDefault())
+    return reminderTimestampAtTime(newTimestamp, currentTime.hour, currentTime.minute)
 }
 
 private fun reminderTimestampAtTime(currentTimestamp: Long?, hour: Int, minute: Int): Long {

@@ -59,8 +59,8 @@ import java.util.Calendar
 import kotlin.math.abs
 
 private val DesktopMenuWidth = 240.dp
-private val DesktopDatePickerMenuWidth = 312.dp
-private val DesktopTimePickerMenuWidth = 292.dp
+internal val DesktopDatePickerMenuWidth = 312.dp
+internal val DesktopTimePickerMenuWidth = 292.dp
 @Composable
 fun ReminderPresetMenu(
     expanded: Boolean,
@@ -191,7 +191,9 @@ fun TimePresetMenu(
     onPresetSelected: (Long) -> Unit,
     onCustomSelected: () -> Unit,
     customTimeInitialTimestamp: Long?,
-    onCustomTimeChosen: (hour: Int, minute: Int) -> Unit
+    onCustomTimeChosen: (hour: Int, minute: Int) -> Unit,
+    isAllDay: Boolean = false,
+    onAllDaySelected: (() -> Unit)? = null
 ) {
     if (isDesktopPlatform) {
         EmberrDesktopMenu(
@@ -200,6 +202,15 @@ fun TimePresetMenu(
             modifier = Modifier.width(DesktopMenuWidth)
         ) {
             Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                if (onAllDaySelected != null) {
+                    EmberrDesktopMenuOption(
+                        label = "All day",
+                        isSelected = isAllDay,
+                        icon = { ReminderMenuIcon(Res.drawable.calendar_day) },
+                        onClick = { onAllDaySelected(); onDismiss() }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
+                }
                 EmberrDesktopMenuOption(
                     label = "In 15 mins",
                     icon = { ReminderMenuIcon(Res.drawable.history2) },
@@ -247,6 +258,15 @@ fun TimePresetMenu(
             LocalRippleConfiguration provides null
           ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+                if (onAllDaySelected != null) {
+                    PresetSheetItem(painterResource(Res.drawable.calendar_day), "All day", isSelected = isAllDay) {
+                        onAllDaySelected(); onDismiss()
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    )
+                }
                 PresetSheetItem(painterResource(Res.drawable.history2), "In 15 mins") {
                     onPresetSelected(
                         getTimePreset(
@@ -299,9 +319,18 @@ private fun ReminderMenuIcon(icon: DrawableResource, tint: Color = MaterialTheme
 }
 
 @Composable
-private fun PresetSheetItem(icon: Painter, text: String, isDestructive: Boolean = false, onClick: () -> Unit) {
-    val textColor = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-    val iconColor = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+private fun PresetSheetItem(
+    icon: Painter,
+    text: String,
+    isDestructive: Boolean = false,
+    isSelected: Boolean = false,
+    onClick: () -> Unit
+) {
+    val textColor = when {
+        isDestructive -> MaterialTheme.colorScheme.error
+        isSelected -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurface
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -311,7 +340,7 @@ private fun PresetSheetItem(icon: Painter, text: String, isDestructive: Boolean 
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(painter = icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
+        Icon(painter = icon, contentDescription = null, tint = textColor, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = text, style = MaterialTheme.typography.bodyLarge, color = textColor)
     }

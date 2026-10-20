@@ -17,6 +17,7 @@ import com.emberr.domain.database.DatabaseRowChange
 import com.emberr.domain.database.RepeatedRowToCreate
 import com.emberr.domain.database.HistoryDirection
 import com.emberr.domain.database.LinkableDatabase
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.NoteBlock
@@ -36,6 +37,7 @@ interface NoteRepository {
 
     fun getCalendarTasksForMonth(yearMonth: String): Flow<List<CalendarTaskEntity>>
     fun getCalendarTasksForDate(dateString: String): Flow<List<CalendarTaskEntity>>
+    fun getCalendarTasksInRange(startDateString: String, endDateString: String): Flow<List<CalendarTaskEntity>>
     fun getAllTasksFlow(): Flow<List<CalendarTaskEntity>>
     fun getCalendarTasksForSearch(today: LocalDate): Flow<List<CalendarTaskEntity>>
 
@@ -65,7 +67,8 @@ interface NoteRepository {
         categoryId: String?,
         durationMinutes: Int,
         url: String?,
-        description: String?
+        description: String?,
+        allDay: AllDaySpan?
     )
 
     suspend fun applyRecurrenceScopedMove(
@@ -73,7 +76,8 @@ interface NoteRepository {
         occurrenceDate: String,
         targetDate: String,
         scope: RecurrenceEditScope,
-        timestamp: Long
+        timestamp: Long,
+        allDay: AllDaySpan?
     )
 
     // Daily Tab operations

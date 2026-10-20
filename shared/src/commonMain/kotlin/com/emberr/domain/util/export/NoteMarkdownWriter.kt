@@ -24,8 +24,11 @@ import com.emberr.domain.model.UnknownBlock
 import com.emberr.domain.model.VoiceBlock
 import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
+import com.emberr.domain.model.lastDate
 import com.emberr.domain.model.valueAsText
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 private const val VOICE_FENCE_NAME = "emberr-voice"
 private const val TOGGLE_MARKER = "- ▸ "
@@ -215,17 +218,26 @@ object NoteMarkdownWriter {
         return if (trailingGroup == null) renderedLines else "$renderedLines $trailingGroup"
     }
 
-    private fun renderTaskAttributes(block: CheckboxBlock, options: RenderOptions): String? =
-        TaskAttributesFormat.render(
+    private fun renderTaskAttributes(block: CheckboxBlock, options: RenderOptions): String? {
+        val allDay = block.allDay
+        val allDayStartDate = block.reminderTimestamp?.takeIf { allDay != null }
+            ?.let { Instant.fromEpochMilliseconds(it).toLocalDateTime(options.timeZone).date }
+        val allDayLastDate = allDayStartDate?.let { allDay?.lastDate(it) }?.takeIf { it != allDayStartDate }
+        return TaskAttributesFormat.render(
             TaskAttributes(
-                dueText = block.reminderTimestamp?.let { TaskDueTimeFormat.render(it, options.timeZone) },
-                durationMinutes = block.durationMinutes.takeIf { it != DEFAULT_TASK_DURATION_MINUTES },
+                dueText = allDayStartDate?.toString()
+                    ?: block.reminderTimestamp?.let { TaskDueTimeFormat.render(it, options.timeZone) },
+                endDateText = allDayLastDate?.toString(),
+                reminderTimeText = block.reminderTimestamp?.takeIf { allDay?.isReminderOn == true }
+                    ?.let { TaskDueTimeFormat.renderTime(it, options.timeZone) },
+                durationMinutes = block.durationMinutes.takeIf { allDay == null && it != DEFAULT_TASK_DURATION_MINUTES },
                 categoryName = block.categoryId?.let { options.categoryNamesById[it] },
                 repeatText = block.recurrenceRule?.let { TaskRepeatFormat.render(it) },
                 link = block.url?.takeIf { it.isNotBlank() },
                 details = block.description?.takeIf { it.isNotBlank() }
             )
         )
+    }
 
     private fun renderCode(block: CodeBlock): String {
         val fence = "`".repeat(longestBacktickRun(block.code).coerceAtLeast(2) + 1)

@@ -1,10 +1,6 @@
 package com.emberr.presentation.calendar
 
-import com.emberr.domain.util.time.formatTimeOfDay
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
 
 data class CalendarSearchResults(
     val upcomingEvents: List<CalendarEvent>,
@@ -36,11 +32,8 @@ data class CalendarEventSearchResult(
     val category: CalendarCategory?
 )
 
-fun CalendarEvent.searchResultDateLabel(usesTwentyFourHourClock: Boolean): String {
-    val startTime = Instant.fromEpochMilliseconds(reminderTimestamp).toLocalDateTime(TimeZone.currentSystemDefault())
-    val timeLabel = formatTimeOfDay(startTime.hour, startTime.minute, usesTwentyFourHourClock)
-    return "${formatFullDate(LocalDate.parse(dateString))} · $timeLabel"
-}
+fun CalendarEvent.searchResultDateLabel(usesTwentyFourHourClock: Boolean): String =
+    "${formatFullDate(LocalDate.parse(dateString))} · ${timeOfDayLabel(usesTwentyFourHourClock)}"
 
 fun CalendarEvent.matchingDetail(query: String): String? =
     listOfNotNull(description, url).firstOrNull { it.contains(query, ignoreCase = true) }

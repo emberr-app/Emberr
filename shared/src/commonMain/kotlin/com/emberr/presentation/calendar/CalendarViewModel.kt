@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.TaskSource
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.model.markDeleted
+import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.ActiveSpaceStore
@@ -158,6 +160,10 @@ class CalendarViewModel(
         combine(repository.getCalendarTasksForDate(dateString), categoryVisibility) { tasks, visibility ->
             tasks.mapNotNull { it.toCalendarEvent() }.filter { event -> visibility.isEventShown(event.categoryId) }
         }
+    fun eventsInRange(startDate: LocalDate, endDate: LocalDate): Flow<List<CalendarEvent>> =
+        combine(repository.getCalendarTasksInRange(startDate.toString(), endDate.toString()), categoryVisibility) { tasks, visibility ->
+            tasks.mapNotNull { it.toCalendarEvent() }.filter { event -> visibility.isEventShown(event.categoryId) }
+        }
     fun eventsForMonth(yearMonth: String): Flow<List<CalendarEvent>> =
         combine(repository.getCalendarTasksForMonth(yearMonth), categoryVisibility) { tasks, visibility ->
             tasks.mapNotNull { it.toCalendarEvent() }.filter { event -> visibility.isEventShown(event.categoryId) }
@@ -185,6 +191,7 @@ class CalendarViewModel(
         durationMinutes: Int,
         url: String?,
         description: String?,
+        allDay: AllDaySpan?,
         recurrenceRule: RecurrenceRule? = null,
         editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
     ) {
@@ -207,7 +214,8 @@ class CalendarViewModel(
                         categoryId = categoryId,
                         durationMinutes = durationMinutes,
                         url = normalizedUrl,
-                        description = normalizedDescription
+                        description = normalizedDescription,
+                        allDay = allDay
                     )
                     SyncEventBus.emitSyncCompleted(original.dateString)
                     return@launch
@@ -231,6 +239,7 @@ class CalendarViewModel(
                             durationMinutes = durationMinutes,
                             url = url,
                             description = description,
+                            allDay = allDay,
                             recurrenceRule = recurrenceRule,
                             editScope = editScope
                         )
@@ -256,6 +265,7 @@ class CalendarViewModel(
                             url = normalizedUrl,
                             description = normalizedDescription,
                             recurrenceRule = recurrenceRule,
+                            allDay = allDay,
                             updatedAt = now
                         )
                         val updatedBlocks = content.blocks.map { if (it.id == blockId) updatedBlock else it }
@@ -263,7 +273,9 @@ class CalendarViewModel(
                         notificationTitle = meta.title.ifBlank { "Task Reminder" }
                     }
                     SyncEventBus.emitSyncCompleted(original.noteId)
-                    reminderScheduler.schedule(blockId, notificationTitle, name.ifBlank { "Unfinished task" }, timestamp)
+                    reminderScheduler.scheduleEventReminder(
+                        blockId, notificationTitle, name.ifBlank { "Unfinished task" }, timestamp, allDay, recurrenceRule
+                    )
                     return@launch
                 }
 
@@ -282,6 +294,7 @@ class CalendarViewModel(
                     url = normalizedUrl,
                     description = normalizedDescription,
                     recurrenceRule = recurrenceRule,
+                    allDay = allDay,
                     updatedAt = now
                 )
 
@@ -308,11 +321,13 @@ class CalendarViewModel(
                     toDateString = dateString
                 )
 
-                reminderScheduler.schedule(
+                reminderScheduler.scheduleEventReminder(
                     blockId = blockId,
                     noteTitle = "Daily: $dateString",
                     text = name.ifBlank { "Unfinished task" },
-                    timestamp = timestamp
+                    timestamp = timestamp,
+                    allDay = allDay,
+                    recurrenceRule = recurrenceRule
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -323,7 +338,8 @@ class CalendarViewModel(
     fun resizeEvent(
         event: CalendarEvent,
         newTimeRange: EventTimeRange,
-        editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
+        editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS,
+        allDay: AllDaySpan? = event.allDay
     ) {
         val newTimestamp = timestampOnDate(event.dateString, newTimeRange.startMinuteOfDay)
         if (event.recurrenceRule == null) {
@@ -335,7 +351,8 @@ class CalendarViewModel(
                 categoryId = event.categoryId,
                 durationMinutes = newTimeRange.durationMinutes,
                 url = event.url,
-                description = event.description
+                description = event.description,
+                allDay = allDay
             )
             return
         }
@@ -350,7 +367,8 @@ class CalendarViewModel(
                     categoryId = event.categoryId,
                     durationMinutes = newTimeRange.durationMinutes,
                     url = event.url,
-                    description = event.description
+                    description = event.description,
+                    allDay = allDay
                 )
                 SyncEventBus.emitSyncCompleted(event.dateString)
             } catch (e: Exception) {
@@ -363,10 +381,11 @@ class CalendarViewModel(
         event: CalendarEvent,
         targetDateString: String,
         newTimeRange: EventTimeRange,
-        editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
+        editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS,
+        allDay: AllDaySpan? = event.allDay
     ) {
         if (targetDateString == event.dateString) {
-            resizeEvent(event, newTimeRange, editScope)
+            resizeEvent(event, newTimeRange, editScope, allDay)
             return
         }
         if (event.recurrenceRule != null) {
@@ -383,7 +402,8 @@ class CalendarViewModel(
                         occurrenceDate = event.occurrenceDateString,
                         targetDate = seriesTargetDateString,
                         scope = editScope,
-                        timestamp = timestampOnDate(targetDateString, newTimeRange.startMinuteOfDay)
+                        timestamp = timestampOnDate(targetDateString, newTimeRange.startMinuteOfDay),
+                        allDay = allDay
                     )
                     SyncEventBus.emitSyncCompleted(event.dateString)
                     SyncEventBus.emitSyncCompleted(targetDateString)
@@ -401,8 +421,19 @@ class CalendarViewModel(
             categoryId = event.categoryId,
             durationMinutes = newTimeRange.durationMinutes,
             url = event.url,
-            description = event.description
+            description = event.description,
+            allDay = allDay
         )
+    }
+
+    fun changeAllDaySpan(
+        event: CalendarEvent,
+        newStartDate: LocalDate,
+        newLengthInDays: Int,
+        editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
+    ) {
+        val allDay = event.allDay ?: return
+        moveEvent(event, newStartDate.toString(), event.timeRange(), editScope, allDay.copy(lengthInDays = newLengthInDays))
     }
 
     fun deleteEvent(event: CalendarEvent, editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS) {

@@ -17,5 +17,8 @@ data class CalendarEventExceptionEntity(
     val overrideCategoryId: String? = null,
     val overrideUrl: String? = null,
     val overrideDescription: String? = null,
+    val overrideIsAllDay: Boolean? = null,
+    val overrideAllDayLengthInDays: Int? = null,
+    val overrideIsAllDayReminderOn: Boolean? = null,
     val updatedAt: Long
 )

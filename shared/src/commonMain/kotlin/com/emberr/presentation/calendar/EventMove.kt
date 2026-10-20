@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import kotlin.math.roundToInt
 import kotlinx.datetime.LocalDate
@@ -31,7 +32,12 @@ private const val EdgeHoldNanosBeforeSwitch = 600_000_000L
 
 enum class EdgeHoldDirection { PREVIOUS, NEXT }
 
-data class EventMovePreview(val event: CalendarEvent, val targetDate: LocalDate, val timeRange: EventTimeRange)
+data class EventMovePreview(
+    val event: CalendarEvent,
+    val targetDate: LocalDate,
+    val timeRange: EventTimeRange,
+    val becomesAllDay: Boolean = false
+)
 
 class ActiveEventMove(
     val event: CalendarEvent,
@@ -39,7 +45,8 @@ class ActiveEventMove(
     val startPointerMinuteOfDay: Float,
     val hourHeightPx: Float,
     val grabOffsetInCard: Offset,
-    val cardSize: IntSize
+    val cardSize: IntSize,
+    val startedInAllDayStrip: Boolean = false
 )
 
 class EventMoveTracker {
@@ -51,6 +58,8 @@ class EventMoveTracker {
     var gridCoordinates: LayoutCoordinates? = null
     var autoScroll: EventResizeAutoScroll? = null
     var visibleDates: List<LocalDate> = emptyList()
+    var hourHeightPx = 0f
+    var allDayDropZone: LayoutCoordinates? = null
     private val columnCoordinatesByDate = mutableMapOf<LocalDate, LayoutCoordinates>()
 
     fun registerColumn(date: LocalDate, coordinates: LayoutCoordinates) {
@@ -82,6 +91,28 @@ class EventMoveTracker {
         )
     }
 
+    fun startFromAllDayStrip(event: CalendarEvent, pointerId: PointerId, pointerInWindow: Offset) {
+        if (hourHeightPx <= 0f) return
+        val (_, column) = columnUnderPointer(pointerInWindow.x) ?: return
+        val cardSize = IntSize(column.size.width, (hourHeightPx * event.durationMinutes / 60f).roundToInt())
+        this.pointerInWindow = pointerInWindow
+        activeMove = ActiveEventMove(
+            event = event,
+            pointerId = pointerId,
+            startPointerMinuteOfDay = event.timeRange().startMinuteOfDay.toFloat(),
+            hourHeightPx = hourHeightPx,
+            grabOffsetInCard = Offset(cardSize.width / 2f, 0f),
+            cardSize = cardSize,
+            startedInAllDayStrip = true
+        )
+        refreshPreview()
+    }
+
+    fun cancelMove() {
+        activeMove = null
+        preview = null
+    }
+
     fun moveTo(pointerInWindow: Offset) {
         this.pointerInWindow = pointerInWindow
         refreshPreview()
@@ -89,7 +120,16 @@ class EventMoveTracker {
 
     fun refreshPreview() {
         val move = activeMove ?: return
-        val (targetDate, targetColumn) = columnUnderPointer() ?: return
+        val (targetDate, targetColumn) = columnUnderPointer(pointerInWindow.x) ?: return
+        if (move.event.allDay == null && isOverAllDayDropZone(pointerInWindow)) {
+            preview = EventMovePreview(
+                event = move.event,
+                targetDate = targetDate,
+                timeRange = EventTimeRange(DEFAULT_ALL_DAY_REMINDER_HOUR * 60, move.event.durationMinutes),
+                becomesAllDay = true
+            )
+            return
+        }
         val pointerMinuteOfDay = targetColumn.windowToLocal(pointerInWindow).y / move.hourHeightPx * 60f
         preview = EventMovePreview(
             event = move.event,
@@ -101,8 +141,12 @@ class EventMoveTracker {
     fun finish(): EventMovePreview? {
         val finished = preview?.takeIf { activeMove != null }
         activeMove = null
-        val isUnchanged = finished == null ||
-            (finished.targetDate.toString() == finished.event.dateString && finished.timeRange == finished.event.timeRange())
+        val isUnchanged = finished == null || (
+            !finished.becomesAllDay &&
+                finished.event.allDay == null &&
+                finished.targetDate.toString() == finished.event.dateString &&
+                finished.timeRange == finished.event.timeRange()
+            )
         if (isUnchanged) {
             preview = null
             return null
@@ -132,9 +176,15 @@ class EventMoveTracker {
         return IntOffset(cardTopLeft.x.roundToInt(), cardTopLeft.y.roundToInt())
     }
 
-    private fun columnUnderPointer(): Pair<LocalDate, LayoutCoordinates>? =
+    fun isOverAllDayDropZone(pointerInWindow: Offset): Boolean {
+        val zone = allDayDropZone?.takeIf { it.isAttached } ?: return false
+        val top = zone.positionInWindow().y
+        return pointerInWindow.y in top..(top + zone.size.height)
+    }
+
+    private fun columnUnderPointer(pointerX: Float): Pair<LocalDate, LayoutCoordinates>? =
         visibleAttachedColumns().entries
-            .minByOrNull { (_, column) -> horizontalDistance(column, pointerInWindow.x) }
+            .minByOrNull { (_, column) -> horizontalDistance(column, pointerX) }
             ?.toPair()
 
     private fun visibleAttachedColumns(): Map<LocalDate, LayoutCoordinates> =
@@ -158,7 +208,7 @@ suspend fun PointerInputScope.followEventMovePointer(
     awaitPointerEventScope {
         while (true) {
             val pointerEvent = awaitPointerEvent()
-            val move = tracker.activeMove ?: continue
+            val move = tracker.activeMove?.takeIf { !it.startedInAllDayStrip } ?: continue
             val change = pointerEvent.changes.firstOrNull { it.id == move.pointerId } ?: continue
             change.consume()
             if (!change.pressed) {
@@ -190,9 +240,10 @@ fun EventMoveFrameEffect(
         var hasLeftStartingEdge = tracker.edgeHoldDirection(cardOvershootPx, pointerZonePx) == null
         while (true) {
             val frameNanos = withFrameNanos { it }
-            tracker.autoScroll?.scrollTowards(tracker.pointerInWindow)
+            if (tracker.preview?.becomesAllDay != true) tracker.autoScroll?.scrollTowards(tracker.pointerInWindow)
 
             val edgeUnderPointer = tracker.edgeHoldDirection(cardOvershootPx, pointerZonePx)
+                .takeIf { tracker.activeMove?.startedInAllDayStrip != true }
             if (edgeUnderPointer == null) hasLeftStartingEdge = true
             val direction = edgeUnderPointer.takeIf { hasLeftStartingEdge }
             if (direction != heldDirection) {
@@ -214,6 +265,7 @@ fun EventMoveFrameEffect(
 @Composable
 fun FloatingMovedEventCard(tracker: EventMoveTracker, categories: List<CalendarCategory>) {
     val move = tracker.activeMove ?: return
+    if (tracker.preview?.becomesAllDay == true) return
     val density = LocalDensity.current
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
     val category = categories.firstOrNull { it.id == move.event.categoryId }
