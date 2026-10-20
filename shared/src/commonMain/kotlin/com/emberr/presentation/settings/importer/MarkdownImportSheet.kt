@@ -58,6 +58,7 @@ fun MarkdownImportSheet(
                     selectedSpaceId = selectedSpaceId,
                     pickedFilesState = pickedFilesState,
                     onChooseFilesClick = openFilePicker,
+                    onFilesDropped = onFilesPicked,
                     onChooseFolderClick = openFolderPicker,
                     onSpaceSelected = onSpaceSelected,
                     onImportClick = onImportClick,
@@ -92,6 +93,7 @@ private fun ImportChoices(
     selectedSpaceId: String,
     pickedFilesState: PickedFilesState,
     onChooseFilesClick: () -> Unit,
+    onFilesDropped: (List<String>) -> Unit,
     onChooseFolderClick: (() -> Unit)?,
     onSpaceSelected: (String) -> Unit,
     onImportClick: () -> Unit,
@@ -100,6 +102,7 @@ private fun ImportChoices(
     ImportChooseBox(
         isClickable = pickedFilesState != PickedFilesState.Reading,
         onClick = onChooseFilesClick,
+        onFilesDropped = onFilesDropped,
         modifier = Modifier.padding(horizontal = ImportSheetContentPadding)
     ) {
         when (pickedFilesState) {
@@ -108,7 +111,7 @@ private fun ImportChoices(
                 hint = ".md, .markdown, .txt, .canvas or .zip"
             )
             PickedFilesState.Reading -> ImportReadingMessage("Reading files…")
-            PickedFilesState.CouldNotRead -> ImportFadedLine(text = "Couldn't read those files. Tap to choose again.")
+            PickedFilesState.CouldNotRead -> ImportFadedLine(text = "Couldn't read those files. $importChooseAgainHint")
             is PickedFilesState.Ready -> PickedFilesSummary(pickedFilesState.summary)
         }
     }
