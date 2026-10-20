@@ -2,9 +2,11 @@
 package com.emberr.presentation.widget.calendar
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
+import com.emberr.presentation.calendar.CalendarCategoryVisibility
 import com.emberr.presentation.widget.WidgetFirstDayOfWeek
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +30,7 @@ class CalendarWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
     private val categoryDao: CategoryDao,
     private val firstDayOfWeek: WidgetFirstDayOfWeek,
+    private val settingsManager: SettingsManager,
 ) {
     suspend fun readContentOnce(spaceId: String, shownMonth: String?): CalendarWidgetContent? =
         withContext(Dispatchers.IO) {
@@ -50,7 +53,14 @@ class CalendarWidgetContentReader(
                 emptyMap()
             }
 
+            val categoryVisibility = CalendarCategoryVisibility(
+                hiddenVisibilityKeys = settingsManager.getHiddenCalendarCategories(),
+                existingCategoryIds = colorsByCategoryId.keys,
+                spaceId = spaceId
+            )
+
             val dotsByDate = tasks
+                .filter { task -> categoryVisibility.isEventShown(task.categoryId) }
                 .filterNot { task -> task.isChecked }
                 .groupBy { task -> task.targetDate }
                 .mapNotNull { (dateString, tasksOnDate) ->

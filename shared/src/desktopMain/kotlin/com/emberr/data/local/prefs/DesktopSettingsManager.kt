@@ -427,6 +427,21 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _hiddenOverviewSections.value = storageKeys
     }
 
+    private val _hiddenCalendarCategories = MutableStateFlow(
+        prefs.get(SyncConstants.KEY_HIDDEN_CALENDAR_CATEGORIES, "")
+            .split(",")
+            .filter { visibilityKey -> visibilityKey.isNotBlank() }
+            .toSet()
+    )
+    override val hiddenCalendarCategoriesFlow: Flow<Set<String>> = _hiddenCalendarCategories
+
+    override fun getHiddenCalendarCategories(): Set<String> = _hiddenCalendarCategories.value
+
+    override fun saveHiddenCalendarCategories(visibilityKeys: Set<String>) {
+        prefs.put(SyncConstants.KEY_HIDDEN_CALENDAR_CATEGORIES, visibilityKeys.joinToString(","))
+        _hiddenCalendarCategories.value = visibilityKeys
+    }
+
     private val _keyboardToolbarItems = MutableStateFlow(
         prefs.get(SyncConstants.KEY_KEYBOARD_TOOLBAR_ITEMS, SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS)
     )

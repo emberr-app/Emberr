@@ -1,14 +1,20 @@
 package com.emberr.presentation.calendar
 
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,7 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
@@ -32,9 +39,11 @@ import com.emberr.presentation.settings.SettingsActionRow
 import com.emberr.presentation.settings.SettingsDivider
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrBottomSheetAction
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
@@ -42,9 +51,20 @@ import com.emberr.presentation.shared.components.EmberrTextField
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.plus
+import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.painterResource
 
-private val CategoryMenuWidth = 300.dp
+private val CategoryMenuWidth = 320.dp
+private val CategoryMenuHorizontalPadding = 14.dp
+private val CategoryMenuVerticalPadding = 12.dp
+private val CategoryMenuHeaderHeight = 32.dp
+private val CategoryMenuContentInset = 6.dp
+private val CategoryEditorSectionSpacing = 16.dp
+private val CategoryEditorLabelSpacing = 8.dp
+private val CategoryEditorButtonsSpacing = 24.dp
+private val CategorySwatchSize = 26.dp
+private val CategorySwatchRingRoom = 5.dp
+private val SwatchBounceEasing = CubicBezierEasing(0.3f, 1.5f, 0.6f, 1f)
 
 private data class CategoryEditorState(
     val categoryId: String?,
@@ -58,6 +78,9 @@ fun CategorySection(
     onAddCategory: (name: String, colorHex: String) -> Unit,
     onUpdateCategory: (id: String, name: String, colorHex: String) -> Unit,
     onDeleteCategory: (id: String) -> Unit,
+    hiddenCategoryVisibilityKeys: Set<String>,
+    noCategoryVisibilityKey: String,
+    onToggleCategoryVisibility: (visibilityKey: String) -> Unit,
     cardColor: Color = MaterialTheme.colorScheme.surface
 ) {
     var editorState by remember { mutableStateOf<CategoryEditorState?>(null) }
@@ -80,6 +103,8 @@ fun CategorySection(
             val state = editorState
             CategoryRow(
                 category = category,
+                isShown = category.id !in hiddenCategoryVisibilityKeys,
+                onToggleShown = { onToggleCategoryVisibility(category.id) },
                 isEditorOpen = isDesktopPlatform && state?.categoryId == category.id,
                 editorState = if (state?.categoryId == category.id) state else null,
                 onClick = {
@@ -98,6 +123,12 @@ fun CategorySection(
             )
             SettingsDivider()
         }
+
+        NoCategoryRow(
+            isShown = noCategoryVisibilityKey !in hiddenCategoryVisibilityKeys,
+            onToggleShown = { onToggleCategoryVisibility(noCategoryVisibilityKey) }
+        )
+        SettingsDivider()
 
         val addState = editorState
         AddCategoryRow(
@@ -123,9 +154,21 @@ fun CategorySection(
         EmberrBottomSheet(
             expanded = state != null,
             onDismiss = { editorState = null },
-            title = if (state?.categoryId == null) "Add Category" else "Edit Category"
+            title = if (state?.categoryId == null) "Add Category" else "Edit Category",
+            headerAction = state?.categoryId?.let { id ->
+                EmberrBottomSheetAction(
+                    icon = painterResource(Res.drawable.trash),
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error,
+                    tooltip = "Delete category",
+                    onClick = {
+                        onDeleteCategory(id)
+                        editorState = null
+                    }
+                )
+            }
         ) { closeAnd ->
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                 if (state != null) {
                     CategoryEditor(
                         state = state,
@@ -133,13 +176,7 @@ fun CategorySection(
                         onNameChange = { editorState = state.copy(name = it) },
                         onColorChange = { editorState = state.copy(colorHex = it) },
                         onCancel = { closeAnd { editorState = null } },
-                        onSave = { closeAnd { performSave(); editorState = null } },
-                        onDelete = state.categoryId?.let { id ->
-                            {
-                                onDeleteCategory(id)
-                                closeAnd { editorState = null }
-                            }
-                        }
+                        onSave = { closeAnd { performSave(); editorState = null } }
                     )
                 }
             }
@@ -157,6 +194,8 @@ private fun keepShowingWhileClosing(editorState: CategoryEditorState?): Category
 @Composable
 private fun CategoryRow(
     category: CalendarCategory,
+    isShown: Boolean,
+    onToggleShown: () -> Unit,
     isEditorOpen: Boolean,
     editorState: CategoryEditorState?,
     onClick: () -> Unit,
@@ -175,18 +214,16 @@ private fun CategoryRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = 14.dp, vertical = 17.dp),
+                .padding(start = 4.dp, end = 14.dp, top = 9.dp, bottom = 9.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.size(20.dp), contentAlignment = Alignment.Center) {
-                Box(
-                    modifier = Modifier
-                        .size(14.dp)
-                        .background(category.colorHex.toCategoryColor(), CircleShape)
-                )
-            }
+            CategoryVisibilityDot(
+                color = category.colorHex.toCategoryColor(),
+                isShown = isShown,
+                onToggleShown = onToggleShown
+            )
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
             Text(
                 text = category.name,
@@ -210,27 +247,81 @@ private fun CategoryRow(
                 modifier = Modifier.width(CategoryMenuWidth)
             ) {
                 if (shownEditorState != null) {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                        Text(
-                            text = "Edit Category",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = 18.dp)
+                    Column(
+                        modifier = Modifier.padding(
+                            horizontal = CategoryMenuHorizontalPadding,
+                            vertical = CategoryMenuVerticalPadding
                         )
+                    ) {
+                        CategoryMenuHeader(title = "Edit Category", onDelete = onDelete)
                         CategoryEditor(
                             state = shownEditorState,
                             isNew = false,
                             onNameChange = onNameChange,
                             onColorChange = onColorChange,
                             onCancel = onCancel,
-                            onSave = onSave,
-                            onDelete = onDelete
+                            onSave = onSave
                         )
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NoCategoryRow(
+    isShown: Boolean,
+    onToggleShown: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggleShown)
+            .padding(start = 4.dp, end = 14.dp, top = 9.dp, bottom = 9.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CategoryVisibilityDot(
+            color = MaterialTheme.colorScheme.outline,
+            isShown = isShown,
+            onToggleShown = onToggleShown
+        )
+
+        Spacer(modifier = Modifier.width(6.dp))
+
+        Text(
+            text = "No Category",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun CategoryVisibilityDot(
+    color: Color,
+    isShown: Boolean,
+    onToggleShown: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onToggleShown
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(14.dp)
+                .then(
+                    if (isShown) Modifier.background(color, CircleShape)
+                    else Modifier.border(2.dp, color, CircleShape)
+                )
+        )
     }
 }
 
@@ -262,22 +353,20 @@ private fun AddCategoryRow(
                 modifier = Modifier.width(CategoryMenuWidth)
             ) {
                 if (shownEditorState != null) {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                        Text(
-                            text = "Add Category",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = 18.dp)
+                    Column(
+                        modifier = Modifier.padding(
+                            horizontal = CategoryMenuHorizontalPadding,
+                            vertical = CategoryMenuVerticalPadding
                         )
+                    ) {
+                        CategoryMenuHeader(title = "Add Category", onDelete = null)
                         CategoryEditor(
                             state = shownEditorState,
                             isNew = true,
                             onNameChange = onNameChange,
                             onColorChange = onColorChange,
                             onCancel = onCancel,
-                            onSave = onSave,
-                            onDelete = null
+                            onSave = onSave
                         )
                     }
                 }
@@ -287,20 +376,61 @@ private fun AddCategoryRow(
 }
 
 @Composable
+private fun CategoryMenuHeader(
+    title: String,
+    onDelete: (() -> Unit)?
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(CategoryMenuHeaderHeight)
+            .padding(horizontal = CategoryMenuContentInset),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+        if (onDelete != null) {
+            IconTooltip(text = "Delete category") {
+                Box(
+                    modifier = Modifier
+                        .size(CategoryMenuHeaderHeight)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onDelete
+                        ),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.trash),
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+    Spacer(modifier = Modifier.height(CategoryEditorSectionSpacing))
+}
+
+@Composable
 private fun CategoryEditor(
     state: CategoryEditorState,
     isNew: Boolean,
     onNameChange: (String) -> Unit,
     onColorChange: (String) -> Unit,
     onCancel: () -> Unit,
-    onSave: () -> Unit,
-    onDelete: (() -> Unit)?
+    onSave: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp)
-    ) {
+    val contentInset = if (isDesktopPlatform) CategoryMenuContentInset else 0.dp
+
+    Column(modifier = Modifier.fillMaxWidth()) {
         EmberrTextField(
             value = state.name,
             onValueChange = onNameChange,
@@ -313,38 +443,24 @@ private fun CategoryEditor(
             text = "Color",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.padding(top = 14.dp, bottom = 8.dp)
+            modifier = Modifier.padding(
+                start = contentInset,
+                top = CategoryEditorSectionSpacing,
+                bottom = CategoryEditorLabelSpacing
+            )
         )
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = contentInset, vertical = CategorySwatchRingRoom)
         ) {
             CategoryPastelPalette.forEach { colorHex ->
-                val isSelected = colorHex == state.colorHex
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .background(colorHex.toCategoryColor(), CircleShape)
-                        .border(
-                            width = if (isSelected) 2.dp else 0.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            shape = CircleShape
-                        )
-                        .clickable { onColorChange(colorHex) }
-                )
-            }
-        }
-
-        if (onDelete != null) {
-            TextButton(
-                onClick = onDelete,
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text(
-                    text = "Delete category",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error
+                CategoryColorSwatch(
+                    color = colorHex.toCategoryColor(),
+                    isSelected = colorHex == state.colorHex,
+                    onClick = { onColorChange(colorHex) }
                 )
             }
         }
@@ -352,7 +468,7 @@ private fun CategoryEditor(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = if (onDelete != null) 4.dp else 20.dp),
+                .padding(top = CategoryEditorButtonsSpacing),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             EmberrButtonSecondary(
@@ -367,4 +483,41 @@ private fun CategoryEditor(
             )
         }
     }
+}
+
+@Composable
+private fun CategoryColorSwatch(
+    color: Color,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val circleScale by animateFloatAsState(
+        targetValue = when {
+            isSelected -> 0.95f
+            isHovered -> 1.1f
+            else -> 1f
+        },
+        animationSpec = tween(durationMillis = 180, easing = SwatchBounceEasing)
+    )
+    val selectedRingAlpha by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0f,
+        animationSpec = tween(durationMillis = 180)
+    )
+
+    Box(
+        modifier = Modifier
+            .size(CategorySwatchSize)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .drawBehind {
+                val circleRadius = size.minDimension / 2f * circleScale
+                drawCircle(color = color, radius = circleRadius)
+                drawCircle(
+                    color = color.copy(alpha = selectedRingAlpha),
+                    radius = circleRadius + 4.dp.toPx(),
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
+    )
 }

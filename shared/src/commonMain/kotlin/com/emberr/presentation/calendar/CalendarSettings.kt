@@ -109,6 +109,7 @@ fun CalendarSidebar(
     val coroutineScope = rememberCoroutineScope()
     val swipeOffsetPx = remember { Animatable(0f) }
     val swipeCloseDistancePx = with(LocalDensity.current) { SidebarSwipeCloseDistance.toPx() }
+    val panelColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
 
     LaunchedEffect(isOpen) {
         if (isOpen) swipeOffsetPx.snapTo(0f)
@@ -158,9 +159,9 @@ fun CalendarSidebar(
                     .emberrBlur(
                         hazeState,
                         EmberrBlur.Thick.copy(
-                            backgroundColor = MaterialTheme.colorScheme.background,
-                            tints = listOf(HazeTint(MaterialTheme.colorScheme.background.copy(alpha = 0.85f))),
-                            fallbackTint = HazeTint(MaterialTheme.colorScheme.background)
+                            backgroundColor = panelColor,
+                            tints = listOf(HazeTint(panelColor.copy(alpha = 0.85f))),
+                            fallbackTint = HazeTint(panelColor)
                         )
                     )
                     .clickable(
@@ -213,6 +214,7 @@ fun CalendarSidebar(
                         showBackButton = false,
                         reserveBackButtonSpace = false,
                         topEdgeFadeAlpha = headerFadeAlpha,
+                        topEdgeColor = panelColor,
                         topEdgeBlurHeight = headerHeight + SidebarHeaderFadeTail,
                         topEdgeGradientHeight = headerHeight + SidebarHeaderFadeTail,
                         hazeState = panelHazeState,
@@ -258,14 +260,17 @@ fun CalendarSettingsContent(
     onAddCategory: (name: String, colorHex: String) -> Unit,
     onUpdateCategory: (id: String, name: String, colorHex: String) -> Unit,
     onDeleteCategory: (id: String) -> Unit,
+    hiddenCategoryVisibilityKeys: Set<String>,
+    noCategoryVisibilityKey: String,
+    onToggleCategoryVisibility: (visibilityKey: String) -> Unit,
     modifier: Modifier = Modifier,
     viewMode: CalendarViewMode? = null,
     onViewModeChange: (CalendarViewMode) -> Unit = {}
 ) {
     var showFirstDayOfWeekOptions by remember { mutableStateOf(false) }
     val cardColor = when {
-        !isDesktopPlatform -> MaterialTheme.colorScheme.surface
         LocalAppIsDark.current -> MaterialTheme.colorScheme.surfaceVariant
+        !isDesktopPlatform -> MaterialTheme.colorScheme.surface
         else -> MaterialTheme.colorScheme.onSurface.copy(alpha = DesktopLightCardTintAlpha)
     }
 
@@ -294,6 +299,9 @@ fun CalendarSettingsContent(
             onAddCategory = onAddCategory,
             onUpdateCategory = onUpdateCategory,
             onDeleteCategory = onDeleteCategory,
+            hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
+            noCategoryVisibilityKey = noCategoryVisibilityKey,
+            onToggleCategoryVisibility = onToggleCategoryVisibility,
             cardColor = cardColor
         )
 
