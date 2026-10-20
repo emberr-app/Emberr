@@ -31,7 +31,7 @@ class EventResizeState {
 }
 
 fun CalendarEvent.isSameOccurrenceAs(other: CalendarEvent?): Boolean =
-    other != null && blockId == other.blockId && dateString == other.dateString
+    other != null && blockId == other.blockId && occurrenceDateString == other.occurrenceDateString
 
 fun resizeEventTimeRange(original: EventTimeRange, edge: EventResizeEdge, draggedMinutes: Float): EventTimeRange =
     when (edge) {
@@ -48,6 +48,12 @@ fun resizeEventTimeRange(original: EventTimeRange, edge: EventResizeEdge, dragge
             original.copy(durationMinutes = newEnd - original.startMinuteOfDay)
         }
     }
+
+fun moveEventTimeRange(original: EventTimeRange, draggedMinutes: Float): EventTimeRange {
+    val latestStart = maxOf(MinutesInDay - original.durationMinutes, original.startMinuteOfDay).coerceAtLeast(0)
+    val newStart = snapToResizeStep(original.startMinuteOfDay + draggedMinutes).coerceIn(0, latestStart)
+    return original.copy(startMinuteOfDay = newStart)
+}
 
 private fun snapToResizeStep(minuteOfDay: Float): Int =
     (minuteOfDay / EventResizeSnapMinutes).roundToInt() * EventResizeSnapMinutes

@@ -48,7 +48,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -57,11 +59,13 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -157,6 +161,7 @@ fun CalendarScreen(
     // set by whichever of Edit/Delete triggered it, null the rest of the time.
     var pendingScopeAction by remember { mutableStateOf<((RecurrenceEditScope) -> Unit)?>(null) }
     val eventResizeState = remember { EventResizeState() }
+    val eventMoveTracker = remember { EventMoveTracker() }
     LaunchedEffect(selectedDate, viewMode) { eventResizeState.eventInResizeMode = null }
     var slideDirection by remember { mutableStateOf(AnimatedContentTransitionScope.SlideDirection.Left) }
 
@@ -224,6 +229,9 @@ fun CalendarScreen(
         val anchor = if (dayCount == 7) selectedDate.startOfWeek(firstDayOfWeek) else selectedDate
         (0 until dayCount).map { offset -> anchor.plus(offset.toLong(), DateTimeUnit.DAY) }
     }
+    SideEffect {
+        eventMoveTracker.visibleDates = if (viewMode == CalendarViewMode.DAY) listOf(selectedDate) else multiDayDates
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -249,6 +257,14 @@ fun CalendarScreen(
                         viewModel.resizeEvent(event, newTimeRange)
                     } else {
                         pendingScopeAction = { scope -> viewModel.resizeEvent(event, newTimeRange, scope) }
+                    }
+                }
+                val onEventMove: (EventMovePreview) -> Unit = { move ->
+                    val targetDateString = move.targetDate.toString()
+                    if (move.event.recurrenceRule == null) {
+                        viewModel.moveEvent(move.event, targetDateString, move.timeRange)
+                    } else {
+                        pendingScopeAction = { scope -> viewModel.moveEvent(move.event, targetDateString, move.timeRange, scope) }
                     }
                 }
 
@@ -281,8 +297,10 @@ fun CalendarScreen(
                                 )
                             },
                             resizeState = eventResizeState,
+                            moveTracker = eventMoveTracker,
                             onEventClick = onEventClick,
                             onEventResize = onEventResize,
+                            onEventMove = onEventMove,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -349,8 +367,10 @@ fun CalendarScreen(
                                 )
                             },
                             resizeState = eventResizeState,
+                            moveTracker = eventMoveTracker,
                             onEventClick = onEventClick,
                             onEventResize = onEventResize,
+                            onEventMove = onEventMove,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -586,7 +606,10 @@ fun CalendarScreen(
     pendingScopeAction?.let { runWithScope ->
         RecurrenceScopeChooser(
             onDismiss = {
-                if (pendingScopeAction != null) eventResizeState.preview = null
+                if (pendingScopeAction != null) {
+                    eventResizeState.preview = null
+                    eventMoveTracker.preview = null
+                }
                 pendingScopeAction = null
             },
             onScopeSelected = { scope ->
@@ -740,15 +763,19 @@ private fun CalendarTimeGrid(
     onSwipePreviousDay: () -> Unit,
     onSwipeNextDay: () -> Unit,
     resizeState: EventResizeState,
+    moveTracker: EventMoveTracker,
     onHourClick: (hour: Int) -> Unit,
     onEventClick: (event: CalendarEvent) -> Unit,
     onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit,
+    onEventMove: (move: EventMovePreview) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var accumulatedDragPx by remember { mutableFloatStateOf(0f) }
     val density = LocalDensity.current
     val swipeThresholdPx = with(density) { 80.dp.toPx() }
     val nowMillis = rememberNowMillis()
+    val currentOnEventMove by rememberUpdatedState(onEventMove)
+    EventMoveFrameEffect(moveTracker, onHoldAtPreviousEdge = onSwipePreviousDay, onHoldAtNextEdge = onSwipeNextDay)
 
     Box(
         modifier = modifier
@@ -770,6 +797,8 @@ private fun CalendarTimeGrid(
                     onDragCancel = { accumulatedDragPx = 0f }
                 )
             }
+            .onPlaced { moveTracker.gridCoordinates = it }
+            .pointerInput(moveTracker) { followEventMovePointer(moveTracker) { move -> currentOnEventMove(move) } }
     ) {
         AnimatedContent(
             targetState = selectedDate,
@@ -788,11 +817,13 @@ private fun CalendarTimeGrid(
                 scrollState = scrollState,
                 topBarHeightDp = topBarHeightDp,
                 resizeState = resizeState,
+                moveTracker = moveTracker,
                 onHourClick = onHourClick,
                 onEventClick = onEventClick,
                 onEventResize = onEventResize
             )
         }
+        FloatingMovedEventCard(tracker = moveTracker, categories = categories)
     }
 }
 
@@ -805,6 +836,7 @@ private fun DayHourGrid(
     scrollState: ScrollState,
     topBarHeightDp: Dp,
     resizeState: EventResizeState,
+    moveTracker: EventMoveTracker,
     onHourClick: (hour: Int) -> Unit,
     onEventClick: (event: CalendarEvent) -> Unit,
     onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit
@@ -815,6 +847,7 @@ private fun DayHourGrid(
     val hourHeightPx = with(density) { hourHeight.toPx() }
     val bottomPadding = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding()
     val resizeAutoScroll = rememberEventResizeAutoScroll(scrollState, topBarHeightDp, bottomPadding)
+    SideEffect { moveTracker.autoScroll = resizeAutoScroll }
 
     Box(modifier = Modifier.fillMaxSize()) {
     Row(
@@ -838,6 +871,7 @@ private fun DayHourGrid(
                 nowMillis = nowMillis,
                 resizeState = resizeState,
                 resizeAutoScroll = resizeAutoScroll,
+                moveTracker = moveTracker,
                 onHourClick = onHourClick,
                 onEventClick = onEventClick,
                 onEventResize = onEventResize
@@ -898,6 +932,7 @@ private fun DayColumnBody(
     nowMillis: Long,
     resizeState: EventResizeState,
     resizeAutoScroll: EventResizeAutoScroll,
+    moveTracker: EventMoveTracker,
     onHourClick: (hour: Int) -> Unit,
     onEventClick: (event: CalendarEvent) -> Unit,
     onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit
@@ -918,6 +953,18 @@ private fun DayColumnBody(
 
     LaunchedEffect(events) {
         if (resizeState.preview?.event?.dateString == date.toString()) resizeState.preview = null
+        val movePreview = moveTracker.preview
+        if (movePreview != null && moveTracker.activeMove == null) {
+            val hasLandedHere = movePreview.targetDate == date
+            val hasLeftHere = movePreview.event.dateString == date.toString() && events.none { it == movePreview.event }
+            if (hasLandedHere || hasLeftHere) moveTracker.preview = null
+        }
+    }
+
+    DisposableEffect(date, columnCoordinates) {
+        val coordinates = columnCoordinates
+        if (coordinates != null) moveTracker.registerColumn(date, coordinates)
+        onDispose { moveTracker.unregisterColumn(date, coordinates) }
     }
 
     LaunchedEffect(activeResize) {
@@ -963,7 +1010,7 @@ private fun DayColumnBody(
 
         positionedEvents.forEach { positioned ->
             val event = positioned.event
-            key(event.blockId) {
+            key(event.blockId, event.occurrenceDateString) {
                 val timeRange = resizeState.preview?.takeIf { event.isSameOccurrenceAs(it.event) }?.timeRange
                     ?: event.timeRange()
                 val topOffset = hourHeight * (timeRange.startMinuteOfDay / 60f)
@@ -1006,6 +1053,19 @@ private fun DayColumnBody(
                         activeResize = null
                         resizeState.preview = null
                     },
+                    onMoveStart = { pointerInWindow, pointerId, cardTopLeftInWindow, cardSize ->
+                        columnCoordinates?.takeIf { it.isAttached }?.let { column ->
+                            moveTracker.start(
+                                event = event,
+                                pointerId = pointerId,
+                                pointerInWindow = pointerInWindow,
+                                cardTopLeftInWindow = cardTopLeftInWindow,
+                                cardSize = cardSize,
+                                sourceColumn = column,
+                                hourHeightPx = hourHeightPx
+                            )
+                        }
+                    },
                     onLongClick = if (isDesktopPlatform) null else {
                         {
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -1020,8 +1080,25 @@ private fun DayColumnBody(
                         .width(chipWidth)
                         .padding(top = topOffset)
                         .offset(x = xOffset)
+                        .alpha(if (event.isSameOccurrenceAs(moveTracker.preview?.event)) MovedEventOriginalAlpha else 1f)
                 )
             }
+        }
+
+        moveTracker.preview?.takeIf { it.targetDate == date && moveTracker.activeMove == null }?.let { preview ->
+            val category = categories.firstOrNull { it.id == preview.event.categoryId }
+            EventMovePreviewChip(
+                text = preview.event.text,
+                timeText = formatEventTimeRange(preview.timeRange, usesTwentyFourHourClock),
+                color = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.surface,
+                hasCategory = category != null,
+                isChecked = preview.event.isChecked,
+                height = maxOf(24.dp, hourHeight * (preview.timeRange.durationMinutes / 60f)),
+                modifier = Modifier
+                    .width(availableWidth)
+                    .padding(top = hourHeight * (preview.timeRange.startMinuteOfDay / 60f))
+                    .offset(x = horizontalInset)
+            )
         }
 
         val nowDt = Instant.fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.currentSystemDefault())
@@ -1086,15 +1163,19 @@ private fun MultiDayTimeGrid(
     onSwipePrevious: () -> Unit,
     onSwipeNext: () -> Unit,
     resizeState: EventResizeState,
+    moveTracker: EventMoveTracker,
     onHourClick: (date: LocalDate, hour: Int) -> Unit,
     onEventClick: (event: CalendarEvent) -> Unit,
     onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit,
+    onEventMove: (move: EventMovePreview) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var accumulatedDragPx by remember { mutableFloatStateOf(0f) }
     val density = LocalDensity.current
     val swipeThresholdPx = with(density) { 80.dp.toPx() }
     val nowMillis = rememberNowMillis()
+    val currentOnEventMove by rememberUpdatedState(onEventMove)
+    EventMoveFrameEffect(moveTracker, onHoldAtPreviousEdge = onSwipePrevious, onHoldAtNextEdge = onSwipeNext)
 
     Box(
         modifier = modifier
@@ -1117,6 +1198,8 @@ private fun MultiDayTimeGrid(
                     onDragCancel = { accumulatedDragPx = 0f }
                 )
             }
+            .onPlaced { moveTracker.gridCoordinates = it }
+            .pointerInput(moveTracker) { followEventMovePointer(moveTracker) { move -> currentOnEventMove(move) } }
     ) {
         AnimatedContent(
             targetState = startDate,
@@ -1136,11 +1219,13 @@ private fun MultiDayTimeGrid(
                 scrollState = scrollState,
                 topBarHeightDp = topBarHeightDp,
                 resizeState = resizeState,
+                moveTracker = moveTracker,
                 onHourClick = onHourClick,
                 onEventClick = onEventClick,
                 onEventResize = onEventResize
             )
         }
+        FloatingMovedEventCard(tracker = moveTracker, categories = categories)
     }
 }
 
@@ -1154,6 +1239,7 @@ private fun MultiDayGridContent(
     scrollState: ScrollState,
     topBarHeightDp: Dp,
     resizeState: EventResizeState,
+    moveTracker: EventMoveTracker,
     onHourClick: (date: LocalDate, hour: Int) -> Unit,
     onEventClick: (event: CalendarEvent) -> Unit,
     onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit
@@ -1176,6 +1262,7 @@ private fun MultiDayGridContent(
     val headerHeight = 40.dp
     val bottomPadding = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding()
     val resizeAutoScroll = rememberEventResizeAutoScroll(scrollState, topBarHeightDp + headerHeight, bottomPadding)
+    SideEffect { moveTracker.autoScroll = resizeAutoScroll }
 
     Box(modifier = Modifier.fillMaxSize()) {
     Row(
@@ -1204,6 +1291,7 @@ private fun MultiDayGridContent(
                     nowMillis = nowMillis,
                     resizeState = resizeState,
                     resizeAutoScroll = resizeAutoScroll,
+                    moveTracker = moveTracker,
                     onHourClick = { hour -> onHourClick(date, hour) },
                     onEventClick = onEventClick,
                     onEventResize = onEventResize

@@ -169,7 +169,7 @@ class CalendarViewModel(
                 if (original != null && original.recurrenceRule != null && editScope != RecurrenceEditScope.ALL_EVENTS) {
                     repository.applyRecurrenceScopedEdit(
                         blockId = original.blockId,
-                        occurrenceDate = original.dateString,
+                        occurrenceDate = original.occurrenceDateString,
                         scope = editScope,
                         text = name,
                         timestamp = timestamp,
@@ -189,7 +189,7 @@ class CalendarViewModel(
                         val daysFromOccurrenceToSeriesStart =
                             LocalDate.parse(original.dateString).daysUntil(LocalDate.parse(seriesStartDateString))
                         saveEvent(
-                            original = original.copy(dateString = seriesStartDateString),
+                            original = original.copy(dateString = seriesStartDateString, occurrenceDateString = seriesStartDateString),
                             dateString = LocalDate.parse(dateString)
                                 .plus(daysFromOccurrenceToSeriesStart, DateTimeUnit.DAY).toString(),
                             timestamp = Instant.fromEpochMilliseconds(timestamp)
@@ -312,7 +312,7 @@ class CalendarViewModel(
             try {
                 repository.applyRecurrenceScopedEdit(
                     blockId = event.blockId,
-                    occurrenceDate = event.dateString,
+                    occurrenceDate = event.occurrenceDateString,
                     scope = editScope,
                     text = event.text,
                     timestamp = newTimestamp,
@@ -328,6 +328,52 @@ class CalendarViewModel(
         }
     }
 
+    fun moveEvent(
+        event: CalendarEvent,
+        targetDateString: String,
+        newTimeRange: EventTimeRange,
+        editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
+    ) {
+        if (targetDateString == event.dateString) {
+            resizeEvent(event, newTimeRange, editScope)
+            return
+        }
+        if (event.recurrenceRule != null) {
+            val daysDragged = LocalDate.parse(event.dateString).daysUntil(LocalDate.parse(targetDateString))
+            val seriesTargetDateString = if (editScope == RecurrenceEditScope.THIS_EVENT) {
+                targetDateString
+            } else {
+                LocalDate.parse(event.occurrenceDateString).plus(daysDragged, DateTimeUnit.DAY).toString()
+            }
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    repository.applyRecurrenceScopedMove(
+                        blockId = event.blockId,
+                        occurrenceDate = event.occurrenceDateString,
+                        targetDate = seriesTargetDateString,
+                        scope = editScope,
+                        timestamp = timestampOnDate(targetDateString, newTimeRange.startMinuteOfDay)
+                    )
+                    SyncEventBus.emitSyncCompleted(event.dateString)
+                    SyncEventBus.emitSyncCompleted(targetDateString)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            return
+        }
+        saveEvent(
+            original = event,
+            dateString = targetDateString,
+            timestamp = timestampOnDate(targetDateString, newTimeRange.startMinuteOfDay),
+            name = event.text,
+            categoryId = event.categoryId,
+            durationMinutes = newTimeRange.durationMinutes,
+            url = event.url,
+            description = event.description
+        )
+    }
+
     fun deleteEvent(event: CalendarEvent, editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -335,7 +381,7 @@ class CalendarViewModel(
                     // Routed through the repository even for ALL_EVENTS so the base block's
                     // markDeleted() and its now-orphaned per-occurrence exceptions are cleaned up
                     // together - see NoteRepositoryImpl.deleteEntireSeries.
-                    repository.applyRecurrenceScopedDelete(event.blockId, event.dateString, editScope)
+                    repository.applyRecurrenceScopedDelete(event.blockId, event.occurrenceDateString, editScope)
                     SyncEventBus.emitSyncCompleted(event.dateString)
                     reminderScheduler.cancel(event.blockId)
                     return@launch
