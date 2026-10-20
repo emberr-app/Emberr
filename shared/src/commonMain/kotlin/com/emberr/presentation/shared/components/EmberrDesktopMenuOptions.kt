@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -50,7 +51,8 @@ fun EmberrDesktopMenuOption(
     labelMaxLines: Int = 1,
     subtitleMaxLines: Int = 1,
     outerHorizontalPadding: Dp = DESKTOP_OPTION_OUTER_HORIZONTAL_PADDING,
-    labelColor: Color? = null
+    labelColor: Color? = null,
+    labelFontFamily: FontFamily? = null
 ) {
     Row(
         modifier = modifier
@@ -78,6 +80,7 @@ fun EmberrDesktopMenuOption(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Normal,
+                fontFamily = labelFontFamily,
                 color = labelColor ?: if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 maxLines = labelMaxLines,
                 overflow = TextOverflow.Ellipsis
