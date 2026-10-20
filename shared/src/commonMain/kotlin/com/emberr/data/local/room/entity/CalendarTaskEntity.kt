@@ -8,6 +8,9 @@ import com.emberr.domain.model.RecurrenceFrequency
 import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.model.isoDayNumberToDayOfWeek
 import com.emberr.domain.model.toIsoDayNumberCsv
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -49,6 +52,12 @@ fun CalendarTaskEntity.toRecurrenceRule(): RecurrenceRule? {
             ?: emptySet(),
         untilDateString = recurrenceUntil
     )
+}
+
+fun CalendarTaskEntity.shownOnDateString(): String? {
+    val timestamp = reminderTimestamp
+    if (recurrenceFrequency == null || timestamp == null) return targetDate
+    return Instant.fromEpochMilliseconds(timestamp).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
 }
 
 fun RecurrenceRule.toEntityColumns(): Triple<RecurrenceFrequency, Int, String?> =
