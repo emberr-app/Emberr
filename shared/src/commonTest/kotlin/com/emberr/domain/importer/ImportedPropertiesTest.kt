@@ -64,6 +64,20 @@ class ImportedPropertiesTest {
     }
 
     @Test
+    fun theLocationJoplinSavesWithEveryNoteIsLeftOut() {
+        val details = ImportedProperties.detailsOf(
+            frontMatter = listOf(
+                FrontMatterField("latitude", single("48.85341270")),
+                FrontMatterField("longitude", single("2.34881070")),
+                FrontMatterField("altitude", single("0.0000"))
+            ),
+            inlineTags = emptyList()
+        )
+
+        assertEquals(emptyList(), details.properties)
+    }
+
+    @Test
     fun keysNamedLikeEmberrPropertiesUseThoseProperties() {
         val details = ImportedProperties.detailsOf(
             frontMatter = listOf(FrontMatterField("status", single("draft")), FrontMatterField("Due_Date", single("2026-10-20"))),
