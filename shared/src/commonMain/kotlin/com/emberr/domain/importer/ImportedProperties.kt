@@ -13,7 +13,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 
 private val keysForCreatedDate = setOf("created", "date")
-private val keysLeftOut = setOf("title", "updated", "modified", "cssclasses", "cssclass")
+private val keysLeftOut = setOf("title", "updated", "modified", "cssclasses", "cssclass", "latitude", "longitude", "altitude")
 private val keysForTags = setOf("tags", "tag")
 private val keysForAliases = setOf("aliases", "alias")
 private val builtInPropertiesByLabel: Map<String, PropertyType> = PropertyType.entries
