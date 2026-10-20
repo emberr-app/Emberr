@@ -542,6 +542,7 @@ fun NoteScreen(
                     selectedBlockIds = selectedBlockIds,
                     onClearSelection = { viewModel.clearSelection() },
                     onDeleteSelectedBlocks = { viewModel.deleteSelectedBlocksWithHiddenChildren() },
+                    onSelectBlocks = { viewModel.selectBlocks(it) },
                     selectionMenuContent = { closeMenu ->
                         BlockSelectionMenuContent(
                             selectedCount = selectedBlockIds.size,

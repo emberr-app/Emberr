@@ -35,6 +35,8 @@ interface CrossBlockSelectionHost {
 
 private data class CaretGoal(val position: BlockTextPosition, val windowX: Float)
 
+data class BlockSelectionBoxAnchor(val blockId: String?, val distanceFromBlockEdge: Float)
+
 enum class SelectionStep { CharacterBack, CharacterForward, LineUp, LineDown }
 
 val LocalCrossBlockSelection = staticCompositionLocalOf<CrossBlockSelectionState?> { null }
@@ -52,9 +54,11 @@ class CrossBlockSelectionState {
     var isBeingTouched by mutableStateOf(false)
     var magnifiedPointInWindow by mutableStateOf<Offset?>(null)
         private set
+    var blockSelectionBoxInList by mutableStateOf<Rect?>(null)
 
     private var listCoordinates: LayoutCoordinates? = null
     private val blockCoordinates = mutableMapOf<String, LayoutCoordinates>()
+    private val blockContentCoordinates = mutableMapOf<String, LayoutCoordinates>()
     private val selectableTextFields = mutableMapOf<String, SelectableTextField>()
 
     val range: CrossBlockTextRange?
@@ -353,12 +357,74 @@ class CrossBlockSelectionState {
     fun windowPointOf(pointInList: Offset): Offset? = listCoordinates?.takeIf { it.isAttached }?.localToWindow(pointInList)
 
     fun rememberBlockCoordinates(blockId: String, coordinates: LayoutCoordinates) {
-        blockCoordinates.entries.removeAll { (otherBlockId, otherCoordinates) -> otherCoordinates === coordinates && otherBlockId != blockId }
-        blockCoordinates[blockId] = coordinates
+        blockCoordinates.rememberOnlyFor(blockId, coordinates)
+    }
+
+    fun rememberBlockContentCoordinates(blockId: String, coordinates: LayoutCoordinates) {
+        blockContentCoordinates.rememberOnlyFor(blockId, coordinates)
+    }
+
+    private fun MutableMap<String, LayoutCoordinates>.rememberOnlyFor(blockId: String, coordinates: LayoutCoordinates) {
+        entries.removeAll { (otherBlockId, otherCoordinates) -> otherCoordinates === coordinates && otherBlockId != blockId }
+        this[blockId] = coordinates
     }
 
     fun forgetBlockCoordinates(blockId: String) {
         if (blockCoordinates[blockId]?.isAttached != true) blockCoordinates.remove(blockId)
+        if (blockContentCoordinates[blockId]?.isAttached != true) blockContentCoordinates.remove(blockId)
+    }
+
+    fun isEmptySpaceAt(pointInWindow: Offset): Boolean {
+        val blockId = blockIdAtHeight(pointInWindow.y) ?: return isBelowLastBlock(pointInWindow.y)
+        val content = blockContentCoordinates[blockId]?.takeIf { it.isAttached } ?: return false
+        val contentLeft = content.positionInWindow().x
+        return pointInWindow.x < contentLeft || pointInWindow.x > contentLeft + content.size.width
+    }
+
+    fun blockIdUnderSelectionBoxCorner(pointInWindow: Offset): String? =
+        if (isBelowLastBlock(pointInWindow.y)) null else positionAt(pointInWindow, mustBeInsideBlock = false)?.blockId
+
+    fun selectionBoxAnchorAt(pointInWindow: Offset): BlockSelectionBoxAnchor? {
+        val blockId = blockIdUnderSelectionBoxCorner(pointInWindow)
+        val edgeY = selectionBoxAnchorEdgeY(blockId) ?: return null
+        return BlockSelectionBoxAnchor(blockId, pointInWindow.y - edgeY)
+    }
+
+    fun selectionBoxAnchorYInList(anchor: BlockSelectionBoxAnchor): Float? {
+        val list = listCoordinates?.takeIf { it.isAttached } ?: return null
+        val edgeY = selectionBoxAnchorEdgeY(anchor.blockId)
+        if (edgeY != null) return list.windowToLocal(Offset(0f, edgeY + anchor.distanceFromBlockEdge)).y
+        val anchorIndex = blockIdsInOrder.indexOf(anchor.blockId ?: blockIdsInOrder.lastOrNull())
+        val firstVisibleIndex = blockIdsInOrder.indexOfFirst { blockCoordinates[it]?.isAttached == true }
+        if (anchorIndex == -1 || firstVisibleIndex == -1) return null
+        return if (anchorIndex < firstVisibleIndex) -1f else list.size.height + 1f
+    }
+
+    private fun selectionBoxAnchorEdgeY(blockId: String?): Float? {
+        val edgeBlockId = blockId ?: blockIdsInOrder.lastOrNull() ?: return null
+        val coordinates = blockCoordinates[edgeBlockId]?.takeIf { it.isAttached } ?: return null
+        val top = coordinates.positionInWindow().y
+        return if (blockId == null) top + coordinates.size.height else top
+    }
+
+    fun blockIdsTouchedBySelectionBox(anchorBlockId: String?, pointerBlockId: String?): List<String> {
+        val cornerIndexes = listOfNotNull(anchorBlockId, pointerBlockId).map { blockIdsInOrder.indexOf(it) }.filter { it != -1 }
+        val firstIndex = cornerIndexes.minOrNull() ?: return emptyList()
+        val reachesBelowLastBlock = anchorBlockId == null || pointerBlockId == null
+        val lastIndex = if (reachesBelowLastBlock) blockIdsInOrder.lastIndex else cornerIndexes.max()
+        return blockIdsInOrder.subList(firstIndex, lastIndex + 1)
+    }
+
+    private fun blockIdAtHeight(y: Float): String? {
+        val blockIdsInNote = blockIdsInOrder.toSet()
+        return blockCoordinates.entries.firstOrNull { (blockId, coordinates) ->
+            coordinates.isAttached && blockId in blockIdsInNote && verticalDistance(coordinates, y) == 0f
+        }?.key
+    }
+
+    private fun isBelowLastBlock(y: Float): Boolean {
+        val lastBlock = blockIdsInOrder.lastOrNull()?.let { blockCoordinates[it] }?.takeIf { it.isAttached } ?: return false
+        return y > lastBlock.positionInWindow().y + lastBlock.size.height
     }
 
     fun registerTextField(blockId: String, field: SelectableTextField) {

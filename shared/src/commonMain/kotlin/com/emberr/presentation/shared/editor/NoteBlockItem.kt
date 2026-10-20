@@ -10,13 +10,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -92,6 +92,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.isCtrlPressed
+import androidx.compose.ui.input.pointer.isMetaPressed
 import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
@@ -99,6 +101,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
@@ -492,6 +495,13 @@ fun NoteBlockItem(
     val latestRightClickHandler by rememberUpdatedState(handleRightClick)
     val latestShiftClickHandler by rememberUpdatedState(onShiftClick)
     val latestInSelectionMode by rememberUpdatedState(inSelectionMode)
+    var selectionOverlayTopLeftInWindow by remember { mutableStateOf(Offset.Zero) }
+    val leaveBlockSelectionAt: (Offset) -> Unit = leave@{ clickInWindow ->
+        val selection = crossBlockSelection ?: return@leave
+        val caret = selection.positionAt(clickInWindow, mustBeInsideBlock = true)
+            ?.takeIf { it.blockId == block.id && selection.hasTextField(block.id) }
+        if (caret != null) selection.host?.placeCaret(caret) else selection.host?.clearBlockSelection()
+    }
 
     val blockMouseModifier = if (isDesktopPlatform && (onRightClick != null || onShiftClick != null)) {
         Modifier
@@ -502,7 +512,17 @@ fun NoteBlockItem(
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         if (event.type != PointerEventType.Press) continue
                         val press = event.changes.firstOrNull() ?: continue
-                        if (press.isConsumed || isFocused) continue
+                        if (press.isConsumed) continue
+
+                        val startsSelectionWithCtrlClick = event.buttons.isPrimaryPressed &&
+                            (event.keyboardModifiers.isCtrlPressed || event.keyboardModifiers.isMetaPressed) &&
+                            !latestInSelectionMode
+                        if (startsSelectionWithCtrlClick) {
+                            press.consume()
+                            actions.onToggleSelection(block.id)
+                            continue
+                        }
+                        if (isFocused) continue
 
                         val opensContextMenu = event.buttons.isSecondaryPressed &&
                             linkHoverState.hoveredLink == null &&
@@ -605,6 +625,13 @@ fun NoteBlockItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = startPadding, end = endPadding)
+                .then(
+                    if (isDesktopPlatform && crossBlockSelection != null) {
+                        Modifier.onPlaced { crossBlockSelection.rememberBlockContentCoordinates(block.id, it) }
+                    } else {
+                        Modifier
+                    }
+                )
                 .padding(vertical = internalVerticalPadding),
             verticalAlignment = Alignment.Top
         ) {
@@ -1173,13 +1200,33 @@ fun NoteBlockItem(
             Box(
                 Modifier
                     .matchParentSize()
-                    .padding(horizontal = 8.dp + desktopExtraPadding, vertical = 1.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), DefaultBlockShape)
+                    .padding(horizontal = 8.dp + desktopExtraPadding)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = if (isDarkTheme) 0.15f else 0.1f))
             )
         }
 
         if (inSelectionMode) {
-            Box(Modifier.matchParentSize().clickable(onClick = { actions.onToggleSelection(block.id) }))
+            val selectedBlocksClickModifier = if (isDesktopPlatform) {
+                Modifier
+                    .onGloballyPositioned { selectionOverlayTopLeftInWindow = it.positionInWindow() }
+                    .pointerInput(block.id) {
+                        awaitEachGesture {
+                            awaitFirstDown()
+                            val pressedKeys = currentEvent.keyboardModifiers
+                            val togglesThisBlock = pressedKeys.isCtrlPressed || pressedKeys.isMetaPressed
+                            val release = waitForUpOrCancellation() ?: return@awaitEachGesture
+                            release.consume()
+                            if (togglesThisBlock) {
+                                actions.onToggleSelection(block.id)
+                            } else {
+                                leaveBlockSelectionAt(selectionOverlayTopLeftInWindow + release.position)
+                            }
+                        }
+                    }
+            } else {
+                Modifier.clickable(onClick = { actions.onToggleSelection(block.id) })
+            }
+            Box(Modifier.matchParentSize().then(selectedBlocksClickModifier))
         }
     }
 }

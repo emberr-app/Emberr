@@ -22,6 +22,8 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
+import androidx.compose.ui.input.pointer.isCtrlPressed
+import androidx.compose.ui.input.pointer.isMetaPressed
 import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
@@ -51,7 +53,7 @@ interface CrossBlockSelectionCommands {
 private val AutoScrollEdgeZone = 48.dp
 private val AutoScrollFastestStepPerFrame = 20.dp
 
-fun Modifier.selectTextAcrossBlocksByDragging(
+fun Modifier.selectAcrossBlocksByDragging(
     selection: CrossBlockSelectionState,
     scrollableState: ScrollableState,
     topInsetPx: Float,
@@ -59,12 +61,18 @@ fun Modifier.selectTextAcrossBlocksByDragging(
     focusedBlockId: () -> String?,
     onPress: () -> Unit,
     onRightClickInsideSelection: (pressInWindow: Offset) -> Unit,
-    onDragEndedInsideOneBlock: (blockId: String, selectedRange: TextRange) -> Unit
+    onDragEndedInsideOneBlock: (blockId: String, selectedRange: TextRange) -> Unit,
+    selectedBlockIds: () -> Set<String>,
+    selectBlocksWithBox: ((Set<String>) -> Unit)?,
+    onSelectingBlocksWithBoxStarted: () -> Unit
 ): Modifier = this
     .onGloballyPositioned { selection.rememberListCoordinates(it) }
     .pointerInput(selection, scrollableState) {
         coroutineScope {
-            val autoScroll = AutoScrollWhileSelecting(this, scrollableState, selection)
+            val gestureScope = this
+            val autoScroll = AutoScrollWhileSelecting(gestureScope, scrollableState) { pointerInList -> selection.extendToPointInList(pointerInList) }
+            val boxDrag = selectBlocksWithBox?.let { BlockSelectionBoxDrag(selection, it) }
+            val boxAutoScroll = AutoScrollWhileSelecting(gestureScope, scrollableState) {}
             awaitEachGesture {
                 val down = awaitPressOfAnyMouseButton()
                 val isMousePress = down.type == PointerType.Mouse
@@ -79,6 +87,29 @@ fun Modifier.selectTextAcrossBlocksByDragging(
                 if (isRightClickInsideSelection && pressInWindow != null) {
                     down.consume()
                     onRightClickInsideSelection(pressInWindow)
+                    return@awaitEachGesture
+                }
+
+                val pressedKeys = currentEvent.keyboardModifiers
+                val startsBlockSelectionBox = boxDrag != null &&
+                    isMousePress &&
+                    buttons.isPrimaryPressed &&
+                    !pressedKeys.isShiftPressed &&
+                    pressInWindow != null &&
+                    selection.isEmptySpaceAt(pressInWindow)
+                if (startsBlockSelectionBox) {
+                    selection.clear()
+                    onPress()
+                    val addsToSelection = pressedKeys.isCtrlPressed || pressedKeys.isMetaPressed
+                    boxDrag.startAt(down.position, if (addsToSelection) selectedBlockIds() else emptySet())
+                    dragBlockSelectionBox(
+                        down = down,
+                        boxDrag = boxDrag,
+                        gestureScope = gestureScope,
+                        autoScroll = boxAutoScroll,
+                        autoScrollStepAt = { pointerY -> autoScrollStepFor(pointerY, topInsetPx) },
+                        onStarted = onSelectingBlocksWithBoxStarted
+                    )
                     return@awaitEachGesture
                 }
 
@@ -152,7 +183,7 @@ fun Modifier.selectTextAcrossBlocksByTouch(
     .pointerInput(selection, scrollableState) {
         coroutineScope {
             val gestureScope = this
-            val autoScroll = AutoScrollWhileSelecting(gestureScope, scrollableState, selection)
+            val autoScroll = AutoScrollWhileSelecting(gestureScope, scrollableState) { pointerInList -> selection.extendToPointInList(pointerInList) }
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                 if (isBlockSelectionActive()) return@awaitEachGesture
@@ -249,6 +280,53 @@ fun Modifier.selectTextAcrossBlocksByTouch(
         }
     }
 
+private suspend fun AwaitPointerEventScope.dragBlockSelectionBox(
+    down: PointerInputChange,
+    boxDrag: BlockSelectionBoxDrag,
+    gestureScope: CoroutineScope,
+    autoScroll: AutoScrollWhileSelecting,
+    autoScrollStepAt: (pointerY: Float) -> Float,
+    onStarted: () -> Unit
+) {
+    var hasStarted = false
+    var boxUpdatesEachFrame: Job? = null
+    try {
+        while (true) {
+            val change = awaitPointerEvent(PointerEventPass.Initial).changes
+                .firstOrNull { it.id == down.id } ?: return
+            if (!change.pressed) {
+                if (hasStarted) change.consume()
+                return
+            }
+            if (!hasStarted) {
+                val hasMovedPastSlop = (change.position - down.position).getDistance() > viewConfiguration.touchSlop
+                if (!hasMovedPastSlop) continue
+                hasStarted = true
+                onStarted()
+                boxUpdatesEachFrame = gestureScope.launch {
+                    while (true) {
+                        withFrameNanos { }
+                        boxDrag.update()
+                    }
+                }
+            }
+            change.consume()
+            boxDrag.moveTo(change.position)
+            autoScroll.follow(change.position, autoScrollStepAt(change.position.y))
+        }
+    } finally {
+        boxUpdatesEachFrame?.cancel()
+        autoScroll.stop()
+        boxDrag.end()
+    }
+}
+
+private fun CrossBlockSelectionState.extendToPointInList(pointInList: Offset) {
+    windowPointOf(pointInList)
+        ?.let { positionAt(it, mustBeInsideBlock = false) }
+        ?.let { extendTo(it) }
+}
+
 private suspend fun AwaitPointerEventScope.awaitPressOfAnyMouseButton(): PointerInputChange {
     while (true) {
         val event = awaitPointerEvent(PointerEventPass.Initial)
@@ -272,7 +350,7 @@ private fun PointerInputScope.autoScrollStepFor(pointerY: Float, topInsetPx: Flo
 private class AutoScrollWhileSelecting(
     private val scope: CoroutineScope,
     private val scrollableState: ScrollableState,
-    private val selection: CrossBlockSelectionState
+    private val afterEachStep: (pointerInList: Offset) -> Unit
 ) {
     private var stepPerFrame = 0f
     private var pointerInList = Offset.Zero
@@ -286,9 +364,7 @@ private class AutoScrollWhileSelecting(
             while (stepPerFrame != 0f) {
                 withFrameNanos { }
                 scrollableState.scrollBy(stepPerFrame)
-                selection.windowPointOf(pointerInList)
-                    ?.let { selection.positionAt(it, mustBeInsideBlock = false) }
-                    ?.let { selection.extendTo(it) }
+                afterEachStep(pointerInList)
             }
         }
     }
