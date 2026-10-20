@@ -63,6 +63,8 @@ import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
+import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
+import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.SelectedOptionBackground
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopBarIconButton
@@ -184,24 +186,18 @@ fun SettingsScreen(
     var showDayPicker by remember { mutableStateOf(false) }
 
     val themePreference by viewModel.themePreference.collectAsState()
-    var showThemeSheet by remember { mutableStateOf(false) }
 
     val fontSizePreference by viewModel.fontSizePreference.collectAsState()
     val fontStylePreference by viewModel.fontStylePreference.collectAsState()
-    var showFontSizeSheet by remember { mutableStateOf(false) }
-    var showFontStyleSheet by remember { mutableStateOf(false) }
 
     val timeFormatPreference by viewModel.timeFormatPreference.collectAsState()
-    var showTimeFormatSheet by remember { mutableStateOf(false) }
 
     val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
-    var showFirstDayOfWeekSheet by remember { mutableStateOf(false) }
 
     val topBarFadeStyle by viewModel.topBarFadeStyle.collectAsState()
     var showTopBarFadeStyleSheet by remember { mutableStateOf(false) }
 
     val subNoteOpenMode by viewModel.subNoteOpenMode.collectAsState()
-    var showSubNoteOpenModeSheet by remember { mutableStateOf(false) }
 
     val showScrollbar by viewModel.showScrollbar.collectAsState()
     val dailyNotesEnabled by viewModel.dailyNotesEnabled.collectAsState()
@@ -322,16 +318,22 @@ fun SettingsScreen(
 
         add(
             SettingsCategory(title = "Appearance", icon = Res.drawable.palette) {
+                val selectedTheme = runCatching { ThemePreference.valueOf(themePreference) }
+                    .getOrDefault(ThemePreference.SYSTEM)
+                val selectedFontStyle = runCatching { FontStylePreference.valueOf(fontStylePreference) }
+                    .getOrDefault(FontStylePreference.POPPINS)
+                val selectedTimeFormat = timeFormatPreferenceNamed(timeFormatPreference)
+                val selectedFirstDayOfWeek = firstDayOfWeekPreferenceNamed(firstDayOfWeekPreference)
+                val selectedSubNoteOpenMode = runCatching { SubNoteOpenMode.valueOf(subNoteOpenMode) }
+                    .getOrDefault(SubNoteOpenMode.SIDE_PANEL)
+
                 AppearanceSettingsSection(
-                    themeLabel = runCatching { ThemePreference.valueOf(themePreference) }
-                        .getOrDefault(ThemePreference.SYSTEM).displayName,
+                    themeLabel = selectedTheme.displayName,
                     fontSizeLabel = fontSizeDisplayNameFor(fontSizePreference),
-                    fontStyleLabel = runCatching { FontStylePreference.valueOf(fontStylePreference) }
-                        .getOrDefault(FontStylePreference.POPPINS).displayName,
-                    timeFormatLabel = timeFormatPreferenceNamed(timeFormatPreference).displayName,
-                    firstDayOfWeekLabel = firstDayOfWeekPreferenceNamed(firstDayOfWeekPreference).displayName,
-                    subNoteOpenModeLabel = runCatching { SubNoteOpenMode.valueOf(subNoteOpenMode) }
-                        .getOrDefault(SubNoteOpenMode.SIDE_PANEL).displayName,
+                    fontStyleLabel = selectedFontStyle.displayName,
+                    timeFormatLabel = selectedTimeFormat.displayName,
+                    firstDayOfWeekLabel = selectedFirstDayOfWeek.displayName,
+                    subNoteOpenModeLabel = selectedSubNoteOpenMode.displayName,
                     topBarFadeStyleLabel = topBarFadeStyleFor(topBarFadeStyle).displayName,
                     showScrollbar = showScrollbar,
                     dailyNotesEnabled = dailyNotesEnabled,
@@ -340,12 +342,40 @@ fun SettingsScreen(
                     hiddenOverviewSections = hiddenOverviewSections,
                     customWindowFrameEnabled = customWindowFrameEnabled,
                     autoHideTitleBar = autoHideTitleBar,
-                    onThemeClick = { showThemeSheet = true },
-                    onFontSizeClick = { showFontSizeSheet = true },
-                    onFontStyleClick = { showFontStyleSheet = true },
-                    onTimeFormatClick = { showTimeFormatSheet = true },
-                    onFirstDayOfWeekClick = { showFirstDayOfWeekSheet = true },
-                    onSubNoteOpenModeClick = { showSubNoteOpenModeSheet = true },
+                    themeChoices = ThemePreference.entries.map { option ->
+                        SettingsChoice(label = option.displayName, isSelected = option == selectedTheme) {
+                            viewModel.setThemePreference(option.name)
+                        }
+                    },
+                    fontSizeChoices = FontSizeOptions.map { (preferenceName, displayName) ->
+                        SettingsChoice(label = displayName, isSelected = preferenceName == fontSizePreference) {
+                            viewModel.setFontSizePreference(preferenceName)
+                        }
+                    },
+                    fontStyleChoices = FontStylePreference.entries.map { option ->
+                        SettingsChoice(
+                            label = option.displayName,
+                            isSelected = option == selectedFontStyle,
+                            labelFontFamily = fontFamilyFor(option)
+                        ) {
+                            viewModel.setFontStylePreference(option.name)
+                        }
+                    },
+                    timeFormatChoices = TimeFormatPreference.entries.map { option ->
+                        SettingsChoice(label = option.displayName, isSelected = option == selectedTimeFormat) {
+                            viewModel.setTimeFormatPreference(option.name)
+                        }
+                    },
+                    firstDayOfWeekChoices = FirstDayOfWeekPreference.entries.map { option ->
+                        SettingsChoice(label = option.displayName, isSelected = option == selectedFirstDayOfWeek) {
+                            viewModel.setFirstDayOfWeekPreference(option.name)
+                        }
+                    },
+                    subNoteOpenModeChoices = SubNoteOpenMode.entries.map { option ->
+                        SettingsChoice(label = option.displayName, isSelected = option == selectedSubNoteOpenMode) {
+                            viewModel.setSubNoteOpenMode(option.name)
+                        }
+                    },
                     onTopBarFadeStyleClick = { showTopBarFadeStyleSheet = true },
                     onShowScrollbarChange = { viewModel.setShowScrollbar(it) },
                     onDailyNotesEnabledChange = { viewModel.setDailyNotesEnabled(it) },
@@ -538,162 +568,6 @@ fun SettingsScreen(
         )
     }
 
-    if (showThemeSheet) {
-        EmberrBottomSheet(
-            expanded = true,
-            onDismiss = { showThemeSheet = false },
-            title = "Theme",
-            contentHorizontalPadding = 0.dp
-        ) {
-            val selectedTheme = runCatching { ThemePreference.valueOf(themePreference) }
-                .getOrDefault(ThemePreference.SYSTEM)
-
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                ThemePreference.entries.forEach { option ->
-                    EmberrBottomSheetOption(
-                        label = option.displayName,
-                        isSelected = option == selectedTheme,
-                        onClick = {
-                            viewModel.setThemePreference(option.name)
-                            showThemeSheet = false
-                        }
-                    )
-                }
-
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { showThemeSheet = false },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-                )
-            }
-        }
-    }
-
-    if (showFontSizeSheet) {
-        EmberrBottomSheet(
-            expanded = true,
-            onDismiss = { showFontSizeSheet = false },
-            title = "Font Size",
-            contentHorizontalPadding = 0.dp
-        ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                FontSizeOptions.forEach { (preferenceName, displayName) ->
-                    EmberrBottomSheetOption(
-                        label = displayName,
-                        isSelected = preferenceName == fontSizePreference,
-                        onClick = {
-                            viewModel.setFontSizePreference(preferenceName)
-                            showFontSizeSheet = false
-                        }
-                    )
-                }
-
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { showFontSizeSheet = false },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-                )
-            }
-        }
-    }
-
-    if (showFontStyleSheet) {
-        EmberrBottomSheet(
-            expanded = true,
-            onDismiss = { showFontStyleSheet = false },
-            title = "Font Style",
-            contentHorizontalPadding = 0.dp
-        ) {
-            val selectedFontStyle = runCatching { FontStylePreference.valueOf(fontStylePreference) }
-                .getOrDefault(FontStylePreference.POPPINS)
-
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                FontStylePreference.entries.forEach { option ->
-                    EmberrBottomSheetOption(
-                        label = option.displayName,
-                        isSelected = option == selectedFontStyle,
-                        labelFontFamily = fontFamilyFor(option),
-                        onClick = {
-                            viewModel.setFontStylePreference(option.name)
-                            showFontStyleSheet = false
-                        }
-                    )
-                }
-
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { showFontStyleSheet = false },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-                )
-            }
-        }
-    }
-
-    if (showTimeFormatSheet) {
-        EmberrBottomSheet(
-            expanded = true,
-            onDismiss = { showTimeFormatSheet = false },
-            title = "Time Format",
-            contentHorizontalPadding = 0.dp
-        ) {
-            val selectedTimeFormat = timeFormatPreferenceNamed(timeFormatPreference)
-
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                TimeFormatPreference.entries.forEach { option ->
-                    EmberrBottomSheetOption(
-                        label = option.displayName,
-                        isSelected = option == selectedTimeFormat,
-                        onClick = {
-                            viewModel.setTimeFormatPreference(option.name)
-                            showTimeFormatSheet = false
-                        }
-                    )
-                }
-
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { showTimeFormatSheet = false },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-                )
-            }
-        }
-    }
-
-    if (showFirstDayOfWeekSheet) {
-        EmberrBottomSheet(
-            expanded = true,
-            onDismiss = { showFirstDayOfWeekSheet = false },
-            title = "First Day of Week",
-            contentHorizontalPadding = 0.dp
-        ) {
-            val selectedFirstDayOfWeek = firstDayOfWeekPreferenceNamed(firstDayOfWeekPreference)
-
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                FirstDayOfWeekPreference.entries.forEach { option ->
-                    EmberrBottomSheetOption(
-                        label = option.displayName,
-                        isSelected = option == selectedFirstDayOfWeek,
-                        onClick = {
-                            viewModel.setFirstDayOfWeekPreference(option.name)
-                            showFirstDayOfWeekSheet = false
-                        }
-                    )
-                }
-
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { showFirstDayOfWeekSheet = false },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-                )
-            }
-        }
-    }
-
     if (showTopBarFadeStyleSheet) {
         EmberrBottomSheet(
             expanded = true,
@@ -719,39 +593,6 @@ fun SettingsScreen(
                 EmberrButtonPrimary(
                     text = "Close",
                     onClick = { showTopBarFadeStyleSheet = false },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-                )
-            }
-        }
-    }
-
-    if (showSubNoteOpenModeSheet) {
-        EmberrBottomSheet(
-            expanded = true,
-            onDismiss = { showSubNoteOpenModeSheet = false },
-            title = "Subnote Opening",
-            subtitle = "Choose how notes linked inside another note (subnotes) open on desktop.",
-            contentHorizontalPadding = 0.dp
-        ) {
-            val selectedMode = runCatching { SubNoteOpenMode.valueOf(subNoteOpenMode) }
-                .getOrDefault(SubNoteOpenMode.SIDE_PANEL)
-
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                SubNoteOpenMode.entries.forEach { option ->
-                    EmberrBottomSheetOption(
-                        label = option.displayName,
-                        isSelected = option == selectedMode,
-                        onClick = {
-                            viewModel.setSubNoteOpenMode(option.name)
-                            showSubNoteOpenModeSheet = false
-                        }
-                    )
-                }
-
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { showSubNoteOpenModeSheet = false },
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 12.dp, start = 20.dp, end = 20.dp)
                 )
@@ -1259,12 +1100,12 @@ private fun AppearanceSettingsSection(
     hiddenOverviewSections: Set<String>,
     customWindowFrameEnabled: Boolean,
     autoHideTitleBar: Boolean,
-    onThemeClick: () -> Unit,
-    onFontSizeClick: () -> Unit,
-    onFontStyleClick: () -> Unit,
-    onTimeFormatClick: () -> Unit,
-    onFirstDayOfWeekClick: () -> Unit,
-    onSubNoteOpenModeClick: () -> Unit,
+    themeChoices: List<SettingsChoice>,
+    fontSizeChoices: List<SettingsChoice>,
+    fontStyleChoices: List<SettingsChoice>,
+    timeFormatChoices: List<SettingsChoice>,
+    firstDayOfWeekChoices: List<SettingsChoice>,
+    subNoteOpenModeChoices: List<SettingsChoice>,
     onTopBarFadeStyleClick: () -> Unit,
     onShowScrollbarChange: (Boolean) -> Unit,
     onDailyNotesEnabledChange: (Boolean) -> Unit,
@@ -1275,25 +1116,25 @@ private fun AppearanceSettingsSection(
     onAutoHideTitleBarChange: (Boolean) -> Unit
 ) {
     SettingsGroup(title = "Appearance") {
-        SettingsActionRow(
+        SettingsChoiceRow(
             icon = painterResource(Res.drawable.palette),
             title = "Theme",
-            trailingLabel = themeLabel,
-            onClick = onThemeClick
+            value = themeLabel,
+            choices = themeChoices
         )
         SettingsDivider()
-        SettingsActionRow(
+        SettingsChoiceRow(
             icon = painterResource(Res.drawable.sliders_horizontal),
             title = "Font Size",
-            trailingLabel = fontSizeLabel,
-            onClick = onFontSizeClick
+            value = fontSizeLabel,
+            choices = fontSizeChoices
         )
         SettingsDivider()
-        SettingsActionRow(
+        SettingsChoiceRow(
             icon = painterResource(Res.drawable.text_type),
             title = "Font Style",
-            trailingLabel = fontStyleLabel,
-            onClick = onFontStyleClick
+            value = fontStyleLabel,
+            choices = fontStyleChoices
         )
 
         if (!isDesktopPlatform) {
@@ -1308,18 +1149,18 @@ private fun AppearanceSettingsSection(
     }
 
     SettingsGroup(title = "Date & Time") {
-        SettingsActionRow(
+        SettingsChoiceRow(
             icon = painterResource(Res.drawable.clock_circle),
             title = "Time Format",
-            trailingLabel = timeFormatLabel,
-            onClick = onTimeFormatClick
+            value = timeFormatLabel,
+            choices = timeFormatChoices
         )
         SettingsDivider()
-        SettingsActionRow(
+        SettingsChoiceRow(
             icon = painterResource(Res.drawable.calendar),
             title = "First Day of Week",
-            trailingLabel = firstDayOfWeekLabel,
-            onClick = onFirstDayOfWeekClick
+            value = firstDayOfWeekLabel,
+            choices = firstDayOfWeekChoices
         )
 
         SettingsFootnote(text = "Same setting as First Day of Week in Calendar settings.")
@@ -1376,11 +1217,11 @@ private fun AppearanceSettingsSection(
 
     if (isDesktopPlatform) {
         SettingsGroup(title = "Desktop Window") {
-            SettingsActionRow(
+            SettingsChoiceRow(
                 icon = painterResource(Res.drawable.sidebar),
                 title = "Subnote Opening",
-                trailingLabel = subNoteOpenModeLabel,
-                onClick = onSubNoteOpenModeClick
+                value = subNoteOpenModeLabel,
+                choices = subNoteOpenModeChoices
             )
 
             SettingsDivider()
@@ -1751,6 +1592,83 @@ fun SettingsActionRow(
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
                 modifier = Modifier.size(18.dp)
             )
+        }
+    }
+}
+
+internal class SettingsChoice(
+    val label: String,
+    val isSelected: Boolean,
+    val labelFontFamily: FontFamily? = null,
+    val onSelect: () -> Unit
+)
+
+@Composable
+internal fun SettingsChoiceRow(icon: Painter, title: String, value: String, choices: List<SettingsChoice>) {
+    var isMenuOpen by remember { mutableStateOf(false) }
+
+    if (isDesktopPlatform) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SettingsRowIcon(icon = icon)
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+
+            EmberrChoiceValueMenu(
+                value = value,
+                isMenuOpen = isMenuOpen,
+                onMenuOpenChange = { isOpen -> isMenuOpen = isOpen }
+            ) { closeMenuAnd ->
+                choices.forEach { choice ->
+                    EmberrDesktopMenuOption(
+                        label = choice.label,
+                        isSelected = choice.isSelected,
+                        labelFontFamily = choice.labelFontFamily,
+                        onClick = { closeMenuAnd(choice.onSelect) }
+                    )
+                }
+            }
+        }
+    } else {
+        SettingsActionRow(icon = icon, title = title, trailingLabel = value, onClick = { isMenuOpen = true })
+
+        EmberrBottomSheet(
+            expanded = isMenuOpen,
+            onDismiss = { isMenuOpen = false },
+            title = title,
+            contentHorizontalPadding = 0.dp
+        ) {
+            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+                choices.forEach { choice ->
+                    EmberrBottomSheetOption(
+                        label = choice.label,
+                        isSelected = choice.isSelected,
+                        labelFontFamily = choice.labelFontFamily,
+                        onClick = {
+                            choice.onSelect()
+                            isMenuOpen = false
+                        }
+                    )
+                }
+
+                EmberrButtonPrimary(
+                    text = "Close",
+                    onClick = { isMenuOpen = false },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
+                )
+            }
         }
     }
 }

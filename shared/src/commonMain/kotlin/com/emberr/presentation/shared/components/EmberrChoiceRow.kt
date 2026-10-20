@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -37,7 +36,8 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 private val ChoiceSheetButtonPadding = 20.dp
-private val ChoiceMenuWidth = 280.dp
+private val ChoiceMenuMinWidth = 160.dp
+private val ChoiceMenuMaxWidth = 280.dp
 private val ChoiceMenuVerticalPadding = 6.dp
 private val ChoiceMenuGap = 6.dp
 private val ChoiceRowIconSize = 18.dp
@@ -67,24 +67,12 @@ fun EmberrChoiceRow(
             )
         },
         trailing = {
-            Box {
-                ChoiceValueButton(value = value, isMenuOpen = isMenuOpen, onClick = { isMenuOpen = true })
-                if (isDesktopPlatform) {
-                    EmberrDesktopMenu(
-                        expanded = isMenuOpen,
-                        onDismissRequest = { isMenuOpen = false },
-                        offset = DpOffset(x = 0.dp, y = ChoiceMenuGap),
-                        modifier = Modifier.width(ChoiceMenuWidth)
-                    ) {
-                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = ChoiceMenuVerticalPadding)) {
-                            menuContent { action ->
-                                action()
-                                isMenuOpen = false
-                            }
-                        }
-                    }
-                }
-            }
+            EmberrChoiceValueMenu(
+                value = value,
+                isMenuOpen = isMenuOpen,
+                onMenuOpenChange = { isOpen -> isMenuOpen = isOpen },
+                menuContent = menuContent
+            )
         },
         onClick = { isMenuOpen = true }
     )
@@ -105,6 +93,33 @@ fun EmberrChoiceRow(
                         .fillMaxWidth()
                         .padding(top = 12.dp, start = ChoiceSheetButtonPadding, end = ChoiceSheetButtonPadding)
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun EmberrChoiceValueMenu(
+    value: String,
+    isMenuOpen: Boolean,
+    onMenuOpenChange: (Boolean) -> Unit,
+    menuContent: @Composable (closeMenuAnd: (() -> Unit) -> Unit) -> Unit
+) {
+    Box {
+        ChoiceValueButton(value = value, isMenuOpen = isMenuOpen, onClick = { onMenuOpenChange(true) })
+        if (isDesktopPlatform) {
+            EmberrDesktopMenu(
+                expanded = isMenuOpen,
+                onDismissRequest = { onMenuOpenChange(false) },
+                offset = DpOffset(x = 0.dp, y = ChoiceMenuGap),
+                modifier = Modifier.widthIn(min = ChoiceMenuMinWidth, max = ChoiceMenuMaxWidth)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(vertical = ChoiceMenuVerticalPadding)) {
+                    menuContent { action ->
+                        action()
+                        onMenuOpenChange(false)
+                    }
+                }
             }
         }
     }
