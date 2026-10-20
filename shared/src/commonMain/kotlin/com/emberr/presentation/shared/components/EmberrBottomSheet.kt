@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import com.emberr.ui.theme.LocalAppIsDark
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -41,6 +42,8 @@ private val BottomSheetShape = RoundedCornerShape(topEnd = BottomSheetCornerRadi
 private val FloatingDialogShape = RoundedCornerShape(22.dp)
 private val SheetHorizontalPadding = 20.dp
 private val SheetIconSpacing = 8.dp
+
+val LocalDialogWindowTitleBar = compositionLocalOf<(@Composable () -> Unit)?> { null }
 
 /**
  * Scrolls a focused child just far enough to be fully visible, and not at all when it already is.
@@ -147,6 +150,7 @@ private fun EmberrFloatingDialog(
     val blurSource = LocalEmberrBlurSource.current
     val surfaceColor = MaterialTheme.colorScheme.surface
     val dialogContentHazeState = remember { HazeState() }
+    val dialogWindowTitleBar = LocalDialogWindowTitleBar.current
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -163,10 +167,17 @@ private fun EmberrFloatingDialog(
                 .emberrBorder(FloatingDialogShape, color = emberrSoftBorderColor)
                 .clip(FloatingDialogShape)
                 .then(
-                    if (blurSource != null) Modifier.emberrBlur(blurSource, EmberrBlur.Thick)
-                    else Modifier.background(surfaceColor)
+                    if (blurSource != null) {
+                        Modifier.emberrBlur(
+                            blurSource,
+                            EmberrBlur.Thick.copy(tints = listOf(HazeTint(surfaceColor.copy(alpha = 0.92f))))
+                        )
+                    } else {
+                        Modifier.background(surfaceColor)
+                    }
                 )
         ) {
+            dialogWindowTitleBar?.invoke()
             CompositionLocalProvider(LocalEmberrBlurSource provides dialogContentHazeState) {
                 Column(
                     modifier = Modifier
