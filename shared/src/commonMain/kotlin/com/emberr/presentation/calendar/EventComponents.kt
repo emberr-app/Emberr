@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.RecurrenceEditScope
@@ -100,12 +101,15 @@ import com.emberr.ui.theme.LocalFirstDayOfWeek
 
 private val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
+private val EventChipShape = RoundedCornerShape(8.dp)
+private val EventChipHeightForTwoLines = 52.dp
 private val FieldPadding = 14.dp
 private val SectionSpacing = 16.dp
 
 @Composable
 fun EventChip(
     text: String,
+    timeText: String,
     color: Color,
     hasCategory: Boolean,
     height: Dp,
@@ -113,23 +117,51 @@ fun EventChip(
     onClick: () -> Unit
 ) {
     val textColor = if (hasCategory) EventChipTextColor else MaterialTheme.colorScheme.onSurface
+    val title: @Composable (Modifier) -> Unit = { titleModifier ->
+        Text(
+            text = text.ifBlank { "Untitled event" },
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Normal,
+            color = textColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = titleModifier
+        )
+    }
+    val time: @Composable () -> Unit = {
+        Text(
+            text = timeText,
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor.copy(alpha = 0.7f),
+            maxLines = 1
+        )
+    }
 
     Surface(
-        shape = InteractiveShape,
+        shape = EventChipShape,
         color = color,
         modifier = modifier
             .height(height)
-            .clip(InteractiveShape)
+            .clip(EventChipShape)
             .clickable(onClick = onClick)
     ) {
-        Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), contentAlignment = Alignment.TopStart) {
-            Text(
-                text = text.ifBlank { "Untitled event" },
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Normal,
-                color = textColor,
-                maxLines = 1
-            )
+        if (height >= EventChipHeightForTwoLines) {
+            Column(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                title(Modifier)
+                time()
+            }
+        } else {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                title(Modifier.weight(1f, fill = false))
+                time()
+            }
         }
     }
 }

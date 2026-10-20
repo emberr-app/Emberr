@@ -880,10 +880,13 @@ private fun DayColumnBody(
         val chipGap = 4.dp
         val availableWidth = maxWidth - horizontalInset * 2
         val positionedEvents = remember(events) { layoutEventsForColumn(events) }
+        val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
 
         positionedEvents.forEach { positioned ->
             val event = positioned.event
             val dt = Instant.fromEpochMilliseconds(event.reminderTimestamp)
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+            val endDt = Instant.fromEpochMilliseconds(event.reminderTimestamp + event.durationMinutes * 60_000L)
                 .toLocalDateTime(TimeZone.currentSystemDefault())
             val topOffset = hourHeight * dt.hour + hourHeight * (dt.minute / 60f)
             val chipHeight = maxOf(24.dp, hourHeight * (event.durationMinutes / 60f))
@@ -894,6 +897,8 @@ private fun DayColumnBody(
 
             EventChip(
                 text = event.text,
+                timeText = ("${formatTimeOfDay(dt.hour, dt.minute, usesTwentyFourHourClock)} - " +
+                    formatTimeOfDay(endDt.hour, endDt.minute, usesTwentyFourHourClock)).lowercase(),
                 color = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.surface,
                 hasCategory = category != null,
                 height = chipHeight,
