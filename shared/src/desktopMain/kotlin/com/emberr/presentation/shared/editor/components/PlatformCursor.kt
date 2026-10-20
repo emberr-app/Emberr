@@ -12,6 +12,7 @@ actual fun Modifier.desktopPointerCursor(
     val awtCursor = when (cursor) {
         DesktopCursor.HAND -> Cursor(Cursor.HAND_CURSOR)
         DesktopCursor.RESIZE_HORIZONTAL -> Cursor(Cursor.E_RESIZE_CURSOR)
+        DesktopCursor.RESIZE_VERTICAL -> Cursor(Cursor.N_RESIZE_CURSOR)
     }
     return this.pointerHoverIcon(PointerIcon(awtCursor), overrideDescendants)
 }

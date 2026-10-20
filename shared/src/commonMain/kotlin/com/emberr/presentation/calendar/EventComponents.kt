@@ -2,9 +2,14 @@
 
 package com.emberr.presentation.calendar
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -37,14 +43,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +67,8 @@ import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.model.RecurrenceFrequency
 import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.editor.components.DesktopCursor
+import com.emberr.presentation.shared.editor.components.desktopPointerCursor
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBlur
 import kotlinx.datetime.DayOfWeek
@@ -98,11 +111,17 @@ import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.LocalFirstDayOfWeek
+import com.emberr.ui.theme.LocalAppIsDark
 
 private val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
 private val EventChipShape = RoundedCornerShape(8.dp)
 private val EventChipHeightForTwoLines = 52.dp
+private val DesktopResizeHandleHeight = 6.dp
+private val TouchResizeHandleHeight = 12.dp
+private val ResizeDashShape = RoundedCornerShape(percent = 50)
+private val ResizeDashDarkModeColor = Color(0xFFDDDDDD)
+private const val CheckedEventTitleAlpha = 0.45f
 private val FieldPadding = 14.dp
 private val SectionSpacing = 16.dp
 
@@ -112,56 +131,124 @@ fun EventChip(
     timeText: String,
     color: Color,
     hasCategory: Boolean,
+    isChecked: Boolean,
     height: Dp,
+    isInResizeMode: Boolean,
+    onResizeStart: (edge: EventResizeEdge, pointerInWindow: Offset) -> Unit,
+    onResizeMove: (pointerInWindow: Offset) -> Unit,
+    onResizeEnd: () -> Unit,
+    onResizeCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     val textColor = if (hasCategory) EventChipTextColor else MaterialTheme.colorScheme.onSurface
-    val title: @Composable (Modifier) -> Unit = { titleModifier ->
-        Text(
-            text = text.ifBlank { "Untitled event" },
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Normal,
-            color = textColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = titleModifier
-        )
-    }
-    val time: @Composable () -> Unit = {
-        Text(
-            text = timeText,
-            style = MaterialTheme.typography.labelSmall,
-            color = textColor.copy(alpha = 0.7f),
-            maxLines = 1
-        )
-    }
+    val resizeDashColor = if (LocalAppIsDark.current && !hasCategory) ResizeDashDarkModeColor else textColor
 
     Surface(
         shape = EventChipShape,
         color = color,
+        border = if (isInResizeMode) BorderStroke(1.5.dp, textColor) else null,
         modifier = modifier
             .height(height)
             .clip(EventChipShape)
-            .clickable(onClick = onClick)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
     ) {
-        if (height >= EventChipHeightForTwoLines) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                title(Modifier)
-                time()
+                Text(
+                    text = text.ifBlank { "Untitled event" },
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Normal,
+                    color = if (isChecked) textColor.copy(alpha = CheckedEventTitleAlpha) else textColor,
+                    textDecoration = if (isChecked) TextDecoration.LineThrough else null,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (height >= EventChipHeightForTwoLines) {
+                    Text(
+                        text = timeText,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = textColor.copy(alpha = 0.7f),
+                        maxLines = 1
+                    )
+                }
             }
-        } else {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                title(Modifier.weight(1f, fill = false))
-                time()
+
+            if (isDesktopPlatform || isInResizeMode) {
+                EventResizeHandle(
+                    edge = EventResizeEdge.TOP,
+                    showDash = isInResizeMode,
+                    dashColor = resizeDashColor,
+                    onResizeStart = onResizeStart,
+                    onResizeMove = onResizeMove,
+                    onResizeEnd = onResizeEnd,
+                    onResizeCancel = onResizeCancel,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+                EventResizeHandle(
+                    edge = EventResizeEdge.BOTTOM,
+                    showDash = isInResizeMode,
+                    dashColor = resizeDashColor,
+                    onResizeStart = onResizeStart,
+                    onResizeMove = onResizeMove,
+                    onResizeEnd = onResizeEnd,
+                    onResizeCancel = onResizeCancel,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun EventResizeHandle(
+    edge: EventResizeEdge,
+    showDash: Boolean,
+    dashColor: Color,
+    onResizeStart: (edge: EventResizeEdge, pointerInWindow: Offset) -> Unit,
+    onResizeMove: (pointerInWindow: Offset) -> Unit,
+    onResizeEnd: () -> Unit,
+    onResizeCancel: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val currentOnResizeStart by rememberUpdatedState(onResizeStart)
+    val currentOnResizeMove by rememberUpdatedState(onResizeMove)
+    val currentOnResizeEnd by rememberUpdatedState(onResizeEnd)
+    val currentOnResizeCancel by rememberUpdatedState(onResizeCancel)
+    var handleCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+
+    Box(
+        contentAlignment = if (edge == EventResizeEdge.TOP) Alignment.TopCenter else Alignment.BottomCenter,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(if (isDesktopPlatform) DesktopResizeHandleHeight else TouchResizeHandleHeight)
+            .onPlaced { handleCoordinates = it }
+            .desktopPointerCursor(DesktopCursor.RESIZE_VERTICAL)
+            .pointerInput(edge) {
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    val coordinates = handleCoordinates?.takeIf { it.isAttached } ?: return@awaitEachGesture
+                    down.consume()
+                    currentOnResizeStart(edge, coordinates.localToWindow(down.position))
+                    val released = drag(down.id) { change ->
+                        change.consume()
+                        currentOnResizeMove(coordinates.localToWindow(change.position))
+                    }
+                    if (released) currentOnResizeEnd() else currentOnResizeCancel()
+                }
+            }
+    ) {
+        if (showDash) {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 3.dp)
+                    .size(width = 18.dp, height = 3.dp)
+                    .background(dashColor, ResizeDashShape)
+            )
         }
     }
 }

@@ -31,10 +31,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import java.util.UUID
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 class CalendarViewModel(
     private val repository: NoteRepository,
@@ -177,6 +182,31 @@ class CalendarViewModel(
                     return@launch
                 }
 
+                if (original != null && original.recurrenceRule != null) {
+                    val seriesStartDateString = repository.getAllTasksFlow().first()
+                        .firstOrNull { it.blockId == original.blockId }?.targetDate
+                    if (seriesStartDateString != null && seriesStartDateString != original.dateString) {
+                        val daysFromOccurrenceToSeriesStart =
+                            LocalDate.parse(original.dateString).daysUntil(LocalDate.parse(seriesStartDateString))
+                        saveEvent(
+                            original = original.copy(dateString = seriesStartDateString),
+                            dateString = LocalDate.parse(dateString)
+                                .plus(daysFromOccurrenceToSeriesStart, DateTimeUnit.DAY).toString(),
+                            timestamp = Instant.fromEpochMilliseconds(timestamp)
+                                .plus(daysFromOccurrenceToSeriesStart, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
+                                .toEpochMilliseconds(),
+                            name = name,
+                            categoryId = categoryId,
+                            durationMinutes = durationMinutes,
+                            url = url,
+                            description = description,
+                            recurrenceRule = recurrenceRule,
+                            editScope = editScope
+                        )
+                        return@launch
+                    }
+                }
+
                 val blockId = original?.blockId ?: UUID.randomUUID().toString()
                 val now = System.currentTimeMillis()
 
@@ -253,6 +283,45 @@ class CalendarViewModel(
                     text = name.ifBlank { "Unfinished task" },
                     timestamp = timestamp
                 )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun resizeEvent(
+        event: CalendarEvent,
+        newTimeRange: EventTimeRange,
+        editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
+    ) {
+        val newTimestamp = timestampOnDate(event.dateString, newTimeRange.startMinuteOfDay)
+        if (event.recurrenceRule == null) {
+            saveEvent(
+                original = event,
+                dateString = event.dateString,
+                timestamp = newTimestamp,
+                name = event.text,
+                categoryId = event.categoryId,
+                durationMinutes = newTimeRange.durationMinutes,
+                url = event.url,
+                description = event.description
+            )
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.applyRecurrenceScopedEdit(
+                    blockId = event.blockId,
+                    occurrenceDate = event.dateString,
+                    scope = editScope,
+                    text = event.text,
+                    timestamp = newTimestamp,
+                    categoryId = event.categoryId,
+                    durationMinutes = newTimeRange.durationMinutes,
+                    url = event.url,
+                    description = event.description
+                )
+                SyncEventBus.emitSyncCompleted(event.dateString)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
