@@ -2075,6 +2075,7 @@ abstract class BaseEditorViewModel(
     fun clearFocusRequest() { _focusRequest.value = null }
     fun toggleSelection(id: String) { _selectedBlockIds.update { if (it.contains(id)) it - id else it + id } }
     fun clearSelection() { _selectedBlockIds.value = emptySet() }
+    fun selectBlocks(ids: Set<String>) { _selectedBlockIds.value = ids }
     fun selectAllBlocks() { _selectedBlockIds.value = _blocks.value.map { it.id }.toSet() }
 
     fun selectedBlocksWithHiddenChildren(): List<NoteBlock> {

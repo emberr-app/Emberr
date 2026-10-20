@@ -189,8 +189,9 @@ import com.emberr.presentation.shared.editor.selection.TextCaret
 import com.emberr.presentation.shared.editor.selection.TextSelectionMenu
 import com.emberr.presentation.shared.editor.selection.TextSelectionMenuActions
 import com.emberr.presentation.shared.editor.selection.blocksCutToRange
+import com.emberr.presentation.shared.editor.selection.drawBlockSelectionBox
 import com.emberr.presentation.shared.editor.selection.handleCrossBlockSelectionKey
-import com.emberr.presentation.shared.editor.selection.selectTextAcrossBlocksByDragging
+import com.emberr.presentation.shared.editor.selection.selectAcrossBlocksByDragging
 import com.emberr.presentation.shared.editor.selection.selectTextAcrossBlocksByTouch
 import com.emberr.presentation.shared.editor.selection.selectionStepFor
 import com.emberr.ui.theme.HighlightColor
@@ -462,6 +463,7 @@ fun EditorScreen(
     selectionMenuContent: (@Composable (onCloseMenu: () -> Unit) -> Unit)? = null,
     onClearSelection: () -> Unit = {},
     onDeleteSelectedBlocks: () -> Unit = {},
+    onSelectBlocks: ((Set<String>) -> Unit)? = null,
     bottomContentPadding: Dp = 0.dp,
     topContentPadding: Dp = 0.dp,
     toolbarOffset: Dp = 0.dp,
@@ -579,6 +581,7 @@ fun EditorScreen(
     val latestOnClearSelection by rememberUpdatedState(onClearSelection)
     val latestOnDeleteSelectedBlocks by rememberUpdatedState(onDeleteSelectedBlocks)
     val latestSelectedBlockIds by rememberUpdatedState(selectedBlockIds)
+    val latestOnSelectBlocks by rememberUpdatedState(onSelectBlocks)
 
     val undoOrRedoOnShortcut: (KeyEvent) -> Boolean = remember {
         { keyEvent ->
@@ -1086,17 +1089,29 @@ fun EditorScreen(
         onDispose { crossBlockSelection.host = null }
     }
 
+    val selectionBoxColor = MaterialTheme.colorScheme.primary
     val crossBlockDragModifier = if (isDesktopPlatform) {
-        Modifier.selectTextAcrossBlocksByDragging(
-            selection = crossBlockSelection,
-            scrollableState = listState,
-            topInsetPx = topBarClearancePx,
-            isBlockSelectionActive = { latestSelectedBlockIds.isNotEmpty() },
-            focusedBlockId = { latestActiveBlockId },
-            onPress = { pendingCaretAfterEdit = null },
-            onRightClickInsideSelection = { pressInWindow -> crossBlockMenuPositionInEditor = pressInWindow - editorTopLeftInWindow },
-            onDragEndedInsideOneBlock = { blockId, selectedRange -> placeCaretInBlock(blockId, selectedRange) }
-        )
+        Modifier
+            .selectAcrossBlocksByDragging(
+                selection = crossBlockSelection,
+                scrollableState = listState,
+                topInsetPx = topBarClearancePx,
+                isBlockSelectionActive = { latestSelectedBlockIds.isNotEmpty() },
+                focusedBlockId = { latestActiveBlockId },
+                onPress = { pendingCaretAfterEdit = null },
+                onRightClickInsideSelection = { pressInWindow -> crossBlockMenuPositionInEditor = pressInWindow - editorTopLeftInWindow },
+                onDragEndedInsideOneBlock = { blockId, selectedRange -> placeCaretInBlock(blockId, selectedRange) },
+                selectedBlockIds = { latestSelectedBlockIds },
+                selectBlocksWithBox = if (onSelectBlocks != null) ({ ids -> latestOnSelectBlocks?.invoke(ids) }) else null,
+                onSelectingBlocksWithBoxStarted = {
+                    runCatching { selectionShortcutFocusRequester.requestFocus() }
+                    activeBlockId = null
+                    GlobalEditorState.currentlyFocusedBlockId = null
+                    localFocusRequest = null
+                    showSlashMenu = false
+                }
+            )
+            .drawBlockSelectionBox(crossBlockSelection, selectionBoxColor)
     } else {
         Modifier.selectTextAcrossBlocksByTouch(
             selection = crossBlockSelection,
