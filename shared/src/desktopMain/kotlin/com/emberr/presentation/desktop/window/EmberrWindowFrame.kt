@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,7 +45,10 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import java.awt.Cursor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -54,10 +58,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowState
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -70,6 +77,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrWindowShadow
+import com.emberr.presentation.shared.components.LocalDialogWindowTitleBar
 
 private val CloseHoverColor = Color(0xFFE04B4B)
 private val TitleBarRevealBand = 22.dp
@@ -77,6 +85,10 @@ private const val TitleBarRevealMillis = 150
 private const val DoubleTapTimeoutMillis = 500L
 private val DoubleTapSlop = 16.dp
 private val DragThreshold = 4.dp
+private val TitleBarEnterTransition = slideInVertically(tween(TitleBarRevealMillis)) { -it } +
+    fadeIn(tween(TitleBarRevealMillis))
+private val TitleBarExitTransition = slideOutVertically(tween(TitleBarRevealMillis)) { -it } +
+    fadeOut(tween(TitleBarRevealMillis))
 
 enum class WindowFrameSize {
     Regular,
@@ -218,6 +230,19 @@ fun WindowScope.EmberrWindowFrame(
             val titleBarHeightPx = with(LocalDensity.current) { frameSize.titleBarHeight.toPx() }
             val revealBandPx = with(LocalDensity.current) { TitleBarRevealBand.toPx() }
             val titleBarRevealBlocker = remember { TitleBarRevealBlocker() }
+            val titleBarAboveDialogs: @Composable () -> Unit = {
+                TitleBarAboveDialog(
+                    frameSize = frameSize,
+                    offsetPx = invisibleBorderPx,
+                    widthPx = frameSizeInPixels.width - 2 * invisibleBorderPx,
+                    shape = if (isMaximized) {
+                        RectangleShape
+                    } else {
+                        RoundedCornerShape(topStart = frameSize.cornerRadius, topEnd = frameSize.cornerRadius)
+                    },
+                    titleBar = titleBar
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -231,17 +256,18 @@ fun WindowScope.EmberrWindowFrame(
                         isTitleBarVisible = false
                     }
             ) {
-                CompositionLocalProvider(LocalTitleBarRevealBlocker provides titleBarRevealBlocker) {
+                CompositionLocalProvider(
+                    LocalTitleBarRevealBlocker provides titleBarRevealBlocker,
+                    LocalDialogWindowTitleBar provides titleBarAboveDialogs
+                ) {
                     content()
                 }
 
                 AnimatedVisibility(
                     visible = isTitleBarVisible && !titleBarRevealBlocker.isPointerOverBlockingElement,
                     modifier = Modifier.align(Alignment.TopCenter),
-                    enter = slideInVertically(tween(TitleBarRevealMillis)) { -it } +
-                        fadeIn(tween(TitleBarRevealMillis)),
-                    exit = slideOutVertically(tween(TitleBarRevealMillis)) { -it } +
-                        fadeOut(tween(TitleBarRevealMillis))
+                    enter = TitleBarEnterTransition,
+                    exit = TitleBarExitTransition
                 ) {
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
@@ -249,6 +275,53 @@ fun WindowScope.EmberrWindowFrame(
                     ) {
                         titleBar()
                     }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun TitleBarAboveDialog(
+    frameSize: WindowFrameSize,
+    offsetPx: Int,
+    widthPx: Int,
+    shape: Shape,
+    titleBar: @Composable () -> Unit
+) {
+    val titleBarVisibility = remember { MutableTransitionState(false) }
+    val isTitleBarOnScreen = titleBarVisibility.currentState || titleBarVisibility.targetState
+    val positionProvider = remember(offsetPx) {
+        object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset = IntOffset(offsetPx, offsetPx)
+        }
+    }
+
+    Popup(popupPositionProvider = positionProvider) {
+        Box(
+            modifier = Modifier
+                .width(with(LocalDensity.current) { widthPx.toDp() })
+                .height(if (isTitleBarOnScreen) frameSize.titleBarHeight else TitleBarRevealBand)
+                .clip(shape)
+                .onPointerEvent(PointerEventType.Enter) { titleBarVisibility.targetState = true }
+                .onPointerEvent(PointerEventType.Exit) { titleBarVisibility.targetState = false }
+        ) {
+            AnimatedVisibility(
+                visibleState = titleBarVisibility,
+                enter = TitleBarEnterTransition,
+                exit = TitleBarExitTransition
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    shadowElevation = EmberrShadowElevation.Standard
+                ) {
+                    titleBar()
                 }
             }
         }
