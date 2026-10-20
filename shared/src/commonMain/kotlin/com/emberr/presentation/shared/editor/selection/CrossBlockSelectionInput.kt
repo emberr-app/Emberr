@@ -316,6 +316,13 @@ fun handleCrossBlockSelectionKey(
             Key.X -> commands.cut()
             Key.V -> commands.paste()
             Key.A -> selection.selectWholeNote()
+            Key.MoveHome, Key.MoveEnd -> {
+                if (!keyEvent.isShiftPressed) {
+                    selection.clear()
+                    return false
+                }
+                selection.extendToEdgeOfNote(toEnd = keyEvent.key == Key.MoveEnd)
+            }
             else -> {
                 selection.clear()
                 return false

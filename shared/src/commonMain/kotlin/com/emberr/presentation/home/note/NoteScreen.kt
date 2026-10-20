@@ -16,6 +16,8 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.FormatSize
@@ -23,18 +25,33 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -45,6 +62,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.selection.BlockSelectionMenuContent
+import com.emberr.presentation.shared.editor.selection.LocalCrossBlockSelection
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.EditorScreen
 import com.emberr.presentation.shared.editor.ImageLinkFetch
@@ -395,7 +413,11 @@ fun NoteScreen(
             override fun onAdjustIndentation(increase: Boolean) = viewModel.adjustIndentation(increase)
             override fun onSetBlockAlignment(alignment: TextAlignment) = viewModel.setFocusedBlockAlignment(alignment)
             override fun onEnterPressed(id: String, before: String, after: String) = viewModel.handleEnter(id, before, after)
+            override fun onShiftEnterPressed(id: String, before: String, after: String) = viewModel.handleShiftEnter(id, before, after)
             override fun onBackspaceOnEmpty(id: String) = viewModel.handleBackspaceOnEmpty(id)
+            override fun onBackspaceAtStartOfText(id: String) = viewModel.handleBackspaceAtStartOfText(id)
+            override fun onDeleteAtEndOfText(id: String) = viewModel.handleDeleteAtEndOfText(id)
+            override fun backspaceLeavesTopOfNote(id: String) = viewModel.backspaceLeavesTopOfNote(id)
             override val canEditTextAcrossBlocks = true
             override fun onBlocksToCopy(range: CrossBlockTextRange, visibleBlocksInRange: List<NoteBlock>) =
                 viewModel.blocksToCopy(range, visibleBlocksInRange)
@@ -1051,6 +1073,40 @@ private fun NoteTitleField(
     modifier: Modifier = Modifier,
     singleLine: Boolean = false
 ) {
+    val crossBlockSelection = LocalCrossBlockSelection.current
+    val focusRequester = remember { FocusRequester() }
+    var titleValue by remember { mutableStateOf(TextFieldValue(noteTitle, TextRange(noteTitle.length))) }
+    val shownValue = if (titleValue.text == noteTitle) titleValue else TextFieldValue(noteTitle, TextRange(noteTitle.length))
+    var titleLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    var titleCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val latestTitle by rememberUpdatedState(noteTitle)
+
+    DisposableEffect(crossBlockSelection) {
+        val focusTitleAtEnd: () -> Unit = {
+            titleValue = TextFieldValue(latestTitle, TextRange(latestTitle.length))
+            runCatching { focusRequester.requestFocus() }
+        }
+        crossBlockSelection?.focusFieldAboveBlocks = focusTitleAtEnd
+        onDispose {
+            if (crossBlockSelection?.focusFieldAboveBlocks === focusTitleAtEnd) crossBlockSelection?.focusFieldAboveBlocks = null
+        }
+    }
+
+    fun cursorWindowX(): Float? {
+        val layout = titleLayout ?: return null
+        val coordinates = titleCoordinates?.takeIf { it.isAttached } ?: return null
+        val cursorRect = layout.getCursorRect(shownValue.selection.end.coerceIn(0, layout.layoutInput.text.length))
+        return coordinates.localToWindow(cursorRect.topLeft).x
+    }
+
+    fun moveCaretIntoNote(windowX: Float?): Boolean =
+        crossBlockSelection?.moveCaretIntoFirstBlock(windowX, selectsBlocksWithoutText = isDesktopPlatform) == true
+
+    fun isCursorOnLastLine(): Boolean {
+        val layout = titleLayout ?: return false
+        return layout.getLineForOffset(shownValue.selection.end.coerceIn(0, layout.layoutInput.text.length)) == layout.lineCount - 1
+    }
+
     Box(modifier = modifier) {
         if (noteTitle.isEmpty()) {
             Text(
@@ -1061,14 +1117,40 @@ private fun NoteTitleField(
             )
         }
         BasicTextField(
-            value = noteTitle,
-            onValueChange = { onTitleChange(it) },
+            value = shownValue,
+            onValueChange = { newValue ->
+                titleValue = newValue
+                if (newValue.text != noteTitle) onTitleChange(newValue.text)
+            },
             textStyle = style.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(onNext = { moveCaretIntoNote(windowX = null) }),
+            onTextLayout = { titleLayout = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
+                .onGloballyPositioned { titleCoordinates = it }
+                .onPreviewKeyEvent { event ->
+                    val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
+                    val movesDownIntoNote = event.type == KeyEventType.KeyDown &&
+                        event.key == Key.DirectionDown &&
+                        !event.isShiftPressed &&
+                        !event.isCtrlPressed &&
+                        !event.isMetaPressed &&
+                        isCursorOnLastLine()
+                    when {
+                        isEnter -> {
+                            if (event.type == KeyEventType.KeyDown) moveCaretIntoNote(windowX = null)
+                            true
+                        }
+                        movesDownIntoNote -> moveCaretIntoNote(cursorWindowX())
+                        else -> false
+                    }
+                },
             singleLine = singleLine
         )
     }

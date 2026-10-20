@@ -101,6 +101,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -191,6 +192,7 @@ import com.emberr.presentation.shared.editor.selection.blocksCutToRange
 import com.emberr.presentation.shared.editor.selection.handleCrossBlockSelectionKey
 import com.emberr.presentation.shared.editor.selection.selectTextAcrossBlocksByDragging
 import com.emberr.presentation.shared.editor.selection.selectTextAcrossBlocksByTouch
+import com.emberr.presentation.shared.editor.selection.selectionStepFor
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import dev.chrisbanes.haze.HazeState
@@ -247,6 +249,7 @@ import org.koin.compose.koinInject
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.TimeSource
 
 private val DefaultCornerShape = RoundedCornerShape(12.dp)
 
@@ -334,6 +337,8 @@ object GlobalEditorState {
 
     var undoOrRedoShortcutOfLastUsedEditor: ((KeyEvent) -> Boolean)? = null
 
+    var lastBlockBoundaryEdit: TimeSource.Monotonic.ValueTimeMark? = null
+
     var hasTextSelection by mutableStateOf(false)
         private set
 
@@ -379,7 +384,11 @@ interface EditorActions {
     fun onAdjustIndentation(increase: Boolean)
     fun onSetBlockAlignment(alignment: TextAlignment)
     fun onEnterPressed(id: String, before: String, after: String)
+    fun onShiftEnterPressed(id: String, before: String, after: String) = onEnterPressed(id, before, after)
     fun onBackspaceOnEmpty(id: String)
+    fun onBackspaceAtStartOfText(id: String): TextCaret? = null
+    fun onDeleteAtEndOfText(id: String): TextCaret? = null
+    fun backspaceLeavesTopOfNote(id: String): Boolean = false
     val canEditTextAcrossBlocks: Boolean get() = false
     fun onBlocksToCopy(range: CrossBlockTextRange, visibleBlocksInRange: List<NoteBlock>): List<NoteBlock> = visibleBlocksInRange
     fun onReplaceTextAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, replacement: String): TextCaret? = null
@@ -628,6 +637,14 @@ fun EditorScreen(
         object : EditorActions by actions {
             override fun onPasteMarkdown(blockId: String, replacedStart: Int, replacedEnd: Int, markdown: String): TextCaret? =
                 actions.onPasteMarkdown(blockId, replacedStart, replacedEnd, markdown)?.also { pendingCaretAfterEdit = it }
+            override fun onEnterPressed(id: String, before: String, after: String) {
+                if (before.isEmpty()) listState.requestScrollToItem(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset)
+                actions.onEnterPressed(id, before, after)
+            }
+            override fun onBackspaceAtStartOfText(id: String): TextCaret? =
+                actions.onBackspaceAtStartOfText(id)?.also { pendingCaretAfterEdit = it }
+            override fun onDeleteAtEndOfText(id: String): TextCaret? =
+                actions.onDeleteAtEndOfText(id)?.also { pendingCaretAfterEdit = it }
             override fun onToggleSelection(id: String) {
                 selectionAnchorBlockId = id
                 actions.onToggleSelection(id)
@@ -791,7 +808,7 @@ fun EditorScreen(
                     val offset = if (viewportHeight > 0) -(viewportHeight / 3) else 0
                     listState.scrollToItem(index = targetLazyColumnIndex, scrollOffset = offset)
                 } catch (_: Exception) {}
-            } else {
+            } else if (itemInfo.size <= layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset) {
                 val itemBottom = itemInfo.offset + itemInfo.size
                 val viewportBottom = layoutInfo.viewportEndOffset
 
@@ -979,6 +996,16 @@ fun EditorScreen(
         }
     }
 
+    fun moveCaretFromSelectedBlock(keyEvent: KeyEvent): Boolean {
+        val selectedBlockId = latestSelectedBlockIds.singleOrNull() ?: return false
+        val isPlainKeyDown = keyEvent.type == KeyEventType.KeyDown &&
+            !keyEvent.isShiftPressed &&
+            !keyEvent.isCtrlPressed &&
+            !keyEvent.isMetaPressed
+        val step = selectionStepFor(keyEvent.key)?.takeIf { isPlainKeyDown } ?: return false
+        return crossBlockSelection.moveCaretFromSelectedBlock(selectedBlockId, step)
+    }
+
     val crossBlockScrollScope = rememberCoroutineScope()
     var hasFocusInsideEditor by remember { mutableStateOf(false) }
     val latestTopBarClearancePx by rememberUpdatedState(topBarClearancePx)
@@ -1006,14 +1033,54 @@ fun EditorScreen(
                 }
             }
 
+            override fun placeCaret(position: BlockTextPosition) {
+                clearBlockSelection()
+                placeCaretInBlock(position.blockId, TextRange(position.offset))
+            }
+
+            override fun clearBlockSelection() {
+                if (latestSelectedBlockIds.isNotEmpty()) latestOnClearSelection()
+            }
+
+            override fun selectBlock(blockId: String) {
+                latestOnClearSelection()
+                activeBlockId = null
+                GlobalEditorState.currentlyFocusedBlockId = null
+                localFocusRequest = null
+                latestWrappedActions.onToggleSelection(blockId)
+            }
+
             override fun textLengthOf(blockId: String): Int? =
                 latestBlocks.firstOrNull { it.id == blockId }?.editableTextOrNull()?.length
 
             override fun revealFocus(step: SelectionStep) {
                 val movesDown = step == SelectionStep.LineDown || step == SelectionStep.CharacterForward
-                val scrollDistance = crossBlockSelection.scrollNeededToShowFocus(latestTopBarClearancePx, crossBlockRevealMarginPx)
-                    ?: if (movesDown) crossBlockRevealMarginPx else -crossBlockRevealMarginPx
+                val neededScroll = crossBlockSelection.scrollNeededToShowFocus(latestTopBarClearancePx, crossBlockRevealMarginPx)
+                if (neededScroll == null && scrolledToFocusBlockFarAway()) return
+                val scrollDistance = neededScroll ?: if (movesDown) crossBlockRevealMarginPx else -crossBlockRevealMarginPx
                 if (scrollDistance != 0f) crossBlockScrollScope.launch { listState.scrollBy(scrollDistance) }
+            }
+
+            private fun scrolledToFocusBlockFarAway(): Boolean {
+                val focusBlockId = crossBlockSelection.focusPosition?.blockId ?: return false
+                val blockIndex = latestBlocks.indexOfFirst { it.id == focusBlockId }.takeIf { it != -1 } ?: return false
+                val hasHeader = if (headerContent != null) 1 else 0
+                val hasStats = if (latestBlocks.any { it is CheckboxBlock }) 1 else 0
+                val itemIndex = blockIndex + hasHeader + hasStats
+                if (listState.layoutInfo.visibleItemsInfo.any { it.index == itemIndex }) return false
+                crossBlockScrollScope.launch { listState.scrollToItem(itemIndex) }
+                return true
+            }
+
+            override fun scrollByPage(downward: Boolean, afterScroll: (didScroll: Boolean) -> Unit) {
+                crossBlockScrollScope.launch {
+                    val pageHeight = (listState.layoutInfo.viewportSize.height - latestTopBarClearancePx - crossBlockRevealMarginPx)
+                        .coerceAtLeast(crossBlockRevealMarginPx)
+                    val scrolled = listState.scrollBy(if (downward) pageHeight else -pageHeight)
+                    withFrameNanos {}
+                    withFrameNanos {}
+                    afterScroll(scrolled != 0f)
+                }
             }
         }
         onDispose { crossBlockSelection.host = null }
@@ -1090,6 +1157,7 @@ fun EditorScreen(
                                 return@onPreviewKeyEvent true
                             }
                             if (deleteSelectedBlocksOnDeleteKey(keyEvent)) return@onPreviewKeyEvent true
+                            if (moveCaretFromSelectedBlock(keyEvent)) return@onPreviewKeyEvent true
                             undoOrRedoOnShortcut(keyEvent)
                         }
                 } else {
