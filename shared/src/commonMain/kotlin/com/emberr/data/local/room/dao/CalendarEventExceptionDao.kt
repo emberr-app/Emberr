@@ -19,6 +19,9 @@ interface CalendarEventExceptionDao {
     @Query("SELECT * FROM calendar_event_exceptions WHERE blockId = :blockId AND occurrenceDate = :occurrenceDate LIMIT 1")
     suspend fun getException(blockId: String, occurrenceDate: String): CalendarEventExceptionEntity?
 
+    @Query("SELECT * FROM calendar_event_exceptions WHERE blockId = :blockId")
+    suspend fun getExceptionsForBlock(blockId: String): List<CalendarEventExceptionEntity>
+
     @Query("SELECT * FROM calendar_event_exceptions WHERE updatedAt > :timestamp")
     suspend fun getExceptionsModifiedSince(timestamp: Long): List<CalendarEventExceptionEntity>
 

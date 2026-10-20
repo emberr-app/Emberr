@@ -68,6 +68,14 @@ interface NoteRepository {
         description: String?
     )
 
+    suspend fun applyRecurrenceScopedMove(
+        blockId: String,
+        occurrenceDate: String,
+        targetDate: String,
+        scope: RecurrenceEditScope,
+        timestamp: Long
+    )
+
     // Daily Tab operations
     suspend fun getDailyNoteMetadata(dateString: String): NoteMetadataEntity?
     suspend fun getDailyNoteMetadataInSpace(spaceId: String, dateString: String): NoteMetadataEntity?
