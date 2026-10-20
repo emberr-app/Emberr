@@ -194,12 +194,14 @@ import com.emberr.presentation.shared.editor.markdown.copyEmberrMarkdown
 import com.emberr.presentation.shared.editor.markdown.inlineMarkdownOf
 import com.emberr.presentation.shared.editor.markdown.markdownShortcutAfterTyping
 import com.emberr.presentation.shared.editor.markdown.pastedTextToReadAsMarkdown
+import com.emberr.presentation.shared.editor.selection.BlockTextPosition
 import com.emberr.presentation.shared.editor.selection.LocalCrossBlockSelection
 import com.emberr.presentation.shared.editor.selection.SelectableTextField
 import com.emberr.presentation.shared.editor.selection.SelectionStep
 import com.emberr.presentation.shared.editor.selection.selectionStepFor
 import com.emberr.presentation.shared.editor.selection.textInsertedBetween
 import com.emberr.presentation.shared.editor.text.ScrollOnlyWhenHiddenBringIntoViewSpec
+import com.emberr.presentation.shared.editor.text.showCursorLineInsteadOfOtherLines
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.LocalEmberrFontStyle
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
@@ -224,6 +226,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
+import kotlin.time.TimeSource
 
 val DefaultBlockShape = RoundedCornerShape(12.dp)
 
@@ -231,6 +234,7 @@ private const val NOTE_LINK_MARKER = "](emberr://note/"
 private val NoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)""".toRegex()
 private val TrailingNoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)$""".toRegex()
 private val EmptyLineSelectionWidth = 6.dp
+private val BlockBoundaryEditGap = 100.milliseconds
 
 private fun storedOffsetBesideSkippingNoteLinks(text: String, storedOffset: Int, forward: Boolean): Int? {
     val candidate = if (forward) storedOffset + 1 else storedOffset - 1
@@ -729,7 +733,12 @@ fun NoteBlockItem(
                                     focusRequester = focusRequester,
                                     onUpdateText = { id, newText -> actions.onUpdateText(id, newText) },
                                     onEnterPressed = { id, before, after -> actions.onEnterPressed(id, before, after) },
+                                    onShiftEnterPressed = { id, before, after -> actions.onShiftEnterPressed(id, before, after) },
                                     onBackspaceOnEmpty = { id -> actions.onBackspaceOnEmpty(id) },
+                                    onBackspaceAtStart = { id -> actions.onBackspaceAtStartOfText(id) },
+                                    onDeleteAtEnd = { id -> actions.onDeleteAtEndOfText(id) },
+                                    backspaceLeavesTopOfNote = { id -> actions.backspaceLeavesTopOfNote(id) },
+                                    breaksLineOnShiftEnter = block is TextBlock || block is HeadingBlock,
                                     onIndentRequested = { increase -> actions.onAdjustIndentation(increase) },
                                     onMarkdownShortcut = { id, literalText, shortcut -> actions.onMarkdownShortcut(id, literalText, shortcut) },
                                     onPasteMarkdown = { id, pasted ->
@@ -1188,7 +1197,12 @@ fun IsolatedEditorTextField(
     focusRequester: FocusRequester,
     onUpdateText: (String, String) -> Unit,
     onEnterPressed: (String, String, String) -> Unit,
+    onShiftEnterPressed: (String, String, String) -> Unit = onEnterPressed,
     onBackspaceOnEmpty: (String) -> Unit,
+    onBackspaceAtStart: (String) -> Unit = {},
+    onDeleteAtEnd: (String) -> Unit = {},
+    backspaceLeavesTopOfNote: (String) -> Boolean = { false },
+    breaksLineOnShiftEnter: Boolean = false,
     onIndentRequested: (increase: Boolean) -> Unit = {},
     onMarkdownShortcut: (blockId: String, literalText: String, shortcut: MarkdownShortcut) -> Boolean = { _, _, _ -> false },
     onPasteMarkdown: (blockId: String, pastedText: PastedText) -> Boolean = { _, _ -> false },
@@ -1215,7 +1229,6 @@ fun IsolatedEditorTextField(
 
     var mentionQuery by remember { mutableStateOf<String?>(null) }
     var mentionStartIndex by remember { mutableIntStateOf(-1) }
-    var isPendingDeletion by remember { mutableStateOf(false) }
 
     var localTextLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     var isFieldFocused by remember { mutableStateOf(false) }
@@ -1248,13 +1261,14 @@ fun IsolatedEditorTextField(
             override fun storedOffsetBeside(storedOffset: Int, forward: Boolean): Int? =
                 storedOffsetBesideSkippingNoteLinks(latestFieldText, storedOffset, forward)
 
-            override fun storedOffsetOnNextLine(storedOffset: Int, downward: Boolean): Int? {
+            override fun storedOffsetOnNextLine(storedOffset: Int, downward: Boolean, windowX: Float?): Int? {
                 val layout = localTextLayoutResult ?: return null
                 val displayedOffset = displayedOffsetOf(storedOffset, layout)
                 val targetLine = layout.getLineForOffset(displayedOffset) + if (downward) 1 else -1
                 if (targetLine !in 0 until layout.lineCount) return null
+                val goalXInField = windowX?.let { x -> attachedCoordinates()?.windowToLocal(Offset(x, 0f))?.x }
                 val pointOnTargetLine = Offset(
-                    layout.getHorizontalPosition(displayedOffset, usePrimaryDirection = true),
+                    goalXInField ?: layout.getHorizontalPosition(displayedOffset, usePrimaryDirection = true),
                     (layout.getLineTop(targetLine) + layout.getLineBottom(targetLine)) / 2
                 )
                 return offsetMapping().transformedToOriginal(layout.getOffsetForPosition(pointOnTargetLine))
@@ -1291,6 +1305,49 @@ fun IsolatedEditorTextField(
     DisposableEffect(crossBlockSelection, blockId) {
         crossBlockSelection?.registerTextField(blockId, selectableTextField)
         onDispose { crossBlockSelection?.forgetTextField(blockId, selectableTextField) }
+    }
+
+    fun cursorRectAt(storedOffset: Int, layout: TextLayoutResult): Rect {
+        val displayedOffset = latestVisualTransformation.filter(AnnotatedString(tfv.text)).offsetMapping
+            .originalToTransformed(storedOffset.coerceIn(0, tfv.text.length))
+            .coerceIn(0, layout.layoutInput.text.length)
+        return layout.getCursorRect(displayedOffset)
+    }
+
+    suspend fun revealCursor(storedOffset: Int) {
+        val layout = localTextLayoutResult ?: return
+        runCatching { bringIntoViewRequester.bringIntoView(cursorRectAt(storedOffset, layout)) }
+    }
+
+    val cursorRectWhileFocused: () -> Rect? = remember {
+        {
+            val layout = localTextLayoutResult
+            if (isFieldFocused && layout != null && tfv.selection.collapsed) cursorRectAt(tfv.selection.end, layout) else null
+        }
+    }
+
+    val caretRevealScope = rememberCoroutineScope()
+    fun placeCaretInsideField(storedOffset: Int) {
+        tfv = tfv.copy(selection = TextRange(storedOffset), composition = null)
+        GlobalEditorState.currentSelection = tfv.selection
+        caretRevealScope.launch { revealCursor(storedOffset) }
+    }
+
+    fun runBlockBoundaryEdit(edit: () -> Unit) {
+        val lastEdit = GlobalEditorState.lastBlockBoundaryEdit
+        if (lastEdit != null && lastEdit.elapsedNow() < BlockBoundaryEditGap) return
+        GlobalEditorState.lastBlockBoundaryEdit = TimeSource.Monotonic.markNow()
+        edit()
+    }
+
+    fun insertLineBreakAtCursor() {
+        val selectionStart = tfv.selection.min
+        val newText = tfv.text.substring(0, selectionStart) + "\n" + tfv.text.substring(tfv.selection.max)
+        tfv = tfv.copy(text = newText, selection = TextRange(selectionStart + 1), composition = null)
+        GlobalEditorState.currentSelection = tfv.selection
+        lastSentText = newText
+        textsSentButNotYetEchoed += newText
+        onUpdateText(blockId, newText)
     }
 
     fun isSelectionFocusAtEdge(step: SelectionStep): Boolean {
@@ -1407,6 +1464,8 @@ fun IsolatedEditorTextField(
     LaunchedEffect(focusRequest?.nonce) {
         if (focusRequest?.id == blockId && focusRequest.placeCursorAtEnd) {
             tfv = tfv.copy(selection = TextRange(tfv.text.length), composition = null)
+            withFrameNanos {}
+            if (isFieldFocused) revealCursor(tfv.text.length)
         }
     }
 
@@ -1437,6 +1496,8 @@ fun IsolatedEditorTextField(
                 composition = null
             )
             lastSentText = initialText
+            withFrameNanos {}
+            if (isFieldFocused) revealCursor(tfv.selection.end)
         }
     }
 
@@ -1570,6 +1631,7 @@ fun IsolatedEditorTextField(
                 }
 
                 val pastedText = if (!isCodeBlock) pastedTextToReadAsMarkdown(tfv.text, newText, GlobalEditorState.lastCopiedMarkdown) else null
+                val insertedText = textInsertedBetween(tfv.text, newText)
                 val isPlainTyping = !isCodeBlock && newValue.composition == null && newValue.selection.collapsed
                 val markdownShortcut = if (isPlainTyping) markdownShortcutAfterTyping(tfv.text, newText, newValue.selection.start) else null
                 if (pastedText != null && onPasteMarkdown(blockId, pastedText)) {
@@ -1583,15 +1645,10 @@ fun IsolatedEditorTextField(
                     textsSentButNotYetEchoed += markdownShortcut.convertedText
                     mentionQuery = null
                     mentionStartIndex = -1
-                } else if (!isCodeBlock && newText.contains('\n')) {
-                    val splitIndex = newText.indexOf('\n')
-                    val textBefore = newText.substring(0, splitIndex)
-                    val textAfter = newText.substring(splitIndex + 1).replace("\n", "")
-
-                    tfv = newValue.copy(text = textBefore, selection = TextRange(textBefore.length))
-                    lastSentText = textBefore
-                    textsSentButNotYetEchoed += textBefore
-                    onEnterPressed(blockId, textBefore, textAfter)
+                } else if (!isCodeBlock && insertedText.contains('\n')) {
+                    val splitIndex = tfv.text.commonPrefixWith(newText).length + insertedText.indexOf('\n')
+                    tfv = tfv.copy(composition = null)
+                    onEnterPressed(blockId, newText.substring(0, splitIndex), newText.substring(splitIndex + 1))
                 } else {
                     tfv = newValue
                     lastSentText = newText
@@ -1601,6 +1658,7 @@ fun IsolatedEditorTextField(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .showCursorLineInsteadOfOtherLines(cursorRectWhileFocused)
                 .onGloballyPositioned { fieldCoordinates = it }
                 .then(
                     if (isDesktopPlatform) {
@@ -1710,6 +1768,48 @@ fun IsolatedEditorTextField(
                         }
                     }
 
+                    val isPlainKeyDown = event.type == KeyEventType.KeyDown &&
+                        !event.isShiftPressed &&
+                        !event.isCtrlPressed &&
+                        !event.isMetaPressed
+                    val caretStep = when (event.key) {
+                        Key.DirectionUp -> SelectionStep.LineUp
+                        Key.DirectionDown -> SelectionStep.LineDown
+                        Key.DirectionLeft -> SelectionStep.CharacterBack.takeIf { isSelectionFocusAtEdge(it) }
+                        Key.DirectionRight -> SelectionStep.CharacterForward.takeIf { isSelectionFocusAtEdge(it) }
+                        else -> null
+                    }
+                    val movedCaret = isPlainKeyDown &&
+                        caretStep != null &&
+                        tfv.selection.collapsed &&
+                        crossBlockSelection?.moveCaret(
+                            from = BlockTextPosition(blockId, tfv.selection.end),
+                            step = caretStep,
+                            selectsBlocksWithoutText = isDesktopPlatform
+                        ) { offset -> placeCaretInsideField(offset) } == true
+                    if (movedCaret) return@onPreviewKeyEvent true
+
+                    val movesCaretByPage = isDesktopPlatform &&
+                        isPlainKeyDown &&
+                        tfv.selection.collapsed &&
+                        (event.key == Key.PageUp || event.key == Key.PageDown)
+                    val movedCaretByPage = movesCaretByPage &&
+                        crossBlockSelection?.moveCaretByPage(BlockTextPosition(blockId, tfv.selection.end), downward = event.key == Key.PageDown) == true
+                    if (movedCaretByPage) return@onPreviewKeyEvent true
+
+                    val isNoteEdgeKey = event.type == KeyEventType.KeyDown &&
+                        event.isCtrlPressed &&
+                        (event.key == Key.MoveHome || event.key == Key.MoveEnd)
+                    if (isNoteEdgeKey) {
+                        val toEnd = event.key == Key.MoveEnd
+                        val handled = when {
+                            !event.isShiftPressed -> crossBlockSelection?.moveCaretToEdgeOfNote(toEnd) == true
+                            isDesktopPlatform -> crossBlockSelection?.selectFromTextFieldToEdgeOfNote(blockId, tfv.selection, toEnd) == true
+                            else -> false
+                        }
+                        if (handled) return@onPreviewKeyEvent true
+                    }
+
                     val isCopyShortcut = event.type == KeyEventType.KeyDown &&
                         event.isCtrlPressed &&
                         (event.key == Key.C || event.key == Key.X)
@@ -1718,17 +1818,32 @@ fun IsolatedEditorTextField(
                         if (copiedAsMarkdown) return@onPreviewKeyEvent true
                     }
 
-                    if (isBackspace && event.type == KeyEventType.KeyUp) isPendingDeletion = false
+                    val deletesAtEnd = event.key == Key.Delete &&
+                        event.type == KeyEventType.KeyDown &&
+                        tfv.selection.collapsed &&
+                        tfv.selection.start == tfv.text.length
+                    if (deletesAtEnd) {
+                        runBlockBoundaryEdit { onDeleteAtEnd(blockId) }
+                        return@onPreviewKeyEvent true
+                    }
+
+                    val backspacesAtStart = isBackspace &&
+                        event.type == KeyEventType.KeyDown &&
+                        tfv.selection.collapsed &&
+                        tfv.selection.start == 0
+                    if (backspacesAtStart) {
+                        runBlockBoundaryEdit {
+                            val movedToTitle = backspaceLeavesTopOfNote(blockId) && crossBlockSelection?.moveCaretAboveBlocks() == true
+                            when {
+                                movedToTitle -> Unit
+                                tfv.text.isEmpty() -> onBackspaceOnEmpty(blockId)
+                                else -> onBackspaceAtStart(blockId)
+                            }
+                        }
+                        return@onPreviewKeyEvent true
+                    }
 
                     if (isBackspace && event.type == KeyEventType.KeyDown) {
-                        if (tfv.text.isEmpty()) {
-                            if (!isPendingDeletion) {
-                                isPendingDeletion = true
-                                onBackspaceOnEmpty(blockId)
-                            }
-                            return@onPreviewKeyEvent true
-                        }
-
                         val cursor = tfv.selection.start
                         if (cursor > 0 && tfv.selection.collapsed) {
                             val textBeforeCursor = tfv.text.substring(0, cursor)
@@ -1745,11 +1860,20 @@ fun IsolatedEditorTextField(
                             }
                         }
                     }
-                    if (isEnter && !isCodeBlock) {
+                    val insertsLineBreak = isEnter && event.isShiftPressed && breaksLineOnShiftEnter && tfv.text.isNotEmpty()
+                    if (insertsLineBreak) {
+                        if (event.type == KeyEventType.KeyDown) insertLineBreakAtCursor()
+                        return@onPreviewKeyEvent true
+                    }
+                    if (isEnter && (!isCodeBlock || event.isShiftPressed)) {
                         if (event.type == KeyEventType.KeyDown) {
                             val textBefore = tfv.text.substring(0, tfv.selection.min)
                             val textAfter = tfv.text.substring(tfv.selection.max)
-                            onEnterPressed(blockId, textBefore, textAfter)
+                            if (event.isShiftPressed) {
+                                onShiftEnterPressed(blockId, textBefore, textAfter)
+                            } else {
+                                onEnterPressed(blockId, textBefore, textAfter)
+                            }
                         }
                         return@onPreviewKeyEvent true
                     }

@@ -2143,7 +2143,10 @@ fun DesktopMainScreen(
                             override fun onAdjustIndentation(increase: Boolean) = dailyViewModel.adjustIndentation(increase)
                             override fun onSetBlockAlignment(alignment: TextAlignment) = dailyViewModel.setFocusedBlockAlignment(alignment)
                             override fun onEnterPressed(id: String, before: String, after: String) = dailyViewModel.handleEnter(id, before, after)
+                            override fun onShiftEnterPressed(id: String, before: String, after: String) = dailyViewModel.handleShiftEnter(id, before, after)
                             override fun onBackspaceOnEmpty(id: String) = dailyViewModel.handleBackspaceOnEmpty(id)
+                            override fun onBackspaceAtStartOfText(id: String) = dailyViewModel.handleBackspaceAtStartOfText(id)
+                            override fun onDeleteAtEndOfText(id: String) = dailyViewModel.handleDeleteAtEndOfText(id)
                             override fun onMarkdownShortcut(blockId: String, literalText: String, shortcut: MarkdownShortcut) =
                                 dailyViewModel.applyMarkdownShortcut(blockId, literalText, shortcut)
                             override fun onToggleSelection(id: String) = dailyViewModel.toggleSelection(id)

@@ -170,7 +170,10 @@ fun DailyEditorPane(
             override fun onAdjustIndentation(increase: Boolean) = viewModel.adjustIndentation(increase)
             override fun onSetBlockAlignment(alignment: TextAlignment) = viewModel.setFocusedBlockAlignment(alignment)
             override fun onEnterPressed(id: String, before: String, after: String) = viewModel.handleEnter(id, before, after)
+            override fun onShiftEnterPressed(id: String, before: String, after: String) = viewModel.handleShiftEnter(id, before, after)
             override fun onBackspaceOnEmpty(id: String) = viewModel.handleBackspaceOnEmpty(id)
+            override fun onBackspaceAtStartOfText(id: String) = viewModel.handleBackspaceAtStartOfText(id)
+            override fun onDeleteAtEndOfText(id: String) = viewModel.handleDeleteAtEndOfText(id)
             override val canEditTextAcrossBlocks = true
             override fun onBlocksToCopy(range: CrossBlockTextRange, visibleBlocksInRange: List<NoteBlock>) =
                 viewModel.blocksToCopy(range, visibleBlocksInRange)

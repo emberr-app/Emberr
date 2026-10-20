@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.toSize
 interface SelectableTextField {
     fun storedOffsetAt(pointInWindow: Offset): Int?
     fun storedOffsetBeside(storedOffset: Int, forward: Boolean): Int?
-    fun storedOffsetOnNextLine(storedOffset: Int, downward: Boolean): Int?
+    fun storedOffsetOnNextLine(storedOffset: Int, downward: Boolean, windowX: Float?): Int?
     fun storedOffsetOnOuterLine(onFirstLine: Boolean, windowX: Float?): Int?
     fun cursorRectInWindow(storedOffset: Int): Rect?
     fun selectionIfFocused(): TextRange?
@@ -27,7 +27,13 @@ interface CrossBlockSelectionHost {
     fun textLengthOf(blockId: String): Int?
     fun revealFocus(step: SelectionStep)
     fun replaceSelectionWithTypedText(typedText: String)
+    fun placeCaret(position: BlockTextPosition)
+    fun selectBlock(blockId: String)
+    fun clearBlockSelection()
+    fun scrollByPage(downward: Boolean, afterScroll: (didScroll: Boolean) -> Unit)
 }
+
+private data class CaretGoal(val position: BlockTextPosition, val windowX: Float)
 
 enum class SelectionStep { CharacterBack, CharacterForward, LineUp, LineDown }
 
@@ -39,6 +45,8 @@ class CrossBlockSelectionState {
     private var focus by mutableStateOf<BlockTextPosition?>(null)
     var blockIdsInOrder by mutableStateOf<List<String>>(emptyList())
     var host: CrossBlockSelectionHost? = null
+    var focusFieldAboveBlocks: (() -> Unit)? = null
+    private var caretGoal: CaretGoal? = null
     var longPressedWord: CrossBlockTextRange? = null
         private set
     var isBeingTouched by mutableStateOf(false)
@@ -59,6 +67,8 @@ class CrossBlockSelectionState {
     val isActive: Boolean get() = range != null
 
     val anchorPosition: BlockTextPosition? get() = anchor
+
+    val focusPosition: BlockTextPosition? get() = focus
 
     fun blockIdsInSelection(): List<String> = range?.let { blockIdsInRange(it, blockIdsInOrder) }.orEmpty()
 
@@ -161,6 +171,125 @@ class CrossBlockSelectionState {
         host?.revealFocus(step)
     }
 
+    fun selectFromTextFieldToEdgeOfNote(blockId: String, fieldSelection: TextRange, toEnd: Boolean): Boolean {
+        val edge = edgeOfNote(toEnd)?.takeIf { it.blockId != blockId } ?: return false
+        anchor = BlockTextPosition(blockId, fieldSelection.start)
+        focus = edge
+        host?.onSelectingStarted()
+        host?.revealFocus(if (toEnd) SelectionStep.LineDown else SelectionStep.LineUp)
+        return true
+    }
+
+    fun extendToEdgeOfNote(toEnd: Boolean) {
+        focus = edgeOfNote(toEnd) ?: return
+        host?.revealFocus(if (toEnd) SelectionStep.LineDown else SelectionStep.LineUp)
+    }
+
+    private fun edgeOfNote(toEnd: Boolean): BlockTextPosition? {
+        val edgeBlockId = (if (toEnd) blockIdsInOrder.lastOrNull() else blockIdsInOrder.firstOrNull()) ?: return null
+        return BlockTextPosition(edgeBlockId, if (toEnd) host?.textLengthOf(edgeBlockId) ?: 0 else 0)
+    }
+
+    fun moveCaret(
+        from: BlockTextPosition,
+        step: SelectionStep,
+        selectsBlocksWithoutText: Boolean,
+        moveInsideBlock: (Int) -> Unit
+    ): Boolean {
+        val host = host ?: return false
+        val goalX = goalXFor(from)
+        val field = selectableTextFields[from.blockId]
+        val offsetInsideBlock = when (step) {
+            SelectionStep.LineUp -> field?.storedOffsetOnNextLine(from.offset, downward = false, windowX = goalX)
+            SelectionStep.LineDown -> field?.storedOffsetOnNextLine(from.offset, downward = true, windowX = goalX)
+            SelectionStep.CharacterBack, SelectionStep.CharacterForward -> null
+        }
+        if (offsetInsideBlock != null) {
+            rememberGoal(BlockTextPosition(from.blockId, offsetInsideBlock), step, goalX)
+            moveInsideBlock(offsetInsideBlock)
+            return true
+        }
+        return moveCaretOutOfBlock(from, step, goalX, host, selectsBlocksWithoutText)
+    }
+
+    fun moveCaretFromSelectedBlock(blockId: String, step: SelectionStep): Boolean {
+        val host = host ?: return false
+        val from = BlockTextPosition(blockId, 0)
+        return moveCaretOutOfBlock(from, step, goalXFor(from), host, selectsBlocksWithoutText = true)
+    }
+
+    fun moveCaretAboveBlocks(): Boolean {
+        val fieldAbove = focusFieldAboveBlocks ?: return false
+        caretGoal = null
+        host?.clearBlockSelection()
+        fieldAbove()
+        return true
+    }
+
+    fun moveCaretByPage(from: BlockTextPosition, downward: Boolean): Boolean {
+        val host = host ?: return false
+        val caretPoint = selectableTextFields[from.blockId]?.cursorRectInWindow(from.offset)?.center ?: return false
+        host.scrollByPage(downward) { didScroll ->
+            val target = if (didScroll) positionAt(caretPoint, mustBeInsideBlock = false) else null
+            if (target == null) {
+                moveCaretToEdgeOfNote(toEnd = downward)
+            } else {
+                caretGoal = null
+                goTo(target, host)
+            }
+        }
+        return true
+    }
+
+    fun moveCaretIntoFirstBlock(windowX: Float?, selectsBlocksWithoutText: Boolean): Boolean {
+        val host = host ?: return false
+        val firstBlockId = blockIdsInOrder.firstOrNull { selectsBlocksWithoutText || host.textLengthOf(it) != null } ?: return false
+        val offset = selectableTextFields[firstBlockId]?.storedOffsetOnOuterLine(onFirstLine = true, windowX = windowX) ?: 0
+        val target = BlockTextPosition(firstBlockId, offset)
+        caretGoal = windowX?.let { CaretGoal(target, it) }
+        goTo(target, host)
+        return true
+    }
+
+    fun moveCaretToEdgeOfNote(toEnd: Boolean): Boolean {
+        val host = host ?: return false
+        val blockIdsWithText = blockIdsInOrder.filter { host.textLengthOf(it) != null }
+        val blockId = (if (toEnd) blockIdsWithText.lastOrNull() else blockIdsWithText.firstOrNull()) ?: return false
+        caretGoal = null
+        host.placeCaret(BlockTextPosition(blockId, if (toEnd) host.textLengthOf(blockId) ?: 0 else 0))
+        return true
+    }
+
+    private fun moveCaretOutOfBlock(
+        from: BlockTextPosition,
+        step: SelectionStep,
+        goalX: Float?,
+        host: CrossBlockSelectionHost,
+        selectsBlocksWithoutText: Boolean
+    ): Boolean {
+        val target = positionInNeighbourBlock(from, step, goalX, skipsBlocksWithoutText = !selectsBlocksWithoutText)
+        if (target == null) {
+            val movesBack = step == SelectionStep.LineUp || step == SelectionStep.CharacterBack
+            return movesBack && moveCaretAboveBlocks()
+        }
+        rememberGoal(target, step, goalX)
+        goTo(target, host)
+        return true
+    }
+
+    private fun goTo(target: BlockTextPosition, host: CrossBlockSelectionHost) {
+        if (host.textLengthOf(target.blockId) == null) host.selectBlock(target.blockId) else host.placeCaret(target)
+    }
+
+    private fun goalXFor(from: BlockTextPosition): Float? =
+        caretGoal?.takeIf { it.position == from }?.windowX
+            ?: selectableTextFields[from.blockId]?.cursorRectInWindow(from.offset)?.left
+
+    private fun rememberGoal(position: BlockTextPosition, step: SelectionStep, goalX: Float?) {
+        val movesByLine = step == SelectionStep.LineUp || step == SelectionStep.LineDown
+        caretGoal = if (movesByLine && goalX != null) CaretGoal(position, goalX) else null
+    }
+
     fun extendTo(position: BlockTextPosition) {
         focus = position
     }
@@ -255,21 +384,34 @@ class CrossBlockSelectionState {
 
     private fun focusMovedBy(step: SelectionStep): BlockTextPosition? {
         val focus = focus ?: return null
+        val goalX = goalXFor(focus)
         val field = selectableTextFields[focus.blockId]
         val offsetInsideBlock = when (step) {
             SelectionStep.CharacterBack -> field?.storedOffsetBeside(focus.offset, forward = false)
             SelectionStep.CharacterForward -> field?.storedOffsetBeside(focus.offset, forward = true)
-            SelectionStep.LineUp -> field?.storedOffsetOnNextLine(focus.offset, downward = false)
-            SelectionStep.LineDown -> field?.storedOffsetOnNextLine(focus.offset, downward = true)
+            SelectionStep.LineUp -> field?.storedOffsetOnNextLine(focus.offset, downward = false, windowX = goalX)
+            SelectionStep.LineDown -> field?.storedOffsetOnNextLine(focus.offset, downward = true, windowX = goalX)
         }
-        if (offsetInsideBlock != null) return BlockTextPosition(focus.blockId, offsetInsideBlock)
+        val movedFocus = offsetInsideBlock?.let { BlockTextPosition(focus.blockId, it) }
+            ?: positionInNeighbourBlock(focus, step, goalX, skipsBlocksWithoutText = false)
+            ?: return null
+        rememberGoal(movedFocus, step, goalX)
+        return movedFocus
+    }
 
+    private fun positionInNeighbourBlock(
+        from: BlockTextPosition,
+        step: SelectionStep,
+        cursorX: Float?,
+        skipsBlocksWithoutText: Boolean
+    ): BlockTextPosition? {
         val movesForward = step == SelectionStep.CharacterForward || step == SelectionStep.LineDown
-        val focusIndex = blockIdsInOrder.indexOf(focus.blockId)
-        val neighbourId = blockIdsInOrder.getOrNull(if (movesForward) focusIndex + 1 else focusIndex - 1) ?: return null
+        val fromIndex = blockIdsInOrder.indexOf(from.blockId)
+        if (fromIndex == -1) return null
+        val blockIdsInDirection = if (movesForward) blockIdsInOrder.drop(fromIndex + 1) else blockIdsInOrder.take(fromIndex).asReversed()
+        val neighbourId = blockIdsInDirection.firstOrNull { !skipsBlocksWithoutText || host?.textLengthOf(it) != null } ?: return null
         val neighbourField = selectableTextFields[neighbourId]
         val neighbourLength = host?.textLengthOf(neighbourId) ?: 0
-        val cursorX = field?.cursorRectInWindow(focus.offset)?.left
         val offsetInNeighbour = when (step) {
             SelectionStep.CharacterForward -> 0
             SelectionStep.CharacterBack -> neighbourLength
