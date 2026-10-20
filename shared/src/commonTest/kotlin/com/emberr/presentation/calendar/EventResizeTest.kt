@@ -43,4 +43,18 @@ class EventResizeTest {
         timestampOnDate("2026-10-20", topDraggedDown.startMinuteOfDay)
         timestampOnDate("2026-10-20", bottomDraggedUp.startMinuteOfDay)
     }
+
+    @Test
+    fun movingAnEventKeepsItsDurationAndStopsAtTheEdgesOfTheDay() {
+        val tenToEleven = EventTimeRange(startMinuteOfDay = 10 * 60, durationMinutes = 60)
+
+        assertEquals(
+            EventTimeRange(startMinuteOfDay = 23 * 60, durationMinutes = 60),
+            moveEventTimeRange(tenToEleven, draggedMinutes = 2000f)
+        )
+        assertEquals(
+            EventTimeRange(startMinuteOfDay = 0, durationMinutes = 60),
+            moveEventTimeRange(tenToEleven, draggedMinutes = -2000f)
+        )
+    }
 }

@@ -5,10 +5,10 @@ package com.emberr.presentation.calendar
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
 import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.LocalIndication
@@ -53,15 +53,22 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerId
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.model.RecurrenceFrequency
@@ -118,6 +125,7 @@ private val InteractiveShape = RoundedCornerShape(12.dp)
 private val EventChipShape = RoundedCornerShape(8.dp)
 private val EventChipHeightForTwoLines = 52.dp
 private val DesktopResizeHandleHeight = 6.dp
+private const val MouseMoveStartSlopRatio = 0.1f
 private val TouchResizeHandleHeight = 12.dp
 private val ResizeDashShape = RoundedCornerShape(percent = 50)
 private val ResizeDashDarkModeColor = Color(0xFFDDDDDD)
@@ -139,11 +147,16 @@ fun EventChip(
     onResizeEnd: () -> Unit,
     onResizeCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    onMoveStart: ((pointerInWindow: Offset, pointerId: PointerId, cardTopLeftInWindow: Offset, cardSize: IntSize) -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     val textColor = if (hasCategory) EventChipTextColor else MaterialTheme.colorScheme.onSurface
     val resizeDashColor = if (LocalAppIsDark.current && !hasCategory) ResizeDashDarkModeColor else textColor
+    val currentOnMoveStart by rememberUpdatedState(onMoveStart)
+    val currentOnLongClick by rememberUpdatedState(onLongClick)
+    val currentIsInResizeMode by rememberUpdatedState(isInResizeMode)
+    var chipCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Surface(
         shape = EventChipShape,
@@ -152,31 +165,27 @@ fun EventChip(
         modifier = modifier
             .height(height)
             .clip(EventChipShape)
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = text.ifBlank { "Untitled event" },
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Normal,
-                    color = if (isChecked) textColor.copy(alpha = CheckedEventTitleAlpha) else textColor,
-                    textDecoration = if (isChecked) TextDecoration.LineThrough else null,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (height >= EventChipHeightForTwoLines) {
-                    Text(
-                        text = timeText,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = textColor.copy(alpha = 0.7f),
-                        maxLines = 1
-                    )
+            .clickable(onClick = onClick)
+            .onPlaced { chipCoordinates = it }
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    if (isDesktopPlatform && !currentEvent.buttons.isPrimaryPressed) return@awaitEachGesture
+                    val coordinates = chipCoordinates?.takeIf { it.isAttached } ?: return@awaitEachGesture
+                    val downInWindow = coordinates.localToWindow(down.position)
+                    val moveStart = when {
+                        isDesktopPlatform -> awaitEventMoveStart(down, viewConfiguration.touchSlop * MouseMoveStartSlopRatio)
+                        currentIsInResizeMode -> awaitEventMoveStart(down, viewConfiguration.touchSlop)
+                        else -> awaitEventMoveStartAfterLongPress(down) { currentOnLongClick?.invoke() }
+                    } ?: return@awaitEachGesture
+                    val onStart = currentOnMoveStart ?: return@awaitEachGesture
+                    onStart(downInWindow, moveStart.id, coordinates.positionInWindow(), coordinates.size)
+                    drag(moveStart.id) { change -> change.consume() }
                 }
             }
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            EventChipLabels(text = text, timeText = timeText, textColor = textColor, isChecked = isChecked, height = height)
 
             if (isDesktopPlatform || isInResizeMode) {
                 EventResizeHandle(
@@ -200,6 +209,83 @@ fun EventChip(
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
+        }
+    }
+}
+
+private suspend fun AwaitPointerEventScope.awaitEventMoveStart(
+    down: PointerInputChange,
+    moveStartDistance: Float
+): PointerInputChange? {
+    while (true) {
+        val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: return null
+        if (!change.pressed || change.isConsumed) return null
+        if ((change.position - down.position).getDistance() >= moveStartDistance) {
+            change.consume()
+            return change
+        }
+    }
+}
+
+private suspend fun AwaitPointerEventScope.awaitEventMoveStartAfterLongPress(
+    down: PointerInputChange,
+    onLongPress: () -> Unit
+): PointerInputChange? {
+    val longPress = awaitLongPressOrCancellation(down.id) ?: return null
+    onLongPress()
+    longPress.consume()
+    while (true) {
+        val change = awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull { it.id == longPress.id }
+            ?: return null
+        change.consume()
+        if (!change.pressed) return null
+        if ((change.position - longPress.position).getDistance() >= viewConfiguration.touchSlop) return change
+    }
+}
+
+@Composable
+fun EventMovePreviewChip(
+    text: String,
+    timeText: String,
+    color: Color,
+    hasCategory: Boolean,
+    isChecked: Boolean,
+    height: Dp,
+    modifier: Modifier = Modifier
+) {
+    val textColor = if (hasCategory) EventChipTextColor else MaterialTheme.colorScheme.onSurface
+    Surface(
+        shape = EventChipShape,
+        color = color,
+        shadowElevation = 6.dp,
+        modifier = modifier.height(height)
+    ) {
+        EventChipLabels(text = text, timeText = timeText, textColor = textColor, isChecked = isChecked, height = height)
+    }
+}
+
+@Composable
+private fun EventChipLabels(text: String, timeText: String, textColor: Color, isChecked: Boolean, height: Dp) {
+    Column(
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = text.ifBlank { "Untitled event" },
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Normal,
+            color = if (isChecked) textColor.copy(alpha = CheckedEventTitleAlpha) else textColor,
+            textDecoration = if (isChecked) TextDecoration.LineThrough else null,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (height >= EventChipHeightForTwoLines) {
+            Text(
+                text = timeText,
+                style = MaterialTheme.typography.labelSmall,
+                color = textColor.copy(alpha = 0.7f),
+                maxLines = 1
+            )
         }
     }
 }

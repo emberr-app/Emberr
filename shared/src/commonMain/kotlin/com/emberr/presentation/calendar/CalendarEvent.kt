@@ -2,6 +2,7 @@ package com.emberr.presentation.calendar
 
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
+import com.emberr.data.local.room.entity.shownOnDateString
 import com.emberr.data.local.room.entity.toRecurrenceRule
 import com.emberr.domain.model.RecurrenceRule
 
@@ -11,6 +12,7 @@ data class CalendarEvent(
     val text: String,
     val isChecked: Boolean,
     val dateString: String,
+    val occurrenceDateString: String,
     val reminderTimestamp: Long,
     val categoryId: String?,
     val durationMinutes: Int,
@@ -22,13 +24,15 @@ data class CalendarEvent(
 
 fun CalendarTaskEntity.toCalendarEvent(): CalendarEvent? {
     val timestamp = reminderTimestamp ?: return null
-    val date = targetDate ?: return null
+    val occurrenceDate = targetDate ?: return null
+    val shownOnDate = shownOnDateString() ?: return null
     return CalendarEvent(
         blockId = blockId,
         noteId = noteId,
         text = text,
         isChecked = isChecked,
-        dateString = date,
+        dateString = shownOnDate,
+        occurrenceDateString = occurrenceDate,
         reminderTimestamp = timestamp,
         categoryId = categoryId,
         durationMinutes = durationMinutes,
