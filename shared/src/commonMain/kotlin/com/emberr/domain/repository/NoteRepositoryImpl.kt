@@ -2139,10 +2139,12 @@ class NoteRepositoryImpl(
     ) {
         val blocks = loadOwnerBlocks(task)
         val now = System.currentTimeMillis()
+        val anchorDate = task.targetDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        val timestampOnAnchorDate = anchorDate?.let { retargetTimestampToDate(timestamp, it) } ?: timestamp
         val updated = blocks.map { block ->
             if (block.id == task.blockId && block is CheckboxBlock) {
                 block.copy(
-                    text = text, reminderTimestamp = timestamp, categoryId = categoryId,
+                    text = text, reminderTimestamp = timestampOnAnchorDate, categoryId = categoryId,
                     durationMinutes = durationMinutes, url = url, description = description, updatedAt = now
                 )
             } else block
@@ -2186,7 +2188,7 @@ class NoteRepositoryImpl(
         val newBlock = CheckboxBlock(
             id = newBlockId,
             text = text,
-            reminderTimestamp = timestamp,
+            reminderTimestamp = retargetTimestampToDate(timestamp, anchor),
             categoryId = categoryId,
             durationMinutes = durationMinutes,
             url = url,

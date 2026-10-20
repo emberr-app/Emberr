@@ -52,22 +52,30 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -148,6 +156,8 @@ fun CalendarScreen(
     // Holds the continuation to run once the user picks a scope in RecurrenceScopeChooser -
     // set by whichever of Edit/Delete triggered it, null the rest of the time.
     var pendingScopeAction by remember { mutableStateOf<((RecurrenceEditScope) -> Unit)?>(null) }
+    val eventResizeState = remember { EventResizeState() }
+    LaunchedEffect(selectedDate, viewMode) { eventResizeState.eventInResizeMode = null }
     var slideDirection by remember { mutableStateOf(AnimatedContentTransitionScope.SlideDirection.Left) }
 
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -234,6 +244,13 @@ fun CalendarScreen(
                 val onEventClick: (CalendarEvent) -> Unit = { event ->
                     eventEditorState = event.toEditorState()
                 }
+                val onEventResize: (CalendarEvent, EventTimeRange) -> Unit = { event, newTimeRange ->
+                    if (event.recurrenceRule == null) {
+                        viewModel.resizeEvent(event, newTimeRange)
+                    } else {
+                        pendingScopeAction = { scope -> viewModel.resizeEvent(event, newTimeRange, scope) }
+                    }
+                }
 
                 when (viewMode) {
                     CalendarViewMode.DAY -> {
@@ -263,7 +280,9 @@ fun CalendarScreen(
                                     durationMinutes = 30
                                 )
                             },
+                            resizeState = eventResizeState,
                             onEventClick = onEventClick,
+                            onEventResize = onEventResize,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -329,7 +348,9 @@ fun CalendarScreen(
                                     durationMinutes = 30
                                 )
                             },
+                            resizeState = eventResizeState,
                             onEventClick = onEventClick,
+                            onEventResize = onEventResize,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -564,7 +585,10 @@ fun CalendarScreen(
 
     pendingScopeAction?.let { runWithScope ->
         RecurrenceScopeChooser(
-            onDismiss = { pendingScopeAction = null },
+            onDismiss = {
+                if (pendingScopeAction != null) eventResizeState.preview = null
+                pendingScopeAction = null
+            },
             onScopeSelected = { scope ->
                 pendingScopeAction = null
                 runWithScope(scope)
@@ -715,8 +739,10 @@ private fun CalendarTimeGrid(
     topBarHeightDp: Dp,
     onSwipePreviousDay: () -> Unit,
     onSwipeNextDay: () -> Unit,
+    resizeState: EventResizeState,
     onHourClick: (hour: Int) -> Unit,
     onEventClick: (event: CalendarEvent) -> Unit,
+    onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var accumulatedDragPx by remember { mutableFloatStateOf(0f) }
@@ -761,8 +787,10 @@ private fun CalendarTimeGrid(
                 nowMillis = nowMillis,
                 scrollState = scrollState,
                 topBarHeightDp = topBarHeightDp,
+                resizeState = resizeState,
                 onHourClick = onHourClick,
-                onEventClick = onEventClick
+                onEventClick = onEventClick,
+                onEventResize = onEventResize
             )
         }
     }
@@ -776,21 +804,26 @@ private fun DayHourGrid(
     nowMillis: Long,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
+    resizeState: EventResizeState,
     onHourClick: (hour: Int) -> Unit,
-    onEventClick: (event: CalendarEvent) -> Unit
+    onEventClick: (event: CalendarEvent) -> Unit,
+    onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit
 ) {
     val hourHeight = 72.dp
     val hours = remember { 0..23 }
     val density = LocalDensity.current
     val hourHeightPx = with(density) { hourHeight.toPx() }
+    val bottomPadding = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding()
+    val resizeAutoScroll = rememberEventResizeAutoScroll(scrollState, topBarHeightDp, bottomPadding)
 
     Box(modifier = Modifier.fillMaxSize()) {
     Row(
         modifier = Modifier
             .fillMaxSize()
+            .onPlaced { resizeAutoScroll.viewportCoordinates = it }
             .verticalScroll(scrollState)
             .smoothWheelScroll(scrollState)
-            .padding(top = topBarHeightDp, bottom = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding())
+            .padding(top = topBarHeightDp, bottom = bottomPadding)
     ) {
         HourLabelColumn(hours = hours, hourHeight = hourHeight)
 
@@ -803,8 +836,11 @@ private fun DayHourGrid(
                 events = events,
                 categories = categories,
                 nowMillis = nowMillis,
+                resizeState = resizeState,
+                resizeAutoScroll = resizeAutoScroll,
                 onHourClick = onHourClick,
-                onEventClick = onEventClick
+                onEventClick = onEventClick,
+                onEventResize = onEventResize
             )
         }
     }
@@ -842,6 +878,15 @@ private fun HourLabelColumn(hours: IntRange, hourHeight: Dp) {
     }
 }
 
+private class ActiveEventResize(
+    val event: CalendarEvent,
+    val edge: EventResizeEdge,
+    val startYInColumn: Float,
+    var pointerInWindow: Offset
+) {
+    var hasMoved = false
+}
+
 @Composable
 private fun DayColumnBody(
     date: LocalDate,
@@ -851,17 +896,51 @@ private fun DayColumnBody(
     events: List<CalendarEvent>,
     categories: List<CalendarCategory>,
     nowMillis: Long,
+    resizeState: EventResizeState,
+    resizeAutoScroll: EventResizeAutoScroll,
     onHourClick: (hour: Int) -> Unit,
-    onEventClick: (event: CalendarEvent) -> Unit
+    onEventClick: (event: CalendarEvent) -> Unit,
+    onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit
 ) {
+    var columnCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var activeResize by remember { mutableStateOf<ActiveEventResize?>(null) }
+    val haptics = LocalHapticFeedback.current
+
+    fun showResizePreview(resize: ActiveEventResize) {
+        val pointerYInColumn = columnCoordinates?.takeIf { it.isAttached }
+            ?.windowToLocal(resize.pointerInWindow)?.y ?: return
+        val draggedMinutes = (pointerYInColumn - resize.startYInColumn) / hourHeightPx * 60f
+        resizeState.preview = EventResizePreview(
+            event = resize.event,
+            timeRange = resizeEventTimeRange(resize.event.timeRange(), resize.edge, draggedMinutes)
+        )
+    }
+
+    LaunchedEffect(events) {
+        if (resizeState.preview?.event?.dateString == date.toString()) resizeState.preview = null
+    }
+
+    LaunchedEffect(activeResize) {
+        val resize = activeResize ?: return@LaunchedEffect
+        while (true) {
+            withFrameNanos { }
+            if (resize.hasMoved && resizeAutoScroll.scrollTowards(resize.pointerInWindow)) showResizePreview(resize)
+        }
+    }
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .height(hourHeight * hours.count())
+            .onPlaced { columnCoordinates = it }
             .pointerInput(hourHeightPx) {
                 detectTapGestures { offset ->
-                    val hour = (offset.y / hourHeightPx).toInt().coerceIn(0, 23)
-                    onHourClick(hour)
+                    if (resizeState.eventInResizeMode != null) {
+                        resizeState.eventInResizeMode = null
+                    } else {
+                        val hour = (offset.y / hourHeightPx).toInt().coerceIn(0, 23)
+                        onHourClick(hour)
+                    }
                 }
             }
     ) {
@@ -884,30 +963,65 @@ private fun DayColumnBody(
 
         positionedEvents.forEach { positioned ->
             val event = positioned.event
-            val dt = Instant.fromEpochMilliseconds(event.reminderTimestamp)
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-            val endDt = Instant.fromEpochMilliseconds(event.reminderTimestamp + event.durationMinutes * 60_000L)
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-            val topOffset = hourHeight * dt.hour + hourHeight * (dt.minute / 60f)
-            val chipHeight = maxOf(24.dp, hourHeight * (event.durationMinutes / 60f))
-            val category = categories.firstOrNull { it.id == event.categoryId }
+            key(event.blockId) {
+                val timeRange = resizeState.preview?.takeIf { event.isSameOccurrenceAs(it.event) }?.timeRange
+                    ?: event.timeRange()
+                val topOffset = hourHeight * (timeRange.startMinuteOfDay / 60f)
+                val chipHeight = maxOf(24.dp, hourHeight * (timeRange.durationMinutes / 60f))
+                val category = categories.firstOrNull { it.id == event.categoryId }
 
-            val chipWidth = (availableWidth - chipGap * (positioned.columnCount - 1)) / positioned.columnCount
-            val xOffset = horizontalInset + (chipWidth + chipGap) * positioned.columnIndex
+                val chipWidth = (availableWidth - chipGap * (positioned.columnCount - 1)) / positioned.columnCount
+                val xOffset = horizontalInset + (chipWidth + chipGap) * positioned.columnIndex
 
-            EventChip(
-                text = event.text,
-                timeText = ("${formatTimeOfDay(dt.hour, dt.minute, usesTwentyFourHourClock)} - " +
-                    formatTimeOfDay(endDt.hour, endDt.minute, usesTwentyFourHourClock)).lowercase(),
-                color = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.surface,
-                hasCategory = category != null,
-                height = chipHeight,
-                onClick = { onEventClick(event) },
-                modifier = Modifier
-                    .width(chipWidth)
-                    .padding(top = topOffset)
-                    .offset(x = xOffset)
-            )
+                EventChip(
+                    text = event.text,
+                    timeText = formatEventTimeRange(timeRange, usesTwentyFourHourClock),
+                    color = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.surface,
+                    hasCategory = category != null,
+                    isChecked = event.isChecked,
+                    height = chipHeight,
+                    isInResizeMode = event.isSameOccurrenceAs(resizeState.eventInResizeMode),
+                    onResizeStart = { edge, pointerInWindow ->
+                        columnCoordinates?.takeIf { it.isAttached }?.windowToLocal(pointerInWindow)?.y?.let { startY ->
+                            activeResize = ActiveEventResize(event, edge, startY, pointerInWindow)
+                        }
+                    },
+                    onResizeMove = { pointerInWindow ->
+                        activeResize?.let { resize ->
+                            resize.pointerInWindow = pointerInWindow
+                            resize.hasMoved = true
+                            showResizePreview(resize)
+                        }
+                    },
+                    onResizeEnd = {
+                        activeResize = null
+                        val newTimeRange = resizeState.preview?.takeIf { event.isSameOccurrenceAs(it.event) }?.timeRange
+                        if (newTimeRange == null || newTimeRange == event.timeRange()) {
+                            resizeState.preview = null
+                        } else {
+                            onEventResize(event, newTimeRange)
+                        }
+                    },
+                    onResizeCancel = {
+                        activeResize = null
+                        resizeState.preview = null
+                    },
+                    onLongClick = if (isDesktopPlatform) null else {
+                        {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            resizeState.eventInResizeMode = event
+                        }
+                    },
+                    onClick = {
+                        resizeState.eventInResizeMode = null
+                        onEventClick(event)
+                    },
+                    modifier = Modifier
+                        .width(chipWidth)
+                        .padding(top = topOffset)
+                        .offset(x = xOffset)
+                )
+            }
         }
 
         val nowDt = Instant.fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.currentSystemDefault())
@@ -971,8 +1085,10 @@ private fun MultiDayTimeGrid(
     topBarHeightDp: Dp,
     onSwipePrevious: () -> Unit,
     onSwipeNext: () -> Unit,
+    resizeState: EventResizeState,
     onHourClick: (date: LocalDate, hour: Int) -> Unit,
     onEventClick: (event: CalendarEvent) -> Unit,
+    onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var accumulatedDragPx by remember { mutableFloatStateOf(0f) }
@@ -1019,8 +1135,10 @@ private fun MultiDayTimeGrid(
                 nowMillis = nowMillis,
                 scrollState = scrollState,
                 topBarHeightDp = topBarHeightDp,
+                resizeState = resizeState,
                 onHourClick = onHourClick,
-                onEventClick = onEventClick
+                onEventClick = onEventClick,
+                onEventResize = onEventResize
             )
         }
     }
@@ -1035,8 +1153,10 @@ private fun MultiDayGridContent(
     nowMillis: Long,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
+    resizeState: EventResizeState,
     onHourClick: (date: LocalDate, hour: Int) -> Unit,
-    onEventClick: (event: CalendarEvent) -> Unit
+    onEventClick: (event: CalendarEvent) -> Unit,
+    onEventResize: (event: CalendarEvent, newTimeRange: EventTimeRange) -> Unit
 ) {
     val firstDayOfWeek = LocalFirstDayOfWeek.current
     val dates = remember(windowStart, dayCount, firstDayOfWeek) {
@@ -1054,14 +1174,17 @@ private fun MultiDayGridContent(
     val density = LocalDensity.current
     val hourHeightPx = with(density) { hourHeight.toPx() }
     val headerHeight = 40.dp
+    val bottomPadding = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding()
+    val resizeAutoScroll = rememberEventResizeAutoScroll(scrollState, topBarHeightDp + headerHeight, bottomPadding)
 
     Box(modifier = Modifier.fillMaxSize()) {
     Row(
         modifier = Modifier
             .fillMaxSize()
+            .onPlaced { resizeAutoScroll.viewportCoordinates = it }
             .verticalScroll(scrollState)
             .smoothWheelScroll(scrollState)
-            .padding(top = topBarHeightDp + headerHeight, bottom = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding())
+            .padding(top = topBarHeightDp + headerHeight, bottom = bottomPadding)
     ) {
         HourLabelColumn(hours = hours, hourHeight = hourHeight)
 
@@ -1079,8 +1202,11 @@ private fun MultiDayGridContent(
                     events = eventsByDate[date] ?: emptyList(),
                     categories = categories,
                     nowMillis = nowMillis,
+                    resizeState = resizeState,
+                    resizeAutoScroll = resizeAutoScroll,
                     onHourClick = { hour -> onHourClick(date, hour) },
-                    onEventClick = onEventClick
+                    onEventClick = onEventClick,
+                    onEventResize = onEventResize
                 )
             }
             if (index != dates.lastIndex) {
@@ -1368,7 +1494,8 @@ private fun MonthEventRow(
         Text(
             text = event.text.ifBlank { "Untitled event" },
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (event.isChecked) 0.45f else 1f),
+            textDecoration = if (event.isChecked) TextDecoration.LineThrough else null,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
