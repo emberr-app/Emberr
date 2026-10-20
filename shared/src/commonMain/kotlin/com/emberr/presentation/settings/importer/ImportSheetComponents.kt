@@ -16,12 +16,18 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -51,16 +57,22 @@ private const val UNAVAILABLE_OPTION_ALPHA = 0.38f
 private const val FADED_TEXT_ALPHA = 0.6f
 private const val PROGRESS_TRACK_ALPHA = 0.12f
 
+internal val importChooseAgainHint = if (isDesktopPlatform) "Click to choose again, or drop here." else "Tap to choose again."
+
 @Composable
 internal fun importChooseBorderColor(): Color = MaterialTheme.colorScheme.onSurface.copy(alpha = CHOOSE_BOX_BORDER_ALPHA)
 
 internal fun Modifier.importDashedBorder(color: Color): Modifier =
     drawBehind {
+        val borderWidth = ChooseBoxBorderWidth.toPx()
+        val halfBorderWidth = borderWidth / 2
         drawRoundRect(
             color = color,
-            cornerRadius = CornerRadius(ChooseBoxCornerRadius.toPx()),
+            topLeft = Offset(halfBorderWidth, halfBorderWidth),
+            size = Size(size.width - borderWidth, size.height - borderWidth),
+            cornerRadius = CornerRadius(ChooseBoxCornerRadius.toPx() - halfBorderWidth),
             style = Stroke(
-                width = ChooseBoxBorderWidth.toPx(),
+                width = borderWidth,
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(ChooseBoxDashLength.toPx(), ChooseBoxDashGap.toPx()))
             )
         )
@@ -70,17 +82,26 @@ internal fun Modifier.importDashedBorder(color: Color): Modifier =
 internal fun ImportChooseBox(
     isClickable: Boolean,
     onClick: () -> Unit,
+    onFilesDropped: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    var isDraggingFilesOver by remember { mutableStateOf(false) }
+    val borderColor = if (isDraggingFilesOver) MaterialTheme.colorScheme.onSurface else importChooseBorderColor()
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = ChooseBoxMinHeight)
-            .importDashedBorder(importChooseBorderColor())
+            .importDashedBorder(borderColor)
             .clip(ImportChooseBoxShape)
             .clickable(enabled = isClickable, onClick = onClick)
+            .importFileDropTarget(
+                isEnabled = isClickable,
+                onFilesDropped = onFilesDropped,
+                onDragOverChange = { isOver -> isDraggingFilesOver = isOver }
+            )
             .padding(16.dp)
     ) {
         content()
@@ -105,6 +126,7 @@ internal fun ImportChoosePrompt(title: String, hint: String) {
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface
         )
+        if (isDesktopPlatform) ImportFadedLine(text = "or drop here")
         ImportFadedLine(text = hint)
     }
 }

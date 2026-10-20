@@ -46,6 +46,7 @@ fun EmberrImportSheet(
                 EmberrImportProgress.NotStarted -> BackupChoices(
                     pickedBackupState = pickedBackupState,
                     onChooseFileClick = openFilePicker,
+                    onFileDropped = onFilePicked,
                     onImportClick = onImportClick,
                     onCloseClick = onDismiss
                 )
@@ -86,6 +87,7 @@ fun EmberrImportSheet(
 private fun BackupChoices(
     pickedBackupState: PickedBackupState,
     onChooseFileClick: () -> Unit,
+    onFileDropped: (String) -> Unit,
     onImportClick: (spaceIds: Set<String>) -> Unit,
     onCloseClick: () -> Unit
 ) {
@@ -95,6 +97,7 @@ private fun BackupChoices(
     ImportChooseBox(
         isClickable = pickedBackupState != PickedBackupState.Reading,
         onClick = onChooseFileClick,
+        onFilesDropped = { droppedPaths -> droppedPaths.firstOrNull()?.let(onFileDropped) },
         modifier = Modifier.padding(horizontal = ImportSheetContentPadding)
     ) {
         when (pickedBackupState) {
@@ -103,7 +106,7 @@ private fun BackupChoices(
                 hint = ".emberr file from Export Backup"
             )
             PickedBackupState.Reading -> ImportReadingMessage("Reading the backup…")
-            is PickedBackupState.CouldNotRead -> ImportFadedLine(text = "${pickedBackupState.reason} Tap to choose again.")
+            is PickedBackupState.CouldNotRead -> ImportFadedLine(text = "${pickedBackupState.reason} $importChooseAgainHint")
             is PickedBackupState.Ready -> ImportPickedSummary(
                 pickedLabel = pickedBackupState.pickedName,
                 countsLine = countLabel(spaces.size, "space"),
