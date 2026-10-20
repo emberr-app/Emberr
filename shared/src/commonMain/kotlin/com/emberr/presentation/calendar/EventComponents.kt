@@ -70,6 +70,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.emberr.domain.model.AllDaySpan
+import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
+import com.emberr.domain.model.lastDate
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.model.RecurrenceFrequency
 import com.emberr.domain.model.RecurrenceRule
@@ -88,7 +91,10 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
+import com.emberr.presentation.shared.components.EmberrSwitch
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.DesktopDatePickerMenuWidth
+import com.emberr.presentation.shared.components.DesktopTimePickerMenuWidth
 import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.MenuTapAnchor
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
@@ -99,7 +105,9 @@ import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.bell
 import emberr.shared.generated.resources.calendar
+import emberr.shared.generated.resources.calendar_day
 import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.link
@@ -108,6 +116,7 @@ import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.widget2
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -120,16 +129,16 @@ import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.LocalFirstDayOfWeek
 import com.emberr.ui.theme.LocalAppIsDark
 
-private val EventChipTextColor = Color(0xFF1A1A1A)
+internal val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
 private val EventChipShape = RoundedCornerShape(8.dp)
 private val EventChipHeightForTwoLines = 52.dp
 private val DesktopResizeHandleHeight = 6.dp
-private const val MouseMoveStartSlopRatio = 0.1f
+internal const val MouseMoveStartSlopRatio = 0.1f
 private val TouchResizeHandleHeight = 12.dp
 private val ResizeDashShape = RoundedCornerShape(percent = 50)
 private val ResizeDashDarkModeColor = Color(0xFFDDDDDD)
-private const val CheckedEventTitleAlpha = 0.45f
+internal const val CheckedEventTitleAlpha = 0.45f
 private val FieldPadding = 14.dp
 private val SectionSpacing = 16.dp
 
@@ -213,7 +222,7 @@ fun EventChip(
     }
 }
 
-private suspend fun AwaitPointerEventScope.awaitEventMoveStart(
+internal suspend fun AwaitPointerEventScope.awaitEventMoveStart(
     down: PointerInputChange,
     moveStartDistance: Float
 ): PointerInputChange? {
@@ -227,7 +236,7 @@ private suspend fun AwaitPointerEventScope.awaitEventMoveStart(
     }
 }
 
-private suspend fun AwaitPointerEventScope.awaitEventMoveStartAfterLongPress(
+internal suspend fun AwaitPointerEventScope.awaitEventMoveStartAfterLongPress(
     down: PointerInputChange,
     onLongPress: () -> Unit
 ): PointerInputChange? {
@@ -350,6 +359,7 @@ data class EventEditorState(
     val url: String = "",
     val description: String = "",
     val recurrenceRule: RecurrenceRule? = null,
+    val allDay: AllDaySpan? = null,
     val editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS,
     val isEditing: Boolean = original == null
 )
@@ -368,7 +378,8 @@ fun CalendarEvent.toEditorState(): EventEditorState {
         durationMinutes = durationMinutes,
         url = url.orEmpty(),
         description = description.orEmpty(),
-        recurrenceRule = recurrenceRule
+        recurrenceRule = recurrenceRule,
+        allDay = allDay
     )
 }
 
@@ -385,6 +396,11 @@ fun EventEditorState.endHour(): Int {
 }
 
 fun EventEditorState.endMinute(): Int = (minute + durationMinutes) % 60
+
+fun EventEditorState.allDayLastDate(): LocalDate = allDay?.lastDate(date) ?: date
+
+private fun LocalDate.atTimeInEpochMillis(hour: Int, minute: Int): Long =
+    LocalDateTime(year, month.number, day, hour, minute).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 
 fun formatRecurrenceSummary(rule: RecurrenceRule): String {
     val base = when (rule.frequency) {
@@ -426,6 +442,7 @@ fun EventEditorSheet(
     onUrlChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onRecurrenceChange: (RecurrenceRule?) -> Unit,
+    onAllDayChange: (AllDaySpan?) -> Unit,
     onEditClick: () -> Unit,
     onSave: () -> Unit,
     onDelete: (() -> Unit)?,
@@ -468,6 +485,7 @@ fun EventEditorSheet(
                     onUrlChange = onUrlChange,
                     onDescriptionChange = onDescriptionChange,
                     onRecurrenceChange = onRecurrenceChange,
+                    onAllDayChange = onAllDayChange,
                     onEditClick = onEditClick,
                     onCancel = { closeAnd(onDismiss) },
                     onSave = { closeAnd(onSave) },
@@ -491,6 +509,7 @@ private fun EventEditorFields(
     onUrlChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onRecurrenceChange: (RecurrenceRule?) -> Unit,
+    onAllDayChange: (AllDaySpan?) -> Unit,
     onEditClick: () -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
@@ -508,8 +527,11 @@ private fun EventEditorFields(
     }
 
     var showDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
     var showStartTimePicker by remember { mutableStateOf(false) }
     var showEndTimePicker by remember { mutableStateOf(false) }
+    var showReminderTimePicker by remember { mutableStateOf(false) }
+    val allDay = state.allDay
 
     Column(
         modifier = Modifier
@@ -535,22 +557,65 @@ private fun EventEditorFields(
             modifier = Modifier.fillMaxWidth(),
             onSubmit = onSave
         )
-        val canEditDate = state.editScope == RecurrenceEditScope.ALL_EVENTS
-        EventFieldRow(
-            icon = painterResource(Res.drawable.calendar),
-            label = formatFullDate(state.date),
-            onClick = { if (canEditDate) showDatePicker = true },
-            modifier = Modifier.fillMaxWidth().let { if (canEditDate) it else it.alpha(0.5f) }
-        )
-        if (showDatePicker) {
-            MinimalDatePickerDialog(
-                initialTimestamp = state.toEpochMillis(),
-                onDismiss = { showDatePicker = false },
-                onConfirm = { millis ->
-                    val instant = Instant.fromEpochMilliseconds(millis)
-                    onDateChange(instant.toLocalDateTime(TimeZone.UTC).date)
+        EventSwitchRow(
+            icon = painterResource(Res.drawable.calendar_day),
+            label = "All day",
+            isOn = allDay != null,
+            onClick = {
+                if (allDay == null) {
+                    onAllDayChange(AllDaySpan())
+                    onTimeChange(DEFAULT_ALL_DAY_REMINDER_HOUR, 0)
+                } else {
+                    onAllDayChange(null)
                 }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        val canEditDate = state.editScope == RecurrenceEditScope.ALL_EVENTS
+        val startDateTapAnchor = rememberMenuTapAnchor()
+        Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(startDateTapAnchor)) {
+            EventFieldRow(
+                icon = painterResource(Res.drawable.calendar),
+                label = formatFullDate(state.date),
+                onClick = { if (canEditDate) showDatePicker = true },
+                modifier = Modifier.fillMaxWidth().let { if (canEditDate) it else it.alpha(0.5f) }
             )
+            if (showDatePicker) {
+                PickerAtTap(startDateTapAnchor, DesktopDatePickerMenuWidth) {
+                    MinimalDatePickerDialog(
+                        initialTimestamp = state.toEpochMillis(),
+                        onDismiss = { showDatePicker = false },
+                        onConfirm = { millis ->
+                            val instant = Instant.fromEpochMilliseconds(millis)
+                            onDateChange(instant.toLocalDateTime(TimeZone.currentSystemDefault()).date)
+                        }
+                    )
+                }
+            }
+        }
+        if (allDay != null) {
+            val endDateTapAnchor = rememberMenuTapAnchor()
+            Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(endDateTapAnchor)) {
+                EventFieldRow(
+                    icon = painterResource(Res.drawable.calendar),
+                    label = "Ends ${formatFullDate(state.allDayLastDate())}",
+                    onClick = { showEndDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (showEndDatePicker) {
+                    PickerAtTap(endDateTapAnchor, DesktopDatePickerMenuWidth) {
+                        MinimalDatePickerDialog(
+                            initialTimestamp = state.allDayLastDate().atTimeInEpochMillis(state.hour, state.minute),
+                            onDismiss = { showEndDatePicker = false },
+                            onConfirm = { millis ->
+                                val endDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+                                onAllDayChange(allDay.copy(lengthInDays = (state.date.daysUntil(endDate) + 1).coerceAtLeast(1)))
+                            }
+                        )
+                    }
+                }
+            }
         }
 
         var showRepeatDialog by remember { mutableStateOf(false) }
@@ -577,7 +642,41 @@ private fun EventEditorFields(
             }
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (allDay != null) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            EventSwitchRow(
+                icon = painterResource(Res.drawable.bell),
+                label = "Reminder",
+                isOn = allDay.isReminderOn,
+                onClick = { onAllDayChange(allDay.copy(isReminderOn = !allDay.isReminderOn)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (allDay.isReminderOn) {
+                val reminderTimeTapAnchor = rememberMenuTapAnchor()
+                Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(reminderTimeTapAnchor)) {
+                    EventFieldRow(
+                        icon = painterResource(Res.drawable.clock_circle),
+                        label = formatTimeOfDay(state.hour, state.minute, LocalUsesTwentyFourHourClock.current),
+                        onClick = { showReminderTimePicker = true },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (showReminderTimePicker) {
+                        PickerAtTap(reminderTimeTapAnchor, DesktopTimePickerMenuWidth) {
+                            MinimalTimePickerDialog(
+                                initialTimestamp = state.toEpochMillis(),
+                                onDismiss = { showReminderTimePicker = false },
+                                onConfirm = { hour, minute -> onTimeChange(hour, minute) }
+                            )
+                        }
+                    }
+                }
+                Text(
+                    text = if (allDay.lengthInDays > 1) "Reminds you on each day" else "Reminds you on this day",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        } else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -715,6 +814,7 @@ private fun EventViewFields(
     val accentColor = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.primary
     val hazeState = remember { HazeState() }
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
+    val allDay = state.allDay
 
     Column(
         modifier = Modifier
@@ -775,8 +875,13 @@ private fun EventViewFields(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "${formatFullDate(state.date)}, ${formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock)} – " +
-                            formatTimeOfDay(state.endHour(), state.endMinute(), usesTwentyFourHourClock),
+                    text = when {
+                        allDay == null ->
+                            "${formatFullDate(state.date)}, ${formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock)} – " +
+                                formatTimeOfDay(state.endHour(), state.endMinute(), usesTwentyFourHourClock)
+                        allDay.lengthInDays > 1 -> "${formatFullDate(state.date)} – ${formatFullDate(state.allDayLastDate())}, All day"
+                        else -> "${formatFullDate(state.date)}, All day"
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -786,6 +891,13 @@ private fun EventViewFields(
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             state.recurrenceRule?.let { rule ->
                 InfoRow(icon = painterResource(Res.drawable.clock_circle), label = "Repeats ${formatRecurrenceSummary(rule).replaceFirstChar(Char::lowercase)}")
+            }
+            if (allDay != null && allDay.isReminderOn) {
+                val reminderTime = formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock)
+                InfoRow(
+                    icon = painterResource(Res.drawable.bell),
+                    label = if (allDay.lengthInDays > 1) "Reminder at $reminderTime each day" else "Reminder at $reminderTime"
+                )
             }
             if (category != null) {
                 InfoRow(icon = painterResource(Res.drawable.widget2), label = category.name)
@@ -874,6 +986,47 @@ private fun EventFieldRow(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(start = 8.dp)
             )
+        }
+    }
+}
+
+@Composable
+private fun PickerAtTap(tapAnchor: MenuTapAnchor, desktopMenuWidth: Dp, picker: @Composable () -> Unit) {
+    if (isDesktopPlatform) MenuAtTap(tapAnchor, menuWidth = desktopMenuWidth, menu = picker) else picker()
+}
+
+@Composable
+private fun EventSwitchRow(
+    icon: Painter,
+    label: String,
+    isOn: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = InteractiveShape,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = modifier
+            .clip(InteractiveShape)
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = FieldPadding, vertical = FieldPadding),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 8.dp).weight(1f)
+            )
+            EmberrSwitch(isOn = isOn)
         }
     }
 }
@@ -1311,17 +1464,14 @@ private fun CustomRepeatForm(
 
             if (showEndDatePicker) {
                 val initialMillis = untilDateString?.let { LocalDate.parse(it) }
-                    ?.let {
-                        LocalDateTime(it.year, it.month.number, it.day, 0, 0)
-                            .toInstant(TimeZone.UTC).toEpochMilliseconds()
-                    }
+                    ?.atTimeInEpochMillis(0, 0)
                     ?: System.currentTimeMillis()
                 MinimalDatePickerDialog(
                     initialTimestamp = initialMillis,
                     onDismiss = { showEndDatePicker = false },
                     onConfirm = { millis ->
                         untilDateString = Instant.fromEpochMilliseconds(millis)
-                            .toLocalDateTime(TimeZone.UTC).date.toString()
+                            .toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
                         showEndDatePicker = false
                     }
                 )

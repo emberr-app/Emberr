@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.prefs.SyncConstants
 import com.emberr.presentation.shared.rememberStableStatusBarsPadding
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyDateRange
@@ -192,7 +193,7 @@ fun DailyEditorPane(
             override fun onAdjustIndentationOfBlocks(blockIds: Set<String>, increase: Boolean) =
                 viewModel.adjustIndentationOfBlocks(blockIds, increase)
             override fun onToggleSelection(id: String) = viewModel.toggleSelection(id)
-            override fun onUpdateReminder(id: String, timestamp: Long?) = viewModel.updateReminder(id, timestamp)
+            override fun onUpdateReminder(id: String, timestamp: Long?, allDay: AllDaySpan?) = viewModel.updateReminder(id, timestamp, allDay)
             override fun onOpenEventOptions(blockId: String, occurrenceDate: String?) {
                 eventOptionsTargetBlockId = blockId
                 eventOptionsOccurrenceDate = occurrenceDate

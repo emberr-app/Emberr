@@ -32,6 +32,7 @@ import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.data.local.room.entity.toEntityColumns
 import com.emberr.data.local.room.entity.shownOnDateString
 import com.emberr.data.local.room.entity.toRecurrenceRule
+import com.emberr.data.local.room.entity.toAllDaySpan
 import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.canvas.CanvasContent
 import com.emberr.domain.canvas.EmbeddedCanvasCleanup
@@ -68,6 +69,7 @@ import com.emberr.domain.database.titleMatchingFilters
 import com.emberr.domain.database.todayInThisTimeZone
 import com.emberr.domain.database.withDatabaseColumnShown
 import com.emberr.domain.database.withRowIdsReplaced
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock
@@ -99,6 +101,7 @@ import com.emberr.domain.model.withPropertyTagReplaced
 import com.emberr.domain.model.withCustomPropertyRenamed
 import com.emberr.domain.model.withCustomPropertyRemoved
 import com.emberr.domain.model.valueAsText
+import com.emberr.domain.model.lastDate
 import com.emberr.domain.sample.lastEditedAtForDisplay
 import com.emberr.domain.search.LINKED_NOTE_BLOCK_JSON_MARKER
 import com.emberr.domain.search.latestParentByChildId
@@ -1824,7 +1827,10 @@ class NoteRepositoryImpl(
                 recurrenceInterval = recurrenceInterval,
                 recurrenceDaysOfWeek = recurrenceDaysOfWeek,
                 recurrenceUntil = block.recurrenceRule?.untilDateString,
-                spaceId = spaceId
+                spaceId = spaceId,
+                isAllDay = block.allDay != null,
+                allDayLengthInDays = block.allDay?.lengthInDays ?: 1,
+                isAllDayReminderOn = block.allDay?.isReminderOn ?: true
             )
         }
 
@@ -1845,6 +1851,7 @@ class NoteRepositoryImpl(
     ): List<CalendarTaskEntity> {
         val range = rangeStart..rangeEnd
         val exceptionsByKey = exceptions.associateBy { it.blockId to it.occurrenceDate }
+        val exceptionsByBlock = exceptions.groupBy { it.blockId }
         val exceptionsWithOverriddenTimeByBlock = exceptions
             .filter { it.overrideTimestamp != null && !it.isCancelled }
             .groupBy { it.blockId }
@@ -1853,21 +1860,23 @@ class NoteRepositoryImpl(
         for (task in tasks) {
             val rule = task.toRecurrenceRule()
             if (rule == null) {
-                val targetDate = task.targetDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                if (targetDate != null && targetDate in range) result.add(task)
+                if (task.isShownWithin(range)) result.add(task)
                 continue
             }
 
             val anchor = task.targetDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: continue
+            val longestLengthInDays = longestAllDayLengthInDays(task, exceptionsByBlock[task.blockId].orEmpty())
+            val searchStart = rangeStart.minus(longestLengthInDays - 1, DateTimeUnit.DAY)
+            val searchRange = searchStart..rangeEnd
 
-            for (occurrenceDate in RecurrenceEngine.occurrenceDatesInRange(rule, anchor, rangeStart, rangeEnd)) {
+            for (occurrenceDate in RecurrenceEngine.occurrenceDatesInRange(rule, anchor, searchStart, rangeEnd)) {
                 val occurrence = occurrenceRow(task, anchor, occurrenceDate, exceptionsByKey[task.blockId to occurrenceDate.toString()])
                 if (occurrence != null && occurrence.isShownWithin(range)) result.add(occurrence)
             }
 
             for (exception in exceptionsWithOverriddenTimeByBlock[task.blockId].orEmpty()) {
                 val occurrenceDate = runCatching { LocalDate.parse(exception.occurrenceDate) }.getOrNull() ?: continue
-                if (occurrenceDate in range || !RecurrenceEngine.occursOn(rule, anchor, occurrenceDate)) continue
+                if (occurrenceDate in searchRange || !RecurrenceEngine.occursOn(rule, anchor, occurrenceDate)) continue
                 val occurrence = occurrenceRow(task, anchor, occurrenceDate, exception)
                 if (occurrence != null && occurrence.isShownWithin(range)) result.add(occurrence)
             }
@@ -1892,13 +1901,23 @@ class NoteRepositoryImpl(
             categoryId = exception?.overrideCategoryId ?: task.categoryId,
             durationMinutes = exception?.overrideDurationMinutes ?: task.durationMinutes,
             url = exception?.overrideUrl ?: task.url,
-            description = exception?.overrideDescription ?: task.description
+            description = exception?.overrideDescription ?: task.description,
+            isAllDay = exception?.overrideIsAllDay ?: task.isAllDay,
+            allDayLengthInDays = exception?.overrideAllDayLengthInDays ?: task.allDayLengthInDays,
+            isAllDayReminderOn = exception?.overrideIsAllDayReminderOn ?: task.isAllDayReminderOn
         )
     }
 
     private fun CalendarTaskEntity.isShownWithin(range: ClosedRange<LocalDate>): Boolean {
         val shownOn = shownOnDateString()?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return false
-        return shownOn in range
+        val lastShownOn = toAllDaySpan()?.lastDate(shownOn) ?: shownOn
+        return shownOn <= range.endInclusive && lastShownOn >= range.start
+    }
+
+    private fun longestAllDayLengthInDays(task: CalendarTaskEntity, blockExceptions: List<CalendarEventExceptionEntity>): Int {
+        val taskLengthInDays = if (task.isAllDay) task.allDayLengthInDays else 1
+        val overriddenLengthsInDays = blockExceptions.mapNotNull { it.overrideAllDayLengthInDays }
+        return (overriddenLengthsInDays + taskLengthInDays).max().coerceAtLeast(1)
     }
 
     private fun retargetTimestampToDate(originalTimestamp: Long, newDate: LocalDate): Long {
@@ -1929,6 +1948,17 @@ class NoteRepositoryImpl(
                 calendarTaskDao.getAllTasksFlow(spaceId),
                 calendarEventExceptionDao.getAllExceptionsFlow()
             ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, date, date) }
+        }
+    }
+
+    override fun getCalendarTasksInRange(startDateString: String, endDateString: String): Flow<List<CalendarTaskEntity>> {
+        val startDate = LocalDate.parse(startDateString)
+        val endDate = LocalDate.parse(endDateString)
+        return inActiveSpace { spaceId ->
+            combine(
+                calendarTaskDao.getAllTasksFlow(spaceId),
+                calendarEventExceptionDao.getAllExceptionsFlow()
+            ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, startDate, endDate) }
         }
     }
 
@@ -2077,13 +2107,14 @@ class NoteRepositoryImpl(
         categoryId: String?,
         durationMinutes: Int,
         url: String?,
-        description: String?
+        description: String?,
+        allDay: AllDaySpan?
     ) = withContext(Dispatchers.IO) {
         SyncCoordinator.mutex.withLock {
             val task = calendarTaskDao.getTaskById(blockId) ?: return@withLock
             val rule = task.toRecurrenceRule()
             if (rule == null || scope == RecurrenceEditScope.ALL_EVENTS) {
-                editEntireSeries(task, text, timestamp, categoryId, durationMinutes, url, description)
+                editEntireSeries(task, text, timestamp, categoryId, durationMinutes, url, description, allDay)
                 return@withLock
             }
 
@@ -2100,20 +2131,23 @@ class NoteRepositoryImpl(
                             overrideCategoryId = categoryId,
                             overrideDurationMinutes = durationMinutes,
                             overrideUrl = url,
-                            overrideDescription = description
+                            overrideDescription = description,
+                            overrideIsAllDay = allDay != null,
+                            overrideAllDayLengthInDays = allDay?.lengthInDays,
+                            overrideIsAllDayReminderOn = allDay?.isReminderOn
                         )
                     }
                 }
                 RecurrenceEditScope.ALL_FUTURE_EVENTS -> {
                     if (d == anchor) {
-                        editEntireSeries(task, text, timestamp, categoryId, durationMinutes, url, description)
+                        editEntireSeries(task, text, timestamp, categoryId, durationMinutes, url, description, allDay)
                     } else {
                         val previous = RecurrenceEngine.previousOccurrence(rule, anchor, before = d)
                         truncateSeriesUntil(task, previous?.toString())
                         val newBlockId = createSplitSeries(
                             task, rule, anchor = d, until = rule.untilDateString,
                             text = text, timestamp = timestamp, categoryId = categoryId,
-                            durationMinutes = durationMinutes, url = url, description = description
+                            durationMinutes = durationMinutes, url = url, description = description, allDay = allDay
                         )
                         calendarEventExceptionDao.rekeyExceptionsFrom(blockId, newBlockId, occurrenceDate, System.currentTimeMillis())
                     }
@@ -2123,7 +2157,7 @@ class NoteRepositoryImpl(
                     val newBlockId = createSplitSeries(
                         task, rule, anchor = anchor, until = occurrenceDate,
                         text = text, timestamp = timestamp, categoryId = categoryId,
-                        durationMinutes = durationMinutes, url = url, description = description
+                        durationMinutes = durationMinutes, url = url, description = description, allDay = allDay
                     )
                     calendarEventExceptionDao.rekeyExceptionsUpTo(blockId, newBlockId, occurrenceDate, System.currentTimeMillis())
                     if (next == null) {
@@ -2142,7 +2176,8 @@ class NoteRepositoryImpl(
         occurrenceDate: String,
         targetDate: String,
         scope: RecurrenceEditScope,
-        timestamp: Long
+        timestamp: Long,
+        allDay: AllDaySpan?
     ) = withContext(Dispatchers.IO) {
         SyncCoordinator.mutex.withLock {
             val task = calendarTaskDao.getTaskById(blockId) ?: return@withLock
@@ -2154,17 +2189,24 @@ class NoteRepositoryImpl(
 
             when (scope) {
                 RecurrenceEditScope.THIS_EVENT -> {
-                    upsertException(blockId, occurrenceDate) { it.copy(overrideTimestamp = timestamp) }
+                    upsertException(blockId, occurrenceDate) {
+                        it.copy(
+                            overrideTimestamp = timestamp,
+                            overrideIsAllDay = allDay != null,
+                            overrideAllDayLengthInDays = allDay?.lengthInDays,
+                            overrideIsAllDayReminderOn = allDay?.isReminderOn
+                        )
+                    }
                 }
-                RecurrenceEditScope.ALL_EVENTS -> moveWholeSeries(task, rule, anchor, draggedOccurrence, target, timestamp)
+                RecurrenceEditScope.ALL_EVENTS -> moveWholeSeries(task, rule, anchor, draggedOccurrence, target, timestamp, allDay)
                 RecurrenceEditScope.ALL_FUTURE_EVENTS -> {
                     val previous = RecurrenceEngine.previousOccurrence(rule, anchor, before = draggedOccurrence)
                     if (previous == null) {
-                        moveWholeSeries(task, rule, anchor, draggedOccurrence, target, timestamp)
+                        moveWholeSeries(task, rule, anchor, draggedOccurrence, target, timestamp, allDay)
                     } else {
                         val shift = shiftRecurringSeries(rule, draggedOccurrence, draggedOccurrence, target)
                         truncateSeriesUntil(task, previous.toString())
-                        val newBlockId = createShiftedSeries(task, shift, timestamp)
+                        val newBlockId = createShiftedSeries(task, shift, timestamp, allDay)
                         copyShiftedExceptions(blockId, newBlockId, shift) { date -> date >= draggedOccurrence }
                         calendarEventExceptionDao.deleteExceptionsFrom(blockId, occurrenceDate)
                     }
@@ -2172,11 +2214,11 @@ class NoteRepositoryImpl(
                 RecurrenceEditScope.ALL_PAST_EVENTS -> {
                     val next = RecurrenceEngine.nextOccurrence(rule, anchor, after = draggedOccurrence)
                     if (next == null) {
-                        moveWholeSeries(task, rule, anchor, draggedOccurrence, target, timestamp)
+                        moveWholeSeries(task, rule, anchor, draggedOccurrence, target, timestamp, allDay)
                     } else {
                         val pastRule = rule.copy(untilDateString = occurrenceDate)
                         val shift = shiftRecurringSeries(pastRule, anchor, draggedOccurrence, target)
-                        val newBlockId = createShiftedSeries(task, shift, timestamp)
+                        val newBlockId = createShiftedSeries(task, shift, timestamp, allDay)
                         copyShiftedExceptions(blockId, newBlockId, shift) { date -> date <= draggedOccurrence }
                         calendarEventExceptionDao.deleteExceptionsUpTo(blockId, occurrenceDate)
                         moveSeriesAnchor(task, next)
@@ -2208,19 +2250,26 @@ class NoteRepositoryImpl(
         anchor: LocalDate,
         draggedOccurrence: LocalDate,
         target: LocalDate,
-        timestamp: Long
+        timestamp: Long,
+        allDay: AllDaySpan?
     ) {
         val shift = shiftRecurringSeries(rule, anchor, draggedOccurrence, target)
-        val newBlockId = createShiftedSeries(task, shift, timestamp)
+        val newBlockId = createShiftedSeries(task, shift, timestamp, allDay)
         copyShiftedExceptions(task.blockId, newBlockId, shift) { true }
         deleteEntireSeries(task)
     }
 
-    private suspend fun createShiftedSeries(task: CalendarTaskEntity, shift: RecurrenceSeriesShift, timestamp: Long): String =
+    private suspend fun createShiftedSeries(
+        task: CalendarTaskEntity,
+        shift: RecurrenceSeriesShift,
+        timestamp: Long,
+        allDay: AllDaySpan?
+    ): String =
         createSplitSeries(
             task, shift.rule, anchor = shift.anchor, until = shift.rule.untilDateString,
             text = task.text, timestamp = timestamp, categoryId = task.categoryId,
-            durationMinutes = task.durationMinutes, url = task.url, description = task.description
+            durationMinutes = task.durationMinutes, url = task.url, description = task.description,
+            allDay = allDay
         )
 
     private suspend fun copyShiftedExceptions(
@@ -2276,7 +2325,7 @@ class NoteRepositoryImpl(
 
     private suspend fun editEntireSeries(
         task: CalendarTaskEntity, text: String, timestamp: Long, categoryId: String?,
-        durationMinutes: Int, url: String?, description: String?
+        durationMinutes: Int, url: String?, description: String?, allDay: AllDaySpan?
     ) {
         val blocks = loadOwnerBlocks(task)
         val now = System.currentTimeMillis()
@@ -2286,7 +2335,8 @@ class NoteRepositoryImpl(
             if (block.id == task.blockId && block is CheckboxBlock) {
                 block.copy(
                     text = text, reminderTimestamp = timestampOnAnchorDate, categoryId = categoryId,
-                    durationMinutes = durationMinutes, url = url, description = description, updatedAt = now
+                    durationMinutes = durationMinutes, url = url, description = description, allDay = allDay,
+                    updatedAt = now
                 )
             } else block
         }
@@ -2335,7 +2385,8 @@ class NoteRepositoryImpl(
     // original block and puts the edited occurrence onward on a brand new one.
     private suspend fun createSplitSeries(
         task: CalendarTaskEntity, rule: RecurrenceRule, anchor: LocalDate, until: String?,
-        text: String, timestamp: Long, categoryId: String?, durationMinutes: Int, url: String?, description: String?
+        text: String, timestamp: Long, categoryId: String?, durationMinutes: Int, url: String?, description: String?,
+        allDay: AllDaySpan?
     ): String {
         val newBlockId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
@@ -2348,6 +2399,7 @@ class NoteRepositoryImpl(
             url = url,
             description = description,
             recurrenceRule = rule.copy(untilDateString = until),
+            allDay = allDay,
             updatedAt = now
         )
 

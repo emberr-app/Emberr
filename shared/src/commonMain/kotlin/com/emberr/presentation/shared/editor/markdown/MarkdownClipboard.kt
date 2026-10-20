@@ -55,7 +55,7 @@ fun copiedBlocksReadyToPaste(copiedBlocks: List<NoteBlock>, baseIndentation: Int
     val pastableBlocks = copiedBlocks.filterNot { it is DatabaseBlock || it is CanvasBlock || it is PropertyBlock }
     val shallowestIndentation = pastableBlocks.minOfOrNull { it.indentationLevel } ?: 0
     return pastableBlocks.map { block ->
-        val withoutReminder = if (block is CheckboxBlock) block.copy(reminderTimestamp = null, recurrenceRule = null) else block
+        val withoutReminder = if (block is CheckboxBlock) block.copy(reminderTimestamp = null, recurrenceRule = null, allDay = null) else block
         withoutReminder
             .deepCopyWithNewIds()
             .withIndentationLevel(block.indentationLevel - shallowestIndentation + baseIndentation)

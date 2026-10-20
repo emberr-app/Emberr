@@ -57,7 +57,8 @@ fun EventEditorSheetHost(
             durationMinutes = event.durationMinutes,
             url = event.url.orEmpty(),
             description = event.description.orEmpty(),
-            recurrenceRule = event.recurrenceRule
+            recurrenceRule = event.recurrenceRule,
+            allDay = event.allDay
         )
     }
 
@@ -77,6 +78,7 @@ fun EventEditorSheetHost(
         onUrlChange = { url -> eventEditorState = eventEditorState?.copy(url = url) },
         onDescriptionChange = { description -> eventEditorState = eventEditorState?.copy(description = description) },
         onRecurrenceChange = { rule -> eventEditorState = eventEditorState?.copy(recurrenceRule = rule) },
+        onAllDayChange = { allDay -> eventEditorState = eventEditorState?.copy(allDay = allDay) },
         onEditClick = {
             val recurring = eventEditorState?.original?.recurrenceRule != null
             if (recurring) {
@@ -96,6 +98,7 @@ fun EventEditorSheetHost(
                     durationMinutes = state.durationMinutes,
                     url = state.url,
                     description = state.description,
+                    allDay = state.allDay,
                     recurrenceRule = state.recurrenceRule,
                     editScope = state.editScope
                 )

@@ -19,6 +19,7 @@ import com.emberr.domain.database.withSettingTimesStamped
 import com.emberr.domain.database.withSharedSettingsFrom
 import com.emberr.domain.importer.ImportLinkResolver
 import com.emberr.domain.importer.markdown.MarkdownToBlocks
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock
@@ -66,6 +67,7 @@ import com.emberr.domain.model.withTextAlignment
 import com.emberr.domain.model.withUpdatedAt
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
+import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.table.withActiveViewOf
@@ -2455,22 +2457,25 @@ abstract class BaseEditorViewModel(
         }
     }
 
-    open fun updateReminder(blockId: String, timestamp: Long?) {
+    open fun updateReminder(blockId: String, timestamp: Long?, allDay: AllDaySpan?) {
         val now = System.currentTimeMillis()
-        val blockText = (findBlockById(_blocks.value, blockId) as? CheckboxBlock)?.text ?: ""
+        val block = findBlockById(_blocks.value, blockId) as? CheckboxBlock
+        val blockText = block?.text ?: ""
         modifyBlocks { list ->
             mapBlockById(list, blockId) {
-                if (it is CheckboxBlock) it.copy(reminderTimestamp = timestamp, updatedAt = now) else it
+                if (it is CheckboxBlock) it.copy(reminderTimestamp = timestamp, allDay = allDay, updatedAt = now) else it
             }
         }
         scheduleAutosave()
 
         if (timestamp != null) {
-            reminderScheduler.schedule(
+            reminderScheduler.scheduleEventReminder(
                 blockId = blockId,
                 noteTitle = getNoteTitleForReminder(),
                 text = blockText.ifBlank { "Unfinished task" },
-                timestamp = timestamp
+                timestamp = timestamp,
+                allDay = allDay,
+                recurrenceRule = block?.recurrenceRule
             )
         } else {
             reminderScheduler.cancel(blockId)

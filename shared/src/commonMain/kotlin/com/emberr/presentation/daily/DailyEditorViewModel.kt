@@ -3,7 +3,8 @@ package com.emberr.presentation.daily
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
-import com.emberr.data.local.room.entity.shownOnDateString
+import com.emberr.data.local.room.entity.datesShownOn
+import com.emberr.data.local.room.entity.toAllDaySpan
 import com.emberr.data.local.room.entity.toRecurrenceRule
 import com.emberr.domain.model.*
 import com.emberr.domain.repository.NoteRepository
@@ -18,6 +19,7 @@ import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.util.eventbus.VoiceTaskEventBus
 import com.emberr.domain.reminders.ReminderScheduler
+import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.presentation.shared.FirstContentRenderSignal
 import com.emberr.presentation.shared.editor.BaseEditorViewModel
 import com.emberr.presentation.shared.editor.FocusRequest
@@ -160,7 +162,7 @@ class DailyEditorViewModel(
     // A checkbox's reminder date is what the Calendar screen treats as its day, so setting a reminder
     // for a different day than the note it was typed into must relocate the block there too - otherwise
     // it stays filed under today while Calendar and any future edit through it disagree on where it lives
-    override fun updateReminder(blockId: String, timestamp: Long?) {
+    override fun updateReminder(blockId: String, timestamp: Long?, allDay: AllDaySpan?) {
         val homeDateString = currentDateString
         val block = findBlockById(_blocks.value, blockId) as? CheckboxBlock
         val targetDateString = timestamp?.let {
@@ -168,13 +170,13 @@ class DailyEditorViewModel(
         }
 
         if (homeDateString == null || block == null || targetDateString == null || targetDateString == homeDateString) {
-            super.updateReminder(blockId, timestamp)
+            super.updateReminder(blockId, timestamp, allDay)
             return
         }
 
         autosaveJob?.cancel()
         val now = System.currentTimeMillis()
-        val updatedBlock = block.copy(reminderTimestamp = timestamp, updatedAt = now)
+        val updatedBlock = block.copy(reminderTimestamp = timestamp, allDay = allDay, updatedAt = now)
 
         // Cancelling the pending autosave means any of the user's other unsaved edits in this note
         // would be lost if we re-fetched its content from disk, so persist the current in-memory
@@ -200,11 +202,13 @@ class DailyEditorViewModel(
 
                 SyncEventBus.emitBlockMoved(blockId, fromDateString = homeDateString, toDateString = targetDateString)
 
-                reminderScheduler.schedule(
+                reminderScheduler.scheduleEventReminder(
                     blockId = blockId,
                     noteTitle = "Daily: $targetDateString",
                     text = block.text.ifBlank { "Unfinished task" },
-                    timestamp = timestamp
+                    timestamp = timestamp,
+                    allDay = allDay,
+                    recurrenceRule = block.recurrenceRule
                 )
             } catch (e: CancellationException) {
                 throw e
@@ -724,6 +728,7 @@ class DailyEditorViewModel(
         url = url,
         description = description,
         recurrenceRule = toRecurrenceRule(),
+        allDay = toAllDaySpan(),
         updatedAt = System.currentTimeMillis()
     )
 
@@ -780,7 +785,8 @@ class DailyEditorViewModel(
                         categoryId = current.categoryId,
                         durationMinutes = current.durationMinutes,
                         url = current.url,
-                        description = current.description
+                        description = current.description,
+                        allDay = current.allDay
                     )
                 } else {
                     repository.updateTaskText(blockId, text)
@@ -801,7 +807,9 @@ class DailyEditorViewModel(
             repository.getCalendarTasksForMonth(yearMonth)
         }
         .map { tasks ->
-            tasks.groupBy { LocalDate.parse(it.shownOnDateString()!!) }
+            tasks
+                .flatMap { task -> task.datesShownOn().map { date -> date to task } }
+                .groupBy({ (date, _) -> date }, { (_, task) -> task })
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 

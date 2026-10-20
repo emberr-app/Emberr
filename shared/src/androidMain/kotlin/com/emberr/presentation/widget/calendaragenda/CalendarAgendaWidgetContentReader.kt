@@ -5,6 +5,10 @@ import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.entity.CalendarTaskEntity
+import com.emberr.data.local.room.entity.datesShownOn
+import com.emberr.data.local.room.entity.toAllDaySpan
+import com.emberr.domain.model.AllDaySpan
+import com.emberr.domain.model.lastDate
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.calendar.CalendarCategoryVisibility
@@ -82,7 +86,7 @@ class CalendarAgendaWidgetContentReader(
     ): List<List<AgendaDayCell>> {
         val datesWithEvents = tasks
             .filterNot { task -> task.isChecked }
-            .mapNotNull { task -> task.targetDate }
+            .flatMap { task -> task.datesShownOn().map { date -> date.toString() } }
             .toSet()
 
         val leadingBlanks = daysSinceStartOfWeek(firstOfMonth.dayOfWeek, weekStartsOn)
@@ -113,13 +117,13 @@ class CalendarAgendaWidgetContentReader(
     ): List<AgendaEvent> =
         tasks
             .filter { task -> task.reminderTimestamp != null }
-            .sortedBy { task -> task.reminderTimestamp }
+            .sortedWith(compareBy({ task -> task.targetDate }, { task -> !task.isAllDay }, { task -> task.reminderTimestamp }))
             .take(maximumEventsShown)
             .map { task ->
                 AgendaEvent(
                     blockId = task.blockId,
                     title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
-                    whenLabel = formatWhenLabel(task.reminderTimestamp ?: 0L, clockFormat),
+                    whenLabel = formatWhenLabel(task.reminderTimestamp ?: 0L, task.toAllDaySpan(), clockFormat),
                     isDone = task.isChecked,
                     accentColorHex = task.categoryId?.let { colorsByCategoryId[it] }
                 )
@@ -157,9 +161,19 @@ private fun monthKeyOf(date: LocalDate): String =
 private fun formatMonthLabel(firstOfMonth: LocalDate): String =
     monthNames.getOrNull(firstOfMonth.month.number - 1) ?: firstOfMonth.month.name
 
-private fun formatWhenLabel(timestamp: Long, clockFormat: WidgetClockFormat): String {
+private fun formatWhenLabel(timestamp: Long, allDay: AllDaySpan?, clockFormat: WidgetClockFormat): String {
     val moment = Instant.fromEpochMilliseconds(timestamp)
         .toLocalDateTime(TimeZone.currentSystemDefault())
-    val month = shortMonthNames.getOrNull(moment.month.number - 1) ?: moment.month.name.take(3)
-    return "$month ${moment.day}, ${clockFormat.clockTimeOf(moment)}"
+    if (allDay == null) return "${shortDateLabel(moment.date)}, ${clockFormat.clockTimeOf(moment)}"
+    val lastDate = allDay.lastDate(moment.date)
+    return if (lastDate == moment.date) {
+        "${shortDateLabel(moment.date)}, All day"
+    } else {
+        "${shortDateLabel(moment.date)} – ${shortDateLabel(lastDate)}, All day"
+    }
+}
+
+private fun shortDateLabel(date: LocalDate): String {
+    val month = shortMonthNames.getOrNull(date.month.number - 1) ?: date.month.name.take(3)
+    return "$month ${date.day}"
 }

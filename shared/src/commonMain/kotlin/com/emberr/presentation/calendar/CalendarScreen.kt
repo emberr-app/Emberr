@@ -75,6 +75,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalFocusManager
@@ -84,6 +85,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.emberr.domain.model.AllDaySpan
+import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -108,6 +111,7 @@ import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.sidebar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -123,7 +127,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
 import com.emberr.domain.util.time.formatHourLabel
-import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.LocalFirstDayOfWeek
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
@@ -164,7 +167,11 @@ fun CalendarScreen(
     var pendingScopeAction by remember { mutableStateOf<((RecurrenceEditScope) -> Unit)?>(null) }
     val eventResizeState = remember { EventResizeState() }
     val eventMoveTracker = remember { EventMoveTracker() }
-    LaunchedEffect(selectedDate, viewMode) { eventResizeState.eventInResizeMode = null }
+    val allDayDragState = remember { AllDayDragState() }
+    LaunchedEffect(selectedDate, viewMode) {
+        eventResizeState.eventInResizeMode = null
+        allDayDragState.selectedEvent = null
+    }
     var slideDirection by remember { mutableStateOf(AnimatedContentTransitionScope.SlideDirection.Left) }
 
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -186,6 +193,9 @@ fun CalendarScreen(
     val density = LocalDensity.current
     var topBarHeightPx by remember { mutableFloatStateOf(0f) }
     val topBarHeightDp = with(density) { topBarHeightPx.toDp() }
+    var timelineHeaderHeightPx by remember { mutableFloatStateOf(0f) }
+    val timelineHeaderHeightDp = with(density) { timelineHeaderHeightPx.toDp() }
+    var allDayListDate by remember { mutableStateOf<LocalDate?>(null) }
 
     LaunchedEffect(Unit) {
         WidgetCalendarEventBus.requestedEvents.collect { request ->
@@ -235,6 +245,16 @@ fun CalendarScreen(
         eventMoveTracker.visibleDates = if (viewMode == CalendarViewMode.DAY) listOf(selectedDate) else multiDayDates
     }
 
+    val onEventMove: (EventMovePreview) -> Unit = { move ->
+        val targetDateString = move.targetDate.toString()
+        val allDay = if (move.becomesAllDay) AllDaySpan() else null
+        if (move.event.recurrenceRule == null) {
+            viewModel.moveEvent(move.event, targetDateString, move.timeRange, allDay = allDay)
+        } else {
+            pendingScopeAction = { scope -> viewModel.moveEvent(move.event, targetDateString, move.timeRange, scope, allDay) }
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0)
@@ -261,14 +281,6 @@ fun CalendarScreen(
                         pendingScopeAction = { scope -> viewModel.resizeEvent(event, newTimeRange, scope) }
                     }
                 }
-                val onEventMove: (EventMovePreview) -> Unit = { move ->
-                    val targetDateString = move.targetDate.toString()
-                    if (move.event.recurrenceRule == null) {
-                        viewModel.moveEvent(move.event, targetDateString, move.timeRange)
-                    } else {
-                        pendingScopeAction = { scope -> viewModel.moveEvent(move.event, targetDateString, move.timeRange, scope) }
-                    }
-                }
 
                 when (viewMode) {
                     CalendarViewMode.DAY -> {
@@ -279,6 +291,7 @@ fun CalendarScreen(
                             categories = categories,
                             scrollState = scrollState,
                             topBarHeightDp = topBarHeightDp,
+                            headerHeight = timelineHeaderHeightDp,
                             onSwipePreviousDay = {
                                 slideDirection = AnimatedContentTransitionScope.SlideDirection.Right
                                 selectedDate = selectedDate.plus(-1, DateTimeUnit.DAY)
@@ -349,6 +362,7 @@ fun CalendarScreen(
                             categories = categories,
                             scrollState = scrollState,
                             topBarHeightDp = topBarHeightDp,
+                            headerHeight = timelineHeaderHeightDp,
                             onSwipePrevious = {
                                 slideDirection = AnimatedContentTransitionScope.SlideDirection.Right
                                 selectedDate = selectedDate.plus(-dayCount.toLong(), DateTimeUnit.DAY)
@@ -420,8 +434,8 @@ fun CalendarScreen(
                 EmberrTopHeaderBar(
                     hazeState = internalHazeState,
                     topEdgeFadeAlpha = topEdgeFadeAlpha,
-                    topEdgeBlurHeight = if (viewMode == CalendarViewMode.THREE_DAY || viewMode == CalendarViewMode.WEEK) {
-                        topBarHeightDp + 40.dp + 48.dp
+                    topEdgeBlurHeight = if (viewMode != CalendarViewMode.MONTH) {
+                        topBarHeightDp + timelineHeaderHeightDp + 48.dp
                     } else {
                         TopEdgeBlurHeight
                     },
@@ -485,15 +499,44 @@ fun CalendarScreen(
                 )
             }
 
-            if ((viewMode == CalendarViewMode.THREE_DAY || viewMode == CalendarViewMode.WEEK) && !areSearchResultsVisible) {
-                MultiDayHeaderBar(
-                    dates = multiDayDates,
+            if (viewMode != CalendarViewMode.MONTH && !areSearchResultsVisible) {
+                TimelineHeader(
+                    dates = if (viewMode == CalendarViewMode.DAY) listOf(selectedDate) else multiDayDates,
+                    showsDayLabels = viewMode != CalendarViewMode.DAY,
                     slideDirection = slideDirection,
+                    viewModel = viewModel,
+                    categories = categories,
+                    onEventClick = { event -> eventEditorState = event.toEditorState() },
+                    onEmptyAllDayClick = { date ->
+                        eventEditorState = EventEditorState(
+                            original = null,
+                            name = "",
+                            date = date,
+                            hour = DEFAULT_ALL_DAY_REMINDER_HOUR,
+                            minute = 0,
+                            categoryId = null,
+                            allDay = AllDaySpan()
+                        )
+                    },
+                    onMoreAllDayClick = { date -> allDayListDate = date },
+                    allDayDragState = allDayDragState,
+                    moveTracker = eventMoveTracker,
+                    onDropIntoTimeline = onEventMove,
+                    onAllDaySpanChange = { change ->
+                        if (change.event.recurrenceRule == null) {
+                            viewModel.changeAllDaySpan(change.event, change.startDate, change.lengthInDays)
+                        } else {
+                            pendingScopeAction = { scope ->
+                                viewModel.changeAllDaySpan(change.event, change.startDate, change.lengthInDays, scope)
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .zIndex(11f)
                         .padding(top = topBarHeightDp)
+                        .onSizeChanged { size -> timelineHeaderHeightPx = size.height.toFloat() }
                 )
             }
 
@@ -570,6 +613,7 @@ fun CalendarScreen(
         onUrlChange = { url -> eventEditorState = eventEditorState?.copy(url = url) },
         onDescriptionChange = { description -> eventEditorState = eventEditorState?.copy(description = description) },
         onRecurrenceChange = { rule -> eventEditorState = eventEditorState?.copy(recurrenceRule = rule) },
+        onAllDayChange = { allDay -> eventEditorState = eventEditorState?.copy(allDay = allDay) },
         onEditClick = {
             val recurring = eventEditorState?.original?.recurrenceRule != null
             if (recurring) {
@@ -589,6 +633,7 @@ fun CalendarScreen(
                     durationMinutes = state.durationMinutes,
                     url = state.url,
                     description = state.description,
+                    allDay = state.allDay,
                     recurrenceRule = state.recurrenceRule,
                     editScope = state.editScope
                 )
@@ -611,12 +656,24 @@ fun CalendarScreen(
         onDismiss = { eventEditorState = null }
     )
 
+    val allDayListEvents by remember(allDayListDate) {
+        allDayListDate?.let { date -> viewModel.eventsForDate(date.toString()) } ?: flowOf(emptyList<CalendarEvent>())
+    }.collectAsState(initial = emptyList())
+    AllDayEventsSheet(
+        date = allDayListDate,
+        events = allDayListEvents.filter { it.allDay != null },
+        categories = categories,
+        onEventClick = { event -> eventEditorState = event.toEditorState() },
+        onDismiss = { allDayListDate = null }
+    )
+
     pendingScopeAction?.let { runWithScope ->
         RecurrenceScopeChooser(
             onDismiss = {
                 if (pendingScopeAction != null) {
                     eventResizeState.preview = null
                     eventMoveTracker.preview = null
+                    allDayDragState.preview = null
                 }
                 pendingScopeAction = null
             },
@@ -684,21 +741,32 @@ private fun CalendarTitle(
 }
 
 @Composable
-private fun MultiDayHeaderBar(
+private fun TimelineHeader(
     dates: List<LocalDate>,
+    showsDayLabels: Boolean,
     slideDirection: AnimatedContentTransitionScope.SlideDirection,
+    viewModel: CalendarViewModel,
+    categories: List<CalendarCategory>,
+    onEventClick: (CalendarEvent) -> Unit,
+    onEmptyAllDayClick: (LocalDate) -> Unit,
+    onMoreAllDayClick: (LocalDate) -> Unit,
+    allDayDragState: AllDayDragState,
+    moveTracker: EventMoveTracker,
+    onDropIntoTimeline: (EventMovePreview) -> Unit,
+    onAllDaySpanChange: (AllDaySpanPreview) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.onPlaced { moveTracker.allDayDropZone = it }) {
         AnimatedContent(
             targetState = dates,
             transitionSpec = {
                 (slideIntoContainer(slideDirection, tween(300, easing = FastOutSlowInEasing)) + fadeIn(tween(300))) togetherWith
                         (slideOutOfContainer(slideDirection, tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300)))
             },
-            label = "MultiDayHeaderTransition"
+            label = "TimelineHeaderTransition"
         ) { windowDates ->
-            Row(
+          Column {
+            if (showsDayLabels) Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp),
@@ -726,6 +794,21 @@ private fun MultiDayHeaderBar(
                     }
                 }
             }
+            val windowEvents by remember(windowDates) { viewModel.eventsInRange(windowDates.first(), windowDates.last()) }
+                .collectAsState(initial = emptyList())
+            AllDayStrip(
+                windowDates = windowDates,
+                events = windowEvents,
+                categories = categories,
+                dragState = allDayDragState,
+                moveTracker = moveTracker,
+                onEventClick = onEventClick,
+                onEmptyDateClick = onEmptyAllDayClick,
+                onMoreClick = onMoreAllDayClick,
+                onDropIntoTimeline = onDropIntoTimeline,
+                onAllDaySpanChange = onAllDaySpanChange
+            )
+          }
         }
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
@@ -768,6 +851,7 @@ private fun CalendarTimeGrid(
     categories: List<CalendarCategory>,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
+    headerHeight: Dp,
     onSwipePreviousDay: () -> Unit,
     onSwipeNextDay: () -> Unit,
     resizeState: EventResizeState,
@@ -824,6 +908,7 @@ private fun CalendarTimeGrid(
                 nowMillis = nowMillis,
                 scrollState = scrollState,
                 topBarHeightDp = topBarHeightDp,
+                headerHeight = headerHeight,
                 resizeState = resizeState,
                 moveTracker = moveTracker,
                 onHourClick = onHourClick,
@@ -843,6 +928,7 @@ private fun DayHourGrid(
     nowMillis: Long,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
+    headerHeight: Dp,
     resizeState: EventResizeState,
     moveTracker: EventMoveTracker,
     onHourClick: (hour: Int) -> Unit,
@@ -854,8 +940,11 @@ private fun DayHourGrid(
     val density = LocalDensity.current
     val hourHeightPx = with(density) { hourHeight.toPx() }
     val bottomPadding = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding()
-    val resizeAutoScroll = rememberEventResizeAutoScroll(scrollState, topBarHeightDp, bottomPadding)
-    SideEffect { moveTracker.autoScroll = resizeAutoScroll }
+    val resizeAutoScroll = rememberEventResizeAutoScroll(scrollState, topBarHeightDp + headerHeight, bottomPadding)
+    SideEffect {
+        moveTracker.autoScroll = resizeAutoScroll
+        moveTracker.hourHeightPx = hourHeightPx
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
     Row(
@@ -864,7 +953,7 @@ private fun DayHourGrid(
             .onPlaced { resizeAutoScroll.viewportCoordinates = it }
             .verticalScroll(scrollState)
             .smoothWheelScroll(scrollState)
-            .padding(top = topBarHeightDp, bottom = bottomPadding)
+            .padding(top = topBarHeightDp + headerHeight, bottom = bottomPadding)
     ) {
         HourLabelColumn(hours = hours, hourHeight = hourHeight)
 
@@ -892,7 +981,7 @@ private fun DayHourGrid(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = topBarHeightDp, bottom = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding())
+                .padding(top = topBarHeightDp + headerHeight, bottom = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding())
         )
     }
 }
@@ -1013,7 +1102,7 @@ private fun DayColumnBody(
         val horizontalInset = 6.dp
         val chipGap = 4.dp
         val availableWidth = maxWidth - horizontalInset * 2
-        val positionedEvents = remember(events) { layoutEventsForColumn(events) }
+        val positionedEvents = remember(events) { layoutEventsForColumn(events.filter { it.allDay == null }) }
         val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
 
         positionedEvents.forEach { positioned ->
@@ -1093,7 +1182,7 @@ private fun DayColumnBody(
             }
         }
 
-        moveTracker.preview?.takeIf { it.targetDate == date && moveTracker.activeMove == null }?.let { preview ->
+        moveTracker.preview?.takeIf { it.targetDate == date && moveTracker.activeMove == null && !it.becomesAllDay }?.let { preview ->
             val category = categories.firstOrNull { it.id == preview.event.categoryId }
             EventMovePreviewChip(
                 text = preview.event.text,
@@ -1168,6 +1257,7 @@ private fun MultiDayTimeGrid(
     categories: List<CalendarCategory>,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
+    headerHeight: Dp,
     onSwipePrevious: () -> Unit,
     onSwipeNext: () -> Unit,
     resizeState: EventResizeState,
@@ -1226,6 +1316,7 @@ private fun MultiDayTimeGrid(
                 nowMillis = nowMillis,
                 scrollState = scrollState,
                 topBarHeightDp = topBarHeightDp,
+                headerHeight = headerHeight,
                 resizeState = resizeState,
                 moveTracker = moveTracker,
                 onHourClick = onHourClick,
@@ -1246,6 +1337,7 @@ private fun MultiDayGridContent(
     nowMillis: Long,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
+    headerHeight: Dp,
     resizeState: EventResizeState,
     moveTracker: EventMoveTracker,
     onHourClick: (date: LocalDate, hour: Int) -> Unit,
@@ -1267,10 +1359,12 @@ private fun MultiDayGridContent(
     val hours = remember { 0..23 }
     val density = LocalDensity.current
     val hourHeightPx = with(density) { hourHeight.toPx() }
-    val headerHeight = 40.dp
     val bottomPadding = if (isDesktopPlatform) 0.dp else calendarSearchBarBottomPadding()
     val resizeAutoScroll = rememberEventResizeAutoScroll(scrollState, topBarHeightDp + headerHeight, bottomPadding)
-    SideEffect { moveTracker.autoScroll = resizeAutoScroll }
+    SideEffect {
+        moveTracker.autoScroll = resizeAutoScroll
+        moveTracker.hourHeightPx = hourHeightPx
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
     Row(
@@ -1464,7 +1558,11 @@ private fun MonthGridContent(
     }
     val monthEvents by remember(yearMonth) { viewModel.eventsForMonth(yearMonth) }
         .collectAsState(initial = emptyList())
-    val eventsByDate = remember(monthEvents) { monthEvents.groupBy { it.dateString } }
+    val eventsByDate = remember(monthEvents) {
+        monthEvents
+            .flatMap { event -> event.datesShownOn().map { date -> date.toString() to event } }
+            .groupBy({ (dateString, _) -> dateString }, { (_, event) -> event })
+    }
     val weekRows = remember(gridDates) { gridDates.chunked(7) }
 
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp).padding(bottom = 8.dp)) {
@@ -1519,7 +1617,7 @@ private fun MonthEventList(
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
-    val sortedEvents = remember(events) { events.sortedBy { it.reminderTimestamp } }
+    val sortedEvents = remember(events) { events.sortedWith(compareBy({ it.allDay == null }, { it.reminderTimestamp })) }
     val bottomPadding = if (isDesktopPlatform) {
         16.dp
     } else {
@@ -1562,14 +1660,11 @@ private fun MonthEventList(
 }
 
 @Composable
-private fun MonthEventRow(
+internal fun MonthEventRow(
     event: CalendarEvent,
     category: CalendarCategory?,
     onClick: () -> Unit
 ) {
-    val startTime = Instant.fromEpochMilliseconds(event.reminderTimestamp)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1597,7 +1692,7 @@ private fun MonthEventRow(
             modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
         )
         Text(
-            text = formatTimeOfDay(startTime.hour, startTime.minute, LocalUsesTwentyFourHourClock.current),
+            text = event.timeOfDayLabel(LocalUsesTwentyFourHourClock.current),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )

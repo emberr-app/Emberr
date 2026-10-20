@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.IconTooltip
-import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.BottomBarSearchField
 import com.emberr.presentation.EXPANDED_BOTTOM_BAR_PILL_HEIGHT
@@ -76,10 +75,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.search
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
-import kotlin.time.Instant
 
 private val CalendarSearchBarReservedHeight = EXPANDED_BOTTOM_BAR_PILL_HEIGHT + BOTTOM_BAR_BOTTOM_PADDING
 private val SEARCH_BUTTON_SIZE = 44.dp
@@ -306,8 +302,6 @@ private fun CalendarSearchResultRow(
     query: String,
     onClick: () -> Unit
 ) {
-    val startTime = Instant.fromEpochMilliseconds(event.reminderTimestamp)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
     val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
     val matchingDetail = event.matchingDetail(query)
 
@@ -357,7 +351,7 @@ private fun CalendarSearchResultRow(
             Spacer(modifier = Modifier.width(6.dp))
         }
         Text(
-            text = formatTimeOfDay(startTime.hour, startTime.minute, LocalUsesTwentyFourHourClock.current),
+            text = event.timeOfDayLabel(LocalUsesTwentyFourHourClock.current),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )

@@ -4,6 +4,7 @@ package com.emberr.presentation.widget.calendar
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CategoryDao
+import com.emberr.data.local.room.entity.datesShownOn
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.calendar.CalendarCategoryVisibility
@@ -62,15 +63,15 @@ class CalendarWidgetContentReader(
             val dotsByDate = tasks
                 .filter { task -> categoryVisibility.isEventShown(task.categoryId) }
                 .filterNot { task -> task.isChecked }
-                .groupBy { task -> task.targetDate }
-                .mapNotNull { (dateString, tasksOnDate) ->
-                    if (dateString == null) null else dateString to tasksOnDate
+                .flatMap { task -> task.datesShownOn().map { date -> date.toString() to task } }
+                .groupBy({ (dateString, _) -> dateString }, { (_, task) -> task })
+                .mapValues { (_, tasksOnDate) ->
+                    tasksOnDate
                         .take(maximumDotsPerDay)
                         .map { task ->
                             task.categoryId?.let { colorsByCategoryId[it] } ?: neutralDotColorHex
                         }
                 }
-                .toMap()
 
             CalendarWidgetContent(
                 shownMonth = monthKey,

@@ -112,7 +112,8 @@ class NoteRepositoryRecurringMoveTest {
             occurrenceDate = "2026-10-26",
             targetDate = "2026-10-28",
             scope = RecurrenceEditScope.THIS_EVENT,
-            timestamp = timestampAt(2026, 10, 28, 14)
+            timestamp = timestampAt(2026, 10, 28, 14),
+            allDay = null
         )
 
         assertTrue(repository.getCalendarTasksForDate("2026-10-26").first().none { it.blockId == "standup" })

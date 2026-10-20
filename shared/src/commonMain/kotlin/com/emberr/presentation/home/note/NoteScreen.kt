@@ -98,6 +98,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.ui.platform.LocalDensity
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyDateRange
@@ -436,7 +437,7 @@ fun NoteScreen(
             override fun onAdjustIndentationOfBlocks(blockIds: Set<String>, increase: Boolean) =
                 viewModel.adjustIndentationOfBlocks(blockIds, increase)
             override fun onToggleSelection(id: String) = viewModel.toggleSelection(id)
-            override fun onUpdateReminder(id: String, timestamp: Long?) = viewModel.updateReminder(id, timestamp)
+            override fun onUpdateReminder(id: String, timestamp: Long?, allDay: AllDaySpan?) = viewModel.updateReminder(id, timestamp, allDay)
             override fun onOpenEventOptions(blockId: String, occurrenceDate: String?) {
                 eventOptionsTargetBlockId = blockId
                 eventOptionsOccurrenceDate = occurrenceDate

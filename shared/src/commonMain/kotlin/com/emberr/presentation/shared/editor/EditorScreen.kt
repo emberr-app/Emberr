@@ -126,6 +126,7 @@ import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.database.LinkableDatabase
+import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock
@@ -400,7 +401,7 @@ interface EditorActions {
     fun onAdjustIndentationOfBlocks(blockIds: Set<String>, increase: Boolean) {}
     fun onToggleFormatAcrossBlocks(range: CrossBlockTextRange, blockIdsInRange: List<String>, format: String) {}
     fun onToggleSelection(id: String)
-    fun onUpdateReminder(id: String, timestamp: Long?)
+    fun onUpdateReminder(id: String, timestamp: Long?, allDay: AllDaySpan?)
     // occurrenceDate is derived from the tapped block's own reminderTimestamp (not the screen's
     // "currently selected day") so it stays correct even when the block is a virtual recurring
     // occurrence rendered on a page other than whatever the screen currently considers active.
