@@ -622,6 +622,7 @@ fun CalendarScreen(
                 eventEditorState = eventEditorState?.copy(isEditing = true)
             }
         },
+        onCancelEdit = { eventEditorState = eventEditorState?.original?.toEditorState() },
         onSave = {
             eventEditorState?.let { state ->
                 viewModel.saveEvent(
@@ -638,7 +639,7 @@ fun CalendarScreen(
                     editScope = state.editScope
                 )
             }
-            eventEditorState = null
+            eventEditorState = eventEditorState?.viewAfterSaving()
         },
         onDelete = eventEditorState?.original?.let { original ->
             {

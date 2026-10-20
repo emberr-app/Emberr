@@ -486,5 +486,5 @@ internal fun CategoryEntity.toCalendarCategory() = CalendarCategory(
 // UriHandler.openUri requires an absolute URI with a scheme - users typically type
 // "example.com" rather than "https://example.com", so default a missing scheme to https
 // instead of letting the link silently fail to open when tapped in the read view.
-private fun normalizeEventUrl(raw: String): String =
+internal fun normalizeEventUrl(raw: String): String =
     if (raw.contains("://")) raw else "https://$raw"

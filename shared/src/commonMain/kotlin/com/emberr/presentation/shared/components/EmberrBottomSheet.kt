@@ -40,6 +40,7 @@ import kotlin.math.abs
 private val BottomSheetCornerRadius = 26.dp
 private val BottomSheetShape = RoundedCornerShape(topEnd = BottomSheetCornerRadius, topStart = BottomSheetCornerRadius)
 private val FloatingDialogShape = RoundedCornerShape(22.dp)
+private val FloatingDialogMaxWidth = 480.dp
 private val SheetHorizontalPadding = 20.dp
 private val SheetIconSpacing = 8.dp
 
@@ -102,6 +103,7 @@ fun EmberrBottomSheet(
     headerAction: EmberrBottomSheetAction? = null,
     contentHorizontalPadding: Dp = SheetHorizontalPadding,
     isDismissible: Boolean = true,
+    desktopMaxWidth: Dp = FloatingDialogMaxWidth,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     if (!expanded) return
@@ -115,6 +117,7 @@ fun EmberrBottomSheet(
                 headerAction = headerAction,
                 contentHorizontalPadding = contentHorizontalPadding,
                 isDismissible = isDismissible,
+                maxWidth = desktopMaxWidth,
                 content = content
             )
         } else {
@@ -140,6 +143,7 @@ private fun EmberrFloatingDialog(
     headerAction: EmberrBottomSheetAction? = null,
     contentHorizontalPadding: Dp,
     isDismissible: Boolean,
+    maxWidth: Dp,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     fun closeAnd(action: () -> Unit) {
@@ -162,7 +166,7 @@ private fun EmberrFloatingDialog(
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = 480.dp)
+                .widthIn(max = maxWidth)
                 .fillMaxWidth(0.9f)
                 .emberrBorder(FloatingDialogShape, color = emberrSoftBorderColor)
                 .clip(FloatingDialogShape)

@@ -87,6 +87,7 @@ fun EventEditorSheetHost(
                 eventEditorState = eventEditorState?.copy(isEditing = true)
             }
         },
+        onCancelEdit = { eventEditorState = eventEditorState?.original?.toEditorState() },
         onSave = {
             eventEditorState?.let { state ->
                 calendarViewModel.saveEvent(
@@ -103,7 +104,8 @@ fun EventEditorSheetHost(
                     editScope = state.editScope
                 )
             }
-            dismiss()
+            val viewState = eventEditorState?.viewAfterSaving()
+            if (viewState != null) eventEditorState = viewState else dismiss()
         },
         onDelete = eventEditorState?.original?.let { original ->
             {

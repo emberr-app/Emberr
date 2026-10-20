@@ -14,18 +14,25 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -39,6 +46,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +57,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -62,7 +72,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -84,14 +99,13 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.isoDayNumber
 import com.emberr.presentation.shared.components.EmberrBottomSheet
-import com.emberr.presentation.shared.components.EmberrBottomSheetAction
+import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
-import com.emberr.presentation.shared.components.EmberrSwitch
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.DesktopDatePickerMenuWidth
 import com.emberr.presentation.shared.components.DesktopTimePickerMenuWidth
@@ -106,14 +120,16 @@ import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.bell
+import emberr.shared.generated.resources.bell_off2
 import emberr.shared.generated.resources.calendar
 import emberr.shared.generated.resources.calendar_day
+import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.link
-import emberr.shared.generated.resources.pen
+import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.trash
-import emberr.shared.generated.resources.widget2
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -121,6 +137,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import kotlinx.datetime.number
 import org.jetbrains.compose.resources.painterResource
 import com.emberr.domain.util.time.formatTimeOfDay
@@ -140,7 +157,18 @@ private val ResizeDashShape = RoundedCornerShape(percent = 50)
 private val ResizeDashDarkModeColor = Color(0xFFDDDDDD)
 internal const val CheckedEventTitleAlpha = 0.45f
 private val FieldPadding = 14.dp
-private val SectionSpacing = 16.dp
+private val EditorSpacing = 24.dp
+private val EventTitleStyle: TextStyle
+    @Composable get() = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal)
+private val EventSheetDesktopMaxWidth = 560.dp
+private val ChipShape = RoundedCornerShape(8.dp)
+private val ChipSpacing = 8.dp
+private val ChipHorizontalPadding = 10.dp
+private val ChipVerticalPadding = 5.dp
+private val PillMenuGap = 6.dp
+private val PillMenuMinWidth = 160.dp
+private val PillMenuMaxWidth = 280.dp
+private val DurationPresetsInMinutes = listOf(15, 30, 45, 60, 90, 120)
 
 @Composable
 fun EventChip(
@@ -399,6 +427,31 @@ fun EventEditorState.endMinute(): Int = (minute + durationMinutes) % 60
 
 fun EventEditorState.allDayLastDate(): LocalDate = allDay?.lastDate(date) ?: date
 
+fun EventEditorState.keepsSheetOpenAfterSave(): Boolean {
+    val original = original ?: return false
+    val splitsSeries = original.recurrenceRule != null &&
+        (editScope == RecurrenceEditScope.ALL_FUTURE_EVENTS || editScope == RecurrenceEditScope.ALL_PAST_EVENTS)
+    return !splitsSeries
+}
+
+fun EventEditorState.viewAfterSaving(): EventEditorState? {
+    val original = original
+    if (original == null || !keepsSheetOpenAfterSave()) return null
+    val savedEvent = original.copy(
+        text = name,
+        dateString = date.toString(),
+        occurrenceDateString = if (editScope == RecurrenceEditScope.THIS_EVENT) original.occurrenceDateString else date.toString(),
+        reminderTimestamp = toEpochMillis(),
+        categoryId = categoryId,
+        durationMinutes = durationMinutes,
+        url = url.trim().takeIf { it.isNotEmpty() }?.let(::normalizeEventUrl),
+        description = description.trim().takeIf { it.isNotEmpty() },
+        recurrenceRule = recurrenceRule,
+        allDay = allDay
+    )
+    return savedEvent.toEditorState()
+}
+
 private fun LocalDate.atTimeInEpochMillis(hour: Int, minute: Int): Long =
     LocalDateTime(year, month.number, day, hour, minute).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 
@@ -424,10 +477,27 @@ fun formatDuration(minutes: Int): String {
     val hours = minutes / 60
     val mins = minutes % 60
     return when {
-        hours == 0 -> "${mins}min"
-        mins == 0 -> "${hours}h"
-        else -> "${hours}h ${mins}min"
+        hours == 0 -> "$mins min"
+        mins == 0 -> "$hours hr"
+        else -> "$hours hr $mins min"
     }
+}
+
+private fun formatEventTimeSuffix(state: EventEditorState, usesTwentyFourHourClock: Boolean): String {
+    val allDay = state.allDay
+    return when {
+        allDay == null -> ", ${formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock)} – " +
+            formatTimeOfDay(state.endHour(), state.endMinute(), usesTwentyFourHourClock)
+        allDay.lengthInDays > 1 -> " – ${formatEditorDate(state.allDayLastDate())}"
+        else -> ", All day"
+    }
+}
+
+private fun formatEditorDate(date: LocalDate): String {
+    val weekday = date.dayOfWeek.name.lowercase().replaceFirstChar(Char::uppercase)
+    val month = date.month.name.take(3).lowercase().replaceFirstChar(Char::uppercase)
+    val isThisYear = date.year == Clock.System.todayIn(TimeZone.currentSystemDefault()).year
+    return if (isThisYear) "$weekday, $month ${date.day}" else "$weekday, $month ${date.day}, ${date.year}"
 }
 
 @Composable
@@ -444,29 +514,15 @@ fun EventEditorSheet(
     onRecurrenceChange: (RecurrenceRule?) -> Unit,
     onAllDayChange: (AllDaySpan?) -> Unit,
     onEditClick: () -> Unit,
+    onCancelEdit: () -> Unit,
     onSave: () -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit
 ) {
-    val title = when {
-        state == null || state.original == null -> "Add Event"
-        state.isEditing -> "Edit Event"
-        else -> null
-    }
-
     EmberrBottomSheet(
         expanded = state != null,
         onDismiss = onDismiss,
-        title = title,
-        headerAction = if (onDelete != null) {
-            EmberrBottomSheetAction(
-                icon = painterResource(Res.drawable.trash),
-                contentDescription = "Delete",
-                tint = MaterialTheme.colorScheme.error,
-                tooltip = "Delete event",
-                onClick = onDelete
-            )
-        } else null,
+        desktopMaxWidth = EventSheetDesktopMaxWidth
     ) { closeAnd ->
       CompositionLocalProvider(
         LocalIndication provides NoRippleIndicationNodeFactory,
@@ -487,8 +543,8 @@ fun EventEditorSheet(
                     onRecurrenceChange = onRecurrenceChange,
                     onAllDayChange = onAllDayChange,
                     onEditClick = onEditClick,
-                    onCancel = { closeAnd(onDismiss) },
-                    onSave = { closeAnd(onSave) },
+                    onCancel = { if (state.isEditing && state.original != null) onCancelEdit() else closeAnd(onDismiss) },
+                    onSave = { if (state.keepsSheetOpenAfterSave()) onSave() else closeAnd(onSave) },
                     onDelete = onDelete?.let { delete -> { closeAnd(delete) } }
                 )
             }
@@ -497,6 +553,7 @@ fun EventEditorSheet(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun EventEditorFields(
     state: EventEditorState,
@@ -521,68 +578,155 @@ private fun EventEditorFields(
             categories = categories,
             onEditClick = onEditClick,
             onDelete = onDelete,
-            onClose = onCancel,
+            onClose = onCancel
         )
         return
     }
 
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showEndDatePicker by remember { mutableStateOf(false) }
-    var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }
-    var showReminderTimePicker by remember { mutableStateOf(false) }
+    var showsDetails by remember {
+        mutableStateOf(state.allDay != null || state.recurrenceRule != null || state.url.isNotBlank() || state.description.isNotBlank())
+    }
+    val canEditDateAndRepeat = state.editScope == RecurrenceEditScope.ALL_EVENTS
+    val titleFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        if (isDesktopPlatform) titleFocusRequester.requestFocus()
+    }
     val allDay = state.allDay
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = if (isDesktopPlatform) 16.dp else 10.dp,
+                top = 32.dp,
                 bottom = if (isDesktopPlatform) 0.dp else 20.dp
             ),
-        verticalArrangement = Arrangement.spacedBy(SectionSpacing)
+        verticalArrangement = Arrangement.spacedBy(EditorSpacing)
     ) {
-        EmberrTextField(
-            value = state.name,
-            onValueChange = onNameChange,
-            placeholder = "Event name",
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            onSubmit = onSave
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            EmberrTextField(
+                value = state.name,
+                onValueChange = onNameChange,
+                placeholder = "What's happening?",
+                textStyle = EventTitleStyle,
+                hasBackground = false,
+                modifier = Modifier.weight(1f).focusRequester(titleFocusRequester),
+                onSubmit = onSave
+            )
+            if (onDelete != null) DeleteEventButton(alignedTo = EventTitleStyle, onDelete = onDelete)
+        }
+
+        EventEditorHeader(
+            state = state,
+            canEditDate = canEditDateAndRepeat,
+            onDateChange = onDateChange,
+            onTimeChange = onTimeChange
         )
 
-        EmberrTextField(
-            value = state.url,
-            onValueChange = onUrlChange,
-            placeholder = "URL (optional)",
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            onSubmit = onSave
-        )
-        EventSwitchRow(
-            icon = painterResource(Res.drawable.calendar_day),
-            label = "All day",
-            isOn = allDay != null,
-            onClick = {
+            horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
+            verticalAlignment = Alignment.Top
+        ) {
+            FlowRow(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
+                verticalArrangement = Arrangement.spacedBy(ChipSpacing)
+            ) {
+                CategoryChoiceChip(categoryId = state.categoryId, categories = categories, onCategoryChange = onCategoryChange)
                 if (allDay == null) {
-                    onAllDayChange(AllDaySpan())
-                    onTimeChange(DEFAULT_ALL_DAY_REMINDER_HOUR, 0)
+                    DurationChip(state = state, onDurationChange = onDurationChange)
                 } else {
-                    onAllDayChange(null)
+                    AllDayLengthChip(state = state, allDay = allDay, onAllDayChange = onAllDayChange)
+                    AllDayReminderChip(state = state, allDay = allDay, onAllDayChange = onAllDayChange, onTimeChange = onTimeChange)
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
+            }
+            DetailsTogglePill(showsDetails = showsDetails, onClick = { showsDetails = !showsDetails })
+        }
 
-        val canEditDate = state.editScope == RecurrenceEditScope.ALL_EVENTS
-        val startDateTapAnchor = rememberMenuTapAnchor()
-        Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(startDateTapAnchor)) {
-            EventFieldRow(
-                icon = painterResource(Res.drawable.calendar),
-                label = formatFullDate(state.date),
-                onClick = { if (canEditDate) showDatePicker = true },
-                modifier = Modifier.fillMaxWidth().let { if (canEditDate) it else it.alpha(0.5f) }
+        if (showsDetails) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
+                verticalArrangement = Arrangement.spacedBy(ChipSpacing)
+            ) {
+                EventEditorChip(
+                    label = "All day",
+                    icon = painterResource(Res.drawable.calendar_day),
+                    isSelected = allDay != null,
+                    opensMenu = false,
+                    onClick = {
+                        if (allDay == null) {
+                            onAllDayChange(AllDaySpan())
+                            onTimeChange(DEFAULT_ALL_DAY_REMINDER_HOUR, 0)
+                        } else {
+                            onAllDayChange(null)
+                        }
+                    }
+                )
+                RepeatChip(state = state, isEnabled = canEditDateAndRepeat, onRecurrenceChange = onRecurrenceChange)
+            }
+
+            EventDetailField(
+                icon = painterResource(Res.drawable.link),
+                value = state.url,
+                onValueChange = onUrlChange,
+                placeholder = "Add a link",
+                onSubmit = onSave
+            )
+
+            EventDetailField(
+                icon = painterResource(Res.drawable.doc_text),
+                value = state.description,
+                onValueChange = onDescriptionChange,
+                placeholder = "Add a description",
+                singleLine = false
+            )
+        }
+
+        val saveLabel = if (state.original == null) "Add" else "Save"
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            EmberrButtonSecondary(text = "Cancel", onClick = onCancel, modifier = Modifier.weight(1f))
+            EmberrButtonPrimary(text = saveLabel, onClick = onSave, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun EventEditorHeader(
+    state: EventEditorState,
+    canEditDate: Boolean,
+    onDateChange: (LocalDate) -> Unit,
+    onTimeChange: (hour: Int, minute: Int) -> Unit
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    val dateTapAnchor = rememberMenuTapAnchor()
+    val timeTapAnchor = rememberMenuTapAnchor()
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
+    val allDay = state.allDay
+
+    FlowRow(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.menuTapAnchor(dateTapAnchor)) {
+            Text(
+                text = formatEditorDate(state.date),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = if (canEditDate) Modifier.clickable { showDatePicker = true } else Modifier.alpha(0.5f)
             )
             if (showDatePicker) {
-                PickerAtTap(startDateTapAnchor, DesktopDatePickerMenuWidth) {
+                PickerAtTap(dateTapAnchor, DesktopDatePickerMenuWidth) {
                     MinimalDatePickerDialog(
                         initialTimestamp = state.toEpochMillis(),
                         onDismiss = { showDatePicker = false },
@@ -594,101 +738,17 @@ private fun EventEditorFields(
                 }
             }
         }
-        if (allDay != null) {
-            val endDateTapAnchor = rememberMenuTapAnchor()
-            Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(endDateTapAnchor)) {
-                EventFieldRow(
-                    icon = painterResource(Res.drawable.calendar),
-                    label = "Ends ${formatFullDate(state.allDayLastDate())}",
-                    onClick = { showEndDatePicker = true },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (showEndDatePicker) {
-                    PickerAtTap(endDateTapAnchor, DesktopDatePickerMenuWidth) {
-                        MinimalDatePickerDialog(
-                            initialTimestamp = state.allDayLastDate().atTimeInEpochMillis(state.hour, state.minute),
-                            onDismiss = { showEndDatePicker = false },
-                            onConfirm = { millis ->
-                                val endDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault()).date
-                                onAllDayChange(allDay.copy(lengthInDays = (state.date.daysUntil(endDate) + 1).coerceAtLeast(1)))
-                            }
-                        )
-                    }
-                }
-            }
-        }
-
-        var showRepeatDialog by remember { mutableStateOf(false) }
-        val repeatTapAnchor = rememberMenuTapAnchor()
-        val canEditRecurrence = state.editScope == RecurrenceEditScope.ALL_EVENTS
-        Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(repeatTapAnchor)) {
-            EventFieldRow(
-                icon = painterResource(Res.drawable.clock_circle),
-                label = state.recurrenceRule?.let(::formatRecurrenceSummary) ?: "Does not repeat",
-                onClick = { if (canEditRecurrence) showRepeatDialog = true },
-                modifier = Modifier.fillMaxWidth().let { if (canEditRecurrence) it else it.alpha(0.5f) }
-            )
-            if (showRepeatDialog) {
-                RepeatOptionsDialog(
-                    initialRule = state.recurrenceRule,
-                    anchorDate = state.date,
-                    tapAnchor = repeatTapAnchor,
-                    onDismiss = { showRepeatDialog = false },
-                    onConfirm = { rule ->
-                        onRecurrenceChange(rule)
-                        showRepeatDialog = false
-                    }
-                )
-            }
-        }
-
-        if (allDay != null) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            EventSwitchRow(
-                icon = painterResource(Res.drawable.bell),
-                label = "Reminder",
-                isOn = allDay.isReminderOn,
-                onClick = { onAllDayChange(allDay.copy(isReminderOn = !allDay.isReminderOn)) },
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (allDay.isReminderOn) {
-                val reminderTimeTapAnchor = rememberMenuTapAnchor()
-                Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(reminderTimeTapAnchor)) {
-                    EventFieldRow(
-                        icon = painterResource(Res.drawable.clock_circle),
-                        label = formatTimeOfDay(state.hour, state.minute, LocalUsesTwentyFourHourClock.current),
-                        onClick = { showReminderTimePicker = true },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (showReminderTimePicker) {
-                        PickerAtTap(reminderTimeTapAnchor, DesktopTimePickerMenuWidth) {
-                            MinimalTimePickerDialog(
-                                initialTimestamp = state.toEpochMillis(),
-                                onDismiss = { showReminderTimePicker = false },
-                                onConfirm = { hour, minute -> onTimeChange(hour, minute) }
-                            )
-                        }
-                    }
-                }
+        val timeSuffix = formatEventTimeSuffix(state, usesTwentyFourHourClock)
+        when {
+            allDay == null -> Box(modifier = Modifier.menuTapAnchor(timeTapAnchor)) {
                 Text(
-                    text = if (allDay.lengthInDays > 1) "Reminds you on each day" else "Reminds you on this day",
+                    text = timeSuffix,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(top = 8.dp)
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.clickable { showStartTimePicker = true }
                 )
-            }
-        } else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    EventFieldRow(
-                        icon = painterResource(Res.drawable.clock_circle),
-                        label = formatTimeOfDay(state.hour, state.minute, LocalUsesTwentyFourHourClock.current),
-                        onClick = { showStartTimePicker = true },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (showStartTimePicker) {
+                if (showStartTimePicker) {
+                    PickerAtTap(timeTapAnchor, DesktopTimePickerMenuWidth) {
                         MinimalTimePickerDialog(
                             initialTimestamp = state.toEpochMillis(),
                             onDismiss = { showStartTimePicker = false },
@@ -696,123 +756,455 @@ private fun EventEditorFields(
                         )
                     }
                 }
-                Box(modifier = Modifier.weight(1f)) {
-                    EventFieldRow(
-                        icon = painterResource(Res.drawable.clock_circle),
-                        label = formatTimeOfDay(state.endHour(), state.endMinute(), LocalUsesTwentyFourHourClock.current),
-                        onClick = { showEndTimePicker = true },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (showEndTimePicker) {
-                        MinimalTimePickerDialog(
-                            initialTimestamp = state.toEndEpochMillis(),
-                            onDismiss = { showEndTimePicker = false },
-                            onConfirm = { hour, minute ->
-                                val startTotal = state.hour * 60 + state.minute
-                                var endTotal = hour * 60 + minute
-                                if (endTotal <= startTotal) endTotal += 24 * 60
-                                onDurationChange((endTotal - startTotal).coerceAtLeast(5))
-                            }
-                        )
-                    }
-                }
             }
-
-            Text(
-                text = "Duration: ${formatDuration(state.durationMinutes)}",
+            else -> Text(
+                text = timeSuffix,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-        )
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = "Category",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                CategoryChip(
-                    label = "None",
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    hasCategory = false,
-                    isSelected = state.categoryId == null,
-                    onClick = { onCategoryChange(null) }
-                )
-                categories.forEach { category ->
-                    CategoryChip(
-                        label = category.name,
-                        color = category.colorHex.toCategoryColor(),
-                        hasCategory = true,
-                        isSelected = state.categoryId == category.id,
-                        onClick = { onCategoryChange(category.id) }
-                    )
-                }
-            }
-        }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-        )
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = "Description",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            EmberrTextField(
-                value = state.description,
-                onValueChange = onDescriptionChange,
-                placeholder = "Add a description (optional)",
-                singleLine = false,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            EmberrButtonSecondary(
-                text = "Cancel",
-                onClick = onCancel,
-                modifier = Modifier.weight(1f)
-            )
-            EmberrButtonPrimary(
-                text = if (state.original == null) "Add" else "Save",
-                onClick = onSave,
-                modifier = Modifier.weight(1f)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
 }
 
 @Composable
+private fun DeleteEventButton(alignedTo: TextStyle, onDelete: () -> Unit) {
+    val lineHeight = with(LocalDensity.current) { alignedTo.lineHeight.toDp() }
+    Box(modifier = Modifier.height(lineHeight).wrapContentHeight(unbounded = true)) {
+        TopBarIconButton(
+            icon = painterResource(Res.drawable.trash),
+            contentDescription = "Delete",
+            bgColor = Color.Transparent,
+            tint = MaterialTheme.colorScheme.error,
+            hazeState = remember { HazeState() },
+            hazeStyle = EmberrBlur.Regular,
+            shadowElevation = EmberrShadowElevation.None,
+            tooltip = "Delete event",
+            onClick = onDelete
+        )
+    }
+}
+
+@Composable
+private fun DurationChip(state: EventEditorState, onDurationChange: (minutes: Int) -> Unit) {
+    var showMenu by remember { mutableStateOf(false) }
+    Box {
+        EventEditorChip(
+            label = formatDuration(state.durationMinutes),
+            icon = painterResource(Res.drawable.clock_circle),
+            onClick = { showMenu = true }
+        )
+        if (showMenu) BelowPill {
+            EventChoiceMenu(
+                title = "Duration",
+                onDismiss = { showMenu = false },
+                choices = DurationPresetsInMinutes.map { minutes ->
+                    EventChoice(
+                        label = formatDuration(minutes),
+                        isSelected = minutes == state.durationMinutes,
+                        onClick = { onDurationChange(minutes) }
+                    )
+                },
+                customTime = EventCustomTimeChoice(
+                    label = "Custom end time…",
+                    initialTimestamp = state.toEndEpochMillis(),
+                    onTimeChosen = { hour, minute ->
+                        val startTotal = state.hour * 60 + state.minute
+                        var endTotal = hour * 60 + minute
+                        if (endTotal <= startTotal) endTotal += 24 * 60
+                        onDurationChange((endTotal - startTotal).coerceAtLeast(5))
+                    }
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun AllDayLengthChip(state: EventEditorState, allDay: AllDaySpan, onAllDayChange: (AllDaySpan?) -> Unit) {
+    var showEndDatePicker by remember { mutableStateOf(false) }
+    Box {
+        EventEditorChip(
+            label = if (allDay.lengthInDays == 1) "1 day" else "${allDay.lengthInDays} days",
+            icon = painterResource(Res.drawable.calendar),
+            onClick = { showEndDatePicker = true }
+        )
+        if (showEndDatePicker) BelowPill {
+            MinimalDatePickerDialog(
+                initialTimestamp = state.allDayLastDate().atTimeInEpochMillis(state.hour, state.minute),
+                onDismiss = { showEndDatePicker = false },
+                onConfirm = { millis ->
+                    val endDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    onAllDayChange(allDay.copy(lengthInDays = (state.date.daysUntil(endDate) + 1).coerceAtLeast(1)))
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun AllDayReminderChip(
+    state: EventEditorState,
+    allDay: AllDaySpan,
+    onAllDayChange: (AllDaySpan?) -> Unit,
+    onTimeChange: (hour: Int, minute: Int) -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    val reminderTime = formatTimeOfDay(state.hour, state.minute, LocalUsesTwentyFourHourClock.current)
+
+    Box {
+        EventEditorChip(
+            label = if (allDay.isReminderOn) reminderTime else "No reminder",
+            icon = painterResource(if (allDay.isReminderOn) Res.drawable.bell else Res.drawable.bell_off2),
+            onClick = { showMenu = true }
+        )
+        if (showMenu) BelowPill {
+            EventChoiceMenu(
+                title = "Reminder",
+                onDismiss = { showMenu = false },
+                choices = listOf(
+                    EventChoice(
+                        label = "No reminder",
+                        isSelected = !allDay.isReminderOn,
+                        onClick = { onAllDayChange(allDay.copy(isReminderOn = false)) }
+                    ),
+                    EventChoice(
+                        label = "At $reminderTime",
+                        subtitle = if (allDay.lengthInDays > 1) "On each day" else "On this day",
+                        isSelected = allDay.isReminderOn,
+                        onClick = { onAllDayChange(allDay.copy(isReminderOn = true)) }
+                    )
+                ),
+                customTime = EventCustomTimeChoice(
+                    label = "Pick a time…",
+                    initialTimestamp = state.toEpochMillis(),
+                    onTimeChosen = { hour, minute ->
+                        onTimeChange(hour, minute)
+                        onAllDayChange(allDay.copy(isReminderOn = true))
+                    }
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryChoiceChip(
+    categoryId: String?,
+    categories: List<CalendarCategory>,
+    onCategoryChange: (String?) -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    val category = categories.firstOrNull { it.id == categoryId }
+    val noCategoryColor = MaterialTheme.colorScheme.outline
+
+    Box {
+        EventEditorChip(
+            label = category?.name ?: "No category",
+            dotColor = category?.colorHex?.toCategoryColor() ?: noCategoryColor,
+            onClick = { showMenu = true }
+        )
+        if (showMenu) BelowPill {
+            EventChoiceMenu(
+                title = "Category",
+                onDismiss = { showMenu = false },
+                choices = listOf(
+                    EventChoice(
+                        label = "No category",
+                        isSelected = category == null,
+                        dotColor = noCategoryColor,
+                        onClick = { onCategoryChange(null) }
+                    )
+                ) + categories.map { choice ->
+                    EventChoice(
+                        label = choice.name,
+                        isSelected = choice.id == category?.id,
+                        dotColor = choice.colorHex.toCategoryColor(),
+                        onClick = { onCategoryChange(choice.id) }
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun RepeatChip(state: EventEditorState, isEnabled: Boolean, onRecurrenceChange: (RecurrenceRule?) -> Unit) {
+    var showRepeatDialog by remember { mutableStateOf(false) }
+    Box {
+        EventEditorChip(
+            label = state.recurrenceRule?.let(::formatRecurrenceSummary) ?: "Does not repeat",
+            icon = painterResource(Res.drawable.refresh_cw),
+            isEnabled = isEnabled,
+            onClick = { showRepeatDialog = true }
+        )
+        if (showRepeatDialog) BelowPill {
+            RepeatOptionsDialog(
+                initialRule = state.recurrenceRule,
+                anchorDate = state.date,
+                onDismiss = { showRepeatDialog = false },
+                onConfirm = { rule ->
+                    onRecurrenceChange(rule)
+                    showRepeatDialog = false
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun EventEditorChip(
+    label: String,
+    onClick: (() -> Unit)?,
+    icon: Painter? = null,
+    dotColor: Color? = null,
+    isSelected: Boolean = false,
+    isEnabled: Boolean = true,
+    opensMenu: Boolean = true
+) {
+    val contentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+    val containerColor = chipContainerColor(isSelected)
+
+    Row(
+        modifier = Modifier
+            .alpha(if (isEnabled) 1f else 0.5f)
+            .clip(ChipShape)
+            .background(containerColor)
+            .then(if (onClick != null) Modifier.clickable(enabled = isEnabled, onClick = onClick) else Modifier)
+            .padding(horizontal = ChipHorizontalPadding, vertical = ChipVerticalPadding),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (icon != null) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                tint = contentColor.copy(alpha = if (isSelected) 1f else 0.7f),
+                modifier = Modifier.size(14.dp)
+            )
+        }
+        if (dotColor != null) {
+            ChoiceDot(dotColor)
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
+        )
+        if (opensMenu) {
+            Icon(
+                painter = painterResource(Res.drawable.chevron_down),
+                contentDescription = null,
+                tint = contentColor.copy(alpha = 0.7f),
+                modifier = Modifier.padding(start = 2.dp).size(14.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun chipContainerColor(isSelected: Boolean): Color = when {
+    isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+    !isDesktopPlatform || LocalAppIsDark.current -> MaterialTheme.colorScheme.surfaceVariant
+    else -> Color(0xFFD8D8D8)
+}
+
+@Composable
+private fun DetailsTogglePill(showsDetails: Boolean, onClick: () -> Unit) {
+    val labelLineHeight = with(LocalDensity.current) { MaterialTheme.typography.labelSmall.lineHeight.toDp() }
+    Box(
+        modifier = Modifier
+            .height(labelLineHeight + ChipVerticalPadding * 2)
+            .clip(ChipShape)
+            .background(chipContainerColor(isSelected = false))
+            .clickable(onClick = onClick)
+            .padding(horizontal = ChipHorizontalPadding),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = if (showsDetails) Icons.Default.Remove else Icons.Default.Add,
+            contentDescription = if (showsDetails) "Fewer details" else "Add details",
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            modifier = Modifier.size(14.dp)
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.BelowPill(menu: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .align(Alignment.BottomStart)
+            .offset(y = PillMenuGap)
+            .size(0.dp)
+    ) {
+        menu()
+    }
+}
+
+@Composable
+private fun ChoiceDot(color: Color) {
+    Box(modifier = Modifier.size(8.dp).background(color, CircleShape))
+}
+
+@Composable
+private fun EventDetailField(
+    icon: Painter,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    singleLine: Boolean = true,
+    onSubmit: (() -> Unit)? = null
+) {
+    EventDetailRow(icon = icon) {
+        EmberrTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = placeholder,
+            singleLine = singleLine,
+            hasBackground = false,
+            modifier = Modifier.weight(1f),
+            onSubmit = onSubmit
+        )
+    }
+}
+
+@Composable
+private fun EventDetailRow(icon: Painter, content: @Composable RowScope.() -> Unit) {
+    val firstLineHeight = with(LocalDensity.current) { MaterialTheme.typography.bodyLarge.lineHeight.toDp() }
+    val iconSize = 16.dp
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
+    ) {
+        Icon(
+            painter = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            modifier = Modifier
+                .padding(top = (firstLineHeight - iconSize) / 2)
+                .size(iconSize)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        content()
+    }
+}
+
+private class EventChoice(
+    val label: String,
+    val onClick: () -> Unit,
+    val subtitle: String? = null,
+    val isSelected: Boolean = false,
+    val dotColor: Color? = null
+)
+
+private class EventCustomTimeChoice(
+    val label: String,
+    val initialTimestamp: Long,
+    val onTimeChosen: (hour: Int, minute: Int) -> Unit
+)
+
+@Composable
+private fun EventChoiceMenu(
+    title: String,
+    choices: List<EventChoice>,
+    onDismiss: () -> Unit,
+    customTime: EventCustomTimeChoice? = null
+) {
+    if (isDesktopPlatform) {
+        EmberrDesktopMenu(
+            expanded = true,
+            onDismissRequest = onDismiss,
+            modifier = Modifier.widthIn(min = PillMenuMinWidth, max = PillMenuMaxWidth)
+        ) {
+            Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                choices.forEach { choice ->
+                    EmberrDesktopMenuOption(
+                        label = choice.label,
+                        subtitle = choice.subtitle,
+                        isSelected = choice.isSelected,
+                        icon = if (choice.dotColor != null) { { ChoiceDot(choice.dotColor) } } else null,
+                        onClick = {
+                            choice.onClick()
+                            onDismiss()
+                        }
+                    )
+                }
+                if (customTime != null) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
+                    EmberrDesktopSubmenu(
+                        menuWidthEstimate = DesktopTimePickerMenuWidth,
+                        anchor = { openPicker, _ ->
+                            EmberrDesktopMenuOption(label = customTime.label, onClick = openPicker)
+                        }
+                    ) { isPickerOpen, closePicker ->
+                        MinimalTimePickerDialog(
+                            expanded = isPickerOpen,
+                            initialTimestamp = customTime.initialTimestamp,
+                            onDismiss = closePicker,
+                            onConfirm = { hour, minute ->
+                                customTime.onTimeChosen(hour, minute)
+                                onDismiss()
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        return
+    }
+
+    var showsCustomTimePicker by remember { mutableStateOf(false) }
+
+    if (customTime != null && showsCustomTimePicker) {
+        MinimalTimePickerDialog(
+            initialTimestamp = customTime.initialTimestamp,
+            onDismiss = onDismiss,
+            onConfirm = { hour, minute -> customTime.onTimeChosen(hour, minute) }
+        )
+        return
+    }
+
+    EmberrBottomSheet(
+        expanded = true,
+        onDismiss = onDismiss,
+        title = title,
+        contentHorizontalPadding = 0.dp
+    ) { closeAnd ->
+        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            choices.forEach { choice ->
+                EmberrBottomSheetOption(
+                    label = choice.label,
+                    subtitle = choice.subtitle,
+                    isSelected = choice.isSelected,
+                    icon = if (choice.dotColor != null) { { ChoiceDot(choice.dotColor) } } else null,
+                    onClick = { closeAnd(choice.onClick) }
+                )
+            }
+            if (customTime != null) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 4.dp, horizontal = 20.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                )
+                EmberrBottomSheetOption(label = customTime.label, onClick = { showsCustomTimePicker = true })
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
 private fun EventViewFields(
     state: EventEditorState,
     categories: List<CalendarCategory>,
     onEditClick: () -> Unit,
     onDelete: (() -> Unit)?,
-    onClose: () -> Unit,
+    onClose: () -> Unit
 ) {
     val category = categories.firstOrNull { it.id == state.categoryId }
-    val accentColor = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.primary
-    val hazeState = remember { HazeState() }
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
     val allDay = state.allDay
 
@@ -820,138 +1212,110 @@ private fun EventViewFields(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = if (isDesktopPlatform) 16.dp else 24.dp,
-                bottom = if (isDesktopPlatform) 0.dp else 24.dp
+                top = 32.dp,
+                bottom = if (isDesktopPlatform) 0.dp else 20.dp
             ),
-        verticalArrangement = Arrangement.spacedBy(SectionSpacing)
+        verticalArrangement = Arrangement.spacedBy(EditorSpacing)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TopBarIconButton(
-                    icon = painterResource(Res.drawable.pen),
-                    contentDescription = "Edit",
-                    bgColor = Color.Transparent,
-                    tint = MaterialTheme.colorScheme.primary,
-                    hazeState = hazeState,
-                    hazeStyle = EmberrBlur.Regular,
-                    shadowElevation = EmberrShadowElevation.None,
-                    tooltip = "Edit",
-                    onClick = onEditClick
-                )
-                if (onDelete != null) {
-                    TopBarIconButton(
-                        icon = painterResource(Res.drawable.trash),
-                        contentDescription = "Delete",
-                        bgColor = Color.Transparent,
-                        tint = MaterialTheme.colorScheme.error,
-                        hazeState = hazeState,
-                        hazeStyle = EmberrBlur.Regular,
-                        shadowElevation = EmberrShadowElevation.None,
-                        tooltip = "Delete",
-                        onClick = onDelete
-                    )
-                }
-            }
-        }
-
-        // Accent bar + title/subtitle block.
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(accentColor)
+            Text(
+                text = state.name.ifBlank { "Untitled event" },
+                style = EventTitleStyle,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.width(18.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = state.name.ifBlank { "Untitled event" },
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = when {
-                        allDay == null ->
-                            "${formatFullDate(state.date)}, ${formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock)} – " +
-                                formatTimeOfDay(state.endHour(), state.endMinute(), usesTwentyFourHourClock)
-                        allDay.lengthInDays > 1 -> "${formatFullDate(state.date)} – ${formatFullDate(state.allDayLastDate())}, All day"
-                        else -> "${formatFullDate(state.date)}, All day"
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
+            if (onDelete != null) DeleteEventButton(alignedTo = EventTitleStyle, onDelete = onDelete)
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            state.recurrenceRule?.let { rule ->
-                InfoRow(icon = painterResource(Res.drawable.clock_circle), label = "Repeats ${formatRecurrenceSummary(rule).replaceFirstChar(Char::lowercase)}")
-            }
-            if (allDay != null && allDay.isReminderOn) {
-                val reminderTime = formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock)
-                InfoRow(
-                    icon = painterResource(Res.drawable.bell),
-                    label = if (allDay.lengthInDays > 1) "Reminder at $reminderTime each day" else "Reminder at $reminderTime"
-                )
-            }
-            if (category != null) {
-                InfoRow(icon = painterResource(Res.drawable.widget2), label = category.name)
-            }
-            if (state.url.isNotBlank()) {
-                val uriHandler = LocalUriHandler.current
-                InfoRow(
-                    icon = painterResource(Res.drawable.link),
-                    label = state.url,
-                    isLink = true,
-                    onClick = { try { uriHandler.openUri(state.url) } catch (_: Exception) {} }
-                )
-            }
-            if (state.description.isNotBlank()) {
-                InfoRow(icon = painterResource(Res.drawable.doc_text), label = state.description)
-            }
-        }
-
-        if (!isDesktopPlatform) {
-            EmberrButtonPrimary(
-                text = "Close",
-                onClick = onClose,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-@Composable
-private fun InfoRow(
-    icon: Painter,
-    label: String,
-    isLink: Boolean = false,
-    onClick: (() -> Unit)? = null
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .let { base -> if (onClick != null) base.clickable(onClick = onClick) else base },
-        verticalAlignment = Alignment.Top
-    ) {
-        Icon(
-            painter = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (isLink) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-            textDecoration = if (isLink) TextDecoration.Underline else null
+            text = buildAnnotatedString {
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(formatEditorDate(state.date)) }
+                append(formatEventTimeSuffix(state, usesTwentyFourHourClock))
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface
         )
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
+            verticalArrangement = Arrangement.spacedBy(ChipSpacing)
+        ) {
+            if (category != null) {
+                EventEditorChip(
+                    label = category.name,
+                    dotColor = category.colorHex.toCategoryColor(),
+                    opensMenu = false,
+                    onClick = null
+                )
+            }
+            if (allDay == null) {
+                EventEditorChip(
+                    label = formatDuration(state.durationMinutes),
+                    icon = painterResource(Res.drawable.clock_circle),
+                    opensMenu = false,
+                    onClick = null
+                )
+            } else {
+                EventEditorChip(
+                    label = if (allDay.lengthInDays == 1) "1 day" else "${allDay.lengthInDays} days",
+                    icon = painterResource(Res.drawable.calendar),
+                    opensMenu = false,
+                    onClick = null
+                )
+                EventEditorChip(
+                    label = if (allDay.isReminderOn) formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock) else "No reminder",
+                    icon = painterResource(if (allDay.isReminderOn) Res.drawable.bell else Res.drawable.bell_off2),
+                    opensMenu = false,
+                    onClick = null
+                )
+            }
+            state.recurrenceRule?.let { rule ->
+                EventEditorChip(
+                    label = formatRecurrenceSummary(rule),
+                    icon = painterResource(Res.drawable.refresh_cw),
+                    opensMenu = false,
+                    onClick = null
+                )
+            }
+        }
+
+        if (state.url.isNotBlank()) {
+            val uriHandler = LocalUriHandler.current
+            EventDetailRow(icon = painterResource(Res.drawable.link)) {
+                Text(
+                    text = state.url,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { try { uriHandler.openUri(state.url) } catch (_: Exception) {} }
+                )
+            }
+        }
+        if (state.description.isNotBlank()) {
+            EventDetailRow(icon = painterResource(Res.drawable.doc_text)) {
+                Text(
+                    text = state.description,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            EmberrButtonSecondary(text = "Close", onClick = onClose, modifier = Modifier.weight(1f))
+            EmberrButtonPrimary(text = "Edit", onClick = onEditClick, modifier = Modifier.weight(1f))
+        }
     }
 }
 
@@ -993,42 +1357,6 @@ private fun EventFieldRow(
 @Composable
 private fun PickerAtTap(tapAnchor: MenuTapAnchor, desktopMenuWidth: Dp, picker: @Composable () -> Unit) {
     if (isDesktopPlatform) MenuAtTap(tapAnchor, menuWidth = desktopMenuWidth, menu = picker) else picker()
-}
-
-@Composable
-private fun EventSwitchRow(
-    icon: Painter,
-    label: String,
-    isOn: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        shape = InteractiveShape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier
-            .clip(InteractiveShape)
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = FieldPadding, vertical = FieldPadding),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                modifier = Modifier.size(16.dp)
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 8.dp).weight(1f)
-            )
-            EmberrSwitch(isOn = isOn)
-        }
-    }
 }
 
 @Composable
@@ -1078,49 +1406,45 @@ private fun SheetOptionRow(label: String, onClick: () -> Unit) {
     }
 }
 
-private val RepeatMenuWidth = 220.dp
 private val CustomRepeatMenuWidth = 340.dp
 
 @Composable
 private fun RepeatDesktopMenu(
     initialRule: RecurrenceRule?,
     anchorDate: LocalDate,
-    tapAnchor: MenuTapAnchor,
     onDismiss: () -> Unit,
     onConfirm: (RecurrenceRule?) -> Unit
 ) {
-    MenuAtTap(tapAnchor, menuWidth = RepeatMenuWidth) {
-        EmberrDesktopMenu(
-            expanded = true,
-            onDismissRequest = onDismiss,
-            modifier = Modifier.width(RepeatMenuWidth)
-        ) {
-            Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                EmberrDesktopMenuOption(label = "Never", onClick = { onConfirm(null) })
-                EmberrDesktopMenuOption(label = "Daily", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.DAILY)) })
-                EmberrDesktopMenuOption(
-                    label = "Weekly",
-                    onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.WEEKLY, daysOfWeek = setOf(anchorDate.dayOfWeek))) }
-                )
-                EmberrDesktopMenuOption(label = "Monthly", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.MONTHLY)) })
-                EmberrDesktopMenuOption(label = "Yearly", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.YEARLY)) })
-                EmberrDesktopSubmenu(
-                    menuWidthEstimate = CustomRepeatMenuWidth,
-                    anchor = { openCustom, _ -> EmberrDesktopMenuOption(label = "Custom…", onClick = openCustom) }
-                ) { isCustomOpen, closeCustom ->
-                    EmberrDesktopMenu(
-                        expanded = isCustomOpen,
-                        onDismissRequest = closeCustom,
-                        modifier = Modifier.width(CustomRepeatMenuWidth)
-                    ) {
-                        CustomRepeatForm(
-                            initialRule = initialRule,
-                            anchorDate = anchorDate,
-                            onCancel = closeCustom,
-                            onDone = onConfirm,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
+    EmberrDesktopMenu(
+        expanded = true,
+        onDismissRequest = onDismiss,
+        modifier = Modifier.widthIn(min = PillMenuMinWidth, max = PillMenuMaxWidth)
+    ) {
+        Column(modifier = Modifier.padding(vertical = 4.dp)) {
+            EmberrDesktopMenuOption(label = "Never", onClick = { onConfirm(null) })
+            EmberrDesktopMenuOption(label = "Daily", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.DAILY)) })
+            EmberrDesktopMenuOption(
+                label = "Weekly",
+                onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.WEEKLY, daysOfWeek = setOf(anchorDate.dayOfWeek))) }
+            )
+            EmberrDesktopMenuOption(label = "Monthly", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.MONTHLY)) })
+            EmberrDesktopMenuOption(label = "Yearly", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.YEARLY)) })
+            EmberrDesktopSubmenu(
+                menuWidthEstimate = CustomRepeatMenuWidth,
+                anchor = { openCustom, _ -> EmberrDesktopMenuOption(label = "Custom…", onClick = openCustom) }
+            ) { isCustomOpen, closeCustom ->
+                EmberrDesktopMenu(
+                    expanded = isCustomOpen,
+                    onDismissRequest = closeCustom,
+                    modifier = Modifier.width(CustomRepeatMenuWidth)
+                ) {
+                    CustomRepeatForm(
+                        initialRule = initialRule,
+                        anchorDate = anchorDate,
+                        onCancel = closeCustom,
+                        onDone = onConfirm,
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
             }
         }
@@ -1131,7 +1455,6 @@ private fun RepeatDesktopMenu(
 fun RepeatOptionsDialog(
     initialRule: RecurrenceRule?,
     anchorDate: LocalDate,
-    tapAnchor: MenuTapAnchor,
     onDismiss: () -> Unit,
     onConfirm: (RecurrenceRule?) -> Unit
 ) {
@@ -1139,7 +1462,6 @@ fun RepeatOptionsDialog(
         RepeatDesktopMenu(
             initialRule = initialRule,
             anchorDate = anchorDate,
-            tapAnchor = tapAnchor,
             onDismiss = onDismiss,
             onConfirm = onConfirm
         )
