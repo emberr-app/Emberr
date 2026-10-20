@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -57,6 +58,32 @@ class CalendarViewModel(
 
     fun setViewMode(mode: CalendarViewMode) {
         settingsManager.saveCalendarViewMode(mode.name)
+    }
+
+    val hiddenCategoryVisibilityKeys: StateFlow<Set<String>> = settingsManager.hiddenCalendarCategoriesFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsManager.getHiddenCalendarCategories())
+
+    val noCategoryVisibilityKey: StateFlow<String> = activeSpaceStore.activeSpaceId
+        .map { spaceId -> noCategoryVisibilityKeyFor(spaceId) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, noCategoryVisibilityKeyFor(activeSpaceStore.currentActiveSpaceId()))
+
+    private val categoryVisibility: Flow<CalendarCategoryVisibility> = combine(
+        hiddenCategoryVisibilityKeys,
+        repository.getAllCategories(),
+        activeSpaceStore.activeSpaceId
+    ) { hiddenKeys, categoryEntities, spaceId ->
+        CalendarCategoryVisibility(
+            hiddenVisibilityKeys = hiddenKeys,
+            existingCategoryIds = categoryEntities.map { it.categoryId }.toSet(),
+            spaceId = spaceId
+        )
+    }.shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    fun toggleCategoryVisibility(visibilityKey: String) {
+        val hiddenKeys = settingsManager.getHiddenCalendarCategories()
+        settingsManager.saveHiddenCalendarCategories(
+            if (visibilityKey in hiddenKeys) hiddenKeys - visibilityKey else hiddenKeys + visibilityKey
+        )
     }
 
     val firstDayOfWeekPreference: StateFlow<FirstDayOfWeekPreference> = settingsManager.firstDayOfWeekPreferenceFlow
@@ -128,9 +155,13 @@ class CalendarViewModel(
     }
 
     fun eventsForDate(dateString: String): Flow<List<CalendarEvent>> =
-        repository.getCalendarTasksForDate(dateString).map { tasks -> tasks.mapNotNull { it.toCalendarEvent() } }
+        combine(repository.getCalendarTasksForDate(dateString), categoryVisibility) { tasks, visibility ->
+            tasks.mapNotNull { it.toCalendarEvent() }.filter { event -> visibility.isEventShown(event.categoryId) }
+        }
     fun eventsForMonth(yearMonth: String): Flow<List<CalendarEvent>> =
-        repository.getCalendarTasksForMonth(yearMonth).map { tasks -> tasks.mapNotNull { it.toCalendarEvent() } }
+        combine(repository.getCalendarTasksForMonth(yearMonth), categoryVisibility) { tasks, visibility ->
+            tasks.mapNotNull { it.toCalendarEvent() }.filter { event -> visibility.isEventShown(event.categoryId) }
+        }
 
     // Used by the checkbox row's three-dot menu (Daily/Note screens) to look up the CalendarEvent
     // for a tapped blockId. When occurrenceDate is known (the checkbox is a virtual recurring

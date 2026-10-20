@@ -152,6 +152,8 @@ fun CalendarScreen(
     val viewMode by viewModel.viewMode.collectAsState()
     var selectedDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     val categories by viewModel.categories.collectAsState()
+    val hiddenCategoryVisibilityKeys by viewModel.hiddenCategoryVisibilityKeys.collectAsState()
+    val noCategoryVisibilityKey by viewModel.noCategoryVisibilityKey.collectAsState()
     val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
     val firstDayOfWeek = LocalFirstDayOfWeek.current
     val events by remember(selectedDate) { viewModel.eventsForDate(selectedDate.toString()) }
@@ -527,7 +529,10 @@ fun CalendarScreen(
                         categories = categories,
                         onAddCategory = viewModel::addCategory,
                         onUpdateCategory = viewModel::updateCategory,
-                        onDeleteCategory = viewModel::deleteCategory
+                        onDeleteCategory = viewModel::deleteCategory,
+                        hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
+                        noCategoryVisibilityKey = noCategoryVisibilityKey,
+                        onToggleCategoryVisibility = viewModel::toggleCategoryVisibility
                     )
                 }
             }
@@ -547,6 +552,9 @@ fun CalendarScreen(
             onAddCategory = viewModel::addCategory,
             onUpdateCategory = viewModel::updateCategory,
             onDeleteCategory = viewModel::deleteCategory,
+            hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
+            noCategoryVisibilityKey = noCategoryVisibilityKey,
+            onToggleCategoryVisibility = viewModel::toggleCategoryVisibility,
             modifier = Modifier.padding(bottom = 16.dp)
         )
     }

@@ -30,6 +30,8 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import androidx.compose.ui.graphics.painter.Painter
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import com.emberr.ui.theme.LocalAppIsDark
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.math.abs
@@ -144,6 +146,7 @@ private fun EmberrFloatingDialog(
 
     val blurSource = LocalEmberrBlurSource.current
     val surfaceColor = MaterialTheme.colorScheme.surface
+    val dialogContentHazeState = remember { HazeState() }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -164,67 +167,70 @@ private fun EmberrFloatingDialog(
                     else Modifier.background(surfaceColor)
                 )
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .imePadding()
-            ) {
-                if (title != null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                                .padding(horizontal = SheetHorizontalPadding, vertical = 8.dp)
-                        )
-                        if (headerAction != null) {
-                            Box(modifier = Modifier.padding(end = SheetHorizontalPadding)) {
-                                TopBarIconButton(
-                                    icon = headerAction.icon,
-                                    contentDescription = headerAction.contentDescription,
-                                    bgColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background,
-                                    tint = headerAction.tint ?: MaterialTheme.colorScheme.onSurface,
-                                    shadowElevation = EmberrShadowElevation.None,
-                                    tooltip = headerAction.tooltip,
-                                    onClick = headerAction.onClick
-                                )
-                            }
-                        }
-//                        Box(modifier = Modifier.padding(end = SheetHorizontalPadding)) {
-//                            TopBarIconButton(
-//                                icon = Icons.Default.Close,
-//                                contentDescription = "Close",
-//                                bgColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background,
-//                                tint = MaterialTheme.colorScheme.onSurface,
-//                                shadowElevation = EmberrShadowElevation.None,
-//                                onClick = onDismiss
-//                            )
-//                        }
-                    }
-                }
-
-                if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(horizontal = SheetHorizontalPadding).padding(bottom = 16.dp)
-                    )
-                }
-
+            CompositionLocalProvider(LocalEmberrBlurSource provides dialogContentHazeState) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 560.dp)
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = contentHorizontalPadding)
+                        .hazeSource(state = dialogContentHazeState)
+                        .imePadding()
                 ) {
-                    content { action -> closeAnd(action) }
+                    if (title != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                                    .padding(horizontal = SheetHorizontalPadding, vertical = 8.dp)
+                            )
+                            if (headerAction != null) {
+                                Box(modifier = Modifier.padding(end = SheetHorizontalPadding)) {
+                                    TopBarIconButton(
+                                        icon = headerAction.icon,
+                                        contentDescription = headerAction.contentDescription,
+                                        bgColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background,
+                                        tint = headerAction.tint ?: MaterialTheme.colorScheme.onSurface,
+                                        shadowElevation = EmberrShadowElevation.None,
+                                        tooltip = headerAction.tooltip,
+                                        onClick = headerAction.onClick
+                                    )
+                                }
+                            }
+    //                        Box(modifier = Modifier.padding(end = SheetHorizontalPadding)) {
+    //                            TopBarIconButton(
+    //                                icon = Icons.Default.Close,
+    //                                contentDescription = "Close",
+    //                                bgColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background,
+    //                                tint = MaterialTheme.colorScheme.onSurface,
+    //                                shadowElevation = EmberrShadowElevation.None,
+    //                                onClick = onDismiss
+    //                            )
+    //                        }
+                        }
+                    }
+
+                    if (subtitle != null) {
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(horizontal = SheetHorizontalPadding).padding(bottom = 16.dp)
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 560.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = contentHorizontalPadding)
+                    ) {
+                        content { action -> closeAnd(action) }
+                    }
                 }
             }
         }

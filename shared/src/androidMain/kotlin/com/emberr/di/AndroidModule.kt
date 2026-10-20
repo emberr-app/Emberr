@@ -137,7 +137,8 @@ val androidModule = module {
             calendarTaskDao = get(),
             categoryDao = get(),
             clockFormat = get(),
-            firstDayOfWeek = get()
+            firstDayOfWeek = get(),
+            settingsManager = get()
         )
     }
 
@@ -152,7 +153,8 @@ val androidModule = module {
         com.emberr.presentation.widget.calendar.CalendarWidgetContentReader(
             calendarTaskDao = get(),
             categoryDao = get(),
-            firstDayOfWeek = get()
+            firstDayOfWeek = get(),
+            settingsManager = get()
         )
     }
 

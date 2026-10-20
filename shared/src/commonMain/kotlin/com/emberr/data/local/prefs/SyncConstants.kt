@@ -55,6 +55,7 @@ object SyncConstants {
     const val KEY_MIC_BUTTON_VISIBLE = "mic_button_visible"
     const val DEFAULT_MIC_BUTTON_VISIBLE = true
     const val KEY_HIDDEN_OVERVIEW_SECTIONS = "hidden_overview_sections"
+    const val KEY_HIDDEN_CALENDAR_CATEGORIES = "hidden_calendar_categories"
     const val KEY_KEYBOARD_TOOLBAR_ITEMS = "keyboard_toolbar_items"
     const val DEFAULT_KEYBOARD_TOOLBAR_ITEMS = "DEFAULT"
     const val KEY_CUSTOM_WINDOW_FRAME = "custom_window_frame"

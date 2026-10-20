@@ -147,6 +147,10 @@ interface SettingsManager {
     fun getHiddenOverviewSections(): Set<String>
     fun saveHiddenOverviewSections(storageKeys: Set<String>)
 
+    val hiddenCalendarCategoriesFlow: Flow<Set<String>>
+    fun getHiddenCalendarCategories(): Set<String>
+    fun saveHiddenCalendarCategories(visibilityKeys: Set<String>)
+
     val keyboardToolbarItemsFlow: Flow<String>
     fun getKeyboardToolbarItems(): String
     fun saveKeyboardToolbarItems(savedValue: String)

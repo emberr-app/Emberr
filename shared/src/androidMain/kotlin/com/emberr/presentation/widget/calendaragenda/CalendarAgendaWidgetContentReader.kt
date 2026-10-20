@@ -2,10 +2,12 @@
 package com.emberr.presentation.widget.calendaragenda
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
+import com.emberr.presentation.calendar.CalendarCategoryVisibility
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetFirstDayOfWeek
 import com.emberr.presentation.widget.WidgetLog
@@ -33,6 +35,7 @@ class CalendarAgendaWidgetContentReader(
     private val categoryDao: CategoryDao,
     private val clockFormat: WidgetClockFormat,
     private val firstDayOfWeek: WidgetFirstDayOfWeek,
+    private val settingsManager: SettingsManager,
 ) {
     suspend fun readContentOnce(spaceId: String, shownMonth: String?): CalendarAgendaWidgetContent? =
         withContext(Dispatchers.IO) {
@@ -55,12 +58,19 @@ class CalendarAgendaWidgetContentReader(
                 emptyMap()
             }
 
+            val categoryVisibility = CalendarCategoryVisibility(
+                hiddenVisibilityKeys = settingsManager.getHiddenCalendarCategories(),
+                existingCategoryIds = colorsByCategoryId.keys,
+                spaceId = spaceId
+            )
+            val shownTasks = tasks.filter { task -> categoryVisibility.isEventShown(task.categoryId) }
+
             CalendarAgendaWidgetContent(
                 shownMonth = monthKey,
                 monthLabel = formatMonthLabel(firstOfMonth),
                 weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> day.name.take(1) },
-                weeks = buildWeeks(firstOfMonth, today, weekStartsOn, tasks),
-                events = buildEvents(tasks, colorsByCategoryId)
+                weeks = buildWeeks(firstOfMonth, today, weekStartsOn, shownTasks),
+                events = buildEvents(shownTasks, colorsByCategoryId)
             )
         }
 

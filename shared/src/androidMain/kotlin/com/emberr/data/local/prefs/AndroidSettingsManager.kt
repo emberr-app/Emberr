@@ -495,6 +495,18 @@ class AndroidSettingsManager(
         _hiddenOverviewSections.value = storageKeys
     }
 
+    private val _hiddenCalendarCategories = MutableStateFlow(
+        sharedPreferences.getStringSet(SyncConstants.KEY_HIDDEN_CALENDAR_CATEGORIES, emptySet()).orEmpty().toSet()
+    )
+    override val hiddenCalendarCategoriesFlow: Flow<Set<String>> = _hiddenCalendarCategories
+
+    override fun getHiddenCalendarCategories(): Set<String> = _hiddenCalendarCategories.value
+
+    override fun saveHiddenCalendarCategories(visibilityKeys: Set<String>) {
+        sharedPreferences.edit { putStringSet(SyncConstants.KEY_HIDDEN_CALENDAR_CATEGORIES, visibilityKeys) }
+        _hiddenCalendarCategories.value = visibilityKeys
+    }
+
     private val _keyboardToolbarItems = MutableStateFlow(
         sharedPreferences.getString(SyncConstants.KEY_KEYBOARD_TOOLBAR_ITEMS, SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS)
             ?: SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS
