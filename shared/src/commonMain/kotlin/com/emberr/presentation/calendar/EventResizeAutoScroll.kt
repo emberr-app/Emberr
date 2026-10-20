@@ -6,7 +6,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -24,9 +24,11 @@ class EventResizeAutoScroll(
     var visibleBottomInsetPx = 0f
 
     fun scrollTowards(pointerInWindow: Offset): Boolean {
-        val viewport = viewportCoordinates?.takeIf { it.isAttached }?.boundsInWindow() ?: return false
-        val upperZoneEnd = viewport.top + visibleTopInsetPx + edgeZonePx
-        val lowerZoneStart = viewport.bottom - visibleBottomInsetPx - edgeZonePx
+        val viewport = viewportCoordinates?.takeIf { it.isAttached } ?: return false
+        val viewportTop = viewport.positionInWindow().y
+        val viewportBottom = viewportTop + viewport.size.height
+        val upperZoneEnd = viewportTop + visibleTopInsetPx + edgeZonePx
+        val lowerZoneStart = viewportBottom - visibleBottomInsetPx - edgeZonePx
         val step = when {
             pointerInWindow.y < upperZoneEnd -> -fastestStepPx * closeness(upperZoneEnd - pointerInWindow.y)
             pointerInWindow.y > lowerZoneStart -> fastestStepPx * closeness(pointerInWindow.y - lowerZoneStart)
