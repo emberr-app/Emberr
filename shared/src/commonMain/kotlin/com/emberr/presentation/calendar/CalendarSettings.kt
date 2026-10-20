@@ -57,21 +57,17 @@ import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
-import com.emberr.presentation.settings.SettingsActionRow
+import com.emberr.presentation.settings.SettingsChoice
+import com.emberr.presentation.settings.SettingsChoiceRow
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.SettingsRowIcon
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
-import com.emberr.presentation.shared.components.EmberrDesktopMenu
-import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.KmpBackHandler
-import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.emberrBorder
-import com.emberr.presentation.shared.components.menuTapAnchor
-import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -95,9 +91,9 @@ private val SidebarMaxWidth = 340.dp
 private const val SidebarWidthFraction = 0.9f
 private val SidebarSwipeCloseDistance = 80.dp
 private const val SidebarScrimAlpha = 0.25f
+private const val DesktopLightCardTintAlpha = 0.05f
 private val SidebarContentHorizontalPadding = 8.dp
 private val SidebarHeaderFadeTail = 16.dp
-private val FirstDayOfWeekMenuWidth = 220.dp
 
 @Composable
 fun CalendarSidebar(
@@ -267,11 +263,10 @@ fun CalendarSettingsContent(
     onViewModeChange: (CalendarViewMode) -> Unit = {}
 ) {
     var showFirstDayOfWeekOptions by remember { mutableStateOf(false) }
-    val firstDayOfWeekTapAnchor = rememberMenuTapAnchor()
-    val cardColor = if (isDesktopPlatform && LocalAppIsDark.current) {
-        MaterialTheme.colorScheme.surfaceVariant
-    } else {
-        MaterialTheme.colorScheme.surface
+    val cardColor = when {
+        !isDesktopPlatform -> MaterialTheme.colorScheme.surface
+        LocalAppIsDark.current -> MaterialTheme.colorScheme.surfaceVariant
+        else -> MaterialTheme.colorScheme.onSurface.copy(alpha = DesktopLightCardTintAlpha)
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -303,44 +298,22 @@ fun CalendarSettingsContent(
         )
 
         SettingsGroup(title = "General", cardColor = cardColor) {
-            Box(modifier = Modifier.menuTapAnchor(firstDayOfWeekTapAnchor)) {
-                if (isDesktopPlatform) {
-                    SettingsActionRow(
-                        icon = painterResource(Res.drawable.calendar),
-                        title = "First Day of Week",
-                        trailingLabel = firstDayOfWeekPreference.displayName,
-                        onClick = { showFirstDayOfWeekOptions = true }
-                    )
-                } else {
-                    FirstDayOfWeekStackedRow(
-                        selectedLabel = firstDayOfWeekPreference.displayName,
-                        onClick = { showFirstDayOfWeekOptions = true }
-                    )
-                }
-
-                if (isDesktopPlatform) {
-                    MenuAtTap(firstDayOfWeekTapAnchor, menuWidth = FirstDayOfWeekMenuWidth) {
-                        EmberrDesktopMenu(
-                            expanded = showFirstDayOfWeekOptions,
-                            onDismissRequest = { showFirstDayOfWeekOptions = false },
-                            modifier = Modifier.width(FirstDayOfWeekMenuWidth)
-                        ) {
-                            Column(modifier = Modifier.padding(8.dp)) {
-                                FirstDayOfWeekPreference.entries.forEach { option ->
-                                    EmberrDesktopMenuOption(
-                                        label = option.displayName,
-                                        isSelected = option == firstDayOfWeekPreference,
-                                        onClick = {
-                                            onFirstDayOfWeekPreferenceChange(option)
-                                            showFirstDayOfWeekOptions = false
-                                        },
-                                        outerHorizontalPadding = 0.dp
-                                    )
-                                }
-                            }
+            if (isDesktopPlatform) {
+                SettingsChoiceRow(
+                    icon = painterResource(Res.drawable.calendar),
+                    title = "First Day of Week",
+                    value = firstDayOfWeekPreference.displayName,
+                    choices = FirstDayOfWeekPreference.entries.map { option ->
+                        SettingsChoice(label = option.displayName, isSelected = option == firstDayOfWeekPreference) {
+                            onFirstDayOfWeekPreferenceChange(option)
                         }
                     }
-                }
+                )
+            } else {
+                FirstDayOfWeekStackedRow(
+                    selectedLabel = firstDayOfWeekPreference.displayName,
+                    onClick = { showFirstDayOfWeekOptions = true }
+                )
             }
         }
     }
