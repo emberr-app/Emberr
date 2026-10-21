@@ -4,7 +4,7 @@ import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
 
-fun noCategoryVisibilityKeyFor(spaceId: String): String = "no_category_$spaceId"
+const val NO_CATEGORY_VISIBILITY_KEY = "no_category_$ACCOUNT_SPACE_ID"
 
 fun spaceVisibilityKeyFor(spaceId: String): String = "space_$spaceId"
 
@@ -19,5 +19,5 @@ data class CalendarCategoryVisibility(
         task.sourceType == TaskSource.NOTE && spaceVisibilityKeyFor(task.spaceId) in hiddenVisibilityKeys
 
     private fun categoryVisibilityKeyFor(categoryId: String?): String =
-        if (categoryId != null && categoryId in existingCategoryIds) categoryId else noCategoryVisibilityKeyFor(ACCOUNT_SPACE_ID)
+        if (categoryId != null && categoryId in existingCategoryIds) categoryId else NO_CATEGORY_VISIBILITY_KEY
 }

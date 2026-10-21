@@ -24,7 +24,7 @@ class CalendarCategoryVisibilityTest {
     @Test
     fun eventsWhoseCategoryWasDeletedFollowTheNoCategoryToggle() {
         val visibility = CalendarCategoryVisibility(
-            hiddenVisibilityKeys = setOf(noCategoryVisibilityKeyFor(ACCOUNT_SPACE_ID)),
+            hiddenVisibilityKeys = setOf(NO_CATEGORY_VISIBILITY_KEY),
             existingCategoryIds = setOf("work")
         )
 

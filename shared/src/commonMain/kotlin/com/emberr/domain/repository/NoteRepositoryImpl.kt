@@ -712,10 +712,13 @@ class NoteRepositoryImpl(
 
         val dailyNoteDatesPointedToSurvivors = LinkedHashSet<String>()
         var rewroteReferencesToDeletedCategories = false
-        for (deletedCategory in categoryDao.getDeletedCategories()) {
-            val survivorId = survivorIdByName[deletedCategory.name.trim().lowercase()] ?: continue
+        val survivorIdByDeletedId = categoryDao.getDeletedCategories()
+            .mapNotNull { deleted -> survivorIdByName[deleted.name.trim().lowercase()]?.let { deleted.categoryId to it } }
+            .toMap()
+        val deletedIdsStillInUse = deletedCategoryIdsStillInUse(survivorIdByDeletedId.keys)
+        for ((deletedId, survivorId) in survivorIdByDeletedId.filterKeys { it in deletedIdsStillInUse }) {
             try {
-                val rewritten = pointCategoryReferencesToSurvivor(deletedCategory.categoryId, survivorId)
+                val rewritten = pointCategoryReferencesToSurvivor(deletedId, survivorId)
                 dailyNoteDatesPointedToSurvivors += rewritten.dailyNoteDates
                 if (rewritten.rewroteAnything) rewroteReferencesToDeletedCategories = true
             } catch (e: CancellationException) {
@@ -738,6 +741,18 @@ class NoteRepositoryImpl(
         }
         categoryDao.moveAllCategoriesToSpace(ACCOUNT_SPACE_ID, System.currentTimeMillis())
         return CategoryMoveToAccount(dailyNoteDatesPointedToSurvivors)
+    }
+
+    private suspend fun deletedCategoryIdsStillInUse(deletedCategoryIds: Set<String>): Set<String> {
+        if (deletedCategoryIds.isEmpty()) return emptySet()
+        val deletedIds = deletedCategoryIds.toList()
+        val pinnedCheckboxCategoryIds = getDailyNote("global_pinned")?.blocks.orEmpty()
+            .filterIsInstance<CheckboxBlock>()
+            .mapNotNull { it.categoryId }
+            .filter { it in deletedCategoryIds }
+        return (calendarTaskDao.getCategoryIdsUsedByTasks(deletedIds) +
+            calendarEventExceptionDao.getOverrideCategoryIdsUsedBy(deletedIds) +
+            pinnedCheckboxCategoryIds).toSet()
     }
 
     private class RewrittenCategoryReferences(val rewroteAnything: Boolean, val dailyNoteDates: Set<String>)
@@ -1320,9 +1335,6 @@ class NoteRepositoryImpl(
 
     override suspend fun getNoteTombstonesModifiedSince(timestamp: Long): List<SelfHostDeletedNoteEntity> =
         selfHostDeletedNoteDao.getTombstonesModifiedSince(timestamp)
-
-    override suspend fun getNoteTombstone(entityId: String): SelfHostDeletedNoteEntity? =
-        getNoteTombstoneInSpace(activeSpaceId(), entityId)
 
     override suspend fun getNoteTombstoneInSpace(spaceId: String, entityId: String): SelfHostDeletedNoteEntity? =
         selfHostDeletedNoteDao.getTombstoneByNoteId(entityId)

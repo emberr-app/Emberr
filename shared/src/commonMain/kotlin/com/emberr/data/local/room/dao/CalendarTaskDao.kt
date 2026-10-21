@@ -13,17 +13,8 @@ interface CalendarTaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertTasks(tasks: List<CalendarTaskEntity>)
 
-    // Fast query for the Calendar Pager to render the dot indicators.
-    // Pass yearMonth as "2026-07" to get everything in July.
-    @Query("SELECT * FROM calendar_tasks WHERE spaceId IN (:spaceIds) AND targetDate LIKE :yearMonth || '%'")
-    fun getTasksForMonth(spaceIds: List<String>, yearMonth: String): Flow<List<CalendarTaskEntity>>
-
     @Query("SELECT * FROM calendar_tasks WHERE targetDate LIKE :yearMonth || '%' AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     suspend fun getTasksInMonth(yearMonth: String): List<CalendarTaskEntity>
-
-    // Precise query for the Bottom Sheet when a user clicks a specific day.
-    @Query("SELECT * FROM calendar_tasks WHERE spaceId IN (:spaceIds) AND targetDate = :dateString")
-    fun getTasksForDate(spaceIds: List<String>, dateString: String): Flow<List<CalendarTaskEntity>>
 
     @Query("SELECT * FROM calendar_tasks WHERE targetDate = :dateString AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     suspend fun getTasksOnDate(dateString: String): List<CalendarTaskEntity>
@@ -31,9 +22,8 @@ interface CalendarTaskDao {
     @Query("SELECT * FROM calendar_tasks WHERE blockId = :blockId LIMIT 1")
     suspend fun getTaskById(blockId: String): CalendarTaskEntity?
 
-    // Allows the Bottom Sheet to instantly toggle a checkbox without loading the full note.
-    @Query("UPDATE calendar_tasks SET isChecked = :isChecked WHERE blockId = :blockId")
-    suspend fun updateTaskStatus(blockId: String, isChecked: Boolean)
+    @Query("SELECT DISTINCT categoryId FROM calendar_tasks WHERE categoryId IN (:categoryIds)")
+    suspend fun getCategoryIdsUsedByTasks(categoryIds: List<String>): List<String>
 
     // Used by the NoteEditorViewModel/DailyEditorViewModel to clear old tasks before saving new ones.
     @Query("SELECT * FROM calendar_tasks WHERE spaceId = :spaceId AND noteId = :noteId")
@@ -41,10 +31,6 @@ interface CalendarTaskDao {
 
     @Query("DELETE FROM calendar_tasks WHERE spaceId = :spaceId AND noteId = :noteId")
     suspend fun deleteTasksByNoteId(spaceId: String, noteId: String)
-
-    // For when a user backspaces/deletes a single task in the editor.
-    @Query("DELETE FROM calendar_tasks WHERE blockId = :blockId")
-    suspend fun deleteTaskById(blockId: String)
 
     @Query("SELECT * FROM calendar_tasks WHERE targetDate >= :fromDate AND isChecked = 0 AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL) ORDER BY targetDate ASC")
     suspend fun getUpcomingTasks(fromDate: String): List<CalendarTaskEntity>
