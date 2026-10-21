@@ -128,7 +128,6 @@ interface NoteRepository {
     // entityId is matched against noteId first, then dateString (daily notes are addressed by
     // dateString in LAN sync envelopes, which don't carry a noteId).
     suspend fun getNoteTombstonesModifiedSince(timestamp: Long): List<com.emberr.data.local.room.entity.SelfHostDeletedNoteEntity>
-    suspend fun getNoteTombstone(entityId: String): com.emberr.data.local.room.entity.SelfHostDeletedNoteEntity?
     suspend fun getNoteTombstoneInSpace(spaceId: String, entityId: String): com.emberr.data.local.room.entity.SelfHostDeletedNoteEntity?
 
     // Applies a tombstone received from a peer: hard-deletes the local copy unless it was genuinely

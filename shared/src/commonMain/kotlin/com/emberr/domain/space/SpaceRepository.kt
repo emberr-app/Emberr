@@ -23,8 +23,6 @@ class SpaceRepository(
 
     fun observeSpaces(): Flow<List<SpaceEntity>> = spaceDao.getAllSpaces()
 
-    suspend fun getSpaces(): List<SpaceEntity> = spaceDao.getAllSpacesOnce()
-
     suspend fun getSpace(spaceId: String): SpaceEntity? = spaceDao.getSpaceById(spaceId)
 
     suspend fun prepareSpacesForLaunch() {

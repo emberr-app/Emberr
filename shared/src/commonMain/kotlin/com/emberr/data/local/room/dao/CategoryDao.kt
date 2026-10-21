@@ -18,9 +18,6 @@ interface CategoryDao {
     @Query("SELECT * FROM calendar_categories WHERE spaceId = :spaceId AND isDeleted = 0")
     suspend fun getAllCategoriesOnce(spaceId: String): List<CategoryEntity>
 
-    @Query("SELECT * FROM calendar_categories WHERE isDeleted = 0 ORDER BY createdAt ASC")
-    fun getAllCategoriesAcrossSpaces(): Flow<List<CategoryEntity>>
-
     @Query("SELECT * FROM calendar_categories WHERE isDeleted = 0")
     suspend fun getAllCategoriesOnceAcrossSpaces(): List<CategoryEntity>
 

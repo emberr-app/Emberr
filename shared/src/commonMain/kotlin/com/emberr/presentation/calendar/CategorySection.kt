@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.settings.SettingsActionRow
@@ -85,7 +84,7 @@ fun CategorySection(
     spaces: List<SpaceEntity>,
     cardColor: Color = MaterialTheme.colorScheme.surface
 ) {
-    val noCategoryVisibilityKey = noCategoryVisibilityKeyFor(ACCOUNT_SPACE_ID)
+    val noCategoryVisibilityKey = NO_CATEGORY_VISIBILITY_KEY
     var editorState by remember { mutableStateOf<CategoryEditorState?>(null) }
 
     fun isNameTakenByAnotherCategory(state: CategoryEditorState?): Boolean =

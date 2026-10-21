@@ -3,7 +3,6 @@ package com.emberr.presentation.daily
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
-import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.data.local.room.entity.datesShownOn
 import com.emberr.data.local.room.entity.toAllDaySpan
 import com.emberr.data.local.room.entity.toRecurrenceRule
@@ -796,57 +795,6 @@ class DailyEditorViewModel(
                 .groupBy({ (date, _) -> date }, { (_, task) -> task })
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
-
-    fun toggleCalendarTask(task: CalendarTaskEntity, isChecked: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (task.sourceType == TaskSource.DAILY && task.noteId == currentDateString) {
-                _blocks.update { currentBlocks ->
-                    currentBlocks.map { block ->
-                        if (block.id == task.blockId && block is CheckboxBlock) {
-                            block.copy(isChecked = isChecked)
-                        } else block
-                    }
-                }
-                val saved = performSave()
-                if (!saved) {
-                    _blocks.update { currentBlocks ->
-                        currentBlocks.map { block ->
-                            if (block.id == task.blockId && block is CheckboxBlock) {
-                                block.copy(isChecked = !isChecked)
-                            } else block
-                        }
-                    }
-                }
-                return@launch
-            }
-
-            try {
-                SyncCoordinator.mutex.withLock {
-                    if (task.sourceType == TaskSource.DAILY) {
-                        val content = repository.getDailyNote(task.noteId) ?: return@withLock
-                        val updatedBlocks = content.blocks.map { block ->
-                            if (block.id == task.blockId && block is CheckboxBlock) {
-                                block.copy(isChecked = isChecked)
-                            } else block
-                        }
-                        val meta = repository.getDailyNoteMetadata(task.noteId)
-                        repository.saveDailyNote(task.noteId, NoteContent(blocks = updatedBlocks), remoteMeta = meta)
-                    } else if (task.sourceType == TaskSource.NOTE) {
-                        val meta = repository.getNoteById(task.noteId) ?: return@withLock
-                        val content = repository.getNoteContent(task.noteId) ?: return@withLock
-                        val updatedBlocks = content.blocks.map { block ->
-                            if (block.id == task.blockId && block is CheckboxBlock) {
-                                block.copy(isChecked = isChecked)
-                            } else block
-                        }
-                        repository.saveNote(meta, NoteContent(blocks = updatedBlocks))
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 }
 // One day of the read-only timeline: the date plus every block on it that renders something.
 data class DailyTimelineDay(
