@@ -1,7 +1,9 @@
 package com.emberr.domain.backup.manual
 
 import com.emberr.data.local.room.AppDatabase
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.NoteKind
+import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.inOneTransaction
 import com.emberr.domain.canvas.CanvasContent
 import com.emberr.domain.model.NoteContent
@@ -10,6 +12,7 @@ import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.sync.AutoSyncTrigger
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.sync.SyncCoordinator
+import com.emberr.domain.util.sync.SyncEventBus
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -50,7 +53,14 @@ sealed interface EmberrImportProgress {
 
 data class EmberrImportResult(
     val importedSpaceNames: List<String>,
-    val missingMediaCount: Int
+    val missingMediaCount: Int,
+    val addedDailyNotes: Boolean = false,
+    val addedCalendar: Boolean = false
+)
+
+class SavedBackupImport(
+    val addedNotes: EmberrBackupData,
+    val mergedAccountNotes: List<NoteMetadataEntity>
 )
 
 class EmberrBackupImporter(
@@ -66,12 +76,12 @@ class EmberrBackupImporter(
 
     private var importJob: Job? = null
 
-    fun startImport(backupFile: EmberrBackupFile, spaceIds: Set<String>) {
+    fun startImport(backupFile: EmberrBackupFile, choice: BackupContentChoice) {
         _progress.value = EmberrImportProgress.CopyingMedia(copiedCount = 0, totalCount = 0)
         importJob = appScope.launch {
-            var savedData: EmberrBackupData? = null
+            var savedData: SavedBackupImport? = null
             val finalProgress = try {
-                val result = backupFile.use { importSpaces(it, spaceIds, onSaved = { saved -> savedData = saved }) }
+                val result = backupFile.use { importSpaces(it, choice, onSaved = { saved -> savedData = saved }) }
                 EmberrImportProgress.Finished(result)
             } catch (cancellation: CancellationException) {
                 _progress.value = EmberrImportProgress.Stopped
@@ -82,7 +92,10 @@ class EmberrBackupImporter(
             withContext(NonCancellable) {
                 if (savedData != null) reminderRescheduler.rescheduleUpcomingReminders()
                 _progress.value = finalProgress
-                savedData?.let { indexForAi(it) }
+                savedData?.let { saved ->
+                    indexForAi(saved.addedNotes)
+                    indexMergedAccountNotesForAi(saved.mergedAccountNotes)
+                }
             }
         }
     }
@@ -103,19 +116,30 @@ class EmberrBackupImporter(
     @OptIn(ExperimentalUuidApi::class)
     suspend fun importSpaces(
         backupFile: EmberrBackupFile,
-        spaceIds: Set<String>,
-        onSaved: (EmberrBackupData) -> Unit = {}
+        choice: BackupContentChoice,
+        onSaved: (SavedBackupImport) -> Unit = {}
     ): EmberrImportResult {
-        val prepared = prepareSpacesForImport(backupFile.backupData, spaceIds, System.currentTimeMillis()) { Uuid.random().toString() }
+        val now = System.currentTimeMillis()
+        val newId = { Uuid.random().toString() }
+        val backup = backupFile.backupData
+        val categories = resolveCategoriesForImport(
+            backupCategories = backup.categories,
+            localCategoriesIncludingDeleted = appDatabase.backupDao().getAllCategoriesIncludingDeleted(),
+            now = now,
+            newId = newId
+        )
+        val preparedBackup = prepareBackupForImport(backup, choice, categories.localCategoryIdByBackupId, now, newId)
+        val prepared = preparedBackup.spaces
+        val accountData = preparedBackup.accountData
         val mediaFileNames = mediaFileNamesUsedBy(
-            blocks = prepared.blocks.mapNotNull { decodeBlockOrNull(it.blockDataJson) },
-            coverImagePaths = prepared.notes.mapNotNull { it.coverImagePath },
-            canvasImagePaths = prepared.canvasNodes.mapNotNull { it.imagePath }
+            blocks = (prepared.blocks + accountData.blocksToMerge + accountData.subNoteBlocks).mapNotNull { decodeBlockOrNull(it.blockDataJson) },
+            coverImagePaths = (prepared.notes + accountData.notesToMerge + accountData.subNotes).mapNotNull { it.coverImagePath },
+            canvasImagePaths = (prepared.canvasNodes + accountData.canvasNodes).mapNotNull { it.imagePath }
         ).sorted()
 
         val newlyCopiedFileNames = mutableListOf<String>()
         var missingMediaCount = 0
-        try {
+        val saved = try {
             mediaFileNames.forEachIndexed { copiedCount, fileName ->
                 currentCoroutineContext().ensureActive()
                 showProgress(EmberrImportProgress.CopyingMedia(copiedCount, mediaFileNames.size))
@@ -127,21 +151,65 @@ class EmberrBackupImporter(
             }
             showProgress(EmberrImportProgress.Saving)
             SyncCoordinator.mutex.withLock {
-                appDatabase.inOneTransaction { save(prepared) }
+                appDatabase.inOneTransaction {
+                    appDatabase.backupDao().insertCategories(categories.newCategories)
+                    save(prepared)
+                    val addedSubNotes = saveAccountSubNotes(accountData)
+                    val mergedAccountNotes = repository.mergeBackupNotesIntoAccountWhileSyncLockHeld(
+                        accountData.notesToMerge,
+                        accountData.blocksToMerge
+                    )
+                    appDatabase.backupDao().insertCalendarEventExceptions(accountData.calendarEventExceptions)
+                    SavedBackupImport(
+                        addedNotes = prepared.copy(
+                            notes = prepared.notes + addedSubNotes.notes,
+                            blocks = prepared.blocks + addedSubNotes.blocks,
+                            canvasNodes = prepared.canvasNodes + addedSubNotes.canvasNodes,
+                            canvasEdges = prepared.canvasEdges + addedSubNotes.canvasEdges,
+                            canvasStrokes = prepared.canvasStrokes + addedSubNotes.canvasStrokes
+                        ),
+                        mergedAccountNotes = mergedAccountNotes
+                    )
+                }
             }
         } catch (error: Throwable) {
             withContext(NonCancellable) {
+                repository.clearCaches()
                 newlyCopiedFileNames.forEach { fileName -> mediaStorageHelper.deleteMediaFile(fileName) }
             }
             throw error
         }
 
+        saved.mergedAccountNotes.forEach { note ->
+            SyncEventBus.emitSyncCompleted(note.dateString?.takeIf { note.isDaily } ?: note.noteId, ACCOUNT_SPACE_ID)
+        }
         AutoSyncTrigger.requestSync()
-        onSaved(prepared)
+        onSaved(saved)
         return EmberrImportResult(
             importedSpaceNames = prepared.spaces.map { it.displayName },
-            missingMediaCount = missingMediaCount
+            missingMediaCount = missingMediaCount,
+            addedDailyNotes = choice.includesDailyNotes,
+            addedCalendar = choice.includesCalendar
         )
+    }
+
+    private suspend fun saveAccountSubNotes(accountData: AccountDataToImport): EmberrBackupData {
+        val addedSubNotes = EmberrBackupData(
+            exportTimestamp = 0L,
+            notes = accountData.subNotes,
+            blocks = accountData.subNoteBlocks,
+            canvasNodes = accountData.canvasNodes,
+            canvasEdges = accountData.canvasEdges,
+            canvasStrokes = accountData.canvasStrokes
+        )
+        val dao = appDatabase.backupDao()
+        dao.insertNotes(addedSubNotes.notes)
+        dao.insertBlocks(addedSubNotes.blocks)
+        dao.insertCanvasNodes(addedSubNotes.canvasNodes)
+        dao.insertCanvasEdges(addedSubNotes.canvasEdges)
+        dao.insertCanvasStrokes(addedSubNotes.canvasStrokes)
+        refreshProjectionsOf(addedSubNotes)
+        return addedSubNotes
     }
 
     private fun showProgress(progress: EmberrImportProgress) {
@@ -152,7 +220,6 @@ class EmberrBackupImporter(
         val dao = appDatabase.backupDao()
         dao.insertSpaces(prepared.spaces)
         dao.insertFolders(prepared.folders)
-        dao.insertCategories(prepared.categories)
         dao.insertPropertyTags(prepared.propertyTags)
         dao.insertCustomProperties(prepared.customProperties)
         dao.insertNotes(prepared.notes)
@@ -161,13 +228,28 @@ class EmberrBackupImporter(
         dao.insertCanvasEdges(prepared.canvasEdges)
         dao.insertCanvasStrokes(prepared.canvasStrokes)
         dao.insertCalendarEventExceptions(prepared.calendarEventExceptions)
+        refreshProjectionsOf(prepared)
+    }
 
+    private suspend fun refreshProjectionsOf(prepared: EmberrBackupData) {
         val blocksByNoteId = prepared.blocks.groupBy { it.noteId }
         prepared.notes.forEach { note ->
             val blocks = blocksByNoteId[note.noteId].orEmpty()
                 .sortedBy { it.displayOrder }
                 .mapNotNull { decodeBlockOrNull(it.blockDataJson) }
             repository.refreshProjectionsForNote(note, blocks)
+        }
+    }
+
+    private suspend fun indexMergedAccountNotesForAi(mergedNotes: List<NoteMetadataEntity>) {
+        mergedNotes.forEach { note ->
+            val dateString = note.dateString?.takeIf { note.isDaily }
+            if (dateString == PINNED_BLOCKS_DATE_STRING) return@forEach
+            if (dateString != null) {
+                repository.getDailyNote(dateString)?.let { content -> repository.indexDailyNote(dateString, content, note) }
+            } else {
+                repository.getNoteContent(note.noteId)?.let { content -> repository.indexNote(note, content) }
+            }
         }
     }
 

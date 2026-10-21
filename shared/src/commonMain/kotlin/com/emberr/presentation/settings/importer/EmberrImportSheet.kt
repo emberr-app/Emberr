@@ -10,13 +10,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.backup.manual.EmberrImportProgress
 import com.emberr.domain.backup.manual.EmberrImportResult
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrChoiceRow
 import com.emberr.presentation.shared.components.EmberrSpaceCheckboxOptions
+import com.emberr.presentation.shared.components.EmberrSwitchRow
 import com.emberr.presentation.shared.components.checkedSpacesLabel
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar
+import emberr.shared.generated.resources.daily
 import emberr.shared.generated.resources.folder
 
 @Composable
@@ -24,7 +28,7 @@ fun EmberrImportSheet(
     pickedBackupState: PickedBackupState,
     importProgress: EmberrImportProgress,
     onFilePicked: (String) -> Unit,
-    onImportClick: (spaceIds: Set<String>) -> Unit,
+    onImportClick: (choice: BackupContentChoice) -> Unit,
     onStopClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -63,7 +67,7 @@ fun EmberrImportSheet(
                     },
                     onStopClick = onStopClick
                 )
-                EmberrImportProgress.Saving -> ImportWorkingMessage("Saving the imported spaces…")
+                EmberrImportProgress.Saving -> ImportWorkingMessage("Saving the import…")
                 EmberrImportProgress.Stopping -> ImportWorkingMessage("Stopping and removing what was imported…")
                 EmberrImportProgress.Stopped -> ImportOutcomeMessage(
                     title = "Import stopped",
@@ -88,11 +92,19 @@ private fun BackupChoices(
     pickedBackupState: PickedBackupState,
     onChooseFileClick: () -> Unit,
     onFileDropped: (String) -> Unit,
-    onImportClick: (spaceIds: Set<String>) -> Unit,
+    onImportClick: (choice: BackupContentChoice) -> Unit,
     onCloseClick: () -> Unit
 ) {
-    val spaces = (pickedBackupState as? PickedBackupState.Ready)?.spaces.orEmpty()
+    val readyBackup = pickedBackupState as? PickedBackupState.Ready
+    val spaces = readyBackup?.spaces.orEmpty()
     var checkedSpaceIds by remember(pickedBackupState) { mutableStateOf(spaces.map { it.spaceId }.toSet()) }
+    var wantsDailyNotes by remember(pickedBackupState) { mutableStateOf(true) }
+    var wantsCalendar by remember(pickedBackupState) { mutableStateOf(true) }
+    val choice = BackupContentChoice(
+        spaceIds = checkedSpaceIds,
+        includesDailyNotes = readyBackup?.hasDailyNotes == true && wantsDailyNotes,
+        includesCalendar = readyBackup?.hasCalendar == true && wantsCalendar
+    )
 
     ImportChooseBox(
         isClickable = pickedBackupState != PickedBackupState.Reading,
@@ -132,20 +144,42 @@ private fun BackupChoices(
                 )
             }
         }
+        if (readyBackup?.hasDailyNotes == true) {
+            EmberrSwitchRow(
+                label = "Daily Notes",
+                icon = Res.drawable.daily,
+                isOn = wantsDailyNotes,
+                onClick = { wantsDailyNotes = !wantsDailyNotes }
+            )
+        }
+        if (readyBackup?.hasCalendar == true) {
+            EmberrSwitchRow(
+                label = "Calendar",
+                icon = Res.drawable.calendar,
+                isOn = wantsCalendar,
+                onClick = { wantsCalendar = !wantsCalendar }
+            )
+        }
     }
 
     ImportStartButtons(
-        isImportEnabled = checkedSpaceIds.isNotEmpty(),
-        onImportClick = { onImportClick(checkedSpaceIds) },
+        isImportEnabled = choice.spaceIds.isNotEmpty() || choice.includesDailyNotes || choice.includesCalendar,
+        onImportClick = { onImportClick(choice) },
         onCloseClick = onCloseClick
     )
 }
 
 @Composable
 private fun ImportFinishedMessage(result: EmberrImportResult, onDoneClick: () -> Unit) {
+    val addedLine = when {
+        result.addedDailyNotes && result.addedCalendar -> "Daily notes and calendar events added"
+        result.addedDailyNotes -> "Daily notes added"
+        result.addedCalendar -> "Calendar events added"
+        else -> null
+    }
     ImportOutcomeMessage(
-        title = "Imported ${countLabel(result.importedSpaceNames.size, "space")}",
-        detailLines = listOf(result.importedSpaceNames.joinToString(" · ")),
+        title = if (result.importedSpaceNames.isEmpty()) "Import finished" else "Imported ${countLabel(result.importedSpaceNames.size, "space")}",
+        detailLines = listOfNotNull(result.importedSpaceNames.joinToString(" · ").ifEmpty { null }, addedLine),
         errorLine = when (result.missingMediaCount) {
             0 -> null
             1 -> "Couldn't find 1 media file in the backup, so it will show as missing."

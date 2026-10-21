@@ -3,10 +3,12 @@ package com.emberr.presentation.settings.importer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.SpaceEntity
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.backup.manual.EmberrBackupFile
 import com.emberr.domain.backup.manual.EmberrBackupFileReader
 import com.emberr.domain.backup.manual.EmberrBackupImporter
 import com.emberr.domain.backup.manual.EmberrImportProgress
+import com.emberr.domain.backup.manual.accountContentIn
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +22,12 @@ sealed interface PickedBackupState {
     data object NothingPicked : PickedBackupState
     data object Reading : PickedBackupState
     data class CouldNotRead(val reason: String) : PickedBackupState
-    data class Ready(val pickedName: String, val spaces: List<SpaceEntity>) : PickedBackupState
+    data class Ready(
+        val pickedName: String,
+        val spaces: List<SpaceEntity>,
+        val hasDailyNotes: Boolean,
+        val hasCalendar: Boolean
+    ) : PickedBackupState
 }
 
 class EmberrImportViewModel(
@@ -55,18 +62,21 @@ class EmberrImportViewModel(
                 return@launch
             }
             pickedBackupFile = backupFile
+            val accountContent = accountContentIn(backupFile.backupData)
             _pickedBackupState.value = PickedBackupState.Ready(
                 pickedName = backupFile.pickedName,
-                spaces = backupFile.backupData.spaces.filterNot { it.isDeleted }
+                spaces = backupFile.backupData.spaces.filterNot { it.isDeleted },
+                hasDailyNotes = accountContent.hasDailyNotes,
+                hasCalendar = accountContent.hasCalendar
             )
         }
     }
 
-    fun startImport(spaceIds: Set<String>) {
+    fun startImport(choice: BackupContentChoice) {
         val backupFile = pickedBackupFile ?: return
         pickedBackupFile = null
         _pickedBackupState.value = PickedBackupState.NothingPicked
-        emberrBackupImporter.startImport(backupFile, spaceIds)
+        emberrBackupImporter.startImport(backupFile, choice)
     }
 
     fun stopImport() {

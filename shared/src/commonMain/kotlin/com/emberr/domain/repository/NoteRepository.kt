@@ -7,6 +7,7 @@ import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.DocumentBlockEntity
 import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.ImageBlockEntity
+import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.PropertyTagEntity
 import com.emberr.data.local.room.entity.CustomPropertyEntity
@@ -93,6 +94,10 @@ interface NoteRepository {
     suspend fun moveDailyNotesAndCategoriesToAccount(reindexScope: CoroutineScope)
     suspend fun mergeDailyNotesAndCategoriesIntoAccount(): AccountMergeResult
     suspend fun mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld(): AccountMergeResult
+    suspend fun mergeBackupNotesIntoAccountWhileSyncLockHeld(
+        notes: List<NoteMetadataEntity>,
+        blocks: List<NoteBlockEntity>
+    ): List<NoteMetadataEntity>
     suspend fun waitUntilDailyNotesAreInAccount()
     suspend fun applyRemoteSpaceChangeWhileSyncLockHeld(noteId: String, spaceId: String)
 
