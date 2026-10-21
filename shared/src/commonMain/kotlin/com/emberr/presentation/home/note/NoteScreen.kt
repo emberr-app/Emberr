@@ -724,7 +724,7 @@ fun NoteScreen(
                     titleVisibility = if (isEditingTemplate) 0f else titleCollapseProgress,
                     titleColor = topBarContentColor ?: MaterialTheme.colorScheme.onSurface,
                     onTitleClick = onCollapsedTitleClick,
-                    topEdgeFadeAlpha = if (isDesktopPlatform) 0f else topEdgeFadeAlpha,
+                    topEdgeFadeAlpha = topEdgeFadeAlpha,
                     hazeState = hazeState,
                     hazeStyle = topBarButtonHazeStyle ?: EmberrBlur.Regular,
                     contentPadding = topHeaderBarPadding(

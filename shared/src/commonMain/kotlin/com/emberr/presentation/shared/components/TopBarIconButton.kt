@@ -68,8 +68,12 @@ fun TopBarPillButton(
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    val colorFadeProgress = LocalTopHeaderColorFadeProgress.current
-    val resolvedStyle = if (colorFadeProgress > 0f) EmberrBlur.overColorFade(colorFadeProgress) else hazeStyle ?: EmberrBlur.Regular
+    val headerTint = LocalTopHeaderButtonTint.current
+    val resolvedStyle = if (headerTint.fadeProgress > 0f) {
+        EmberrBlur.headerFadeTint(headerTint.fadeProgress, headerTint.fullTintAlpha)
+    } else {
+        hazeStyle ?: EmberrBlur.Regular
+    }
     Surface(
         shape = shape,
         color = bgColor,
@@ -119,8 +123,12 @@ fun TopBarIconButton(
     tooltipPosition: IconTooltipPosition = IconTooltipPosition.Below,
     onClick: () -> Unit
 ) {
-    val colorFadeProgress = LocalTopHeaderColorFadeProgress.current
-    val resolvedStyle = if (colorFadeProgress > 0f) EmberrBlur.overColorFade(colorFadeProgress) else hazeStyle ?: EmberrBlur.Regular
+    val headerTint = LocalTopHeaderButtonTint.current
+    val resolvedStyle = if (headerTint.fadeProgress > 0f) {
+        EmberrBlur.headerFadeTint(headerTint.fadeProgress, headerTint.fullTintAlpha)
+    } else {
+        hazeStyle ?: EmberrBlur.Regular
+    }
     IconTooltip(text = tooltip, position = tooltipPosition) {
         Surface(
             shape = CircleShape,
@@ -209,8 +217,12 @@ fun TopBarIconButtonGroup(
     isHorizontallyScrollable: Boolean = false,
     tooltipPosition: IconTooltipPosition = IconTooltipPosition.Below
 ) {
-    val colorFadeProgress = LocalTopHeaderColorFadeProgress.current
-    val resolvedStyle = if (colorFadeProgress > 0f) EmberrBlur.overColorFade(colorFadeProgress) else hazeStyle ?: EmberrBlur.Regular
+    val headerTint = LocalTopHeaderButtonTint.current
+    val resolvedStyle = if (headerTint.fadeProgress > 0f) {
+        EmberrBlur.headerFadeTint(headerTint.fadeProgress, headerTint.fullTintAlpha)
+    } else {
+        hazeStyle ?: EmberrBlur.Regular
+    }
     Surface(
         shape = CircleShape,
         color = bgColor,

@@ -68,8 +68,10 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
-import com.emberr.presentation.shared.components.LocalTopHeaderColorFadeProgress
-import com.emberr.presentation.shared.components.rememberTopHeaderUsesColorFade
+import com.emberr.presentation.shared.TopBarFadeStyle
+import com.emberr.presentation.shared.components.LocalTopHeaderButtonTint
+import com.emberr.presentation.shared.components.TopHeaderButtonTint
+import com.emberr.presentation.shared.components.rememberTopBarFadeStyle
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -681,8 +683,12 @@ fun DailyScreen(
                     }
                 )
 
+                val fadeStyle = rememberTopBarFadeStyle()
                 CompositionLocalProvider(
-                    LocalTopHeaderColorFadeProgress provides if (rememberTopHeaderUsesColorFade()) topEdgeFadeAlpha else 0f
+                    LocalTopHeaderButtonTint provides TopHeaderButtonTint(
+                        fadeProgress = if (fadeStyle != TopBarFadeStyle.NONE) topEdgeFadeAlpha else 0f,
+                        fullTintAlpha = if (fadeStyle == TopBarFadeStyle.COLOR) 0.75f else 0.55f
+                    )
                 ) {
                     DailyBottomWeekStrip(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),

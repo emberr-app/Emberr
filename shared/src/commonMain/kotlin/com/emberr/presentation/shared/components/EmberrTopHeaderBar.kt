@@ -63,9 +63,13 @@ val TopEdgeGradientHeight = 200.dp
 
 private const val TopEdgeGradientStopCount = 24
 
+private const val TopEdgeBlurExtraTintAlpha = 0.5f
+
 val TopEdgeBlurHeight = 140.dp
 
-val LocalTopHeaderColorFadeProgress = compositionLocalOf { 0f }
+data class TopHeaderButtonTint(val fadeProgress: Float, val fullTintAlpha: Float)
+
+val LocalTopHeaderButtonTint = compositionLocalOf { TopHeaderButtonTint(fadeProgress = 0f, fullTintAlpha = 0f) }
 
 private val TopEdgeFadeEasing = Easing { position -> smoothStep(position) }
 
@@ -158,7 +162,11 @@ fun EmberrTopHeaderBar(
         }
 
         CompositionLocalProvider(
-            LocalTopHeaderColorFadeProgress provides if (fadeStyle == TopBarFadeStyle.COLOR) topEdgeFadeAlpha.coerceIn(0f, 1f) else 0f
+            LocalTopHeaderButtonTint provides when (fadeStyle) {
+                TopBarFadeStyle.COLOR -> TopHeaderButtonTint(topEdgeFadeAlpha.coerceIn(0f, 1f), fullTintAlpha = 0.8f)
+                TopBarFadeStyle.BLUR -> TopHeaderButtonTint(topEdgeFadeAlpha.coerceIn(0f, 1f), fullTintAlpha = 0.65f)
+                else -> TopHeaderButtonTint(fadeProgress = 0f, fullTintAlpha = 0f)
+            }
         ) {
             Box(
                 modifier = Modifier
@@ -245,12 +253,7 @@ fun EmberrTopHeaderBar(
 }
 
 @Composable
-fun rememberTopHeaderUsesColorFade(): Boolean = rememberTopBarFadeStyle() == TopBarFadeStyle.COLOR
-
-@Composable
-private fun rememberTopBarFadeStyle(): TopBarFadeStyle {
-    if (isDesktopPlatform) return TopBarFadeStyle.NONE
-
+fun rememberTopBarFadeStyle(): TopBarFadeStyle {
     val settingsManager = koinInject<SettingsManager>()
     val styleName by settingsManager.topBarFadeStyleFlow.collectAsState(
         initial = settingsManager.getTopBarFadeStyle()
@@ -316,7 +319,7 @@ private fun TopEdgeBlurBand(
     Layout(
         content = {
             Box(
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
+                modifier = Modifier.hazeEffect(hazeState, hazeStyle.withStrongerTint()) {
                     alpha = blurAlpha.coerceIn(0f, 1f)
                     progressive = TopEdgeBlurFade
                 }
@@ -335,6 +338,12 @@ private fun TopEdgeBlurBand(
 }
 
 private fun smoothStep(position: Float): Float = position * position * (3f - 2f * position)
+
+private fun HazeStyle.withStrongerTint(): HazeStyle = copy(
+    tints = tints.map { tint ->
+        tint.copy(color = tint.color.copy(alpha = (tint.color.alpha + TopEdgeBlurExtraTintAlpha).coerceAtMost(1f)))
+    }
+)
 
 @Composable
 private fun TopHeaderBarTitle(
