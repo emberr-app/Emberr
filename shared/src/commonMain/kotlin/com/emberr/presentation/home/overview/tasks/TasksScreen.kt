@@ -73,21 +73,22 @@ fun TasksScreen(
     val blockLocations by viewModel.blockLocations.collectAsState()
 
     val noteTitleById by viewModel.noteTitlesById.collectAsState()
+    val noteHeadingById by viewModel.noteHeadingsById.collectAsState()
     val inboxNoteIds = remember(noteTitleById) {
         noteTitleById.filterValues { it.equals("Inbox", ignoreCase = true) }.keys + ACCOUNT_TASKS_INBOX_NOTE_ID
     }
-    val sectionLabelFor = remember(blockLocations, inboxNoteIds, noteTitleById) {
+    val sectionLabelFor = remember(blockLocations, inboxNoteIds, noteHeadingById) {
         { block: NoteBlock ->
             val location = blockLocations[block.id]
             when {
                 location == null -> null
                 !location.isDaily && location.noteId in inboxNoteIds -> null
                 location.isDaily -> dailyDateLabel(location.noteId)
-                else -> noteTitleById[location.noteId] ?: "Note"
+                else -> noteHeadingById[location.noteId] ?: "Note"
             }
         }
     }
-    val groupedBlocks = remember(blocks, blockLocations, inboxNoteIds, noteTitleById) {
+    val groupedBlocks = remember(blocks, blockLocations, inboxNoteIds, noteHeadingById) {
         val (rest, located) = blocks.partition { block ->
             val location = blockLocations[block.id]
             location == null || (!location.isDaily && location.noteId in inboxNoteIds)
@@ -97,7 +98,12 @@ fun TasksScreen(
             .sortedBy { blockLocations[it.id]?.noteId }
         val noteBlocks = located
             .filter { blockLocations[it.id]?.isDaily == false }
-            .sortedBy { noteTitleById[blockLocations[it.id]?.noteId] ?: "" }
+            .sortedWith(
+                compareBy(
+                    { noteHeadingById[blockLocations[it.id]?.noteId] ?: "" },
+                    { blockLocations[it.id]?.noteId ?: "" }
+                )
+            )
         rest + dailyBlocks + noteBlocks
     }
 

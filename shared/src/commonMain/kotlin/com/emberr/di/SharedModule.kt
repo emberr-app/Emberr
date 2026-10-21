@@ -273,7 +273,8 @@ val sharedModule = module {
     viewModel {
         com.emberr.presentation.home.overview.tasks.TasksViewModel(
             repository = get(),
-            reminderScheduler = get()
+            reminderScheduler = get(),
+            spaceRepository = get()
         )
     }
     viewModel {

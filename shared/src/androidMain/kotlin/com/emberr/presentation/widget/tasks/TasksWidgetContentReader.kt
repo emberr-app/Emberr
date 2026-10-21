@@ -3,8 +3,10 @@ package com.emberr.presentation.widget.tasks
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.NoteDao
+import com.emberr.data.local.room.dao.SpaceDao
 import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
+import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.TaskSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +22,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.home.overview.tasks.taskHeadingsByNoteId
 
 private const val maximumTasksShown = 40
 private const val maximumCharactersPerTask = 160
@@ -28,6 +31,7 @@ private const val inboxNoteTitle = "Inbox"
 class TasksWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
     private val noteDao: NoteDao,
+    private val spaceDao: SpaceDao,
     private val clockFormat: WidgetClockFormat
 ) {
     fun observeTasks(): Flow<List<CalendarTaskEntity>> =
@@ -60,11 +64,13 @@ class TasksWidgetContentReader(
     private suspend fun buildRows(tasks: List<CalendarTaskEntity>): List<TasksWidgetRow> {
         if (tasks.isEmpty()) return emptyList()
 
-        val noteTitlesById = resolveNoteTitles(tasks)
+        val notesHoldingTasks = resolveNotesHoldingTasks(tasks)
+        val noteTitlesById = notesHoldingTasks.associate { note -> note.noteId to note.title.trim() }
+        val noteHeadingsById = taskHeadingsByNoteId(notesHoldingTasks, resolveSpaceNames())
         val inboxNoteIds = findInboxNoteIds(noteTitlesById)
 
         val (unlabelled, labelled) = tasks.partition { task ->
-            headingFor(task, noteTitlesById, inboxNoteIds) == null
+            headingFor(task, noteHeadingsById, inboxNoteIds) == null
         }
 
         val dailyTasks = labelled
@@ -72,7 +78,7 @@ class TasksWidgetContentReader(
             .sortedBy { task -> task.noteId }
         val noteTasks = labelled
             .filter { task -> task.sourceType != TaskSource.DAILY }
-            .sortedBy { task -> noteTitlesById[task.noteId].orEmpty() }
+            .sortedWith(compareBy({ task -> noteHeadingsById[task.noteId].orEmpty() }, { task -> task.noteId }))
 
         val orderedTasks = (sortedWithinGroup(unlabelled) + dailyTasks + noteTasks)
             .take(maximumTasksShown)
@@ -81,7 +87,7 @@ class TasksWidgetContentReader(
         var lastHeading: String? = null
 
         orderedTasks.forEach { task ->
-            val heading = headingFor(task, noteTitlesById, inboxNoteIds)
+            val heading = headingFor(task, noteHeadingsById, inboxNoteIds)
             if (heading != null && heading != lastHeading) {
                 rows += TasksWidgetRow.SectionHeading(key = "heading:${task.blockId}", label = heading)
             }
@@ -107,32 +113,40 @@ class TasksWidgetContentReader(
             )
         )
 
-    private suspend fun resolveNoteTitles(tasks: List<CalendarTaskEntity>): Map<String, String> {
+    private suspend fun resolveNotesHoldingTasks(tasks: List<CalendarTaskEntity>): List<NoteMetadataEntity> {
         val noteIds = tasks
             .filter { task -> task.sourceType != TaskSource.DAILY }
             .map { task -> task.noteId }
             .distinct()
-        if (noteIds.isEmpty()) return emptyMap()
+        if (noteIds.isEmpty()) return emptyList()
 
         return try {
-            noteDao.getNotesByIds(noteIds).associate { note -> note.noteId to note.title.trim() }
+            noteDao.getNotesByIds(noteIds)
         } catch (cause: Exception) {
             WidgetLog.e("Could not resolve note titles for the task list", cause)
-            emptyMap()
+            emptyList()
         }
     }
+
+    private suspend fun resolveSpaceNames(): Map<String, String> =
+        try {
+            spaceDao.getAllSpacesOnce().associate { space -> space.spaceId to space.displayName }
+        } catch (cause: Exception) {
+            WidgetLog.e("Could not resolve space names for the task list", cause)
+            emptyMap()
+        }
 
     private fun findInboxNoteIds(noteTitlesById: Map<String, String>): Set<String> =
         noteTitlesById.filterValues { title -> title.equals(inboxNoteTitle, ignoreCase = true) }.keys + ACCOUNT_TASKS_INBOX_NOTE_ID
 
     private fun headingFor(
         task: CalendarTaskEntity,
-        noteTitlesById: Map<String, String>,
+        noteHeadingsById: Map<String, String>,
         inboxNoteIds: Set<String>
     ): String? = when {
         task.sourceType == TaskSource.DAILY -> dailyDateLabel(task.noteId)
         task.noteId in inboxNoteIds -> null
-        else -> noteTitlesById[task.noteId]?.takeIf { it.isNotBlank() } ?: "Note"
+        else -> noteHeadingsById[task.noteId] ?: "Note"
     }
 }
 
