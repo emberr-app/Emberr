@@ -154,4 +154,18 @@ class NoteRepositoryAccountMoveTest {
         val storedCheckbox = Json { ignoreUnknownKeys = true }.decodeFromString(NoteBlockSerializer, storedJson) as CheckboxBlock
         assertEquals("personal-work", storedCheckbox.categoryId)
     }
+
+    @Test
+    fun aMovedCategoryIsNewerThanItsOldSpaceCopySoSyncCannotMoveItBack() = runTest {
+        val oldSpaceCopy = CategoryEntity(
+            categoryId = "errands", name = "Errands", colorHex = "#333333", createdAt = 1L, updatedAt = 5L, spaceId = workSpaceId
+        )
+        appDatabase.categoryDao().insertOrUpdateCategory(oldSpaceCopy)
+
+        repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        val movedCategory = appDatabase.categoryDao().getCategoryById("errands")
+        assertEquals(ACCOUNT_SPACE_ID, movedCategory?.spaceId)
+        assertTrue(movedCategory!!.updatedAt > oldSpaceCopy.updatedAt)
+    }
 }

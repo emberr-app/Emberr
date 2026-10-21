@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 // Raise this by one in any release that adds a new kind of synced item or changes what is in the
 // shared list. Devices on an older version then pause self-host sync and ask to be updated instead
 // of failing to read the list or dropping what they don't understand when they write it back.
-const val SELF_HOST_MANIFEST_SCHEMA_VERSION = 1
+const val SELF_HOST_MANIFEST_SCHEMA_VERSION = 2
 
 const val SELF_HOST_UPDATE_REQUIRED_MESSAGE =
     "Another device synced with a newer version of Emberr. Update Emberr on this device to resume self-host sync."
@@ -58,4 +58,5 @@ fun decodeSelfHostManifest(rawJson: String): SelfHostManifest {
         throw SelfHostManifestTooNewException(serverSchemaVersion)
     }
     return manifestDecodingJson.decodeFromString(SelfHostManifest.serializer(), rawJson)
+        .copy(schemaVersion = serverSchemaVersion)
 }

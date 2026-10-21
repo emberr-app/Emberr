@@ -9,12 +9,12 @@ class SelfHostManifestDecodingTest {
     @Test
     fun aListFromANewerVersionWithAnUnknownKindOfItemAsksForAnUpdateInsteadOfFailingToRead() {
         val newerList = """
-            {"schemaVersion":2,"entries":[{"entryId":"trip-plan","entryType":"WHITEBOARD","updatedAt":1000}]}
+            {"schemaVersion":3,"entries":[{"entryId":"trip-plan","entryType":"WHITEBOARD","updatedAt":1000}]}
         """.trimIndent()
 
         val error = assertFailsWith<SelfHostManifestTooNewException> { decodeSelfHostManifest(newerList) }
 
-        assertEquals(2, error.serverSchemaVersion)
+        assertEquals(3, error.serverSchemaVersion)
         assertEquals(SELF_HOST_UPDATE_REQUIRED_MESSAGE, error.message)
     }
 
