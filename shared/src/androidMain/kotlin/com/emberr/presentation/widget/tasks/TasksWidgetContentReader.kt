@@ -3,6 +3,7 @@ package com.emberr.presentation.widget.tasks
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.NoteDao
+import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
 import kotlinx.coroutines.Dispatchers
@@ -60,10 +61,10 @@ class TasksWidgetContentReader(
         if (tasks.isEmpty()) return emptyList()
 
         val noteTitlesById = resolveNoteTitles(tasks)
-        val inboxNoteId = findInboxNoteId(noteTitlesById)
+        val inboxNoteIds = findInboxNoteIds(noteTitlesById)
 
         val (unlabelled, labelled) = tasks.partition { task ->
-            headingFor(task, noteTitlesById, inboxNoteId) == null
+            headingFor(task, noteTitlesById, inboxNoteIds) == null
         }
 
         val dailyTasks = labelled
@@ -80,7 +81,7 @@ class TasksWidgetContentReader(
         var lastHeading: String? = null
 
         orderedTasks.forEach { task ->
-            val heading = headingFor(task, noteTitlesById, inboxNoteId)
+            val heading = headingFor(task, noteTitlesById, inboxNoteIds)
             if (heading != null && heading != lastHeading) {
                 rows += TasksWidgetRow.SectionHeading(key = "heading:${task.blockId}", label = heading)
             }
@@ -121,18 +122,16 @@ class TasksWidgetContentReader(
         }
     }
 
-    private fun findInboxNoteId(noteTitlesById: Map<String, String>): String? =
-        noteTitlesById.entries
-            .firstOrNull { entry -> entry.value.equals(inboxNoteTitle, ignoreCase = true) }
-            ?.key
+    private fun findInboxNoteIds(noteTitlesById: Map<String, String>): Set<String> =
+        noteTitlesById.filterValues { title -> title.equals(inboxNoteTitle, ignoreCase = true) }.keys + ACCOUNT_TASKS_INBOX_NOTE_ID
 
     private fun headingFor(
         task: CalendarTaskEntity,
         noteTitlesById: Map<String, String>,
-        inboxNoteId: String?
+        inboxNoteIds: Set<String>
     ): String? = when {
         task.sourceType == TaskSource.DAILY -> dailyDateLabel(task.noteId)
-        task.noteId == inboxNoteId -> null
+        task.noteId in inboxNoteIds -> null
         else -> noteTitlesById[task.noteId]?.takeIf { it.isNotBlank() } ?: "Note"
     }
 }

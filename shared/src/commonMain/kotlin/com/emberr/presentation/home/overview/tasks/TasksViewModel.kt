@@ -2,6 +2,8 @@ package com.emberr.presentation.home.overview.tasks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
+import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.domain.model.AllDaySpan
@@ -71,6 +73,7 @@ class TasksViewModel(
 
     private var typingJob: Job? = null
     private val dirtyBlocks = mutableSetOf<String>()
+    private var focusedBlockId: String? = null
 
     val allLinkableNotes = repository.getAllLinkableNotes()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
@@ -101,9 +104,15 @@ class TasksViewModel(
             snippet = ""
         )
 
+        val focusedTaskLocation = focusedBlockId?.let { blockSourceMap[it] }
         viewModelScope.launch(Dispatchers.IO) {
             val content = NoteContent(blocks = emptyList())
-            repository.saveNote(metadata, content)
+            val parentSpaceId = when {
+                focusedTaskLocation == null -> null
+                focusedTaskLocation.isDaily -> ACCOUNT_SPACE_ID
+                else -> repository.getNoteById(focusedTaskLocation.noteId)?.spaceId
+            }
+            if (parentSpaceId == null) repository.saveNote(metadata, content) else repository.saveNoteInSpace(parentSpaceId, metadata, content)
             repository.indexNote(metadata, content)
         }
 
@@ -218,24 +227,18 @@ class TasksViewModel(
     }
 
     private suspend fun getOrCreateInbox(): Pair<NoteMetadataEntity, NoteContent> {
-        val allNotes = repository.getAllNotes().first()
-        var inboxNote = allNotes.find { it.title.equals("Inbox", ignoreCase = true) && !it.isDaily }
-        val noteId: String
-        val content: NoteContent
-
-        if (inboxNote == null) {
-            noteId = UUID.randomUUID().toString()
-            inboxNote = NoteMetadataEntity(
-                noteId = noteId, title = "Inbox", icon = "📥", folderId = null,
-                isDaily = false, dateString = null, createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis(), filePath = "note_$noteId.json", snippet = "Saved tasks and links."
-            )
-            content = NoteContent(blocks = emptyList())
-        } else {
-            noteId = inboxNote.noteId
-            content = repository.getNoteContent(noteId) ?: NoteContent(blocks = emptyList())
+        val inboxNote = repository.getNoteById(ACCOUNT_TASKS_INBOX_NOTE_ID)
+        if (inboxNote != null) {
+            val content = repository.getNoteContent(inboxNote.noteId) ?: NoteContent(blocks = emptyList())
+            return Pair(inboxNote.copy(trashedAt = null), content)
         }
-        return Pair(inboxNote, content)
+        val now = System.currentTimeMillis()
+        val newInboxNote = NoteMetadataEntity(
+            noteId = ACCOUNT_TASKS_INBOX_NOTE_ID, title = "Inbox", icon = "📥", folderId = null,
+            isDaily = false, dateString = null, createdAt = now,
+            updatedAt = now, filePath = "", snippet = "Saved tasks."
+        )
+        return Pair(newInboxNote, NoteContent(blocks = emptyList()))
     }
 
     fun insertNewReminder() {
@@ -263,7 +266,7 @@ class TasksViewModel(
                     val updatedBlocks = listOf(newBlock) + content.blocks
                     val updatedMeta = inboxMeta.copy(updatedAt = System.currentTimeMillis())
                     val updatedContent = NoteContent(blocks = updatedBlocks)
-                    repository.saveNote(updatedMeta, updatedContent)
+                    repository.saveNoteInSpace(ACCOUNT_SPACE_ID, updatedMeta, updatedContent)
                     repository.indexNote(updatedMeta, updatedContent)
 
                     _focusRequest.value = FocusRequest(id = id)
@@ -575,16 +578,16 @@ class TasksViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val (inboxMeta, inboxContent) = getOrCreateInbox()
-                val isParentInbox = (originalLoc.noteId == inboxMeta.noteId)
+                val isParentInbox = (originalLoc.noteId == ACCOUNT_TASKS_INBOX_NOTE_ID)
 
-                val inboxLoc = BlockLocation(noteId = inboxMeta.noteId, isDaily = false)
+                val inboxLoc = BlockLocation(noteId = ACCOUNT_TASKS_INBOX_NOTE_ID, isDaily = false)
                 blockSourceMap[newId] = inboxLoc
                 sessionBlockCache[newId] = inboxLoc
                 _blockLocations.value = blockSourceMap.toMap()
                 localEditTimestamps[newId] = System.currentTimeMillis()
 
                 SyncCoordinator.mutex.withLock {
+                    val (inboxMeta, inboxContent) = getOrCreateInbox()
                     if (isParentInbox) {
                         val dbIdx = inboxContent.blocks.indexOfFirst { it.id == id }
                         val updatedInboxBlocks = if (dbIdx != -1) {
@@ -597,7 +600,7 @@ class TasksViewModel(
                         }
                         val updatedInboxMeta = inboxMeta.copy(updatedAt = System.currentTimeMillis())
                         val updatedInboxContent = NoteContent(blocks = updatedInboxBlocks)
-                        repository.saveNote(updatedInboxMeta, updatedInboxContent)
+                        repository.saveNoteInSpace(ACCOUNT_SPACE_ID, updatedInboxMeta, updatedInboxContent)
                         repository.indexNote(updatedInboxMeta, updatedInboxContent)
                     } else {
                         if (originalLoc.isDaily) {
@@ -625,7 +628,7 @@ class TasksViewModel(
                         val updatedInboxBlocks = listOf(newBlock) + inboxContent.blocks
                         val updatedInboxMeta = inboxMeta.copy(updatedAt = System.currentTimeMillis())
                         val updatedInboxContent = NoteContent(blocks = updatedInboxBlocks)
-                        repository.saveNote(updatedInboxMeta, updatedInboxContent)
+                        repository.saveNoteInSpace(ACCOUNT_SPACE_ID, updatedInboxMeta, updatedInboxContent)
                         repository.indexNote(updatedInboxMeta, updatedInboxContent)
                     }
                 }
@@ -758,7 +761,9 @@ class TasksViewModel(
     fun clearSelection() { _selectedBlockIds.value = emptySet() }
     fun clearFocusRequest() { _focusRequest.value = null }
 
-    fun setFocusedBlock() {}
+    fun setFocusedBlock(id: String) {
+        focusedBlockId = id
+    }
 
     fun selectAllBlocks() {
         val currentBlocks = if (_isShowingCompleted.value) _completedBlocks.value else _activeBlocks.value
