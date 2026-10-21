@@ -327,6 +327,46 @@ class NoteRepositoryAccountMoveTest {
     }
 
     @Test
+    fun aDatabaseFollowsTheNoteThatOwnsItAndIgnoresLinksFromOtherNotes() = runTest {
+        repository.saveDailyNote(
+            date,
+            NoteContent(
+                blocks = listOf(
+                    DatabaseBlock(id = "reading-daily-view", databaseId = "reading", updatedAt = 1L),
+                    DatabaseBlock(id = "budget-daily-link", databaseId = "budget", isLinkedDatabase = true, updatedAt = 1L)
+                )
+            )
+        )
+        saveDatabaseNoteInWork("reading")
+        repository.saveNoteInSpace(workSpaceId, subNoteMetadata("first-book", databaseId = "reading"), NoteContent(blocks = emptyList()))
+        saveDatabaseNoteInWork("budget")
+        repository.saveNoteInSpace(
+            workSpaceId,
+            noteMetadata("books", createdAt = 1L, dailyDate = null),
+            NoteContent(blocks = listOf(DatabaseBlock(id = "reading-books-link", databaseId = "reading", isLinkedDatabase = true, updatedAt = 1L)))
+        )
+        repository.saveNoteInSpace(
+            workSpaceId,
+            noteMetadata("plans", createdAt = 1L, dailyDate = null),
+            NoteContent(blocks = listOf(DatabaseBlock(id = "budget-plans-view", databaseId = "budget", updatedAt = 1L)))
+        )
+
+        val firstMerge = repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        val noteDao = appDatabase.noteDao()
+        val readingDatabase = listOf(databaseNoteId("reading"), "first-book")
+        assertEquals(readingDatabase.toSet(), firstMerge.movedSubNoteIds)
+        assertEquals(readingDatabase.map { ACCOUNT_SPACE_ID }, readingDatabase.map { noteDao.getNoteById(it)?.spaceId })
+        assertEquals(workSpaceId, noteDao.getNoteById(databaseNoteId("budget"))?.spaceId)
+
+        val notesAfterFirstMerge = noteDao.getAllNotesForBackup()
+        val secondMerge = repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        assertTrue(secondMerge.movedSubNoteIds.isEmpty())
+        assertEquals(notesAfterFirstMerge, noteDao.getAllNotesForBackup())
+    }
+
+    @Test
     fun deletingASpaceKeepsADatabaseThatADailyNoteStillShows() = runTest {
         repository.saveDailyNote(
             date,
