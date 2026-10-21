@@ -22,10 +22,6 @@ val CategoryPastelPalette = listOf(
     "#FFC6FF"  // pastel pink
 )
 
-fun defaultCalendarCategories(): List<CalendarCategory> = listOf(
-    CalendarCategory(id = "personal", name = "Personal", colorHex = CategoryPastelPalette[5])
-)
-
 fun String.toCategoryColor(): Color = try {
     Color(this.removePrefix("#").toLong(16) or 0xFF000000)
 } catch (_: Exception) {

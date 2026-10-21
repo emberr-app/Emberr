@@ -3,7 +3,6 @@ package com.emberr.presentation.calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
-import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.data.local.room.entity.TaskSource
@@ -55,7 +54,7 @@ class CalendarViewModel(
 
     val categories: StateFlow<List<CalendarCategory>> = repository.getAllCategories()
         .map { entities -> entities.map { it.toCalendarCategory() } }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, defaultCalendarCategories())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val viewMode: StateFlow<CalendarViewMode> = settingsManager.calendarViewModeFlow
         .map { stored -> runCatching { CalendarViewMode.valueOf(stored) }.getOrDefault(CalendarViewMode.DAY) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, CalendarViewMode.DAY)
@@ -120,20 +119,6 @@ class CalendarViewModel(
 
     fun onSearchQueryChange(query: String) {
         searchQueryState.value = query
-    }
-
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.waitUntilDailyNotesAreInAccount()
-            if (repository.getAllCategories().first().isEmpty()) {
-                val default = defaultCalendarCategories().first()
-                repository.insertOrUpdateCategory(
-                    categoryId = defaultCategoryIdInSpace(default.id, ACCOUNT_SPACE_ID),
-                    name = default.name,
-                    colorHex = default.colorHex
-                )
-            }
-        }
     }
 
     fun addCategory(name: String, colorHex: String) {
@@ -478,8 +463,6 @@ class CalendarViewModel(
         }
     }
 }
-
-private fun defaultCategoryIdInSpace(categoryId: String, spaceId: String) = "${categoryId}_$spaceId"
 
 internal fun CategoryEntity.toCalendarCategory() = CalendarCategory(
     id = categoryId,
