@@ -51,6 +51,7 @@ import androidx.compose.ui.zIndex
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.NoteKind
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
@@ -823,7 +824,7 @@ fun DesktopMainScreen(
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
     onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
-    onExportBackup: (spaceIds: Set<String>) -> Unit = {},
+    onExportBackup: (choice: BackupContentChoice) -> Unit = {},
     onAiIconTap: () -> Unit = {},
     isAiChatVisible: Boolean = false,
     ragViewModel: com.emberr.presentation.ai.RagViewModel? = null,

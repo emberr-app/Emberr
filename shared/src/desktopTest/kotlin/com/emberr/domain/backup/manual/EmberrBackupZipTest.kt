@@ -79,7 +79,7 @@ class EmberrBackupZipTest {
                     stored("note-b", ImageBlock(id = "image-b", localFilePath = "/media/b.jpg"))
                 )
             )
-            database.keepOnlySpacesForExport(setOf("space-a"))
+            database.keepOnlySpacesForExport(setOf("space-a"), keepDailyNotes = true, keepCalendar = true)
         } finally {
             database.close()
         }

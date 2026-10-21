@@ -161,6 +161,23 @@ private fun ChoiceValueButton(value: String, isMenuOpen: Boolean, onClick: () ->
 }
 
 @Composable
+fun EmberrSwitchRow(label: String, icon: DrawableResource, isOn: Boolean, onClick: () -> Unit) {
+    EmberrBottomSheetOption(
+        label = label,
+        icon = {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(ChoiceRowIconSize)
+            )
+        },
+        trailing = { EmberrSwitch(isOn = isOn) },
+        onClick = onClick
+    )
+}
+
+@Composable
 fun EmberrCheckboxOption(label: String, isChecked: Boolean, onClick: () -> Unit) {
     val checkbox: @Composable () -> Unit = {
         EmberrCheckbox(checked = isChecked, onCheckedChange = null)

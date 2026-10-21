@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.sync.SyncPairingData
 import com.emberr.domain.sync.SyncServerStatus
 import com.emberr.domain.update.LATEST_RELEASE_PAGE_URL
@@ -152,7 +153,7 @@ private class SettingsCategory(
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    onExportReady: (spaceIds: Set<String>) -> Unit = {},
+    onExportReady: (choice: BackupContentChoice) -> Unit = {},
     onRequestBackupFolder: () -> Unit = {},
     onNavigateToSelfHostSetup: () -> Unit = {},
     onNavigateToEmberrCloud: () -> Unit = {},

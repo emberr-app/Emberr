@@ -21,6 +21,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.gif.AnimatedImageDecoder
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.model.PendingShare
 import com.emberr.domain.util.eventbus.WidgetComposeRequest
 import com.emberr.domain.util.eventbus.WidgetComposeRequestBus
@@ -314,6 +315,8 @@ class MainActivity : ComponentActivity() {
                     var pendingPdfTitle by remember { mutableStateOf("") }
                     var pendingPdfBlocks by remember { mutableStateOf(emptyList<NoteBlock>()) }
                     var pendingExportSpaceIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
+                    var pendingExportIncludesDailyNotes by rememberSaveable { mutableStateOf(true) }
+                    var pendingExportIncludesCalendar by rememberSaveable { mutableStateOf(true) }
 
                     // Markdown Saver
                     val exportMarkdownLauncher = rememberLauncherForActivityResult(
@@ -342,10 +345,14 @@ class MainActivity : ComponentActivity() {
                         ActivityResultContracts.CreateDocument("application/zip")
                     ) { uri ->
                         uri?.let { destinationUri ->
-                            val spaceIds = pendingExportSpaceIds.toSet()
+                            val choice = BackupContentChoice(
+                                spaceIds = pendingExportSpaceIds.toSet(),
+                                includesDailyNotes = pendingExportIncludesDailyNotes,
+                                includesCalendar = pendingExportIncludesCalendar
+                            )
                             lifecycleScope.launch(Dispatchers.IO) {
                                 try {
-                                    manualBackupExporter.exportToZip(destinationUri, spaceIds)
+                                    manualBackupExporter.exportToZip(destinationUri, choice)
 
                                     withContext(Dispatchers.Main) {
                                         Toast.makeText(context, "Backup saved!", Toast.LENGTH_SHORT).show()
@@ -428,8 +435,10 @@ class MainActivity : ComponentActivity() {
                             pendingPdfBlocks = blocks
                             exportPdfLauncher.launch(fileName)
                         },
-                        onExportBackup = { spaceIds ->
-                            pendingExportSpaceIds = spaceIds.toList()
+                        onExportBackup = { choice ->
+                            pendingExportSpaceIds = choice.spaceIds.toList()
+                            pendingExportIncludesDailyNotes = choice.includesDailyNotes
+                            pendingExportIncludesCalendar = choice.includesCalendar
                             val fileName = "EmberrBackup_${System.currentTimeMillis()}.emberr"
                             exportBackupLauncher.launch(fileName)
                         },

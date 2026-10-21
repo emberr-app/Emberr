@@ -4,6 +4,8 @@ import androidx.room.Room
 import androidx.room.useReaderConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.emberr.data.local.room.AppDatabase
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
+import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
 import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.CanvasEdgeEntity
@@ -249,8 +251,8 @@ class BackupExportTrimTest {
         database.unusedMediaFileDao().markUnused(listOf(UnusedMediaFileEntity(fileName = "old.jpg", unusedSince = 1L)))
     }
 
-    private suspend fun firstColumnOf(sql: String): Set<String> =
-        database.useReaderConnection { connection ->
+    private suspend fun firstColumnOf(sql: String, from: AppDatabase = database): Set<String> =
+        from.useReaderConnection { connection ->
             connection.usePrepared(sql) { statement ->
                 buildSet {
                     while (statement.step()) add(statement.getText(0))
@@ -262,7 +264,7 @@ class BackupExportTrimTest {
     fun onlyThePickedSpacesAndTheirLiveNotesAreKept() = runTest {
         fillDatabase()
 
-        database.keepOnlySpacesForExport(setOf("space-a"))
+        database.keepOnlySpacesForExport(setOf("space-a"), keepDailyNotes = true, keepCalendar = true)
 
         assertEquals(setOf("space-a"), firstColumnOf("SELECT spaceId FROM spaces"))
         assertEquals(setOf("note-a", "daily-a"), firstColumnOf("SELECT noteId FROM notes_metadata"))
@@ -279,10 +281,10 @@ class BackupExportTrimTest {
     fun spaceItemsFromOtherSpacesAndDeletedItemsAreLeftOut() = runTest {
         fillDatabase()
 
-        database.keepOnlySpacesForExport(setOf("space-a"))
+        database.keepOnlySpacesForExport(setOf("space-a"), keepDailyNotes = true, keepCalendar = true)
 
         assertEquals(setOf("folder-a"), firstColumnOf("SELECT folderId FROM folders"))
-        assertEquals(setOf("category-a"), firstColumnOf("SELECT categoryId FROM calendar_categories"))
+        assertEquals(setOf("category-a", "category-b"), firstColumnOf("SELECT categoryId FROM calendar_categories"))
         assertEquals(setOf("tag-a"), firstColumnOf("SELECT tagId FROM property_tags"))
         assertEquals(setOf("property-a"), firstColumnOf("SELECT propertyId FROM custom_properties"))
         assertEquals(setOf("a-task", "daily-task"), firstColumnOf("SELECT blockId FROM calendar_tasks"))
@@ -295,7 +297,7 @@ class BackupExportTrimTest {
     fun chatsAndSyncBookkeepingAreLeftOut() = runTest {
         fillDatabase()
 
-        database.keepOnlySpacesForExport(setOf("space-a"))
+        database.keepOnlySpacesForExport(setOf("space-a"), keepDailyNotes = true, keepCalendar = true)
 
         assertEquals(emptySet(), firstColumnOf("SELECT id FROM chat_sessions"))
         assertEquals(emptySet(), firstColumnOf("SELECT noteId FROM self_host_deleted_notes"))
@@ -308,7 +310,7 @@ class BackupExportTrimTest {
     fun onlyMediaUsedByTheKeptNotesIsListed() = runTest {
         fillDatabase()
 
-        val mediaFileNames = database.keepOnlySpacesForExport(setOf("space-a"))
+        val mediaFileNames = database.keepOnlySpacesForExport(setOf("space-a"), keepDailyNotes = true, keepCalendar = true)
 
         assertEquals(setOf("kept.jpg", "voice.m4a", "document.pdf", "cover.png", "canvas.png"), mediaFileNames)
     }
@@ -317,7 +319,7 @@ class BackupExportTrimTest {
     fun pickingEverySpaceKeepsEveryLiveNote() = runTest {
         fillDatabase()
 
-        val mediaFileNames = database.keepOnlySpacesForExport(setOf("space-a", "space-b"))
+        val mediaFileNames = database.keepOnlySpacesForExport(setOf("space-a", "space-b"), keepDailyNotes = true, keepCalendar = true)
 
         assertEquals(setOf("space-a", "space-b"), firstColumnOf("SELECT spaceId FROM spaces"))
         assertEquals(setOf("note-a", "note-b", "daily-a"), firstColumnOf("SELECT noteId FROM notes_metadata"))
@@ -325,5 +327,76 @@ class BackupExportTrimTest {
             setOf("kept.jpg", "voice.m4a", "document.pdf", "cover.png", "canvas.png", "other-space.jpg", "other-canvas.png"),
             mediaFileNames
         )
+    }
+
+    private class AccountRowsKept(val noteIds: Set<String>, val blockIds: Set<String>, val exceptionBlockIds: Set<String>, val categoryIds: Set<String>)
+
+    private suspend fun accountRowsKeptByExport(keepDailyNotes: Boolean, keepCalendar: Boolean): AccountRowsKept {
+        val exportCopy = Room.inMemoryDatabaseBuilder<AppDatabase>().setDriver(BundledSQLiteDriver()).build()
+        try {
+            val dao = exportCopy.backupDao()
+            dao.insertSpaces(listOf(space("space-a")))
+            dao.insertNotes(
+                listOf(
+                    note("day-with-both", ACCOUNT_SPACE_ID, dailyDate = "2026-10-20"),
+                    note("day-with-journal-only", ACCOUNT_SPACE_ID, dailyDate = "2026-10-21"),
+                    note("pinned", ACCOUNT_SPACE_ID, dailyDate = "global_pinned"),
+                    note("canvas-shown-in-a-day", ACCOUNT_SPACE_ID),
+                    note(ACCOUNT_TASKS_INBOX_NOTE_ID, ACCOUNT_SPACE_ID)
+                )
+            )
+            dao.insertBlocks(
+                listOf(
+                    stored("day-with-both", TextBlock(id = "journal", text = "Dear diary")),
+                    stored("day-with-both", CheckboxBlock(id = "event", text = "Dentist")),
+                    stored("day-with-journal-only", TextBlock(id = "journal-only", text = "Quiet day")),
+                    stored("pinned", CheckboxBlock(id = "pinned-task", text = "Water plants")),
+                    stored("canvas-shown-in-a-day", TextBlock(id = "sub-note-text", text = "Sketch")),
+                    stored(ACCOUNT_TASKS_INBOX_NOTE_ID, CheckboxBlock(id = "inbox-task", text = "Call mum"))
+                )
+            )
+            dao.insertCalendarEventExceptions(
+                listOf(CalendarEventExceptionEntity(blockId = "event", occurrenceDate = "2026-10-27", isCancelled = true, updatedAt = 1L))
+            )
+            dao.insertCategories(
+                listOf(
+                    CategoryEntity(categoryId = "category-work", name = "Work", colorHex = "#000000", createdAt = 1L, spaceId = ACCOUNT_SPACE_ID),
+                    CategoryEntity(categoryId = "category-gym", name = "Gym", colorHex = "#000000", createdAt = 1L, spaceId = "space-a")
+                )
+            )
+
+            exportCopy.keepOnlySpacesForExport(emptySet(), keepDailyNotes, keepCalendar)
+
+            return AccountRowsKept(
+                noteIds = firstColumnOf("SELECT noteId FROM notes_metadata", from = exportCopy),
+                blockIds = firstColumnOf("SELECT blockId FROM note_blocks", from = exportCopy),
+                exceptionBlockIds = firstColumnOf("SELECT blockId FROM calendar_event_exceptions", from = exportCopy),
+                categoryIds = firstColumnOf("SELECT categoryId FROM calendar_categories", from = exportCopy)
+            )
+        } finally {
+            exportCopy.close()
+        }
+    }
+
+    @Test
+    fun theDailyNotesAndCalendarChoicesEachKeepTheirOwnDailyBlocksAndCategoriesAlwaysStay() = runTest {
+        val both = accountRowsKeptByExport(keepDailyNotes = true, keepCalendar = true)
+        val calendarOnly = accountRowsKeptByExport(keepDailyNotes = false, keepCalendar = true)
+        val dailyNotesOnly = accountRowsKeptByExport(keepDailyNotes = true, keepCalendar = false)
+
+        assertEquals(setOf("journal", "event", "journal-only", "pinned-task", "sub-note-text", "inbox-task"), both.blockIds)
+        assertEquals(setOf("event"), both.exceptionBlockIds)
+
+        assertEquals(setOf("event", "inbox-task"), calendarOnly.blockIds)
+        assertEquals(setOf("event"), calendarOnly.exceptionBlockIds)
+        assertEquals(setOf("day-with-both", ACCOUNT_TASKS_INBOX_NOTE_ID), calendarOnly.noteIds)
+
+        assertEquals(setOf("journal", "journal-only", "pinned-task", "sub-note-text"), dailyNotesOnly.blockIds)
+        assertEquals(emptySet(), dailyNotesOnly.exceptionBlockIds)
+        assertEquals(setOf("day-with-both", "day-with-journal-only", "pinned", "canvas-shown-in-a-day"), dailyNotesOnly.noteIds)
+
+        listOf(both, calendarOnly, dailyNotesOnly).forEach { kept ->
+            assertEquals(setOf("category-work", "category-gym"), kept.categoryIds)
+        }
     }
 }

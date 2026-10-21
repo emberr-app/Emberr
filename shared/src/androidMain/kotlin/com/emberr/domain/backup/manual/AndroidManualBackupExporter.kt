@@ -15,16 +15,17 @@ class AndroidManualBackupExporter(
     private val appDatabase: AppDatabase
 ) {
 
-    suspend fun exportToZip(uri: Uri, spaceIds: Set<String>) {
-        exportSpacesToZip(uri, spaceIds, tempDatabaseFileName = "emberr_manual_export_temp.db")
+    suspend fun exportToZip(uri: Uri, choice: BackupContentChoice) {
+        exportSpacesToZip(uri, choice, tempDatabaseFileName = "emberr_manual_export_temp.db")
     }
 
     suspend fun exportAllSpacesToZip(uri: Uri) {
         val allSpaceIds = appDatabase.spaceDao().getAllSpacesOnce().map { it.spaceId }.toSet()
-        exportSpacesToZip(uri, allSpaceIds, tempDatabaseFileName = "emberr_export_temp.db")
+        val everything = BackupContentChoice(allSpaceIds, includesDailyNotes = true, includesCalendar = true)
+        exportSpacesToZip(uri, everything, tempDatabaseFileName = "emberr_export_temp.db")
     }
 
-    private suspend fun exportSpacesToZip(uri: Uri, spaceIds: Set<String>, tempDatabaseFileName: String) {
+    private suspend fun exportSpacesToZip(uri: Uri, choice: BackupContentChoice, tempDatabaseFileName: String) {
         val plainDbFile = File(context.cacheDir, tempDatabaseFileName)
         val plainDbJournalFile = File(context.cacheDir, "$tempDatabaseFileName-journal")
         plainDbFile.delete()
@@ -33,7 +34,7 @@ class AndroidManualBackupExporter(
         try {
             exportPlainSqliteCopy(appDatabase, plainDbFile)
             check(plainDbFile.length() > 0L) { "sqlcipher_export produced an empty file" }
-            val mediaFileNames = keepOnlySpacesInCopy(plainDbFile, spaceIds)
+            val mediaFileNames = keepOnlyChosenContentInCopy(plainDbFile, choice)
             val outputStream = context.contentResolver.openOutputStream(uri)
                 ?: throw IOException("Couldn't open the chosen file for saving.")
             outputStream.use { writeBackupZip(it, plainDbFile, File(context.filesDir, "media"), mediaFileNames) }
@@ -43,12 +44,12 @@ class AndroidManualBackupExporter(
         }
     }
 
-    private suspend fun keepOnlySpacesInCopy(plainDbFile: File, spaceIds: Set<String>): Set<String> {
+    private suspend fun keepOnlyChosenContentInCopy(plainDbFile: File, choice: BackupContentChoice): Set<String> {
         val copyDatabase = getRoomDatabase(
             getDatabaseBuilder(context, plainDbFile.absolutePath).setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
         )
         return try {
-            copyDatabase.keepOnlySpacesForExport(spaceIds)
+            copyDatabase.keepOnlySpacesForExport(choice.spaceIds, choice.includesDailyNotes, choice.includesCalendar)
         } finally {
             copyDatabase.close()
         }
