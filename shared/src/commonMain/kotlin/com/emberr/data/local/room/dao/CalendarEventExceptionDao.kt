@@ -43,4 +43,7 @@ interface CalendarEventExceptionDao {
 
     @Query("UPDATE calendar_event_exceptions SET blockId = :newBlockId, updatedAt = :updatedAt WHERE blockId = :oldBlockId AND occurrenceDate <= :toDateInclusive")
     suspend fun rekeyExceptionsUpTo(oldBlockId: String, newBlockId: String, toDateInclusive: String, updatedAt: Long)
+
+    @Query("UPDATE calendar_event_exceptions SET overrideCategoryId = :newCategoryId, updatedAt = :updatedAt WHERE overrideCategoryId = :oldCategoryId")
+    suspend fun replaceOverrideCategoryId(oldCategoryId: String, newCategoryId: String, updatedAt: Long)
 }

@@ -1,6 +1,7 @@
 package com.emberr.domain.space
 
 import com.emberr.data.local.room.dao.SpaceDao
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.DEFAULT_SPACE_ID
 import com.emberr.data.local.room.entity.DEFAULT_SPACE_NAME
 import com.emberr.data.local.room.entity.PLACEHOLDER_SPACE_UPDATED_AT
@@ -83,7 +84,7 @@ class SpaceRepository(
     }
 
     suspend fun ensureSpaceExists(spaceId: String, displayName: String? = null) {
-        if (spaceId.isBlank()) return
+        if (spaceId.isBlank() || spaceId == ACCOUNT_SPACE_ID) return
         if (spaceDao.getSpaceById(spaceId) != null) return
 
         spaceDao.insertOrUpdateSpace(

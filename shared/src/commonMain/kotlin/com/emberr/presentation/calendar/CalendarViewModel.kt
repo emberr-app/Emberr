@@ -3,6 +3,7 @@ package com.emberr.presentation.calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.domain.model.AllDaySpan
@@ -125,15 +126,14 @@ class CalendarViewModel(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            activeSpaceStore.activeSpaceId.collect { spaceId ->
-                if (repository.getAllCategories().first().isEmpty()) {
-                    val default = defaultCalendarCategories().first()
-                    repository.insertOrUpdateCategory(
-                        categoryId = defaultCategoryIdInSpace(default.id, spaceId),
-                        name = default.name,
-                        colorHex = default.colorHex
-                    )
-                }
+            repository.waitUntilDailyNotesAreInAccount()
+            if (repository.getAllCategories().first().isEmpty()) {
+                val default = defaultCalendarCategories().first()
+                repository.insertOrUpdateCategory(
+                    categoryId = defaultCategoryIdInSpace(default.id, ACCOUNT_SPACE_ID),
+                    name = default.name,
+                    colorHex = default.colorHex
+                )
             }
         }
     }

@@ -26,6 +26,7 @@ import com.emberr.domain.model.NoteSearchResult
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.RecurrenceEditScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
 
@@ -89,6 +90,8 @@ interface NoteRepository {
     suspend fun saveDailyNote(dateString: String, content: NoteContent, updatedAt: Long? = null, remoteMeta: NoteMetadataEntity? = null)
     fun refreshDailyNoteCache(spaceId: String, dateString: String, content: NoteContent)
     suspend fun dedupeDuplicateDailyNotes(): Int
+    suspend fun moveDailyNotesAndCategoriesToAccount(reindexScope: CoroutineScope)
+    suspend fun waitUntilDailyNotesAreInAccount()
 
     // Notes operations
     fun getAllNotes(): Flow<List<NoteMetadataEntity>>

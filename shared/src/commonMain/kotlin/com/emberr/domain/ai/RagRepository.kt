@@ -1,5 +1,6 @@
 package com.emberr.domain.ai
 
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.domain.ai.chat.ChatTurn
 import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.ai.external.ExternalAiEngine
@@ -57,7 +58,7 @@ class RagRepository(
         val queryVector = localAiEngine.generateEmbedding(userQuestion)
 
         val allBlocks = database.vectorStoreQueries
-            .getBlocksInSpace(activeSpaceStore.currentActiveSpaceId())
+            .getBlocksInSpaces(listOf(activeSpaceStore.currentActiveSpaceId(), ACCOUNT_SPACE_ID))
             .executeAsList()
 
         if (allBlocks.isEmpty()) {

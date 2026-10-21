@@ -32,4 +32,10 @@ interface CategoryDao {
 
     @Query("UPDATE calendar_categories SET isDeleted = 1, updatedAt = :updatedAt WHERE categoryId = :categoryId")
     suspend fun markCategoryDeleted(categoryId: String, updatedAt: Long)
+
+    @Query("SELECT * FROM calendar_categories WHERE spaceId != :spaceId")
+    suspend fun getCategoriesOutsideSpaceIncludingDeleted(spaceId: String): List<CategoryEntity>
+
+    @Query("UPDATE calendar_categories SET spaceId = :spaceId WHERE spaceId != :spaceId")
+    suspend fun moveAllCategoriesToSpace(spaceId: String)
 }

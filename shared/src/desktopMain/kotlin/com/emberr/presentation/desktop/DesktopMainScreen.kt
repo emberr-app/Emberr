@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
@@ -1080,7 +1081,7 @@ fun DesktopMainScreen(
             ReminderClickBus.consumePendingBlockId()
             if (target == null) return@collect
 
-            if (target.spaceId != activeSpaceId) {
+            if (target.spaceId != activeSpaceId && target.spaceId != ACCOUNT_SPACE_ID) {
                 isOpeningReminderTarget = true
                 spaceViewModel.openSpace(target.spaceId)
             }
