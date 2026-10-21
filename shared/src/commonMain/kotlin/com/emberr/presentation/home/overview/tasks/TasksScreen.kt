@@ -24,6 +24,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.koin.compose.viewmodel.koinViewModel
+import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
@@ -71,25 +72,25 @@ fun TasksScreen(
     val allLinkableNotes by viewModel.allLinkableNotes.collectAsState(emptyList())
     val blockLocations by viewModel.blockLocations.collectAsState()
 
-    val inboxNoteId = remember(allLinkableNotes) {
-        allLinkableNotes.firstOrNull { it.title.equals("Inbox", ignoreCase = true) && !it.isDaily }?.noteId
-    }
     val noteTitleById by viewModel.noteTitlesById.collectAsState()
-    val sectionLabelFor = remember(blockLocations, inboxNoteId, noteTitleById) {
+    val inboxNoteIds = remember(noteTitleById) {
+        noteTitleById.filterValues { it.equals("Inbox", ignoreCase = true) }.keys + ACCOUNT_TASKS_INBOX_NOTE_ID
+    }
+    val sectionLabelFor = remember(blockLocations, inboxNoteIds, noteTitleById) {
         { block: NoteBlock ->
             val location = blockLocations[block.id]
             when {
                 location == null -> null
-                !location.isDaily && location.noteId == inboxNoteId -> null
+                !location.isDaily && location.noteId in inboxNoteIds -> null
                 location.isDaily -> dailyDateLabel(location.noteId)
                 else -> noteTitleById[location.noteId] ?: "Note"
             }
         }
     }
-    val groupedBlocks = remember(blocks, blockLocations, inboxNoteId, noteTitleById) {
+    val groupedBlocks = remember(blocks, blockLocations, inboxNoteIds, noteTitleById) {
         val (rest, located) = blocks.partition { block ->
             val location = blockLocations[block.id]
-            location == null || (!location.isDaily && location.noteId == inboxNoteId)
+            location == null || (!location.isDaily && location.noteId in inboxNoteIds)
         }
         val dailyBlocks = located
             .filter { blockLocations[it.id]?.isDaily == true }
@@ -200,7 +201,7 @@ fun TasksScreen(
                         override fun onClearFocusRequest() = viewModel.clearFocusRequest()
                         override fun onUpdateText(id: String, text: String) = viewModel.updateBlockText(id, text)
                         override fun onToggleCheckbox(id: String, checked: Boolean) = viewModel.toggleCheckbox(id, checked)
-                        override fun onFocusBlock(id: String) = viewModel.setFocusedBlock()
+                        override fun onFocusBlock(id: String) = viewModel.setFocusedBlock(id)
                         override fun onEnterPressed(id: String, before: String, after: String) = viewModel.handleEnter(id, before, after)
                         override fun onBackspaceOnEmpty(id: String) = viewModel.handleBackspaceOnEmpty(id)
                         override fun onToggleSelection(id: String) = viewModel.toggleSelection(id)

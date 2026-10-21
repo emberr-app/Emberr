@@ -36,6 +36,10 @@ The first space is always id `00000000-0000-0000-0000-000000000001`, named `Defa
 
 Older installs kept daily notes and categories per space. At every launch `NoteRepository.moveDailyNotesAndCategoriesToAccount` folds them into `account`: daily notes on the same date become one note (the oldest note keeps its blocks first, the others' blocks are added after), and categories with the same name become one (the others are soft-deleted and every checkbox, calendar row and event exception is pointed at the one that stays). Once everything is in `account` it does nothing.
 
+**Sub-notes follow their parent:** a sub-note (`isSubNote = 1`: the note behind an embedded canvas, a database note and its rows, a Tasks linked sub-page) is saved in the space of the note it was made from, so one made inside a daily note lives in `account`. The same launch step, and the merge that runs after every sync, moves older sub-notes into `account` when only `account` notes point at them (through canvas, database or linked-note blocks, nested ones included). A database moves together with all its rows. A moved note gets a new `updatedAt`, so sync carries the move, and both sync engines apply a newer `spaceId` from the other device.
+
+**The tasks Inbox:** new tasks from the Tasks screen go into one Inbox note in `account` with the fixed id `account-tasks-inbox` (`ACCOUNT_TASKS_INBOX_NOTE_ID` in `SpaceEntity.kt`). Because the id is fixed, two devices that each create it end up with one note whose blocks merge. Older per-space "Inbox" notes keep their tasks, and the Tasks screen shows them in the same Inbox group. Images, documents, bookmarks and shared items still use the per-space Inbox.
+
 **Active space:** stored in preferences as `active_space_id`, touched only by `ActiveSpaceStore`. Never synced, because switching to Work on your laptop should not switch your phone.
 
 **How the wall holds:** DAO queries take a `spaceId` argument, so the filter cannot be forgotten. The code will not compile without it.
