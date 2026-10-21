@@ -77,6 +77,12 @@ interface BackupDao {
     @Delete
     suspend fun deleteBlocks(blocks: List<NoteBlockEntity>)
 
+    @Query("SELECT * FROM note_blocks WHERE noteId = :noteId ORDER BY displayOrder")
+    suspend fun getBlocksOfNote(noteId: String): List<NoteBlockEntity>
+
+    @Query("UPDATE notes_metadata SET snippet = :snippet WHERE noteId = :noteId")
+    suspend fun updateSnippet(noteId: String, snippet: String)
+
     @Query("DELETE FROM note_blocks WHERE isDeleted = 1 OR noteId NOT IN (SELECT noteId FROM notes_metadata)")
     suspend fun deleteBlocksThatAreDeletedOrHaveNoNote()
 
@@ -95,14 +101,23 @@ interface BackupDao {
     @Query("DELETE FROM calendar_event_exceptions WHERE blockId NOT IN (SELECT blockId FROM note_blocks)")
     suspend fun deleteCalendarEventExceptionsThatHaveNoBlock()
 
-    @Query("DELETE FROM image_blocks WHERE noteId NOT IN (SELECT noteId FROM notes_metadata)")
-    suspend fun deleteImageBlocksThatHaveNoNote()
+    @Query(
+        "DELETE FROM image_blocks WHERE NOT EXISTS " +
+                "(SELECT 1 FROM note_blocks WHERE note_blocks.noteId = image_blocks.noteId AND note_blocks.blockId = image_blocks.blockId)"
+    )
+    suspend fun deleteImageBlocksThatHaveNoBlock()
 
-    @Query("DELETE FROM document_blocks WHERE noteId NOT IN (SELECT noteId FROM notes_metadata)")
-    suspend fun deleteDocumentBlocksThatHaveNoNote()
+    @Query(
+        "DELETE FROM document_blocks WHERE NOT EXISTS " +
+                "(SELECT 1 FROM note_blocks WHERE note_blocks.noteId = document_blocks.noteId AND note_blocks.blockId = document_blocks.blockId)"
+    )
+    suspend fun deleteDocumentBlocksThatHaveNoBlock()
 
-    @Query("DELETE FROM bookmark_blocks WHERE noteId NOT IN (SELECT noteId FROM notes_metadata)")
-    suspend fun deleteBookmarkBlocksThatHaveNoNote()
+    @Query(
+        "DELETE FROM bookmark_blocks WHERE NOT EXISTS " +
+                "(SELECT 1 FROM note_blocks WHERE note_blocks.noteId = bookmark_blocks.noteId AND note_blocks.blockId = bookmark_blocks.blockId)"
+    )
+    suspend fun deleteBookmarkBlocksThatHaveNoBlock()
 
     @Query("DELETE FROM media_references WHERE noteId NOT IN (SELECT noteId FROM notes_metadata)")
     suspend fun deleteMediaReferencesThatHaveNoNote()

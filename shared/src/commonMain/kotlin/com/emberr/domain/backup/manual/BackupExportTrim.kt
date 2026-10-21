@@ -5,10 +5,12 @@ import androidx.room.useWriterConnection
 import com.emberr.data.local.room.AppDatabase
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
+import com.emberr.data.local.room.entity.MediaReferenceEntity
 import com.emberr.data.local.room.inOneTransaction
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteBlockSerializer
+import com.emberr.domain.model.generateDailyNoteSnippet
 import com.emberr.domain.selfhost.media.MediaReferenceScanner
 import com.emberr.domain.util.media.mediaFileNameOnly
 import kotlinx.serialization.SerializationException
@@ -26,6 +28,7 @@ suspend fun AppDatabase.keepOnlySpacesForExport(
     val dao = backupDao()
     val spaceIds = spaceIdsToKeep.toList()
     val spaceIdsWithAccount = (spaceIdsToKeep + ACCOUNT_SPACE_ID).toList()
+    val dailyNoteIdsThatLostBlocks = HashSet<String>()
 
     inOneTransaction {
         dao.deleteNotesOutsideSpacesOrInTrash(spaceIdsWithAccount)
@@ -40,17 +43,19 @@ suspend fun AppDatabase.keepOnlySpacesForExport(
                 if (isCalendarBlock) !keepCalendar else !keepDailyNotes
             }
             dao.deleteBlocks(dailyBlocksToDrop)
+            dailyBlocksToDrop.mapTo(dailyNoteIdsThatLostBlocks) { it.noteId }
         }
         dao.deleteBlocksThatAreDeletedOrHaveNoNote()
         dao.deleteDailyNotesWithoutBlocks(ACCOUNT_SPACE_ID)
+        rebuildSnippetAndMediaReferencesOf(dailyNoteIdsThatLostBlocks)
         dao.deleteCanvasNodesThatAreDeletedOrHaveNoNote()
         dao.deleteCanvasEdgesThatAreDeletedOrHaveNoNote()
         dao.deleteCanvasStrokesThatAreDeletedOrHaveNoNote()
         dao.deleteCalendarTasksThatHaveNoBlock()
         dao.deleteCalendarEventExceptionsThatHaveNoBlock()
-        dao.deleteImageBlocksThatHaveNoNote()
-        dao.deleteDocumentBlocksThatHaveNoNote()
-        dao.deleteBookmarkBlocksThatHaveNoNote()
+        dao.deleteImageBlocksThatHaveNoBlock()
+        dao.deleteDocumentBlocksThatHaveNoBlock()
+        dao.deleteBookmarkBlocksThatHaveNoBlock()
         dao.deleteMediaReferencesThatHaveNoNote()
         dao.deleteSpacesNotKept(spaceIds)
         dao.deleteFoldersOutsideSpacesOrDeleted(spaceIds)
@@ -66,6 +71,17 @@ suspend fun AppDatabase.keepOnlySpacesForExport(
     useWriterConnection { connection -> connection.execSQL("VACUUM") }
 
     return mediaFileNamesStillInUse()
+}
+
+private suspend fun AppDatabase.rebuildSnippetAndMediaReferencesOf(noteIds: Set<String>) {
+    for (noteId in noteIds) {
+        val blocks = backupDao().getBlocksOfNote(noteId).mapNotNull { decodeBlockOrNull(it.blockDataJson) }
+        backupDao().updateSnippet(noteId, generateDailyNoteSnippet(blocks))
+        mediaReferenceDao().deleteByNoteId(noteId)
+        mediaReferenceDao().upsertReferences(
+            MediaReferenceScanner.extractMediaFileNames(blocks).map { fileName -> MediaReferenceEntity(noteId = noteId, fileName = fileName) }
+        )
+    }
 }
 
 private suspend fun AppDatabase.mediaFileNamesStillInUse(): Set<String> =
