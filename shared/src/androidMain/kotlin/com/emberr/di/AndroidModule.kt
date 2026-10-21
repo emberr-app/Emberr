@@ -216,6 +216,7 @@ val androidModule = module {
         com.emberr.presentation.widget.tasks.TasksWidgetContentReader(
             calendarTaskDao = get(),
             noteDao = get(),
+            spaceDao = get(),
             clockFormat = get()
         )
     }

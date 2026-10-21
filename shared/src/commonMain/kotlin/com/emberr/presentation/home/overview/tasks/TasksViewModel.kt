@@ -13,6 +13,7 @@ import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.sync.AutoSyncTrigger
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
@@ -40,7 +41,8 @@ data class BlockLocation(val noteId: String, val isDaily: Boolean)
 
 class TasksViewModel(
     private val repository: NoteRepository,
-    private val reminderScheduler: ReminderScheduler
+    private val reminderScheduler: ReminderScheduler,
+    private val spaceRepository: SpaceRepository
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(true)
@@ -79,13 +81,23 @@ class TasksViewModel(
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val noteTitlesById: StateFlow<Map<String, String>> = _blockLocations
+    private val notesHoldingTasks: StateFlow<List<NoteMetadataEntity>> = _blockLocations
         .map { locations -> locations.values.filterNot { it.isDaily }.map { it.noteId }.distinct().sorted() }
         .distinctUntilChanged()
         .flatMapLatest { noteIds -> repository.observeNotesByIds(noteIds) }
-        .map { notes -> notes.associate { it.noteId to it.title } }
         .catch { cause -> cause.printStackTrace() }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val noteTitlesById: StateFlow<Map<String, String>> = notesHoldingTasks
+        .map { notes -> notes.associate { it.noteId to it.title } }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
+
+    val noteHeadingsById: StateFlow<Map<String, String>> =
+        combine(notesHoldingTasks, spaceRepository.observeSpaces()) { notes, spaces ->
+            taskHeadingsByNoteId(notes, spaces.associate { it.spaceId to it.displayName })
+        }
+            .catch { cause -> cause.printStackTrace() }
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
     fun createLinkedNote(title: String): String {
         val newNoteId = UUID.randomUUID().toString()
