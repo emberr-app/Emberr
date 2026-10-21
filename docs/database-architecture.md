@@ -32,6 +32,10 @@ One file is simpler to open, back up and sync than one database per space.
 
 The first space is always id `00000000-0000-0000-0000-000000000001`, named `Default`. Fixing the id means two devices set up offline agree on it instead of each making their own "Default".
 
+**The `account` id:** some data belongs to the whole app, not to one space: every daily note (one per date), the pinned daily blocks (`global_pinned`) and the calendar categories (one shared set). These rows use the reserved id `account` (`ACCOUNT_SPACE_ID` in `SpaceEntity.kt`) in the same `spaceId` column. `account` is not a row in `spaces`, so it never shows up in the space list and cannot be deleted. Deleting a space never touches it. Dated checkboxes inside regular notes still belong to their note's space.
+
+Older installs kept daily notes and categories per space. At every launch `NoteRepository.moveDailyNotesAndCategoriesToAccount` folds them into `account`: daily notes on the same date become one note (the oldest note keeps its blocks first, the others' blocks are added after), and categories with the same name become one (the others are soft-deleted and every checkbox, calendar row and event exception is pointed at the one that stays). Once everything is in `account` it does nothing.
+
 **Active space:** stored in preferences as `active_space_id`, touched only by `ActiveSpaceStore`. Never synced, because switching to Work on your laptop should not switch your phone.
 
 **How the wall holds:** DAO queries take a `spaceId` argument, so the filter cannot be forgotten. The code will not compile without it.
@@ -41,7 +45,7 @@ The first space is always id `00000000-0000-0000-0000-000000000001`, named `Defa
 fun getAllNotes(spaceId: String): Flow<List<NoteMetadataEntity>>
 ```
 
-Repositories pass the active space in, so screens never handle space ids. Queries that read every space on purpose end in `AcrossSpaces`, used by sync and backup.
+Repositories pass the active space in, so screens never handle space ids. Daily notes and categories use `account` instead, and calendar reads pass the active space plus `account`. Queries that read every space on purpose end in `AcrossSpaces`, used by sync and backup.
 
 ## Tables
 
@@ -76,7 +80,7 @@ data class NoteBlockEntity(
 
 ### Organising
 
-`folders` (a tree via `parentFolderId`), `global_tags`, `calendar_categories` — all per space.
+`folders` (a tree via `parentFolderId`) and `global_tags` — per space. `calendar_categories` — one shared set, stored under `account`.
 
 `database_templates` holds saved table layouts, columns and views only, never rows. Not per space, because a layout is a tool, not content.
 
@@ -106,7 +110,7 @@ Unused media is cleaned up at launch only, never on delete, because undo can bri
 
 One table, `block_metadata`: `block_id`, `note_id`, `space_id`, `chunk_text`, `embedding`.
 
-`space_id` is repeated here on purpose. AI search compares a question against every vector, so the index filters by space itself instead of loading everything and asking the main database. Reads go through `getBlocksInSpace`, so a question in Personal cannot be answered from a Work note.
+`space_id` is repeated here on purpose. AI search compares a question against every vector, so the index filters by space itself instead of loading everything and asking the main database. Reads go through `getBlocksInSpaces` with the active space plus `account`, so a question in Personal can use daily notes but cannot be answered from a Work note.
 
 ## Encryption at rest
 
