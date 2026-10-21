@@ -210,6 +210,11 @@ class NoteRepositoryImpl(
 
     private fun activeSpaceId(): String = activeSpaceStore.currentActiveSpaceId()
 
+    private fun <T> inActiveSpaceAndAccount(scopedQuery: (List<String>) -> Flow<T>): Flow<T> =
+        activeSpaceStore.activeSpaceId.flatMapLatest { spaceId -> scopedQuery(listOf(spaceId, ACCOUNT_SPACE_ID)) }
+
+    private fun activeSpaceAndAccountIds(): List<String> = listOf(activeSpaceId(), ACCOUNT_SPACE_ID)
+
     private fun dailyCacheKey(spaceId: String, dateString: String) = "$spaceId|$dateString"
 
     // In-memory cache for regular notes keyed by noteId.
@@ -705,7 +710,7 @@ class NoteRepositoryImpl(
     override suspend fun searchNoteTitlesAndSnippets(query: String): List<NoteSearchResult> =
         withContext(Dispatchers.IO) {
             if (query.isBlank()) return@withContext emptyList()
-            val results = noteDao.searchNotesByTitleOrSnippet(activeSpaceId(), query).map { metadata ->
+            val results = noteDao.searchNotesByTitleOrSnippet(activeSpaceAndAccountIds(), query).map { metadata ->
                 NoteSearchResult(
                     note = metadata,
                     matchedText = metadata.snippet.ifBlank { metadata.title }
@@ -724,11 +729,11 @@ class NoteRepositoryImpl(
         withContext(Dispatchers.IO) {
             if (query.isBlank()) return@withContext emptyList()
 
-            val spaceId = activeSpaceId()
+            val spaceIds = activeSpaceAndAccountIds()
             val metadataResults = searchNoteTitlesAndSnippets(query)
             val matchedIds = metadataResults.mapTo(mutableSetOf()) { it.note.noteId }
 
-            val contentMatchIds = blockDao.findNoteIdsMatchingContent(spaceId, query)
+            val contentMatchIds = blockDao.findNoteIdsMatchingContent(spaceIds, query)
                 .filterNot { it in matchedIds }
 
             val contentMatches = if (contentMatchIds.isEmpty()) {
@@ -741,9 +746,9 @@ class NoteRepositoryImpl(
             }
 
             val alreadyFoundIds = matchedIds + contentMatches.map { it.note.noteId }
-            val canvasMatches = findCanvasTextMatches(spaceId, query).filterNot { it.note.noteId in alreadyFoundIds }
+            val canvasMatches = findCanvasTextMatches(spaceIds, query).filterNot { it.note.noteId in alreadyFoundIds }
             val alreadyFoundOrCanvasIds = alreadyFoundIds + canvasMatches.map { it.note.noteId }
-            val databaseMatches = findDatabaseTitleMatches(spaceId, query, contentMatchIds).filterNot { it.note.noteId in alreadyFoundOrCanvasIds }
+            val databaseMatches = findDatabaseTitleMatches(spaceIds, query, contentMatchIds).filterNot { it.note.noteId in alreadyFoundOrCanvasIds }
 
             (metadataResults + resolveSubNoteParents(contentMatches + canvasMatches + databaseMatches)).sortedByDescending { it.note.updatedAt }
         }
@@ -789,21 +794,21 @@ class NoteRepositoryImpl(
             .latestParentByChildId()
     }
 
-    private suspend fun findCanvasTextMatches(spaceId: String, query: String): List<NoteSearchResult> {
+    private suspend fun findCanvasTextMatches(spaceIds: List<String>, query: String): List<NoteSearchResult> {
         val resultsByNoteId = LinkedHashMap<String, NoteSearchResult>()
-        for (canvasNoteId in canvasDao.findCanvasNoteIdsWithTextMatching(spaceId, query)) {
+        for (canvasNoteId in canvasDao.findCanvasNoteIdsWithTextMatching(spaceIds, query)) {
             val matchedText = canvasDao.findFirstNodeTextMatching(canvasNoteId, query) ?: continue
             val canvasMetadata = noteDao.getNoteById(canvasNoteId) ?: continue
             val resultNoteIds = if (canvasMetadata.isSubNote) notesContainingCanvas(canvasNoteId) else listOf(canvasNoteId)
             if (resultNoteIds.isEmpty()) continue
             noteDao.getSearchableNotesByIds(resultNoteIds)
-                .filter { it.spaceId == spaceId }
+                .filter { it.spaceId in spaceIds }
                 .forEach { note -> resultsByNoteId.putIfAbsent(note.noteId, NoteSearchResult(note = note, matchedText = matchedText)) }
         }
         return resultsByNoteId.values.toList()
     }
 
-    private suspend fun findDatabaseTitleMatches(spaceId: String, query: String, contentMatchIds: List<String>): List<NoteSearchResult> {
+    private suspend fun findDatabaseTitleMatches(spaceIds: List<String>, query: String, contentMatchIds: List<String>): List<NoteSearchResult> {
         val resultsByNoteId = LinkedHashMap<String, NoteSearchResult>()
         for (databaseNote in noteDao.getNotesByIdsIncludingTemplates(contentMatchIds).filter { it.kind == NoteKind.DATABASE }) {
             val settings = blockDao.findMatchingBlocksForNote(databaseNote.noteId, query)
@@ -811,7 +816,7 @@ class NoteRepositoryImpl(
                 ?: continue
             if (!settings.title.contains(query, ignoreCase = true)) continue
             noteDao.getSearchableNotesByIds(notesShowingDatabase(settings.databaseId))
-                .filter { it.spaceId == spaceId }
+                .filter { it.spaceId in spaceIds }
                 .forEach { note -> resultsByNoteId.putIfAbsent(note.noteId, NoteSearchResult(note = note, matchedText = settings.title)) }
         }
         return resultsByNoteId.values.toList()
@@ -880,7 +885,7 @@ class NoteRepositoryImpl(
 
     override fun getFavoriteNotes(): Flow<List<NoteMetadataEntity>> = inActiveSpace { noteDao.getFavoriteNotes(it) }
 
-    override fun getTrashedNotes(): Flow<List<NoteMetadataEntity>> = inActiveSpace { noteDao.getTrashedNotes(it) }
+    override fun getTrashedNotes(): Flow<List<NoteMetadataEntity>> = inActiveSpaceAndAccount { noteDao.getTrashedNotes(it) }
 
     override suspend fun getNoteContent(noteId: String): NoteContent? =
         withContext(Dispatchers.IO) {
@@ -1357,8 +1362,8 @@ class NoteRepositoryImpl(
     ): List<Pair<NoteMetadataEntity, NoteContent>> {
         val rewrittenNotes = mutableListOf<Pair<NoteMetadataEntity, NoteContent>>()
         val noteIds = (
-            blockDao.findNoteIdsMatchingContent(activeSpaceId(), "\"type\":\"property\"") +
-                blockDao.findNoteIdsMatchingContent(activeSpaceId(), "\"type\":\"database\"")
+            blockDao.findNoteIdsMatchingContent(activeSpaceAndAccountIds(), "\"type\":\"property\"") +
+                blockDao.findNoteIdsMatchingContent(activeSpaceAndAccountIds(), "\"type\":\"database\"")
             ).distinct()
         for (noteId in noteIds) {
             val metadata = noteDao.getNoteById(noteId) ?: continue
@@ -2660,7 +2665,7 @@ class NoteRepositoryImpl(
         }
     }
 
-    override fun getAllImagesFlow(): Flow<List<ImageBlockEntity>> = inActiveSpace { imageBlockDao.getAllImagesFlow(it) }
+    override fun getAllImagesFlow(): Flow<List<ImageBlockEntity>> = inActiveSpaceAndAccount { imageBlockDao.getAllImagesFlow(it) }
 
     // Rebuilds the DocumentBlockEntity projection table for a given note on every save.
     // DocumentsScreen reads from this via getAllDocumentsFlow().
@@ -2694,7 +2699,7 @@ class NoteRepositoryImpl(
     }
 
     override fun getAllDocumentsFlow(): Flow<List<DocumentBlockEntity>> =
-        inActiveSpace { documentBlockDao.getAllDocumentsFlow(it) }
+        inActiveSpaceAndAccount { documentBlockDao.getAllDocumentsFlow(it) }
 
     // Rebuilds the BookmarkBlockEntity projection table for a given note on every save.
     // BookmarksScreen reads from this via getAllBookmarksFlow().
@@ -2728,11 +2733,11 @@ class NoteRepositoryImpl(
     }
 
     override fun getAllBookmarksFlow(): Flow<List<BookmarkBlockEntity>> =
-        inActiveSpace { bookmarkBlockDao.getAllBookmarksFlow(it) }
+        inActiveSpaceAndAccount { bookmarkBlockDao.getAllBookmarksFlow(it) }
 
-    override fun getImagesCount(): Flow<Int> = inActiveSpace { imageBlockDao.getImagesCount(it) }
-    override fun getDocumentsCount(): Flow<Int> = inActiveSpace { documentBlockDao.getDocumentsCount(it) }
-    override fun getBookmarksCount(): Flow<Int> = inActiveSpace { bookmarkBlockDao.getBookmarksCount(it) }
+    override fun getImagesCount(): Flow<Int> = inActiveSpaceAndAccount { imageBlockDao.getImagesCount(it) }
+    override fun getDocumentsCount(): Flow<Int> = inActiveSpaceAndAccount { documentBlockDao.getDocumentsCount(it) }
+    override fun getBookmarksCount(): Flow<Int> = inActiveSpaceAndAccount { bookmarkBlockDao.getBookmarksCount(it) }
 
     override fun getAllLinkableNotes(): Flow<List<NoteMetadataEntity>> =
         inActiveSpace { noteDao.getAllLinkableNotes(it) }

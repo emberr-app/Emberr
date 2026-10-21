@@ -56,12 +56,12 @@ interface NoteDao {
     @Query(
         """
         SELECT * FROM notes_metadata
-        WHERE spaceId = :spaceId AND trashedAt IS NULL AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND isTemplate = 0
+        WHERE spaceId IN (:spaceIds) AND trashedAt IS NULL AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND isTemplate = 0
         AND (title LIKE '%' || :query || '%' OR snippet LIKE '%' || :query || '%')
         ORDER BY updatedAt DESC
         """
     )
-    suspend fun searchNotesByTitleOrSnippet(spaceId: String, query: String): List<NoteMetadataEntity>
+    suspend fun searchNotesByTitleOrSnippet(spaceIds: List<String>, query: String): List<NoteMetadataEntity>
 
     // isTemplate = 0 here too: callers like the tasks widget and the reminder rescheduler look up
     // titles by id and must never resolve a template row.
@@ -85,8 +85,8 @@ interface NoteDao {
     @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isFavorite = 1 AND trashedAt IS NULL AND isTemplate = 0 ORDER BY updatedAt DESC")
     fun getFavoriteNotes(spaceId: String): Flow<List<NoteMetadataEntity>>
 
-    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND trashedAt IS NOT NULL AND isTemplate = 0 ORDER BY trashedAt DESC")
-    fun getTrashedNotes(spaceId: String): Flow<List<NoteMetadataEntity>>
+    @Query("SELECT * FROM notes_metadata WHERE spaceId IN (:spaceIds) AND trashedAt IS NOT NULL AND isTemplate = 0 ORDER BY trashedAt DESC")
+    fun getTrashedNotes(spaceIds: List<String>): Flow<List<NoteMetadataEntity>>
 
     @Query("DELETE FROM notes_metadata WHERE noteId = :noteId")
     suspend fun deleteNoteMetadata(noteId: String)
