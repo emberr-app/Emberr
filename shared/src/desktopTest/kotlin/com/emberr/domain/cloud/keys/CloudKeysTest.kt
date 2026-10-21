@@ -176,14 +176,14 @@ class CloudKeysTest {
     }
 
     @Test
-    fun aDailyNoteIdDependsOnTheSpaceKeyAndDate() = runTest {
-        val spaceKey = itemKeyManager.newItemKey()
-        val otherSpaceKey = itemKeyManager.newItemKey()
+    fun aDailyNoteIdDependsOnTheAccountKeyAndDate() = runTest {
+        val accountKey = itemKeyManager.newItemKey()
+        val otherAccountKey = itemKeyManager.newItemKey()
 
-        val dailyNoteId = dailyNoteIds.dailyNoteId(spaceKey, "2026-10-18")
+        val dailyNoteId = dailyNoteIds.dailyNoteId(accountKey, "2026-10-18")
 
-        assertEquals(dailyNoteId, dailyNoteIds.dailyNoteId(spaceKey, "2026-10-18"))
-        assertNotEquals(dailyNoteId, dailyNoteIds.dailyNoteId(otherSpaceKey, "2026-10-18"))
+        assertEquals(dailyNoteId, dailyNoteIds.dailyNoteId(accountKey, "2026-10-18"))
+        assertNotEquals(dailyNoteId, dailyNoteIds.dailyNoteId(otherAccountKey, "2026-10-18"))
         assertTrue(Regex("daily_[0-9a-f]{32}").matches(dailyNoteId))
     }
 }
