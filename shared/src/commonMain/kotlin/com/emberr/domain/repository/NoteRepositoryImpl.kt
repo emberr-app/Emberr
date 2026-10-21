@@ -681,7 +681,16 @@ class NoteRepositoryImpl(
                     )
                     if (changedBlocks.isEmpty()) continue
                     blockDao.insertOrUpdateBlocks(changedBlocks)
-                    localNote.copy(updatedAt = System.currentTimeMillis()).also { noteDao.insertOrUpdateMetadata(it) }
+                    val snippet = if (localNote.isDaily) {
+                        generateDailyNoteSnippet(
+                            blockDao.getAllBlocksForNoteIncludingDeleted(localNote.noteId)
+                                .mapNotNull { decodeBlockOrNull(it.blockDataJson) }
+                                .filterNot { it.isDeleted }
+                        )
+                    } else {
+                        localNote.snippet
+                    }
+                    localNote.copy(updatedAt = System.currentTimeMillis(), snippet = snippet).also { noteDao.insertOrUpdateMetadata(it) }
                 }
 
                 val savedBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(savedNote.noteId)
