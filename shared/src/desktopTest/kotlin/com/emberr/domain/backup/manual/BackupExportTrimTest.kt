@@ -6,6 +6,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.emberr.data.local.room.AppDatabase
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
+import com.emberr.data.local.room.entity.BookmarkBlockEntity
 import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.CanvasEdgeEntity
@@ -28,6 +29,7 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.data.local.room.entity.UnappliedSyncChangeEntity
 import com.emberr.data.local.room.entity.UnusedMediaFileEntity
+import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.ImageBlock
@@ -398,5 +400,36 @@ class BackupExportTrimTest {
         listOf(both, calendarOnly, dailyNotesOnly).forEach { kept ->
             assertEquals(setOf("category-work", "category-gym"), kept.categoryIds)
         }
+    }
+
+    @Test
+    fun withDailyNotesLeftOutADayKeptForItsEventHasNoBookmarkRowOrPreviewOfTheLeftOutBlocks() = runTest {
+        backupDao.insertNotes(listOf(note("day", ACCOUNT_SPACE_ID, dailyDate = "2026-10-20").copy(snippet = "Dear diary Dentist")))
+        backupDao.insertBlocks(
+            listOf(
+                stored("day", TextBlock(id = "journal", text = "Dear diary")),
+                stored("day", BookmarkBlock(id = "link", url = "https://example.com", title = "Example")),
+                stored("day", CheckboxBlock(id = "event", text = "Dentist"))
+            )
+        )
+        database.bookmarkBlockDao().upsertBookmarks(
+            listOf(
+                BookmarkBlockEntity(
+                    blockId = "link",
+                    noteId = "day",
+                    url = "https://example.com",
+                    title = "Example",
+                    description = null,
+                    previewImageUrl = null,
+                    noteUpdatedAt = 1L,
+                    sourceType = TaskSource.DAILY
+                )
+            )
+        )
+
+        database.keepOnlySpacesForExport(emptySet(), keepDailyNotes = false, keepCalendar = true)
+
+        assertEquals(emptySet(), firstColumnOf("SELECT blockId FROM bookmark_blocks"))
+        assertEquals(setOf("Dentist"), firstColumnOf("SELECT snippet FROM notes_metadata WHERE noteId = 'day'"))
     }
 }

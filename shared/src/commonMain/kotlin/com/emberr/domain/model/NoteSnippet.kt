@@ -9,6 +9,21 @@ fun generateSnippet(blocks: List<NoteBlock>): String {
         .take(120)
 }
 
+fun generateDailyNoteSnippet(blocks: List<NoteBlock>): String =
+    blocks.joinToString(" ") { block ->
+        when (block) {
+            is TextBlock -> block.text
+            is HeadingBlock -> block.text
+            is CheckboxBlock -> block.text
+            is BulletedListBlock -> block.text
+            is NumberedListBlock -> block.text
+            is ToggleBlock -> block.text
+            is CalloutBlock -> block.text
+            is CodeBlock -> block.code
+            else -> ""
+        }
+    }.trim().take(120)
+
 fun extractTextFromBlock(block: NoteBlock): String? {
     if (block.isDeleted) return null
     return when (block) {
