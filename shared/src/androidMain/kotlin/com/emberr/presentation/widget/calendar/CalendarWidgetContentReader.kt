@@ -4,6 +4,7 @@ package com.emberr.presentation.widget.calendar
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CategoryDao
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.datesShownOn
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
@@ -41,14 +42,14 @@ class CalendarWidgetContentReader(
             val weekStartsOn = firstDayOfWeek.firstDayOfWeek()
 
             val tasks = try {
-                calendarTaskDao.getTasksInMonth(spaceId, monthKey)
+                calendarTaskDao.getTasksInMonth(listOf(spaceId, ACCOUNT_SPACE_ID), monthKey)
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read tasks for $monthKey", cause)
                 return@withContext null
             }
 
             val colorsByCategoryId = try {
-                categoryDao.getAllCategoriesOnce(spaceId).associate { it.categoryId to it.colorHex }
+                categoryDao.getAllCategoriesOnce(ACCOUNT_SPACE_ID).associate { it.categoryId to it.colorHex }
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read the task categories", cause)
                 emptyMap()

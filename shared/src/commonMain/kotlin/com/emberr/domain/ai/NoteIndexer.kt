@@ -269,4 +269,8 @@ class NoteIndexer(
     fun deleteNoteFromIndex(noteId: String) {
         database.vectorStoreQueries.deleteBlocksForNote(noteId)
     }
+
+    fun moveNoteToSpace(noteId: String, spaceId: String) {
+        database.vectorStoreQueries.moveNoteToSpace(spaceId, noteId)
+    }
 }

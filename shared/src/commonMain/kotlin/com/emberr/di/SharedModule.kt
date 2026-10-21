@@ -324,7 +324,6 @@ val sharedModule = module {
             reminderScheduler = get(),
             audioRecorder = get(),
             appScope = get(named("AppScope")),
-            activeSpaceStore = get(),
             deviceTableLayoutStore = get()
         )
     }

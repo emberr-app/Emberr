@@ -3,6 +3,7 @@ package com.emberr.presentation.widget.upcomingevents
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.CategoryDao
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
@@ -28,14 +29,14 @@ class UpcomingEventsWidgetContentReader(
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
         val tasks = try {
-            calendarTaskDao.getUpcomingTasks(spaceId, today.toString())
+            calendarTaskDao.getUpcomingTasks(listOf(spaceId, ACCOUNT_SPACE_ID), today.toString())
         } catch (cause: Exception) {
             WidgetLog.e("Could not read upcoming events", cause)
             return@withContext null
         }
 
         val colorsByCategoryId = try {
-            categoryDao.getAllCategoriesOnce(spaceId).associate { category -> category.categoryId to category.colorHex }
+            categoryDao.getAllCategoriesOnce(ACCOUNT_SPACE_ID).associate { category -> category.categoryId to category.colorHex }
         } catch (cause: Exception) {
             WidgetLog.e("Could not read the event categories", cause)
             emptyMap()

@@ -14,6 +14,7 @@ import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.data.local.room.dao.PropertyTagDao
 import com.emberr.data.local.room.dao.CustomPropertyDao
 import com.emberr.data.local.room.dao.SelfHostDeletedNoteDao
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.BookmarkBlockEntity
 import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
 import com.emberr.data.local.room.entity.CalendarTaskEntity
@@ -122,6 +123,7 @@ import kotlinx.datetime.toInstant
 import com.emberr.domain.sync.AutoSyncTrigger
 import com.emberr.domain.sync.withNewerDetailsFrom
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -130,6 +132,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.util.UUID
@@ -206,6 +209,8 @@ class NoteRepositoryImpl(
 
     private fun activeSpaceId(): String = activeSpaceStore.currentActiveSpaceId()
 
+    private fun spaceAndAccount(spaceId: String) = listOf(spaceId, ACCOUNT_SPACE_ID)
+
     private fun dailyCacheKey(spaceId: String, dateString: String) = "$spaceId|$dateString"
 
     // In-memory cache for regular notes keyed by noteId.
@@ -224,10 +229,10 @@ class NoteRepositoryImpl(
     // Exposes a Flow that emits whenever the cache entry for this dateString changes.
     // DailyEditorViewModel subscribes to this in its init block for the same reason.
     override fun observeDailyNote(dateString: String): Flow<NoteContent?> =
-        inActiveSpace { spaceId -> dailyNoteCache.map { it[dailyCacheKey(spaceId, dateString)] } }
+        dailyNoteCache.map { it[dailyCacheKey(ACCOUNT_SPACE_ID, dateString)] }
 
     override suspend fun getDailyNote(dateString: String): NoteContent? =
-        getDailyNoteInSpace(activeSpaceId(), dateString)
+        getDailyNoteInSpace(ACCOUNT_SPACE_ID, dateString)
 
     override suspend fun getDailyNoteInSpace(spaceId: String, dateString: String): NoteContent? =
         withContext(Dispatchers.IO) {
@@ -268,7 +273,7 @@ class NoteRepositoryImpl(
 
     override suspend fun getSavedDailyNoteDates(): List<String> =
         withContext(Dispatchers.IO) {
-            noteDao.getAllDailyNoteMetadata(activeSpaceId())
+            noteDao.getAllDailyNoteMetadata(ACCOUNT_SPACE_ID)
                 .filter { it.trashedAt == null }
                 .mapNotNull { it.dateString }
                 .filter { it != "global_pinned" && it.isNotBlank() }
@@ -333,8 +338,175 @@ class NoteRepositoryImpl(
         return losers.size
     }
 
+    private val hasMovedDailyNotesToAccount = MutableStateFlow(false)
+
+    override suspend fun waitUntilDailyNotesAreInAccount() {
+        hasMovedDailyNotesToAccount.first { it }
+    }
+
+    override suspend fun moveDailyNotesAndCategoriesToAccount(reindexScope: CoroutineScope) {
+        try {
+            val mergedDailyNotes = withContext(Dispatchers.IO) {
+                SyncCoordinator.mutex.withLock {
+                    val mergedNotes = moveDailyNotesToAccount()
+                    moveCategoriesToAccount()
+                    mergedNotes
+                }
+            }
+            if (mergedDailyNotes.isNotEmpty()) {
+                reindexScope.launch(Dispatchers.IO) {
+                    mergedDailyNotes.forEach { (metadata, content) ->
+                        indexDailyNote(metadata.dateString.orEmpty(), content, metadata)
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            hasMovedDailyNotesToAccount.value = true
+        }
+    }
+
+    private val oldestNoteFirst = compareBy<NoteMetadataEntity> { it.createdAt }.thenBy { it.noteId }
+
+    private suspend fun moveDailyNotesToAccount(): List<Pair<NoteMetadataEntity, NoteContent>> {
+        val dailyNotesByDate = noteDao.getAllDailyNoteMetadataAcrossSpaces()
+            .filter { it.dateString != null }
+            .groupBy { it.dateString.orEmpty() }
+            .filterValues { notesOnDate -> notesOnDate.any { it.spaceId != ACCOUNT_SPACE_ID } }
+
+        val mergedNotes = mutableListOf<Pair<NoteMetadataEntity, NoteContent>>()
+        for ((dateString, notesOnDate) in dailyNotesByDate) {
+            try {
+                foldDailyNotesIntoAccount(dateString, notesOnDate)?.let { mergedNotes.add(it) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        return mergedNotes
+    }
+
+    private suspend fun foldDailyNotesIntoAccount(
+        dateString: String,
+        notesOnDate: List<NoteMetadataEntity>
+    ): Pair<NoteMetadataEntity, NoteContent>? {
+        val survivor = notesOnDate.minWith(oldestNoteFirst)
+        val mergedAwayNotes = notesOnDate.filter { it.noteId != survivor.noteId }.sortedWith(oldestNoteFirst)
+
+        val survivorBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(survivor.noteId)
+        val blockIdsInSurvivor = survivorBlocks.mapTo(HashSet()) { it.blockId }
+        var nextDisplayOrder = (survivorBlocks.maxOfOrNull { it.displayOrder } ?: -1) + 1
+        val addedBlocks = mutableListOf<NoteBlockEntity>()
+        for (note in mergedAwayNotes) {
+            for (block in blockDao.getAllBlocksForNoteIncludingDeleted(note.noteId)) {
+                if (!blockIdsInSurvivor.add(block.blockId)) continue
+                addedBlocks.add(block.copy(noteId = survivor.noteId, displayOrder = nextDisplayOrder++))
+            }
+        }
+        if (addedBlocks.isNotEmpty()) blockDao.insertOrUpdateBlocks(addedBlocks)
+
+        val movedSurvivor = survivor.copy(
+            spaceId = ACCOUNT_SPACE_ID,
+            updatedAt = if (addedBlocks.isEmpty()) survivor.updatedAt else System.currentTimeMillis(),
+            filePath = ""
+        )
+        noteDao.insertOrUpdateMetadata(movedSurvivor)
+
+        notesOnDate.map { it.spaceId }.distinct().filter { it != ACCOUNT_SPACE_ID }.forEach { oldSpaceId ->
+            calendarTaskDao.deleteTasksByNoteId(oldSpaceId, dateString)
+        }
+        val mergedBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(survivor.noteId)
+            .mapNotNull { entity -> decodeBlockOrNull(entity.blockDataJson) }
+        refreshProjectionsForNote(movedSurvivor, mergedBlocks)
+
+        for (note in mergedAwayNotes) {
+            imageBlockDao.deleteByNoteId(note.noteId)
+            documentBlockDao.deleteByNoteId(note.noteId)
+            bookmarkBlockDao.deleteByNoteId(note.noteId)
+            mediaReferenceDao.deleteByNoteId(note.noteId)
+            blockDao.deleteAllBlocksForNote(note.noteId)
+            noteDao.deleteNoteMetadata(note.noteId)
+            noteContentCache.update { it - note.noteId }
+            dailyNoteCache.update { it - dailyCacheKey(note.spaceId, dateString) }
+        }
+        dailyNoteCache.update { it - dailyCacheKey(survivor.spaceId, dateString) }
+        val mergedContent = NoteContent(blocks = mergedBlocks)
+        cacheSavedContent(ACCOUNT_SPACE_ID, survivor.noteId, dateString, mergedContent)
+
+        try {
+            noteIndexer.moveNoteToSpace(survivor.noteId, ACCOUNT_SPACE_ID)
+            mergedAwayNotes.forEach { note -> noteIndexer.deleteNoteFromIndex(note.noteId) }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        if (mergedAwayNotes.isEmpty() || savedContentOmitsTombstones(dateString)) return null
+        return movedSurvivor to mergedContent
+    }
+
+    private suspend fun moveCategoriesToAccount() {
+        val categoriesOutsideAccount = categoryDao.getCategoriesOutsideSpaceIncludingDeleted(ACCOUNT_SPACE_ID)
+        if (categoriesOutsideAccount.isEmpty()) return
+        val categoryIdsOutsideAccount = categoriesOutsideAccount.mapTo(HashSet()) { it.categoryId }
+
+        val survivorIdByRemovedId = mutableMapOf<String, String>()
+        categoryDao.getAllCategoriesOnceAcrossSpaces()
+            .groupBy { it.name.trim().lowercase() }
+            .values
+            .filter { sameNamed -> sameNamed.size > 1 && sameNamed.any { it.categoryId in categoryIdsOutsideAccount } }
+            .forEach { sameNamed ->
+                val survivor = sameNamed.minWith(compareBy<CategoryEntity> { it.createdAt }.thenBy { it.categoryId })
+                sameNamed.filter { it.categoryId != survivor.categoryId }
+                    .forEach { removed -> survivorIdByRemovedId[removed.categoryId] = survivor.categoryId }
+            }
+
+        for ((removedId, survivorId) in survivorIdByRemovedId) {
+            try {
+                pointCategoryReferencesToSurvivor(removedId, survivorId)
+                categoryDao.markCategoryDeleted(removedId, System.currentTimeMillis())
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        categoryDao.moveAllCategoriesToSpace(ACCOUNT_SPACE_ID)
+    }
+
+    private suspend fun pointCategoryReferencesToSurvivor(removedId: String, survivorId: String) {
+        val now = System.currentTimeMillis()
+        val rewrittenNoteIds = LinkedHashSet<String>()
+        for (entity in blockDao.findBlocksContainingIncludingDeleted(removedId)) {
+            val checkbox = decodeBlockOrNull(entity.blockDataJson) as? CheckboxBlock ?: continue
+            if (checkbox.categoryId != removedId) continue
+            val rewrittenCheckbox = checkbox.copy(categoryId = survivorId, updatedAt = now)
+            blockDao.insertOrUpdateBlock(
+                entity.copy(blockDataJson = jsonFormat.encodeToString(NoteBlockSerializer, rewrittenCheckbox), updatedAt = now)
+            )
+            rewrittenNoteIds.add(entity.noteId)
+        }
+
+        for (noteId in rewrittenNoteIds) {
+            val metadata = noteDao.getNoteById(noteId) ?: continue
+            val updatedMetadata = metadata.copy(updatedAt = now)
+            noteDao.insertOrUpdateMetadata(updatedMetadata)
+            val blocks = blockDao.getAllBlocksForNoteIncludingDeleted(noteId).mapNotNull { decodeBlockOrNull(it.blockDataJson) }
+            refreshProjectionsForNote(updatedMetadata, blocks)
+            noteContentCache.update { it - noteId }
+            metadata.dateString?.takeIf { metadata.isDaily }?.let { dailyDateString ->
+                dailyNoteCache.update { it - dailyCacheKey(metadata.spaceId, dailyDateString) }
+            }
+        }
+
+        calendarEventExceptionDao.replaceOverrideCategoryId(removedId, survivorId, now)
+    }
+
     override suspend fun getDailyNoteMetadata(dateString: String): NoteMetadataEntity? =
-        getDailyNoteMetadataInSpace(activeSpaceId(), dateString)
+        getDailyNoteMetadataInSpace(ACCOUNT_SPACE_ID, dateString)
 
     override suspend fun getDailyNoteMetadataInSpace(spaceId: String, dateString: String): NoteMetadataEntity? =
         withContext(Dispatchers.IO) {
@@ -411,7 +583,7 @@ class NoteRepositoryImpl(
     override suspend fun saveDailyNote(dateString: String, content: NoteContent, updatedAt: Long?, remoteMeta: NoteMetadataEntity?) =
         withContext(Dispatchers.IO) {
 
-            val spaceId = remoteMeta?.spaceId ?: activeSpaceId()
+            val spaceId = remoteMeta?.spaceId ?: ACCOUNT_SPACE_ID
             val existing = noteDao.getDailyNoteMetadata(spaceId, dateString)
 
             val adoptableRemoteNoteId = remoteMeta?.noteId?.let { remoteNoteId ->
@@ -493,7 +665,7 @@ class NoteRepositoryImpl(
         }
 
     override fun searchDailyNotes(query: String): Flow<List<NoteMetadataEntity>> =
-        inActiveSpace { noteDao.searchDailyNotes(it, query) }
+        noteDao.searchDailyNotes(ACCOUNT_SPACE_ID, query)
 
     // The fast half of cross-note search: one indexed-ish LIKE over note_metadata only. No block
     // JSON is touched, so the sidebar can paint these hits while the content scan is still running.
@@ -982,7 +1154,7 @@ class NoteRepositoryImpl(
         }
     }
 
-    override fun getAllCategories(): Flow<List<CategoryEntity>> = inActiveSpace { categoryDao.getAllCategories(it) }
+    override fun getAllCategories(): Flow<List<CategoryEntity>> = categoryDao.getAllCategories(ACCOUNT_SPACE_ID)
 
     override suspend fun insertOrUpdateCategory(categoryId: String, name: String, colorHex: String) =
         withContext(Dispatchers.IO) {
@@ -995,7 +1167,7 @@ class NoteRepositoryImpl(
                     categoryId = categoryId,
                     name = name,
                     colorHex = colorHex,
-                    spaceId = existing?.spaceId ?: activeSpaceId(),
+                    spaceId = ACCOUNT_SPACE_ID,
                     createdAt = existing?.createdAt ?: now,
                     updatedAt = now,
                     isDeleted = false
@@ -1935,7 +2107,7 @@ class NoteRepositoryImpl(
         val monthEnd = monthStart.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY)
         return inActiveSpace { spaceId ->
             combine(
-                calendarTaskDao.getAllTasksFlow(spaceId),
+                calendarTaskDao.getAllTasksFlow(spaceAndAccount(spaceId)),
                 calendarEventExceptionDao.getAllExceptionsFlow()
             ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, monthStart, monthEnd) }
         }
@@ -1945,7 +2117,7 @@ class NoteRepositoryImpl(
         val date = LocalDate.parse(dateString)
         return inActiveSpace { spaceId ->
             combine(
-                calendarTaskDao.getAllTasksFlow(spaceId),
+                calendarTaskDao.getAllTasksFlow(spaceAndAccount(spaceId)),
                 calendarEventExceptionDao.getAllExceptionsFlow()
             ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, date, date) }
         }
@@ -1956,19 +2128,19 @@ class NoteRepositoryImpl(
         val endDate = LocalDate.parse(endDateString)
         return inActiveSpace { spaceId ->
             combine(
-                calendarTaskDao.getAllTasksFlow(spaceId),
+                calendarTaskDao.getAllTasksFlow(spaceAndAccount(spaceId)),
                 calendarEventExceptionDao.getAllExceptionsFlow()
             ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, startDate, endDate) }
         }
     }
 
     override fun getAllTasksFlow(): Flow<List<CalendarTaskEntity>> =
-        inActiveSpace { calendarTaskDao.getAllTasksFlow(it) }
+        inActiveSpace { calendarTaskDao.getAllTasksFlow(spaceAndAccount(it)) }
 
     override fun getCalendarTasksForSearch(today: LocalDate): Flow<List<CalendarTaskEntity>> =
         inActiveSpace { spaceId ->
             combine(
-                calendarTaskDao.getAllTasksFlow(spaceId),
+                calendarTaskDao.getAllTasksFlow(spaceAndAccount(spaceId)),
                 calendarEventExceptionDao.getAllExceptionsFlow()
             ) { tasks, exceptions ->
                 val exceptionsByKey = exceptions.associateBy { it.blockId to it.occurrenceDate }
@@ -2417,7 +2589,7 @@ class NoteRepositoryImpl(
         return newBlockId
     }
 
-    override fun getIncompleteTasksCount(): Flow<Int> = inActiveSpace { noteDao.getIncompleteTasksCount(it) }
+    override fun getIncompleteTasksCount(): Flow<Int> = inActiveSpace { noteDao.getIncompleteTasksCount(spaceAndAccount(it)) }
 
     private suspend fun syncMediaReferences(noteId: String, blocks: List<NoteBlock>) {
         mediaReferenceDao.deleteByNoteId(noteId)

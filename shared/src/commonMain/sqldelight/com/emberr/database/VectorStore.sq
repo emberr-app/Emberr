@@ -13,14 +13,17 @@ insertMetadata:
 INSERT OR REPLACE INTO block_metadata(block_id, note_id, space_id, chunk_text, embedding)
 VALUES (?, ?, ?, ?, ?);
 
-getBlocksInSpace:
-SELECT note_id, chunk_text, embedding FROM block_metadata WHERE space_id = ?;
+getBlocksInSpaces:
+SELECT note_id, chunk_text, embedding FROM block_metadata WHERE space_id IN ?;
 
 getBlocksForNote:
 SELECT block_id, chunk_text, embedding FROM block_metadata WHERE note_id = ?;
 
 deleteBlocksForNote:
 DELETE FROM block_metadata WHERE note_id = ?;
+
+moveNoteToSpace:
+UPDATE block_metadata SET space_id = ? WHERE note_id = ?;
 
 deleteAllBlocks:
 DELETE FROM block_metadata;

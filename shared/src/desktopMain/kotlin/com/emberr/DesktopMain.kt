@@ -82,6 +82,7 @@ import com.emberr.domain.util.export.handleExportPdf
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
 import com.emberr.presentation.shared.editor.GlobalEditorState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.FlowPreview
@@ -94,6 +95,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
+import org.koin.core.qualifier.named
 import java.awt.Frame
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
@@ -152,6 +154,8 @@ private fun runEmberrDesktopApp() = application {
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             GlobalContext.get().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
+            GlobalContext.get().get<com.emberr.domain.repository.NoteRepository>()
+                .moveDailyNotesAndCategoriesToAccount(GlobalContext.get().get<CoroutineScope>(named("AppScope")))
         }
     }
 

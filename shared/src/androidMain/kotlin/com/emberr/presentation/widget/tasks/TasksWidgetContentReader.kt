@@ -3,6 +3,7 @@ package com.emberr.presentation.widget.tasks
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.NoteDao
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +38,7 @@ class TasksWidgetContentReader(
     suspend fun readContentOnce(spaceId: String, isShowingCompleted: Boolean): TasksWidgetContent? =
         withContext(Dispatchers.IO) {
             val tasks = try {
-                calendarTaskDao.getAllTasks(spaceId)
+                calendarTaskDao.getAllTasks(listOf(spaceId, ACCOUNT_SPACE_ID))
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read the task list", cause)
                 return@withContext null
@@ -51,7 +52,7 @@ class TasksWidgetContentReader(
         isShowingCompleted: Boolean
     ): TasksWidgetContent = withContext(Dispatchers.Default) {
         val matchingTasks = tasks.filter { task ->
-            task.spaceId == spaceId && task.isChecked == isShowingCompleted
+            (task.spaceId == spaceId || task.spaceId == ACCOUNT_SPACE_ID) && task.isChecked == isShowingCompleted
         }
         TasksWidgetContent(
             isShowingCompleted = isShowingCompleted,

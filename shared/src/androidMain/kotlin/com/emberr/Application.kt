@@ -18,6 +18,7 @@ import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
+import org.koin.core.qualifier.named
 
 class EmberrApplication : Application() {
     companion object {
@@ -37,6 +38,8 @@ class EmberrApplication : Application() {
             getKoin().get<AppDatabase>()
             getKoin().get<SharedPreferences>()
             getKoin().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
+            getKoin().get<com.emberr.domain.repository.NoteRepository>()
+                .moveDailyNotesAndCategoriesToAccount(getKoin().get<CoroutineScope>(named("AppScope")))
             deleteImportCopiesLeftFromEarlierRuns(this@EmberrApplication)
             deleteBackupImportCopiesLeftFromEarlierRuns(this@EmberrApplication)
             isReady = true

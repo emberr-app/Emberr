@@ -8,7 +8,6 @@ import com.emberr.data.local.room.entity.toAllDaySpan
 import com.emberr.data.local.room.entity.toRecurrenceRule
 import com.emberr.domain.model.*
 import com.emberr.domain.repository.NoteRepository
-import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.eventbus.AiEventBus
 import com.emberr.domain.util.voice.AudioRecorder
@@ -56,7 +55,6 @@ class DailyEditorViewModel(
     reminderScheduler: ReminderScheduler,
     audioRecorder: AudioRecorder,
     appScope: CoroutineScope,
-    private val activeSpaceStore: ActiveSpaceStore,
     deviceTableLayoutStore: DeviceTableLayoutStore
 ) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore) {
 
@@ -71,8 +69,6 @@ class DailyEditorViewModel(
 
     private val _loadedDateString = MutableStateFlow<String?>(null)
     val loadedDateString: StateFlow<String?> = _loadedDateString.asStateFlow()
-
-    private var loadedSpaceId: String? = null
 
     // Preview cache
     private val _previewCache = MutableStateFlow<Map<String, List<NoteBlock>>>(emptyMap())
@@ -103,6 +99,7 @@ class DailyEditorViewModel(
 
     // Reloads a single date's preview from the repository, overwriting any stale cached entry for it
     private suspend fun refreshPreviewCacheEntry(dateString: String) {
+        repository.waitUntilDailyNotesAreInAccount()
         val pinnedContent = repository.getDailyNote("global_pinned")
         val pinnedBlocks = pinnedContent?.blocks?.filter { !it.isDeleted } ?: emptyList()
 
@@ -329,17 +326,6 @@ class DailyEditorViewModel(
             FirstContentRenderSignal.reportContentRendered()
         }
         viewModelScope.launch {
-            activeSpaceStore.activeSpaceId.drop(1).collect {
-                autosaveJob?.cancel()
-                _previewCache.value = emptyMap()
-                clearTimeline()
-                val dateToReload = currentDateString ?: return@collect
-                currentDateString = null
-                _blocks.value = emptyList()
-                loadDailyNote(dateToReload)
-            }
-        }
-        viewModelScope.launch {
             VoiceTaskEventBus.taskAddedEvent.collect { event ->
                 if (event.dateString == currentDateString) {
                     val currentBlocks = _blocks.value.toMutableList()
@@ -372,9 +358,6 @@ class DailyEditorViewModel(
                     }
                     is NoteSyncEvent.BlockRemoved -> removeBlockLocally(event.blockId, event.dateString)
                     is NoteSyncEvent.NoteChanged -> {
-                        if (event.spaceId != null && !activeSpaceStore.isActiveSpace(event.spaceId)) {
-                            return@collect
-                        }
                         val syncedEntityId = event.entityId
 
                         // If the remote edit affects a cached date other than the currently active one,
@@ -486,7 +469,6 @@ class DailyEditorViewModel(
         if (_loadedDateString.value == null || _loadedDateString.value != currentDateString) return false
 
         val dateToSave = currentDateString ?: return false
-        val spaceToSave = loadedSpaceId ?: return false
 
         return try {
             withContext(Dispatchers.IO) {
@@ -497,7 +479,6 @@ class DailyEditorViewModel(
                     // queued behind a long lock wait would write whatever date the user has since
                     // switched to into dateToSave's note instead of its own - cross-date contamination.
                     if (currentDateString != dateToSave) return@withLock false
-                    if (!activeSpaceStore.isActiveSpace(spaceToSave)) return@withLock false
 
                     val storedBlocks = storedBlocksOf(dateToSave)
                     val reconciled = _blocks.updateAndGet { editorBlocks -> editorDiskReconciler.reconcile(editorBlocks, storedBlocks) }
@@ -542,12 +523,12 @@ class DailyEditorViewModel(
         if (currentDateString == dateString) return
         currentDateString = dateString
         editorDiskReconciler.forgetBlocksShown()
-        loadedSpaceId = activeSpaceStore.currentActiveSpaceId()
         _loadedDateString.value = null
 
         AiEventBus.activeNoteId = dateString
 
         viewModelScope.launch(Dispatchers.IO) {
+            repository.waitUntilDailyNotesAreInAccount()
             // These two reads must never propagate uncaught - the try/catch below is what guarantees
             // _loadedDateString eventually gets set (in both its success and fallback paths), and the
             // reactive sync collector drops every emission for this date while that stays null.
