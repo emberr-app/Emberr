@@ -30,10 +30,10 @@ interface CanvasDao {
     @Query(
         "SELECT DISTINCT canvas_nodes.noteId FROM canvas_nodes " +
             "JOIN notes_metadata ON notes_metadata.noteId = canvas_nodes.noteId " +
-            "WHERE canvas_nodes.isDeleted = 0 AND notes_metadata.trashedAt IS NULL AND notes_metadata.spaceId = :spaceId " +
+            "WHERE canvas_nodes.isDeleted = 0 AND notes_metadata.trashedAt IS NULL AND notes_metadata.spaceId IN (:spaceIds) " +
             "AND canvas_nodes.text LIKE '%' || :query || '%'"
     )
-    suspend fun findCanvasNoteIdsWithTextMatching(spaceId: String, query: String): List<String>
+    suspend fun findCanvasNoteIdsWithTextMatching(spaceIds: List<String>, query: String): List<String>
 
     @Query(
         "SELECT text FROM canvas_nodes WHERE noteId = :noteId AND isDeleted = 0 " +

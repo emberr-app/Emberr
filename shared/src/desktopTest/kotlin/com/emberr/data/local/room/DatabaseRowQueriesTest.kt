@@ -130,7 +130,7 @@ class DatabaseRowQueriesTest {
         notes.forEach { noteDao.insertOrUpdateMetadata(it.copy(title = "Monday")) }
         val expectedIds = setOf("plain-note", "linked-sub-note", "row")
 
-        val titleMatchIds = noteDao.searchNotesByTitleOrSnippet(DEFAULT_SPACE_ID, "Monday").map { it.noteId }.toSet()
+        val titleMatchIds = noteDao.searchNotesByTitleOrSnippet(listOf(DEFAULT_SPACE_ID), "Monday").map { it.noteId }.toSet()
         val searchableIds = noteDao.getSearchableNotesByIds(notes.map { it.noteId }).map { it.noteId }.toSet()
 
         assertEquals(expectedIds, titleMatchIds)

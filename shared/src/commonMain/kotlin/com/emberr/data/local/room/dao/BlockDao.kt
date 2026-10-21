@@ -21,9 +21,9 @@ interface BlockDao {
     @Query(
         "SELECT DISTINCT noteId FROM note_blocks WHERE isDeleted = 0 " +
             "AND blockDataJson LIKE '%' || :query || '%' " +
-            "AND noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId)"
+            "AND noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId IN (:spaceIds))"
     )
-    suspend fun findNoteIdsMatchingContent(spaceId: String, query: String): List<String>
+    suspend fun findNoteIdsMatchingContent(spaceIds: List<String>, query: String): List<String>
 
     // Lets SQLite do the "which blocks could possibly match" filtering so cross-note search
     // only ever JSON-decodes blocks that already contain the query text.

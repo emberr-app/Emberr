@@ -168,4 +168,29 @@ class NoteRepositoryAccountMoveTest {
         assertEquals(ACCOUNT_SPACE_ID, movedCategory?.spaceId)
         assertTrue(movedCategory!!.updatedAt > oldSpaceCopy.updatedAt)
     }
+
+    @Test
+    fun searchInARegularSpaceFindsWordsInsideADailyNoteButNotInAnotherSpace() = runTest {
+        val textLongerThanTheSnippet = "Morning pages ".repeat(10)
+        repository.saveDailyNote(
+            date,
+            NoteContent(
+                blocks = listOf(
+                    TextBlock(id = "opening", text = textLongerThanTheSnippet, updatedAt = 1L),
+                    TextBlock(id = "budget", text = "Quarterly budget review", updatedAt = 1L)
+                )
+            )
+        )
+        repository.saveNoteInSpace(
+            workSpaceId,
+            noteMetadata("work-plans", createdAt = 1L, dailyDate = null),
+            NoteContent(blocks = listOf(TextBlock(id = "work-budget", text = "Quarterly budget for work", updatedAt = 1L)))
+        )
+
+        val results = repository.searchNotes("Quarterly")
+
+        val dailyNote = appDatabase.noteDao().getAllDailyNoteMetadataAcrossSpaces().single()
+        assertEquals(listOf(dailyNote.noteId), results.map { it.note.noteId })
+        assertEquals("Quarterly budget review", results.single().matchedText)
+    }
 }

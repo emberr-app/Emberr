@@ -1,5 +1,6 @@
 package com.emberr.domain.ai.tools
 
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.database.withDatabasesAsTables
@@ -53,7 +54,7 @@ class NoteToolExecutor(
 
     private suspend fun readNote(noteId: String): NoteToolResult {
         val metadata = noteRepository.getNoteById(noteId)
-            ?.takeIf { it.trashedAt == null && !it.isTemplate && activeSpaceStore.isActiveSpace(it.spaceId) }
+            ?.takeIf { it.trashedAt == null && !it.isTemplate && (it.spaceId == ACCOUNT_SPACE_ID || activeSpaceStore.isActiveSpace(it.spaceId)) }
             ?: return NoteToolResult.Failure("No note with note_id \"$noteId\"")
 
         val blocks = noteRepository.getNoteContent(noteId)?.blocks.orEmpty().withDatabasesAsTables(noteRepository)
