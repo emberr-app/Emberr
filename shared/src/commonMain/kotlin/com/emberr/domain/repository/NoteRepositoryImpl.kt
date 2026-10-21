@@ -576,27 +576,16 @@ class NoteRepositoryImpl(
         val survivor = notesOnDate.minWith(oldestNoteFirst)
         val mergedAwayNotes = notesOnDate.filter { it.noteId != survivor.noteId }.sortedWith(oldestNoteFirst)
 
-        val survivorBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(survivor.noteId)
-        val keptBlockById = survivorBlocks.associateByTo(HashMap()) { it.blockId }
-        var nextDisplayOrder = (survivorBlocks.maxOfOrNull { it.displayOrder } ?: -1) + 1
-        val changedBlockById = LinkedHashMap<String, NoteBlockEntity>()
-        for (note in mergedAwayNotes) {
-            for (block in blockDao.getAllBlocksForNoteIncludingDeleted(note.noteId)) {
-                val keptBlock = keptBlockById[block.blockId]
-                val blockToKeep = when {
-                    keptBlock == null -> block.copy(noteId = survivor.noteId, displayOrder = nextDisplayOrder++)
-                    block.updatedAt > keptBlock.updatedAt -> block.copy(noteId = survivor.noteId, displayOrder = keptBlock.displayOrder)
-                    else -> continue
-                }
-                keptBlockById[block.blockId] = blockToKeep
-                changedBlockById[block.blockId] = blockToKeep
-            }
-        }
-        if (changedBlockById.isNotEmpty()) blockDao.insertOrUpdateBlocks(changedBlockById.values.toList())
+        val changedBlocks = blocksChangedByMergingInto(
+            survivor.noteId,
+            survivorBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(survivor.noteId),
+            incomingBlocks = mergedAwayNotes.flatMap { note -> blockDao.getAllBlocksForNoteIncludingDeleted(note.noteId) }
+        )
+        if (changedBlocks.isNotEmpty()) blockDao.insertOrUpdateBlocks(changedBlocks)
 
         val movedSurvivor = survivor.copy(
             spaceId = ACCOUNT_SPACE_ID,
-            updatedAt = if (changedBlockById.isEmpty()) survivor.updatedAt else System.currentTimeMillis(),
+            updatedAt = if (changedBlocks.isEmpty()) survivor.updatedAt else System.currentTimeMillis(),
             filePath = ""
         )
         noteDao.insertOrUpdateMetadata(movedSurvivor)
@@ -636,6 +625,67 @@ class NoteRepositoryImpl(
             needsReindex = mergedAwayNotes.isNotEmpty() && !savedContentOmitsTombstones(dateString)
         )
     }
+
+    private fun blocksChangedByMergingInto(
+        survivorNoteId: String,
+        survivorBlocks: List<NoteBlockEntity>,
+        incomingBlocks: List<NoteBlockEntity>
+    ): List<NoteBlockEntity> {
+        val keptBlockById = survivorBlocks.associateByTo(HashMap()) { it.blockId }
+        var nextDisplayOrder = (survivorBlocks.maxOfOrNull { it.displayOrder } ?: -1) + 1
+        val changedBlockById = LinkedHashMap<String, NoteBlockEntity>()
+        for (block in incomingBlocks) {
+            val keptBlock = keptBlockById[block.blockId]
+            val blockToKeep = when {
+                keptBlock == null -> block.copy(noteId = survivorNoteId, displayOrder = nextDisplayOrder++)
+                block.updatedAt > keptBlock.updatedAt -> block.copy(noteId = survivorNoteId, displayOrder = keptBlock.displayOrder)
+                else -> continue
+            }
+            keptBlockById[block.blockId] = blockToKeep
+            changedBlockById[block.blockId] = blockToKeep
+        }
+        return changedBlockById.values.toList()
+    }
+
+    override suspend fun mergeBackupNotesIntoAccountWhileSyncLockHeld(
+        notes: List<NoteMetadataEntity>,
+        blocks: List<NoteBlockEntity>
+    ): List<NoteMetadataEntity> =
+        withContext(Dispatchers.IO) {
+            val blocksByNoteId = blocks.groupBy { it.noteId }
+            val changedNotes = LinkedHashMap<String, NoteMetadataEntity>()
+            for (backupNote in notes) {
+                val backupBlocks = blocksByNoteId[backupNote.noteId].orEmpty().sortedBy { it.displayOrder }
+                val localNote = if (backupNote.isDaily) {
+                    backupNote.dateString?.let { dateString -> noteDao.getDailyNoteMetadata(ACCOUNT_SPACE_ID, dateString) }
+                } else {
+                    noteDao.getNoteById(backupNote.noteId)
+                }
+                val savedNote = if (localNote == null) {
+                    val noteId = if (noteDao.getNoteById(backupNote.noteId) == null) backupNote.noteId else UUID.randomUUID().toString()
+                    backupNote.copy(noteId = noteId).also { newNote ->
+                        noteDao.insertOrUpdateMetadata(newNote)
+                        blockDao.insertOrUpdateBlocks(backupBlocks.map { it.copy(noteId = noteId) })
+                    }
+                } else {
+                    val changedBlocks = blocksChangedByMergingInto(
+                        localNote.noteId,
+                        survivorBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(localNote.noteId),
+                        incomingBlocks = backupBlocks
+                    )
+                    if (changedBlocks.isEmpty()) continue
+                    blockDao.insertOrUpdateBlocks(changedBlocks)
+                    localNote.copy(updatedAt = System.currentTimeMillis()).also { noteDao.insertOrUpdateMetadata(it) }
+                }
+
+                val savedBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(savedNote.noteId)
+                    .mapNotNull { entity -> decodeBlockOrNull(entity.blockDataJson) }
+                refreshProjectionsForNote(savedNote, savedBlocks)
+                cacheSavedContent(ACCOUNT_SPACE_ID, savedNote.noteId, savedNote.dateString?.takeIf { savedNote.isDaily }, NoteContent(blocks = savedBlocks))
+                changedNotes[savedNote.noteId] = savedNote
+            }
+            changedNotes.values.toList()
+        }
 
     private class CategoryMoveToAccount(val dailyNoteDatesPointedToSurvivors: Set<String>)
 

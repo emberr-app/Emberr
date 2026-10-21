@@ -5,6 +5,8 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.AppDatabase
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
+import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.DEFAULT_SPACE_ID
 import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
@@ -13,6 +15,7 @@ import com.emberr.database.EmberrDatabase
 import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.ai.external.AiSettingsRepository
+import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteBlockSerializer
@@ -143,6 +146,8 @@ class EmberrBackupImporterTest {
         appScope = appScope
     )
 
+    private val onlyThePersonalSpace = BackupContentChoice(setOf(DEFAULT_SPACE_ID), includesDailyNotes = false, includesCalendar = false)
+
     private fun personalSpace() = SpaceEntity(spaceId = DEFAULT_SPACE_ID, displayName = "Personal", createdAt = 1L, updatedAt = 1L)
 
     private fun note(noteId: String, title: String) = NoteMetadataEntity(
@@ -186,7 +191,7 @@ class EmberrBackupImporterTest {
 
         val result = importer(backgroundScope).importSpaces(
             FakeBackupFile(backupWithImages("photo.jpg"), mediaInBackup = setOf("photo.jpg")),
-            setOf(DEFAULT_SPACE_ID)
+            onlyThePersonalSpace
         )
 
         val spaces = appDatabase.spaceDao().getAllSpacesOnce()
@@ -211,8 +216,8 @@ class EmberrBackupImporterTest {
         val importer = importer(backgroundScope)
         val backup = backupWithImages("photo.jpg")
 
-        importer.importSpaces(FakeBackupFile(backup, mediaInBackup = setOf("photo.jpg")), setOf(DEFAULT_SPACE_ID))
-        importer.importSpaces(FakeBackupFile(backup, mediaInBackup = setOf("photo.jpg")), setOf(DEFAULT_SPACE_ID))
+        importer.importSpaces(FakeBackupFile(backup, mediaInBackup = setOf("photo.jpg")), onlyThePersonalSpace)
+        importer.importSpaces(FakeBackupFile(backup, mediaInBackup = setOf("photo.jpg")), onlyThePersonalSpace)
 
         assertEquals(2, appDatabase.spaceDao().getAllSpacesOnce().size)
         assertEquals(2, appDatabase.noteDao().getAllNotesForBackup().map { it.noteId }.toSet().size)
@@ -225,7 +230,7 @@ class EmberrBackupImporterTest {
 
         val result = importer(backgroundScope).importSpaces(
             FakeBackupFile(backupWithImages("already-here.jpg", "new.jpg", "lost.jpg"), mediaInBackup = setOf("already-here.jpg", "new.jpg")),
-            setOf(DEFAULT_SPACE_ID)
+            onlyThePersonalSpace
         )
 
         assertEquals(setOf("already-here.jpg", "new.jpg"), mediaOnDevice)
@@ -243,7 +248,7 @@ class EmberrBackupImporterTest {
                     mediaInBackup = setOf("1-copied.jpg", "2-broken.jpg"),
                     mediaThatFailsToCopy = "2-broken.jpg"
                 ),
-                setOf(DEFAULT_SPACE_ID)
+                onlyThePersonalSpace
             )
         }
 
@@ -258,7 +263,7 @@ class EmberrBackupImporterTest {
         val importer = importer(backgroundScope)
         val backupFile = FakeBackupFile(backupWithImages("photo.jpg"), mediaInBackup = setOf("photo.jpg"))
 
-        importer.startImport(backupFile, setOf(DEFAULT_SPACE_ID))
+        importer.startImport(backupFile, onlyThePersonalSpace)
         val finished = importer.progress.first { it is EmberrImportProgress.Finished || it is EmberrImportProgress.Failed }
 
         assertEquals(
@@ -273,12 +278,61 @@ class EmberrBackupImporterTest {
         val importer = importer(backgroundScope)
         val backupFile = FakeBackupFile(backupWithImages("broken.jpg"), mediaInBackup = setOf("broken.jpg"), mediaThatFailsToCopy = "broken.jpg")
 
-        importer.startImport(backupFile, setOf(DEFAULT_SPACE_ID))
+        importer.startImport(backupFile, onlyThePersonalSpace)
         val finished = importer.progress.first { it is EmberrImportProgress.Finished || it is EmberrImportProgress.Failed }
 
         assertEquals(EmberrImportProgress.Failed("The disk is full"), finished)
         assertTrue(backupFile.isClosed)
     }
+
+    private fun dailyNote(noteId: String, dateString: String) =
+        note(noteId, title = dateString).copy(isDaily = true, dateString = dateString, spaceId = ACCOUNT_SPACE_ID)
+
+    @Test
+    fun importedDailyBlocksAreAddedAsNewCopiesSoAnEventDeletedHereComesBack() = runTest {
+        val dateString = "2026-10-20"
+        val dao = appDatabase.backupDao()
+        dao.insertCategories(
+            listOf(CategoryEntity(categoryId = "local-work", name = "Work", colorHex = "#111111", createdAt = 1L, spaceId = ACCOUNT_SPACE_ID))
+        )
+        dao.insertNotes(listOf(dailyNote("local-day", dateString)))
+        dao.insertBlocks(
+            listOf(
+                stored("local-day", TextBlock(id = "journal", text = "edited here", updatedAt = 5L), displayOrder = 0).copy(updatedAt = 5L),
+                stored("local-day", CheckboxBlock(id = "dentist", text = "Dentist", isDeleted = true, updatedAt = 9L), displayOrder = 1)
+                    .copy(updatedAt = 9L, isDeleted = true)
+            )
+        )
+        val backup = EmberrBackupData(
+            exportTimestamp = 1L,
+            notes = listOf(dailyNote("backup-day", dateString)),
+            categories = listOf(
+                CategoryEntity(categoryId = "backup-work", name = " work ", colorHex = "#222222", createdAt = 1L, spaceId = ACCOUNT_SPACE_ID)
+            ),
+            blocks = listOf(
+                stored("backup-day", TextBlock(id = "journal", text = "older text", updatedAt = 2L), displayOrder = 0).copy(updatedAt = 2L),
+                stored("backup-day", CheckboxBlock(id = "dentist", text = "Dentist", categoryId = "backup-work", updatedAt = 2L), displayOrder = 1)
+                    .copy(updatedAt = 2L)
+            )
+        )
+        val dailyNotesAndCalendar = BackupContentChoice(emptySet(), includesDailyNotes = true, includesCalendar = true)
+        val importer = importer(backgroundScope)
+
+        importer.importSpaces(FakeBackupFile(backup), dailyNotesAndCalendar)
+        val liveBlocksAfterFirstImport = appDatabase.blockDao().getAllBlocksForNoteIncludingDeleted("local-day")
+            .filter { !it.isDeleted }
+            .map { blockJson.decodeFromString(NoteBlockSerializer, it.blockDataJson) }
+        importer.importSpaces(FakeBackupFile(backup), dailyNotesAndCalendar)
+
+        assertEquals(listOf("edited here", "older text", "Dentist"), liveBlocksAfterFirstImport.map { it.textOrNull() })
+        assertTrue(liveBlocksAfterFirstImport.drop(1).none { it.id == "journal" || it.id == "dentist" })
+        assertEquals("local-work", (liveBlocksAfterFirstImport.last() as CheckboxBlock).categoryId)
+        assertEquals(listOf("local-day"), appDatabase.noteDao().getAllNotesForBackup().map { it.noteId })
+        assertEquals(listOf("local-work"), dao.getAllCategoriesIncludingDeleted().map { it.categoryId })
+        assertEquals(2, appDatabase.calendarTaskDao().getTasksOutsideTrashAcrossSpaces().count { it.text == "Dentist" })
+    }
+
+    private fun NoteBlock.textOrNull(): String? = (this as? TextBlock)?.text ?: (this as? CheckboxBlock)?.text
 
     private inline fun <reified T : Any> stubOf(
         crossinline answer: (methodName: String, arguments: Array<out Any?>) -> Any?

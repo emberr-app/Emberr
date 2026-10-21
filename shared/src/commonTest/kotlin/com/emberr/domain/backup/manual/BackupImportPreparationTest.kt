@@ -111,8 +111,17 @@ class BackupImportPreparationTest {
         chatSessions = chatSessions
     )
 
-    private fun prepare(backup: EmberrBackupData, spaceIds: Set<String> = backup.spaces.map { it.spaceId }.toSet()) =
-        prepareSpacesForImport(backup, spaceIds, now, ::newId)
+    private fun prepare(
+        backup: EmberrBackupData,
+        spaceIds: Set<String> = backup.spaces.map { it.spaceId }.toSet(),
+        localCategoryIdByBackupId: Map<String, String> = emptyMap()
+    ) = prepareBackupForImport(
+        backup,
+        BackupContentChoice(spaceIds, includesDailyNotes = false, includesCalendar = false),
+        localCategoryIdByBackupId,
+        now,
+        ::newId
+    ).spaces
 
     private fun decoded(block: NoteBlockEntity): NoteBlock =
         Json { ignoreUnknownKeys = true }.decodeFromString(NoteBlockSerializer, block.blockDataJson)
@@ -177,7 +186,8 @@ class BackupImportPreparationTest {
                 customProperties = listOf(
                     CustomPropertyEntity(propertyId = customPropertyId, name = "Owner", valueType = PropertyValueType.TEXT, createdAt = 1L)
                 )
-            )
+            ),
+            localCategoryIdByBackupId = mapOf(categoryId to "local-work-category")
         )
 
         val copiedNote = prepared.notes.single { it.title == noteId }
@@ -185,7 +195,7 @@ class BackupImportPreparationTest {
         val blocks = prepared.blocks.filter { it.noteId == copiedNote.noteId }.map(::decoded)
         assertEquals(copiedOtherNote.noteId, blocks.filterIsInstance<LinkedNoteBlock>().single().linkedNoteId)
         assertEquals(copiedOtherNote.noteId, blocks.filterIsInstance<CanvasBlock>().single().canvasNoteId)
-        assertEquals(prepared.categories.single().categoryId, blocks.filterIsInstance<CheckboxBlock>().single().categoryId)
+        assertEquals("local-work-category", blocks.filterIsInstance<CheckboxBlock>().single().categoryId)
         assertEquals(prepared.customProperties.single().propertyId, blocks.filterIsInstance<PropertyBlock>().single().customPropertyId)
         assertEquals(prepared.folders.single().folderId, copiedNote.folderId)
     }
