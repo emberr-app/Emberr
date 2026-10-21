@@ -179,7 +179,7 @@ class EventMoveTracker {
     fun isOverAllDayDropZone(pointerInWindow: Offset): Boolean {
         val zone = allDayDropZone?.takeIf { it.isAttached } ?: return false
         val top = zone.positionInWindow().y
-        return pointerInWindow.y in top..(top + zone.size.height)
+        return pointerInWindow.y <= top + zone.size.height
     }
 
     private fun columnUnderPointer(pointerX: Float): Pair<LocalDate, LayoutCoordinates>? =

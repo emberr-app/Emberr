@@ -195,7 +195,12 @@ fun AllDayStrip(
     }
     val rowsHeight = AllDayBarHeight * layout.shownRowCount + AllDayBarGap * (layout.shownRowCount - 1).coerceAtLeast(0)
     val moreLineHeight = if (layout.hasHiddenBars) AllDayBarGap + AllDayMoreLineHeight else 0.dp
-    val targetHeight = maxOf(EmptyAllDayStripHeight, AllDayStripVerticalPadding * 2 + rowsHeight + moreLineHeight)
+    val isReceivingTimedEvent = moveTracker.preview?.becomesAllDay == true
+    val targetHeight = if (layout.shownBars.isEmpty() && !isReceivingTimedEvent) {
+        0.dp
+    } else {
+        maxOf(EmptyAllDayStripHeight, AllDayStripVerticalPadding * 2 + rowsHeight + moreLineHeight)
+    }
     val stripHeight by animateDpAsState(targetHeight, label = "AllDayStripHeight")
     val emptyAreaInteractionSource = remember { MutableInteractionSource() }
     var stripCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
