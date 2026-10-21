@@ -42,7 +42,7 @@ class CalendarAgendaWidgetContentReader(
     private val firstDayOfWeek: WidgetFirstDayOfWeek,
     private val settingsManager: SettingsManager,
 ) {
-    suspend fun readContentOnce(spaceId: String, shownMonth: String?): CalendarAgendaWidgetContent? =
+    suspend fun readContentOnce(shownMonth: String?): CalendarAgendaWidgetContent? =
         withContext(Dispatchers.IO) {
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
             val firstOfMonth = parseFirstOfMonth(shownMonth) ?: firstOfMonthFor(today)
@@ -50,7 +50,7 @@ class CalendarAgendaWidgetContentReader(
             val weekStartsOn = firstDayOfWeek.firstDayOfWeek()
 
             val tasks = try {
-                calendarTaskDao.getTasksInMonth(listOf(spaceId, ACCOUNT_SPACE_ID), monthKey)
+                calendarTaskDao.getTasksInMonth(monthKey)
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read events for $monthKey", cause)
                 return@withContext null
@@ -65,10 +65,9 @@ class CalendarAgendaWidgetContentReader(
 
             val categoryVisibility = CalendarCategoryVisibility(
                 hiddenVisibilityKeys = settingsManager.getHiddenCalendarCategories(),
-                existingCategoryIds = colorsByCategoryId.keys,
-                spaceId = spaceId
+                existingCategoryIds = colorsByCategoryId.keys
             )
-            val shownTasks = tasks.filter { task -> categoryVisibility.isEventShown(task.categoryId) }
+            val shownTasks = tasks.filter { task -> categoryVisibility.isEventShown(task) }
 
             CalendarAgendaWidgetContent(
                 shownMonth = monthKey,

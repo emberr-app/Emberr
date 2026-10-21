@@ -58,6 +58,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -146,6 +147,7 @@ internal val calendarViewModeLabels = listOf(
 fun CalendarScreen(
     onNavigateBack: () -> Unit = {},
     showBackButton: Boolean = true,
+    onOpenSourceNote: ((CalendarEvent) -> Unit)? = null,
     viewModel: CalendarViewModel = koinViewModel()
 ) {
     val internalHazeState = remember { HazeState() }
@@ -156,12 +158,16 @@ fun CalendarScreen(
     var selectedDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     val categories by viewModel.categories.collectAsState()
     val hiddenCategoryVisibilityKeys by viewModel.hiddenCategoryVisibilityKeys.collectAsState()
-    val noCategoryVisibilityKey by viewModel.noCategoryVisibilityKey.collectAsState()
+    val spaces by viewModel.spaces.collectAsState()
     val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
     val firstDayOfWeek = LocalFirstDayOfWeek.current
     val events by remember(selectedDate) { viewModel.eventsForDate(selectedDate.toString()) }
         .collectAsState(initial = emptyList())
     var eventEditorState by remember { mutableStateOf<EventEditorState?>(null) }
+    val shownEvent = eventEditorState?.original
+    val sourceNoteTitle by produceState<String?>(null, shownEvent?.blockId) {
+        value = shownEvent?.let { event -> viewModel.sourceNoteTitle(event) }
+    }
     // Holds the continuation to run once the user picks a scope in RecurrenceScopeChooser -
     // set by whichever of Edit/Delete triggered it, null the rest of the time.
     var pendingScopeAction by remember { mutableStateOf<((RecurrenceEditScope) -> Unit)?>(null) }
@@ -574,8 +580,8 @@ fun CalendarScreen(
                         onUpdateCategory = viewModel::updateCategory,
                         onDeleteCategory = viewModel::deleteCategory,
                         hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
-                        noCategoryVisibilityKey = noCategoryVisibilityKey,
-                        onToggleCategoryVisibility = viewModel::toggleCategoryVisibility
+                        onToggleCategoryVisibility = viewModel::toggleCategoryVisibility,
+                        spaces = spaces
                     )
                 }
             }
@@ -596,8 +602,8 @@ fun CalendarScreen(
             onUpdateCategory = viewModel::updateCategory,
             onDeleteCategory = viewModel::deleteCategory,
             hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
-            noCategoryVisibilityKey = noCategoryVisibilityKey,
             onToggleCategoryVisibility = viewModel::toggleCategoryVisibility,
+            spaces = spaces,
             modifier = Modifier.padding(bottom = 16.dp)
         )
     }
@@ -654,7 +660,16 @@ fun CalendarScreen(
                 }
             }
         },
-        onDismiss = { eventEditorState = null }
+        onDismiss = { eventEditorState = null },
+        sourceNoteTitle = sourceNoteTitle,
+        onOpenSourceNote = onOpenSourceNote?.let { openSourceNote ->
+            shownEvent?.let { event ->
+                {
+                    eventEditorState = null
+                    openSourceNote(event)
+                }
+            }
+        }
     )
 
     val allDayListEvents by remember(allDayListDate) {

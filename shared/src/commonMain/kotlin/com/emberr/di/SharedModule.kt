@@ -273,8 +273,7 @@ val sharedModule = module {
     viewModel {
         com.emberr.presentation.home.overview.tasks.TasksViewModel(
             repository = get(),
-            reminderScheduler = get(),
-            activeSpaceStore = get()
+            reminderScheduler = get()
         )
     }
     viewModel {
@@ -396,7 +395,7 @@ val sharedModule = module {
             repository = get(),
             reminderScheduler = get(),
             settingsManager = get(),
-            activeSpaceStore = get()
+            spaceRepository = get()
         )
     }
     single<TaskExtractor> { HeuristicTaskExtractor() }

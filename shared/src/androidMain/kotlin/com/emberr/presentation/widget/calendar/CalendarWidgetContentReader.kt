@@ -34,7 +34,7 @@ class CalendarWidgetContentReader(
     private val firstDayOfWeek: WidgetFirstDayOfWeek,
     private val settingsManager: SettingsManager,
 ) {
-    suspend fun readContentOnce(spaceId: String, shownMonth: String?): CalendarWidgetContent? =
+    suspend fun readContentOnce(shownMonth: String?): CalendarWidgetContent? =
         withContext(Dispatchers.IO) {
             val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
             val firstOfMonth = parseFirstOfMonth(shownMonth) ?: firstOfMonthFor(today)
@@ -42,7 +42,7 @@ class CalendarWidgetContentReader(
             val weekStartsOn = firstDayOfWeek.firstDayOfWeek()
 
             val tasks = try {
-                calendarTaskDao.getTasksInMonth(listOf(spaceId, ACCOUNT_SPACE_ID), monthKey)
+                calendarTaskDao.getTasksInMonth(monthKey)
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read tasks for $monthKey", cause)
                 return@withContext null
@@ -57,12 +57,11 @@ class CalendarWidgetContentReader(
 
             val categoryVisibility = CalendarCategoryVisibility(
                 hiddenVisibilityKeys = settingsManager.getHiddenCalendarCategories(),
-                existingCategoryIds = colorsByCategoryId.keys,
-                spaceId = spaceId
+                existingCategoryIds = colorsByCategoryId.keys
             )
 
             val dotsByDate = tasks
-                .filter { task -> categoryVisibility.isEventShown(task.categoryId) }
+                .filter { task -> categoryVisibility.isEventShown(task) }
                 .filterNot { task -> task.isChecked }
                 .flatMap { task -> task.datesShownOn().map { date -> date.toString() to task } }
                 .groupBy({ (dateString, _) -> dateString }, { (_, task) -> task })

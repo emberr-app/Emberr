@@ -693,7 +693,10 @@ fun EmberrApp(
                             }
                         ) {
                             com.emberr.presentation.calendar.CalendarScreen(
-                                onNavigateBack = { navController.popBackStack() }
+                                onNavigateBack = { navController.popBackStack() },
+                                onOpenSourceNote = { event ->
+                                    navController.navigate(Screen.Note.createRoute(event.noteId))
+                                }
                             )
                         }
 

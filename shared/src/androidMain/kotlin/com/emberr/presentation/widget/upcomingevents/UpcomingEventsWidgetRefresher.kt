@@ -13,7 +13,6 @@ import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.emberr.presentation.widget.WidgetLog
-import com.emberr.presentation.widget.readWidgetSpaceId
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
 
@@ -74,15 +73,12 @@ suspend fun pushRenderedUpcomingEvents(
         val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
             .takeIf { it > 0 } ?: fallbackWidgetHeightDp
 
-        val pinnedSpaceId = readWidgetSpaceId(context, glanceId)
-
         val rendered = GlanceRemoteViews().compose(
             context = context,
             size = DpSize(widthDp.dp, heightDp.dp)
         ) {
             UpcomingEventsWidgetBody(
                 context = context,
-                spaceId = pinnedSpaceId,
                 content = content
             )
         }
@@ -96,8 +92,7 @@ suspend fun pushRenderedUpcomingEvents(
 suspend fun refreshUpcomingEventsWidget(context: Context, glanceId: GlanceId) {
     try {
         val contentReader = GlobalContext.get().get<UpcomingEventsWidgetContentReader>()
-        val spaceId = readWidgetSpaceId(context, glanceId)
-        val freshContent = contentReader.readContentOnce(spaceId) ?: return
+        val freshContent = contentReader.readContentOnce() ?: return
 
         if (freshContent == readCachedUpcomingEvents(context, glanceId)) return
 

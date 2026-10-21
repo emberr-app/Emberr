@@ -2,7 +2,6 @@
 package com.emberr.presentation.widget.todaytasks
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
-import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
@@ -22,11 +21,11 @@ class TodayTasksWidgetContentReader(
     private val clockFormat: WidgetClockFormat
 ) {
 
-    suspend fun readContentOnce(spaceId: String): TodayTasksWidgetContent? = withContext(Dispatchers.IO) {
+    suspend fun readContentOnce(): TodayTasksWidgetContent? = withContext(Dispatchers.IO) {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
         val tasks = try {
-            calendarTaskDao.getTasksOnDate(listOf(spaceId, ACCOUNT_SPACE_ID), today.toString())
+            calendarTaskDao.getTasksOnDate(today.toString())
         } catch (cause: Exception) {
             WidgetLog.e("Could not read today's tasks", cause)
             return@withContext null

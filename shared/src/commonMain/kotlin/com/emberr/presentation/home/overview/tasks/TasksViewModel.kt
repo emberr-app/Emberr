@@ -11,7 +11,6 @@ import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.repository.NoteRepository
-import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.sync.AutoSyncTrigger
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
@@ -27,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
@@ -38,8 +38,7 @@ data class BlockLocation(val noteId: String, val isDaily: Boolean)
 
 class TasksViewModel(
     private val repository: NoteRepository,
-    private val reminderScheduler: ReminderScheduler,
-    private val activeSpaceStore: ActiveSpaceStore
+    private val reminderScheduler: ReminderScheduler
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(true)
@@ -73,10 +72,17 @@ class TasksViewModel(
     private var typingJob: Job? = null
     private val dirtyBlocks = mutableSetOf<String>()
 
-    private var loadedSpaceId: String? = null
-
     val allLinkableNotes = repository.getAllLinkableNotes()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val noteTitlesById: StateFlow<Map<String, String>> = _blockLocations
+        .map { locations -> locations.values.filterNot { it.isDaily }.map { it.noteId }.distinct().sorted() }
+        .distinctUntilChanged()
+        .flatMapLatest { noteIds -> repository.observeNotesByIds(noteIds) }
+        .map { notes -> notes.associate { it.noteId to it.title } }
+        .catch { cause -> cause.printStackTrace() }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
     fun createLinkedNote(title: String): String {
         val newNoteId = UUID.randomUUID().toString()
@@ -126,10 +132,6 @@ class TasksViewModel(
             _isLoading.value = true
 
             repository.getAllTasksFlow().collectLatest { allTasks ->
-                val emittedSpaceId = activeSpaceStore.currentActiveSpaceId()
-                if (loadedSpaceId != null && loadedSpaceId != emittedSpaceId) discardTaskSessionState()
-                loadedSpaceId = emittedSpaceId
-
                 val dbTasksMap = allTasks.associateBy { it.blockId }
                 val currentTime = System.currentTimeMillis()
 
@@ -208,20 +210,6 @@ class TasksViewModel(
                 _isLoading.value = false
             }
         }
-    }
-
-    private fun discardTaskSessionState() {
-        typingJob?.cancel()
-        dirtyBlocks.clear()
-        blockSourceMap.clear()
-        sessionBlockCache.clear()
-        localEditTimestamps.clear()
-        localToggleTimestamps.clear()
-        _blockLocations.value = emptyMap()
-        _selectedBlockIds.value = emptySet()
-        _focusRequest.value = null
-        _activeBlocks.value = emptyList()
-        _completedBlocks.value = emptyList()
     }
 
     fun toggleCompletedView() {
@@ -509,10 +497,6 @@ class TasksViewModel(
     private suspend fun flushDirtyBlocks() {
         val blocksToSave = dirtyBlocks.toList()
         if (blocksToSave.isEmpty()) return
-        if (!activeSpaceStore.isActiveSpace(loadedSpaceId)) {
-            dirtyBlocks.clear()
-            return
-        }
 
         val currentBlocks = if (_isShowingCompleted.value) _completedBlocks.value else _activeBlocks.value
         val byNote = blocksToSave.groupBy { blockSourceMap[it] }

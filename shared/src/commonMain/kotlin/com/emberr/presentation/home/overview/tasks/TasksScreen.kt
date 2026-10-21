@@ -74,9 +74,7 @@ fun TasksScreen(
     val inboxNoteId = remember(allLinkableNotes) {
         allLinkableNotes.firstOrNull { it.title.equals("Inbox", ignoreCase = true) && !it.isDaily }?.noteId
     }
-    val noteTitleById = remember(allLinkableNotes) {
-        allLinkableNotes.associate { it.noteId to it.title }
-    }
+    val noteTitleById by viewModel.noteTitlesById.collectAsState()
     val sectionLabelFor = remember(blockLocations, inboxNoteId, noteTitleById) {
         { block: NoteBlock ->
             val location = blockLocations[block.id]

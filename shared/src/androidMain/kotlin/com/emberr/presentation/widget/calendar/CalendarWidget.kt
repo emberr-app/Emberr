@@ -49,8 +49,6 @@ import com.emberr.presentation.widget.primaryTextColor
 import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.calendarDateUriScheme
-import com.emberr.presentation.widget.widgetSpaceIdExtra
-import com.emberr.presentation.widget.readWidgetSpaceId
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import androidx.core.graphics.toColorInt
@@ -70,13 +68,11 @@ class CalendarWidget : GlanceAppWidget(), KoinComponent {
         val content = loadAndCacheCalendar(context, id, shownMonth)
             ?: readCachedCalendar(context, id)
         val appWidgetId = resolveAppWidgetId(context, id)
-        val spaceId = readWidgetSpaceId(context, id)
 
         provideContent {
             CalendarWidgetBody(
                 context = context,
                 appWidgetId = appWidgetId,
-                spaceId = spaceId,
                 content = content
             )
         }
@@ -88,8 +84,7 @@ class CalendarWidget : GlanceAppWidget(), KoinComponent {
         shownMonth: String?
     ): CalendarWidgetContent? {
         val contentReader = runCatching { get<CalendarWidgetContentReader>() }.getOrNull() ?: return null
-        val spaceId = readWidgetSpaceId(context, id)
-        val freshContent = contentReader.readContentOnce(spaceId, shownMonth) ?: return null
+        val freshContent = contentReader.readContentOnce(shownMonth) ?: return null
 
         if (freshContent != readCachedCalendar(context, id)) {
             writeCachedCalendar(context, id, freshContent)
@@ -110,7 +105,6 @@ class CalendarWidget : GlanceAppWidget(), KoinComponent {
 internal fun CalendarWidgetBody(
     context: Context,
     appWidgetId: Int,
-    spaceId: String,
     content: CalendarWidgetContent?
 ) {
     Column(
@@ -197,7 +191,7 @@ internal fun CalendarWidgetBody(
                                     GlanceModifier
                                 } else {
                                     GlanceModifier.clickable(
-                                        actionStartActivity(openCalendarDayIntent(context, cell.dateString, spaceId))
+                                        actionStartActivity(openCalendarDayIntent(context, cell.dateString))
                                     )
                                 }
                             ),
@@ -277,8 +271,7 @@ private fun monthStepIntent(context: Context, appWidgetId: Int, isForward: Boole
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
     }
 
-private fun openCalendarDayIntent(context: Context, dateString: String, spaceId: String): Intent =
+private fun openCalendarDayIntent(context: Context, dateString: String): Intent =
     Intent(context, MainActivity::class.java)
         .setData("$calendarDateUriScheme://day/$dateString".toUri())
-        .putExtra(widgetSpaceIdExtra, spaceId)
         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
