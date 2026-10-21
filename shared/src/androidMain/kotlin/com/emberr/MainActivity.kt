@@ -464,11 +464,10 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
     }
 
-    private fun switchToWidgetSpaceIfRequested(intent: Intent) {
+    private fun takeWidgetSpaceId(intent: Intent): String? {
         val pinnedSpaceId = intent.getStringExtra(widgetSpaceIdExtra)?.takeIf { it.isNotBlank() }
-            ?: return
         intent.removeExtra(widgetSpaceIdExtra)
-        runCatching { activeSpaceStore.setActiveSpace(pinnedSpaceId) }
+        return pinnedSpaceId
     }
 
     private fun consumeWidgetRoute(intent: Intent?): String? {
@@ -480,7 +479,7 @@ class MainActivity : ComponentActivity() {
             return Screen.Note.createRoute(noteId)
         }
 
-        switchToWidgetSpaceIfRequested(intent)
+        val widgetSpaceId = takeWidgetSpaceId(intent)
 
         if (intent.getBooleanExtra(widgetTasksScreenExtra, false)) {
             intent.removeExtra(widgetTasksScreenExtra)
@@ -529,6 +528,7 @@ class MainActivity : ComponentActivity() {
 
         if (intent.getBooleanExtra(widgetHomeScreenExtra, false)) {
             intent.removeExtra(widgetHomeScreenExtra)
+            widgetSpaceId?.let { spaceId -> runCatching { activeSpaceStore.setActiveSpace(spaceId) } }
             if (intent.getBooleanExtra(widgetNewNoteExtra, false)) {
                 intent.removeExtra(widgetNewNoteExtra)
                 WidgetComposeRequestBus.request(WidgetComposeRequest.NEW_NOTE)
