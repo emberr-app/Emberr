@@ -88,10 +88,15 @@ fun CategorySection(
     val noCategoryVisibilityKey = noCategoryVisibilityKeyFor(ACCOUNT_SPACE_ID)
     var editorState by remember { mutableStateOf<CategoryEditorState?>(null) }
 
+    fun isNameTakenByAnotherCategory(state: CategoryEditorState?): Boolean =
+        state != null && categories.any { category ->
+            category.id != state.categoryId && category.name.trim().lowercase() == state.name.trim().lowercase()
+        }
+
     fun performSave() {
         val state = editorState
         val trimmedName = state?.name?.trim() ?: return
-        if (trimmedName.isNotEmpty()) {
+        if (trimmedName.isNotEmpty() && !isNameTakenByAnotherCategory(state)) {
             val id = state.categoryId
             if (id == null) {
                 onAddCategory(trimmedName, state.colorHex)
@@ -110,6 +115,7 @@ fun CategorySection(
                 onToggleShown = { onToggleCategoryVisibility(category.id) },
                 isEditorOpen = isDesktopPlatform && state?.categoryId == category.id,
                 editorState = if (state?.categoryId == category.id) state else null,
+                isNameTaken = state?.categoryId == category.id && isNameTakenByAnotherCategory(state),
                 onClick = {
                     editorState = CategoryEditorState(
                         categoryId = category.id,
@@ -138,6 +144,7 @@ fun CategorySection(
         AddCategoryRow(
             isEditorOpen = isDesktopPlatform && addState?.categoryId == null && addState != null,
             editorState = if (addState?.categoryId == null) addState else null,
+            isNameTaken = addState?.categoryId == null && isNameTakenByAnotherCategory(addState),
             onClick = {
                 editorState = CategoryEditorState(
                     categoryId = null,
@@ -194,6 +201,7 @@ fun CategorySection(
                     CategoryEditor(
                         state = state,
                         isNew = state.categoryId == null,
+                        isNameTaken = isNameTakenByAnotherCategory(state),
                         onNameChange = { editorState = state.copy(name = it) },
                         onColorChange = { editorState = state.copy(colorHex = it) },
                         onCancel = { closeAnd { editorState = null } },
@@ -219,6 +227,7 @@ private fun CategoryRow(
     onToggleShown: () -> Unit,
     isEditorOpen: Boolean,
     editorState: CategoryEditorState?,
+    isNameTaken: Boolean,
     onClick: () -> Unit,
     onDismissEditor: () -> Unit,
     onNameChange: (String) -> Unit,
@@ -278,6 +287,7 @@ private fun CategoryRow(
                         CategoryEditor(
                             state = shownEditorState,
                             isNew = false,
+                            isNameTaken = isNameTaken,
                             onNameChange = onNameChange,
                             onColorChange = onColorChange,
                             onCancel = onCancel,
@@ -351,6 +361,7 @@ private fun CategoryVisibilityDot(
 private fun AddCategoryRow(
     isEditorOpen: Boolean,
     editorState: CategoryEditorState?,
+    isNameTaken: Boolean,
     onClick: () -> Unit,
     onDismissEditor: () -> Unit,
     onNameChange: (String) -> Unit,
@@ -385,6 +396,7 @@ private fun AddCategoryRow(
                         CategoryEditor(
                             state = shownEditorState,
                             isNew = true,
+                            isNameTaken = isNameTaken,
                             onNameChange = onNameChange,
                             onColorChange = onColorChange,
                             onCancel = onCancel,
@@ -445,6 +457,7 @@ private fun CategoryMenuHeader(
 private fun CategoryEditor(
     state: CategoryEditorState,
     isNew: Boolean,
+    isNameTaken: Boolean,
     onNameChange: (String) -> Unit,
     onColorChange: (String) -> Unit,
     onCancel: () -> Unit,
@@ -456,8 +469,17 @@ private fun CategoryEditor(
             onValueChange = onNameChange,
             placeholder = "Category name",
             modifier = Modifier.fillMaxWidth(),
-            onSubmit = onSave
+            onSubmit = { if (!isNameTaken) onSave() }
         )
+
+        if (isNameTaken) {
+            Text(
+                text = "Category already exists",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = CategoryMenuContentInset, top = CategoryEditorLabelSpacing)
+            )
+        }
 
         Text(
             text = "Color",
@@ -499,7 +521,8 @@ private fun CategoryEditor(
             EmberrButtonPrimary(
                 text = if (isNew) "Add" else "Save",
                 onClick = onSave,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                enabled = !isNameTaken
             )
         }
     }
