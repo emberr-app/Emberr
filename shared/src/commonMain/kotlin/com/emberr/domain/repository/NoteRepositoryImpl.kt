@@ -354,6 +354,7 @@ class NoteRepositoryImpl(
                 SyncCoordinator.mutex.withLock {
                     val movedNotes = moveDailyNotesToAccount()
                     moveCategoriesToAccount()
+                    moveSubNotesOfAccountNotesToAccount()
                     movedNotes
                 }
             }
@@ -381,12 +382,124 @@ class NoteRepositoryImpl(
         withContext(Dispatchers.IO) {
             val movedDailyNotes = moveDailyNotesToAccount()
             val categoryMove = moveCategoriesToAccount()
+            val movedSubNoteIds = moveSubNotesOfAccountNotesToAccount()
             movedDailyNotes.filter { it.needsReindex }.forEach { indexDailyNote(it.dateString, it.content, it.metadata) }
 
             val changedDailyNoteDates = movedDailyNotes.mapTo(LinkedHashSet()) { it.dateString } +
                 categoryMove?.dailyNoteDatesPointedToSurvivors.orEmpty()
             changedDailyNoteDates.forEach { dateString -> SyncEventBus.emitSyncCompleted(dateString, ACCOUNT_SPACE_ID) }
-            AccountMergeResult(changedDailyNoteDates = changedDailyNoteDates, categoriesChanged = categoryMove != null)
+            AccountMergeResult(
+                changedDailyNoteDates = changedDailyNoteDates,
+                categoriesChanged = categoryMove != null,
+                movedSubNoteIds = movedSubNoteIds
+            )
+        }
+
+    private sealed interface SubNoteGroup {
+        data class SingleNote(val noteId: String) : SubNoteGroup
+        data class Database(val databaseId: String) : SubNoteGroup
+    }
+
+    private suspend fun moveSubNotesOfAccountNotesToAccount(): Set<String> {
+        val pointers = livePointersToSubNotes()
+        if (pointers.isEmpty()) return emptySet()
+        val pointedNoteIds = pointers.mapNotNull { (_, group) -> (group as? SubNoteGroup.SingleNote)?.noteId }
+        val notesById = noteDao.getNotesByIdsIncludingTemplates((pointers.map { it.first } + pointedNoteIds).distinct())
+            .associateBy { it.noteId }
+        val hostNoteIdsByGroup = pointers
+            .mapNotNull { (hostNoteId, group) ->
+                if (hostNoteId !in notesById) return@mapNotNull null
+                groupContaining(group, notesById)?.let { it to hostNoteId }
+            }
+            .groupBy({ it.first }, { it.second })
+
+        val noteIdsToMove = LinkedHashSet<String>()
+        fun isInAccountOnceMoved(noteId: String) = noteId in noteIdsToMove || notesById[noteId]?.spaceId == ACCOUNT_SPACE_ID
+        val membersByGroup = HashMap<SubNoteGroup, List<NoteMetadataEntity>>()
+        val settledGroups = HashSet<SubNoteGroup>()
+        do {
+            var foundAnotherGroupToMove = false
+            for ((group, hostNoteIds) in hostNoteIdsByGroup) {
+                if (group in settledGroups || hostNoteIds.none(::isInAccountOnceMoved)) continue
+                val members = membersByGroup.getOrPut(group) { membersOf(group, notesById) }
+                val memberIds = members.mapTo(HashSet()) { it.noteId }
+                if (hostNoteIds.any { it !in memberIds && !isInAccountOnceMoved(it) }) continue
+                settledGroups += group
+                if (members.any { !it.isSubNote }) continue
+                val membersOutsideAccount = members.filter { it.spaceId != ACCOUNT_SPACE_ID }
+                if (membersOutsideAccount.isEmpty()) continue
+                membersOutsideAccount.forEach { noteIdsToMove += it.noteId }
+                foundAnotherGroupToMove = true
+            }
+        } while (foundAnotherGroupToMove)
+
+        val movedAt = System.currentTimeMillis()
+        val movedNoteIds = LinkedHashSet<String>()
+        for (noteId in noteIdsToMove) {
+            try {
+                val note = noteDao.getNoteById(noteId) ?: continue
+                moveNoteAndItsProjectionsToSpace(note, ACCOUNT_SPACE_ID, movedAt)
+                movedNoteIds += noteId
+                SyncEventBus.emitSyncCompleted(noteId, ACCOUNT_SPACE_ID)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        return movedNoteIds
+    }
+
+    private suspend fun livePointersToSubNotes(): List<Pair<String, SubNoteGroup>> {
+        val canvasPointers = liveBlocksContaining(EmbeddedCanvasCleanup.CANVAS_NOTE_ID_FIELD)
+            .mapNotNull { (hostNoteId, block) -> (block as? CanvasBlock)?.let { hostNoteId to SubNoteGroup.SingleNote(it.canvasNoteId) } }
+        val databasePointers = liveBlocksContaining(DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER)
+            .mapNotNull { (hostNoteId, block) -> block.shownDatabaseIdOrNull()?.let { hostNoteId to SubNoteGroup.Database(it) } }
+        val linkedNotePointers = liveBlocksContaining(LINKED_NOTE_BLOCK_JSON_MARKER)
+            .mapNotNull { (hostNoteId, block) -> (block as? LinkedNoteBlock)?.let { hostNoteId to SubNoteGroup.SingleNote(it.linkedNoteId) } }
+        return canvasPointers + databasePointers + linkedNotePointers
+    }
+
+    private suspend fun liveBlocksContaining(blockJsonMarker: String): List<Pair<String, NoteBlock>> =
+        blockDao.findBlocksContainingIncludingDeleted(blockJsonMarker)
+            .filter { !it.isDeleted }
+            .mapNotNull { entity -> decodeBlockOrNull(entity.blockDataJson)?.takeUnless { it.isDeleted }?.let { entity.noteId to it } }
+
+    private fun groupContaining(group: SubNoteGroup, notesById: Map<String, NoteMetadataEntity>): SubNoteGroup? {
+        if (group !is SubNoteGroup.SingleNote) return group
+        val note = notesById[group.noteId] ?: return null
+        return when {
+            !note.isSubNote || note.kind == NoteKind.DATABASE -> null
+            note.databaseId != null -> SubNoteGroup.Database(note.databaseId)
+            else -> group
+        }
+    }
+
+    private suspend fun membersOf(group: SubNoteGroup, notesById: Map<String, NoteMetadataEntity>): List<NoteMetadataEntity> =
+        when (group) {
+            is SubNoteGroup.SingleNote -> listOfNotNull(notesById[group.noteId])
+            is SubNoteGroup.Database -> listOfNotNull(noteDao.getNoteById(databaseNoteId(group.databaseId))) +
+                noteDao.getAllRowNotesIncludingTrashed(group.databaseId)
+        }
+
+    private suspend fun moveNoteAndItsProjectionsToSpace(note: NoteMetadataEntity, spaceId: String, updatedAt: Long) {
+        val movedNote = note.copy(spaceId = spaceId, updatedAt = updatedAt)
+        noteDao.insertOrUpdateMetadata(movedNote)
+        calendarTaskDao.deleteTasksByNoteId(note.spaceId, note.noteId)
+        val blocks = blockDao.getAllBlocksForNoteIncludingDeleted(note.noteId).mapNotNull { decodeBlockOrNull(it.blockDataJson) }
+        refreshProjectionsForNote(movedNote, blocks)
+        try {
+            noteIndexer.moveNoteToSpace(note.noteId, spaceId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override suspend fun applyRemoteSpaceChangeWhileSyncLockHeld(noteId: String, spaceId: String) =
+        withContext(Dispatchers.IO) {
+            val note = noteDao.getNoteById(noteId) ?: return@withContext
+            if (note.isDaily || note.spaceId == spaceId) return@withContext
+            moveNoteAndItsProjectionsToSpace(note, spaceId, note.updatedAt)
         }
 
     private val oldestNoteFirst = compareBy<NoteMetadataEntity> { it.createdAt }.thenBy { it.noteId }
@@ -1523,20 +1636,21 @@ class NoteRepositoryImpl(
         withContext(Dispatchers.IO) {
             val rowNoteId = UUID.randomUUID().toString()
             val now = System.currentTimeMillis()
+            val databaseSpaceId = spaceIdOfDatabase(database.databaseId)
             val template = templateNoteId?.let { noteDao.getNoteById(it) }?.takeIf { it.isTemplate && it.trashedAt == null }
             val blocksBeforePreset = if (template == null) {
                 database.newRowBlocks(rowNoteId, now)
             } else {
                 val templateBlocks = getNoteContent(template.noteId)?.blocks.orEmpty()
                 val blocksFromTemplate = database.rowBlocksFromTemplate(templateBlocks, template.noteId, rowNoteId, now)
-                copyDatabasesIn(copyEmbeddedCanvasesIn(NoteContent(blocks = blocksFromTemplate))).blocks
+                copySubNotesIn(NoteContent(blocks = blocksFromTemplate), databaseSpaceId).blocks
             }
             val blocksMatchingFilters = blocksBeforePreset.withCellsMatchingFilters(database, rowNoteId, now, todayInThisTimeZone())
             val rowBlocks = cellPreset?.let { blocksMatchingFilters.withCellPreset(database, it, rowNoteId, now) } ?: blocksMatchingFilters
             val rowTitle = database.titleMatchingFilters(template?.title.orEmpty())
             val rowNote = newRowMetadata(rowNoteId, database, template, title = rowTitle, now = now)
             SyncCoordinator.mutex.withLock {
-                saveNote(rowNote, NoteContent(blocks = rowBlocks))
+                saveNoteResolvingSpace(rowNote, NoteContent(blocks = rowBlocks), stampUpdatedAt = true, requestedSpaceId = databaseSpaceId)
             }
             DatabaseRowChange.RowPresence(rowNoteId, wasInTable = false, isInTable = true)
         }
@@ -1555,7 +1669,8 @@ class NoteRepositoryImpl(
                 now,
                 keepsBlockIdsSameOnEveryDevice = true
             )
-            val rowContent = copyDatabasesIn(copyEmbeddedCanvasesIn(NoteContent(blocks = rowBlocks)))
+            val databaseSpaceId = spaceIdOfDatabase(database.databaseId)
+            val rowContent = copySubNotesIn(NoteContent(blocks = rowBlocks), databaseSpaceId)
             val rowNote = newRowMetadata(
                 rowToCreate.rowNoteId,
                 database,
@@ -1565,7 +1680,7 @@ class NoteRepositoryImpl(
             )
             SyncCoordinator.mutex.withLock {
                 if (noteDao.getNoteById(rowToCreate.rowNoteId) != null) return@withLock false
-                saveNote(rowNote, rowContent)
+                saveNoteResolvingSpace(rowNote, rowContent, stampUpdatedAt = true, requestedSpaceId = databaseSpaceId)
                 true
             }
         }
@@ -1641,10 +1756,16 @@ class NoteRepositoryImpl(
             val databaseId = sourceRow.databaseId ?: return@withContext null
             val copyRowNoteId = UUID.randomUUID().toString()
             val now = System.currentTimeMillis()
+            val databaseSpaceId = spaceIdOfDatabase(databaseId)
             val sourceBlocks = getNoteContent(rowNoteId)?.blocks.orEmpty()
-            val copiedContent = copyDatabasesIn(copyEmbeddedCanvasesIn(NoteContent(blocks = sourceBlocks.copiedForRow(rowNoteId, copyRowNoteId))))
+            val copiedContent = copySubNotesIn(NoteContent(blocks = sourceBlocks.copiedForRow(rowNoteId, copyRowNoteId)), databaseSpaceId)
             SyncCoordinator.mutex.withLock {
-                saveNote(rowCopyMetadata(sourceRow, copyRowNoteId, databaseId, createdAt = now, now = now), copiedContent)
+                saveNoteResolvingSpace(
+                    rowCopyMetadata(sourceRow, copyRowNoteId, databaseId, createdAt = now, now = now),
+                    copiedContent,
+                    stampUpdatedAt = true,
+                    requestedSpaceId = databaseSpaceId
+                )
             }
             DatabaseRowChange.RowPresence(copyRowNoteId, wasInTable = false, isInTable = true)
         }
@@ -1772,12 +1893,14 @@ class NoteRepositoryImpl(
             }
         }
 
-    override suspend fun createDatabase(databaseId: String) =
+    override suspend fun createDatabase(databaseId: String, spaceId: String?) =
         withContext(Dispatchers.IO) {
             SyncCoordinator.mutex.withLock {
-                saveDatabaseNote(newDatabaseSettings(databaseId, System.currentTimeMillis()), spaceId = null)
+                saveDatabaseNote(newDatabaseSettings(databaseId, System.currentTimeMillis()), spaceId)
             }
         }
+
+    private suspend fun spaceIdOfDatabase(databaseId: String): String? = noteDao.getNoteById(databaseNoteId(databaseId))?.spaceId
 
     override suspend fun createMissingDatabaseNotes() =
         withContext(Dispatchers.IO) {
@@ -1812,14 +1935,14 @@ class NoteRepositoryImpl(
             }
         }
 
-    private suspend fun copyDatabaseSettings(sourceDatabaseId: String, copyDatabaseId: String) {
+    private suspend fun copyDatabaseSettings(sourceDatabaseId: String, copyDatabaseId: String, spaceId: String?) {
         createMissingDatabaseNote(sourceDatabaseId)
         val now = System.currentTimeMillis()
         val sourceSettings = getNoteContent(databaseNoteId(sourceDatabaseId))?.blocks.orEmpty()
             .firstOrNull { it.id == databaseSettingsBlockId(sourceDatabaseId) } as? DatabaseBlock
         val copySettings = sourceSettings?.sharedSettingsCopiedTo(copyDatabaseId, now) ?: newDatabaseSettings(copyDatabaseId, now)
         SyncCoordinator.mutex.withLock {
-            saveDatabaseNote(copySettings, spaceId = null)
+            saveDatabaseNote(copySettings, spaceId)
         }
     }
 
@@ -1855,9 +1978,9 @@ class NoteRepositoryImpl(
                 .associate { (_, settings) -> settings.databaseId to settings.title }
             val views = databaseBlocksWithNoteIds.filterNot { (_, databaseBlock) -> databaseBlock.holdsSharedSettings }
             if (views.isEmpty()) return@withContext emptyList()
-            val spaceId = activeSpaceId()
+            val spaceIds = activeSpaceAndAccountIds()
             val notesById = noteDao.getNotesByIds(views.map { (noteId, _) -> noteId }.distinct())
-                .filter { it.trashedAt == null && it.spaceId == spaceId }
+                .filter { it.trashedAt == null && it.spaceId in spaceIds }
                 .associateBy { it.noteId }
             views
                 .mapNotNull { (noteId, view) -> notesById[noteId]?.let { note -> note to view } }
@@ -2743,23 +2866,28 @@ class NoteRepositoryImpl(
         inActiveSpace { noteDao.getAllLinkableNotes(it) }
 
     override suspend fun getLinkableCanvases(): List<NoteMetadataEntity> =
-        withContext(Dispatchers.IO) { noteDao.getLinkableCanvases(activeSpaceId()) }
+        withContext(Dispatchers.IO) { noteDao.getLinkableCanvases(activeSpaceAndAccountIds()) }
 
     override fun observeNoteMetadata(noteId: String): Flow<NoteMetadataEntity?> = noteDao.observeNoteById(noteId)
 
-    override suspend fun copyEmbeddedCanvasesIn(content: NoteContent): NoteContent = withContext(Dispatchers.IO) {
+    override suspend fun copyEmbeddedCanvasesIn(content: NoteContent): NoteContent = copyEmbeddedCanvasesIn(content, spaceId = null)
+
+    private suspend fun copySubNotesIn(content: NoteContent, spaceId: String?): NoteContent =
+        copyDatabasesIn(copyEmbeddedCanvasesIn(content, spaceId), spaceId, copyIdsBySourceDatabaseId = mutableMapOf(), copyRowIdsBySourceDatabaseId = mutableMapOf())
+
+    private suspend fun copyEmbeddedCanvasesIn(content: NoteContent, spaceId: String?): NoteContent = withContext(Dispatchers.IO) {
         val copyIdsBySourceCanvasId = mutableMapOf<String, String>()
         val blocks = content.blocks.map { block ->
             if (block !is CanvasBlock || block.isDeleted) return@map block
             val copiedCanvasNoteId = copyIdsBySourceCanvasId.getOrPut(block.canvasNoteId) {
-                copyEmbeddedCanvas(block.canvasNoteId) ?: block.canvasNoteId
+                copyEmbeddedCanvas(block.canvasNoteId, spaceId) ?: block.canvasNoteId
             }
             block.copy(canvasNoteId = copiedCanvasNoteId)
         }
         content.copy(blocks = blocks)
     }
 
-    private suspend fun copyEmbeddedCanvas(sourceCanvasNoteId: String): String? {
+    private suspend fun copyEmbeddedCanvas(sourceCanvasNoteId: String, spaceId: String?): String? {
         val source = noteDao.getNoteById(sourceCanvasNoteId)?.takeIf { it.isEmbeddedCanvas } ?: return null
         val copyNoteId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
@@ -2781,7 +2909,7 @@ class NoteRepositoryImpl(
             kind = NoteKind.CANVAS
         )
         SyncCoordinator.mutex.withLock {
-            saveNote(copyMetadata, NoteContent(blocks = emptyList()))
+            saveNoteResolvingSpace(copyMetadata, NoteContent(blocks = emptyList()), stampUpdatedAt = true, requestedSpaceId = spaceId)
             canvasDao.upsertNodes(copiedCanvas.nodes)
             canvasDao.upsertEdges(copiedCanvas.edges)
             canvasDao.upsertStrokes(copiedCanvas.strokes)
@@ -2790,11 +2918,12 @@ class NoteRepositoryImpl(
     }
 
     override suspend fun copyDatabasesIn(content: NoteContent): NoteContent = withContext(Dispatchers.IO) {
-        copyDatabasesIn(content, copyIdsBySourceDatabaseId = mutableMapOf(), copyRowIdsBySourceDatabaseId = mutableMapOf())
+        copyDatabasesIn(content, spaceId = null, copyIdsBySourceDatabaseId = mutableMapOf(), copyRowIdsBySourceDatabaseId = mutableMapOf())
     }
 
     private suspend fun copyDatabasesIn(
         content: NoteContent,
+        spaceId: String?,
         copyIdsBySourceDatabaseId: MutableMap<String, String>,
         copyRowIdsBySourceDatabaseId: MutableMap<String, Map<String, String>>
     ): NoteContent {
@@ -2807,8 +2936,8 @@ class NoteRepositoryImpl(
             val copiedDatabaseId = copyIdsBySourceDatabaseId[block.databaseId] ?: UUID.randomUUID().toString().also { copiedDatabaseId ->
                 copyIdsBySourceDatabaseId[block.databaseId] = copiedDatabaseId
                 copyRowIdsBySourceDatabaseId[block.databaseId] = if (block.databaseId in liveSourceDatabaseIds) {
-                    copyDatabaseSettings(block.databaseId, copiedDatabaseId)
-                    copyDatabaseRows(block.databaseId, copiedDatabaseId, copyIdsBySourceDatabaseId, copyRowIdsBySourceDatabaseId)
+                    copyDatabaseSettings(block.databaseId, copiedDatabaseId, spaceId)
+                    copyDatabaseRows(block.databaseId, copiedDatabaseId, spaceId, copyIdsBySourceDatabaseId, copyRowIdsBySourceDatabaseId)
                 } else {
                     emptyMap()
                 }
@@ -2821,6 +2950,7 @@ class NoteRepositoryImpl(
     private suspend fun copyDatabaseRows(
         sourceDatabaseId: String,
         copyDatabaseId: String,
+        spaceId: String?,
         copyIdsBySourceDatabaseId: MutableMap<String, String>,
         copyRowIdsBySourceDatabaseId: MutableMap<String, Map<String, String>>
     ): Map<String, String> {
@@ -2834,12 +2964,18 @@ class NoteRepositoryImpl(
             copyIdsBySourceRowId[sourceRow.noteId] = copyRowNoteId
             val sourceBlocks = getNoteContent(sourceRow.noteId)?.blocks.orEmpty()
             val copiedContent = copyDatabasesIn(
-                copyEmbeddedCanvasesIn(NoteContent(blocks = sourceBlocks.copiedForRow(sourceRow.noteId, copyRowNoteId))),
+                copyEmbeddedCanvasesIn(NoteContent(blocks = sourceBlocks.copiedForRow(sourceRow.noteId, copyRowNoteId)), spaceId),
+                spaceId,
                 copyIdsBySourceDatabaseId,
                 copyRowIdsBySourceDatabaseId
             )
             SyncCoordinator.mutex.withLock {
-                saveNote(rowCopyMetadata(sourceRow, copyRowNoteId, copyDatabaseId, createdAt = now + index, now = now), copiedContent)
+                saveNoteResolvingSpace(
+                    rowCopyMetadata(sourceRow, copyRowNoteId, copyDatabaseId, createdAt = now + index, now = now),
+                    copiedContent,
+                    stampUpdatedAt = true,
+                    requestedSpaceId = spaceId
+                )
             }
         }
         return copyIdsBySourceRowId

@@ -153,7 +153,7 @@ interface NoteDao {
     @Query(
         """
         SELECT canvas.* FROM notes_metadata AS canvas
-        WHERE canvas.spaceId = :spaceId AND canvas.kind = 'CANVAS' AND canvas.trashedAt IS NULL AND canvas.isTemplate = 0
+        WHERE canvas.spaceId IN (:spaceIds) AND canvas.kind = 'CANVAS' AND canvas.trashedAt IS NULL AND canvas.isTemplate = 0
         AND (
             canvas.isSubNote = 0 OR EXISTS (
                 SELECT 1 FROM note_blocks
@@ -166,7 +166,7 @@ interface NoteDao {
         ORDER BY canvas.updatedAt DESC
         """
     )
-    suspend fun getLinkableCanvases(spaceId: String): List<NoteMetadataEntity>
+    suspend fun getLinkableCanvases(spaceIds: List<String>): List<NoteMetadataEntity>
 
     @Query("SELECT * FROM notes_metadata WHERE isDaily = 0 AND trashedAt IS NULL AND isSubNote = 0 AND isTemplate = 0 ORDER BY updatedAt DESC")
     suspend fun getAllNotesAcrossSpaces(): List<NoteMetadataEntity>

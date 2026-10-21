@@ -8,12 +8,17 @@ import com.emberr.data.local.room.AppDatabase
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.DEFAULT_SPACE_ID
+import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.database.EmberrDatabase
 import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.ai.external.AiSettingsRepository
+import com.emberr.domain.database.databaseNoteId
+import com.emberr.domain.database.databaseSettingsBlockId
+import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
+import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.NoteBlockSerializer
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.TextBlock
@@ -192,5 +197,65 @@ class NoteRepositoryAccountMoveTest {
         val dailyNote = appDatabase.noteDao().getAllDailyNoteMetadataAcrossSpaces().single()
         assertEquals(listOf(dailyNote.noteId), results.map { it.note.noteId })
         assertEquals("Quarterly budget review", results.single().matchedText)
+    }
+
+    private fun subNoteMetadata(noteId: String, kind: NoteKind = NoteKind.NOTE, databaseId: String? = null) = NoteMetadataEntity(
+        noteId = noteId,
+        title = noteId,
+        folderId = null,
+        isDaily = false,
+        dateString = null,
+        createdAt = 1L,
+        updatedAt = 1L,
+        filePath = "",
+        isSubNote = true,
+        kind = kind,
+        databaseId = databaseId
+    )
+
+    private suspend fun saveDatabaseNoteInWork(databaseId: String) {
+        repository.saveNoteInSpace(
+            workSpaceId,
+            subNoteMetadata(databaseNoteId(databaseId), kind = NoteKind.DATABASE),
+            NoteContent(blocks = listOf(DatabaseBlock(id = databaseSettingsBlockId(databaseId), databaseId = databaseId, updatedAt = 1L)))
+        )
+    }
+
+    @Test
+    fun subNotesShownOnlyInADailyNoteMoveToAccountButADatabaseAlsoShownInARegularNoteStays() = runTest {
+        repository.saveDailyNote(
+            date,
+            NoteContent(
+                blocks = listOf(
+                    CanvasBlock(id = "sketch-block", canvasNoteId = "sketch", updatedAt = 1L),
+                    DatabaseBlock(id = "reading-view", databaseId = "reading", updatedAt = 1L),
+                    DatabaseBlock(id = "budget-daily-view", databaseId = "budget", updatedAt = 1L)
+                )
+            )
+        )
+        repository.saveNoteInSpace(workSpaceId, subNoteMetadata("sketch", kind = NoteKind.CANVAS), NoteContent(blocks = emptyList()))
+        saveDatabaseNoteInWork("reading")
+        repository.saveNoteInSpace(workSpaceId, subNoteMetadata("first-book", databaseId = "reading"), NoteContent(blocks = emptyList()))
+        repository.saveNoteInSpace(workSpaceId, subNoteMetadata("second-book", databaseId = "reading"), NoteContent(blocks = emptyList()))
+        saveDatabaseNoteInWork("budget")
+        repository.saveNoteInSpace(
+            workSpaceId,
+            noteMetadata("plans", createdAt = 1L, dailyDate = null),
+            NoteContent(blocks = listOf(DatabaseBlock(id = "budget-plans-view", databaseId = "budget", updatedAt = 1L)))
+        )
+
+        val firstMerge = repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        val noteDao = appDatabase.noteDao()
+        val subNotesOfTheDailyNote = listOf("sketch", databaseNoteId("reading"), "first-book", "second-book")
+        assertEquals(subNotesOfTheDailyNote.toSet(), firstMerge.movedSubNoteIds)
+        assertEquals(subNotesOfTheDailyNote.map { ACCOUNT_SPACE_ID }, subNotesOfTheDailyNote.map { noteDao.getNoteById(it)?.spaceId })
+        assertEquals(workSpaceId, noteDao.getNoteById(databaseNoteId("budget"))?.spaceId)
+
+        val notesAfterFirstMerge = noteDao.getAllNotesForBackup()
+        val secondMerge = repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        assertTrue(secondMerge.movedSubNoteIds.isEmpty())
+        assertEquals(notesAfterFirstMerge, noteDao.getAllNotesForBackup())
     }
 }

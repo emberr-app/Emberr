@@ -94,6 +94,7 @@ interface NoteRepository {
     suspend fun mergeDailyNotesAndCategoriesIntoAccount(): AccountMergeResult
     suspend fun mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld(): AccountMergeResult
     suspend fun waitUntilDailyNotesAreInAccount()
+    suspend fun applyRemoteSpaceChangeWhileSyncLockHeld(noteId: String, spaceId: String)
 
     // Notes operations
     fun getAllNotes(): Flow<List<NoteMetadataEntity>>
@@ -208,7 +209,7 @@ interface NoteRepository {
     suspend fun applyDatabaseRowChanges(changes: List<DatabaseRowChange>, direction: HistoryDirection)
     fun observeDatabaseSettings(databaseId: String): Flow<DatabaseBlock?>
     suspend fun changeDatabaseSettings(databaseId: String, change: (DatabaseBlock) -> DatabaseBlock?): Boolean
-    suspend fun createDatabase(databaseId: String)
+    suspend fun createDatabase(databaseId: String, spaceId: String? = null)
     suspend fun createMissingDatabaseNotes()
     suspend fun getLinkableDatabases(): List<LinkableDatabase>
 
@@ -268,4 +269,8 @@ interface NoteRepository {
     fun clearCaches()
 }
 
-data class AccountMergeResult(val changedDailyNoteDates: Set<String>, val categoriesChanged: Boolean)
+data class AccountMergeResult(
+    val changedDailyNoteDates: Set<String>,
+    val categoriesChanged: Boolean,
+    val movedSubNoteIds: Set<String>
+)

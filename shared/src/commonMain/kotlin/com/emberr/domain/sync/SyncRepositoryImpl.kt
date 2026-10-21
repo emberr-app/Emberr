@@ -351,6 +351,9 @@ class SyncRepositoryImpl(
                                     pendingMediaContent = mergedNote.content
                                     pendingCoverImagePath = mergedNote.metadata.coverImagePath
                                     if (mergedNote.hasChanges) {
+                                        if (mergedNote.metadata.spaceId != localMeta.spaceId) {
+                                            repository.applyRemoteSpaceChangeWhileSyncLockHeld(localMeta.noteId, mergedNote.metadata.spaceId)
+                                        }
                                         repository.saveNote(
                                             mergedNote.metadata,
                                             mergedNote.content,
