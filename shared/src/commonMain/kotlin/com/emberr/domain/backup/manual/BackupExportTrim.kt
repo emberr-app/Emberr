@@ -3,6 +3,7 @@ package com.emberr.domain.backup.manual
 import androidx.room.execSQL
 import androidx.room.useWriterConnection
 import com.emberr.data.local.room.AppDatabase
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.inOneTransaction
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteBlockSerializer
@@ -16,9 +17,10 @@ private val exportBlockJson = Json { ignoreUnknownKeys = true }
 suspend fun AppDatabase.keepOnlySpacesForExport(spaceIdsToKeep: Set<String>): Set<String> {
     val dao = backupDao()
     val spaceIds = spaceIdsToKeep.toList()
+    val spaceIdsWithAccount = (spaceIdsToKeep + ACCOUNT_SPACE_ID).toList()
 
     inOneTransaction {
-        dao.deleteNotesOutsideSpacesOrInTrash(spaceIds)
+        dao.deleteNotesOutsideSpacesOrInTrash(spaceIdsWithAccount)
         dao.deleteBlocksThatAreDeletedOrHaveNoNote()
         dao.deleteCanvasNodesThatAreDeletedOrHaveNoNote()
         dao.deleteCanvasEdgesThatAreDeletedOrHaveNoNote()
@@ -31,7 +33,7 @@ suspend fun AppDatabase.keepOnlySpacesForExport(spaceIdsToKeep: Set<String>): Se
         dao.deleteMediaReferencesThatHaveNoNote()
         dao.deleteSpacesNotKept(spaceIds)
         dao.deleteFoldersOutsideSpacesOrDeleted(spaceIds)
-        dao.deleteCategoriesOutsideSpacesOrDeleted(spaceIds)
+        dao.deleteCategoriesOutsideSpacesOrDeleted(spaceIdsWithAccount)
         dao.deletePropertyTagsOutsideSpacesOrDeleted(spaceIds)
         dao.deleteCustomPropertiesOutsideSpacesOrDeleted(spaceIds)
         dao.deleteAllChatSessions()
