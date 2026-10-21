@@ -97,6 +97,7 @@ import com.emberr.domain.model.RecurrenceSeriesShift
 import com.emberr.domain.model.shiftRecurringSeries
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.ToggleBlock
+import com.emberr.domain.model.generateDailyNoteSnippet
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.model.withPropertyTagReplaced
 import com.emberr.domain.model.withCustomPropertyRenamed
@@ -663,7 +664,12 @@ class NoteRepositoryImpl(
                 }
                 val savedNote = if (localNote == null) {
                     val noteId = if (noteDao.getNoteById(backupNote.noteId) == null) backupNote.noteId else UUID.randomUUID().toString()
-                    backupNote.copy(noteId = noteId).also { newNote ->
+                    val snippet = if (backupNote.isDaily) {
+                        generateDailyNoteSnippet(backupBlocks.mapNotNull { decodeBlockOrNull(it.blockDataJson) })
+                    } else {
+                        backupNote.snippet
+                    }
+                    backupNote.copy(noteId = noteId, snippet = snippet).also { newNote ->
                         noteDao.insertOrUpdateMetadata(newNote)
                         blockDao.insertOrUpdateBlocks(backupBlocks.map { it.copy(noteId = noteId) })
                     }
@@ -693,22 +699,36 @@ class NoteRepositoryImpl(
         val categoryIdsOutsideAccount = categoryDao.getCategoriesOutsideSpaceIncludingDeleted(ACCOUNT_SPACE_ID)
             .mapTo(HashSet()) { it.categoryId }
 
+        val survivorIdByName = HashMap<String, String>()
         val survivorIdByRemovedId = mutableMapOf<String, String>()
         categoryDao.getAllCategoriesOnceAcrossSpaces()
             .groupBy { it.name.trim().lowercase() }
-            .values
-            .filter { sameNamed -> sameNamed.size > 1 }
-            .forEach { sameNamed ->
+            .forEach { (name, sameNamed) ->
                 val survivor = sameNamed.minWith(compareBy<CategoryEntity> { it.createdAt }.thenBy { it.categoryId })
+                survivorIdByName[name] = survivor.categoryId
                 sameNamed.filter { it.categoryId != survivor.categoryId }
                     .forEach { removed -> survivorIdByRemovedId[removed.categoryId] = survivor.categoryId }
             }
-        if (categoryIdsOutsideAccount.isEmpty() && survivorIdByRemovedId.isEmpty()) return null
 
         val dailyNoteDatesPointedToSurvivors = LinkedHashSet<String>()
+        var rewroteReferencesToDeletedCategories = false
+        for (deletedCategory in categoryDao.getDeletedCategories()) {
+            val survivorId = survivorIdByName[deletedCategory.name.trim().lowercase()] ?: continue
+            try {
+                val rewritten = pointCategoryReferencesToSurvivor(deletedCategory.categoryId, survivorId)
+                dailyNoteDatesPointedToSurvivors += rewritten.dailyNoteDates
+                if (rewritten.rewroteAnything) rewroteReferencesToDeletedCategories = true
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        if (categoryIdsOutsideAccount.isEmpty() && survivorIdByRemovedId.isEmpty() && !rewroteReferencesToDeletedCategories) return null
+
         for ((removedId, survivorId) in survivorIdByRemovedId) {
             try {
-                dailyNoteDatesPointedToSurvivors += pointCategoryReferencesToSurvivor(removedId, survivorId)
+                dailyNoteDatesPointedToSurvivors += pointCategoryReferencesToSurvivor(removedId, survivorId).dailyNoteDates
                 categoryDao.markCategoryDeleted(removedId, System.currentTimeMillis())
             } catch (e: CancellationException) {
                 throw e
@@ -720,7 +740,9 @@ class NoteRepositoryImpl(
         return CategoryMoveToAccount(dailyNoteDatesPointedToSurvivors)
     }
 
-    private suspend fun pointCategoryReferencesToSurvivor(removedId: String, survivorId: String): Set<String> {
+    private class RewrittenCategoryReferences(val rewroteAnything: Boolean, val dailyNoteDates: Set<String>)
+
+    private suspend fun pointCategoryReferencesToSurvivor(removedId: String, survivorId: String): RewrittenCategoryReferences {
         val now = System.currentTimeMillis()
         val rewrittenNoteIds = LinkedHashSet<String>()
         val rewrittenDailyNoteDates = LinkedHashSet<String>()
@@ -747,8 +769,11 @@ class NoteRepositoryImpl(
             }
         }
 
-        calendarEventExceptionDao.replaceOverrideCategoryId(removedId, survivorId, now)
-        return rewrittenDailyNoteDates
+        val rewrittenExceptionCount = calendarEventExceptionDao.replaceOverrideCategoryId(removedId, survivorId, now)
+        return RewrittenCategoryReferences(
+            rewroteAnything = rewrittenNoteIds.isNotEmpty() || rewrittenExceptionCount > 0,
+            dailyNoteDates = rewrittenDailyNoteDates
+        )
     }
 
     override suspend fun getDailyNoteMetadata(dateString: String): NoteMetadataEntity? =
@@ -839,19 +864,7 @@ class NoteRepositoryImpl(
 
             val noteId = existing?.noteId ?: adoptableRemoteNoteId ?: UUID.randomUUID().toString()
 
-            val previewText = content.blocks.joinToString(" ") { block ->
-                when (block) {
-                    is TextBlock -> block.text
-                    is HeadingBlock -> block.text
-                    is CheckboxBlock -> block.text
-                    is BulletedListBlock -> block.text
-                    is NumberedListBlock -> block.text
-                    is ToggleBlock -> block.text
-                    is CalloutBlock -> block.text
-                    is CodeBlock -> block.code
-                    else -> ""
-                }
-            }.trim().take(120)
+            val previewText = generateDailyNoteSnippet(content.blocks)
 
             val baseMeta = remoteMeta ?: existing
 

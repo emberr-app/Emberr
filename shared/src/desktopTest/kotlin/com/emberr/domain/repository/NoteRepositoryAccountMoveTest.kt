@@ -200,6 +200,34 @@ class NoteRepositoryAccountMoveTest {
     }
 
     @Test
+    fun aCheckboxStillPointingAtACategoryThatArrivedDeletedMovesToTheLiveCategoryWithTheSameName() = runTest {
+        val categoryDao = appDatabase.categoryDao()
+        categoryDao.insertOrUpdateCategory(
+            CategoryEntity(categoryId = "a", name = "Work", colorHex = "#111111", createdAt = 1L, spaceId = ACCOUNT_SPACE_ID)
+        )
+        categoryDao.insertOrUpdateCategory(
+            CategoryEntity(categoryId = "b", name = " work ", colorHex = "#222222", createdAt = 2L, isDeleted = true, spaceId = ACCOUNT_SPACE_ID)
+        )
+        repository.saveNoteInSpace(
+            workSpaceId,
+            noteMetadata("plans", createdAt = 1L, dailyDate = null),
+            NoteContent(blocks = listOf(CheckboxBlock(id = "meeting", text = "Meeting", categoryId = "b", updatedAt = 1L)))
+        )
+
+        repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        val blocksAfterFirstMerge = appDatabase.blockDao().getAllBlocksForNoteIncludingDeleted("plans")
+        val storedCheckbox = Json { ignoreUnknownKeys = true }
+            .decodeFromString(NoteBlockSerializer, blocksAfterFirstMerge.single().blockDataJson) as CheckboxBlock
+        assertEquals("a", storedCheckbox.categoryId)
+
+        val secondMerge = repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        assertEquals(false, secondMerge.categoriesChanged)
+        assertEquals(blocksAfterFirstMerge, appDatabase.blockDao().getAllBlocksForNoteIncludingDeleted("plans"))
+    }
+
+    @Test
     fun aMovedCategoryIsNewerThanItsOldSpaceCopySoSyncCannotMoveItBack() = runTest {
         val oldSpaceCopy = CategoryEntity(
             categoryId = "errands", name = "Errands", colorHex = "#333333", createdAt = 1L, updatedAt = 5L, spaceId = workSpaceId

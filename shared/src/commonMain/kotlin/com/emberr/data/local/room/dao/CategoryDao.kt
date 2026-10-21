@@ -24,6 +24,9 @@ interface CategoryDao {
     @Query("SELECT * FROM calendar_categories WHERE isDeleted = 0")
     suspend fun getAllCategoriesOnceAcrossSpaces(): List<CategoryEntity>
 
+    @Query("SELECT * FROM calendar_categories WHERE isDeleted = 1")
+    suspend fun getDeletedCategories(): List<CategoryEntity>
+
     @Query("SELECT * FROM calendar_categories WHERE categoryId = :categoryId LIMIT 1")
     suspend fun getCategoryById(categoryId: String): CategoryEntity?
 
