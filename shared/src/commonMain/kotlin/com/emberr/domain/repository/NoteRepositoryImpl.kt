@@ -401,18 +401,24 @@ class NoteRepositoryImpl(
         data class Database(val databaseId: String) : SubNoteGroup
     }
 
+    private data class SubNotePointer(val hostNoteId: String, val group: SubNoteGroup, val isLink: Boolean)
+
     private suspend fun moveSubNotesOfAccountNotesToAccount(): Set<String> {
         val pointers = livePointersToSubNotes()
         if (pointers.isEmpty()) return emptySet()
         val pointedNoteIds = pointers.mapNotNull { (_, group) -> (group as? SubNoteGroup.SingleNote)?.noteId }
-        val notesById = noteDao.getNotesByIdsIncludingTemplates((pointers.map { it.first } + pointedNoteIds).distinct())
+        val notesById = noteDao.getNotesByIdsIncludingTemplates((pointers.map { it.hostNoteId } + pointedNoteIds).distinct())
             .associateBy { it.noteId }
         val hostNoteIdsByGroup = pointers
-            .mapNotNull { (hostNoteId, group) ->
-                if (hostNoteId !in notesById) return@mapNotNull null
-                groupContaining(group, notesById)?.let { it to hostNoteId }
+            .mapNotNull { pointer ->
+                if (pointer.hostNoteId !in notesById) return@mapNotNull null
+                groupContaining(pointer.group, notesById)?.let { it to pointer }
             }
             .groupBy({ it.first }, { it.second })
+            .mapValues { (_, groupPointers) ->
+                val ownerPointers = groupPointers.filterNot { it.isLink }
+                ownerPointers.ifEmpty { groupPointers }.map { it.hostNoteId }
+            }
 
         val noteIdsToMove = LinkedHashSet<String>()
         fun isInAccountOnceMoved(noteId: String) = noteId in noteIdsToMove || notesById[noteId]?.spaceId == ACCOUNT_SPACE_ID
@@ -457,7 +463,7 @@ class NoteRepositoryImpl(
         LINKED_NOTE_BLOCK_JSON_MARKER
     )
 
-    private suspend fun livePointersToSubNotes(): List<Pair<String, SubNoteGroup>> {
+    private suspend fun livePointersToSubNotes(): List<SubNotePointer> {
         val pointersFromAccountNotes = subNotePointersIn(
             subNotePointerMarkers.flatMap { marker -> blockDao.findLiveBlocksInSpaceContaining(ACCOUNT_SPACE_ID, marker) }
         )
@@ -482,17 +488,20 @@ class NoteRepositoryImpl(
         return pointers.toList()
     }
 
-    private fun subNotePointersIn(blocks: List<NoteBlockEntity>): List<Pair<String, SubNoteGroup>> =
+    private fun subNotePointersIn(blocks: List<NoteBlockEntity>): List<SubNotePointer> =
         blocks.distinctBy { it.noteId to it.blockId }.mapNotNull { entity ->
-            val group = when (val block = decodeBlockOrNull(entity.blockDataJson)?.takeUnless { it.isDeleted }) {
+            val block = decodeBlockOrNull(entity.blockDataJson)?.takeUnless { it.isDeleted }
+            val group = when (block) {
                 is CanvasBlock -> SubNoteGroup.SingleNote(block.canvasNoteId)
                 is LinkedNoteBlock -> SubNoteGroup.SingleNote(block.linkedNoteId)
                 else -> block?.shownDatabaseIdOrNull()?.let { SubNoteGroup.Database(it) }
             }
-            group?.let { entity.noteId to it }
+            group?.let {
+                SubNotePointer(hostNoteId = entity.noteId, group = it, isLink = (block as? DatabaseBlock)?.isLinkedDatabase == true)
+            }
         }
 
-    private suspend fun idsOfPointedGroupsWithMembersOutsideAccount(pointers: List<Pair<String, SubNoteGroup>>): Set<String> {
+    private suspend fun idsOfPointedGroupsWithMembersOutsideAccount(pointers: List<SubNotePointer>): Set<String> {
         val pointedNoteIds = pointers.mapNotNull { (_, group) -> (group as? SubNoteGroup.SingleNote)?.noteId }.distinct()
         val notesById = noteDao.getNotesByIdsIncludingTemplates(pointedNoteIds).associateBy { it.noteId }
         val ids = HashSet<String>()
