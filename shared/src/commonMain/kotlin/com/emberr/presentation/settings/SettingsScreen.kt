@@ -69,6 +69,8 @@ import com.emberr.presentation.shared.components.SelectedOptionBackground
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
+import com.emberr.presentation.shared.components.TopEdgeBlurHeight
+import com.emberr.presentation.shared.components.TopEdgeGradientHeight
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.sync.SyncPairingDialog
 import com.emberr.presentation.sync.SyncScannerDialog
@@ -376,6 +378,11 @@ fun SettingsScreen(
                             viewModel.setSubNoteOpenMode(option.name)
                         }
                     },
+                    topBarFadeStyleChoices = TopBarFadeStyle.entries.filter { isDebugBuild || it != TopBarFadeStyle.FALLBACK }.map { option ->
+                        SettingsChoice(label = option.displayName, isSelected = option == topBarFadeStyleFor(topBarFadeStyle)) {
+                            viewModel.setTopBarFadeStyle(option.name)
+                        }
+                    },
                     onTopBarFadeStyleClick = { showTopBarFadeStyleSheet = true },
                     onShowScrollbarChange = { viewModel.setShowScrollbar(it) },
                     onDailyNotesEnabledChange = { viewModel.setDailyNotesEnabled(it) },
@@ -473,6 +480,8 @@ fun SettingsScreen(
             EmberrTopHeaderBar(
                 title = "Settings",
                 hazeState = hazeState,
+                topEdgeBlurHeight = if (isDesktopPlatform) topBarHeightDp else TopEdgeBlurHeight,
+                topEdgeGradientHeight = if (isDesktopPlatform) topBarHeightDp else TopEdgeGradientHeight,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 showBackButton = showBackButton,
                 backTooltip = "Back",
@@ -1106,6 +1115,7 @@ private fun AppearanceSettingsSection(
     timeFormatChoices: List<SettingsChoice>,
     firstDayOfWeekChoices: List<SettingsChoice>,
     subNoteOpenModeChoices: List<SettingsChoice>,
+    topBarFadeStyleChoices: List<SettingsChoice>,
     onTopBarFadeStyleClick: () -> Unit,
     onShowScrollbarChange: (Boolean) -> Unit,
     onDailyNotesEnabledChange: (Boolean) -> Unit,
@@ -1137,8 +1147,15 @@ private fun AppearanceSettingsSection(
             choices = fontStyleChoices
         )
 
-        if (!isDesktopPlatform) {
-            SettingsDivider()
+        SettingsDivider()
+        if (isDesktopPlatform) {
+            SettingsChoiceRow(
+                icon = painterResource(Res.drawable.palette),
+                title = "Top Bar Fade",
+                value = topBarFadeStyleLabel,
+                choices = topBarFadeStyleChoices
+            )
+        } else {
             SettingsActionRow(
                 icon = painterResource(Res.drawable.palette),
                 title = "Top Bar Fade",

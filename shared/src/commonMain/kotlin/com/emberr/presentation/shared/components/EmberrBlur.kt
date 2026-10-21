@@ -37,7 +37,7 @@ object EmberrBlur {
 
     @Composable
     @ReadOnlyComposable
-    fun overColorFade(fadeProgress: Float, fullTintAlpha: Float = 0.8f): HazeStyle = HazeStyle(
+    fun headerFadeTint(fadeProgress: Float, fullTintAlpha: Float): HazeStyle = HazeStyle(
         backgroundColor = MaterialTheme.colorScheme.background,
         tints = listOf(
             HazeTint(MaterialTheme.colorScheme.background.copy(alpha = lerp(0.45f, fullTintAlpha, fadeProgress)))

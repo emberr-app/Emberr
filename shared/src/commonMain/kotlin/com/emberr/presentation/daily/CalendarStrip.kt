@@ -30,7 +30,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.shared.components.EmberrBlur
-import com.emberr.presentation.shared.components.LocalTopHeaderColorFadeProgress
+import com.emberr.presentation.shared.components.LocalTopHeaderButtonTint
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
@@ -211,9 +211,9 @@ private fun WeekStripChip(
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     }
     val activeFontWeight = if (isActiveDate) FontWeight.SemiBold else FontWeight.Normal
-    val colorFadeProgress = LocalTopHeaderColorFadeProgress.current
-    val chipBlurStyle = if (colorFadeProgress > 0f) {
-        EmberrBlur.overColorFade(colorFadeProgress, fullTintAlpha = 0.75f)
+    val headerTint = LocalTopHeaderButtonTint.current
+    val chipBlurStyle = if (headerTint.fadeProgress > 0f) {
+        EmberrBlur.headerFadeTint(headerTint.fadeProgress, headerTint.fullTintAlpha)
     } else {
         EmberrBlur.Regular
     }
