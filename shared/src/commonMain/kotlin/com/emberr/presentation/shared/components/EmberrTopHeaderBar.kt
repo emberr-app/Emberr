@@ -63,8 +63,6 @@ val TopEdgeGradientHeight = 200.dp
 
 private const val TopEdgeGradientStopCount = 24
 
-private const val TopEdgeBlurExtraTintAlpha = 0.5f
-
 val TopEdgeBlurHeight = 140.dp
 
 data class TopHeaderButtonTint(val fadeProgress: Float, val fullTintAlpha: Float)
@@ -319,7 +317,7 @@ private fun TopEdgeBlurBand(
     Layout(
         content = {
             Box(
-                modifier = Modifier.hazeEffect(hazeState, hazeStyle.withStrongerTint()) {
+                modifier = Modifier.hazeEffect(hazeState, hazeStyle) {
                     alpha = blurAlpha.coerceIn(0f, 1f)
                     progressive = TopEdgeBlurFade
                 }
@@ -338,12 +336,6 @@ private fun TopEdgeBlurBand(
 }
 
 private fun smoothStep(position: Float): Float = position * position * (3f - 2f * position)
-
-private fun HazeStyle.withStrongerTint(): HazeStyle = copy(
-    tints = tints.map { tint ->
-        tint.copy(color = tint.color.copy(alpha = (tint.color.alpha + TopEdgeBlurExtraTintAlpha).coerceAtMost(1f)))
-    }
-)
 
 @Composable
 private fun TopHeaderBarTitle(
