@@ -32,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.util.eventbus.AiEventBus
 import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
 import com.emberr.domain.util.system.appVersionName
@@ -87,7 +88,7 @@ fun EmberrApp(
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
     onTakePhoto: (onPathSelected: (String) -> Unit) -> Unit = {},
     onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
-    onExportBackup: (spaceIds: Set<String>) -> Unit = {},
+    onExportBackup: (choice: BackupContentChoice) -> Unit = {},
     onRequestBackupFolder: () -> Unit,
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     onExitApp: () -> Unit = {}

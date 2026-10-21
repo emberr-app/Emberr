@@ -14,7 +14,7 @@ class DesktopManualBackupExporter(
     private val appDatabase: AppDatabase
 ) {
 
-    suspend fun exportToZip(destinationFile: File, spaceIds: Set<String>) {
+    suspend fun exportToZip(destinationFile: File, choice: BackupContentChoice) {
         val plainDbFile = File(System.getProperty("java.io.tmpdir"), "emberr_manual_export_temp_${System.nanoTime()}.db")
         val plainDbJournalFile = File(plainDbFile.path + "-journal")
         if (plainDbFile.exists()) plainDbFile.delete()
@@ -24,7 +24,7 @@ class DesktopManualBackupExporter(
                 connection.execSQL("VACUUM INTO '${plainDbFile.absolutePath}'")
             }
             check(plainDbFile.length() > 0L) { "VACUUM INTO produced an empty file" }
-            val mediaFileNames = keepOnlySpacesInCopy(plainDbFile, spaceIds)
+            val mediaFileNames = keepOnlyChosenContentInCopy(plainDbFile, choice)
             FileOutputStream(destinationFile).use { outputStream ->
                 writeBackupZip(outputStream, plainDbFile, DesktopAppStorage.mediaDirectory, mediaFileNames)
             }
@@ -34,12 +34,12 @@ class DesktopManualBackupExporter(
         }
     }
 
-    private suspend fun keepOnlySpacesInCopy(plainDbFile: File, spaceIds: Set<String>): Set<String> {
+    private suspend fun keepOnlyChosenContentInCopy(plainDbFile: File, choice: BackupContentChoice): Set<String> {
         val copyDatabase = getRoomDatabase(
             getDatabaseBuilder(plainDbFile.absolutePath).setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
         )
         return try {
-            copyDatabase.keepOnlySpacesForExport(spaceIds)
+            copyDatabase.keepOnlySpacesForExport(choice.spaceIds, choice.includesDailyNotes, choice.includesCalendar)
         } finally {
             copyDatabase.close()
         }

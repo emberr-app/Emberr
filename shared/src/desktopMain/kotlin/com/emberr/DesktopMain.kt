@@ -420,8 +420,8 @@ private fun runEmberrDesktopApp() = application {
                     onExportPdf = { fileName, title, blocks ->
                         Thread { handleExportPdf(currentWindow, fileName, title, blocks) }.start()
                     },
-                    onExportBackup = { spaceIds ->
-                        Thread { handleExportBackup(currentWindow, spaceIds) }.start()
+                    onExportBackup = { choice ->
+                        Thread { handleExportBackup(currentWindow, choice) }.start()
                     },
                     onRequestBackupFolder = {
                         SwingUtilities.invokeLater {

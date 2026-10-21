@@ -1,6 +1,7 @@
 package com.emberr.data.local.room.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -55,6 +56,27 @@ interface BackupDao {
     @Query("DELETE FROM notes_metadata WHERE spaceId NOT IN (:spaceIdsToKeep) OR trashedAt IS NOT NULL")
     suspend fun deleteNotesOutsideSpacesOrInTrash(spaceIdsToKeep: List<String>)
 
+    @Query("DELETE FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND noteId != :noteIdToKeep")
+    suspend fun deleteNotesInSpaceThatAreNotDailyExcept(spaceId: String, noteIdToKeep: String)
+
+    @Query("DELETE FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 1 AND dateString = :dateString")
+    suspend fun deleteDailyNote(spaceId: String, dateString: String)
+
+    @Query("DELETE FROM notes_metadata WHERE noteId = :noteId")
+    suspend fun deleteNote(noteId: String)
+
+    @Query("DELETE FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 1 AND noteId NOT IN (SELECT noteId FROM note_blocks)")
+    suspend fun deleteDailyNotesWithoutBlocks(spaceId: String)
+
+    @Query(
+        "SELECT note_blocks.* FROM note_blocks JOIN notes_metadata ON note_blocks.noteId = notes_metadata.noteId " +
+                "WHERE notes_metadata.spaceId = :spaceId AND notes_metadata.isDaily = 1 AND notes_metadata.dateString != :pinnedDateString"
+    )
+    suspend fun getBlocksOfDatedDailyNotes(spaceId: String, pinnedDateString: String): List<NoteBlockEntity>
+
+    @Delete
+    suspend fun deleteBlocks(blocks: List<NoteBlockEntity>)
+
     @Query("DELETE FROM note_blocks WHERE isDeleted = 1 OR noteId NOT IN (SELECT noteId FROM notes_metadata)")
     suspend fun deleteBlocksThatAreDeletedOrHaveNoNote()
 
@@ -91,8 +113,8 @@ interface BackupDao {
     @Query("DELETE FROM folders WHERE spaceId NOT IN (:spaceIdsToKeep) OR isDeleted = 1")
     suspend fun deleteFoldersOutsideSpacesOrDeleted(spaceIdsToKeep: List<String>)
 
-    @Query("DELETE FROM calendar_categories WHERE spaceId NOT IN (:spaceIdsToKeep) OR isDeleted = 1")
-    suspend fun deleteCategoriesOutsideSpacesOrDeleted(spaceIdsToKeep: List<String>)
+    @Query("DELETE FROM calendar_categories WHERE isDeleted = 1")
+    suspend fun deleteDeletedCategories()
 
     @Query("DELETE FROM property_tags WHERE spaceId NOT IN (:spaceIdsToKeep) OR isDeleted = 1")
     suspend fun deletePropertyTagsOutsideSpacesOrDeleted(spaceIdsToKeep: List<String>)
@@ -117,4 +139,7 @@ interface BackupDao {
 
     @Query("SELECT blockDataJson FROM note_blocks")
     suspend fun getAllBlockDataJson(): List<String>
+
+    @Query("SELECT * FROM calendar_categories")
+    suspend fun getAllCategoriesIncludingDeleted(): List<CategoryEntity>
 }

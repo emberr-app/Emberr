@@ -11,13 +11,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.SpaceEntity
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrChoiceRow
 import com.emberr.presentation.shared.components.EmberrSpaceCheckboxOptions
+import com.emberr.presentation.shared.components.EmberrSwitchRow
 import com.emberr.presentation.shared.components.checkedSpacesLabel
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar
+import emberr.shared.generated.resources.daily
 import emberr.shared.generated.resources.folder
 
 private val ExportSheetButtonPadding = 20.dp
@@ -25,10 +29,12 @@ private val ExportSheetButtonPadding = 20.dp
 @Composable
 fun ExportSpacesSheet(
     spaces: List<SpaceEntity>,
-    onExportClick: (spaceIds: Set<String>) -> Unit,
+    onExportClick: (choice: BackupContentChoice) -> Unit,
     onDismiss: () -> Unit
 ) {
     var uncheckedSpaceIds by remember { mutableStateOf(emptySet<String>()) }
+    var includesDailyNotes by remember { mutableStateOf(true) }
+    var includesCalendar by remember { mutableStateOf(true) }
     val allSpaceIds = spaces.map { it.spaceId }.toSet()
     val checkedSpaceIds = allSpaceIds - uncheckedSpaceIds
 
@@ -36,7 +42,7 @@ fun ExportSpacesSheet(
         expanded = true,
         onDismiss = onDismiss,
         title = "Export Backup",
-        subtitle = "Choose the spaces to save.",
+        subtitle = "Choose what to save.",
         contentHorizontalPadding = 0.dp
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
@@ -51,10 +57,24 @@ fun ExportSpacesSheet(
                     onCheckedSpaceIdsChange = { newCheckedSpaceIds -> uncheckedSpaceIds = allSpaceIds - newCheckedSpaceIds }
                 )
             }
+            EmberrSwitchRow(
+                label = "Daily Notes",
+                icon = Res.drawable.daily,
+                isOn = includesDailyNotes,
+                onClick = { includesDailyNotes = !includesDailyNotes }
+            )
+            EmberrSwitchRow(
+                label = "Calendar",
+                icon = Res.drawable.calendar,
+                isOn = includesCalendar,
+                onClick = { includesCalendar = !includesCalendar }
+            )
             EmberrButtonPrimary(
                 text = "Export",
-                onClick = { closeAnd { onExportClick(checkedSpaceIds) } },
-                enabled = checkedSpaceIds.isNotEmpty(),
+                onClick = {
+                    closeAnd { onExportClick(BackupContentChoice(checkedSpaceIds, includesDailyNotes, includesCalendar)) }
+                },
+                enabled = checkedSpaceIds.isNotEmpty() || includesDailyNotes || includesCalendar,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp, start = ExportSheetButtonPadding, end = ExportSheetButtonPadding)

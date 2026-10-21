@@ -2,6 +2,7 @@ package com.emberr.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.model.NoteBlock
 import com.emberr.presentation.ai.RagViewModel
 
@@ -17,7 +18,7 @@ actual fun DesktopMainScreenWrapper(
     onOpenFile: (String, String) -> Unit,
     onExportMarkdown: (String, String) -> Unit,
     onExportPdf: (String, String, List<NoteBlock>) -> Unit,
-    onExportBackup: (spaceIds: Set<String>) -> Unit,
+    onExportBackup: (choice: BackupContentChoice) -> Unit,
     onAiIconTap: () -> Unit,
     isAiChatVisible: Boolean,
     ragViewModel: RagViewModel?,

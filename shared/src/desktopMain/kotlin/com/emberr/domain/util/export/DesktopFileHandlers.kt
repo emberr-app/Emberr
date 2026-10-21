@@ -1,5 +1,6 @@
 package com.emberr.domain.util.export
 
+import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.backup.manual.DesktopManualBackupExporter
 import com.emberr.domain.model.NoteBlock
 import kotlinx.coroutines.runBlocking
@@ -73,7 +74,7 @@ fun handleExportPdf(window: Frame, fileName: String, title: String, blocks: List
     }
 }
 
-fun handleExportBackup(window: Frame, spaceIds: Set<String>) {
+fun handleExportBackup(window: Frame, choice: BackupContentChoice) {
     try {
         val fileName = "EmberrBackup_${System.currentTimeMillis()}.emberr"
         val dialog = FileDialog(window, "Export Emberr Backup", FileDialog.SAVE)
@@ -86,7 +87,7 @@ fun handleExportBackup(window: Frame, spaceIds: Set<String>) {
         else java.io.File(chosenFileStr)
 
         val exporter = GlobalContext.get().get<DesktopManualBackupExporter>()
-        runBlocking { exporter.exportToZip(saveFile, spaceIds) }
+        runBlocking { exporter.exportToZip(saveFile, choice) }
 
         SwingUtilities.invokeLater {
             JOptionPane.showMessageDialog(window, "Backup saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE)

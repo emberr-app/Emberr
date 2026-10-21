@@ -41,3 +41,9 @@ data class EmberrBackupData(
     val canvasEdges: List<CanvasEdgeEntity> = emptyList(),
     val canvasStrokes: List<CanvasStrokeEntity> = emptyList()
 )
+
+data class BackupContentChoice(
+    val spaceIds: Set<String>,
+    val includesDailyNotes: Boolean,
+    val includesCalendar: Boolean
+)
