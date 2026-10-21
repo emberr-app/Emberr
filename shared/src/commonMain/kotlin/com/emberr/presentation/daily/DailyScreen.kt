@@ -68,6 +68,8 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.LocalTopHeaderColorFadeProgress
+import com.emberr.presentation.shared.components.rememberTopHeaderUsesColorFade
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -679,12 +681,16 @@ fun DailyScreen(
                     }
                 )
 
-                DailyBottomWeekStrip(
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                    selectedDate = selectedDate,
-                    onDateSelected = { viewModel.selectDate(it) },
-                    hazeState = hazeState
-                )
+                CompositionLocalProvider(
+                    LocalTopHeaderColorFadeProgress provides if (rememberTopHeaderUsesColorFade()) topEdgeFadeAlpha else 0f
+                ) {
+                    DailyBottomWeekStrip(
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                        selectedDate = selectedDate,
+                        onDateSelected = { viewModel.selectDate(it) },
+                        hazeState = hazeState
+                    )
+                }
             }
         }
     ) { paddingValues ->

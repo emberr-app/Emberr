@@ -8,6 +8,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -33,6 +34,18 @@ object EmberrBlur {
             noiseFactor = 0f,
             fallbackTint = HazeTint(MaterialTheme.colorScheme.background)
         )
+
+    @Composable
+    @ReadOnlyComposable
+    fun overColorFade(fadeProgress: Float, fullTintAlpha: Float = 0.8f): HazeStyle = HazeStyle(
+        backgroundColor = MaterialTheme.colorScheme.background,
+        tints = listOf(
+            HazeTint(MaterialTheme.colorScheme.background.copy(alpha = lerp(0.45f, fullTintAlpha, fadeProgress)))
+        ),
+        blurRadius = 32.dp,
+        noiseFactor = 0f,
+        fallbackTint = HazeTint(MaterialTheme.colorScheme.background)
+    )
 
     /** Heavier separation — sheets, dialogs, anything that must hold long-form text. */
     val Thick: HazeStyle

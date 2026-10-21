@@ -68,7 +68,8 @@ fun TopBarPillButton(
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    val resolvedStyle = hazeStyle ?: EmberrBlur.Regular
+    val colorFadeProgress = LocalTopHeaderColorFadeProgress.current
+    val resolvedStyle = if (colorFadeProgress > 0f) EmberrBlur.overColorFade(colorFadeProgress) else hazeStyle ?: EmberrBlur.Regular
     Surface(
         shape = shape,
         color = bgColor,
@@ -118,7 +119,8 @@ fun TopBarIconButton(
     tooltipPosition: IconTooltipPosition = IconTooltipPosition.Below,
     onClick: () -> Unit
 ) {
-    val resolvedStyle = hazeStyle ?: EmberrBlur.Regular
+    val colorFadeProgress = LocalTopHeaderColorFadeProgress.current
+    val resolvedStyle = if (colorFadeProgress > 0f) EmberrBlur.overColorFade(colorFadeProgress) else hazeStyle ?: EmberrBlur.Regular
     IconTooltip(text = tooltip, position = tooltipPosition) {
         Surface(
             shape = CircleShape,
@@ -207,7 +209,8 @@ fun TopBarIconButtonGroup(
     isHorizontallyScrollable: Boolean = false,
     tooltipPosition: IconTooltipPosition = IconTooltipPosition.Below
 ) {
-    val resolvedStyle = hazeStyle ?: EmberrBlur.Regular
+    val colorFadeProgress = LocalTopHeaderColorFadeProgress.current
+    val resolvedStyle = if (colorFadeProgress > 0f) EmberrBlur.overColorFade(colorFadeProgress) else hazeStyle ?: EmberrBlur.Regular
     Surface(
         shape = CircleShape,
         color = bgColor,

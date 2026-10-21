@@ -98,6 +98,7 @@ import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopEdgeBlurHeight
+import com.emberr.presentation.shared.components.TopEdgeGradientHeight
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -444,6 +445,11 @@ fun CalendarScreen(
                         topBarHeightDp + timelineHeaderHeightDp + 48.dp
                     } else {
                         TopEdgeBlurHeight
+                    },
+                    topEdgeGradientHeight = if (viewMode != CalendarViewMode.MONTH) {
+                        topBarHeightDp + timelineHeaderHeightDp + 108.dp
+                    } else {
+                        TopEdgeGradientHeight
                     },
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
                     verticalAlignment = Alignment.Top,
