@@ -110,6 +110,7 @@ import com.emberr.domain.search.subNoteParentTitles
 import com.emberr.domain.search.withSubNoteParents
 import com.emberr.domain.selfhost.media.MediaReferenceScanner
 import com.emberr.domain.util.sync.SyncCoordinator
+import com.emberr.domain.util.sync.SyncEventBus
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -346,18 +347,17 @@ class NoteRepositoryImpl(
 
     override suspend fun moveDailyNotesAndCategoriesToAccount(reindexScope: CoroutineScope) {
         try {
-            val mergedDailyNotes = withContext(Dispatchers.IO) {
+            val movedDailyNotes = withContext(Dispatchers.IO) {
                 SyncCoordinator.mutex.withLock {
-                    val mergedNotes = moveDailyNotesToAccount()
+                    val movedNotes = moveDailyNotesToAccount()
                     moveCategoriesToAccount()
-                    mergedNotes
+                    movedNotes
                 }
             }
-            if (mergedDailyNotes.isNotEmpty()) {
+            val dailyNotesToReindex = movedDailyNotes.filter { it.needsReindex }
+            if (dailyNotesToReindex.isNotEmpty()) {
                 reindexScope.launch(Dispatchers.IO) {
-                    mergedDailyNotes.forEach { (metadata, content) ->
-                        indexDailyNote(metadata.dateString.orEmpty(), content, metadata)
-                    }
+                    dailyNotesToReindex.forEach { indexDailyNote(it.dateString, it.content, it.metadata) }
                 }
             }
         } catch (e: CancellationException) {
@@ -369,31 +369,55 @@ class NoteRepositoryImpl(
         }
     }
 
+    override suspend fun mergeDailyNotesAndCategoriesIntoAccount(): AccountMergeResult =
+        withContext(Dispatchers.IO) {
+            SyncCoordinator.mutex.withLock { mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld() }
+        }
+
+    override suspend fun mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld(): AccountMergeResult =
+        withContext(Dispatchers.IO) {
+            val movedDailyNotes = moveDailyNotesToAccount()
+            val categoryMove = moveCategoriesToAccount()
+            movedDailyNotes.filter { it.needsReindex }.forEach { indexDailyNote(it.dateString, it.content, it.metadata) }
+
+            val changedDailyNoteDates = movedDailyNotes.mapTo(LinkedHashSet()) { it.dateString } +
+                categoryMove?.dailyNoteDatesPointedToSurvivors.orEmpty()
+            changedDailyNoteDates.forEach { dateString -> SyncEventBus.emitSyncCompleted(dateString, ACCOUNT_SPACE_ID) }
+            AccountMergeResult(changedDailyNoteDates = changedDailyNoteDates, categoriesChanged = categoryMove != null)
+        }
+
     private val oldestNoteFirst = compareBy<NoteMetadataEntity> { it.createdAt }.thenBy { it.noteId }
 
-    private suspend fun moveDailyNotesToAccount(): List<Pair<NoteMetadataEntity, NoteContent>> {
+    private class DailyNoteMovedToAccount(
+        val dateString: String,
+        val metadata: NoteMetadataEntity,
+        val content: NoteContent,
+        val needsReindex: Boolean
+    )
+
+    private suspend fun moveDailyNotesToAccount(): List<DailyNoteMovedToAccount> {
         val dailyNotesByDate = noteDao.getAllDailyNoteMetadataAcrossSpaces()
             .filter { it.dateString != null }
             .groupBy { it.dateString.orEmpty() }
             .filterValues { notesOnDate -> notesOnDate.any { it.spaceId != ACCOUNT_SPACE_ID } }
 
-        val mergedNotes = mutableListOf<Pair<NoteMetadataEntity, NoteContent>>()
+        val movedNotes = mutableListOf<DailyNoteMovedToAccount>()
         for ((dateString, notesOnDate) in dailyNotesByDate) {
             try {
-                foldDailyNotesIntoAccount(dateString, notesOnDate)?.let { mergedNotes.add(it) }
+                movedNotes.add(foldDailyNotesIntoAccount(dateString, notesOnDate))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-        return mergedNotes
+        return movedNotes
     }
 
     private suspend fun foldDailyNotesIntoAccount(
         dateString: String,
         notesOnDate: List<NoteMetadataEntity>
-    ): Pair<NoteMetadataEntity, NoteContent>? {
+    ): DailyNoteMovedToAccount {
         val survivor = notesOnDate.minWith(oldestNoteFirst)
         val mergedAwayNotes = notesOnDate.filter { it.noteId != survivor.noteId }.sortedWith(oldestNoteFirst)
 
@@ -444,13 +468,19 @@ class NoteRepositoryImpl(
             e.printStackTrace()
         }
 
-        if (mergedAwayNotes.isEmpty() || savedContentOmitsTombstones(dateString)) return null
-        return movedSurvivor to mergedContent
+        return DailyNoteMovedToAccount(
+            dateString = dateString,
+            metadata = movedSurvivor,
+            content = mergedContent,
+            needsReindex = mergedAwayNotes.isNotEmpty() && !savedContentOmitsTombstones(dateString)
+        )
     }
 
-    private suspend fun moveCategoriesToAccount() {
+    private class CategoryMoveToAccount(val dailyNoteDatesPointedToSurvivors: Set<String>)
+
+    private suspend fun moveCategoriesToAccount(): CategoryMoveToAccount? {
         val categoriesOutsideAccount = categoryDao.getCategoriesOutsideSpaceIncludingDeleted(ACCOUNT_SPACE_ID)
-        if (categoriesOutsideAccount.isEmpty()) return
+        if (categoriesOutsideAccount.isEmpty()) return null
         val categoryIdsOutsideAccount = categoriesOutsideAccount.mapTo(HashSet()) { it.categoryId }
 
         val survivorIdByRemovedId = mutableMapOf<String, String>()
@@ -464,9 +494,10 @@ class NoteRepositoryImpl(
                     .forEach { removed -> survivorIdByRemovedId[removed.categoryId] = survivor.categoryId }
             }
 
+        val dailyNoteDatesPointedToSurvivors = LinkedHashSet<String>()
         for ((removedId, survivorId) in survivorIdByRemovedId) {
             try {
-                pointCategoryReferencesToSurvivor(removedId, survivorId)
+                dailyNoteDatesPointedToSurvivors += pointCategoryReferencesToSurvivor(removedId, survivorId)
                 categoryDao.markCategoryDeleted(removedId, System.currentTimeMillis())
             } catch (e: CancellationException) {
                 throw e
@@ -474,12 +505,14 @@ class NoteRepositoryImpl(
                 e.printStackTrace()
             }
         }
-        categoryDao.moveAllCategoriesToSpace(ACCOUNT_SPACE_ID)
+        categoryDao.moveAllCategoriesToSpace(ACCOUNT_SPACE_ID, System.currentTimeMillis())
+        return CategoryMoveToAccount(dailyNoteDatesPointedToSurvivors)
     }
 
-    private suspend fun pointCategoryReferencesToSurvivor(removedId: String, survivorId: String) {
+    private suspend fun pointCategoryReferencesToSurvivor(removedId: String, survivorId: String): Set<String> {
         val now = System.currentTimeMillis()
         val rewrittenNoteIds = LinkedHashSet<String>()
+        val rewrittenDailyNoteDates = LinkedHashSet<String>()
         for (entity in blockDao.findBlocksContainingIncludingDeleted(removedId)) {
             val checkbox = decodeBlockOrNull(entity.blockDataJson) as? CheckboxBlock ?: continue
             if (checkbox.categoryId != removedId) continue
@@ -499,10 +532,12 @@ class NoteRepositoryImpl(
             noteContentCache.update { it - noteId }
             metadata.dateString?.takeIf { metadata.isDaily }?.let { dailyDateString ->
                 dailyNoteCache.update { it - dailyCacheKey(metadata.spaceId, dailyDateString) }
+                rewrittenDailyNoteDates.add(dailyDateString)
             }
         }
 
         calendarEventExceptionDao.replaceOverrideCategoryId(removedId, survivorId, now)
+        return rewrittenDailyNoteDates
     }
 
     override suspend fun getDailyNoteMetadata(dateString: String): NoteMetadataEntity? =

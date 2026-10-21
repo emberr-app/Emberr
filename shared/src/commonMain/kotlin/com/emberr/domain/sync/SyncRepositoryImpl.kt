@@ -46,6 +46,7 @@ import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.util.sync.withSyncCoordinatorWaitingAtMost
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.database.EmberrDatabase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -266,6 +267,7 @@ class SyncRepositoryImpl(
 
     override suspend fun applyRemoteChanges(changes: List<SyncEnvelope>): Boolean =
         withContext(Dispatchers.IO) {
+            repository.waitUntilDailyNotesAreInAccount()
             val syncKey = settingsManager.getSyncEncryptionKey()
             val currentAppVersion = appVersionName.orEmpty()
             var allSucceeded = true
@@ -281,6 +283,8 @@ class SyncRepositoryImpl(
             suspend fun <T> withSyncLock(block: suspend () -> T): T? =
                 withSyncCoordinatorWaitingAtMost(syncLockWaitForThisRun, block)
                     .also { result -> if (result == null) syncLockWaitForThisRun = Duration.ZERO }
+
+            var appliedDailyNotesOrCategories = false
 
             changesToApply.forEach { (envelope, wasWaitingToRetry) ->
                 // Media downloads are queued after releasing the lock so large file downloads do not block editor saves.
@@ -623,6 +627,9 @@ class SyncRepositoryImpl(
                 val handled = when (outcome) {
                     RemoteChangeOutcome.APPLIED -> {
                         if (key in failedAttemptsByKey) forgetChangeWaitingToRetry(envelope)
+                        if (envelope.entityType == SyncType.DAILY_NOTE || envelope.entityType == SyncType.CATEGORY) {
+                            appliedDailyNotesOrCategories = true
+                        }
                         true
                     }
                     RemoteChangeOutcome.CANNOT_BE_READ ->
@@ -639,6 +646,16 @@ class SyncRepositoryImpl(
                     }
                 }
                 if (!handled && !wasWaitingToRetry) allSucceeded = false
+            }
+
+            if (appliedDailyNotesOrCategories) {
+                try {
+                    repository.mergeDailyNotesAndCategoriesIntoAccount()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    LanSyncLog.e("applyRemoteChanges: could not merge incoming daily notes and categories into the account space: ${e.message}", e)
+                }
             }
 
             // A synced-in change can tombstone a block (or a whole note) that this device didn't
@@ -718,6 +735,7 @@ class SyncRepositoryImpl(
 
     override suspend fun collectLocalChanges(since: Long, uploadMedia: Boolean): List<SyncEnvelope> =
         withContext(Dispatchers.IO) {
+            repository.waitUntilDailyNotesAreInAccount()
             val lastSyncTime = since
             val syncKey = settingsManager.getSyncEncryptionKey()
             val changes = mutableListOf<SyncEnvelope>()

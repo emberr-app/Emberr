@@ -91,6 +91,8 @@ interface NoteRepository {
     fun refreshDailyNoteCache(spaceId: String, dateString: String, content: NoteContent)
     suspend fun dedupeDuplicateDailyNotes(): Int
     suspend fun moveDailyNotesAndCategoriesToAccount(reindexScope: CoroutineScope)
+    suspend fun mergeDailyNotesAndCategoriesIntoAccount(): AccountMergeResult
+    suspend fun mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld(): AccountMergeResult
     suspend fun waitUntilDailyNotesAreInAccount()
 
     // Notes operations
@@ -264,3 +266,5 @@ interface NoteRepository {
     // clear cache after import
     fun clearCaches()
 }
+
+data class AccountMergeResult(val changedDailyNoteDates: Set<String>, val categoriesChanged: Boolean)

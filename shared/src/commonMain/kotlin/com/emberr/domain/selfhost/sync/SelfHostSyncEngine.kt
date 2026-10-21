@@ -12,6 +12,7 @@ import com.emberr.data.local.room.dao.CustomPropertyDao
 import com.emberr.data.local.room.dao.SelfHostDeletedApiConfigDao
 import com.emberr.data.local.room.dao.SelfHostDeletedNoteDao
 import com.emberr.data.local.room.dao.SpaceDao
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
 import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.PropertyTagEntity
@@ -21,7 +22,6 @@ import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.PLACEHOLDER_SPACE_UPDATED_AT
-import com.emberr.data.local.room.entity.SelfHostDeletedNoteEntity
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.ai.chat.ChatSessionMerge
 import com.emberr.domain.ai.external.AiSettingsRepository
@@ -643,6 +643,7 @@ class SelfHostSyncEngine(
     }
 
     private suspend fun runSyncLocked(): SelfHostSyncResult {
+        noteRepository.waitUntilDailyNotesAreInAccount()
         _noteSyncProgress.value = SelfHostSyncProgress()
         return try {
             webDavSyncClient.ensureRemoteLayoutExists()
@@ -721,8 +722,10 @@ class SelfHostSyncEngine(
             var skippedBusyCount = 0
             var brokenNoteCount = 0
             val noteIdsStillWaitingToUpload = mutableSetOf<String>()
+            val noteIdsSyncedThisPass = mutableSetOf<String>()
+            val oldSpaceDailyEntryIdsNotPulled = mutableSetOf<String>()
 
-            for ((noteId, remoteEntry) in candidates) {
+            suspend fun reconcileCandidate(noteId: String, remoteEntry: SelfHostManifestEntry?) {
                 // Lock each note individually for reconciliation.
                 val outcome = reconcileOrSkipBrokenNote(noteId) {
                     withSyncLock {
@@ -734,11 +737,19 @@ class SelfHostSyncEngine(
                 }
                 SelfHostSyncLog.d("TextSync: note=$noteId outcome=$outcome")
                 when (outcome) {
-                    ReconcileOutcome.SYNCED -> syncedCount++
+                    ReconcileOutcome.SYNCED -> {
+                        syncedCount++
+                        noteIdsSyncedThisPass += noteId
+                        noteIdsStillWaitingToUpload -= noteId
+                    }
                     ReconcileOutcome.CONFLICT_SKIPPED -> { conflictCount++; noteIdsStillWaitingToUpload += noteId }
                     ReconcileOutcome.LOCK_BUSY -> { skippedBusyCount++; noteIdsStillWaitingToUpload += noteId }
                     ReconcileOutcome.UNCHANGED -> Unit
                     ReconcileOutcome.BROKEN_NOTE -> { brokenNoteCount++; noteIdsStillWaitingToUpload += noteId }
+                }
+                val wasPulled = outcome == ReconcileOutcome.SYNCED || outcome == ReconcileOutcome.UNCHANGED
+                if (remoteEntry != null && isLiveOldSpaceDailyEntry(remoteEntry) && !wasPulled) {
+                    oldSpaceDailyEntryIdsNotPulled += remoteEntry.entryId
                 }
                 _noteSyncProgress.update { progress ->
                     when {
@@ -747,6 +758,10 @@ class SelfHostSyncEngine(
                         else -> progress.copy(received = progress.received + 1)
                     }
                 }
+            }
+
+            for ((noteId, remoteEntry) in candidates) {
+                reconcileCandidate(noteId, remoteEntry)
             }
             _noteSyncProgress.update { it?.copy(stage = SelfHostSyncStage.FINISHING) }
 
@@ -779,6 +794,55 @@ class SelfHostSyncEngine(
                 manifest.entries.filter { it.entryType == SelfHostEntryType.CHAT_SESSION }
             }
 
+            val accountMerge = try {
+                withSyncLock { noteRepository.mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld() }.also { merge ->
+                    if (merge == null) SelfHostSyncLog.d("TextSync: account merge skipped this cycle, SyncCoordinator.mutex busy - will retry next trigger")
+                }
+            } catch (cause: CancellationException) {
+                throw cause
+            } catch (cause: Exception) {
+                SelfHostSyncLog.e("TextSync: merging daily notes and categories into the account space failed, will retry next cycle", cause)
+                null
+            }
+            if (accountMerge?.categoriesChanged == true && withSyncLock { reconcileCategories() } == null) {
+                SelfHostSyncLog.d("TextSync: merged categories skipped this cycle, SyncCoordinator.mutex busy - will retry next trigger")
+            }
+
+            val dailyEntriesOnServerById = remoteTextEntries
+                .filter { it.entryType == SelfHostEntryType.DAILY }
+                .associateBy { it.entryId }
+            val serverEntryByAccountDailyNoteIdToUpload = noteDao.getAllDailyNoteMetadata(ACCOUNT_SPACE_ID)
+                .filter { note ->
+                    val isMissingOnServer = manifestEntryIdFor(note) !in dailyEntriesOnServerById
+                    note.dateString in accountMerge?.changedDailyNoteDates.orEmpty() ||
+                        (isMissingOnServer && note.noteId !in noteIdsSyncedThisPass)
+                }
+                .associate { note -> note.noteId to dailyEntriesOnServerById[manifestEntryIdFor(note)]?.takeUnless { it.isDeleted } }
+            if (serverEntryByAccountDailyNoteIdToUpload.isNotEmpty()) {
+                _noteSyncProgress.update { progress ->
+                    progress?.copy(
+                        stage = SelfHostSyncStage.TRANSFERRING,
+                        toSend = progress.toSend + serverEntryByAccountDailyNoteIdToUpload.values.count { it == null },
+                        toReceive = progress.toReceive + serverEntryByAccountDailyNoteIdToUpload.values.count { it != null }
+                    )
+                }
+                for ((noteId, serverEntry) in serverEntryByAccountDailyNoteIdToUpload) {
+                    reconcileCandidate(noteId, serverEntry)
+                }
+                _noteSyncProgress.update { it?.copy(stage = SelfHostSyncStage.FINISHING) }
+            }
+
+            val oldSpaceDailyVersionsMergedHere = deleteOldSpaceDailyFilesMergedHere(
+                oldSpaceDailyEntries = remoteTextEntries.filter { isLiveOldSpaceDailyEntry(it) },
+                entryIdsNotMergedHere = oldSpaceDailyEntryIdsNotPulled +
+                    noteDao.getAllDailyNoteMetadataAcrossSpaces()
+                        .filter { it.spaceId != ACCOUNT_SPACE_ID }
+                        .map { manifestEntryIdFor(it) },
+                datesStillWaitingToUpload = noteDao.getAllDailyNoteMetadata(ACCOUNT_SPACE_ID)
+                    .filter { it.noteId in noteIdsStillWaitingToUpload }
+                    .mapNotNullTo(HashSet()) { it.dateString }
+            )
+
             // Always publish the manifest, even if some individual notes had conflicts.
             // Conflicted notes retain their downloaded state until locally resolved and pushed.
             // This runs without locks to read a fresh, unlocked database snapshot.
@@ -788,6 +852,7 @@ class SelfHostSyncEngine(
                     previousManifest = latestManifest,
                     noteIdsStillWaitingToUpload = noteIdsStillWaitingToUpload,
                     chatSessionEntries = chatSessionEntries,
+                    oldSpaceDailyVersionsMergedHere = oldSpaceDailyVersionsMergedHere,
                     previousManifestEtag = latestManifestEtag
                 )
             }
@@ -816,6 +881,28 @@ class SelfHostSyncEngine(
         } finally {
             _noteSyncProgress.value = null
         }
+    }
+
+    private suspend fun deleteOldSpaceDailyFilesMergedHere(
+        oldSpaceDailyEntries: List<SelfHostManifestEntry>,
+        entryIdsNotMergedHere: Set<String>,
+        datesStillWaitingToUpload: Set<String>
+    ): Map<String, Long> {
+        val deletedVersionsByEntryId = mutableMapOf<String, Long>()
+        for (entry in oldSpaceDailyEntries) {
+            val dateString = entry.dateString ?: continue
+            if (entry.entryId in entryIdsNotMergedHere || dateString in datesStillWaitingToUpload) continue
+            try {
+                webDavSyncClient.deleteFile(WebDavSyncPaths.dailyPath(entry.spaceId, dateString))
+                deletedVersionsByEntryId[entry.entryId] = entry.updatedAt
+                SelfHostSyncLog.d("TextSync: ${entry.entryId} is merged into the account daily note, deleted its old file")
+            } catch (cause: CancellationException) {
+                throw cause
+            } catch (cause: Exception) {
+                SelfHostSyncLog.e("TextSync: failed to delete the old daily file ${entry.entryId}, will retry next cycle", cause)
+            }
+        }
+        return deletedVersionsByEntryId
     }
 
     private suspend fun reconcileSpaces() {
@@ -1538,32 +1625,6 @@ class SelfHostSyncEngine(
         return if (spaceHoldingThatId == null || spaceHoldingThatId == spaceId) noteId else null
     }
 
-    private fun manifestEntryForTombstone(tombstone: SelfHostDeletedNoteEntity): SelfHostManifestEntry {
-        val isDailyTombstone = tombstone.isDaily && tombstone.dateString != null
-        return SelfHostManifestEntry(
-            entryId = if (isDailyTombstone) {
-                dailyManifestEntryId(tombstone.spaceId, tombstone.dateString.orEmpty())
-            } else {
-                tombstone.noteId
-            },
-            entryType = if (tombstone.isDaily) SelfHostEntryType.DAILY else SelfHostEntryType.NOTE,
-            spaceId = tombstone.spaceId,
-            updatedAt = tombstone.deletedAt,
-            dateString = tombstone.dateString,
-            isDeleted = true
-        )
-    }
-
-    private fun dailyManifestEntryId(spaceId: String, dateString: String): String =
-        "daily_${spaceId}_$dateString"
-
-    private fun manifestEntryIdFor(note: NoteMetadataEntity): String =
-        if (note.isDaily && note.dateString != null) {
-            dailyManifestEntryId(note.spaceId, note.dateString)
-        } else {
-            note.noteId
-        }
-
     private fun pickNewerMetadata(local: NoteMetadataEntity?, remote: NoteMetadataEntity?): NoteMetadataEntity? {
         return when {
             remote == null -> local
@@ -1596,42 +1657,22 @@ class SelfHostSyncEngine(
         previousManifest: SelfHostManifest,
         noteIdsStillWaitingToUpload: Set<String> = emptySet(),
         chatSessionEntries: List<SelfHostManifestEntry> = emptyList(),
+        oldSpaceDailyVersionsMergedHere: Map<String, Long> = emptyMap(),
         previousManifestEtag: String? = null,
         attempt: Int = 0
     ) {
         // Preserve existing tombstones in the manifest.
         // This ensures offline or lagging devices eventually see the deletion and don't
         // accidentally resurrect deleted notes.
-        val previousTombstones = previousManifest.entries.filter { it.isDeleted }
-        val localTombstones = selfHostDeletedNoteDao.getAllTombstones()
-        val localNotes = noteDao.getAllNotesForBackup()
-        val mediaFileNamesByNoteId = mediaReferenceIndex.loadReferencedFileNamesByNoteId()
-        val localEntries = localNotes.map { note ->
-            SelfHostManifestEntry(
-                entryId = manifestEntryIdFor(note),
-                entryType = if (note.isDaily) SelfHostEntryType.DAILY else SelfHostEntryType.NOTE,
-                spaceId = note.spaceId,
-                updatedAt = note.updatedAt,
-                dateString = note.dateString.takeIf { note.isDaily },
-                mediaFileNames = mediaFileNamesByNoteId[note.noteId].orEmpty()
-            )
-        }
-        val entryIdsStillWaitingToUpload = localNotes
-            .filter { it.noteId in noteIdsStillWaitingToUpload }
-            .map { manifestEntryIdFor(it) }
-            .toSet()
-
-        val localTombstoneEntriesByNoteId = localTombstones.associate { it.noteId to manifestEntryForTombstone(it) }
-        val replacedTombstoneIds = tombstoneIdsReplacedByNewerNotes(
-            tombstones = previousTombstones + localTombstoneEntriesByNoteId.values,
+        val noteManifestEntries = buildNoteManifestEntries(
             serverEntries = previousManifest.entries,
-            localEntries = localEntries,
-            entryIdsStillWaitingToUpload = entryIdsStillWaitingToUpload
+            localNotes = noteDao.getAllNotesForBackup(),
+            localTombstones = selfHostDeletedNoteDao.getAllTombstones(),
+            mediaFileNamesByNoteId = mediaReferenceIndex.loadReferencedFileNamesByNoteId(),
+            noteIdsStillWaitingToUpload = noteIdsStillWaitingToUpload,
+            oldSpaceDailyVersionsMergedHere = oldSpaceDailyVersionsMergedHere
         )
-        val (replacedLocalTombstones, activeLocalTombstones) = localTombstones.partition { tombstone ->
-            localTombstoneEntriesByNoteId.getValue(tombstone.noteId).entryId in replacedTombstoneIds
-        }
-        for (tombstone in replacedLocalTombstones) {
+        for (tombstone in noteManifestEntries.replacedLocalTombstones) {
             selfHostDeletedNoteDao.deleteTombstone(tombstone.noteId)
             SelfHostSyncLog.d("TextSync: note ${tombstone.noteId} was edited after it was deleted, keeping the edit")
         }
@@ -1639,7 +1680,7 @@ class SelfHostSyncEngine(
         // Perform a one-time remote file cleanup for notes deleted by this device.
         // This prevents orphaned files from wasting server storage.
         // Success is tracked to avoid repeating, and failures are retried next cycle.
-        for (tombstone in activeLocalTombstones) {
+        for (tombstone in noteManifestEntries.activeLocalTombstones) {
             if (tombstone.remoteFileDeleted) continue
             try {
                 val remotePath = if (tombstone.isDaily) {
@@ -1659,26 +1700,9 @@ class SelfHostSyncEngine(
             }
         }
 
-        val mergedTombstonesById = LinkedHashMap<String, SelfHostManifestEntry>()
-        previousTombstones
-            .filter { it.entryId !in replacedTombstoneIds }
-            .forEach { mergedTombstonesById[it.entryId] = it }
-        activeLocalTombstones.map { localTombstoneEntriesByNoteId.getValue(it.noteId) }.forEach { entry ->
-            val existing = mergedTombstonesById[entry.entryId]
-            if (existing == null || entry.updatedAt > existing.updatedAt) {
-                mergedTombstonesById[entry.entryId] = entry
-            }
-        }
-        val tombstoneIds = mergedTombstonesById.keys
-        val noteEntries = mergeNoteManifestEntries(
-            serverEntries = previousManifest.entries,
-            localEntries = localEntries,
-            entryIdsStillWaitingToUpload = entryIdsStillWaitingToUpload,
-            tombstoneIds = tombstoneIds
-        )
         val preservedMediaEntries = previousManifest.entries.filter { it.entryType == SelfHostEntryType.MEDIA }
         val newManifest = SelfHostManifest(
-            entries = noteEntries + mergedTombstonesById.values + preservedMediaEntries + chatSessionEntries
+            entries = noteManifestEntries.entries + preservedMediaEntries + chatSessionEntries
         )
         if (newManifest.isAlreadySavedAs(previousManifest)) {
             SelfHostSyncLog.d("TextSync: manifest unchanged, not uploading it")
@@ -1700,6 +1724,7 @@ class SelfHostSyncEngine(
                 freshManifest,
                 noteIdsStillWaitingToUpload,
                 chatSessionEntries,
+                oldSpaceDailyVersionsMergedHere,
                 freshEtag,
                 attempt + 1
             )
