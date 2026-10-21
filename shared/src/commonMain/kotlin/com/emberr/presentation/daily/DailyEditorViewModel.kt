@@ -1,6 +1,7 @@
 package com.emberr.presentation.daily
 
 import androidx.lifecycle.viewModelScope
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.data.local.room.entity.datesShownOn
@@ -497,6 +498,8 @@ class DailyEditorViewModel(
 
     override fun getNoteTitleForReminder(): String =
         "Daily: ${currentDateString ?: "Note"}"
+
+    override suspend fun spaceIdOfThisNote(): String = ACCOUNT_SPACE_ID
 
     // The reactive observeDailyNote collector drops every cache emission while _loadedDateString
     // doesn't yet match this date - if a background sync refreshed this exact date (or its pinned

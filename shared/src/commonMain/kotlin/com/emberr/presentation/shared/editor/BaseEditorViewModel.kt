@@ -351,6 +351,7 @@ abstract class BaseEditorViewModel(
     protected abstract suspend fun performSave(): Boolean
     protected abstract suspend fun performIndexing()
     protected abstract fun getNoteTitleForReminder(): String
+    protected abstract suspend fun spaceIdOfThisNote(): String?
 
     val allLinkableNotes: StateFlow<List<NoteMetadataEntity>> = repository.getAllLinkableNotes()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
@@ -2594,6 +2595,7 @@ abstract class BaseEditorViewModel(
         val now = System.currentTimeMillis()
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                val parentSpaceId = spaceIdOfThisNote() ?: return@launch
                 val canvasMetadata = NoteMetadataEntity(
                     noteId = canvasNoteId,
                     title = "",
@@ -2607,7 +2609,7 @@ abstract class BaseEditorViewModel(
                     kind = NoteKind.CANVAS
                 )
                 SyncCoordinator.mutex.withLock {
-                    repository.saveNote(canvasMetadata, NoteContent(blocks = emptyList()))
+                    repository.saveNoteInSpace(parentSpaceId, canvasMetadata, NoteContent(blocks = emptyList()))
                 }
                 withContext(Dispatchers.Main) {
                     insertNewMediaBlock("canvas", canvasNoteId = canvasNoteId)
@@ -2623,7 +2625,8 @@ abstract class BaseEditorViewModel(
         val databaseId = UUID.randomUUID().toString()
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                repository.createDatabase(databaseId)
+                val parentSpaceId = spaceIdOfThisNote() ?: return@launch
+                repository.createDatabase(databaseId, parentSpaceId)
                 withContext(Dispatchers.Main) {
                     insertNewMediaBlock("database", databaseId = databaseId)
                     flushPendingSave()

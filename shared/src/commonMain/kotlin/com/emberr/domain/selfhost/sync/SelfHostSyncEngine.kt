@@ -818,15 +818,21 @@ class SelfHostSyncEngine(
                         (isMissingOnServer && note.noteId !in noteIdsSyncedThisPass)
                 }
                 .associate { note -> note.noteId to dailyEntriesOnServerById[manifestEntryIdFor(note)]?.takeUnless { it.isDeleted } }
-            if (serverEntryByAccountDailyNoteIdToUpload.isNotEmpty()) {
+            val noteEntriesOnServerById = remoteTextEntries
+                .filter { it.entryType == SelfHostEntryType.NOTE }
+                .associateBy { it.entryId }
+            val serverEntryBySubNoteIdMovedToAccount = accountMerge?.movedSubNoteIds.orEmpty()
+                .associateWith { noteId -> noteEntriesOnServerById[noteId]?.takeUnless { it.isDeleted } }
+            val serverEntryByNoteIdToUploadAfterMerge = serverEntryByAccountDailyNoteIdToUpload + serverEntryBySubNoteIdMovedToAccount
+            if (serverEntryByNoteIdToUploadAfterMerge.isNotEmpty()) {
                 _noteSyncProgress.update { progress ->
                     progress?.copy(
                         stage = SelfHostSyncStage.TRANSFERRING,
-                        toSend = progress.toSend + serverEntryByAccountDailyNoteIdToUpload.values.count { it == null },
-                        toReceive = progress.toReceive + serverEntryByAccountDailyNoteIdToUpload.values.count { it != null }
+                        toSend = progress.toSend + serverEntryByNoteIdToUploadAfterMerge.values.count { it == null },
+                        toReceive = progress.toReceive + serverEntryByNoteIdToUploadAfterMerge.values.count { it != null }
                     )
                 }
-                for ((noteId, serverEntry) in serverEntryByAccountDailyNoteIdToUpload) {
+                for ((noteId, serverEntry) in serverEntryByNoteIdToUploadAfterMerge) {
                     reconcileCandidate(noteId, serverEntry)
                 }
                 _noteSyncProgress.update { it?.copy(stage = SelfHostSyncStage.FINISHING) }
@@ -1415,7 +1421,7 @@ class SelfHostSyncEngine(
             val newerMetadata = pickNewerMetadata(localMetadata, remoteOps?.metadataUpsert)
                 ?: return ReconcileOutcome.UNCHANGED
 
-            val targetSpaceId = localMetadata?.spaceId ?: newerMetadata.spaceId
+            val targetSpaceId = if (newerMetadata.isDaily) localMetadata?.spaceId ?: newerMetadata.spaceId else newerMetadata.spaceId
             val noteId = localMetadata?.noteId
                 ?: adoptableNoteIdInSpace(remoteOps?.metadataUpsert?.noteId, targetSpaceId)
                 ?: candidateId.takeUnless { isDaily }
@@ -1450,6 +1456,9 @@ class SelfHostSyncEngine(
             )
 
             spaceRepository.ensureSpaceExists(mergedMetadata.spaceId)
+            if (localMetadata != null && localMetadata.spaceId != mergedMetadata.spaceId) {
+                noteRepository.applyRemoteSpaceChangeWhileSyncLockHeld(noteId, mergedMetadata.spaceId)
+            }
             noteDao.insertOrUpdateMetadata(mergedMetadata.copy(filePath = ""))
             blockDao.insertOrUpdateBlocks(mergedBlocks)
             remoteOps?.canvas?.let { remoteCanvas ->

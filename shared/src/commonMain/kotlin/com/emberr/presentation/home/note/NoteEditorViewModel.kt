@@ -228,6 +228,11 @@ class NoteEditorViewModel(
         return _noteTitle.value.ifBlank { "Note" }
     }
 
+    override suspend fun spaceIdOfThisNote(): String? {
+        val noteId = currentMetadata?.noteId ?: return null
+        return repository.getNoteById(noteId)?.spaceId
+    }
+
     fun toggleWordCount() {
         val previous = _showWordCount.value
         _showWordCount.value = !previous
