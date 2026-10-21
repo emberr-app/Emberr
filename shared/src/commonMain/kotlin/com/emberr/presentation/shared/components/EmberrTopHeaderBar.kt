@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -57,11 +59,13 @@ val TopHeaderBarButtonSize = 44.dp
 
 private val DefaultTitleSideInset = 56.dp
 
-private val TopEdgeGradientHeight = 200.dp
+val TopEdgeGradientHeight = 200.dp
 
 private const val TopEdgeGradientStopCount = 24
 
 val TopEdgeBlurHeight = 140.dp
+
+val LocalTopHeaderColorFadeProgress = compositionLocalOf { 0f }
 
 private val TopEdgeFadeEasing = Easing { position -> smoothStep(position) }
 
@@ -153,88 +157,95 @@ fun EmberrTopHeaderBar(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(if (applyStatusBarPadding) Modifier.stableStatusBarsPadding() else Modifier)
-                .padding(contentPadding)
-                .onGloballyPositioned(onPositioned)
+        CompositionLocalProvider(
+            LocalTopHeaderColorFadeProgress provides if (fadeStyle == TopBarFadeStyle.COLOR) topEdgeFadeAlpha.coerceIn(0f, 1f) else 0f
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = verticalAlignment
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (applyStatusBarPadding) Modifier.stableStatusBarsPadding() else Modifier)
+                    .padding(contentPadding)
+                    .onGloballyPositioned(onPositioned)
             ) {
-                when {
-                    showBackButton -> TopBarIconButton(
-                        icon = backIcon,
-                        contentDescription = backContentDescription,
-                        bgColor = backButtonBackground,
-                        tint = backButtonTint,
-                        hazeState = hazeState,
-                        hazeStyle = hazeStyle,
-                        size = TopHeaderBarButtonSize,
-                        tooltip = backTooltip,
-                        onClick = onBackClick
-                    )
-
-                    reserveBackButtonSpace -> Spacer(Modifier.size(TopHeaderBarButtonSize))
-                }
-
-                leadingContent()
-
-                if (titlePlacement == TopHeaderTitlePlacement.Start) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 16.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        TopHeaderBarTitle(
-                            text = title,
-                            style = titleStyle,
-                            color = titleColor,
-                            fontWeight = titleFontWeight,
-                            visibility = titleVisibility,
-                            padding = titlePadding,
-                            leadingIcon = titleLeadingIcon,
-                            trailingIcon = titleTrailingIcon,
-                            onClick = onTitleClick
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = verticalAlignment
+                ) {
+                    when {
+                        showBackButton -> TopBarIconButton(
+                            icon = backIcon,
+                            contentDescription = backContentDescription,
+                            bgColor = backButtonBackground,
+                            tint = backButtonTint,
+                            hazeState = hazeState,
+                            hazeStyle = hazeStyle,
+                            size = TopHeaderBarButtonSize,
+                            tooltip = backTooltip,
+                            onClick = onBackClick
                         )
+
+                        reserveBackButtonSpace -> Spacer(Modifier.size(TopHeaderBarButtonSize))
                     }
+
+                    leadingContent()
+
+                    if (titlePlacement == TopHeaderTitlePlacement.Start) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 16.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            TopHeaderBarTitle(
+                                text = title,
+                                style = titleStyle,
+                                color = titleColor,
+                                fontWeight = titleFontWeight,
+                                visibility = titleVisibility,
+                                padding = titlePadding,
+                                leadingIcon = titleLeadingIcon,
+                                trailingIcon = titleTrailingIcon,
+                                onClick = onTitleClick
+                            )
+                        }
+                    }
+
+                    if (centerContent != null) {
+                        centerContent()
+                    } else if (titlePlacement != TopHeaderTitlePlacement.Start) {
+                        Spacer(Modifier.weight(1f))
+                    }
+
+                    actions()
                 }
 
-                if (centerContent != null) {
-                    centerContent()
-                } else if (titlePlacement != TopHeaderTitlePlacement.Start) {
-                    Spacer(Modifier.weight(1f))
+                if (titlePlacement == TopHeaderTitlePlacement.Center) {
+                    TopHeaderBarTitle(
+                        text = title,
+                        style = titleStyle,
+                        color = titleColor,
+                        fontWeight = titleFontWeight,
+                        visibility = titleVisibility,
+                        padding = titlePadding,
+                        leadingIcon = titleLeadingIcon,
+                        trailingIcon = titleTrailingIcon,
+                        onClick = onTitleClick,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .fillMaxWidth()
+                            .padding(horizontal = titleSideInset)
+                    )
                 }
 
-                actions()
+                overlayContent()
             }
-
-            if (titlePlacement == TopHeaderTitlePlacement.Center) {
-                TopHeaderBarTitle(
-                    text = title,
-                    style = titleStyle,
-                    color = titleColor,
-                    fontWeight = titleFontWeight,
-                    visibility = titleVisibility,
-                    padding = titlePadding,
-                    leadingIcon = titleLeadingIcon,
-                    trailingIcon = titleTrailingIcon,
-                    onClick = onTitleClick,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .fillMaxWidth()
-                        .padding(horizontal = titleSideInset)
-                )
-            }
-
-            overlayContent()
         }
     }
 }
+
+@Composable
+fun rememberTopHeaderUsesColorFade(): Boolean = rememberTopBarFadeStyle() == TopBarFadeStyle.COLOR
 
 @Composable
 private fun rememberTopBarFadeStyle(): TopBarFadeStyle {
