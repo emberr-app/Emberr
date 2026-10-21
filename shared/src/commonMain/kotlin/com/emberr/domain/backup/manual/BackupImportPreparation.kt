@@ -81,7 +81,7 @@ fun prepareBackupForImport(
     val subNoteIds = subNotes.mapTo(HashSet()) { it.noteId }
     val subNoteBlocks = subNotes.flatMap { subNote -> accountBlocksOf(subNote.noteId) { true } }
 
-    val databaseIds = (blocks + subNoteBlocks).mapNotNull { (_, blockJson) -> ownDatabaseIdOf(blockJson) } +
+    val databaseIds = (blocks + blocksToMerge + subNoteBlocks).mapNotNull { (_, blockJson) -> ownDatabaseIdOf(blockJson) } +
             (notes + subNotes).mapNotNull { it.databaseId }
     val rewriter = IdRewriter(
         oldIds = spaceIds + noteIds + folderIds + propertyTags.map { it.tagId } + customProperties.map { it.propertyId } +
