@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
+import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.settings.SettingsActionRow
 import com.emberr.presentation.settings.SettingsDivider
@@ -79,10 +81,11 @@ fun CategorySection(
     onUpdateCategory: (id: String, name: String, colorHex: String) -> Unit,
     onDeleteCategory: (id: String) -> Unit,
     hiddenCategoryVisibilityKeys: Set<String>,
-    noCategoryVisibilityKey: String,
     onToggleCategoryVisibility: (visibilityKey: String) -> Unit,
+    spaces: List<SpaceEntity>,
     cardColor: Color = MaterialTheme.colorScheme.surface
 ) {
+    val noCategoryVisibilityKey = noCategoryVisibilityKeyFor(ACCOUNT_SPACE_ID)
     var editorState by remember { mutableStateOf<CategoryEditorState?>(null) }
 
     fun performSave() {
@@ -124,7 +127,8 @@ fun CategorySection(
             SettingsDivider()
         }
 
-        NoCategoryRow(
+        VisibilityToggleRow(
+            label = "No Category",
             isShown = noCategoryVisibilityKey !in hiddenCategoryVisibilityKeys,
             onToggleShown = { onToggleCategoryVisibility(noCategoryVisibilityKey) }
         )
@@ -147,6 +151,23 @@ fun CategorySection(
             onCancel = { editorState = null },
             onSave = { performSave(); editorState = null }
         )
+    }
+
+    val isAnySpaceHidden = spaces.any { space -> spaceVisibilityKeyFor(space.spaceId) in hiddenCategoryVisibilityKeys }
+    var keepsSpacesGroupShown by remember { mutableStateOf(false) }
+    if (spaces.size >= 2 || isAnySpaceHidden) keepsSpacesGroupShown = true
+    if (keepsSpacesGroupShown && spaces.isNotEmpty()) {
+        SettingsGroup(title = "Spaces", cardColor = cardColor) {
+            spaces.forEachIndexed { index, space ->
+                if (index > 0) SettingsDivider()
+                val spaceVisibilityKey = spaceVisibilityKeyFor(space.spaceId)
+                VisibilityToggleRow(
+                    label = space.displayName.trim().ifBlank { "Untitled space" },
+                    isShown = spaceVisibilityKey !in hiddenCategoryVisibilityKeys,
+                    onToggleShown = { onToggleCategoryVisibility(spaceVisibilityKey) }
+                )
+            }
+        }
     }
 
     if (!isDesktopPlatform) {
@@ -270,7 +291,8 @@ private fun CategoryRow(
 }
 
 @Composable
-private fun NoCategoryRow(
+private fun VisibilityToggleRow(
+    label: String,
     isShown: Boolean,
     onToggleShown: () -> Unit
 ) {
@@ -290,7 +312,7 @@ private fun NoCategoryRow(
         Spacer(modifier = Modifier.width(6.dp))
 
         Text(
-            text = "No Category",
+            text = label,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)

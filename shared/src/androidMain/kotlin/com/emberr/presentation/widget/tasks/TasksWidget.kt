@@ -49,9 +49,7 @@ import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.taskBlockIdExtra
 import com.emberr.presentation.widget.taskIsCheckedExtra
 import com.emberr.presentation.widget.widgetNewTaskExtra
-import com.emberr.presentation.widget.widgetSpaceIdExtra
 import com.emberr.presentation.widget.widgetTasksScreenExtra
-import com.emberr.presentation.widget.readWidgetSpaceId
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -71,13 +69,11 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
             ?: readCachedTasks(context, id)
 
         val appWidgetId = resolveAppWidgetId(context, id)
-        val spaceId = readWidgetSpaceId(context, id)
 
         provideContent {
             TasksWidgetBody(
                 context = context,
                 appWidgetId = appWidgetId,
-                spaceId = spaceId,
                 content = content
             )
         }
@@ -89,8 +85,7 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
         isShowingCompleted: Boolean
     ): TasksWidgetContent? {
         val contentReader = runCatching { get<TasksWidgetContentReader>() }.getOrNull() ?: return null
-        val spaceId = readWidgetSpaceId(context, id)
-        val freshContent = contentReader.readContentOnce(spaceId, isShowingCompleted) ?: return null
+        val freshContent = contentReader.readContentOnce(isShowingCompleted) ?: return null
 
         if (freshContent != readCachedTasks(context, id)) {
             writeCachedTasks(context, id, freshContent)
@@ -111,11 +106,10 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
 internal fun TasksWidgetBody(
     context: Context,
     appWidgetId: Int,
-    spaceId: String,
     content: TasksWidgetContent?
 ) {
     val isShowingCompleted = content?.isShowingCompleted == true
-    val openTasksScreen = actionStartActivity(openTasksScreenIntent(context, spaceId))
+    val openTasksScreen = actionStartActivity(openTasksScreenIntent(context))
 
     Column(
         modifier = GlanceModifier
@@ -158,7 +152,7 @@ internal fun TasksWidgetBody(
                 colorFilter = ColorFilter.tint(primaryTextColor),
                 modifier = GlanceModifier
                     .size(topBarIconSize)
-                    .clickable(actionStartActivity(addTaskIntent(context, spaceId)))
+                    .clickable(actionStartActivity(addTaskIntent(context)))
             )
         }
 
@@ -256,19 +250,17 @@ private fun TaskRow(task: TasksWidgetRow.Task, appWidgetId: Int, context: Contex
     }
 }
 
-private fun openTasksScreenIntent(context: Context, spaceId: String): Intent =
+private fun openTasksScreenIntent(context: Context): Intent =
     Intent(context, MainActivity::class.java)
         .setData("emberr://tasks".toUri())
         .putExtra(widgetTasksScreenExtra, true)
-        .putExtra(widgetSpaceIdExtra, spaceId)
         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-private fun addTaskIntent(context: Context, spaceId: String): Intent =
+private fun addTaskIntent(context: Context): Intent =
     Intent(context, MainActivity::class.java)
         .setData("emberr://tasks/new".toUri())
         .putExtra(widgetTasksScreenExtra, true)
         .putExtra(widgetNewTaskExtra, true)
-        .putExtra(widgetSpaceIdExtra, spaceId)
         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
 private fun toggleCompletedViewIntent(context: Context, appWidgetId: Int): Intent =

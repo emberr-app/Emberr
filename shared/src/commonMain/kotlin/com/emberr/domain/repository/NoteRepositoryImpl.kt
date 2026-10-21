@@ -210,8 +210,6 @@ class NoteRepositoryImpl(
 
     private fun activeSpaceId(): String = activeSpaceStore.currentActiveSpaceId()
 
-    private fun spaceAndAccount(spaceId: String) = listOf(spaceId, ACCOUNT_SPACE_ID)
-
     private fun dailyCacheKey(spaceId: String, dateString: String) = "$spaceId|$dateString"
 
     // In-memory cache for regular notes keyed by noteId.
@@ -1130,6 +1128,9 @@ class NoteRepositoryImpl(
         }
 
     override suspend fun getNoteById(noteId: String): NoteMetadataEntity? = noteDao.getNoteById(noteId)
+
+    override fun observeNotesByIds(noteIds: List<String>): Flow<List<NoteMetadataEntity>> =
+        noteDao.observeNotesByIds(noteIds)
 
     override fun getAllFolders(): Flow<List<FolderEntity>> = inActiveSpace { folderDao.getAllFolders(it) }
 
@@ -2140,58 +2141,50 @@ class NoteRepositoryImpl(
         val (year, month) = yearMonth.split("-").map { it.toInt() }
         val monthStart = LocalDate(year, month, 1)
         val monthEnd = monthStart.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY)
-        return inActiveSpace { spaceId ->
-            combine(
-                calendarTaskDao.getAllTasksFlow(spaceAndAccount(spaceId)),
-                calendarEventExceptionDao.getAllExceptionsFlow()
-            ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, monthStart, monthEnd) }
-        }
+        return combine(
+            calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow(),
+            calendarEventExceptionDao.getAllExceptionsFlow()
+        ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, monthStart, monthEnd) }
     }
 
     override fun getCalendarTasksForDate(dateString: String): Flow<List<CalendarTaskEntity>> {
         val date = LocalDate.parse(dateString)
-        return inActiveSpace { spaceId ->
-            combine(
-                calendarTaskDao.getAllTasksFlow(spaceAndAccount(spaceId)),
-                calendarEventExceptionDao.getAllExceptionsFlow()
-            ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, date, date) }
-        }
+        return combine(
+            calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow(),
+            calendarEventExceptionDao.getAllExceptionsFlow()
+        ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, date, date) }
     }
 
     override fun getCalendarTasksInRange(startDateString: String, endDateString: String): Flow<List<CalendarTaskEntity>> {
         val startDate = LocalDate.parse(startDateString)
         val endDate = LocalDate.parse(endDateString)
-        return inActiveSpace { spaceId ->
-            combine(
-                calendarTaskDao.getAllTasksFlow(spaceAndAccount(spaceId)),
-                calendarEventExceptionDao.getAllExceptionsFlow()
-            ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, startDate, endDate) }
-        }
+        return combine(
+            calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow(),
+            calendarEventExceptionDao.getAllExceptionsFlow()
+        ) { tasks, exceptions -> expandOccurrences(tasks, exceptions, startDate, endDate) }
     }
 
     override fun getAllTasksFlow(): Flow<List<CalendarTaskEntity>> =
-        inActiveSpace { calendarTaskDao.getAllTasksFlow(spaceAndAccount(it)) }
+        calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow()
 
     override fun getCalendarTasksForSearch(today: LocalDate): Flow<List<CalendarTaskEntity>> =
-        inActiveSpace { spaceId ->
-            combine(
-                calendarTaskDao.getAllTasksFlow(spaceAndAccount(spaceId)),
-                calendarEventExceptionDao.getAllExceptionsFlow()
-            ) { tasks, exceptions ->
-                val exceptionsByKey = exceptions.associateBy { it.blockId to it.occurrenceDate }
-                val cancelledOccurrences = exceptions
-                    .filter { it.isCancelled }
-                    .map { it.blockId to it.occurrenceDate }
-                    .toSet()
-                tasks.flatMap { task ->
-                    val rule = task.toRecurrenceRule() ?: return@flatMap listOf(task)
-                    val anchor = task.targetDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                        ?: return@flatMap emptyList()
-                    val occurrenceDate = RecurrenceEngine.nextOrLastOccurrence(rule, anchor, today) { date ->
-                        (task.blockId to date.toString()) in cancelledOccurrences
-                    } ?: return@flatMap emptyList()
-                    listOfNotNull(occurrenceRow(task, anchor, occurrenceDate, exceptionsByKey[task.blockId to occurrenceDate.toString()]))
-                }
+        combine(
+            calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow(),
+            calendarEventExceptionDao.getAllExceptionsFlow()
+        ) { tasks, exceptions ->
+            val exceptionsByKey = exceptions.associateBy { it.blockId to it.occurrenceDate }
+            val cancelledOccurrences = exceptions
+                .filter { it.isCancelled }
+                .map { it.blockId to it.occurrenceDate }
+                .toSet()
+            tasks.flatMap { task ->
+                val rule = task.toRecurrenceRule() ?: return@flatMap listOf(task)
+                val anchor = task.targetDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: return@flatMap emptyList()
+                val occurrenceDate = RecurrenceEngine.nextOrLastOccurrence(rule, anchor, today) { date ->
+                    (task.blockId to date.toString()) in cancelledOccurrences
+                } ?: return@flatMap emptyList()
+                listOfNotNull(occurrenceRow(task, anchor, occurrenceDate, exceptionsByKey[task.blockId to occurrenceDate.toString()]))
             }
         }
 
@@ -2624,7 +2617,7 @@ class NoteRepositoryImpl(
         return newBlockId
     }
 
-    override fun getIncompleteTasksCount(): Flow<Int> = inActiveSpace { noteDao.getIncompleteTasksCount(spaceAndAccount(it)) }
+    override fun getIncompleteTasksCount(): Flow<Int> = noteDao.getIncompleteTasksCount()
 
     private suspend fun syncMediaReferences(noteId: String, blocks: List<NoteBlock>) {
         mediaReferenceDao.deleteByNoteId(noteId)

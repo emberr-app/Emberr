@@ -149,6 +149,7 @@ interface NoteRepository {
     suspend fun insertFolderInSpace(spaceId: String, folder: FolderEntity)
     suspend fun deleteFolder(folderId: String)
     suspend fun getNoteById(noteId: String): NoteMetadataEntity?
+    fun observeNotesByIds(noteIds: List<String>): Flow<List<NoteMetadataEntity>>
     suspend fun getFoldersModifiedSince(timestamp: Long): List<FolderEntity>
 
     // Applies a folder received from a peer as-is (preserving its own updatedAt/isDeleted) if it's

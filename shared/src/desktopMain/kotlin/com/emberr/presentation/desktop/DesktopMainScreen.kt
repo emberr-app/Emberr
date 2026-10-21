@@ -1896,7 +1896,8 @@ fun DesktopMainScreen(
                 Box(Modifier.fillMaxSize()) {
                     CalendarScreen(
                         onNavigateBack = closeDetailPane,
-                        showBackButton = isSidebarVisible
+                        showBackButton = isSidebarVisible,
+                        onOpenSourceNote = { event -> ReminderClickBus.requestOpen(event.blockId) }
                     )
                 }
             }

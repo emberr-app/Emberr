@@ -13,7 +13,6 @@ import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.emberr.presentation.widget.WidgetLog
-import com.emberr.presentation.widget.readWidgetSpaceId
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
 
@@ -83,8 +82,6 @@ suspend fun pushRenderedCalendar(context: Context, glanceId: GlanceId, content: 
         val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
             .takeIf { it > 0 } ?: fallbackWidgetSideDp
 
-        val pinnedSpaceId = readWidgetSpaceId(context, glanceId)
-
         val rendered = GlanceRemoteViews().compose(
             context = context,
             size = DpSize(widthDp.dp, heightDp.dp)
@@ -92,7 +89,6 @@ suspend fun pushRenderedCalendar(context: Context, glanceId: GlanceId, content: 
             CalendarWidgetBody(
                 context = context,
                 appWidgetId = appWidgetId,
-                spaceId = pinnedSpaceId,
                 content = content
             )
         }
@@ -107,8 +103,7 @@ suspend fun refreshCalendarWidget(context: Context, glanceId: GlanceId) {
     try {
         val contentReader = GlobalContext.get().get<CalendarWidgetContentReader>()
         val shownMonth = readShownMonth(context, glanceId)
-        val spaceId = readWidgetSpaceId(context, glanceId)
-        val freshContent = contentReader.readContentOnce(spaceId, shownMonth) ?: return
+        val freshContent = contentReader.readContentOnce(shownMonth) ?: return
 
         if (freshContent == readCachedCalendar(context, glanceId)) return
 

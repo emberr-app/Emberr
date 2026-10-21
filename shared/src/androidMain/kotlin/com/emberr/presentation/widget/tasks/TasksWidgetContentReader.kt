@@ -3,7 +3,6 @@ package com.emberr.presentation.widget.tasks
 
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.NoteDao
-import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
 import kotlinx.coroutines.Dispatchers
@@ -35,25 +34,22 @@ class TasksWidgetContentReader(
             .flowOn(Dispatchers.IO)
             .catch { cause -> WidgetLog.e("Stopped observing the task list", cause) }
 
-    suspend fun readContentOnce(spaceId: String, isShowingCompleted: Boolean): TasksWidgetContent? =
+    suspend fun readContentOnce(isShowingCompleted: Boolean): TasksWidgetContent? =
         withContext(Dispatchers.IO) {
             val tasks = try {
-                calendarTaskDao.getAllTasks(listOf(spaceId, ACCOUNT_SPACE_ID))
+                calendarTaskDao.getTasksOutsideTrashAcrossSpaces()
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read the task list", cause)
                 return@withContext null
             }
-            buildContent(spaceId, tasks, isShowingCompleted)
+            buildContent(tasks, isShowingCompleted)
         }
 
     suspend fun buildContent(
-        spaceId: String,
         tasks: List<CalendarTaskEntity>,
         isShowingCompleted: Boolean
     ): TasksWidgetContent = withContext(Dispatchers.Default) {
-        val matchingTasks = tasks.filter { task ->
-            (task.spaceId == spaceId || task.spaceId == ACCOUNT_SPACE_ID) && task.isChecked == isShowingCompleted
-        }
+        val matchingTasks = tasks.filter { task -> task.isChecked == isShowingCompleted }
         TasksWidgetContent(
             isShowingCompleted = isShowingCompleted,
             rows = buildRows(matchingTasks)

@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.presentation.settings.SettingsChoice
@@ -261,8 +262,8 @@ fun CalendarSettingsContent(
     onUpdateCategory: (id: String, name: String, colorHex: String) -> Unit,
     onDeleteCategory: (id: String) -> Unit,
     hiddenCategoryVisibilityKeys: Set<String>,
-    noCategoryVisibilityKey: String,
     onToggleCategoryVisibility: (visibilityKey: String) -> Unit,
+    spaces: List<SpaceEntity>,
     modifier: Modifier = Modifier,
     viewMode: CalendarViewMode? = null,
     onViewModeChange: (CalendarViewMode) -> Unit = {}
@@ -300,8 +301,8 @@ fun CalendarSettingsContent(
             onUpdateCategory = onUpdateCategory,
             onDeleteCategory = onDeleteCategory,
             hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
-            noCategoryVisibilityKey = noCategoryVisibilityKey,
             onToggleCategoryVisibility = onToggleCategoryVisibility,
+            spaces = spaces,
             cardColor = cardColor
         )
 

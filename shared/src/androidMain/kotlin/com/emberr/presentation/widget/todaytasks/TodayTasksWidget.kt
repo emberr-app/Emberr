@@ -55,8 +55,6 @@ import com.emberr.presentation.widget.taskBlockIdExtra
 import com.emberr.presentation.widget.taskIsCheckedExtra
 import com.emberr.presentation.widget.widgetDailyDateExtra
 import com.emberr.presentation.widget.widgetDailyScreenExtra
-import com.emberr.presentation.widget.widgetSpaceIdExtra
-import com.emberr.presentation.widget.readWidgetSpaceId
 import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -76,13 +74,11 @@ class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val content = loadAndCacheTodayTasks(context, id) ?: readCachedTodayTasks(context, id)
         val appWidgetId = resolveAppWidgetId(context, id)
-        val spaceId = readWidgetSpaceId(context, id)
 
         provideContent {
             TodayTasksWidgetBody(
                 context = context,
                 appWidgetId = appWidgetId,
-                spaceId = spaceId,
                 content = content
             )
         }
@@ -101,8 +97,7 @@ class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
         id: GlanceId
     ): TodayTasksWidgetContent? {
         val contentReader = runCatching { get<TodayTasksWidgetContentReader>() }.getOrNull() ?: return null
-        val spaceId = readWidgetSpaceId(context, id)
-        val freshContent = contentReader.readContentOnce(spaceId) ?: return null
+        val freshContent = contentReader.readContentOnce() ?: return null
 
         if (freshContent != readCachedTodayTasks(context, id)) {
             writeCachedTodayTasks(context, id, freshContent)
@@ -115,10 +110,9 @@ class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
 internal fun TodayTasksWidgetBody(
     context: Context,
     appWidgetId: Int,
-    spaceId: String,
     content: TodayTasksWidgetContent?
 ) {
-    val openDailyScreen = actionStartActivity(openDailyScreenIntent(context, spaceId))
+    val openDailyScreen = actionStartActivity(openDailyScreenIntent(context))
 
     Column(
         modifier = GlanceModifier
@@ -303,13 +297,12 @@ private fun toggleTaskIntent(
         putExtra(taskIsCheckedExtra, isChecked)
     }
 
-private fun openDailyScreenIntent(context: Context, spaceId: String): Intent {
+private fun openDailyScreenIntent(context: Context): Intent {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
     return Intent(context, MainActivity::class.java)
         .setData("emberr://daily/$today".toUri())
         .putExtra(widgetDailyScreenExtra, true)
         .putExtra(widgetDailyDateExtra, today)
-        .putExtra(widgetSpaceIdExtra, spaceId)
         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 }

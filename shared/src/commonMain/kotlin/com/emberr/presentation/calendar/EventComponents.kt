@@ -126,6 +126,7 @@ import emberr.shared.generated.resources.calendar_day
 import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.doc_text
+import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.link
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.trash
@@ -517,7 +518,9 @@ fun EventEditorSheet(
     onCancelEdit: () -> Unit,
     onSave: () -> Unit,
     onDelete: (() -> Unit)?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    sourceNoteTitle: String? = null,
+    onOpenSourceNote: (() -> Unit)? = null
 ) {
     EmberrBottomSheet(
         expanded = state != null,
@@ -545,7 +548,9 @@ fun EventEditorSheet(
                     onEditClick = onEditClick,
                     onCancel = { if (state.isEditing && state.original != null) onCancelEdit() else closeAnd(onDismiss) },
                     onSave = { if (state.keepsSheetOpenAfterSave()) onSave() else closeAnd(onSave) },
-                    onDelete = onDelete?.let { delete -> { closeAnd(delete) } }
+                    onDelete = onDelete?.let { delete -> { closeAnd(delete) } },
+                    sourceNoteTitle = sourceNoteTitle,
+                    onOpenSourceNote = onOpenSourceNote?.let { open -> { closeAnd(open) } }
                 )
             }
         }
@@ -570,7 +575,9 @@ private fun EventEditorFields(
     onEditClick: () -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
-    onDelete: (() -> Unit)?
+    onDelete: (() -> Unit)?,
+    sourceNoteTitle: String?,
+    onOpenSourceNote: (() -> Unit)?
 ) {
     if (!state.isEditing) {
         EventViewFields(
@@ -578,7 +585,9 @@ private fun EventEditorFields(
             categories = categories,
             onEditClick = onEditClick,
             onDelete = onDelete,
-            onClose = onCancel
+            onClose = onCancel,
+            sourceNoteTitle = sourceNoteTitle,
+            onOpenSourceNote = onOpenSourceNote
         )
         return
     }
@@ -1202,7 +1211,9 @@ private fun EventViewFields(
     categories: List<CalendarCategory>,
     onEditClick: () -> Unit,
     onDelete: (() -> Unit)?,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    sourceNoteTitle: String?,
+    onOpenSourceNote: (() -> Unit)?
 ) {
     val category = categories.firstOrNull { it.id == state.categoryId }
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
@@ -1305,6 +1316,18 @@ private fun EventViewFields(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        if (sourceNoteTitle != null && onOpenSourceNote != null) {
+            EventDetailRow(icon = painterResource(Res.drawable.file_text)) {
+                Text(
+                    text = sourceNoteTitle,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(onClick = onOpenSourceNote)
                 )
             }
         }

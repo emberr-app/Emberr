@@ -25,11 +25,11 @@ class UpcomingEventsWidgetContentReader(
     private val categoryDao: CategoryDao,
     private val clockFormat: WidgetClockFormat,
 ) {
-    suspend fun readContentOnce(spaceId: String): UpcomingEventsWidgetContent? = withContext(Dispatchers.IO) {
+    suspend fun readContentOnce(): UpcomingEventsWidgetContent? = withContext(Dispatchers.IO) {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
         val tasks = try {
-            calendarTaskDao.getUpcomingTasks(listOf(spaceId, ACCOUNT_SPACE_ID), today.toString())
+            calendarTaskDao.getUpcomingTasks(today.toString())
         } catch (cause: Exception) {
             WidgetLog.e("Could not read upcoming events", cause)
             return@withContext null

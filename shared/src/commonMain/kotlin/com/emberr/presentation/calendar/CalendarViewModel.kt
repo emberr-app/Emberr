@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CategoryEntity
+import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CheckboxBlock
@@ -15,7 +16,7 @@ import com.emberr.domain.model.markDeleted
 import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.repository.NoteRepository
-import com.emberr.domain.space.ActiveSpaceStore
+import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.domain.util.sync.SyncCoordinator
@@ -49,7 +50,7 @@ class CalendarViewModel(
     private val repository: NoteRepository,
     private val reminderScheduler: ReminderScheduler,
     private val settingsManager: SettingsManager,
-    private val activeSpaceStore: ActiveSpaceStore
+    private val spaceRepository: SpaceRepository
 ) : ViewModel() {
 
     val categories: StateFlow<List<CalendarCategory>> = repository.getAllCategories()
@@ -66,19 +67,16 @@ class CalendarViewModel(
     val hiddenCategoryVisibilityKeys: StateFlow<Set<String>> = settingsManager.hiddenCalendarCategoriesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsManager.getHiddenCalendarCategories())
 
-    val noCategoryVisibilityKey: StateFlow<String> = activeSpaceStore.activeSpaceId
-        .map { spaceId -> noCategoryVisibilityKeyFor(spaceId) }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, noCategoryVisibilityKeyFor(activeSpaceStore.currentActiveSpaceId()))
+    val spaces: StateFlow<List<SpaceEntity>> = spaceRepository.observeSpaces()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val categoryVisibility: Flow<CalendarCategoryVisibility> = combine(
         hiddenCategoryVisibilityKeys,
-        repository.getAllCategories(),
-        activeSpaceStore.activeSpaceId
-    ) { hiddenKeys, categoryEntities, spaceId ->
+        repository.getAllCategories()
+    ) { hiddenKeys, categoryEntities ->
         CalendarCategoryVisibility(
             hiddenVisibilityKeys = hiddenKeys,
-            existingCategoryIds = categoryEntities.map { it.categoryId }.toSet(),
-            spaceId = spaceId
+            existingCategoryIds = categoryEntities.map { it.categoryId }.toSet()
         )
     }.shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
@@ -158,16 +156,22 @@ class CalendarViewModel(
 
     fun eventsForDate(dateString: String): Flow<List<CalendarEvent>> =
         combine(repository.getCalendarTasksForDate(dateString), categoryVisibility) { tasks, visibility ->
-            tasks.mapNotNull { it.toCalendarEvent() }.filter { event -> visibility.isEventShown(event.categoryId) }
+            tasks.filter { task -> visibility.isEventShown(task) }.mapNotNull { it.toCalendarEvent() }
         }
     fun eventsInRange(startDate: LocalDate, endDate: LocalDate): Flow<List<CalendarEvent>> =
         combine(repository.getCalendarTasksInRange(startDate.toString(), endDate.toString()), categoryVisibility) { tasks, visibility ->
-            tasks.mapNotNull { it.toCalendarEvent() }.filter { event -> visibility.isEventShown(event.categoryId) }
+            tasks.filter { task -> visibility.isEventShown(task) }.mapNotNull { it.toCalendarEvent() }
         }
     fun eventsForMonth(yearMonth: String): Flow<List<CalendarEvent>> =
         combine(repository.getCalendarTasksForMonth(yearMonth), categoryVisibility) { tasks, visibility ->
-            tasks.mapNotNull { it.toCalendarEvent() }.filter { event -> visibility.isEventShown(event.categoryId) }
+            tasks.filter { task -> visibility.isEventShown(task) }.mapNotNull { it.toCalendarEvent() }
         }
+
+    suspend fun sourceNoteTitle(event: CalendarEvent): String? {
+        if (event.sourceType != TaskSource.NOTE) return null
+        val note = runCatching { repository.getNoteById(event.noteId) }.getOrNull() ?: return null
+        return note.title.trim().ifBlank { "Untitled" }
+    }
 
     // Used by the checkbox row's three-dot menu (Daily/Note screens) to look up the CalendarEvent
     // for a tapped blockId. When occurrenceDate is known (the checkbox is a virtual recurring
