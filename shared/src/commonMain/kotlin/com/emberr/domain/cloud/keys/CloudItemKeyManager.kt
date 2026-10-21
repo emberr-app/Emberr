@@ -10,7 +10,7 @@ enum class CloudItemType {
     DAILY,
     CHAT,
     SPACE_LISTS,
-    PERSONAL_LISTS
+    ACCOUNT_LISTS
 }
 
 class CloudItemKeyManager(private val cloudCrypto: CloudCrypto) {
