@@ -7,6 +7,7 @@ import com.emberr.data.local.room.dao.ChatSessionDao
 import com.emberr.data.local.room.dao.SelfHostDeletedApiConfigDao
 import com.emberr.data.local.room.dao.SpaceDao
 import com.emberr.data.local.room.dao.UnappliedSyncChangeDao
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
 import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.ChatSessionEntity
@@ -380,8 +381,8 @@ class SyncRepositoryImpl(
 
                             // Daily notes
                             SyncType.DAILY_NOTE -> {
-                                val remoteMeta =
-                                    json.decodeFromString<NoteMetadataEntity>(decryptedMetaJson)
+                                val remoteMeta = json.decodeFromString<NoteMetadataEntity>(decryptedMetaJson)
+                                    .copy(spaceId = ACCOUNT_SPACE_ID)
                                 val remoteContent = if (!decryptedContentJson.isNullOrEmpty()) {
                                     json.decodeFromString<NoteContent>(decryptedContentJson)
                                 } else NoteContent(blocks = emptyList())

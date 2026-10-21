@@ -725,11 +725,15 @@ class SelfHostSyncEngine(
             val noteIdsSyncedThisPass = mutableSetOf<String>()
             val oldSpaceDailyEntryIdsNotPulled = mutableSetOf<String>()
 
-            suspend fun reconcileCandidate(noteId: String, remoteEntry: SelfHostManifestEntry?) {
+            suspend fun reconcileCandidate(
+                noteId: String,
+                remoteEntry: SelfHostManifestEntry?,
+                readsServerCopyOfDailyNoteFirst: Boolean = false
+            ) {
                 // Lock each note individually for reconciliation.
                 val outcome = reconcileOrSkipBrokenNote(noteId) {
                     withSyncLock {
-                        reconcileNote(noteId, remoteEntry = remoteEntry)
+                        reconcileNote(noteId, remoteEntry = remoteEntry, readsServerCopyOfDailyNoteFirst = readsServerCopyOfDailyNoteFirst)
                     } ?: run {
                         SelfHostSyncLog.d("TextSync: note=$noteId skipped this cycle, SyncCoordinator.mutex busy - will retry next trigger")
                         ReconcileOutcome.LOCK_BUSY
@@ -811,10 +815,14 @@ class SelfHostSyncEngine(
             val dailyEntriesOnServerById = remoteTextEntries
                 .filter { it.entryType == SelfHostEntryType.DAILY }
                 .associateBy { it.entryId }
+            val datesMergedFromOldSpaceDailyFiles = remoteChangedEntries
+                .filter { isLiveOldSpaceDailyEntry(it) && it.entryId !in oldSpaceDailyEntryIdsNotPulled }
+                .mapNotNullTo(HashSet()) { it.dateString }
             val serverEntryByAccountDailyNoteIdToUpload = noteDao.getAllDailyNoteMetadata(ACCOUNT_SPACE_ID)
                 .filter { note ->
                     val isMissingOnServer = manifestEntryIdFor(note) !in dailyEntriesOnServerById
                     note.dateString in accountMerge?.changedDailyNoteDates.orEmpty() ||
+                        note.dateString in datesMergedFromOldSpaceDailyFiles ||
                         (isMissingOnServer && note.noteId !in noteIdsSyncedThisPass)
                 }
                 .associate { note -> note.noteId to dailyEntriesOnServerById[manifestEntryIdFor(note)]?.takeUnless { it.isDeleted } }
@@ -833,7 +841,7 @@ class SelfHostSyncEngine(
                     )
                 }
                 for ((noteId, serverEntry) in serverEntryByNoteIdToUploadAfterMerge) {
-                    reconcileCandidate(noteId, serverEntry)
+                    reconcileCandidate(noteId, serverEntry, readsServerCopyOfDailyNoteFirst = true)
                 }
                 _noteSyncProgress.update { it?.copy(stage = SelfHostSyncStage.FINISHING) }
             }
@@ -1383,7 +1391,11 @@ class SelfHostSyncEngine(
         isDeleted = session.isDeleted
     )
 
-    private suspend fun reconcileNote(candidateId: String, remoteEntry: SelfHostManifestEntry?): ReconcileOutcome {
+    private suspend fun reconcileNote(
+        candidateId: String,
+        remoteEntry: SelfHostManifestEntry?,
+        readsServerCopyOfDailyNoteFirst: Boolean = false
+    ): ReconcileOutcome {
         if (remoteEntry?.isDeleted == true) {
             return applyRemoteTombstone(candidateId, remoteEntry)
         }
@@ -1392,15 +1404,23 @@ class SelfHostSyncEngine(
             val isDaily = remoteEntry?.entryType == SelfHostEntryType.DAILY
             val remoteDateString = remoteEntry?.dateString
             val remoteSpaceId = remoteEntry?.spaceId
+            val isOldSpaceDailyEntry = remoteEntry != null && isLiveOldSpaceDailyEntry(remoteEntry)
 
             val localMetadata = if (isDaily && remoteDateString != null && remoteSpaceId != null) {
-                noteDao.getDailyNoteMetadata(remoteSpaceId, remoteDateString)
+                noteDao.getDailyNoteMetadata(if (isOldSpaceDailyEntry) ACCOUNT_SPACE_ID else remoteSpaceId, remoteDateString)
             } else {
                 noteDao.getNoteById(candidateId)
             }
 
             val remoteJsonWithEtag = when {
-                remoteEntry == null -> null
+                remoteEntry == null -> {
+                    val dailyDateString = localMetadata?.dateString
+                    if (readsServerCopyOfDailyNoteFirst && localMetadata != null && localMetadata.isDaily && dailyDateString != null) {
+                        webDavSyncClient.downloadDailyWithEtag(localMetadata.spaceId, dailyDateString)
+                    } else {
+                        null
+                    }
+                }
                 isDaily -> {
                     val dateString = remoteDateString ?: localMetadata?.dateString
                     val spaceId = remoteSpaceId ?: localMetadata?.spaceId
@@ -1421,17 +1441,15 @@ class SelfHostSyncEngine(
             val newerMetadata = pickNewerMetadata(localMetadata, remoteOps?.metadataUpsert)
                 ?: return ReconcileOutcome.UNCHANGED
 
-            val targetSpaceId = if (newerMetadata.isDaily) localMetadata?.spaceId ?: newerMetadata.spaceId else newerMetadata.spaceId
+            val targetSpaceId = when {
+                isOldSpaceDailyEntry -> ACCOUNT_SPACE_ID
+                newerMetadata.isDaily -> localMetadata?.spaceId ?: newerMetadata.spaceId
+                else -> newerMetadata.spaceId
+            }
             val noteId = localMetadata?.noteId
                 ?: adoptableNoteIdInSpace(remoteOps?.metadataUpsert?.noteId, targetSpaceId)
                 ?: candidateId.takeUnless { isDaily }
                 ?: UUID.randomUUID().toString()
-
-            val mergedMetadata = newerMetadata.copy(
-                noteId = noteId,
-                spaceId = targetSpaceId,
-                kind = localMetadata?.kind ?: newerMetadata.kind
-            )
 
             val localBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(noteId).filter { block ->
                 val belongsToNote = block.noteId == noteId
@@ -1453,6 +1471,15 @@ class SelfHostSyncEngine(
                 remoteIsNewer = remoteOps?.metadataUpsert?.let { remoteMetadata ->
                     localMetadata == null || remoteMetadata.updatedAt > localMetadata.updatedAt
                 } ?: false
+            )
+            val oldSpaceDailyFileChangedThisNote = isOldSpaceDailyEntry &&
+                mergedBlocks.associate { it.blockId to it.updatedAt } != localBlocks.associate { it.blockId to it.updatedAt }
+
+            val mergedMetadata = newerMetadata.copy(
+                noteId = noteId,
+                spaceId = targetSpaceId,
+                kind = localMetadata?.kind ?: newerMetadata.kind,
+                updatedAt = if (oldSpaceDailyFileChangedThisNote) System.currentTimeMillis() else newerMetadata.updatedAt
             )
 
             spaceRepository.ensureSpaceExists(mergedMetadata.spaceId)
@@ -1501,13 +1528,20 @@ class SelfHostSyncEngine(
                 mergedMetadata.spaceId
             )
 
-            adoptRemoteEmbeddingsIfWinning(
-                noteId = noteId,
-                spaceId = mergedMetadata.spaceId,
-                localMetadata = localMetadata,
-                remoteMetadata = remoteOps?.metadataUpsert,
-                remoteEmbeddedBlocks = remoteOps?.embeddedBlocks.orEmpty()
-            )
+            if (!isOldSpaceDailyEntry) {
+                adoptRemoteEmbeddingsIfWinning(
+                    noteId = noteId,
+                    spaceId = mergedMetadata.spaceId,
+                    localMetadata = localMetadata,
+                    remoteMetadata = remoteOps?.metadataUpsert,
+                    remoteEmbeddedBlocks = remoteOps?.embeddedBlocks.orEmpty()
+                )
+            }
+
+            if (isOldSpaceDailyEntry) {
+                SelfHostSyncLog.d("TextSync: ${remoteEntry?.entryId} merged into the account daily note $noteId, uploading it after the account merge")
+                return ReconcileOutcome.SYNCED
+            }
 
             val serverAlreadyHasThisNote = serverAlreadyHasMergedNote(
                 localMetadata = localMetadata,
