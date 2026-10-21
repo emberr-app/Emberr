@@ -3,16 +3,20 @@ package com.emberr.presentation.shared.components
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 
 val LocalEmberrBlurSource = staticCompositionLocalOf<HazeState?> { null }
+
+val isBlurFallbackForced = mutableStateOf(false)
 
 object EmberrBlur {
 
@@ -66,4 +70,6 @@ object EmberrBlur {
 fun Modifier.emberrBlur(
     hazeState: HazeState?,
     style: HazeStyle
-): Modifier = if (hazeState == null) this else hazeEffect(hazeState, style)
+): Modifier = if (hazeState == null) this else hazeEffect(hazeState, style) {
+    blurEnabled = HazeDefaults.blurEnabled() && !isBlurFallbackForced.value
+}

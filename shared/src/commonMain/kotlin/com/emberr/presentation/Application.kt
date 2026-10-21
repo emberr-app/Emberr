@@ -41,9 +41,11 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.daily.DailyScreen
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.onboarding.OnboardingScreen
+import com.emberr.presentation.shared.TopBarFadeStyle
 import com.emberr.presentation.shared.components.EmberrUpdatePeek
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.LocalEmberrBlurSource
+import com.emberr.presentation.shared.components.isBlurFallbackForced
 import com.emberr.presentation.trash.TrashScreen
 import com.emberr.presentation.properties.PropertiesScreen
 import dev.chrisbanes.haze.HazeState
@@ -102,6 +104,12 @@ fun EmberrApp(
     val isDailyNotesEnabled by settingsManager.dailyNotesEnabledFlow.collectAsState(
         initial = settingsManager.isDailyNotesEnabled()
     )
+
+    LaunchedEffect(settingsManager) {
+        settingsManager.topBarFadeStyleFlow.collect { styleName ->
+            isBlurFallbackForced.value = styleName == TopBarFadeStyle.FALLBACK.name
+        }
+    }
 
     LaunchedEffect(Unit) {
         com.emberr.domain.util.eventbus.WidgetNavigationBus.requestedRoutes.collect { requestedRoute ->

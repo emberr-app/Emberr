@@ -43,6 +43,7 @@ import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.TopBarFadeStyle
 import com.emberr.presentation.shared.stableStatusBarsPadding
+import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -244,7 +245,12 @@ private fun rememberTopBarFadeStyle(): TopBarFadeStyle {
         initial = settingsManager.getTopBarFadeStyle()
     )
     return remember(styleName) {
-        runCatching { TopBarFadeStyle.valueOf(styleName) }.getOrDefault(TopBarFadeStyle.BLUR)
+        val savedStyle = runCatching { TopBarFadeStyle.valueOf(styleName) }.getOrDefault(TopBarFadeStyle.BLUR)
+        when {
+            savedStyle == TopBarFadeStyle.FALLBACK -> TopBarFadeStyle.COLOR
+            savedStyle == TopBarFadeStyle.BLUR && !HazeDefaults.blurEnabled() -> TopBarFadeStyle.COLOR
+            else -> savedStyle
+        }
     }
 }
 

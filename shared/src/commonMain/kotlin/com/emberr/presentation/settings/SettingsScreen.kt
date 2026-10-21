@@ -579,7 +579,7 @@ fun SettingsScreen(
             val selectedFadeStyle = topBarFadeStyleFor(topBarFadeStyle)
 
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                TopBarFadeStyle.entries.forEach { option ->
+                TopBarFadeStyle.entries.filter { isDebugBuild || it != TopBarFadeStyle.FALLBACK }.forEach { option ->
                     EmberrBottomSheetOption(
                         label = option.displayName,
                         isSelected = option == selectedFadeStyle,
