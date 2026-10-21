@@ -137,6 +137,45 @@ class NoteRepositoryAccountMoveTest {
     }
 
     @Test
+    fun aBlockInBothCopiesOfADailyNoteKeepsTheNewerVersionEvenWhenThatVersionIsADeletion() = runTest {
+        val dateWithDeletion = "2026-10-22"
+        repository.saveNoteInSpace(
+            DEFAULT_SPACE_ID,
+            noteMetadata("personal-daily", createdAt = 1L, dailyDate = date),
+            NoteContent(blocks = listOf(TextBlock(id = "shared", text = "Old text", updatedAt = 1L)))
+        )
+        repository.saveNoteInSpace(
+            workSpaceId,
+            noteMetadata("work-daily", createdAt = 2L, dailyDate = date),
+            NoteContent(blocks = listOf(TextBlock(id = "shared", text = "New text", updatedAt = 2L)))
+        )
+        repository.saveNoteInSpace(
+            DEFAULT_SPACE_ID,
+            noteMetadata("personal-daily-with-deletion", createdAt = 1L, dailyDate = dateWithDeletion),
+            NoteContent(blocks = listOf(TextBlock(id = "removed", text = "Errand", updatedAt = 1L)))
+        )
+        repository.saveNoteInSpace(
+            workSpaceId,
+            noteMetadata("work-daily-with-deletion", createdAt = 2L, dailyDate = dateWithDeletion),
+            NoteContent(blocks = listOf(TextBlock(id = "removed", text = "Errand", updatedAt = 2L, isDeleted = true)))
+        )
+
+        repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        val blockDao = appDatabase.blockDao()
+        assertEquals("New text", (repository.getDailyNote(date)?.blocks?.single() as TextBlock).text)
+        assertTrue(blockDao.getAllBlocksForNoteIncludingDeleted("personal-daily-with-deletion").single().isDeleted)
+
+        val survivorIds = listOf("personal-daily", "personal-daily-with-deletion")
+        val notesAfterFirstMerge = appDatabase.noteDao().getAllNotesForBackup()
+        val blocksAfterFirstMerge = survivorIds.map { blockDao.getAllBlocksForNoteIncludingDeleted(it) }
+        repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        assertEquals(notesAfterFirstMerge, appDatabase.noteDao().getAllNotesForBackup())
+        assertEquals(blocksAfterFirstMerge, survivorIds.map { blockDao.getAllBlocksForNoteIncludingDeleted(it) })
+    }
+
+    @Test
     fun sameNamedCategoriesInTwoSpacesMergeAndACheckboxInARegularNotePointsToTheSurvivor() = runTest {
         val categoryDao = appDatabase.categoryDao()
         categoryDao.insertOrUpdateCategory(
@@ -257,5 +296,27 @@ class NoteRepositoryAccountMoveTest {
 
         assertTrue(secondMerge.movedSubNoteIds.isEmpty())
         assertEquals(notesAfterFirstMerge, noteDao.getAllNotesForBackup())
+    }
+
+    @Test
+    fun deletingASpaceKeepsADatabaseThatADailyNoteStillShows() = runTest {
+        repository.saveDailyNote(
+            date,
+            NoteContent(blocks = listOf(DatabaseBlock(id = "budget-daily-view", databaseId = "budget", updatedAt = 1L)))
+        )
+        saveDatabaseNoteInWork("budget")
+        repository.saveNoteInSpace(workSpaceId, subNoteMetadata("budget-row", databaseId = "budget"), NoteContent(blocks = emptyList()))
+        repository.saveNoteInSpace(
+            workSpaceId,
+            noteMetadata("plans", createdAt = 1L, dailyDate = null),
+            NoteContent(blocks = listOf(DatabaseBlock(id = "budget-plans-view", databaseId = "budget", updatedAt = 1L)))
+        )
+
+        repository.deleteAllContentInSpace(workSpaceId)
+
+        val noteDao = appDatabase.noteDao()
+        assertEquals(null, noteDao.getNoteById("plans"))
+        val databaseAndRow = listOf(databaseNoteId("budget"), "budget-row")
+        assertEquals(databaseAndRow.map { ACCOUNT_SPACE_ID }, databaseAndRow.map { noteDao.getNoteById(it)?.spaceId })
     }
 }

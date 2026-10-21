@@ -450,20 +450,59 @@ class NoteRepositoryImpl(
         return movedNoteIds
     }
 
+    private val subNotePointerMarkers = listOf(
+        EmbeddedCanvasCleanup.CANVAS_NOTE_ID_FIELD,
+        DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER,
+        LINKED_NOTE_BLOCK_JSON_MARKER
+    )
+
     private suspend fun livePointersToSubNotes(): List<Pair<String, SubNoteGroup>> {
-        val canvasPointers = liveBlocksContaining(EmbeddedCanvasCleanup.CANVAS_NOTE_ID_FIELD)
-            .mapNotNull { (hostNoteId, block) -> (block as? CanvasBlock)?.let { hostNoteId to SubNoteGroup.SingleNote(it.canvasNoteId) } }
-        val databasePointers = liveBlocksContaining(DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER)
-            .mapNotNull { (hostNoteId, block) -> block.shownDatabaseIdOrNull()?.let { hostNoteId to SubNoteGroup.Database(it) } }
-        val linkedNotePointers = liveBlocksContaining(LINKED_NOTE_BLOCK_JSON_MARKER)
-            .mapNotNull { (hostNoteId, block) -> (block as? LinkedNoteBlock)?.let { hostNoteId to SubNoteGroup.SingleNote(it.linkedNoteId) } }
-        return canvasPointers + databasePointers + linkedNotePointers
+        val pointersFromAccountNotes = subNotePointersIn(
+            subNotePointerMarkers.flatMap { marker -> blockDao.findLiveBlocksInSpaceContaining(ACCOUNT_SPACE_ID, marker) }
+        )
+        var idsToLookFor = idsOfPointedGroupsWithMembersOutsideAccount(pointersFromAccountNotes)
+        if (idsToLookFor.isEmpty()) return emptyList()
+
+        val liveBlocksWithPointers = subNotePointerMarkers
+            .flatMap { marker -> blockDao.findBlocksContainingIncludingDeleted(marker) }
+            .filter { !it.isDeleted }
+            .distinctBy { it.noteId to it.blockId }
+        val pointers = LinkedHashSet(pointersFromAccountNotes)
+        val idsAlreadyLookedFor = HashSet<String>()
+        while (idsToLookFor.isNotEmpty()) {
+            idsAlreadyLookedFor += idsToLookFor
+            val ids = idsToLookFor
+            val newPointers = subNotePointersIn(
+                liveBlocksWithPointers.filter { block -> block.noteId in ids || ids.any { it in block.blockDataJson } }
+            ).filter { it !in pointers }
+            pointers += newPointers
+            idsToLookFor = idsOfPointedGroupsWithMembersOutsideAccount(newPointers) - idsAlreadyLookedFor
+        }
+        return pointers.toList()
     }
 
-    private suspend fun liveBlocksContaining(blockJsonMarker: String): List<Pair<String, NoteBlock>> =
-        blockDao.findBlocksContainingIncludingDeleted(blockJsonMarker)
-            .filter { !it.isDeleted }
-            .mapNotNull { entity -> decodeBlockOrNull(entity.blockDataJson)?.takeUnless { it.isDeleted }?.let { entity.noteId to it } }
+    private fun subNotePointersIn(blocks: List<NoteBlockEntity>): List<Pair<String, SubNoteGroup>> =
+        blocks.distinctBy { it.noteId to it.blockId }.mapNotNull { entity ->
+            val group = when (val block = decodeBlockOrNull(entity.blockDataJson)?.takeUnless { it.isDeleted }) {
+                is CanvasBlock -> SubNoteGroup.SingleNote(block.canvasNoteId)
+                is LinkedNoteBlock -> SubNoteGroup.SingleNote(block.linkedNoteId)
+                else -> block?.shownDatabaseIdOrNull()?.let { SubNoteGroup.Database(it) }
+            }
+            group?.let { entity.noteId to it }
+        }
+
+    private suspend fun idsOfPointedGroupsWithMembersOutsideAccount(pointers: List<Pair<String, SubNoteGroup>>): Set<String> {
+        val pointedNoteIds = pointers.mapNotNull { (_, group) -> (group as? SubNoteGroup.SingleNote)?.noteId }.distinct()
+        val notesById = noteDao.getNotesByIdsIncludingTemplates(pointedNoteIds).associateBy { it.noteId }
+        val ids = HashSet<String>()
+        for (group in pointers.mapNotNullTo(HashSet()) { (_, group) -> groupContaining(group, notesById) }) {
+            val members = membersOf(group, notesById)
+            if (members.all { it.spaceId == ACCOUNT_SPACE_ID }) continue
+            members.mapTo(ids) { it.noteId }
+            if (group is SubNoteGroup.Database) ids += group.databaseId
+        }
+        return ids
+    }
 
     private fun groupContaining(group: SubNoteGroup, notesById: Map<String, NoteMetadataEntity>): SubNoteGroup? {
         if (group !is SubNoteGroup.SingleNote) return group
@@ -538,20 +577,26 @@ class NoteRepositoryImpl(
         val mergedAwayNotes = notesOnDate.filter { it.noteId != survivor.noteId }.sortedWith(oldestNoteFirst)
 
         val survivorBlocks = blockDao.getAllBlocksForNoteIncludingDeleted(survivor.noteId)
-        val blockIdsInSurvivor = survivorBlocks.mapTo(HashSet()) { it.blockId }
+        val keptBlockById = survivorBlocks.associateByTo(HashMap()) { it.blockId }
         var nextDisplayOrder = (survivorBlocks.maxOfOrNull { it.displayOrder } ?: -1) + 1
-        val addedBlocks = mutableListOf<NoteBlockEntity>()
+        val changedBlockById = LinkedHashMap<String, NoteBlockEntity>()
         for (note in mergedAwayNotes) {
             for (block in blockDao.getAllBlocksForNoteIncludingDeleted(note.noteId)) {
-                if (!blockIdsInSurvivor.add(block.blockId)) continue
-                addedBlocks.add(block.copy(noteId = survivor.noteId, displayOrder = nextDisplayOrder++))
+                val keptBlock = keptBlockById[block.blockId]
+                val blockToKeep = when {
+                    keptBlock == null -> block.copy(noteId = survivor.noteId, displayOrder = nextDisplayOrder++)
+                    block.updatedAt > keptBlock.updatedAt -> block.copy(noteId = survivor.noteId, displayOrder = keptBlock.displayOrder)
+                    else -> continue
+                }
+                keptBlockById[block.blockId] = blockToKeep
+                changedBlockById[block.blockId] = blockToKeep
             }
         }
-        if (addedBlocks.isNotEmpty()) blockDao.insertOrUpdateBlocks(addedBlocks)
+        if (changedBlockById.isNotEmpty()) blockDao.insertOrUpdateBlocks(changedBlockById.values.toList())
 
         val movedSurvivor = survivor.copy(
             spaceId = ACCOUNT_SPACE_ID,
-            updatedAt = if (addedBlocks.isEmpty()) survivor.updatedAt else System.currentTimeMillis(),
+            updatedAt = if (changedBlockById.isEmpty()) survivor.updatedAt else System.currentTimeMillis(),
             filePath = ""
         )
         noteDao.insertOrUpdateMetadata(movedSurvivor)
@@ -595,20 +640,20 @@ class NoteRepositoryImpl(
     private class CategoryMoveToAccount(val dailyNoteDatesPointedToSurvivors: Set<String>)
 
     private suspend fun moveCategoriesToAccount(): CategoryMoveToAccount? {
-        val categoriesOutsideAccount = categoryDao.getCategoriesOutsideSpaceIncludingDeleted(ACCOUNT_SPACE_ID)
-        if (categoriesOutsideAccount.isEmpty()) return null
-        val categoryIdsOutsideAccount = categoriesOutsideAccount.mapTo(HashSet()) { it.categoryId }
+        val categoryIdsOutsideAccount = categoryDao.getCategoriesOutsideSpaceIncludingDeleted(ACCOUNT_SPACE_ID)
+            .mapTo(HashSet()) { it.categoryId }
 
         val survivorIdByRemovedId = mutableMapOf<String, String>()
         categoryDao.getAllCategoriesOnceAcrossSpaces()
             .groupBy { it.name.trim().lowercase() }
             .values
-            .filter { sameNamed -> sameNamed.size > 1 && sameNamed.any { it.categoryId in categoryIdsOutsideAccount } }
+            .filter { sameNamed -> sameNamed.size > 1 }
             .forEach { sameNamed ->
                 val survivor = sameNamed.minWith(compareBy<CategoryEntity> { it.createdAt }.thenBy { it.categoryId })
                 sameNamed.filter { it.categoryId != survivor.categoryId }
                     .forEach { removed -> survivorIdByRemovedId[removed.categoryId] = survivor.categoryId }
             }
+        if (categoryIdsOutsideAccount.isEmpty() && survivorIdByRemovedId.isEmpty()) return null
 
         val dailyNoteDatesPointedToSurvivors = LinkedHashSet<String>()
         for ((removedId, survivorId) in survivorIdByRemovedId) {
@@ -1156,6 +1201,10 @@ class NoteRepositoryImpl(
 
     override suspend fun deleteAllContentInSpace(spaceId: String) {
         withContext(Dispatchers.IO) {
+            noteDao.getAllNotesForBackup()
+                .filter { it.spaceId == spaceId && !it.isSubNote }
+                .forEach { note -> deleteNote(note.noteId, note.filePath) }
+            SyncCoordinator.mutex.withLock { moveSubNotesOfAccountNotesToAccount() }
             noteDao.getAllNotesForBackup()
                 .filter { it.spaceId == spaceId }
                 .forEach { note -> deleteNote(note.noteId, note.filePath) }
@@ -2344,6 +2393,7 @@ class NoteRepositoryImpl(
 
     override suspend fun toggleTaskCompletion(blockId: String, isChecked: Boolean) =
         withContext(Dispatchers.IO) {
+            waitUntilDailyNotesAreInAccount()
             SyncCoordinator.mutex.withLock {
                 val task = calendarTaskDao.getTaskById(blockId) ?: return@withLock
                 val blocks = loadOwnerBlocks(task)

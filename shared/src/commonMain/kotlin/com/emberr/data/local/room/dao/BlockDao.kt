@@ -37,6 +37,13 @@ interface BlockDao {
     suspend fun findBlocksContainingIncludingDeleted(text: String): List<NoteBlockEntity>
 
     @Query(
+        "SELECT * FROM note_blocks WHERE isDeleted = 0 " +
+            "AND blockDataJson LIKE '%' || :text || '%' " +
+            "AND noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId)"
+    )
+    suspend fun findLiveBlocksInSpaceContaining(spaceId: String, text: String): List<NoteBlockEntity>
+
+    @Query(
         "SELECT note_blocks.* FROM note_blocks " +
             "INNER JOIN notes_metadata ON notes_metadata.noteId = note_blocks.noteId " +
             "WHERE notes_metadata.databaseId = :databaseId AND notes_metadata.trashedAt IS NULL " +
