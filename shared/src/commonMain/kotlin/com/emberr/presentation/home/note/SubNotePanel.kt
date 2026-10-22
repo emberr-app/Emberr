@@ -27,6 +27,7 @@ import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
 import com.emberr.presentation.shared.components.TopHeaderBarTopPadding
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
@@ -164,23 +165,25 @@ fun SubNotePanel(
                 background = if (isExpanded) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface
             )
             MaterialTheme(colorScheme = panelColorScheme) {
-                NoteScreen(
-                    noteId = noteId,
-                    onNavigateBack = dismiss,
-                    onPickImage = onPickImage,
-                    onTakePhoto = onTakePhoto,
-                    onPickDocument = onPickDocument,
-                    onOpenFile = onOpenFile,
-                    onExportMarkdown = onExportMarkdown,
-                    onExportPdf = onExportPdf,
-                    externalHazeState = hazeState,
-                    topBarContentColor = topBarContentColor,
-                    topBarButtonHazeStyle = topBarButtonHazeStyle,
-                    onNavigateToEditor = { nestedId ->
-                        innerPanelNoteId = nestedId
-                        showInnerPanel = true
-                    }
-                )
+                CompositionLocalProvider(LocalDesktopSidebarToggle provides null) {
+                    NoteScreen(
+                        noteId = noteId,
+                        onNavigateBack = dismiss,
+                        onPickImage = onPickImage,
+                        onTakePhoto = onTakePhoto,
+                        onPickDocument = onPickDocument,
+                        onOpenFile = onOpenFile,
+                        onExportMarkdown = onExportMarkdown,
+                        onExportPdf = onExportPdf,
+                        externalHazeState = hazeState,
+                        topBarContentColor = topBarContentColor,
+                        topBarButtonHazeStyle = topBarButtonHazeStyle,
+                        onNavigateToEditor = { nestedId ->
+                            innerPanelNoteId = nestedId
+                            showInnerPanel = true
+                        }
+                    )
+                }
 
                 if (showInnerPanel && innerPanelNoteId != null) {
                     SubNotePanel(
@@ -200,6 +203,7 @@ fun SubNotePanel(
 
             EmberrTopHeaderBar(
                 modifier = Modifier.align(Alignment.TopStart),
+                showsSidebarToggle = false,
                 backIcon = (if (isExpanded) painterResource(Res.drawable.minimize_2) else painterResource(Res.drawable.maximize_2)).scaledDown(0.8f),
                 backContentDescription = if (isExpanded) "Collapse panel" else "Expand panel",
                 backTooltip = if (isExpanded) "Collapse panel" else "Expand panel",

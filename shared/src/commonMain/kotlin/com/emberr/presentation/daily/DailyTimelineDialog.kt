@@ -287,6 +287,7 @@ private fun TimelineHeader(
 
     EmberrTopHeaderBar(
         modifier = modifier.onSizeChanged { headerHeightPx = it.height },
+        showsSidebarToggle = false,
         title = "Timeline",
         titlePlacement = TopHeaderTitlePlacement.Start,
         showBackButton = false,
