@@ -491,7 +491,7 @@ fun CalendarScreen(
                     centerContent = {
                         if (isDesktopPlatform) {
                             Box(
-                                modifier = Modifier.weight(1f).padding(start = 16.dp, end = 16.dp),
+                                modifier = Modifier.weight(1f).padding(start = 24.dp, end = 16.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 CalendarTitle(
@@ -1014,7 +1014,9 @@ private fun CalendarTimeGrid(
 
     Box(
         modifier = modifier
+            .swipeDatesWithTrackpad(onSwipePrevious = onSwipePreviousDay, onSwipeNext = onSwipeNextDay)
             .pointerInput(Unit) {
+                if (isDesktopPlatform) return@pointerInput
                 detectHorizontalDragGestures(
                     onDragStart = { accumulatedDragPx = 0f },
                     onHorizontalDrag = { change, dragAmount ->
@@ -1421,7 +1423,9 @@ private fun MultiDayTimeGrid(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .swipeDatesWithTrackpad(onSwipePrevious = onSwipePrevious, onSwipeNext = onSwipeNext)
             .pointerInput(dayCount) {
+                if (isDesktopPlatform) return@pointerInput
                 detectHorizontalDragGestures(
                     onDragStart = { accumulatedDragPx = 0f },
                     onHorizontalDrag = { change, dragAmount ->
@@ -1643,7 +1647,9 @@ private fun MonthGrid(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .swipeDatesWithTrackpad(onSwipePrevious = onSwipePreviousMonth, onSwipeNext = onSwipeNextMonth)
             .pointerInput(Unit) {
+                if (isDesktopPlatform) return@pointerInput
                 detectHorizontalDragGestures(
                     onDragStart = { accumulatedDragPx = 0f },
                     onHorizontalDrag = { change, dragAmount ->
