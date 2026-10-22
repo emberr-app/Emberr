@@ -105,8 +105,23 @@ fun EmberrChoiceValueMenu(
     onMenuOpenChange: (Boolean) -> Unit,
     menuContent: @Composable (closeMenuAnd: (() -> Unit) -> Unit) -> Unit
 ) {
+    EmberrChoiceMenu(
+        isMenuOpen = isMenuOpen,
+        onMenuOpenChange = onMenuOpenChange,
+        anchor = { ChoiceValueButton(value = value, isMenuOpen = isMenuOpen, onClick = { onMenuOpenChange(true) }) },
+        menuContent = menuContent
+    )
+}
+
+@Composable
+fun EmberrChoiceMenu(
+    isMenuOpen: Boolean,
+    onMenuOpenChange: (Boolean) -> Unit,
+    anchor: @Composable () -> Unit,
+    menuContent: @Composable (closeMenuAnd: (() -> Unit) -> Unit) -> Unit
+) {
     Box {
-        ChoiceValueButton(value = value, isMenuOpen = isMenuOpen, onClick = { onMenuOpenChange(true) })
+        anchor()
         if (isDesktopPlatform) {
             EmberrDesktopMenu(
                 expanded = isMenuOpen,

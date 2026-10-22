@@ -7,6 +7,9 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -42,6 +45,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -96,6 +100,10 @@ import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrChoiceMenu
+import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
+import com.emberr.presentation.shared.components.LocalTopHeaderButtonTint
+import com.emberr.presentation.shared.components.flippedHorizontally
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopEdgeBlurHeight
 import com.emberr.presentation.shared.components.TopEdgeGradientHeight
@@ -108,6 +116,7 @@ import com.emberr.presentation.shared.components.smoothWheelScroll
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.cog
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.sidebar
@@ -145,6 +154,7 @@ internal val calendarViewModeLabels = listOf(
 )
 
 private val CalendarTitleHeight = 52.dp
+private const val SidePanelAnimationMillis = 280
 private val DayCalendarTitleHeight = 72.dp
 
 @Composable
@@ -203,12 +213,6 @@ fun CalendarScreen(
     val density = LocalDensity.current
     var topBarHeightPx by remember { mutableFloatStateOf(0f) }
     val topBarHeightDp = with(density) { topBarHeightPx.toDp() }
-    var isTopBarMeasuredInDayView by remember { mutableStateOf(false) }
-    val sidePanelTop = if (isTopBarMeasuredInDayView) {
-        topBarHeightDp - (DayCalendarTitleHeight - CalendarTitleHeight)
-    } else {
-        topBarHeightDp
-    }
     var timelineHeaderHeightPx by remember { mutableFloatStateOf(0f) }
     val timelineHeaderHeightDp = with(density) { timelineHeaderHeightPx.toDp() }
     var allDayListDate by remember { mutableStateOf<LocalDate?>(null) }
@@ -260,7 +264,19 @@ fun CalendarScreen(
     SideEffect {
         eventMoveTracker.visibleDates = if (viewMode == CalendarViewMode.DAY) listOf(selectedDate) else multiDayDates
     }
-    val sidePanelSpace = if (isDesktopPlatform) CalendarSidePanelWidth + CalendarSidePanelContentGap else 0.dp
+    val isSidePanelVisible by viewModel.isSidePanelVisible.collectAsState()
+    val sidebarIcon = painterResource(Res.drawable.sidebar)
+    val sidePanelIcon = remember(sidebarIcon) { sidebarIcon.flippedHorizontally() }
+    val showsSidePanel = isDesktopPlatform && isSidePanelVisible
+    val sidePanelSpace by animateDpAsState(
+        targetValue = when {
+            showsSidePanel -> CalendarSidePanelWidth + CalendarSidePanelContentGap
+            isDesktopPlatform || viewMode != CalendarViewMode.MONTH -> CalendarSidePanelContentGap
+            else -> 0.dp
+        },
+        animationSpec = tween(SidePanelAnimationMillis, easing = FastOutSlowInEasing),
+        label = "CalendarSidePanelSpace"
+    )
 
     val onEventMove: (EventMovePreview) -> Unit = { move ->
         val targetDateString = move.targetDate.toString()
@@ -446,10 +462,7 @@ fun CalendarScreen(
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
                     .zIndex(10f)
-                    .onGloballyPositioned { coordinates ->
-                        topBarHeightPx = coordinates.size.height.toFloat()
-                        isTopBarMeasuredInDayView = viewMode == CalendarViewMode.DAY
-                    }
+                    .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
                     .pointerInput(Unit) { detectTapGestures {} }
             ) {
                 EmberrTopHeaderBar(
@@ -476,11 +489,22 @@ fun CalendarScreen(
                     backTooltip = "Back",
                     onBackClick = onNavigateBack,
                     centerContent = {
-                        CalendarTitle(
-                            selectedDate = selectedDate,
-                            viewMode = viewMode,
-                            slideDirection = slideDirection
-                        )
+                        if (isDesktopPlatform) {
+                            Box(
+                                modifier = Modifier.weight(1f).padding(start = 16.dp, end = 16.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                CalendarTitle(
+                                    selectedDate = selectedDate,
+                                    viewMode = viewMode
+                                )
+                            }
+                        } else {
+                            CalendarTitle(
+                                selectedDate = selectedDate,
+                                viewMode = viewMode
+                            )
+                        }
                     },
                     actions = {
                         Row(horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) 12.dp else 8.dp)) {
@@ -511,6 +535,16 @@ fun CalendarScreen(
                                     viewMode = viewMode,
                                     onViewModeChange = viewModel::setViewMode,
                                     hazeState = internalHazeState
+                                )
+                                TopBarIconButton(
+                                    icon = sidePanelIcon,
+                                    contentDescription = if (isSidePanelVisible) "Hide calendar panel" else "Show calendar panel",
+                                    bgColor = Color.Transparent,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    hazeState = internalHazeState,
+                                    hazeStyle = EmberrBlur.Regular,
+                                    tooltip = if (isSidePanelVisible) "Hide calendar panel" else "Show calendar panel",
+                                    onClick = viewModel::toggleSidePanel
                                 )
                             }
                             TopBarIconButton(
@@ -571,14 +605,23 @@ fun CalendarScreen(
                 )
             }
 
-            if (isDesktopPlatform) {
+            AnimatedVisibility(
+                visible = showsSidePanel,
+                enter = slideInHorizontally(tween(SidePanelAnimationMillis, easing = FastOutSlowInEasing)) { width -> -width } +
+                        fadeIn(tween(SidePanelAnimationMillis)),
+                exit = slideOutHorizontally(tween(SidePanelAnimationMillis, easing = FastOutSlowInEasing)) { width -> -width } +
+                        fadeOut(tween(SidePanelAnimationMillis)),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .zIndex(12f)
+                    .padding(top = topBarHeightDp)
+            ) {
                 CalendarSidePanel(
                     selectedDate = selectedDate,
                     visibleDates = when (viewMode) {
                         CalendarViewMode.DAY, CalendarViewMode.MONTH -> listOf(selectedDate)
                         else -> multiDayDates
                     },
-                    viewModel = viewModel,
                     categories = categories,
                     hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
                     spaces = spaces,
@@ -590,11 +633,7 @@ fun CalendarScreen(
                         }
                         selectedDate = date
                     },
-                    onToggleVisibility = viewModel::toggleCategoryVisibility,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .zIndex(12f)
-                        .padding(top = sidePanelTop)
+                    onToggleVisibility = viewModel::toggleCategoryVisibility
                 )
             }
 
@@ -756,22 +795,22 @@ fun CalendarScreen(
 @Composable
 private fun CalendarTitle(
     selectedDate: LocalDate,
-    viewMode: CalendarViewMode,
-    slideDirection: AnimatedContentTransitionScope.SlideDirection
+    viewMode: CalendarViewMode
 ) {
     val titleColor = MaterialTheme.colorScheme.onSurface
 
     AnimatedContent(
         targetState = selectedDate,
-        transitionSpec = {
-            (slideIntoContainer(slideDirection, tween(300, easing = FastOutSlowInEasing)) + fadeIn(tween(300))) togetherWith
-                    (slideOutOfContainer(slideDirection, tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300)))
-        },
+        transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
         contentKey = { date -> if (viewMode == CalendarViewMode.MONTH) monthKey(date) else date },
         label = "CalendarTitleTransition",
-        modifier = Modifier.height(if (viewMode == CalendarViewMode.DAY) DayCalendarTitleHeight else CalendarTitleHeight)
+        modifier = Modifier.height(
+            if (viewMode == CalendarViewMode.DAY && !isDesktopPlatform) DayCalendarTitleHeight else CalendarTitleHeight
+        )
     ) { date ->
-        Box(
+        if (isDesktopPlatform) {
+            DesktopCalendarTitleLine(date = date, viewMode = viewMode, titleColor = titleColor)
+        } else Box(
             modifier = Modifier.fillMaxHeight(),
             contentAlignment = Alignment.TopCenter
         ) {
@@ -806,6 +845,42 @@ private fun CalendarTitle(
             }
         }
     }
+}
+
+@Composable
+private fun DesktopCalendarTitleLine(
+    date: LocalDate,
+    viewMode: CalendarViewMode,
+    titleColor: Color
+) {
+    Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.TopStart) {
+        Row(
+            modifier = Modifier.height(TopHeaderBarButtonSize),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (viewMode == CalendarViewMode.MONTH) formatMonthYear(date) else formatLongDate(date),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = titleColor,
+                maxLines = 1
+            )
+            if (viewMode != CalendarViewMode.MONTH) {
+                Text(
+                    text = formatDayOfWeek(date),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = titleColor.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+private fun formatLongDate(date: LocalDate): String {
+    val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
+    return "$monthName ${date.day}${ordinalSuffix(date.day)}, ${date.year}"
 }
 
 @Composable
@@ -1843,47 +1918,59 @@ private fun CalendarViewModeSwitcher(
     onViewModeChange: (CalendarViewMode) -> Unit,
     hazeState: HazeState
 ) {
-    Surface(
-        shape = CircleShape,
-        color = Color.Transparent,
-        modifier = Modifier
-            .height(TopHeaderBarButtonSize)
-            .emberrBorder(CircleShape)
-            .customEmberrShadow(CircleShape, elevation = EmberrShadowElevation.Standard)
-            .clip(CircleShape)
-            .emberrBlur(hazeState, EmberrBlur.Regular)
-    ) {
-        Row(
-            modifier = Modifier.padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            calendarViewModeLabels.forEach { (mode, label) ->
-                val isSelected = viewMode == mode
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .clip(CircleShape)
-                        .background(if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { onViewModeChange(mode) }
-                        .padding(horizontal = 14.dp)
+    var isMenuOpen by remember { mutableStateOf(false) }
+    val currentLabel = calendarViewModeLabels.first { (mode, _) -> mode == viewMode }.second
+    val headerTint = LocalTopHeaderButtonTint.current
+    val pillBlurStyle = if (headerTint.fadeProgress > 0f) {
+        EmberrBlur.headerFadeTint(headerTint.fadeProgress, headerTint.fullTintAlpha)
+    } else {
+        EmberrBlur.Regular
+    }
+
+    EmberrChoiceMenu(
+        isMenuOpen = isMenuOpen,
+        onMenuOpenChange = { isOpen -> isMenuOpen = isOpen },
+        anchor = {
+            Surface(
+                shape = CircleShape,
+                color = Color.Transparent,
+                modifier = Modifier
+                    .height(TopHeaderBarButtonSize)
+                    .emberrBorder(CircleShape)
+                    .customEmberrShadow(CircleShape, elevation = EmberrShadowElevation.Standard)
+                    .clip(CircleShape)
+                    .emberrBlur(hazeState, pillBlurStyle)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { isMenuOpen = true }
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxHeight().padding(start = 18.dp, end = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = label,
+                        text = currentLabel,
                         style = MaterialTheme.typography.labelLarge,
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                        },
+                        color = MaterialTheme.colorScheme.primary,
                         maxLines = 1
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.chevron_down),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 6.dp).size(16.dp)
                     )
                 }
             }
+        }
+    ) { closeMenuAnd ->
+        calendarViewModeLabels.forEach { (mode, label) ->
+            EmberrDesktopMenuOption(
+                label = label,
+                isSelected = mode == viewMode,
+                onClick = { closeMenuAnd { onViewModeChange(mode) } }
+            )
         }
     }
 }

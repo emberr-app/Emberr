@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -33,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,7 +78,6 @@ private const val MiniMonthVisibleDaysAlpha = 0.12f
 internal fun CalendarSidePanel(
     selectedDate: LocalDate,
     visibleDates: List<LocalDate>,
-    viewModel: CalendarViewModel,
     categories: List<CalendarCategory>,
     hiddenCategoryVisibilityKeys: Set<String>,
     spaces: List<SpaceEntity>,
@@ -108,8 +105,6 @@ internal fun CalendarSidePanel(
             MiniMonthCalendar(
                 selectedDate = selectedDate,
                 visibleDates = visibleDates,
-                viewModel = viewModel,
-                categories = categories,
                 onDateClick = onDateClick
             )
 
@@ -154,8 +149,6 @@ internal fun CalendarSidePanel(
 private fun MiniMonthCalendar(
     selectedDate: LocalDate,
     visibleDates: List<LocalDate>,
-    viewModel: CalendarViewModel,
-    categories: List<CalendarCategory>,
     onDateClick: (LocalDate) -> Unit
 ) {
     var shownMonth by remember(selectedDate) { mutableStateOf(LocalDate(selectedDate.year, selectedDate.month, 1)) }
@@ -221,8 +214,6 @@ private fun MiniMonthCalendar(
             MiniMonthGrid(
                 month = month,
                 visibleDates = visibleDates,
-                viewModel = viewModel,
-                categories = categories,
                 onDateClick = onDateClick
             )
         }
@@ -233,8 +224,6 @@ private fun MiniMonthCalendar(
 private fun MiniMonthGrid(
     month: LocalDate,
     visibleDates: List<LocalDate>,
-    viewModel: CalendarViewModel,
-    categories: List<CalendarCategory>,
     onDateClick: (LocalDate) -> Unit
 ) {
     val today = remember { Clock.System.todayIn(TimeZone.currentSystemDefault()) }
@@ -242,15 +231,6 @@ private fun MiniMonthGrid(
     val gridDates = remember(month, firstDayOfWeek) {
         val gridStart = month.startOfWeek(firstDayOfWeek)
         (0 until MiniMonthWeekCount * 7).map { offset -> gridStart.plus(offset.toLong(), DateTimeUnit.DAY) }
-    }
-    val gridEvents by remember(gridDates) { viewModel.eventsInRange(gridDates.first(), gridDates.last()) }
-        .collectAsState(initial = emptyList())
-    val firstEventByDate = remember(gridEvents) {
-        gridEvents
-            .sortedBy { event -> event.reminderTimestamp }
-            .flatMap { event -> event.datesShownOn().map { date -> date to event } }
-            .distinctBy { (date, _) -> date }
-            .toMap()
     }
     val visibleDateSet = remember(visibleDates) { visibleDates.toSet() }
 
@@ -262,7 +242,6 @@ private fun MiniMonthGrid(
             Row(modifier = Modifier.fillMaxWidth().height(MiniMonthCellHeight)) {
                 week.forEachIndexed { index, date ->
                     val isVisible = date in visibleDateSet
-                    val firstEvent = firstEventByDate[date]
                     MiniMonthDayCell(
                         date = date,
                         isInShownMonth = date.month == month.month,
@@ -270,10 +249,6 @@ private fun MiniMonthGrid(
                         isVisible = isVisible,
                         joinsPreviousDay = isVisible && index > 0 && week[index - 1] in visibleDateSet,
                         joinsNextDay = isVisible && index < week.lastIndex && week[index + 1] in visibleDateSet,
-                        eventColor = firstEvent?.let { event ->
-                            categories.firstOrNull { it.id == event.categoryId }?.colorHex?.toCategoryColor()
-                                ?: MaterialTheme.colorScheme.outline
-                        },
                         onClick = { onDateClick(date) },
                         modifier = Modifier.weight(1f).fillMaxHeight()
                     )
@@ -291,7 +266,6 @@ private fun MiniMonthDayCell(
     isVisible: Boolean,
     joinsPreviousDay: Boolean,
     joinsNextDay: Boolean,
-    eventColor: Color?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -317,13 +291,12 @@ private fun MiniMonthDayCell(
     }
     val outsideMonthAlpha = if (isInShownMonth) 1f else 0.3f
 
-    Column(
+    Box(
         modifier = modifier
             .clip(cellShape)
             .background(cellColor)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
@@ -345,16 +318,6 @@ private fun MiniMonthDayCell(
                 }
             )
         }
-
-        Box(
-            modifier = Modifier
-                .padding(top = 2.dp)
-                .size(4.dp)
-                .then(
-                    if (eventColor != null) Modifier.background(eventColor.copy(alpha = outsideMonthAlpha), CircleShape)
-                    else Modifier
-                )
-        )
     }
 }
 

@@ -63,6 +63,15 @@ class CalendarViewModel(
         settingsManager.saveCalendarViewMode(mode.name)
     }
 
+    private val _isSidePanelVisible = MutableStateFlow(settingsManager.isCalendarSidePanelVisible())
+    val isSidePanelVisible: StateFlow<Boolean> = _isSidePanelVisible.asStateFlow()
+
+    fun toggleSidePanel() {
+        val isVisible = !_isSidePanelVisible.value
+        _isSidePanelVisible.value = isVisible
+        settingsManager.saveCalendarSidePanelVisible(isVisible)
+    }
+
     val hiddenCategoryVisibilityKeys: StateFlow<Set<String>> = settingsManager.hiddenCalendarCategoriesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsManager.getHiddenCalendarCategories())
 
