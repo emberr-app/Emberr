@@ -340,6 +340,8 @@ class AndroidSettingsManager(
     override fun saveDesktopSidebarWidth(width: Float) { /* desktop-only */ }
     override fun isDesktopSidebarVisible(): Boolean = true
     override fun saveDesktopSidebarVisible(visible: Boolean) { }
+    override fun isCalendarSidePanelVisible(): Boolean = true
+    override fun saveCalendarSidePanelVisible(visible: Boolean) { }
 
     private val _calendarViewMode = MutableStateFlow(
         sharedPreferences.getString(SyncConstants.KEY_CALENDAR_VIEW_MODE, SyncConstants.DEFAULT_CALENDAR_VIEW_MODE)

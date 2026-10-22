@@ -97,6 +97,8 @@ interface SettingsManager {
     fun saveDesktopSidebarWidth(width: Float)
     fun isDesktopSidebarVisible(): Boolean
     fun saveDesktopSidebarVisible(visible: Boolean)
+    fun isCalendarSidePanelVisible(): Boolean
+    fun saveCalendarSidePanelVisible(visible: Boolean)
 
     // Remembers which calendar view (day/3-day/week/month) was last selected.
     val calendarViewModeFlow: Flow<String>
