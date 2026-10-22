@@ -63,7 +63,7 @@ val TopEdgeGradientHeight = 200.dp
 
 private const val TopEdgeGradientStopCount = 24
 
-val TopEdgeBlurHeight = 140.dp
+val TopEdgeBlurHeight = if (isDesktopPlatform) 100.dp else 140.dp
 
 data class TopHeaderButtonTint(val fadeProgress: Float, val fullTintAlpha: Float)
 
