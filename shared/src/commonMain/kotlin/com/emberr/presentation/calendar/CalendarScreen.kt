@@ -271,7 +271,7 @@ fun CalendarScreen(
     val sidePanelSpace by animateDpAsState(
         targetValue = when {
             showsSidePanel -> CalendarSidePanelWidth + CalendarSidePanelContentGap
-            isDesktopPlatform || viewMode != CalendarViewMode.MONTH -> CalendarSidePanelContentGap
+            isDesktopPlatform -> CalendarSidePanelContentGap
             else -> 0.dp
         },
         animationSpec = tween(SidePanelAnimationMillis, easing = FastOutSlowInEasing),
@@ -655,7 +655,6 @@ fun CalendarScreen(
                     title = "Settings",
                     isOpen = showSidebar,
                     onClose = { showSidebar = false },
-                    hazeState = internalHazeState,
                     modifier = Modifier.zIndex(30f)
                 ) {
                     CalendarSettingsContent(
@@ -1965,7 +1964,7 @@ private fun CalendarViewModeSwitcher(
                         painter = painterResource(Res.drawable.chevron_down),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(start = 6.dp).size(16.dp)
+                        modifier = Modifier.padding(start = 10.dp).offset(y = 1.dp).size(16.dp)
                     )
                 }
             }

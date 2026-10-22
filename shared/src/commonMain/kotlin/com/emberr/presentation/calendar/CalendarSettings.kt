@@ -39,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +71,6 @@ import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.topHeaderBarPadding
-import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.ui.theme.LocalAppIsDark
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
@@ -94,14 +92,14 @@ private val SidebarSwipeCloseDistance = 80.dp
 private const val SidebarScrimAlpha = 0.25f
 private const val DesktopLightCardTintAlpha = 0.05f
 private val SidebarContentHorizontalPadding = 8.dp
-private val SidebarHeaderFadeTail = 16.dp
+private val SidebarHeaderBlurHeight = 90.dp
+private val SidebarHeaderGradientHeight = 110.dp
 
 @Composable
 fun CalendarSidebar(
     title: String,
     isOpen: Boolean,
     onClose: () -> Unit,
-    hazeState: HazeState,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -157,14 +155,7 @@ fun CalendarSidebar(
                     .fillMaxHeight()
                     .emberrBorder(SidebarShape)
                     .clip(SidebarShape)
-                    .emberrBlur(
-                        hazeState,
-                        EmberrBlur.Thick.copy(
-                            backgroundColor = panelColor,
-                            tints = listOf(HazeTint(panelColor.copy(alpha = 0.85f))),
-                            fallbackTint = HazeTint(panelColor)
-                        )
-                    )
+                    .background(panelColor)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
@@ -189,9 +180,11 @@ fun CalendarSidebar(
                 val panelScrollState = rememberScrollState()
                 var headerHeightPx by remember { mutableFloatStateOf(0f) }
                 val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
-                val headerFadeAlpha by remember(panelScrollState) {
-                    derivedStateOf { if (panelScrollState.value > 0) 1f else 0f }
-                }
+                val headerBlurStyle = EmberrBlur.Regular.copy(
+                    backgroundColor = panelColor,
+                    tints = listOf(HazeTint(panelColor.copy(alpha = 0.45f))),
+                    fallbackTint = HazeTint(panelColor)
+                )
 
                 Column(
                     modifier = Modifier
@@ -214,11 +207,12 @@ fun CalendarSidebar(
                         titlePlacement = TopHeaderTitlePlacement.Start,
                         showBackButton = false,
                         reserveBackButtonSpace = false,
-                        topEdgeFadeAlpha = headerFadeAlpha,
                         topEdgeColor = panelColor,
-                        topEdgeBlurHeight = headerHeight + SidebarHeaderFadeTail,
-                        topEdgeGradientHeight = headerHeight + SidebarHeaderFadeTail,
+                        topEdgeBlurHeight = SidebarHeaderBlurHeight,
+                        topEdgeGradientHeight = SidebarHeaderGradientHeight,
+                        flatFadeHeight = headerHeight + 4.dp,
                         hazeState = panelHazeState,
+                        hazeStyle = headerBlurStyle,
                         applyStatusBarPadding = false,
                         contentPadding = topHeaderBarPadding(
                             top = 8.dp,
