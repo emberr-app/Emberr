@@ -139,6 +139,16 @@ class SettingsViewModel(
         settingsManager.saveTopBarFadeStyle(style)
     }
 
+    val topBarFadeProgressive: StateFlow<Boolean> = settingsManager.topBarFadeProgressiveFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.isTopBarFadeProgressive()
+    )
+
+    fun setTopBarFadeProgressive(enabled: Boolean) {
+        settingsManager.saveTopBarFadeProgressive(enabled)
+    }
+
     val subNoteOpenMode: StateFlow<String> = settingsManager.subNoteOpenModeFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

@@ -17,6 +17,7 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
@@ -612,8 +613,9 @@ fun DailyScreen(
             val calendarStripHeightAllowance = 44.dp
             val headerBlurHeight = DailyHeaderBaseBlurHeight + calendarStripHeightAllowance
             val headerGradientHeight = DailyHeaderBaseGradientHeight + calendarStripHeightAllowance
+            var headerWithStripHeightPx by remember { mutableIntStateOf(0) }
 
-            Column {
+            Column(modifier = Modifier.onSizeChanged { headerWithStripHeightPx = it.height }) {
                 EmberrTopHeaderBar(
                     modifier = Modifier.pointerInput(Unit) { detectTapGestures {} },
                     title = dailyHeaderTitle(selectedDate),
@@ -629,6 +631,7 @@ fun DailyScreen(
                     contentPadding = topHeaderBarPadding(top = 8.dp, bottom = 14.dp),
                     topEdgeBlurHeight = headerBlurHeight,
                     topEdgeGradientHeight = headerGradientHeight,
+                    flatFadeHeight = with(density) { headerWithStripHeightPx.toDp() },
                     topEdgeFadeAlpha = topEdgeFadeAlpha,
                     actions = {
                         Row(

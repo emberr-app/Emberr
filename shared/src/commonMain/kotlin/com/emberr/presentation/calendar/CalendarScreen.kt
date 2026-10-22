@@ -451,6 +451,11 @@ fun CalendarScreen(
                     } else {
                         TopEdgeGradientHeight
                     },
+                    flatFadeHeight = if (viewMode != CalendarViewMode.MONTH && !areSearchResultsVisible) {
+                        topBarHeightDp + timelineHeaderHeightDp
+                    } else {
+                        null
+                    },
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
                     verticalAlignment = Alignment.Top,
                     showBackButton = showBackButton,

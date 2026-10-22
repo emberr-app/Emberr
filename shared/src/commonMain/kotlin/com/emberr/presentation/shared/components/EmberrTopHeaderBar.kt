@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +63,8 @@ private val DefaultTitleSideInset = 56.dp
 val TopEdgeGradientHeight = 200.dp
 
 private const val TopEdgeGradientStopCount = 24
+
+private val MobileFlatFadeExtraGap = 6.dp
 
 val TopEdgeBlurHeight = if (isDesktopPlatform) 100.dp else 140.dp
 
@@ -115,6 +118,7 @@ fun EmberrTopHeaderBar(
     topEdgeColor: Color = MaterialTheme.colorScheme.background,
     topEdgeGradientHeight: Dp = TopEdgeGradientHeight,
     topEdgeBlurHeight: Dp = TopEdgeBlurHeight,
+    flatFadeHeight: Dp? = null,
     hazeState: HazeState? = null,
     hazeStyle: HazeStyle = EmberrBlur.Regular,
     applyStatusBarPadding: Boolean = !isDesktopPlatform,
@@ -127,6 +131,7 @@ fun EmberrTopHeaderBar(
     overlayContent: @Composable BoxScope.() -> Unit = {}
 ) {
     val fadeStyle = rememberTopBarFadeStyle()
+    val isFadeProgressive = rememberTopBarFadeProgressive()
     val topEdgeGradient = rememberTopEdgeGradient(topEdgeColor)
 
     val showColorFade = fadeStyle == TopBarFadeStyle.COLOR &&
@@ -142,21 +147,44 @@ fun EmberrTopHeaderBar(
             .fillMaxWidth()
             .background(background)
     ) {
-        if (showColorFade) {
-            TopEdgeColorFadeBand(
-                gradient = topEdgeGradient,
-                fadeHeight = topEdgeGradientHeight,
-                fadeAlpha = topEdgeFadeAlpha
-            )
-        }
+        if (!isFadeProgressive) {
+            val flatFadeExtraHeight = contentPadding.calculateTopPadding() - contentPadding.calculateBottomPadding() +
+                if (isDesktopPlatform) 0.dp else MobileFlatFadeExtraGap
 
-        if (blurBandSource != null) {
-            TopEdgeBlurBand(
-                hazeState = blurBandSource,
-                hazeStyle = hazeStyle,
-                blurHeight = topEdgeBlurHeight,
-                blurAlpha = topEdgeFadeAlpha
-            )
+            if (showColorFade) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .flatFadeBox(flatFadeHeight, flatFadeExtraHeight)
+                        .drawBehind { drawRect(color = topEdgeColor, alpha = topEdgeFadeAlpha.coerceIn(0f, 1f)) }
+                )
+            }
+
+            if (blurBandSource != null) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .flatFadeBox(flatFadeHeight, flatFadeExtraHeight)
+                        .hazeEffect(blurBandSource, hazeStyle) { alpha = topEdgeFadeAlpha.coerceIn(0f, 1f) }
+                )
+            }
+        } else {
+            if (showColorFade) {
+                TopEdgeColorFadeBand(
+                    gradient = topEdgeGradient,
+                    fadeHeight = topEdgeGradientHeight,
+                    fadeAlpha = topEdgeFadeAlpha
+                )
+            }
+
+            if (blurBandSource != null) {
+                TopEdgeBlurBand(
+                    hazeState = blurBandSource,
+                    hazeStyle = hazeStyle,
+                    blurHeight = topEdgeBlurHeight,
+                    blurAlpha = topEdgeFadeAlpha
+                )
+            }
         }
 
         CompositionLocalProvider(
@@ -267,6 +295,15 @@ fun rememberTopBarFadeStyle(): TopBarFadeStyle {
 }
 
 @Composable
+fun rememberTopBarFadeProgressive(): Boolean {
+    val settingsManager = koinInject<SettingsManager>()
+    val isProgressive by settingsManager.topBarFadeProgressiveFlow.collectAsState(
+        initial = settingsManager.isTopBarFadeProgressive()
+    )
+    return isProgressive
+}
+
+@Composable
 private fun rememberTopEdgeGradient(edgeColor: Color): Brush {
     return remember(edgeColor) {
         val colorStops = Array(TopEdgeGradientStopCount) { stopIndex ->
@@ -336,6 +373,12 @@ private fun TopEdgeBlurBand(
 }
 
 private fun smoothStep(position: Float): Float = position * position * (3f - 2f * position)
+
+private fun Modifier.flatFadeBox(fixedHeight: Dp?, extraHeight: Dp): Modifier = layout { measurable, constraints ->
+    val height = (fixedHeight?.roundToPx() ?: (constraints.maxHeight + extraHeight.roundToPx())).coerceAtLeast(0)
+    val placeable = measurable.measure(Constraints.fixed(constraints.maxWidth, height))
+    layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(0, 0) }
+}
 
 @Composable
 private fun TopHeaderBarTitle(

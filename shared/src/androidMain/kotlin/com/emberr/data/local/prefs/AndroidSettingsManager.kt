@@ -424,6 +424,18 @@ class AndroidSettingsManager(
         _topBarFadeStyle.value = style
     }
 
+    private val _topBarFadeProgressive = MutableStateFlow(
+        sharedPreferences.getBoolean(SyncConstants.KEY_TOP_BAR_FADE_PROGRESSIVE, SyncConstants.DEFAULT_TOP_BAR_FADE_PROGRESSIVE)
+    )
+    override val topBarFadeProgressiveFlow: Flow<Boolean> = _topBarFadeProgressive
+
+    override fun isTopBarFadeProgressive(): Boolean = _topBarFadeProgressive.value
+
+    override fun saveTopBarFadeProgressive(enabled: Boolean) {
+        sharedPreferences.edit { putBoolean(SyncConstants.KEY_TOP_BAR_FADE_PROGRESSIVE, enabled) }
+        _topBarFadeProgressive.value = enabled
+    }
+
     private val _subNoteOpenMode = MutableStateFlow(
         sharedPreferences.getString(SyncConstants.KEY_SUBNOTE_OPEN_MODE, SyncConstants.DEFAULT_SUBNOTE_OPEN_MODE)
             ?: SyncConstants.DEFAULT_SUBNOTE_OPEN_MODE

@@ -124,6 +124,10 @@ interface SettingsManager {
     fun getTopBarFadeStyle(): String
     fun saveTopBarFadeStyle(style: String)
 
+    val topBarFadeProgressiveFlow: Flow<Boolean>
+    fun isTopBarFadeProgressive(): Boolean
+    fun saveTopBarFadeProgressive(enabled: Boolean)
+
     val subNoteOpenModeFlow: Flow<String>
     fun saveSubNoteOpenMode(mode: String)
 

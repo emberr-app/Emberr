@@ -50,6 +50,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -280,9 +282,11 @@ private fun TimelineHeader(
         tints = listOf(HazeTint(backgroundColor.copy(alpha = 0.45f))),
         fallbackTint = HazeTint(backgroundColor)
     )
+    val density = LocalDensity.current
+    var headerHeightPx by remember { mutableIntStateOf(0) }
 
     EmberrTopHeaderBar(
-        modifier = modifier,
+        modifier = modifier.onSizeChanged { headerHeightPx = it.height },
         title = "Timeline",
         titlePlacement = TopHeaderTitlePlacement.Start,
         showBackButton = false,
@@ -290,6 +294,7 @@ private fun TimelineHeader(
         topEdgeColor = backgroundColor,
         topEdgeBlurHeight = HeaderBlurHeight,
         topEdgeGradientHeight = HeaderGradientHeight,
+        flatFadeHeight = with(density) { headerHeightPx.toDp() } + 4.dp,
         hazeState = hazeState,
         hazeStyle = headerBlurStyle,
         applyStatusBarPadding = false,
