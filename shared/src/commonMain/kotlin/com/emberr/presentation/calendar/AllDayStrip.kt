@@ -68,13 +68,13 @@ import kotlinx.datetime.plus
 
 const val MAX_ALL_DAY_ROWS_SHOWN = 2
 
-private val AllDayBarHeight = 22.dp
+private val AllDayBarHeight = 28.dp
 private val AllDayBarGap = 2.dp
 private val AllDayBarInset = 2.dp
 private val AllDayBarCorner = 6.dp
 private val AllDayStripVerticalPadding = 4.dp
 private val AllDayMoreLineHeight = 18.dp
-private val EmptyAllDayStripHeight = 28.dp
+private val EmptyAllDayStripHeight = 36.dp
 private val ColumnDividerThickness = 1.dp
 private val DesktopEdgeHandleWidth = 6.dp
 private val TouchEdgeHandleWidth = 14.dp
