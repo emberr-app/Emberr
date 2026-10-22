@@ -338,7 +338,7 @@ fun SettingsScreen(
                     timeFormatLabel = selectedTimeFormat.displayName,
                     firstDayOfWeekLabel = selectedFirstDayOfWeek.displayName,
                     subNoteOpenModeLabel = selectedSubNoteOpenMode.displayName,
-                    topBarFadeStyleLabel = topBarFadeStyleFor(topBarFadeStyle).displayName,
+                    topBarFadeStyleLabel = topBarFadeStyleFor(topBarFadeStyle).displayName(topBarFadeProgressive),
                     showScrollbar = showScrollbar,
                     dailyNotesEnabled = dailyNotesEnabled,
                     startOnHome = startOnHome,
@@ -381,7 +381,7 @@ fun SettingsScreen(
                         }
                     },
                     topBarFadeStyleChoices = TopBarFadeStyle.entries.filter { isDebugBuild || it != TopBarFadeStyle.FALLBACK }.map { option ->
-                        SettingsChoice(label = option.displayName, isSelected = option == topBarFadeStyleFor(topBarFadeStyle)) {
+                        SettingsChoice(label = option.displayName(topBarFadeProgressive), isSelected = option == topBarFadeStyleFor(topBarFadeStyle)) {
                             viewModel.setTopBarFadeStyle(option.name)
                         }
                     },
@@ -599,7 +599,7 @@ fun SettingsScreen(
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                 TopBarFadeStyle.entries.filter { isDebugBuild || it != TopBarFadeStyle.FALLBACK }.forEach { option ->
                     EmberrBottomSheetOption(
-                        label = option.displayName,
+                        label = option.displayName(topBarFadeProgressive),
                         isSelected = option == selectedFadeStyle,
                         onClick = {
                             viewModel.setTopBarFadeStyle(option.name)
