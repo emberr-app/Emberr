@@ -354,6 +354,18 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _topBarFadeStyle.value = style
     }
 
+    private val _topBarFadeProgressive = MutableStateFlow(
+        prefs.getBoolean(SyncConstants.KEY_TOP_BAR_FADE_PROGRESSIVE, SyncConstants.DEFAULT_TOP_BAR_FADE_PROGRESSIVE)
+    )
+    override val topBarFadeProgressiveFlow: Flow<Boolean> = _topBarFadeProgressive
+
+    override fun isTopBarFadeProgressive(): Boolean = _topBarFadeProgressive.value
+
+    override fun saveTopBarFadeProgressive(enabled: Boolean) {
+        prefs.putBoolean(SyncConstants.KEY_TOP_BAR_FADE_PROGRESSIVE, enabled)
+        _topBarFadeProgressive.value = enabled
+    }
+
     private val _subNoteOpenMode = MutableStateFlow(
         prefs.get(SyncConstants.KEY_SUBNOTE_OPEN_MODE, SyncConstants.DEFAULT_SUBNOTE_OPEN_MODE)
     )

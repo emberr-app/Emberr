@@ -204,6 +204,7 @@ fun SubNotePanel(
                 backContentDescription = if (isExpanded) "Collapse panel" else "Expand panel",
                 backTooltip = if (isExpanded) "Collapse panel" else "Expand panel",
                 backButtonTint = MaterialTheme.colorScheme.primary,
+                topEdgeFadeAlpha = 0f,
                 hazeState = hazeState,
                 applyStatusBarPadding = false,
                 contentPadding = PaddingValues(top = TopHeaderBarTopPadding, start = 74.dp),

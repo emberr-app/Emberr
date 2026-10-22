@@ -28,6 +28,8 @@ object SyncConstants {
     const val DEFAULT_FIRST_DAY_OF_WEEK_PREFERENCE = "SYSTEM"
     const val KEY_TOP_BAR_FADE_STYLE = "top_bar_fade_style"
     const val DEFAULT_TOP_BAR_FADE_STYLE = "BLUR"
+    const val KEY_TOP_BAR_FADE_PROGRESSIVE = "top_bar_fade_progressive"
+    const val DEFAULT_TOP_BAR_FADE_PROGRESSIVE = true
     const val KEY_SUBNOTE_OPEN_MODE = "subnote_open_mode"
     const val DEFAULT_SUBNOTE_OPEN_MODE = "SIDE_PANEL"
     // AI generation

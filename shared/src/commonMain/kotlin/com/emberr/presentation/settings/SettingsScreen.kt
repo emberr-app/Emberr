@@ -65,6 +65,7 @@ import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
+import com.emberr.presentation.shared.components.EmberrSwitch
 import com.emberr.presentation.shared.components.SelectedOptionBackground
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopBarIconButton
@@ -197,6 +198,7 @@ fun SettingsScreen(
     val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
 
     val topBarFadeStyle by viewModel.topBarFadeStyle.collectAsState()
+    val topBarFadeProgressive by viewModel.topBarFadeProgressive.collectAsState()
     var showTopBarFadeStyleSheet by remember { mutableStateOf(false) }
 
     val subNoteOpenMode by viewModel.subNoteOpenMode.collectAsState()
@@ -381,6 +383,13 @@ fun SettingsScreen(
                     topBarFadeStyleChoices = TopBarFadeStyle.entries.filter { isDebugBuild || it != TopBarFadeStyle.FALLBACK }.map { option ->
                         SettingsChoice(label = option.displayName, isSelected = option == topBarFadeStyleFor(topBarFadeStyle)) {
                             viewModel.setTopBarFadeStyle(option.name)
+                        }
+                    },
+                    topBarFadeProgressiveToggle = if (topBarFadeStyleFor(topBarFadeStyle) == TopBarFadeStyle.NONE) {
+                        null
+                    } else {
+                        SettingsMenuToggle(label = "Progressive", isOn = topBarFadeProgressive) {
+                            viewModel.setTopBarFadeProgressive(!topBarFadeProgressive)
                         }
                     },
                     onTopBarFadeStyleClick = { showTopBarFadeStyleSheet = true },
@@ -596,6 +605,14 @@ fun SettingsScreen(
                             viewModel.setTopBarFadeStyle(option.name)
                             showTopBarFadeStyleSheet = false
                         }
+                    )
+                }
+
+                if (selectedFadeStyle != TopBarFadeStyle.NONE) {
+                    EmberrBottomSheetOption(
+                        label = "Progressive",
+                        onClick = { viewModel.setTopBarFadeProgressive(!topBarFadeProgressive) },
+                        trailing = { EmberrSwitch(isOn = topBarFadeProgressive) }
                     )
                 }
 
@@ -1116,6 +1133,7 @@ private fun AppearanceSettingsSection(
     firstDayOfWeekChoices: List<SettingsChoice>,
     subNoteOpenModeChoices: List<SettingsChoice>,
     topBarFadeStyleChoices: List<SettingsChoice>,
+    topBarFadeProgressiveToggle: SettingsMenuToggle?,
     onTopBarFadeStyleClick: () -> Unit,
     onShowScrollbarChange: (Boolean) -> Unit,
     onDailyNotesEnabledChange: (Boolean) -> Unit,
@@ -1153,7 +1171,8 @@ private fun AppearanceSettingsSection(
                 icon = painterResource(Res.drawable.palette),
                 title = "Top Bar Fade",
                 value = topBarFadeStyleLabel,
-                choices = topBarFadeStyleChoices
+                choices = topBarFadeStyleChoices,
+                menuToggle = topBarFadeProgressiveToggle
             )
         } else {
             SettingsActionRow(
@@ -1620,8 +1639,20 @@ internal class SettingsChoice(
     val onSelect: () -> Unit
 )
 
+internal class SettingsMenuToggle(
+    val label: String,
+    val isOn: Boolean,
+    val onToggle: () -> Unit
+)
+
 @Composable
-internal fun SettingsChoiceRow(icon: Painter, title: String, value: String, choices: List<SettingsChoice>) {
+internal fun SettingsChoiceRow(
+    icon: Painter,
+    title: String,
+    value: String,
+    choices: List<SettingsChoice>,
+    menuToggle: SettingsMenuToggle? = null
+) {
     var isMenuOpen by remember { mutableStateOf(false) }
 
     if (isDesktopPlatform) {
@@ -1655,6 +1686,14 @@ internal fun SettingsChoiceRow(icon: Painter, title: String, value: String, choi
                         onClick = { closeMenuAnd(choice.onSelect) }
                     )
                 }
+
+                if (menuToggle != null) {
+                    EmberrDesktopMenuOption(
+                        label = menuToggle.label,
+                        onClick = menuToggle.onToggle,
+                        trailing = { EmberrSwitch(isOn = menuToggle.isOn) }
+                    )
+                }
             }
         }
     } else {
@@ -1676,6 +1715,14 @@ internal fun SettingsChoiceRow(icon: Painter, title: String, value: String, choi
                             choice.onSelect()
                             isMenuOpen = false
                         }
+                    )
+                }
+
+                if (menuToggle != null) {
+                    EmberrBottomSheetOption(
+                        label = menuToggle.label,
+                        onClick = menuToggle.onToggle,
+                        trailing = { EmberrSwitch(isOn = menuToggle.isOn) }
                     )
                 }
 
