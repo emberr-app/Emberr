@@ -144,6 +144,9 @@ internal val calendarViewModeLabels = listOf(
     CalendarViewMode.MONTH to "Month"
 )
 
+private val CalendarTitleHeight = 52.dp
+private val DayCalendarTitleHeight = 72.dp
+
 @Composable
 fun CalendarScreen(
     onNavigateBack: () -> Unit = {},
@@ -200,6 +203,12 @@ fun CalendarScreen(
     val density = LocalDensity.current
     var topBarHeightPx by remember { mutableFloatStateOf(0f) }
     val topBarHeightDp = with(density) { topBarHeightPx.toDp() }
+    var isTopBarMeasuredInDayView by remember { mutableStateOf(false) }
+    val sidePanelTop = if (isTopBarMeasuredInDayView) {
+        topBarHeightDp - (DayCalendarTitleHeight - CalendarTitleHeight)
+    } else {
+        topBarHeightDp
+    }
     var timelineHeaderHeightPx by remember { mutableFloatStateOf(0f) }
     val timelineHeaderHeightDp = with(density) { timelineHeaderHeightPx.toDp() }
     var allDayListDate by remember { mutableStateOf<LocalDate?>(null) }
@@ -251,6 +260,7 @@ fun CalendarScreen(
     SideEffect {
         eventMoveTracker.visibleDates = if (viewMode == CalendarViewMode.DAY) listOf(selectedDate) else multiDayDates
     }
+    val sidePanelSpace = if (isDesktopPlatform) CalendarSidePanelWidth + CalendarSidePanelContentGap else 0.dp
 
     val onEventMove: (EventMovePreview) -> Unit = { move ->
         val targetDateString = move.targetDate.toString()
@@ -277,6 +287,7 @@ fun CalendarScreen(
                     .fillMaxSize()
                     .hazeSource(state = internalHazeState)
                     .background(MaterialTheme.colorScheme.background)
+                    .padding(start = sidePanelSpace)
             ) {
                 val onEventClick: (CalendarEvent) -> Unit = { event ->
                     eventEditorState = event.toEditorState()
@@ -435,7 +446,10 @@ fun CalendarScreen(
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
                     .zIndex(10f)
-                    .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
+                    .onGloballyPositioned { coordinates ->
+                        topBarHeightPx = coordinates.size.height.toFloat()
+                        isTopBarMeasuredInDayView = viewMode == CalendarViewMode.DAY
+                    }
                     .pointerInput(Unit) { detectTapGestures {} }
             ) {
                 EmberrTopHeaderBar(
@@ -552,8 +566,35 @@ fun CalendarScreen(
                         .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .zIndex(11f)
-                        .padding(top = topBarHeightDp)
+                        .padding(start = sidePanelSpace, top = topBarHeightDp)
                         .onSizeChanged { size -> timelineHeaderHeightPx = size.height.toFloat() }
+                )
+            }
+
+            if (isDesktopPlatform) {
+                CalendarSidePanel(
+                    selectedDate = selectedDate,
+                    visibleDates = when (viewMode) {
+                        CalendarViewMode.DAY, CalendarViewMode.MONTH -> listOf(selectedDate)
+                        else -> multiDayDates
+                    },
+                    viewModel = viewModel,
+                    categories = categories,
+                    hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
+                    spaces = spaces,
+                    onDateClick = { date ->
+                        slideDirection = if (date < selectedDate) {
+                            AnimatedContentTransitionScope.SlideDirection.Right
+                        } else {
+                            AnimatedContentTransitionScope.SlideDirection.Left
+                        }
+                        selectedDate = date
+                    },
+                    onToggleVisibility = viewModel::toggleCategoryVisibility,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .zIndex(12f)
+                        .padding(top = sidePanelTop)
                 )
             }
 
@@ -728,7 +769,7 @@ private fun CalendarTitle(
         },
         contentKey = { date -> if (viewMode == CalendarViewMode.MONTH) monthKey(date) else date },
         label = "CalendarTitleTransition",
-        modifier = Modifier.height(if (viewMode == CalendarViewMode.DAY) 72.dp else 52.dp)
+        modifier = Modifier.height(if (viewMode == CalendarViewMode.DAY) DayCalendarTitleHeight else CalendarTitleHeight)
     ) { date ->
         Box(
             modifier = Modifier.fillMaxHeight(),
@@ -855,7 +896,7 @@ private fun formatSelectedDateTitle(date: LocalDate): String = formatFullDate(da
 private fun formatDayOfWeek(date: LocalDate): String =
     date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
 
-private fun formatMonthYear(date: LocalDate): String {
+internal fun formatMonthYear(date: LocalDate): String {
     val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
     return "$monthName ${date.year}"
 }

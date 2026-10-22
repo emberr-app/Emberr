@@ -110,8 +110,8 @@ fun CategorySection(
             val state = editorState
             CategoryRow(
                 category = category,
-                isShown = category.id !in hiddenCategoryVisibilityKeys,
-                onToggleShown = { onToggleCategoryVisibility(category.id) },
+                isShown = isDesktopPlatform || category.id !in hiddenCategoryVisibilityKeys,
+                onToggleShown = if (isDesktopPlatform) null else { { onToggleCategoryVisibility(category.id) } },
                 isEditorOpen = isDesktopPlatform && state?.categoryId == category.id,
                 editorState = if (state?.categoryId == category.id) state else null,
                 isNameTaken = state?.categoryId == category.id && isNameTakenByAnotherCategory(state),
@@ -132,12 +132,14 @@ fun CategorySection(
             SettingsDivider()
         }
 
-        VisibilityToggleRow(
-            label = "No Category",
-            isShown = noCategoryVisibilityKey !in hiddenCategoryVisibilityKeys,
-            onToggleShown = { onToggleCategoryVisibility(noCategoryVisibilityKey) }
-        )
-        SettingsDivider()
+        if (!isDesktopPlatform) {
+            VisibilityToggleRow(
+                label = "No Category",
+                isShown = noCategoryVisibilityKey !in hiddenCategoryVisibilityKeys,
+                onToggleShown = { onToggleCategoryVisibility(noCategoryVisibilityKey) }
+            )
+            SettingsDivider()
+        }
 
         val addState = editorState
         AddCategoryRow(
@@ -162,7 +164,7 @@ fun CategorySection(
     val isAnySpaceHidden = spaces.any { space -> spaceVisibilityKeyFor(space.spaceId) in hiddenCategoryVisibilityKeys }
     var keepsSpacesGroupShown by remember { mutableStateOf(false) }
     if (spaces.size >= 2 || isAnySpaceHidden) keepsSpacesGroupShown = true
-    if (keepsSpacesGroupShown && spaces.isNotEmpty()) {
+    if (!isDesktopPlatform && keepsSpacesGroupShown && spaces.isNotEmpty()) {
         SettingsGroup(title = "Spaces", cardColor = cardColor) {
             spaces.forEachIndexed { index, space ->
                 if (index > 0) SettingsDivider()
@@ -223,7 +225,7 @@ private fun keepShowingWhileClosing(editorState: CategoryEditorState?): Category
 private fun CategoryRow(
     category: CalendarCategory,
     isShown: Boolean,
-    onToggleShown: () -> Unit,
+    onToggleShown: (() -> Unit)?,
     isEditorOpen: Boolean,
     editorState: CategoryEditorState?,
     isNameTaken: Boolean,
@@ -333,27 +335,38 @@ private fun VisibilityToggleRow(
 private fun CategoryVisibilityDot(
     color: Color,
     isShown: Boolean,
-    onToggleShown: () -> Unit
+    onToggleShown: (() -> Unit)?
 ) {
     Box(
         modifier = Modifier
             .size(40.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onToggleShown
+            .then(
+                if (onToggleShown != null) {
+                    Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onToggleShown
+                    )
+                } else {
+                    Modifier
+                }
             ),
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(14.dp)
-                .then(
-                    if (isShown) Modifier.background(color, CircleShape)
-                    else Modifier.border(2.dp, color, CircleShape)
-                )
-        )
+        CategoryVisibilityMark(color = color, isShown = isShown)
     }
+}
+
+@Composable
+internal fun CategoryVisibilityMark(color: Color, isShown: Boolean) {
+    Box(
+        modifier = Modifier
+            .size(14.dp)
+            .then(
+                if (isShown) Modifier.background(color, CircleShape)
+                else Modifier.border(2.dp, color, CircleShape)
+            )
+    )
 }
 
 @Composable
