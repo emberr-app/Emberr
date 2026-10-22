@@ -107,6 +107,7 @@ fun EmberrTopHeaderBar(
     onTitleClick: (() -> Unit)? = null,
     showBackButton: Boolean = true,
     reserveBackButtonSpace: Boolean = true,
+    showsSidebarToggle: Boolean = true,
     backIcon: Painter = painterResource(Res.drawable.chevron_left),
     backContentDescription: String = "Back",
     backTooltip: String? = null,
@@ -206,20 +207,40 @@ fun EmberrTopHeaderBar(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = verticalAlignment
                 ) {
-                    when {
-                        showBackButton -> TopBarIconButton(
-                            icon = backIcon,
-                            contentDescription = backContentDescription,
-                            bgColor = backButtonBackground,
-                            tint = backButtonTint,
-                            hazeState = hazeState,
-                            hazeStyle = hazeStyle,
-                            size = TopHeaderBarButtonSize,
-                            tooltip = backTooltip,
-                            onClick = onBackClick
-                        )
+                    val backButtonSlot: @Composable () -> Unit = {
+                        when {
+                            showBackButton -> TopBarIconButton(
+                                icon = backIcon,
+                                contentDescription = backContentDescription,
+                                bgColor = backButtonBackground,
+                                tint = backButtonTint,
+                                hazeState = hazeState,
+                                hazeStyle = hazeStyle,
+                                size = TopHeaderBarButtonSize,
+                                tooltip = backTooltip,
+                                onClick = onBackClick
+                            )
 
-                        reserveBackButtonSpace -> Spacer(Modifier.size(TopHeaderBarButtonSize))
+                            reserveBackButtonSpace -> Spacer(Modifier.size(TopHeaderBarButtonSize))
+                        }
+                    }
+                    val onShowSidebar = if (showsSidebarToggle) LocalDesktopSidebarToggle.current else null
+                    if (onShowSidebar != null) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(DesktopSidebarToggleGap),
+                            verticalAlignment = verticalAlignment
+                        ) {
+                            DesktopSidebarToggleButton(
+                                onClick = onShowSidebar,
+                                hazeState = hazeState,
+                                hazeStyle = hazeStyle,
+                                tint = backButtonTint,
+                                bgColor = backButtonBackground
+                            )
+                            backButtonSlot()
+                        }
+                    } else {
+                        backButtonSlot()
                     }
 
                     leadingContent()

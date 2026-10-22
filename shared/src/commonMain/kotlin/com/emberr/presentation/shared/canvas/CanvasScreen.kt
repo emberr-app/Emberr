@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -132,7 +133,10 @@ import com.emberr.domain.util.system.triggerHapticFeedback
 import com.emberr.domain.canvas.membersOf
 import com.emberr.presentation.LocalImagePicker
 import com.emberr.presentation.shared.StickyNoteWindowBus
+import com.emberr.presentation.shared.components.DesktopSidebarToggleButton
+import com.emberr.presentation.shared.components.DesktopSidebarToggleGap
 import com.emberr.presentation.shared.components.KmpBackHandler
+import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
 import emberr.shared.generated.resources.Res
@@ -1557,11 +1561,16 @@ fun CanvasScreen(
 
         val isDesktopBackButtonVisible = isDesktopPlatform && !isEmbedded && !isStickyNote && showBackButton
         if (isDesktopBackButtonVisible) {
-            CanvasBackButton(
-                hazeState = hazeState,
-                onClick = onNavigateBack,
-                modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp, start = 22.dp)
-            )
+            val onShowSidebar = LocalDesktopSidebarToggle.current
+            Row(
+                modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp, start = 22.dp),
+                horizontalArrangement = Arrangement.spacedBy(DesktopSidebarToggleGap)
+            ) {
+                if (onShowSidebar != null) {
+                    DesktopSidebarToggleButton(onClick = onShowSidebar, hazeState = hazeState)
+                }
+                CanvasBackButton(hazeState = hazeState, onClick = onNavigateBack)
+            }
         }
 
         val hasControlAboveToolPanel = isEmbedded || isDesktopBackButtonVisible

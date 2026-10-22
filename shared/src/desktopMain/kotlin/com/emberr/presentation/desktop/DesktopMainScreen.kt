@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.compose.foundation.layout.BoxScope
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.NoteKind
@@ -72,6 +73,10 @@ import com.emberr.presentation.shared.components.EmberrPillShadowSpotColor
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.EmberrUpdatePeek
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
+import com.emberr.presentation.shared.components.DesktopSidebarToggleButton
+import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
+import com.emberr.presentation.shared.components.TopHeaderBarTopPadding
+import com.emberr.presentation.shared.components.flippedHorizontally
 import com.emberr.presentation.shared.canvas.CanvasScreen
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.sync.SyncViewModel
@@ -1236,7 +1241,12 @@ fun DesktopMainScreen(
                 ) {
                     IconTooltip(text = "Hide sidebar") {
                         IconButton(onClick = onToggleSidebar) {
-                            Icon(painterResource(Res.drawable.sidebar), "Collapse sidebar", tint = MaterialTheme.colorScheme.onSurface)
+                            val sidebarIcon = painterResource(Res.drawable.sidebar)
+                            Icon(
+                                remember(sidebarIcon) { sidebarIcon.flippedHorizontally() },
+                                "Collapse sidebar",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
                     Spacer(Modifier.weight(1f))
@@ -1787,15 +1797,18 @@ fun DesktopMainScreen(
     }
 
     // RIGHT PANEL
-    val detailPaneContent = @Composable { d: DetailPane? ->
+    val detailPaneScreen = @Composable { d: DetailPane? ->
         when (d) {
-            null -> Box(Modifier.fillMaxSize())
+            null -> Box(Modifier.fillMaxSize()) {
+                PaneSidebarToggle(hazeState = hazeState)
+            }
             DetailPane.Empty -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "Select a note from the sidebar",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                 )
+                PaneSidebarToggle(hazeState = hazeState)
             }
             is DetailPane.Daily -> Box(Modifier.fillMaxSize()) {
                 DailyEditorPane(
@@ -1811,6 +1824,7 @@ fun DesktopMainScreen(
                     onExportPdf = onExportPdf,
                     onSelectionModeChange = onSelectionModeChange
                 )
+                PaneSidebarToggle(hazeState = hazeState)
             }
             is DetailPane.Note -> key(d.noteId) {
                 val noteKind by produceState<NoteKind?>(initialValue = null) {
@@ -1819,13 +1833,11 @@ fun DesktopMainScreen(
                 when (noteKind) {
                     NoteKind.CANVAS -> CanvasScreen(
                         noteId = d.noteId,
-                        showBackButton = isSidebarVisible,
                         onNavigateBack = closeDetailPane
                     )
                     NoteKind.NOTE, NoteKind.DATABASE -> NoteScreen(
                         noteId = d.noteId,
                         onNavigateBack = closeDetailPane,
-                        showBackButton = isSidebarVisible,
                         onSelectionModeChange = onSelectionModeChange,
                         onPickImage = onPickImage, onTakePhoto = onTakePhoto, onPickDocument = onPickDocument,
                         onOpenFile = onOpenFile, onExportMarkdown = onExportMarkdown, onExportPdf = onExportPdf,
@@ -1858,7 +1870,6 @@ fun DesktopMainScreen(
                         onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
                         desktopSubPage = d.settingsSubPage(),
                         onDesktopSubPageChange = { page -> detail = page.toDetailPane() },
-                        showBackButton = isSidebarVisible,
                         syncViewModel = syncViewModel
                     )
                 }
@@ -1897,11 +1908,19 @@ fun DesktopMainScreen(
                 Box(Modifier.fillMaxSize()) {
                     CalendarScreen(
                         onNavigateBack = closeDetailPane,
-                        showBackButton = isSidebarVisible,
                         onOpenSourceNote = { event -> ReminderClickBus.requestOpen(event.blockId) }
                     )
                 }
             }
+        }
+    }
+
+    val detailPaneContent = @Composable { d: DetailPane? ->
+        val isLeftmostPane = splitState.panes.firstOrNull()?.let { firstPane -> firstPane == d } ?: true
+        CompositionLocalProvider(
+            LocalDesktopSidebarToggle provides if (!isSidebarVisible && isLeftmostPane) onToggleSidebar else null
+        ) {
+            detailPaneScreen(d)
         }
     }
 
@@ -1949,25 +1968,6 @@ fun DesktopMainScreen(
                             .fillMaxHeight()
                             .background(MaterialTheme.colorScheme.background)
                     ) {
-                        if (!isSidebarVisible) {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(start = 26.dp, top = PANEL_TOP_MARGIN + 4.dp)
-                                    .zIndex(10f)
-                            ) {
-                                TopBarIconButton(
-                                    icon = painterResource(Res.drawable.sidebar),
-                                    contentDescription = "Expand sidebar",
-                                    bgColor = Color.Transparent,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    hazeState = hazeState,
-                                    hazeStyle = EmberrBlur.Regular,
-                                    tooltip = "Show sidebar",
-                                    onClick = onToggleSidebar
-                                )
-                            }
-                        }
                         var canvasFullScreenContent by remember { mutableStateOf<(@Composable () -> Unit)?>(null) }
                         CompositionLocalProvider(LocalCanvasFullScreenOverlay provides { content -> canvasFullScreenContent = content }) {
                             rightPanel()
@@ -2266,3 +2266,16 @@ private data class TreeRowMenuTarget(
     val usesSelection: Boolean,
     val menu: TreeSelectionMenu
 )
+
+@Composable
+private fun BoxScope.PaneSidebarToggle(hazeState: HazeState) {
+    val onShowSidebar = LocalDesktopSidebarToggle.current ?: return
+    Box(
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(start = 16.dp, top = TopHeaderBarTopPadding)
+            .zIndex(10f)
+    ) {
+        DesktopSidebarToggleButton(onClick = onShowSidebar, hazeState = hazeState)
+    }
+}

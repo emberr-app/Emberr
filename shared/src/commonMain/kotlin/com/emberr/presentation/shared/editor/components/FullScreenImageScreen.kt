@@ -344,6 +344,7 @@ fun FullScreenImageScreen(
         )
 
         EmberrTopHeaderBar(
+            showsSidebarToggle = false,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .graphicsLayer { alpha = currentExpansion() },
