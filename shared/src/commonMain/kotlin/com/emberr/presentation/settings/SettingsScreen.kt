@@ -43,7 +43,6 @@ import androidx.compose.ui.zIndex
 import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.sync.SyncPairingData
 import com.emberr.domain.sync.SyncServerStatus
-import com.emberr.domain.update.LATEST_RELEASE_PAGE_URL
 import com.emberr.domain.util.system.AppPermission
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDebugBuild
@@ -61,6 +60,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.EmberrUpdateDialog
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
@@ -1391,6 +1391,7 @@ private fun EditorSettingsSection(onKeyboardToolbarClick: () -> Unit) {
 @Composable
 private fun HelpSettingsSection(onAboutClick: () -> Unit) {
     val uriHandler = LocalUriHandler.current
+    var isWhatsNewOpen by remember { mutableStateOf(false) }
     SettingsGroup(title = "Need Help?") {
         SettingsActionRow(
             icon = painterResource(Res.drawable.badge_question_mark),
@@ -1402,7 +1403,7 @@ private fun HelpSettingsSection(onAboutClick: () -> Unit) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.badge_plus),
             title = "What's New",
-            onClick = { uriHandler.openUri(LATEST_RELEASE_PAGE_URL) }
+            onClick = { isWhatsNewOpen = true }
         )
         SettingsDivider()
         SettingsActionRow(
@@ -1417,6 +1418,10 @@ private fun HelpSettingsSection(onAboutClick: () -> Unit) {
             trailingLabel = appVersionName?.let { "v$it" },
             onClick = onAboutClick
         )
+    }
+
+    if (isWhatsNewOpen) {
+        EmberrUpdateDialog(onDismissRequest = { isWhatsNewOpen = false })
     }
 }
 
