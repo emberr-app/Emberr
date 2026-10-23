@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +43,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -50,6 +53,8 @@ import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.ui.theme.LocalAppIsDark
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -59,62 +64,80 @@ private val UpdatePeekDelayAfterLaunch = 800.milliseconds
 private val UpdatePeekGoodbyeDuration = 1500.milliseconds
 private val UpdatePillGrowsFromBottom = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 1f)
 private val UpdateDialogShape = RoundedCornerShape(22.dp)
-private val UpdateDialogMaxHeight = 560.dp
+private val UpdateDialogMaxHeight = 620.dp
+private val UpdateDialogPadding = 24.dp
+private val UpdateDialogHeaderBlurHeight = 110.dp
+private val UpdateDialogHeaderGradientHeight = 130.dp
 
 private class UpdateNotesSection(val heading: String, val items: List<String>)
 
 private val CurrentUpdateNotes = listOf(
     UpdateNotesSection(
-        heading = "Added",
+        heading = "Calendar Enhancements",
         items = listOf(
-            "Select, copy and paste text across several blocks",
-            "Typed and pasted Markdown turns into blocks and formatting",
-            "Search your calendar events, and see them in the main search",
-            "Choose your first day of the week, with new Calendar settings for categories",
-            "Choose a 12-hour, 24-hour or system time format",
-            "Rename, favorite and delete notes right from search results"
+            "Drag events to a new time or day",
+            "Resize events by dragging their edges",
+            "Move repeating events, one or all",
+            "All-day and multi-day events",
+            "Redesigned event sheets",
+            "Start and end times on events",
+            "Checked events greyed out",
+            "Show or hide categories"
         ) + if (isDesktopPlatform) {
             listOf(
-                "Split view: open up to four screens side by side",
-                "Hover tooltips on icon buttons",
-                "Zoom full screen images with Ctrl and scroll",
-                "A calendar view switcher"
+                "Side panel with a mini month",
+                "Two-finger date swipe"
             )
         } else {
-            listOf(
-                "Customize the keyboard toolbar: add, remove and drag to reorder buttons",
-                "Long-press tooltips on icon buttons"
-            )
+            emptyList()
         }
     ),
     UpdateNotesSection(
-        heading = "Improved",
+        heading = "Shared Daily Notes and Calendar",
         items = listOf(
-            "The cursor lands exactly where you tap in text, tables and databases",
-            "Database blocks scroll smoothly, and each device remembers the open database view",
-            "Pasted blocks keep their images"
+            "One daily note and calendar across all spaces",
+            "Per-space calendar toggles",
+            "Account-wide tasks Inbox",
+            "Daily notes in search, media and trash",
+            "Daily notes sync across devices",
+            "Daily notes and calendar in backups"
+        )
+    ),
+    UpdateNotesSection(
+        heading = "Cover Images and GIFs",
+        items = listOf(
+            "Animated GIFs",
+            "Add note covers using web links",
+            "Reposition covers"
+        )
+    ),
+    UpdateNotesSection(
+        heading = "Editor",
+        items = listOf(
+            "Smoother typing and moving between blocks with Backspace, Enter and arrow keys"
         ) + if (isDesktopPlatform) {
-            listOf(
-                "Menus open submenus on hover",
-                "A new note menu with Note, Canvas and Templates",
-                "Ctrl+Z and Ctrl+Y work even without a cursor",
-                "The sidebar stays collapsed after a restart",
-                "Emberr follows display scale changes on Linux without a restart"
-            )
+            listOf("Drag a box to select blocks")
         } else {
-            listOf(
-                "The new note menu opens right next to its button",
-                "Indent buttons added to the keyboard toolbar"
-            )
+            emptyList()
         }
     ),
     UpdateNotesSection(
-        heading = "Fixed",
+        heading = "Others",
         items = listOf(
-            "Images no longer stretch when a note opens",
-            "Tapping a table cell no longer makes the page jump"
-        ) + (if (isDesktopPlatform) listOf("Right-click works on text selected across blocks") else emptyList()) + listOf(
-            "Fixed some more bugs and improved UI/UX"
+            "New Blur and Color top bar styles"
+        ) + (if (isDesktopPlatform) {
+            listOf(
+                "Top bar fade",
+                "Sidebar button in headers",
+                "Drag and drop files to import",
+                "Right-click title bar for window menu"
+            )
+        } else {
+            emptyList()
+        }) + listOf(
+            "Joplin location fields skipped on import",
+            "Sub-notes stay in their parent's space",
+            "Duplicate category names are blocked"
         )
     )
 )
@@ -240,6 +263,8 @@ private fun UpdatePeekPill(
 
 @Composable
 fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
+    val dialogColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
+
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -250,47 +275,87 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                 .fillMaxWidth(0.92f)
                 .heightIn(max = UpdateDialogMaxHeight)
                 .clip(UpdateDialogShape)
-                .background(
-                    if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface
-                    else MaterialTheme.colorScheme.background
-                )
-                .padding(24.dp)
+                .background(dialogColor)
         ) {
-            Text(
-                text = "What's new",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            appVersionName?.let { version ->
-                Text(
-                    text = "Version $version",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
+            Box(modifier = Modifier.weight(1f, fill = false)) {
+                val dialogHazeState = remember { HazeState() }
+                var headerHeightPx by remember { mutableFloatStateOf(0f) }
+                var buttonAreaHeightPx by remember { mutableFloatStateOf(0f) }
+                val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+                val buttonAreaHeight = with(LocalDensity.current) { buttonAreaHeightPx.toDp() }
+                val headerBlurStyle = EmberrBlur.Regular.copy(
+                    backgroundColor = dialogColor,
+                    tints = listOf(HazeTint(dialogColor.copy(alpha = 0.45f))),
+                    fallbackTint = HazeTint(dialogColor)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .hazeSource(state = dialogHazeState)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = UpdateDialogPadding)
+                        .padding(top = headerHeight + 16.dp, bottom = buttonAreaHeight),
+                    verticalArrangement = Arrangement.spacedBy(28.dp)
+                ) {
+                    CurrentUpdateNotes.forEach { section ->
+                        UpdateNotesSectionView(section)
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .onGloballyPositioned { coordinates -> headerHeightPx = coordinates.size.height.toFloat() }
+                ) {
+                    EmberrTopHeaderBar(
+                        titlePlacement = TopHeaderTitlePlacement.Start,
+                        showBackButton = false,
+                        reserveBackButtonSpace = false,
+                        showsSidebarToggle = false,
+                        topEdgeColor = dialogColor,
+                        topEdgeBlurHeight = UpdateDialogHeaderBlurHeight,
+                        topEdgeGradientHeight = UpdateDialogHeaderGradientHeight,
+                        flatFadeHeight = headerHeight + 4.dp,
+                        hazeState = dialogHazeState,
+                        hazeStyle = headerBlurStyle,
+                        applyStatusBarPadding = false,
+                        contentPadding = topHeaderBarPadding(
+                            top = UpdateDialogPadding,
+                            horizontal = UpdateDialogPadding,
+                            bottom = 8.dp
+                        ),
+                        leadingContent = {
+                            Column {
+                                Text(
+                                    text = "What's new",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                appVersionName?.let { version ->
+                                    Text(
+                                        text = "Version $version",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
+
+                EmberrButtonPrimary(
+                    text = "Got it",
+                    onClick = onDismissRequest,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .onGloballyPositioned { coordinates -> buttonAreaHeightPx = coordinates.size.height.toFloat() }
+                        .fillMaxWidth()
+                        .padding(UpdateDialogPadding)
                 )
             }
-
-            Spacer(Modifier.height(24.dp))
-
-            Column(
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(28.dp)
-            ) {
-                CurrentUpdateNotes.forEach { section ->
-                    UpdateNotesSectionView(section)
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            EmberrButtonPrimary(
-                text = "Got it",
-                onClick = onDismissRequest,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
