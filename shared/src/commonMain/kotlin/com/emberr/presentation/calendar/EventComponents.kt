@@ -161,7 +161,7 @@ private val FieldPadding = 14.dp
 private val EditorSpacing = 24.dp
 private val EventTitleStyle: TextStyle
     @Composable get() = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal)
-private val EventSheetDesktopMaxWidth = 560.dp
+private val EventSheetDesktopMaxWidth = 480.dp
 private val ChipShape = RoundedCornerShape(8.dp)
 private val ChipSpacing = 8.dp
 private val ChipHorizontalPadding = 10.dp
