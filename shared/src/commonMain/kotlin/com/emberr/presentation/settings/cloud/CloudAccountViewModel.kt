@@ -200,7 +200,10 @@ private fun cloudAccountErrorMessage(
 }
 
 private fun cloudSyncResultMessage(result: CloudSyncResult): String = when (result) {
-    is CloudSyncResult.Done -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent"
+    is CloudSyncResult.Done -> when (result.notSentCount) {
+        0 -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent"
+        else -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent, ${result.notSentCount} not sent"
+    }
     CloudSyncResult.NotSignedIn -> SIGNED_OUT_MESSAGE
     CloudSyncResult.Busy -> "Another sync is running. Try again in a moment."
     CloudSyncResult.UpdateRequired -> "Update Emberr to keep syncing with Emberr Cloud."

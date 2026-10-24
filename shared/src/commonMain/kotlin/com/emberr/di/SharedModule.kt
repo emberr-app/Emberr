@@ -12,8 +12,10 @@ import com.emberr.domain.cloud.api.configureForCloudBlobTransfer
 import com.emberr.domain.cloud.api.configureForEmberrCloud
 import com.emberr.domain.cloud.crypto.CloudCrypto
 import com.emberr.domain.cloud.keys.CloudAccountKeyManager
+import com.emberr.domain.cloud.keys.CloudDailyNoteIds
 import com.emberr.domain.cloud.keys.CloudItemKeyManager
 import com.emberr.domain.cloud.keys.CloudRecoveryWords
+import com.emberr.domain.cloud.sync.CloudNoteSync
 import com.emberr.domain.cloud.sync.CloudSyncEngine
 import com.emberr.domain.cloud.sync.forgetCloudSyncRecords
 import com.emberr.domain.util.system.appVersionName
@@ -465,6 +467,7 @@ val sharedModule = module {
     single { CloudCrypto() }
     single { CloudAccountKeyManager(cloudCrypto = get()) }
     single { CloudItemKeyManager(cloudCrypto = get()) }
+    single { CloudDailyNoteIds(cloudCrypto = get()) }
     single { CloudRecoveryWords(cloudCrypto = get()) }
     single {
         val settingsManager = get<SettingsManager>()
@@ -490,6 +493,22 @@ val sharedModule = module {
         )
     }
     single {
+        CloudNoteSync(
+            apiClient = get(),
+            blobTransfer = get(),
+            itemKeyManager = get(),
+            dailyNoteIds = get(),
+            cloudItemDao = get(),
+            noteDao = get(),
+            blockDao = get(),
+            folderDao = get(),
+            selfHostDeletedNoteDao = get(),
+            noteRepository = get(),
+            spaceRepository = get(),
+            canvasRepository = get()
+        )
+    }
+    single {
         CloudSyncEngine(
             apiClient = get(),
             accountStorage = get(),
@@ -499,7 +518,9 @@ val sharedModule = module {
             cloudItemDao = get(),
             spaceDao = get(),
             folderDao = get(),
-            spaceRepository = get()
+            spaceRepository = get(),
+            noteRepository = get(),
+            noteSync = get()
         )
     }
     viewModel {
