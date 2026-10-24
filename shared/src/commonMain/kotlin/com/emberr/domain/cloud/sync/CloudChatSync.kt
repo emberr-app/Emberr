@@ -54,12 +54,20 @@ class CloudChatSync(
 
     private suspend fun applyPulledChat(stream: CloudStream, item: CloudRemoteItem, counts: SyncPassCounts) {
         if (item.deleted) {
-            applyChatTombstone(stream, item, counts)
+            withLocalDataLock { applyChatTombstone(stream, item, counts) }
             return
         }
-        val localSession = chatSessionDao.getSession(item.itemId)
         val remoteSession = openPulledChat(stream, item).copy(id = item.itemId, spaceId = stream.appSpaceId)
+        withLocalDataLock { writePulledChat(stream, item, remoteSession, counts) }
+    }
 
+    private suspend fun writePulledChat(
+        stream: CloudStream,
+        item: CloudRemoteItem,
+        remoteSession: ChatSessionEntity,
+        counts: SyncPassCounts
+    ) {
+        val localSession = chatSessionDao.getSession(item.itemId)
         when {
             localSession == null -> saveRemoteSession(remoteSession, counts)
             localSession.updatedAt == remoteSession.updatedAt -> Unit

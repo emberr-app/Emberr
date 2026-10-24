@@ -128,4 +128,14 @@ class CloudSyncRulesTest {
         assertEquals(listOf("standup"), exceptionsByStream["work"]?.map { it.blockId })
         assertEquals(2, exceptionsByStream.values.sumOf { it.size })
     }
+
+    @Test
+    fun syncHasWorkOnlyWhenARevisionMovedASpaceIsNewOrLocalChangesWait() {
+        val seen = mapOf("work" to 12L, ACCOUNT_SPACE_ID to 7L)
+
+        assertFalse(cloudSyncHasWork(mapOf("work" to 12L, ACCOUNT_SPACE_ID to 7L), seen, localChangesAreWaiting = false))
+        assertTrue(cloudSyncHasWork(mapOf("work" to 13L, ACCOUNT_SPACE_ID to 7L), seen, localChangesAreWaiting = false))
+        assertTrue(cloudSyncHasWork(seen + ("travel" to 1L), seen, localChangesAreWaiting = false))
+        assertTrue(cloudSyncHasWork(seen, seen, localChangesAreWaiting = true))
+    }
 }

@@ -17,8 +17,10 @@ import com.emberr.domain.cloud.keys.CloudItemKeyManager
 import com.emberr.domain.cloud.keys.CloudRecoveryWords
 import com.emberr.domain.cloud.sync.CloudChatSync
 import com.emberr.domain.cloud.sync.CloudListSync
+import com.emberr.domain.cloud.sync.CloudLocalChanges
 import com.emberr.domain.cloud.sync.CloudNoteSync
 import com.emberr.domain.cloud.sync.CloudSyncEngine
+import com.emberr.domain.cloud.sync.CloudSyncPoller
 import com.emberr.domain.cloud.sync.forgetCloudSyncRecords
 import com.emberr.domain.util.system.appVersionName
 import io.ktor.client.HttpClient
@@ -539,6 +541,19 @@ val sharedModule = module {
         )
     }
     single {
+        CloudLocalChanges(
+            cloudItemDao = get(),
+            noteDao = get(),
+            spaceDao = get(),
+            folderDao = get(),
+            chatSessionDao = get(),
+            selfHostDeletedNoteDao = get(),
+            categoryDao = get(),
+            propertyTagDao = get(),
+            customPropertyDao = get()
+        )
+    }
+    single {
         CloudSyncEngine(
             apiClient = get(),
             accountStorage = get(),
@@ -552,13 +567,20 @@ val sharedModule = module {
             noteRepository = get(),
             noteSync = get(),
             listSync = get(),
-            chatSync = get()
+            chatSync = get(),
+            localChanges = get(),
+            selfHostConnectionState = get(),
+            syncPairingState = get()
         )
     }
+    single { CloudSyncPoller(cloudSyncEngine = get()) }
     viewModel {
         CloudAccountViewModel(
             cloudAccountRepository = get(),
             cloudSyncEngine = get(),
+            cloudSyncScheduler = get(),
+            selfHostConnectionState = get(),
+            syncPairingState = get(),
             settingsManager = get()
         )
     }

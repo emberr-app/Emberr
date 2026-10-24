@@ -58,6 +58,17 @@ private class NoteKeyToSend(val openKey: ByteArray, val lockedKey: CloudEncrypte
 
 private class SavedNoteKey(val stream: CloudStream, val lockedKey: CloudEncryptedBytes, val parentId: String)
 
+private class NoteToIndex(val metadata: NoteMetadataEntity, val content: NoteContent)
+
+private class NoteToSend(
+    val note: NoteMetadataEntity,
+    val stream: CloudStream,
+    val itemType: CloudItemType,
+    val itemId: String,
+    val keyParentId: String,
+    val noteJson: String
+)
+
 class CloudNoteSync(
     private val apiClient: CloudApiClient,
     private val blobTransfer: CloudBlobTransfer,
@@ -131,6 +142,21 @@ class CloudNoteSync(
         item: CloudRemoteItem,
         remoteOperations: PreparedSyncOperations
     ) {
+        val noteToIndex = withLocalDataLock { writePulledLiveNote(pass, stream, item, remoteOperations) } ?: return
+        val dateString = noteToIndex.metadata.dateString
+        if (noteToIndex.metadata.isDaily && dateString != null) {
+            noteRepository.indexDailyNote(dateString, noteToIndex.content, noteToIndex.metadata)
+        } else {
+            noteRepository.indexNote(noteToIndex.metadata, noteToIndex.content)
+        }
+    }
+
+    private suspend fun writePulledLiveNote(
+        pass: NotePass,
+        stream: CloudStream,
+        item: CloudRemoteItem,
+        remoteOperations: PreparedSyncOperations
+    ): NoteToIndex? {
         val isDailyItem = item.noteItemType() == CloudItemType.DAILY
         val remoteMetadata = remoteOperations.metadataUpsert.copy(
             spaceId = if (isDailyItem) ACCOUNT_SPACE_ID else stream.appSpaceId
@@ -153,7 +179,7 @@ class CloudNoteSync(
             }
             if (localDeletion != null && remoteMetadata.updatedAt <= localDeletion.deletedAt) {
                 streamRecords.saveRow(stream, rowForLiveItem(stream, item, localDeletion.noteId, remoteMetadata.updatedAt))
-                return
+                return null
             }
         }
 
@@ -202,14 +228,7 @@ class CloudNoteSync(
         val noteChangedHere = canvasChanged ||
             localMetadata?.copy(filePath = "") != mergedMetadata ||
             localBlocks.toSet() != mergedBlocks.toSet()
-        if (noteChangedHere) {
-            pass.counts.receivedCount++
-            if (mergedMetadata.isDaily && mergedDateString != null) {
-                noteRepository.indexDailyNote(mergedDateString, refreshedContent, mergedMetadata)
-            } else {
-                noteRepository.indexNote(mergedMetadata, refreshedContent)
-            }
-        }
+        if (noteChangedHere) pass.counts.receivedCount++
 
         val cloudSyncedAt = cloudSyncedAtAfterPull(
             localMetadata = localMetadata,
@@ -222,9 +241,10 @@ class CloudNoteSync(
         if (cloudSyncedAt != mergedMetadata.cloudSyncedAt) noteDao.updateCloudSyncedAt(noteId, cloudSyncedAt)
 
         streamRecords.saveRow(stream, rowForLiveItem(stream, item, noteId, remoteMetadata.updatedAt))
+        return if (noteChangedHere) NoteToIndex(mergedMetadata, refreshedContent) else null
     }
 
-    private suspend fun applyPulledNoteTombstone(pass: NotePass, stream: CloudStream, item: CloudRemoteItem) {
+    private suspend fun applyPulledNoteTombstone(pass: NotePass, stream: CloudStream, item: CloudRemoteItem) = withLocalDataLock {
         val row = stream.rowsByItemId[item.itemId]
         val localNote = localNoteOfItem(pass, stream, item, row)
         if (localNote != null && !localEditIsNewerThanTombstone(localNote.updatedAt, item.updatedAtMicroseconds)) {
@@ -355,26 +375,38 @@ class CloudNoteSync(
         }
     }
 
+    private suspend fun compileNoteToSend(pass: NotePass, noteId: String): NoteToSend? {
+        val note = noteDao.getNoteById(noteId) ?: return null
+        val stream = pass.streamsBySpaceId[note.spaceId] ?: return null
+        if (note.isDaily && !stream.isAccountStream) return null
+        val itemType = if (note.isDaily) CloudItemType.DAILY else CloudItemType.NOTE
+        val itemId = if (note.isDaily) dailyItemIdOf(pass, note.dateString ?: return null) else note.noteId
+        val row = stream.rowsByItemId[itemId]
+        val keyParentId = keyParentIdOf(pass, stream, note)
+        val needsPush = row == null || row.isDeleted || row.localId != note.noteId ||
+            row.parentId != keyParentId || note.updatedAt > note.cloudSyncedAt
+        if (!needsPush || !keyParentHasKey(stream, keyParentId)) return null
+
+        val noteJson = NoteJsonCompiler.compileNoteToJson(
+            metadata = note,
+            blocks = blockDao.getAllBlocksForNoteIncludingDeleted(noteId),
+            canvas = canvasRepository.loadCanvasIncludingDeleted(noteId)
+        )
+        return NoteToSend(note, stream, itemType, itemId, keyParentId, noteJson)
+    }
+
     private suspend fun commitNote(pass: NotePass, noteId: String) {
         repeat(MAX_COMMIT_TRIES_PER_ITEM) {
-            val note = noteDao.getNoteById(noteId) ?: return
-            val stream = pass.streamsBySpaceId[note.spaceId] ?: return
-            if (note.isDaily && !stream.isAccountStream) return
-            val itemType = if (note.isDaily) CloudItemType.DAILY else CloudItemType.NOTE
-            val itemId = if (note.isDaily) dailyItemIdOf(pass, note.dateString ?: return) else note.noteId
+            val noteToSend = withLocalDataLock { compileNoteToSend(pass, noteId) } ?: return
+            val note = noteToSend.note
+            val stream = noteToSend.stream
+            val itemType = noteToSend.itemType
+            val itemId = noteToSend.itemId
+            val keyParentId = noteToSend.keyParentId
             val row = stream.rowsByItemId[itemId]
-            val keyParentId = keyParentIdOf(pass, stream, note)
-            val needsPush = row == null || row.isDeleted || row.localId != note.noteId ||
-                row.parentId != keyParentId || note.updatedAt > note.cloudSyncedAt
-            if (!needsPush || !keyParentHasKey(stream, keyParentId)) return
 
             val noteKey = noteKeyToSend(pass, stream, itemId, keyParentId)
-            val noteJson = NoteJsonCompiler.compileNoteToJson(
-                metadata = note,
-                blocks = blockDao.getAllBlocksForNoteIncludingDeleted(noteId),
-                canvas = canvasRepository.loadCanvasIncludingDeleted(noteId)
-            )
-            val encryptedNote = itemKeyManager.encryptContent(noteJson.encodeToByteArray(), noteKey.openKey, itemType, itemId)
+            val encryptedNote = itemKeyManager.encryptContent(noteToSend.noteJson.encodeToByteArray(), noteKey.openKey, itemType, itemId)
             val sizeBytes = encryptedNote.cipherText.size.toLong()
             val uploadUrl = requestUploadUrlUnlessTooLarge(pass, stream, itemId, sizeBytes) ?: run {
                 pass.counts.notSentCount++
@@ -412,7 +444,7 @@ class CloudNoteSync(
                             isDeleted = false
                         )
                     )
-                    noteDao.updateCloudSyncedAt(noteId, note.updatedAt)
+                    withLocalDataLock { noteDao.updateCloudSyncedAt(noteId, note.updatedAt) }
                     pass.counts.sentCount++
                     return
                 }

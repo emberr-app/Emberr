@@ -101,7 +101,7 @@ class CloudListSync(
     private fun isListItemOf(stream: CloudStream, item: CloudRemoteItem): Boolean =
         item.itemType == listItemTypeOf(stream) && item.itemId == listItemIdOf(stream)
 
-    private suspend fun applyPulledList(pass: ListPass, stream: CloudStream, item: CloudRemoteItem, counts: SyncPassCounts) {
+    private suspend fun applyPulledList(pass: ListPass, stream: CloudStream, item: CloudRemoteItem, counts: SyncPassCounts) = withLocalDataLock {
         val syncedUpdatedAt = if (item.deleted) {
             pass.pulledCopiesBySpaceId.remove(stream.appSpaceId)
             applyListTombstone(stream, item, counts)
@@ -243,7 +243,7 @@ class CloudListSync(
         repeat(MAX_COMMIT_TRIES_PER_ITEM) {
             val row = stream.rowsByItemId[itemId]
             val pulledCopy = pass.pulledCopiesBySpaceId[stream.appSpaceId]
-            val builtList = buildListOf(stream, routedEventExceptions(pass))
+            val builtList = withLocalDataLock { buildListOf(stream, routedEventExceptions(pass)) }
             val listToSend = if (pulledCopy == null) {
                 builtList
             } else {

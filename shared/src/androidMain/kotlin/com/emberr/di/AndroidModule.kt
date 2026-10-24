@@ -35,6 +35,8 @@ import com.emberr.domain.selfhost.crypto.Pbkdf2KeyDerivationManager
 import com.emberr.domain.selfhost.crypto.SecureSyncKeyStorage
 import com.emberr.domain.cloud.account.AndroidCloudAccountStorage
 import com.emberr.domain.cloud.account.CloudAccountStorage
+import com.emberr.domain.cloud.sync.CloudSyncScheduler
+import com.emberr.domain.cloud.sync.CloudSyncWorker
 import com.emberr.domain.selfhost.sync.AndroidMeteredNetworkChecker
 import com.emberr.domain.selfhost.sync.MeteredNetworkChecker
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
@@ -308,6 +310,14 @@ val androidModule = module {
 
     // Emberr Cloud
     single<CloudAccountStorage> { AndroidCloudAccountStorage(androidContext(), get()) }
+    single { CloudSyncScheduler(androidContext(), get(), get(), get()) }
+    worker {
+        CloudSyncWorker(
+            appContext = get(),
+            workerParams = get(),
+            cloudSyncEngine = get()
+        )
+    }
 
     // Sync
     single<SyncEncryptionManager> { AesGcmEncryptionManager() }

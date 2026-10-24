@@ -22,6 +22,7 @@ import com.emberr.domain.ai.chat.ChatSessionMerge
 import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.canvas.CanvasContent
 import com.emberr.domain.canvas.CanvasRepository
+import com.emberr.domain.cloud.account.CloudSignInSignal
 import com.emberr.domain.canvas.liveImageFileNames
 import com.emberr.domain.ai.external.ExternalAiProvider
 import com.emberr.domain.ai.external.ExternalAiProviderConfig
@@ -268,6 +269,10 @@ class SyncRepositoryImpl(
 
     override suspend fun applyRemoteChanges(changes: List<SyncEnvelope>): Boolean =
         withContext(Dispatchers.IO) {
+            if (CloudSignInSignal.isSignedIn.value) {
+                LanSyncLog.d("applyRemoteChanges: skipped, this device is signed in to Emberr Cloud")
+                return@withContext false
+            }
             repository.waitUntilDailyNotesAreInAccount()
             val syncKey = settingsManager.getSyncEncryptionKey()
             val currentAppVersion = appVersionName.orEmpty()
@@ -739,6 +744,10 @@ class SyncRepositoryImpl(
 
     override suspend fun collectLocalChanges(since: Long, uploadMedia: Boolean): List<SyncEnvelope> =
         withContext(Dispatchers.IO) {
+            if (CloudSignInSignal.isSignedIn.value) {
+                LanSyncLog.d("collectLocalChanges: skipped, this device is signed in to Emberr Cloud")
+                throw IllegalStateException("LAN Sync is off while this device is signed in to Emberr Cloud")
+            }
             repository.waitUntilDailyNotesAreInAccount()
             val lastSyncTime = since
             val syncKey = settingsManager.getSyncEncryptionKey()

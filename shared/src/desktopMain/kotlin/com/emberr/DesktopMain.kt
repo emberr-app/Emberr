@@ -42,9 +42,11 @@ import com.emberr.domain.selfhost.sync.ForegroundSyncPoller
 import com.emberr.domain.selfhost.crypto.SecureSyncKeyStorage
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
+import com.emberr.domain.cloud.sync.CloudSyncScheduler
 import com.emberr.domain.update.AppUpdateController
 import com.emberr.domain.update.detectStagedUpdateInstallation
 import com.emberr.domain.util.system.appVersionName
+import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.domain.util.time.desktopSystemUsesTwentyFourHourClock
 import com.emberr.domain.util.time.timeFormatPreferenceNamed
 import com.emberr.domain.util.time.desktopSystemFirstDayOfWeek
@@ -200,6 +202,8 @@ private fun runEmberrDesktopApp() = application {
             } else {
                 SelfHostSyncLog.d("DesktopMain: no self-host vault configured, skipping background sync schedules")
             }
+
+            if (isDebugBuild) koin.get<CloudSyncScheduler>().start()
         }
     }
 

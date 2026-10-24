@@ -32,6 +32,7 @@ import com.emberr.domain.selfhost.crypto.Pbkdf2KeyDerivationManager
 import com.emberr.domain.selfhost.crypto.SecureSyncKeyStorage
 import com.emberr.domain.cloud.account.CloudAccountStorage
 import com.emberr.domain.cloud.account.DesktopCloudAccountStorage
+import com.emberr.domain.cloud.sync.CloudSyncScheduler
 import com.emberr.domain.selfhost.sync.DesktopMeteredNetworkChecker
 import com.emberr.domain.selfhost.sync.MeteredNetworkChecker
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
@@ -134,6 +135,7 @@ val desktopModule = module {
 
     // Emberr Cloud
     single<CloudAccountStorage> { DesktopCloudAccountStorage(get()) }
+    single { CloudSyncScheduler(cloudSyncEngine = get(), cloudAccountRepository = get(), cloudSyncPoller = get()) }
 
     // Sync
     single<SyncEncryptionManager> { AesGcmEncryptionManager() }

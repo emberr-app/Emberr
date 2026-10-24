@@ -170,6 +170,7 @@ fun SettingsScreen(
 ) {
     val isPaired by syncViewModel.isPaired.collectAsState()
     val isSelfHostConnected by syncViewModel.isSelfHostConnected.collectAsState()
+    val isSignedInToCloud by syncViewModel.isSignedInToCloud.collectAsState()
     val syncStatus by syncViewModel.syncStatus.collectAsState()
     val serverStatus = syncViewModel.serverStatus?.collectAsState()?.value
     val serverUnavailableReason = (serverStatus as? SyncServerStatus.Unavailable)?.reason
@@ -279,6 +280,7 @@ fun SettingsScreen(
                 SyncSettingsSection(
                     isPaired = isPaired,
                     isSelfHostConnected = isSelfHostConnected,
+                    isSignedInToCloud = isSignedInToCloud,
                     syncStatus = syncStatus,
                     serverUnavailableReason = serverUnavailableReason,
                     syncPortInput = syncPortInput,
@@ -999,6 +1001,7 @@ private fun DataSettingsSection(
 private fun SyncSettingsSection(
     isPaired: Boolean,
     isSelfHostConnected: Boolean,
+    isSignedInToCloud: Boolean,
     syncStatus: String,
     serverUnavailableReason: String?,
     syncPortInput: String,
@@ -1014,19 +1017,27 @@ private fun SyncSettingsSection(
         SettingsActionRow(
             icon = painterResource(Res.drawable.refresh_cw),
             title = "Self-Host",
-            isEnabled = !isPaired,
+            isEnabled = !isPaired && !isSignedInToCloud,
             onClick = onOpenSelfHostSetup
         )
-        if (isPaired) {
-            SettingsFootnote(text = "Unpair LAN Sync to use Self-Host.")
+        when {
+            isPaired -> SettingsFootnote(text = "Unpair LAN Sync to use Self-Host.")
+            isSignedInToCloud -> SettingsFootnote(text = "Sign out of Emberr Cloud to use Self-Host.")
         }
         if (isDebugBuild) {
             SettingsDivider()
             SettingsActionRow(
                 icon = painterResource(Res.drawable.lock),
                 title = "Emberr Cloud",
+                isEnabled = isSignedInToCloud || (!isSelfHostConnected && !isPaired),
                 onClick = onOpenEmberrCloud
             )
+            if (!isSignedInToCloud) {
+                when {
+                    isSelfHostConnected -> SettingsFootnote(text = "Disconnect Self-Host to use Emberr Cloud.")
+                    isPaired -> SettingsFootnote(text = "Unpair LAN Sync to use Emberr Cloud.")
+                }
+            }
         }
     }
 
@@ -1089,7 +1100,7 @@ private fun SyncSettingsSection(
                 SettingsActionRow(
                     icon = painterResource(Res.drawable.qr_code),
                     title = "Pair Mobile Device",
-                    isEnabled = !isSelfHostConnected,
+                    isEnabled = !isSelfHostConnected && !isSignedInToCloud,
                     onClick = onPairMobileDevice
                 )
             }
@@ -1098,14 +1109,17 @@ private fun SyncSettingsSection(
                 SettingsActionRow(
                     icon = painterResource(Res.drawable.scan_line),
                     title = "Pair with Desktop",
-                    isEnabled = !isSelfHostConnected,
+                    isEnabled = !isSelfHostConnected && !isSignedInToCloud,
                     onClick = onPairWithDesktop
                 )
             }
         }
 
-        if (!isPaired && isSelfHostConnected) {
-            SettingsFootnote(text = "Disconnect Self-Host to use LAN Sync.")
+        if (!isPaired) {
+            when {
+                isSelfHostConnected -> SettingsFootnote(text = "Disconnect Self-Host to use LAN Sync.")
+                isSignedInToCloud -> SettingsFootnote(text = "Sign out of Emberr Cloud to use LAN Sync.")
+            }
         }
     }
 }

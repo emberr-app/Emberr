@@ -124,3 +124,13 @@ internal fun tombstonesPrunedFromFullList(
         )
     }
 }
+
+fun cloudSyncHasWork(
+    latestRevisionsBySpaceId: Map<String, Long>,
+    lastRevisionsSeenBySpaceId: Map<String, Long>,
+    localChangesAreWaiting: Boolean
+): Boolean =
+    localChangesAreWaiting ||
+        latestRevisionsBySpaceId.any { (spaceId, latestRevision) -> lastRevisionsSeenBySpaceId[spaceId] != latestRevision }
+
+fun shouldSyncInBackground(signedInSessionCount: Int): Boolean = signedInSessionCount >= 2

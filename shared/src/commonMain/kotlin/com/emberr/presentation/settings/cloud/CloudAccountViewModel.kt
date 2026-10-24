@@ -18,6 +18,10 @@ import com.emberr.domain.cloud.keys.IncorrectRecoveryKeyException
 import com.emberr.domain.cloud.keys.InvalidRecoveryWordsException
 import com.emberr.domain.cloud.sync.CloudSyncEngine
 import com.emberr.domain.cloud.sync.CloudSyncResult
+import com.emberr.domain.cloud.sync.CloudSyncScheduler
+import com.emberr.domain.cloud.sync.CloudSyncStatus
+import com.emberr.domain.selfhost.sync.SelfHostConnectionState
+import com.emberr.domain.sync.SyncPairingState
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +29,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,9 +79,15 @@ data class CloudAccountScreenState(
     val isWorking: Boolean = false,
     val errorMessage: String? = null,
     val newCodeSentMessage: String? = null,
-    val isSyncing: Boolean = false,
-    val syncMessage: String? = null
+    val syncStatus: CloudSyncStatus = CloudSyncStatus(),
+    val otherSyncMethodMessage: String? = null
 ) {
+    val syncProblemMessage: String?
+        get() = syncStatus.lastProblem?.let(::cloudSyncResultMessage)
+
+    val canStartSignIn: Boolean
+        get() = !isWorking && otherSyncMethodMessage == null
+
     val isServerAddressShown: Boolean
         get() = step !in setOf(CloudAccountStep.LOADING, CloudAccountStep.SIGN_UP_RECOVERY_WORDS) && step !in signedInSteps
 
@@ -207,12 +218,17 @@ private fun cloudSyncResultMessage(result: CloudSyncResult): String = when (resu
     CloudSyncResult.NotSignedIn -> SIGNED_OUT_MESSAGE
     CloudSyncResult.Busy -> "Another sync is running. Try again in a moment."
     CloudSyncResult.UpdateRequired -> "Update Emberr to keep syncing with Emberr Cloud."
+    CloudSyncResult.AnotherSyncMethodIsOn ->
+        "Another sync method is on. Disconnect Self-Host or unpair LAN Sync to keep using Emberr Cloud."
     is CloudSyncResult.Failed -> result.message
 }
 
 class CloudAccountViewModel(
     private val cloudAccountRepository: CloudAccountRepository,
     private val cloudSyncEngine: CloudSyncEngine,
+    private val cloudSyncScheduler: CloudSyncScheduler,
+    private val selfHostConnectionState: SelfHostConnectionState,
+    private val syncPairingState: SyncPairingState,
     private val settingsManager: SettingsManager
 ) : ViewModel() {
 
@@ -229,6 +245,18 @@ class CloudAccountViewModel(
     init {
         viewModelScope.launch {
             cloudAccountRepository.signInState.collect { signInState -> onSignInStateChanged(signInState) }
+        }
+        viewModelScope.launch {
+            cloudSyncEngine.status.collect { syncStatus -> _screenState.update { it.copy(syncStatus = syncStatus) } }
+        }
+        viewModelScope.launch {
+            combine(selfHostConnectionState.isConnected, syncPairingState.isPaired) { isSelfHostConnected, isPaired ->
+                when {
+                    isSelfHostConnected -> "Disconnect Self-Host to use Emberr Cloud."
+                    isPaired -> "Unpair LAN Sync to use Emberr Cloud."
+                    else -> null
+                }
+            }.collect { message -> _screenState.update { it.copy(otherSyncMethodMessage = message) } }
         }
         runAccountTask {
             try {
@@ -412,12 +440,8 @@ class CloudAccountViewModel(
     }
 
     fun syncNow() {
-        if (_screenState.value.isSyncing) return
-        _screenState.update { it.copy(isSyncing = true, syncMessage = null) }
-        viewModelScope.launch {
-            val result = cloudSyncEngine.syncNow()
-            _screenState.update { it.copy(isSyncing = false, syncMessage = cloudSyncResultMessage(result)) }
-        }
+        if (_screenState.value.syncStatus.isSyncing) return
+        cloudSyncScheduler.syncNow()
     }
 
     fun signOutThisDevice() {
@@ -639,7 +663,9 @@ class CloudAccountViewModel(
                 step = CloudAccountStep.SIGNED_IN,
                 serverAddressInput = it.serverAddressInput,
                 signedInEmail = email,
-                isWorking = it.isWorking
+                isWorking = it.isWorking,
+                syncStatus = it.syncStatus,
+                otherSyncMethodMessage = it.otherSyncMethodMessage
             )
         }
         loadAccountOverview()
@@ -652,7 +678,9 @@ class CloudAccountViewModel(
                 step = CloudAccountStep.WELCOME,
                 serverAddressInput = it.serverAddressInput,
                 isWorking = it.isWorking,
-                errorMessage = errorMessage
+                errorMessage = errorMessage,
+                syncStatus = it.syncStatus,
+                otherSyncMethodMessage = it.otherSyncMethodMessage
             )
         }
     }

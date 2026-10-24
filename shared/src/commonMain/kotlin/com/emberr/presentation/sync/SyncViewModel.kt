@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.emberr.core.security.SyncEncryptionManager
 import com.emberr.core.security.SyncHmacSigner
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.domain.cloud.account.CloudSignInSignal
 import com.emberr.domain.selfhost.sync.SelfHostConnectionState
 import com.emberr.domain.sync.LanSyncLog
 import com.emberr.domain.sync.LanSyncSchemaMismatchException
@@ -71,6 +72,8 @@ class SyncViewModel(
     val isPaired = pairingState.isPaired
 
     val isSelfHostConnected by lazy { selfHostConnectionState.isConnected }
+
+    val isSignedInToCloud = CloudSignInSignal.isSignedIn
 
     fun startServerForPairing() {
         viewModelScope.launch(Dispatchers.IO) {
