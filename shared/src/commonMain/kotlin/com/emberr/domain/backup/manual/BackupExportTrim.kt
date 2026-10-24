@@ -67,6 +67,8 @@ suspend fun AppDatabase.keepOnlySpacesForExport(
         dao.deleteAllApiConfigTombstones()
         dao.deleteAllUnappliedSyncChanges()
         dao.deleteAllUnusedMediaFiles()
+        dao.deleteAllCloudSpaces()
+        dao.deleteAllCloudItems()
     }
     useWriterConnection { connection -> connection.execSQL("VACUUM") }
 

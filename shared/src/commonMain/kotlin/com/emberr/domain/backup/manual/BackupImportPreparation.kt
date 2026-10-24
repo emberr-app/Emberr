@@ -137,7 +137,8 @@ fun prepareBackupForImport(
                 spaceId = rewriter.rewrite(note.spaceId),
                 databaseId = note.databaseId?.let(rewriter::rewrite),
                 updatedAt = now,
-                selfHostSyncedAt = 0L
+                selfHostSyncedAt = 0L,
+                cloudSyncedAt = 0L
             )
         },
         folders = folders.map { folder ->
@@ -184,6 +185,7 @@ fun prepareBackupForImport(
                 folderId = null,
                 updatedAt = now,
                 selfHostSyncedAt = 0L,
+                cloudSyncedAt = 0L,
                 filePath = ""
             )
         },
@@ -195,7 +197,8 @@ fun prepareBackupForImport(
                 folderId = null,
                 databaseId = subNote.databaseId?.let(rewriter::rewrite),
                 updatedAt = now,
-                selfHostSyncedAt = 0L
+                selfHostSyncedAt = 0L,
+                cloudSyncedAt = 0L
             )
         },
         subNoteBlocks = importedSubNoteBlocks,

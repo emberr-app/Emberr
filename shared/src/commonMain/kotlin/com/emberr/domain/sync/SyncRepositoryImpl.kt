@@ -321,7 +321,7 @@ class SyncRepositoryImpl(
                                         envelope.entityId
                                     )
                                     if (!envelope.isDeleted && (tombstone == null || tombstone.deletedAt < envelope.updatedAt)) {
-                                        val newMeta = remoteMeta.copy(selfHostSyncedAt = 0L)
+                                        val newMeta = remoteMeta.copy(selfHostSyncedAt = 0L, cloudSyncedAt = 0L)
                                         repository.saveNoteInSpace(
                                             spaceId = remoteMeta.spaceId,
                                             metadata = newMeta,

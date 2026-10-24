@@ -168,7 +168,8 @@ class NoteEditorViewModel(
 
         return metadataToSave.copy(
             updatedAt = storedMetadata.updatedAt,
-            selfHostSyncedAt = storedMetadata.selfHostSyncedAt
+            selfHostSyncedAt = storedMetadata.selfHostSyncedAt,
+            cloudSyncedAt = storedMetadata.cloudSyncedAt
         ) == storedMetadata
     }
 
