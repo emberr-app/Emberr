@@ -1,8 +1,12 @@
 package com.emberr.domain.cloud.sync
 
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
+import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
+import com.emberr.data.local.room.entity.CloudItemEntity
 import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.cloud.api.CloudRemoteItem
+import com.emberr.domain.cloud.keys.CloudItemType
 import com.emberr.domain.database.databaseNoteId
 import com.emberr.domain.selfhost.sync.serverAlreadyHasMergedNote
 import com.emberr.domain.selfhost.translation.BlockTombstone
@@ -72,5 +76,51 @@ internal fun cloudSyncedAtAfterPull(
         cloudAlreadyHasMergedNote -> mergedMetadata.updatedAt
         mergedMetadata.updatedAt > keptCloudSyncedAt -> keptCloudSyncedAt
         else -> 0L
+    }
+}
+
+fun listNeedsPush(
+    listToSend: CloudListsPayload,
+    pulledCopy: CloudListsPayload?,
+    row: CloudItemEntity?,
+    mustSendChanges: Boolean
+): Boolean = when {
+    pulledCopy != null -> !listToSend.hasSameEntriesAs(pulledCopy)
+    row == null -> listToSend.hasEntries()
+    else -> mustSendChanges || listToSend.newestEntryTime() > row.syncedUpdatedAt
+}
+
+inline fun eventExceptionsByStream(
+    exceptions: List<CalendarEventExceptionEntity>,
+    noteIdOfBlock: (blockId: String) -> String?,
+    noteOf: (noteId: String) -> NoteMetadataEntity?
+): Map<String, List<CalendarEventExceptionEntity>> =
+    exceptions
+        .mapNotNull { exception ->
+            val note = noteIdOfBlock(exception.blockId)?.let { noteId -> noteOf(noteId) } ?: return@mapNotNull null
+            streamSpaceIdOf(note) to exception
+        }
+        .groupBy(keySelector = { it.first }, valueTransform = { it.second })
+
+internal fun tombstonesPrunedFromFullList(
+    rows: Collection<CloudItemEntity>,
+    fullList: List<CloudRemoteItem>
+): List<CloudRemoteItem> {
+    val itemIdsOnServer = fullList.mapTo(HashSet()) { it.itemId }
+    return rows.filter { row -> !row.isDeleted && row.itemId !in itemIdsOnServer }.map { row ->
+        CloudRemoteItem(
+            itemId = row.itemId,
+            itemType = CloudItemType.entries.firstOrNull { it.name == row.itemType },
+            payloadVersion = 0,
+            parentId = null,
+            lockedKey = null,
+            inlinePayload = null,
+            blobNonce = null,
+            downloadUrl = null,
+            revision = 0L,
+            sizeBytes = 0L,
+            deleted = true,
+            updatedAtMicroseconds = row.syncedUpdatedAt * MICROSECONDS_PER_MILLISECOND
+        )
     }
 }

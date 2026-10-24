@@ -15,6 +15,8 @@ import com.emberr.domain.cloud.keys.CloudAccountKeyManager
 import com.emberr.domain.cloud.keys.CloudDailyNoteIds
 import com.emberr.domain.cloud.keys.CloudItemKeyManager
 import com.emberr.domain.cloud.keys.CloudRecoveryWords
+import com.emberr.domain.cloud.sync.CloudChatSync
+import com.emberr.domain.cloud.sync.CloudListSync
 import com.emberr.domain.cloud.sync.CloudNoteSync
 import com.emberr.domain.cloud.sync.CloudSyncEngine
 import com.emberr.domain.cloud.sync.forgetCloudSyncRecords
@@ -509,6 +511,34 @@ val sharedModule = module {
         )
     }
     single {
+        CloudListSync(
+            apiClient = get(),
+            itemKeyManager = get(),
+            cloudItemDao = get(),
+            noteDao = get(),
+            blockDao = get(),
+            categoryDao = get(),
+            propertyTagDao = get(),
+            customPropertyDao = get(),
+            calendarEventExceptionDao = get(),
+            selfHostDeletedApiConfigDao = get(),
+            aiSettingsRepository = get(),
+            bookmarkCategoryOrderStore = get(),
+            favoriteNoteOrderStore = get(),
+            spaceRepository = get()
+        )
+    }
+    single {
+        CloudChatSync(
+            apiClient = get(),
+            blobTransfer = get(),
+            itemKeyManager = get(),
+            cloudItemDao = get(),
+            chatSessionDao = get(),
+            spaceRepository = get()
+        )
+    }
+    single {
         CloudSyncEngine(
             apiClient = get(),
             accountStorage = get(),
@@ -520,7 +550,9 @@ val sharedModule = module {
             folderDao = get(),
             spaceRepository = get(),
             noteRepository = get(),
-            noteSync = get()
+            noteSync = get(),
+            listSync = get(),
+            chatSync = get()
         )
     }
     viewModel {

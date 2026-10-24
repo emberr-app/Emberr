@@ -1,9 +1,12 @@
 package com.emberr.domain.cloud.sync
 
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
+import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
+import com.emberr.data.local.room.entity.CloudItemEntity
 import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.data.local.room.entity.PropertyTagEntity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -88,5 +91,41 @@ class CloudSyncRulesTest {
 
         assertEquals(1500L, cloudSyncedAtAfterPullingOnto(sentToSelfHostButNotToCloud))
         assertEquals(2000L, cloudSyncedAtAfterPullingOnto(alreadySentToCloud))
+    }
+
+    @Test
+    fun aListIsSentWhenTheCloudCopyLacksAnOlderEntryAndOtherwiseOnlyAfterANewerEdit() {
+        fun tag(tagId: String, updatedAt: Long) =
+            PropertyTagEntity(tagId = tagId, propertyKey = "status", name = tagId, createdAt = 1, updatedAt = updatedAt, spaceId = "work")
+        val listRow = CloudItemEntity(
+            spaceRef = 7, itemId = "space_lists", itemType = "SPACE_LISTS", localId = "space_lists", parentId = "work",
+            encryptedKey = "a2V5", encryptedKeyNonce = "bm9uY2U=", revision = 3, syncedUpdatedAt = 500, isDeleted = false
+        )
+        val cloudCopy = CloudListsPayload(propertyTags = listOf(tag("from-other-device", updatedAt = 500)))
+        val mergedWithAnOldTagNeverSent = CloudListsPayload(
+            propertyTags = listOf(tag("old-tag-made-offline", updatedAt = 100), tag("from-other-device", updatedAt = 500))
+        )
+
+        assertTrue(listNeedsPush(mergedWithAnOldTagNeverSent, pulledCopy = cloudCopy, row = listRow, mustSendChanges = false))
+        assertFalse(listNeedsPush(cloudCopy, pulledCopy = cloudCopy, row = listRow, mustSendChanges = false))
+        assertFalse(listNeedsPush(cloudCopy, pulledCopy = null, row = listRow, mustSendChanges = false))
+        assertTrue(listNeedsPush(cloudCopy, pulledCopy = null, row = listRow.copy(syncedUpdatedAt = 400), mustSendChanges = false))
+    }
+
+    @Test
+    fun anEventExceptionGoesToTheStreamOfTheNoteHoldingItsBlockAndStaysHereWhenThatBlockIsUnknown() {
+        fun exception(blockId: String) = CalendarEventExceptionEntity(blockId = blockId, occurrenceDate = "2026-10-24", isCancelled = true, updatedAt = 1)
+        val notesById = mapOf("today" to note("today", isDaily = true), "plan" to note("plan"))
+        val noteIdByBlockId = mapOf("gym" to "today", "standup" to "plan")
+
+        val exceptionsByStream = eventExceptionsByStream(
+            exceptions = listOf(exception("gym"), exception("standup"), exception("not-here-yet")),
+            noteIdOfBlock = { blockId -> noteIdByBlockId[blockId] },
+            noteOf = { noteId -> notesById[noteId] }
+        )
+
+        assertEquals(listOf("gym"), exceptionsByStream[ACCOUNT_SPACE_ID]?.map { it.blockId })
+        assertEquals(listOf("standup"), exceptionsByStream["work"]?.map { it.blockId })
+        assertEquals(2, exceptionsByStream.values.sumOf { it.size })
     }
 }

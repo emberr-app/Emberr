@@ -27,6 +27,7 @@ import com.emberr.domain.cloud.crypto.CloudDecryptionException
 import com.emberr.domain.cloud.crypto.CloudEncryptedBytes
 import com.emberr.domain.cloud.keys.CloudItemKeyManager
 import com.emberr.domain.cloud.keys.CloudItemType
+import com.emberr.domain.repository.AccountMergeResult
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.selfhost.merge.mergeFolders
 import com.emberr.domain.selfhost.merge.mergeSpaces
@@ -41,7 +42,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private val SYNC_LOCK_MAX_WAIT = 10.seconds
 
-private class PulledChanges(val items: List<CloudRemoteItem>, val latestRevision: Long)
+private class PulledChanges(val items: List<CloudRemoteItem>, val latestRevision: Long, val isFullList: Boolean)
 
 private class FolderKeyToSend(val openKey: ByteArray, val lockedKey: CloudEncryptedBytes)
 
@@ -56,7 +57,9 @@ class CloudSyncEngine(
     private val folderDao: FolderDao,
     private val spaceRepository: SpaceRepository,
     private val noteRepository: NoteRepository,
-    private val noteSync: CloudNoteSync
+    private val noteSync: CloudNoteSync,
+    private val listSync: CloudListSync,
+    private val chatSync: CloudChatSync
 ) {
 
     private val payloadJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -103,20 +106,38 @@ class CloudSyncEngine(
 
         val streams = registerAndOpenStreams(sessionToken, masterKey)
         val pulledChangesByStream = streams.map { stream -> stream to fetchEveryChangedItem(sessionToken, stream) }
-        pulledChangesByStream.forEach { (_, pulledChanges) -> pulledChanges.items.forEach(::checkThisAppCanRead) }
-        val itemsNotYetAppliedByStream = pulledChangesByStream.map { (stream, pulledChanges) ->
-            stream to pulledChanges.items.filter { item -> item.revision != stream.rowsByItemId[item.itemId]?.revision }
+        val pulledItemsByStream = pulledChangesByStream.map { (stream, pulledChanges) ->
+            val prunedTombstones = if (pulledChanges.isFullList) {
+                tombstonesPrunedFromFullList(stream.rowsByItemId.values, pulledChanges.items)
+            } else {
+                emptyList()
+            }
+            stream to (pulledChanges.items + prunedTombstones)
+        }
+        pulledItemsByStream.forEach { (_, items) -> items.forEach(::checkThisAppCanRead) }
+        val itemsNotYetAppliedByStream = pulledItemsByStream.map { (stream, items) ->
+            stream to items.filter { item -> item.revision != stream.rowsByItemId[item.itemId]?.revision }
         }
         itemsNotYetAppliedByStream.forEach { (stream, items) -> applyPulledSpaceAndFolders(stream, items, counts) }
         moveActiveSpaceIfSpacesChanged(counts)
         noteSync.applyPulledNotes(sessionToken, streams, itemsNotYetAppliedByStream, counts)
+        val listPass = listSync.applyPulledLists(itemsNotYetAppliedByStream, counts)
+        chatSync.applyPulledChats(itemsNotYetAppliedByStream, counts)
         pulledChangesByStream.forEach { (stream, pulledChanges) ->
             cloudSpaceDao.updateLastRevisionSeen(stream.appSpaceId, pulledChanges.latestRevision)
         }
 
-        mergeDailyNotesIntoAccount()
+        val accountMerge = mergeDailyNotesIntoAccount()
         streams.filterNot { it.isAccountStream }.forEach { stream -> pushStream(sessionToken, stream, counts) }
         noteSync.pushNotes(sessionToken, streams, counts)
+        listSync.pushLists(
+            sessionToken = sessionToken,
+            streams = streams,
+            pass = listPass,
+            categoriesChangedByAccountMerge = accountMerge?.categoriesChanged == true,
+            counts = counts
+        )
+        chatSync.pushChats(sessionToken, streams, counts)
         moveActiveSpaceIfSpacesChanged(counts)
 
         return CloudSyncResult.Done(
@@ -126,14 +147,14 @@ class CloudSyncEngine(
         )
     }
 
-    private suspend fun mergeDailyNotesIntoAccount() {
+    private suspend fun mergeDailyNotesIntoAccount(): AccountMergeResult? =
         try {
             noteRepository.mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld()
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (_: Exception) {
+            null
         }
-    }
 
     private suspend fun moveActiveSpaceIfSpacesChanged(counts: SyncPassCounts) {
         if (!counts.spacesChanged) return
@@ -221,11 +242,13 @@ class CloudSyncEngine(
     private suspend fun fetchEveryChangedItem(sessionToken: String, stream: CloudStream): PulledChanges {
         val newestItemsById = LinkedHashMap<String, CloudRemoteItem>()
         var since = stream.lastRevisionSeen
+        var isFullList = false
         while (true) {
             when (val changes = apiClient.fetchChanges(sessionToken, stream.spaceRef, since)) {
                 is CloudChanges.ResyncRequired -> {
                     newestItemsById.clear()
                     since = 0L
+                    isFullList = true
                 }
                 is CloudChanges.Page -> {
                     changes.items.forEach { item ->
@@ -234,7 +257,7 @@ class CloudSyncEngine(
                             newestItemsById[item.itemId] = item
                         }
                     }
-                    if (!changes.hasMore) return PulledChanges(newestItemsById.values.toList(), changes.latest)
+                    if (!changes.hasMore) return PulledChanges(newestItemsById.values.toList(), changes.latest, isFullList)
                     since = changes.latest
                 }
             }

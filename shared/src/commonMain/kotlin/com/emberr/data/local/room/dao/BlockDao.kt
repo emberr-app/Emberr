@@ -33,6 +33,12 @@ interface BlockDao {
     )
     suspend fun findMatchingBlocksForNote(noteId: String, query: String): List<NoteBlockEntity>
 
+    @Query(
+        "SELECT * FROM note_blocks WHERE blockId IN (SELECT blockId FROM calendar_event_exceptions) " +
+            "ORDER BY isDeleted DESC"
+    )
+    suspend fun getBlocksThatHaveEventExceptions(): List<NoteBlockEntity>
+
     @Query("SELECT * FROM note_blocks WHERE blockDataJson LIKE '%' || :text || '%'")
     suspend fun findBlocksContainingIncludingDeleted(text: String): List<NoteBlockEntity>
 
