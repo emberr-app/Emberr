@@ -11,13 +11,18 @@ import com.emberr.domain.cloud.keys.CloudItemType
 import com.emberr.domain.selfhost.translation.NOTE_PAYLOAD_SCHEMA_VERSION
 
 internal const val SPACE_AND_FOLDER_PAYLOAD_VERSION = 1
+internal const val LISTS_PAYLOAD_VERSION = 1
+internal const val CHAT_PAYLOAD_VERSION = 1
 internal const val MAX_COMMIT_TRIES_PER_ITEM = 3
 
 private val highestPayloadVersionThisAppReads = mapOf(
     CloudItemType.SPACE to SPACE_AND_FOLDER_PAYLOAD_VERSION,
     CloudItemType.FOLDER to SPACE_AND_FOLDER_PAYLOAD_VERSION,
     CloudItemType.NOTE to NOTE_PAYLOAD_SCHEMA_VERSION,
-    CloudItemType.DAILY to NOTE_PAYLOAD_SCHEMA_VERSION
+    CloudItemType.DAILY to NOTE_PAYLOAD_SCHEMA_VERSION,
+    CloudItemType.CHAT to CHAT_PAYLOAD_VERSION,
+    CloudItemType.SPACE_LISTS to LISTS_PAYLOAD_VERSION,
+    CloudItemType.ACCOUNT_LISTS to LISTS_PAYLOAD_VERSION
 )
 
 internal class CloudUpdateRequiredException : Exception("Emberr Cloud holds data this version of the app cannot read")

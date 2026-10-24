@@ -465,7 +465,7 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
             when {
                 state.isSyncing -> HintText(text = "Syncing...")
                 state.syncMessage != null -> HintText(text = state.syncMessage)
-                else -> HintText(text = "Sends and receives spaces, folders and notes.")
+                else -> HintText(text = "Sends and receives spaces, folders, notes, lists and chats.")
             }
             EmberrButtonSecondary(
                 text = "Sync now",
