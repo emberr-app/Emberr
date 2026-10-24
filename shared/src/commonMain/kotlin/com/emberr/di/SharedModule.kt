@@ -1,6 +1,9 @@
 package com.emberr.di
 
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.data.local.room.dao.CloudItemDao
+import com.emberr.data.local.room.dao.CloudSpaceDao
+import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.domain.cloud.account.CloudAccountRepository
 import com.emberr.domain.cloud.account.cloudDeviceName
 import com.emberr.domain.cloud.api.CloudApiClient
@@ -11,6 +14,8 @@ import com.emberr.domain.cloud.crypto.CloudCrypto
 import com.emberr.domain.cloud.keys.CloudAccountKeyManager
 import com.emberr.domain.cloud.keys.CloudItemKeyManager
 import com.emberr.domain.cloud.keys.CloudRecoveryWords
+import com.emberr.domain.cloud.sync.CloudSyncEngine
+import com.emberr.domain.cloud.sync.forgetCloudSyncRecords
 import com.emberr.domain.util.system.appVersionName
 import io.ktor.client.HttpClient
 import org.koin.core.module.dsl.viewModel
@@ -471,18 +476,36 @@ val sharedModule = module {
     }
     single { CloudBlobTransfer(httpClient = HttpClient { configureForCloudBlobTransfer() }) }
     single {
+        val cloudSpaceDao = get<CloudSpaceDao>()
+        val cloudItemDao = get<CloudItemDao>()
+        val noteDao = get<NoteDao>()
         CloudAccountRepository(
             apiClient = get(),
             accountKeyManager = get(),
             recoveryWords = get(),
             cloudCrypto = get(),
             accountStorage = get(),
-            deviceName = cloudDeviceName()
+            deviceName = cloudDeviceName(),
+            forgetCloudSyncRecords = { forgetCloudSyncRecords(cloudSpaceDao, cloudItemDao, noteDao) }
+        )
+    }
+    single {
+        CloudSyncEngine(
+            apiClient = get(),
+            accountStorage = get(),
+            accountRepository = get(),
+            itemKeyManager = get(),
+            cloudSpaceDao = get(),
+            cloudItemDao = get(),
+            spaceDao = get(),
+            folderDao = get(),
+            spaceRepository = get()
         )
     }
     viewModel {
         CloudAccountViewModel(
             cloudAccountRepository = get(),
+            cloudSyncEngine = get(),
             settingsManager = get()
         )
     }
