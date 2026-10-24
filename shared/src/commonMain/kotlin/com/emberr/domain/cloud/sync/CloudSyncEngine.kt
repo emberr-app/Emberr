@@ -15,6 +15,7 @@ import com.emberr.domain.cloud.account.CloudAccountStorage
 import com.emberr.domain.cloud.api.CloudApiClient
 import com.emberr.domain.cloud.api.CloudApiErrorCode
 import com.emberr.domain.cloud.api.CloudApiException
+import com.emberr.domain.cloud.api.CloudBlobTransferException
 import com.emberr.domain.cloud.api.CloudChanges
 import com.emberr.domain.cloud.api.CloudRemoteItem
 import com.emberr.domain.cloud.api.CloudServerUnreachableException
@@ -26,8 +27,10 @@ import com.emberr.domain.cloud.crypto.CloudDecryptionException
 import com.emberr.domain.cloud.crypto.CloudEncryptedBytes
 import com.emberr.domain.cloud.keys.CloudItemKeyManager
 import com.emberr.domain.cloud.keys.CloudItemType
+import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.selfhost.merge.mergeFolders
 import com.emberr.domain.selfhost.merge.mergeSpaces
+import com.emberr.domain.selfhost.translation.NotePayloadSyncException
 import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.sync.withSyncCoordinatorWaitingAtMost
 import kotlinx.coroutines.CancellationException
@@ -36,35 +39,11 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
 
-private const val SPACE_AND_FOLDER_PAYLOAD_VERSION = 1
-private const val MAX_COMMIT_TRIES_PER_ITEM = 3
 private val SYNC_LOCK_MAX_WAIT = 10.seconds
-private val itemTypesThisAppReads = setOf(CloudItemType.SPACE, CloudItemType.FOLDER)
-
-private class CloudUpdateRequiredException : Exception("Emberr Cloud holds data this version of the app cannot read")
-
-private class CloudKeyNotFoundException : Exception("An item's key could not be opened because its parent's key is missing")
-
-private class CloudStream(
-    val appSpaceId: String,
-    val spaceRef: Long,
-    val lastRevisionSeen: Long,
-    val rowsByItemId: MutableMap<String, CloudItemEntity>,
-    val openKeys: MutableMap<String, ByteArray>
-) {
-    val isAccountStream: Boolean
-        get() = appSpaceId == ACCOUNT_SPACE_ID
-}
 
 private class PulledChanges(val items: List<CloudRemoteItem>, val latestRevision: Long)
 
 private class FolderKeyToSend(val openKey: ByteArray, val lockedKey: CloudEncryptedBytes)
-
-private class SyncPassCounts {
-    var receivedCount = 0
-    var sentCount = 0
-    var spacesChanged = false
-}
 
 class CloudSyncEngine(
     private val apiClient: CloudApiClient,
@@ -75,13 +54,17 @@ class CloudSyncEngine(
     private val cloudItemDao: CloudItemDao,
     private val spaceDao: SpaceDao,
     private val folderDao: FolderDao,
-    private val spaceRepository: SpaceRepository
+    private val spaceRepository: SpaceRepository,
+    private val noteRepository: NoteRepository,
+    private val noteSync: CloudNoteSync
 ) {
 
     private val payloadJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val streamRecords = CloudStreamRecords(itemKeyManager, cloudItemDao)
 
     suspend fun syncNow(): CloudSyncResult = withContext(Dispatchers.IO) {
         try {
+            noteRepository.waitUntilDailyNotesAreInAccount()
             withSyncCoordinatorWaitingAtMost(SYNC_LOCK_MAX_WAIT) { syncWhileSyncLockHeld() } ?: CloudSyncResult.Busy
         } catch (cancellation: CancellationException) {
             throw cancellation
@@ -104,9 +87,12 @@ class CloudSyncEngine(
             else -> CloudSyncResult.Failed("Emberr Cloud refused the sync (${error.code}).")
         }
         is CloudServerUnreachableException -> CloudSyncResult.Failed("Can't reach the Emberr Cloud server.")
+        is CloudBlobTransferException ->
+            CloudSyncResult.Failed("A storage link expired or was refused (HTTP ${error.httpStatus}). Try again.")
         is CloudUpdateRequiredException -> CloudSyncResult.UpdateRequired
         is CloudDecryptionException, is CloudKeyNotFoundException ->
             CloudSyncResult.Failed("Some synced data could not be decrypted.")
+        is NotePayloadSyncException -> CloudSyncResult.Failed("A synced note could not be read.")
         else -> CloudSyncResult.Failed("Something went wrong while syncing.")
     }
 
@@ -116,12 +102,37 @@ class CloudSyncEngine(
         val counts = SyncPassCounts()
 
         val streams = registerAndOpenStreams(sessionToken, masterKey)
-        streams.forEach { stream -> pullStream(sessionToken, stream, counts) }
+        val pulledChangesByStream = streams.map { stream -> stream to fetchEveryChangedItem(sessionToken, stream) }
+        pulledChangesByStream.forEach { (_, pulledChanges) -> pulledChanges.items.forEach(::checkThisAppCanRead) }
+        val itemsNotYetAppliedByStream = pulledChangesByStream.map { (stream, pulledChanges) ->
+            stream to pulledChanges.items.filter { item -> item.revision != stream.rowsByItemId[item.itemId]?.revision }
+        }
+        itemsNotYetAppliedByStream.forEach { (stream, items) -> applyPulledSpaceAndFolders(stream, items, counts) }
         moveActiveSpaceIfSpacesChanged(counts)
+        noteSync.applyPulledNotes(sessionToken, streams, itemsNotYetAppliedByStream, counts)
+        pulledChangesByStream.forEach { (stream, pulledChanges) ->
+            cloudSpaceDao.updateLastRevisionSeen(stream.appSpaceId, pulledChanges.latestRevision)
+        }
+
+        mergeDailyNotesIntoAccount()
         streams.filterNot { it.isAccountStream }.forEach { stream -> pushStream(sessionToken, stream, counts) }
+        noteSync.pushNotes(sessionToken, streams, counts)
         moveActiveSpaceIfSpacesChanged(counts)
 
-        return CloudSyncResult.Done(receivedCount = counts.receivedCount, sentCount = counts.sentCount)
+        return CloudSyncResult.Done(
+            receivedCount = counts.receivedCount,
+            sentCount = counts.sentCount,
+            notSentCount = counts.notSentCount
+        )
+    }
+
+    private suspend fun mergeDailyNotesIntoAccount() {
+        try {
+            noteRepository.mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (_: Exception) {
+        }
     }
 
     private suspend fun moveActiveSpaceIfSpacesChanged(counts: SyncPassCounts) {
@@ -195,25 +206,16 @@ class CloudSyncEngine(
         )
     }
 
-    private suspend fun pullStream(sessionToken: String, stream: CloudStream, counts: SyncPassCounts) {
-        val pulledChanges = fetchEveryChangedItem(sessionToken, stream)
-        pulledChanges.items.forEach(::checkThisAppCanRead)
-
-        val itemsNotYetApplied = pulledChanges.items.filter { item ->
-            item.revision != stream.rowsByItemId[item.itemId]?.revision
-        }
-        if (!stream.isAccountStream) {
-            itemsNotYetApplied
-                .filter { it.itemType == CloudItemType.SPACE && it.itemId == stream.appSpaceId }
-                .forEach { item -> applyPulledSpace(stream, item, counts) }
-            parentsBeforeChildren(
-                items = itemsNotYetApplied.filter { it.itemType == CloudItemType.FOLDER },
-                idOf = { it.itemId },
-                parentIdOf = { it.parentId }
-            ).forEach { item -> applyPulledFolder(stream, item, counts) }
-        }
-
-        cloudSpaceDao.updateLastRevisionSeen(stream.appSpaceId, pulledChanges.latestRevision)
+    private suspend fun applyPulledSpaceAndFolders(stream: CloudStream, itemsNotYetApplied: List<CloudRemoteItem>, counts: SyncPassCounts) {
+        if (stream.isAccountStream) return
+        itemsNotYetApplied
+            .filter { it.itemType == CloudItemType.SPACE && it.itemId == stream.appSpaceId }
+            .forEach { item -> applyPulledSpace(stream, item, counts) }
+        parentsBeforeChildren(
+            items = itemsNotYetApplied.filter { it.itemType == CloudItemType.FOLDER },
+            idOf = { it.itemId },
+            parentIdOf = { it.parentId }
+        ).forEach { item -> applyPulledFolder(stream, item, counts) }
     }
 
     private suspend fun fetchEveryChangedItem(sessionToken: String, stream: CloudStream): PulledChanges {
@@ -239,19 +241,12 @@ class CloudSyncEngine(
         }
     }
 
-    private fun checkThisAppCanRead(item: CloudRemoteItem) {
-        val itemType = item.itemType
-        if (itemType == null || itemType !in itemTypesThisAppReads || item.payloadVersion > SPACE_AND_FOLDER_PAYLOAD_VERSION) {
-            throw CloudUpdateRequiredException()
-        }
-    }
-
     private suspend fun applyPulledSpace(stream: CloudStream, item: CloudRemoteItem, counts: SyncPassCounts) {
         val localSpace = spaceDao.getSpaceById(stream.appSpaceId)
         val syncedUpdatedAt = if (item.deleted) {
             applySpaceTombstone(localSpace, item, counts)
         } else {
-            val payload = decryptPayload(item, CloudItemType.SPACE, openKeyOf(stream, stream.appSpaceId))
+            val payload = decryptPayload(item, CloudItemType.SPACE, streamRecords.openKeyOf(stream, stream.appSpaceId))
             val remoteSpace = payloadJson.decodeFromString(SpaceEntity.serializer(), payload).copy(spaceId = stream.appSpaceId)
             val mergedSpace = mergeSpaces(listOfNotNull(localSpace), listOf(remoteSpace)).single()
             if (mergedSpace != localSpace) {
@@ -261,7 +256,7 @@ class CloudSyncEngine(
             }
             remoteSpace.updatedAt
         }
-        saveRow(stream, rowFromRemoteItem(stream, item, CloudItemType.SPACE, syncedUpdatedAt))
+        streamRecords.saveRow(stream, rowFromRemoteItem(stream, item, CloudItemType.SPACE, syncedUpdatedAt))
     }
 
     private suspend fun applySpaceTombstone(localSpace: SpaceEntity?, item: CloudRemoteItem, counts: SyncPassCounts): Long {
@@ -281,7 +276,7 @@ class CloudSyncEngine(
         val syncedUpdatedAt = if (item.deleted) {
             applyFolderTombstone(localFolder, item, counts)
         } else {
-            val payload = decryptPayload(item, CloudItemType.FOLDER, openPulledFolderKey(stream, item))
+            val payload = decryptPayload(item, CloudItemType.FOLDER, streamRecords.openPulledItemKey(stream, item))
             val remoteFolder = payloadJson.decodeFromString(FolderEntity.serializer(), payload)
                 .copy(folderId = item.itemId, spaceId = stream.appSpaceId)
             val mergedFolder = mergeFolders(listOfNotNull(localFolder), listOf(remoteFolder)).single()
@@ -292,7 +287,7 @@ class CloudSyncEngine(
             }
             remoteFolder.updatedAt
         }
-        saveRow(stream, rowFromRemoteItem(stream, item, CloudItemType.FOLDER, syncedUpdatedAt))
+        streamRecords.saveRow(stream, rowFromRemoteItem(stream, item, CloudItemType.FOLDER, syncedUpdatedAt))
     }
 
     private suspend fun applyFolderTombstone(localFolder: FolderEntity?, item: CloudRemoteItem, counts: SyncPassCounts): Long {
@@ -304,29 +299,6 @@ class CloudSyncEngine(
             counts.receivedCount++
         }
         return tombstoneMillis
-    }
-
-    private suspend fun openPulledFolderKey(stream: CloudStream, item: CloudRemoteItem): ByteArray {
-        val lockedKey = item.lockedKey ?: throw CloudKeyNotFoundException()
-        val parentId = item.parentId ?: throw CloudKeyNotFoundException()
-        val folderKey = itemKeyManager.unlockChildKey(lockedKey, item.itemId, openKeyOf(stream, parentId), parentId)
-        stream.openKeys[item.itemId] = folderKey
-        return folderKey
-    }
-
-    private suspend fun openKeyOf(
-        stream: CloudStream,
-        itemId: String,
-        idsOnThisPath: MutableSet<String> = mutableSetOf()
-    ): ByteArray {
-        stream.openKeys[itemId]?.let { return it }
-        val row = stream.rowsByItemId[itemId]
-        val parentId = row?.parentId
-        val lockedKey = row?.lockedKeyOrNull()
-        if (parentId == null || lockedKey == null || !idsOnThisPath.add(itemId)) throw CloudKeyNotFoundException()
-        val itemKey = itemKeyManager.unlockChildKey(lockedKey, itemId, openKeyOf(stream, parentId, idsOnThisPath), parentId)
-        stream.openKeys[itemId] = itemKey
-        return itemKey
     }
 
     private suspend fun decryptPayload(item: CloudRemoteItem, itemType: CloudItemType, itemKey: ByteArray): String {
@@ -356,11 +328,6 @@ class CloudSyncEngine(
         )
     }
 
-    private suspend fun saveRow(stream: CloudStream, row: CloudItemEntity) {
-        cloudItemDao.upsertItem(row)
-        stream.rowsByItemId[row.itemId] = row
-    }
-
     private suspend fun pushStream(sessionToken: String, stream: CloudStream, counts: SyncPassCounts) {
         pushSpace(sessionToken, stream, counts)
         val changedFolders = folderDao.getFoldersModifiedSince(0L).filter { folder ->
@@ -381,7 +348,7 @@ class CloudSyncEngine(
 
             val encryptedPayload = itemKeyManager.encryptContent(
                 content = payloadJson.encodeToString(SpaceEntity.serializer(), space).encodeToByteArray(),
-                itemKey = openKeyOf(stream, stream.appSpaceId),
+                itemKey = streamRecords.openKeyOf(stream, stream.appSpaceId),
                 itemType = CloudItemType.SPACE,
                 itemId = stream.appSpaceId
             )
@@ -398,7 +365,7 @@ class CloudSyncEngine(
             )
             when (result) {
                 is CloudWriteResult.Saved -> {
-                    saveRow(
+                    streamRecords.saveRow(
                         stream,
                         CloudItemEntity(
                             spaceRef = stream.spaceRef,
@@ -450,7 +417,7 @@ class CloudSyncEngine(
             when (result) {
                 is CloudWriteResult.Saved -> {
                     stream.openKeys[folderId] = folderKey.openKey
-                    saveRow(
+                    streamRecords.saveRow(
                         stream,
                         CloudItemEntity(
                             spaceRef = stream.spaceRef,
@@ -492,7 +459,7 @@ class CloudSyncEngine(
         row: CloudItemEntity?,
         keyParentId: String
     ): FolderKeyToSend {
-        val keyParentKey = openKeyOf(stream, keyParentId)
+        val keyParentKey = streamRecords.openKeyOf(stream, keyParentId)
         val savedLockedKey = row?.lockedKeyOrNull()
         val savedParentId = row?.parentId
         if (savedLockedKey == null || savedParentId == null) {
@@ -508,13 +475,13 @@ class CloudSyncEngine(
             itemKeyManager.relockChildKeyForMove(
                 lockedChildKey = savedLockedKey,
                 childId = folderId,
-                oldParentKey = openKeyOf(stream, savedParentId),
+                oldParentKey = streamRecords.openKeyOf(stream, savedParentId),
                 oldParentId = savedParentId,
                 newParentKey = keyParentKey,
                 newParentId = keyParentId
             )
         }
-        return FolderKeyToSend(openKey = openKeyOf(stream, folderId), lockedKey = lockedKey)
+        return FolderKeyToSend(openKey = streamRecords.openKeyOf(stream, folderId), lockedKey = lockedKey)
     }
 
     private suspend fun takeInConflictingItem(
@@ -534,11 +501,5 @@ class CloudSyncEngine(
             CloudItemType.SPACE -> applyPulledSpace(stream, currentItem, counts)
             else -> applyPulledFolder(stream, currentItem, counts)
         }
-    }
-
-    private fun CloudItemEntity.lockedKeyOrNull(): CloudEncryptedBytes? {
-        val cipherText = encryptedKey ?: return null
-        val nonce = encryptedKeyNonce ?: return null
-        return CloudEncryptedBytes(cipherText.fromBase64(), nonce.fromBase64())
     }
 }
