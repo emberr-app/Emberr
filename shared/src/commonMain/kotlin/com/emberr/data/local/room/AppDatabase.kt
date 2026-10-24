@@ -13,6 +13,8 @@ import com.emberr.data.local.room.dao.CanvasDao
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.dao.ChatSessionDao
+import com.emberr.data.local.room.dao.CloudItemDao
+import com.emberr.data.local.room.dao.CloudSpaceDao
 import com.emberr.data.local.room.dao.CustomPropertyDao
 import com.emberr.data.local.room.dao.DocumentBlockDao
 import com.emberr.data.local.room.dao.FolderDao
@@ -33,6 +35,8 @@ import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.data.local.room.entity.CanvasStrokeEntity
 import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.ChatSessionEntity
+import com.emberr.data.local.room.entity.CloudItemEntity
+import com.emberr.data.local.room.entity.CloudSpaceEntity
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.DocumentBlockEntity
 import com.emberr.data.local.room.entity.FolderEntity
@@ -47,7 +51,7 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.data.local.room.entity.UnappliedSyncChangeEntity
 import com.emberr.data.local.room.entity.UnusedMediaFileEntity
 
-const val APP_DATABASE_VERSION = 4
+const val APP_DATABASE_VERSION = 5
 
 @Database(
     entities = [
@@ -71,11 +75,13 @@ const val APP_DATABASE_VERSION = 4
         CanvasEdgeEntity::class,
         CanvasStrokeEntity::class,
         UnappliedSyncChangeEntity::class,
-        UnusedMediaFileEntity::class
+        UnusedMediaFileEntity::class,
+        CloudSpaceEntity::class,
+        CloudItemEntity::class
     ],
     version = APP_DATABASE_VERSION,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4)]
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5)]
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -99,6 +105,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun unappliedSyncChangeDao(): UnappliedSyncChangeDao
     abstract fun backupDao(): BackupDao
     abstract fun unusedMediaFileDao(): UnusedMediaFileDao
+    abstract fun cloudSpaceDao(): CloudSpaceDao
+    abstract fun cloudItemDao(): CloudItemDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

@@ -29,6 +29,7 @@ object IncomingNoteMerge {
             updatedAt = remoteMeta.updatedAt,
             filePath = remoteMeta.filePath,
             selfHostSyncedAt = remoteMeta.selfHostSyncedAt,
+            cloudSyncedAt = remoteMeta.cloudSyncedAt,
             kind = remoteMeta.kind
         ) != remoteMeta
 
@@ -37,6 +38,7 @@ object IncomingNoteMerge {
             remoteMeta.copy(
                 updatedAt = resolvedUpdatedAt,
                 selfHostSyncedAt = localMeta.selfHostSyncedAt,
+                cloudSyncedAt = localMeta.cloudSyncedAt,
                 kind = localMeta.kind
             ).withNewerDetailsFrom(localMeta)
         } else {

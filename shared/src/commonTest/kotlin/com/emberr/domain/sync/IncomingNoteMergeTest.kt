@@ -25,7 +25,8 @@ class IncomingNoteMergeTest {
         coverImagePath: String? = null,
         coverImageUpdatedAt: Long = 0L,
         showWordCount: Boolean = false,
-        wordCountUpdatedAt: Long = 0L
+        wordCountUpdatedAt: Long = 0L,
+        cloudSyncedAt: Long = 0L
     ) = NoteMetadataEntity(
         noteId = "note-1",
         title = title,
@@ -45,7 +46,8 @@ class IncomingNoteMergeTest {
         coverImagePath = coverImagePath,
         coverImageUpdatedAt = coverImageUpdatedAt,
         showWordCount = showWordCount,
-        wordCountUpdatedAt = wordCountUpdatedAt
+        wordCountUpdatedAt = wordCountUpdatedAt,
+        cloudSyncedAt = cloudSyncedAt
     )
 
     private fun text(id: String, body: String, updatedAt: Long) =
@@ -222,5 +224,18 @@ class IncomingNoteMergeTest {
         )
 
         assertTrue(merged.metadata.showWordCount)
+    }
+
+    @Test
+    fun aNewerNoteFromTheOtherDeviceKeepsThisDevicesCloudSyncTime() {
+        val merged = IncomingNoteMerge.merge(
+            localMeta = note(updatedAt = 100L, cloudSyncedAt = 100L),
+            localContent = contentOf(text("block-1", "milk", 1L)),
+            remoteMeta = note(updatedAt = 200L, cloudSyncedAt = 999L),
+            remoteContent = contentOf(text("block-1", "milk and eggs", 200L)),
+            remoteUpdatedAt = 200L
+        )
+
+        assertEquals(100L, merged.metadata.cloudSyncedAt)
     }
 }

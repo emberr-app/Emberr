@@ -141,6 +141,15 @@ interface NoteDao {
     @Query("UPDATE notes_metadata SET selfHostSyncedAt = 0")
     suspend fun forgetSelfHostSyncProgressForAllNotes()
 
+    @Query("SELECT * FROM notes_metadata WHERE updatedAt > cloudSyncedAt")
+    suspend fun getNotesNeedingCloudSync(): List<NoteMetadataEntity>
+
+    @Query("UPDATE notes_metadata SET cloudSyncedAt = :syncedAt WHERE noteId = :noteId")
+    suspend fun updateCloudSyncedAt(noteId: String, syncedAt: Long)
+
+    @Query("UPDATE notes_metadata SET cloudSyncedAt = 0")
+    suspend fun forgetCloudSyncProgressForAllNotes()
+
     @Query("UPDATE notes_metadata SET updatedAt = :updatedAt WHERE noteId = :noteId")
     suspend fun updateNoteUpdatedAt(noteId: String, updatedAt: Long)
 

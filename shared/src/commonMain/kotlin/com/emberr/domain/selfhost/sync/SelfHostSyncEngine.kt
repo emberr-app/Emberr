@@ -1418,6 +1418,7 @@ class SelfHostSyncEngine(
                 noteId = noteId,
                 spaceId = targetSpaceId,
                 kind = localMetadata?.kind ?: newerMetadata.kind,
+                cloudSyncedAt = localMetadata?.cloudSyncedAt ?: 0L,
                 updatedAt = if (oldSpaceDailyFileChangedThisNote) System.currentTimeMillis() else newerMetadata.updatedAt
             )
 
