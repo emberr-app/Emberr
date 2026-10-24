@@ -1,6 +1,8 @@
 package com.emberr.domain.cloud.api
 
+import com.emberr.domain.cloud.crypto.CloudEncryptedBytes
 import com.emberr.domain.cloud.keys.CloudAccountKeys
+import com.emberr.domain.cloud.keys.CloudItemType
 import com.emberr.domain.cloud.keys.CloudPasswordKeys
 import com.emberr.domain.cloud.keys.CloudRecoveryKeys
 import kotlinx.serialization.Serializable
@@ -107,6 +109,100 @@ internal class ChangePasswordRequest(
 )
 
 @Serializable
+internal class RegisterSpaceRequest(
+    val clientSpaceId: String,
+    val kind: String,
+    val encryptedKey: String,
+    val encryptedKeyNonce: String
+)
+
+@Serializable
+internal class RegisterSpaceResponse(
+    val spaceRef: Long,
+    val encryptedKey: String,
+    val encryptedKeyNonce: String
+)
+
+@Serializable
+internal class SpaceJson(
+    val spaceRef: Long,
+    val clientSpaceId: String,
+    val kind: String,
+    val latestRevision: Long,
+    val encryptedKey: String,
+    val encryptedKeyNonce: String
+)
+
+@Serializable
+internal class SyncStateResponse(val spaces: List<SpaceJson>)
+
+@Serializable
+internal class ItemJson(
+    val itemId: String,
+    val itemType: String,
+    val payloadVersion: Int,
+    val parentId: String?,
+    val encryptedKey: String?,
+    val encryptedKeyNonce: String?,
+    val inlinePayload: String?,
+    val inlinePayloadNonce: String?,
+    val blobNonce: String?,
+    val downloadUrl: String?,
+    val revision: Long,
+    val sizeBytes: Long,
+    val deleted: Boolean,
+    val updatedAt: Long
+)
+
+@Serializable
+internal class ChangesResponse(
+    val resyncRequired: Boolean = false,
+    val items: List<ItemJson> = emptyList(),
+    val latest: Long,
+    val hasMore: Boolean = false
+)
+
+@Serializable
+internal class UploadUrlRequest(val sizeBytes: Long)
+
+@Serializable
+internal class UploadUrlResponse(val objectKey: String, val uploadUrl: String, val expiresAt: Long)
+
+@Serializable
+internal class CommitInlineItemRequest(
+    val baseRevision: Long,
+    val itemType: String,
+    val payloadVersion: Int,
+    val parentId: String? = null,
+    val encryptedKey: String? = null,
+    val encryptedKeyNonce: String? = null,
+    val inlinePayload: String,
+    val inlinePayloadNonce: String
+)
+
+@Serializable
+internal class CommitBlobItemRequest(
+    val baseRevision: Long,
+    val itemType: String,
+    val payloadVersion: Int,
+    val parentId: String? = null,
+    val encryptedKey: String,
+    val encryptedKeyNonce: String,
+    val objectKey: String,
+    val blobNonce: String,
+    val sizeBytes: Long
+)
+
+@Serializable
+internal class DeleteItemRequest(val baseRevision: Long)
+
+@Serializable
+internal class RevisionResponse(val revision: Long)
+
+@Serializable
+internal class ConflictResponse(val item: ItemJson? = null)
+
+@Serializable
 internal class ErrorResponse(val code: String)
 
 internal fun ByteArray.toBase64(): String = Base64.Default.encode(this)
@@ -166,3 +262,29 @@ internal fun SessionJson.toCloudSession() = CloudSession(
     lastUsedAtMicroseconds = lastUsedAt,
     isCurrent = isCurrent
 )
+
+internal fun SpaceJson.toCloudRemoteSpace() = CloudRemoteSpace(
+    spaceRef = spaceRef,
+    clientSpaceId = clientSpaceId,
+    kind = CloudSpaceKind.entries.firstOrNull { it.wireValue == kind },
+    latestRevision = latestRevision,
+    lockedSpaceKey = CloudEncryptedBytes(encryptedKey.fromBase64(), encryptedKeyNonce.fromBase64())
+)
+
+internal fun ItemJson.toCloudRemoteItem() = CloudRemoteItem(
+    itemId = itemId,
+    itemType = CloudItemType.entries.firstOrNull { it.name == itemType },
+    payloadVersion = payloadVersion,
+    parentId = parentId,
+    lockedKey = encryptedBytesOrNull(encryptedKey, encryptedKeyNonce),
+    inlinePayload = encryptedBytesOrNull(inlinePayload, inlinePayloadNonce),
+    blobNonce = blobNonce?.fromBase64(),
+    downloadUrl = downloadUrl,
+    revision = revision,
+    sizeBytes = sizeBytes,
+    deleted = deleted,
+    updatedAtMicroseconds = updatedAt
+)
+
+private fun encryptedBytesOrNull(cipherText: String?, nonce: String?): CloudEncryptedBytes? =
+    if (cipherText == null || nonce == null) null else CloudEncryptedBytes(cipherText.fromBase64(), nonce.fromBase64())
