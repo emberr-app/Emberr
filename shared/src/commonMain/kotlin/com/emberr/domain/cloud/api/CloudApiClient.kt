@@ -145,6 +145,12 @@ class CloudApiClient(
         }
     }
 
+    suspend fun eraseAccountData(sessionToken: String, loginKey: ByteArray) {
+        send(HttpMethod.Post, "account", "erase", sessionToken = sessionToken) {
+            jsonBody(EraseAccountDataRequest(loginKey = loginKey.toBase64()))
+        }
+    }
+
     suspend fun sendChangeEmailCode(sessionToken: String, newEmail: String) {
         send(HttpMethod.Post, "account", "email-code", sessionToken = sessionToken) {
             jsonBody(AccountEmailCodeRequest(purpose = "change", email = newEmail))

@@ -2,6 +2,7 @@ package com.emberr
 
 import android.app.Application
 import android.content.SharedPreferences
+import com.emberr.core.android.eraseAppDataKeepingCloudAccountIfRequested
 import com.emberr.data.local.room.AppDatabase
 import com.emberr.di.androidModule
 import com.emberr.di.sharedModule
@@ -30,6 +31,7 @@ class EmberrApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        eraseAppDataKeepingCloudAccountIfRequested(this)
         startKoin {
             androidContext(this@EmberrApplication)
             workManagerFactory()

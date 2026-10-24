@@ -7,6 +7,11 @@ import android.content.pm.ApplicationInfo
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
+import com.emberr.core.android.requestAppDataEraseKeepingCloudAccountOnNextLaunch
+import com.emberr.data.local.room.dao.CalendarTaskDao
+import com.emberr.domain.reminders.ReminderScheduler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.mp.KoinPlatform
 import kotlin.system.exitProcess
 
@@ -40,8 +45,24 @@ actual fun restartApplication() {
     exitProcess(0)
 }
 
-actual suspend fun eraseAllAppData(): Boolean {
+actual suspend fun eraseAllAppData(keepCloudAccount: Boolean): Boolean {
     val context = KoinPlatform.getKoin().get<Context>()
+    if (keepCloudAccount) {
+        val wasRequested = withContext(Dispatchers.IO) {
+            cancelEveryTaskReminder()
+            requestAppDataEraseKeepingCloudAccountOnNextLaunch(context)
+        }
+        if (wasRequested) restartApplication()
+        return wasRequested
+    }
     val activityManager = context.getSystemService(ActivityManager::class.java) ?: return false
     return activityManager.clearApplicationUserData()
+}
+
+private suspend fun cancelEveryTaskReminder() {
+    val koin = KoinPlatform.getKoin()
+    runCatching {
+        val reminderScheduler = koin.get<ReminderScheduler>()
+        koin.get<CalendarTaskDao>().getAllTasksAcrossSpaces().forEach { task -> reminderScheduler.cancel(task.blockId) }
+    }
 }

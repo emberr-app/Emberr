@@ -208,6 +208,18 @@ class CloudAccountRepository(
         clearLocalAccount()
     }
 
+    suspend fun eraseAccountData(password: String) {
+        val sessionToken = checkNotNull(accountStorage.getSessionToken()) { MISSING_ACCOUNT_MESSAGE }
+        val accountKeys = apiClient.fetchAccountDetails(sessionToken).keys
+        val passwordKey = derivePasswordKeyOffMainThread(
+            password,
+            accountKeys.salt,
+            accountKeys.memLimit,
+            accountKeys.opsLimit
+        )
+        apiClient.eraseAccountData(sessionToken, accountKeyManager.deriveLoginKey(passwordKey))
+    }
+
     private suspend fun endCurrentSessionOnServer() {
         val sessionToken = accountStorage.getSessionToken() ?: return
         val currentSession = apiClient.listSessions(sessionToken).firstOrNull { it.isCurrent } ?: return

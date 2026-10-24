@@ -360,5 +360,5 @@ val androidModule = module {
     single<BackupRescheduler> { AndroidBackupRescheduler(backupScheduler = get()) }
 }
 
-private const val SETTINGS_STORE_FILE_NAME = "emberr_settings"
+internal const val SETTINGS_STORE_FILE_NAME = "emberr_settings"
 private const val SETTINGS_SECRET_STORE_FILE_NAME = "emberr_settings_secrets"

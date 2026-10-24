@@ -95,6 +95,9 @@ internal class AccountDetailsResponse(
 internal class DeleteAccountRequest(val loginKey: String, val code: String)
 
 @Serializable
+internal class EraseAccountDataRequest(val loginKey: String)
+
+@Serializable
 internal class AccountEmailCodeRequest(val purpose: String, val email: String? = null)
 
 @Serializable

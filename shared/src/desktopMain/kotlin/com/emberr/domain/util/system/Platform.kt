@@ -25,10 +25,10 @@ actual fun restartApplication() {
     DesktopRestartBus.requestRestart()
 }
 
-actual suspend fun eraseAllAppData(): Boolean {
+actual suspend fun eraseAllAppData(keepCloudAccount: Boolean): Boolean {
     val emberrDirectory = DesktopAppStorage.emberrDirectory
     val wasRequested = withContext(Dispatchers.IO) {
-        if (!requestAppDataEraseOnNextLaunch(emberrDirectory)) return@withContext false
+        if (!requestAppDataEraseOnNextLaunch(emberrDirectory, keepCloudAccount)) return@withContext false
         val koin = KoinPlatform.getKoin()
         runCatching { koin.get<SettingsManager>().clearSyncPairing() }
         runCatching { koin.get<SecureSyncKeyStorage>().clearAll() }
