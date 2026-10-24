@@ -16,6 +16,8 @@ import com.emberr.domain.cloud.api.normalizedCloudServerAddress
 import com.emberr.domain.cloud.keys.IncorrectCloudPasswordException
 import com.emberr.domain.cloud.keys.IncorrectRecoveryKeyException
 import com.emberr.domain.cloud.keys.InvalidRecoveryWordsException
+import com.emberr.domain.cloud.sync.CloudSyncEngine
+import com.emberr.domain.cloud.sync.CloudSyncResult
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +73,9 @@ data class CloudAccountScreenState(
     val clearNotesOnThisDevice: Boolean = false,
     val isWorking: Boolean = false,
     val errorMessage: String? = null,
-    val newCodeSentMessage: String? = null
+    val newCodeSentMessage: String? = null,
+    val isSyncing: Boolean = false,
+    val syncMessage: String? = null
 ) {
     val isServerAddressShown: Boolean
         get() = step !in setOf(CloudAccountStep.LOADING, CloudAccountStep.SIGN_UP_RECOVERY_WORDS) && step !in signedInSteps
@@ -195,8 +199,17 @@ private fun cloudAccountErrorMessage(
     else -> SOMETHING_WENT_WRONG_MESSAGE
 }
 
+private fun cloudSyncResultMessage(result: CloudSyncResult): String = when (result) {
+    is CloudSyncResult.Done -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent"
+    CloudSyncResult.NotSignedIn -> SIGNED_OUT_MESSAGE
+    CloudSyncResult.Busy -> "Another sync is running. Try again in a moment."
+    CloudSyncResult.UpdateRequired -> "Update Emberr to keep syncing with Emberr Cloud."
+    is CloudSyncResult.Failed -> result.message
+}
+
 class CloudAccountViewModel(
     private val cloudAccountRepository: CloudAccountRepository,
+    private val cloudSyncEngine: CloudSyncEngine,
     private val settingsManager: SettingsManager
 ) : ViewModel() {
 
@@ -393,6 +406,15 @@ class CloudAccountViewModel(
         if (current.isWorking || current.step !in signedInSteps) return
         returnToSignedIn()
         loadAccountOverview()
+    }
+
+    fun syncNow() {
+        if (_screenState.value.isSyncing) return
+        _screenState.update { it.copy(isSyncing = true, syncMessage = null) }
+        viewModelScope.launch {
+            val result = cloudSyncEngine.syncNow()
+            _screenState.update { it.copy(isSyncing = false, syncMessage = cloudSyncResultMessage(result)) }
+        }
     }
 
     fun signOutThisDevice() {

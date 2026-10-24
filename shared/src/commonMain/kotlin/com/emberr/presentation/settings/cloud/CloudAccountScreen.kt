@@ -461,6 +461,20 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
             if (state.isWorking) WorkingIndicator()
         }
 
+        StepGroup(title = "Sync") {
+            when {
+                state.isSyncing -> HintText(text = "Syncing...")
+                state.syncMessage != null -> HintText(text = state.syncMessage)
+                else -> HintText(text = "Sends and receives spaces and folders.")
+            }
+            EmberrButtonSecondary(
+                text = "Sync now",
+                onClick = viewModel::syncNow,
+                enabled = !state.isSyncing,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         SettingsGroup(title = "Devices") {
             state.sessions?.forEachIndexed { index, session ->
                 if (index > 0) SessionDivider()

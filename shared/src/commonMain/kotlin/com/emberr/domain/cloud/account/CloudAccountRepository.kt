@@ -23,7 +23,8 @@ class CloudAccountRepository(
     private val recoveryWords: CloudRecoveryWords,
     private val cloudCrypto: CloudCrypto,
     private val accountStorage: CloudAccountStorage,
-    private val deviceName: String
+    private val deviceName: String,
+    private val forgetCloudSyncRecords: suspend () -> Unit = {}
 ) {
 
     private val mutableSignInState = MutableStateFlow<CloudSignInState>(CloudSignInState.SignedOut)
@@ -248,9 +249,10 @@ class CloudAccountRepository(
         mutableSignInState.value = CloudSignInState.SignedIn(email)
     }
 
-    private suspend fun clearLocalAccount() {
+    suspend fun clearLocalAccount() {
         accountStorage.clearAll()
         mutableSignInState.value = CloudSignInState.SignedOut
+        forgetCloudSyncRecords()
     }
 
     private companion object {
