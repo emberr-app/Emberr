@@ -892,7 +892,7 @@ private fun NewPasswordFields(state: CloudAccountScreenState, viewModel: CloudAc
 }
 
 @Composable
-private fun PasswordField(
+internal fun PasswordField(
     password: String,
     onPasswordChanged: (String) -> Unit,
     placeholder: String,

@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
@@ -53,6 +54,7 @@ import com.emberr.presentation.settings.about.AboutScreen
 import com.emberr.presentation.settings.about.OpenSourceLicensesScreen
 import com.emberr.presentation.settings.importer.ImportScreen
 import com.emberr.presentation.settings.cloud.CloudAccountScreen
+import com.emberr.presentation.settings.cloud.PasswordField
 import com.emberr.presentation.settings.selfhost.SelfHostSetupScreen
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrAlertDialog
@@ -171,6 +173,9 @@ fun SettingsScreen(
     val isPaired by syncViewModel.isPaired.collectAsState()
     val isSelfHostConnected by syncViewModel.isSelfHostConnected.collectAsState()
     val isSignedInToCloud by syncViewModel.isSignedInToCloud.collectAsState()
+    val clearAllDataErasesCloudData = isDebugBuild && isSignedInToCloud
+    val isErasingCloudData by viewModel.isErasingCloudData.collectAsState()
+    val cloudEraseErrorMessage by viewModel.cloudEraseErrorMessage.collectAsState()
     val syncStatus by syncViewModel.syncStatus.collectAsState()
     val serverStatus = syncViewModel.serverStatus?.collectAsState()?.value
     val serverUnavailableReason = (serverStatus as? SyncServerStatus.Unavailable)?.reason
@@ -657,7 +662,19 @@ fun SettingsScreen(
         }
     }
 
-    if (showClearAllDataConfirmation) {
+    if (showClearAllDataConfirmation && clearAllDataErasesCloudData) {
+        EraseCloudDataDialog(
+            isErasing = isErasingCloudData,
+            errorMessage = cloudEraseErrorMessage,
+            onDismiss = {
+                showClearAllDataConfirmation = false
+                viewModel.consumeCloudEraseErrorMessage()
+            },
+            onErase = viewModel::eraseCloudDataAndThisDevice
+        )
+    }
+
+    if (showClearAllDataConfirmation && !clearAllDataErasesCloudData) {
         EmberrAlertDialog(
             onDismissRequest = { showClearAllDataConfirmation = false },
             title = "Clear All Data?"
@@ -1453,6 +1470,69 @@ private fun DangerZoneSettingsSection(onClearAllData: () -> Unit) {
             SettingsFootnote(
                 text = "Deletes every note, reminder and attachment stored on this device. This cannot be undone."
             )
+        }
+    }
+}
+
+@Composable
+private fun EraseCloudDataDialog(
+    isErasing: Boolean,
+    errorMessage: String?,
+    onDismiss: () -> Unit,
+    onErase: (password: String) -> Unit
+) {
+    var password by remember { mutableStateOf("") }
+
+    EmberrAlertDialog(
+        onDismissRequest = { if (!isErasing) onDismiss() },
+        title = "Clear All Data?"
+    ) {
+        Text(
+            text = "Erases all your data from Emberr Cloud and every signed-in device. You stay signed in.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+        )
+        Spacer(Modifier.height(16.dp))
+        PasswordField(
+            password = password,
+            onPasswordChanged = { password = it },
+            placeholder = "Password",
+            onSubmit = { onErase(password) }
+        )
+        if (errorMessage != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+        Spacer(Modifier.height(20.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            EmberrButtonSecondary(
+                text = "Cancel",
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f),
+                enabled = !isErasing
+            )
+            Button(
+                onClick = { onErase(password) },
+                enabled = !isErasing && password.isNotEmpty(),
+                modifier = Modifier.weight(1f).height(46.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None)
+            ) {
+                Text(
+                    text = if (isErasing) "Erasing..." else "Erase",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
+                )
+            }
         }
     }
 }

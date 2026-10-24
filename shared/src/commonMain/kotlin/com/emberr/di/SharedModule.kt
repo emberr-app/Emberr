@@ -21,6 +21,7 @@ import com.emberr.domain.cloud.sync.CloudLocalChanges
 import com.emberr.domain.cloud.sync.CloudNoteSync
 import com.emberr.domain.cloud.sync.CloudSyncEngine
 import com.emberr.domain.cloud.sync.CloudSyncPoller
+import com.emberr.domain.cloud.sync.eraseCloudDataAndThisDevice
 import com.emberr.domain.cloud.sync.forgetCloudSyncRecords
 import com.emberr.domain.util.system.appVersionName
 import io.ktor.client.HttpClient
@@ -244,7 +245,8 @@ val sharedModule = module {
             backupRescheduler = get(),
             disableAiFeaturesUseCase = get(),
             appScope = get(named("AppScope")),
-            spaceRepository = get()
+            spaceRepository = get(),
+            cloudEraser = { password -> eraseCloudDataAndThisDevice(get(), password) }
         )
     }
 

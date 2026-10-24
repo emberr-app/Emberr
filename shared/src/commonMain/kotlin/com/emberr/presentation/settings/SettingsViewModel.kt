@@ -7,6 +7,10 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.backup.automatic.BackupRescheduler
 import com.emberr.domain.ai.AiPurgeReport
 import com.emberr.domain.ai.DisableAiFeaturesUseCase
+import com.emberr.domain.cloud.api.CloudApiErrorCode
+import com.emberr.domain.cloud.api.CloudApiException
+import com.emberr.domain.cloud.api.CloudServerUnreachableException
+import com.emberr.domain.cloud.sync.CloudEraseResult
 import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.format.formatByteSize
 import com.emberr.domain.util.system.eraseAllAppData
@@ -25,7 +29,8 @@ class SettingsViewModel(
     private val backupRescheduler: BackupRescheduler,
     private val disableAiFeaturesUseCase: DisableAiFeaturesUseCase,
     private val appScope: CoroutineScope,
-    spaceRepository: SpaceRepository
+    spaceRepository: SpaceRepository,
+    private val cloudEraser: suspend (password: String) -> CloudEraseResult
 ) : ViewModel() {
 
     val spaces: StateFlow<List<SpaceEntity>> = spaceRepository.observeSpaces().stateIn(
@@ -274,6 +279,48 @@ class SettingsViewModel(
             if (!eraseAllAppData()) {
                 showNativeToast("Couldn't clear your data. Nothing was deleted.")
             }
+        }
+    }
+
+    private val _isErasingCloudData = MutableStateFlow(false)
+    val isErasingCloudData: StateFlow<Boolean> = _isErasingCloudData.asStateFlow()
+
+    private val _cloudEraseErrorMessage = MutableStateFlow<String?>(null)
+    val cloudEraseErrorMessage: StateFlow<String?> = _cloudEraseErrorMessage.asStateFlow()
+
+    fun consumeCloudEraseErrorMessage() {
+        _cloudEraseErrorMessage.value = null
+    }
+
+    fun eraseCloudDataAndThisDevice(password: String) {
+        if (_isErasingCloudData.value || password.isEmpty()) return
+        _isErasingCloudData.value = true
+        _cloudEraseErrorMessage.value = null
+        appScope.launch {
+            val result = try {
+                cloudEraser(password)
+            } catch (error: Exception) {
+                CloudEraseResult.NothingErased(error)
+            }
+            _cloudEraseErrorMessage.value = cloudEraseErrorMessage(result)
+            if (result != CloudEraseResult.Erased) _isErasingCloudData.value = false
+        }
+    }
+
+    private fun cloudEraseErrorMessage(result: CloudEraseResult): String? = when (result) {
+        CloudEraseResult.Erased -> null
+        CloudEraseResult.ThisDeviceNotCleared ->
+            "Your cloud data was erased, but this device could not be cleared. Try Clear All Data again."
+        is CloudEraseResult.NothingErased -> when (val error = result.error) {
+            is CloudApiException -> when (error.code) {
+                CloudApiErrorCode.INVALID_PASSWORD -> "Incorrect password. Try again."
+                CloudApiErrorCode.TOO_MANY_REQUESTS -> "Too many tries. Wait a bit and try again."
+                CloudApiErrorCode.INVALID_TOKEN -> "You were signed out of Emberr Cloud. Nothing was erased."
+                else -> "Something went wrong. Nothing was erased."
+            }
+            is CloudServerUnreachableException ->
+                "Can't reach the server at ${settingsManager.getCloudServerAddress()}. Nothing was erased."
+            else -> "Something went wrong. Nothing was erased."
         }
     }
 

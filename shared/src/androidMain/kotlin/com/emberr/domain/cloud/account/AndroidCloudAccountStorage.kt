@@ -58,7 +58,7 @@ class AndroidCloudAccountStorage(
         }
     }
 
-    private companion object {
+    internal companion object {
         const val SECRET_STORE_FILE_NAME = "emberr_cloud_vault"
         const val KEY_SESSION_TOKEN = "cloud_session_token"
         const val KEY_MASTER_KEY = "cloud_master_key"

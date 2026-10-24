@@ -26,7 +26,7 @@ class AndroidSecretCipher(applicationContext: Context) {
     fun decrypt(encryptedBytes: ByteArray, purposeLabel: String): ByteArray =
         aead.decrypt(encryptedBytes, purposeLabel.encodeToByteArray())
 
-    private companion object {
+    internal companion object {
         const val KEYSET_NAME = "emberr_secret_keyset"
         const val KEYSET_STORAGE_FILE_NAME = "emberr_tink_keyset"
         const val AES_256_GCM_TEMPLATE_NAME = "AES256_GCM"
