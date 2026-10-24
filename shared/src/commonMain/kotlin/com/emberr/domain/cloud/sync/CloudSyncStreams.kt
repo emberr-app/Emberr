@@ -9,11 +9,15 @@ import com.emberr.domain.cloud.crypto.CloudEncryptedBytes
 import com.emberr.domain.cloud.keys.CloudItemKeyManager
 import com.emberr.domain.cloud.keys.CloudItemType
 import com.emberr.domain.selfhost.translation.NOTE_PAYLOAD_SCHEMA_VERSION
+import com.emberr.domain.util.sync.withSyncCoordinatorWaitingAtMost
+import kotlin.time.Duration.Companion.seconds
 
 internal const val SPACE_AND_FOLDER_PAYLOAD_VERSION = 1
 internal const val LISTS_PAYLOAD_VERSION = 1
 internal const val CHAT_PAYLOAD_VERSION = 1
 internal const val MAX_COMMIT_TRIES_PER_ITEM = 3
+
+private val LOCAL_DATA_LOCK_MAX_WAIT = 10.seconds
 
 private val highestPayloadVersionThisAppReads = mapOf(
     CloudItemType.SPACE to SPACE_AND_FOLDER_PAYLOAD_VERSION,
@@ -28,6 +32,13 @@ private val highestPayloadVersionThisAppReads = mapOf(
 internal class CloudUpdateRequiredException : Exception("Emberr Cloud holds data this version of the app cannot read")
 
 internal class CloudKeyNotFoundException : Exception("An item's key could not be opened because its parent's key is missing")
+
+internal class CloudLocalDataBusyException : Exception("This device's notes stayed busy, so the sync stopped to try again later")
+
+private class LockedAnswer<T>(val value: T)
+
+internal suspend fun <T> withLocalDataLock(block: suspend () -> T): T =
+    (withSyncCoordinatorWaitingAtMost(LOCAL_DATA_LOCK_MAX_WAIT) { LockedAnswer(block()) } ?: throw CloudLocalDataBusyException()).value
 
 internal class CloudStream(
     val appSpaceId: String,

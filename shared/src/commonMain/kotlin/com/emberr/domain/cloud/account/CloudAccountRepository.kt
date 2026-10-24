@@ -33,11 +33,13 @@ class CloudAccountRepository(
     suspend fun loadSignedInState() {
         val sessionToken = accountStorage.getSessionToken()
         val email = accountStorage.getEmail()
-        mutableSignInState.value = if (sessionToken != null && email != null) {
-            CloudSignInState.SignedIn(email)
-        } else {
-            CloudSignInState.SignedOut
-        }
+        setSignInState(
+            if (sessionToken != null && email != null) {
+                CloudSignInState.SignedIn(email)
+            } else {
+                CloudSignInState.SignedOut
+            }
+        )
     }
 
     suspend fun sendSignupCode(email: String) {
@@ -241,18 +243,23 @@ class CloudAccountRepository(
         accountStorage.savePrivateKey(privateKey)
         accountStorage.saveEmail(email)
         accountStorage.saveSessionToken(sessionToken)
-        mutableSignInState.value = CloudSignInState.SignedIn(email)
+        setSignInState(CloudSignInState.SignedIn(email))
     }
 
     private suspend fun saveEmail(email: String) {
         accountStorage.saveEmail(email)
-        mutableSignInState.value = CloudSignInState.SignedIn(email)
+        setSignInState(CloudSignInState.SignedIn(email))
     }
 
     suspend fun clearLocalAccount() {
         accountStorage.clearAll()
-        mutableSignInState.value = CloudSignInState.SignedOut
+        setSignInState(CloudSignInState.SignedOut)
         forgetCloudSyncRecords()
+    }
+
+    private fun setSignInState(signInState: CloudSignInState) {
+        mutableSignInState.value = signInState
+        CloudSignInSignal.update(signInState is CloudSignInState.SignedIn)
     }
 
     private companion object {

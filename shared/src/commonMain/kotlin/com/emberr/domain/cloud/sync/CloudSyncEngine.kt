@@ -31,16 +31,20 @@ import com.emberr.domain.repository.AccountMergeResult
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.selfhost.merge.mergeFolders
 import com.emberr.domain.selfhost.merge.mergeSpaces
+import com.emberr.domain.selfhost.sync.SelfHostConnectionState
 import com.emberr.domain.selfhost.translation.NotePayloadSyncException
 import com.emberr.domain.space.SpaceRepository
-import com.emberr.domain.util.sync.withSyncCoordinatorWaitingAtMost
+import com.emberr.domain.sync.SyncPairingState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import kotlin.time.Duration.Companion.seconds
-
-private val SYNC_LOCK_MAX_WAIT = 10.seconds
+import kotlin.concurrent.Volatile
+import kotlin.time.Clock
 
 private class PulledChanges(val items: List<CloudRemoteItem>, val latestRevision: Long, val isFullList: Boolean)
 
@@ -59,24 +63,103 @@ class CloudSyncEngine(
     private val noteRepository: NoteRepository,
     private val noteSync: CloudNoteSync,
     private val listSync: CloudListSync,
-    private val chatSync: CloudChatSync
+    private val chatSync: CloudChatSync,
+    private val localChanges: CloudLocalChanges,
+    private val selfHostConnectionState: SelfHostConnectionState,
+    private val syncPairingState: SyncPairingState
 ) {
 
     private val payloadJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val streamRecords = CloudStreamRecords(itemKeyManager, cloudItemDao)
 
-    suspend fun syncNow(): CloudSyncResult = withContext(Dispatchers.IO) {
-        try {
+    private val mutableStatus = MutableStateFlow(CloudSyncStatus())
+    val status: StateFlow<CloudSyncStatus> = mutableStatus.asStateFlow()
+
+    @Volatile
+    var isPausedUntilAppRestart = false
+        private set
+
+    suspend fun syncNow(): CloudSyncResult = runPass(waitForRunningPass = false)
+
+    private suspend fun runPass(waitForRunningPass: Boolean): CloudSyncResult = withContext(Dispatchers.IO) {
+        if (anotherSyncMethodIsOn()) return@withContext rememberResult(CloudSyncResult.AnotherSyncMethodIsOn)
+        if (waitForRunningPass) {
+            CloudSyncPassLock.mutex.lock()
+        } else if (!CloudSyncPassLock.mutex.tryLock()) {
+            return@withContext CloudSyncResult.Busy
+        }
+        val passOutcome = try {
+            mutableStatus.update { it.copy(isSyncing = true) }
             noteRepository.waitUntilDailyNotesAreInAccount()
-            withSyncCoordinatorWaitingAtMost(SYNC_LOCK_MAX_WAIT) { syncWhileSyncLockHeld() } ?: CloudSyncResult.Busy
+            Result.success(syncWhilePassLockHeld())
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {
-            resultForFailedPass(error)
+            Result.failure(error)
+        } finally {
+            CloudSyncPassLock.mutex.unlock()
+            mutableStatus.update { it.copy(isSyncing = false) }
         }
+        rememberResult(passOutcome.getOrElse { error -> resultForFailedPass(error) })
     }
 
-    private suspend fun resultForFailedPass(error: Exception): CloudSyncResult = when (error) {
+    suspend fun syncAutomatically(): CloudSyncResult? =
+        if (isPausedUntilAppRestart) null else syncNow()
+
+    suspend fun syncAutomaticallyIfThereIsWork(
+        waitForRunningPass: Boolean = false,
+        beforeSyncing: suspend () -> Unit = {}
+    ): CloudSyncResult? =
+        withContext(Dispatchers.IO) {
+            if (isPausedUntilAppRestart) return@withContext null
+            if (anotherSyncMethodIsOn()) return@withContext rememberResult(CloudSyncResult.AnotherSyncMethodIsOn)
+            val hasWork = try {
+                thereIsWorkToSync()
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Exception) {
+                return@withContext rememberResult(resultForFailedPass(error))
+            }
+            if (!hasWork) return@withContext null
+            beforeSyncing()
+            runPass(waitForRunningPass)
+        }
+
+    fun forgetStatus() {
+        mutableStatus.value = CloudSyncStatus()
+    }
+
+    private fun anotherSyncMethodIsOn(): Boolean =
+        selfHostConnectionState.isConnected.value || syncPairingState.isPaired.value
+
+    private suspend fun thereIsWorkToSync(): Boolean {
+        val sessionToken = accountStorage.getSessionToken() ?: return false
+        val latestRevisionsBySpaceId = apiClient.fetchSyncState(sessionToken)
+            .associate { remoteSpace -> remoteSpace.clientSpaceId to remoteSpace.latestRevision }
+        val savedSpaces = cloudSpaceDao.getAllSpaces()
+        return cloudSyncHasWork(
+            latestRevisionsBySpaceId = latestRevisionsBySpaceId,
+            lastRevisionsSeenBySpaceId = savedSpaces.associate { it.appSpaceId to it.lastRevisionSeen },
+            localChangesAreWaiting = localChanges.areWaiting(savedSpaces)
+        )
+    }
+
+    private fun rememberResult(result: CloudSyncResult): CloudSyncResult {
+        if (result == CloudSyncResult.UpdateRequired) isPausedUntilAppRestart = true
+        mutableStatus.update { status ->
+            if (result is CloudSyncResult.Done) {
+                status.copy(
+                    lastSyncedAtMillis = Clock.System.now().toEpochMilliseconds(),
+                    lastProblem = result.takeIf { it.notSentCount > 0 }
+                )
+            } else {
+                status.copy(lastProblem = result)
+            }
+        }
+        return result
+    }
+
+    private suspend fun resultForFailedPass(error: Throwable): CloudSyncResult = when (error) {
         is CloudApiException -> when (error.code) {
             CloudApiErrorCode.INVALID_TOKEN -> try {
                 accountRepository.clearLocalAccount()
@@ -96,10 +179,11 @@ class CloudSyncEngine(
         is CloudDecryptionException, is CloudKeyNotFoundException ->
             CloudSyncResult.Failed("Some synced data could not be decrypted.")
         is NotePayloadSyncException -> CloudSyncResult.Failed("A synced note could not be read.")
+        is CloudLocalDataBusyException -> CloudSyncResult.Busy
         else -> CloudSyncResult.Failed("Something went wrong while syncing.")
     }
 
-    private suspend fun syncWhileSyncLockHeld(): CloudSyncResult {
+    private suspend fun syncWhilePassLockHeld(): CloudSyncResult {
         val sessionToken = accountStorage.getSessionToken() ?: return CloudSyncResult.NotSignedIn
         val masterKey = accountStorage.getMasterKey() ?: return CloudSyncResult.NotSignedIn
         val counts = SyncPassCounts()
@@ -149,7 +233,7 @@ class CloudSyncEngine(
 
     private suspend fun mergeDailyNotesIntoAccount(): AccountMergeResult? =
         try {
-            noteRepository.mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld()
+            withLocalDataLock { noteRepository.mergeDailyNotesAndCategoriesIntoAccountWhileSyncLockHeld() }
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (_: Exception) {
@@ -158,7 +242,7 @@ class CloudSyncEngine(
 
     private suspend fun moveActiveSpaceIfSpacesChanged(counts: SyncPassCounts) {
         if (!counts.spacesChanged) return
-        spaceRepository.moveActiveSpaceIfItNoLongerExists()
+        withLocalDataLock { spaceRepository.moveActiveSpaceIfItNoLongerExists() }
         counts.spacesChanged = false
     }
 
@@ -264,7 +348,7 @@ class CloudSyncEngine(
         }
     }
 
-    private suspend fun applyPulledSpace(stream: CloudStream, item: CloudRemoteItem, counts: SyncPassCounts) {
+    private suspend fun applyPulledSpace(stream: CloudStream, item: CloudRemoteItem, counts: SyncPassCounts) = withLocalDataLock {
         val localSpace = spaceDao.getSpaceById(stream.appSpaceId)
         val syncedUpdatedAt = if (item.deleted) {
             applySpaceTombstone(localSpace, item, counts)
@@ -294,7 +378,7 @@ class CloudSyncEngine(
         return tombstoneMillis
     }
 
-    private suspend fun applyPulledFolder(stream: CloudStream, item: CloudRemoteItem, counts: SyncPassCounts) {
+    private suspend fun applyPulledFolder(stream: CloudStream, item: CloudRemoteItem, counts: SyncPassCounts) = withLocalDataLock {
         val localFolder = folderDao.getFolderById(item.itemId)
         val syncedUpdatedAt = if (item.deleted) {
             applyFolderTombstone(localFolder, item, counts)

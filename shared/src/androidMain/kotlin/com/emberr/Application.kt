@@ -7,9 +7,11 @@ import com.emberr.di.androidModule
 import com.emberr.di.sharedModule
 import com.emberr.domain.backup.automatic.BackupScheduler
 import com.emberr.domain.backup.manual.deleteBackupImportCopiesLeftFromEarlierRuns
+import com.emberr.domain.cloud.sync.CloudSyncScheduler
 import com.emberr.domain.importer.deleteImportCopiesLeftFromEarlierRuns
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.reminders.ReminderRescheduler
+import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.presentation.shared.FirstContentRenderSignal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,6 +57,7 @@ class EmberrApplication : Application() {
             getKoin().get<ReminderRescheduler>().rescheduleUpcomingReminders()
             getKoin().get<BackupScheduler>()
             getKoin().get<SelfHostSyncScheduler>()
+            if (isDebugBuild) getKoin().get<CloudSyncScheduler>().start()
         }
 
     }

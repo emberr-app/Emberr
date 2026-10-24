@@ -28,6 +28,7 @@ import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.ai.external.ExternalAiProvider
 import com.emberr.domain.ai.external.ExternalAiProviderConfig
 import com.emberr.domain.canvas.CanvasRepository
+import com.emberr.domain.cloud.account.CloudSignInSignal
 import com.emberr.domain.model.BookmarkCategoryOrderBySpace
 import com.emberr.domain.model.FavoriteNoteOrderBySpace
 import com.emberr.domain.repository.BookmarkCategoryOrderStore
@@ -262,6 +263,10 @@ class SelfHostSyncEngine(
     }
 
     private suspend fun runAsCancellablePass(pass: suspend () -> SelfHostSyncResult): SelfHostSyncResult {
+        if (CloudSignInSignal.isSignedIn.value) {
+            SelfHostSyncLog.d("Sync pass skipped, this device is signed in to Emberr Cloud")
+            return SelfHostSyncResult.NotConfigured
+        }
         if (isPausedUntilAppRestart) {
             SelfHostSyncLog.d("Sync pass skipped, sync is paused after the user cancelled it")
             return SelfHostSyncResult.Cancelled

@@ -248,17 +248,18 @@ private fun ServerAddressGroup(state: CloudAccountScreenState, viewModel: CloudA
 private fun WelcomeStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
     StepGroup(title = "Emberr Cloud") {
         HintText(text = "Sync your notes between devices with end-to-end encryption. Only your devices can read them.")
+        state.otherSyncMethodMessage?.let { message -> HintText(text = message) }
         state.errorMessage?.let { message -> ErrorText(message = message) }
         EmberrButtonPrimary(
             text = "Create account",
             onClick = viewModel::startSignUp,
-            enabled = !state.isWorking,
+            enabled = state.canStartSignIn,
             modifier = Modifier.fillMaxWidth()
         )
         EmberrButtonSecondary(
             text = "Log in",
             onClick = viewModel::startLogIn,
-            enabled = !state.isWorking,
+            enabled = state.canStartSignIn,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -439,6 +440,7 @@ private fun RecoveryNewPasswordStep(state: CloudAccountScreenState, viewModel: C
 
 @Composable
 private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
     val deviceLockPrompt = rememberDeviceLockPrompt()
     val coroutineScope = rememberCoroutineScope()
     var sessionToSignOut by remember { mutableStateOf<CloudSession?>(null) }
@@ -462,15 +464,18 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
         }
 
         StepGroup(title = "Sync") {
+            val lastSyncedAtMillis = state.syncStatus.lastSyncedAtMillis
             when {
-                state.isSyncing -> HintText(text = "Syncing...")
-                state.syncMessage != null -> HintText(text = state.syncMessage)
+                state.syncStatus.isSyncing -> HintText(text = "Syncing...")
+                lastSyncedAtMillis != null ->
+                    HintText(text = "Last synced ${formatDateAndTime(lastSyncedAtMillis, usesTwentyFourHourClock)}")
                 else -> HintText(text = "Sends and receives spaces, folders, notes, lists and chats.")
             }
+            state.syncProblemMessage?.let { message -> ErrorText(message = message) }
             EmberrButtonSecondary(
                 text = "Sync now",
                 onClick = viewModel::syncNow,
-                enabled = !state.isSyncing,
+                enabled = !state.syncStatus.isSyncing,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -627,8 +632,11 @@ private fun SessionDivider() {
     )
 }
 
-private fun formatLastUsed(lastUsedAtMicroseconds: Long, usesTwentyFourHourClock: Boolean): String {
-    val local = Instant.fromEpochMilliseconds(lastUsedAtMicroseconds / 1_000L)
+private fun formatLastUsed(lastUsedAtMicroseconds: Long, usesTwentyFourHourClock: Boolean): String =
+    formatDateAndTime(lastUsedAtMicroseconds / 1_000L, usesTwentyFourHourClock)
+
+private fun formatDateAndTime(epochMillis: Long, usesTwentyFourHourClock: Boolean): String {
+    val local = Instant.fromEpochMilliseconds(epochMillis)
         .toLocalDateTime(TimeZone.currentSystemDefault())
     return "${shortDateText(local.date)}, ${formatTimeOfDay(local.hour, local.minute, usesTwentyFourHourClock)}"
 }
