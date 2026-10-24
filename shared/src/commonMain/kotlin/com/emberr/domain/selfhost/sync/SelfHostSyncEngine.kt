@@ -37,6 +37,13 @@ import com.emberr.domain.model.NoteContent
 import com.emberr.domain.media.MediaReferenceIndex
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.selfhost.merge.NoteMergeHelper
+import com.emberr.domain.selfhost.merge.mergeApiConfig
+import com.emberr.domain.selfhost.merge.mergeCategories
+import com.emberr.domain.selfhost.merge.mergeCustomProperties
+import com.emberr.domain.selfhost.merge.mergeEventExceptions
+import com.emberr.domain.selfhost.merge.mergeFolders
+import com.emberr.domain.selfhost.merge.mergePropertyTags
+import com.emberr.domain.selfhost.merge.mergeSpaces
 import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.selfhost.translation.EmbeddedBlockPayload
 import com.emberr.domain.selfhost.translation.NoteJsonCompiler
@@ -928,15 +935,7 @@ class SelfHostSyncEngine(
                 .orEmpty()
             val localSpaces = spaceDao.getSpacesModifiedSince(PLACEHOLDER_SPACE_UPDATED_AT)
 
-            val merged = LinkedHashMap<String, SpaceEntity>()
-            localSpaces.forEach { merged[it.spaceId] = it }
-            remoteSpaces.forEach { remote ->
-                val local = merged[remote.spaceId]
-                if (local == null || remote.updatedAt >= local.updatedAt) {
-                    merged[remote.spaceId] = remote
-                }
-            }
-            val mergedList = merged.values.toList()
+            val mergedList = mergeSpaces(localSpaces, remoteSpaces)
             mergedList.forEach { spaceDao.insertOrUpdateSpace(it) }
             spaceRepository.moveActiveSpaceIfItNoLongerExists()
 
@@ -968,15 +967,7 @@ class SelfHostSyncEngine(
                 .orEmpty()
             val localFolders = folderDao.getFoldersModifiedSince(0L)
 
-            val merged = LinkedHashMap<String, FolderEntity>()
-            localFolders.forEach { merged[it.folderId] = it }
-            remoteFolders.forEach { remote ->
-                val local = merged[remote.folderId]
-                if (local == null || remote.updatedAt >= local.updatedAt) {
-                    merged[remote.folderId] = remote
-                }
-            }
-            val mergedList = merged.values.toList()
+            val mergedList = mergeFolders(localFolders, remoteFolders)
             mergedList.forEach { spaceRepository.ensureSpaceExists(it.spaceId) }
             mergedList.forEach { folderDao.insertFolder(it) }
 
@@ -1007,15 +998,7 @@ class SelfHostSyncEngine(
                 .orEmpty()
             val localExceptions = calendarEventExceptionDao.getExceptionsModifiedSince(0L)
 
-            val merged = LinkedHashMap<String, CalendarEventExceptionEntity>()
-            localExceptions.forEach { merged[occurrenceKeyOf(it)] = it }
-            remoteExceptions.forEach { remote ->
-                val local = merged[occurrenceKeyOf(remote)]
-                if (local == null || remote.updatedAt >= local.updatedAt) {
-                    merged[occurrenceKeyOf(remote)] = remote
-                }
-            }
-            val mergedList = merged.values.toList()
+            val mergedList = mergeEventExceptions(localExceptions, remoteExceptions)
             mergedList.forEach { calendarEventExceptionDao.upsert(it) }
 
             if (mergedList.toSet() != remoteExceptions.toSet()) {
@@ -1038,9 +1021,6 @@ class SelfHostSyncEngine(
         }
     }
 
-    private fun occurrenceKeyOf(exception: CalendarEventExceptionEntity): String =
-        "${exception.blockId}|${exception.occurrenceDate}"
-
     private suspend fun reconcileCategories() {
         try {
             val remoteJsonWithEtag = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.CATEGORIES_FILE)
@@ -1050,15 +1030,7 @@ class SelfHostSyncEngine(
                 .orEmpty()
             val localCategories = categoryDao.getCategoriesModifiedSince(0L)
 
-            val merged = LinkedHashMap<String, CategoryEntity>()
-            localCategories.forEach { merged[it.categoryId] = it }
-            remoteCategories.forEach { remote ->
-                val local = merged[remote.categoryId]
-                if (local == null || remote.updatedAt >= local.updatedAt) {
-                    merged[remote.categoryId] = remote
-                }
-            }
-            val mergedList = merged.values.toList()
+            val mergedList = mergeCategories(localCategories, remoteCategories)
             mergedList.forEach { spaceRepository.ensureSpaceExists(it.spaceId) }
             mergedList.forEach { categoryDao.insertOrUpdateCategory(it) }
 
@@ -1088,15 +1060,7 @@ class SelfHostSyncEngine(
                 .orEmpty()
             val localTags = propertyTagDao.getTagsModifiedSince(0L)
 
-            val merged = LinkedHashMap<String, PropertyTagEntity>()
-            localTags.forEach { merged[it.tagId] = it }
-            remoteTags.forEach { remote ->
-                val local = merged[remote.tagId]
-                if (local == null || remote.updatedAt >= local.updatedAt) {
-                    merged[remote.tagId] = remote
-                }
-            }
-            val mergedList = merged.values.toList()
+            val mergedList = mergePropertyTags(localTags, remoteTags)
             mergedList.forEach { spaceRepository.ensureSpaceExists(it.spaceId) }
             mergedList.forEach { propertyTagDao.insertOrUpdateTag(it) }
 
@@ -1126,15 +1090,7 @@ class SelfHostSyncEngine(
                 .orEmpty()
             val localProperties = customPropertyDao.getPropertiesModifiedSince(0L)
 
-            val merged = LinkedHashMap<String, CustomPropertyEntity>()
-            localProperties.forEach { merged[it.propertyId] = it }
-            remoteProperties.forEach { remote ->
-                val local = merged[remote.propertyId]
-                if (local == null || remote.updatedAt >= local.updatedAt) {
-                    merged[remote.propertyId] = remote
-                }
-            }
-            val mergedList = merged.values.toList()
+            val mergedList = mergeCustomProperties(localProperties, remoteProperties)
             mergedList.forEach { spaceRepository.ensureSpaceExists(it.spaceId) }
             mergedList.forEach { customPropertyDao.insertOrUpdateProperty(it) }
 
@@ -1172,46 +1128,29 @@ class SelfHostSyncEngine(
             val mergedEntries = mutableListOf<ApiConfigSyncEntry>()
 
             for (provider in ExternalAiProvider.entries) {
-                val localConfig = aiSettingsRepository.getProviderConfig(provider)
-                val localTombstone = localTombstonesByProvider[provider.name]
-                val localIsDeleted = localConfig == null ||
-                    (localTombstone != null && localTombstone.deletedAt >= localConfig.updatedAt)
-                val localUpdatedAt = maxOf(localConfig?.updatedAt ?: 0L, localTombstone?.deletedAt ?: 0L)
-                val remoteEntry = remoteEntriesByProvider[provider.name]
-
-                when {
-                    remoteEntry != null && remoteEntry.updatedAt > localUpdatedAt -> {
-                        if (remoteEntry.isDeleted) {
-                            aiSettingsRepository.applyRemoteProviderConfigDeletion(provider, remoteEntry.updatedAt)
-                        } else {
-                            aiSettingsRepository.saveProviderConfig(
-                                provider,
-                                ExternalAiProviderConfig(
-                                    apiKey = remoteEntry.apiKey,
-                                    model = remoteEntry.model,
-                                    baseUrl = remoteEntry.baseUrl,
-                                    updatedAt = remoteEntry.updatedAt
-                                )
+                val merge = mergeApiConfig(
+                    provider = provider,
+                    localConfig = aiSettingsRepository.getProviderConfig(provider),
+                    localTombstone = localTombstonesByProvider[provider.name],
+                    remoteEntry = remoteEntriesByProvider[provider.name]
+                )
+                val remoteEntry = merge.remoteEntryToApply
+                if (remoteEntry != null) {
+                    if (remoteEntry.isDeleted) {
+                        aiSettingsRepository.applyRemoteProviderConfigDeletion(provider, remoteEntry.updatedAt)
+                    } else {
+                        aiSettingsRepository.saveProviderConfig(
+                            provider,
+                            ExternalAiProviderConfig(
+                                apiKey = remoteEntry.apiKey,
+                                model = remoteEntry.model,
+                                baseUrl = remoteEntry.baseUrl,
+                                updatedAt = remoteEntry.updatedAt
                             )
-                        }
-                        mergedEntries += remoteEntry
+                        )
                     }
-                    !localIsDeleted -> mergedEntries += ApiConfigSyncEntry(
-                        provider = provider.name,
-                        apiKey = localConfig.apiKey,
-                        model = localConfig.model,
-                        baseUrl = localConfig.baseUrl,
-                        updatedAt = localConfig.updatedAt
-                    )
-                    localTombstone != null -> mergedEntries += ApiConfigSyncEntry(
-                        provider = provider.name,
-                        apiKey = "",
-                        model = "",
-                        baseUrl = null,
-                        updatedAt = localTombstone.deletedAt,
-                        isDeleted = true
-                    )
                 }
+                merge.mergedEntry?.let { mergedEntries += it }
             }
 
             if (mergedEntries.toSet() != remoteEntriesByProvider.values.toSet()) {
