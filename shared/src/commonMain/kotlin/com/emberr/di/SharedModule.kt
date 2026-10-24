@@ -4,6 +4,8 @@ import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.cloud.account.CloudAccountRepository
 import com.emberr.domain.cloud.account.cloudDeviceName
 import com.emberr.domain.cloud.api.CloudApiClient
+import com.emberr.domain.cloud.api.CloudBlobTransfer
+import com.emberr.domain.cloud.api.configureForCloudBlobTransfer
 import com.emberr.domain.cloud.api.configureForEmberrCloud
 import com.emberr.domain.cloud.crypto.CloudCrypto
 import com.emberr.domain.cloud.keys.CloudAccountKeyManager
@@ -467,6 +469,7 @@ val sharedModule = module {
             appVersion = appVersionName.orEmpty()
         )
     }
+    single { CloudBlobTransfer(httpClient = HttpClient { configureForCloudBlobTransfer() }) }
     single {
         CloudAccountRepository(
             apiClient = get(),

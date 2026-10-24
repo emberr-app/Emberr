@@ -12,6 +12,7 @@ enum class CloudApiErrorCode {
     UPGRADE_REQUIRED,
     NOT_FOUND,
     EMAIL_ALREADY_USED,
+    CONFLICT,
     UNKNOWN
 }
 

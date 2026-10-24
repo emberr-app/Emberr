@@ -1,6 +1,8 @@
 package com.emberr.domain.cloud.api
 
+import com.emberr.domain.cloud.crypto.CloudEncryptedBytes
 import com.emberr.domain.cloud.keys.CloudAccountKeys
+import com.emberr.domain.cloud.keys.CloudItemType
 import com.emberr.domain.cloud.keys.CloudPasswordKeys
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -15,6 +17,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -185,13 +188,172 @@ class CloudApiClient(
         }
     }
 
+    suspend fun registerSpace(
+        sessionToken: String,
+        clientSpaceId: String,
+        kind: CloudSpaceKind,
+        lockedSpaceKey: CloudEncryptedBytes
+    ): CloudRegisteredSpace {
+        val response = send(HttpMethod.Post, "spaces", sessionToken = sessionToken) {
+            jsonBody(
+                RegisterSpaceRequest(
+                    clientSpaceId = clientSpaceId,
+                    kind = kind.wireValue,
+                    encryptedKey = lockedSpaceKey.cipherText.toBase64(),
+                    encryptedKeyNonce = lockedSpaceKey.nonce.toBase64()
+                )
+            )
+        }
+        val answer = response.readAnswer<RegisterSpaceResponse>()
+        return response.decodeBase64Fields {
+            CloudRegisteredSpace(
+                spaceRef = answer.spaceRef,
+                lockedSpaceKey = CloudEncryptedBytes(answer.encryptedKey.fromBase64(), answer.encryptedKeyNonce.fromBase64())
+            )
+        }
+    }
+
+    suspend fun fetchSyncState(sessionToken: String): List<CloudRemoteSpace> {
+        val response = send(HttpMethod.Get, "sync", "state", sessionToken = sessionToken)
+        val answer = response.readAnswer<SyncStateResponse>()
+        return response.decodeBase64Fields { answer.spaces.map { it.toCloudRemoteSpace() } }
+    }
+
+    suspend fun fetchChanges(sessionToken: String, spaceRef: Long, since: Long): CloudChanges {
+        val response = send(HttpMethod.Get, "spaces", spaceRef.toString(), "changes", sessionToken = sessionToken) {
+            parameter("since", since)
+        }
+        val answer = response.readAnswer<ChangesResponse>()
+        if (answer.resyncRequired) return CloudChanges.ResyncRequired(latest = answer.latest)
+        return response.decodeBase64Fields {
+            CloudChanges.Page(
+                items = answer.items.map { it.toCloudRemoteItem() },
+                latest = answer.latest,
+                hasMore = answer.hasMore
+            )
+        }
+    }
+
+    suspend fun requestUploadUrl(sessionToken: String, spaceRef: Long, itemId: String, sizeBytes: Long): CloudUploadUrl {
+        val answer = send(
+            HttpMethod.Post,
+            "spaces", spaceRef.toString(), "items", itemId, "upload-urls",
+            sessionToken = sessionToken
+        ) {
+            jsonBody(UploadUrlRequest(sizeBytes = sizeBytes))
+        }.readAnswer<UploadUrlResponse>()
+        return CloudUploadUrl(
+            objectKey = answer.objectKey,
+            uploadUrl = answer.uploadUrl,
+            expiresAtMicroseconds = answer.expiresAt
+        )
+    }
+
+    suspend fun commitInlineItem(
+        sessionToken: String,
+        spaceRef: Long,
+        itemId: String,
+        baseRevision: Long,
+        itemType: CloudItemType,
+        payloadVersion: Int,
+        parentId: String?,
+        lockedKey: CloudEncryptedBytes?,
+        encryptedPayload: CloudEncryptedBytes
+    ): CloudWriteResult =
+        writeItem(HttpMethod.Put, sessionToken, spaceRef, itemId) {
+            jsonBody(
+                CommitInlineItemRequest(
+                    baseRevision = baseRevision,
+                    itemType = itemType.name,
+                    payloadVersion = payloadVersion,
+                    parentId = parentId,
+                    encryptedKey = lockedKey?.cipherText?.toBase64(),
+                    encryptedKeyNonce = lockedKey?.nonce?.toBase64(),
+                    inlinePayload = encryptedPayload.cipherText.toBase64(),
+                    inlinePayloadNonce = encryptedPayload.nonce.toBase64()
+                )
+            )
+        }
+
+    suspend fun commitBlobItem(
+        sessionToken: String,
+        spaceRef: Long,
+        itemId: String,
+        baseRevision: Long,
+        itemType: CloudItemType,
+        payloadVersion: Int,
+        parentId: String?,
+        lockedKey: CloudEncryptedBytes,
+        objectKey: String,
+        blobNonce: ByteArray,
+        sizeBytes: Long
+    ): CloudWriteResult =
+        writeItem(HttpMethod.Put, sessionToken, spaceRef, itemId) {
+            jsonBody(
+                CommitBlobItemRequest(
+                    baseRevision = baseRevision,
+                    itemType = itemType.name,
+                    payloadVersion = payloadVersion,
+                    parentId = parentId,
+                    encryptedKey = lockedKey.cipherText.toBase64(),
+                    encryptedKeyNonce = lockedKey.nonce.toBase64(),
+                    objectKey = objectKey,
+                    blobNonce = blobNonce.toBase64(),
+                    sizeBytes = sizeBytes
+                )
+            )
+        }
+
+    suspend fun deleteItem(sessionToken: String, spaceRef: Long, itemId: String, baseRevision: Long): CloudWriteResult =
+        writeItem(HttpMethod.Delete, sessionToken, spaceRef, itemId) {
+            jsonBody(DeleteItemRequest(baseRevision = baseRevision))
+        }
+
+    private suspend fun writeItem(
+        method: HttpMethod,
+        sessionToken: String,
+        spaceRef: Long,
+        itemId: String,
+        configureRequest: HttpRequestBuilder.() -> Unit
+    ): CloudWriteResult {
+        val response = sendAndKeepAnyStatus(
+            method,
+            "spaces", spaceRef.toString(), "items", itemId,
+            sessionToken = sessionToken,
+            configureRequest = configureRequest
+        )
+        if (response.status.isSuccess()) {
+            return CloudWriteResult.Saved(revision = response.readAnswer<RevisionResponse>().revision)
+        }
+        val error = response.toCloudApiException()
+        if (response.status != HttpStatusCode.Conflict || error.code != CloudApiErrorCode.CONFLICT) throw error
+        val conflict = response.readAnswer<ConflictResponse>()
+        return response.decodeBase64Fields { CloudWriteResult.Conflict(currentItem = conflict.item?.toCloudRemoteItem()) }
+    }
+
     private suspend fun send(
         method: HttpMethod,
         vararg pathSegments: String,
         sessionToken: String? = null,
         configureRequest: HttpRequestBuilder.() -> Unit = {}
     ): HttpResponse {
-        val response = try {
+        val response = sendAndKeepAnyStatus(
+            method,
+            *pathSegments,
+            sessionToken = sessionToken,
+            configureRequest = configureRequest
+        )
+        if (!response.status.isSuccess()) throw response.toCloudApiException()
+        return response
+    }
+
+    private suspend fun sendAndKeepAnyStatus(
+        method: HttpMethod,
+        vararg pathSegments: String,
+        sessionToken: String?,
+        configureRequest: HttpRequestBuilder.() -> Unit
+    ): HttpResponse =
+        try {
             httpClient.request {
                 this.method = method
                 url {
@@ -205,9 +367,6 @@ class CloudApiClient(
         } catch (_: IOException) {
             throw CloudServerUnreachableException()
         }
-        if (!response.status.isSuccess()) throw response.toCloudApiException()
-        return response
-    }
 
     private suspend fun HttpResponse.toCloudApiException(): CloudApiException {
         val errorCode = try {

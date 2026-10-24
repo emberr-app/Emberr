@@ -1,6 +1,8 @@
 package com.emberr.domain.cloud.api
 
+import com.emberr.domain.cloud.crypto.CloudEncryptedBytes
 import com.emberr.domain.cloud.keys.CloudAccountKeys
+import com.emberr.domain.cloud.keys.CloudItemType
 import com.emberr.domain.cloud.keys.CloudPasswordKeys
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -24,6 +26,10 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class CloudApiClientTest {
 
@@ -192,5 +198,147 @@ class CloudApiClientTest {
         )
 
         assertEquals(setOf("loginKey", "keys", "logOutOtherDevices"), changePasswordBodySent!!.keys)
+    }
+
+    @Test
+    fun blobCommitSendsOnlyTheBlobFieldsToTheItemPathAndReadsTheNewRevision() = runTest {
+        var methodSent: HttpMethod? = null
+        var pathSent: String? = null
+        var tokenSent: String? = null
+        var bodySent: JsonObject? = null
+        val client = clientAnswering { request ->
+            methodSent = request.method
+            pathSent = request.url.encodedPath
+            tokenSent = request.headers["X-Auth-Token"]
+            bodySent = Json.parseToJsonElement(request.body.toByteArray().decodeToString()).jsonObject
+            respond("""{"revision":12}""", HttpStatusCode.OK, jsonHeaders)
+        }
+
+        val result = client.commitBlobItem(
+            sessionToken = "session-token",
+            spaceRef = 7,
+            itemId = "note-1",
+            baseRevision = 11,
+            itemType = CloudItemType.NOTE,
+            payloadVersion = 1,
+            parentId = "folder-1",
+            lockedKey = CloudEncryptedBytes(ByteArray(48) { 2 }, ByteArray(24) { 3 }),
+            objectKey = "items/7/note-1/ABC",
+            blobNonce = ByteArray(24) { 4 },
+            sizeBytes = 2048
+        )
+
+        assertEquals(12L, assertIs<CloudWriteResult.Saved>(result).revision)
+        assertEquals(HttpMethod.Put, methodSent)
+        assertEquals("/v1/spaces/7/items/note-1", pathSent)
+        assertEquals("session-token", tokenSent)
+        val body = bodySent!!
+        assertEquals(
+            setOf(
+                "baseRevision", "itemType", "payloadVersion", "parentId", "encryptedKey", "encryptedKeyNonce",
+                "objectKey", "blobNonce", "sizeBytes"
+            ),
+            body.keys
+        )
+        assertEquals("NOTE", body.getValue("itemType").jsonPrimitive.content)
+        assertEquals(11L, body.getValue("baseRevision").jsonPrimitive.long)
+        assertEquals(2048L, body.getValue("sizeBytes").jsonPrimitive.long)
+        assertContentEquals(ByteArray(24) { 4 }, Base64.Default.decode(body.getValue("blobNonce").jsonPrimitive.content))
+    }
+
+    @Test
+    fun aConflictAnswerBecomesAConflictResultWithTheCurrentItemOrNone() = runTest {
+        val lockedKey = Base64.Default.encode(ByteArray(48) { 2 })
+        val lockedKeyNonce = Base64.Default.encode(ByteArray(24) { 3 })
+        val blobNonce = Base64.Default.encode(ByteArray(24) { 4 })
+        val conflictWithItemClient = clientAnswering {
+            respond(
+                """{"code":"CONFLICT","message":"the item changed on the server","item":{""" +
+                    """"itemId":"note-1","itemType":"NOTE","payloadVersion":1,"parentId":"folder-1",""" +
+                    """"encryptedKey":"$lockedKey","encryptedKeyNonce":"$lockedKeyNonce",""" +
+                    """"inlinePayload":null,"inlinePayloadNonce":null,"blobNonce":"$blobNonce",""" +
+                    """"downloadUrl":"http://localhost:3900/emberr/items/7/note-1/ABC?X-Amz-Expires=900\u0026X-Amz-Signature=abc",""" +
+                    """"revision":15,"sizeBytes":2048,"deleted":false,"updatedAt":1761300000000000}}""",
+                HttpStatusCode.Conflict,
+                jsonHeaders
+            )
+        }
+
+        val conflict = conflictWithItemClient.commitInlineItem(
+            sessionToken = "session-token",
+            spaceRef = 7,
+            itemId = "note-1",
+            baseRevision = 11,
+            itemType = CloudItemType.FOLDER,
+            payloadVersion = 1,
+            parentId = null,
+            lockedKey = null,
+            encryptedPayload = CloudEncryptedBytes(ByteArray(40) { 5 }, ByteArray(24) { 6 })
+        )
+
+        val currentItem = assertIs<CloudWriteResult.Conflict>(conflict).currentItem!!
+        assertEquals("note-1", currentItem.itemId)
+        assertEquals(CloudItemType.NOTE, currentItem.itemType)
+        assertEquals("folder-1", currentItem.parentId)
+        assertContentEquals(ByteArray(48) { 2 }, currentItem.lockedKey!!.cipherText)
+        assertContentEquals(ByteArray(24) { 3 }, currentItem.lockedKey!!.nonce)
+        assertNull(currentItem.inlinePayload)
+        assertContentEquals(ByteArray(24) { 4 }, currentItem.blobNonce)
+        assertEquals("http://localhost:3900/emberr/items/7/note-1/ABC?X-Amz-Expires=900&X-Amz-Signature=abc", currentItem.downloadUrl)
+        assertEquals(15L, currentItem.revision)
+        assertEquals(2048L, currentItem.sizeBytes)
+        assertFalse(currentItem.deleted)
+        assertEquals(1761300000000000L, currentItem.updatedAtMicroseconds)
+
+        val conflictWithoutItemClient = clientAnswering {
+            respond(
+                """{"code":"CONFLICT","message":"the item changed on the server"}""",
+                HttpStatusCode.Conflict,
+                jsonHeaders
+            )
+        }
+
+        val conflictWithoutItem = conflictWithoutItemClient.deleteItem("session-token", 7, "note-1", baseRevision = 11)
+
+        assertNull(assertIs<CloudWriteResult.Conflict>(conflictWithoutItem).currentItem)
+    }
+
+    @Test
+    fun changesReadResyncRequiredAndATombstoneWithEveryOptionalFieldNull() = runTest {
+        val resyncClient = clientAnswering {
+            respond("""{"resyncRequired":true,"latest":1290}""", HttpStatusCode.OK, jsonHeaders)
+        }
+
+        val resync = resyncClient.fetchChanges("session-token", spaceRef = 7, since = 3)
+
+        assertEquals(1290L, assertIs<CloudChanges.ResyncRequired>(resync).latest)
+
+        var querySent: String? = null
+        val tombstoneClient = clientAnswering { request ->
+            querySent = request.url.encodedQuery
+            respond(
+                """{"items":[{"itemId":"folder-1","itemType":"FOLDER","payloadVersion":1,"parentId":null,""" +
+                    """"encryptedKey":null,"encryptedKeyNonce":null,"inlinePayload":null,"inlinePayloadNonce":null,""" +
+                    """"blobNonce":null,"downloadUrl":null,"revision":1043,"sizeBytes":0,"deleted":true,""" +
+                    """"updatedAt":1761300000000000}],"latest":1043,"hasMore":false}""",
+                HttpStatusCode.OK,
+                jsonHeaders
+            )
+        }
+
+        val page = assertIs<CloudChanges.Page>(tombstoneClient.fetchChanges("session-token", spaceRef = 7, since = 1042))
+
+        assertEquals("since=1042", querySent)
+        assertEquals(1043L, page.latest)
+        assertFalse(page.hasMore)
+        val tombstone = page.items.single()
+        assertEquals("folder-1", tombstone.itemId)
+        assertEquals(CloudItemType.FOLDER, tombstone.itemType)
+        assertTrue(tombstone.deleted)
+        assertNull(tombstone.parentId)
+        assertNull(tombstone.lockedKey)
+        assertNull(tombstone.inlinePayload)
+        assertNull(tombstone.blobNonce)
+        assertNull(tombstone.downloadUrl)
     }
 }
