@@ -150,8 +150,10 @@ import com.emberr.domain.model.ToggleBlock
 import com.emberr.domain.model.VoiceBlock
 import com.emberr.domain.model.editableTextOrNull
 import com.emberr.domain.model.idsOfBlocksInsideAToggleOrCallout
+import com.emberr.domain.model.shortDateText
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
@@ -197,15 +199,18 @@ import com.emberr.presentation.shared.editor.selection.selectTextAcrossBlocksByT
 import com.emberr.presentation.shared.editor.selection.selectionStepFor
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_right2
 import emberr.shared.generated.resources.arrow_up
 import emberr.shared.generated.resources.bookmark
+import emberr.shared.generated.resources.calendar_date
 import emberr.shared.generated.resources.card_edit2
 import emberr.shared.generated.resources.check_square
 import emberr.shared.generated.resources.chevron_right
+import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.database
@@ -245,11 +250,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
@@ -363,10 +372,27 @@ object EditorEventBus {
         insertMentionSignal = blockId to insertMentionNonce
     }
 
+    var insertTextSignal by mutableStateOf<InsertTextRequest?>(null)
+        private set
+    private var insertTextNonce = 0L
+    fun requestInsertText(blockId: String, text: String) {
+        insertTextNonce++
+        insertTextSignal = InsertTextRequest(blockId, text, insertTextNonce)
+    }
+
     val confirmMentionEvent = MutableSharedFlow<Pair<String, String>>(extraBufferCapacity = 1)
     val confirmMentionAndOpenEvent = MutableSharedFlow<Pair<String, String>>(extraBufferCapacity = 1)
     val cancelMentionEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 }
+
+data class InsertTextRequest(val blockId: String, val text: String, val nonce: Long)
+
+fun currentTimeText(usesTwentyFourHourClock: Boolean): String {
+    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    return formatTimeOfDay(now.hour, now.minute, usesTwentyFourHourClock)
+}
+
+fun currentDateText(): String = shortDateText(Clock.System.todayIn(TimeZone.currentSystemDefault()))
 
 data class ImageLinkFetch(val address: String, val hasFailed: Boolean)
 
@@ -376,6 +402,7 @@ private val noImageLinkFetches: StateFlow<Map<String, ImageLinkFetch>> = Mutable
 interface EditorActions {
 
     fun onClearSlashQuery()
+    fun onReplaceSlashQuery(replacement: String)
     fun onClearFocusRequest()
     fun onUpdateText(id: String, text: String)
     fun onToggleCheckbox(id: String, checked: Boolean)
@@ -557,6 +584,8 @@ fun EditorScreen(
             onAdjustIndentation = {},
             onSetAlignment = {},
             onInsertMediaBlock = {},
+            onInsertText = {},
+            usesTwentyFourHourClock = false,
             customProperties = customProperties
         ).flatMap { section -> section.items.map { it.label } }
     }
@@ -736,6 +765,12 @@ fun EditorScreen(
             override fun onAdjustIndentation(increase: Boolean) = clearSlashAndExecute { actions.onAdjustIndentation(increase) }
             override fun onSetBlockAlignment(alignment: TextAlignment) = clearSlashAndExecute { actions.onSetBlockAlignment(alignment) }
             override fun onInsertMediaBlock(type: String) = clearSlashAndExecute { actions.onInsertMediaBlock(type) }
+            override fun onReplaceSlashQuery(replacement: String) {
+                if (isDesktopPlatform) showSlashMenu = false
+                latestOnMobileMenuStateChange(MobileMenuState.MAIN)
+                latestOnSlashQueryChange("")
+                actions.onReplaceSlashQuery(replacement)
+            }
             override fun onTogglePin() = actions.onTogglePin()
             override fun onNoteLinkClick(noteId: String) = actions.onNoteLinkClick(noteId)
             override fun onCreateLinkedNote(title: String): String = actions.onCreateLinkedNote(title)
@@ -1542,6 +1577,7 @@ fun EditorToolbar(
     onRedo: () -> Unit = {},
     showHistory: Boolean = false,
     onClearSlashQuery: () -> Unit = {},
+    onReplaceSlashQuery: (String) -> Unit = {},
     allLinkableNotes: List<NoteMetadataEntity> = emptyList(),
     mentionQuery: String = "",
     onMentionNoteSelected: (String) -> Unit = {},
@@ -1580,6 +1616,10 @@ fun EditorToolbar(
         onInsertMediaBlock(type)
         onMenuStateChange(mobileMenuStateAfterInserting(type))
     }
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
+    val insertTextAtCursor: (String) -> Unit = { text ->
+        GlobalEditorState.currentlyFocusedBlockId?.let { EditorEventBus.requestInsertText(it, text) }
+    }
     val onToolbarItemClick: (KeyboardToolbarItem) -> Unit = { item ->
         when (item) {
             KeyboardToolbarItem.UNDO -> {
@@ -1597,6 +1637,8 @@ fun EditorToolbar(
                 keyboardController?.hide()
                 onSelectCurrentBlock()
             }
+            KeyboardToolbarItem.CURRENT_TIME -> insertTextAtCursor(currentTimeText(usesTwentyFourHourClock))
+            KeyboardToolbarItem.CURRENT_DATE -> insertTextAtCursor(currentDateText())
             KeyboardToolbarItem.TEXT -> onChangeBlockType("text")
             KeyboardToolbarItem.HEADING_1 -> onChangeBlockType("h1")
             KeyboardToolbarItem.HEADING_2 -> onChangeBlockType("h2")
@@ -1752,6 +1794,10 @@ fun EditorToolbar(
                                             onInsertMediaBlock(it)
                                             onMenuStateChange(mobileMenuStateAfterInserting(it))
                                         },
+                                        onInsertText = {
+                                            onReplaceSlashQuery("$it ")
+                                            onMenuStateChange(MobileMenuState.MAIN)
+                                        },
                                         customProperties = customProperties
                                     )
                                 }
@@ -1782,6 +1828,10 @@ fun EditorToolbar(
                                         onInsertMediaBlock = {
                                             onInsertMediaBlock(it)
                                             onMenuStateChange(mobileMenuStateAfterInserting(it))
+                                        },
+                                        onInsertText = {
+                                            insertTextAtCursor(it)
+                                            onMenuStateChange(MobileMenuState.MAIN)
                                         },
                                         customProperties = customProperties
                                     )
@@ -2058,6 +2108,8 @@ fun buildSlashMenuSections(
     onAdjustIndentation: (Boolean) -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onInsertMediaBlock: (String) -> Unit,
+    onInsertText: (String) -> Unit,
+    usesTwentyFourHourClock: Boolean,
     customProperties: List<CustomPropertyEntity> = emptyList()
 ): List<SlashMenuSectionData> = listOf(
     SlashMenuSectionData("Basic Blocks", listOf(
@@ -2083,6 +2135,10 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Link to Note", Res.drawable.link) { onInsertMediaBlock("linked_note") },
         SlashMenuItemData("Link to Canvas", Res.drawable.group) { onInsertMediaBlock("linked_canvas") },
         SlashMenuItemData("Link to Database", Res.drawable.database) { onInsertMediaBlock("linked_database") }
+    )),
+    SlashMenuSectionData("Date & Time", listOf(
+        SlashMenuItemData("Current Time", Res.drawable.clock_circle) { onInsertText(currentTimeText(usesTwentyFourHourClock)) },
+        SlashMenuItemData("Current Date", Res.drawable.calendar_date) { onInsertText(currentDateText()) }
     )),
     SlashMenuSectionData(
         "Properties",
@@ -2124,9 +2180,18 @@ fun filteredSlashMenuSections(
     onAdjustIndentation: (Boolean) -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onInsertMediaBlock: (String) -> Unit,
+    onInsertText: (String) -> Unit,
+    usesTwentyFourHourClock: Boolean,
     customProperties: List<CustomPropertyEntity> = emptyList()
 ): List<SlashMenuSectionData> = buildSlashMenuSections(
-    onChangeBlockType, onToggleFormat, onAdjustIndentation, onSetAlignment, onInsertMediaBlock, customProperties
+    onChangeBlockType,
+    onToggleFormat,
+    onAdjustIndentation,
+    onSetAlignment,
+    onInsertMediaBlock,
+    onInsertText,
+    usesTwentyFourHourClock,
+    customProperties
 ).map { section ->
     section.copy(items = section.items.filter { item ->
         query.isBlank() || item.label.contains(query, ignoreCase = true)
@@ -2141,9 +2206,11 @@ fun DesktopSlashMenuContent(
     onAdjustIndentation: (Boolean) -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onInsertMediaBlock: (String) -> Unit,
+    onInsertText: (String) -> Unit,
     selectedIndex: Int = -1,
     customProperties: List<CustomPropertyEntity> = emptyList()
 ) {
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
     val filteredSections = remember(
         query,
         onChangeBlockType,
@@ -2151,10 +2218,20 @@ fun DesktopSlashMenuContent(
         onAdjustIndentation,
         onSetAlignment,
         onInsertMediaBlock,
+        onInsertText,
+        usesTwentyFourHourClock,
         customProperties
     ) {
         filteredSlashMenuSections(
-            query, onChangeBlockType, onToggleFormat, onAdjustIndentation, onSetAlignment, onInsertMediaBlock, customProperties
+            query,
+            onChangeBlockType,
+            onToggleFormat,
+            onAdjustIndentation,
+            onSetAlignment,
+            onInsertMediaBlock,
+            onInsertText,
+            usesTwentyFourHourClock,
+            customProperties
         )
     }
 

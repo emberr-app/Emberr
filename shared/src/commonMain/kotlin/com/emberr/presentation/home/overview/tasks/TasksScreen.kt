@@ -204,6 +204,7 @@ fun TasksScreen(
                 val editorActions = remember(viewModel, onOpenFile) {
                     object : EditorActions {
                         override fun onClearSlashQuery() {}
+                        override fun onReplaceSlashQuery(replacement: String) {}
                         override fun onClearFocusRequest() = viewModel.clearFocusRequest()
                         override fun onUpdateText(id: String, text: String) = viewModel.updateBlockText(id, text)
                         override fun onToggleCheckbox(id: String, checked: Boolean) = viewModel.toggleCheckbox(id, checked)

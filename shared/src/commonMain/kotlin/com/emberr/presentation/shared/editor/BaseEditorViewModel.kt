@@ -1667,14 +1667,16 @@ abstract class BaseEditorViewModel(
     // The single authoritative slash strip. Runs synchronously against _blocks.value rather than a
     // composition snapshot, and uses the text itself rather than slashQuery - which desyncs the moment
     // isSlashKilled forces it to "" while the block text keeps its "/whatever".
-    fun clearActiveSlashQuery() {
+    fun clearActiveSlashQuery() = replaceActiveSlashQuery("")
+
+    fun replaceActiveSlashQuery(replacement: String) {
         val id = currentlyFocusedBlockId ?: return
         val block = _blocks.value.firstOrNull { it.id == id } ?: return
         val raw = getBlockText(block)
         val slashIndex = raw.lastIndexOf('/')
         if (slashIndex == -1) return
         if (raw.substring(slashIndex).contains(" ")) return
-        updateBlockText(id, raw.substring(0, slashIndex))
+        updateBlockText(id, raw.substring(0, slashIndex) + replacement)
     }
 
     private fun getBlockText(b: NoteBlock) = when (b) {

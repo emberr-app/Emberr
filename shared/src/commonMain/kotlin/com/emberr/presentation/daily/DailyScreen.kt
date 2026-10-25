@@ -242,6 +242,7 @@ fun DailyScreen(
     val sharedEditorActions = remember(viewModel, onOpenFile) {
         object : EditorActions {
             override fun onClearSlashQuery() = viewModel.clearActiveSlashQuery()
+            override fun onReplaceSlashQuery(replacement: String) = viewModel.replaceActiveSlashQuery(replacement)
             override fun onClearFocusRequest() = viewModel.clearFocusRequest()
             override fun onUpdateText(id: String, text: String) = viewModel.updateBlockText(id, text)
             override fun onToggleCheckbox(id: String, checked: Boolean) = viewModel.toggleCheckbox(id, checked)
@@ -537,6 +538,7 @@ fun DailyScreen(
                         }
                     },
                     onClearSlashQuery = { sharedEditorActions.onClearSlashQuery() },
+                    onReplaceSlashQuery = { sharedEditorActions.onReplaceSlashQuery(it) },
                     canUndo = canUndo,
                     canRedo = canRedo,
                     onUndo = { viewModel.undo() },
