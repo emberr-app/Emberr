@@ -28,7 +28,12 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
     private var textScope: CoroutineScope? = null
     private var mediaScope: CoroutineScope? = null
 
-    actual fun scheduleDailySync() {
+    actual fun scheduleBackgroundSync() {
+        scheduleDailySync()
+        scheduleMediaSync()
+    }
+
+    private fun scheduleDailySync() {
         if (textScope?.isActive == true) {
             SelfHostSyncLog.d("Scheduler: daily text sync already scheduled, keeping it")
             return
@@ -66,7 +71,7 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
 
     actual fun scheduleDeferredSyncAfterAppClose() = Unit
 
-    actual fun scheduleMediaSync() {
+    private fun scheduleMediaSync() {
         if (mediaScope?.isActive == true) {
             SelfHostSyncLog.d("Scheduler: media sync already scheduled, keeping it")
             return

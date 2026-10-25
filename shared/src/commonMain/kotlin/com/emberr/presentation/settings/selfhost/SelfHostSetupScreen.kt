@@ -261,6 +261,7 @@ private fun ConnectedDashboard(
     sidePadding: Dp
 ) {
     var showDisconnectConfirmation by remember { mutableStateOf(false) }
+    val notesWaitingToSync by viewModel.notesWaitingToSyncCount.collectAsState()
     val deviceLockPrompt = rememberDeviceLockPrompt()
     val coroutineScope = rememberCoroutineScope()
 
@@ -360,6 +361,11 @@ private fun ConnectedDashboard(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
+                    }
+
+                    if (!isSyncRunning && notesWaitingToSync > 0) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        SyncProgressHint(text = describeNotesWaitingToSync(notesWaitingToSync))
                     }
 
                     state.noteSyncProgress?.let { progress ->
@@ -629,6 +635,9 @@ private fun SyncProgressHint(text: String) {
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
     )
 }
+
+private fun describeNotesWaitingToSync(count: Int): String =
+    if (count == 1) "1 note waiting to sync" else "$count notes waiting to sync"
 
 private fun describeNoteCount(done: Long, total: Long): String =
     "${minOf(done, total)} of $total ${if (total == 1L) "note" else "notes"}"

@@ -18,7 +18,8 @@ import kotlinx.coroutines.withContext
 class SelfHostSyncWorker(
     appContext: Context,
     workerParams: WorkerParameters,
-    private val selfHostSyncEngine: SelfHostSyncEngine
+    private val selfHostSyncEngine: SelfHostSyncEngine,
+    private val foregroundSyncPoller: ForegroundSyncPoller
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
@@ -32,6 +33,7 @@ class SelfHostSyncWorker(
                     showSyncNotification()
                     syncTextThenMedia()
                 }
+                SCOPE_BACKGROUND -> syncTextThenMediaIfAnythingChanged()
                 else -> selfHostSyncEngine.runSyncAfterAnyRunningOne()
             }
 
@@ -97,6 +99,12 @@ class SelfHostSyncWorker(
         return if (mediaOutcome is SelfHostSyncResult.Success) textOutcome else mediaOutcome
     }
 
+    private suspend fun syncTextThenMediaIfAnythingChanged(): SelfHostSyncResult {
+        if (foregroundSyncPoller.hasServerOrLocalChanges()) return syncTextThenMedia()
+        SelfHostSyncLog.d("Worker: nothing changed on the server or this device, skipping this run")
+        return SelfHostSyncResult.Success(notesSynced = 0, conflicts = 0)
+    }
+
     private suspend fun showSyncNotification() {
         try {
             ensureNotificationChannel()
@@ -147,6 +155,7 @@ class SelfHostSyncWorker(
         const val SCOPE_TEXT = "text"
         const val SCOPE_MEDIA = "media"
         const val SCOPE_MANUAL = "manual"
+        const val SCOPE_BACKGROUND = "background"
         const val KEY_ERROR_MESSAGE = "self_host_sync_error_message"
         const val KEY_NOTES_NOT_SYNCED_MESSAGE = "self_host_sync_notes_not_synced_message"
         const val MAX_RETRY_ATTEMPTS = 5

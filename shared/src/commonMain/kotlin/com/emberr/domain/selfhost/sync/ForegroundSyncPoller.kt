@@ -48,6 +48,14 @@ class ForegroundSyncPoller(
 
     private suspend fun pollOnce() {
         if (!selfHostSyncEngine.isOnAllowedNetwork()) return
+        if (!hasServerOrLocalChanges()) return
+        scope.launch {
+            selfHostSyncEngine.runSync()
+            selfHostSyncEngine.syncMedia()
+        }.join()
+    }
+
+    suspend fun hasServerOrLocalChanges(): Boolean {
         pollCount++
         val supportsETags = settingsManager.getSelfHostSupportsETags()
             ?: webDavSyncClient.checkETagSupport().also { settingsManager.saveSelfHostSupportsETags(it) }
@@ -60,16 +68,8 @@ class ForegroundSyncPoller(
         val useEtag = supportsETags && pollCount % FORCE_TIMESTAMP_CHECK_EVERY != 0
         val remoteChanged = if (useEtag) checkViaETag() else checkViaTimestamp()
         val hasUnsentLocalChanges = selfHostSyncEngine.hasPendingLocalChanges()
-        if (remoteChanged || hasUnsentLocalChanges) {
-            SelfHostSyncLog.d(
-                "ForegroundSyncPoller: remoteChanged=$remoteChanged, hasUnsentLocalChanges=$hasUnsentLocalChanges, " +
-                        "triggering text sync then media sync"
-            )
-            scope.launch {
-                selfHostSyncEngine.runSync()
-                selfHostSyncEngine.syncMedia()
-            }.join()
-        }
+        SelfHostSyncLog.d("ForegroundSyncPoller: remoteChanged=$remoteChanged, hasUnsentLocalChanges=$hasUnsentLocalChanges")
+        return remoteChanged || hasUnsentLocalChanges
     }
 
     private suspend fun checkViaETag(): Boolean {

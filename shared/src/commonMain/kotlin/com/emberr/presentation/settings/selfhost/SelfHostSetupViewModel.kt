@@ -12,7 +12,6 @@ import com.emberr.domain.selfhost.webdav.SelfHostServerCredentials
 import com.emberr.domain.selfhost.sync.SELF_HOST_UPDATE_REQUIRED_MESSAGE
 import com.emberr.domain.selfhost.sync.SelfHostConnectionState
 import com.emberr.domain.selfhost.sync.SelfHostSyncEngine
-import com.emberr.domain.selfhost.sync.SelfHostSyncResult
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
 import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
@@ -23,11 +22,12 @@ import com.emberr.domain.selfhost.webdav.WebDavConflictException
 import com.emberr.domain.selfhost.webdav.WebDavConnectionTestResult
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
@@ -127,12 +127,14 @@ class SelfHostSetupViewModel(
     private val selfHostSyncScheduler: SelfHostSyncScheduler,
     private val settingsManager: SettingsManager,
     private val foregroundSyncPoller: ForegroundSyncPoller,
-    private val selfHostConnectionState: SelfHostConnectionState,
-    private val appScope: CoroutineScope
+    private val selfHostConnectionState: SelfHostConnectionState
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<SelfHostScreenState>(SelfHostScreenState.Checking)
     val screenState: StateFlow<SelfHostScreenState> = _screenState.asStateFlow()
+
+    val notesWaitingToSyncCount: StateFlow<Int> = selfHostSyncEngine.notesWaitingToSyncCount
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     init {
         viewModelScope.launch {
@@ -189,8 +191,7 @@ class SelfHostSetupViewModel(
 
         _screenState.value = if (credentials != null && encryptionKey != null) {
             SelfHostSyncLog.d("ViewModel: vault already configured, re-arming background sync schedules for this session")
-            selfHostSyncScheduler.scheduleDailySync()
-            selfHostSyncScheduler.scheduleMediaSync()
+            selfHostSyncScheduler.scheduleBackgroundSync()
             foregroundSyncPoller.start()
 
             SelfHostScreenState.Connected(
@@ -435,24 +436,8 @@ class SelfHostSetupViewModel(
                     hasSavedRecoveryPassphrase = true
                 )
             )
-            runFirstSyncThenScheduleBackgroundSync()
-        }
-    }
-
-    private fun runFirstSyncThenScheduleBackgroundSync() {
-        appScope.launch {
-            val firstSyncError = when (val result = selfHostSyncEngine.runBaselineSync()) {
-                is SelfHostSyncResult.Success -> result.notesNotSyncedMessage
-                SelfHostSyncResult.Cancelled, SelfHostSyncResult.AlreadyInProgress -> null
-                SelfHostSyncResult.WaitingForAllowedNetwork -> waitingForNetworkMessage(savedSyncNetwork())
-                is SelfHostSyncResult.Failure ->
-                    "First sync failed: ${result.cause.message ?: "unknown error"}. Tap Sync Now to try again."
-                SelfHostSyncResult.NotConfigured -> "First sync could not start because the server setup is missing."
-            }
-            updateConnected { it.copy(syncError = firstSyncError) }
-
-            selfHostSyncScheduler.scheduleDailySync()
-            selfHostSyncScheduler.scheduleMediaSync()
+            syncNow()
+            selfHostSyncScheduler.scheduleBackgroundSync()
             foregroundSyncPoller.start()
         }
     }
@@ -484,8 +469,7 @@ class SelfHostSetupViewModel(
     fun onSyncNetworkSelected(syncNetwork: SelfHostSyncNetwork) {
         settingsManager.saveSelfHostSyncNetwork(syncNetwork.name)
         updateConnected { it.copy(syncNetwork = syncNetwork, syncError = null) }
-        selfHostSyncScheduler.scheduleDailySync()
-        selfHostSyncScheduler.scheduleMediaSync()
+        selfHostSyncScheduler.scheduleBackgroundSync()
     }
 
     fun showRecoveryPassphrase() {

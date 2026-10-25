@@ -304,7 +304,8 @@ val androidModule = module {
         SelfHostSyncWorker(
             appContext = get(),
             workerParams = get(),
-            selfHostSyncEngine = get()
+            selfHostSyncEngine = get(),
+            foregroundSyncPoller = get()
         )
     }
 

@@ -50,11 +50,13 @@ import com.emberr.domain.selfhost.translation.EmbeddedBlockPayload
 import com.emberr.domain.selfhost.translation.NoteJsonCompiler
 import com.emberr.domain.selfhost.translation.NoteJsonParser
 import com.emberr.domain.selfhost.translation.NotePayloadSyncException
+import com.emberr.domain.selfhost.webdav.JsonDownloadIfChanged
 import com.emberr.domain.selfhost.webdav.WebDavConfigurationException
 import com.emberr.domain.selfhost.webdav.WebDavConflictException
 import com.emberr.domain.selfhost.webdav.WebDavDecryptionException
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import com.emberr.domain.selfhost.webdav.WebDavSyncPaths
+import com.emberr.domain.selfhost.webdav.isWeakETag
 import com.emberr.domain.sync.MediaTransferPhase
 import com.emberr.domain.sync.MediaTransferStatusBus
 import com.emberr.domain.sync.withNewerDetailsFrom
@@ -71,6 +73,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -149,6 +152,11 @@ class SelfHostSyncEngine(
     private val mediaSyncMutex = Mutex()
     private val manifestWriteMutex = Mutex()
     private val listFileSyncMemory = ListFileSyncMemory()
+
+    private class LastSeenManifest(val manifest: SelfHostManifest, val etag: String)
+
+    @Volatile
+    private var lastSeenManifest: LastSeenManifest? = null
     private val manifestJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val blockJson = Json { ignoreUnknownKeys = true }
     private val collectionJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -185,6 +193,8 @@ class SelfHostSyncEngine(
     // wire this up in the app ui so let users know if any self host sync is pending
     suspend fun hasPendingLocalChanges(): Boolean =
         noteDao.getNotesNeedingSelfHostSync().isNotEmpty()
+
+    val notesWaitingToSyncCount: Flow<Int> = noteDao.observeNotesNeedingSelfHostSyncCount()
 
     fun isOnAllowedNetwork(): Boolean =
         SelfHostSyncNetwork.fromStoredName(settingsManager.getSelfHostSyncNetwork())
@@ -223,6 +233,7 @@ class SelfHostSyncEngine(
 
     suspend fun forgetServerSyncProgress() = textSyncMutex.withLock {
         listFileSyncMemory.forgetAll()
+        lastSeenManifest = null
         noteDao.forgetSelfHostSyncProgressForAllNotes()
         settingsManager.saveSelfHostLastSyncTimestamp(0L)
         settingsManager.saveSelfHostSupportsETags(null)
@@ -655,11 +666,12 @@ class SelfHostSyncEngine(
         }
 
         try {
-            webDavSyncClient.uploadEncryptedJson(
+            val uploadedEtag = webDavSyncClient.uploadEncryptedJson(
                 WebDavSyncPaths.MANIFEST_FILE,
                 manifestJson.encodeToString(SelfHostManifest.serializer(), newManifest),
                 previousManifestEtag
             )
+            rememberManifest(newManifest, uploadedEtag)
         } catch (cause: WebDavConflictException) {
             if (attempt >= MAX_MANIFEST_UPLOAD_RETRIES) throw cause
             val (freshManifest, freshEtag) = downloadManifestWithEtag()
@@ -685,8 +697,9 @@ class SelfHostSyncEngine(
             }
 
             val syncStartTimestamp = Clock.System.now().toEpochMilliseconds()
-            val manifest = downloadManifest()
-            listFileSyncMemory.startPass(readListFileStatesOnServer())
+            val fileStatesOnServer = readListFileStatesOnServer()
+            listFileSyncMemory.startPass(fileStatesOnServer)
+            val manifest = downloadManifestUnlessListedUnchanged(fileStatesOnServer[WebDavSyncPaths.MANIFEST_FILE])
 
             // Sync candidacy is determined per note using its `selfHostSyncedAt` value.
             // If a local row doesn't exist (e.g., a new note or wiped data), it defaults to 0
@@ -947,7 +960,10 @@ class SelfHostSyncEngine(
 
     private suspend fun readListFileStatesOnServer(): Map<String, String> =
         try {
-            listFileStatesOnServer(webDavSyncClient.listDirectory(WebDavSyncPaths.ROOT), LIST_FILE_PATHS)
+            listFileStatesOnServer(
+                webDavSyncClient.listDirectory(WebDavSyncPaths.ROOT),
+                LIST_FILE_PATHS + WebDavSyncPaths.MANIFEST_FILE
+            )
         } catch (cause: CancellationException) {
             throw cause
         } catch (cause: Exception) {
@@ -1757,9 +1773,29 @@ class SelfHostSyncEngine(
     // This forces a retry instead of treating corrupted data as empty and orphaning notes.
     private suspend fun downloadManifest(): SelfHostManifest = downloadManifestWithEtag().first
 
+    private suspend fun downloadManifestUnlessListedUnchanged(listedEtag: String?): SelfHostManifest {
+        val lastSeen = lastSeenManifest
+        if (lastSeen != null && lastSeen.etag == listedEtag) {
+            SelfHostSyncLog.d("TextSync: manifest unchanged on the server, reusing the copy from the last sync")
+            return lastSeen.manifest
+        }
+        return downloadManifest()
+    }
+
     private suspend fun downloadManifestWithEtag(): Pair<SelfHostManifest, String?> {
-        val result = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.MANIFEST_FILE)
-            ?: return SelfHostManifest() to null
+        val lastSeen = lastSeenManifest
+        val result = if (lastSeen == null) {
+            webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.MANIFEST_FILE)
+        } else {
+            when (val download = webDavSyncClient.downloadAndDecryptJsonIfChanged(WebDavSyncPaths.MANIFEST_FILE, lastSeen.etag)) {
+                JsonDownloadIfChanged.Unchanged -> return lastSeen.manifest to lastSeen.etag
+                is JsonDownloadIfChanged.Changed -> download.jsonWithEtag
+            }
+        }
+        if (result == null) {
+            lastSeenManifest = null
+            return SelfHostManifest() to null
+        }
         val (raw, etag) = result
         val manifest = try {
             decodeSelfHostManifest(raw)
@@ -1768,7 +1804,12 @@ class SelfHostSyncEngine(
             SelfHostUpdateRequiredSignal.markUpdateRequired()
             throw cause
         }
+        rememberManifest(manifest, etag)
         return manifest to etag
+    }
+
+    private fun rememberManifest(manifest: SelfHostManifest, etag: String?) {
+        lastSeenManifest = if (etag != null && !isWeakETag(etag)) LastSeenManifest(manifest, etag) else null
     }
 
     private suspend fun uploadManifest(
@@ -1830,11 +1871,12 @@ class SelfHostSyncEngine(
         // The If-Match ETag check prevents concurrent manifest uploads from overwriting each other.
         // On a conflict (412 status), we abort and retry with a fresh download.
         try {
-            webDavSyncClient.uploadEncryptedJson(
+            val uploadedEtag = webDavSyncClient.uploadEncryptedJson(
                 WebDavSyncPaths.MANIFEST_FILE,
                 manifestJson.encodeToString(SelfHostManifest.serializer(), newManifest),
                 previousManifestEtag
             )
+            rememberManifest(newManifest, uploadedEtag)
         } catch (cause: WebDavConflictException) {
             if (attempt >= MAX_MANIFEST_UPLOAD_RETRIES) throw cause
             val (freshManifest, freshEtag) = downloadManifestWithEtag()

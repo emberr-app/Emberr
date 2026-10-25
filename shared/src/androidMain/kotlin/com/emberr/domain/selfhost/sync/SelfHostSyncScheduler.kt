@@ -82,6 +82,7 @@ actual class SelfHostSyncScheduler(
         override fun onStart(owner: LifecycleOwner) {
             schedulerScope.launch {
                 if (!selfHostConnectionState.isConnected.value) return@launch
+                scheduleBackgroundSync()
                 val isStillInForeground = withContext(Dispatchers.Main) {
                     val isInForeground = owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
                     if (isInForeground) foregroundSyncPoller.start()
@@ -154,17 +155,22 @@ actual class SelfHostSyncScheduler(
 //            .launchIn(schedulerScope)
     }
 
-    actual fun scheduleDailySync() {
-        val request = PeriodicWorkRequestBuilder<SelfHostSyncWorker>(24, TimeUnit.HOURS)
+    actual fun scheduleBackgroundSync() {
+        val request = PeriodicWorkRequestBuilder<SelfHostSyncWorker>(BACKGROUND_SYNC_MINUTES, TimeUnit.MINUTES)
+            .setInitialDelay(BACKGROUND_SYNC_MINUTES, TimeUnit.MINUTES)
             .setConstraints(allowedNetworkConstraints())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
-            .setInputData(workDataOf(SelfHostSyncWorker.KEY_SYNC_SCOPE to SelfHostSyncWorker.SCOPE_TEXT))
+            .setInputData(workDataOf(SelfHostSyncWorker.KEY_SYNC_SCOPE to SelfHostSyncWorker.SCOPE_BACKGROUND))
             .addTag(TAG_TEXT_SYNC)
+            .addTag(TAG_MEDIA_SYNC)
             .build()
 
-        SelfHostSyncLog.d("Scheduler: enqueueing daily text sync (policy=UPDATE)")
-        WorkManager.getInstance(context)
-            .enqueueUniquePeriodicWork(WORK_NAME_DAILY, ExistingPeriodicWorkPolicy.UPDATE, request)
+        SelfHostSyncLog.d("Scheduler: enqueueing the 30-minute background sync (policy=UPDATE)")
+        WorkManager.getInstance(context).apply {
+            cancelUniqueWork(OLD_WORK_NAME_DAILY)
+            cancelUniqueWork(OLD_WORK_NAME_MEDIA)
+            enqueueUniquePeriodicWork(WORK_NAME_BACKGROUND, ExistingPeriodicWorkPolicy.UPDATE, request)
+        }
     }
 
     actual fun scheduleDeferredSyncAfterAppClose() {
@@ -187,19 +193,6 @@ actual class SelfHostSyncScheduler(
             .beginUniqueWork(WORK_NAME_DEFERRED, ExistingWorkPolicy.APPEND_OR_REPLACE, textRequest)
             .then(mediaRequest)
             .enqueue()
-    }
-
-    actual fun scheduleMediaSync() {
-        val request = PeriodicWorkRequestBuilder<SelfHostSyncWorker>(6, TimeUnit.HOURS)
-            .setConstraints(allowedNetworkConstraints())
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
-            .setInputData(workDataOf(SelfHostSyncWorker.KEY_SYNC_SCOPE to SelfHostSyncWorker.SCOPE_MEDIA))
-            .addTag(TAG_MEDIA_SYNC)
-            .build()
-
-        SelfHostSyncLog.d("Scheduler: enqueueing periodic media sync (policy=UPDATE)")
-        WorkManager.getInstance(context)
-            .enqueueUniquePeriodicWork(WORK_NAME_MEDIA, ExistingPeriodicWorkPolicy.UPDATE, request)
     }
 
     actual fun syncNow() {
@@ -241,9 +234,8 @@ actual class SelfHostSyncScheduler(
     actual fun cancelAll() {
         SelfHostSyncLog.d("Scheduler: cancelAll() cancelling all self-host WorkManager jobs")
         WorkManager.getInstance(context).apply {
-            cancelUniqueWork(WORK_NAME_DAILY)
+            cancelUniqueWork(WORK_NAME_BACKGROUND)
             cancelUniqueWork(WORK_NAME_DEFERRED)
-            cancelUniqueWork(WORK_NAME_MEDIA)
             cancelUniqueWork(WORK_NAME_MANUAL)
         }
         foregroundSyncPoller.stop()
@@ -260,13 +252,15 @@ actual class SelfHostSyncScheduler(
     }
 
     private companion object {
-        const val WORK_NAME_DAILY = "EmberrSelfHostDailyTextSync"
+        const val WORK_NAME_BACKGROUND = "EmberrSelfHostBackgroundSync"
+        const val OLD_WORK_NAME_DAILY = "EmberrSelfHostDailyTextSync"
+        const val OLD_WORK_NAME_MEDIA = "EmberrSelfHostMediaSync"
         const val WORK_NAME_DEFERRED = "EmberrSelfHostDeferredTextSync"
-        const val WORK_NAME_MEDIA = "EmberrSelfHostMediaSync"
         const val WORK_NAME_MANUAL = "EmberrSelfHostManualSync"
         const val TAG_TEXT_SYNC = "EmberrSelfHostTextSync"
         const val TAG_MEDIA_SYNC = "EmberrSelfHostMediaSync"
         const val FLUSH_BEFORE_BACKGROUND_TIMEOUT_MS = 3000L
+        const val BACKGROUND_SYNC_MINUTES = 30L
         val WAIT_BEFORE_BASELINE_SYNC_AFTER_OPENING = 5.seconds
     }
 }

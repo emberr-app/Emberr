@@ -597,8 +597,7 @@ val sharedModule = module {
             selfHostSyncScheduler = get(),
             settingsManager = get(),
             foregroundSyncPoller = get(),
-            selfHostConnectionState = get(),
-            appScope = get(named("AppScope"))
+            selfHostConnectionState = get()
         )
     }
 }
