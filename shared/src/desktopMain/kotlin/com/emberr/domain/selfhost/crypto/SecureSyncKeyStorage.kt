@@ -45,8 +45,15 @@ actual class SecureSyncKeyStorage(private val secretStore: DesktopSecretStore) {
         }
     }
 
+    actual fun saveRecoveryPassphrase(passphrase: String) {
+        secretStore.writeSecret(SecretNamespace.SelfHostSync, ACCOUNT_RECOVERY_PASSPHRASE, passphrase)
+    }
+
+    actual fun getRecoveryPassphrase(): String? =
+        secretStore.readSecret(SecretNamespace.SelfHostSync, ACCOUNT_RECOVERY_PASSPHRASE)
+
     actual fun clearAll() {
-        listOf(ACCOUNT_ENCRYPTION_KEY, ACCOUNT_SERVER_CREDENTIALS).forEach { account ->
+        listOf(ACCOUNT_ENCRYPTION_KEY, ACCOUNT_SERVER_CREDENTIALS, ACCOUNT_RECOVERY_PASSPHRASE).forEach { account ->
             secretStore.removeSecret(SecretNamespace.SelfHostSync, account)
         }
     }
@@ -54,5 +61,6 @@ actual class SecureSyncKeyStorage(private val secretStore: DesktopSecretStore) {
     private companion object {
         const val ACCOUNT_ENCRYPTION_KEY = "encryption_key"
         const val ACCOUNT_SERVER_CREDENTIALS = "server_credentials"
+        const val ACCOUNT_RECOVERY_PASSPHRASE = "recovery_passphrase"
     }
 }

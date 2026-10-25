@@ -1,5 +1,6 @@
 package com.emberr.presentation.shared.components
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -8,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -27,11 +29,13 @@ fun EmberrButtonPrimary(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None)
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None),
+        contentPadding = PaddingValues(horizontal = 12.dp)
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
         )
         if (showsWavingDots) {
             WavingDots(style = MaterialTheme.typography.bodyLarge)

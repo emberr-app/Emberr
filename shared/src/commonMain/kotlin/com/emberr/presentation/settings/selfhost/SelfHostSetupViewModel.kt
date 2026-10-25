@@ -82,7 +82,9 @@ data class SelfHostConnectedState(
     val syncError: String? = null,
     val syncNetwork: SelfHostSyncNetwork = SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA,
     val noteSyncProgress: SelfHostSyncProgress? = null,
-    val imageSyncProgress: SelfHostSyncProgress? = null
+    val imageSyncProgress: SelfHostSyncProgress? = null,
+    val hasSavedRecoveryPassphrase: Boolean = false,
+    val shownRecoveryPassphrase: String? = null
 )
 
 sealed class SelfHostScreenState {
@@ -185,7 +187,8 @@ class SelfHostSetupViewModel(
                 SelfHostConnectedState(
                     serverUrl = credentials.serverUrl,
                     lastSyncedAtMillis = settingsManager.getSelfHostLastSyncTimestamp().takeIf { it > 0L },
-                    syncNetwork = savedSyncNetwork()
+                    syncNetwork = savedSyncNetwork(),
+                    hasSavedRecoveryPassphrase = secureSyncKeyStorage.getRecoveryPassphrase() != null
                 )
             )
         } else {
@@ -361,7 +364,8 @@ class SelfHostSetupViewModel(
                 webDavSyncClient.ensureRemoteLayoutExists()
 
                 val isRestoring = form.vaultMode == VaultMode.RESTORE_VAULT
-                val passphraseChars = (if (isRestoring) form.existingPassphraseInput else form.passphrase).toCharArray()
+                val passphrase = if (isRestoring) form.existingPassphraseInput else form.passphrase
+                val passphraseChars = passphrase.toCharArray()
                 val vaultKey = try {
                     if (isRestoring) {
                         val vaultFileBytes = webDavSyncClient.downloadVaultFile()
@@ -387,6 +391,7 @@ class SelfHostSetupViewModel(
                     passphraseChars.fill(Char(0))
                 }
                 secureSyncKeyStorage.saveEncryptionKey(vaultKey)
+                secureSyncKeyStorage.saveRecoveryPassphrase(passphrase)
                 selfHostSyncEngine.forgetServerSyncProgress()
             } catch (cause: WebDavConflictException) {
                 secureSyncKeyStorage.clearAll()
@@ -414,7 +419,11 @@ class SelfHostSetupViewModel(
             selfHostSyncEngine.resumeAfterPause()
 
             _screenState.value = SelfHostScreenState.Connected(
-                SelfHostConnectedState(serverUrl = credentials.serverUrl, syncNetwork = savedSyncNetwork())
+                SelfHostConnectedState(
+                    serverUrl = credentials.serverUrl,
+                    syncNetwork = savedSyncNetwork(),
+                    hasSavedRecoveryPassphrase = true
+                )
             )
             runFirstSyncThenScheduleBackgroundSync()
         }
@@ -467,6 +476,15 @@ class SelfHostSetupViewModel(
         updateConnected { it.copy(syncNetwork = syncNetwork, syncError = null) }
         selfHostSyncScheduler.scheduleDailySync()
         selfHostSyncScheduler.scheduleMediaSync()
+    }
+
+    fun showRecoveryPassphrase() {
+        val passphrase = secureSyncKeyStorage.getRecoveryPassphrase() ?: return
+        updateConnected { it.copy(shownRecoveryPassphrase = passphrase) }
+    }
+
+    fun hideRecoveryPassphrase() {
+        updateConnected { it.copy(shownRecoveryPassphrase = null) }
     }
 
     fun disconnectVault() {

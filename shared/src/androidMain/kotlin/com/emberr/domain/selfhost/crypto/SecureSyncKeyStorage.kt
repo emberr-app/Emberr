@@ -50,6 +50,12 @@ actual class SecureSyncKeyStorage(
         }
     }
 
+    actual fun saveRecoveryPassphrase(passphrase: String) {
+        secretStore.writeSecret(KEY_RECOVERY_PASSPHRASE, passphrase)
+    }
+
+    actual fun getRecoveryPassphrase(): String? = secretStore.readSecret(KEY_RECOVERY_PASSPHRASE)
+
     actual fun clearAll() {
         secretStore.clearAllSecrets()
     }
@@ -58,5 +64,6 @@ actual class SecureSyncKeyStorage(
         const val SECRET_STORE_FILE_NAME = "emberr_selfhost_sync_vault"
         const val KEY_ENCRYPTION_KEY = "selfhost_encryption_key"
         const val KEY_SERVER_CREDENTIALS = "selfhost_server_credentials"
+        const val KEY_RECOVERY_PASSPHRASE = "selfhost_recovery_passphrase"
     }
 }
