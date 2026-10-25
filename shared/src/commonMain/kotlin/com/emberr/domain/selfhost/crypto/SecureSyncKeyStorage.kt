@@ -7,5 +7,7 @@ expect class SecureSyncKeyStorage {
     fun getEncryptionKey(): ByteArray?
     fun saveServerCredentials(credentials: SelfHostServerCredentials)
     fun getServerCredentials(): SelfHostServerCredentials?
+    fun saveRecoveryPassphrase(passphrase: String)
+    fun getRecoveryPassphrase(): String?
     fun clearAll()
 }

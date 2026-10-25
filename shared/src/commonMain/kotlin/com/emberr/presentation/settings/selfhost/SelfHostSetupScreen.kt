@@ -23,21 +23,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.LinkOff
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -60,7 +56,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
@@ -78,10 +73,12 @@ import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
-import com.emberr.ui.theme.LocalEmberrFontStyle
-import com.emberr.ui.theme.fontFamilyFor
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.copy
+import emberr.shared.generated.resources.refresh_cw
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
@@ -184,15 +181,11 @@ private fun SetupForm(
         if (form.vaultMode == VaultMode.CREATE_VAULT) {
             item {
                 SettingsGroup(title = "Recovery Passphrase") {
-                    PassphraseCard(passphrase = form.passphrase, onRegenerate = viewModel::regeneratePassphrase)
-                }
-            }
-
-            item {
-                SettingsGroup(title = "Before You Continue") {
-                    ZeroKnowledgeWarningCard(
-                        acknowledged = form.hasAcknowledgedRisk,
-                        onAcknowledgedChanged = viewModel::onAcknowledgeRiskChanged
+                    NewPassphraseCard(
+                        passphrase = form.passphrase,
+                        hasSavedPassphrase = form.hasAcknowledgedRisk,
+                        onHasSavedPassphraseChanged = viewModel::onAcknowledgeRiskChanged,
+                        onRegenerate = viewModel::regeneratePassphrase
                     )
                 }
             }
@@ -200,7 +193,7 @@ private fun SetupForm(
 
         if (form.vaultMode == VaultMode.RESTORE_VAULT) {
             item {
-                SettingsGroup(title = "Restore Vault") {
+                SettingsGroup(title = "Unlock Vault") {
                     RestorePassphraseCard(
                         passphraseInput = form.existingPassphraseInput,
                         onPassphraseChanged = viewModel::onExistingPassphraseChanged,
@@ -216,8 +209,8 @@ private fun SetupForm(
                     EmberrButtonPrimary(
                         text = when {
                             form.setupPhase == SetupPhase.FINALIZING -> "Setting up"
-                            form.vaultMode == VaultMode.RESTORE_VAULT -> "Restore Vault"
-                            else -> "Complete Setup"
+                            form.vaultMode == VaultMode.RESTORE_VAULT -> "Unlock and Sync"
+                            else -> "Create Vault and Sync"
                         },
                         onClick = viewModel::completeSetup,
                         enabled = form.canFinishSetup,
@@ -385,6 +378,29 @@ private fun ConnectedDashboard(
             }
         }
 
+        item {
+            SettingsGroup(title = "Recovery Passphrase") {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (state.hasSavedRecoveryPassphrase) {
+                        SettingsHint(text = "You need this passphrase to connect another phone or computer to this server.")
+                        EmberrButtonSecondary(
+                            text = "Show Passphrase",
+                            onClick = viewModel::showRecoveryPassphrase,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        SettingsHint(
+                            text = "This device was connected before Emberr saved the passphrase, so it can't show it. " +
+                                "Use the copy you saved when the vault was created."
+                        )
+                    }
+                }
+            }
+        }
+
         if (!isDesktopPlatform) {
             item {
                 SettingsGroup(title = "Sync network") {
@@ -447,40 +463,54 @@ private fun ConnectedDashboard(
         }
     }
 
+    state.shownRecoveryPassphrase?.let { passphrase ->
+        EmberrAlertDialog(
+            onDismissRequest = viewModel::hideRecoveryPassphrase,
+            title = "Recovery Passphrase"
+        ) {
+            Text(
+                text = "Enter this on the other device when it asks to unlock the vault. Don't share it with anyone.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+            )
+            Spacer(Modifier.height(16.dp))
+            PassphraseBox(passphrase = passphrase)
+            Spacer(Modifier.height(16.dp))
+            EmberrButtonPrimary(
+                text = "Done",
+                onClick = viewModel::hideRecoveryPassphrase,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
     if (showDisconnectConfirmation) {
-        AlertDialog(
+        EmberrAlertDialog(
             onDismissRequest = { showDisconnectConfirmation = false },
-            shape = RoundedCornerShape(12.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            title = {
-                Text(text = "Disconnect Vault?", fontFamily = fontFamilyFor(LocalEmberrFontStyle.current), fontWeight = FontWeight.SemiBold)
-            },
-            text = {
-                Text(
-                    text = "This permanently removes your encryption key and server credentials from this " +
-                        "device. You'll need your recovery passphrase to reconnect.",
-                    style = MaterialTheme.typography.bodyLarge
+            title = "Disconnect Vault?"
+        ) {
+            Text(
+                text = "Your notes stay on this device and the server. You'll need your recovery passphrase to reconnect.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+            )
+            Spacer(Modifier.height(20.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                EmberrButtonSecondary(
+                    text = "Cancel",
+                    onClick = { showDisconnectConfirmation = false },
+                    modifier = Modifier.weight(1f)
                 )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDisconnectConfirmation = false
-                    viewModel.disconnectVault()
-                }) {
-                    Text(
-                        text = "Disconnect",
-                        fontFamily = fontFamilyFor(LocalEmberrFontStyle.current),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDisconnectConfirmation = false }) {
-                    Text(text = "Cancel", fontFamily = fontFamilyFor(LocalEmberrFontStyle.current), color = MaterialTheme.colorScheme.onSurface)
-                }
+                EmberrButtonPrimary(
+                    text = "Disconnect",
+                    onClick = {
+                        showDisconnectConfirmation = false
+                        viewModel.disconnectVault()
+                    },
+                    modifier = Modifier.weight(1f)
+                )
             }
-        )
+        }
     }
 }
 
@@ -586,6 +616,11 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
     ) {
         val onSubmitServerDetails: () -> Unit = { if (form.canTestConnection) viewModel.testConnection() }
 
+        SettingsHint(
+            text = "Enter the WebDAV address and login of your server, for example Nextcloud or a NAS. " +
+                "Emberr encrypts your notes before they leave this device."
+        )
+
         EmberrTextField(
             value = form.serverUrl,
             onValueChange = viewModel::onServerUrlChanged,
@@ -683,11 +718,12 @@ private fun RestorePassphraseCard(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "An existing vault was found on this server. Enter the recovery passphrase you set up " +
-                "on your other device to unlock it.",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        SettingsHint(
+            text = "This server already has an Emberr vault. Enter the 16-character recovery passphrase " +
+                "that was shown when the vault was created."
+        )
+        SettingsHint(
+            text = "Can't find it? Open Settings → Self-Host → Show Passphrase on a device that is already connected."
         )
 
         EmberrTextField(
@@ -714,22 +750,97 @@ private fun RestorePassphraseCard(
 }
 
 @Composable
-private fun PassphraseCard(passphrase: String, onRegenerate: () -> Unit) {
+private fun NewPassphraseCard(
+    passphrase: String,
+    hasSavedPassphrase: Boolean,
+    onHasSavedPassphraseChanged: (Boolean) -> Unit,
+    onRegenerate: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.WarningAmber,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "Save this passphrase now",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        PassphraseFact("You will type it on every other phone or computer you connect to this server.")
+        PassphraseFact("It locks your notes on the server. No one can read them without it, not even Emberr.")
+        PassphraseFact("Emberr can't reset it. Keep it in a password manager or write it down.")
+        PassphraseFact("You can see it again later in Settings → Self-Host on any device that is connected.")
+
+        PassphraseBox(
+            passphrase = passphrase,
+            extraAction = {
+                IconTooltip(text = "New passphrase") {
+                    IconButton(onClick = onRegenerate) {
+                        Icon(
+                            painter = painterResource(Res.drawable.refresh_cw),
+                            contentDescription = "Generate a new passphrase",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            EmberrCheckbox(
+                checked = hasSavedPassphrase,
+                onCheckedChange = onHasSavedPassphraseChanged
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "I saved this passphrase somewhere safe",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun PassphraseFact(text: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "•",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun PassphraseBox(passphrase: String, extraAction: @Composable () -> Unit = {}) {
     val clipboardManager = LocalClipboardManager.current
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "This passphrase is the only way to recover your data on a new device.",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -741,82 +852,36 @@ private fun PassphraseCard(passphrase: String, onRegenerate: () -> Unit) {
         ) {
             Text(
                 text = passphrase,
-                style = MaterialTheme.typography.titleLarge,
-                letterSpacing = 2.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             IconTooltip(text = "Copy passphrase") {
                 IconButton(onClick = { clipboardManager.setText(AnnotatedString(passphrase)) }) {
                     Icon(
-                        imageVector = Icons.Default.ContentCopy,
+                        painter = painterResource(Res.drawable.copy),
                         contentDescription = "Copy passphrase",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
-            IconTooltip(text = "New passphrase") {
-                IconButton(onClick = onRegenerate) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Generate a new passphrase",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-            }
+            extraAction()
         }
     }
 }
 
 @Composable
-private fun ZeroKnowledgeWarningCard(acknowledged: Boolean, onAcknowledgedChanged: (Boolean) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.07f))
-                .padding(14.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.WarningAmber,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(
-                text = "Emberr uses zero-knowledge encryption. Your passphrase is never sent to us or " +
-                    "stored on the server. If you lose it, your synced notes cannot be recovered — " +
-                    "not even by Emberr.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            EmberrCheckbox(
-                checked = acknowledged,
-                onCheckedChange = onAcknowledgedChanged,
-                tickColor = MaterialTheme.colorScheme.error
-            )
-            Text(
-                text = "I understand this passphrase cannot be recovered if lost",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
+private fun SettingsHint(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    )
 }
 
 @Composable

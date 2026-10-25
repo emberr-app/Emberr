@@ -26,7 +26,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.ui.theme.LocalAppIsDark
 
 @Composable
@@ -160,11 +159,7 @@ private fun EmberrTextFieldPlaceholder(placeholder: String, textStyle: TextStyle
 
 @Composable
 private fun emberrTextFieldColors(): TextFieldColors {
-    val containerColor = when {
-        !isDesktopPlatform -> MaterialTheme.colorScheme.surfaceVariant
-        LocalAppIsDark.current -> MaterialTheme.colorScheme.surfaceVariant
-        else -> Color(0xFFD8D8D8)
-    }
+    val containerColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFD8D8D8)
     return OutlinedTextFieldDefaults.colors(
         unfocusedBorderColor = Color.Transparent,
         focusedBorderColor = Color.Transparent,
