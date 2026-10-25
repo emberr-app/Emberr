@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
@@ -54,7 +55,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -65,6 +65,7 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncStage
 import com.emberr.domain.util.system.DeviceLockConfirmation
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.rememberDeviceLockPrompt
+import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.SettingsSegmentedOptions
 import com.emberr.presentation.settings.desktopSettingsSidePadding
@@ -299,15 +300,9 @@ private fun ConnectedDashboard(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = state.serverUrl,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    ServerAddressBox(serverUrl = state.serverUrl)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -921,6 +916,41 @@ private fun PassphraseBox(passphrase: String, extraAction: @Composable () -> Uni
                 }
             }
             extraAction()
+        }
+    }
+}
+
+@Composable
+private fun ServerAddressBox(serverUrl: String) {
+    val clipboardManager = LocalClipboardManager.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+            .padding(start = 16.dp, top = 4.dp, end = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SelectionContainer(modifier = Modifier.weight(1f).padding(vertical = 10.dp)) {
+            Text(
+                text = serverUrl,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        IconTooltip(text = "Copy address") {
+            IconButton(onClick = {
+                clipboardManager.setText(AnnotatedString(serverUrl))
+                showNativeToast("copied address")
+            }) {
+                Icon(
+                    painter = painterResource(Res.drawable.copy),
+                    contentDescription = "Copy address",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
