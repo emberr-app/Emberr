@@ -215,12 +215,13 @@ private fun SetupForm(
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
                     EmberrButtonPrimary(
                         text = when {
-                            form.setupPhase == SetupPhase.FINALIZING -> "Setting up..."
+                            form.setupPhase == SetupPhase.FINALIZING -> "Setting up"
                             form.vaultMode == VaultMode.RESTORE_VAULT -> "Restore Vault"
                             else -> "Complete Setup"
                         },
                         onClick = viewModel::completeSetup,
                         enabled = form.canFinishSetup,
+                        showsWavingDots = form.setupPhase == SetupPhase.FINALIZING,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
