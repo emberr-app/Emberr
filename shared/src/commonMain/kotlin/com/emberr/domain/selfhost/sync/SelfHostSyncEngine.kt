@@ -344,7 +344,7 @@ class SelfHostSyncEngine(
     private suspend fun syncMediaLocked(): SelfHostSyncResult {
         _imageSyncProgress.value = SelfHostSyncProgress()
         return try {
-            webDavSyncClient.ensureRemoteLayoutExists()
+            webDavSyncClient.ensureRemoteLayoutExistsOnce()
 
             val manifest = downloadManifest()
             val manifestMediaEntries = manifest.entries.filter { it.entryType == SelfHostEntryType.MEDIA }
@@ -658,7 +658,7 @@ class SelfHostSyncEngine(
         noteRepository.waitUntilDailyNotesAreInAccount()
         _noteSyncProgress.value = SelfHostSyncProgress()
         return try {
-            webDavSyncClient.ensureRemoteLayoutExists()
+            webDavSyncClient.ensureRemoteLayoutExistsOnce()
 
             try {
                 val dedupedCount = noteRepository.dedupeDuplicateDailyNotes()

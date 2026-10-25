@@ -15,7 +15,8 @@ fun EmberrButtonPrimary(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    showsWavingDots: Boolean = false
 ) {
     Button(
         onClick = onClick,
@@ -32,5 +33,8 @@ fun EmberrButtonPrimary(
             text = text,
             style = MaterialTheme.typography.bodyLarge
         )
+        if (showsWavingDots) {
+            WavingDots(style = MaterialTheme.typography.bodyLarge)
+        }
     }
 }

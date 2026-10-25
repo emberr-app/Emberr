@@ -38,6 +38,7 @@ import java.io.StringReader
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.concurrent.Volatile
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
@@ -108,13 +109,27 @@ class WebDavSyncClient(
         return "Basic ${Base64.encode(raw)}"
     }
 
+    @Volatile
+    private var serverUrlWithConfirmedFolders: String? = null
+
     suspend fun ensureRemoteLayoutExists() {
+        val serverUrl = requireCredentials().serverUrl
         createDirectory(WebDavSyncPaths.ROOT)
         createDirectory(WebDavSyncPaths.NOTES_DIR)
         createDirectory(WebDavSyncPaths.DAILY_DIR)
         createDirectory(WebDavSyncPaths.MEDIA_DIR)
         createDirectory(WebDavSyncPaths.MEDIA_TRASH_DIR)
         createDirectory(WebDavSyncPaths.CHAT_SESSIONS_DIR)
+        serverUrlWithConfirmedFolders = serverUrl
+    }
+
+    suspend fun ensureRemoteLayoutExistsOnce() {
+        if (serverUrlWithConfirmedFolders == requireCredentials().serverUrl) return
+        ensureRemoteLayoutExists()
+    }
+
+    private fun forgetConfirmedFoldersIfParentFolderIsMissing(response: HttpResponse) {
+        if (response.status.value == HttpStatusCode.Conflict.value) serverUrlWithConfirmedFolders = null
     }
 
     suspend fun createDirectory(remotePath: String): Boolean {
@@ -149,7 +164,10 @@ class WebDavSyncClient(
                     delay((LOCK_RETRY_BASE_DELAY_MS * (attempt + 1)).milliseconds)
                     attempt++
                 }
-                else -> throw statusException("MKCOL", remotePath, response)
+                else -> {
+                    forgetConfirmedFoldersIfParentFolderIsMissing(response)
+                    throw statusException("MKCOL", remotePath, response)
+                }
             }
         }
     }
@@ -565,7 +583,10 @@ class WebDavSyncClient(
                     delay((LOCK_RETRY_BASE_DELAY_MS * (attempt + 1)).milliseconds)
                     attempt++
                 }
-                else -> throw statusException("PUT", remotePath, response)
+                else -> {
+                    forgetConfirmedFoldersIfParentFolderIsMissing(response)
+                    throw statusException("PUT", remotePath, response)
+                }
             }
         }
     }

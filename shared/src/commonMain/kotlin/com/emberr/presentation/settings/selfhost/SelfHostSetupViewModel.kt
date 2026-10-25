@@ -21,6 +21,9 @@ import com.emberr.domain.selfhost.webdav.WebDavConfigurationException
 import com.emberr.domain.selfhost.webdav.WebDavConflictException
 import com.emberr.domain.selfhost.webdav.WebDavConnectionTestResult
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -112,7 +115,8 @@ class SelfHostSetupViewModel(
     private val selfHostSyncScheduler: SelfHostSyncScheduler,
     private val settingsManager: SettingsManager,
     private val foregroundSyncPoller: ForegroundSyncPoller,
-    private val selfHostConnectionState: SelfHostConnectionState
+    private val selfHostConnectionState: SelfHostConnectionState,
+    private val appScope: CoroutineScope
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<SelfHostScreenState>(SelfHostScreenState.Checking)
@@ -362,7 +366,7 @@ class SelfHostSetupViewModel(
                     if (isRestoring) {
                         val vaultFileBytes = webDavSyncClient.downloadVaultFile()
                             ?: throw WebDavConfigurationException("No vault file was found on the server to restore from")
-                        vaultKeyLock.unlockVault(vaultFileBytes, passphraseChars)
+                        withContext(Dispatchers.Default) { vaultKeyLock.unlockVault(vaultFileBytes, passphraseChars) }
                     } else {
                         if (webDavSyncClient.checkVaultExists(credentials)) {
                             throw WebDavConflictException(
@@ -375,7 +379,7 @@ class SelfHostSetupViewModel(
                                     "Delete the emberr_sync folder on your server, then set up again."
                             )
                         }
-                        val newVault = vaultKeyLock.createVault(passphraseChars)
+                        val newVault = withContext(Dispatchers.Default) { vaultKeyLock.createVault(passphraseChars) }
                         webDavSyncClient.uploadVaultFile(newVault.vaultFileBytes, failIfExists = true)
                         newVault.vaultKey
                     }
@@ -409,43 +413,24 @@ class SelfHostSetupViewModel(
             selfHostConnectionState.refresh()
             selfHostSyncEngine.resumeAfterPause()
 
-            when (val result = selfHostSyncEngine.runBaselineSync()) {
-                is SelfHostSyncResult.Success, SelfHostSyncResult.Cancelled -> {
-                    _screenState.value = SelfHostScreenState.Connected(
-                        SelfHostConnectedState(
-                            serverUrl = credentials.serverUrl,
-                            lastSyncedAtMillis = settingsManager.getSelfHostLastSyncTimestamp().takeIf { it > 0L },
-                            syncNetwork = savedSyncNetwork()
-                        )
-                    )
-                }
+            _screenState.value = SelfHostScreenState.Connected(
+                SelfHostConnectedState(serverUrl = credentials.serverUrl, syncNetwork = savedSyncNetwork())
+            )
+            runFirstSyncThenScheduleBackgroundSync()
+        }
+    }
 
-                SelfHostSyncResult.WaitingForAllowedNetwork -> {
-                    _screenState.value = SelfHostScreenState.Connected(
-                        SelfHostConnectedState(
-                            serverUrl = credentials.serverUrl,
-                            syncError = waitingForNetworkMessage(savedSyncNetwork()),
-                            syncNetwork = savedSyncNetwork()
-                        )
-                    )
-                }
-
-                is SelfHostSyncResult.Failure -> updateForm {
-                    it.copy(
-                        setupPhase = SetupPhase.ERROR,
-                        errorMessage = "Initial sync failed: ${result.cause.message ?: "unknown error"}. " +
-                            "Your encryption key is saved, you can retry from the dashboard."
-                    )
-                }
-
-                SelfHostSyncResult.NotConfigured -> updateForm {
-                    it.copy(setupPhase = SetupPhase.ERROR, errorMessage = "Setup could not be completed, configuration missing")
-                }
-
-                SelfHostSyncResult.AlreadyInProgress -> updateForm {
-                    it.copy(setupPhase = SetupPhase.ERROR, errorMessage = "A sync is already running, please try again shortly")
-                }
+    private fun runFirstSyncThenScheduleBackgroundSync() {
+        appScope.launch {
+            val firstSyncError = when (val result = selfHostSyncEngine.runBaselineSync()) {
+                is SelfHostSyncResult.Success -> result.notesNotSyncedMessage
+                SelfHostSyncResult.Cancelled, SelfHostSyncResult.AlreadyInProgress -> null
+                SelfHostSyncResult.WaitingForAllowedNetwork -> waitingForNetworkMessage(savedSyncNetwork())
+                is SelfHostSyncResult.Failure ->
+                    "First sync failed: ${result.cause.message ?: "unknown error"}. Tap Sync Now to try again."
+                SelfHostSyncResult.NotConfigured -> "First sync could not start because the server setup is missing."
             }
+            updateConnected { it.copy(syncError = firstSyncError) }
 
             selfHostSyncScheduler.scheduleDailySync()
             selfHostSyncScheduler.scheduleMediaSync()
