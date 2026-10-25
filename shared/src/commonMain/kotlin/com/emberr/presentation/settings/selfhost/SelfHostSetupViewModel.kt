@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.selfhost.sync.ForegroundSyncPoller
+import com.emberr.domain.selfhost.crypto.IncorrectPassphraseException
 import com.emberr.domain.selfhost.crypto.KeyDerivationManager
 import com.emberr.domain.selfhost.crypto.SecureSyncKeyStorage
 import com.emberr.domain.selfhost.crypto.VaultKeyLock
@@ -21,6 +22,7 @@ import com.emberr.domain.selfhost.webdav.WebDavConfigurationException
 import com.emberr.domain.selfhost.webdav.WebDavConflictException
 import com.emberr.domain.selfhost.webdav.WebDavConnectionTestResult
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -84,8 +86,14 @@ data class SelfHostConnectedState(
     val noteSyncProgress: SelfHostSyncProgress? = null,
     val imageSyncProgress: SelfHostSyncProgress? = null,
     val hasSavedRecoveryPassphrase: Boolean = false,
-    val shownRecoveryPassphrase: String? = null
-)
+    val shownRecoveryPassphrase: String? = null,
+    val passphraseToSaveInput: String = "",
+    val isSavingPassphrase: Boolean = false,
+    val savePassphraseError: String? = null
+) {
+    val canSavePassphrase: Boolean
+        get() = passphraseToSaveInput.length == 16 && !isSavingPassphrase
+}
 
 sealed class SelfHostScreenState {
     data object Checking : SelfHostScreenState()
@@ -94,6 +102,8 @@ sealed class SelfHostScreenState {
 }
 
 private const val WAIT_BEFORE_SHOWING_SYNC_FINISHED_MS = 1_000L
+
+private const val WRONG_PASSPHRASE_MESSAGE = "That passphrase doesn't unlock this vault."
 
 private fun waitingForNetworkMessage(syncNetwork: SelfHostSyncNetwork): String = when (syncNetwork) {
     SelfHostSyncNetwork.WIFI_ONLY -> "Sync is set to Wi-Fi only. It will run when you connect to Wi-Fi."
@@ -485,6 +495,57 @@ class SelfHostSetupViewModel(
 
     fun hideRecoveryPassphrase() {
         updateConnected { it.copy(shownRecoveryPassphrase = null) }
+    }
+
+    fun onPassphraseToSaveChanged(value: String) {
+        updateConnected { it.copy(passphraseToSaveInput = value, savePassphraseError = null) }
+    }
+
+    fun savePassphraseOnThisDevice() {
+        val connectedState = (_screenState.value as? SelfHostScreenState.Connected)?.connectedState ?: return
+        if (!connectedState.canSavePassphrase) return
+        val passphrase = connectedState.passphraseToSaveInput
+
+        viewModelScope.launch {
+            updateConnected { it.copy(isSavingPassphrase = true, savePassphraseError = null) }
+
+            val errorMessage = try {
+                val vaultFileBytes = webDavSyncClient.downloadVaultFile()
+                if (vaultFileBytes == null) {
+                    "No vault was found on the server."
+                } else if (unlocksThisDevicesVault(vaultFileBytes, passphrase)) {
+                    secureSyncKeyStorage.saveRecoveryPassphrase(passphrase)
+                    null
+                } else {
+                    WRONG_PASSPHRASE_MESSAGE
+                }
+            } catch (cause: IncorrectPassphraseException) {
+                WRONG_PASSPHRASE_MESSAGE
+            } catch (cause: CancellationException) {
+                throw cause
+            } catch (cause: Exception) {
+                "Could not check the passphrase: ${cause.message ?: "unknown error"}"
+            }
+
+            updateConnected {
+                if (errorMessage == null) {
+                    it.copy(isSavingPassphrase = false, hasSavedRecoveryPassphrase = true, passphraseToSaveInput = "")
+                } else {
+                    it.copy(isSavingPassphrase = false, savePassphraseError = errorMessage)
+                }
+            }
+        }
+    }
+
+    private suspend fun unlocksThisDevicesVault(vaultFileBytes: ByteArray, passphrase: String): Boolean {
+        val savedVaultKey = secureSyncKeyStorage.getEncryptionKey() ?: return false
+        val passphraseChars = passphrase.toCharArray()
+        val unlockedVaultKey = try {
+            withContext(Dispatchers.Default) { vaultKeyLock.unlockVault(vaultFileBytes, passphraseChars) }
+        } finally {
+            passphraseChars.fill(Char(0))
+        }
+        return unlockedVaultKey.contentEquals(savedVaultKey)
     }
 
     fun disconnectVault() {

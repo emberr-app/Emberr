@@ -148,6 +148,7 @@ class SelfHostSyncEngine(
     private val textSyncMutex = Mutex()
     private val mediaSyncMutex = Mutex()
     private val manifestWriteMutex = Mutex()
+    private val listFileSyncMemory = ListFileSyncMemory()
     private val manifestJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val blockJson = Json { ignoreUnknownKeys = true }
     private val collectionJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -168,6 +169,17 @@ class SelfHostSyncEngine(
         const val MAX_MANIFEST_UPLOAD_RETRIES = 3
         const val PROGRESS_REPORT_STEP_BYTES = 256L * 1024
         val SYNC_LOCK_MAX_WAIT = 10.seconds
+        val LIST_FILE_PATHS = listOf(
+            WebDavSyncPaths.SPACES_FILE,
+            WebDavSyncPaths.FOLDERS_FILE,
+            WebDavSyncPaths.CATEGORIES_FILE,
+            WebDavSyncPaths.PROPERTY_TAGS_FILE,
+            WebDavSyncPaths.CUSTOM_PROPERTIES_FILE,
+            WebDavSyncPaths.EVENT_EXCEPTIONS_FILE,
+            WebDavSyncPaths.API_CONFIGS_FILE,
+            WebDavSyncPaths.BOOKMARK_CATEGORY_ORDER_FILE,
+            WebDavSyncPaths.FAVORITE_NOTE_ORDER_FILE
+        )
     }
 
     // wire this up in the app ui so let users know if any self host sync is pending
@@ -210,6 +222,7 @@ class SelfHostSyncEngine(
     }
 
     suspend fun forgetServerSyncProgress() = textSyncMutex.withLock {
+        listFileSyncMemory.forgetAll()
         noteDao.forgetSelfHostSyncProgressForAllNotes()
         settingsManager.saveSelfHostLastSyncTimestamp(0L)
         settingsManager.saveSelfHostSupportsETags(null)
@@ -673,6 +686,7 @@ class SelfHostSyncEngine(
 
             val syncStartTimestamp = Clock.System.now().toEpochMilliseconds()
             val manifest = downloadManifest()
+            listFileSyncMemory.startPass(readListFileStatesOnServer())
 
             // Sync candidacy is determined per note using its `selfHostSyncedAt` value.
             // If a local row doesn't exist (e.g., a new note or wiped data), it defaults to 0
@@ -931,26 +945,47 @@ class SelfHostSyncEngine(
         return deletedVersionsByEntryId
     }
 
+    private suspend fun readListFileStatesOnServer(): Map<String, String> =
+        try {
+            listFileStatesOnServer(webDavSyncClient.listDirectory(WebDavSyncPaths.ROOT), LIST_FILE_PATHS)
+        } catch (cause: CancellationException) {
+            throw cause
+        } catch (cause: Exception) {
+            SelfHostSyncLog.e("TextSync: could not list the sync folder, checking every list file this pass", cause)
+            emptyMap()
+        }
+
     private suspend fun reconcileSpaces() {
         try {
+            val localSpaces = spaceDao.getSpacesModifiedSince(PLACEHOLDER_SPACE_UPDATED_AT)
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.SPACES_FILE, localSpaces.toSet())) {
+                SelfHostSyncLog.d("SpaceSync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.SPACES_FILE)
             val remoteJson = remoteJsonWithEtag?.first
             val remoteSpaces = remoteJson
                 ?.let { collectionJson.decodeFromString(ListSerializer(SpaceEntity.serializer()), it) }
                 .orEmpty()
-            val localSpaces = spaceDao.getSpacesModifiedSince(PLACEHOLDER_SPACE_UPDATED_AT)
 
             val mergedList = mergeSpaces(localSpaces, remoteSpaces)
             mergedList.forEach { spaceDao.insertOrUpdateSpace(it) }
             spaceRepository.moveActiveSpaceIfItNoLongerExists()
 
-            if (mergedList.toSet() != remoteSpaces.toSet()) {
+            val needsUpload = mergedList.toSet() != remoteSpaces.toSet()
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.SPACES_FILE,
                     collectionJson.encodeToString(ListSerializer(SpaceEntity.serializer()), mergedList),
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.SPACES_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localSpaces.toSet(),
+                changedNothing = !needsUpload && mergedList.toSet() == localSpaces.toSet()
+            )
             SelfHostSyncLog.d("SpaceSync: complete, ${mergedList.size} space(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("SpaceSync: remote spaces.json changed concurrently, will retry next cycle")
@@ -965,24 +1000,35 @@ class SelfHostSyncEngine(
     // We merge them entity-by-entity using a "last-write-wins" approach based on updatedAt.
     private suspend fun reconcileFolders() {
         try {
+            val localFolders = folderDao.getFoldersModifiedSince(0L)
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.FOLDERS_FILE, localFolders.toSet())) {
+                SelfHostSyncLog.d("FolderSync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.FOLDERS_FILE)
             val remoteJson = remoteJsonWithEtag?.first
             val remoteFolders = remoteJson
                 ?.let { collectionJson.decodeFromString(ListSerializer(FolderEntity.serializer()), it) }
                 .orEmpty()
-            val localFolders = folderDao.getFoldersModifiedSince(0L)
 
             val mergedList = mergeFolders(localFolders, remoteFolders)
             mergedList.forEach { spaceRepository.ensureSpaceExists(it.spaceId) }
             mergedList.forEach { folderDao.insertFolder(it) }
 
-            if (mergedList.toSet() != remoteFolders.toSet()) {
+            val needsUpload = mergedList.toSet() != remoteFolders.toSet()
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.FOLDERS_FILE,
                     collectionJson.encodeToString(ListSerializer(FolderEntity.serializer()), mergedList),
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.FOLDERS_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localFolders.toSet(),
+                changedNothing = !needsUpload && mergedList.toSet() == localFolders.toSet()
+            )
             SelfHostSyncLog.d("FolderSync: complete, ${mergedList.size} folder(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("FolderSync: remote folders.json changed concurrently, will retry next cycle")
@@ -995,18 +1041,23 @@ class SelfHostSyncEngine(
 
     private suspend fun reconcileEventExceptions() {
         try {
+            val localExceptions = calendarEventExceptionDao.getExceptionsModifiedSince(0L)
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.EVENT_EXCEPTIONS_FILE, localExceptions.toSet())) {
+                SelfHostSyncLog.d("EventExceptionSync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag =
                 webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.EVENT_EXCEPTIONS_FILE)
             val remoteJson = remoteJsonWithEtag?.first
             val remoteExceptions = remoteJson
                 ?.let { collectionJson.decodeFromString(ListSerializer(CalendarEventExceptionEntity.serializer()), it) }
                 .orEmpty()
-            val localExceptions = calendarEventExceptionDao.getExceptionsModifiedSince(0L)
 
             val mergedList = mergeEventExceptions(localExceptions, remoteExceptions)
             mergedList.forEach { calendarEventExceptionDao.upsert(it) }
 
-            if (mergedList.toSet() != remoteExceptions.toSet()) {
+            val needsUpload = mergedList.toSet() != remoteExceptions.toSet()
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.EVENT_EXCEPTIONS_FILE,
                     collectionJson.encodeToString(
@@ -1016,6 +1067,12 @@ class SelfHostSyncEngine(
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.EVENT_EXCEPTIONS_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localExceptions.toSet(),
+                changedNothing = !needsUpload && mergedList.toSet() == localExceptions.toSet()
+            )
             SelfHostSyncLog.d("EventExceptionSync: complete, ${mergedList.size} occurrence override(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("EventExceptionSync: remote event_exceptions.json changed concurrently, will retry next cycle")
@@ -1028,24 +1085,35 @@ class SelfHostSyncEngine(
 
     private suspend fun reconcileCategories() {
         try {
+            val localCategories = categoryDao.getCategoriesModifiedSince(0L)
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.CATEGORIES_FILE, localCategories.toSet())) {
+                SelfHostSyncLog.d("CategorySync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.CATEGORIES_FILE)
             val remoteJson = remoteJsonWithEtag?.first
             val remoteCategories = remoteJson
                 ?.let { collectionJson.decodeFromString(ListSerializer(CategoryEntity.serializer()), it) }
                 .orEmpty()
-            val localCategories = categoryDao.getCategoriesModifiedSince(0L)
 
             val mergedList = mergeCategories(localCategories, remoteCategories)
             mergedList.forEach { spaceRepository.ensureSpaceExists(it.spaceId) }
             mergedList.forEach { categoryDao.insertOrUpdateCategory(it) }
 
-            if (mergedList.toSet() != remoteCategories.toSet()) {
+            val needsUpload = mergedList.toSet() != remoteCategories.toSet()
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.CATEGORIES_FILE,
                     collectionJson.encodeToString(ListSerializer(CategoryEntity.serializer()), mergedList),
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.CATEGORIES_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localCategories.toSet(),
+                changedNothing = !needsUpload && mergedList.toSet() == localCategories.toSet()
+            )
             SelfHostSyncLog.d("CategorySync: complete, ${mergedList.size} categor(y/ies) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("CategorySync: remote categories.json changed concurrently, will retry next cycle")
@@ -1058,24 +1126,35 @@ class SelfHostSyncEngine(
 
     private suspend fun reconcilePropertyTags() {
         try {
+            val localTags = propertyTagDao.getTagsModifiedSince(0L)
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.PROPERTY_TAGS_FILE, localTags.toSet())) {
+                SelfHostSyncLog.d("PropertyTagSync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.PROPERTY_TAGS_FILE)
             val remoteJson = remoteJsonWithEtag?.first
             val remoteTags = remoteJson
                 ?.let { collectionJson.decodeFromString(ListSerializer(PropertyTagEntity.serializer()), it) }
                 .orEmpty()
-            val localTags = propertyTagDao.getTagsModifiedSince(0L)
 
             val mergedList = mergePropertyTags(localTags, remoteTags)
             mergedList.forEach { spaceRepository.ensureSpaceExists(it.spaceId) }
             mergedList.forEach { propertyTagDao.insertOrUpdateTag(it) }
 
-            if (mergedList.toSet() != remoteTags.toSet()) {
+            val needsUpload = mergedList.toSet() != remoteTags.toSet()
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.PROPERTY_TAGS_FILE,
                     collectionJson.encodeToString(ListSerializer(PropertyTagEntity.serializer()), mergedList),
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.PROPERTY_TAGS_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localTags.toSet(),
+                changedNothing = !needsUpload && mergedList.toSet() == localTags.toSet()
+            )
             SelfHostSyncLog.d("PropertyTagSync: complete, ${mergedList.size} tag(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("PropertyTagSync: remote property_tags.json changed concurrently, will retry next cycle")
@@ -1088,24 +1167,35 @@ class SelfHostSyncEngine(
 
     private suspend fun reconcileCustomProperties() {
         try {
+            val localProperties = customPropertyDao.getPropertiesModifiedSince(0L)
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.CUSTOM_PROPERTIES_FILE, localProperties.toSet())) {
+                SelfHostSyncLog.d("CustomPropertySync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.CUSTOM_PROPERTIES_FILE)
             val remoteJson = remoteJsonWithEtag?.first
             val remoteProperties = remoteJson
                 ?.let { collectionJson.decodeFromString(ListSerializer(CustomPropertyEntity.serializer()), it) }
                 .orEmpty()
-            val localProperties = customPropertyDao.getPropertiesModifiedSince(0L)
 
             val mergedList = mergeCustomProperties(localProperties, remoteProperties)
             mergedList.forEach { spaceRepository.ensureSpaceExists(it.spaceId) }
             mergedList.forEach { customPropertyDao.insertOrUpdateProperty(it) }
 
-            if (mergedList.toSet() != remoteProperties.toSet()) {
+            val needsUpload = mergedList.toSet() != remoteProperties.toSet()
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.CUSTOM_PROPERTIES_FILE,
                     collectionJson.encodeToString(ListSerializer(CustomPropertyEntity.serializer()), mergedList),
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.CUSTOM_PROPERTIES_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localProperties.toSet(),
+                changedNothing = !needsUpload && mergedList.toSet() == localProperties.toSet()
+            )
             SelfHostSyncLog.d("CustomPropertySync: complete, ${mergedList.size} propert(y/ies) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("CustomPropertySync: remote custom_properties.json changed concurrently, will retry next cycle")
@@ -1123,24 +1213,33 @@ class SelfHostSyncEngine(
     // storage, not a Room table we can just flag a row on.
     private suspend fun reconcileApiConfigs() {
         try {
+            val localConfigsByProvider = ExternalAiProvider.entries.associateWith { aiSettingsRepository.getProviderConfig(it) }
+            val localTombstones = selfHostDeletedApiConfigDao.getAllTombstones()
+            val localState = localConfigsByProvider to localTombstones.toSet()
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.API_CONFIGS_FILE, localState)) {
+                SelfHostSyncLog.d("ApiConfigSync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.API_CONFIGS_FILE)
             val remoteEntriesByProvider = remoteJsonWithEtag?.first
                 ?.let { collectionJson.decodeFromString(ListSerializer(ApiConfigSyncEntry.serializer()), it) }
                 .orEmpty()
                 .associateBy { it.provider }
-            val localTombstonesByProvider = selfHostDeletedApiConfigDao.getAllTombstones().associateBy { it.provider }
+            val localTombstonesByProvider = localTombstones.associateBy { it.provider }
 
             val mergedEntries = mutableListOf<ApiConfigSyncEntry>()
+            var appliedRemoteChange = false
 
             for (provider in ExternalAiProvider.entries) {
                 val merge = mergeApiConfig(
                     provider = provider,
-                    localConfig = aiSettingsRepository.getProviderConfig(provider),
+                    localConfig = localConfigsByProvider[provider],
                     localTombstone = localTombstonesByProvider[provider.name],
                     remoteEntry = remoteEntriesByProvider[provider.name]
                 )
                 val remoteEntry = merge.remoteEntryToApply
                 if (remoteEntry != null) {
+                    appliedRemoteChange = true
                     if (remoteEntry.isDeleted) {
                         aiSettingsRepository.applyRemoteProviderConfigDeletion(provider, remoteEntry.updatedAt)
                     } else {
@@ -1158,13 +1257,20 @@ class SelfHostSyncEngine(
                 merge.mergedEntry?.let { mergedEntries += it }
             }
 
-            if (mergedEntries.toSet() != remoteEntriesByProvider.values.toSet()) {
+            val needsUpload = mergedEntries.toSet() != remoteEntriesByProvider.values.toSet()
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.API_CONFIGS_FILE,
                     collectionJson.encodeToString(ListSerializer(ApiConfigSyncEntry.serializer()), mergedEntries),
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.API_CONFIGS_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localState,
+                changedNothing = !needsUpload && !appliedRemoteChange
+            )
             SelfHostSyncLog.d("ApiConfigSync: complete, ${mergedEntries.size} provider config(s) reconciled")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("ApiConfigSync: remote api_configs.json changed concurrently, will retry next cycle")
@@ -1181,6 +1287,11 @@ class SelfHostSyncEngine(
     // neither device asked for, so the newer drag simply wins outright.
     private suspend fun reconcileBookmarkCategoryOrder() {
         try {
+            val localOrders = bookmarkCategoryOrderStore.getAllOrders()
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.BOOKMARK_CATEGORY_ORDER_FILE, localOrders)) {
+                SelfHostSyncLog.d("BookmarkCategoryOrderSync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag =
                 webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.BOOKMARK_CATEGORY_ORDER_FILE)
             val remoteOrders = remoteJsonWithEtag?.first
@@ -1189,13 +1300,20 @@ class SelfHostSyncEngine(
             if (remoteOrders != null) bookmarkCategoryOrderStore.applyRemoteOrders(remoteOrders)
 
             val mergedOrders = bookmarkCategoryOrderStore.getAllOrders()
-            if (mergedOrders.ordersBySpaceId.isNotEmpty() && mergedOrders != remoteOrders) {
+            val needsUpload = mergedOrders.ordersBySpaceId.isNotEmpty() && mergedOrders != remoteOrders
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.BOOKMARK_CATEGORY_ORDER_FILE,
                     collectionJson.encodeToString(BookmarkCategoryOrderBySpace.serializer(), mergedOrders),
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.BOOKMARK_CATEGORY_ORDER_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localOrders,
+                changedNothing = !needsUpload && mergedOrders == localOrders
+            )
             SelfHostSyncLog.d("BookmarkCategoryOrderSync: complete, ${mergedOrders.ordersBySpaceId.size} space(s) ordered")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("BookmarkCategoryOrderSync: remote bookmark_category_order.json changed concurrently, will retry next cycle")
@@ -1212,6 +1330,11 @@ class SelfHostSyncEngine(
     // when the sidebar sorts, and the next local drag rewrites the list without them.
     private suspend fun reconcileFavoriteNoteOrder() {
         try {
+            val localOrders = favoriteNoteOrderStore.getAllOrders()
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.FAVORITE_NOTE_ORDER_FILE, localOrders)) {
+                SelfHostSyncLog.d("FavoriteNoteOrderSync: unchanged on this device and the server, skipped")
+                return
+            }
             val remoteJsonWithEtag =
                 webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.FAVORITE_NOTE_ORDER_FILE)
             val remoteOrders = remoteJsonWithEtag?.first
@@ -1220,13 +1343,20 @@ class SelfHostSyncEngine(
             if (remoteOrders != null) favoriteNoteOrderStore.applyRemoteOrders(remoteOrders)
 
             val mergedOrders = favoriteNoteOrderStore.getAllOrders()
-            if (mergedOrders.ordersBySpaceId.isNotEmpty() && mergedOrders != remoteOrders) {
+            val needsUpload = mergedOrders.ordersBySpaceId.isNotEmpty() && mergedOrders != remoteOrders
+            if (needsUpload) {
                 webDavSyncClient.uploadEncryptedJson(
                     WebDavSyncPaths.FAVORITE_NOTE_ORDER_FILE,
                     collectionJson.encodeToString(FavoriteNoteOrderBySpace.serializer(), mergedOrders),
                     remoteJsonWithEtag?.second
                 )
             }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.FAVORITE_NOTE_ORDER_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localOrders,
+                changedNothing = !needsUpload && mergedOrders == localOrders
+            )
             SelfHostSyncLog.d("FavoriteNoteOrderSync: complete, ${mergedOrders.ordersBySpaceId.size} space(s) ordered")
         } catch (cause: WebDavConflictException) {
             SelfHostSyncLog.d("FavoriteNoteOrderSync: remote favorite_note_order.json changed concurrently, will retry next cycle")
