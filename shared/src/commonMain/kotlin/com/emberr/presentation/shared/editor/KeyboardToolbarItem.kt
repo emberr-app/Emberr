@@ -20,8 +20,10 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_right2
 import emberr.shared.generated.resources.at
 import emberr.shared.generated.resources.bookmark
+import emberr.shared.generated.resources.calendar_date
 import emberr.shared.generated.resources.card_edit2
 import emberr.shared.generated.resources.check_square
+import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.database
 import emberr.shared.generated.resources.document_text_12
@@ -58,6 +60,8 @@ enum class KeyboardToolbarItem(val title: String) {
     REDO("Redo"),
     LINK_TO_NOTE("Mention a Note"),
     SELECT_BLOCK("Select Block"),
+    CURRENT_TIME("Current Time"),
+    CURRENT_DATE("Current Date"),
     TEXT("Text"),
     HEADING_1("Heading 1"),
     HEADING_2("Heading 2"),
@@ -101,6 +105,8 @@ val DefaultKeyboardToolbarItems: List<KeyboardToolbarItem> = listOf(
     KeyboardToolbarItem.DIVIDER,
     KeyboardToolbarItem.LINK_TO_NOTE,
     KeyboardToolbarItem.SELECT_BLOCK,
+    KeyboardToolbarItem.CURRENT_TIME,
+    KeyboardToolbarItem.CURRENT_DATE,
     KeyboardToolbarItem.DIVIDER,
     KeyboardToolbarItem.TEXT,
     KeyboardToolbarItem.HEADING_1,
@@ -166,6 +172,8 @@ internal fun KeyboardToolbarItemIcon(item: KeyboardToolbarItem, tint: Color) {
         KeyboardToolbarItem.REDO -> ToolbarItemDrawable(Res.drawable.redo_circle, item, tint, 18.dp)
         KeyboardToolbarItem.LINK_TO_NOTE -> ToolbarItemDrawable(Res.drawable.at, item, tint, 18.dp)
         KeyboardToolbarItem.SELECT_BLOCK -> ToolbarItemDrawable(Res.drawable.mouse_square2, item, tint, 16.dp)
+        KeyboardToolbarItem.CURRENT_TIME -> ToolbarItemDrawable(Res.drawable.clock_circle, item, tint, 17.dp)
+        KeyboardToolbarItem.CURRENT_DATE -> ToolbarItemDrawable(Res.drawable.calendar_date, item, tint, 17.dp)
         KeyboardToolbarItem.TEXT -> Icon(Icons.AutoMirrored.Filled.Subject, item.title, tint = tint, modifier = Modifier.size(19.dp))
         KeyboardToolbarItem.HEADING_1 -> Text("H1", style = MaterialTheme.typography.labelSmall, color = tint)
         KeyboardToolbarItem.HEADING_2 -> Text("H2", style = MaterialTheme.typography.labelSmall, color = tint)

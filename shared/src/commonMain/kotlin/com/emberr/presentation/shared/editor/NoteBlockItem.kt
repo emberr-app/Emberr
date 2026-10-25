@@ -466,7 +466,8 @@ fun NoteBlockItem(
 
     var isChoosingHighlightColor by remember { mutableStateOf(false) }
 
-    val slashMenuSections = remember(slashQuery, isSlashMenuActiveHere, customProperties) {
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
+    val slashMenuSections = remember(slashQuery, isSlashMenuActiveHere, customProperties, usesTwentyFourHourClock) {
         if (isSlashMenuActiveHere) {
             filteredSlashMenuSections(
                 query = slashQuery,
@@ -482,6 +483,8 @@ fun NoteBlockItem(
                 onAdjustIndentation = { actions.onAdjustIndentation(it) },
                 onSetAlignment = { actions.onSetBlockAlignment(it) },
                 onInsertMediaBlock = { actions.onInsertMediaBlock(it) },
+                onInsertText = { actions.onReplaceSlashQuery("$it ") },
+                usesTwentyFourHourClock = usesTwentyFourHourClock,
                 customProperties = customProperties
             )
         } else {
@@ -1026,7 +1029,6 @@ fun NoteBlockItem(
                                     )
                                 }
                                 if (hasReminder) {
-                                    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
                                     val timeText = remember(block.reminderTimestamp, block.allDay, usesTwentyFourHourClock) {
                                         val instant = Instant.fromEpochMilliseconds(block.reminderTimestamp)
                                         val dt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
@@ -1527,6 +1529,24 @@ fun IsolatedEditorTextField(
         textsSentButNotYetEchoed += newText
         mentionStartIndex = newCursor - 1
         mentionQuery = ""
+        onUpdateText(blockId, newText)
+    }
+
+    LaunchedEffect(EditorEventBus.insertTextSignal) {
+        val request = EditorEventBus.insertTextSignal ?: return@LaunchedEffect
+        if (request.blockId != blockId || !isFieldFocused) return@LaunchedEffect
+
+        val selectionStart = tfv.selection.min
+        val selectionEnd = tfv.selection.max
+        val spaceBefore = if (selectionStart > 0 && !tfv.text[selectionStart - 1].isWhitespace()) " " else ""
+        val spaceAfter = if (selectionEnd < tfv.text.length && tfv.text[selectionEnd].isWhitespace()) "" else " "
+        val insertedText = spaceBefore + request.text + spaceAfter
+        val newText = tfv.text.substring(0, selectionStart) + insertedText + tfv.text.substring(selectionEnd)
+
+        tfv = tfv.copy(text = newText, selection = TextRange(selectionStart + insertedText.length), composition = null)
+        GlobalEditorState.currentSelection = tfv.selection
+        lastSentText = newText
+        textsSentButNotYetEchoed += newText
         onUpdateText(blockId, newText)
     }
 

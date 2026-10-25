@@ -404,6 +404,7 @@ fun NoteScreen(
     val editorActions = remember(viewModel, onOpenFile) {
         object : EditorActions {
             override fun onClearSlashQuery() = viewModel.clearActiveSlashQuery()
+            override fun onReplaceSlashQuery(replacement: String) = viewModel.replaceActiveSlashQuery(replacement)
             override fun onClearFocusRequest() = viewModel.clearFocusRequest()
             override fun onUpdateText(id: String, text: String) = viewModel.updateBlockText(id, text)
             override fun onToggleCheckbox(id: String, checked: Boolean) = viewModel.toggleCheckbox(id, checked)
@@ -637,6 +638,7 @@ fun NoteScreen(
                 ) {
                     EditorToolbar(
                         onClearSlashQuery = { editorActions.onClearSlashQuery() },
+                        onReplaceSlashQuery = { editorActions.onReplaceSlashQuery(it) },
                         mobileMenuState = mobileMenuState,
                         onMenuStateChange = onMobileMenuStateChange,
                         query = slashQuery,

@@ -2138,6 +2138,7 @@ fun DesktopMainScreen(
                     val timelineEditorActions = remember(dailyViewModel, onOpenFile) {
                         object : EditorActions {
                             override fun onClearSlashQuery() = dailyViewModel.clearActiveSlashQuery()
+                            override fun onReplaceSlashQuery(replacement: String) = dailyViewModel.replaceActiveSlashQuery(replacement)
                             override fun onClearFocusRequest() = dailyViewModel.clearFocusRequest()
                             override fun onUpdateText(id: String, text: String) = dailyViewModel.updateBlockText(id, text)
                             override fun onToggleCheckbox(id: String, checked: Boolean) = dailyViewModel.toggleCheckbox(id, checked)
