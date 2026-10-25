@@ -500,14 +500,47 @@ class WebDavSyncClient(
 
     suspend fun downloadAndDecryptJsonWithEtag(remotePath: String): Pair<String, String?>? {
         val (encryptedBytes, etag) = getFileWithEtag(remotePath) ?: return null
+        return decryptJson(remotePath, encryptedBytes) to etag
+    }
+
+    suspend fun downloadAndDecryptJsonIfChanged(remotePath: String, knownEtag: String): JsonDownloadIfChanged {
+        val credentials = requireCredentials()
+        var attempt = 0
+        while (true) {
+            val (response, bytes) = try {
+                val response = httpClient.get(resolveUrl(credentials, remotePath)) {
+                    header(HttpHeaders.Authorization, basicAuthHeaderValue(credentials))
+                    header(HttpHeaders.IfNoneMatch, knownEtag)
+                }
+                response to response.body<ByteArray>()
+            } catch (cause: CancellationException) {
+                throw cause
+            } catch (cause: Exception) {
+                if (attempt >= MAX_NETWORK_RETRIES) throw cause
+                delay((NETWORK_RETRY_BASE_DELAY_MS * (attempt + 1)).milliseconds)
+                attempt++
+                continue
+            }
+            return when (response.status.value) {
+                HttpStatusCode.NotModified.value -> JsonDownloadIfChanged.Unchanged
+                HttpStatusCode.NotFound.value -> JsonDownloadIfChanged.Changed(jsonWithEtag = null)
+                in 200..299 -> JsonDownloadIfChanged.Changed(
+                    jsonWithEtag = bytes.takeIf { it.isNotEmpty() }
+                        ?.let { decryptJson(remotePath, it) to response.headers[HttpHeaders.ETag] }
+                )
+                else -> throw statusException("GET", remotePath, response)
+            }
+        }
+    }
+
+    private fun decryptJson(remotePath: String, encryptedBytes: ByteArray): String {
         val encryptedBase64 = Base64.encode(encryptedBytes)
         val encryptionKey = requireEncryptionKeyBase64()
-        val decrypted = try {
+        return try {
             syncEncryptionManager.decryptPayload(encryptedBase64, encryptionKey, WebDavSyncPaths.encryptionLabel(remotePath))
         } catch (cause: Exception) {
             throw WebDavDecryptionException("Could not decrypt $remotePath", cause)
         }
-        return decrypted to etag
     }
 
     suspend fun uploadEncryptedBytes(remotePath: String, rawBytes: ByteArray, ifMatchEtag: String? = null): String? {
