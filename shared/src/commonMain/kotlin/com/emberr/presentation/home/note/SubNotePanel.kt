@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrShadowElevation
@@ -63,7 +64,7 @@ fun SubNotePanel(
     onPickDocument: (onPathSelected: (String) -> Unit) -> Unit = {},
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
     onTakePhoto: (onPathSelected: (String) -> Unit) -> Unit = {},
-    onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
+    onExportMarkdown: (MarkdownExport) -> Unit = {},
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     openMode: SubNoteOpenMode = SubNoteOpenMode.SIDE_PANEL,
 ) {

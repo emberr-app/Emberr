@@ -101,6 +101,7 @@ import androidx.compose.ui.platform.LocalDensity
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.repository.EmojiRepository
@@ -164,7 +165,7 @@ fun NoteScreen(
     onNavigateToEditor: (String) -> Unit = {},
     showBackButton: Boolean = true,
     isStickyNote: Boolean = false,
-    onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
+    onExportMarkdown: (MarkdownExport) -> Unit = {},
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     externalHazeState: HazeState? = null,
     topBarContentColor: Color? = null,
@@ -351,8 +352,7 @@ fun NoteScreen(
         showOptionsMenu = false
         scope.launch {
             val safeTitle = noteTitle.ifBlank { "Untitled_Note" }.replace(Regex("[^a-zA-Z0-9.-]"), "_")
-            val content = viewModel.generateMarkdownExport()
-            onExportMarkdown("$safeTitle.md", content)
+            onExportMarkdown(viewModel.generateMarkdownFileExport(safeTitle))
         }
     }
 

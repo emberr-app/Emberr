@@ -56,6 +56,7 @@ import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.LocalCanvasFullScreenOverlay
@@ -827,7 +828,7 @@ fun DesktopMainScreen(
     onTakePhoto: (onPathSelected: (String) -> Unit) -> Unit = {},
     onPickDocument: (onPathSelected: (String) -> Unit) -> Unit = {},
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
-    onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
+    onExportMarkdown: (MarkdownExport) -> Unit = {},
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     onExportBackup: (choice: BackupContentChoice) -> Unit = {},
     onAiIconTap: () -> Unit = {},

@@ -18,12 +18,14 @@ object ExportEngine {
         blocks: List<NoteBlock>,
         title: String? = null,
         noteTitlesById: Map<String, String> = emptyMap(),
-        categoryNamesById: Map<String, String> = emptyMap()
+        categoryNamesById: Map<String, String> = emptyMap(),
+        attachmentPathsByStoredName: Map<String, String> = emptyMap()
     ): String = NoteMarkdownWriter.writeMarkdown(
         blocks = blocks,
         title = title,
         noteTitlesById = noteTitlesById,
-        categoryNamesById = categoryNamesById
+        categoryNamesById = categoryNamesById,
+        attachmentPathsByStoredName = attachmentPathsByStoredName
     )
 
     private fun buildPlainText(blocks: List<NoteBlock>, builder: StringBuilder) {

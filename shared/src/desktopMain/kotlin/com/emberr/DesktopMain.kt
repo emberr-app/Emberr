@@ -418,8 +418,8 @@ private fun runEmberrDesktopApp() = application {
                             }
                         }
                     },
-                    onExportMarkdown = { fileName, content ->
-                        Thread { handleExportMarkdown(currentWindow, fileName, content) }.start()
+                    onExportMarkdown = { export ->
+                        Thread { handleExportMarkdown(currentWindow, export) }.start()
                     },
                     onExportPdf = { fileName, title, blocks ->
                         Thread { handleExportPdf(currentWindow, fileName, title, blocks) }.start()
@@ -575,8 +575,8 @@ private fun runEmberrDesktopApp() = application {
                                     }
                                 }
                             },
-                            onExportMarkdown = { fileName, content ->
-                                Thread { handleExportMarkdown(stickyWindow, fileName, content) }.start()
+                            onExportMarkdown = { export ->
+                                Thread { handleExportMarkdown(stickyWindow, export) }.start()
                             },
                             onExportPdf = { fileName, title, blocks ->
                                 Thread { handleExportPdf(stickyWindow, fileName, title, blocks) }.start()

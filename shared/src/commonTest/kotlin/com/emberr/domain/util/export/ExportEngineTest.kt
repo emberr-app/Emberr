@@ -209,6 +209,30 @@ class ExportEngineTest {
     }
 
     @Test
+    fun aMarkdownFileExportLinksMediaIntoTheAttachmentsFolderWithReadableUniqueNames() {
+        val blocks = listOf(
+            ImageBlock(id = "image-1", localFilePath = "media_photo.jpg"),
+            DocumentBlock(id = "document-1", localFilePath = "media_first.pdf", fileName = "My invoice.pdf"),
+            DocumentBlock(id = "document-2", localFilePath = "media_second.pdf", fileName = "My invoice.pdf")
+        )
+        val attachments = MarkdownAttachments.collect(blocks)
+
+        val markdown = ExportEngine.generateMarkdown(
+            blocks = blocks,
+            attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport }
+        )
+
+        assertEquals(
+            listOf("attachments/media_photo.jpg", "attachments/My_invoice.pdf", "attachments/My_invoice_2.pdf"),
+            attachments.map { it.pathInExport }
+        )
+        assertEquals(
+            "![](attachments/media_photo.jpg)\n\n[My invoice.pdf](attachments/My_invoice.pdf)\n\n[My invoice.pdf](attachments/My_invoice_2.pdf)",
+            markdown
+        )
+    }
+
+    @Test
     fun aVoiceNoteHasNoPlainTextFormButStillAppearsInMarkdown() {
         val blocks = arrayOf(
             TextBlock(id = "text-1", text = "kept"),

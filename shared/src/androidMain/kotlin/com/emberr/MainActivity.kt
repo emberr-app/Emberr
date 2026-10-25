@@ -62,6 +62,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
+import java.io.File
 import java.util.UUID
 import android.text.format.DateFormat
 import androidx.lifecycle.Lifecycle
@@ -92,6 +93,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.util.export.generateAndSaveAndroidPdf
+import com.emberr.domain.util.export.MarkdownExport
+import com.emberr.domain.util.export.MarkdownZipWriter
 import com.emberr.domain.update.AndroidUpdateChecker
 import com.emberr.presentation.navigation.Screen
 import kotlin.time.Duration
@@ -311,7 +314,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // State to hold payloads while the OS file picker is open
-                    var pendingMarkdownContent by remember { mutableStateOf("") }
+                    var pendingMarkdownExport by remember { mutableStateOf<MarkdownExport?>(null) }
                     var pendingPdfTitle by remember { mutableStateOf("") }
                     var pendingPdfBlocks by remember { mutableStateOf(emptyList<NoteBlock>()) }
                     var pendingExportSpaceIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
@@ -325,11 +328,39 @@ class MainActivity : ComponentActivity() {
                         uri?.let {
                             try {
                                 context.contentResolver.openOutputStream(it)?.use { stream ->
-                                    stream.write(pendingMarkdownContent.toByteArray())
+                                    stream.write(pendingMarkdownExport?.markdown.orEmpty().toByteArray())
                                 }
                                 Toast.makeText(context, "Markdown saved", Toast.LENGTH_SHORT).show()
                             } catch (_: Exception) {
                                 Toast.makeText(context, "Failed to save file", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+
+                    val exportMarkdownZipLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.CreateDocument("application/zip")
+                    ) { uri ->
+                        val export = pendingMarkdownExport
+                        if (uri != null && export != null) {
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                val message = try {
+                                    val missingAttachmentCount = context.contentResolver.openOutputStream(uri)?.use { stream ->
+                                        MarkdownZipWriter.write(export, stream) { storedFileName ->
+                                            File(mediaStorageHelper.getAbsoluteMediaPath(storedFileName))
+                                        }
+                                    }
+                                    if (missingAttachmentCount == null) {
+                                        "Failed to save file"
+                                    } else {
+                                        MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount)
+                                            ?.let { notice -> "Markdown saved. $notice" } ?: "Markdown saved"
+                                    }
+                                } catch (_: Exception) {
+                                    "Failed to save file"
+                                }
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     }
@@ -426,9 +457,10 @@ class MainActivity : ComponentActivity() {
                                 Toast.makeText(this@MainActivity, "Failed to open file: ${e.message}", Toast.LENGTH_LONG).show()
                             }
                         },
-                        onExportMarkdown = { fileName, content ->
-                            pendingMarkdownContent = content
-                            exportMarkdownLauncher.launch(fileName)
+                        onExportMarkdown = { export ->
+                            pendingMarkdownExport = export
+                            if (export.isZip) exportMarkdownZipLauncher.launch(export.fileName)
+                            else exportMarkdownLauncher.launch(export.fileName)
                         },
                         onExportPdf = { fileName, title, blocks ->
                             pendingPdfTitle = title

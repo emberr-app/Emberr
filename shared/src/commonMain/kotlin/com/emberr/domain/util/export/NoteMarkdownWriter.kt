@@ -45,6 +45,7 @@ private const val SPACES_PER_INDENT_LEVEL = 2
 private data class RenderOptions(
     val noteTitlesById: Map<String, String>,
     val categoryNamesById: Map<String, String>,
+    val attachmentPathsByStoredName: Map<String, String>,
     val timeZone: TimeZone
 )
 
@@ -54,12 +55,14 @@ object NoteMarkdownWriter {
         blocks: List<NoteBlock>,
         title: String? = null,
         noteTitlesById: Map<String, String> = emptyMap(),
-        categoryNamesById: Map<String, String> = emptyMap()
+        categoryNamesById: Map<String, String> = emptyMap(),
+        attachmentPathsByStoredName: Map<String, String> = emptyMap()
     ): String {
         val visibleBlocks = blocks.filter { !it.isDeleted }
         val options = RenderOptions(
             noteTitlesById = noteTitlesById,
             categoryNamesById = categoryNamesById,
+            attachmentPathsByStoredName = attachmentPathsByStoredName,
             timeZone = TimeZone.currentSystemDefault()
         )
 
@@ -163,9 +166,9 @@ object NoteMarkdownWriter {
             is CodeBlock -> renderCode(block)
             is BookmarkBlock -> renderBookmark(block)
             is LinkedNoteBlock -> renderLinkedNote(block, options)
-            is ImageBlock -> "![](${mediaLinkTargetFor(block.localFilePath)})"
-            is DocumentBlock -> renderDocument(block)
-            is VoiceBlock -> renderVoice(block)
+            is ImageBlock -> "![](${mediaLinkTargetFor(block.localFilePath, options)})"
+            is DocumentBlock -> renderDocument(block, options)
+            is VoiceBlock -> renderVoice(block, options)
             is CanvasBlock -> ""
             is PropertyBlock -> renderProperty(block)
             is DatabaseBlock -> ""
@@ -274,13 +277,13 @@ object NoteMarkdownWriter {
         return "[[${safeTitle.ifEmpty { "Untitled" }}]]"
     }
 
-    private fun renderDocument(block: DocumentBlock): String {
+    private fun renderDocument(block: DocumentBlock, options: RenderOptions): String {
         val label = escapeLinkLabel(block.fileName.ifBlank { "Document" })
-        return "[$label](${mediaLinkTargetFor(block.localFilePath)})"
+        return "[$label](${mediaLinkTargetFor(block.localFilePath, options)})"
     }
 
-    private fun renderVoice(block: VoiceBlock): String {
-        val fileName = mediaFileNameOf(block.localFilePath)
+    private fun renderVoice(block: VoiceBlock, options: RenderOptions): String {
+        val fileName = mediaPathOf(block.localFilePath, options)
         return buildString {
             appendLine("```$VOICE_FENCE_NAME")
             if (fileName != null) appendLine("file: $fileName")
@@ -357,14 +360,14 @@ object NoteMarkdownWriter {
         return longestRun
     }
 
-    private fun mediaFileNameOf(localFilePath: String?): String? = localFilePath
-        ?.substringAfterLast('/')
-        ?.substringAfterLast('\\')
-        ?.takeIf { it.isNotBlank() }
+    private fun mediaPathOf(localFilePath: String?, options: RenderOptions): String? {
+        val storedFileName = MarkdownAttachments.storedFileNameOf(localFilePath) ?: return null
+        return options.attachmentPathsByStoredName[storedFileName] ?: storedFileName
+    }
 
-    private fun mediaLinkTargetFor(localFilePath: String?): String {
-        val fileName = mediaFileNameOf(localFilePath) ?: return ""
-        return escapeLinkTarget(fileName)
+    private fun mediaLinkTargetFor(localFilePath: String?, options: RenderOptions): String {
+        val mediaPath = mediaPathOf(localFilePath, options) ?: return ""
+        return escapeLinkTarget(mediaPath)
     }
 
     private fun escapeLinkLabel(label: String): String = flattenLineBreaks(label)

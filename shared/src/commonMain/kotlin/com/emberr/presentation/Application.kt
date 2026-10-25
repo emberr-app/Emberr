@@ -51,6 +51,7 @@ import com.emberr.presentation.properties.PropertiesScreen
 import dev.chrisbanes.haze.HazeState
 import com.emberr.presentation.splash.LoadingScreen
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.presentation.shared.canvas.CanvasScreen
@@ -89,7 +90,7 @@ fun EmberrApp(
     onPickDocument: (onPathSelected: (String) -> Unit) -> Unit = {},
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
     onTakePhoto: (onPathSelected: (String) -> Unit) -> Unit = {},
-    onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
+    onExportMarkdown: (MarkdownExport) -> Unit = {},
     onExportBackup: (choice: BackupContentChoice) -> Unit = {},
     onRequestBackupFolder: () -> Unit,
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },

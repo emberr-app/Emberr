@@ -25,6 +25,7 @@ import com.emberr.presentation.shared.rememberStableStatusBarsPadding
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.TableCellStyle
 import com.emberr.domain.model.TextAlignment
@@ -69,7 +70,7 @@ fun DailyEditorPane(
     onPickDocument: (onPathSelected: (String) -> Unit) -> Unit = {},
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
     onNavigateToEditor: (String) -> Unit = {},
-    onExportMarkdown: (fileName: String, content: String) -> Unit = { _, _ -> },
+    onExportMarkdown: (MarkdownExport) -> Unit = {},
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     onSelectionModeChange: (Boolean) -> Unit = {}
 ) {
