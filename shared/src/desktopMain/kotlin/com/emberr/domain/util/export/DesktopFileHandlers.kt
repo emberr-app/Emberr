@@ -3,6 +3,7 @@ package com.emberr.domain.util.export
 import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.backup.manual.DesktopManualBackupExporter
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.util.media.MediaStorageHelper
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.GlobalContext
 import java.awt.FileDialog
@@ -10,10 +11,10 @@ import java.awt.Frame
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 
-fun handleExportMarkdown(window: Frame, fileName: String, content: String) {
+fun handleExportMarkdown(window: Frame, export: MarkdownExport) {
     try {
         val dialog = FileDialog(window, "Export Markdown", FileDialog.SAVE)
-        dialog.file = fileName
+        dialog.file = export.fileName
         dialog.isVisible = true
 
         val chosenFileStr = dialog.file ?: return
@@ -25,14 +26,26 @@ fun handleExportMarkdown(window: Frame, fileName: String, content: String) {
         if (saveFile.name.endsWith(".txt", ignoreCase = true)) {
             saveFile = java.io.File(saveFile.absolutePath.removeSuffix(".txt").removeSuffix(".TXT"))
         }
-        if (!saveFile.name.endsWith(".md", ignoreCase = true)) {
-            saveFile = java.io.File(saveFile.absolutePath + ".md")
+        val extension = if (export.isZip) ".zip" else ".md"
+        if (!saveFile.name.endsWith(extension, ignoreCase = true)) {
+            saveFile = java.io.File(saveFile.absolutePath + extension)
         }
 
-        saveFile.writeText(content)
+        val missingAttachmentCount = if (export.isZip) {
+            val mediaStorageHelper = GlobalContext.get().get<MediaStorageHelper>()
+            saveFile.outputStream().use { stream ->
+                MarkdownZipWriter.write(export, stream) { storedFileName ->
+                    java.io.File(mediaStorageHelper.getAbsoluteMediaPath(storedFileName))
+                }
+            }
+        } else {
+            saveFile.writeText(export.markdown)
+            0
+        }
 
+        val missingNotice = MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount)?.let { "\n\n$it" }.orEmpty()
         SwingUtilities.invokeLater {
-            JOptionPane.showMessageDialog(window, "Markdown saved successfully:\n${saveFile.name}", "Success", JOptionPane.INFORMATION_MESSAGE)
+            JOptionPane.showMessageDialog(window, "Markdown saved successfully:\n${saveFile.name}$missingNotice", "Success", JOptionPane.INFORMATION_MESSAGE)
         }
     } catch (e: Throwable) {
         e.printStackTrace()

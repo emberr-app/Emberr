@@ -6,6 +6,9 @@ import com.emberr.domain.database.withDatabasesAsTables
 import com.emberr.domain.model.*
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
+import com.emberr.domain.util.export.MarkdownAttachment
+import com.emberr.domain.util.export.MarkdownAttachments
+import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.media.WebImageFetcher
@@ -416,14 +419,23 @@ class NoteEditorViewModel(
 
     suspend fun blocksForExport(): List<NoteBlock> = _blocks.value.withDatabasesAsTables(repository)
 
-    suspend fun generateMarkdownExport(): String {
+    suspend fun generateMarkdownExport(): String = markdownOf(blocksForExport(), attachments = emptyList())
+
+    suspend fun generateMarkdownFileExport(baseFileName: String): MarkdownExport {
+        val blocks = blocksForExport()
+        val attachments = MarkdownAttachments.collect(blocks)
+        return MarkdownExport(baseFileName, markdownOf(blocks, attachments), attachments)
+    }
+
+    private suspend fun markdownOf(blocks: List<NoteBlock>, attachments: List<MarkdownAttachment>): String {
         val title = _noteTitle.value.ifBlank { "Untitled Note" }
         val categoryNamesById = repository.getAllCategories().first()
             .filter { !it.isDeleted }
             .associate { it.categoryId to it.name }
         val body = com.emberr.domain.util.export.ExportEngine.generateMarkdown(
-            blocks = blocksForExport(),
-            categoryNamesById = categoryNamesById
+            blocks = blocks,
+            categoryNamesById = categoryNamesById,
+            attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport }
         )
         return "# $title\n\n$body"
     }
