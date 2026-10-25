@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +62,9 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
 import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.selfhost.sync.SelfHostSyncStage
+import com.emberr.domain.util.system.DeviceLockConfirmation
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.util.system.rememberDeviceLockPrompt
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.SettingsSegmentedOptions
 import com.emberr.presentation.settings.desktopSettingsSidePadding
@@ -79,6 +82,7 @@ import emberr.shared.generated.resources.refresh_cw
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.painterResource
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
@@ -257,6 +261,8 @@ private fun ConnectedDashboard(
     sidePadding: Dp
 ) {
     var showDisconnectConfirmation by remember { mutableStateOf(false) }
+    val deviceLockPrompt = rememberDeviceLockPrompt()
+    val coroutineScope = rememberCoroutineScope()
 
     val listState = rememberLazyListState()
 
@@ -388,13 +394,42 @@ private fun ConnectedDashboard(
                         SettingsHint(text = "You need this passphrase to connect another phone or computer to this server.")
                         EmberrButtonSecondary(
                             text = "Show Passphrase",
-                            onClick = viewModel::showRecoveryPassphrase,
+                            onClick = {
+                                coroutineScope.launch {
+                                    val confirmation = deviceLockPrompt.confirm(
+                                        title = "Recovery passphrase",
+                                        description = "Unlock to see your recovery passphrase"
+                                    )
+                                    if (confirmation != DeviceLockConfirmation.NOT_CONFIRMED) {
+                                        viewModel.showRecoveryPassphrase()
+                                    }
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                     } else {
                         SettingsHint(
-                            text = "This device was connected before Emberr saved the passphrase, so it can't show it. " +
-                                "Use the copy you saved when the vault was created."
+                            text = "This device was connected before Emberr saved the passphrase. " +
+                                "Enter it once to save it here, so you can see it later."
+                        )
+                        PassphraseField(
+                            value = state.passphraseToSaveInput,
+                            onValueChange = viewModel::onPassphraseToSaveChanged,
+                            onSubmit = viewModel::savePassphraseOnThisDevice
+                        )
+                        state.savePassphraseError?.let { message ->
+                            Text(
+                                text = message,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        EmberrButtonSecondary(
+                            text = if (state.isSavingPassphrase) "Checking" else "Save Passphrase",
+                            onClick = viewModel::savePassphraseOnThisDevice,
+                            enabled = state.canSavePassphrase,
+                            showsWavingDots = state.isSavingPassphrase,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
@@ -662,9 +697,10 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
         Spacer(modifier = Modifier.height(4.dp))
 
         EmberrButtonPrimary(
-            text = if (form.connectionTestStatus == ConnectionTestStatus.TESTING) "Testing..." else "Test Connection",
+            text = if (form.connectionTestStatus == ConnectionTestStatus.TESTING) "Testing" else "Test Connection",
             onClick = viewModel::testConnection,
             enabled = form.canTestConnection,
+            showsWavingDots = form.connectionTestStatus == ConnectionTestStatus.TESTING,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -712,8 +748,6 @@ private fun RestorePassphraseCard(
     onPassphraseChanged: (String) -> Unit,
     onSubmit: (() -> Unit)? = null
 ) {
-    var isPassphraseVisible by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -726,27 +760,34 @@ private fun RestorePassphraseCard(
             text = "Can't find it? Open Settings → Self-Host → Show Passphrase on a device that is already connected."
         )
 
-        EmberrTextField(
-            value = passphraseInput,
-            onValueChange = onPassphraseChanged,
-            placeholder = "16-character passphrase",
-            visualTransformation = if (isPassphraseVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                IconTooltip(text = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase") {
-                    IconButton(onClick = { isPassphraseVisible = !isPassphraseVisible }) {
-                        Icon(
-                            imageVector = if (isPassphraseVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            onSubmit = onSubmit
-        )
+        PassphraseField(value = passphraseInput, onValueChange = onPassphraseChanged, onSubmit = onSubmit)
     }
+}
+
+@Composable
+private fun PassphraseField(value: String, onValueChange: (String) -> Unit, onSubmit: (() -> Unit)?) {
+    var isPassphraseVisible by remember { mutableStateOf(false) }
+
+    EmberrTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = "16-character passphrase",
+        visualTransformation = if (isPassphraseVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        trailingIcon = {
+            IconTooltip(text = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase") {
+                IconButton(onClick = { isPassphraseVisible = !isPassphraseVisible }) {
+                    Icon(
+                        imageVector = if (isPassphraseVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+        onSubmit = onSubmit
+    )
 }
 
 @Composable

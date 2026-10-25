@@ -28,21 +28,27 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
     private var textScope: CoroutineScope? = null
     private var mediaScope: CoroutineScope? = null
 
-    actual fun scheduleDailySync() = scheduleDailySync(afterFirstSync = {})
+    actual fun scheduleDailySync() {
+        if (textScope?.isActive == true) {
+            SelfHostSyncLog.d("Scheduler: daily text sync already scheduled, keeping it")
+            return
+        }
+        startDailySync(syncsRightAway = false)
+    }
 
-    fun scheduleDailySyncThenMediaSync() = scheduleDailySync(afterFirstSync = {
-        SelfHostSyncLog.d("Scheduler: first text sync finished, starting media sync")
-        scheduleMediaSync()
-    })
+    fun scheduleDailySyncThenMediaSync() = startDailySync(syncsRightAway = true)
 
-    private fun scheduleDailySync(afterFirstSync: () -> Unit) {
+    private fun startDailySync(syncsRightAway: Boolean) {
         textScope?.cancel()
         val newScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         textScope = newScope
 
         newScope.launch {
-            selfHostSyncEngine.runSync()
-            afterFirstSync()
+            if (syncsRightAway) {
+                selfHostSyncEngine.runSync()
+                SelfHostSyncLog.d("Scheduler: first text sync finished, starting media sync")
+                scheduleMediaSync(syncsRightAway = true)
+            }
             while (isActive) {
                 delay(24.hours)
                 selfHostSyncEngine.runSync()
@@ -61,11 +67,20 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
     actual fun scheduleDeferredSyncAfterAppClose() = Unit
 
     actual fun scheduleMediaSync() {
+        if (mediaScope?.isActive == true) {
+            SelfHostSyncLog.d("Scheduler: media sync already scheduled, keeping it")
+            return
+        }
+        scheduleMediaSync(syncsRightAway = false)
+    }
+
+    private fun scheduleMediaSync(syncsRightAway: Boolean) {
         mediaScope?.cancel()
         val newScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         mediaScope = newScope
 
         newScope.launch {
+            if (!syncsRightAway) delay(6.hours)
             while (isActive) {
                 SelfHostSyncLog.d("Scheduler: starting scheduled desktop media sync pass")
                 selfHostSyncEngine.syncMedia()

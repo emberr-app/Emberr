@@ -19,7 +19,8 @@ fun EmberrButtonSecondary(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    showsWavingDots: Boolean = false
 ) {
     Button(
         onClick = onClick,
@@ -38,5 +39,8 @@ fun EmberrButtonSecondary(
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
+        if (showsWavingDots) {
+            WavingDots(style = MaterialTheme.typography.bodyLarge)
+        }
     }
 }
