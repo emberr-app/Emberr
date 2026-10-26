@@ -3,6 +3,7 @@ package com.emberr.presentation.shared.editor.blockViews.movie
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -82,6 +83,7 @@ import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTab
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import com.emberr.presentation.shared.editor.DefaultBlockShape
@@ -91,16 +93,23 @@ import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.link
-import emberr.shared.generated.resources.play
+import emberr.shared.generated.resources.logo_facebook
+import emberr.shared.generated.resources.logo_imdb
+import emberr.shared.generated.resources.logo_instagram
+import emberr.shared.generated.resources.logo_x
+import emberr.shared.generated.resources.logo_youtube
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.star
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 private val DialogShape = RoundedCornerShape(24.dp)
 private val FactShape = RoundedCornerShape(8.dp)
+private val TrailerButtonShape = RoundedCornerShape(12.dp)
+private val TrailerButtonHeight = 44.dp
 private val CastPortraitMinWidthDesktop = 140.dp
 private val CastPortraitMinWidthPhone = 88.dp
 private val CastColumnGap = 24.dp
@@ -111,7 +120,7 @@ private val BackdropContentOverlap = 96.dp
 private val BackdropCropAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.6f)
 private val SectionGap = 32.dp
 private val TabContentGap = 20.dp
-private val TabRowFadeWidth = 40.dp
+private val ScrollFadeWidth = 40.dp
 private val FactLabelWidthDesktop = 140.dp
 private val FactLabelWidthPhone = 112.dp
 private val ProviderLabelWidthDesktop = 80.dp
@@ -127,6 +136,7 @@ private val DialogScrim = Brush.verticalGradient(
     1f to Color.Black.copy(alpha = 0.85f)
 )
 private const val MAXIMUM_STAR_HALVES = 10
+private const val SKELETON_FACT_ROWS = 4
 private val BackdropFade = Brush.verticalGradient(0.5f to Color.Black, 1f to Color.Transparent)
 
 private enum class MovieDetailsTab(val label: String, val needsLiveExtras: Boolean = false) {
@@ -265,10 +275,7 @@ internal fun MovieDetailsDialog(
                                 showsWatchState = !isPreview,
                                 watchlistAdder = watchlistAdder
                             )
-                            val hasRatingPanelContent = !isPreview ||
-                                details.tmdbRating != null ||
-                                details.trailer != null ||
-                                watchlistAdder != null
+                            val hasRatingPanelContent = !isPreview || details.tmdbRating != null || watchlistAdder != null
                             if (!isDesktopPlatform && hasRatingPanelContent) {
                                 MovieRatingPanel(
                                     block = block,
@@ -279,7 +286,9 @@ internal fun MovieDetailsDialog(
                                     watchlistAdder = watchlistAdder
                                 )
                             }
-                            if (liveLoad != null) {
+                            if (liveLoad?.load == LiveTmdbLoad.Loading) {
+                                MovieOverviewSkeleton(colors = colors)
+                            } else if (liveLoad != null) {
                                 LiveTmdbLoadMessage(state = liveLoad, textColor = colors.text, chipBackground = colors.chipBackground)
                             } else if (shownTab != null) {
                                 Column(verticalArrangement = Arrangement.spacedBy(TabContentGap)) {
@@ -317,6 +326,16 @@ internal fun MovieDetailsDialog(
                             }
                         }
                     }
+                }
+
+                details.trailer?.let { trailer ->
+                    MovieTrailerButton(
+                        trailer = trailer,
+                        hazeState = hazeState,
+                        isOnPoster = hasPoster,
+                        textColor = colors.text,
+                        modifier = Modifier.align(Alignment.TopStart).padding(14.dp)
+                    )
                 }
 
                 Box(
@@ -361,22 +380,7 @@ private fun MovieDetailsTabRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-            .drawWithContent {
-                drawContent()
-                val fadeFraction = (TabRowFadeWidth.toPx() / size.width).coerceAtMost(0.5f)
-                val startColor = if (scrollState.canScrollBackward) Color.Transparent else Color.Black
-                val endColor = if (scrollState.canScrollForward) Color.Transparent else Color.Black
-                drawRect(
-                    brush = Brush.horizontalGradient(
-                        0f to startColor,
-                        fadeFraction to Color.Black,
-                        1f - fadeFraction to Color.Black,
-                        1f to endColor
-                    ),
-                    blendMode = BlendMode.DstIn
-                )
-            }
+            .fadesWhereItScrolls(scrollState)
             .horizontalScroll(scrollState),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -390,6 +394,24 @@ private fun MovieDetailsTabRow(
         }
     }
 }
+
+internal fun Modifier.fadesWhereItScrolls(scrollState: ScrollState): Modifier =
+    graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val fadeFraction = (ScrollFadeWidth.toPx() / size.width).coerceAtMost(0.5f)
+            val startColor = if (scrollState.canScrollBackward) Color.Transparent else Color.Black
+            val endColor = if (scrollState.canScrollForward) Color.Transparent else Color.Black
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    0f to startColor,
+                    fadeFraction to Color.Black,
+                    1f - fadeFraction to Color.Black,
+                    1f to endColor
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
 
 @Composable
 private fun MovieBackdropBanner(details: MovieDetails, height: Dp) {
@@ -469,12 +491,14 @@ private fun MovieDetailsHeader(
                             showsWatchState = showsWatchState
                         )
                     }
-                    MovieHeaderActions(
-                        details = details,
-                        colors = colors,
-                        watchlistAdder = watchlistAdder,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    watchlistAdder?.let { adder ->
+                        MovieAddToWatchlistButton(
+                            details = details,
+                            adder = adder,
+                            colors = colors,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
             }
         }
@@ -527,27 +551,17 @@ private fun MovieRatingPanel(
                 showsWatchState = showsWatchState
             )
         }
-        MovieHeaderActions(details = details, colors = colors, watchlistAdder = watchlistAdder)
+        watchlistAdder?.let { adder -> MovieAddToWatchlistButton(details = details, adder = adder, colors = colors) }
     }
 }
 
 @Composable
-private fun MovieHeaderActions(
+private fun MovieAddToWatchlistButton(
     details: MovieDetails,
+    adder: WatchlistAdder,
     colors: DetailsColors,
-    watchlistAdder: WatchlistAdder?,
     modifier: Modifier = Modifier
 ) {
-    val trailer = details.trailer
-    if (trailer == null && watchlistAdder == null) return
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (trailer != null) MovieTrailerButton(trailer = trailer, colors = colors)
-        if (watchlistAdder != null) MovieAddToWatchlistButton(details = details, adder = watchlistAdder, colors = colors)
-    }
-}
-
-@Composable
-private fun MovieAddToWatchlistButton(details: MovieDetails, adder: WatchlistAdder, colors: DetailsColors) {
     val isInWatchlist = details.titleKey() in adder.titleKeysInWatchlist
     val label = when {
         isInWatchlist -> "In watchlist"
@@ -557,7 +571,7 @@ private fun MovieAddToWatchlistButton(details: MovieDetails, adder: WatchlistAdd
     MovieChip(
         label = label,
         onClick = if (isInWatchlist || adder.isAdding) null else ({ adder.add(details.toSearchResult()) }),
-        modifier = Modifier.height(movieChipHeight()),
+        modifier = modifier.height(movieChipHeight()),
         background = colors.chipBackground,
         contentColor = colors.chipText
     ) {
@@ -571,21 +585,32 @@ private fun MovieAddToWatchlistButton(details: MovieDetails, adder: WatchlistAdd
 }
 
 @Composable
-private fun MovieTrailerButton(trailer: MovieTrailer, colors: DetailsColors, modifier: Modifier = Modifier) {
+private fun MovieTrailerButton(
+    trailer: MovieTrailer,
+    hazeState: HazeState,
+    isOnPoster: Boolean,
+    textColor: Color,
+    modifier: Modifier = Modifier
+) {
     val uriHandler = LocalUriHandler.current
-    MovieChip(
-        label = "Trailer",
-        onClick = { uriHandler.openUri(trailer.youtubeLink) },
-        modifier = modifier.height(movieChipHeight()),
-        background = colors.chipBackground,
-        contentColor = colors.chipText
+    Row(
+        modifier = modifier
+            .height(TrailerButtonHeight)
+            .emberrBorder(TrailerButtonShape)
+            .clip(TrailerButtonShape)
+            .emberrBlur(hazeState, if (isOnPoster) EmberrBlur.OnImage else EmberrBlur.Regular)
+            .clickable { uriHandler.openUri(trailer.youtubeLink) }
+            .padding(horizontal = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(Res.drawable.play),
+            painter = painterResource(Res.drawable.logo_youtube),
             contentDescription = null,
-            tint = colors.chipText,
-            modifier = Modifier.size(12.dp)
+            tint = Color.Unspecified,
+            modifier = Modifier.size(20.dp)
         )
+        Text(text = "Trailer", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium, color = textColor)
     }
 }
 
@@ -715,6 +740,10 @@ private fun MovieDetailsSection(title: String, colors: DetailsColors, content: @
 private fun MovieOverviewTab(details: MovieDetails, colors: DetailsColors) {
     val uriHandler = LocalUriHandler.current
     Column(verticalArrangement = Arrangement.spacedBy(SectionGap)) {
+        val links = linksOf(details)
+        if (links.isNotEmpty()) {
+            MovieLinkChips(links = links, background = colors.chipBackground, contentColor = colors.chipText)
+        }
         if (details.overview.isNotBlank()) {
             Text(text = details.overview, style = MaterialTheme.typography.bodyLarge, color = colors.text)
         }
@@ -757,9 +786,40 @@ private fun MovieOverviewTab(details: MovieDetails, colors: DetailsColors) {
                 }
             }
         }
-        val links = linksOf(details)
-        if (links.isNotEmpty()) {
-            MovieLinkChips(links = links, background = colors.chipBackground, contentColor = colors.chipText)
+    }
+}
+
+@Composable
+private fun MovieOverviewSkeleton(colors: DetailsColors) {
+    val progress = rememberShimmerProgress()
+    val shimmerColors = shimmerColorsOf(colors.chipBackground, colors.text)
+    val chipHeight = movieChipHeight()
+    Column(verticalArrangement = Arrangement.spacedBy(SectionGap)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf(76.dp, 52.dp, 64.dp, 92.dp).forEachIndexed { index, tabWidth ->
+                Box(
+                    modifier = Modifier
+                        .size(width = tabWidth, height = chipHeight)
+                        .clip(FactShape)
+                        .shimmer(progress, shimmerColors, itemIndex = index)
+                )
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            listOf(1f, 1f, 1f, 0.95f, 0.6f).forEachIndexed { index, widthFraction ->
+                MovieSkeletonLine(widthFraction = widthFraction, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            MovieSkeletonLine(widthFraction = 0.25f, height = 14.dp, progress = progress, colors = shimmerColors)
+            repeat(SKELETON_FACT_ROWS) { index ->
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Box(modifier = Modifier.width(if (isDesktopPlatform) FactLabelWidthDesktop else FactLabelWidthPhone).padding(end = 24.dp)) {
+                        MovieSkeletonLine(widthFraction = 1f, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+                    }
+                    MovieSkeletonLine(widthFraction = 0.6f, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+                }
+            }
         }
     }
 }
@@ -792,38 +852,62 @@ internal fun MovieReadMoreText(text: String, color: Color, shortLines: Int) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun MovieLinkChips(
-    links: List<Pair<String, String>>,
+    links: List<MovieLink>,
     background: Color,
     contentColor: Color,
     modifier: Modifier = Modifier
 ) {
     val uriHandler = LocalUriHandler.current
-    FlowRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    val scrollState = rememberScrollState()
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .fadesWhereItScrolls(scrollState)
+            .horizontalScroll(scrollState),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        links.forEach { (label, address) ->
+        links.forEach { link ->
             MovieChip(
-                label = label,
-                onClick = { uriHandler.openUri(address) },
+                label = link.label,
+                onClick = { uriHandler.openUri(link.address) },
                 modifier = Modifier.height(movieChipHeight()),
                 background = background,
                 contentColor = contentColor
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.link),
+                    painter = painterResource(link.icon),
                     contentDescription = null,
-                    tint = contentColor,
-                    modifier = Modifier.size(14.dp)
+                    tint = if (link.keepsIconColors) Color.Unspecified else contentColor,
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
     }
 }
+
+internal class MovieLink(
+    val label: String,
+    val address: String,
+    val icon: DrawableResource,
+    val keepsIconColors: Boolean = true
+)
+
+internal fun imdbLinkOf(imdbPath: String): MovieLink =
+    MovieLink(label = "IMDb", address = "https://www.imdb.com/$imdbPath", icon = Res.drawable.logo_imdb)
+
+internal fun socialLinksOf(instagramHandle: String, facebookHandle: String, xHandle: String): List<MovieLink> = listOfNotNull(
+    instagramHandle.takeIf { it.isNotBlank() }?.let {
+        MovieLink(label = "Instagram", address = "https://www.instagram.com/$it", icon = Res.drawable.logo_instagram)
+    },
+    facebookHandle.takeIf { it.isNotBlank() }?.let {
+        MovieLink(label = "Facebook", address = "https://www.facebook.com/$it", icon = Res.drawable.logo_facebook)
+    },
+    xHandle.takeIf { it.isNotBlank() }?.let {
+        MovieLink(label = "X", address = "https://x.com/$it", icon = Res.drawable.logo_x, keepsIconColors = false)
+    }
+)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -1063,13 +1147,12 @@ private fun logoRowsOf(details: MovieDetails): List<Pair<String, List<MovieNamed
     listOf("Networks" to details.networks, "Companies" to details.productionCompanies)
         .filter { (_, companies) -> companies.isNotEmpty() }
 
-private fun linksOf(details: MovieDetails): List<Pair<String, String>> = listOfNotNull(
-    details.imdbId.takeIf { it.isNotBlank() }?.let { "IMDb" to "https://www.imdb.com/title/$it" },
-    details.homepage.takeIf { it.startsWith("https://") || it.startsWith("http://") }?.let { "Website" to it },
-    details.instagramHandle.takeIf { it.isNotBlank() }?.let { "Instagram" to "https://www.instagram.com/$it" },
-    details.facebookHandle.takeIf { it.isNotBlank() }?.let { "Facebook" to "https://www.facebook.com/$it" },
-    details.xHandle.takeIf { it.isNotBlank() }?.let { "X" to "https://x.com/$it" }
-)
+private fun linksOf(details: MovieDetails): List<MovieLink> = listOfNotNull(
+    details.imdbId.takeIf { it.isNotBlank() }?.let { imdbLinkOf("title/$it") },
+    details.homepage.takeIf { it.startsWith("https://") || it.startsWith("http://") }?.let {
+        MovieLink(label = "Website", address = it, icon = Res.drawable.link, keepsIconColors = false)
+    }
+) + socialLinksOf(details.instagramHandle, details.facebookHandle, details.xHandle)
 
 private fun shownTabsOf(details: MovieDetails): List<MovieDetailsTab> {
     val hasOverview = details.overview.isNotBlank() ||

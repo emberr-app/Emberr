@@ -1,9 +1,5 @@
 package com.emberr.presentation.shared.editor.blockViews.movie
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -712,13 +708,11 @@ private fun MovieSearchResultsMessage(text: String) {
 
 @Composable
 internal fun MovieCardLoading() {
-    val pulse = rememberInfiniteTransition()
-    val shimmerAlpha by pulse.animateFloat(
-        initialValue = 0.05f,
-        targetValue = 0.12f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 700), RepeatMode.Reverse)
+    val progress = rememberShimmerProgress()
+    val shimmerColors = ShimmerColors(
+        base = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+        highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
     )
-    val shimmerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = shimmerAlpha)
 
     Row(
         modifier = Modifier
@@ -733,20 +727,14 @@ internal fun MovieCardLoading() {
                 .width(cardPosterWidth())
                 .aspectRatio(2f / 3f)
                 .clip(DefaultBlockShape)
-                .background(shimmerColor)
+                .shimmer(progress, shimmerColors)
         )
         Column(
             modifier = Modifier.weight(1f).padding(top = 4.dp),
             verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             listOf(0.45f to 16.dp, 0.6f to 12.dp, 0.35f to 12.dp).forEach { (widthFraction, height) ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(widthFraction)
-                        .height(height)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(shimmerColor)
-                )
+                MovieSkeletonLine(widthFraction = widthFraction, height = height, progress = progress, colors = shimmerColors)
             }
         }
     }

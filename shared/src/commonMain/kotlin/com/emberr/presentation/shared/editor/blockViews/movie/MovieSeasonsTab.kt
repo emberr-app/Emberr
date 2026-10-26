@@ -49,6 +49,7 @@ private val EpisodeStillWidthDesktop = 160.dp
 private val EpisodeStillWidthPhone = 120.dp
 private val EpisodeStillShape = RoundedCornerShape(8.dp)
 private const val SHORT_OVERVIEW_LINES = 3
+private const val SKELETON_EPISODES = 3
 
 internal fun hasSeasonsToShow(details: MovieDetails): Boolean =
     details.kind == MovieKind.SHOW &&
@@ -173,6 +174,7 @@ private fun MovieSeasonEpisodes(showId: Long, seasonNumber: Int, colors: Details
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         when {
+            liveEpisodes.load == LiveTmdbLoad.Loading -> MovieEpisodesSkeleton(colors = colors)
             episodes == null -> LiveTmdbLoadMessage(
                 state = liveEpisodes,
                 textColor = colors.text,
@@ -184,6 +186,27 @@ private fun MovieSeasonEpisodes(showId: Long, seasonNumber: Int, colors: Details
                 color = colors.secondaryText
             )
             else -> episodes.forEach { episode -> MovieEpisodeRow(episode = episode, colors = colors) }
+        }
+    }
+}
+
+@Composable
+private fun MovieEpisodesSkeleton(colors: DetailsColors) {
+    val progress = rememberShimmerProgress()
+    val shimmerColors = shimmerColorsOf(colors.chipBackground, colors.text)
+    repeat(SKELETON_EPISODES) { index ->
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .width(if (isDesktopPlatform) EpisodeStillWidthDesktop else EpisodeStillWidthPhone)
+                    .aspectRatio(16f / 9f)
+                    .clip(EpisodeStillShape)
+                    .shimmer(progress, shimmerColors, itemIndex = index)
+            )
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                MovieSkeletonLine(widthFraction = 0.7f, height = 14.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+                MovieSkeletonLine(widthFraction = 0.4f, height = 10.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+            }
         }
     }
 }
