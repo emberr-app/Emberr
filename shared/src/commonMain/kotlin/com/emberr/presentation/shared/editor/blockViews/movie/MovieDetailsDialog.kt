@@ -3,6 +3,7 @@ package com.emberr.presentation.shared.editor.blockViews.movie
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
@@ -72,7 +73,9 @@ import com.emberr.domain.model.allProviders
 import com.emberr.domain.model.hasBackdrop
 import com.emberr.domain.model.hasPoster
 import com.emberr.domain.model.starsTextOf
+import com.emberr.domain.model.titleKey
 import com.emberr.domain.model.youtubeLink
+import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrShadowElevation
@@ -86,11 +89,14 @@ import com.emberr.ui.theme.LocalAppIsDark
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.link
 import emberr.shared.generated.resources.play
+import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.star
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 private val DialogShape = RoundedCornerShape(24.dp)
@@ -122,10 +128,12 @@ private val DialogScrim = Brush.verticalGradient(
 private const val MAXIMUM_STAR_HALVES = 10
 private val BackdropFade = Brush.verticalGradient(0.5f to Color.Black, 1f to Color.Transparent)
 
-private enum class MovieDetailsTab(val label: String) {
+private enum class MovieDetailsTab(val label: String, val needsLiveExtras: Boolean = false) {
     OVERVIEW("Overview"),
     CAST("Cast"),
-    SEASONS("Seasons")
+    SEASONS("Seasons"),
+    MORE_LIKE_THIS("More like this", needsLiveExtras = true),
+    REVIEWS("Reviews", needsLiveExtras = true)
 }
 
 internal data class DetailsColors(
@@ -189,8 +197,17 @@ internal fun MovieDetailsDialog(
         val hazeState = remember { HazeState() }
         var selectedTab by remember { mutableStateOf(MovieDetailsTab.OVERVIEW) }
         var openCastMember by remember { mutableStateOf<MovieCastMember?>(null) }
+        var titleToPreview by remember { mutableStateOf<MovieTitleToPreview?>(null) }
+        var hasOpenedLiveTab by remember { mutableStateOf(false) }
         val shownTabs = shownTabsOf(details)
         val shownTab = selectedTab.takeIf { it in shownTabs } ?: shownTabs.firstOrNull()
+        val titleSource = koinInject<MovieTitleSource>()
+        val liveExtras = if (liveLoad == null && (hasOpenedLiveTab || shownTab?.needsLiveExtras == true)) {
+            rememberLiveTmdbLoad(details.titleKey()) { titleSource.loadTitleExtras(details.tmdbId, details.kind) }
+        } else {
+            null
+        }
+        val watchlistAdder = if (isPreview) LocalWatchlistAdder.current else null
 
         Box(
             modifier = Modifier
@@ -244,16 +261,21 @@ internal fun MovieDetailsDialog(
                                 details = details,
                                 editor = editor,
                                 colors = colors,
-                                showsWatchState = !isPreview
+                                showsWatchState = !isPreview,
+                                watchlistAdder = watchlistAdder
                             )
-                            val hasRatingPanelContent = !isPreview || details.tmdbRating != null || details.trailer != null
+                            val hasRatingPanelContent = !isPreview ||
+                                details.tmdbRating != null ||
+                                details.trailer != null ||
+                                watchlistAdder != null
                             if (!isDesktopPlatform && hasRatingPanelContent) {
                                 MovieRatingPanel(
                                     block = block,
                                     details = details,
                                     editor = editor,
                                     colors = colors,
-                                    showsWatchState = !isPreview
+                                    showsWatchState = !isPreview,
+                                    watchlistAdder = watchlistAdder
                                 )
                             }
                             if (liveLoad != null) {
@@ -261,13 +283,19 @@ internal fun MovieDetailsDialog(
                             } else if (shownTab != null) {
                                 Column(verticalArrangement = Arrangement.spacedBy(TabContentGap)) {
                                     if (shownTabs.size > 1) {
-                                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Row(
+                                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
                                             shownTabs.forEach { tab ->
                                                 EmberrTab(
                                                     label = tab.label,
                                                     isSelected = tab == shownTab,
                                                     contentColor = colors.text,
-                                                    onClick = { selectedTab = tab }
+                                                    onClick = {
+                                                        selectedTab = tab
+                                                        if (tab.needsLiveExtras) hasOpenedLiveTab = true
+                                                    }
                                                 )
                                             }
                                         }
@@ -280,6 +308,16 @@ internal fun MovieDetailsDialog(
                                             onOpenPerson = { member -> openCastMember = member }
                                         )
                                         MovieDetailsTab.SEASONS -> MovieSeasonsTab(details = details, colors = colors)
+                                        MovieDetailsTab.MORE_LIKE_THIS -> liveExtras?.let { extras ->
+                                            MovieMoreLikeThisTab(
+                                                liveExtras = extras,
+                                                colors = colors,
+                                                onOpenTitle = { result -> titleToPreview = result.toTitleToPreview() }
+                                            )
+                                        }
+                                        MovieDetailsTab.REVIEWS -> liveExtras?.let { extras ->
+                                            MovieReviewsTab(liveExtras = extras, colors = colors)
+                                        }
                                     }
                                 }
                             }
@@ -314,6 +352,7 @@ internal fun MovieDetailsDialog(
                 MoviePersonSheet(member = member, personId = personId, onDismiss = { openCastMember = null })
             }
         }
+        titleToPreview?.let { title -> MovieTitlePreviewDialog(title = title, onDismiss = { titleToPreview = null }) }
     }
 }
 
@@ -341,7 +380,8 @@ private fun MovieDetailsHeader(
     details: MovieDetails,
     editor: MovieBlockEditor?,
     colors: DetailsColors,
-    showsWatchState: Boolean
+    showsWatchState: Boolean,
+    watchlistAdder: WatchlistAdder?
 ) {
     val posterWidth = if (isDesktopPlatform) 150.dp else 104.dp
 
@@ -394,9 +434,12 @@ private fun MovieDetailsHeader(
                             showsWatchState = showsWatchState
                         )
                     }
-                    details.trailer?.let { trailer ->
-                        MovieTrailerButton(trailer = trailer, colors = colors, modifier = Modifier.padding(top = 8.dp))
-                    }
+                    MovieHeaderActions(
+                        details = details,
+                        colors = colors,
+                        watchlistAdder = watchlistAdder,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
         }
@@ -426,7 +469,8 @@ private fun MovieRatingPanel(
     details: MovieDetails,
     editor: MovieBlockEditor?,
     colors: DetailsColors,
-    showsWatchState: Boolean
+    showsWatchState: Boolean,
+    watchlistAdder: WatchlistAdder?
 ) {
     Column(
         modifier = Modifier
@@ -448,7 +492,46 @@ private fun MovieRatingPanel(
                 showsWatchState = showsWatchState
             )
         }
-        details.trailer?.let { trailer -> MovieTrailerButton(trailer = trailer, colors = colors) }
+        MovieHeaderActions(details = details, colors = colors, watchlistAdder = watchlistAdder)
+    }
+}
+
+@Composable
+private fun MovieHeaderActions(
+    details: MovieDetails,
+    colors: DetailsColors,
+    watchlistAdder: WatchlistAdder?,
+    modifier: Modifier = Modifier
+) {
+    val trailer = details.trailer
+    if (trailer == null && watchlistAdder == null) return
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (trailer != null) MovieTrailerButton(trailer = trailer, colors = colors)
+        if (watchlistAdder != null) MovieAddToWatchlistButton(details = details, adder = watchlistAdder, colors = colors)
+    }
+}
+
+@Composable
+private fun MovieAddToWatchlistButton(details: MovieDetails, adder: WatchlistAdder, colors: DetailsColors) {
+    val isInWatchlist = details.titleKey() in adder.titleKeysInWatchlist
+    val label = when {
+        isInWatchlist -> "In watchlist"
+        adder.isAdding -> "Adding"
+        else -> "Add to watchlist"
+    }
+    MovieChip(
+        label = label,
+        onClick = if (isInWatchlist || adder.isAdding) null else ({ adder.add(details.toSearchResult()) }),
+        modifier = Modifier.height(movieChipHeight()),
+        background = colors.chipBackground,
+        contentColor = colors.chipText
+    ) {
+        Icon(
+            painter = painterResource(if (isInWatchlist) Res.drawable.check else Res.drawable.plus),
+            contentDescription = null,
+            tint = colors.chipText,
+            modifier = Modifier.size(12.dp)
+        )
     }
 }
 
@@ -963,7 +1046,9 @@ private fun shownTabsOf(details: MovieDetails): List<MovieDetailsTab> {
     return listOfNotNull(
         MovieDetailsTab.OVERVIEW.takeIf { hasOverview },
         MovieDetailsTab.CAST.takeIf { details.cast.isNotEmpty() },
-        MovieDetailsTab.SEASONS.takeIf { hasSeasonsToShow(details) }
+        MovieDetailsTab.SEASONS.takeIf { hasSeasonsToShow(details) },
+        MovieDetailsTab.MORE_LIKE_THIS,
+        MovieDetailsTab.REVIEWS
     )
 }
 

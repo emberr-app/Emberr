@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -221,51 +222,61 @@ fun WatchlistBlockView(
         val loadedTitles = titles
         val shownTitles = loadedTitles.orEmpty().shownIn(block, searchText)
         val shownTitleIds = shownTitles.map { it.id }
-        when {
-            loadedTitles == null -> Unit
-            loadedTitles.isEmpty() && !isAddingTitle && !isLoadingNewTitle -> WatchlistEmptyState(onAddTitle = { startAddingTitle() })
-            shownTitles.isEmpty() && loadedTitles.isNotEmpty() && searchText.isNotBlank() -> WatchlistNoMatches(
-                message = "No titles match \"${searchText.trim()}\"",
-                clearLabel = "Clear search",
-                onClear = ::closeSearch
+        val titleKeysInWatchlist = loadedTitles.orEmpty().mapNotNullTo(HashSet()) { it.titleKey() }
+        val watchlistAdder = remember(titleKeysInWatchlist, isLoadingNewTitle, block.watchlistNoteId) {
+            WatchlistAdder(
+                titleKeysInWatchlist = titleKeysInWatchlist,
+                isAdding = isLoadingNewTitle,
+                add = { result -> editor.addTitle(block.watchlistNoteId, result) }
             )
-            shownTitles.isEmpty() && loadedTitles.isNotEmpty() -> WatchlistNoMatches(
-                message = "No titles match these filters",
-                clearLabel = "Clear filters",
-                onClear = { editor.changeSettings(block.id) { it.copy(kindFilter = null, statusFilter = null) } }
-            )
-            block.view == WatchlistView.BOARD -> WatchlistBoard(
-                titles = shownTitles,
-                statuses = block.statusFilter?.let { listOf(it) } ?: WatchStatus.entries,
-                movieEditor = movieEditor,
-                inSelectionMode = inSelectionMode,
-                onToggleSelection = onToggleSelection
-            )
-            block.view == WatchlistView.GALLERY -> WatchlistGallery(
-                titles = shownTitles,
-                movieEditor = movieEditor,
-                inSelectionMode = inSelectionMode,
-                onToggleSelection = onToggleSelection,
-                titleSelection = titleSelection
-            )
-            else -> shownTitles.forEach { title ->
-                key(title.id) {
-                    val isNewlyAdded = title.id == lastAddedBlockId
-                    val appearance = remember { MutableTransitionState(!isNewlyAdded).apply { targetState = true } }
-                    AnimatedVisibility(
-                        visibleState = appearance,
-                        enter = expandVertically(tween(TITLE_RESIZE_MILLIS)) + fadeIn(tween(TITLE_FADE_MILLIS, delayMillis = TITLE_FADE_DELAY_MILLIS))
-                    ) {
-                        WatchlistTitle(
-                            title = title,
-                            movieEditor = movieEditor,
-                            isNewlyAdded = isNewlyAdded,
-                            inSelectionMode = inSelectionMode,
-                            onToggleSelection = onToggleSelection,
-                            onRemove = { editor.removeTitle(block.watchlistNoteId, title.id) },
-                            selection = if (inSelectionMode) null else titleSelection.forTitle(title.id, shownTitleIds),
-                            runAfterKeyboardCloses = runAfterKeyboardCloses
-                        )
+        }
+        CompositionLocalProvider(LocalWatchlistAdder provides watchlistAdder) {
+            when {
+                loadedTitles == null -> Unit
+                loadedTitles.isEmpty() && !isAddingTitle && !isLoadingNewTitle -> WatchlistEmptyState(onAddTitle = { startAddingTitle() })
+                shownTitles.isEmpty() && loadedTitles.isNotEmpty() && searchText.isNotBlank() -> WatchlistNoMatches(
+                    message = "No titles match \"${searchText.trim()}\"",
+                    clearLabel = "Clear search",
+                    onClear = ::closeSearch
+                )
+                shownTitles.isEmpty() && loadedTitles.isNotEmpty() -> WatchlistNoMatches(
+                    message = "No titles match these filters",
+                    clearLabel = "Clear filters",
+                    onClear = { editor.changeSettings(block.id) { it.copy(kindFilter = null, statusFilter = null) } }
+                )
+                block.view == WatchlistView.BOARD -> WatchlistBoard(
+                    titles = shownTitles,
+                    statuses = block.statusFilter?.let { listOf(it) } ?: WatchStatus.entries,
+                    movieEditor = movieEditor,
+                    inSelectionMode = inSelectionMode,
+                    onToggleSelection = onToggleSelection
+                )
+                block.view == WatchlistView.GALLERY -> WatchlistGallery(
+                    titles = shownTitles,
+                    movieEditor = movieEditor,
+                    inSelectionMode = inSelectionMode,
+                    onToggleSelection = onToggleSelection,
+                    titleSelection = titleSelection
+                )
+                else -> shownTitles.forEach { title ->
+                    key(title.id) {
+                        val isNewlyAdded = title.id == lastAddedBlockId
+                        val appearance = remember { MutableTransitionState(!isNewlyAdded).apply { targetState = true } }
+                        AnimatedVisibility(
+                            visibleState = appearance,
+                            enter = expandVertically(tween(TITLE_RESIZE_MILLIS)) + fadeIn(tween(TITLE_FADE_MILLIS, delayMillis = TITLE_FADE_DELAY_MILLIS))
+                        ) {
+                            WatchlistTitle(
+                                title = title,
+                                movieEditor = movieEditor,
+                                isNewlyAdded = isNewlyAdded,
+                                inSelectionMode = inSelectionMode,
+                                onToggleSelection = onToggleSelection,
+                                onRemove = { editor.removeTitle(block.watchlistNoteId, title.id) },
+                                selection = if (inSelectionMode) null else titleSelection.forTitle(title.id, shownTitleIds),
+                                runAfterKeyboardCloses = runAfterKeyboardCloses
+                            )
+                        }
                     }
                 }
             }

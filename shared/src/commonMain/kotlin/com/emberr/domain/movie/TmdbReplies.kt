@@ -8,7 +8,9 @@ import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieNamedLogo
 import com.emberr.domain.model.MoviePerson
 import com.emberr.domain.model.MoviePersonRole
+import com.emberr.domain.model.MovieReview
 import com.emberr.domain.model.MovieSearchResult
+import com.emberr.domain.model.MovieTitleExtras
 import com.emberr.domain.model.MovieSeason
 import com.emberr.domain.model.MovieTrailer
 import com.emberr.domain.model.MovieWatchProviders
@@ -24,6 +26,7 @@ private const val CAST_PHOTO_ADDRESS = "https://image.tmdb.org/t/p/w185"
 private const val PERSON_PHOTO_ADDRESS = "https://image.tmdb.org/t/p/h632"
 private const val ROLE_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w342"
 private const val EPISODE_STILL_ADDRESS = "https://image.tmdb.org/t/p/w300"
+private const val SIMILAR_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w342"
 private const val SEASON_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w342"
 private const val COMPANY_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w185"
 private const val PROVIDER_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w92"
@@ -165,6 +168,45 @@ internal object TmdbReplyReader {
             facebookHandle = reply.externalIds.facebookId,
             xHandle = reply.externalIds.twitterId,
             roles = rolesFrom(reply.combinedCredits, mostRoles)
+        )
+    }
+
+    fun titleExtrasFrom(replyText: String, kind: MovieKind, mostSimilarTitles: Int): MovieTitleExtras {
+        val reply = json.decodeFromString<TmdbTitleExtrasReply>(replyText)
+        val similarTitles = (reply.recommendations.results + reply.similar.results)
+            .distinctBy { it.id }
+            .mapNotNull { item -> item.toSimilarTitle(kind) }
+            .take(mostSimilarTitles)
+        return MovieTitleExtras(similarTitles = similarTitles, reviews = reviewsOf(reply.reviews))
+    }
+
+    fun reviewsFrom(replyText: String): List<MovieReview> =
+        reviewsOf(json.decodeFromString<TmdbReviewList>(replyText))
+
+    private fun reviewsOf(reviews: TmdbReviewList): List<MovieReview> =
+        reviews.results.mapNotNull { review ->
+            val text = review.content.replace("\r\n", "\n").trim()
+            if (text.isEmpty()) return@mapNotNull null
+            MovieReview(
+                author = review.authorDetails.name.ifBlank { review.author }.ifBlank { review.authorDetails.username },
+                text = text,
+                link = review.url,
+                ratingOutOfTen = review.authorDetails.rating,
+                writtenOn = dateOrNull(review.createdAt.take(10))
+            )
+        }
+
+    private fun TmdbSearchItem.toSimilarTitle(kind: MovieKind): MovieSearchResult? {
+        val shownTitle = if (kind == MovieKind.MOVIE) title else name
+        if (shownTitle.isBlank()) return null
+        val date = if (kind == MovieKind.MOVIE) releaseDate else firstAirDate
+        return MovieSearchResult(
+            tmdbId = id,
+            kind = kind,
+            title = shownTitle,
+            yearText = date.take(4),
+            tmdbRating = voteAverage.takeIf { voteCount > 0 },
+            posterUrl = posterPath?.let { SIMILAR_POSTER_ADDRESS + it }
         )
     }
 
@@ -575,6 +617,32 @@ internal data class TmdbTranslationData(
     val overview: String = "",
     val tagline: String = "",
     val biography: String = ""
+)
+
+@Serializable
+internal data class TmdbTitleExtrasReply(
+    val recommendations: TmdbSearchReply = TmdbSearchReply(),
+    val similar: TmdbSearchReply = TmdbSearchReply(),
+    val reviews: TmdbReviewList = TmdbReviewList()
+)
+
+@Serializable
+internal data class TmdbReviewList(val results: List<TmdbReview> = emptyList())
+
+@Serializable
+internal data class TmdbReview(
+    val author: String = "",
+    @SerialName("author_details") val authorDetails: TmdbReviewAuthor = TmdbReviewAuthor(),
+    val content: String = "",
+    @SerialName("created_at") val createdAt: String = "",
+    val url: String = ""
+)
+
+@Serializable
+internal data class TmdbReviewAuthor(
+    val name: String = "",
+    val username: String = "",
+    val rating: Double? = null
 )
 
 @Serializable

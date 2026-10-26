@@ -221,6 +221,21 @@ data class MoviePerson(
 )
 
 @Immutable
+data class MovieReview(
+    val author: String,
+    val text: String,
+    val link: String,
+    val ratingOutOfTen: Double? = null,
+    val writtenOn: LocalDate? = null
+)
+
+@Immutable
+data class MovieTitleExtras(
+    val similarTitles: List<MovieSearchResult> = emptyList(),
+    val reviews: List<MovieReview> = emptyList()
+)
+
+@Immutable
 data class MovieSearchResult(
     val tmdbId: Long,
     val kind: MovieKind,
