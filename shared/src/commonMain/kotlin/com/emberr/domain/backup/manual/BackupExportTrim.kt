@@ -56,6 +56,7 @@ suspend fun AppDatabase.keepOnlySpacesForExport(
         dao.deleteImageBlocksThatHaveNoBlock()
         dao.deleteDocumentBlocksThatHaveNoBlock()
         dao.deleteBookmarkBlocksThatHaveNoBlock()
+        dao.deleteMovieBlocksThatHaveNoBlock()
         dao.deleteMediaReferencesThatHaveNoNote()
         dao.deleteSpacesNotKept(spaceIds)
         dao.deleteFoldersOutsideSpacesOrDeleted(spaceIds)

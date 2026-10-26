@@ -64,7 +64,8 @@ class NoteRepositoryRecurringMoveTest {
         customPropertyDao = appDatabase.customPropertyDao(),
         selfHostDeletedNoteDao = appDatabase.selfHostDeletedNoteDao(),
         mediaReferenceDao = appDatabase.mediaReferenceDao(),
-        canvasDao = appDatabase.canvasDao()
+        canvasDao = appDatabase.canvasDao(),
+        movieBlockDao = appDatabase.movieBlockDao()
     )
 
     @AfterTest
