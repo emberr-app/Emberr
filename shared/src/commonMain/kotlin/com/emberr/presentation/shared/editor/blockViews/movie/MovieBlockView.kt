@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -145,7 +146,7 @@ private val CardPosterWidthDesktop = 88.dp
 private val CardPosterWidthPhone = 76.dp
 private val CardPadding = 16.dp
 private val CardContentGap = 16.dp
-private val CardScrim = Brush.horizontalGradient(
+internal val CardScrim = Brush.horizontalGradient(
     0f to Color.Black.copy(alpha = 0.35f),
     0.38f to Color.Black.copy(alpha = 0.62f),
     1f to Color.Black.copy(alpha = 0.72f)
@@ -834,15 +835,14 @@ internal fun MovieCard(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(modifier = Modifier.padding(end = 28.dp)) {
+                    Row(modifier = Modifier.padding(end = 28.dp).basicMarquee(iterations = Int.MAX_VALUE)) {
                         Text(
                             text = details.title,
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
                             color = colors.title,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false).alignByBaseline()
+                            maxLines = 1,
+                            modifier = Modifier.alignByBaseline()
                         )
                         if (details.yearText.isNotBlank()) {
                             Spacer(modifier = Modifier.width(8.dp))
@@ -862,7 +862,7 @@ internal fun MovieCard(
                             style = MaterialTheme.typography.labelSmall,
                             color = colors.secondary,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
                         )
                     }
                 }

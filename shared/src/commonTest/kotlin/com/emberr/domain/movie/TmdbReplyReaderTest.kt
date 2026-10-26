@@ -45,7 +45,7 @@ class TmdbReplyReaderTest {
         assertEquals(1396L, details.tmdbId)
         assertEquals(MovieKind.SHOW, details.kind)
         assertEquals("Breaking Bad", details.title)
-        assertEquals("2008–2013", details.yearText)
+        assertEquals("2008 - 2013", details.yearText)
         assertEquals("Change the equation.", details.tagline)
         assertEquals("A chemistry teacher diagnosed with cancer turns to making meth.", details.overview)
         assertEquals(45, details.runtimeMinutes)

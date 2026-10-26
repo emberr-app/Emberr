@@ -114,9 +114,9 @@ internal object TmdbReplyReader {
         val isStillRunning = reply.inProduction || reply.status in runningShowStatuses
         return when {
             firstYear.isBlank() -> ""
-            isStillRunning -> "$firstYear–"
+            isStillRunning -> "$firstYear - Present"
             lastYear.isBlank() || lastYear == firstYear -> firstYear
-            else -> "$firstYear–$lastYear"
+            else -> "$firstYear - $lastYear"
         }
     }
 

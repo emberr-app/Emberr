@@ -183,6 +183,7 @@ fun EmberrSearchTextField(
         modifier = modifier
             .height(50.dp)
             .emberrBorder(CircleShape)
+            .customEmberrShadow(CircleShape)
             .clip(CircleShape)
             .emberrBlur(hazeState, EmberrBlur.Regular)
     ) {
