@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 private const val POSTER_ADDRESS = "https://image.tmdb.org/t/p/w500"
+private const val BACKDROP_ADDRESS = "https://image.tmdb.org/t/p/w1280"
 private const val SEARCH_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w154"
 private const val CAST_PHOTO_ADDRESS = "https://image.tmdb.org/t/p/w185"
 private const val MOST_CAST_MEMBERS = 10
@@ -55,6 +56,7 @@ internal object TmdbReplyReader {
             countries = reply.productionCountries.map { it.name }.filter { it.isNotBlank() },
             releaseDate = dateOrNull(reply.releaseDate),
             posterUrl = reply.posterPath?.let { POSTER_ADDRESS + it },
+            backdropUrl = reply.backdropPath?.let { BACKDROP_ADDRESS + it },
             cast = castFrom(reply.credits),
             refreshedAt = refreshedAt
         )
@@ -84,6 +86,7 @@ internal object TmdbReplyReader {
             countries = reply.productionCountries.map { it.name }.filter { it.isNotBlank() },
             releaseDate = dateOrNull(reply.firstAirDate),
             posterUrl = reply.posterPath?.let { POSTER_ADDRESS + it },
+            backdropUrl = reply.backdropPath?.let { BACKDROP_ADDRESS + it },
             cast = castFrom(reply.credits),
             refreshedAt = refreshedAt
         )
@@ -184,6 +187,7 @@ internal data class TmdbMovieReply(
     @SerialName("spoken_languages") val spokenLanguages: List<TmdbSpokenLanguage> = emptyList(),
     @SerialName("production_countries") val productionCountries: List<TmdbNamed> = emptyList(),
     @SerialName("poster_path") val posterPath: String? = null,
+    @SerialName("backdrop_path") val backdropPath: String? = null,
     val credits: TmdbCredits = TmdbCredits(),
     @SerialName("release_dates") val releaseDates: TmdbReleaseDates = TmdbReleaseDates(),
     val translations: TmdbTranslations = TmdbTranslations()
@@ -212,6 +216,7 @@ internal data class TmdbShowReply(
     @SerialName("spoken_languages") val spokenLanguages: List<TmdbSpokenLanguage> = emptyList(),
     @SerialName("production_countries") val productionCountries: List<TmdbNamed> = emptyList(),
     @SerialName("poster_path") val posterPath: String? = null,
+    @SerialName("backdrop_path") val backdropPath: String? = null,
     val credits: TmdbCredits = TmdbCredits(),
     @SerialName("content_ratings") val contentRatings: TmdbContentRatings = TmdbContentRatings(),
     val translations: TmdbTranslations = TmdbTranslations()

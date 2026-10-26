@@ -66,6 +66,8 @@ data class MovieDetails(
     val releaseDate: LocalDate? = null,
     val posterUrl: String? = null,
     val posterFilePath: String? = null,
+    val backdropUrl: String? = null,
+    val backdropFilePath: String? = null,
     val cast: List<MovieCastMember> = emptyList(),
     val refreshedAt: Long = 0L
 )
@@ -161,7 +163,9 @@ fun MovieBlock.withWatchState(state: WatchState, now: Long): MovieBlock =
 
 val MovieDetails.hasPoster: Boolean get() = posterFilePath != null || posterUrl != null
 
+val MovieDetails.hasBackdrop: Boolean get() = backdropFilePath != null || backdropUrl != null
+
 fun MovieBlock.mediaFilePaths(): List<String> {
     val details = details ?: return emptyList()
-    return listOfNotNull(details.posterFilePath) + details.cast.mapNotNull { it.photoFilePath }
+    return listOfNotNull(details.posterFilePath, details.backdropFilePath) + details.cast.mapNotNull { it.photoFilePath }
 }

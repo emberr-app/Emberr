@@ -8,11 +8,13 @@ import kotlinx.coroutines.coroutineScope
 
 suspend fun MovieDetails.withImagesSavedBy(webImageFetcher: WebImageFetcher): MovieDetails = coroutineScope {
     val posterFile = async { posterUrl?.let { webImageFetcher.fetchIntoMedia(it)?.localFileName } }
+    val backdropFile = async { backdropUrl?.let { webImageFetcher.fetchIntoMedia(it)?.localFileName } }
     val castPhotoFiles = cast.map { member ->
         async { member.photoUrl?.let { webImageFetcher.fetchIntoMedia(it)?.localFileName } }
     }
     copy(
         posterFilePath = posterFile.await(),
+        backdropFilePath = backdropFile.await(),
         cast = cast.zip(castPhotoFiles.awaitAll()) { member, photoFile -> member.copy(photoFilePath = photoFile) }
     )
 }

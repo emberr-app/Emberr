@@ -27,6 +27,7 @@ class TmdbReplyReaderTest {
         assertEquals(listOf("United Kingdom", "United States of America"), details.countries)
         assertEquals(LocalDate(2008, 7, 16), details.releaseDate)
         assertEquals("https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", details.posterUrl)
+        assertEquals("https://image.tmdb.org/t/p/w1280/dqK9Hag1054tghRQSqLSaJ6PcAD.jpg", details.backdropUrl)
         assertEquals(
             listOf(
                 MovieCastMember("Christian Bale", "Bruce Wayne", "https://image.tmdb.org/t/p/w185/bale.jpg"),
@@ -86,6 +87,7 @@ class TmdbReplyReaderTest {
             {"iso_3166_1": "US", "name": "United States of America"}
           ],
           "poster_path": "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+          "backdrop_path": "/dqK9Hag1054tghRQSqLSaJ6PcAD.jpg",
           "belongs_to_collection": null,
           "credits": {
             "cast": [
