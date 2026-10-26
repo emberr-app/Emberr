@@ -252,6 +252,59 @@ object TestNoteBlocks {
             isPinned = true,
             updatedAt = 119L
         ),
+        MovieBlock(
+            id = "movie-1",
+            details = MovieDetails(
+                tmdbId = 1396,
+                kind = MovieKind.SHOW,
+                title = "Breaking Bad",
+                yearText = "2008–2013",
+                tagline = "Chemistry is the study of change.",
+                overview = "A chemistry teacher starts cooking.",
+                runtimeMinutes = 47,
+                seasonCount = 5,
+                episodeCount = 62,
+                ageRating = "TV-MA",
+                tmdbRating = 9.5,
+                genres = listOf("Crime", "Drama"),
+                creditLabel = "Created by",
+                creditNames = listOf("Vince Gilligan"),
+                language = "English",
+                countries = listOf("United States"),
+                releaseDate = LocalDate(2008, 1, 20),
+                posterUrl = "https://example.com/poster.jpg",
+                posterFilePath = "/media/poster.jpg",
+                cast = listOf(
+                    MovieCastMember(
+                        name = "Bryan Cranston",
+                        character = "Walter White",
+                        photoUrl = "https://example.com/bryan.jpg",
+                        photoFilePath = "/media/bryan.jpg"
+                    )
+                ),
+                refreshedAt = 1_700_000_000_000L
+            ),
+            watchStatus = WatchStatus.WATCHING,
+            ratingHalfStars = 9,
+            watchStateChangedAt = 1_700_000_100_000L,
+            addedAt = 1_700_000_000_000L,
+            indentationLevel = 1,
+            isPinned = true,
+            updatedAt = 120L
+        ),
+        WatchlistBlock(
+            id = "watchlist-1",
+            watchlistNoteId = "watchlist-note-1",
+            title = "To watch",
+            view = WatchlistView.BOARD,
+            addedViews = listOf(WatchlistView.LIST, WatchlistView.BOARD),
+            sortKey = WatchlistSortKey.YOUR_RATING,
+            sortsDescending = true,
+            kindFilter = MovieKind.SHOW,
+            statusFilter = WatchStatus.WATCHING,
+            indentationLevel = 1,
+            updatedAt = 121L
+        ),
         SolidDividerBlock(
             id = "solid-divider-1",
             indentationLevel = 1,
