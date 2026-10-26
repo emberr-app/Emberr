@@ -2,6 +2,10 @@ package com.emberr.domain.selfhost.media
 
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.ImageBlock
+import com.emberr.domain.model.MovieBlock
+import com.emberr.domain.model.MovieCastMember
+import com.emberr.domain.model.MovieDetails
+import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.VoiceBlock
 import kotlin.test.Test
@@ -42,6 +46,28 @@ class MediaReferenceScannerTest {
             setOf("photo.png", "invoice.pdf"),
             MediaReferenceScanner.extractMediaFileNames(blocks)
         )
+    }
+
+    @Test
+    fun aMovieBlocksPosterAndCastPhotosAreCollected() {
+        val blocks = listOf(
+            MovieBlock(
+                id = "movie-1",
+                details = MovieDetails(
+                    tmdbId = 155,
+                    kind = MovieKind.MOVIE,
+                    title = "The Dark Knight",
+                    posterUrl = "https://image.tmdb.org/t/p/w500/poster.jpg",
+                    posterFilePath = "poster.jpg",
+                    cast = listOf(
+                        MovieCastMember(name = "Christian Bale", photoFilePath = "bale.jpg"),
+                        MovieCastMember(name = "Aaron Eckhart", photoUrl = "https://image.tmdb.org/t/p/w185/eckhart.jpg")
+                    )
+                )
+            )
+        )
+
+        assertEquals(setOf("poster.jpg", "bale.jpg"), MediaReferenceScanner.extractMediaFileNames(blocks))
     }
 
     @Test

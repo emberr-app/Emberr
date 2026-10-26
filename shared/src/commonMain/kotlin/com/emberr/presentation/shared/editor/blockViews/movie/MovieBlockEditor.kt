@@ -7,6 +7,8 @@ import com.emberr.domain.model.MovieSearchResult
 import com.emberr.domain.model.WatchState
 import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.movie.MovieTitleSource
+import com.emberr.domain.movie.withImagesSavedBy
+import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.system.showNativeToast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -24,13 +26,12 @@ interface MovieBlockHost {
 
 class MovieBlockEditor(
     private val titleSource: MovieTitleSource,
+    private val webImageFetcher: WebImageFetcher,
     private val scope: CoroutineScope,
     private val host: MovieBlockHost
 ) {
     private val _loadingBlockIds = MutableStateFlow<Set<String>>(emptySet())
     val loadingBlockIds: StateFlow<Set<String>> = _loadingBlockIds.asStateFlow()
-
-    val canSearch: Boolean get() = titleSource.canSearch
 
     suspend fun search(query: String): List<MovieSearchResult> = titleSource.search(query)
 
@@ -91,7 +92,7 @@ class MovieBlockEditor(
         _loadingBlockIds.update { it + blockId }
         scope.launch {
             try {
-                val details = titleSource.loadDetails(tmdbId, kind)
+                val details = titleSource.loadDetails(tmdbId, kind)?.withImagesSavedBy(webImageFetcher)
                 if (details == null) {
                     showNativeToast("couldn't find this title")
                 } else {

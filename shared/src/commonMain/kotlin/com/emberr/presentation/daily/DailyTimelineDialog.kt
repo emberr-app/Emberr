@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,7 +46,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
@@ -91,14 +89,14 @@ import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.model.valueAsText
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.LocalImageOverlay
-import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrCheckbox
+import com.emberr.presentation.shared.components.EmberrSearchTextField
+import com.emberr.presentation.shared.components.EmberrSearchTextFieldAction
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.TopBarIconButton
-import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import com.emberr.presentation.shared.editor.EditorActions
@@ -119,8 +117,6 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_up
 import emberr.shared.generated.resources.code
-import emberr.shared.generated.resources.search
-import emberr.shared.generated.resources.x
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -338,104 +334,32 @@ private fun TimelineSearchBar(
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-    Box(
+    EmberrSearchTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = "Search the timeline",
+        hazeState = hazeState,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 14.dp)
-            .height(50.dp)
-            .emberrBorder(CircleShape)
-            .clip(CircleShape)
-            .emberrBlur(hazeState, EmberrBlur.Regular)
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+        textFieldModifier = Modifier.focusRequester(focusRequester)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 16.dp, end = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.search),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                modifier = Modifier.size(18.dp)
+        if (matchCount > 1) {
+            Text(
+                text = "${currentMatchPosition + 1}/$matchCount",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(end = 4.dp)
             )
-            Spacer(modifier = Modifier.width(12.dp))
-            BasicTextField(
-                value = query,
-                onValueChange = onQueryChange,
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.weight(1f).focusRequester(focusRequester),
-                decorationBox = { innerTextField ->
-                    Box(contentAlignment = Alignment.CenterStart) {
-                        if (query.isEmpty()) {
-                            Text(
-                                text = "Search the timeline",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-                            )
-                        }
-                        innerTextField()
-                    }
-                }
+            EmberrSearchTextFieldAction(
+                icon = painterResource(Res.drawable.arrow_up),
+                contentDescription = "Previous match",
+                onClick = onPreviousMatch
             )
-
-            if (matchCount > 1) {
-                Text(
-                    text = "${currentMatchPosition + 1}/$matchCount",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(end = 4.dp)
-                )
-                SearchBarActionIcon(
-                    icon = painterResource(Res.drawable.arrow_up),
-                    contentDescription = "Previous match",
-                    onClick = onPreviousMatch
-                )
-                SearchBarActionIcon(
-                    icon = painterResource(Res.drawable.arrow_down),
-                    contentDescription = "Next match",
-                    onClick = onNextMatch
-                )
-            }
-
-            if (query.isNotEmpty()) {
-                SearchBarActionIcon(
-                    icon = painterResource(Res.drawable.x),
-                    contentDescription = "Clear search",
-                    onClick = { onQueryChange("") }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SearchBarActionIcon(
-    icon: Painter,
-    contentDescription: String,
-    onClick: () -> Unit
-) {
-    IconTooltip(text = contentDescription) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onClick
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = icon,
-                contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                modifier = Modifier.size(17.dp)
+            EmberrSearchTextFieldAction(
+                icon = painterResource(Res.drawable.arrow_down),
+                contentDescription = "Next match",
+                onClick = onNextMatch
             )
         }
     }

@@ -71,7 +71,9 @@ import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieSearchResult
 import com.emberr.domain.model.WatchStatus
+import com.emberr.domain.model.hasPoster
 import com.emberr.domain.model.titleKey
+import com.emberr.domain.movie.TmdbTooManyRequestsException
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.SelectedOptionBackground
@@ -90,6 +92,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.jetbrains.compose.resources.painterResource
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -104,8 +107,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import emberr.shared.generated.resources.x
 import com.emberr.presentation.shared.components.customEmberrShadow
-import coil3.compose.AsyncImage
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.shadow
@@ -114,7 +115,10 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.runtime.Stable
 import androidx.compose.foundation.layout.navigationBarsPadding
 import com.emberr.presentation.shared.components.EmberrBottomSheet
-import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.EmberrSearchTextField
+import com.emberr.presentation.shared.openKeyboardHeightPx
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -147,6 +151,8 @@ private val CardScrim = Brush.horizontalGradient(
     1f to Color.Black.copy(alpha = 0.72f)
 )
 private val ResultPosterWidth = 30.dp
+private val PhoneResultPosterWidth = 44.dp
+private val PhoneSearchFieldSpace = 78.dp
 private val ChipShape = RoundedCornerShape(8.dp)
 private val RowShape = RoundedCornerShape(8.dp)
 private val SearchFieldShape = RoundedCornerShape(12.dp)
@@ -212,7 +218,6 @@ fun MovieBlockView(
                 }
                 MovieBlockPart.SEARCH -> editor?.let {
                     MovieSearchBox(
-                        canSearch = it.canSearch,
                         search = it::search,
                         onChoose = { result -> it.chooseTitle(block.id, result) },
                         focusRequestNonce = focusRequestNonce
@@ -228,24 +233,23 @@ private enum class MovieBlockPart { SEARCH, LOADING, CARD, NOTHING }
 
 @Composable
 internal fun MovieSearchBox(
-    canSearch: Boolean,
     search: suspend (String) -> List<MovieSearchResult>,
     onChoose: (MovieSearchResult) -> Unit,
     focusRequestNonce: String?,
     excludedTitleKeys: Set<String> = emptySet(),
     onClose: (() -> Unit)? = null
 ) {
-    when {
-        !canSearch -> MovieSearchMessage("Search isn't available in this build")
-        isDesktopPlatform -> DesktopMovieSearchBox(search, onChoose, focusRequestNonce, excludedTitleKeys, onClose)
-        else -> PhoneMovieSearchBox(search, onChoose, focusRequestNonce, excludedTitleKeys, onClose)
+    if (isDesktopPlatform) {
+        DesktopMovieSearchBox(search, onChoose, focusRequestNonce, excludedTitleKeys, onClose)
+    } else {
+        PhoneMovieSearchBox(search, onChoose, focusRequestNonce, excludedTitleKeys, onClose)
     }
 }
 
 @Stable
 private class MovieSearchState {
     var results by mutableStateOf<List<MovieSearchResult>?>(null)
-    var hasFailed by mutableStateOf(false)
+    var failureMessage by mutableStateOf<String?>(null)
 }
 
 @Composable
@@ -257,14 +261,16 @@ private fun rememberMovieSearch(
     val state = remember { MovieSearchState() }
     LaunchedEffect(query, isActive) {
         if (!isActive) return@LaunchedEffect
-        delay(SEARCH_DELAY_MILLIS)
+        if (query.isNotBlank()) delay(SEARCH_DELAY_MILLIS)
         try {
             state.results = search(query)
-            state.hasFailed = false
+            state.failureMessage = null
         } catch (cancellation: CancellationException) {
             throw cancellation
+        } catch (_: TmdbTooManyRequestsException) {
+            state.failureMessage = "Too many searches right now. Try again in a minute."
         } catch (_: Exception) {
-            state.hasFailed = true
+            state.failureMessage = "Needs internet to search"
         }
     }
     return state
@@ -288,8 +294,8 @@ private fun DesktopMovieSearchBox(
     val density = LocalDensity.current
     val resultsGapPx = with(density) { ResultsPanelGap.roundToPx() }
     val searchState = rememberMovieSearch(query = query, isActive = isFocused, search = search)
-    val visibleResults = if (searchState.hasFailed) emptyList() else searchState.results.orEmpty().filter { it.titleKey() !in excludedTitleKeys }
-    val hasSomethingToShow = searchState.hasFailed || visibleResults.isNotEmpty() || (searchState.results != null && query.isNotBlank())
+    val visibleResults = if (searchState.failureMessage != null) emptyList() else searchState.results.orEmpty().filter { it.titleKey() !in excludedTitleKeys }
+    val hasSomethingToShow = searchState.failureMessage != null || visibleResults.isNotEmpty() || (searchState.results != null && query.isNotBlank())
 
     LaunchedEffect(focusRequestNonce) {
         if (focusRequestNonce != null) runCatching { focusRequester.requestFocus() }
@@ -371,7 +377,7 @@ private fun DesktopMovieSearchBox(
                     MovieSearchResultsList(
                         query = query,
                         results = visibleResults,
-                        hasSearchFailed = searchState.hasFailed,
+                        failureMessage = searchState.failureMessage,
                         highlightedIndex = highlightedIndex,
                         onHighlight = { highlightedIndex = it },
                         onChoose = ::choose
@@ -443,7 +449,8 @@ internal fun MovieSearchSheet(
         expanded = expanded,
         onDismiss = onDismiss,
         title = "Add a movie or show",
-        contentHorizontalPadding = 0.dp
+        contentHorizontalPadding = 0.dp,
+        scrollsContent = false
     ) { closeAnd ->
         var query by remember { mutableStateOf("") }
         val focusManager = LocalFocusManager.current
@@ -466,38 +473,53 @@ internal fun MovieSearchSheet(
                 closeAnd { onChoose(result) }
             }
         }
-        val visibleResults = if (searchState.hasFailed) emptyList() else searchState.results.orEmpty().filter { it.titleKey() !in excludedTitleKeys }
+        val visibleResults = if (searchState.failureMessage != null) emptyList() else searchState.results.orEmpty().filter { it.titleKey() !in excludedTitleKeys }
 
-        Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 16.dp)) {
-            EmberrTextField(
-                value = query,
-                onValueChange = { query = it },
-                placeholder = "Search a movie or show",
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                onSubmit = { focusManager.clearFocus() },
-                trailingIcon = if (query.isNotEmpty()) ({ MovieSearchCloseIcon(onClick = { query = "" }) }) else null,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).hidesEditorToolbarWhileFocused()
-            )
+        val resultsHazeState = remember { HazeState() }
+        val density = LocalDensity.current
+        val openKeyboardHeight = openKeyboardHeightPx()
+
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val resultsMaxHeight = with(density) {
+                resultsHeightWhileKeyboardMoves(maxHeight, currentKeyboardHeight.toDp(), openKeyboardHeight.toDp())
+            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = PhoneResultsMinHeight, max = PhoneResultsMaxHeight)
+                    .heightIn(min = PhoneResultsMinHeight.coerceAtMost(resultsMaxHeight), max = resultsMaxHeight)
+                    .hazeSource(resultsHazeState)
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 12.dp, end = 12.dp, top = 12.dp),
+                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = PhoneSearchFieldSpace)
+                    .navigationBarsPadding(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                if (searchState.results != null || searchState.hasFailed) {
+                if (searchState.results != null || searchState.failureMessage != null) {
                     MovieSearchResultsList(
                         query = query,
                         results = visibleResults,
-                        hasSearchFailed = searchState.hasFailed,
+                        failureMessage = searchState.failureMessage,
                         highlightedIndex = -1,
                         onHighlight = {},
                         onChoose = ::chooseAfterKeyboardCloses,
-                        rowVerticalPadding = 10.dp
+                        rowVerticalPadding = 12.dp,
+                        posterWidth = PhoneResultPosterWidth
                     )
                 }
             }
+            EmberrSearchTextField(
+                value = query,
+                onValueChange = { query = it },
+                placeholder = "Search a movie or show",
+                hazeState = resultsHazeState,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                onSubmit = { focusManager.clearFocus() },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 14.dp)
+                    .hidesEditorToolbarWhileFocused()
+            )
         }
     }
 }
@@ -575,19 +597,27 @@ private class ResultsBelowField(private val gapPx: Int) : PopupPositionProvider 
     ): IntOffset = IntOffset(anchorBounds.left, anchorBounds.bottom + gapPx)
 }
 
+private fun resultsHeightWhileKeyboardMoves(spaceNow: Dp, keyboardNow: Dp, keyboardOpen: Dp): Dp {
+    val spaceWithKeyboardOpen = spaceNow - (keyboardOpen - keyboardNow)
+    val shrinkWithKeyboardOpen = (PhoneResultsMaxHeight - spaceWithKeyboardOpen).coerceAtLeast(0.dp)
+    val keyboardProgress = if (keyboardOpen > 0.dp) (keyboardNow / keyboardOpen).coerceIn(0f, 1f) else 0f
+    return (PhoneResultsMaxHeight - shrinkWithKeyboardOpen * keyboardProgress).coerceAtMost(spaceNow)
+}
+
 @Composable
 private fun MovieSearchResultsList(
     query: String,
     results: List<MovieSearchResult>,
-    hasSearchFailed: Boolean,
+    failureMessage: String?,
     highlightedIndex: Int,
     onHighlight: (Int) -> Unit,
     onChoose: (MovieSearchResult) -> Unit,
-    rowVerticalPadding: Dp = 6.dp
+    rowVerticalPadding: Dp = 6.dp,
+    posterWidth: Dp = ResultPosterWidth
 ) {
     val trimmedQuery = query.trim()
     when {
-        hasSearchFailed -> MovieSearchResultsMessage("Needs internet to search")
+        failureMessage != null -> MovieSearchResultsMessage(failureMessage)
         results.isEmpty() -> MovieSearchResultsMessage(
             if (trimmedQuery.isEmpty()) {
                 "Everything here is already added"
@@ -609,7 +639,8 @@ private fun MovieSearchResultsList(
                     isHighlighted = index == highlightedIndex,
                     onHover = { onHighlight(index) },
                     onClick = { onChoose(result) },
-                    verticalPadding = rowVerticalPadding
+                    verticalPadding = rowVerticalPadding,
+                    posterWidth = posterWidth
                 )
             }
         }
@@ -623,7 +654,8 @@ private fun MovieSearchResultRow(
     isHighlighted: Boolean,
     onHover: () -> Unit,
     onClick: () -> Unit,
-    verticalPadding: Dp
+    verticalPadding: Dp,
+    posterWidth: Dp
 ) {
     val hoverSource = remember { MutableInteractionSource() }
     val isHovered by hoverSource.collectIsHoveredAsState()
@@ -640,7 +672,7 @@ private fun MovieSearchResultRow(
             .padding(horizontal = 8.dp, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        MoviePoster(imageUrl = result.posterUrl, width = ResultPosterWidth, cornerRadius = 4.dp)
+        MoviePoster(filePath = null, url = result.posterUrl, width = posterWidth, cornerRadius = 4.dp)
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -672,27 +704,6 @@ private fun MovieSearchResultsMessage(text: String) {
         color = MaterialTheme.colorScheme.outline,
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
     )
-}
-
-@Composable
-private fun MovieSearchMessage(text: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(DefaultBlockShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.film),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
-    }
 }
 
 @Composable
@@ -766,8 +777,8 @@ internal fun MovieCard(
         )
     }
 
-    val posterUrl = details.posterUrl
-    val colors = movieCardColors(isOnPoster = posterUrl != null)
+    val hasPoster = details.hasPoster
+    val colors = movieCardColors(isOnPoster = hasPoster)
     val posterWidth = cardPosterWidth()
     val chipHeight = movieChipHeight()
 
@@ -782,7 +793,7 @@ internal fun MovieCard(
                 }
             )
             .clip(DefaultBlockShape)
-            .background(if (posterUrl != null) PosterBackdropBaseColor else MaterialTheme.colorScheme.surface)
+            .background(if (hasPoster) PosterBackdropBaseColor else MaterialTheme.colorScheme.surface)
             .hoverable(hoverSource)
             .titleSelectionMouseClicks(selection)
             .then(
@@ -798,8 +809,8 @@ internal fun MovieCard(
                 }
             )
     ) {
-        if (posterUrl != null) {
-            BlurredPosterBackdrop(imageUrl = posterUrl, blurRadius = 30.dp, scrim = CardScrim)
+        if (hasPoster) {
+            BlurredPosterBackdrop(details = details, blurRadius = 30.dp, scrim = CardScrim)
         }
         Row(
             modifier = Modifier
@@ -810,11 +821,11 @@ internal fun MovieCard(
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .then(if (posterUrl != null) Modifier.shadow(8.dp, RoundedCornerShape(8.dp)) else Modifier)
+                    .then(if (hasPoster) Modifier.shadow(8.dp, RoundedCornerShape(8.dp)) else Modifier)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(onClick = openDetails)
             ) {
-                MoviePoster(imageUrl = posterUrl, width = posterWidth, cornerRadius = 8.dp)
+                MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = 8.dp)
             }
             Column(
                 modifier = Modifier
@@ -1042,28 +1053,26 @@ private fun MovieOptionsMenu(
 }
 
 @Composable
-internal fun MoviePoster(imageUrl: String?, width: Dp, cornerRadius: Dp) {
+internal fun MoviePoster(filePath: String?, url: String?, width: Dp, cornerRadius: Dp) {
+    var isImageShown by remember(filePath, url) { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .width(width)
             .aspectRatio(2f / 3f)
             .clip(RoundedCornerShape(cornerRadius))
-            .background(chipContainerColor()),
+            .then(if (isImageShown) Modifier else Modifier.background(chipContainerColor())),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            painter = painterResource(Res.drawable.film),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(width * 0.4f)
-        )
-        if (imageUrl != null) {
-            AsyncImage(
-                model = imageUrl,
+        if (!isImageShown) {
+            Icon(
+                painter = painterResource(Res.drawable.film),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(width * 0.4f)
             )
+        }
+        if (filePath != null || url != null) {
+            MovieImage(filePath = filePath, url = url, modifier = Modifier.fillMaxSize(), onLoaded = { isImageShown = true })
         }
     }
 }

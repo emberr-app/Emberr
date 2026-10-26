@@ -383,7 +383,9 @@ val sharedModule = module {
     single<com.emberr.domain.util.media.WebImageFetcher> {
         com.emberr.domain.util.media.KtorWebImageFetcher(mediaStorageHelper = get())
     }
-    single<com.emberr.domain.movie.MovieTitleSource> { com.emberr.domain.movie.SampleMovieTitleSource() }
+    single<com.emberr.domain.movie.MovieTitleSource> {
+        com.emberr.domain.movie.TmdbMovieTitleSource()
+    }
     single {
         com.emberr.domain.backup.manual.EmberrBackupImporter(
             appDatabase = get(),

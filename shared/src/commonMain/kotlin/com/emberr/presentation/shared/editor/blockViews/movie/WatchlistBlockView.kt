@@ -112,6 +112,7 @@ fun WatchlistBlockView(
             onToggleSelection()
             return
         }
+        editor.loadSuggestionsEarly()
         if (isDesktopPlatform) {
             isAddingTitle = true
             searchFocusNonce = UUID.randomUUID().toString()
@@ -190,7 +191,6 @@ fun WatchlistBlockView(
 
         if (isAddingTitle) {
             MovieSearchBox(
-                canSearch = editor.canSearch,
                 search = editor::search,
                 onChoose = { result ->
                     editor.addTitle(block.watchlistNoteId, result)

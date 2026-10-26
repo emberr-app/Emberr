@@ -28,9 +28,11 @@ import com.emberr.domain.ai.external.ExternalAiProvider
 import com.emberr.domain.ai.external.ExternalAiProviderConfig
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.ImageBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.VoiceBlock
+import com.emberr.domain.model.mediaFilePaths
 import com.emberr.domain.media.MediaReferenceIndex
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.SpaceRepository
@@ -130,6 +132,7 @@ class SyncRepositoryImpl(
                     is ImageBlock -> block.localFilePath?.substringAfterLast("/")?.let { mediaFiles.add(it) }
                     is DocumentBlock -> block.localFilePath?.substringAfterLast("/")?.let { mediaFiles.add(it) }
                     is VoiceBlock -> block.localFilePath?.substringAfterLast("/")?.let { mediaFiles.add(it) }
+                    is MovieBlock -> block.mediaFilePaths().forEach { mediaFiles.add(it.substringAfterLast("/")) }
                     else -> {}
                 }
             }

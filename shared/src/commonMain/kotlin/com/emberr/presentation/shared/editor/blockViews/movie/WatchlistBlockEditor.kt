@@ -12,7 +12,9 @@ import com.emberr.domain.model.titleKey
 import com.emberr.domain.model.withDeleted
 import com.emberr.domain.model.withWatchState
 import com.emberr.domain.movie.MovieTitleSource
+import com.emberr.domain.movie.withImagesSavedBy
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.system.showNativeToast
 import kotlinx.coroutines.CancellationException
@@ -31,6 +33,7 @@ import java.util.UUID
 class WatchlistBlockEditor(
     private val repository: NoteRepository,
     private val titleSource: MovieTitleSource,
+    private val webImageFetcher: WebImageFetcher,
     private val appScope: CoroutineScope,
     private val changeWatchlistBlock: (blockId: String, change: (WatchlistBlock) -> WatchlistBlock) -> Unit
 ) {
@@ -42,9 +45,11 @@ class WatchlistBlockEditor(
     private val _lastAddedBlockId = MutableStateFlow<String?>(null)
     val lastAddedBlockId: StateFlow<String?> = _lastAddedBlockId.asStateFlow()
 
-    val canSearch: Boolean get() = titleSource.canSearch
-
     suspend fun search(query: String): List<MovieSearchResult> = titleSource.search(query)
+
+    fun loadSuggestionsEarly() {
+        appScope.launch { runCatching { titleSource.search("") } }
+    }
 
     fun titlesOf(watchlistNoteId: String): Flow<List<MovieBlock>> =
         repository.observeNoteContent(watchlistNoteId)
@@ -57,7 +62,7 @@ class WatchlistBlockEditor(
 
     fun movieEditorFor(watchlistNoteId: String): MovieBlockEditor =
         movieEditorsByWatchlistId.getOrPut(watchlistNoteId) {
-            MovieBlockEditor(titleSource, appScope, hostFor(watchlistNoteId))
+            MovieBlockEditor(titleSource, webImageFetcher, appScope, hostFor(watchlistNoteId))
         }
 
     fun rename(blockId: String, title: String) {
@@ -77,7 +82,7 @@ class WatchlistBlockEditor(
         _addingToWatchlistIds.update { it + watchlistNoteId }
         appScope.launch {
             try {
-                val details = titleSource.loadDetails(result.tmdbId, result.kind)
+                val details = titleSource.loadDetails(result.tmdbId, result.kind)?.withImagesSavedBy(webImageFetcher)
                 if (details == null) {
                     showNativeToast("couldn't find this title")
                     return@launch
