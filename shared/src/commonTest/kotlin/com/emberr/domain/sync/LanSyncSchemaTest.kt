@@ -32,6 +32,8 @@ class LanSyncSchemaTest {
         "table" to "id, rows, cellStyles, cellSpans, rowStyles, columnStyles, columnWidths, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "voice" to "id, localFilePath, durationSeconds, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "canvas" to "id, canvasNoteId, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
+        "movie" to "id, details, watchStatus, ratingHalfStars, watchStateChangedAt, addedAt, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
+        "watchlist" to "id, watchlistNoteId, title, views, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "property" to "id, propertyType, customPropertyId, customLabel, customValueType, text, date, endDate, time, endTime, tags, isChecked, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "database" to "id, databaseId, isLinkedDatabase, title, columns, notesColumnAfterKey, customProperties, columnWidths, defaultTemplateId, calculations, formulas, numberFormats, colorRules, repeatingTemplates, isLocked, showsRowCount, views, activeViewId, cellStyles, rowStyles, columnStyles, settingTimes, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "solid_divider" to "id, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
