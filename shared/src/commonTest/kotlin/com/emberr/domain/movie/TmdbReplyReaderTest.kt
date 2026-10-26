@@ -6,6 +6,8 @@ import com.emberr.domain.model.MovieEpisodeSummary
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieNamedLogo
 import com.emberr.domain.model.MoviePersonRole
+import com.emberr.domain.model.MovieReview
+import com.emberr.domain.model.MovieSearchResult
 import com.emberr.domain.model.MovieSeason
 import com.emberr.domain.model.MovieTrailer
 import com.emberr.domain.model.MovieWatchProviders
@@ -154,6 +156,33 @@ class TmdbReplyReaderTest {
         )
     }
 
+    @Test
+    fun recommendationsThenSimilarTitlesAndReviewsAreReadWithoutDuplicates() {
+        val extras = TmdbReplyReader.titleExtrasFrom(SAVED_EXTRAS_REPLY, MovieKind.MOVIE, mostSimilarTitles = 3)
+
+        assertEquals(
+            listOf(
+                MovieSearchResult(272, MovieKind.MOVIE, "Batman Begins", "2005", 7.7, "https://image.tmdb.org/t/p/w342/begins.jpg"),
+                MovieSearchResult(49026, MovieKind.MOVIE, "The Dark Knight Rises", "2012", 7.8, null),
+                MovieSearchResult(1124, MovieKind.MOVIE, "The Prestige", "2006", null, "https://image.tmdb.org/t/p/w342/prestige.jpg")
+            ),
+            extras.similarTitles
+        )
+        assertEquals(
+            listOf(
+                MovieReview(
+                    author = "Jane Critic",
+                    text = "A masterpiece.\nTruly.",
+                    link = "https://www.themoviedb.org/review/1",
+                    ratingOutOfTen = 9.0,
+                    writtenOn = LocalDate(2017, 2, 13)
+                ),
+                MovieReview(author = "filmfan", text = "Too long.", link = "https://www.themoviedb.org/review/2")
+            ),
+            extras.reviews
+        )
+    }
+
     private companion object {
         const val SAVED_MOVIE_REPLY = """
         {
@@ -248,6 +277,37 @@ class TmdbReplyReaderTest {
               {"iso_639_1": null, "file_path": "/logo-none.png", "vote_average": 8.0},
               {"iso_639_1": "en", "file_path": "/logo-en-lower-vote.png", "vote_average": 3.0},
               {"iso_639_1": "en", "file_path": "/logo-en.png", "vote_average": 5.5}
+            ]
+          }
+        }
+        """
+
+        const val SAVED_EXTRAS_REPLY = """
+        {
+          "id": 155,
+          "title": "The Dark Knight",
+          "recommendations": {
+            "page": 1,
+            "results": [
+              {"id": 272, "media_type": "movie", "title": "Batman Begins", "release_date": "2005-06-10", "vote_average": 7.7, "vote_count": 21000, "poster_path": "/begins.jpg"},
+              {"id": 777, "media_type": "movie", "title": "", "release_date": "2020-01-01", "vote_average": 5.0, "vote_count": 10},
+              {"id": 49026, "media_type": "movie", "title": "The Dark Knight Rises", "release_date": "2012-07-17", "vote_average": 7.8, "vote_count": 23000, "poster_path": null}
+            ]
+          },
+          "similar": {
+            "page": 1,
+            "results": [
+              {"id": 272, "title": "Batman Begins", "release_date": "2005-06-10", "vote_average": 7.7, "vote_count": 21000, "poster_path": "/begins.jpg"},
+              {"id": 1124, "title": "The Prestige", "release_date": "2006-10-17", "vote_average": 0.0, "vote_count": 0, "poster_path": "/prestige.jpg"},
+              {"id": 2000, "title": "One Too Many", "release_date": "2001-01-01", "vote_average": 6.0, "vote_count": 100}
+            ]
+          },
+          "reviews": {
+            "page": 1,
+            "results": [
+              {"author": "jane", "author_details": {"name": "Jane Critic", "username": "jane", "rating": 9.0}, "content": "A masterpiece.\r\nTruly.  ", "created_at": "2017-02-13T23:16:19.538Z", "url": "https://www.themoviedb.org/review/1"},
+              {"author": "", "author_details": {"name": "", "username": "filmfan", "rating": null}, "content": "Too long.", "created_at": "", "url": "https://www.themoviedb.org/review/2"},
+              {"author": "empty", "author_details": {"name": "", "username": "empty", "rating": 3.0}, "content": "   ", "created_at": "2020-01-01T00:00:00.000Z", "url": "https://www.themoviedb.org/review/3"}
             ]
           }
         }

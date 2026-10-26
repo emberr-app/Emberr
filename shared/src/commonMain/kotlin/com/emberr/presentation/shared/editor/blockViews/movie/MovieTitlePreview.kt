@@ -1,11 +1,13 @@
 package com.emberr.presentation.shared.editor.blockViews.movie
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MoviePersonRole
+import com.emberr.domain.model.MovieSearchResult
 import com.emberr.domain.model.titleKey
 import com.emberr.domain.movie.MovieTitleSource
 import org.koin.compose.koinInject
@@ -18,8 +20,29 @@ internal data class MovieTitleToPreview(
     val posterUrl: String? = null
 )
 
+internal class WatchlistAdder(
+    val titleKeysInWatchlist: Set<String>,
+    val isAdding: Boolean,
+    val add: (MovieSearchResult) -> Unit
+)
+
+internal val LocalWatchlistAdder = compositionLocalOf<WatchlistAdder?> { null }
+
 internal fun MoviePersonRole.toTitleToPreview(): MovieTitleToPreview =
     MovieTitleToPreview(tmdbId = tmdbId, kind = kind, title = title, yearText = yearText, posterUrl = posterUrl)
+
+internal fun MovieSearchResult.toTitleToPreview(): MovieTitleToPreview =
+    MovieTitleToPreview(tmdbId = tmdbId, kind = kind, title = title, yearText = yearText, posterUrl = posterUrl)
+
+internal fun MovieDetails.toSearchResult(): MovieSearchResult =
+    MovieSearchResult(
+        tmdbId = tmdbId,
+        kind = kind,
+        title = title,
+        yearText = yearText,
+        tmdbRating = tmdbRating,
+        posterUrl = posterUrl
+    )
 
 @Composable
 internal fun MovieTitlePreviewDialog(title: MovieTitleToPreview, onDismiss: () -> Unit) {

@@ -5,7 +5,9 @@ import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieEpisode
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MoviePerson
+import com.emberr.domain.model.MovieReview
 import com.emberr.domain.model.MovieSearchResult
+import com.emberr.domain.model.MovieTitleExtras
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.HttpRequestBuilder
@@ -15,6 +17,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -25,6 +28,8 @@ private const val CONNECT_TIMEOUT_MILLIS = 15_000L
 private const val REQUEST_TIMEOUT_MILLIS = 30_000L
 private const val MOST_SEARCH_RESULTS = 10
 private const val MOST_PERSON_ROLES = 12
+private const val MOST_SIMILAR_TITLES = 20
+private const val ENGLISH_US = "en-US"
 private const val ENGLISH = "en"
 private const val NO_LANGUAGE = "null"
 private val savedInfoParts = listOf("videos", "external_ids", "keywords", "watch/providers", "images")
@@ -75,6 +80,7 @@ class TmdbMovieTitleSource : MovieTitleSource {
     private val recentDetails = RecentReplies<MovieDetails>()
     private val recentPeople = RecentReplies<MoviePerson>()
     private val recentSeasons = RecentReplies<List<MovieEpisode>>()
+    private val recentExtras = RecentReplies<MovieTitleExtras>()
 
     override suspend fun search(query: String): List<MovieSearchResult> {
         val trimmedQuery = query.trim()
@@ -146,6 +152,34 @@ class TmdbMovieTitleSource : MovieTitleSource {
         return requestSeasonEpisodes(showId, seasonNumber)?.also { episodes -> recentSeasons.keep(key, episodes, System.currentTimeMillis()) }
     }
 
+    override suspend fun loadTitleExtras(tmdbId: Long, kind: MovieKind): MovieTitleExtras? {
+        val key = "${deviceLanguageTag()}:${kind.name}:$tmdbId"
+        recentExtras.find(key, System.currentTimeMillis())?.let { return it }
+        return requestTitleExtras(tmdbId, kind)?.also { extras -> recentExtras.keep(key, extras, System.currentTimeMillis()) }
+    }
+
+    private suspend fun requestTitleExtras(tmdbId: Long, kind: MovieKind): MovieTitleExtras? {
+        val path = if (kind == MovieKind.MOVIE) "movie/$tmdbId" else "tv/$tmdbId"
+        val response = requestTmdb(path) { parameter("append_to_response", "recommendations,similar,reviews") }
+        if (response.status == HttpStatusCode.NotFound) return null
+
+        val replyText = successfulReplyText(response)
+        val extras = withContext(Dispatchers.Default) { TmdbReplyReader.titleExtrasFrom(replyText, kind, MOST_SIMILAR_TITLES) }
+        val isEnglish = Locale.current.language.lowercase() == ENGLISH
+        if (extras.reviews.isNotEmpty() || isEnglish) return extras
+        return extras.copy(reviews = englishReviews(path))
+    }
+
+    private suspend fun englishReviews(titlePath: String): List<MovieReview> =
+        try {
+            val replyText = successfulReplyText(requestTmdb("$titlePath/reviews", language = ENGLISH_US))
+            withContext(Dispatchers.Default) { TmdbReplyReader.reviewsFrom(replyText) }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (_: Exception) {
+            emptyList()
+        }
+
     private suspend fun requestSeasonEpisodes(showId: Long, seasonNumber: Int): List<MovieEpisode>? {
         val response = requestTmdb("tv/$showId/season/$seasonNumber")
         if (response.status == HttpStatusCode.NotFound) return null
@@ -166,10 +200,11 @@ class TmdbMovieTitleSource : MovieTitleSource {
 
     private suspend fun requestTmdb(
         path: String,
+        language: String = deviceLanguageTag(),
         addParameters: HttpRequestBuilder.() -> Unit = {}
     ): HttpResponse =
         httpClient.get("$TMDB_PROXY_ADDRESS/$path") {
-            parameter("language", deviceLanguageTag())
+            parameter("language", language)
             addParameters()
         }
 
