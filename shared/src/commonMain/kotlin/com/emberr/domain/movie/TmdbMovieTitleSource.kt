@@ -2,6 +2,7 @@ package com.emberr.domain.movie
 
 import androidx.compose.ui.text.intl.Locale
 import com.emberr.domain.model.MovieDetails
+import com.emberr.domain.model.MovieEpisode
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MoviePerson
 import com.emberr.domain.model.MovieSearchResult
@@ -73,6 +74,7 @@ class TmdbMovieTitleSource : MovieTitleSource {
     private var savedTrending: SavedTrending? = null
     private val recentDetails = RecentReplies<MovieDetails>()
     private val recentPeople = RecentReplies<MoviePerson>()
+    private val recentSeasons = RecentReplies<List<MovieEpisode>>()
 
     override suspend fun search(query: String): List<MovieSearchResult> {
         val trimmedQuery = query.trim()
@@ -136,6 +138,20 @@ class TmdbMovieTitleSource : MovieTitleSource {
         val key = "${deviceLanguageTag()}:$personId"
         recentPeople.find(key, System.currentTimeMillis())?.let { return it }
         return requestPerson(personId)?.also { person -> recentPeople.keep(key, person, System.currentTimeMillis()) }
+    }
+
+    override suspend fun loadSeasonEpisodes(showId: Long, seasonNumber: Int): List<MovieEpisode>? {
+        val key = "${deviceLanguageTag()}:$showId:$seasonNumber"
+        recentSeasons.find(key, System.currentTimeMillis())?.let { return it }
+        return requestSeasonEpisodes(showId, seasonNumber)?.also { episodes -> recentSeasons.keep(key, episodes, System.currentTimeMillis()) }
+    }
+
+    private suspend fun requestSeasonEpisodes(showId: Long, seasonNumber: Int): List<MovieEpisode>? {
+        val response = requestTmdb("tv/$showId/season/$seasonNumber")
+        if (response.status == HttpStatusCode.NotFound) return null
+
+        val replyText = successfulReplyText(response)
+        return withContext(Dispatchers.Default) { TmdbReplyReader.seasonEpisodesFrom(replyText) }
     }
 
     private suspend fun requestPerson(personId: Long): MoviePerson? {

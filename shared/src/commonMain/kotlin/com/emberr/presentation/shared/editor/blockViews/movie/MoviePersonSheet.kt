@@ -76,7 +76,11 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
             if (person != null) {
                 if (person.biography.isNotBlank()) {
                     MoviePersonSection(title = "Biography") {
-                        MoviePersonBiography(biography = person.biography)
+                        MovieReadMoreText(
+                            text = person.biography,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            shortLines = SHORT_BIOGRAPHY_LINES
+                        )
                     }
                 }
                 if (person.roles.isNotEmpty()) {
@@ -166,34 +170,6 @@ private fun MoviePersonSection(title: String, padsContent: Boolean = true, conte
         )
         Box(modifier = if (padsContent) Modifier.padding(horizontal = PersonSheetSidePadding) else Modifier) {
             content()
-        }
-    }
-}
-
-@Composable
-private fun MoviePersonBiography(biography: String) {
-    var isExpanded by remember { mutableStateOf(false) }
-    var isCutShort by remember { mutableStateOf(false) }
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = biography,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = if (isExpanded) Int.MAX_VALUE else SHORT_BIOGRAPHY_LINES,
-            overflow = TextOverflow.Ellipsis,
-            onTextLayout = { layout -> if (!isExpanded) isCutShort = layout.hasVisualOverflow }
-        )
-        if (isCutShort) {
-            Text(
-                text = if (isExpanded) "Show less" else "Read more",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .clip(DefaultBlockShape)
-                    .clickable { isExpanded = !isExpanded }
-                    .padding(vertical = 4.dp)
-            )
         }
     }
 }

@@ -2,6 +2,7 @@ package com.emberr.domain.movie
 
 import com.emberr.domain.model.MovieCastMember
 import com.emberr.domain.model.MovieDetails
+import com.emberr.domain.model.MovieEpisode
 import com.emberr.domain.model.MovieEpisodeSummary
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieNamedLogo
@@ -22,6 +23,7 @@ private const val SEARCH_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w154"
 private const val CAST_PHOTO_ADDRESS = "https://image.tmdb.org/t/p/w185"
 private const val PERSON_PHOTO_ADDRESS = "https://image.tmdb.org/t/p/h632"
 private const val ROLE_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w342"
+private const val EPISODE_STILL_ADDRESS = "https://image.tmdb.org/t/p/w300"
 private const val SEASON_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w342"
 private const val COMPANY_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w185"
 private const val PROVIDER_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w92"
@@ -165,6 +167,20 @@ internal object TmdbReplyReader {
             roles = rolesFrom(reply.combinedCredits, mostRoles)
         )
     }
+
+    fun seasonEpisodesFrom(replyText: String): List<MovieEpisode> =
+        json.decodeFromString<TmdbSeasonReply>(replyText).episodes
+            .sortedBy { it.episodeNumber }
+            .map { episode ->
+                MovieEpisode(
+                    number = episode.episodeNumber,
+                    name = episode.name,
+                    airDate = dateOrNull(episode.airDate),
+                    runtimeMinutes = episode.runtime?.takeIf { it > 0 },
+                    overview = episode.overview,
+                    stillUrl = episode.stillPath?.let { EPISODE_STILL_ADDRESS + it }
+                )
+            }
 
     private fun rolesFrom(credits: TmdbCombinedCredits, mostRoles: Int): List<MoviePersonRole> {
         val castThenCrew = credits.cast.map { it to it.character } + credits.crew.map { it to it.job }
@@ -559,6 +575,19 @@ internal data class TmdbTranslationData(
     val overview: String = "",
     val tagline: String = "",
     val biography: String = ""
+)
+
+@Serializable
+internal data class TmdbSeasonReply(val episodes: List<TmdbSeasonEpisode> = emptyList())
+
+@Serializable
+internal data class TmdbSeasonEpisode(
+    @SerialName("episode_number") val episodeNumber: Int = 0,
+    val name: String = "",
+    @SerialName("air_date") val airDate: String = "",
+    val runtime: Int? = null,
+    val overview: String = "",
+    @SerialName("still_path") val stillPath: String? = null
 )
 
 @Serializable
