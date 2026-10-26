@@ -43,12 +43,15 @@ import com.emberr.domain.model.WatchlistSortKey
 import com.emberr.domain.model.WatchlistView
 import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.SelectedOptionBackground
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.funnel
 import emberr.shared.generated.resources.kanban
 import emberr.shared.generated.resources.list_sort_descending
+import emberr.shared.generated.resources.pen
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.sliders_horizontal
@@ -106,12 +109,14 @@ internal fun WatchlistToolbar(
                 WatchlistViewTab(
                     view = view,
                     isActive = view.id == openView.id,
-                    canRemove = views.size > 1,
+                    canDelete = views.size > 1,
                     isEnabled = isEnabled,
                     dragState = viewDragState,
                     onDrop = ::dropDraggedView,
                     onShow = { editor.showView(block.id, view.id) },
-                    onRemove = { editor.removeView(block.id, view.id) },
+                    onRename = { name -> editor.changeView(block.id, view.id) { it.copy(name = name) } },
+                    onDuplicate = { editor.duplicateView(block, view) },
+                    onDelete = { editor.removeView(block.id, view.id) },
                     runAfterKeyboardCloses = runAfterKeyboardCloses
                 )
             }
@@ -348,17 +353,18 @@ private fun WatchlistFilterChip(label: String, isEnabled: Boolean, onRemove: () 
 private fun WatchlistViewTab(
     view: WatchlistViewSettings,
     isActive: Boolean,
-    canRemove: Boolean,
+    canDelete: Boolean,
     isEnabled: Boolean,
     dragState: WatchlistViewDragState,
     onDrop: () -> Unit,
     onShow: () -> Unit,
-    onRemove: () -> Unit,
+    onRename: (String) -> Unit,
+    onDuplicate: () -> Unit,
+    onDelete: () -> Unit,
     runAfterKeyboardCloses: (() -> Unit) -> Unit
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
     val latestOnDrop by rememberUpdatedState(onDrop)
-    val latestCanRemove by rememberUpdatedState(canRemove)
     val color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
     Box(
         modifier = Modifier
@@ -373,7 +379,7 @@ private fun WatchlistViewTab(
                 viewId = view.id,
                 isEnabled = isEnabled,
                 onDrop = { latestOnDrop() },
-                onLongPressWithoutDrag = { if (latestCanRemove) runAfterKeyboardCloses { isMenuOpen = true } }
+                onLongPressWithoutDrag = { runAfterKeyboardCloses { isMenuOpen = true } }
             )
     ) {
         Row(
@@ -382,10 +388,7 @@ private fun WatchlistViewTab(
                 .clip(PillShape)
                 .background(if (isActive) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f) else Color.Transparent)
                 .clickable(enabled = isEnabled) {
-                    when {
-                        !isActive -> onShow()
-                        canRemove -> runAfterKeyboardCloses { isMenuOpen = true }
-                    }
+                    if (isActive) runAfterKeyboardCloses { isMenuOpen = true } else onShow()
                 }
                 .padding(horizontal = HeaderButtonInnerPadding, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -405,14 +408,45 @@ private fun WatchlistViewTab(
             )
         }
         MovieMenu(expanded = isMenuOpen, title = view.name, onDismiss = { isMenuOpen = false }) { closeAnd ->
-            MovieMenuOption(
-                label = "Remove view",
-                icon = Res.drawable.trash,
-                labelColor = MaterialTheme.colorScheme.error,
-                onClick = { closeAnd(onRemove) }
-            )
+            MovieMenuLayer(
+                title = "Rename view",
+                showsCloseButton = false,
+                anchor = { openLayer -> MovieMenuOption(label = "Rename", icon = Res.drawable.pen, onClick = openLayer) }
+            ) { closeLayerAnd ->
+                WatchlistRenameViewPage(
+                    currentName = view.name,
+                    onCancel = { closeLayerAnd { } },
+                    onRename = { name -> closeLayerAnd { closeAnd { onRename(name) } } }
+                )
+            }
+            MovieMenuOption(label = "Duplicate", icon = Res.drawable.copy, onClick = { closeAnd(onDuplicate) })
+            if (canDelete) {
+                MovieMenuOption(
+                    label = "Delete view",
+                    icon = Res.drawable.trash,
+                    labelColor = MaterialTheme.colorScheme.error,
+                    onClick = { closeAnd(onDelete) }
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun WatchlistRenameViewPage(currentName: String, onCancel: () -> Unit, onRename: (String) -> Unit) {
+    var name by remember { mutableStateOf(currentName) }
+    val saveName = { if (name.isNotBlank()) onRename(name.trim()) }
+
+    MovieMenuContent {
+        EmberrTextField(
+            value = name,
+            onValueChange = { name = it },
+            placeholder = "View name",
+            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+            onSubmit = saveName
+        )
+    }
+    MovieMenuButtons(cancelText = "Cancel", onCancel = onCancel, confirmText = "Save", onConfirm = saveName)
 }
 
 @Composable
