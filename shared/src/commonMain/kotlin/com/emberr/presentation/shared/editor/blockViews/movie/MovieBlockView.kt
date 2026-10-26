@@ -1098,14 +1098,14 @@ internal fun WatchStatus.dotColor(): Color {
 }
 
 internal fun MovieDetails.lengthText(): String? = when (kind) {
-    MovieKind.MOVIE -> runtimeMinutes?.let { minutes ->
-        when {
-            minutes < 60 -> "${minutes}m"
-            minutes % 60 == 0 -> "${minutes / 60}h"
-            else -> "${minutes / 60}h ${minutes % 60}m"
-        }
-    }
+    MovieKind.MOVIE -> runtimeMinutes?.let(::minutesText)
     MovieKind.SHOW -> seasonCount?.let { seasons -> if (seasons == 1) "1 season" else "$seasons seasons" }
+}
+
+internal fun minutesText(minutes: Int): String = when {
+    minutes < 60 -> "${minutes}m"
+    minutes % 60 == 0 -> "${minutes / 60}h"
+    else -> "${minutes / 60}h ${minutes % 60}m"
 }
 
 internal fun tmdbRatingText(rating: Double): String = ((rating * 10).roundToInt() / 10.0).toString()

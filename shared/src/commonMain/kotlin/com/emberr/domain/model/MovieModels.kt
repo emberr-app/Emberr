@@ -184,6 +184,16 @@ data class WatchlistBlock(
 ) : NoteBlock()
 
 @Immutable
+data class MovieEpisode(
+    val number: Int,
+    val name: String = "",
+    val airDate: LocalDate? = null,
+    val runtimeMinutes: Int? = null,
+    val overview: String = "",
+    val stillUrl: String? = null
+)
+
+@Immutable
 data class MoviePersonRole(
     val tmdbId: Long,
     val kind: MovieKind,

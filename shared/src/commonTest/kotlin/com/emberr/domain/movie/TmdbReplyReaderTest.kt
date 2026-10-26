@@ -1,6 +1,7 @@
 package com.emberr.domain.movie
 
 import com.emberr.domain.model.MovieCastMember
+import com.emberr.domain.model.MovieEpisode
 import com.emberr.domain.model.MovieEpisodeSummary
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieNamedLogo
@@ -139,6 +140,20 @@ class TmdbReplyReaderTest {
         )
     }
 
+    @Test
+    fun aSeasonReplyBecomesItsEpisodesInOrder() {
+        val episodes = TmdbReplyReader.seasonEpisodesFrom(SAVED_SEASON_REPLY)
+
+        assertEquals(
+            listOf(
+                MovieEpisode(1, "Pilot", LocalDate(2008, 1, 20), 58, "Walter White starts cooking.", "https://image.tmdb.org/t/p/w300/pilot.jpg"),
+                MovieEpisode(2, "Cat's in the Bag...", LocalDate(2008, 1, 27), 48, "", null),
+                MovieEpisode(3, "", null, null, "", null)
+            ),
+            episodes
+        )
+    }
+
     private companion object {
         const val SAVED_MOVIE_REPLY = """
         {
@@ -235,6 +250,20 @@ class TmdbReplyReaderTest {
               {"iso_639_1": "en", "file_path": "/logo-en.png", "vote_average": 5.5}
             ]
           }
+        }
+        """
+
+        const val SAVED_SEASON_REPLY = """
+        {
+          "_id": "52542282760ee313280017f9",
+          "air_date": "2008-01-20",
+          "name": "Season 1",
+          "season_number": 1,
+          "episodes": [
+            {"episode_number": 2, "name": "Cat's in the Bag...", "air_date": "2008-01-27", "runtime": 48, "overview": "", "still_path": null, "season_number": 1},
+            {"episode_number": 3, "name": "", "air_date": null, "runtime": 0, "overview": null, "still_path": null, "season_number": 1},
+            {"episode_number": 1, "name": "Pilot", "air_date": "2008-01-20", "runtime": 58, "overview": "Walter White starts cooking.", "still_path": "/pilot.jpg", "season_number": 1, "crew": [], "guest_stars": []}
+          ]
         }
         """
 

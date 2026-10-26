@@ -124,10 +124,11 @@ private val BackdropFade = Brush.verticalGradient(0.5f to Color.Black, 1f to Col
 
 private enum class MovieDetailsTab(val label: String) {
     OVERVIEW("Overview"),
-    CAST("Cast")
+    CAST("Cast"),
+    SEASONS("Seasons")
 }
 
-private data class DetailsColors(
+internal data class DetailsColors(
     val text: Color,
     val secondaryText: Color,
     val panel: Color,
@@ -278,6 +279,7 @@ internal fun MovieDetailsDialog(
                                             colors = colors,
                                             onOpenPerson = { member -> openCastMember = member }
                                         )
+                                        MovieDetailsTab.SEASONS -> MovieSeasonsTab(details = details, colors = colors)
                                     }
                                 }
                             }
@@ -644,6 +646,34 @@ private fun MovieOverviewTab(details: MovieDetails, colors: DetailsColors) {
     }
 }
 
+@Composable
+internal fun MovieReadMoreText(text: String, color: Color, shortLines: Int) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var isCutShort by remember { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = color,
+            maxLines = if (isExpanded) Int.MAX_VALUE else shortLines,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { layout -> if (!isExpanded) isCutShort = layout.hasVisualOverflow }
+        )
+        if (isCutShort) {
+            Text(
+                text = if (isExpanded) "Show less" else "Read more",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = color,
+                modifier = Modifier
+                    .clip(DefaultBlockShape)
+                    .clickable { isExpanded = !isExpanded }
+                    .padding(vertical = 4.dp)
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun MovieLinkChips(
@@ -932,7 +962,8 @@ private fun shownTabsOf(details: MovieDetails): List<MovieDetailsTab> {
         linksOf(details).isNotEmpty()
     return listOfNotNull(
         MovieDetailsTab.OVERVIEW.takeIf { hasOverview },
-        MovieDetailsTab.CAST.takeIf { details.cast.isNotEmpty() }
+        MovieDetailsTab.CAST.takeIf { details.cast.isNotEmpty() },
+        MovieDetailsTab.SEASONS.takeIf { hasSeasonsToShow(details) }
     )
 }
 
@@ -946,7 +977,7 @@ private fun dollarsText(dollars: Long): String = when {
 
 private fun oneDecimalText(value: Double): String = ((value * 10).roundToInt() / 10.0).toString()
 
-private fun episodeCountText(episodes: Int): String = if (episodes == 1) "1 episode" else "$episodes episodes"
+internal fun episodeCountText(episodes: Int): String = if (episodes == 1) "1 episode" else "$episodes episodes"
 
 internal fun releaseDateText(date: LocalDate): String {
     val month = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
