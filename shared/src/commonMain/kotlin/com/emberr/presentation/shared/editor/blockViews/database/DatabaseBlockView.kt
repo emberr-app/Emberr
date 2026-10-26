@@ -77,6 +77,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.domain.database.DatabaseRow
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.applyFiltersAndSort
@@ -241,6 +242,8 @@ private fun DatabaseBlockContent(
     var showFilterMenu by remember { mutableStateOf(false) }
     var showTemplateMenu by remember { mutableStateOf(false) }
     val rowSelection = remember(block.databaseId) { DatabaseRowSelection() }
+
+    KmpBackHandler(enabled = rowSelection.isSelecting) { rowSelection.stopSelecting() }
     val newRowIds = remember(block.databaseId) { mutableStateListOf<String>() }
 
     fun savedColumnWidth(target: DatabaseColumnTarget): Int {
