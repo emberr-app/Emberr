@@ -35,6 +35,8 @@ import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.selection.CrossBlockTextRange
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
@@ -193,7 +195,7 @@ fun DailyScreen(
     }
 
     val showToolbar = !isSelectionMode && !showAddNoteDialog && !showTimelineDialog &&
-        !isSearchActive && isKeyboardOpen
+        !isSearchActive && isKeyboardOpen && GlobalEditorState.focusedFieldsHidingToolbar == 0
 
     val calendarTaskMap by viewModel.calendarTaskMap.collectAsState()
     var showNoteLinkMenu by remember { mutableStateOf(false) }
@@ -347,6 +349,8 @@ fun DailyScreen(
             override fun onUpdatePropertyTags(id: String, tags: List<String>) = viewModel.updatePropertyTags(id, tags)
             override fun onUpdatePropertyChecked(id: String, isChecked: Boolean) = viewModel.updatePropertyChecked(id, isChecked)
             override val databaseBlockEditor: DatabaseBlockEditor get() = viewModel.databaseBlockEditor
+            override val movieBlockEditor: MovieBlockEditor get() = viewModel.movieBlockEditor
+            override val watchlistBlockEditor: WatchlistBlockEditor get() = viewModel.watchlistBlockEditor
         }
     }
 

@@ -61,6 +61,8 @@ import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.LocalCanvasFullScreenOverlay
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
 import com.emberr.presentation.settings.SettingsScreen
@@ -2210,6 +2212,8 @@ fun DesktopMainScreen(
                             override fun onUpdatePropertyTags(id: String, tags: List<String>) = dailyViewModel.updatePropertyTags(id, tags)
                             override fun onUpdatePropertyChecked(id: String, isChecked: Boolean) = dailyViewModel.updatePropertyChecked(id, isChecked)
                             override val databaseBlockEditor: DatabaseBlockEditor get() = dailyViewModel.databaseBlockEditor
+                            override val movieBlockEditor: MovieBlockEditor get() = dailyViewModel.movieBlockEditor
+                            override val watchlistBlockEditor: WatchlistBlockEditor get() = dailyViewModel.watchlistBlockEditor
                         }
                     }
 

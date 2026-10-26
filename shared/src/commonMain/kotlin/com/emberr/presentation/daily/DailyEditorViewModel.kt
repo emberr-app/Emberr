@@ -7,6 +7,7 @@ import com.emberr.data.local.room.entity.datesShownOn
 import com.emberr.data.local.room.entity.toAllDaySpan
 import com.emberr.data.local.room.entity.toRecurrenceRule
 import com.emberr.domain.model.*
+import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.eventbus.AiEventBus
@@ -55,8 +56,9 @@ class DailyEditorViewModel(
     reminderScheduler: ReminderScheduler,
     audioRecorder: AudioRecorder,
     appScope: CoroutineScope,
-    deviceTableLayoutStore: DeviceTableLayoutStore
-) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore) {
+    deviceTableLayoutStore: DeviceTableLayoutStore,
+    movieTitleSource: MovieTitleSource
+) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore, movieTitleSource) {
 
     // Date state
     private val _currentDateString = MutableStateFlow<String?>(null)
@@ -807,6 +809,8 @@ private fun isBlockHiddenFromTimeline(block: NoteBlock): Boolean = when (block) 
     is ImageBlock -> block.localFilePath.isNullOrBlank()
     is DocumentBlock -> block.localFilePath.isNullOrBlank()
     is VoiceBlock -> block.localFilePath.isNullOrBlank()
+    is MovieBlock -> block.details == null
+    is WatchlistBlock -> true
     else -> false
 }
 
@@ -826,6 +830,7 @@ private fun isBlockEmptyForTimeline(block: NoteBlock): Boolean = when (block) {
     is VoiceBlock -> block.localFilePath.isNullOrBlank()
     is TableBlock -> block.rows.all { row -> row.all { cell -> cell.isBlank() } }
     is PropertyBlock -> block.valueAsText().isBlank()
+    is MovieBlock -> block.details == null
     is SolidDividerBlock -> true
     is ThreeDotDividerBlock -> true
     else -> false

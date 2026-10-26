@@ -141,6 +141,7 @@ import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.InlineSpan
 import com.emberr.domain.model.LinkedNoteBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
 import com.emberr.domain.model.PropertyBlock
@@ -153,6 +154,7 @@ import com.emberr.domain.model.ThreeDotDividerBlock
 import com.emberr.domain.model.ToggleBlock
 import com.emberr.domain.model.UnknownBlock
 import com.emberr.domain.model.VoiceBlock
+import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.model.lastDate
@@ -178,6 +180,8 @@ import com.emberr.presentation.shared.editor.blockViews.TableBlockView
 import com.emberr.presentation.shared.editor.blockViews.UnknownBlockView
 import com.emberr.presentation.shared.editor.blockViews.callout.accentColor
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockView
+import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockView
+import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockView
 import com.emberr.presentation.shared.editor.blockViews.callout.icon
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyBlockView
 import com.emberr.presentation.shared.editor.formatting.HighlightColorCircles
@@ -360,7 +364,7 @@ fun NoteBlockItem(
         }
     }
 
-    val isTextBased = block !is BookmarkBlock && block !is ImageBlock && block !is DocumentBlock && block !is TableBlock && block !is VoiceBlock && block !is SolidDividerBlock && block !is ThreeDotDividerBlock && block !is LinkedNoteBlock && block !is CanvasBlock && block !is PropertyBlock && block !is DatabaseBlock && block !is UnknownBlock
+    val isTextBased = block !is BookmarkBlock && block !is ImageBlock && block !is DocumentBlock && block !is TableBlock && block !is VoiceBlock && block !is SolidDividerBlock && block !is ThreeDotDividerBlock && block !is LinkedNoteBlock && block !is CanvasBlock && block !is PropertyBlock && block !is DatabaseBlock && block !is MovieBlock && block !is WatchlistBlock && block !is UnknownBlock
     LaunchedEffect(focusRequest?.nonce) {
         if (focusRequest == null || focusRequest.id != block.id) return@LaunchedEffect
 
@@ -523,7 +527,8 @@ fun NoteBlockItem(
 
                         val startsSelectionWithCtrlClick = event.buttons.isPrimaryPressed &&
                             (event.keyboardModifiers.isCtrlPressed || event.keyboardModifiers.isMetaPressed) &&
-                            !latestInSelectionMode
+                            !latestInSelectionMode &&
+                            !GlobalEditorState.isPointerOverWatchlistTitle
                         if (startsSelectionWithCtrlClick) {
                             press.consume()
                             actions.onToggleSelection(block.id)
@@ -1160,6 +1165,23 @@ fun NoteBlockItem(
                                     Box(Modifier.size(dotSize).clip(CircleShape).background(dotColor))
                                 }
                             }
+                            is MovieBlock -> MovieBlockView(
+                                block = block,
+                                editor = actions.movieBlockEditor,
+                                inSelectionMode = inSelectionMode,
+                                onToggleSelection = { actions.onToggleSelection(block.id) },
+                                onDelete = { actions.onDeleteBlock(block.id) },
+                                focusRequestNonce = focusRequest?.takeIf { it.id == block.id }?.nonce,
+                                runAfterKeyboardCloses = afterKeyboardCloses
+                            )
+                            is WatchlistBlock -> WatchlistBlockView(
+                                block = block,
+                                editor = actions.watchlistBlockEditor,
+                                inSelectionMode = inSelectionMode,
+                                onToggleSelection = { actions.onToggleSelection(block.id) },
+                                onDelete = { actions.onDeleteBlock(block.id) },
+                                runAfterKeyboardCloses = afterKeyboardCloses
+                            )
                             is UnknownBlock -> UnknownBlockView()
                         }
                     }

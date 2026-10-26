@@ -92,6 +92,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.composed
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -138,6 +139,7 @@ import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.LinkedNoteBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
 import com.emberr.domain.model.PropertyBlock
@@ -148,6 +150,7 @@ import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.ToggleBlock
 import com.emberr.domain.model.VoiceBlock
+import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.editableTextOrNull
 import com.emberr.domain.model.idsOfBlocksInsideAToggleOrCallout
 import com.emberr.domain.model.shortDateText
@@ -173,6 +176,8 @@ import com.emberr.presentation.shared.editor.blockViews.LinkedNoteOptionsMenu
 import com.emberr.presentation.shared.editor.blockViews.callout.calloutContentPadding
 import com.emberr.presentation.shared.editor.blockViews.callout.calloutFramesByRow
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.callout.displayedIndentationLevelOf
 import com.emberr.presentation.shared.editor.blockViews.callout.drawCalloutFrames
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
@@ -217,6 +222,8 @@ import emberr.shared.generated.resources.database
 import emberr.shared.generated.resources.document_text_12
 import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.eye3
+import emberr.shared.generated.resources.film
+import emberr.shared.generated.resources.tv
 import emberr.shared.generated.resources.format_bold
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.image
@@ -323,8 +330,25 @@ data class SlashMenuSectionData(
 // MENU  = the full "everything" menu opened from the + button
 enum class MobileMenuState { MAIN, SLASH, MENU, MENTION, LINK_TO_NOTE, LINK_TO_CANVAS, LINK_TO_DATABASE }
 
+fun Modifier.hidesEditorToolbarWhileFocused(): Modifier = composed {
+    var isFocused by remember { mutableStateOf(false) }
+    DisposableEffect(Unit) {
+        onDispose { if (isFocused) GlobalEditorState.focusedFieldsHidingToolbar -= 1 }
+    }
+    onFocusChanged { focusState ->
+        if (focusState.hasFocus != isFocused) {
+            isFocused = focusState.hasFocus
+            GlobalEditorState.focusedFieldsHidingToolbar += if (focusState.hasFocus) 1 else -1
+        }
+    }
+}
+
 object GlobalEditorState {
     var currentlyFocusedBlockId: String? = null
+
+    var focusedFieldsHidingToolbar by mutableIntStateOf(0)
+
+    var isPointerOverWatchlistTitle: Boolean = false
 
     var lastCopiedMarkdown: String? = null
 
@@ -477,6 +501,8 @@ interface EditorActions {
     fun onUpdatePropertyTags(id: String, tags: List<String>)
     fun onUpdatePropertyChecked(id: String, isChecked: Boolean)
     val databaseBlockEditor: DatabaseBlockEditor?
+    val movieBlockEditor: MovieBlockEditor? get() = null
+    val watchlistBlockEditor: WatchlistBlockEditor? get() = null
 }
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
@@ -1281,6 +1307,8 @@ fun EditorScreen(
                                         || lastBlock is CanvasBlock
                                         || lastBlock is PropertyBlock
                                         || lastBlock is DatabaseBlock
+                                        || lastBlock is MovieBlock
+                                        || lastBlock is WatchlistBlock
 
                                 if (isMediaBlock) {
                                     wrappedActions.onFocusBlock(lastBlock.id)
@@ -1421,6 +1449,8 @@ fun EditorScreen(
                                                     || lastBlock is CanvasBlock
                                                     || lastBlock is PropertyBlock
                                                     || lastBlock is DatabaseBlock
+                                                    || lastBlock is MovieBlock
+                                                    || lastBlock is WatchlistBlock
 
                                             if (isMediaBlock) {
                                                 wrappedActions.onFocusBlock(lastBlock.id)
@@ -2129,6 +2159,8 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Image", Res.drawable.image) { onInsertMediaBlock("image") },
         SlashMenuItemData("Document / File", Res.drawable.document_text_12) { onInsertMediaBlock("document") },
         SlashMenuItemData("Web Bookmark", Res.drawable.bookmark) { onInsertMediaBlock("bookmark") },
+        SlashMenuItemData("Movie or Show", Res.drawable.film) { onInsertMediaBlock("movie") },
+        SlashMenuItemData("Watchlist", Res.drawable.tv) { onInsertMediaBlock("watchlist") },
         SlashMenuItemData("Simple Table", Res.drawable.table) { onInsertMediaBlock("table") },
         SlashMenuItemData("Database", Res.drawable.database) { onInsertMediaBlock("database") },
         SlashMenuItemData("Canvas", Res.drawable.group) { onInsertMediaBlock("canvas") },

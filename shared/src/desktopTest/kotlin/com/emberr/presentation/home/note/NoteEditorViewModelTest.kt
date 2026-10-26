@@ -3,6 +3,7 @@ package com.emberr.presentation.home.note
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.NoteContent
+import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
@@ -84,7 +85,8 @@ class NoteEditorViewModelTest {
             reminderScheduler = neverCalledStub<ReminderScheduler>(),
             audioRecorder = neverCalledStub<AudioRecorder>(),
             appScope = CoroutineScope(Job()),
-            deviceTableLayoutStore = DeviceTableLayoutStore(neverCalledStub<SettingsManager>())
+            deviceTableLayoutStore = DeviceTableLayoutStore(neverCalledStub<SettingsManager>()),
+            movieTitleSource = neverCalledStub<MovieTitleSource>()
         )
         viewModel.loadNote("note-1")
         withTimeout(5_000) { viewModel.isLoading.first { isLoading -> !isLoading } }

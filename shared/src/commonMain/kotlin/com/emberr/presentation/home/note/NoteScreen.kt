@@ -67,6 +67,8 @@ import com.emberr.presentation.shared.editor.BlockSelectionPill
 import com.emberr.presentation.shared.editor.EditorScreen
 import com.emberr.presentation.shared.editor.ImageLinkFetch
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.selection.CrossBlockTextRange
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
@@ -278,7 +280,7 @@ fun NoteScreen(
         previousImeBottom = imeBottom
     }
 
-    val showToolbar = !isSelectionMode && !isSearchActive &&
+    val showToolbar = !isSelectionMode && !isSearchActive && GlobalEditorState.focusedFieldsHidingToolbar == 0 &&
         (isKeyboardOpen || isDesktopPlatform || mobileMenuState != MobileMenuState.MAIN)
 
     SelectionModeObserver(isSelectionMode, onSelectionModeChange)
@@ -516,6 +518,8 @@ fun NoteScreen(
             override fun onUpdatePropertyTags(id: String, tags: List<String>) = viewModel.updatePropertyTags(id, tags)
             override fun onUpdatePropertyChecked(id: String, isChecked: Boolean) = viewModel.updatePropertyChecked(id, isChecked)
             override val databaseBlockEditor: DatabaseBlockEditor get() = viewModel.databaseBlockEditor
+            override val movieBlockEditor: MovieBlockEditor get() = viewModel.movieBlockEditor
+            override val watchlistBlockEditor: WatchlistBlockEditor get() = viewModel.watchlistBlockEditor
         }
     }
 
