@@ -17,6 +17,7 @@ import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.movie.newViewWithLayout
 import com.emberr.domain.movie.viewsInOrderOf
 import com.emberr.domain.movie.withViewAdded
+import com.emberr.domain.movie.withViewAddedAfter
 import com.emberr.domain.movie.withViewChanged
 import com.emberr.domain.movie.withViewRemoved
 import com.emberr.domain.movie.withImagesSavedBy
@@ -92,6 +93,16 @@ class WatchlistBlockEditor(
         changeWatchlistBlock(block.id) { it.withViewAdded(newView) }
         deviceTableLayoutStore.setViewOrder(block.id, viewIdsHere + newView.id)
         deviceTableLayoutStore.setActiveViewId(block.id, newView.id)
+    }
+
+    fun duplicateView(block: WatchlistBlock, view: WatchlistViewSettings) {
+        val copy = view.copy(id = UUID.randomUUID().toString(), name = "${view.name} copy")
+        val viewIdsHere = block.viewsInOrderOf(deviceTableLayoutStore.currentLayoutOf(block.id)).map { it.id }
+        val originalIndex = viewIdsHere.indexOf(view.id)
+        val viewIdsWithCopy = viewIdsHere.toMutableList().apply { add(originalIndex + 1, copy.id) }
+        changeWatchlistBlock(block.id) { it.withViewAddedAfter(copy, view.id) }
+        deviceTableLayoutStore.setViewOrder(block.id, viewIdsWithCopy)
+        deviceTableLayoutStore.setActiveViewId(block.id, copy.id)
     }
 
     fun removeView(blockId: String, viewId: String) {

@@ -1,5 +1,6 @@
 package com.emberr.presentation.shared.editor.blockViews.movie
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +28,10 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
+import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.emberrBorderColor
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -41,12 +44,14 @@ private val MenuTextInset = 20.dp
 private val SheetActionRowShape = RoundedCornerShape(12.dp)
 private val SheetActionRowSpacing = 2.dp
 private val SheetActionRowIconGap = 12.dp
+private val MenuContentInset = if (isDesktopPlatform) 8.dp else 20.dp
 
 @Composable
 internal fun MovieMenu(
     expanded: Boolean,
     title: String,
     onDismiss: () -> Unit,
+    showsCloseButton: Boolean = true,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     if (isDesktopPlatform) {
@@ -71,12 +76,53 @@ internal fun MovieMenu(
         ) { closeAnd ->
             Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = SheetBottomPadding)) {
                 content(closeAnd)
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { closeAnd { } },
-                    modifier = Modifier.fillMaxWidth().padding(start = MenuTextInset, end = MenuTextInset, top = 12.dp)
-                )
+                if (showsCloseButton) {
+                    EmberrButtonPrimary(
+                        text = "Close",
+                        onClick = { closeAnd { } },
+                        modifier = Modifier.fillMaxWidth().padding(start = MenuTextInset, end = MenuTextInset, top = 12.dp)
+                    )
+                }
             }
+        }
+    }
+}
+
+@Composable
+internal fun MovieMenuLayer(
+    title: String,
+    anchor: @Composable (openLayer: () -> Unit) -> Unit,
+    showsCloseButton: Boolean = true,
+    content: @Composable ColumnScope.(closeLayerAnd: (() -> Unit) -> Unit) -> Unit
+) {
+    EmberrDesktopSubmenu(
+        menuWidthEstimate = DesktopMenuMaxWidth,
+        anchor = { openLayer, _ -> anchor(openLayer) }
+    ) { isOpen, closeLayer ->
+        MovieMenu(
+            expanded = isOpen,
+            title = title,
+            onDismiss = closeLayer,
+            showsCloseButton = showsCloseButton,
+            content = content
+        )
+    }
+}
+
+@Composable
+internal fun MovieMenuContent(content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = MenuContentInset), content = content)
+}
+
+@Composable
+internal fun MovieMenuButtons(cancelText: String, onCancel: () -> Unit, confirmText: String, onConfirm: () -> Unit) {
+    MovieMenuContent {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            EmberrButtonSecondary(text = cancelText, onClick = onCancel, modifier = Modifier.weight(1f))
+            EmberrButtonPrimary(text = confirmText, onClick = onConfirm, modifier = Modifier.weight(1f))
         }
     }
 }

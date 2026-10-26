@@ -37,6 +37,12 @@ fun WatchlistBlock.newViewWithLayout(layout: WatchlistView, id: String): Watchli
 
 fun WatchlistBlock.withViewAdded(view: WatchlistViewSettings): WatchlistBlock = copy(views = allViews() + view)
 
+fun WatchlistBlock.withViewAddedAfter(view: WatchlistViewSettings, afterViewId: String): WatchlistBlock {
+    val viewsNow = allViews()
+    val insertAt = viewsNow.indexOfFirst { it.id == afterViewId }.takeIf { it >= 0 }?.plus(1) ?: viewsNow.size
+    return copy(views = viewsNow.toMutableList().apply { add(insertAt, view) })
+}
+
 fun WatchlistBlock.withViewRemoved(viewId: String): WatchlistBlock {
     val remainingViews = allViews().filter { it.id != viewId }
     return if (remainingViews.isEmpty()) this else copy(views = remainingViews)
