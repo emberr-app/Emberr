@@ -169,7 +169,9 @@ internal fun MovieDetailsDialog(
     block: MovieBlock,
     details: MovieDetails,
     editor: MovieBlockEditor?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isPreview: Boolean = false,
+    liveLoad: LiveTmdbLoadState<*>? = null
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -185,6 +187,7 @@ internal fun MovieDetailsDialog(
         val horizontalPadding = if (isDesktopPlatform) 32.dp else 24.dp
         val hazeState = remember { HazeState() }
         var selectedTab by remember { mutableStateOf(MovieDetailsTab.OVERVIEW) }
+        var openCastMember by remember { mutableStateOf<MovieCastMember?>(null) }
         val shownTabs = shownTabsOf(details)
         val shownTab = selectedTab.takeIf { it in shownTabs } ?: shownTabs.firstOrNull()
 
@@ -235,11 +238,26 @@ internal fun MovieDetailsDialog(
                             ),
                             verticalArrangement = Arrangement.spacedBy(SectionGap)
                         ) {
-                            MovieDetailsHeader(block = block, details = details, editor = editor, colors = colors)
-                            if (!isDesktopPlatform) {
-                                MovieRatingPanel(block = block, details = details, editor = editor, colors = colors)
+                            MovieDetailsHeader(
+                                block = block,
+                                details = details,
+                                editor = editor,
+                                colors = colors,
+                                showsWatchState = !isPreview
+                            )
+                            val hasRatingPanelContent = !isPreview || details.tmdbRating != null || details.trailer != null
+                            if (!isDesktopPlatform && hasRatingPanelContent) {
+                                MovieRatingPanel(
+                                    block = block,
+                                    details = details,
+                                    editor = editor,
+                                    colors = colors,
+                                    showsWatchState = !isPreview
+                                )
                             }
-                            if (shownTab != null) {
+                            if (liveLoad != null) {
+                                LiveTmdbLoadMessage(state = liveLoad, textColor = colors.text, chipBackground = colors.chipBackground)
+                            } else if (shownTab != null) {
                                 Column(verticalArrangement = Arrangement.spacedBy(TabContentGap)) {
                                     if (shownTabs.size > 1) {
                                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -255,7 +273,11 @@ internal fun MovieDetailsDialog(
                                     }
                                     when (shownTab) {
                                         MovieDetailsTab.OVERVIEW -> MovieOverviewTab(details = details, colors = colors)
-                                        MovieDetailsTab.CAST -> MovieCastGrid(cast = details.cast, colors = colors)
+                                        MovieDetailsTab.CAST -> MovieCastGrid(
+                                            cast = details.cast,
+                                            colors = colors,
+                                            onOpenPerson = { member -> openCastMember = member }
+                                        )
                                     }
                                 }
                             }
@@ -284,6 +306,12 @@ internal fun MovieDetailsDialog(
                 }
             }
         }
+
+        openCastMember?.let { member ->
+            member.personId?.let { personId ->
+                MoviePersonSheet(member = member, personId = personId, onDismiss = { openCastMember = null })
+            }
+        }
     }
 }
 
@@ -306,7 +334,13 @@ private fun MovieBackdropBanner(details: MovieDetails, height: Dp) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MovieDetailsHeader(block: MovieBlock, details: MovieDetails, editor: MovieBlockEditor?, colors: DetailsColors) {
+private fun MovieDetailsHeader(
+    block: MovieBlock,
+    details: MovieDetails,
+    editor: MovieBlockEditor?,
+    colors: DetailsColors,
+    showsWatchState: Boolean
+) {
     val posterWidth = if (isDesktopPlatform) 150.dp else 104.dp
 
     val titleAndTagline: @Composable ColumnScope.() -> Unit = {
@@ -350,7 +384,13 @@ private fun MovieDetailsHeader(block: MovieBlock, details: MovieDetails, editor:
                         horizontalArrangement = Arrangement.spacedBy(32.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        MovieRatingItems(block = block, details = details, editor = editor, colors = colors)
+                        MovieRatingItems(
+                            block = block,
+                            details = details,
+                            editor = editor,
+                            colors = colors,
+                            showsWatchState = showsWatchState
+                        )
                     }
                     details.trailer?.let { trailer ->
                         MovieTrailerButton(trailer = trailer, colors = colors, modifier = Modifier.padding(top = 8.dp))
@@ -383,7 +423,8 @@ private fun MovieRatingPanel(
     block: MovieBlock,
     details: MovieDetails,
     editor: MovieBlockEditor?,
-    colors: DetailsColors
+    colors: DetailsColors,
+    showsWatchState: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -397,7 +438,13 @@ private fun MovieRatingPanel(
             horizontalArrangement = Arrangement.spacedBy(32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            MovieRatingItems(block = block, details = details, editor = editor, colors = colors)
+            MovieRatingItems(
+                block = block,
+                details = details,
+                editor = editor,
+                colors = colors,
+                showsWatchState = showsWatchState
+            )
         }
         details.trailer?.let { trailer -> MovieTrailerButton(trailer = trailer, colors = colors) }
     }
@@ -427,7 +474,8 @@ private fun MovieRatingItems(
     block: MovieBlock,
     details: MovieDetails,
     editor: MovieBlockEditor?,
-    colors: DetailsColors
+    colors: DetailsColors,
+    showsWatchState: Boolean
 ) {
     details.tmdbRating?.let { rating ->
         MovieRatingItem(label = "TMDB", colors = colors) {
@@ -445,6 +493,7 @@ private fun MovieRatingItems(
             }
         }
     }
+    if (!showsWatchState) return
     MovieRatingItem(label = "Your rating", colors = colors) {
         StarRatingPicker(
             ratingHalfStars = block.ratingHalfStars,
@@ -590,26 +639,39 @@ private fun MovieOverviewTab(details: MovieDetails, colors: DetailsColors) {
         }
         val links = linksOf(details)
         if (links.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            MovieLinkChips(links = links, background = colors.chipBackground, contentColor = colors.chipText)
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun MovieLinkChips(
+    links: List<Pair<String, String>>,
+    background: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val uriHandler = LocalUriHandler.current
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        links.forEach { (label, address) ->
+            MovieChip(
+                label = label,
+                onClick = { uriHandler.openUri(address) },
+                modifier = Modifier.height(movieChipHeight()),
+                background = background,
+                contentColor = contentColor
             ) {
-                links.forEach { (label, address) ->
-                    MovieChip(
-                        label = label,
-                        onClick = { uriHandler.openUri(address) },
-                        modifier = Modifier.height(movieChipHeight()),
-                        background = colors.chipBackground,
-                        contentColor = colors.chipText
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.link),
-                            contentDescription = null,
-                            tint = colors.chipText,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                }
+                Icon(
+                    painter = painterResource(Res.drawable.link),
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(14.dp)
+                )
             }
         }
     }
@@ -741,7 +803,7 @@ private fun MovieFactRow(label: String, value: String, colors: DetailsColors) {
 }
 
 @Composable
-private fun MovieCastGrid(cast: List<MovieCastMember>, colors: DetailsColors) {
+private fun MovieCastGrid(cast: List<MovieCastMember>, colors: DetailsColors, onOpenPerson: (MovieCastMember) -> Unit) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val portraitMinWidth = if (isDesktopPlatform) CastPortraitMinWidthDesktop else CastPortraitMinWidthPhone
         val columnCount = ((maxWidth + CastColumnGap) / (portraitMinWidth + CastColumnGap)).toInt().coerceAtLeast(1)
@@ -749,7 +811,12 @@ private fun MovieCastGrid(cast: List<MovieCastMember>, colors: DetailsColors) {
             cast.chunked(columnCount).forEach { rowMembers ->
                 Row(horizontalArrangement = Arrangement.spacedBy(CastColumnGap)) {
                     rowMembers.forEach { member ->
-                        MovieCastPortrait(member = member, colors = colors, modifier = Modifier.weight(1f))
+                        MovieCastPortrait(
+                            member = member,
+                            colors = colors,
+                            onClick = member.personId?.let { { onOpenPerson(member) } },
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                     repeat(columnCount - rowMembers.size) {
                         Spacer(modifier = Modifier.weight(1f))
@@ -761,8 +828,18 @@ private fun MovieCastGrid(cast: List<MovieCastMember>, colors: DetailsColors) {
 }
 
 @Composable
-private fun MovieCastPortrait(member: MovieCastMember, colors: DetailsColors, modifier: Modifier = Modifier) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+private fun MovieCastPortrait(
+    member: MovieCastMember,
+    colors: DetailsColors,
+    onClick: (() -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(DefaultBlockShape)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -871,10 +948,10 @@ private fun oneDecimalText(value: Double): String = ((value * 10).roundToInt() /
 
 private fun episodeCountText(episodes: Int): String = if (episodes == 1) "1 episode" else "$episodes episodes"
 
-private fun releaseDateText(date: LocalDate): String {
+internal fun releaseDateText(date: LocalDate): String {
     val month = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
     return "${date.day} $month ${date.year}"
 }
 
-private fun initialsOf(name: String): String =
+internal fun initialsOf(name: String): String =
     name.split(' ').filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }

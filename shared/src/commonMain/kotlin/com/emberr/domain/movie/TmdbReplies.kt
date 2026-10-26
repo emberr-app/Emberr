@@ -5,6 +5,8 @@ import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieEpisodeSummary
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieNamedLogo
+import com.emberr.domain.model.MoviePerson
+import com.emberr.domain.model.MoviePersonRole
 import com.emberr.domain.model.MovieSearchResult
 import com.emberr.domain.model.MovieSeason
 import com.emberr.domain.model.MovieTrailer
@@ -18,12 +20,15 @@ private const val POSTER_ADDRESS = "https://image.tmdb.org/t/p/w500"
 private const val BACKDROP_ADDRESS = "https://image.tmdb.org/t/p/w1280"
 private const val SEARCH_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w154"
 private const val CAST_PHOTO_ADDRESS = "https://image.tmdb.org/t/p/w185"
+private const val PERSON_PHOTO_ADDRESS = "https://image.tmdb.org/t/p/h632"
+private const val ROLE_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w342"
 private const val SEASON_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w342"
 private const val COMPANY_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w185"
 private const val PROVIDER_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w92"
 private const val TITLE_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w500"
 private const val YOUTUBE = "YouTube"
 private val trailerTypesInOrder = listOf("Trailer", "Teaser")
+private val talkAndNewsGenreIds = setOf(10763, 10767)
 private const val MOST_CAST_MEMBERS = 10
 private const val FALLBACK_REGION = "US"
 private const val ENGLISH = "en"
@@ -142,6 +147,53 @@ internal object TmdbReplyReader {
         )
     }
 
+    fun personFrom(replyText: String, mostRoles: Int): MoviePerson {
+        val reply = json.decodeFromString<TmdbPersonReply>(replyText)
+        return MoviePerson(
+            tmdbId = reply.id,
+            name = reply.name,
+            knownFor = reply.knownForDepartment,
+            birthday = dateOrNull(reply.birthday),
+            deathday = dateOrNull(reply.deathday),
+            placeOfBirth = reply.placeOfBirth,
+            biography = reply.biography.ifBlank { reply.translations.englishData()?.biography.orEmpty() },
+            photoUrl = reply.profilePath?.let { PERSON_PHOTO_ADDRESS + it },
+            imdbId = reply.imdbId.ifBlank { reply.externalIds.imdbId },
+            instagramHandle = reply.externalIds.instagramId,
+            facebookHandle = reply.externalIds.facebookId,
+            xHandle = reply.externalIds.twitterId,
+            roles = rolesFrom(reply.combinedCredits, mostRoles)
+        )
+    }
+
+    private fun rolesFrom(credits: TmdbCombinedCredits, mostRoles: Int): List<MoviePersonRole> {
+        val castThenCrew = credits.cast.map { it to it.character } + credits.crew.map { it to it.job }
+        return castThenCrew
+            .filter { (credit, _) -> credit.genreIds.none { it in talkAndNewsGenreIds } }
+            .distinctBy { (credit, _) -> credit.mediaType to credit.id }
+            .sortedByDescending { (credit, _) -> credit.voteCount }
+            .mapNotNull { (credit, roleName) -> credit.toRole(roleName) }
+            .take(mostRoles)
+    }
+
+    private fun TmdbPersonCredit.toRole(roleName: String): MoviePersonRole? {
+        val kind = when (mediaType) {
+            "movie" -> MovieKind.MOVIE
+            "tv" -> MovieKind.SHOW
+            else -> return null
+        }
+        val shownTitle = if (kind == MovieKind.MOVIE) title else name
+        if (shownTitle.isBlank()) return null
+        return MoviePersonRole(
+            tmdbId = id,
+            kind = kind,
+            title = shownTitle,
+            yearText = (if (kind == MovieKind.MOVIE) releaseDate else firstAirDate).take(4),
+            roleName = roleName,
+            posterUrl = posterPath?.let { ROLE_POSTER_ADDRESS + it }
+        )
+    }
+
     private fun TmdbSearchItem.toSearchResult(): MovieSearchResult? {
         val kind = when (mediaType) {
             "movie" -> MovieKind.MOVIE
@@ -188,7 +240,8 @@ internal object TmdbReplyReader {
                 MovieCastMember(
                     name = member.name,
                     character = member.character,
-                    photoUrl = member.profilePath?.let { CAST_PHOTO_ADDRESS + it }
+                    photoUrl = member.profilePath?.let { CAST_PHOTO_ADDRESS + it },
+                    personId = member.id
                 )
             }
 
@@ -455,6 +508,7 @@ internal data class TmdbCredits(
 
 @Serializable
 internal data class TmdbCastMember(
+    val id: Long? = null,
     val name: String = "",
     val character: String = "",
     val order: Int = Int.MAX_VALUE,
@@ -503,5 +557,43 @@ internal data class TmdbTranslationData(
     val title: String = "",
     val name: String = "",
     val overview: String = "",
-    val tagline: String = ""
+    val tagline: String = "",
+    val biography: String = ""
+)
+
+@Serializable
+internal data class TmdbPersonReply(
+    val id: Long,
+    val name: String = "",
+    val biography: String = "",
+    val birthday: String = "",
+    val deathday: String = "",
+    @SerialName("place_of_birth") val placeOfBirth: String = "",
+    @SerialName("known_for_department") val knownForDepartment: String = "",
+    @SerialName("profile_path") val profilePath: String? = null,
+    @SerialName("imdb_id") val imdbId: String = "",
+    @SerialName("combined_credits") val combinedCredits: TmdbCombinedCredits = TmdbCombinedCredits(),
+    @SerialName("external_ids") val externalIds: TmdbExternalIds = TmdbExternalIds(),
+    val translations: TmdbTranslations = TmdbTranslations()
+)
+
+@Serializable
+internal data class TmdbCombinedCredits(
+    val cast: List<TmdbPersonCredit> = emptyList(),
+    val crew: List<TmdbPersonCredit> = emptyList()
+)
+
+@Serializable
+internal data class TmdbPersonCredit(
+    val id: Long,
+    @SerialName("media_type") val mediaType: String = "",
+    val title: String = "",
+    val name: String = "",
+    val character: String = "",
+    val job: String = "",
+    @SerialName("release_date") val releaseDate: String = "",
+    @SerialName("first_air_date") val firstAirDate: String = "",
+    @SerialName("poster_path") val posterPath: String? = null,
+    @SerialName("vote_count") val voteCount: Int = 0,
+    @SerialName("genre_ids") val genreIds: List<Int> = emptyList()
 )
