@@ -11,6 +11,7 @@ import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.LinkedNoteBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
 import com.emberr.domain.model.PropertyBlock
@@ -22,9 +23,11 @@ import com.emberr.domain.model.ThreeDotDividerBlock
 import com.emberr.domain.model.ToggleBlock
 import com.emberr.domain.model.UnknownBlock
 import com.emberr.domain.model.VoiceBlock
+import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.model.lastDate
+import com.emberr.domain.model.summaryLine
 import com.emberr.domain.model.valueAsText
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -37,6 +40,7 @@ private const val UNCHECKED_MARKER = "- [ ] "
 private const val BULLET_MARKER = "- "
 private const val SOLID_DIVIDER_LINE = "---"
 private const val DOT_DIVIDER_LINE = "* * *"
+private const val MOVIE_MARKER = "🎬 "
 private const val DEFAULT_CODE_LANGUAGE = "plaintext"
 private const val MAX_HEADING_LEVEL = 6
 private const val MAX_INDENT_LEVELS = 10
@@ -172,6 +176,8 @@ object NoteMarkdownWriter {
             is CanvasBlock -> ""
             is PropertyBlock -> renderProperty(block)
             is DatabaseBlock -> ""
+            is MovieBlock -> renderMovie(block)
+            is WatchlistBlock -> ""
             is TableBlock -> renderTable(block)
             is SolidDividerBlock -> SOLID_DIVIDER_LINE
             is ThreeDotDividerBlock -> DOT_DIVIDER_LINE
@@ -291,6 +297,9 @@ object NoteMarkdownWriter {
             append("```")
         }
     }
+
+    private fun renderMovie(block: MovieBlock): String =
+        block.summaryLine()?.let { "$MOVIE_MARKER${flattenLineBreaks(it)}" }.orEmpty()
 
     private fun renderProperty(block: PropertyBlock): String {
         val value = flattenLineBreaks(block.valueAsText())

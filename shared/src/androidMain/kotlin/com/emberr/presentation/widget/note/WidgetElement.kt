@@ -12,6 +12,7 @@ import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.LinkedNoteBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
 import com.emberr.domain.model.PropertyBlock
@@ -23,8 +24,10 @@ import com.emberr.domain.model.ThreeDotDividerBlock
 import com.emberr.domain.model.ToggleBlock
 import com.emberr.domain.model.UnknownBlock
 import com.emberr.domain.model.VoiceBlock
+import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
+import com.emberr.domain.model.summaryLine
 import com.emberr.domain.model.valueAsText
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -166,6 +169,10 @@ private fun convertBlockToElements(
     is CanvasBlock -> textLine(block, "Canvas", WidgetTextStyleName.SUBTLE)
 
     is DatabaseBlock -> textLine(block, block.title.ifBlank { "Database" }, WidgetTextStyleName.SUBTLE)
+
+    is MovieBlock -> block.summaryLine()?.let { textLine(block, it, WidgetTextStyleName.SUBTLE) } ?: emptyList()
+
+    is WatchlistBlock -> textLine(block, block.title.ifBlank { "Watchlist" }, WidgetTextStyleName.SUBTLE)
 
     is PropertyBlock -> {
         val value = block.valueAsText()

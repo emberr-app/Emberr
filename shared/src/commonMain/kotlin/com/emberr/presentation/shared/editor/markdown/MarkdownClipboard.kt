@@ -10,6 +10,7 @@ import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.TextBlock
+import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.deepCopyWithNewIds
 import com.emberr.domain.model.editableTextOrNull
 import com.emberr.domain.model.highlightColorNameOrNull
@@ -52,7 +53,7 @@ fun blocksEmberrCopiedAs(pastedText: String): List<NoteBlock>? {
 }
 
 fun copiedBlocksReadyToPaste(copiedBlocks: List<NoteBlock>, baseIndentation: Int, now: Long): List<NoteBlock> {
-    val pastableBlocks = copiedBlocks.filterNot { it is DatabaseBlock || it is CanvasBlock || it is PropertyBlock }
+    val pastableBlocks = copiedBlocks.filterNot { it is DatabaseBlock || it is CanvasBlock || it is PropertyBlock || it is WatchlistBlock }
     val shallowestIndentation = pastableBlocks.minOfOrNull { it.indentationLevel } ?: 0
     return pastableBlocks.map { block ->
         val withoutReminder = if (block is CheckboxBlock) block.copy(reminderTimestamp = null, recurrenceRule = null, allDay = null) else block
