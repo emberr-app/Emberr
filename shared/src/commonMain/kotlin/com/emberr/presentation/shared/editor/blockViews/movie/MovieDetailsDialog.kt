@@ -260,8 +260,8 @@ private fun MovieDetailsHeader(block: MovieBlock, details: MovieDetails, editor:
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) 24.dp else 18.dp)) {
-            Box(modifier = if (details.hasPoster) Modifier.shadow(16.dp, RoundedCornerShape(10.dp)) else Modifier) {
-                MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = 10.dp)
+            Box(modifier = if (details.hasPoster) Modifier.shadow(16.dp, DefaultBlockShape) else Modifier) {
+                MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = PosterCornerRadius)
             }
             Column(
                 modifier = Modifier.weight(1f).padding(end = 36.dp),
