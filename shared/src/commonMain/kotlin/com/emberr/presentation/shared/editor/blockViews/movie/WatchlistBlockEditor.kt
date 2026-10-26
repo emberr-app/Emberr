@@ -8,12 +8,20 @@ import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.WatchState
 import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.model.WatchlistBlock
+import com.emberr.domain.model.WatchlistView
+import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.model.titleKey
 import com.emberr.domain.model.withDeleted
 import com.emberr.domain.model.withWatchState
 import com.emberr.domain.movie.MovieTitleSource
+import com.emberr.domain.movie.newViewWithLayout
+import com.emberr.domain.movie.viewsInOrderOf
+import com.emberr.domain.movie.withViewAdded
+import com.emberr.domain.movie.withViewChanged
+import com.emberr.domain.movie.withViewRemoved
 import com.emberr.domain.movie.withImagesSavedBy
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.system.showNativeToast
@@ -35,6 +43,7 @@ class WatchlistBlockEditor(
     private val titleSource: MovieTitleSource,
     private val webImageFetcher: WebImageFetcher,
     private val appScope: CoroutineScope,
+    private val deviceTableLayoutStore: DeviceTableLayoutStore,
     private val changeWatchlistBlock: (blockId: String, change: (WatchlistBlock) -> WatchlistBlock) -> Unit
 ) {
     private val movieEditorsByWatchlistId = mutableMapOf<String, MovieBlockEditor>()
@@ -69,8 +78,28 @@ class WatchlistBlockEditor(
         changeWatchlistBlock(blockId) { block -> block.copy(title = title) }
     }
 
-    fun changeSettings(blockId: String, change: (WatchlistBlock) -> WatchlistBlock) {
-        changeWatchlistBlock(blockId, change)
+    fun showView(blockId: String, viewId: String) {
+        deviceTableLayoutStore.setActiveViewId(blockId, viewId)
+    }
+
+    fun reorderViews(blockId: String, viewIds: List<String>) {
+        deviceTableLayoutStore.setViewOrder(blockId, viewIds)
+    }
+
+    fun addView(block: WatchlistBlock, layout: WatchlistView) {
+        val newView = block.newViewWithLayout(layout, UUID.randomUUID().toString())
+        val viewIdsHere = block.viewsInOrderOf(deviceTableLayoutStore.currentLayoutOf(block.id)).map { it.id }
+        changeWatchlistBlock(block.id) { it.withViewAdded(newView) }
+        deviceTableLayoutStore.setViewOrder(block.id, viewIdsHere + newView.id)
+        deviceTableLayoutStore.setActiveViewId(block.id, newView.id)
+    }
+
+    fun removeView(blockId: String, viewId: String) {
+        changeWatchlistBlock(blockId) { it.withViewRemoved(viewId) }
+    }
+
+    fun changeView(blockId: String, viewId: String, change: (WatchlistViewSettings) -> WatchlistViewSettings) {
+        changeWatchlistBlock(blockId) { it.withViewChanged(viewId, change) }
     }
 
     fun forgetLastAddedTitle() {

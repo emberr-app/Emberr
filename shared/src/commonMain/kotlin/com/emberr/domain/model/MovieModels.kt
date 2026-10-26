@@ -35,6 +35,66 @@ enum class WatchlistSortKey(val label: String, val sortsDescendingFirst: Boolean
     TITLE("Title", false)
 }
 
+@Serializable
+enum class WatchlistFilterField(val label: String) {
+    TYPE("Type"),
+    STATUS("Status"),
+    GENRE("Genre"),
+    RELEASE_DATE("Release date"),
+    DATE_ADDED("Date added"),
+    YOUR_RATING("Your rating"),
+    TMDB_RATING("TMDB rating"),
+    RUNTIME("Runtime"),
+    LANGUAGE("Language"),
+    WHERE_TO_WATCH("Where to watch"),
+    SHOW_STATUS("Show status")
+}
+
+@Serializable
+enum class WatchlistFilterCondition(val label: String) {
+    IS("is"),
+    IS_ANY_OF("is any of"),
+    HAS_ANY_OF("has any of"),
+    HAS_NONE_OF("has none of"),
+    STREAMS_ON_ANY_OF("streams on any of"),
+    BEFORE("before"),
+    AFTER("after"),
+    ON_OR_AFTER("on or after"),
+    BETWEEN("between"),
+    WITHIN_PAST_DAYS("within the past days"),
+    WITHIN_PAST_YEARS("within the past years"),
+    AT_LEAST("at least"),
+    AT_MOST("at most"),
+    NOT_RATED_YET("not rated yet"),
+    SHORTER_THAN("shorter than"),
+    LONGER_THAN("longer than"),
+    STILL_AIRING("still airing"),
+    ENDED("ended")
+}
+
+@Immutable
+@Serializable
+data class WatchlistFilter(
+    val id: String,
+    val field: WatchlistFilterField,
+    val condition: WatchlistFilterCondition,
+    val picks: List<String> = emptyList(),
+    val date: LocalDate? = null,
+    val endDate: LocalDate? = null,
+    val number: Double? = null
+)
+
+@Immutable
+@Serializable
+data class WatchlistViewSettings(
+    val id: String,
+    val name: String,
+    val layout: WatchlistView,
+    val sortKey: WatchlistSortKey = WatchlistSortKey.STATUS,
+    val sortsDescending: Boolean = false,
+    val filters: List<WatchlistFilter> = emptyList()
+)
+
 @Immutable
 @Serializable
 data class MovieCastMember(
@@ -166,12 +226,7 @@ data class WatchlistBlock(
     override val id: String,
     val watchlistNoteId: String,
     val title: String = "Watchlist",
-    val view: WatchlistView = WatchlistView.LIST,
-    val addedViews: List<WatchlistView> = listOf(WatchlistView.LIST),
-    val sortKey: WatchlistSortKey = WatchlistSortKey.STATUS,
-    val sortsDescending: Boolean = false,
-    val kindFilter: MovieKind? = null,
-    val statusFilter: WatchStatus? = null,
+    val views: List<WatchlistViewSettings> = emptyList(),
     override val indentationLevel: Int = 0,
     override val isBold: Boolean = false,
     override val isItalic: Boolean = false,
@@ -244,8 +299,6 @@ data class MovieSearchResult(
     val tmdbRating: Double? = null,
     val posterUrl: String? = null
 )
-
-fun WatchlistBlock.shownViews(): List<WatchlistView> = if (view in addedViews) addedViews else addedViews + view
 
 fun starsTextOf(halfStars: Int): String =
     if (halfStars % 2 == 0) "${halfStars / 2}" else "${halfStars / 2}.5"

@@ -17,7 +17,8 @@ import kotlinx.serialization.json.Json
 data class DeviceTableLayout(
     val columnWidths: Map<String, Int> = emptyMap(),
     val freezesTitleColumnByViewId: Map<String, Boolean> = emptyMap(),
-    val activeViewId: String? = null
+    val activeViewId: String? = null,
+    val viewOrderIds: List<String> = emptyList()
 ) {
     fun freezesTitleColumn(view: DatabaseView): Boolean = freezesTitleColumnByViewId[view.id] ?: view.freezesTitleColumn
 }
@@ -49,6 +50,8 @@ class DeviceTableLayoutStore(private val settingsManager: SettingsManager) {
         change(blockId) { it.copy(freezesTitleColumnByViewId = it.freezesTitleColumnByViewId + (viewId to freezes)) }
 
     fun setActiveViewId(blockId: String, viewId: String) = change(blockId) { it.copy(activeViewId = viewId) }
+
+    fun setViewOrder(blockId: String, viewIds: List<String>) = change(blockId) { it.copy(viewOrderIds = viewIds) }
 
     private fun change(blockId: String, update: (DeviceTableLayout) -> DeviceTableLayout) {
         loadIfNeeded(blockId)

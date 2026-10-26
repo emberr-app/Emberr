@@ -44,15 +44,18 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.MovieBlock
-import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.WatchlistView
 import com.emberr.domain.model.titleKey
+import com.emberr.domain.movie.boardStatuses
+import com.emberr.domain.movie.openViewOn
 import com.emberr.domain.movie.shownIn
+import com.emberr.domain.movie.viewsInOrderOf
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.editor.DefaultBlockShape
+import com.emberr.presentation.shared.editor.blockViews.rememberDeviceTableLayout
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import kotlinx.coroutines.delay
 import java.util.UUID
@@ -86,6 +89,9 @@ fun WatchlistBlockView(
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
     val searchFocusRequester = remember { FocusRequester() }
+    val deviceLayout = rememberDeviceTableLayout(block.id)
+    val viewsHere = block.viewsInOrderOf(deviceLayout)
+    val openView = block.openViewOn(deviceLayout)
 
     fun closeSearch() {
         isSearchOpen = false
@@ -94,12 +100,12 @@ fun WatchlistBlockView(
 
     KmpBackHandler(enabled = titleSelection.isSelecting) { titleSelection.stop() }
 
-    LaunchedEffect(block.view, inSelectionMode) {
-        if (block.view == WatchlistView.BOARD || inSelectionMode) titleSelection.stop()
+    LaunchedEffect(openView.layout, inSelectionMode) {
+        if (openView.layout == WatchlistView.BOARD || inSelectionMode) titleSelection.stop()
     }
 
-    LaunchedEffect(titles, block.kindFilter, block.statusFilter, searchText) {
-        titleSelection.keepOnly(titles.orEmpty().shownIn(block, searchText).map { it.id })
+    LaunchedEffect(titles, openView, searchText) {
+        titleSelection.keepOnly(titles.orEmpty().shownIn(openView, searchText).map { it.id })
     }
 
     LaunchedEffect(isSearchOpen) {
@@ -147,6 +153,8 @@ fun WatchlistBlockView(
         )
         WatchlistToolbar(
             block = block,
+            views = viewsHere,
+            openView = openView,
             editor = editor,
             isEnabled = !inSelectionMode,
             isSearchActive = searchText.isNotBlank(),
@@ -172,7 +180,7 @@ fun WatchlistBlockView(
                     }
             )
         }
-        WatchlistFilterChips(block = block, editor = editor, isEnabled = !inSelectionMode)
+        WatchlistFilterChips(block = block, openView = openView, editor = editor, isEnabled = !inSelectionMode)
         if (titleSelection.isSelecting) {
             WatchlistSelectionBar(
                 selectedCount = titleSelection.selectedTitleIds.size,
@@ -220,7 +228,7 @@ fun WatchlistBlockView(
         }
 
         val loadedTitles = titles
-        val shownTitles = loadedTitles.orEmpty().shownIn(block, searchText)
+        val shownTitles = loadedTitles.orEmpty().shownIn(openView, searchText)
         val shownTitleIds = shownTitles.map { it.id }
         val titleKeysInWatchlist = loadedTitles.orEmpty().mapNotNullTo(HashSet()) { it.titleKey() }
         val watchlistAdder = remember(titleKeysInWatchlist, isLoadingNewTitle, block.watchlistNoteId) {
@@ -242,16 +250,16 @@ fun WatchlistBlockView(
                 shownTitles.isEmpty() && loadedTitles.isNotEmpty() -> WatchlistNoMatches(
                     message = "No titles match these filters",
                     clearLabel = "Clear filters",
-                    onClear = { editor.changeSettings(block.id) { it.copy(kindFilter = null, statusFilter = null) } }
+                    onClear = { editor.changeView(block.id, openView.id) { it.copy(filters = emptyList()) } }
                 )
-                block.view == WatchlistView.BOARD -> WatchlistBoard(
+                openView.layout == WatchlistView.BOARD -> WatchlistBoard(
                     titles = shownTitles,
-                    statuses = block.statusFilter?.let { listOf(it) } ?: WatchStatus.entries,
+                    statuses = openView.boardStatuses(),
                     movieEditor = movieEditor,
                     inSelectionMode = inSelectionMode,
                     onToggleSelection = onToggleSelection
                 )
-                block.view == WatchlistView.GALLERY -> WatchlistGallery(
+                openView.layout == WatchlistView.GALLERY -> WatchlistGallery(
                     titles = shownTitles,
                     movieEditor = movieEditor,
                     inSelectionMode = inSelectionMode,

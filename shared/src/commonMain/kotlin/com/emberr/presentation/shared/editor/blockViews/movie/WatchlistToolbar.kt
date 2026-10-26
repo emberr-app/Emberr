@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,9 +36,12 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.model.WatchlistBlock
+import com.emberr.domain.model.WatchlistFilter
+import com.emberr.domain.model.WatchlistFilterCondition
+import com.emberr.domain.model.WatchlistFilterField
 import com.emberr.domain.model.WatchlistSortKey
 import com.emberr.domain.model.WatchlistView
-import com.emberr.domain.model.shownViews
+import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.SelectedOptionBackground
@@ -54,6 +58,7 @@ import emberr.shared.generated.resources.widget
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import java.util.UUID
 
 private val PillShape = RoundedCornerShape(8.dp)
 private val HeaderButtonGap = 6.dp
@@ -66,6 +71,8 @@ private const val DesktopInactiveIconAlpha = 0.6f
 @Composable
 internal fun WatchlistToolbar(
     block: WatchlistBlock,
+    views: List<WatchlistViewSettings>,
+    openView: WatchlistViewSettings,
     editor: WatchlistBlockEditor,
     isEnabled: Boolean,
     isSearchActive: Boolean,
@@ -77,56 +84,43 @@ internal fun WatchlistToolbar(
     var isSortMenuOpen by remember { mutableStateOf(false) }
     var isFilterMenuOpen by remember { mutableStateOf(false) }
     var isSettingsMenuOpen by remember { mutableStateOf(false) }
-    val sortIsChanged = block.sortKey != WatchlistSortKey.STATUS || block.sortsDescending
+    val sortIsChanged = openView.sortKey != WatchlistSortKey.STATUS || openView.sortsDescending
 
-    val shownViews = block.shownViews()
-    val viewsNotAdded = WatchlistView.entries - shownViews.toSet()
+    val viewIds = views.map { it.id }
     val viewDragState = remember { WatchlistViewDragState() }
-    val latestShownViews by rememberUpdatedState(shownViews)
+    val latestViewIds by rememberUpdatedState(viewIds)
     val dropLineColor = MaterialTheme.colorScheme.primary
 
     fun dropDraggedView() {
-        val draggedView = viewDragState.draggedView ?: return
-        val viewsNow = latestShownViews
-        val beforeView = viewToDropBefore(viewsNow, viewDragState.pillSpans, viewDragState.pointerX)
+        val draggedViewId = viewDragState.draggedViewId ?: return
+        val viewIdsNow = latestViewIds
+        val beforeViewId = viewToDropBefore(viewIdsNow, viewDragState.pillSpans, viewDragState.pointerX)
         viewDragState.reset()
-        if (!dropKeepsViewInPlace(viewsNow, draggedView, beforeView)) {
-            editor.changeSettings(block.id) { watchlist ->
-                watchlist.copy(addedViews = viewsWithDroppedView(watchlist.shownViews(), draggedView, beforeView))
-            }
+        if (!dropKeepsViewInPlace(viewIdsNow, draggedViewId, beforeViewId)) {
+            editor.reorderViews(block.id, viewsWithDroppedView(viewIdsNow, draggedViewId, beforeViewId))
         }
     }
     val viewTabs: @Composable () -> Unit = {
-        shownViews.forEach { view ->
-            WatchlistViewTab(
-                view = view,
-                isActive = block.view == view,
-                canRemove = shownViews.size > 1,
-                isEnabled = isEnabled,
-                dragState = viewDragState,
-                onDrop = ::dropDraggedView,
-                onShow = { editor.changeSettings(block.id) { it.copy(view = view) } },
-                onRemove = {
-                    editor.changeSettings(block.id) { watchlist ->
-                        val remainingViews = watchlist.shownViews() - view
-                        watchlist.copy(addedViews = remainingViews, view = remainingViews.first())
-                    }
-                },
-                runAfterKeyboardCloses = runAfterKeyboardCloses
-            )
+        views.forEach { view ->
+            key(view.id) {
+                WatchlistViewTab(
+                    view = view,
+                    isActive = view.id == openView.id,
+                    canRemove = views.size > 1,
+                    isEnabled = isEnabled,
+                    dragState = viewDragState,
+                    onDrop = ::dropDraggedView,
+                    onShow = { editor.showView(block.id, view.id) },
+                    onRemove = { editor.removeView(block.id, view.id) },
+                    runAfterKeyboardCloses = runAfterKeyboardCloses
+                )
+            }
         }
-        if (viewsNotAdded.isNotEmpty()) {
-            AddViewButton(
-                viewsNotAdded = viewsNotAdded,
-                isEnabled = isEnabled,
-                onAdd = { view ->
-                    editor.changeSettings(block.id) { watchlist ->
-                        watchlist.copy(addedViews = watchlist.shownViews() + view, view = view)
-                    }
-                },
-                runAfterKeyboardCloses = runAfterKeyboardCloses
-            )
-        }
+        AddViewButton(
+            isEnabled = isEnabled,
+            onAdd = { layout -> editor.addView(block, layout) },
+            runAfterKeyboardCloses = runAfterKeyboardCloses
+        )
     }
     val searchButton: @Composable () -> Unit = {
         WatchlistHeaderButton(
@@ -146,17 +140,17 @@ internal fun WatchlistToolbar(
                 isEnabled = isEnabled,
                 onClick = { runAfterKeyboardCloses { isSortMenuOpen = true } }
             )
-            WatchlistSortMenu(expanded = isSortMenuOpen, block = block, editor = editor, onDismiss = { isSortMenuOpen = false })
+            WatchlistSortMenu(expanded = isSortMenuOpen, block = block, openView = openView, editor = editor, onDismiss = { isSortMenuOpen = false })
         }
         Box {
             WatchlistHeaderButton(
                 label = "Filter",
                 icon = Res.drawable.funnel,
-                isActive = block.kindFilter != null || block.statusFilter != null,
+                isActive = openView.filters.isNotEmpty(),
                 isEnabled = isEnabled,
                 onClick = { runAfterKeyboardCloses { isFilterMenuOpen = true } }
             )
-            WatchlistFilterMenu(expanded = isFilterMenuOpen, block = block, editor = editor, onDismiss = { isFilterMenuOpen = false })
+            WatchlistFilterMenu(expanded = isFilterMenuOpen, block = block, openView = openView, editor = editor, onDismiss = { isFilterMenuOpen = false })
         }
         Box {
             WatchlistHeaderButton(
@@ -189,7 +183,7 @@ internal fun WatchlistToolbar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
-                modifier = Modifier.weight(1f).watchlistViewDropLine(viewDragState, shownViews, dropLineColor),
+                modifier = Modifier.weight(1f).watchlistViewDropLine(viewDragState, viewIds, dropLineColor),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) { viewTabs() }
@@ -199,7 +193,7 @@ internal fun WatchlistToolbar(
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth().watchlistViewDropLine(viewDragState, shownViews, dropLineColor),
+                modifier = Modifier.fillMaxWidth().watchlistViewDropLine(viewDragState, viewIds, dropLineColor),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) { viewTabs() }
@@ -217,16 +211,22 @@ internal fun WatchlistToolbar(
 }
 
 @Composable
-private fun WatchlistSortMenu(expanded: Boolean, block: WatchlistBlock, editor: WatchlistBlockEditor, onDismiss: () -> Unit) {
+private fun WatchlistSortMenu(
+    expanded: Boolean,
+    block: WatchlistBlock,
+    openView: WatchlistViewSettings,
+    editor: WatchlistBlockEditor,
+    onDismiss: () -> Unit
+) {
     MovieMenu(expanded = expanded, title = "Sort", onDismiss = onDismiss) { closeAnd ->
         MovieMenuSectionLabel("Sort by")
         WatchlistSortKey.entries.forEach { sortKey ->
             MovieMenuOption(
                 label = sortKey.label,
-                isSelected = block.sortKey == sortKey,
+                isSelected = openView.sortKey == sortKey,
                 onClick = {
                     closeAnd {
-                        editor.changeSettings(block.id) { it.copy(sortKey = sortKey, sortsDescending = sortKey.sortsDescendingFirst) }
+                        editor.changeView(block.id, openView.id) { it.copy(sortKey = sortKey, sortsDescending = sortKey.sortsDescendingFirst) }
                     }
                 }
             )
@@ -236,22 +236,36 @@ private fun WatchlistSortMenu(expanded: Boolean, block: WatchlistBlock, editor: 
         listOf(false, true).forEach { descending ->
             MovieMenuOption(
                 label = if (descending) "Descending" else "Ascending",
-                isSelected = block.sortsDescending == descending,
-                onClick = { closeAnd { editor.changeSettings(block.id) { it.copy(sortsDescending = descending) } } }
+                isSelected = openView.sortsDescending == descending,
+                onClick = { closeAnd { editor.changeView(block.id, openView.id) { it.copy(sortsDescending = descending) } } }
             )
         }
     }
 }
 
 @Composable
-private fun WatchlistFilterMenu(expanded: Boolean, block: WatchlistBlock, editor: WatchlistBlockEditor, onDismiss: () -> Unit) {
+private fun WatchlistFilterMenu(
+    expanded: Boolean,
+    block: WatchlistBlock,
+    openView: WatchlistViewSettings,
+    editor: WatchlistBlockEditor,
+    onDismiss: () -> Unit
+) {
+    val chosenKind = openView.filters.firstOrNull { it.field == WatchlistFilterField.TYPE }?.picks?.firstOrNull()
+    val chosenStatus = openView.filters.firstOrNull { it.field == WatchlistFilterField.STATUS }?.picks?.firstOrNull()
     MovieMenu(expanded = expanded, title = "Filter", onDismiss = onDismiss) { closeAnd ->
         MovieMenuSectionLabel("Type")
         listOf(null, MovieKind.MOVIE, MovieKind.SHOW).forEach { kind ->
             MovieMenuOption(
                 label = kind?.let { "${it.label}s" } ?: "All titles",
-                isSelected = block.kindFilter == kind,
-                onClick = { closeAnd { editor.changeSettings(block.id) { it.copy(kindFilter = kind) } } }
+                isSelected = chosenKind == kind?.name,
+                onClick = {
+                    closeAnd {
+                        editor.changeView(block.id, openView.id) { view ->
+                            view.withOnlyFilterOf(WatchlistFilterField.TYPE, WatchlistFilterCondition.IS, kind?.name)
+                        }
+                    }
+                }
             )
         }
         MovieMenuDivider()
@@ -259,32 +273,54 @@ private fun WatchlistFilterMenu(expanded: Boolean, block: WatchlistBlock, editor
         (listOf(null) + WatchStatus.entries).forEach { status ->
             MovieMenuOption(
                 label = status?.label ?: "Any status",
-                isSelected = block.statusFilter == status,
-                onClick = { closeAnd { editor.changeSettings(block.id) { it.copy(statusFilter = status) } } }
+                isSelected = chosenStatus == status?.name,
+                onClick = {
+                    closeAnd {
+                        editor.changeView(block.id, openView.id) { view ->
+                            view.withOnlyFilterOf(WatchlistFilterField.STATUS, WatchlistFilterCondition.IS_ANY_OF, status?.name)
+                        }
+                    }
+                }
             )
         }
     }
 }
 
+private fun WatchlistViewSettings.withOnlyFilterOf(
+    field: WatchlistFilterField,
+    condition: WatchlistFilterCondition,
+    pick: String?
+): WatchlistViewSettings {
+    val otherFilters = filters.filter { it.field != field }
+    val newFilter = pick?.let { WatchlistFilter(id = UUID.randomUUID().toString(), field = field, condition = condition, picks = listOf(it)) }
+    return copy(filters = otherFilters + listOfNotNull(newFilter))
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun WatchlistFilterChips(block: WatchlistBlock, editor: WatchlistBlockEditor, isEnabled: Boolean) {
-    if (block.kindFilter == null && block.statusFilter == null) return
+internal fun WatchlistFilterChips(
+    block: WatchlistBlock,
+    openView: WatchlistViewSettings,
+    editor: WatchlistBlockEditor,
+    isEnabled: Boolean
+) {
+    if (openView.filters.isEmpty()) return
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        block.kindFilter?.let { kind ->
-            WatchlistFilterChip(label = "${kind.label}s only", isEnabled = isEnabled) {
-                editor.changeSettings(block.id) { it.copy(kindFilter = null) }
-            }
-        }
-        block.statusFilter?.let { status ->
-            WatchlistFilterChip(label = status.label, isEnabled = isEnabled) {
-                editor.changeSettings(block.id) { it.copy(statusFilter = null) }
+        openView.filters.forEach { filter ->
+            WatchlistFilterChip(label = filter.chipLabel(), isEnabled = isEnabled) {
+                editor.changeView(block.id, openView.id) { view -> view.copy(filters = view.filters.filter { it.id != filter.id }) }
             }
         }
     }
+}
+
+private fun WatchlistFilter.chipLabel(): String = when (field) {
+    WatchlistFilterField.TYPE -> MovieKind.entries.filter { it.name in picks }.joinToString(", ") { "${it.label}s only" }
+    WatchlistFilterField.STATUS -> WatchStatus.entries.filter { it.name in picks }.joinToString(", ") { it.label }
+    else -> field.label
 }
 
 @Composable
@@ -310,7 +346,7 @@ private fun WatchlistFilterChip(label: String, isEnabled: Boolean, onRemove: () 
 
 @Composable
 private fun WatchlistViewTab(
-    view: WatchlistView,
+    view: WatchlistViewSettings,
     isActive: Boolean,
     canRemove: Boolean,
     isEnabled: Boolean,
@@ -329,12 +365,12 @@ private fun WatchlistViewTab(
             .onPlaced { coordinates ->
                 val pillLeft = coordinates.positionInParent().x
                 val span = ViewPillSpan(left = pillLeft, right = pillLeft + coordinates.size.width)
-                if (dragState.pillSpans[view] != span) dragState.pillSpans[view] = span
+                if (dragState.pillSpans[view.id] != span) dragState.pillSpans[view.id] = span
             }
-            .zIndex(if (dragState.draggedView == view) 1f else 0f)
+            .zIndex(if (dragState.draggedViewId == view.id) 1f else 0f)
             .watchlistViewPillDrag(
                 dragState = dragState,
-                view = view,
+                viewId = view.id,
                 isEnabled = isEnabled,
                 onDrop = { latestOnDrop() },
                 onLongPressWithoutDrag = { if (latestCanRemove) runAfterKeyboardCloses { isMenuOpen = true } }
@@ -342,7 +378,7 @@ private fun WatchlistViewTab(
     ) {
         Row(
             modifier = Modifier
-                .graphicsLayer { translationX = dragState.offsetOf(view) }
+                .graphicsLayer { translationX = dragState.offsetOf(view.id) }
                 .clip(PillShape)
                 .background(if (isActive) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f) else Color.Transparent)
                 .clickable(enabled = isEnabled) {
@@ -355,20 +391,20 @@ private fun WatchlistViewTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(view.iconResource()),
+                painter = painterResource(view.layout.iconResource()),
                 contentDescription = null,
                 tint = desktopInactiveTintOr(color),
                 modifier = Modifier.size(TabIconSize)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = view.label,
+                text = view.name,
                 style = if (isDesktopPlatform) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelSmall,
                 color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 maxLines = 1
             )
         }
-        MovieMenu(expanded = isMenuOpen, title = view.label, onDismiss = { isMenuOpen = false }) { closeAnd ->
+        MovieMenu(expanded = isMenuOpen, title = view.name, onDismiss = { isMenuOpen = false }) { closeAnd ->
             MovieMenuOption(
                 label = "Remove view",
                 icon = Res.drawable.trash,
@@ -381,7 +417,6 @@ private fun WatchlistViewTab(
 
 @Composable
 private fun AddViewButton(
-    viewsNotAdded: List<WatchlistView>,
     isEnabled: Boolean,
     onAdd: (WatchlistView) -> Unit,
     runAfterKeyboardCloses: (() -> Unit) -> Unit
@@ -401,11 +436,11 @@ private fun AddViewButton(
             )
         }
         MovieMenu(expanded = isMenuOpen, title = "Add view", onDismiss = { isMenuOpen = false }) { closeAnd ->
-            viewsNotAdded.forEach { view ->
+            WatchlistView.entries.forEach { layout ->
                 MovieMenuOption(
-                    label = view.label,
-                    icon = view.iconResource(),
-                    onClick = { closeAnd { onAdd(view) } }
+                    label = layout.label,
+                    icon = layout.iconResource(),
+                    onClick = { closeAnd { onAdd(layout) } }
                 )
             }
         }
