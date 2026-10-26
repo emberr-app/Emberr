@@ -673,7 +673,7 @@ private fun MovieRatingItem(
 }
 
 @Composable
-private fun StarRatingPicker(ratingHalfStars: Int?, emptyColor: Color, onRate: ((Int?) -> Unit)?) {
+internal fun StarRatingPicker(ratingHalfStars: Int?, emptyColor: Color, onRate: ((Int?) -> Unit)?) {
     val filledHalves = ratingHalfStars ?: 0
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         repeat(MAXIMUM_STAR_HALVES / 2) { starIndex ->

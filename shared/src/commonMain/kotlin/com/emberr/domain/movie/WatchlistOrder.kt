@@ -37,27 +37,6 @@ fun List<MovieBlock>.shownIn(
     return matchingTitles.sortedWith(byChosenKey.thenBy { it.details?.title?.lowercase().orEmpty() })
 }
 
-private fun WatchlistFilter.isUsable(): Boolean = when (condition) {
-    WatchlistFilterCondition.IS,
-    WatchlistFilterCondition.IS_ANY_OF,
-    WatchlistFilterCondition.HAS_ANY_OF,
-    WatchlistFilterCondition.HAS_NONE_OF,
-    WatchlistFilterCondition.STREAMS_ON_ANY_OF -> picks.isNotEmpty()
-    WatchlistFilterCondition.BEFORE,
-    WatchlistFilterCondition.AFTER,
-    WatchlistFilterCondition.ON_OR_AFTER -> date != null
-    WatchlistFilterCondition.BETWEEN -> date != null && endDate != null
-    WatchlistFilterCondition.WITHIN_PAST_DAYS,
-    WatchlistFilterCondition.WITHIN_PAST_YEARS,
-    WatchlistFilterCondition.AT_LEAST,
-    WatchlistFilterCondition.AT_MOST,
-    WatchlistFilterCondition.SHORTER_THAN,
-    WatchlistFilterCondition.LONGER_THAN -> number != null
-    WatchlistFilterCondition.NOT_RATED_YET,
-    WatchlistFilterCondition.STILL_AIRING,
-    WatchlistFilterCondition.ENDED -> true
-}
-
 private fun MovieBlock.passes(filter: WatchlistFilter, today: LocalDate, timeZone: TimeZone): Boolean {
     val details = details ?: return false
     return when (filter.field) {
@@ -74,8 +53,6 @@ private fun MovieBlock.passes(filter: WatchlistFilter, today: LocalDate, timeZon
             }
         WatchlistFilterField.TMDB_RATING -> details.tmdbRating.matchesNumberOf(filter)
         WatchlistFilterField.RUNTIME -> details.runtimeMinutes?.toDouble().matchesNumberOf(filter)
-        WatchlistFilterField.LANGUAGE -> details.language.isNotBlank() && details.language in filter.picks
-        WatchlistFilterField.WHERE_TO_WATCH -> details.watchProviders?.stream.orEmpty().map { it.name }.matchesPicksOf(filter)
         WatchlistFilterField.SHOW_STATUS -> details.kind == MovieKind.SHOW && when (filter.condition) {
             WatchlistFilterCondition.STILL_AIRING -> details.productionStatus in StillAiringShowStatuses
             WatchlistFilterCondition.ENDED -> details.productionStatus in EndedShowStatuses

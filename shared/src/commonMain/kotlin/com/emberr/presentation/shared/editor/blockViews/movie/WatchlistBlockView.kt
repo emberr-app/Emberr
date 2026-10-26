@@ -155,6 +155,7 @@ fun WatchlistBlockView(
             block = block,
             views = viewsHere,
             openView = openView,
+            titles = titles.orEmpty(),
             editor = editor,
             isEnabled = !inSelectionMode,
             isSearchActive = searchText.isNotBlank(),

@@ -45,8 +45,6 @@ enum class WatchlistFilterField(val label: String) {
     YOUR_RATING("Your rating"),
     TMDB_RATING("TMDB rating"),
     RUNTIME("Runtime"),
-    LANGUAGE("Language"),
-    WHERE_TO_WATCH("Where to watch"),
     SHOW_STATUS("Show status")
 }
 
@@ -56,13 +54,12 @@ enum class WatchlistFilterCondition(val label: String) {
     IS_ANY_OF("is any of"),
     HAS_ANY_OF("has any of"),
     HAS_NONE_OF("has none of"),
-    STREAMS_ON_ANY_OF("streams on any of"),
     BEFORE("before"),
     AFTER("after"),
     ON_OR_AFTER("on or after"),
     BETWEEN("between"),
-    WITHIN_PAST_DAYS("within the past days"),
-    WITHIN_PAST_YEARS("within the past years"),
+    WITHIN_PAST_DAYS("within the past"),
+    WITHIN_PAST_YEARS("within the past"),
     AT_LEAST("at least"),
     AT_MOST("at most"),
     NOT_RATED_YET("not rated yet"),

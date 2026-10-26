@@ -93,9 +93,11 @@ internal fun MovieMenuLayer(
     title: String,
     anchor: @Composable (openLayer: () -> Unit) -> Unit,
     showsCloseButton: Boolean = true,
+    anchorIsMenuRow: Boolean = true,
     content: @Composable ColumnScope.(closeLayerAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     EmberrDesktopSubmenu(
+        opensOnHover = anchorIsMenuRow,
         menuWidthEstimate = DesktopMenuMaxWidth,
         anchor = { openLayer, _ -> anchor(openLayer) }
     ) { isOpen, closeLayer ->
