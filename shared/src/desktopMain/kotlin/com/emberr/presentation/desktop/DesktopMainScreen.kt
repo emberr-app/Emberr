@@ -205,6 +205,7 @@ sealed interface DetailPane {
     data object About : DetailPane
     data object ImportNotes : DetailPane
     data object OpenSourceLicenses : DetailPane
+    data object ThirdPartyServices : DetailPane
     data object Trash : DetailPane
     data object Properties : DetailPane
     data object Reminders : DetailPane
@@ -220,6 +221,7 @@ private fun DetailPane?.settingsSubPage(): SettingsSubPage? = when (this) {
     DetailPane.ImportNotes -> SettingsSubPage.IMPORT
     DetailPane.About -> SettingsSubPage.ABOUT
     DetailPane.OpenSourceLicenses -> SettingsSubPage.OPEN_SOURCE_LICENSES
+    DetailPane.ThirdPartyServices -> SettingsSubPage.THIRD_PARTY_SERVICES
     else -> null
 }
 
@@ -230,6 +232,7 @@ private fun SettingsSubPage?.toDetailPane(): DetailPane = when (this) {
     SettingsSubPage.IMPORT -> DetailPane.ImportNotes
     SettingsSubPage.ABOUT -> DetailPane.About
     SettingsSubPage.OPEN_SOURCE_LICENSES -> DetailPane.OpenSourceLicenses
+    SettingsSubPage.THIRD_PARTY_SERVICES -> DetailPane.ThirdPartyServices
 }
 
 internal fun DetailPane.encode(): String = when (this) {
@@ -242,6 +245,7 @@ internal fun DetailPane.encode(): String = when (this) {
     DetailPane.About -> "PANEL:ABOUT"
     DetailPane.ImportNotes -> "PANEL:IMPORT_NOTES"
     DetailPane.OpenSourceLicenses -> "PANEL:LICENSES"
+    DetailPane.ThirdPartyServices -> "PANEL:THIRD_PARTY_SERVICES"
     DetailPane.Trash -> "PANEL:TRASH"
     DetailPane.Properties -> "PANEL:PROPERTIES"
     DetailPane.Reminders -> "PANEL:REMINDERS"
@@ -262,6 +266,7 @@ internal fun decodeDetailPane(raw: String, today: LocalDate): DetailPane = when 
     raw == "PANEL:ABOUT" -> DetailPane.About
     raw == "PANEL:IMPORT_NOTES" -> DetailPane.ImportNotes
     raw == "PANEL:LICENSES" -> DetailPane.OpenSourceLicenses
+    raw == "PANEL:THIRD_PARTY_SERVICES" -> DetailPane.ThirdPartyServices
     raw == "PANEL:TRASH" -> DetailPane.Trash
     raw == "PANEL:PROPERTIES" -> DetailPane.Properties
     raw == "PANEL:REMINDERS" -> DetailPane.Reminders
@@ -1856,7 +1861,8 @@ fun DesktopMainScreen(
             DetailPane.EmberrCloud,
             DetailPane.About,
             DetailPane.ImportNotes,
-            DetailPane.OpenSourceLicenses -> key("settings") {
+            DetailPane.OpenSourceLicenses,
+            DetailPane.ThirdPartyServices -> key("settings") {
                 Box(
                     Modifier
                         .fillMaxSize()

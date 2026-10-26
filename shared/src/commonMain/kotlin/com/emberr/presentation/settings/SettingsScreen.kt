@@ -52,6 +52,7 @@ import com.emberr.domain.util.system.restartApplication
 import com.emberr.domain.util.system.rememberAppPermissionCoordinator
 import com.emberr.presentation.settings.about.AboutScreen
 import com.emberr.presentation.settings.about.OpenSourceLicensesScreen
+import com.emberr.presentation.settings.about.ThirdPartyServicesScreen
 import com.emberr.presentation.settings.importer.ImportScreen
 import com.emberr.presentation.settings.cloud.CloudAccountScreen
 import com.emberr.presentation.settings.cloud.PasswordField
@@ -470,9 +471,11 @@ fun SettingsScreen(
                         SettingsSubPage.ABOUT -> AboutScreen(
                             onNavigateBack = goBack,
                             onOpenSourceLicensesClick = { onDesktopSubPageChange(SettingsSubPage.OPEN_SOURCE_LICENSES) },
+                            onThirdPartyServicesClick = { onDesktopSubPageChange(SettingsSubPage.THIRD_PARTY_SERVICES) },
                             showTopBar = false
                         )
                         SettingsSubPage.OPEN_SOURCE_LICENSES -> OpenSourceLicensesScreen(onNavigateBack = goBack, showTopBar = false)
+                        SettingsSubPage.THIRD_PARTY_SERVICES -> ThirdPartyServicesScreen(onNavigateBack = goBack, showTopBar = false)
                     }
                 },
                 modifier = surfaceModifier

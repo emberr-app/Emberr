@@ -9,5 +9,6 @@ enum class SettingsSubPage(val categoryTitle: String, val parentPage: SettingsSu
     EMBERR_CLOUD(categoryTitle = SYNC_CATEGORY_TITLE, parentPage = null),
     IMPORT(categoryTitle = DATA_CATEGORY_TITLE, parentPage = null),
     ABOUT(categoryTitle = HELP_CATEGORY_TITLE, parentPage = null),
-    OPEN_SOURCE_LICENSES(categoryTitle = HELP_CATEGORY_TITLE, parentPage = ABOUT)
+    OPEN_SOURCE_LICENSES(categoryTitle = HELP_CATEGORY_TITLE, parentPage = ABOUT),
+    THIRD_PARTY_SERVICES(categoryTitle = HELP_CATEGORY_TITLE, parentPage = ABOUT)
 }
