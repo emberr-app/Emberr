@@ -46,6 +46,51 @@ data class MovieCastMember(
 
 @Immutable
 @Serializable
+data class MovieTrailer(
+    val youtubeKey: String,
+    val name: String = ""
+)
+
+@Immutable
+@Serializable
+data class MovieNamedLogo(
+    val name: String,
+    val logoUrl: String? = null,
+    val logoFilePath: String? = null
+)
+
+@Immutable
+@Serializable
+data class MovieSeason(
+    val number: Int,
+    val name: String = "",
+    val episodeCount: Int? = null,
+    val airDate: LocalDate? = null,
+    val posterUrl: String? = null,
+    val posterFilePath: String? = null
+)
+
+@Immutable
+@Serializable
+data class MovieEpisodeSummary(
+    val seasonNumber: Int,
+    val episodeNumber: Int,
+    val name: String = "",
+    val airDate: LocalDate? = null
+)
+
+@Immutable
+@Serializable
+data class MovieWatchProviders(
+    val regionCode: String,
+    val link: String = "",
+    val stream: List<MovieNamedLogo> = emptyList(),
+    val rent: List<MovieNamedLogo> = emptyList(),
+    val buy: List<MovieNamedLogo> = emptyList()
+)
+
+@Immutable
+@Serializable
 data class MovieDetails(
     val tmdbId: Long,
     val kind: MovieKind,
@@ -69,6 +114,26 @@ data class MovieDetails(
     val backdropUrl: String? = null,
     val backdropFilePath: String? = null,
     val cast: List<MovieCastMember> = emptyList(),
+    val trailer: MovieTrailer? = null,
+    val imdbId: String = "",
+    val homepage: String = "",
+    val instagramHandle: String = "",
+    val facebookHandle: String = "",
+    val xHandle: String = "",
+    val wikidataId: String = "",
+    val collectionName: String = "",
+    val budgetDollars: Long? = null,
+    val revenueDollars: Long? = null,
+    val productionStatus: String = "",
+    val productionCompanies: List<MovieNamedLogo> = emptyList(),
+    val networks: List<MovieNamedLogo> = emptyList(),
+    val seasons: List<MovieSeason> = emptyList(),
+    val nextEpisode: MovieEpisodeSummary? = null,
+    val lastEpisode: MovieEpisodeSummary? = null,
+    val keywords: List<String> = emptyList(),
+    val watchProviders: MovieWatchProviders? = null,
+    val titleLogoUrl: String? = null,
+    val titleLogoFilePath: String? = null,
     val refreshedAt: Long = 0L
 )
 
@@ -165,7 +230,15 @@ val MovieDetails.hasPoster: Boolean get() = posterFilePath != null || posterUrl 
 
 val MovieDetails.hasBackdrop: Boolean get() = backdropFilePath != null || backdropUrl != null
 
+val MovieTrailer.youtubeLink: String get() = "https://www.youtube.com/watch?v=$youtubeKey"
+
+val MovieWatchProviders.allProviders: List<MovieNamedLogo> get() = stream + rent + buy
+
 fun MovieBlock.mediaFilePaths(): List<String> {
     val details = details ?: return emptyList()
-    return listOfNotNull(details.posterFilePath, details.backdropFilePath) + details.cast.mapNotNull { it.photoFilePath }
+    val logos = details.productionCompanies + details.networks + details.watchProviders?.allProviders.orEmpty()
+    return listOfNotNull(details.posterFilePath, details.backdropFilePath, details.titleLogoFilePath) +
+        details.cast.mapNotNull { it.photoFilePath } +
+        details.seasons.mapNotNull { it.posterFilePath } +
+        logos.mapNotNull { it.logoFilePath }
 }

@@ -81,10 +81,15 @@ class AndroidMediaStorageHelper(private val context: Context) : MediaStorageHelp
             null
         }
 
-    override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo? =
+    override suspend fun saveBytesToInternalStorage(
+        bytes: ByteArray,
+        extension: String,
+        mimeType: String,
+        fileNamePrefix: String
+    ): MediaInfo? =
         withContext(Dispatchers.IO) {
             try {
-                val localFileName = "media_${UUID.randomUUID()}${if (extension.isNotEmpty()) ".$extension" else ""}"
+                val localFileName = "${fileNamePrefix}media_${UUID.randomUUID()}${if (extension.isNotEmpty()) ".$extension" else ""}"
                 val file = File(mediaDir, localFileName)
                 FileOutputStream(file).use { it.write(bytes) }
 

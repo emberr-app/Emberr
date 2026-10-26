@@ -23,6 +23,8 @@ private const val CONNECT_TIMEOUT_MILLIS = 15_000L
 private const val REQUEST_TIMEOUT_MILLIS = 30_000L
 private const val MOST_SEARCH_RESULTS = 10
 private const val ENGLISH = "en"
+private const val NO_LANGUAGE = "null"
+private val savedInfoParts = listOf("videos", "external_ids", "keywords", "watch/providers", "images")
 private const val TRENDING_KEEP_MILLIS = 60 * 60 * 1000L
 
 private class SavedTrending(val languageTag: String, val results: List<MovieSearchResult>, val savedAtMillis: Long)
@@ -74,11 +76,17 @@ class TmdbMovieTitleSource : MovieTitleSource {
     }
 
     override suspend fun loadDetails(tmdbId: Long, kind: MovieKind): MovieDetails? {
-        val isEnglish = Locale.current.language == ENGLISH
+        val language = Locale.current.language.lowercase()
+        val isEnglish = language == ENGLISH
         val ratingsPart = if (kind == MovieKind.MOVIE) "release_dates" else "content_ratings"
-        val extraParts = listOfNotNull("credits", ratingsPart, "translations".takeUnless { isEnglish })
+        val extraParts = listOfNotNull("credits", ratingsPart, "translations".takeUnless { isEnglish }) + savedInfoParts
+        val extraLanguages = listOf(language, ENGLISH, NO_LANGUAGE).distinct().joinToString(",")
         val path = if (kind == MovieKind.MOVIE) "movie/$tmdbId" else "tv/$tmdbId"
-        val response = requestTmdb(path) { parameter("append_to_response", extraParts.joinToString(",")) }
+        val response = requestTmdb(path) {
+            parameter("append_to_response", extraParts.joinToString(","))
+            parameter("include_video_language", extraLanguages)
+            parameter("include_image_language", extraLanguages)
+        }
         if (response.status == HttpStatusCode.NotFound) return null
 
         val replyText = successfulReplyText(response)
@@ -86,8 +94,8 @@ class TmdbMovieTitleSource : MovieTitleSource {
         val now = System.currentTimeMillis()
         return withContext(Dispatchers.Default) {
             when (kind) {
-                MovieKind.MOVIE -> TmdbReplyReader.movieDetailsFrom(replyText, region, now)
-                MovieKind.SHOW -> TmdbReplyReader.showDetailsFrom(replyText, region, now)
+                MovieKind.MOVIE -> TmdbReplyReader.movieDetailsFrom(replyText, language, region, now)
+                MovieKind.SHOW -> TmdbReplyReader.showDetailsFrom(replyText, language, region, now)
             }
         }
     }

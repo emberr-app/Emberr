@@ -87,8 +87,12 @@ class EmberrBackupImporterTest {
 
     private val mediaStorage = object : MediaStorageHelper {
         override suspend fun copyUriToInternalStorage(uriString: String): MediaInfo? = error("Not expected")
-        override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo? =
-            error("Not expected")
+        override suspend fun saveBytesToInternalStorage(
+            bytes: ByteArray,
+            extension: String,
+            mimeType: String,
+            fileNamePrefix: String
+        ): MediaInfo? = error("Not expected")
         override suspend fun saveStreamToInternalStorage(
             openSource: () -> Source,
             extension: String,

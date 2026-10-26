@@ -6,6 +6,9 @@ import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieCastMember
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
+import com.emberr.domain.model.MovieNamedLogo
+import com.emberr.domain.model.MovieSeason
+import com.emberr.domain.model.MovieWatchProviders
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.VoiceBlock
 import kotlin.test.Test
@@ -68,6 +71,43 @@ class MediaReferenceScannerTest {
         )
 
         assertEquals(setOf("poster.jpg", "bale.jpg"), MediaReferenceScanner.extractMediaFileNames(blocks))
+    }
+
+    @Test
+    fun aShowBlocksLogosAndSeasonPostersAreCollected() {
+        val blocks = listOf(
+            MovieBlock(
+                id = "show-1",
+                details = MovieDetails(
+                    tmdbId = 1396,
+                    kind = MovieKind.SHOW,
+                    title = "Breaking Bad",
+                    titleLogoFilePath = "tmdb_title_logo.png",
+                    productionCompanies = listOf(MovieNamedLogo("Sony Pictures Television", logoFilePath = "tmdb_sony.png")),
+                    networks = listOf(MovieNamedLogo("AMC", logoFilePath = "tmdb_amc.png")),
+                    seasons = listOf(MovieSeason(number = 1, posterFilePath = "tmdb_season1.jpg"), MovieSeason(number = 2)),
+                    watchProviders = MovieWatchProviders(
+                        regionCode = "US",
+                        stream = listOf(MovieNamedLogo("Netflix", logoFilePath = "tmdb_netflix.jpg")),
+                        rent = listOf(MovieNamedLogo("Apple TV", logoFilePath = "tmdb_apple.jpg")),
+                        buy = listOf(MovieNamedLogo("Google Play", logoFilePath = "tmdb_google.jpg"))
+                    )
+                )
+            )
+        )
+
+        assertEquals(
+            setOf(
+                "tmdb_title_logo.png",
+                "tmdb_sony.png",
+                "tmdb_amc.png",
+                "tmdb_season1.jpg",
+                "tmdb_netflix.jpg",
+                "tmdb_apple.jpg",
+                "tmdb_google.jpg"
+            ),
+            MediaReferenceScanner.extractMediaFileNames(blocks)
+        )
     }
 
     @Test
