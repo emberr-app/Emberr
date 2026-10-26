@@ -154,6 +154,7 @@ internal val CardScrim = Brush.horizontalGradient(
 private val ResultPosterWidth = 30.dp
 private val PhoneResultPosterWidth = 44.dp
 private val PhoneSearchFieldSpace = 78.dp
+internal val PosterCornerRadius = 12.dp
 private val ChipShape = RoundedCornerShape(8.dp)
 private val RowShape = RoundedCornerShape(8.dp)
 private val SearchFieldShape = RoundedCornerShape(12.dp)
@@ -729,7 +730,7 @@ internal fun MovieCardLoading() {
             modifier = Modifier
                 .width(cardPosterWidth())
                 .aspectRatio(2f / 3f)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(DefaultBlockShape)
                 .background(shimmerColor)
         )
         Column(
@@ -822,11 +823,11 @@ internal fun MovieCard(
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .then(if (hasPoster) Modifier.shadow(8.dp, RoundedCornerShape(8.dp)) else Modifier)
-                    .clip(RoundedCornerShape(8.dp))
+                    .then(if (hasPoster) Modifier.shadow(8.dp, DefaultBlockShape) else Modifier)
+                    .clip(DefaultBlockShape)
                     .clickable(onClick = openDetails)
             ) {
-                MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = 8.dp)
+                MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = PosterCornerRadius)
             }
             Column(
                 modifier = Modifier

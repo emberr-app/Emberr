@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.WatchStatus
@@ -70,7 +71,7 @@ import kotlin.math.roundToInt
 
 private val BoardColumnMinWidth = 250.dp
 private val BoardColumnGap = 12.dp
-private val BoardCardShape = RoundedCornerShape(10.dp)
+private val BoardCardShape = DefaultBlockShape
 private val BoardColumnShape = RoundedCornerShape(10.dp)
 private val BoardEdgeZone = 48.dp
 private const val BOARD_EDGE_SCROLL_STEP_PIXELS = 12f

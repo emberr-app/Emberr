@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.util.system.isDesktopPlatform
@@ -104,7 +105,7 @@ private fun WatchlistGalleryCell(
     Column(
         modifier = Modifier
             .width(width)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(DefaultBlockShape)
             .titleSelectionMouseClicks(selection)
             .combinedClickable(
                 onClick = {
@@ -120,12 +121,12 @@ private fun WatchlistGalleryCell(
     ) {
         Box(
             modifier = if (selection?.isSelected == true) {
-                Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(10.dp))
+                Modifier.border(2.dp, MaterialTheme.colorScheme.primary, DefaultBlockShape)
             } else {
                 Modifier
             }
         ) {
-            MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = width, cornerRadius = 10.dp)
+            MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = width, cornerRadius = PosterCornerRadius)
             if (selection?.isSelecting == true) {
                 TitleSelectionCheckbox(
                     isSelected = selection.isSelected,
