@@ -75,6 +75,7 @@ import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.InlineSpan
 import com.emberr.domain.model.LinkedNoteBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
 import com.emberr.domain.model.PropertyBlock
@@ -106,6 +107,7 @@ import com.emberr.presentation.shared.editor.blockViews.media.BookmarkBlockView
 import com.emberr.presentation.shared.editor.blockViews.media.DocumentBlockView
 import com.emberr.presentation.shared.editor.blockViews.media.ImageBlockView
 import com.emberr.presentation.shared.editor.blockViews.LinkedNoteBlockView
+import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockView
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyBlockView
 import com.emberr.presentation.shared.editor.blockViews.TableBlockView
 import com.emberr.ui.theme.LocalAppIsDark
@@ -738,6 +740,14 @@ private fun TimelineBlockContent(
                 .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(1.dp))
         )
 
+        is MovieBlock -> MovieBlockView(
+            block = block,
+            editor = null,
+            inSelectionMode = false,
+            onToggleSelection = {},
+            onDelete = {}
+        )
+
         is ThreeDotDividerBlock -> Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -931,6 +941,7 @@ private fun timelineBlockSearchText(block: NoteBlock): String = when (block) {
     is DocumentBlock -> block.fileName
     is TableBlock -> block.rows.joinToString(" ") { row -> row.joinToString(" ") }
     is PropertyBlock -> block.valueAsText()
+    is MovieBlock -> block.details?.title.orEmpty()
     else -> ""
 }
 

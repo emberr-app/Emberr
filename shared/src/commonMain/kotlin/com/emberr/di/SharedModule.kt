@@ -126,7 +126,8 @@ val sharedModule = module {
             customPropertyDao = get(),
             selfHostDeletedNoteDao = get(),
             mediaReferenceDao = get(),
-            canvasDao = get()
+            canvasDao = get(),
+            movieBlockDao = get()
         )
     }
 
@@ -189,6 +190,13 @@ val sharedModule = module {
             canvasRepository = get(),
             noteRepository = get(),
             viewPositionStore = get()
+        )
+    }
+    single {
+        com.emberr.domain.movie.WatchlistCleaner(
+            noteDao = get(),
+            blockDao = get(),
+            noteRepository = get()
         )
     }
 
@@ -271,6 +279,7 @@ val sharedModule = module {
             sampleNotesSeeder = get(),
             localMediaGarbageCollector = get(),
             embeddedCanvasCleaner = get(),
+            watchlistCleaner = get(),
             databaseRowCleaner = get(),
             repeatingTemplateRowCreator = get(),
             favoriteNoteOrderStore = get(),
@@ -328,7 +337,8 @@ val sharedModule = module {
             reminderScheduler = get(),
             audioRecorder = get(),
             appScope = get(named("AppScope")),
-            deviceTableLayoutStore = get()
+            deviceTableLayoutStore = get(),
+            movieTitleSource = get()
         )
     }
     viewModel {
@@ -339,7 +349,8 @@ val sharedModule = module {
             reminderScheduler = get(),
             audioRecorder = get(),
             appScope = get(named("AppScope")),
-            deviceTableLayoutStore = get()
+            deviceTableLayoutStore = get(),
+            movieTitleSource = get()
         )
     }
     single {
@@ -372,6 +383,7 @@ val sharedModule = module {
     single<com.emberr.domain.util.media.WebImageFetcher> {
         com.emberr.domain.util.media.KtorWebImageFetcher(mediaStorageHelper = get())
     }
+    single<com.emberr.domain.movie.MovieTitleSource> { com.emberr.domain.movie.SampleMovieTitleSource() }
     single {
         com.emberr.domain.backup.manual.EmberrBackupImporter(
             appDatabase = get(),

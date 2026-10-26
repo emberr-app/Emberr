@@ -33,6 +33,7 @@ import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.InlineSpan
 import com.emberr.domain.model.LinkedNoteBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.NumberedListBlock
@@ -49,11 +50,18 @@ import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.ThreeDotDividerBlock
 import com.emberr.domain.model.ToggleBlock
 import com.emberr.domain.model.VoiceBlock
+import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.defaultHighlightColorName
 import com.emberr.domain.model.editableTextOrNull
 import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.model.markDeleted
+import com.emberr.domain.model.MovieDetails
+import com.emberr.domain.model.WatchState
+import com.emberr.domain.model.titleKey
+import com.emberr.domain.model.watchState
+import com.emberr.domain.model.withWatchState
+import com.emberr.domain.model.summaryLine
 import com.emberr.domain.model.textAlignmentOrNull
 import com.emberr.domain.model.valueAsText
 import com.emberr.domain.model.withChildrenPinnedLikeTheirToggleOrCallout
@@ -68,6 +76,7 @@ import com.emberr.domain.model.withUpdatedAt
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.reminders.scheduleEventReminder
+import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.table.withActiveViewOf
@@ -78,6 +87,9 @@ import com.emberr.domain.util.network.HtmlMetadataFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
+import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockHost
+import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockHost
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
 import com.emberr.presentation.shared.editor.markdown.blocksEmberrCopiedAs
@@ -159,7 +171,8 @@ abstract class BaseEditorViewModel(
     protected val reminderScheduler: ReminderScheduler,
     protected val audioRecorder: AudioRecorder,
     private val appScope: CoroutineScope,
-    private val deviceTableLayoutStore: DeviceTableLayoutStore
+    private val deviceTableLayoutStore: DeviceTableLayoutStore,
+    movieTitleSource: MovieTitleSource
 ) : ViewModel() {
 
     // AI event bus
@@ -218,6 +231,8 @@ abstract class BaseEditorViewModel(
                     is QuoteBlock -> "${block.id}:${block.text}"
                     is PropertyBlock -> "${block.id}:${block.label}:${block.valueAsText()}"
                     is DatabaseBlock -> "${block.id}:${block.title}"
+                    is MovieBlock -> "${block.id}:${block.summaryLine()}"
+                    is WatchlistBlock -> "${block.id}:${block.title}"
                     else -> block.id
                 }
             }
@@ -720,6 +735,45 @@ abstract class BaseEditorViewModel(
     }
 
     val databaseBlockEditor: DatabaseBlockEditor = DatabaseBlockEditor(repository, appScope, databaseBlockHost)
+
+    private val movieBlockHost: MovieBlockHost = object : MovieBlockHost {
+        override fun changeMovieBlock(blockId: String, change: (MovieBlock) -> MovieBlock) {
+            val now = System.currentTimeMillis()
+            modifyBlocks { list -> mapBlockById(list, blockId) { if (it is MovieBlock) change(it).copy(updatedAt = now) else it } }
+            scheduleAutosave()
+        }
+
+        override fun applyWatchStateToTitle(blockId: String, state: WatchState) {
+            val now = System.currentTimeMillis()
+            modifyBlocks { list ->
+                val titleKey = (list.firstOrNull { it.id == blockId } as? MovieBlock)?.titleKey()
+                list.map { block ->
+                    val isSameTitle = block is MovieBlock && !block.isDeleted && titleKey != null && block.titleKey() == titleKey
+                    if (block is MovieBlock && (block.id == blockId || isSameTitle)) block.withWatchState(state, now) else block
+                }
+            }
+            scheduleAutosave()
+        }
+
+        override suspend fun newestWatchStateInThisSpace(details: MovieDetails): WatchState? {
+            val titleKey = details.titleKey()
+            val stateInThisNote = _blocks.value
+                .filterIsInstance<MovieBlock>()
+                .filter { !it.isDeleted && it.titleKey() == titleKey }
+                .maxByOrNull { it.watchStateChangedAt }
+                ?.watchState()
+            val stateElsewhere = spaceIdOfThisNote()?.let { spaceId -> repository.findNewestWatchState(spaceId, titleKey) }
+            return listOfNotNull(stateInThisNote, stateElsewhere).maxByOrNull { it.changedAt }
+        }
+    }
+
+    val movieBlockEditor: MovieBlockEditor = MovieBlockEditor(movieTitleSource, viewModelScope, movieBlockHost)
+
+    val watchlistBlockEditor: WatchlistBlockEditor = WatchlistBlockEditor(repository, movieTitleSource, appScope) { blockId, change ->
+        val now = System.currentTimeMillis()
+        modifyBlocks { list -> mapBlockById(list, blockId) { if (it is WatchlistBlock) change(it).copy(updatedAt = now) else it } }
+        scheduleAutosave()
+    }
 
     init {
         viewModelScope.launch { databaseBlockEditor.keepDatabaseSettingsUpdated() }
@@ -2051,6 +2105,8 @@ abstract class BaseEditorViewModel(
         is BookmarkBlock -> "bookmark"
         is TableBlock -> "table"
         is DatabaseBlock -> "database"
+        is MovieBlock -> "movie"
+        is WatchlistBlock -> "watchlist"
         else -> null
     }
 
@@ -2489,8 +2545,13 @@ abstract class BaseEditorViewModel(
         type: String,
         linkedNoteId: String? = null,
         canvasNoteId: String? = null,
-        databaseId: String? = null
+        databaseId: String? = null,
+        watchlistNoteId: String? = null
     ) {
+        if (type == "watchlist" && watchlistNoteId == null) {
+            createWatchlistThenInsertBlock()
+            return
+        }
         if (type == "canvas" && canvasNoteId == null) {
             createEmbeddedCanvasThenInsertBlock()
             return
@@ -2516,6 +2577,11 @@ abstract class BaseEditorViewModel(
                 "image" -> ImageBlock(id = newId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
                 "document" -> DocumentBlock(id = newId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
                 "bookmark" -> BookmarkBlock(id = newId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
+                "movie" -> MovieBlock(id = newId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
+                "watchlist" -> {
+                    if (watchlistNoteId == null) return@modifyBlocks list
+                    WatchlistBlock(id = newId, watchlistNoteId = watchlistNoteId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
+                }
                 "linked_note" -> {
                     if (linkedNoteId == null) return@modifyBlocks list
                     LinkedNoteBlock(id = newId, linkedNoteId = linkedNoteId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
@@ -2615,6 +2681,36 @@ abstract class BaseEditorViewModel(
                 }
                 withContext(Dispatchers.Main) {
                     insertNewMediaBlock("canvas", canvasNoteId = canvasNoteId)
+                    flushPendingSave()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun createWatchlistThenInsertBlock() {
+        val watchlistNoteId = UUID.randomUUID().toString()
+        val now = System.currentTimeMillis()
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val parentSpaceId = spaceIdOfThisNote() ?: return@launch
+                val watchlistMetadata = NoteMetadataEntity(
+                    noteId = watchlistNoteId,
+                    title = "",
+                    folderId = null,
+                    isDaily = false,
+                    dateString = null,
+                    createdAt = now,
+                    updatedAt = now,
+                    filePath = "note_$watchlistNoteId.json",
+                    isSubNote = true
+                )
+                SyncCoordinator.mutex.withLock {
+                    repository.saveNoteInSpace(parentSpaceId, watchlistMetadata, NoteContent(blocks = emptyList()))
+                }
+                withContext(Dispatchers.Main) {
+                    insertNewMediaBlock("watchlist", watchlistNoteId = watchlistNoteId)
                     flushPendingSave()
                 }
             } catch (e: Exception) {

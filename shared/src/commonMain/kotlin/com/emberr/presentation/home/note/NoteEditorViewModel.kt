@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.database.withDatabasesAsTables
 import com.emberr.domain.model.*
+import com.emberr.domain.movie.MovieTitleSource
+import com.emberr.domain.movie.withWatchlistsExpanded
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.export.MarkdownAttachment
@@ -33,8 +35,9 @@ class NoteEditorViewModel(
     reminderScheduler: ReminderScheduler,
     audioRecorder: AudioRecorder,
     appScope: CoroutineScope,
-    deviceTableLayoutStore: DeviceTableLayoutStore
-) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore) {
+    deviceTableLayoutStore: DeviceTableLayoutStore,
+    movieTitleSource: MovieTitleSource
+) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore, movieTitleSource) {
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -417,7 +420,7 @@ class NoteEditorViewModel(
         return "$title\n\n$body"
     }
 
-    suspend fun blocksForExport(): List<NoteBlock> = _blocks.value.withDatabasesAsTables(repository)
+    suspend fun blocksForExport(): List<NoteBlock> = _blocks.value.withDatabasesAsTables(repository).withWatchlistsExpanded(repository)
 
     suspend fun generateMarkdownExport(): String = markdownOf(blocksForExport(), attachments = emptyList())
 
