@@ -263,6 +263,15 @@ class NoteIndexer(
         is CanvasBlock -> null
         is PropertyBlock -> block.valueAsText().takeIf { it.isNotBlank() }?.let { "${block.label}: $it" }
         is DatabaseBlock -> block.title.takeIf { it.isNotBlank() }?.let { "Database: $it" }
+        is MovieBlock -> block.details?.let { details ->
+            buildString {
+                append("${details.kind.label}: ${block.summaryLine()}")
+                if (details.genres.isNotEmpty()) append("\nGenres: ${details.genres.joinToString()}")
+                if (details.creditNames.isNotEmpty()) append("\n${details.creditLabel}: ${details.creditNames.joinToString()}")
+                if (details.overview.isNotBlank()) append("\nOverview: ${details.overview}")
+            }
+        }
+        is WatchlistBlock -> block.title.takeIf { it.isNotBlank() }?.let { "Watchlist: $it" }
         is UnknownBlock -> null
     }
 

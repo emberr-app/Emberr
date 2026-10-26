@@ -58,6 +58,8 @@ object ExportEngine {
                 is CanvasBlock -> builder.appendLine("${indent}[Canvas]")
                 is PropertyBlock -> builder.appendLine("$indent${block.label}: ${block.valueAsText()}")
                 is DatabaseBlock -> block.title.takeIf { it.isNotBlank() }?.let { builder.appendLine("$indent$it") }
+                is MovieBlock -> block.summaryLine()?.let { builder.appendLine("$indent$it") }
+                is WatchlistBlock -> block.title.takeIf { it.isNotBlank() }?.let { builder.appendLine("$indent$it") }
                 is LinkedNoteBlock -> { /* Ignored - only linkedNoteId is available here, no title to render */ }
                 is UnknownBlock -> {}
             }
