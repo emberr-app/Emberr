@@ -166,7 +166,7 @@ private fun WatchlistGalleryCell(
             ) {
                 if (details.yearText.isNotBlank()) {
                     Text(
-                        text = details.yearText.take(4),
+                        text = details.yearText,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                         maxLines = 1

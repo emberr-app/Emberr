@@ -150,12 +150,7 @@ internal fun Modifier.titleSelectionMouseClicks(selection: TitleCardSelection?):
 
 @Composable
 internal fun TitleSelectionCheckbox(isSelected: Boolean, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
-            .padding(4.dp)
-    ) {
+    Box(modifier = modifier.padding(4.dp)) {
         EmberrCheckbox(checked = isSelected, onCheckedChange = null)
     }
 }

@@ -2,6 +2,7 @@ package com.emberr.presentation.shared.editor.blockViews.movie
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -53,7 +54,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -61,6 +61,7 @@ import androidx.compose.ui.zIndex
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.WatchStatus
+import com.emberr.domain.model.hasPoster
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
 import com.emberr.presentation.shared.components.emberrBorder
@@ -345,37 +346,48 @@ private fun DraggableBoardCard(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun WatchlistBoardCard(title: MovieBlock, details: MovieDetails, modifier: Modifier = Modifier) {
-    Row(
+    val hasPoster = details.hasPoster
+    val colors = movieCardColors(isOnPoster = hasPoster)
+    val plainBackground = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.background
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(BoardCardShape)
-            .background(if (LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.background)
-            .padding(9.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+            .background(if (hasPoster) PosterBackdropBaseColor else plainBackground)
     ) {
-        MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = 44.dp, cornerRadius = 4.dp)
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+        if (hasPoster) {
+            BlurredPosterBackdrop(details = details, blurRadius = 30.dp, scrim = CardScrim)
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(9.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = details.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = 44.dp, cornerRadius = 4.dp)
+            Column(
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                listOf(details.yearText.take(4), details.kind.label)
-                    .filter { it.isNotBlank() }
-                    .forEach { fact ->
-                        Text(text = fact, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline, maxLines = 1)
-                    }
-                details.tmdbRating?.let { rating -> TmdbRating(rating = rating) }
+                Text(
+                    text = details.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.title,
+                    maxLines = 1,
+                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    listOf(details.yearText, details.kind.label)
+                        .filter { it.isNotBlank() }
+                        .forEach { fact ->
+                            Text(text = fact, style = MaterialTheme.typography.labelSmall, color = colors.secondary, maxLines = 1)
+                        }
+                    details.tmdbRating?.let { rating -> TmdbRating(rating = rating, numberColor = colors.secondary) }
+                }
             }
         }
     }
