@@ -159,7 +159,7 @@ interface NoteDao {
     @Query("SELECT COUNT(*) FROM calendar_tasks WHERE isChecked = 0 AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     fun getIncompleteTasksCount(): Flow<Int>
 
-    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isTemplate = 0 AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND databaseId IS NULL")
+    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isTemplate = 0 AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND NOT (isSubNote = 1 AND title = '') AND kind != 'DATABASE' AND databaseId IS NULL")
     fun getAllLinkableNotes(spaceId: String): Flow<List<NoteMetadataEntity>>
 
     @Query(

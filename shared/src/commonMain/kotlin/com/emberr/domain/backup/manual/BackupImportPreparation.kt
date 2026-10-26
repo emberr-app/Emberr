@@ -15,6 +15,7 @@ import com.emberr.domain.database.holdsSharedSettings
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.LinkedNoteBlock
+import com.emberr.domain.model.WatchlistBlock
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -387,6 +388,7 @@ private fun accountNotesIn(backup: EmberrBackupData): AccountNotesInBackup {
             val group = when (val block = decodeBlockOrNull(entity.blockDataJson)?.takeUnless { it.isDeleted }) {
                 is CanvasBlock -> groupHolding(block.canvasNoteId)
                 is LinkedNoteBlock -> groupHolding(block.linkedNoteId)
+                is WatchlistBlock -> groupHolding(block.watchlistNoteId)
                 is DatabaseBlock -> if (block.holdsSharedSettings) null else SubNoteGroup.Database(block.databaseId)
                 else -> null
             }
@@ -420,4 +422,4 @@ private fun accountNotesIn(backup: EmberrBackupData): AccountNotesInBackup {
     )
 }
 
-private val SUB_NOTE_POINTER_FIELDS = listOf("canvasNoteId", "linkedNoteId", "databaseId")
+private val SUB_NOTE_POINTER_FIELDS = listOf("canvasNoteId", "linkedNoteId", "databaseId", "watchlistNoteId")

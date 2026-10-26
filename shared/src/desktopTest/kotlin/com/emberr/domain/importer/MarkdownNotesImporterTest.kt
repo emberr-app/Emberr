@@ -84,7 +84,8 @@ class MarkdownNotesImporterTest {
         customPropertyDao = appDatabase.customPropertyDao(),
         selfHostDeletedNoteDao = appDatabase.selfHostDeletedNoteDao(),
         mediaReferenceDao = appDatabase.mediaReferenceDao(),
-        canvasDao = appDatabase.canvasDao()
+        canvasDao = appDatabase.canvasDao(),
+        movieBlockDao = appDatabase.movieBlockDao()
     )
 
     private val canvasRepository = CanvasRepository(canvasDao = appDatabase.canvasDao(), noteDao = appDatabase.noteDao())

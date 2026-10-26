@@ -10,12 +10,14 @@ import com.emberr.data.local.room.dao.DocumentBlockDao
 import com.emberr.data.local.room.dao.FolderDao
 import com.emberr.data.local.room.dao.ImageBlockDao
 import com.emberr.data.local.room.dao.MediaReferenceDao
+import com.emberr.data.local.room.dao.MovieBlockDao
 import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.data.local.room.dao.PropertyTagDao
 import com.emberr.data.local.room.dao.CustomPropertyDao
 import com.emberr.data.local.room.dao.SelfHostDeletedNoteDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.BookmarkBlockEntity
+import com.emberr.data.local.room.entity.MovieBlockEntity
 import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.CategoryEntity
@@ -83,6 +85,13 @@ import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.LinkedNoteBlock
+import com.emberr.domain.model.MovieBlock
+import com.emberr.domain.model.WatchState
+import com.emberr.domain.model.titleKey
+import com.emberr.domain.model.watchState
+import com.emberr.domain.model.withWatchState
+import com.emberr.domain.model.deepCopyWithNewIds
+import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteBlockSerializer
 import com.emberr.domain.model.NoteContent
@@ -106,6 +115,7 @@ import com.emberr.domain.model.valueAsText
 import com.emberr.domain.model.lastDate
 import com.emberr.domain.sample.lastEditedAtForDisplay
 import com.emberr.domain.search.LINKED_NOTE_BLOCK_JSON_MARKER
+import com.emberr.domain.movie.WatchlistCleanup
 import com.emberr.domain.search.latestParentByChildId
 import com.emberr.domain.search.subNoteParentTitles
 import com.emberr.domain.search.withSubNoteParents
@@ -198,7 +208,8 @@ class NoteRepositoryImpl(
     private val customPropertyDao: CustomPropertyDao,
     private val selfHostDeletedNoteDao: SelfHostDeletedNoteDao,
     private val mediaReferenceDao: MediaReferenceDao,
-    private val canvasDao: CanvasDao
+    private val canvasDao: CanvasDao,
+    private val movieBlockDao: MovieBlockDao
 ) : NoteRepository {
 
     private val jsonFormat = Json {
@@ -328,12 +339,14 @@ class NoteRepositoryImpl(
         syncImageBlocks(winner.noteId, decodedBlocks, TaskSource.DAILY, winner.createdAt)
         syncDocumentBlocks(winner.noteId, decodedBlocks, TaskSource.DAILY, winner.createdAt)
         syncBookmarkBlocks(winner.noteId, decodedBlocks, TaskSource.DAILY, winner.lastEditedAtForDisplay())
+        syncMovieBlocks(winner.noteId, decodedBlocks)
         syncMediaReferences(winner.noteId, decodedBlocks)
 
         losers.forEach { loser ->
             imageBlockDao.deleteByNoteId(loser.noteId)
             documentBlockDao.deleteByNoteId(loser.noteId)
             bookmarkBlockDao.deleteByNoteId(loser.noteId)
+            movieBlockDao.deleteByNoteId(loser.noteId)
             mediaReferenceDao.deleteByNoteId(loser.noteId)
             noteDao.deleteNoteMetadata(loser.noteId)
         }
@@ -460,7 +473,8 @@ class NoteRepositoryImpl(
     private val subNotePointerMarkers = listOf(
         EmbeddedCanvasCleanup.CANVAS_NOTE_ID_FIELD,
         DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER,
-        LINKED_NOTE_BLOCK_JSON_MARKER
+        LINKED_NOTE_BLOCK_JSON_MARKER,
+        WatchlistCleanup.WATCHLIST_NOTE_ID_FIELD
     )
 
     private suspend fun livePointersToSubNotes(): List<SubNotePointer> {
@@ -494,6 +508,7 @@ class NoteRepositoryImpl(
             val group = when (block) {
                 is CanvasBlock -> SubNoteGroup.SingleNote(block.canvasNoteId)
                 is LinkedNoteBlock -> SubNoteGroup.SingleNote(block.linkedNoteId)
+                is WatchlistBlock -> SubNoteGroup.SingleNote(block.watchlistNoteId)
                 else -> block?.shownDatabaseIdOrNull()?.let { SubNoteGroup.Database(it) }
             }
             group?.let {
@@ -611,6 +626,7 @@ class NoteRepositoryImpl(
             imageBlockDao.deleteByNoteId(note.noteId)
             documentBlockDao.deleteByNoteId(note.noteId)
             bookmarkBlockDao.deleteByNoteId(note.noteId)
+            movieBlockDao.deleteByNoteId(note.noteId)
             mediaReferenceDao.deleteByNoteId(note.noteId)
             blockDao.deleteAllBlocksForNote(note.noteId)
             noteDao.deleteNoteMetadata(note.noteId)
@@ -953,6 +969,8 @@ class NoteRepositoryImpl(
                     sourceType    = TaskSource.DAILY,
                     noteUpdatedAt = metadata.lastEditedAtForDisplay()
                 )
+                syncMovieBlocks(noteId = noteId, blocks = content.blocks)
+                shareNewestWatchStates(metadata = metadata, blocks = content.blocks)
             }
         }
 
@@ -1004,7 +1022,9 @@ class NoteRepositoryImpl(
             val alreadyFoundOrCanvasIds = alreadyFoundIds + canvasMatches.map { it.note.noteId }
             val databaseMatches = findDatabaseTitleMatches(spaceIds, query, contentMatchIds).filterNot { it.note.noteId in alreadyFoundOrCanvasIds }
 
-            (metadataResults + resolveSubNoteParents(contentMatches + canvasMatches + databaseMatches)).sortedByDescending { it.note.updatedAt }
+            (metadataResults + resolveSubNoteParents(contentMatches + canvasMatches + databaseMatches))
+                .distinctBy { it.note.noteId }
+                .sortedByDescending { it.note.updatedAt }
         }
 
     private suspend fun resolveSubNoteParents(results: List<NoteSearchResult>): List<NoteSearchResult> {
@@ -1014,7 +1034,11 @@ class NoteRepositoryImpl(
         }
         val parentsByDatabaseId = parentsOf(DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER, loadLiveParents) { it.shownDatabaseIdOrNull() }
         val parentsByLinkedNoteId = parentsOf(LINKED_NOTE_BLOCK_JSON_MARKER, loadLiveParents) { (it as? LinkedNoteBlock)?.linkedNoteId }
-        return results.withSubNoteParents(parentsByDatabaseId, parentsByLinkedNoteId)
+        val parentsByWatchlistId = parentsOf(WatchlistCleanup.WATCHLIST_NOTE_ID_FIELD, loadLiveParents) { (it as? WatchlistBlock)?.watchlistNoteId }
+        return results
+            .withSubNoteParents(parentsByDatabaseId, parentsByLinkedNoteId)
+            .map { result -> parentsByWatchlistId[result.note.noteId]?.let { parent -> result.copy(note = parent, parentTitle = null) } ?: result }
+            .distinctBy { it.note.noteId }
     }
 
     override suspend fun parentTitlesOfSubNotes(notes: List<NoteMetadataEntity>): Map<String, String> =
@@ -1024,7 +1048,8 @@ class NoteRepositoryImpl(
                 noteDao.getNotesByIdsIncludingTemplates(noteIds)
             }
             val parentsByDatabaseId = parentsOf(DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER, loadAnyParents) { it.shownDatabaseIdOrNull() }
-            val parentsByLinkedNoteId = parentsOf(LINKED_NOTE_BLOCK_JSON_MARKER, loadAnyParents) { (it as? LinkedNoteBlock)?.linkedNoteId }
+            val parentsByLinkedNoteId = parentsOf(LINKED_NOTE_BLOCK_JSON_MARKER, loadAnyParents) { (it as? LinkedNoteBlock)?.linkedNoteId } +
+                parentsOf(WatchlistCleanup.WATCHLIST_NOTE_ID_FIELD, loadAnyParents) { (it as? WatchlistBlock)?.watchlistNoteId }
             notes.subNoteParentTitles(parentsByDatabaseId, parentsByLinkedNoteId)
         }
 
@@ -1122,6 +1147,8 @@ class NoteRepositoryImpl(
         is DocumentBlock -> block.fileName
         is PropertyBlock -> block.valueAsText()
         is DatabaseBlock -> block.title
+        is MovieBlock -> block.details?.title
+        is WatchlistBlock -> block.title
         else -> null
     }.let { text -> text?.takeIf { it.isNotBlank() } }
 
@@ -1178,14 +1205,100 @@ class NoteRepositoryImpl(
                     syncImageBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.DAILY, noteCreatedAt = metadata.createdAt)
                     syncDocumentBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.DAILY, noteCreatedAt = metadata.createdAt)
                     syncBookmarkBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.DAILY, noteUpdatedAt = metadata.lastEditedAtForDisplay())
+                    syncMovieBlocks(noteId = metadata.noteId, blocks = blocks)
+                    shareNewestWatchStates(metadata = metadata, blocks = blocks)
                 }
             } else {
                 syncCalendarTasks(spaceId = metadata.spaceId, noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.NOTE, dailyDateString = null)
                 syncImageBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.NOTE, noteCreatedAt = metadata.createdAt)
                 syncDocumentBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.NOTE, noteCreatedAt = metadata.createdAt)
                 syncBookmarkBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.NOTE, noteUpdatedAt = metadata.lastEditedAtForDisplay())
+                syncMovieBlocks(noteId = metadata.noteId, blocks = blocks)
+                shareNewestWatchStates(metadata = metadata, blocks = blocks)
             }
         }
+
+    override suspend fun findNewestWatchState(spaceId: String, titleKey: String): WatchState? =
+        withContext(Dispatchers.IO) { movieBlockDao.getNewestMovieBlockOfTitle(spaceId, titleKey)?.watchState() }
+
+    private suspend fun syncMovieBlocks(noteId: String, blocks: List<NoteBlock>) {
+        movieBlockDao.deleteByNoteId(noteId)
+
+        val movieBlocks = blocks
+            .filterIsInstance<MovieBlock>()
+            .filter { !it.isDeleted }
+            .mapNotNull { block ->
+                val titleKey = block.titleKey() ?: return@mapNotNull null
+                MovieBlockEntity(
+                    blockId = block.id,
+                    noteId = noteId,
+                    titleKey = titleKey,
+                    watchStatus = block.watchStatus,
+                    ratingHalfStars = block.ratingHalfStars,
+                    watchStateChangedAt = block.watchStateChangedAt
+                )
+            }
+
+        if (movieBlocks.isNotEmpty()) {
+            movieBlockDao.upsertMovieBlocks(movieBlocks)
+        }
+    }
+
+    private suspend fun shareNewestWatchStates(metadata: NoteMetadataEntity, blocks: List<NoteBlock>) {
+        if (metadata.isTemplate || metadata.trashedAt != null) return
+        val movieBlocks = blocks.filterIsInstance<MovieBlock>().filter { !it.isDeleted && it.details != null }
+        if (movieBlocks.isEmpty()) return
+
+        val titleKeys = movieBlocks.mapNotNull { it.titleKey() }.distinct()
+        val linkedRows = movieBlockDao.getLinkedMovieBlocks(metadata.spaceId, titleKeys, exceptNoteId = metadata.noteId)
+        if (linkedRows.isEmpty()) return
+
+        val newestByTitle = newestWatchStateByTitle(
+            movieBlocks.mapNotNull { block -> block.titleKey()?.let { it to block.watchState() } } +
+                linkedRows.map { row -> row.titleKey to row.watchState() }
+        )
+
+        if (movieBlocks.any { it.isOlderThan(newestByTitle) }) {
+            rewriteWatchStatesInNote(metadata.noteId, newestByTitle)
+        }
+        linkedRows
+            .filter { row -> row.watchStateChangedAt < newestByTitle.getValue(row.titleKey).changedAt }
+            .map { it.noteId }
+            .distinct()
+            .forEach { noteId -> rewriteWatchStatesInNote(noteId, newestByTitle) }
+    }
+
+    private suspend fun rewriteWatchStatesInNote(noteId: String, newestByTitle: Map<String, WatchState>) {
+        val metadata = noteDao.getNoteById(noteId) ?: return
+        val dailyDateString = metadata.dateString?.takeIf { metadata.isDaily }
+        val blocks = (if (dailyDateString != null) getDailyNote(dailyDateString) else getNoteContent(noteId))
+            ?.blocks ?: return
+        val now = System.currentTimeMillis()
+        val updatedBlocks = blocks.map { block ->
+            if (block is MovieBlock && !block.isDeleted && block.isOlderThan(newestByTitle)) {
+                block.withWatchState(newestByTitle.getValue(block.titleKey()!!), now)
+            } else {
+                block
+            }
+        }
+        if (updatedBlocks == blocks) return
+        val updatedContent = NoteContent(blocks = updatedBlocks)
+        if (dailyDateString != null) {
+            saveDailyNote(dailyDateString, updatedContent)
+        } else {
+            saveNote(metadata, updatedContent)
+        }
+    }
+
+    private fun newestWatchStateByTitle(statesByTitle: List<Pair<String, WatchState>>): Map<String, WatchState> =
+        statesByTitle
+            .groupBy({ (titleKey, _) -> titleKey }, { (_, state) -> state })
+            .mapValues { (_, states) -> states.maxBy { it.changedAt } }
+
+    private fun MovieBlock.isOlderThan(newestByTitle: Map<String, WatchState>): Boolean {
+        val newest = titleKey()?.let(newestByTitle::get) ?: return false
+        return newest.changedAt > watchStateChangedAt
+    }
 
     override suspend fun saveNote(metadata: NoteMetadataEntity, content: NoteContent, stampUpdatedAt: Boolean) =
         saveNoteResolvingSpace(metadata, content, stampUpdatedAt, null)
@@ -1240,6 +1353,7 @@ class NoteRepositoryImpl(
                 .mapNotNull { decodeBlockOrNull(it.blockDataJson) }
             if (metadata?.kind != NoteKind.DATABASE) parkViewsOfDatabasesNoOtherNoteShows(noteId, blocksOfNote)
             parkCanvasBlocksNoOtherNoteShows(noteId, blocksOfNote)
+            parkWatchlistBlocksNoOtherNoteShows(noteId, blocksOfNote)
             hardDeleteLocalNote(noteId)
             selfHostDeletedNoteDao.upsertTombstone(
                 SelfHostDeletedNoteEntity(
@@ -1292,6 +1406,27 @@ class NoteRepositoryImpl(
             val blocks = getNoteContent(canvasNote.noteId)?.blocks.orEmpty()
             val parkedBlock = canvasBlock.copy(isDeleted = true, updatedAt = if (canvasBlock.isDeleted) canvasBlock.updatedAt else now)
             saveNote(canvasNote, NoteContent(blocks = blocks.filterNot { it.id == parkedBlock.id } + parkedBlock))
+        }
+    }
+
+    private suspend fun parkWatchlistBlocksNoOtherNoteShows(noteId: String, blocksOfNote: List<NoteBlock>) {
+        val watchlistBlocks = blocksOfNote.filterIsInstance<WatchlistBlock>().filter { it.watchlistNoteId != noteId }
+        if (watchlistBlocks.isEmpty()) return
+        val usedWatchlistIds = blockDao.findBlocksContainingIncludingDeleted(WatchlistCleanup.WATCHLIST_NOTE_ID_FIELD)
+            .filter { it.noteId != noteId }
+            .mapNotNull { decodeBlockOrNull(it.blockDataJson) as? WatchlistBlock }
+            .filter { !it.isDeleted }
+            .mapTo(HashSet()) { it.watchlistNoteId }
+        val now = System.currentTimeMillis()
+        watchlistBlocks.filter { it.watchlistNoteId !in usedWatchlistIds }.forEach { watchlistBlock -> parkWatchlistBlock(watchlistBlock, now) }
+    }
+
+    private suspend fun parkWatchlistBlock(watchlistBlock: WatchlistBlock, now: Long) {
+        SyncCoordinator.mutex.withLock {
+            val watchlistNote = noteDao.getNoteById(watchlistBlock.watchlistNoteId)?.takeIf { it.isSubNote } ?: return@withLock
+            val blocks = getNoteContent(watchlistNote.noteId)?.blocks.orEmpty()
+            val parkedBlock = watchlistBlock.copy(isDeleted = true, updatedAt = if (watchlistBlock.isDeleted) watchlistBlock.updatedAt else now)
+            saveNote(watchlistNote, NoteContent(blocks = blocks.filterNot { it.id == parkedBlock.id } + parkedBlock))
         }
     }
 
@@ -3016,7 +3151,48 @@ class NoteRepositoryImpl(
     override suspend fun copyEmbeddedCanvasesIn(content: NoteContent): NoteContent = copyEmbeddedCanvasesIn(content, spaceId = null)
 
     private suspend fun copySubNotesIn(content: NoteContent, spaceId: String?): NoteContent =
-        copyDatabasesIn(copyEmbeddedCanvasesIn(content, spaceId), spaceId, copyIdsBySourceDatabaseId = mutableMapOf(), copyRowIdsBySourceDatabaseId = mutableMapOf())
+        copyWatchlistsIn(
+            copyDatabasesIn(copyEmbeddedCanvasesIn(content, spaceId), spaceId, copyIdsBySourceDatabaseId = mutableMapOf(), copyRowIdsBySourceDatabaseId = mutableMapOf()),
+            spaceId
+        )
+
+    override suspend fun copyWatchlistsIn(content: NoteContent): NoteContent = copyWatchlistsIn(content, spaceId = null)
+
+    private suspend fun copyWatchlistsIn(content: NoteContent, spaceId: String?): NoteContent = withContext(Dispatchers.IO) {
+        val copyIdsBySourceWatchlistId = mutableMapOf<String, String>()
+        val blocks = content.blocks.map { block ->
+            if (block !is WatchlistBlock || block.isDeleted) return@map block
+            val copiedWatchlistNoteId = copyIdsBySourceWatchlistId.getOrPut(block.watchlistNoteId) {
+                copyWatchlistNote(block.watchlistNoteId, spaceId) ?: block.watchlistNoteId
+            }
+            block.copy(watchlistNoteId = copiedWatchlistNoteId)
+        }
+        content.copy(blocks = blocks)
+    }
+
+    private suspend fun copyWatchlistNote(sourceWatchlistNoteId: String, spaceId: String?): String? {
+        val source = noteDao.getNoteById(sourceWatchlistNoteId)?.takeIf { it.isSubNote } ?: return null
+        val copiedBlocks = getNoteContent(sourceWatchlistNoteId)?.blocks.orEmpty()
+            .filter { it is MovieBlock && !it.isDeleted }
+            .map { it.deepCopyWithNewIds() }
+        val copyNoteId = UUID.randomUUID().toString()
+        val now = System.currentTimeMillis()
+        val copyMetadata = NoteMetadataEntity(
+            noteId = copyNoteId,
+            title = source.title,
+            folderId = null,
+            isDaily = false,
+            dateString = null,
+            createdAt = now,
+            updatedAt = now,
+            filePath = "note_$copyNoteId.json",
+            isSubNote = true
+        )
+        SyncCoordinator.mutex.withLock {
+            saveNoteResolvingSpace(copyMetadata, NoteContent(blocks = copiedBlocks), stampUpdatedAt = true, requestedSpaceId = spaceId)
+        }
+        return copyNoteId
+    }
 
     private suspend fun copyEmbeddedCanvasesIn(content: NoteContent, spaceId: String?): NoteContent = withContext(Dispatchers.IO) {
         val copyIdsBySourceCanvasId = mutableMapOf<String, String>()

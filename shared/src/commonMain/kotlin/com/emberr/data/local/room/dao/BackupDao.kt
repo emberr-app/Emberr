@@ -119,6 +119,12 @@ interface BackupDao {
     )
     suspend fun deleteBookmarkBlocksThatHaveNoBlock()
 
+    @Query(
+        "DELETE FROM movie_blocks WHERE NOT EXISTS " +
+                "(SELECT 1 FROM note_blocks WHERE note_blocks.noteId = movie_blocks.noteId AND note_blocks.blockId = movie_blocks.blockId)"
+    )
+    suspend fun deleteMovieBlocksThatHaveNoBlock()
+
     @Query("DELETE FROM media_references WHERE noteId NOT IN (SELECT noteId FROM notes_metadata)")
     suspend fun deleteMediaReferencesThatHaveNoNote()
 

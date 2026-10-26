@@ -23,6 +23,7 @@ import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
+import com.emberr.domain.model.WatchState
 import com.emberr.domain.model.NoteSearchResult
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyValueType
@@ -116,6 +117,7 @@ interface NoteRepository {
     )
     fun refreshNoteContentCache(noteId: String, content: NoteContent)
     suspend fun refreshProjectionsForNote(metadata: NoteMetadataEntity, blocks: List<NoteBlock>)
+    suspend fun findNewestWatchState(spaceId: String, titleKey: String): WatchState?
     suspend fun deleteNote(noteId: String, filePath: String)
     suspend fun deleteAllContentInSpace(spaceId: String)
 
@@ -258,6 +260,7 @@ interface NoteRepository {
 
     suspend fun copyEmbeddedCanvasesIn(content: NoteContent): NoteContent
     suspend fun copyDatabasesIn(content: NoteContent): NoteContent
+    suspend fun copyWatchlistsIn(content: NoteContent): NoteContent
 
     fun observeNoteMetadata(noteId: String): Flow<NoteMetadataEntity?>
 

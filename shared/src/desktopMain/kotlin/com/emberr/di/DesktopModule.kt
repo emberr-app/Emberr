@@ -13,6 +13,7 @@ import com.emberr.data.local.room.AppDatabase
 import com.emberr.data.local.room.backUpDatabaseWhenAppVersionChanges
 import com.emberr.data.local.room.dao.BlockDao
 import com.emberr.data.local.room.dao.BookmarkBlockDao
+import com.emberr.data.local.room.dao.MovieBlockDao
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.dao.DocumentBlockDao
@@ -84,6 +85,7 @@ val desktopModule = module {
     single<ImageBlockDao> { get<AppDatabase>().imageBlockDao() }
     single<DocumentBlockDao> { get<AppDatabase>().documentBlockDao() }
     single<BookmarkBlockDao> { get<AppDatabase>().bookmarkBlockDao() }
+    single<MovieBlockDao> { get<AppDatabase>().movieBlockDao() }
     single<CategoryDao> { get<AppDatabase>().categoryDao() }
     single<com.emberr.data.local.room.dao.PropertyTagDao> { get<AppDatabase>().propertyTagDao() }
     single<com.emberr.data.local.room.dao.CustomPropertyDao> { get<AppDatabase>().customPropertyDao() }
