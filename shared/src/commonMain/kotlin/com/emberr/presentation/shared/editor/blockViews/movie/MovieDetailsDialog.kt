@@ -101,7 +101,7 @@ import kotlin.math.roundToInt
 
 private val DialogShape = RoundedCornerShape(24.dp)
 private val FactShape = RoundedCornerShape(8.dp)
-private val CastPortraitMinWidthDesktop = 100.dp
+private val CastPortraitMinWidthDesktop = 140.dp
 private val CastPortraitMinWidthPhone = 88.dp
 private val CastColumnGap = 24.dp
 private val CastRowGap = 28.dp
@@ -111,6 +111,7 @@ private val BackdropContentOverlap = 96.dp
 private val BackdropCropAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.6f)
 private val SectionGap = 32.dp
 private val TabContentGap = 20.dp
+private val TabRowFadeWidth = 40.dp
 private val FactLabelWidthDesktop = 140.dp
 private val FactLabelWidthPhone = 112.dp
 private val ProviderLabelWidthDesktop = 80.dp
@@ -283,22 +284,15 @@ internal fun MovieDetailsDialog(
                             } else if (shownTab != null) {
                                 Column(verticalArrangement = Arrangement.spacedBy(TabContentGap)) {
                                     if (shownTabs.size > 1) {
-                                        Row(
-                                            modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                        ) {
-                                            shownTabs.forEach { tab ->
-                                                EmberrTab(
-                                                    label = tab.label,
-                                                    isSelected = tab == shownTab,
-                                                    contentColor = colors.text,
-                                                    onClick = {
-                                                        selectedTab = tab
-                                                        if (tab.needsLiveExtras) hasOpenedLiveTab = true
-                                                    }
-                                                )
+                                        MovieDetailsTabRow(
+                                            tabs = shownTabs,
+                                            selectedTab = shownTab,
+                                            contentColor = colors.text,
+                                            onSelectTab = { tab ->
+                                                selectedTab = tab
+                                                if (tab.needsLiveExtras) hasOpenedLiveTab = true
                                             }
-                                        }
+                                        )
                                     }
                                     when (shownTab) {
                                         MovieDetailsTab.OVERVIEW -> MovieOverviewTab(details = details, colors = colors)
@@ -353,6 +347,47 @@ internal fun MovieDetailsDialog(
             }
         }
         titleToPreview?.let { title -> MovieTitlePreviewDialog(title = title, onDismiss = { titleToPreview = null }) }
+    }
+}
+
+@Composable
+private fun MovieDetailsTabRow(
+    tabs: List<MovieDetailsTab>,
+    selectedTab: MovieDetailsTab,
+    contentColor: Color,
+    onSelectTab: (MovieDetailsTab) -> Unit
+) {
+    val scrollState = rememberScrollState()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+            .drawWithContent {
+                drawContent()
+                val fadeFraction = (TabRowFadeWidth.toPx() / size.width).coerceAtMost(0.5f)
+                val startColor = if (scrollState.canScrollBackward) Color.Transparent else Color.Black
+                val endColor = if (scrollState.canScrollForward) Color.Transparent else Color.Black
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        0f to startColor,
+                        fadeFraction to Color.Black,
+                        1f - fadeFraction to Color.Black,
+                        1f to endColor
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+            .horizontalScroll(scrollState),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        tabs.forEach { tab ->
+            EmberrTab(
+                label = tab.label,
+                isSelected = tab == selectedTab,
+                contentColor = contentColor,
+                onClick = { onSelectTab(tab) }
+            )
+        }
     }
 }
 

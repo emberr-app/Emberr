@@ -33,7 +33,7 @@ import emberr.shared.generated.resources.link
 import emberr.shared.generated.resources.star
 import org.jetbrains.compose.resources.painterResource
 
-private val SimilarPosterMinWidthDesktop = 100.dp
+private val SimilarPosterMinWidthDesktop = 140.dp
 private val SimilarPosterMinWidthPhone = 88.dp
 private val SimilarColumnGap = 16.dp
 private val SimilarRowGap = 24.dp
