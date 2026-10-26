@@ -296,12 +296,37 @@ object TestNoteBlocks {
             id = "watchlist-1",
             watchlistNoteId = "watchlist-note-1",
             title = "To watch",
-            view = WatchlistView.BOARD,
-            addedViews = listOf(WatchlistView.LIST, WatchlistView.BOARD),
-            sortKey = WatchlistSortKey.YOUR_RATING,
-            sortsDescending = true,
-            kindFilter = MovieKind.SHOW,
-            statusFilter = WatchStatus.WATCHING,
+            views = listOf(
+                WatchlistViewSettings(id = "watchlist-view-1", name = "List", layout = WatchlistView.LIST),
+                WatchlistViewSettings(
+                    id = "watchlist-view-2",
+                    name = "Board 2",
+                    layout = WatchlistView.BOARD,
+                    sortKey = WatchlistSortKey.YOUR_RATING,
+                    sortsDescending = true,
+                    filters = listOf(
+                        WatchlistFilter(
+                            id = "watchlist-filter-1",
+                            field = WatchlistFilterField.STATUS,
+                            condition = WatchlistFilterCondition.IS_ANY_OF,
+                            picks = listOf(WatchStatus.WATCHING.name, WatchStatus.WATCHED.name)
+                        ),
+                        WatchlistFilter(
+                            id = "watchlist-filter-2",
+                            field = WatchlistFilterField.RELEASE_DATE,
+                            condition = WatchlistFilterCondition.BETWEEN,
+                            date = LocalDate(2000, 1, 1),
+                            endDate = LocalDate(2010, 12, 31)
+                        ),
+                        WatchlistFilter(
+                            id = "watchlist-filter-3",
+                            field = WatchlistFilterField.YOUR_RATING,
+                            condition = WatchlistFilterCondition.AT_LEAST,
+                            number = 3.5
+                        )
+                    )
+                )
+            ),
             indentationLevel = 1,
             updatedAt = 121L
         ),

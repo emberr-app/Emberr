@@ -769,7 +769,7 @@ abstract class BaseEditorViewModel(
 
     val movieBlockEditor: MovieBlockEditor = MovieBlockEditor(movieTitleSource, webImageFetcher, viewModelScope, movieBlockHost)
 
-    val watchlistBlockEditor: WatchlistBlockEditor = WatchlistBlockEditor(repository, movieTitleSource, webImageFetcher, appScope) { blockId, change ->
+    val watchlistBlockEditor: WatchlistBlockEditor = WatchlistBlockEditor(repository, movieTitleSource, webImageFetcher, appScope, deviceTableLayoutStore) { blockId, change ->
         val now = System.currentTimeMillis()
         modifyBlocks { list -> mapBlockById(list, blockId) { if (it is WatchlistBlock) change(it).copy(updatedAt = now) else it } }
         scheduleAutosave()
