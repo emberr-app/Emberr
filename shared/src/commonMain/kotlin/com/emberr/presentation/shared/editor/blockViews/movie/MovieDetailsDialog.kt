@@ -75,7 +75,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.star
-import emberr.shared.generated.resources.star_outline
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
 
@@ -85,8 +84,8 @@ private val CastPortraitMinWidthDesktop = 100.dp
 private val CastPortraitMinWidthPhone = 88.dp
 private val CastColumnGap = 24.dp
 private val CastRowGap = 28.dp
-private val BackdropHeightDesktop = 240.dp
-private val BackdropHeightPhone = 180.dp
+private val BackdropHeightDesktop = 320.dp
+private val BackdropHeightPhone = 230.dp
 private val BackdropContentOverlap = 96.dp
 private val BackdropCropAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.6f)
 private val SectionGap = 32.dp
@@ -105,7 +104,7 @@ private data class DetailsColors(
     val chipBackground: Color,
     val chipText: Color,
     val chipBorder: Color?,
-    val starOutline: Color,
+    val emptyStar: Color,
     val avatarBackground: Color
 )
 
@@ -119,7 +118,7 @@ private fun detailsColors(isOnPoster: Boolean): DetailsColors =
             chipBackground = Color.White.copy(alpha = 0.12f),
             chipText = Color.White,
             chipBorder = Color.White.copy(alpha = 0.24f),
-            starOutline = Color.White.copy(alpha = 0.5f),
+            emptyStar = Color.White.copy(alpha = 0.22f),
             avatarBackground = Color.White.copy(alpha = 0.14f)
         )
     } else {
@@ -130,7 +129,7 @@ private fun detailsColors(isOnPoster: Boolean): DetailsColors =
             chipBackground = chipContainerColor(),
             chipText = MaterialTheme.colorScheme.onSurface,
             chipBorder = null,
-            starOutline = MaterialTheme.colorScheme.outline,
+            emptyStar = chipContainerColor(),
             avatarBackground = chipContainerColor()
         )
     }
@@ -389,7 +388,7 @@ private fun MovieRatingItems(
     MovieRatingItem(label = "Your rating", colors = colors) {
         StarRatingPicker(
             ratingHalfStars = block.ratingHalfStars,
-            outlineColor = colors.starOutline,
+            emptyColor = colors.emptyStar,
             onRate = editor?.let { { halfStars: Int? -> it.setRating(block, halfStars) } }
         )
     }
@@ -420,16 +419,16 @@ private fun MovieRatingItem(
 }
 
 @Composable
-private fun StarRatingPicker(ratingHalfStars: Int?, outlineColor: Color, onRate: ((Int?) -> Unit)?) {
+private fun StarRatingPicker(ratingHalfStars: Int?, emptyColor: Color, onRate: ((Int?) -> Unit)?) {
     val filledHalves = ratingHalfStars ?: 0
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         repeat(MAXIMUM_STAR_HALVES / 2) { starIndex ->
             val halvesInThisStar = (filledHalves - starIndex * 2).coerceIn(0, 2)
             Box(modifier = Modifier.size(28.dp)) {
                 Icon(
-                    painter = painterResource(Res.drawable.star_outline),
+                    painter = painterResource(Res.drawable.star),
                     contentDescription = null,
-                    tint = outlineColor,
+                    tint = emptyColor,
                     modifier = Modifier.fillMaxSize()
                 )
                 if (halvesInThisStar > 0) {
