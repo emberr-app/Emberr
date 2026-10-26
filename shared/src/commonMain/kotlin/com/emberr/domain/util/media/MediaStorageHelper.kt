@@ -27,7 +27,12 @@ data class MediaInfo(
 
 interface MediaStorageHelper {
     suspend fun copyUriToInternalStorage(uriString: String): MediaInfo?
-    suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo?
+    suspend fun saveBytesToInternalStorage(
+        bytes: ByteArray,
+        extension: String,
+        mimeType: String,
+        fileNamePrefix: String = ""
+    ): MediaInfo?
     suspend fun saveStreamToInternalStorage(
         openSource: () -> Source,
         extension: String,

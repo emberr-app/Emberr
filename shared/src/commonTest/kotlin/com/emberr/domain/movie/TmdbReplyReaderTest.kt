@@ -1,7 +1,12 @@
 package com.emberr.domain.movie
 
 import com.emberr.domain.model.MovieCastMember
+import com.emberr.domain.model.MovieEpisodeSummary
 import com.emberr.domain.model.MovieKind
+import com.emberr.domain.model.MovieNamedLogo
+import com.emberr.domain.model.MovieSeason
+import com.emberr.domain.model.MovieTrailer
+import com.emberr.domain.model.MovieWatchProviders
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,7 +15,7 @@ class TmdbReplyReaderTest {
 
     @Test
     fun aMovieReplyBecomesMovieDetails() {
-        val details = TmdbReplyReader.movieDetailsFrom(SAVED_MOVIE_REPLY, region = "GB", refreshedAt = 42L)
+        val details = TmdbReplyReader.movieDetailsFrom(SAVED_MOVIE_REPLY, language = "en", region = "GB", refreshedAt = 42L)
 
         assertEquals(155L, details.tmdbId)
         assertEquals(MovieKind.MOVIE, details.kind)
@@ -37,11 +42,44 @@ class TmdbReplyReaderTest {
             details.cast
         )
         assertEquals(42L, details.refreshedAt)
+        assertEquals(MovieTrailer(youtubeKey = "EXeTwQWrcwY", name = "Official Trailer"), details.trailer)
+        assertEquals(
+            listOf("tt0468569", "https://www.warnerbros.com/movies/dark-knight", "thedarkknight", "thedarkknight", "thedarkknight", "Q163872"),
+            listOf(details.imdbId, details.homepage, details.instagramHandle, details.facebookHandle, details.xHandle, details.wikidataId)
+        )
+        assertEquals(
+            listOf("The Dark Knight Collection", 185_000_000L, 1_004_558_444L, "Released"),
+            listOf(details.collectionName, details.budgetDollars, details.revenueDollars, details.productionStatus)
+        )
+        assertEquals(
+            listOf(
+                MovieNamedLogo("Legendary Pictures", "https://image.tmdb.org/t/p/w185/legendary.png"),
+                MovieNamedLogo("DC Comics", "https://image.tmdb.org/t/p/w185/dc.png"),
+                MovieNamedLogo("Syncopy", null)
+            ),
+            details.productionCompanies
+        )
+        assertEquals(listOf("joker", "vigilante"), details.keywords)
+        val appleTv = MovieNamedLogo("Apple TV", "https://image.tmdb.org/t/p/w92/apple.jpg")
+        assertEquals(
+            MovieWatchProviders(
+                regionCode = "GB",
+                link = "https://www.themoviedb.org/movie/155-the-dark-knight/watch?locale=GB",
+                stream = listOf(
+                    MovieNamedLogo("Max", "https://image.tmdb.org/t/p/w92/max.jpg"),
+                    MovieNamedLogo("Netflix", "https://image.tmdb.org/t/p/w92/netflix.jpg")
+                ),
+                rent = listOf(appleTv),
+                buy = listOf(appleTv)
+            ),
+            details.watchProviders
+        )
+        assertEquals("https://image.tmdb.org/t/p/w500/logo-en.png", details.titleLogoUrl)
     }
 
     @Test
     fun aShowReplyInAnotherLanguageBecomesShowDetailsWithEnglishText() {
-        val details = TmdbReplyReader.showDetailsFrom(SAVED_SHOW_REPLY, region = "DE", refreshedAt = 42L)
+        val details = TmdbReplyReader.showDetailsFrom(SAVED_SHOW_REPLY, language = "de", region = "DE", refreshedAt = 42L)
 
         assertEquals(1396L, details.tmdbId)
         assertEquals(MovieKind.SHOW, details.kind)
@@ -60,6 +98,21 @@ class TmdbReplyReaderTest {
         assertEquals(LocalDate(2008, 1, 20), details.releaseDate)
         assertEquals(null, details.posterUrl)
         assertEquals(listOf("Bryan Cranston"), details.cast.map { it.name })
+        assertEquals(MovieTrailer(youtubeKey = "deTrailer", name = "Offizieller Trailer"), details.trailer)
+        assertEquals(listOf("tt0903747", "breakingbad"), listOf(details.imdbId, details.instagramHandle))
+        assertEquals(listOf(MovieNamedLogo("AMC", "https://image.tmdb.org/t/p/w185/amc.png")), details.networks)
+        assertEquals(
+            listOf(
+                MovieSeason(0, "Specials", 9, LocalDate(2009, 2, 17), null),
+                MovieSeason(1, "Staffel 1", 7, LocalDate(2008, 1, 20), "https://image.tmdb.org/t/p/w342/season1.jpg")
+            ),
+            details.seasons
+        )
+        assertEquals(
+            listOf(null, MovieEpisodeSummary(5, 16, "Felina", LocalDate(2013, 9, 29))),
+            listOf(details.nextEpisode, details.lastEpisode)
+        )
+        assertEquals(listOf("drug dealer"), details.keywords)
     }
 
     private companion object {
@@ -88,7 +141,16 @@ class TmdbReplyReaderTest {
           ],
           "poster_path": "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
           "backdrop_path": "/dqK9Hag1054tghRQSqLSaJ6PcAD.jpg",
-          "belongs_to_collection": null,
+          "homepage": "https://www.warnerbros.com/movies/dark-knight",
+          "status": "Released",
+          "budget": 185000000,
+          "revenue": 1004558444,
+          "belongs_to_collection": {"id": 263, "name": "The Dark Knight Collection", "poster_path": "/collection.jpg"},
+          "production_companies": [
+            {"id": 923, "name": "Legendary Pictures", "logo_path": "/legendary.png", "origin_country": "US"},
+            {"id": 429, "name": "DC Comics", "logo_path": "/dc.svg", "origin_country": "US"},
+            {"id": 9996, "name": "Syncopy", "logo_path": null, "origin_country": "GB"}
+          ],
           "credits": {
             "cast": [
               {"id": 3, "name": "Aaron Eckhart", "character": "Harvey Dent", "order": 2, "profile_path": null},
@@ -106,6 +168,48 @@ class TmdbReplyReaderTest {
               {"iso_3166_1": "DE", "release_dates": [{"certification": "16", "type": 3}]},
               {"iso_3166_1": "US", "release_dates": [{"certification": "", "type": 1}, {"certification": "PG-13", "type": 3}]}
             ]
+          },
+          "videos": {
+            "results": [
+              {"iso_639_1": "en", "name": "Official Teaser", "key": "teaserKey", "site": "YouTube", "type": "Teaser", "official": true},
+              {"iso_639_1": "en", "name": "Vimeo Trailer", "key": "vimeoKey", "site": "Vimeo", "type": "Trailer", "official": true},
+              {"iso_639_1": "de", "name": "Offizieller Trailer", "key": "deTrailer", "site": "YouTube", "type": "Trailer", "official": true},
+              {"iso_639_1": "en", "name": "Fan Trailer", "key": "fanKey", "site": "YouTube", "type": "Trailer", "official": false},
+              {"iso_639_1": "en", "name": "Official Trailer", "key": "EXeTwQWrcwY", "site": "YouTube", "type": "Trailer", "official": true},
+              {"iso_639_1": "en", "name": "Behind the Scenes", "key": "clipKey", "site": "YouTube", "type": "Featurette", "official": true}
+            ]
+          },
+          "external_ids": {
+            "imdb_id": "tt0468569",
+            "wikidata_id": "Q163872",
+            "facebook_id": "thedarkknight",
+            "instagram_id": "thedarkknight",
+            "twitter_id": "thedarkknight"
+          },
+          "keywords": {"keywords": [{"id": 1, "name": "joker"}, {"id": 2, "name": "vigilante"}]},
+          "watch/providers": {
+            "results": {
+              "US": {"link": "https://www.themoviedb.org/movie/155-the-dark-knight/watch?locale=US", "flatrate": [{"provider_name": "Hulu", "logo_path": "/hulu.jpg", "display_priority": 1}]},
+              "GB": {
+                "link": "https://www.themoviedb.org/movie/155-the-dark-knight/watch?locale=GB",
+                "flatrate": [
+                  {"provider_id": 8, "provider_name": "Netflix", "logo_path": "/netflix.jpg", "display_priority": 5},
+                  {"provider_id": 1899, "provider_name": "Max", "logo_path": "/max.jpg", "display_priority": 2}
+                ],
+                "rent": [{"provider_id": 2, "provider_name": "Apple TV", "logo_path": "/apple.jpg", "display_priority": 4}],
+                "buy": [{"provider_id": 2, "provider_name": "Apple TV", "logo_path": "/apple.jpg", "display_priority": 4}]
+              }
+            }
+          },
+          "images": {
+            "backdrops": [],
+            "posters": [],
+            "logos": [
+              {"iso_639_1": "de", "file_path": "/logo-de.png", "vote_average": 9.0},
+              {"iso_639_1": null, "file_path": "/logo-none.png", "vote_average": 8.0},
+              {"iso_639_1": "en", "file_path": "/logo-en-lower-vote.png", "vote_average": 3.0},
+              {"iso_639_1": "en", "file_path": "/logo-en.png", "vote_average": 5.5}
+            ]
           }
         }
         """
@@ -122,7 +226,8 @@ class TmdbReplyReaderTest {
           "status": "Ended",
           "in_production": false,
           "episode_run_time": [45, 47],
-          "last_episode_to_air": {"id": 62161, "runtime": 55},
+          "last_episode_to_air": {"id": 62161, "runtime": 55, "name": "Felina", "season_number": 5, "episode_number": 16, "air_date": "2013-09-29"},
+          "next_episode_to_air": null,
           "number_of_seasons": 5,
           "number_of_episodes": 62,
           "vote_average": 0.0,
@@ -133,6 +238,21 @@ class TmdbReplyReaderTest {
           "spoken_languages": [{"english_name": "English", "iso_639_1": "en", "name": "English"}],
           "production_countries": [{"iso_3166_1": "US", "name": "United States of America"}],
           "poster_path": null,
+          "homepage": "https://www.sonypictures.com/tv/breakingbad",
+          "networks": [{"id": 174, "name": "AMC", "logo_path": "/amc.png", "origin_country": "US"}],
+          "seasons": [
+            {"air_date": "2009-02-17", "episode_count": 9, "id": 3577, "name": "Specials", "poster_path": null, "season_number": 0},
+            {"air_date": "2008-01-20", "episode_count": 7, "id": 3572, "name": "Staffel 1", "poster_path": "/season1.jpg", "season_number": 1}
+          ],
+          "videos": {
+            "results": [
+              {"iso_639_1": "en", "name": "Official Trailer", "key": "enTrailer", "site": "YouTube", "type": "Trailer", "official": true},
+              {"iso_639_1": "de", "name": "Teaser", "key": "deTeaser", "site": "YouTube", "type": "Teaser", "official": true},
+              {"iso_639_1": "de", "name": "Offizieller Trailer", "key": "deTrailer", "site": "YouTube", "type": "Trailer", "official": true}
+            ]
+          },
+          "external_ids": {"imdb_id": "tt0903747", "tvdb_id": 81189, "wikidata_id": "Q1079", "facebook_id": null, "instagram_id": "breakingbad", "twitter_id": "BreakingBad"},
+          "keywords": {"results": [{"id": 1, "name": "drug dealer"}]},
           "credits": {
             "cast": [{"id": 17419, "name": "Bryan Cranston", "character": "Walter White", "order": 0, "profile_path": "/cranston.jpg"}],
             "crew": []

@@ -2,8 +2,13 @@ package com.emberr.domain.movie
 
 import com.emberr.domain.model.MovieCastMember
 import com.emberr.domain.model.MovieDetails
+import com.emberr.domain.model.MovieEpisodeSummary
 import com.emberr.domain.model.MovieKind
+import com.emberr.domain.model.MovieNamedLogo
 import com.emberr.domain.model.MovieSearchResult
+import com.emberr.domain.model.MovieSeason
+import com.emberr.domain.model.MovieTrailer
+import com.emberr.domain.model.MovieWatchProviders
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -13,6 +18,12 @@ private const val POSTER_ADDRESS = "https://image.tmdb.org/t/p/w500"
 private const val BACKDROP_ADDRESS = "https://image.tmdb.org/t/p/w1280"
 private const val SEARCH_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w154"
 private const val CAST_PHOTO_ADDRESS = "https://image.tmdb.org/t/p/w185"
+private const val SEASON_POSTER_ADDRESS = "https://image.tmdb.org/t/p/w342"
+private const val COMPANY_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w185"
+private const val PROVIDER_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w92"
+private const val TITLE_LOGO_ADDRESS = "https://image.tmdb.org/t/p/w500"
+private const val YOUTUBE = "YouTube"
+private val trailerTypesInOrder = listOf("Trailer", "Teaser")
 private const val MOST_CAST_MEMBERS = 10
 private const val FALLBACK_REGION = "US"
 private const val ENGLISH = "en"
@@ -30,7 +41,7 @@ internal object TmdbReplyReader {
             .mapNotNull { item -> item.toSearchResult() }
             .take(mostResults)
 
-    fun movieDetailsFrom(replyText: String, region: String, refreshedAt: Long): MovieDetails {
+    fun movieDetailsFrom(replyText: String, language: String, region: String, refreshedAt: Long): MovieDetails {
         val reply = json.decodeFromString<TmdbMovieReply>(replyText)
         val english = reply.translations.englishData()
         return MovieDetails(
@@ -58,11 +69,26 @@ internal object TmdbReplyReader {
             posterUrl = reply.posterPath?.let { POSTER_ADDRESS + it },
             backdropUrl = reply.backdropPath?.let { BACKDROP_ADDRESS + it },
             cast = castFrom(reply.credits),
+            trailer = trailerFrom(reply.videos, language),
+            imdbId = reply.imdbId.ifBlank { reply.externalIds.imdbId },
+            homepage = reply.homepage,
+            instagramHandle = reply.externalIds.instagramId,
+            facebookHandle = reply.externalIds.facebookId,
+            xHandle = reply.externalIds.twitterId,
+            wikidataId = reply.externalIds.wikidataId,
+            collectionName = reply.collection?.name.orEmpty(),
+            budgetDollars = reply.budget.takeIf { it > 0 },
+            revenueDollars = reply.revenue.takeIf { it > 0 },
+            productionStatus = reply.status,
+            productionCompanies = namedLogosFrom(reply.productionCompanies),
+            keywords = reply.keywords.keywords.map { it.name }.filter { it.isNotBlank() },
+            watchProviders = watchProvidersFrom(reply.watchProviders, region),
+            titleLogoUrl = titleLogoUrlFrom(reply.images, language),
             refreshedAt = refreshedAt
         )
     }
 
-    fun showDetailsFrom(replyText: String, region: String, refreshedAt: Long): MovieDetails {
+    fun showDetailsFrom(replyText: String, language: String, region: String, refreshedAt: Long): MovieDetails {
         val reply = json.decodeFromString<TmdbShowReply>(replyText)
         val english = reply.translations.englishData()
         return MovieDetails(
@@ -88,6 +114,30 @@ internal object TmdbReplyReader {
             posterUrl = reply.posterPath?.let { POSTER_ADDRESS + it },
             backdropUrl = reply.backdropPath?.let { BACKDROP_ADDRESS + it },
             cast = castFrom(reply.credits),
+            trailer = trailerFrom(reply.videos, language),
+            imdbId = reply.externalIds.imdbId,
+            homepage = reply.homepage,
+            instagramHandle = reply.externalIds.instagramId,
+            facebookHandle = reply.externalIds.facebookId,
+            xHandle = reply.externalIds.twitterId,
+            wikidataId = reply.externalIds.wikidataId,
+            productionStatus = reply.status,
+            productionCompanies = namedLogosFrom(reply.productionCompanies),
+            networks = namedLogosFrom(reply.networks),
+            seasons = reply.seasons.map { season ->
+                MovieSeason(
+                    number = season.seasonNumber,
+                    name = season.name,
+                    episodeCount = season.episodeCount?.takeIf { it > 0 },
+                    airDate = dateOrNull(season.airDate),
+                    posterUrl = season.posterPath?.let { SEASON_POSTER_ADDRESS + it }
+                )
+            },
+            nextEpisode = reply.nextEpisodeToAir?.toEpisodeSummary(),
+            lastEpisode = reply.lastEpisodeToAir?.toEpisodeSummary(),
+            keywords = reply.keywords.results.map { it.name }.filter { it.isNotBlank() },
+            watchProviders = watchProvidersFrom(reply.watchProviders, region),
+            titleLogoUrl = titleLogoUrlFrom(reply.images, language),
             refreshedAt = refreshedAt
         )
     }
@@ -142,6 +192,70 @@ internal object TmdbReplyReader {
                 )
             }
 
+    private fun trailerFrom(videos: TmdbVideos, language: String): MovieTrailer? =
+        videos.results
+            .filter { it.site == YOUTUBE && it.key.isNotBlank() && it.type in trailerTypesInOrder }
+            .sortedWith(
+                compareBy<TmdbVideo>(
+                    { trailerTypesInOrder.indexOf(it.type) },
+                    { languageRankOf(it.languageCode, language) },
+                    { !it.official }
+                )
+            )
+            .firstOrNull()
+            ?.let { MovieTrailer(youtubeKey = it.key, name = it.name) }
+
+    private fun titleLogoUrlFrom(images: TmdbImages, language: String): String? =
+        images.logos
+            .filter { it.filePath.isNotBlank() }
+            .sortedWith(compareBy<TmdbImage>({ languageRankOf(it.languageCode, language) }, { -it.voteAverage }))
+            .firstOrNull()
+            ?.let { TITLE_LOGO_ADDRESS + pngPathOf(it.filePath) }
+
+    private fun languageRankOf(languageCode: String?, language: String): Int =
+        when {
+            languageCode == language -> 0
+            languageCode == ENGLISH -> 1
+            languageCode.isNullOrBlank() -> 2
+            else -> 3
+        }
+
+    private fun namedLogosFrom(companies: List<TmdbCompany>): List<MovieNamedLogo> =
+        companies
+            .filter { it.name.isNotBlank() }
+            .map { company ->
+                MovieNamedLogo(name = company.name, logoUrl = company.logoPath?.let { COMPANY_LOGO_ADDRESS + pngPathOf(it) })
+            }
+
+    private fun watchProvidersFrom(watchProviders: TmdbWatchProviders, region: String): MovieWatchProviders? {
+        val regionCode = region.uppercase().ifBlank { FALLBACK_REGION }
+        val regionProviders = watchProviders.results[regionCode] ?: return null
+        return MovieWatchProviders(
+            regionCode = regionCode,
+            link = regionProviders.link,
+            stream = providerLogosFrom(regionProviders.flatrate),
+            rent = providerLogosFrom(regionProviders.rent),
+            buy = providerLogosFrom(regionProviders.buy)
+        )
+    }
+
+    private fun providerLogosFrom(providers: List<TmdbProvider>): List<MovieNamedLogo> =
+        providers
+            .filter { it.name.isNotBlank() }
+            .sortedBy { it.displayPriority }
+            .map { provider ->
+                MovieNamedLogo(name = provider.name, logoUrl = provider.logoPath?.let { PROVIDER_LOGO_ADDRESS + it })
+            }
+
+    private fun pngPathOf(path: String): String =
+        if (path.endsWith(".svg", ignoreCase = true)) path.dropLast(".svg".length) + ".png" else path
+
+    private fun TmdbEpisode.toEpisodeSummary(): MovieEpisodeSummary? {
+        val season = seasonNumber ?: return null
+        val episode = episodeNumber ?: return null
+        return MovieEpisodeSummary(seasonNumber = season, episodeNumber = episode, name = name, airDate = dateOrNull(airDate))
+    }
+
     private fun dateOrNull(text: String): LocalDate? =
         try {
             if (text.isBlank()) null else LocalDate.parse(text)
@@ -188,9 +302,21 @@ internal data class TmdbMovieReply(
     @SerialName("production_countries") val productionCountries: List<TmdbNamed> = emptyList(),
     @SerialName("poster_path") val posterPath: String? = null,
     @SerialName("backdrop_path") val backdropPath: String? = null,
+    @SerialName("imdb_id") val imdbId: String = "",
+    val homepage: String = "",
+    val status: String = "",
+    val budget: Long = 0L,
+    val revenue: Long = 0L,
+    @SerialName("belongs_to_collection") val collection: TmdbNamed? = null,
+    @SerialName("production_companies") val productionCompanies: List<TmdbCompany> = emptyList(),
     val credits: TmdbCredits = TmdbCredits(),
     @SerialName("release_dates") val releaseDates: TmdbReleaseDates = TmdbReleaseDates(),
-    val translations: TmdbTranslations = TmdbTranslations()
+    val translations: TmdbTranslations = TmdbTranslations(),
+    val videos: TmdbVideos = TmdbVideos(),
+    @SerialName("external_ids") val externalIds: TmdbExternalIds = TmdbExternalIds(),
+    val keywords: TmdbKeywords = TmdbKeywords(),
+    @SerialName("watch/providers") val watchProviders: TmdbWatchProviders = TmdbWatchProviders(),
+    val images: TmdbImages = TmdbImages()
 )
 
 @Serializable
@@ -206,6 +332,7 @@ internal data class TmdbShowReply(
     @SerialName("in_production") val inProduction: Boolean = false,
     @SerialName("episode_run_time") val episodeRunTime: List<Int> = emptyList(),
     @SerialName("last_episode_to_air") val lastEpisodeToAir: TmdbEpisode? = null,
+    @SerialName("next_episode_to_air") val nextEpisodeToAir: TmdbEpisode? = null,
     @SerialName("number_of_seasons") val numberOfSeasons: Int? = null,
     @SerialName("number_of_episodes") val numberOfEpisodes: Int? = null,
     @SerialName("vote_average") val voteAverage: Double = 0.0,
@@ -217,9 +344,18 @@ internal data class TmdbShowReply(
     @SerialName("production_countries") val productionCountries: List<TmdbNamed> = emptyList(),
     @SerialName("poster_path") val posterPath: String? = null,
     @SerialName("backdrop_path") val backdropPath: String? = null,
+    val homepage: String = "",
+    @SerialName("production_companies") val productionCompanies: List<TmdbCompany> = emptyList(),
+    val networks: List<TmdbCompany> = emptyList(),
+    val seasons: List<TmdbSeason> = emptyList(),
     val credits: TmdbCredits = TmdbCredits(),
     @SerialName("content_ratings") val contentRatings: TmdbContentRatings = TmdbContentRatings(),
-    val translations: TmdbTranslations = TmdbTranslations()
+    val translations: TmdbTranslations = TmdbTranslations(),
+    val videos: TmdbVideos = TmdbVideos(),
+    @SerialName("external_ids") val externalIds: TmdbExternalIds = TmdbExternalIds(),
+    val keywords: TmdbKeywords = TmdbKeywords(),
+    @SerialName("watch/providers") val watchProviders: TmdbWatchProviders = TmdbWatchProviders(),
+    val images: TmdbImages = TmdbImages()
 )
 
 @Serializable
@@ -232,7 +368,84 @@ internal data class TmdbSpokenLanguage(
 )
 
 @Serializable
-internal data class TmdbEpisode(val runtime: Int? = null)
+internal data class TmdbEpisode(
+    val runtime: Int? = null,
+    val name: String = "",
+    @SerialName("season_number") val seasonNumber: Int? = null,
+    @SerialName("episode_number") val episodeNumber: Int? = null,
+    @SerialName("air_date") val airDate: String = ""
+)
+
+@Serializable
+internal data class TmdbCompany(
+    val name: String = "",
+    @SerialName("logo_path") val logoPath: String? = null
+)
+
+@Serializable
+internal data class TmdbSeason(
+    @SerialName("season_number") val seasonNumber: Int = 0,
+    val name: String = "",
+    @SerialName("episode_count") val episodeCount: Int? = null,
+    @SerialName("air_date") val airDate: String = "",
+    @SerialName("poster_path") val posterPath: String? = null
+)
+
+@Serializable
+internal data class TmdbVideos(val results: List<TmdbVideo> = emptyList())
+
+@Serializable
+internal data class TmdbVideo(
+    val key: String = "",
+    val name: String = "",
+    val site: String = "",
+    val type: String = "",
+    val official: Boolean = false,
+    @SerialName("iso_639_1") val languageCode: String? = null
+)
+
+@Serializable
+internal data class TmdbExternalIds(
+    @SerialName("imdb_id") val imdbId: String = "",
+    @SerialName("wikidata_id") val wikidataId: String = "",
+    @SerialName("facebook_id") val facebookId: String = "",
+    @SerialName("instagram_id") val instagramId: String = "",
+    @SerialName("twitter_id") val twitterId: String = ""
+)
+
+@Serializable
+internal data class TmdbKeywords(
+    val keywords: List<TmdbNamed> = emptyList(),
+    val results: List<TmdbNamed> = emptyList()
+)
+
+@Serializable
+internal data class TmdbWatchProviders(val results: Map<String, TmdbRegionProviders> = emptyMap())
+
+@Serializable
+internal data class TmdbRegionProviders(
+    val link: String = "",
+    val flatrate: List<TmdbProvider> = emptyList(),
+    val rent: List<TmdbProvider> = emptyList(),
+    val buy: List<TmdbProvider> = emptyList()
+)
+
+@Serializable
+internal data class TmdbProvider(
+    @SerialName("provider_name") val name: String = "",
+    @SerialName("logo_path") val logoPath: String? = null,
+    @SerialName("display_priority") val displayPriority: Int = Int.MAX_VALUE
+)
+
+@Serializable
+internal data class TmdbImages(val logos: List<TmdbImage> = emptyList())
+
+@Serializable
+internal data class TmdbImage(
+    @SerialName("file_path") val filePath: String = "",
+    @SerialName("iso_639_1") val languageCode: String? = null,
+    @SerialName("vote_average") val voteAverage: Double = 0.0
+)
 
 @Serializable
 internal data class TmdbCredits(
