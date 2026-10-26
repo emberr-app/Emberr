@@ -442,17 +442,6 @@ private fun MovieDetailsHeader(
 ) {
     val posterWidth = if (isDesktopPlatform) 150.dp else 104.dp
 
-    val titleAndTagline: @Composable ColumnScope.() -> Unit = {
-        Text(text = details.title, style = MaterialTheme.typography.titleLarge, color = colors.text)
-        if (details.tagline.isNotBlank()) {
-            Text(
-                text = details.tagline,
-                style = MaterialTheme.typography.bodyLarge,
-                fontStyle = FontStyle.Italic,
-                color = colors.secondaryText
-            )
-        }
-    }
     val factChips: @Composable () -> Unit = {
         val facts = headerFactsOf(details)
         if (facts.isNotEmpty()) {
@@ -466,16 +455,27 @@ private fun MovieDetailsHeader(
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) 24.dp else 18.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) 24.dp else 18.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
             Box(modifier = if (details.hasPoster) Modifier.shadow(16.dp, DefaultBlockShape) else Modifier) {
                 MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = PosterCornerRadius)
             }
             Column(
-                modifier = Modifier.weight(1f).padding(end = 36.dp),
+                modifier = Modifier.weight(1f).padding(end = if (isDesktopPlatform) 36.dp else 0.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                titleAndTagline()
+                Text(text = details.title, style = MaterialTheme.typography.titleLarge, color = colors.text)
                 if (isDesktopPlatform) {
+                    if (details.tagline.isNotBlank()) {
+                        Text(
+                            text = details.tagline,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontStyle = FontStyle.Italic,
+                            color = colors.secondaryText
+                        )
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
                     factChips()
                     FlowRow(
