@@ -4,6 +4,7 @@ import com.emberr.domain.model.MovieCastMember
 import com.emberr.domain.model.MovieEpisodeSummary
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieNamedLogo
+import com.emberr.domain.model.MoviePersonRole
 import com.emberr.domain.model.MovieSeason
 import com.emberr.domain.model.MovieTrailer
 import com.emberr.domain.model.MovieWatchProviders
@@ -35,9 +36,9 @@ class TmdbReplyReaderTest {
         assertEquals("https://image.tmdb.org/t/p/w1280/dqK9Hag1054tghRQSqLSaJ6PcAD.jpg", details.backdropUrl)
         assertEquals(
             listOf(
-                MovieCastMember("Christian Bale", "Bruce Wayne", "https://image.tmdb.org/t/p/w185/bale.jpg"),
-                MovieCastMember("Heath Ledger", "Joker", "https://image.tmdb.org/t/p/w185/ledger.jpg"),
-                MovieCastMember("Aaron Eckhart", "Harvey Dent", null)
+                MovieCastMember("Christian Bale", "Bruce Wayne", "https://image.tmdb.org/t/p/w185/bale.jpg", personId = 1),
+                MovieCastMember("Heath Ledger", "Joker", "https://image.tmdb.org/t/p/w185/ledger.jpg", personId = 2),
+                MovieCastMember("Aaron Eckhart", "Harvey Dent", null, personId = 3)
             ),
             details.cast
         )
@@ -113,6 +114,29 @@ class TmdbReplyReaderTest {
             listOf(details.nextEpisode, details.lastEpisode)
         )
         assertEquals(listOf("drug dealer"), details.keywords)
+    }
+
+    @Test
+    fun aPersonReplyBecomesAnActorPageWithTheBestKnownRolesFirst() {
+        val person = TmdbReplyReader.personFrom(SAVED_PERSON_REPLY, mostRoles = 3)
+
+        assertEquals(3894L, person.tmdbId)
+        assertEquals("Christian Bale", person.name)
+        assertEquals(
+            listOf("Acting", "Haverfordwest, Pembrokeshire, Wales, UK", "https://image.tmdb.org/t/p/h632/bale.jpg"),
+            listOf(person.knownFor, person.placeOfBirth, person.photoUrl)
+        )
+        assertEquals(listOf(LocalDate(1974, 1, 30), null), listOf(person.birthday, person.deathday))
+        assertEquals("English biography.", person.biography)
+        assertEquals(listOf("nm0000288", "christianbale"), listOf(person.imdbId, person.instagramHandle))
+        assertEquals(
+            listOf(
+                MoviePersonRole(155, MovieKind.MOVIE, "The Dark Knight", "2008", "Bruce Wayne", "https://image.tmdb.org/t/p/w342/tdk.jpg"),
+                MoviePersonRole(272, MovieKind.MOVIE, "Batman Begins", "2005", "Bruce Wayne", null),
+                MoviePersonRole(2316, MovieKind.SHOW, "The Office", "2005", "Executive Producer", "https://image.tmdb.org/t/p/w342/office.jpg")
+            ),
+            person.roles
+        )
     }
 
     private companion object {
@@ -209,6 +233,40 @@ class TmdbReplyReaderTest {
               {"iso_639_1": null, "file_path": "/logo-none.png", "vote_average": 8.0},
               {"iso_639_1": "en", "file_path": "/logo-en-lower-vote.png", "vote_average": 3.0},
               {"iso_639_1": "en", "file_path": "/logo-en.png", "vote_average": 5.5}
+            ]
+          }
+        }
+        """
+
+        const val SAVED_PERSON_REPLY = """
+        {
+          "id": 3894,
+          "name": "Christian Bale",
+          "biography": "",
+          "birthday": "1974-01-30",
+          "deathday": null,
+          "place_of_birth": "Haverfordwest, Pembrokeshire, Wales, UK",
+          "known_for_department": "Acting",
+          "profile_path": "/bale.jpg",
+          "imdb_id": "nm0000288",
+          "combined_credits": {
+            "cast": [
+              {"id": 272, "media_type": "movie", "title": "Batman Begins", "character": "Bruce Wayne", "release_date": "2005-06-10", "poster_path": null, "vote_count": 21000, "genre_ids": [28]},
+              {"id": 155, "media_type": "movie", "title": "The Dark Knight", "character": "Bruce Wayne", "release_date": "2008-07-16", "poster_path": "/tdk.jpg", "vote_count": 33000, "genre_ids": [18, 28]},
+              {"id": 22980, "media_type": "tv", "name": "The Tonight Show", "character": "Self", "first_air_date": "2009-06-01", "vote_count": 90000, "genre_ids": [10767]},
+              {"id": 999, "media_type": "movie", "title": "", "character": "Cameo", "release_date": "2010-01-01", "vote_count": 25000, "genre_ids": []},
+              {"id": 140, "media_type": "movie", "title": "Little Women", "character": "Laurie", "release_date": "1994-12-21", "vote_count": 3000, "genre_ids": [18]}
+            ],
+            "crew": [
+              {"id": 155, "media_type": "movie", "title": "The Dark Knight", "job": "Thanks", "release_date": "2008-07-16", "vote_count": 33000, "genre_ids": []},
+              {"id": 2316, "media_type": "tv", "name": "The Office", "job": "Executive Producer", "first_air_date": "2005-03-24", "poster_path": "/office.jpg", "vote_count": 4000, "genre_ids": [35]}
+            ]
+          },
+          "external_ids": {"imdb_id": "nm0000288", "instagram_id": "christianbale", "facebook_id": null, "twitter_id": null, "wikidata_id": "Q45772"},
+          "translations": {
+            "translations": [
+              {"iso_3166_1": "US", "iso_639_1": "en", "data": {"biography": "English biography."}},
+              {"iso_3166_1": "DE", "iso_639_1": "de", "data": {"biography": ""}}
             ]
           }
         }

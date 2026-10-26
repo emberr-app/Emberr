@@ -3,6 +3,7 @@ package com.emberr.domain.movie
 import androidx.compose.ui.text.intl.Locale
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
+import com.emberr.domain.model.MoviePerson
 import com.emberr.domain.model.MovieSearchResult
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -22,12 +23,35 @@ private const val TMDB_PROXY_ADDRESS = "https://emberr-tmdb.emberr.workers.dev"
 private const val CONNECT_TIMEOUT_MILLIS = 15_000L
 private const val REQUEST_TIMEOUT_MILLIS = 30_000L
 private const val MOST_SEARCH_RESULTS = 10
+private const val MOST_PERSON_ROLES = 12
 private const val ENGLISH = "en"
 private const val NO_LANGUAGE = "null"
 private val savedInfoParts = listOf("videos", "external_ids", "keywords", "watch/providers", "images")
 private const val TRENDING_KEEP_MILLIS = 60 * 60 * 1000L
+private const val RECENT_REPLY_KEEP_MILLIS = 60 * 60 * 1000L
+private const val MOST_RECENT_REPLIES = 20
 
 private class SavedTrending(val languageTag: String, val results: List<MovieSearchResult>, val savedAtMillis: Long)
+
+private class RecentReplies<T : Any> {
+    private class Entry<T>(val value: T, val savedAtMillis: Long)
+
+    private val mutex = Mutex()
+    private val entries = LinkedHashMap<String, Entry<T>>()
+
+    suspend fun find(key: String, now: Long): T? = mutex.withLock {
+        val entry = entries.remove(key) ?: return@withLock null
+        if (now - entry.savedAtMillis >= RECENT_REPLY_KEEP_MILLIS) return@withLock null
+        entries[key] = entry
+        entry.value
+    }
+
+    suspend fun keep(key: String, value: T, now: Long) = mutex.withLock {
+        entries.remove(key)
+        entries[key] = Entry(value, now)
+        while (entries.size > MOST_RECENT_REPLIES) entries.remove(entries.keys.first())
+    }
+}
 
 class TmdbRequestFailedException(status: HttpStatusCode) : Exception("TMDB answered ${status.value}")
 
@@ -47,6 +71,8 @@ class TmdbMovieTitleSource : MovieTitleSource {
 
     private val trendingMutex = Mutex()
     private var savedTrending: SavedTrending? = null
+    private val recentDetails = RecentReplies<MovieDetails>()
+    private val recentPeople = RecentReplies<MoviePerson>()
 
     override suspend fun search(query: String): List<MovieSearchResult> {
         val trimmedQuery = query.trim()
@@ -75,7 +101,13 @@ class TmdbMovieTitleSource : MovieTitleSource {
         return withContext(Dispatchers.Default) { TmdbReplyReader.searchResultsFrom(replyText, MOST_SEARCH_RESULTS) }
     }
 
-    override suspend fun loadDetails(tmdbId: Long, kind: MovieKind): MovieDetails? {
+    override suspend fun loadDetails(tmdbId: Long, kind: MovieKind, mayReuseRecentCopy: Boolean): MovieDetails? {
+        val key = "${deviceLanguageTag()}:${kind.name}:$tmdbId"
+        if (mayReuseRecentCopy) recentDetails.find(key, System.currentTimeMillis())?.let { return it }
+        return requestDetails(tmdbId, kind)?.also { details -> recentDetails.keep(key, details, System.currentTimeMillis()) }
+    }
+
+    private suspend fun requestDetails(tmdbId: Long, kind: MovieKind): MovieDetails? {
         val language = Locale.current.language.lowercase()
         val isEnglish = language == ENGLISH
         val ratingsPart = if (kind == MovieKind.MOVIE) "release_dates" else "content_ratings"
@@ -98,6 +130,22 @@ class TmdbMovieTitleSource : MovieTitleSource {
                 MovieKind.SHOW -> TmdbReplyReader.showDetailsFrom(replyText, language, region, now)
             }
         }
+    }
+
+    override suspend fun loadPerson(personId: Long): MoviePerson? {
+        val key = "${deviceLanguageTag()}:$personId"
+        recentPeople.find(key, System.currentTimeMillis())?.let { return it }
+        return requestPerson(personId)?.also { person -> recentPeople.keep(key, person, System.currentTimeMillis()) }
+    }
+
+    private suspend fun requestPerson(personId: Long): MoviePerson? {
+        val isEnglish = Locale.current.language.lowercase() == ENGLISH
+        val extraParts = listOfNotNull("combined_credits", "external_ids", "translations".takeUnless { isEnglish })
+        val response = requestTmdb("person/$personId") { parameter("append_to_response", extraParts.joinToString(",")) }
+        if (response.status == HttpStatusCode.NotFound) return null
+
+        val replyText = successfulReplyText(response)
+        return withContext(Dispatchers.Default) { TmdbReplyReader.personFrom(replyText, MOST_PERSON_ROLES) }
     }
 
     private suspend fun requestTmdb(

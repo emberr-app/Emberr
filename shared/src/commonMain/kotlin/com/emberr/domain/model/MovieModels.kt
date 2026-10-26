@@ -41,7 +41,8 @@ data class MovieCastMember(
     val name: String,
     val character: String = "",
     val photoUrl: String? = null,
-    val photoFilePath: String? = null
+    val photoFilePath: String? = null,
+    val personId: Long? = null
 )
 
 @Immutable
@@ -181,6 +182,33 @@ data class WatchlistBlock(
     override val isPinned: Boolean = false,
     override val updatedAt: Long = 0L
 ) : NoteBlock()
+
+@Immutable
+data class MoviePersonRole(
+    val tmdbId: Long,
+    val kind: MovieKind,
+    val title: String,
+    val yearText: String = "",
+    val roleName: String = "",
+    val posterUrl: String? = null
+)
+
+@Immutable
+data class MoviePerson(
+    val tmdbId: Long,
+    val name: String,
+    val knownFor: String = "",
+    val birthday: LocalDate? = null,
+    val deathday: LocalDate? = null,
+    val placeOfBirth: String = "",
+    val biography: String = "",
+    val photoUrl: String? = null,
+    val imdbId: String = "",
+    val instagramHandle: String = "",
+    val facebookHandle: String = "",
+    val xHandle: String = "",
+    val roles: List<MoviePersonRole> = emptyList()
+)
 
 @Immutable
 data class MovieSearchResult(
