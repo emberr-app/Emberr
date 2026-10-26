@@ -158,3 +158,10 @@ fun MovieBlock.withWatchState(state: WatchState, now: Long): MovieBlock =
         watchStateChangedAt = state.changedAt,
         updatedAt = now
     )
+
+val MovieDetails.hasPoster: Boolean get() = posterFilePath != null || posterUrl != null
+
+fun MovieBlock.mediaFilePaths(): List<String> {
+    val details = details ?: return emptyList()
+    return listOfNotNull(details.posterFilePath) + details.cast.mapNotNull { it.photoFilePath }
+}

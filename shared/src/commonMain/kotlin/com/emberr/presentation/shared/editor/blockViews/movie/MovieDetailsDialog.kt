@@ -41,7 +41,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
@@ -52,11 +51,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import coil3.compose.AsyncImage
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieCastMember
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
+import com.emberr.domain.model.hasPoster
 import com.emberr.domain.model.starsTextOf
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -139,8 +138,8 @@ internal fun MovieDetailsDialog(
         } else {
             MaterialTheme.colorScheme.background
         }
-        val posterUrl = details.posterUrl
-        val colors = detailsColors(isOnPoster = posterUrl != null)
+        val hasPoster = details.hasPoster
+        val colors = detailsColors(isOnPoster = hasPoster)
         val horizontalPadding = if (isDesktopPlatform) 32.dp else 24.dp
         val hazeState = remember { HazeState() }
 
@@ -162,7 +161,7 @@ internal fun MovieDetailsDialog(
                     .heightIn(max = if (isDesktopPlatform) 720.dp else Dp.Unspecified)
                     .safeDrawingPadding()
                     .clip(DialogShape)
-                    .background(if (posterUrl != null) PosterBackdropBaseColor else dialogBackgroundColor)
+                    .background(if (hasPoster) PosterBackdropBaseColor else dialogBackgroundColor)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -170,8 +169,8 @@ internal fun MovieDetailsDialog(
                     )
             ) {
                 Box(modifier = Modifier.matchParentSize().hazeSource(hazeState)) {
-                    if (posterUrl != null) {
-                        BlurredPosterBackdrop(imageUrl = posterUrl, blurRadius = 60.dp, scrim = DialogScrim)
+                    if (hasPoster) {
+                        BlurredPosterBackdrop(details = details, blurRadius = 60.dp, scrim = DialogScrim)
                     }
                     Column(
                         modifier = Modifier
@@ -220,7 +219,7 @@ internal fun MovieDetailsDialog(
                         bgColor = Color.Transparent,
                         tint = colors.text,
                         hazeState = hazeState,
-                        hazeStyle = if (posterUrl != null) EmberrBlur.OnImage else EmberrBlur.Regular,
+                        hazeStyle = if (hasPoster) EmberrBlur.OnImage else EmberrBlur.Regular,
                         shadowElevation = EmberrShadowElevation.None,
                         tooltip = "Close",
                         onClick = onDismiss
@@ -234,7 +233,6 @@ internal fun MovieDetailsDialog(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MovieDetailsHeader(block: MovieBlock, details: MovieDetails, editor: MovieBlockEditor?, colors: DetailsColors) {
-    val posterUrl = details.posterUrl
     val posterWidth = if (isDesktopPlatform) 150.dp else 104.dp
 
     val titleAndTagline: @Composable ColumnScope.() -> Unit = {
@@ -262,8 +260,8 @@ private fun MovieDetailsHeader(block: MovieBlock, details: MovieDetails, editor:
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) 24.dp else 18.dp)) {
-            Box(modifier = if (posterUrl != null) Modifier.shadow(16.dp, RoundedCornerShape(10.dp)) else Modifier) {
-                MoviePoster(imageUrl = posterUrl, width = posterWidth, cornerRadius = 10.dp)
+            Box(modifier = if (details.hasPoster) Modifier.shadow(16.dp, RoundedCornerShape(10.dp)) else Modifier) {
+                MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = 10.dp)
             }
             Column(
                 modifier = Modifier.weight(1f).padding(end = 36.dp),
@@ -487,13 +485,8 @@ private fun MovieCastRow(cast: List<MovieCastMember>, colors: DetailsColors) {
                         fontWeight = FontWeight.Medium,
                         color = colors.text
                     )
-                    if (member.photoUrl != null) {
-                        AsyncImage(
-                            model = member.photoUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    if (member.photoFilePath != null || member.photoUrl != null) {
+                        MovieImage(filePath = member.photoFilePath, url = member.photoUrl, modifier = Modifier.fillMaxSize())
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))

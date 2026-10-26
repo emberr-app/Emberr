@@ -2,6 +2,7 @@ package com.emberr.domain.util.export
 
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.ImageBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.VoiceBlock
 
@@ -47,6 +48,7 @@ object MarkdownAttachments {
         is ImageBlock -> storedFileNameOf(block.localFilePath)
         is DocumentBlock -> storedFileNameOf(block.localFilePath)
         is VoiceBlock -> storedFileNameOf(block.localFilePath)
+        is MovieBlock -> storedFileNameOf(block.details?.posterFilePath)
         else -> null
     }
 

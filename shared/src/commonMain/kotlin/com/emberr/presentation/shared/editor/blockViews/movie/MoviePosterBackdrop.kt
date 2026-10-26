@@ -5,6 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
@@ -14,8 +18,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import coil3.compose.AsyncImage
+import com.emberr.domain.model.MovieDetails
+import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.presentation.shared.components.isBlurFallbackForced
 import dev.chrisbanes.haze.HazeDefaults
+import okio.Path.Companion.toPath
+import org.koin.compose.koinInject
 
 internal val PosterBackdropBaseColor = Color(0xFF1C1C1C)
 private const val BACKDROP_IMAGE_SCALE = 1.4f
@@ -50,12 +58,11 @@ internal fun movieCardColors(isOnPoster: Boolean): MovieCardColors =
     }
 
 @Composable
-internal fun BoxScope.BlurredPosterBackdrop(imageUrl: String, blurRadius: Dp, scrim: Brush) {
+internal fun BoxScope.BlurredPosterBackdrop(details: MovieDetails, blurRadius: Dp, scrim: Brush) {
     val canBlur = HazeDefaults.blurEnabled() && !isBlurFallbackForced.value
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
+    MovieImage(
+        filePath = details.posterFilePath,
+        url = details.posterUrl,
         modifier = Modifier
             .matchParentSize()
             .graphicsLayer {
@@ -68,4 +75,20 @@ internal fun BoxScope.BlurredPosterBackdrop(imageUrl: String, blurRadius: Dp, sc
     if (!canBlur) {
         Box(modifier = Modifier.matchParentSize().background(Color.Black.copy(alpha = EXTRA_DARKNESS_WITHOUT_BLUR)))
     }
+}
+
+@Composable
+internal fun MovieImage(filePath: String?, url: String?, modifier: Modifier = Modifier, onLoaded: () -> Unit = {}) {
+    val mediaStorageHelper = koinInject<MediaStorageHelper>()
+    val localPath = remember(filePath) { filePath?.let { mediaStorageHelper.getAbsoluteMediaPath(it).toPath() } }
+    var localFileFailed by remember(filePath) { mutableStateOf(false) }
+    val usesLocalFile = localPath != null && !localFileFailed
+    AsyncImage(
+        model = if (usesLocalFile) localPath else url,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier,
+        onSuccess = { onLoaded() },
+        onError = { if (usesLocalFile) localFileFailed = true }
+    )
 }

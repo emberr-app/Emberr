@@ -125,7 +125,7 @@ private fun WatchlistGalleryCell(
                 Modifier
             }
         ) {
-            MoviePoster(imageUrl = details.posterUrl, width = width, cornerRadius = 10.dp)
+            MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = width, cornerRadius = 10.dp)
             if (selection?.isSelecting == true) {
                 TitleSelectionCheckbox(
                     isSelected = selection.isSelected,

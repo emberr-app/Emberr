@@ -2,8 +2,10 @@ package com.emberr.domain.selfhost.media
 
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.ImageBlock
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.VoiceBlock
+import com.emberr.domain.model.mediaFilePaths
 
 object MediaReferenceScanner {
 
@@ -15,6 +17,7 @@ object MediaReferenceScanner {
                 is ImageBlock -> block.localFilePath?.substringAfterLast("/")?.let { fileNames.add(it) }
                 is DocumentBlock -> block.localFilePath?.substringAfterLast("/")?.let { fileNames.add(it) }
                 is VoiceBlock -> block.localFilePath?.substringAfterLast("/")?.let { fileNames.add(it) }
+                is MovieBlock -> block.mediaFilePaths().forEach { fileNames.add(it.substringAfterLast("/")) }
                 else -> Unit
             }
         }

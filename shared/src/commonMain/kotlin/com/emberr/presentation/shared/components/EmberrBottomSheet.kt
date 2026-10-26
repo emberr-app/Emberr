@@ -104,6 +104,7 @@ fun EmberrBottomSheet(
     contentHorizontalPadding: Dp = SheetHorizontalPadding,
     isDismissible: Boolean = true,
     desktopMaxWidth: Dp = FloatingDialogMaxWidth,
+    scrollsContent: Boolean = true,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     if (!expanded) return
@@ -118,6 +119,7 @@ fun EmberrBottomSheet(
                 contentHorizontalPadding = contentHorizontalPadding,
                 isDismissible = isDismissible,
                 maxWidth = desktopMaxWidth,
+                scrollsContent = scrollsContent,
                 content = content
             )
         } else {
@@ -129,6 +131,7 @@ fun EmberrBottomSheet(
                 headerAction = headerAction,
                 contentHorizontalPadding = contentHorizontalPadding,
                 isDismissible = isDismissible,
+                scrollsContent = scrollsContent,
                 content = content
             )
         }
@@ -144,6 +147,7 @@ private fun EmberrFloatingDialog(
     contentHorizontalPadding: Dp,
     isDismissible: Boolean,
     maxWidth: Dp,
+    scrollsContent: Boolean,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     fun closeAnd(action: () -> Unit) {
@@ -241,7 +245,7 @@ private fun EmberrFloatingDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 560.dp)
-                            .verticalScroll(rememberScrollState())
+                            .then(if (scrollsContent) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                             .padding(horizontal = contentHorizontalPadding)
                     ) {
                         content { action -> closeAnd(action) }
@@ -262,6 +266,7 @@ private fun EmberrModalBottomSheet(
     headerAction: EmberrBottomSheetAction? = null,
     contentHorizontalPadding: Dp,
     isDismissible: Boolean,
+    scrollsContent: Boolean,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -378,7 +383,7 @@ private fun EmberrModalBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f, fill = false)
-                        .verticalScroll(rememberScrollState())
+                        .then(if (scrollsContent) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                         .padding(horizontal = contentHorizontalPadding)
                 ) {
                     CompositionLocalProvider(LocalIndication provides NoRippleIndicationNodeFactory) {

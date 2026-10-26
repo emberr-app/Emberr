@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Last updated: October 8, 2026
+Last updated: October 26, 2026
 
 Emberr is an open-source, offline-first notes, calendar and reminder app for Android and Desktop. This policy explains what happens to your data when you use it.
 
@@ -8,7 +8,7 @@ Emberr is an open-source, offline-first notes, calendar and reminder app for And
 
 * Emberr has no accounts (yet), no analytics, no ads and no tracking.
 * Your notes, tasks, reminders, attachments and chats are stored only on your device.
-* Nothing is sent to me (the developer) or to any server I run. I have no way to see your data.
+* Nothing is sent to me (the developer) or to any server I run, except movie and show searches, which pass through a small proxy (see below). I have no way to see your notes.
 * Emberr only connects to the internet for features you turn on or use, listed below.
 * AI features are disabled by default. Nothing related to AI is downloaded or sent until you turn them on.
 
@@ -34,6 +34,7 @@ Emberr works fully offline. It only makes network requests in these cases:
 | Update check | A request for the latest version number. No personal data. | GitHub. Can be turned off in Settings. |
 | Local AI model download | A download request for the model file. | Hugging Face. Only when you choose to download a model. |
 | External AI providers | Your chat message and the parts of your notes needed to answer it. | The provider you set up (OpenAI, Anthropic, Google Gemini, or a custom endpoint), using your own API key. Only when you choose that provider. |
+| Movie and show search | What you type in the search, the TMDB id of titles you add or refresh, and your device language. Nothing from your notes. | Emberr's TMDB proxy, hosted on Cloudflare, which passes the request on to The Movie Database (TMDB). The proxy keeps no logs. Cloudflare may cache TMDB's replies for up to a day. Posters and cast photos are downloaded straight from TMDB's image server. Only when you search for or refresh a movie or show. |
 | Bookmarks and web images | A normal web request for the page or image. | The website you linked to. |
 | Self-hosted sync | Your notes, attachments, AI chat history, spaces, folders and AI provider settings (including API keys), encrypted on your device before upload. | Your own WebDAV server. |
 | Device sync | Your notes and attachments, encrypted, over your local network. | Your own paired device. Nothing leaves your local network. |

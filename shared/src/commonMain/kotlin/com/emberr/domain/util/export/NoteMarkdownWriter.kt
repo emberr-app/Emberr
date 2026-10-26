@@ -176,7 +176,7 @@ object NoteMarkdownWriter {
             is CanvasBlock -> ""
             is PropertyBlock -> renderProperty(block)
             is DatabaseBlock -> ""
-            is MovieBlock -> renderMovie(block)
+            is MovieBlock -> renderMovie(block, options)
             is WatchlistBlock -> ""
             is TableBlock -> renderTable(block)
             is SolidDividerBlock -> SOLID_DIVIDER_LINE
@@ -298,8 +298,12 @@ object NoteMarkdownWriter {
         }
     }
 
-    private fun renderMovie(block: MovieBlock): String =
-        block.summaryLine()?.let { "$MOVIE_MARKER${flattenLineBreaks(it)}" }.orEmpty()
+    private fun renderMovie(block: MovieBlock, options: RenderOptions): String {
+        val summary = block.summaryLine() ?: return ""
+        val summaryLine = "$MOVIE_MARKER${flattenLineBreaks(summary)}"
+        val posterTarget = mediaLinkTargetFor(block.details?.posterFilePath, options)
+        return if (posterTarget.isEmpty()) summaryLine else "![]($posterTarget)\n\n$summaryLine"
+    }
 
     private fun renderProperty(block: PropertyBlock): String {
         val value = flattenLineBreaks(block.valueAsText())

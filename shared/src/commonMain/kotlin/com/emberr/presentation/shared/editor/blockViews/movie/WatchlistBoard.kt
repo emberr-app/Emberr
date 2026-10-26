@@ -353,7 +353,7 @@ private fun WatchlistBoardCard(title: MovieBlock, details: MovieDetails, modifie
             .padding(9.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        MoviePoster(imageUrl = details.posterUrl, width = 44.dp, cornerRadius = 4.dp)
+        MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = 44.dp, cornerRadius = 4.dp)
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(2.dp)
