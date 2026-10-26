@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
@@ -78,7 +79,13 @@ internal fun BoxScope.BlurredPosterBackdrop(details: MovieDetails, blurRadius: D
 }
 
 @Composable
-internal fun MovieImage(filePath: String?, url: String?, modifier: Modifier = Modifier, onLoaded: () -> Unit = {}) {
+internal fun MovieImage(
+    filePath: String?,
+    url: String?,
+    modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.Center,
+    onLoaded: () -> Unit = {}
+) {
     val mediaStorageHelper = koinInject<MediaStorageHelper>()
     val localPath = remember(filePath) { filePath?.let { mediaStorageHelper.getAbsoluteMediaPath(it).toPath() } }
     var localFileFailed by remember(filePath) { mutableStateOf(false) }
@@ -87,6 +94,7 @@ internal fun MovieImage(filePath: String?, url: String?, modifier: Modifier = Mo
         model = if (usesLocalFile) localPath else url,
         contentDescription = null,
         contentScale = ContentScale.Crop,
+        alignment = alignment,
         modifier = modifier,
         onSuccess = { onLoaded() },
         onError = { if (usesLocalFile) localFileFailed = true }

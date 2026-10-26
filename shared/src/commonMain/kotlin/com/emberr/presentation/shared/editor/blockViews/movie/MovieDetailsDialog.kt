@@ -3,10 +3,11 @@ package com.emberr.presentation.shared.editor.blockViews.movie
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -34,12 +35,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -55,6 +60,7 @@ import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieCastMember
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
+import com.emberr.domain.model.hasBackdrop
 import com.emberr.domain.model.hasPoster
 import com.emberr.domain.model.starsTextOf
 import com.emberr.domain.util.system.isDesktopPlatform
@@ -75,8 +81,14 @@ import org.jetbrains.compose.resources.painterResource
 
 private val DialogShape = RoundedCornerShape(24.dp)
 private val FactShape = RoundedCornerShape(8.dp)
-private val CastPhotoSize = 56.dp
-private val CastColumnWidth = 80.dp
+private val CastPortraitMinWidthDesktop = 100.dp
+private val CastPortraitMinWidthPhone = 88.dp
+private val CastColumnGap = 24.dp
+private val CastRowGap = 28.dp
+private val BackdropHeightDesktop = 240.dp
+private val BackdropHeightPhone = 180.dp
+private val BackdropContentOverlap = 96.dp
+private val BackdropCropAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.6f)
 private val SectionGap = 32.dp
 private val DialogScrim = Brush.verticalGradient(
     0f to Color.Black.copy(alpha = 0.5f),
@@ -84,6 +96,7 @@ private val DialogScrim = Brush.verticalGradient(
     1f to Color.Black.copy(alpha = 0.85f)
 )
 private const val MAXIMUM_STAR_HALVES = 10
+private val BackdropFade = Brush.verticalGradient(0.5f to Color.Black, 1f to Color.Transparent)
 
 private data class DetailsColors(
     val text: Color,
@@ -172,35 +185,47 @@ internal fun MovieDetailsDialog(
                     if (hasPoster) {
                         BlurredPosterBackdrop(details = details, blurRadius = 60.dp, scrim = DialogScrim)
                     }
-                    Column(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
-                            .padding(start = horizontalPadding, end = horizontalPadding, top = 72.dp, bottom = 32.dp),
-                        verticalArrangement = Arrangement.spacedBy(SectionGap)
                     ) {
-                        MovieDetailsHeader(block = block, details = details, editor = editor, colors = colors)
-                        if (!isDesktopPlatform) {
-                            MovieRatingPanel(block = block, details = details, editor = editor, colors = colors)
+                        val backdropHeight = if (isDesktopPlatform) BackdropHeightDesktop else BackdropHeightPhone
+                        if (details.hasBackdrop) {
+                            MovieBackdropBanner(details = details, height = backdropHeight)
                         }
-                        if (details.overview.isNotBlank()) {
-                            MovieDetailsSection(title = "Overview", colors = colors) {
-                                Text(
-                                    text = details.overview,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.text
-                                )
+                        Column(
+                            modifier = Modifier.padding(
+                                start = horizontalPadding,
+                                end = horizontalPadding,
+                                top = if (details.hasBackdrop) backdropHeight - BackdropContentOverlap else 72.dp,
+                                bottom = 32.dp
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(SectionGap)
+                        ) {
+                            MovieDetailsHeader(block = block, details = details, editor = editor, colors = colors)
+                            if (!isDesktopPlatform) {
+                                MovieRatingPanel(block = block, details = details, editor = editor, colors = colors)
                             }
-                        }
-                        val facts = factRowsOf(details)
-                        if (facts.isNotEmpty()) {
-                            MovieDetailsSection(title = "Details", colors = colors) {
-                                facts.forEach { (label, value) -> MovieFactRow(label = label, value = value, colors = colors) }
+                            if (details.overview.isNotBlank()) {
+                                MovieDetailsSection(title = "Overview", colors = colors) {
+                                    Text(
+                                        text = details.overview,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = colors.text
+                                    )
+                                }
                             }
-                        }
-                        if (details.cast.isNotEmpty()) {
-                            MovieDetailsSection(title = "Cast", colors = colors) {
-                                MovieCastRow(cast = details.cast, colors = colors)
+                            val facts = factRowsOf(details)
+                            if (facts.isNotEmpty()) {
+                                MovieDetailsSection(title = "Details", colors = colors) {
+                                    facts.forEach { (label, value) -> MovieFactRow(label = label, value = value, colors = colors) }
+                                }
+                            }
+                            if (details.cast.isNotEmpty()) {
+                                MovieDetailsSection(title = "Cast", colors = colors) {
+                                    MovieCastGrid(cast = details.cast, colors = colors)
+                                }
                             }
                         }
                     }
@@ -228,6 +253,23 @@ internal fun MovieDetailsDialog(
             }
         }
     }
+}
+
+@Composable
+private fun MovieBackdropBanner(details: MovieDetails, height: Dp) {
+    MovieImage(
+        filePath = details.backdropFilePath,
+        url = details.backdropUrl,
+        alignment = BackdropCropAlignment,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+            .drawWithContent {
+                drawContent()
+                drawRect(BackdropFade, blendMode = BlendMode.DstIn)
+            }
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -459,56 +501,65 @@ private fun MovieFactRow(label: String, value: String, colors: DetailsColors) {
 }
 
 @Composable
-private fun MovieCastRow(cast: List<MovieCastMember>, colors: DetailsColors) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(bottom = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        cast.forEach { member ->
-            Column(
-                modifier = Modifier.width(CastColumnWidth),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(CastPhotoSize)
-                        .clip(CircleShape)
-                        .background(colors.avatarBackground),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = initialsOf(member.name),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Medium,
-                        color = colors.text
-                    )
-                    if (member.photoFilePath != null || member.photoUrl != null) {
-                        MovieImage(filePath = member.photoFilePath, url = member.photoUrl, modifier = Modifier.fillMaxSize())
+private fun MovieCastGrid(cast: List<MovieCastMember>, colors: DetailsColors) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val portraitMinWidth = if (isDesktopPlatform) CastPortraitMinWidthDesktop else CastPortraitMinWidthPhone
+        val columnCount = ((maxWidth + CastColumnGap) / (portraitMinWidth + CastColumnGap)).toInt().coerceAtLeast(1)
+        Column(verticalArrangement = Arrangement.spacedBy(CastRowGap)) {
+            cast.chunked(columnCount).forEach { rowMembers ->
+                Row(horizontalArrangement = Arrangement.spacedBy(CastColumnGap)) {
+                    rowMembers.forEach { member ->
+                        MovieCastPortrait(member = member, colors = colors, modifier = Modifier.weight(1f))
+                    }
+                    repeat(columnCount - rowMembers.size) {
+                        Spacer(modifier = Modifier.weight(1f))
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = member.name,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.text,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (member.character.isNotBlank()) {
-                    Text(
-                        text = member.character,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.secondaryText,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
+        }
+    }
+}
+
+@Composable
+private fun MovieCastPortrait(member: MovieCastMember, colors: DetailsColors, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2f / 3f)
+                .clip(DefaultBlockShape)
+                .background(colors.avatarBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initialsOf(member.name),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = colors.text
+            )
+            if (member.photoFilePath != null || member.photoUrl != null) {
+                MovieImage(filePath = member.photoFilePath, url = member.photoUrl, modifier = Modifier.fillMaxSize())
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = member.name,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium,
+            color = colors.text,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (member.character.isNotBlank()) {
+            Text(
+                text = member.character,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.secondaryText,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
