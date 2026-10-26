@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -36,7 +36,6 @@ import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.presentation.shared.components.emberrBorder
 
 private val GalleryCellMinWidthDesktop = 150.dp
 private val GalleryCellMinWidthPhone = 110.dp
@@ -133,21 +132,6 @@ private fun WatchlistGalleryCell(
                     modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
                 )
             }
-            if (isDesktopPlatform) {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
-                        .emberrBorder(RoundedCornerShape(50))
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    GalleryStatus(title = title)
-                }
-            }
         }
         Column(
             modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 10.dp),
@@ -157,7 +141,8 @@ private fun WatchlistGalleryCell(
                 text = details.title,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = if (title.isWatched) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
+                textDecoration = if (title.isWatched) TextDecoration.LineThrough else null,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -175,13 +160,11 @@ private fun WatchlistGalleryCell(
                 }
                 details.tmdbRating?.let { rating -> TmdbRating(rating = rating) }
             }
-            if (!isDesktopPlatform) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    GalleryStatus(title = title)
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                GalleryStatus(title = title)
             }
         }
     }

@@ -63,6 +63,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -155,6 +156,7 @@ private val ResultPosterWidth = 30.dp
 private val PhoneResultPosterWidth = 44.dp
 private val PhoneSearchFieldSpace = 78.dp
 internal val PosterCornerRadius = 12.dp
+internal val MovieBlock.isWatched: Boolean get() = watchStatus == WatchStatus.WATCHED
 private val ChipShape = RoundedCornerShape(8.dp)
 private val RowShape = RoundedCornerShape(8.dp)
 private val SearchFieldShape = RoundedCornerShape(12.dp)
@@ -841,7 +843,8 @@ internal fun MovieCard(
                             text = details.title,
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
-                            color = colors.title,
+                            color = if (block.isWatched) colors.secondary else colors.title,
+                            textDecoration = if (block.isWatched) TextDecoration.LineThrough else null,
                             maxLines = 1,
                             modifier = Modifier.alignByBaseline()
                         )
