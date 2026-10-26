@@ -5,8 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,19 +31,14 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
-import com.emberr.domain.model.MovieKind
-import com.emberr.domain.model.WatchStatus
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.WatchlistBlock
-import com.emberr.domain.model.WatchlistFilter
-import com.emberr.domain.model.WatchlistFilterCondition
-import com.emberr.domain.model.WatchlistFilterField
 import com.emberr.domain.model.WatchlistSortKey
 import com.emberr.domain.model.WatchlistView
 import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
-import com.emberr.presentation.shared.components.SelectedOptionBackground
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.funnel
@@ -58,10 +51,8 @@ import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.unordered_list
 import emberr.shared.generated.resources.widget
-import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import java.util.UUID
 
 private val PillShape = RoundedCornerShape(8.dp)
 private val HeaderButtonGap = 6.dp
@@ -76,6 +67,7 @@ internal fun WatchlistToolbar(
     block: WatchlistBlock,
     views: List<WatchlistViewSettings>,
     openView: WatchlistViewSettings,
+    titles: List<MovieBlock>,
     editor: WatchlistBlockEditor,
     isEnabled: Boolean,
     isSearchActive: Boolean,
@@ -155,7 +147,7 @@ internal fun WatchlistToolbar(
                 isEnabled = isEnabled,
                 onClick = { runAfterKeyboardCloses { isFilterMenuOpen = true } }
             )
-            WatchlistFilterMenu(expanded = isFilterMenuOpen, block = block, openView = openView, editor = editor, onDismiss = { isFilterMenuOpen = false })
+            WatchlistFilterMenu(expanded = isFilterMenuOpen, block = block, openView = openView, titles = titles, editor = editor, onDismiss = { isFilterMenuOpen = false })
         }
         Box {
             WatchlistHeaderButton(
@@ -245,107 +237,6 @@ private fun WatchlistSortMenu(
                 onClick = { closeAnd { editor.changeView(block.id, openView.id) { it.copy(sortsDescending = descending) } } }
             )
         }
-    }
-}
-
-@Composable
-private fun WatchlistFilterMenu(
-    expanded: Boolean,
-    block: WatchlistBlock,
-    openView: WatchlistViewSettings,
-    editor: WatchlistBlockEditor,
-    onDismiss: () -> Unit
-) {
-    val chosenKind = openView.filters.firstOrNull { it.field == WatchlistFilterField.TYPE }?.picks?.firstOrNull()
-    val chosenStatus = openView.filters.firstOrNull { it.field == WatchlistFilterField.STATUS }?.picks?.firstOrNull()
-    MovieMenu(expanded = expanded, title = "Filter", onDismiss = onDismiss) { closeAnd ->
-        MovieMenuSectionLabel("Type")
-        listOf(null, MovieKind.MOVIE, MovieKind.SHOW).forEach { kind ->
-            MovieMenuOption(
-                label = kind?.let { "${it.label}s" } ?: "All titles",
-                isSelected = chosenKind == kind?.name,
-                onClick = {
-                    closeAnd {
-                        editor.changeView(block.id, openView.id) { view ->
-                            view.withOnlyFilterOf(WatchlistFilterField.TYPE, WatchlistFilterCondition.IS, kind?.name)
-                        }
-                    }
-                }
-            )
-        }
-        MovieMenuDivider()
-        MovieMenuSectionLabel("Status")
-        (listOf(null) + WatchStatus.entries).forEach { status ->
-            MovieMenuOption(
-                label = status?.label ?: "Any status",
-                isSelected = chosenStatus == status?.name,
-                onClick = {
-                    closeAnd {
-                        editor.changeView(block.id, openView.id) { view ->
-                            view.withOnlyFilterOf(WatchlistFilterField.STATUS, WatchlistFilterCondition.IS_ANY_OF, status?.name)
-                        }
-                    }
-                }
-            )
-        }
-    }
-}
-
-private fun WatchlistViewSettings.withOnlyFilterOf(
-    field: WatchlistFilterField,
-    condition: WatchlistFilterCondition,
-    pick: String?
-): WatchlistViewSettings {
-    val otherFilters = filters.filter { it.field != field }
-    val newFilter = pick?.let { WatchlistFilter(id = UUID.randomUUID().toString(), field = field, condition = condition, picks = listOf(it)) }
-    return copy(filters = otherFilters + listOfNotNull(newFilter))
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-internal fun WatchlistFilterChips(
-    block: WatchlistBlock,
-    openView: WatchlistViewSettings,
-    editor: WatchlistBlockEditor,
-    isEnabled: Boolean
-) {
-    if (openView.filters.isEmpty()) return
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        openView.filters.forEach { filter ->
-            WatchlistFilterChip(label = filter.chipLabel(), isEnabled = isEnabled) {
-                editor.changeView(block.id, openView.id) { view -> view.copy(filters = view.filters.filter { it.id != filter.id }) }
-            }
-        }
-    }
-}
-
-private fun WatchlistFilter.chipLabel(): String = when (field) {
-    WatchlistFilterField.TYPE -> MovieKind.entries.filter { it.name in picks }.joinToString(", ") { "${it.label}s only" }
-    WatchlistFilterField.STATUS -> WatchStatus.entries.filter { it.name in picks }.joinToString(", ") { it.label }
-    else -> field.label
-}
-
-@Composable
-private fun WatchlistFilterChip(label: String, isEnabled: Boolean, onRemove: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(PillShape)
-            .background(SelectedOptionBackground)
-            .clickable(enabled = isEnabled, onClick = onRemove)
-            .padding(start = 10.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
-        Icon(
-            painter = painterResource(Res.drawable.x),
-            contentDescription = "Remove filter",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            modifier = Modifier.size(12.dp)
-        )
     }
 }
 
