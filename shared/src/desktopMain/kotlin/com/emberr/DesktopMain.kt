@@ -45,6 +45,7 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.cloud.sync.CloudSyncScheduler
 import com.emberr.domain.update.AppUpdateController
 import com.emberr.domain.update.detectStagedUpdateInstallation
+import com.emberr.domain.util.media.SmoothShrinkImageDecoder
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.domain.util.time.desktopSystemUsesTwentyFourHourClock
@@ -149,6 +150,7 @@ private fun runEmberrDesktopApp() = application {
             }
             .components {
                 add(KtorNetworkFetcherFactory())
+                add(SmoothShrinkImageDecoder.Factory())
             }
             .build()
     }
