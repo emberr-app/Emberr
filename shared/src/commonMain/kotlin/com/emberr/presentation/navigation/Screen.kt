@@ -42,6 +42,8 @@ sealed class Screen(val route: String, val title: String? = null, val icon: Imag
 
     object OpenSourceLicenses : Screen("open_source_licenses")
 
+    object ThirdPartyServices : Screen("third_party_services")
+
     object AiChat : Screen("rag_chat")
 
     object Splash : Screen("splash_screen")

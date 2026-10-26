@@ -76,6 +76,8 @@ private const val ONBOARDING_SWAP_FADE_IN_MILLIS = 380
 
 private val SEARCH_BAR_RESERVED_HEIGHT = EXPANDED_BOTTOM_BAR_PILL_HEIGHT + BOTTOM_BAR_BOTTOM_PADDING + 6.dp
 
+private val ABOUT_SUB_SCREEN_ROUTES = setOf(Screen.OpenSourceLicenses.route, Screen.ThirdPartyServices.route)
+
 val LocalImageOverlay = staticCompositionLocalOf<(((@Composable () -> Unit)?) -> Unit)?> { null }
 val LocalCanvasFullScreenOverlay = staticCompositionLocalOf<(((@Composable () -> Unit)?) -> Unit)?> { null }
 
@@ -1032,7 +1034,7 @@ fun EmberrApp(
                                 )
                             },
                             exitTransition = {
-                                if (targetState.destination.route == Screen.OpenSourceLicenses.route) {
+                                if (targetState.destination.route in ABOUT_SUB_SCREEN_ROUTES) {
                                     ExitTransition.None
                                 } else {
                                     slideOutOfContainer(
@@ -1042,7 +1044,7 @@ fun EmberrApp(
                                 }
                             },
                             popEnterTransition = {
-                                if (initialState.destination.route == Screen.OpenSourceLicenses.route) {
+                                if (initialState.destination.route in ABOUT_SUB_SCREEN_ROUTES) {
                                     EnterTransition.None
                                 } else {
                                     slideIntoContainer(
@@ -1060,7 +1062,8 @@ fun EmberrApp(
                         ) {
                             com.emberr.presentation.settings.about.AboutScreen(
                                 onNavigateBack = { navController.popBackStack() },
-                                onOpenSourceLicensesClick = { navController.navigate(Screen.OpenSourceLicenses.route) }
+                                onOpenSourceLicensesClick = { navController.navigate(Screen.OpenSourceLicenses.route) },
+                                onThirdPartyServicesClick = { navController.navigate(Screen.ThirdPartyServices.route) }
                             )
                         }
 
@@ -1092,6 +1095,38 @@ fun EmberrApp(
                             }
                         ) {
                             com.emberr.presentation.settings.about.OpenSourceLicensesScreen(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(
+                            route = Screen.ThirdPartyServices.route,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    tween(300)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    tween(300)
+                                )
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    tween(300)
+                                )
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    tween(300)
+                                )
+                            }
+                        ) {
+                            com.emberr.presentation.settings.about.ThirdPartyServicesScreen(
                                 onNavigateBack = { navController.popBackStack() }
                             )
                         }

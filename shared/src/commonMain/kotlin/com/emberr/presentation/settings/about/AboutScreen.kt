@@ -39,6 +39,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.files
+import emberr.shared.generated.resources.info
 import org.jetbrains.compose.resources.painterResource
 
 private const val SOURCE_CODE_URL = "https://github.com/emberr-app/Emberr"
@@ -48,6 +49,7 @@ private const val AGPL_LICENSE_URL = "https://www.gnu.org/licenses/agpl-3.0.html
 fun AboutScreen(
     onNavigateBack: () -> Unit,
     onOpenSourceLicensesClick: () -> Unit,
+    onThirdPartyServicesClick: () -> Unit,
     showTopBar: Boolean = true
 ) {
     val hazeState = remember { HazeState() }
@@ -100,6 +102,12 @@ fun AboutScreen(
                         icon = painterResource(Res.drawable.files),
                         title = "Open-Source Licenses",
                         onClick = onOpenSourceLicensesClick
+                    )
+                    SettingsDivider()
+                    SettingsActionRow(
+                        icon = painterResource(Res.drawable.info),
+                        title = "Third-Party Services",
+                        onClick = onThirdPartyServicesClick
                     )
                 }
             }

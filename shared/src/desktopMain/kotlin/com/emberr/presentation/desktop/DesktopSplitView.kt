@@ -115,7 +115,8 @@ private val settingsScreenPanes = setOf(
     DetailPane.EmberrCloud,
     DetailPane.About,
     DetailPane.ImportNotes,
-    DetailPane.OpenSourceLicenses
+    DetailPane.OpenSourceLicenses,
+    DetailPane.ThirdPartyServices
 )
 
 sealed interface SplitDropTarget {
