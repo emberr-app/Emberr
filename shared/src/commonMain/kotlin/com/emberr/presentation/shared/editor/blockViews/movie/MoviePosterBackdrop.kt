@@ -84,6 +84,7 @@ internal fun MovieImage(
     url: String?,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
+    contentScale: ContentScale = ContentScale.Crop,
     onLoaded: () -> Unit = {}
 ) {
     val mediaStorageHelper = koinInject<MediaStorageHelper>()
@@ -93,7 +94,7 @@ internal fun MovieImage(
     AsyncImage(
         model = if (usesLocalFile) localPath else url,
         contentDescription = null,
-        contentScale = ContentScale.Crop,
+        contentScale = contentScale,
         alignment = alignment,
         modifier = modifier,
         onSuccess = { onLoaded() },

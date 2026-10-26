@@ -24,15 +24,20 @@ fun NoteKindTabs(
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        NoteKindTab(label = "Note", isSelected = selectedKind == NoteKind.NOTE) { onKindSelected(NoteKind.NOTE) }
-        NoteKindTab(label = "Canvas", isSelected = selectedKind == NoteKind.CANVAS) { onKindSelected(NoteKind.CANVAS) }
+        EmberrTab(label = "Note", isSelected = selectedKind == NoteKind.NOTE) { onKindSelected(NoteKind.NOTE) }
+        EmberrTab(label = "Canvas", isSelected = selectedKind == NoteKind.CANVAS) { onKindSelected(NoteKind.CANVAS) }
     }
 }
 
 @Composable
-private fun NoteKindTab(label: String, isSelected: Boolean, onClick: () -> Unit) {
-    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.11f) else Color.Transparent
-    val textColor = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+fun EmberrTab(
+    label: String,
+    isSelected: Boolean,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    onClick: () -> Unit
+) {
+    val backgroundColor = if (isSelected) contentColor.copy(alpha = 0.11f) else Color.Transparent
+    val textColor = if (isSelected) contentColor else contentColor.copy(alpha = 0.6f)
     Text(
         text = label,
         style = MaterialTheme.typography.bodyMedium,
