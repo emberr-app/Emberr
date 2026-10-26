@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +50,8 @@ private val RoleGap = 12.dp
 private val RoleRowGap = 20.dp
 private val RolePosterWidthPhone = 104.dp
 private const val SHORT_BIOGRAPHY_LINES = 5
+private const val SKELETON_PERSON_FACTS = 3
+private const val SKELETON_PERSON_ROLES = 6
 
 @Composable
 internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss: () -> Unit) {
@@ -73,6 +75,9 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
             verticalArrangement = Arrangement.spacedBy(PersonSectionGap)
         ) {
             MoviePersonHeader(member = member, person = person, livePerson = livePerson)
+            if (livePerson.load == LiveTmdbLoad.Loading) {
+                MoviePersonBodySkeleton()
+            }
             if (person != null) {
                 if (person.biography.isNotBlank()) {
                     MoviePersonSection(title = "Biography") {
@@ -137,7 +142,9 @@ private fun MoviePersonHeader(member: MovieCastMember, person: MoviePerson?, liv
             }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            if (person == null) {
+            if (livePerson.load == LiveTmdbLoad.Loading) {
+                MoviePersonFactsSkeleton()
+            } else if (person == null) {
                 LiveTmdbLoadMessage(
                     state = livePerson,
                     textColor = MaterialTheme.colorScheme.onSurface,
@@ -176,14 +183,22 @@ private fun MoviePersonSection(title: String, padsContent: Boolean = true, conte
 
 @Composable
 private fun MoviePersonRoles(roles: List<MoviePersonRole>, onOpenRole: (MoviePersonRole) -> Unit) {
+    MoviePersonRolesLayout(itemCount = roles.size) { index, posterWidth ->
+        val role = roles[index]
+        MovieRolePoster(role = role, width = posterWidth, onClick = { onOpenRole(role) })
+    }
+}
+
+@Composable
+private fun MoviePersonRolesLayout(itemCount: Int, item: @Composable (index: Int, posterWidth: Dp) -> Unit) {
     if (isDesktopPlatform) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(horizontal = PersonSheetSidePadding)) {
             val columnCount = ((maxWidth + RoleGap) / (RolePosterMinWidthDesktop + RoleGap)).toInt().coerceAtLeast(1)
             val posterWidth = (maxWidth - RoleGap * (columnCount - 1)) / columnCount
             Column(verticalArrangement = Arrangement.spacedBy(RoleRowGap)) {
-                roles.chunked(columnCount).forEach { rowRoles ->
+                (0 until itemCount).chunked(columnCount).forEach { rowIndexes ->
                     Row(horizontalArrangement = Arrangement.spacedBy(RoleGap)) {
-                        rowRoles.forEach { role -> MovieRolePoster(role = role, width = posterWidth, onClick = { onOpenRole(role) }) }
+                        rowIndexes.forEach { index -> item(index, posterWidth) }
                     }
                 }
             }
@@ -193,8 +208,46 @@ private fun MoviePersonRoles(roles: List<MoviePersonRole>, onOpenRole: (MoviePer
             contentPadding = PaddingValues(horizontal = PersonSheetSidePadding),
             horizontalArrangement = Arrangement.spacedBy(RoleGap)
         ) {
-            items(roles, key = { role -> "${role.kind}:${role.tmdbId}" }) { role ->
-                MovieRolePoster(role = role, width = RolePosterWidthPhone, onClick = { onOpenRole(role) })
+            items(itemCount) { index -> item(index, RolePosterWidthPhone) }
+        }
+    }
+}
+
+@Composable
+private fun MoviePersonFactsSkeleton() {
+    val progress = rememberShimmerProgress()
+    val shimmerColors = shimmerColorsOf(chipContainerColor(), MaterialTheme.colorScheme.onSurface)
+    repeat(SKELETON_PERSON_FACTS) { index ->
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            MovieSkeletonLine(widthFraction = 0.3f, height = 10.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+            MovieSkeletonLine(widthFraction = 0.7f, height = 14.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+        }
+    }
+}
+
+@Composable
+private fun MoviePersonBodySkeleton() {
+    val progress = rememberShimmerProgress()
+    val shimmerColors = shimmerColorsOf(chipContainerColor(), MaterialTheme.colorScheme.onSurface)
+    MoviePersonSection(title = "Biography") {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            listOf(1f, 1f, 1f, 0.9f, 0.55f).forEachIndexed { index, widthFraction ->
+                MovieSkeletonLine(widthFraction = widthFraction, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+            }
+        }
+    }
+    MoviePersonSection(title = "Best known for", padsContent = false) {
+        MoviePersonRolesLayout(itemCount = SKELETON_PERSON_ROLES) { index, posterWidth ->
+            Column(modifier = Modifier.width(posterWidth), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(2f / 3f)
+                        .clip(RoundedCornerShape(PosterCornerRadius))
+                        .shimmer(progress, shimmerColors, itemIndex = index)
+                )
+                MovieSkeletonLine(widthFraction = 0.85f, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+                MovieSkeletonLine(widthFraction = 0.5f, height = 10.dp, progress = progress, colors = shimmerColors, itemIndex = index)
             }
         }
     }
@@ -238,9 +291,6 @@ private fun personFactsOf(person: MoviePerson): List<Pair<String, String>> = lis
     person.deathday?.let { "Died" to releaseDateText(it) }
 )
 
-private fun personLinksOf(person: MoviePerson): List<Pair<String, String>> = listOfNotNull(
-    person.imdbId.takeIf { it.isNotBlank() }?.let { "IMDb" to "https://www.imdb.com/name/$it" },
-    person.instagramHandle.takeIf { it.isNotBlank() }?.let { "Instagram" to "https://www.instagram.com/$it" },
-    person.facebookHandle.takeIf { it.isNotBlank() }?.let { "Facebook" to "https://www.facebook.com/$it" },
-    person.xHandle.takeIf { it.isNotBlank() }?.let { "X" to "https://x.com/$it" }
-)
+private fun personLinksOf(person: MoviePerson): List<MovieLink> =
+    listOfNotNull(person.imdbId.takeIf { it.isNotBlank() }?.let { imdbLinkOf("name/$it") }) +
+        socialLinksOf(person.instagramHandle, person.facebookHandle, person.xHandle)

@@ -3,14 +3,17 @@ package com.emberr.presentation.shared.editor.blockViews.movie
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +41,8 @@ private val SimilarPosterMinWidthPhone = 88.dp
 private val SimilarColumnGap = 16.dp
 private val SimilarRowGap = 24.dp
 private const val SHORT_REVIEW_LINES = 6
+private const val SKELETON_SIMILAR_TITLES = 8
+private const val SKELETON_REVIEWS = 2
 
 @Composable
 internal fun MovieMoreLikeThisTab(
@@ -47,24 +52,52 @@ internal fun MovieMoreLikeThisTab(
 ) {
     val extras = liveExtras.loadedValue
     when {
+        liveExtras.load == LiveTmdbLoad.Loading -> MovieSimilarTitlesSkeleton(colors = colors)
         extras == null -> LiveTmdbLoadMessage(state = liveExtras, textColor = colors.text, chipBackground = colors.chipBackground)
         extras.similarTitles.isEmpty() -> MovieTabEmptyMessage(text = "No similar titles yet", colors = colors)
-        else -> BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val posterMinWidth = if (isDesktopPlatform) SimilarPosterMinWidthDesktop else SimilarPosterMinWidthPhone
-            val columnCount = ((maxWidth + SimilarColumnGap) / (posterMinWidth + SimilarColumnGap)).toInt().coerceAtLeast(1)
-            val posterWidth = (maxWidth - SimilarColumnGap * (columnCount - 1)) / columnCount
-            Column(verticalArrangement = Arrangement.spacedBy(SimilarRowGap)) {
-                extras.similarTitles.chunked(columnCount).forEach { rowTitles ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(SimilarColumnGap)) {
-                        rowTitles.forEach { title ->
-                            MovieSimilarTitle(title = title, width = posterWidth, colors = colors, onClick = { onOpenTitle(title) })
-                        }
-                    }
+        else -> MovieSimilarGrid(itemCount = extras.similarTitles.size) { index, posterWidth ->
+            val title = extras.similarTitles[index]
+            MovieSimilarTitle(title = title, width = posterWidth, colors = colors, onClick = { onOpenTitle(title) })
+        }
+    }
+}
+
+@Composable
+private fun MovieSimilarGrid(itemCount: Int, item: @Composable (index: Int, posterWidth: Dp) -> Unit) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val posterMinWidth = if (isDesktopPlatform) SimilarPosterMinWidthDesktop else SimilarPosterMinWidthPhone
+        val columnCount = ((maxWidth + SimilarColumnGap) / (posterMinWidth + SimilarColumnGap)).toInt().coerceAtLeast(1)
+        val posterWidth = (maxWidth - SimilarColumnGap * (columnCount - 1)) / columnCount
+        Column(verticalArrangement = Arrangement.spacedBy(SimilarRowGap)) {
+            (0 until itemCount).chunked(columnCount).forEach { rowIndexes ->
+                Row(horizontalArrangement = Arrangement.spacedBy(SimilarColumnGap)) {
+                    rowIndexes.forEach { index -> item(index, posterWidth) }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun MovieSimilarTitlesSkeleton(colors: DetailsColors) {
+    val progress = rememberShimmerProgress()
+    val shimmerColors = shimmerColorsOf(colors.chipBackground, colors.text)
+    MovieSimilarGrid(itemCount = SKELETON_SIMILAR_TITLES) { index, posterWidth ->
+        Column(modifier = Modifier.width(posterWidth), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(2f / 3f)
+                    .clip(RoundedCornerShape(PosterCornerRadius))
+                    .shimmer(progress, shimmerColors, itemIndex = index)
+            )
+            MovieSkeletonLine(widthFraction = 0.85f, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+            MovieSkeletonLine(widthFraction = 0.5f, height = 10.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+        }
+    }
+}
+
+
 
 @Composable
 private fun MovieSimilarTitle(title: MovieSearchResult, width: Dp, colors: DetailsColors, onClick: () -> Unit) {
@@ -96,10 +129,35 @@ private fun MovieSimilarTitle(title: MovieSearchResult, width: Dp, colors: Detai
 internal fun MovieReviewsTab(liveExtras: LiveTmdbLoadState<MovieTitleExtras>, colors: DetailsColors) {
     val extras = liveExtras.loadedValue
     when {
+        liveExtras.load == LiveTmdbLoad.Loading -> MovieReviewsSkeleton(colors = colors)
         extras == null -> LiveTmdbLoadMessage(state = liveExtras, textColor = colors.text, chipBackground = colors.chipBackground)
         extras.reviews.isEmpty() -> MovieTabEmptyMessage(text = "No reviews yet", colors = colors)
         else -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             extras.reviews.forEach { review -> MovieReviewCard(review = review, colors = colors) }
+        }
+    }
+}
+
+@Composable
+private fun MovieReviewsSkeleton(colors: DetailsColors) {
+    val progress = rememberShimmerProgress()
+    val shimmerColors = shimmerColorsOf(colors.chipBackground, colors.text)
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        repeat(SKELETON_REVIEWS) { index ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(DefaultBlockShape)
+                    .background(colors.panel)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                MovieSkeletonLine(widthFraction = 0.35f, height = 14.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+                MovieSkeletonLine(widthFraction = 0.2f, height = 10.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+                listOf(1f, 1f, 0.9f, 0.6f).forEach { widthFraction ->
+                    MovieSkeletonLine(widthFraction = widthFraction, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+                }
+            }
         }
     }
 }
