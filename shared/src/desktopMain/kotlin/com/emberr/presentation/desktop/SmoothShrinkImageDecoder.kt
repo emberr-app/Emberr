@@ -1,4 +1,4 @@
-package com.emberr.domain.util.media
+package com.emberr.presentation.desktop
 
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
