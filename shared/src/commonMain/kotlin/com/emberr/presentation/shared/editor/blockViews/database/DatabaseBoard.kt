@@ -2,9 +2,6 @@ package com.emberr.presentation.shared.editor.blockViews.database
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,9 +40,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -82,14 +76,17 @@ import com.emberr.domain.model.columnKey
 import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.tagPoolKey
 import com.emberr.domain.model.valueTypeOf
-import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.GestureCoordinates
+import com.emberr.presentation.shared.components.LoadMoreButton
 import com.emberr.presentation.shared.components.MenuAtTap
+import com.emberr.presentation.shared.components.boardDragGesture
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
+import com.emberr.presentation.shared.components.scrollWhenPointerNearEdges
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagChip
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagColorChoices
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
@@ -111,7 +108,6 @@ private val CollapsedColumnWidth = 48.dp
 private val BoardEdgeScrollZone = 56.dp
 private val VerticalLabelMaxLength = 240.dp
 private val BoardColumnShape = RoundedCornerShape(10.dp)
-private const val BoardEdgeScrollStepPixels = 14f
 internal const val DraggedItemSourceAlpha = 0.35f
 private val BoardCardGap = 8.dp
 internal val DropIndicatorThickness = 2.dp
@@ -167,43 +163,11 @@ private class BoardDragState {
 
 private fun cardBoundsKey(groupKey: String, rowNoteId: String): String = "$groupKey/$rowNoteId"
 
-internal class GestureCoordinates {
-    var coordinates: LayoutCoordinates? = null
-}
-
 private data class CardDropSpot(
     val group: DatabaseBoardGroup,
     val beforeRowId: String?,
     val lastOtherRowId: String?
 )
-
-internal fun Modifier.boardDragGesture(
-    key: Any,
-    isEnabled: Boolean,
-    gestureCoordinates: GestureCoordinates,
-    onStart: (pointerInRoot: Offset, pointerInItem: Offset, itemSize: IntSize) -> Unit,
-    onMove: (pointerInRoot: Offset) -> Unit,
-    onDrop: () -> Unit,
-    onCancel: () -> Unit
-): Modifier = pointerInput(key, isEnabled) {
-    if (!isEnabled) return@pointerInput
-    val startDrag = { pointerInItem: Offset ->
-        gestureCoordinates.coordinates?.let { coordinates ->
-            onStart(coordinates.localToRoot(pointerInItem), pointerInItem, coordinates.size)
-        }
-        Unit
-    }
-    val followPointer = { change: PointerInputChange, _: Offset ->
-        change.consume()
-        gestureCoordinates.coordinates?.let { onMove(it.localToRoot(change.position)) }
-        Unit
-    }
-    if (isDesktopPlatform) {
-        detectDragGestures(onDragStart = startDrag, onDragEnd = onDrop, onDragCancel = onCancel, onDrag = followPointer)
-    } else {
-        detectDragGesturesAfterLongPress(onDragStart = startDrag, onDragEnd = onDrop, onDragCancel = onCancel, onDrag = followPointer)
-    }
-}
 
 @Composable
 internal fun DatabaseBoard(
@@ -335,10 +299,7 @@ internal fun DatabaseBoard(
         val edgeZonePx = with(density) { BoardEdgeScrollZone.toPx() }
         while (dragState.isDragging) {
             val pointerX = dragState.pointerInRoot.x - boardOriginInRoot.x
-            when {
-                pointerX < edgeZonePx -> scrollState.scrollBy(-BoardEdgeScrollStepPixels)
-                pointerX > boardSize.width - edgeZonePx -> scrollState.scrollBy(BoardEdgeScrollStepPixels)
-            }
+            scrollState.scrollWhenPointerNearEdges(pointerX, boardSize.width, edgeZonePx)
             withFrameNanos { }
         }
     }
@@ -607,7 +568,7 @@ private fun DatabaseBoardColumn(
             }
         }
         if (loadedCards.size < group.rows.size) {
-            DatabaseLoadMoreButton(onClick = onLoadMore)
+            LoadMoreButton(onClick = onLoadMore)
         }
         if (!inSelectionMode) {
             DatabaseAddRowButton(onClick = { editor.addRowInGroup(block.id, groupColumn, group.value) })

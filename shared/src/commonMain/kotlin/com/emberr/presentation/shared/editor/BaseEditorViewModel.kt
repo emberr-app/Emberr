@@ -60,7 +60,6 @@ import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.WatchState
 import com.emberr.domain.model.titleKey
 import com.emberr.domain.model.watchState
-import com.emberr.domain.model.withWatchState
 import com.emberr.domain.model.summaryLine
 import com.emberr.domain.model.textAlignmentOrNull
 import com.emberr.domain.model.valueAsText
@@ -77,6 +76,7 @@ import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.domain.movie.MovieTitleSource
+import com.emberr.domain.movie.withWatchStateOnAllCopiesOf
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.table.withActiveViewOf
@@ -745,13 +745,7 @@ abstract class BaseEditorViewModel(
 
         override fun applyWatchStateToTitle(blockId: String, state: WatchState) {
             val now = System.currentTimeMillis()
-            modifyBlocks { list ->
-                val titleKey = (list.firstOrNull { it.id == blockId } as? MovieBlock)?.titleKey()
-                list.map { block ->
-                    val isSameTitle = block is MovieBlock && !block.isDeleted && titleKey != null && block.titleKey() == titleKey
-                    if (block is MovieBlock && (block.id == blockId || isSameTitle)) block.withWatchState(state, now) else block
-                }
-            }
+            modifyBlocks { list -> list.withWatchStateOnAllCopiesOf(blockId, state, now) }
             scheduleAutosave()
         }
 
@@ -2549,11 +2543,11 @@ abstract class BaseEditorViewModel(
         watchlistNoteId: String? = null
     ) {
         if (type == "watchlist" && watchlistNoteId == null) {
-            createWatchlistThenInsertBlock()
+            createSubNoteThenInsertBlock(NoteKind.NOTE) { subNoteId -> insertNewMediaBlock("watchlist", watchlistNoteId = subNoteId) }
             return
         }
         if (type == "canvas" && canvasNoteId == null) {
-            createEmbeddedCanvasThenInsertBlock()
+            createSubNoteThenInsertBlock(NoteKind.CANVAS) { subNoteId -> insertNewMediaBlock("canvas", canvasNoteId = subNoteId) }
             return
         }
         if (type == "database" && databaseId == null) {
@@ -2658,59 +2652,29 @@ abstract class BaseEditorViewModel(
         scheduleAutosave()
     }
 
-    private fun createEmbeddedCanvasThenInsertBlock() {
-        val canvasNoteId = UUID.randomUUID().toString()
+    private fun createSubNoteThenInsertBlock(kind: NoteKind, insertBlockFor: (subNoteId: String) -> Unit) {
+        val subNoteId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val parentSpaceId = spaceIdOfThisNote() ?: return@launch
-                val canvasMetadata = NoteMetadataEntity(
-                    noteId = canvasNoteId,
+                val subNoteMetadata = NoteMetadataEntity(
+                    noteId = subNoteId,
                     title = "",
                     folderId = null,
                     isDaily = false,
                     dateString = null,
                     createdAt = now,
                     updatedAt = now,
-                    filePath = "note_$canvasNoteId.json",
+                    filePath = "note_$subNoteId.json",
                     isSubNote = true,
-                    kind = NoteKind.CANVAS
+                    kind = kind
                 )
                 SyncCoordinator.mutex.withLock {
-                    repository.saveNoteInSpace(parentSpaceId, canvasMetadata, NoteContent(blocks = emptyList()))
+                    repository.saveNoteInSpace(parentSpaceId, subNoteMetadata, NoteContent(blocks = emptyList()))
                 }
                 withContext(Dispatchers.Main) {
-                    insertNewMediaBlock("canvas", canvasNoteId = canvasNoteId)
-                    flushPendingSave()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun createWatchlistThenInsertBlock() {
-        val watchlistNoteId = UUID.randomUUID().toString()
-        val now = System.currentTimeMillis()
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val parentSpaceId = spaceIdOfThisNote() ?: return@launch
-                val watchlistMetadata = NoteMetadataEntity(
-                    noteId = watchlistNoteId,
-                    title = "",
-                    folderId = null,
-                    isDaily = false,
-                    dateString = null,
-                    createdAt = now,
-                    updatedAt = now,
-                    filePath = "note_$watchlistNoteId.json",
-                    isSubNote = true
-                )
-                SyncCoordinator.mutex.withLock {
-                    repository.saveNoteInSpace(parentSpaceId, watchlistMetadata, NoteContent(blocks = emptyList()))
-                }
-                withContext(Dispatchers.Main) {
-                    insertNewMediaBlock("watchlist", watchlistNoteId = watchlistNoteId)
+                    insertBlockFor(subNoteId)
                     flushPendingSave()
                 }
             } catch (e: Exception) {

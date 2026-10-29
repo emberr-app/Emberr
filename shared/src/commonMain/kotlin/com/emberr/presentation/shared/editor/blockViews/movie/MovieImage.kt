@@ -21,7 +21,6 @@ internal fun MovieImage(
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.Crop,
-    onLoaded: () -> Unit = {},
     onImageLoaded: (AsyncImagePainter.State.Success) -> Unit = {}
 ) {
     val mediaStorageHelper = koinInject<MediaStorageHelper>()
@@ -34,10 +33,7 @@ internal fun MovieImage(
         contentScale = contentScale,
         alignment = alignment,
         modifier = modifier,
-        onSuccess = { success ->
-            onLoaded()
-            onImageLoaded(success)
-        },
+        onSuccess = onImageLoaded,
         onError = { if (usesLocalFile) localFileFailed = true }
     )
 }

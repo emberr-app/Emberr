@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +39,16 @@ import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.NewItemButtonColor
+import com.emberr.presentation.shared.components.SmallRoundedCornerShape
+import com.emberr.presentation.shared.components.ViewPillDragState
+import com.emberr.presentation.shared.components.ViewPillSpan
+import com.emberr.presentation.shared.components.dropKeepsViewInPlace
+import com.emberr.presentation.shared.components.subtleFillColor
+import com.emberr.presentation.shared.components.viewDropLine
+import com.emberr.presentation.shared.components.viewPillDragGesture
+import com.emberr.presentation.shared.components.viewToDropBefore
+import com.emberr.presentation.shared.components.viewsWithDroppedView
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.copy
@@ -56,12 +65,10 @@ import emberr.shared.generated.resources.widget
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-private val PillShape = RoundedCornerShape(8.dp)
 private val HeaderButtonGap = 6.dp
 private val HeaderButtonInnerPadding = 8.dp
 private val HeaderIconSize = 18.dp
 private val TabIconSize = if (isDesktopPlatform) 18.dp else 16.dp
-private val AddTitleButtonColor = Color(0xFF4F5B8A)
 private const val DesktopInactiveIconAlpha = 0.6f
 
 @Composable
@@ -84,7 +91,7 @@ internal fun WatchlistToolbar(
     val sortIsChanged = openView.sortKey != WatchlistSortKey.STATUS || openView.sortsDescending
 
     val viewIds = views.map { it.id }
-    val viewDragState = remember { WatchlistViewDragState() }
+    val viewDragState = remember { ViewPillDragState() }
     val latestViewIds by rememberUpdatedState(viewIds)
     val dropLineColor = MaterialTheme.colorScheme.primary
 
@@ -201,7 +208,7 @@ internal fun WatchlistToolbar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
-                modifier = Modifier.weight(1f).watchlistViewDropLine(viewDragState, viewIds, dropLineColor),
+                modifier = Modifier.weight(1f).viewDropLine(viewDragState, viewIds, dropLineColor),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) { viewTabs() }
@@ -211,7 +218,7 @@ internal fun WatchlistToolbar(
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth().watchlistViewDropLine(viewDragState, viewIds, dropLineColor),
+                modifier = Modifier.fillMaxWidth().viewDropLine(viewDragState, viewIds, dropLineColor),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) { viewTabs() }
@@ -267,7 +274,7 @@ private fun WatchlistViewTab(
     isActive: Boolean,
     canDelete: Boolean,
     isEnabled: Boolean,
-    dragState: WatchlistViewDragState,
+    dragState: ViewPillDragState,
     onDrop: () -> Unit,
     onShow: () -> Unit,
     onRename: (String) -> Unit,
@@ -286,7 +293,7 @@ private fun WatchlistViewTab(
                 if (dragState.pillSpans[view.id] != span) dragState.pillSpans[view.id] = span
             }
             .zIndex(if (dragState.draggedViewId == view.id) 1f else 0f)
-            .watchlistViewPillDrag(
+            .viewPillDragGesture(
                 dragState = dragState,
                 viewId = view.id,
                 isEnabled = isEnabled,
@@ -297,8 +304,8 @@ private fun WatchlistViewTab(
         Row(
             modifier = Modifier
                 .graphicsLayer { translationX = dragState.offsetOf(view.id) }
-                .clip(PillShape)
-                .background(if (isActive) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f) else Color.Transparent)
+                .clip(SmallRoundedCornerShape)
+                .background(if (isActive) subtleFillColor() else Color.Transparent)
                 .clickable(enabled = isEnabled) {
                     if (isActive) runAfterKeyboardCloses { isMenuOpen = true } else onShow()
                 }
@@ -308,7 +315,7 @@ private fun WatchlistViewTab(
             Icon(
                 painter = painterResource(view.layout.iconResource()),
                 contentDescription = null,
-                tint = desktopInactiveTintOr(color),
+                tint = dimmedIconTintOnDesktop(color),
                 modifier = Modifier.size(TabIconSize)
             )
             Spacer(modifier = Modifier.width(6.dp))
@@ -375,7 +382,7 @@ private fun AddViewButton(
                 contentDescription = "Add view",
                 tint = MaterialTheme.colorScheme.outline,
                 modifier = Modifier
-                    .clip(PillShape)
+                    .clip(SmallRoundedCornerShape)
                     .clickable(enabled = isEnabled) { runAfterKeyboardCloses { isMenuOpen = true } }
                     .padding(6.dp)
                     .size(16.dp)
@@ -405,7 +412,7 @@ private fun WatchlistHeaderButton(
     IconTooltip(text = if (isDesktopPlatform) null else label) {
         Row(
             modifier = Modifier
-                .clip(PillShape)
+                .clip(SmallRoundedCornerShape)
                 .clickable(enabled = isEnabled, onClick = onClick)
                 .padding(horizontal = HeaderButtonInnerPadding, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -414,7 +421,7 @@ private fun WatchlistHeaderButton(
                 Icon(
                     painter = painterResource(icon),
                     contentDescription = null,
-                    tint = if (isActive) color else desktopInactiveTintOr(color),
+                    tint = if (isActive) color else dimmedIconTintOnDesktop(color),
                     modifier = Modifier.size(HeaderIconSize)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -435,8 +442,8 @@ private fun AddTitleButton(isEnabled: Boolean, onClick: () -> Unit) {
             tint = Color.White,
             modifier = Modifier
                 .padding(start = HeaderButtonInnerPadding)
-                .clip(PillShape)
-                .background(AddTitleButtonColor)
+                .clip(SmallRoundedCornerShape)
+                .background(NewItemButtonColor)
                 .clickable(enabled = isEnabled, onClick = onClick)
                 .padding(horizontal = 7.dp, vertical = 5.dp)
                 .size(18.dp)
@@ -445,7 +452,7 @@ private fun AddTitleButton(isEnabled: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun desktopInactiveTintOr(mobileTint: Color): Color =
+private fun dimmedIconTintOnDesktop(mobileTint: Color): Color =
     if (isDesktopPlatform) MaterialTheme.colorScheme.onSurface.copy(alpha = DesktopInactiveIconAlpha) else mobileTint
 
 private fun WatchlistView.iconResource(): DrawableResource = when (this) {

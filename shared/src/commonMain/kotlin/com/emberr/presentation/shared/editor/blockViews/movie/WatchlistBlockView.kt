@@ -13,16 +13,10 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -52,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.WatchlistView
+import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.model.titleKey
 import com.emberr.domain.movie.boardStatuses
 import com.emberr.domain.movie.openViewOn
@@ -60,15 +55,14 @@ import com.emberr.domain.movie.takeLoaded
 import com.emberr.domain.movie.viewsInOrderOf
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.KmpBackHandler
+import com.emberr.presentation.shared.components.LoadMoreButton
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.presentation.shared.editor.blockViews.rememberDeviceTableLayout
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import kotlinx.coroutines.delay
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.arrow_down
-import org.jetbrains.compose.resources.painterResource
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private const val NEW_TITLE_HIGHLIGHT_MILLIS = 1_200L
 private const val TITLE_RESIZE_MILLIS = 260
@@ -76,7 +70,7 @@ private const val TITLE_FADE_MILLIS = 220
 private const val TITLE_FADE_DELAY_MILLIS = 80
 private const val ALL_TITLES_GROUP = "all"
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalUuidApi::class)
 @Composable
 fun WatchlistBlockView(
     block: WatchlistBlock,
@@ -89,6 +83,7 @@ fun WatchlistBlockView(
     if (editor == null) return
 
     val titles by remember(block.watchlistNoteId) { editor.titlesOf(block.watchlistNoteId) }.collectAsState(initial = null)
+    val titleKeysInWatchlist = titles.orEmpty().mapNotNullTo(HashSet()) { it.titleKey() }
     val addingToWatchlistIds by editor.addingToWatchlistIds.collectAsState()
     val lastAddedBlockId by editor.lastAddedBlockId.collectAsState()
     val movieEditor = remember(block.watchlistNoteId) { editor.movieEditorFor(block.watchlistNoteId) }
@@ -141,7 +136,7 @@ fun WatchlistBlockView(
         editor.loadSuggestionsEarly()
         if (isDesktopPlatform) {
             isAddingTitle = true
-            searchFocusNonce = UUID.randomUUID().toString()
+            searchFocusNonce = Uuid.random().toString()
         } else {
             isSearchSheetOpen = true
         }
@@ -227,7 +222,7 @@ fun WatchlistBlockView(
                     isAddingTitle = false
                 },
                 focusRequestNonce = searchFocusNonce,
-                excludedTitleKeys = titles.orEmpty().mapNotNullTo(HashSet()) { it.titleKey() },
+                excludedTitleKeys = titleKeysInWatchlist,
                 onClose = { isAddingTitle = false }
             )
         }
@@ -235,7 +230,7 @@ fun WatchlistBlockView(
         MovieSearchSheet(
             expanded = isSearchSheetOpen,
             search = editor::search,
-            excludedTitleKeys = titles.orEmpty().mapNotNullTo(HashSet()) { it.titleKey() },
+            excludedTitleKeys = titleKeysInWatchlist,
             onChoose = { result -> editor.addTitle(block.watchlistNoteId, result) },
             onDismiss = { isSearchSheetOpen = false }
         )
@@ -248,11 +243,6 @@ fun WatchlistBlockView(
             MovieTicketLoading()
         }
 
-        val loadedTitles = titles
-        val shownTitles = loadedTitles.orEmpty().shownIn(openView, searchText)
-        val titlesUpToLimit = shownTitles.takeLoaded(loadedTitleCountOf(ALL_TITLES_GROUP), titleIdsAddedHere)
-        val titleIdsUpToLimit = titlesUpToLimit.map { it.id }
-        val titleKeysInWatchlist = loadedTitles.orEmpty().mapNotNullTo(HashSet()) { it.titleKey() }
         val watchlistAdder = remember(titleKeysInWatchlist, isLoadingNewTitle, block.watchlistNoteId) {
             WatchlistAdder(
                 titleKeysInWatchlist = titleKeysInWatchlist,
@@ -261,82 +251,106 @@ fun WatchlistBlockView(
             )
         }
         CompositionLocalProvider(LocalWatchlistAdder provides watchlistAdder) {
-            when {
-                loadedTitles == null -> Unit
-                loadedTitles.isEmpty() && !isAddingTitle && !isLoadingNewTitle -> WatchlistEmptyState(onAddTitle = { startAddingTitle() })
-                shownTitles.isEmpty() && loadedTitles.isNotEmpty() && searchText.isNotBlank() -> WatchlistNoMatches(
-                    message = "No titles match \"${searchText.trim()}\"",
-                    clearLabel = "Clear search",
-                    onClear = ::closeSearch
-                )
-                shownTitles.isEmpty() && loadedTitles.isNotEmpty() -> WatchlistNoMatches(
-                    message = "No titles match these filters",
-                    clearLabel = "Clear filters",
-                    onClear = { editor.changeView(block.id, openView.id) { it.copy(filters = emptyList()) } }
-                )
-                openView.layout == WatchlistView.BOARD -> WatchlistBoard(
-                    titles = shownTitles,
-                    statuses = openView.boardStatuses(),
-                    movieEditor = movieEditor,
-                    inSelectionMode = inSelectionMode,
-                    onToggleSelection = onToggleSelection,
-                    loadedCountOf = { status -> loadedTitleCountOf(status.name) },
-                    onLoadMore = { status -> loadMoreTitles(status.name) },
-                    alwaysShownTitleIds = titleIdsAddedHere
-                )
-                openView.layout == WatchlistView.GALLERY -> WatchlistGallery(
-                    titles = titlesUpToLimit,
-                    movieEditor = movieEditor,
-                    inSelectionMode = inSelectionMode,
-                    onToggleSelection = onToggleSelection,
-                    titleSelection = titleSelection
-                )
-                else -> titlesUpToLimit.forEach { title ->
-                    key(title.id) {
-                        val isNewlyAdded = title.id == lastAddedBlockId
-                        val appearance = remember { MutableTransitionState(!isNewlyAdded).apply { targetState = true } }
-                        AnimatedVisibility(
-                            visibleState = appearance,
-                            enter = expandVertically(tween(TITLE_RESIZE_MILLIS)) + fadeIn(tween(TITLE_FADE_MILLIS, delayMillis = TITLE_FADE_DELAY_MILLIS))
-                        ) {
-                            WatchlistTitle(
-                                title = title,
-                                movieEditor = movieEditor,
-                                isNewlyAdded = isNewlyAdded,
-                                inSelectionMode = inSelectionMode,
-                                onToggleSelection = onToggleSelection,
-                                onRemove = { editor.removeTitle(block.watchlistNoteId, title.id) },
-                                selection = if (inSelectionMode) null else titleSelection.forTitle(title.id, titleIdsUpToLimit),
-                                runAfterKeyboardCloses = runAfterKeyboardCloses
-                            )
-                        }
-                    }
-                }
-            }
-            if (openView.layout != WatchlistView.BOARD && titlesUpToLimit.size < shownTitles.size) {
-                WatchlistLoadMoreButton(onClick = { loadMoreTitles(ALL_TITLES_GROUP) })
-            }
+            WatchlistTitles(
+                block = block,
+                openView = openView,
+                titles = titles,
+                searchText = searchText,
+                isAddingTitle = isAddingTitle || isLoadingNewTitle,
+                editor = editor,
+                movieEditor = movieEditor,
+                titleSelection = titleSelection,
+                lastAddedBlockId = lastAddedBlockId,
+                titleIdsAddedHere = titleIdsAddedHere,
+                inSelectionMode = inSelectionMode,
+                onToggleSelection = onToggleSelection,
+                loadedCountOf = ::loadedTitleCountOf,
+                onLoadMore = ::loadMoreTitles,
+                onAddTitle = ::startAddingTitle,
+                onClearSearch = ::closeSearch,
+                runAfterKeyboardCloses = runAfterKeyboardCloses
+            )
         }
     }
 }
 
 @Composable
-internal fun WatchlistLoadMoreButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 7.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.arrow_down),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(16.dp)
+private fun WatchlistTitles(
+    block: WatchlistBlock,
+    openView: WatchlistViewSettings,
+    titles: List<MovieBlock>?,
+    searchText: String,
+    isAddingTitle: Boolean,
+    editor: WatchlistBlockEditor,
+    movieEditor: MovieBlockEditor,
+    titleSelection: WatchlistSelection,
+    lastAddedBlockId: String?,
+    titleIdsAddedHere: List<String>,
+    inSelectionMode: Boolean,
+    onToggleSelection: () -> Unit,
+    loadedCountOf: (groupKey: String) -> Int,
+    onLoadMore: (groupKey: String) -> Unit,
+    onAddTitle: () -> Unit,
+    onClearSearch: () -> Unit,
+    runAfterKeyboardCloses: (() -> Unit) -> Unit
+) {
+    val shownTitles = titles.orEmpty().shownIn(openView, searchText)
+    val titlesUpToLimit = shownTitles.takeLoaded(loadedCountOf(ALL_TITLES_GROUP), titleIdsAddedHere)
+    val titleIdsUpToLimit = titlesUpToLimit.map { it.id }
+    when {
+        titles == null -> Unit
+        titles.isEmpty() && !isAddingTitle -> WatchlistEmptyState(onAddTitle = onAddTitle)
+        shownTitles.isEmpty() && titles.isNotEmpty() && searchText.isNotBlank() -> WatchlistNoMatches(
+            message = "No titles match \"${searchText.trim()}\"",
+            clearLabel = "Clear search",
+            onClear = onClearSearch
         )
-        Spacer(modifier = Modifier.width(7.dp))
-        Text(text = "Load more", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
+        shownTitles.isEmpty() && titles.isNotEmpty() -> WatchlistNoMatches(
+            message = "No titles match these filters",
+            clearLabel = "Clear filters",
+            onClear = { editor.changeView(block.id, openView.id) { it.copy(filters = emptyList()) } }
+        )
+        openView.layout == WatchlistView.BOARD -> WatchlistBoard(
+            titles = shownTitles,
+            statuses = openView.boardStatuses(),
+            movieEditor = movieEditor,
+            inSelectionMode = inSelectionMode,
+            onToggleSelection = onToggleSelection,
+            loadedCountOf = { status -> loadedCountOf(status.name) },
+            onLoadMore = { status -> onLoadMore(status.name) },
+            alwaysShownTitleIds = titleIdsAddedHere
+        )
+        openView.layout == WatchlistView.GALLERY -> WatchlistGallery(
+            titles = titlesUpToLimit,
+            movieEditor = movieEditor,
+            inSelectionMode = inSelectionMode,
+            onToggleSelection = onToggleSelection,
+            titleSelection = titleSelection
+        )
+        else -> titlesUpToLimit.forEach { title ->
+            key(title.id) {
+                val isNewlyAdded = title.id == lastAddedBlockId
+                val appearance = remember { MutableTransitionState(!isNewlyAdded).apply { targetState = true } }
+                AnimatedVisibility(
+                    visibleState = appearance,
+                    enter = expandVertically(tween(TITLE_RESIZE_MILLIS)) + fadeIn(tween(TITLE_FADE_MILLIS, delayMillis = TITLE_FADE_DELAY_MILLIS))
+                ) {
+                    WatchlistTitle(
+                        title = title,
+                        movieEditor = movieEditor,
+                        isNewlyAdded = isNewlyAdded,
+                        inSelectionMode = inSelectionMode,
+                        onToggleSelection = onToggleSelection,
+                        onRemove = { editor.removeTitle(block.watchlistNoteId, title.id) },
+                        selection = if (inSelectionMode) null else titleSelection.forTitle(title.id, titleIdsUpToLimit),
+                        runAfterKeyboardCloses = runAfterKeyboardCloses
+                    )
+                }
+            }
+        }
+    }
+    if (openView.layout != WatchlistView.BOARD && titlesUpToLimit.size < shownTitles.size) {
+        LoadMoreButton(onClick = { onLoadMore(ALL_TITLES_GROUP) })
     }
 }
 
@@ -354,39 +368,34 @@ private fun WatchlistHeader(
         if (block.title != titleText) titleText = block.title
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            modifier = Modifier.combinedClickable(
+    BasicTextField(
+        value = titleText,
+        onValueChange = { newTitle ->
+            titleText = newTitle
+            onRename(newTitle)
+        },
+        singleLine = true,
+        textStyle = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        modifier = Modifier
+            .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = { if (inSelectionMode) onToggleSelection() },
                 onLongClick = if (isDesktopPlatform) null else onToggleSelection
-            ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BasicTextField(
-                value = titleText,
-                onValueChange = { newTitle ->
-                    titleText = newTitle
-                    onRename(newTitle)
-                },
-                singleLine = true,
-                textStyle = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.weight(1f, fill = false).hidesEditorToolbarWhileFocused(),
-                decorationBox = { innerTextField ->
-                    if (titleText.isEmpty()) {
-                        Text(
-                            text = "Watchlist",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                    }
-                    innerTextField()
-                }
             )
+            .hidesEditorToolbarWhileFocused(),
+        decorationBox = { innerTextField ->
+            if (titleText.isEmpty()) {
+                Text(
+                    text = "Watchlist",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+            innerTextField()
         }
-    }
+    )
 }
 
 @Composable
@@ -410,13 +419,13 @@ private fun WatchlistTitle(
         block = title,
         details = details,
         editor = movieEditor,
-        inSelectionMode = inSelectionMode,
-        onToggleSelection = onToggleSelection,
+        inBlockSelectionMode = inSelectionMode,
+        onToggleBlockSelection = onToggleSelection,
         onDelete = onRemove,
         runAfterKeyboardCloses = runAfterKeyboardCloses,
         isInWatchlist = true,
         isNewlyAdded = isNewlyAdded,
-        selection = selection
+        watchlistSelection = selection
     )
 }
 
@@ -464,7 +473,7 @@ private fun WatchlistNoMatches(message: String, clearLabel: String, onClear: () 
             color = MaterialTheme.colorScheme.outline,
             textAlign = TextAlign.Center
         )
-        MovieChip(label = clearLabel, onClick = onClear) {}
+        MovieChip(label = clearLabel, onClick = onClear)
     }
 }
 

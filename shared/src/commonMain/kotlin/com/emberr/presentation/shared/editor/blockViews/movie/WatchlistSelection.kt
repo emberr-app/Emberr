@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,10 +32,12 @@ import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import com.emberr.presentation.shared.editor.GlobalEditorState
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.SmallRoundedCornerShape
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.trash
@@ -165,7 +166,7 @@ internal fun WatchlistSelectionBar(
     val hasSelectedTitles = selectedCount > 0
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(SmallRoundedCornerShape)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
             .padding(horizontal = 10.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -186,18 +187,23 @@ internal fun WatchlistSelectionBar(
             isDestructive = true,
             onClick = onRemove
         )
-        IconTooltip(text = "Clear selection") {
-            Icon(
-                painter = painterResource(Res.drawable.x),
-                contentDescription = "Clear selection",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable(onClick = onClear)
-                    .padding(6.dp)
-                    .size(14.dp)
-            )
-        }
+        WatchlistCloseButton(label = "Clear selection", touchPadding = 6.dp, onClick = onClear)
+    }
+}
+
+@Composable
+internal fun WatchlistCloseButton(label: String, touchPadding: Dp, onClick: () -> Unit) {
+    IconTooltip(text = label) {
+        Icon(
+            painter = painterResource(Res.drawable.x),
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(onClick = onClick)
+                .padding(touchPadding)
+                .size(14.dp)
+        )
     }
 }
 
@@ -213,7 +219,7 @@ private fun SelectionBarButton(
     val color = if (isEnabled) fullColor else fullColor.copy(alpha = 0.38f)
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(SmallRoundedCornerShape)
             .clickable(enabled = isEnabled, onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically

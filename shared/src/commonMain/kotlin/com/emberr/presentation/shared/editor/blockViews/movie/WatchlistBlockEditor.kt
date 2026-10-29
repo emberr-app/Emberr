@@ -6,13 +6,11 @@ import com.emberr.domain.model.MovieSearchResult
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.WatchState
-import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.WatchlistView
 import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.model.titleKey
 import com.emberr.domain.model.withDeleted
-import com.emberr.domain.model.withWatchState
 import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.movie.newViewWithLayout
 import com.emberr.domain.movie.viewsInOrderOf
@@ -20,12 +18,11 @@ import com.emberr.domain.movie.withViewAdded
 import com.emberr.domain.movie.withViewAddedAfter
 import com.emberr.domain.movie.withViewChanged
 import com.emberr.domain.movie.withViewRemoved
-import com.emberr.domain.movie.withImagesSavedBy
+import com.emberr.domain.movie.withWatchStateOnAllCopiesOf
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
-import com.emberr.domain.util.system.showNativeToast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -37,7 +34,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class WatchlistBlockEditor(
     private val repository: NoteRepository,
@@ -87,16 +85,18 @@ class WatchlistBlockEditor(
         deviceTableLayoutStore.setViewOrder(blockId, viewIds)
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     fun addView(block: WatchlistBlock, layout: WatchlistView) {
-        val newView = block.newViewWithLayout(layout, UUID.randomUUID().toString())
+        val newView = block.newViewWithLayout(layout, Uuid.random().toString())
         val viewIdsHere = block.viewsInOrderOf(deviceTableLayoutStore.currentLayoutOf(block.id)).map { it.id }
         changeWatchlistBlock(block.id) { it.withViewAdded(newView) }
         deviceTableLayoutStore.setViewOrder(block.id, viewIdsHere + newView.id)
         deviceTableLayoutStore.setActiveViewId(block.id, newView.id)
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     fun duplicateView(block: WatchlistBlock, view: WatchlistViewSettings) {
-        val copy = view.copy(id = UUID.randomUUID().toString(), name = "${view.name} copy")
+        val copy = view.copy(id = Uuid.random().toString(), name = "${view.name} copy")
         val viewIdsHere = block.viewsInOrderOf(deviceTableLayoutStore.currentLayoutOf(block.id)).map { it.id }
         val originalIndex = viewIdsHere.indexOf(view.id)
         val viewIdsWithCopy = viewIdsHere.toMutableList().apply { add(originalIndex + 1, copy.id) }
@@ -117,33 +117,20 @@ class WatchlistBlockEditor(
         _lastAddedBlockId.value = null
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     fun addTitle(watchlistNoteId: String, result: MovieSearchResult) {
         if (watchlistNoteId in _addingToWatchlistIds.value) return
         _addingToWatchlistIds.update { it + watchlistNoteId }
         appScope.launch {
             try {
-                val details = titleSource.loadDetails(result.tmdbId, result.kind)?.withImagesSavedBy(webImageFetcher)
-                if (details == null) {
-                    showNativeToast("couldn't find this title")
-                    return@launch
+                titleSource.loadDetailsWithImages(result.tmdbId, result.kind, webImageFetcher) { details ->
+                    val linkedState = newestWatchState(watchlistNoteId, details)
+                    val now = System.currentTimeMillis()
+                    val newTitle = MovieBlock(id = Uuid.random().toString(), updatedAt = now)
+                        .withChosenTitle(details, linkedState, now)
+                    _lastAddedBlockId.value = newTitle.id
+                    changeTitles(watchlistNoteId) { blocks, _ -> blocks + newTitle }
                 }
-                val linkedState = newestWatchState(watchlistNoteId, details)
-                val now = System.currentTimeMillis()
-                val newTitle = MovieBlock(
-                    id = UUID.randomUUID().toString(),
-                    details = details,
-                    watchStatus = linkedState?.status ?: WatchStatus.NOT_WATCHED,
-                    ratingHalfStars = linkedState?.ratingHalfStars,
-                    watchStateChangedAt = linkedState?.changedAt ?: 0L,
-                    addedAt = now,
-                    updatedAt = now
-                )
-                _lastAddedBlockId.value = newTitle.id
-                changeTitles(watchlistNoteId) { blocks, _ -> blocks + newTitle }
-            } catch (cancellation: CancellationException) {
-                throw cancellation
-            } catch (_: Exception) {
-                showNativeToast("couldn't load this title, check your internet")
             } finally {
                 _addingToWatchlistIds.update { it - watchlistNoteId }
             }
@@ -173,13 +160,7 @@ class WatchlistBlockEditor(
 
         override fun applyWatchStateToTitle(blockId: String, state: WatchState) {
             appScope.launch {
-                changeTitles(watchlistNoteId) { blocks, now ->
-                    val titleKey = (blocks.firstOrNull { it.id == blockId } as? MovieBlock)?.titleKey()
-                    blocks.map { block ->
-                        val isSameTitle = block is MovieBlock && !block.isDeleted && titleKey != null && block.titleKey() == titleKey
-                        if (block is MovieBlock && (block.id == blockId || isSameTitle)) block.withWatchState(state, now) else block
-                    }
-                }
+                changeTitles(watchlistNoteId) { blocks, now -> blocks.withWatchStateOnAllCopiesOf(blockId, state, now) }
             }
         }
 

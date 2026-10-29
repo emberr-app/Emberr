@@ -366,7 +366,7 @@ object GlobalEditorState {
 
     var isPointerOverDatabaseViewPill: Boolean = false
 
-    var pressStartedOnDatabaseViewPill: Boolean = false
+    var pressStartedOnViewPill: Boolean = false
 
     var tapsOutsideNewDatabaseRows by mutableIntStateOf(0)
 
@@ -1207,7 +1207,7 @@ fun EditorScreen(
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                     if (isDesktopPlatform) GlobalEditorState.undoOrRedoShortcutOfLastUsedEditor = undoOrRedoOnShortcut
                     GlobalEditorState.pressStartedOnNewDatabaseRow = false
-                    GlobalEditorState.pressStartedOnDatabaseViewPill = false
+                    GlobalEditorState.pressStartedOnViewPill = false
                     while (true) {
                         val change = awaitPointerEvent(PointerEventPass.Initial).changes
                             .firstOrNull { it.id == down.id } ?: return@awaitEachGesture

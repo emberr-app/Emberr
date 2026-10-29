@@ -1,41 +1,56 @@
 package com.emberr.presentation.shared.editor.blockViews.movie
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,14 +59,16 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import coil3.compose.AsyncImagePainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -60,66 +77,38 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import com.emberr.domain.model.MovieBlock
-import com.emberr.domain.model.MovieDetails
-import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieSearchResult
-import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.model.titleKey
 import com.emberr.domain.movie.TmdbTooManyRequestsException
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.SelectedOptionBackground
+import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
-import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.presentation.shared.fullKeyboardHeightPx
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.film
-import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.search
-import emberr.shared.generated.resources.star
-import emberr.shared.generated.resources.trash
+import emberr.shared.generated.resources.x
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.jetbrains.compose.resources.painterResource
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
-import emberr.shared.generated.resources.x
-import com.emberr.presentation.shared.components.customEmberrShadow
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Stable
-import androidx.compose.foundation.layout.navigationBarsPadding
-import com.emberr.presentation.shared.components.EmberrBottomSheet
-import com.emberr.presentation.shared.components.EmberrSearchTextField
-import com.emberr.presentation.shared.openKeyboardHeightPx
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.ime
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.painterResource
 
 private const val SEARCH_DELAY_MILLIS = 250L
 private const val RESULTS_HIDE_DELAY_MILLIS = 150L
@@ -131,16 +120,12 @@ private const val PART_RESIZE_MILLIS = 260
 private val ResultPosterWidth = 30.dp
 private val PhoneResultPosterWidth = 44.dp
 private val PhoneSearchFieldSpace = 78.dp
-internal val PosterCornerRadius = 12.dp
-internal val MovieBlock.isWatched: Boolean get() = watchStatus == WatchStatus.WATCHED
-private val ChipShape = RoundedCornerShape(8.dp)
 private val RowShape = RoundedCornerShape(8.dp)
 private val SearchFieldShape = RoundedCornerShape(12.dp)
 private val ResultsPanelGap = 6.dp
 private val ResultsPanelMaxHeight = 320.dp
 private val PhoneResultsMinHeight = 280.dp
 private val PhoneResultsMaxHeight = 460.dp
-internal val RatingStarColor = Color(0xFFE0A82E)
 
 private val noLoadingBlocks = MutableStateFlow(emptySet<String>())
 
@@ -190,8 +175,8 @@ fun MovieBlockView(
                         block = block,
                         details = shownDetails,
                         editor = editor,
-                        inSelectionMode = inSelectionMode,
-                        onToggleSelection = onToggleSelection,
+                        inBlockSelectionMode = inSelectionMode,
+                        onToggleBlockSelection = onToggleSelection,
                         onDelete = onDelete,
                         runAfterKeyboardCloses = runAfterKeyboardCloses
                     )
@@ -382,22 +367,7 @@ private fun PhoneMovieSearchBox(
         if (focusRequestNonce != null) isSheetOpen = true
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(SearchFieldShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable { isSheetOpen = true }
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.search),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
+    MovieSearchRow(onClose = onClose, onClick = { isSheetOpen = true }) {
         Text(
             text = "Search a movie or show",
             style = MaterialTheme.typography.bodyLarge,
@@ -405,7 +375,6 @@ private fun PhoneMovieSearchBox(
             maxLines = 1,
             modifier = Modifier.weight(1f)
         )
-        if (onClose != null) MovieSearchCloseIcon(onClick = onClose)
     }
 
     MovieSearchSheet(
@@ -457,11 +426,11 @@ internal fun MovieSearchSheet(
 
         val resultsHazeState = remember { HazeState() }
         val density = LocalDensity.current
-        val openKeyboardHeight = openKeyboardHeightPx()
+        val fullKeyboardHeight = fullKeyboardHeightPx()
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val resultsMaxHeight = with(density) {
-                resultsHeightWhileKeyboardMoves(maxHeight, currentKeyboardHeight.toDp(), openKeyboardHeight.toDp())
+                resultsHeightWhileKeyboardMoves(maxHeight, currentKeyboardHeight.toDp(), fullKeyboardHeight.toDp())
             }
             Column(
                 modifier = Modifier
@@ -515,21 +484,7 @@ internal fun MovieSearchField(
     placeholder: String = "Search a movie or show"
 ) {
     val textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(SearchFieldShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.search),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
+    MovieSearchRow(onClose = onClose, modifier = modifier) {
         BasicTextField(
             value = query,
             onValueChange = onQueryChange,
@@ -548,6 +503,33 @@ internal fun MovieSearchField(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun MovieSearchRow(
+    onClose: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(SearchFieldShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.search),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        content()
         if (onClose != null) MovieSearchCloseIcon(onClick = onClose)
     }
 }
@@ -685,148 +667,6 @@ private fun MovieSearchResultsMessage(text: String) {
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
     )
 }
-
-@Composable
-internal fun TmdbRating(rating: Double, numberColor: Color = MaterialTheme.colorScheme.outline) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            painter = painterResource(Res.drawable.star),
-            contentDescription = null,
-            tint = RatingStarColor,
-            modifier = Modifier.size(12.dp)
-        )
-        Spacer(modifier = Modifier.width(3.dp))
-        Text(
-            text = tmdbRatingText(rating),
-            style = MaterialTheme.typography.labelSmall,
-            color = numberColor,
-            maxLines = 1
-        )
-    }
-}
-
-@Composable
-internal fun MovieChip(
-    label: String?,
-    onClick: (() -> Unit)?,
-    modifier: Modifier = Modifier,
-    background: Color = chipContainerColor(),
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-    leading: @Composable () -> Unit
-) {
-    Row(
-        modifier = modifier
-            .clip(ChipShape)
-            .background(background)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = if (label == null) 8.dp else 10.dp, vertical = 5.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        leading()
-        if (label != null) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = contentColor,
-                maxLines = 1,
-                softWrap = false
-            )
-        }
-    }
-}
-
-@Composable
-internal fun movieChipHeight(): Dp =
-    with(LocalDensity.current) { MaterialTheme.typography.labelSmall.lineHeight.toDp() } + 12.dp
-
-@Composable
-internal fun MovieOptionsMenu(
-    expanded: Boolean,
-    title: String,
-    onDismiss: () -> Unit,
-    onChangeTitle: (() -> Unit)?,
-    onRefreshDetails: () -> Unit,
-    deleteLabel: String,
-    onDelete: () -> Unit
-) {
-    MovieMenu(expanded = expanded, title = title, onDismiss = onDismiss) { closeAnd ->
-        if (onChangeTitle != null) {
-            MovieMenuOption(label = "Change title", icon = Res.drawable.search, onClick = { closeAnd(onChangeTitle) })
-        }
-        MovieMenuOption(label = "Refresh details", icon = Res.drawable.refresh_cw, onClick = { closeAnd(onRefreshDetails) })
-        MovieMenuOption(
-            label = deleteLabel,
-            icon = Res.drawable.trash,
-            labelColor = MaterialTheme.colorScheme.error,
-            onClick = { closeAnd(onDelete) }
-        )
-    }
-}
-
-@Composable
-internal fun MoviePoster(
-    filePath: String?,
-    url: String?,
-    width: Dp,
-    cornerRadius: Dp,
-    onImageLoaded: (AsyncImagePainter.State.Success) -> Unit = {}
-) {
-    var isImageShown by remember(filePath, url) { mutableStateOf(false) }
-    Box(
-        modifier = Modifier
-            .width(width)
-            .aspectRatio(2f / 3f)
-            .clip(RoundedCornerShape(cornerRadius))
-            .then(if (isImageShown) Modifier else Modifier.background(chipContainerColor())),
-        contentAlignment = Alignment.Center
-    ) {
-        if (!isImageShown) {
-            Icon(
-                painter = painterResource(Res.drawable.film),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(width * 0.4f)
-            )
-        }
-        if (filePath != null || url != null) {
-            MovieImage(
-                filePath = filePath,
-                url = url,
-                modifier = Modifier.fillMaxSize(),
-                onLoaded = { isImageShown = true },
-                onImageLoaded = onImageLoaded
-            )
-        }
-    }
-}
-
-@Composable
-internal fun chipContainerColor(): Color =
-    if (!isDesktopPlatform || LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFD8D8D8)
-
-@Composable
-internal fun WatchStatus.dotColor(): Color {
-    val isDark = LocalAppIsDark.current
-    return when (this) {
-        WatchStatus.NOT_WATCHED -> if (isDark) Color(0xFF529CCA) else Color(0xFF2383E2)
-        WatchStatus.WATCHING -> if (isDark) Color(0xFFD9A347) else Color(0xFFCB912F)
-        WatchStatus.WATCHED -> if (isDark) Color(0xFF5FA37E) else Color(0xFF448361)
-    }
-}
-
-internal fun MovieDetails.lengthText(): String? = when (kind) {
-    MovieKind.MOVIE -> runtimeMinutes?.let(::minutesText)
-    MovieKind.SHOW -> seasonCount?.let { seasons -> if (seasons == 1) "1 season" else "$seasons seasons" }
-}
-
-internal fun minutesText(minutes: Int): String = when {
-    minutes < 60 -> "${minutes}m"
-    minutes % 60 == 0 -> "${minutes / 60}h"
-    else -> "${minutes / 60}h ${minutes % 60}m"
-}
-
-internal fun tmdbRatingText(rating: Double): String = ((rating * 10).roundToInt() / 10.0).toString()
 
 private fun titleWithMatchInBold(title: String, query: String): AnnotatedString = buildAnnotatedString {
     val matchStart = if (query.isEmpty()) -1 else title.indexOf(query, ignoreCase = true)

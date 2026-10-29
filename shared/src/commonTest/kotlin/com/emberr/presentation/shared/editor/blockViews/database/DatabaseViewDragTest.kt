@@ -1,5 +1,9 @@
 package com.emberr.presentation.shared.editor.blockViews.database
 
+import com.emberr.presentation.shared.components.ViewPillDragState
+import com.emberr.presentation.shared.components.ViewPillSpan
+import com.emberr.presentation.shared.components.dropKeepsViewInPlace
+import com.emberr.presentation.shared.components.viewToDropBefore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -10,9 +14,9 @@ class DatabaseViewDragTest {
 
     private val viewIds = listOf("table", "board", "gallery")
     private val pillSpans = mapOf(
-        "table" to HeaderSpan(left = 0f, right = 80f),
-        "board" to HeaderSpan(left = 82f, right = 162f),
-        "gallery" to HeaderSpan(left = 164f, right = 264f)
+        "table" to ViewPillSpan(left = 0f, right = 80f),
+        "board" to ViewPillSpan(left = 82f, right = 162f),
+        "gallery" to ViewPillSpan(left = 164f, right = 264f)
     )
 
     @Test
@@ -39,7 +43,7 @@ class DatabaseViewDragTest {
 
     @Test
     fun theDraggedPillFollowsThePointer() {
-        val dragState = DatabaseViewDragState()
+        val dragState = ViewPillDragState()
         dragState.pillSpans.putAll(pillSpans)
 
         dragState.start("board", grabXInPill = 20f)
@@ -52,7 +56,7 @@ class DatabaseViewDragTest {
 
     @Test
     fun scrollingTheRowWhileDraggingMovesThePointerAndThePillWithIt() {
-        val dragState = DatabaseViewDragState()
+        val dragState = ViewPillDragState()
         dragState.pillSpans.putAll(pillSpans)
         dragState.start("board", grabXInPill = 20f)
 
@@ -65,7 +69,7 @@ class DatabaseViewDragTest {
 
     @Test
     fun afterResetNoPillIsDragged() {
-        val dragState = DatabaseViewDragState()
+        val dragState = ViewPillDragState()
         dragState.pillSpans.putAll(pillSpans)
         dragState.start("board", grabXInPill = 20f)
 

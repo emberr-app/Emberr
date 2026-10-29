@@ -133,7 +133,7 @@ internal fun LiveTmdbLoadMessage(
                 modifier = Modifier.height(movieChipHeight()),
                 background = chipBackground,
                 contentColor = textColor
-            ) {}
+            )
         }
         is LiveTmdbLoad.Loaded -> Unit
     }

@@ -3,6 +3,7 @@ package com.emberr.presentation.shared.editor.blockViews.movie
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -11,14 +12,14 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -104,8 +104,13 @@ private val DetailsCloseButtonSize = 36.dp
 private val SpacedLabelLetterSpacing = 1.5.sp
 private val DesktopTextLineGap = 6.dp
 private val PhoneTextLineGap = 2.dp
+private val CardHighlightBorderWidth = 2.dp
+private val SkeletonLineGap = 9.dp
+private val RatingStatusGap = 10.dp
+private val RatingLabelGap = 8.dp
 private const val RATING_SIZE_SCALE = 2f
 private const val RATING_LINE_HEIGHT_SCALE = 1.15f
+private const val TICKET_LINE_ALPHA = 0.35f
 
 internal val MovieTicketShape: Shape = TicketShape(stubSize = TicketStubWidth, notchRadius = TicketNotchRadius)
 private val BoardTicketShape: Shape = TicketShape(stubSize = BoardStubWidth, notchRadius = BoardNotchRadius)
@@ -138,24 +143,24 @@ internal fun MovieTicketCard(
     block: MovieBlock,
     details: MovieDetails,
     editor: MovieBlockEditor?,
-    inSelectionMode: Boolean,
-    onToggleSelection: () -> Unit,
+    inBlockSelectionMode: Boolean,
+    onToggleBlockSelection: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     isInWatchlist: Boolean = false,
     isNewlyAdded: Boolean = false,
-    selection: TitleCardSelection? = null,
+    watchlistSelection: TitleCardSelection? = null,
     runAfterKeyboardCloses: (() -> Unit) -> Unit = { it() }
 ) {
     val hoverSource = remember { MutableInteractionSource() }
     val isHovered by hoverSource.collectIsHoveredAsState()
     var isMenuOpen by remember { mutableStateOf(false) }
     var isDetailsOpen by remember { mutableStateOf(false) }
-    val openDetails = if (inSelectionMode) onToggleSelection else ({ runAfterKeyboardCloses { isDetailsOpen = true } })
+    val openDetails = if (inBlockSelectionMode) onToggleBlockSelection else ({ runAfterKeyboardCloses { isDetailsOpen = true } })
     val onStatusClick = when {
         editor == null -> null
-        inSelectionMode -> onToggleSelection
-        else -> ({ editor.showNextWatchStatus(block) })
+        inBlockSelectionMode -> onToggleBlockSelection
+        else -> ({ editor.moveToNextWatchStatus(block) })
     }
     val phoneStubHeight = phoneStubHeight()
     val shape = if (isDesktopPlatform) MovieTicketShape else rememberBottomStubShape(phoneStubHeight, PhoneNotchRadius)
@@ -174,21 +179,23 @@ internal fun MovieTicketCard(
             .fillMaxWidth()
             .then(
                 when {
-                    selection?.isSelected == true -> Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape)
-                    isNewlyAdded -> Modifier.border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), shape)
+                    watchlistSelection?.isSelected == true -> Modifier.border(CardHighlightBorderWidth, MaterialTheme.colorScheme.primary, shape)
+                    isNewlyAdded -> Modifier.border(CardHighlightBorderWidth, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), shape)
                     else -> Modifier
                 }
             )
             .clip(shape)
             .hoverable(hoverSource)
-            .titleSelectionMouseClicks(selection)
+            .titleSelectionMouseClicks(watchlistSelection)
             .then(
-                if (selection != null) {
+                if (watchlistSelection != null) {
                     Modifier.combinedClickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = { if (selection.isSelecting) selection.onToggle() },
-                        onLongClick = { if (selection.isSelecting) selection.onToggle() else selection.onStartSelecting() }
+                        onClick = { if (watchlistSelection.isSelecting) watchlistSelection.onToggle() },
+                        onLongClick = {
+                            if (watchlistSelection.isSelecting) watchlistSelection.onToggle() else watchlistSelection.onStartSelecting()
+                        }
                     )
                 } else {
                     Modifier
@@ -196,19 +203,15 @@ internal fun MovieTicketCard(
             )
     ) {
         if (isDesktopPlatform) {
-            TicketMainPart(
-                block = block,
+            SideStubTicketLayout(
                 details = details,
-                onOpenDetails = openDetails,
-                modifier = Modifier.fillMaxWidth().padding(end = TicketStubWidth)
-            )
-            Box(modifier = Modifier.matchParentSize(), contentAlignment = Alignment.CenterEnd) {
-                TicketStub(
-                    block = block,
-                    details = details,
-                    onStatusClick = onStatusClick,
-                    modifier = Modifier.width(TicketStubWidth).fillMaxHeight()
-                )
+                stubWidth = TicketStubWidth,
+                notchRadius = TicketNotchRadius,
+                mainPart = { mainPartModifier ->
+                    TicketMainPart(block = block, details = details, onOpenDetails = openDetails, modifier = mainPartModifier)
+                }
+            ) {
+                TicketStub(block = block, details = details, onStatusClick = onStatusClick)
             }
         } else {
             PhoneTicketContent(
@@ -217,9 +220,9 @@ internal fun MovieTicketCard(
                 stubHeight = phoneStubHeight,
                 onOpenDetails = openDetails,
                 onLongPress = when {
-                    selection == null -> onToggleSelection
-                    selection.isSelecting -> selection.onToggle
-                    else -> selection.onStartSelecting
+                    watchlistSelection == null -> onToggleBlockSelection
+                    watchlistSelection.isSelecting -> watchlistSelection.onToggle
+                    else -> watchlistSelection.onStartSelecting
                 },
                 onStatusClick = onStatusClick
             )
@@ -228,17 +231,17 @@ internal fun MovieTicketCard(
         val cornerModifier = Modifier
             .align(Alignment.TopEnd)
             .padding(top = 8.dp, end = if (isDesktopPlatform) TicketStubWidth + 8.dp else 8.dp)
-        if (selection?.isSelecting == true) {
+        if (watchlistSelection?.isSelecting == true) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = selection.onToggle
+                        onClick = watchlistSelection.onToggle
                     )
             )
-            TitleSelectionCheckbox(isSelected = selection.isSelected, modifier = cornerModifier)
+            TitleSelectionCheckbox(isSelected = watchlistSelection.isSelected, modifier = cornerModifier)
         } else if (editor != null) {
             Box(modifier = cornerModifier) {
                 if (!isDesktopPlatform || isHovered || isMenuOpen) {
@@ -269,6 +272,55 @@ internal fun MovieTicketCard(
     }
 }
 
+@Composable
+private fun BoxScope.SideStubTicketLayout(
+    details: MovieDetails,
+    stubWidth: Dp,
+    notchRadius: Dp,
+    mainPart: @Composable (Modifier) -> Unit,
+    stub: @Composable BoxScope.() -> Unit
+) {
+    mainPart(Modifier.fillMaxWidth().padding(end = stubWidth))
+    Box(modifier = Modifier.matchParentSize(), contentAlignment = Alignment.CenterEnd) {
+        Box(
+            modifier = Modifier
+                .width(stubWidth)
+                .fillMaxHeight()
+                .ticketStub(stubColor = animatedStubColor(details), perforationColor = ticketLineColor(), notchRadius = notchRadius),
+            content = stub
+        )
+    }
+}
+
+@Composable
+private fun BottomStubTicketLayout(
+    details: MovieDetails,
+    stubHeight: Dp,
+    notchRadius: Dp,
+    stubHorizontalPadding: Dp,
+    modifier: Modifier,
+    mainPart: @Composable () -> Unit,
+    stub: @Composable BoxScope.() -> Unit
+) {
+    Column(modifier = modifier) {
+        mainPart()
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(stubHeight)
+                .ticketStub(
+                    stubColor = animatedStubColor(details),
+                    perforationColor = ticketLineColor(),
+                    notchRadius = notchRadius,
+                    stubIsAtBottom = true
+                )
+                .padding(horizontal = stubHorizontalPadding),
+            contentAlignment = Alignment.CenterStart,
+            content = stub
+        )
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PhoneTicketContent(
@@ -279,75 +331,36 @@ private fun PhoneTicketContent(
     onLongPress: () -> Unit,
     onStatusClick: (() -> Unit)?
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        PosterBesideText(
-            gap = PhonePosterGap,
-            minPosterHeight = PhonePosterWidth * 1.5f,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .combinedClickable(onClick = onOpenDetails, onLongClick = onLongPress)
-                .padding(TicketPadding),
-            poster = {
-                Box(propagateMinConstraints = true) {
-                    MoviePoster(
-                        filePath = details.posterFilePath,
-                        url = details.posterUrl,
-                        width = PhonePosterWidth,
-                        cornerRadius = TicketPosterCornerRadius,
-                        onImageLoaded = { loadedImage -> savePosterColor(details.posterColorKey, loadedImage) }
-                    )
-                }
-            }
-        ) {
-            Column(
-                modifier = Modifier.padding(end = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)
+    BottomStubTicketLayout(
+        details = details,
+        stubHeight = stubHeight,
+        notchRadius = PhoneNotchRadius,
+        stubHorizontalPadding = TicketPadding,
+        modifier = Modifier.fillMaxWidth(),
+        mainPart = {
+            PosterBesideText(
+                gap = PhonePosterGap,
+                minPosterHeight = PhonePosterWidth / PosterAspectRatio,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .combinedClickable(onClick = onOpenDetails, onLongClick = onLongPress)
+                    .padding(TicketPadding),
+                poster = { TicketPoster(details = details, width = PhonePosterWidth, cornerRadius = TicketPosterCornerRadius) }
             ) {
-                SpacedLabel(
-                    text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
+                TicketTitleLines(
+                    details = details,
+                    credit = details.creditLine(),
+                    showsAsWatched = block.isWatched,
+                    verticalArrangement = Arrangement.spacedBy(PhoneTextLineGap, Alignment.CenterVertically),
+                    modifier = Modifier.padding(end = 24.dp)
                 )
-                Text(
-                    text = details.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = if (block.isWatched) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-                    textDecoration = if (block.isWatched) TextDecoration.LineThrough else null,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                details.creditLine()?.let { credit ->
-                    Text(
-                        text = credit,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.outline,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
         }
+    ) {
         RatingBesideStatus(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(stubHeight)
-                .ticketStub(details = details, notchRadius = PhoneNotchRadius, stubIsAtBottom = true)
-                .padding(horizontal = TicketPadding),
-            rating = {
-                Row {
-                    Text(
-                        text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        modifier = Modifier.alignByBaseline()
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    SpacedLabel(text = "TMDB rating", modifier = Modifier.alignByBaseline())
-                }
-            },
+            modifier = Modifier.fillMaxSize(),
+            rating = { RatingBesideLabel(details = details, label = "TMDB rating") },
             fullStatus = { TicketStatusChip(block = block, onClick = onStatusClick) },
             shortStatus = { TicketStatusChip(block = block, onClick = onStatusClick, showsLabel = false) }
         )
@@ -372,55 +385,30 @@ private fun TicketMainPart(
 ) {
     PosterBesideText(
         gap = TicketPosterGap,
-        minPosterHeight = TicketPosterWidth * 1.5f,
+        minPosterHeight = TicketPosterWidth / PosterAspectRatio,
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface)
             .padding(TicketPadding),
         poster = {
-            Box(
+            TicketPoster(
+                details = details,
+                width = TicketPosterWidth,
+                cornerRadius = TicketPosterCornerRadius,
                 modifier = Modifier
                     .clip(RoundedCornerShape(TicketPosterCornerRadius))
-                    .clickable(onClick = onOpenDetails),
-                propagateMinConstraints = true
-            ) {
-                MoviePoster(
-                    filePath = details.posterFilePath,
-                    url = details.posterUrl,
-                    width = TicketPosterWidth,
-                    cornerRadius = TicketPosterCornerRadius,
-                    onImageLoaded = { loadedImage -> savePosterColor(details.posterColorKey, loadedImage) }
-                )
-            }
+                    .clickable(onClick = onOpenDetails)
+            )
         }
     ) {
         Column(verticalArrangement = Arrangement.SpaceBetween) {
-            Column(
+            TicketTitleLines(
+                details = details,
+                credit = details.creditLine(),
+                showsAsWatched = block.isWatched,
+                verticalArrangement = Arrangement.spacedBy(DesktopTextLineGap),
                 modifier = Modifier.padding(end = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(DesktopTextLineGap)
-            ) {
-                SpacedLabel(
-                    text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
-                )
-                Text(
-                    text = details.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = if (block.isWatched) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-                    textDecoration = if (block.isWatched) TextDecoration.LineThrough else null,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                details.creditLine()?.let { credit ->
-                    Text(
-                        text = credit,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.outline,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+                creditStyle = MaterialTheme.typography.bodyLarge
+            )
             Column {
                 HorizontalDivider(
                     modifier = Modifier.padding(top = 12.dp, bottom = 10.dp),
@@ -456,6 +444,60 @@ private fun TicketMainPart(
 }
 
 @Composable
+private fun TicketPoster(details: MovieDetails, width: Dp, cornerRadius: Dp, modifier: Modifier = Modifier) {
+    Box(modifier = modifier, propagateMinConstraints = true) {
+        MoviePoster(
+            filePath = details.posterFilePath,
+            url = details.posterUrl,
+            width = width,
+            cornerRadius = cornerRadius,
+            savesPosterColor = true
+        )
+    }
+}
+
+@Composable
+private fun TicketTitleLines(
+    details: MovieDetails,
+    credit: String?,
+    showsAsWatched: Boolean,
+    verticalArrangement: Arrangement.Vertical,
+    modifier: Modifier = Modifier,
+    creditStyle: TextStyle = MaterialTheme.typography.labelSmall,
+    scrollsLongText: Boolean = false
+) {
+    val textModifier = if (scrollsLongText) Modifier.loopingMarquee() else Modifier
+    val textOverflow = if (scrollsLongText) TextOverflow.Clip else TextOverflow.Ellipsis
+    Column(modifier = modifier, verticalArrangement = verticalArrangement) {
+        SpacedLabel(
+            text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · "),
+            modifier = textModifier
+        )
+        Text(
+            text = details.title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = if (showsAsWatched) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
+            textDecoration = if (showsAsWatched) TextDecoration.LineThrough else null,
+            maxLines = 1,
+            overflow = textOverflow,
+            modifier = textModifier
+        )
+        credit?.let {
+            Text(
+                text = it,
+                style = creditStyle,
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1,
+                overflow = textOverflow,
+                modifier = textModifier
+            )
+        }
+    }
+}
+
+@Composable
 private fun PosterBesideText(
     gap: Dp,
     minPosterHeight: Dp,
@@ -467,7 +509,7 @@ private fun PosterBesideText(
         val textPart = textParts.first()
         val gapPx = gap.roundToPx()
         val height = maxOf(textPart.minIntrinsicHeight(constraints.maxWidth), minPosterHeight.roundToPx())
-        val posterWidth = (height * 2f / 3f).roundToInt()
+        val posterWidth = (height * PosterAspectRatio).roundToInt()
         val posterPlaceable = posterParts.first().measure(Constraints.fixed(posterWidth, height))
         val textWidth = (constraints.maxWidth - posterWidth - gapPx).coerceAtLeast(0)
         val textPlaceable = textPart.measure(Constraints.fixed(textWidth, height))
@@ -482,27 +524,45 @@ private fun PosterBesideText(
 private fun TicketStub(
     block: MovieBlock,
     details: MovieDetails,
-    onStatusClick: (() -> Unit)?,
-    modifier: Modifier
+    onStatusClick: (() -> Unit)?
 ) {
-    val ratingStyle = bigRatingStyle()
-
     Column(
-        modifier = modifier
-            .ticketStub(details = details, notchRadius = TicketNotchRadius)
+        modifier = Modifier
+            .fillMaxSize()
             .padding(horizontal = 12.dp, vertical = TicketPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
-            style = ratingStyle,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1
-        )
+        RatingNumber(details = details, style = bigRatingStyle())
         SpacedLabel(text = "TMDB rating")
         Spacer(modifier = Modifier.height(14.dp))
         TicketStatusChip(block = block, onClick = onStatusClick)
+    }
+}
+
+@Composable
+private fun RatingNumber(details: MovieDetails, style: TextStyle, modifier: Modifier = Modifier) {
+    Text(
+        text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
+        style = style,
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun RatingBesideLabel(
+    details: MovieDetails,
+    label: String,
+    modifier: Modifier = Modifier,
+    labelGap: Dp = RatingLabelGap,
+    numberStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium)
+) {
+    Row(modifier = modifier) {
+        RatingNumber(details = details, style = numberStyle, modifier = Modifier.alignByBaseline())
+        Spacer(modifier = Modifier.width(labelGap))
+        SpacedLabel(text = label, modifier = Modifier.alignByBaseline())
     }
 }
 
@@ -518,21 +578,30 @@ private fun bigRatingStyle(): TextStyle = MaterialTheme.typography.titleLarge.le
 }
 
 @Composable
-private fun Modifier.ticketStub(details: MovieDetails, notchRadius: Dp, stubIsAtBottom: Boolean = false): Modifier {
-    val posterColor = savedPosterColor(details.posterColorKey)
-    val stubColor by animateColorAsState(posterColor?.stubColor() ?: chipContainerColor())
-    val perforationColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-    return background(stubColor).drawBehind {
-        val dashLength = PerforationDashLength.toPx()
-        val edgeGap = notchRadius.toPx() + dashLength
-        drawLine(
-            color = perforationColor,
-            start = if (stubIsAtBottom) Offset(edgeGap, 0f) else Offset(0f, edgeGap),
-            end = if (stubIsAtBottom) Offset(size.width - edgeGap, 0f) else Offset(0f, size.height - edgeGap),
-            strokeWidth = 1.dp.toPx(),
-            pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashLength, dashLength))
-        )
-    }
+private fun titleRatingStyle(): TextStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal)
+
+@Composable
+private fun ticketLineColor(): Color = MaterialTheme.colorScheme.onSurface.copy(alpha = TICKET_LINE_ALPHA)
+
+@Composable
+private fun animatedStubColor(details: MovieDetails): Color =
+    animateColorAsState(savedPosterColor(details.posterColorKey)?.stubColor() ?: chipContainerColor()).value
+
+private fun Modifier.ticketStub(
+    stubColor: Color,
+    perforationColor: Color,
+    notchRadius: Dp,
+    stubIsAtBottom: Boolean = false
+): Modifier = background(stubColor).drawBehind {
+    val dashLength = PerforationDashLength.toPx()
+    val edgeGap = notchRadius.toPx() + dashLength
+    drawLine(
+        color = perforationColor,
+        start = if (stubIsAtBottom) Offset(edgeGap, 0f) else Offset(0f, edgeGap),
+        end = if (stubIsAtBottom) Offset(size.width - edgeGap, 0f) else Offset(0f, size.height - edgeGap),
+        strokeWidth = 1.dp.toPx(),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashLength, dashLength))
+    )
 }
 
 @Composable
@@ -541,7 +610,7 @@ private fun TicketStatusChip(block: MovieBlock, onClick: (() -> Unit)?, showsLab
     Row(
         modifier = Modifier
             .clip(CircleShape)
-            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f), CircleShape)
+            .border(1.dp, ticketLineColor(), CircleShape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 10.dp, vertical = StatusChipVerticalPadding)
             .height(labelHeight),
@@ -599,7 +668,7 @@ internal fun boardTicketShape(): Shape =
 
 @Composable
 internal fun BoardTicketCard(
-    title: MovieBlock,
+    block: MovieBlock,
     details: MovieDetails,
     modifier: Modifier = Modifier
 ) {
@@ -609,110 +678,60 @@ internal fun BoardTicketCard(
             .clip(boardTicketShape())
     ) {
         if (isDesktopPlatform) {
-            BoardTicketMainPart(
-                title = title,
+            SideStubTicketLayout(
                 details = details,
-                modifier = Modifier.fillMaxWidth().padding(end = BoardStubWidth)
-            )
-            Box(modifier = Modifier.matchParentSize(), contentAlignment = Alignment.CenterEnd) {
+                stubWidth = BoardStubWidth,
+                notchRadius = BoardNotchRadius,
+                mainPart = { mainPartModifier -> BoardTicketMainPart(block = block, details = details, modifier = mainPartModifier) }
+            ) {
                 Column(
                     modifier = Modifier
-                        .width(BoardStubWidth)
-                        .fillMaxHeight()
-                        .ticketStub(details = details, notchRadius = BoardNotchRadius)
+                        .fillMaxSize()
                         .padding(horizontal = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1
-                    )
+                    RatingNumber(details = details, style = titleRatingStyle())
                     SpacedLabel(text = "TMDB")
                 }
             }
         } else {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                BoardTicketMainPart(title = title, details = details, modifier = Modifier.fillMaxWidth())
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(phoneStubHeight())
-                        .ticketStub(details = details, notchRadius = BoardNotchRadius, stubIsAtBottom = true)
-                        .padding(horizontal = BoardPadding),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row {
-                        Text(
-                            text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            modifier = Modifier.alignByBaseline()
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        SpacedLabel(text = "TMDB rating", modifier = Modifier.alignByBaseline())
-                    }
-                }
+            BottomStubTicketLayout(
+                details = details,
+                stubHeight = phoneStubHeight(),
+                notchRadius = BoardNotchRadius,
+                stubHorizontalPadding = BoardPadding,
+                modifier = Modifier.fillMaxWidth(),
+                mainPart = { BoardTicketMainPart(block = block, details = details, modifier = Modifier.fillMaxWidth()) }
+            ) {
+                RatingBesideLabel(details = details, label = "TMDB rating")
             }
         }
     }
 }
 
 @Composable
-private fun BoardTicketMainPart(title: MovieBlock, details: MovieDetails, modifier: Modifier) {
+private fun BoardTicketMainPart(block: MovieBlock, details: MovieDetails, modifier: Modifier) {
     PosterBesideText(
         gap = BoardPosterGap,
         minPosterHeight = BoardMinPosterHeight,
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface)
             .padding(BoardPadding),
-        poster = {
-            Box(propagateMinConstraints = true) {
-                MoviePoster(
-                    filePath = details.posterFilePath,
-                    url = details.posterUrl,
-                    width = BoardMinPosterHeight * 2f / 3f,
-                    cornerRadius = 4.dp,
-                    onImageLoaded = { loadedImage -> savePosterColor(details.posterColorKey, loadedImage) }
-                )
-            }
-        }
+        poster = { TicketPoster(details = details, width = BoardMinPosterHeight * PosterAspectRatio, cornerRadius = 4.dp) }
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(cardTextLineGap(), Alignment.CenterVertically)) {
-            SpacedLabel(
-                text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
-            )
-            Text(
-                text = details.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = if (title.isWatched) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-                textDecoration = if (title.isWatched) TextDecoration.LineThrough else null,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            details.creditLine()?.let { credit ->
-                Text(
-                    text = credit,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.outline,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
+        TicketTitleLines(
+            details = details,
+            credit = details.creditLine(),
+            showsAsWatched = block.isWatched,
+            verticalArrangement = Arrangement.spacedBy(cardTextLineGap(), Alignment.CenterVertically)
+        )
     }
 }
 
 @Composable
 internal fun GalleryTicketCard(
-    title: MovieBlock,
+    block: MovieBlock,
     details: MovieDetails,
     width: Dp,
     selection: TitleCardSelection?,
@@ -728,97 +747,64 @@ internal fun GalleryTicketCard(
     }
     val shape = rememberBottomStubShape(stubHeight, GalleryNotchRadius)
 
-    Column(
+    BottomStubTicketLayout(
+        details = details,
+        stubHeight = stubHeight,
+        notchRadius = GalleryNotchRadius,
+        stubHorizontalPadding = GalleryPadding,
         modifier = Modifier
             .width(width)
             .then(
                 if (selection?.isSelected == true) {
-                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape)
+                    Modifier.border(CardHighlightBorderWidth, MaterialTheme.colorScheme.primary, shape)
                 } else {
                     Modifier
                 }
             )
             .clip(shape)
             .then(clickModifier)
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        Box {
-            MoviePoster(
-                filePath = details.posterFilePath,
-                url = details.posterUrl,
-                width = width,
-                cornerRadius = 0.dp,
-                onImageLoaded = { loadedImage -> savePosterColor(details.posterColorKey, loadedImage) }
-            )
-            if (selection?.isSelecting == true) {
-                TitleSelectionCheckbox(
-                    isSelected = selection.isSelected,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+            .background(MaterialTheme.colorScheme.surface),
+        mainPart = {
+            Box {
+                MoviePoster(
+                    filePath = details.posterFilePath,
+                    url = details.posterUrl,
+                    width = width,
+                    cornerRadius = 0.dp,
+                    savesPosterColor = true
                 )
+                if (selection?.isSelecting == true) {
+                    TitleSelectionCheckbox(
+                        isSelected = selection.isSelected,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+                    )
+                }
             }
-        }
-        Column(
-            modifier = Modifier.padding(GalleryPadding),
-            verticalArrangement = Arrangement.spacedBy(cardTextLineGap())
-        ) {
-            SpacedLabel(
-                text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
-            )
-            Text(
-                text = details.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = if (title.isWatched) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-                textDecoration = if (title.isWatched) TextDecoration.LineThrough else null,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = details.creditNames.joinToString(", "),
-                style = MaterialTheme.typography.labelSmall,
-                fontStyle = FontStyle.Italic,
-                color = MaterialTheme.colorScheme.outline,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            TicketTitleLines(
+                details = details,
+                credit = details.creditNames.joinToString(", "),
+                showsAsWatched = block.isWatched,
+                verticalArrangement = Arrangement.spacedBy(cardTextLineGap()),
+                modifier = Modifier.padding(GalleryPadding)
             )
         }
+    ) {
         RatingBesideStatus(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(stubHeight)
-                .ticketStub(details = details, notchRadius = GalleryNotchRadius, stubIsAtBottom = true)
-                .padding(horizontal = GalleryPadding),
+            modifier = Modifier.fillMaxSize(),
             rating = {
                 if (isDesktopPlatform) {
                     Column {
-                        Text(
-                            text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1
-                        )
+                        RatingNumber(details = details, style = titleRatingStyle())
                         SpacedLabel(text = "TMDB")
                     }
                 } else {
-                    Row {
-                        Text(
-                            text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            modifier = Modifier.alignByBaseline()
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        SpacedLabel(text = "TMDB", modifier = Modifier.alignByBaseline())
-                    }
+                    RatingBesideLabel(details = details, label = "TMDB", labelGap = 6.dp)
                 }
             },
-            fullStatus = { TicketStatusChip(block = title, onClick = onStatusClick) },
+            fullStatus = { TicketStatusChip(block = block, onClick = onStatusClick) },
             shortStatus = {
-                IconTooltip(text = title.watchStatus.label) {
-                    TicketStatusChip(block = title, onClick = onStatusClick, showsLabel = false)
+                IconTooltip(text = block.watchStatus.label) {
+                    TicketStatusChip(block = block, onClick = onStatusClick, showsLabel = false)
                 }
             }
         )
@@ -835,7 +821,7 @@ private fun RatingBesideStatus(
     Layout(contents = listOf(rating, fullStatus, shortStatus), modifier = modifier) { (ratingParts, fullParts, shortParts), constraints ->
         val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
         val ratingPlaceable = ratingParts.first().measure(looseConstraints)
-        val gap = GalleryPadding.roundToPx()
+        val gap = RatingStatusGap.roundToPx()
         val fullStatusPlaceable = fullParts.first().measure(looseConstraints)
         val statusPlaceable = if (ratingPlaceable.width + gap + fullStatusPlaceable.width <= constraints.maxWidth) {
             fullStatusPlaceable
@@ -865,33 +851,22 @@ internal fun MovieDetailsTicket(
                 .fillMaxWidth()
                 .clip(MovieTicketShape)
         ) {
-            DetailsTicketMainPart(
+            SideStubTicketLayout(
                 details = details,
-                facts = facts,
-                background = background,
-                modifier = Modifier.fillMaxWidth().padding(end = TicketStubWidth)
-            )
-            Box(modifier = Modifier.matchParentSize(), contentAlignment = Alignment.CenterEnd) {
-                Box(
-                    modifier = Modifier
-                        .width(TicketStubWidth)
-                        .fillMaxHeight()
-                        .ticketStub(details = details, notchRadius = TicketNotchRadius)
-                ) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center).padding(horizontal = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
-                            style = bigRatingStyle(),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1
-                        )
-                        SpacedLabel(text = "TMDB rating")
-                    }
-                    DetailsCloseButton(onClose = onClose, modifier = Modifier.align(Alignment.TopEnd).padding(10.dp))
+                stubWidth = TicketStubWidth,
+                notchRadius = TicketNotchRadius,
+                mainPart = { mainPartModifier ->
+                    DetailsTicketMainPart(details = details, facts = facts, background = background, modifier = mainPartModifier)
                 }
+            ) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center).padding(horizontal = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    RatingNumber(details = details, style = bigRatingStyle())
+                    SpacedLabel(text = "TMDB rating")
+                }
+                DetailsCloseButton(onClose = onClose, modifier = Modifier.align(Alignment.TopEnd).padding(10.dp))
             }
         }
         return
@@ -901,38 +876,30 @@ internal fun MovieDetailsTicket(
         with(LocalDensity.current) { MaterialTheme.typography.titleLarge.lineHeight.toDp() },
         DetailsCloseButtonSize
     ) + DetailsStubVerticalPadding * 2
-    Column(
+    BottomStubTicketLayout(
+        details = details,
+        stubHeight = stubHeight,
+        notchRadius = DetailsNotchRadius,
+        stubHorizontalPadding = TicketPadding,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(rememberBottomStubShape(stubHeight, DetailsNotchRadius))
+            .clip(rememberBottomStubShape(stubHeight, DetailsNotchRadius)),
+        mainPart = { DetailsTicketMainPart(details = details, facts = facts, background = background, modifier = Modifier.fillMaxWidth()) }
     ) {
-        DetailsTicketMainPart(details = details, facts = facts, background = background, modifier = Modifier.fillMaxWidth())
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(stubHeight)
-                .ticketStub(details = details, notchRadius = DetailsNotchRadius, stubIsAtBottom = true)
-                .padding(horizontal = TicketPadding),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    modifier = Modifier.alignByBaseline()
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                SpacedLabel(text = "TMDB rating", modifier = Modifier.alignByBaseline())
-            }
+        Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+            RatingBesideLabel(
+                details = details,
+                label = "TMDB rating",
+                modifier = Modifier.weight(1f),
+                numberStyle = titleRatingStyle()
+            )
             DetailsCloseButton(onClose = onClose)
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+private fun Modifier.loopingMarquee(): Modifier = basicMarquee(iterations = Int.MAX_VALUE)
+
 @Composable
 private fun DetailsTicketMainPart(
     details: MovieDetails,
@@ -942,45 +909,26 @@ private fun DetailsTicketMainPart(
 ) {
     PosterBesideText(
         gap = PhonePosterGap,
-        minPosterHeight = DetailsPosterWidth * 1.5f,
+        minPosterHeight = DetailsPosterWidth / PosterAspectRatio,
         modifier = modifier
             .background(background)
             .padding(TicketPadding),
-        poster = {
-            Box(propagateMinConstraints = true) {
-                MoviePoster(
-                    filePath = details.posterFilePath,
-                    url = details.posterUrl,
-                    width = DetailsPosterWidth,
-                    cornerRadius = TicketPosterCornerRadius,
-                    onImageLoaded = { loadedImage -> savePosterColor(details.posterColorKey, loadedImage) }
-                )
-            }
-        }
+        poster = { TicketPoster(details = details, width = DetailsPosterWidth, cornerRadius = TicketPosterCornerRadius) }
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
-            SpacedLabel(
-                text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
+            TicketTitleLines(
+                details = details,
+                credit = details.creditLine(),
+                showsAsWatched = false,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                scrollsLongText = true
             )
-            Text(
-                text = details.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            details.creditLine()?.let { credit ->
-                Text(
-                    text = credit,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
             if (facts.isNotEmpty()) {
-                FlowRow(
-                    modifier = Modifier.padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                Row(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .loopingMarquee(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     facts.forEach { fact -> SpacedLabel(text = fact) }
                 }
@@ -1010,92 +958,91 @@ private fun DetailsCloseButton(onClose: () -> Unit, modifier: Modifier = Modifie
 
 @Composable
 internal fun MovieTicketLoading() {
+    if (isDesktopPlatform) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .clip(MovieTicketShape)
+        ) {
+            TicketSkeletonMainPart(
+                posterWidth = TicketPosterWidth,
+                posterGap = TicketPosterGap,
+                lineSizes = listOf(0.25f to 10.dp, 0.5f to 20.dp, 0.4f to 12.dp),
+                linesTopPadding = 4.dp,
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier.weight(1f)
+            )
+            Box(
+                modifier = Modifier
+                    .width(TicketStubWidth)
+                    .fillMaxHeight()
+                    .background(chipContainerColor())
+            )
+        }
+    } else {
+        val stubHeight = phoneStubHeight()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(rememberBottomStubShape(stubHeight, PhoneNotchRadius))
+        ) {
+            TicketSkeletonMainPart(
+                posterWidth = PhonePosterWidth,
+                posterGap = PhonePosterGap,
+                lineSizes = listOf(0.35f to 10.dp, 0.7f to 20.dp, 0.5f to 12.dp),
+                linesTopPadding = 0.dp,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(stubHeight)
+                    .background(chipContainerColor())
+            )
+        }
+    }
+}
+
+@Composable
+private fun TicketSkeletonMainPart(
+    posterWidth: Dp,
+    posterGap: Dp,
+    lineSizes: List<Pair<Float, Dp>>,
+    linesTopPadding: Dp,
+    verticalAlignment: Alignment.Vertical,
+    modifier: Modifier
+) {
     val progress = rememberShimmerProgress()
     val shimmerColors = ShimmerColors(
         base = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
         highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
     )
-    if (!isDesktopPlatform) {
-        PhoneTicketLoading(progress = progress, shimmerColors = shimmerColors)
-        return
-    }
-
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .clip(MovieTicketShape)
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(TicketPadding),
+        horizontalArrangement = Arrangement.spacedBy(posterGap),
+        verticalAlignment = verticalAlignment
     ) {
-        Row(
+        Box(
+            modifier = Modifier
+                .width(posterWidth)
+                .aspectRatio(PosterAspectRatio)
+                .clip(RoundedCornerShape(TicketPosterCornerRadius))
+                .shimmer(progress, shimmerColors)
+        )
+        Column(
             modifier = Modifier
                 .weight(1f)
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(TicketPadding),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(top = linesTopPadding),
+            verticalArrangement = Arrangement.spacedBy(SkeletonLineGap)
         ) {
-            Box(
-                modifier = Modifier
-                    .width(TicketPosterWidth)
-                    .aspectRatio(2f / 3f)
-                    .clip(RoundedCornerShape(TicketPosterCornerRadius))
-                    .shimmer(progress, shimmerColors)
-            )
-            Column(
-                modifier = Modifier.weight(1f).padding(top = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(9.dp)
-            ) {
-                listOf(0.25f to 10.dp, 0.5f to 20.dp, 0.4f to 12.dp).forEach { (widthFraction, height) ->
-                    MovieSkeletonLine(widthFraction = widthFraction, height = height, progress = progress, colors = shimmerColors)
-                }
+            lineSizes.forEach { (widthFraction, height) ->
+                MovieSkeletonLine(widthFraction = widthFraction, height = height, progress = progress, colors = shimmerColors)
             }
         }
-        Box(
-            modifier = Modifier
-                .width(TicketStubWidth)
-                .fillMaxHeight()
-                .background(chipContainerColor())
-        )
-    }
-}
-
-@Composable
-private fun PhoneTicketLoading(progress: State<Float>, shimmerColors: ShimmerColors) {
-    val stubHeight = phoneStubHeight()
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(rememberBottomStubShape(stubHeight, PhoneNotchRadius))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(TicketPadding),
-            horizontalArrangement = Arrangement.spacedBy(PhonePosterGap),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(PhonePosterWidth)
-                    .aspectRatio(2f / 3f)
-                    .clip(RoundedCornerShape(TicketPosterCornerRadius))
-                    .shimmer(progress, shimmerColors)
-            )
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(9.dp)
-            ) {
-                listOf(0.35f to 10.dp, 0.7f to 20.dp, 0.5f to 12.dp).forEach { (widthFraction, height) ->
-                    MovieSkeletonLine(widthFraction = widthFraction, height = height, progress = progress, colors = shimmerColors)
-                }
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(stubHeight)
-                .background(chipContainerColor())
-        )
     }
 }
 

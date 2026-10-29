@@ -1,12 +1,8 @@
 package com.emberr.presentation.shared.editor.blockViews.movie
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -46,9 +43,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -63,8 +57,11 @@ import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.movie.takeLoaded
-import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
+import com.emberr.presentation.shared.components.GestureCoordinates
+import com.emberr.presentation.shared.components.LoadMoreButton
+import com.emberr.presentation.shared.components.boardDragGesture
+import com.emberr.presentation.shared.components.scrollWhenPointerNearEdges
 import com.emberr.presentation.shared.components.emberrBorder
 import kotlin.math.roundToInt
 
@@ -73,7 +70,6 @@ private val BoardColumnGap = 12.dp
 private val BoardCardShape = DefaultBlockShape
 private val BoardColumnShape = RoundedCornerShape(10.dp)
 private val BoardEdgeZone = 48.dp
-private const val BOARD_EDGE_SCROLL_STEP_PIXELS = 12f
 
 private data class PendingMove(val status: WatchStatus, val changedAtBeforeMove: Long)
 
@@ -137,7 +133,7 @@ internal fun WatchlistBoard(
         if (dragState.draggedBlockId == null) return@LaunchedEffect
         val edgeZonePx = with(density) { BoardEdgeZone.toPx() }
         while (true) {
-            scrollBoardNearEdges(scrollState, dragState.pointerInRoot.x - boardOriginInRoot.x, boardWidthPx, edgeZonePx)
+            scrollState.scrollWhenPointerNearEdges(dragState.pointerInRoot.x - boardOriginInRoot.x, boardWidthPx, edgeZonePx)
             withFrameNanos { }
         }
     }
@@ -189,7 +185,7 @@ internal fun WatchlistBoard(
         if (draggedTitle != null && draggedDetails != null) {
             val cardOffset = dragState.pointerInRoot - boardOriginInRoot - dragState.grabOffset
             BoardTicketCard(
-                title = draggedTitle,
+                block = draggedTitle,
                 details = draggedDetails,
                 modifier = Modifier
                     .zIndex(1f)
@@ -205,13 +201,6 @@ internal fun WatchlistBoard(
 private fun boardColumnColor(): Color =
     lerp(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.surface, 0.5f)
 
-private suspend fun scrollBoardNearEdges(scrollState: ScrollState, pointerX: Float, boardWidthPx: Int, edgeZonePx: Float) {
-    when {
-        pointerX < edgeZonePx -> scrollState.scrollBy(-BOARD_EDGE_SCROLL_STEP_PIXELS)
-        pointerX > boardWidthPx - edgeZonePx -> scrollState.scrollBy(BOARD_EDGE_SCROLL_STEP_PIXELS)
-    }
-}
-
 @Composable
 private fun WatchlistBoardColumn(
     status: WatchStatus,
@@ -226,6 +215,10 @@ private fun WatchlistBoardColumn(
     onToggleSelection: () -> Unit,
     onDrop: () -> Unit
 ) {
+    DisposableEffect(status) {
+        onDispose { dragState.columnBoundsInRoot.remove(status) }
+    }
+
     Column(
         modifier = Modifier
             .width(width)
@@ -292,7 +285,7 @@ private fun WatchlistBoardColumn(
             }
         }
         if (loadedTitles.size < titles.size) {
-            WatchlistLoadMoreButton(onClick = onLoadMore)
+            LoadMoreButton(onClick = onLoadMore)
         }
     }
 }
@@ -307,10 +300,15 @@ private fun DraggableBoardCard(
     onToggleSelection: () -> Unit,
     onDrop: () -> Unit
 ) {
-    var cardCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val gestureCoordinates = remember { GestureCoordinates() }
     var isDetailsOpen by remember(title.id) { mutableStateOf(false) }
     val currentOnDrop by rememberUpdatedState(onDrop)
     val currentInSelectionMode by rememberUpdatedState(inSelectionMode)
+    val isThisCardDragged = { dragState.draggedBlockId == title.id }
+
+    DisposableEffect(title.id) {
+        onDispose { if (isThisCardDragged()) dragState.reset() }
+    }
 
     if (isDetailsOpen) {
         MovieDetailsDialog(
@@ -322,40 +320,27 @@ private fun DraggableBoardCard(
     }
 
     BoardTicketCard(
-        title = title,
+        block = title,
         details = details,
         modifier = Modifier
-            .alpha(if (dragState.draggedBlockId == title.id) 0.4f else 1f)
-            .onGloballyPositioned { cardCoordinates = it }
-            .pointerInput(title.id) {
-                val isThisCardDragged = { dragState.draggedBlockId == title.id }
-                val startDrag = { pointerInCard: Offset ->
-                    val coordinates = cardCoordinates
-                    if (!currentInSelectionMode && dragState.draggedBlockId == null && coordinates != null) {
-                        dragState.pointerInRoot = coordinates.localToRoot(pointerInCard)
+            .alpha(if (isThisCardDragged()) 0.4f else 1f)
+            .onGloballyPositioned { gestureCoordinates.coordinates = it }
+            .boardDragGesture(
+                key = title.id,
+                isEnabled = true,
+                gestureCoordinates = gestureCoordinates,
+                onStart = { pointerInRoot, pointerInCard, cardSize ->
+                    if (!currentInSelectionMode && dragState.draggedBlockId == null) {
+                        dragState.pointerInRoot = pointerInRoot
                         dragState.grabOffset = pointerInCard
-                        dragState.draggedCardWidthPx = coordinates.size.width
+                        dragState.draggedCardWidthPx = cardSize.width
                         dragState.draggedBlockId = title.id
                     }
-                }
-                val followPointer = { change: PointerInputChange, _: Offset ->
-                    if (isThisCardDragged()) {
-                        change.consume()
-                        cardCoordinates?.let { dragState.pointerInRoot = it.localToRoot(change.position) }
-                    }
-                }
-                val finishDrag = { if (isThisCardDragged()) currentOnDrop() }
-                val cancelDrag = { if (isThisCardDragged()) dragState.reset() }
-                try {
-                    if (isDesktopPlatform) {
-                        detectDragGestures(onDragStart = startDrag, onDragEnd = finishDrag, onDragCancel = cancelDrag, onDrag = followPointer)
-                    } else {
-                        detectDragGesturesAfterLongPress(onDragStart = startDrag, onDragEnd = finishDrag, onDragCancel = cancelDrag, onDrag = followPointer)
-                    }
-                } finally {
-                    cancelDrag()
-                }
-            }
+                },
+                onMove = { pointerInRoot -> if (isThisCardDragged()) dragState.pointerInRoot = pointerInRoot },
+                onDrop = { if (isThisCardDragged()) currentOnDrop() },
+                onCancel = { if (isThisCardDragged()) dragState.reset() }
+            )
             .clickable { if (inSelectionMode) onToggleSelection() else isDetailsOpen = true }
     )
 }

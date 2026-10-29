@@ -33,6 +33,10 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.emberrBorderColor
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.refresh_cw
+import emberr.shared.generated.resources.search
+import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -85,6 +89,30 @@ internal fun MovieMenu(
                 }
             }
         }
+    }
+}
+
+@Composable
+internal fun MovieOptionsMenu(
+    expanded: Boolean,
+    title: String,
+    onDismiss: () -> Unit,
+    onChangeTitle: (() -> Unit)?,
+    onRefreshDetails: () -> Unit,
+    deleteLabel: String,
+    onDelete: () -> Unit
+) {
+    MovieMenu(expanded = expanded, title = title, onDismiss = onDismiss) { closeAnd ->
+        if (onChangeTitle != null) {
+            MovieMenuOption(label = "Change title", icon = Res.drawable.search, onClick = { closeAnd(onChangeTitle) })
+        }
+        MovieMenuOption(label = "Refresh details", icon = Res.drawable.refresh_cw, onClick = { closeAnd(onRefreshDetails) })
+        MovieMenuOption(
+            label = deleteLabel,
+            icon = Res.drawable.trash,
+            labelColor = MaterialTheme.colorScheme.error,
+            onClick = { closeAnd(onDelete) }
+        )
     }
 }
 
