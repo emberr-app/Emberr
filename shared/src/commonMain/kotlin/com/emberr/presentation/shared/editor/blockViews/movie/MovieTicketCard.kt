@@ -12,6 +12,8 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +45,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -68,6 +71,7 @@ import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.emberrBorderColor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.ellipsis
+import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 
@@ -92,6 +96,10 @@ private val PhonePosterWidth = 64.dp
 private val PhonePosterGap = 16.dp
 private val PhoneNotchRadius = 9.dp
 private val PhoneStubVerticalPadding = 10.dp
+private val DetailsPosterWidth = 96.dp
+private val DetailsNotchRadius = 10.dp
+private val DetailsStubVerticalPadding = 12.dp
+private val DetailsCloseButtonSize = 36.dp
 private val SpacedLabelLetterSpacing = 1.5.sp
 private const val RATING_SIZE_SCALE = 2f
 private const val RATING_LINE_HEIGHT_SCALE = 1.15f
@@ -831,6 +839,109 @@ private fun RatingBesideStatus(
                 constraints.maxWidth - statusPlaceable.width,
                 (constraints.maxHeight - statusPlaceable.height) / 2
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun MovieDetailsTicket(
+    details: MovieDetails,
+    facts: List<String>,
+    background: Color,
+    onClose: () -> Unit
+) {
+    val stubHeight = maxOf(
+        with(LocalDensity.current) { MaterialTheme.typography.titleLarge.lineHeight.toDp() },
+        DetailsCloseButtonSize
+    ) + DetailsStubVerticalPadding * 2
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(rememberBottomStubShape(stubHeight, DetailsNotchRadius))
+    ) {
+        PosterBesideText(
+            gap = PhonePosterGap,
+            minPosterHeight = DetailsPosterWidth * 1.5f,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(background)
+                .padding(TicketPadding),
+            poster = {
+                Box(propagateMinConstraints = true) {
+                    MoviePoster(
+                        filePath = details.posterFilePath,
+                        url = details.posterUrl,
+                        width = DetailsPosterWidth,
+                        cornerRadius = TicketPosterCornerRadius,
+                        onImageLoaded = { loadedImage -> savePosterColor(details.posterColorKey, loadedImage) }
+                    )
+                }
+            }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
+                SpacedLabel(
+                    text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
+                )
+                Text(
+                    text = details.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                details.creditLine()?.let { credit ->
+                    Text(
+                        text = credit,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+                if (facts.isNotEmpty()) {
+                    FlowRow(
+                        modifier = Modifier.padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        facts.forEach { fact -> SpacedLabel(text = fact) }
+                    }
+                }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(stubHeight)
+                .ticketStub(details = details, notchRadius = DetailsNotchRadius, stubIsAtBottom = true)
+                .padding(horizontal = TicketPadding),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.alignByBaseline()
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                SpacedLabel(text = "TMDB rating", modifier = Modifier.alignByBaseline())
+            }
+            Box(
+                modifier = Modifier
+                    .size(DetailsCloseButtonSize)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                    .clickable(onClick = onClose),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.x),
+                    contentDescription = "Close details",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }
