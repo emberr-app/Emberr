@@ -32,7 +32,7 @@ private const val MOST_SIMILAR_TITLES = 20
 private const val ENGLISH_US = "en-US"
 private const val ENGLISH = "en"
 private const val NO_LANGUAGE = "null"
-private val savedInfoParts = listOf("videos", "external_ids", "keywords", "watch/providers", "images")
+private val savedInfoParts = listOf("videos", "external_ids", "keywords", "watch/providers")
 private const val TRENDING_KEEP_MILLIS = 60 * 60 * 1000L
 private const val RECENT_REPLY_KEEP_MILLIS = 60 * 60 * 1000L
 private const val MOST_RECENT_REPLIES = 20
@@ -45,17 +45,22 @@ private class RecentReplies<T : Any> {
     private val mutex = Mutex()
     private val entries = LinkedHashMap<String, Entry<T>>()
 
-    suspend fun find(key: String, now: Long): T? = mutex.withLock {
+    private suspend fun find(key: String, now: Long): T? = mutex.withLock {
         val entry = entries.remove(key) ?: return@withLock null
         if (now - entry.savedAtMillis >= RECENT_REPLY_KEEP_MILLIS) return@withLock null
         entries[key] = entry
         entry.value
     }
 
-    suspend fun keep(key: String, value: T, now: Long) = mutex.withLock {
+    private suspend fun keep(key: String, value: T, now: Long) = mutex.withLock {
         entries.remove(key)
         entries[key] = Entry(value, now)
         while (entries.size > MOST_RECENT_REPLIES) entries.remove(entries.keys.first())
+    }
+
+    suspend fun findOrRequest(key: String, mayReuseRecentCopy: Boolean = true, request: suspend () -> T?): T? {
+        if (mayReuseRecentCopy) find(key, System.currentTimeMillis())?.let { return it }
+        return request()?.also { value -> keep(key, value, System.currentTimeMillis()) }
     }
 }
 
@@ -109,54 +114,39 @@ class TmdbMovieTitleSource : MovieTitleSource {
         return withContext(Dispatchers.Default) { TmdbReplyReader.searchResultsFrom(replyText, MOST_SEARCH_RESULTS) }
     }
 
-    override suspend fun loadDetails(tmdbId: Long, kind: MovieKind, mayReuseRecentCopy: Boolean): MovieDetails? {
-        val key = "${deviceLanguageTag()}:${kind.name}:$tmdbId"
-        if (mayReuseRecentCopy) recentDetails.find(key, System.currentTimeMillis())?.let { return it }
-        return requestDetails(tmdbId, kind)?.also { details -> recentDetails.keep(key, details, System.currentTimeMillis()) }
-    }
+    override suspend fun loadDetails(tmdbId: Long, kind: MovieKind, mayReuseRecentCopy: Boolean): MovieDetails? =
+        recentDetails.findOrRequest("${deviceLanguageTag()}:${kind.name}:$tmdbId", mayReuseRecentCopy) { requestDetails(tmdbId, kind) }
 
     private suspend fun requestDetails(tmdbId: Long, kind: MovieKind): MovieDetails? {
-        val language = Locale.current.language.lowercase()
-        val isEnglish = language == ENGLISH
+        val language = deviceLanguage()
         val ratingsPart = if (kind == MovieKind.MOVIE) "release_dates" else "content_ratings"
-        val extraParts = listOfNotNull("credits", ratingsPart, "translations".takeUnless { isEnglish }) + savedInfoParts
+        val extraParts = listOfNotNull("credits", ratingsPart, "translations".takeUnless { language == ENGLISH }) + savedInfoParts
         val extraLanguages = listOf(language, ENGLISH, NO_LANGUAGE).distinct().joinToString(",")
         val path = if (kind == MovieKind.MOVIE) "movie/$tmdbId" else "tv/$tmdbId"
         val response = requestTmdb(path) {
             parameter("append_to_response", extraParts.joinToString(","))
             parameter("include_video_language", extraLanguages)
-            parameter("include_image_language", extraLanguages)
         }
         if (response.status == HttpStatusCode.NotFound) return null
 
         val replyText = successfulReplyText(response)
         val region = Locale.current.region
-        val now = System.currentTimeMillis()
         return withContext(Dispatchers.Default) {
             when (kind) {
-                MovieKind.MOVIE -> TmdbReplyReader.movieDetailsFrom(replyText, language, region, now)
-                MovieKind.SHOW -> TmdbReplyReader.showDetailsFrom(replyText, language, region, now)
+                MovieKind.MOVIE -> TmdbReplyReader.movieDetailsFrom(replyText, language, region)
+                MovieKind.SHOW -> TmdbReplyReader.showDetailsFrom(replyText, language, region)
             }
         }
     }
 
-    override suspend fun loadPerson(personId: Long): MoviePerson? {
-        val key = "${deviceLanguageTag()}:$personId"
-        recentPeople.find(key, System.currentTimeMillis())?.let { return it }
-        return requestPerson(personId)?.also { person -> recentPeople.keep(key, person, System.currentTimeMillis()) }
-    }
+    override suspend fun loadPerson(personId: Long): MoviePerson? =
+        recentPeople.findOrRequest("${deviceLanguageTag()}:$personId") { requestPerson(personId) }
 
-    override suspend fun loadSeasonEpisodes(showId: Long, seasonNumber: Int): List<MovieEpisode>? {
-        val key = "${deviceLanguageTag()}:$showId:$seasonNumber"
-        recentSeasons.find(key, System.currentTimeMillis())?.let { return it }
-        return requestSeasonEpisodes(showId, seasonNumber)?.also { episodes -> recentSeasons.keep(key, episodes, System.currentTimeMillis()) }
-    }
+    override suspend fun loadSeasonEpisodes(showId: Long, seasonNumber: Int): List<MovieEpisode>? =
+        recentSeasons.findOrRequest("${deviceLanguageTag()}:$showId:$seasonNumber") { requestSeasonEpisodes(showId, seasonNumber) }
 
-    override suspend fun loadTitleExtras(tmdbId: Long, kind: MovieKind): MovieTitleExtras? {
-        val key = "${deviceLanguageTag()}:${kind.name}:$tmdbId"
-        recentExtras.find(key, System.currentTimeMillis())?.let { return it }
-        return requestTitleExtras(tmdbId, kind)?.also { extras -> recentExtras.keep(key, extras, System.currentTimeMillis()) }
-    }
+    override suspend fun loadTitleExtras(tmdbId: Long, kind: MovieKind): MovieTitleExtras? =
+        recentExtras.findOrRequest("${deviceLanguageTag()}:${kind.name}:$tmdbId") { requestTitleExtras(tmdbId, kind) }
 
     private suspend fun requestTitleExtras(tmdbId: Long, kind: MovieKind): MovieTitleExtras? {
         val path = if (kind == MovieKind.MOVIE) "movie/$tmdbId" else "tv/$tmdbId"
@@ -165,8 +155,7 @@ class TmdbMovieTitleSource : MovieTitleSource {
 
         val replyText = successfulReplyText(response)
         val extras = withContext(Dispatchers.Default) { TmdbReplyReader.titleExtrasFrom(replyText, kind, MOST_SIMILAR_TITLES) }
-        val isEnglish = Locale.current.language.lowercase() == ENGLISH
-        if (extras.reviews.isNotEmpty() || isEnglish) return extras
+        if (extras.reviews.isNotEmpty() || deviceLanguage() == ENGLISH) return extras
         return extras.copy(reviews = englishReviews(path))
     }
 
@@ -189,8 +178,7 @@ class TmdbMovieTitleSource : MovieTitleSource {
     }
 
     private suspend fun requestPerson(personId: Long): MoviePerson? {
-        val isEnglish = Locale.current.language.lowercase() == ENGLISH
-        val extraParts = listOfNotNull("combined_credits", "external_ids", "translations".takeUnless { isEnglish })
+        val extraParts = listOfNotNull("combined_credits", "external_ids", "translations".takeUnless { deviceLanguage() == ENGLISH })
         val response = requestTmdb("person/$personId") { parameter("append_to_response", extraParts.joinToString(",")) }
         if (response.status == HttpStatusCode.NotFound) return null
 
@@ -213,6 +201,8 @@ class TmdbMovieTitleSource : MovieTitleSource {
         if (!response.status.isSuccess()) throw TmdbRequestFailedException(response.status)
         return response.bodyAsText()
     }
+
+    private fun deviceLanguage(): String = Locale.current.language.lowercase()
 
     private fun deviceLanguageTag(): String {
         val locale = Locale.current

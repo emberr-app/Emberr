@@ -145,7 +145,6 @@ data class MovieEpisodeSummary(
 @Immutable
 @Serializable
 data class MovieWatchProviders(
-    val regionCode: String,
     val link: String = "",
     val stream: List<MovieNamedLogo> = emptyList(),
     val rent: List<MovieNamedLogo> = emptyList(),
@@ -174,8 +173,6 @@ data class MovieDetails(
     val releaseDate: LocalDate? = null,
     val posterUrl: String? = null,
     val posterFilePath: String? = null,
-    val backdropUrl: String? = null,
-    val backdropFilePath: String? = null,
     val cast: List<MovieCastMember> = emptyList(),
     val trailer: MovieTrailer? = null,
     val imdbId: String = "",
@@ -183,7 +180,6 @@ data class MovieDetails(
     val instagramHandle: String = "",
     val facebookHandle: String = "",
     val xHandle: String = "",
-    val wikidataId: String = "",
     val collectionName: String = "",
     val budgetDollars: Long? = null,
     val revenueDollars: Long? = null,
@@ -194,10 +190,7 @@ data class MovieDetails(
     val nextEpisode: MovieEpisodeSummary? = null,
     val lastEpisode: MovieEpisodeSummary? = null,
     val keywords: List<String> = emptyList(),
-    val watchProviders: MovieWatchProviders? = null,
-    val titleLogoUrl: String? = null,
-    val titleLogoFilePath: String? = null,
-    val refreshedAt: Long = 0L
+    val watchProviders: MovieWatchProviders? = null
 )
 
 @Immutable
@@ -318,11 +311,13 @@ data class WatchState(
     val changedAt: Long
 )
 
-fun MovieDetails.titleKey(): String = "${kind.name.lowercase()}:$tmdbId"
+private fun titleKeyOf(kind: MovieKind, tmdbId: Long): String = "${kind.name.lowercase()}:$tmdbId"
+
+fun MovieDetails.titleKey(): String = titleKeyOf(kind, tmdbId)
 
 fun MovieBlock.titleKey(): String? = details?.titleKey()
 
-fun MovieSearchResult.titleKey(): String = "${kind.name.lowercase()}:$tmdbId"
+fun MovieSearchResult.titleKey(): String = titleKeyOf(kind, tmdbId)
 
 fun MovieBlock.watchState(): WatchState = WatchState(watchStatus, ratingHalfStars, watchStateChangedAt)
 
@@ -334,8 +329,6 @@ fun MovieBlock.withWatchState(state: WatchState, now: Long): MovieBlock =
         updatedAt = now
     )
 
-val MovieDetails.hasPoster: Boolean get() = posterFilePath != null || posterUrl != null
-
 val MovieTrailer.youtubeLink: String get() = "https://www.youtube.com/watch?v=$youtubeKey"
 
 val MovieWatchProviders.allProviders: List<MovieNamedLogo> get() = stream + rent + buy
@@ -343,7 +336,7 @@ val MovieWatchProviders.allProviders: List<MovieNamedLogo> get() = stream + rent
 fun MovieBlock.mediaFilePaths(): List<String> {
     val details = details ?: return emptyList()
     val logos = details.productionCompanies + details.networks + details.watchProviders?.allProviders.orEmpty()
-    return listOfNotNull(details.posterFilePath, details.backdropFilePath, details.titleLogoFilePath) +
+    return listOfNotNull(details.posterFilePath) +
         details.cast.mapNotNull { it.photoFilePath } +
         details.seasons.mapNotNull { it.posterFilePath } +
         logos.mapNotNull { it.logoFilePath }
