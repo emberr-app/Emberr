@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -101,6 +102,8 @@ private val DetailsNotchRadius = 10.dp
 private val DetailsStubVerticalPadding = 12.dp
 private val DetailsCloseButtonSize = 36.dp
 private val SpacedLabelLetterSpacing = 1.5.sp
+private val DesktopTextLineGap = 6.dp
+private val PhoneTextLineGap = 2.dp
 private const val RATING_SIZE_SCALE = 2f
 private const val RATING_LINE_HEIGHT_SCALE = 1.15f
 
@@ -393,14 +396,15 @@ private fun TicketMainPart(
         Column(verticalArrangement = Arrangement.SpaceBetween) {
             Column(
                 modifier = Modifier.padding(end = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(DesktopTextLineGap)
             ) {
                 SpacedLabel(
                     text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
                 )
                 Text(
                     text = details.title,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
                     color = if (block.isWatched) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
                     textDecoration = if (block.isWatched) TextDecoration.LineThrough else null,
                     maxLines = 1,
@@ -481,13 +485,7 @@ private fun TicketStub(
     onStatusClick: (() -> Unit)?,
     modifier: Modifier
 ) {
-    val ratingStyle = MaterialTheme.typography.titleLarge.let { style ->
-        style.copy(
-            fontSize = style.fontSize * RATING_SIZE_SCALE,
-            lineHeight = style.fontSize * RATING_SIZE_SCALE * RATING_LINE_HEIGHT_SCALE,
-            fontWeight = FontWeight.Normal
-        )
-    }
+    val ratingStyle = bigRatingStyle()
 
     Column(
         modifier = modifier
@@ -506,6 +504,17 @@ private fun TicketStub(
         Spacer(modifier = Modifier.height(14.dp))
         TicketStatusChip(block = block, onClick = onStatusClick)
     }
+}
+
+private fun cardTextLineGap(): Dp = if (isDesktopPlatform) DesktopTextLineGap else PhoneTextLineGap
+
+@Composable
+private fun bigRatingStyle(): TextStyle = MaterialTheme.typography.titleLarge.let { style ->
+    style.copy(
+        fontSize = style.fontSize * RATING_SIZE_SCALE,
+        lineHeight = style.fontSize * RATING_SIZE_SCALE * RATING_LINE_HEIGHT_SCALE,
+        fontWeight = FontWeight.Normal
+    )
 }
 
 @Composable
@@ -559,7 +568,7 @@ private fun TicketStatusChip(block: MovieBlock, onClick: (() -> Unit)?, showsLab
 
 @Composable
 private fun TicketFact(label: String, value: String) {
-    Column {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         SpacedLabel(text = label)
         Text(
             text = value,
@@ -674,7 +683,7 @@ private fun BoardTicketMainPart(title: MovieBlock, details: MovieDetails, modifi
             }
         }
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)) {
+        Column(verticalArrangement = Arrangement.spacedBy(cardTextLineGap(), Alignment.CenterVertically)) {
             SpacedLabel(
                 text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
             )
@@ -750,7 +759,7 @@ internal fun GalleryTicketCard(
         }
         Column(
             modifier = Modifier.padding(GalleryPadding),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(cardTextLineGap())
         ) {
             SpacedLabel(
                 text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
@@ -843,7 +852,6 @@ private fun RatingBesideStatus(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun MovieDetailsTicket(
     details: MovieDetails,
@@ -851,6 +859,44 @@ internal fun MovieDetailsTicket(
     background: Color,
     onClose: () -> Unit
 ) {
+    if (isDesktopPlatform) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MovieTicketShape)
+        ) {
+            DetailsTicketMainPart(
+                details = details,
+                facts = facts,
+                background = background,
+                modifier = Modifier.fillMaxWidth().padding(end = TicketStubWidth)
+            )
+            Box(modifier = Modifier.matchParentSize(), contentAlignment = Alignment.CenterEnd) {
+                Box(
+                    modifier = Modifier
+                        .width(TicketStubWidth)
+                        .fillMaxHeight()
+                        .ticketStub(details = details, notchRadius = TicketNotchRadius)
+                ) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center).padding(horizontal = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = details.tmdbRating?.let(::tmdbRatingText) ?: "–",
+                            style = bigRatingStyle(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1
+                        )
+                        SpacedLabel(text = "TMDB rating")
+                    }
+                    DetailsCloseButton(onClose = onClose, modifier = Modifier.align(Alignment.TopEnd).padding(10.dp))
+                }
+            }
+        }
+        return
+    }
+
     val stubHeight = maxOf(
         with(LocalDensity.current) { MaterialTheme.typography.titleLarge.lineHeight.toDp() },
         DetailsCloseButtonSize
@@ -860,53 +906,7 @@ internal fun MovieDetailsTicket(
             .fillMaxWidth()
             .clip(rememberBottomStubShape(stubHeight, DetailsNotchRadius))
     ) {
-        PosterBesideText(
-            gap = PhonePosterGap,
-            minPosterHeight = DetailsPosterWidth * 1.5f,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(background)
-                .padding(TicketPadding),
-            poster = {
-                Box(propagateMinConstraints = true) {
-                    MoviePoster(
-                        filePath = details.posterFilePath,
-                        url = details.posterUrl,
-                        width = DetailsPosterWidth,
-                        cornerRadius = TicketPosterCornerRadius,
-                        onImageLoaded = { loadedImage -> savePosterColor(details.posterColorKey, loadedImage) }
-                    )
-                }
-            }
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
-                SpacedLabel(
-                    text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
-                )
-                Text(
-                    text = details.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                details.creditLine()?.let { credit ->
-                    Text(
-                        text = credit,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
-                if (facts.isNotEmpty()) {
-                    FlowRow(
-                        modifier = Modifier.padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        facts.forEach { fact -> SpacedLabel(text = fact) }
-                    }
-                }
-            }
-        }
+        DetailsTicketMainPart(details = details, facts = facts, background = background, modifier = Modifier.fillMaxWidth())
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -927,22 +927,84 @@ internal fun MovieDetailsTicket(
                 Spacer(modifier = Modifier.width(8.dp))
                 SpacedLabel(text = "TMDB rating", modifier = Modifier.alignByBaseline())
             }
-            Box(
-                modifier = Modifier
-                    .size(DetailsCloseButtonSize)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-                    .clickable(onClick = onClose),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.x),
-                    contentDescription = "Close details",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(16.dp)
+            DetailsCloseButton(onClose = onClose)
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun DetailsTicketMainPart(
+    details: MovieDetails,
+    facts: List<String>,
+    background: Color,
+    modifier: Modifier
+) {
+    PosterBesideText(
+        gap = PhonePosterGap,
+        minPosterHeight = DetailsPosterWidth * 1.5f,
+        modifier = modifier
+            .background(background)
+            .padding(TicketPadding),
+        poster = {
+            Box(propagateMinConstraints = true) {
+                MoviePoster(
+                    filePath = details.posterFilePath,
+                    url = details.posterUrl,
+                    width = DetailsPosterWidth,
+                    cornerRadius = TicketPosterCornerRadius,
+                    onImageLoaded = { loadedImage -> savePosterColor(details.posterColorKey, loadedImage) }
                 )
             }
         }
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
+            SpacedLabel(
+                text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · ")
+            )
+            Text(
+                text = details.title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            details.creditLine()?.let { credit ->
+                Text(
+                    text = credit,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontStyle = FontStyle.Italic,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+            if (facts.isNotEmpty()) {
+                FlowRow(
+                    modifier = Modifier.padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    facts.forEach { fact -> SpacedLabel(text = fact) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailsCloseButton(onClose: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(DetailsCloseButtonSize)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            .clickable(onClick = onClose),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.x),
+            contentDescription = "Close details",
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(16.dp)
+        )
     }
 }
 
