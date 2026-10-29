@@ -645,7 +645,7 @@ private fun MovieSearchResultRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = listOf(result.yearText, result.kind.label).filter { it.isNotBlank() }.joinToString(" · "),
+                text = listOf(result.kind.label, result.yearText).filter { it.isNotBlank() }.joinToString(" · "),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
                 maxLines = 1
