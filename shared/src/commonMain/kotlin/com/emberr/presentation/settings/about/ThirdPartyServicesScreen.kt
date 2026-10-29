@@ -105,7 +105,7 @@ private fun TmdbNotice() {
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Movie and show searches go to TMDB anonymously. Nothing from your notes is sent.",
+            text = "Movie and show searches pass through Emberr's small proxy on Cloudflare, which sends them on to TMDB and keeps no logs. Posters and photos come straight from TMDB. Nothing from your notes is sent.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.padding(top = 8.dp)
