@@ -118,6 +118,7 @@ interface NoteRepository {
     fun refreshNoteContentCache(noteId: String, content: NoteContent)
     suspend fun refreshProjectionsForNote(metadata: NoteMetadataEntity, blocks: List<NoteBlock>)
     suspend fun findNewestWatchState(spaceId: String, titleKey: String): WatchState?
+    suspend fun shareWatchStateWithOtherNotes(spaceId: String, titleKey: String, state: WatchState, blockIdsAlreadyChanged: Set<String>)
     suspend fun deleteNote(noteId: String, filePath: String)
     suspend fun deleteAllContentInSpace(spaceId: String)
 

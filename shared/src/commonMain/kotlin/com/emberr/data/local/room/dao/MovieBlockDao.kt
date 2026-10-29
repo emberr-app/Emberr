@@ -16,10 +16,10 @@ interface MovieBlockDao {
     suspend fun deleteByNoteId(noteId: String)
 
     @Query(
-        "SELECT * FROM movie_blocks WHERE titleKey IN (:titleKeys) AND noteId != :exceptNoteId AND noteId IN " +
+        "SELECT * FROM movie_blocks WHERE titleKey = :titleKey AND noteId IN " +
             "(SELECT noteId FROM notes_metadata WHERE spaceId = :spaceId AND trashedAt IS NULL AND isTemplate = 0)"
     )
-    suspend fun getLinkedMovieBlocks(spaceId: String, titleKeys: List<String>, exceptNoteId: String): List<MovieBlockEntity>
+    suspend fun getMovieBlocksOfTitle(spaceId: String, titleKey: String): List<MovieBlockEntity>
 
     @Query(
         "SELECT * FROM movie_blocks WHERE titleKey = :titleKey AND noteId IN " +

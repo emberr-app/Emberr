@@ -76,6 +76,8 @@ import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.domain.movie.MovieTitleSource
+import com.emberr.domain.movie.idsOfBlocksShowingTitle
+import com.emberr.domain.movie.titleKeyOfBlock
 import com.emberr.domain.movie.withWatchStateOnAllCopiesOf
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
@@ -747,6 +749,14 @@ abstract class BaseEditorViewModel(
             val now = System.currentTimeMillis()
             modifyBlocks { list -> list.withWatchStateOnAllCopiesOf(blockId, state, now) }
             scheduleAutosave()
+            val blocksNow = _blocks.value
+            val titleKey = blocksNow.titleKeyOfBlock(blockId) ?: return
+            appScope.launch {
+                val spaceId = spaceIdOfThisNote() ?: return@launch
+                SyncCoordinator.mutex.withLock {
+                    repository.shareWatchStateWithOtherNotes(spaceId, titleKey, state, blocksNow.idsOfBlocksShowingTitle(titleKey))
+                }
+            }
         }
 
         override suspend fun newestWatchStateInThisSpace(details: MovieDetails): WatchState? {
