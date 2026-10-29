@@ -135,8 +135,19 @@ internal fun MovieMenuOption(
     onClick: () -> Unit,
     isSelected: Boolean? = null,
     icon: DrawableResource? = null,
-    labelColor: Color? = null
+    labelColor: Color? = null,
+    trailingText: String? = null
 ) {
+    val trailingContent: (@Composable () -> Unit)? = trailingText?.let {
+        {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1
+            )
+        }
+    }
     val iconContent: (@Composable () -> Unit)? = icon?.let {
         {
             Icon(
@@ -153,6 +164,7 @@ internal fun MovieMenuOption(
             onClick = onClick,
             isSelected = isSelected == true,
             icon = iconContent,
+            trailing = trailingContent,
             labelColor = labelColor
         )
         isSelected != null -> EmberrBottomSheetOption(
@@ -160,9 +172,10 @@ internal fun MovieMenuOption(
             onClick = onClick,
             isSelected = isSelected,
             icon = iconContent,
+            trailing = trailingContent,
             labelColor = labelColor
         )
-        else -> MovieSheetActionRow(label = label, onClick = onClick, icon = iconContent, labelColor = labelColor)
+        else -> MovieSheetActionRow(label = label, onClick = onClick, icon = iconContent, labelColor = labelColor, trailing = trailingContent)
     }
 }
 
@@ -171,7 +184,8 @@ private fun MovieSheetActionRow(
     label: String,
     onClick: () -> Unit,
     icon: (@Composable () -> Unit)?,
-    labelColor: Color?
+    labelColor: Color?,
+    trailing: (@Composable () -> Unit)?
 ) {
     Row(
         modifier = Modifier
@@ -193,6 +207,7 @@ private fun MovieSheetActionRow(
             color = labelColor ?: MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
+        trailing?.invoke()
     }
 }
 

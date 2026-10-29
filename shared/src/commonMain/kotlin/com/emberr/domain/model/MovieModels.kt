@@ -89,8 +89,13 @@ data class WatchlistViewSettings(
     val layout: WatchlistView,
     val sortKey: WatchlistSortKey = WatchlistSortKey.STATUS,
     val sortsDescending: Boolean = false,
-    val filters: List<WatchlistFilter> = emptyList()
+    val filters: List<WatchlistFilter> = emptyList(),
+    val loadLimit: Int = DEFAULT_WATCHLIST_LOAD_LIMIT
 )
+
+const val DEFAULT_WATCHLIST_LOAD_LIMIT = 20
+
+val WatchlistLoadLimitChoices = listOf(10, DEFAULT_WATCHLIST_LOAD_LIMIT, 30)
 
 @Immutable
 @Serializable

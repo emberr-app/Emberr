@@ -2,7 +2,6 @@ package com.emberr.presentation.shared.editor.blockViews.movie
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -33,6 +30,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +44,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -54,7 +54,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -63,11 +62,10 @@ import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.WatchStatus
-import com.emberr.domain.model.hasPoster
+import com.emberr.domain.movie.takeLoaded
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
 import com.emberr.presentation.shared.components.emberrBorder
-import com.emberr.ui.theme.LocalAppIsDark
 import kotlin.math.roundToInt
 
 private val BoardColumnMinWidth = 250.dp
@@ -101,9 +99,13 @@ internal fun WatchlistBoard(
     statuses: List<WatchStatus>,
     movieEditor: MovieBlockEditor,
     inSelectionMode: Boolean,
-    onToggleSelection: () -> Unit
+    onToggleSelection: () -> Unit,
+    loadedCountOf: (WatchStatus) -> Int,
+    onLoadMore: (WatchStatus) -> Unit,
+    alwaysShownTitleIds: Collection<String>
 ) {
     val dragState = remember { WatchlistBoardDragState() }
+    val droppedTitleIds = remember { mutableStateListOf<String>() }
     val scrollState = rememberScrollState()
     val density = LocalDensity.current
     var boardOriginInRoot by remember { mutableStateOf(Offset.Zero) }
@@ -125,6 +127,7 @@ internal fun WatchlistBoard(
         val targetStatus = dragState.statusUnderPointer()
         if (draggedTitle != null && targetStatus != null && targetStatus != statusShownFor(draggedTitle)) {
             pendingMoves[draggedTitle.id] = PendingMove(targetStatus, draggedTitle.watchStateChangedAt)
+            if (draggedTitle.id !in droppedTitleIds) droppedTitleIds += draggedTitle.id
             movieEditor.setWatchStatus(draggedTitle, targetStatus)
         }
         dragState.reset()
@@ -156,9 +159,12 @@ internal fun WatchlistBoard(
             ) {
                 statuses.forEach { status ->
                     key(status) {
+                        val titlesInColumn = titles.filter { statusShownFor(it) == status }
                         WatchlistBoardColumn(
                             status = status,
-                            titles = titles.filter { statusShownFor(it) == status },
+                            titles = titlesInColumn,
+                            loadedTitles = titlesInColumn.takeLoaded(loadedCountOf(status), alwaysShownTitleIds + droppedTitleIds),
+                            onLoadMore = { onLoadMore(status) },
                             width = columnWidth,
                             isDropTarget = dragState.draggedBlockId != null &&
                                 dragState.statusUnderPointer() == status &&
@@ -182,18 +188,22 @@ internal fun WatchlistBoard(
         val draggedDetails = draggedTitle?.details
         if (draggedTitle != null && draggedDetails != null) {
             val cardOffset = dragState.pointerInRoot - boardOriginInRoot - dragState.grabOffset
-            WatchlistBoardCard(
+            BoardTicketCard(
                 title = draggedTitle,
                 details = draggedDetails,
                 modifier = Modifier
                     .zIndex(1f)
                     .offset { IntOffset(cardOffset.x.roundToInt(), cardOffset.y.roundToInt()) }
                     .width(with(density) { dragState.draggedCardWidthPx.toDp() })
-                    .shadow(elevation = 8.dp, shape = BoardCardShape)
+                    .shadow(elevation = 8.dp, shape = boardTicketShape())
             )
         }
     }
 }
+
+@Composable
+private fun boardColumnColor(): Color =
+    lerp(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.surface, 0.5f)
 
 private suspend fun scrollBoardNearEdges(scrollState: ScrollState, pointerX: Float, boardWidthPx: Int, edgeZonePx: Float) {
     when {
@@ -206,6 +216,8 @@ private suspend fun scrollBoardNearEdges(scrollState: ScrollState, pointerX: Flo
 private fun WatchlistBoardColumn(
     status: WatchStatus,
     titles: List<MovieBlock>,
+    loadedTitles: List<MovieBlock>,
+    onLoadMore: () -> Unit,
     width: Dp,
     isDropTarget: Boolean,
     dragState: WatchlistBoardDragState,
@@ -219,7 +231,7 @@ private fun WatchlistBoardColumn(
             .width(width)
             .onGloballyPositioned { dragState.columnBoundsInRoot[status] = it.boundsInRoot() }
             .clip(BoardColumnShape)
-            .background(MaterialTheme.colorScheme.surface)
+            .background(boardColumnColor())
             .then(
                 if (isDropTarget) {
                     Modifier.border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), BoardColumnShape)
@@ -265,7 +277,7 @@ private fun WatchlistBoardColumn(
                 )
             }
         }
-        titles.forEach { title ->
+        loadedTitles.forEach { title ->
             val details = title.details ?: return@forEach
             key(title.id) {
                 DraggableBoardCard(
@@ -278,6 +290,9 @@ private fun WatchlistBoardColumn(
                     onDrop = onDrop
                 )
             }
+        }
+        if (loadedTitles.size < titles.size) {
+            WatchlistLoadMoreButton(onClick = onLoadMore)
         }
     }
 }
@@ -306,7 +321,7 @@ private fun DraggableBoardCard(
         )
     }
 
-    WatchlistBoardCard(
+    BoardTicketCard(
         title = title,
         details = details,
         modifier = Modifier
@@ -343,55 +358,4 @@ private fun DraggableBoardCard(
             }
             .clickable { if (inSelectionMode) onToggleSelection() else isDetailsOpen = true }
     )
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun WatchlistBoardCard(title: MovieBlock, details: MovieDetails, modifier: Modifier = Modifier) {
-    val hasPoster = details.hasPoster
-    val colors = movieCardColors(isOnPoster = hasPoster)
-    val plainBackground = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.background
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(BoardCardShape)
-            .background(if (hasPoster) PosterBackdropBaseColor else plainBackground)
-    ) {
-        if (hasPoster) {
-            BlurredPosterBackdrop(details = details, blurRadius = 30.dp, scrim = CardScrim)
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(9.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = 44.dp, cornerRadius = 4.dp)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = details.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = if (title.isWatched) colors.secondary else colors.title,
-                    textDecoration = if (title.isWatched) TextDecoration.LineThrough else null,
-                    maxLines = 1,
-                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
-                )
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    listOf(details.yearText, details.kind.label)
-                        .filter { it.isNotBlank() }
-                        .forEach { fact ->
-                            Text(text = fact, style = MaterialTheme.typography.labelSmall, color = colors.secondary, maxLines = 1)
-                        }
-                    details.tmdbRating?.let { rating -> TmdbRating(rating = rating, numberColor = colors.secondary) }
-                }
-            }
-        }
-    }
 }
