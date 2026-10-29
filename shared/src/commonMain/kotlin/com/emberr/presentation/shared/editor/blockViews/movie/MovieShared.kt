@@ -138,7 +138,7 @@ internal fun MoviePoster(
 
 @Composable
 internal fun chipContainerColor(): Color =
-    if (!isDesktopPlatform || LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFD8D8D8)
+    if (isDesktopPlatform) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceVariant
 
 @Composable
 internal fun WatchStatus.dotColor(): Color {

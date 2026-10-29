@@ -63,6 +63,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.LocalSitsOnCard
 import com.emberr.presentation.shared.components.EmberrUpdateDialog
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
@@ -1563,13 +1564,15 @@ fun SettingsGroup(
     ) {
         SettingsGroupTitle(title = title)
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(SettingsCardShape)
-                .background(cardColor),
-            content = content
-        )
+        CompositionLocalProvider(LocalSitsOnCard provides true) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(SettingsCardShape)
+                    .background(cardColor),
+                content = content
+            )
+        }
     }
 }
 
