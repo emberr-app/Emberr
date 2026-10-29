@@ -1016,8 +1016,8 @@ private fun EventEditorChip(
 @Composable
 private fun chipContainerColor(isSelected: Boolean): Color = when {
     isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-    !isDesktopPlatform || LocalAppIsDark.current -> MaterialTheme.colorScheme.surfaceVariant
-    else -> Color(0xFFD8D8D8)
+    isDesktopPlatform -> MaterialTheme.colorScheme.surfaceContainerHigh
+    else -> MaterialTheme.colorScheme.surfaceVariant
 }
 
 @Composable
