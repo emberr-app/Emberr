@@ -35,11 +35,13 @@ import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.WatchlistSortKey
 import com.emberr.domain.model.WatchlistView
+import com.emberr.domain.model.WatchlistLoadLimitChoices
 import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.funnel
 import emberr.shared.generated.resources.kanban
@@ -162,6 +164,25 @@ internal fun WatchlistToolbar(
                 title = block.title.ifBlank { "Watchlist" },
                 onDismiss = { isSettingsMenuOpen = false }
             ) { closeAnd ->
+                MovieMenuLayer(
+                    title = "Load limit",
+                    anchor = { openLayer ->
+                        MovieMenuOption(
+                            label = "Load limit",
+                            icon = Res.drawable.arrow_down,
+                            trailingText = "${openView.loadLimit} titles",
+                            onClick = openLayer
+                        )
+                    }
+                ) { closeLayerAnd ->
+                    WatchlistLoadLimitChoices.forEach { loadLimit ->
+                        MovieMenuOption(
+                            label = "$loadLimit titles",
+                            isSelected = openView.loadLimit == loadLimit,
+                            onClick = { closeLayerAnd { editor.changeView(block.id, openView.id) { it.copy(loadLimit = loadLimit) } } }
+                        )
+                    }
+                }
                 MovieMenuOption(
                     label = "Delete watchlist",
                     icon = Res.drawable.trash,

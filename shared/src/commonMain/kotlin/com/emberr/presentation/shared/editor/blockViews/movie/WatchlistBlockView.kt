@@ -8,17 +8,21 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -27,6 +31,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,6 +56,7 @@ import com.emberr.domain.model.titleKey
 import com.emberr.domain.movie.boardStatuses
 import com.emberr.domain.movie.openViewOn
 import com.emberr.domain.movie.shownIn
+import com.emberr.domain.movie.takeLoaded
 import com.emberr.domain.movie.viewsInOrderOf
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.KmpBackHandler
@@ -58,12 +65,16 @@ import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.presentation.shared.editor.blockViews.rememberDeviceTableLayout
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import kotlinx.coroutines.delay
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.arrow_down
+import org.jetbrains.compose.resources.painterResource
 import java.util.UUID
 
 private const val NEW_TITLE_HIGHLIGHT_MILLIS = 1_200L
 private const val TITLE_RESIZE_MILLIS = 260
 private const val TITLE_FADE_MILLIS = 220
 private const val TITLE_FADE_DELAY_MILLIS = 80
+private const val ALL_TITLES_GROUP = "all"
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -92,6 +103,14 @@ fun WatchlistBlockView(
     val deviceLayout = rememberDeviceTableLayout(block.id)
     val viewsHere = block.viewsInOrderOf(deviceLayout)
     val openView = block.openViewOn(deviceLayout)
+    val titleIdsAddedHere = remember(block.watchlistNoteId) { mutableStateListOf<String>() }
+    val loadedTitleCounts = remember(openView.id, openView.loadLimit) { mutableStateMapOf<String, Int>() }
+
+    fun loadedTitleCountOf(groupKey: String): Int = loadedTitleCounts[groupKey] ?: openView.loadLimit
+
+    fun loadMoreTitles(groupKey: String) {
+        loadedTitleCounts[groupKey] = loadedTitleCountOf(groupKey) + openView.loadLimit
+    }
 
     fun closeSearch() {
         isSearchOpen = false
@@ -129,7 +148,8 @@ fun WatchlistBlockView(
     }
 
     LaunchedEffect(lastAddedBlockId) {
-        if (lastAddedBlockId == null) return@LaunchedEffect
+        val addedTitleId = lastAddedBlockId ?: return@LaunchedEffect
+        if (addedTitleId !in titleIdsAddedHere) titleIdsAddedHere += addedTitleId
         delay(NEW_TITLE_HIGHLIGHT_MILLIS)
         editor.forgetLastAddedTitle()
     }
@@ -225,12 +245,13 @@ fun WatchlistBlockView(
             enter = expandVertically(tween(TITLE_RESIZE_MILLIS)) + fadeIn(tween(TITLE_FADE_MILLIS)),
             exit = shrinkVertically(tween(TITLE_RESIZE_MILLIS)) + fadeOut(tween(TITLE_FADE_MILLIS))
         ) {
-            MovieCardLoading()
+            MovieTicketLoading()
         }
 
         val loadedTitles = titles
         val shownTitles = loadedTitles.orEmpty().shownIn(openView, searchText)
-        val shownTitleIds = shownTitles.map { it.id }
+        val titlesUpToLimit = shownTitles.takeLoaded(loadedTitleCountOf(ALL_TITLES_GROUP), titleIdsAddedHere)
+        val titleIdsUpToLimit = titlesUpToLimit.map { it.id }
         val titleKeysInWatchlist = loadedTitles.orEmpty().mapNotNullTo(HashSet()) { it.titleKey() }
         val watchlistAdder = remember(titleKeysInWatchlist, isLoadingNewTitle, block.watchlistNoteId) {
             WatchlistAdder(
@@ -258,16 +279,19 @@ fun WatchlistBlockView(
                     statuses = openView.boardStatuses(),
                     movieEditor = movieEditor,
                     inSelectionMode = inSelectionMode,
-                    onToggleSelection = onToggleSelection
+                    onToggleSelection = onToggleSelection,
+                    loadedCountOf = { status -> loadedTitleCountOf(status.name) },
+                    onLoadMore = { status -> loadMoreTitles(status.name) },
+                    alwaysShownTitleIds = titleIdsAddedHere
                 )
                 openView.layout == WatchlistView.GALLERY -> WatchlistGallery(
-                    titles = shownTitles,
+                    titles = titlesUpToLimit,
                     movieEditor = movieEditor,
                     inSelectionMode = inSelectionMode,
                     onToggleSelection = onToggleSelection,
                     titleSelection = titleSelection
                 )
-                else -> shownTitles.forEach { title ->
+                else -> titlesUpToLimit.forEach { title ->
                     key(title.id) {
                         val isNewlyAdded = title.id == lastAddedBlockId
                         val appearance = remember { MutableTransitionState(!isNewlyAdded).apply { targetState = true } }
@@ -282,14 +306,37 @@ fun WatchlistBlockView(
                                 inSelectionMode = inSelectionMode,
                                 onToggleSelection = onToggleSelection,
                                 onRemove = { editor.removeTitle(block.watchlistNoteId, title.id) },
-                                selection = if (inSelectionMode) null else titleSelection.forTitle(title.id, shownTitleIds),
+                                selection = if (inSelectionMode) null else titleSelection.forTitle(title.id, titleIdsUpToLimit),
                                 runAfterKeyboardCloses = runAfterKeyboardCloses
                             )
                         }
                     }
                 }
             }
+            if (openView.layout != WatchlistView.BOARD && titlesUpToLimit.size < shownTitles.size) {
+                WatchlistLoadMoreButton(onClick = { loadMoreTitles(ALL_TITLES_GROUP) })
+            }
         }
+    }
+}
+
+@Composable
+internal fun WatchlistLoadMoreButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.arrow_down),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(7.dp))
+        Text(text = "Load more", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
     }
 }
 
@@ -356,10 +403,10 @@ private fun WatchlistTitle(
     val loadingBlockIds by movieEditor.loadingBlockIds.collectAsState()
     val details = title.details ?: return
     if (title.id in loadingBlockIds) {
-        MovieCardLoading()
+        MovieTicketLoading()
         return
     }
-    MovieCard(
+    MovieTicketCard(
         block = title,
         details = details,
         editor = movieEditor,
@@ -368,12 +415,8 @@ private fun WatchlistTitle(
         onDelete = onRemove,
         runAfterKeyboardCloses = runAfterKeyboardCloses,
         isInWatchlist = true,
-        selection = selection,
-        modifier = if (isNewlyAdded) {
-            Modifier.border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), DefaultBlockShape)
-        } else {
-            Modifier
-        }
+        isNewlyAdded = isNewlyAdded,
+        selection = selection
     )
 }
 

@@ -1,5 +1,6 @@
 package com.emberr.domain.movie
 
+import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.WatchlistFilterField
@@ -8,6 +9,9 @@ import com.emberr.domain.model.WatchlistViewSettings
 import com.emberr.domain.table.DeviceTableLayout
 
 const val DEFAULT_WATCHLIST_VIEW_ID = "default-list"
+
+fun List<MovieBlock>.takeLoaded(loadedCount: Int, alwaysShownTitleIds: Collection<String>): List<MovieBlock> =
+    filterIndexed { position, title -> position < loadedCount || title.id in alwaysShownTitleIds }
 
 fun WatchlistBlock.allViews(): List<WatchlistViewSettings> =
     views.ifEmpty {

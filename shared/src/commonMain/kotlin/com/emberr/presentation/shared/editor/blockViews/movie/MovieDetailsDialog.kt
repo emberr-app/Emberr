@@ -1,7 +1,6 @@
 package com.emberr.presentation.shared.editor.blockViews.movie
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
@@ -130,11 +129,6 @@ private val CompanyLogoShape = RoundedCornerShape(4.dp)
 private val CompanyLogoWidth = 48.dp
 private val CompanyLogoHeight = 24.dp
 private val CompanyChipHeight = 32.dp
-private val DialogScrim = Brush.verticalGradient(
-    0f to Color.Black.copy(alpha = 0.5f),
-    0.35f to Color.Black.copy(alpha = 0.7f),
-    1f to Color.Black.copy(alpha = 0.85f)
-)
 private const val MAXIMUM_STAR_HALVES = 10
 private const val SKELETON_FACT_ROWS = 4
 private val BackdropFade = Brush.verticalGradient(0.5f to Color.Black, 1f to Color.Transparent)
@@ -153,36 +147,21 @@ internal data class DetailsColors(
     val panel: Color,
     val chipBackground: Color,
     val chipText: Color,
-    val chipBorder: Color?,
     val emptyStar: Color,
     val avatarBackground: Color
 )
 
 @Composable
-private fun detailsColors(isOnPoster: Boolean): DetailsColors =
-    if (isOnPoster) {
-        DetailsColors(
-            text = Color.White,
-            secondaryText = Color.White.copy(alpha = 0.7f),
-            panel = Color.White.copy(alpha = 0.08f),
-            chipBackground = Color.White.copy(alpha = 0.12f),
-            chipText = Color.White,
-            chipBorder = Color.White.copy(alpha = 0.24f),
-            emptyStar = Color.White.copy(alpha = 0.22f),
-            avatarBackground = Color.White.copy(alpha = 0.14f)
-        )
-    } else {
-        DetailsColors(
-            text = MaterialTheme.colorScheme.onSurface,
-            secondaryText = MaterialTheme.colorScheme.outline,
-            panel = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
-            chipBackground = chipContainerColor(),
-            chipText = MaterialTheme.colorScheme.onSurface,
-            chipBorder = null,
-            emptyStar = chipContainerColor(),
-            avatarBackground = chipContainerColor()
-        )
-    }
+private fun detailsColors(): DetailsColors =
+    DetailsColors(
+        text = MaterialTheme.colorScheme.onSurface,
+        secondaryText = MaterialTheme.colorScheme.outline,
+        panel = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
+        chipBackground = chipContainerColor(),
+        chipText = MaterialTheme.colorScheme.onSurface,
+        emptyStar = chipContainerColor(),
+        avatarBackground = chipContainerColor()
+    )
 
 @Composable
 internal fun MovieDetailsDialog(
@@ -202,8 +181,7 @@ internal fun MovieDetailsDialog(
         } else {
             MaterialTheme.colorScheme.background
         }
-        val hasPoster = details.hasPoster
-        val colors = detailsColors(isOnPoster = hasPoster)
+        val colors = detailsColors()
         val horizontalPadding = if (isDesktopPlatform) 32.dp else 24.dp
         val hazeState = remember { HazeState() }
         var selectedTab by remember { mutableStateOf(MovieDetailsTab.OVERVIEW) }
@@ -238,7 +216,7 @@ internal fun MovieDetailsDialog(
                     .heightIn(max = if (isDesktopPlatform) 720.dp else Dp.Unspecified)
                     .safeDrawingPadding()
                     .clip(DialogShape)
-                    .background(if (hasPoster) PosterBackdropBaseColor else dialogBackgroundColor)
+                    .background(dialogBackgroundColor)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -246,9 +224,6 @@ internal fun MovieDetailsDialog(
                     )
             ) {
                 Box(modifier = Modifier.matchParentSize().hazeSource(hazeState)) {
-                    if (hasPoster) {
-                        BlurredPosterBackdrop(details = details, blurRadius = 60.dp, scrim = DialogScrim)
-                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -332,7 +307,6 @@ internal fun MovieDetailsDialog(
                     MovieTrailerButton(
                         trailer = trailer,
                         hazeState = hazeState,
-                        isOnPoster = hasPoster,
                         textColor = colors.text,
                         modifier = Modifier.align(Alignment.TopStart).padding(14.dp)
                     )
@@ -351,7 +325,7 @@ internal fun MovieDetailsDialog(
                         bgColor = Color.Transparent,
                         tint = colors.text,
                         hazeState = hazeState,
-                        hazeStyle = if (hasPoster) EmberrBlur.OnImage else EmberrBlur.Regular,
+                        hazeStyle = EmberrBlur.Regular,
                         shadowElevation = EmberrShadowElevation.None,
                         tooltip = "Close",
                         onClick = onDismiss
@@ -516,7 +490,6 @@ private fun MovieFactChip(text: String, colors: DetailsColors) {
         modifier = Modifier
             .clip(FactShape)
             .background(colors.chipBackground)
-            .then(if (colors.chipBorder != null) Modifier.border(1.dp, colors.chipBorder, FactShape) else Modifier)
             .padding(horizontal = 10.dp, vertical = 4.dp)
     )
 }
@@ -588,7 +561,6 @@ private fun MovieAddToWatchlistButton(
 private fun MovieTrailerButton(
     trailer: MovieTrailer,
     hazeState: HazeState,
-    isOnPoster: Boolean,
     textColor: Color,
     modifier: Modifier = Modifier
 ) {
@@ -598,7 +570,7 @@ private fun MovieTrailerButton(
             .height(TrailerButtonHeight)
             .emberrBorder(TrailerButtonShape)
             .clip(TrailerButtonShape)
-            .emberrBlur(hazeState, if (isOnPoster) EmberrBlur.OnImage else EmberrBlur.Regular)
+            .emberrBlur(hazeState, EmberrBlur.Regular)
             .clickable { uriHandler.openUri(trailer.youtubeLink) }
             .padding(horizontal = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -985,7 +957,6 @@ private fun MovieCompanyChip(company: MovieNamedLogo, colors: DetailsColors) {
             .height(CompanyChipHeight)
             .clip(FactShape)
             .background(colors.chipBackground)
-            .then(if (colors.chipBorder != null) Modifier.border(1.dp, colors.chipBorder, FactShape) else Modifier)
             .padding(start = if (hasLogo) 4.dp else 10.dp, end = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically

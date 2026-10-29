@@ -4,8 +4,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.hoverable
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -47,6 +44,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import coil3.compose.AsyncImagePainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -59,7 +57,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -69,19 +66,15 @@ import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieSearchResult
 import com.emberr.domain.model.WatchStatus
-import com.emberr.domain.model.hasPoster
 import com.emberr.domain.model.titleKey
 import com.emberr.domain.movie.TmdbTooManyRequestsException
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.SelectedOptionBackground
-import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import com.emberr.ui.theme.LocalAppIsDark
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.film
-import emberr.shared.generated.resources.maximize_2
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.star
@@ -106,10 +99,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import emberr.shared.generated.resources.x
 import com.emberr.presentation.shared.components.customEmberrShadow
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.draw.shadow
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.runtime.Stable
 import androidx.compose.foundation.layout.navigationBarsPadding
 import com.emberr.presentation.shared.components.EmberrBottomSheet
@@ -139,15 +128,6 @@ private const val PART_FADE_IN_MILLIS = 220
 private const val PART_FADE_OUT_MILLIS = 120
 private const val PART_RESIZE_MILLIS = 260
 
-private val CardPosterWidthDesktop = 88.dp
-private val CardPosterWidthPhone = 76.dp
-private val CardPadding = 16.dp
-private val CardContentGap = 16.dp
-internal val CardScrim = Brush.horizontalGradient(
-    0f to Color.Black.copy(alpha = 0.35f),
-    0.38f to Color.Black.copy(alpha = 0.62f),
-    1f to Color.Black.copy(alpha = 0.72f)
-)
 private val ResultPosterWidth = 30.dp
 private val PhoneResultPosterWidth = 44.dp
 private val PhoneSearchFieldSpace = 78.dp
@@ -204,9 +184,9 @@ fun MovieBlockView(
             }
         ) { part ->
             when (part) {
-                MovieBlockPart.LOADING -> MovieCardLoading()
+                MovieBlockPart.LOADING -> MovieTicketLoading()
                 MovieBlockPart.CARD -> block.details?.let { shownDetails ->
-                    MovieCard(
+                    MovieTicketCard(
                         block = block,
                         details = shownDetails,
                         editor = editor,
@@ -707,266 +687,6 @@ private fun MovieSearchResultsMessage(text: String) {
 }
 
 @Composable
-internal fun MovieCardLoading() {
-    val progress = rememberShimmerProgress()
-    val shimmerColors = ShimmerColors(
-        base = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
-        highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(DefaultBlockShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(CardPadding),
-        horizontalArrangement = Arrangement.spacedBy(CardContentGap)
-    ) {
-        Box(
-            modifier = Modifier
-                .width(cardPosterWidth())
-                .aspectRatio(2f / 3f)
-                .clip(DefaultBlockShape)
-                .shimmer(progress, shimmerColors)
-        )
-        Column(
-            modifier = Modifier.weight(1f).padding(top = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp)
-        ) {
-            listOf(0.45f to 16.dp, 0.6f to 12.dp, 0.35f to 12.dp).forEach { (widthFraction, height) ->
-                MovieSkeletonLine(widthFraction = widthFraction, height = height, progress = progress, colors = shimmerColors)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-internal fun MovieCard(
-    block: MovieBlock,
-    details: MovieDetails,
-    editor: MovieBlockEditor?,
-    inSelectionMode: Boolean,
-    onToggleSelection: () -> Unit,
-    onDelete: () -> Unit,
-    runAfterKeyboardCloses: (() -> Unit) -> Unit,
-    modifier: Modifier = Modifier,
-    isInWatchlist: Boolean = false,
-    selection: TitleCardSelection? = null
-) {
-    val hoverSource = remember { MutableInteractionSource() }
-    val isHovered by hoverSource.collectIsHoveredAsState()
-    var isMenuOpen by remember { mutableStateOf(false) }
-    var isDetailsOpen by remember { mutableStateOf(false) }
-    val openDetails = if (inSelectionMode) onToggleSelection else ({ runAfterKeyboardCloses { isDetailsOpen = true } })
-
-    if (isDetailsOpen) {
-        MovieDetailsDialog(
-            block = block,
-            details = details,
-            editor = editor,
-            onDismiss = { isDetailsOpen = false }
-        )
-    }
-
-    val hasPoster = details.hasPoster
-    val colors = movieCardColors(isOnPoster = hasPoster)
-    val posterWidth = cardPosterWidth()
-    val chipHeight = movieChipHeight()
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(
-                if (selection?.isSelected == true) {
-                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, DefaultBlockShape)
-                } else {
-                    Modifier
-                }
-            )
-            .clip(DefaultBlockShape)
-            .background(if (hasPoster) PosterBackdropBaseColor else MaterialTheme.colorScheme.surface)
-            .hoverable(hoverSource)
-            .titleSelectionMouseClicks(selection)
-            .then(
-                if (selection != null) {
-                    Modifier.combinedClickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = { if (selection.isSelecting) selection.onToggle() },
-                        onLongClick = { if (selection.isSelecting) selection.onToggle() else selection.onStartSelecting() }
-                    )
-                } else {
-                    Modifier
-                }
-            )
-    ) {
-        if (hasPoster) {
-            BlurredPosterBackdrop(details = details, blurRadius = 30.dp, scrim = CardScrim)
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(CardPadding),
-            horizontalArrangement = Arrangement.spacedBy(CardContentGap)
-        ) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .then(if (hasPoster) Modifier.shadow(8.dp, DefaultBlockShape) else Modifier)
-                    .clip(DefaultBlockShape)
-                    .clickable(onClick = openDetails)
-            ) {
-                MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = PosterCornerRadius)
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = posterWidth * 1.5f),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(modifier = Modifier.padding(end = 28.dp).basicMarquee(iterations = Int.MAX_VALUE)) {
-                        Text(
-                            text = details.title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = if (block.isWatched) colors.secondary else colors.title,
-                            textDecoration = if (block.isWatched) TextDecoration.LineThrough else null,
-                            maxLines = 1,
-                            modifier = Modifier.alignByBaseline()
-                        )
-                        if (details.yearText.isNotBlank()) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = details.yearText,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colors.secondary,
-                                maxLines = 1,
-                                modifier = Modifier.alignByBaseline()
-                            )
-                        }
-                    }
-                    MovieCardFacts(details = details, colors = colors)
-                    if (details.genres.isNotEmpty()) {
-                        Text(
-                            text = details.genres.joinToString(", "),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.secondary,
-                            maxLines = 1,
-                            modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
-                        )
-                    }
-                }
-                FlowRow(
-                    modifier = Modifier.padding(top = 14.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    MovieChip(
-                        label = if (isDesktopPlatform) "Show details" else null,
-                        onClick = openDetails,
-                        modifier = Modifier.height(chipHeight),
-                        background = colors.chipBackground,
-                        contentColor = colors.chipContent
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.maximize_2),
-                            contentDescription = if (isDesktopPlatform) null else "Show details",
-                            tint = colors.chipContent.copy(alpha = 0.8f),
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                    MovieChip(
-                        label = block.watchStatus.label,
-                        onClick = when {
-                            editor == null -> null
-                            inSelectionMode -> onToggleSelection
-                            else -> ({ editor.showNextWatchStatus(block) })
-                        },
-                        modifier = Modifier.height(chipHeight),
-                        background = colors.chipBackground,
-                        contentColor = colors.chipContent
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .background(block.watchStatus.dotColor(), CircleShape)
-                        )
-                    }
-                }
-            }
-        }
-
-        if (selection?.isSelecting == true) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = selection.onToggle
-                    )
-            )
-            TitleSelectionCheckbox(
-                isSelected = selection.isSelected,
-                modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)
-            )
-        } else if (editor != null) {
-            Box(modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
-                if (!isDesktopPlatform || isHovered || isMenuOpen) {
-                    IconTooltip(text = "Options") {
-                        Icon(
-                            painter = painterResource(Res.drawable.ellipsis),
-                            contentDescription = "Options",
-                            tint = colors.icon,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable { runAfterKeyboardCloses { isMenuOpen = true } }
-                                .padding(6.dp)
-                                .size(16.dp)
-                        )
-                    }
-                }
-                MovieOptionsMenu(
-                    expanded = isMenuOpen,
-                    title = details.title,
-                    onDismiss = { isMenuOpen = false },
-                    onChangeTitle = if (isInWatchlist) null else ({ editor.changeTitle(block.id) }),
-                    onRefreshDetails = { editor.refreshDetails(block.id, details) },
-                    deleteLabel = if (isInWatchlist) "Remove from watchlist" else "Delete block",
-                    onDelete = onDelete
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun MovieCardFacts(details: MovieDetails, colors: MovieCardColors) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = details.kind.label,
-            style = MaterialTheme.typography.labelSmall,
-            color = colors.chipContent,
-            maxLines = 1,
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(colors.chipBackground)
-                .padding(horizontal = 6.dp)
-        )
-        details.lengthText()?.let { length ->
-            Text(text = length, style = MaterialTheme.typography.labelSmall, color = colors.secondary, maxLines = 1)
-        }
-        details.tmdbRating?.let { rating -> TmdbRating(rating = rating, numberColor = colors.secondary) }
-    }
-}
-
-@Composable
 internal fun TmdbRating(rating: Double, numberColor: Color = MaterialTheme.colorScheme.outline) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
@@ -1021,7 +741,7 @@ internal fun movieChipHeight(): Dp =
     with(LocalDensity.current) { MaterialTheme.typography.labelSmall.lineHeight.toDp() } + 12.dp
 
 @Composable
-private fun MovieOptionsMenu(
+internal fun MovieOptionsMenu(
     expanded: Boolean,
     title: String,
     onDismiss: () -> Unit,
@@ -1045,7 +765,13 @@ private fun MovieOptionsMenu(
 }
 
 @Composable
-internal fun MoviePoster(filePath: String?, url: String?, width: Dp, cornerRadius: Dp) {
+internal fun MoviePoster(
+    filePath: String?,
+    url: String?,
+    width: Dp,
+    cornerRadius: Dp,
+    onImageLoaded: (AsyncImagePainter.State.Success) -> Unit = {}
+) {
     var isImageShown by remember(filePath, url) { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -1064,7 +790,13 @@ internal fun MoviePoster(filePath: String?, url: String?, width: Dp, cornerRadiu
             )
         }
         if (filePath != null || url != null) {
-            MovieImage(filePath = filePath, url = url, modifier = Modifier.fillMaxSize(), onLoaded = { isImageShown = true })
+            MovieImage(
+                filePath = filePath,
+                url = url,
+                modifier = Modifier.fillMaxSize(),
+                onLoaded = { isImageShown = true },
+                onImageLoaded = onImageLoaded
+            )
         }
     }
 }
@@ -1072,8 +804,6 @@ internal fun MoviePoster(filePath: String?, url: String?, width: Dp, cornerRadiu
 @Composable
 internal fun chipContainerColor(): Color =
     if (!isDesktopPlatform || LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFD8D8D8)
-
-private fun cardPosterWidth(): Dp = if (isDesktopPlatform) CardPosterWidthDesktop else CardPosterWidthPhone
 
 @Composable
 internal fun WatchStatus.dotColor(): Color {
