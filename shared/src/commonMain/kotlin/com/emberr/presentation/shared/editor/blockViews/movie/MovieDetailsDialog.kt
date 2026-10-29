@@ -30,12 +30,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,6 +54,8 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -59,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -68,7 +74,9 @@ import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.MovieNamedLogo
 import com.emberr.domain.model.MovieTrailer
+import com.emberr.domain.model.MovieTitleExtras
 import com.emberr.domain.model.MovieWatchProviders
+import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.model.allProviders
 import com.emberr.domain.model.hasBackdrop
 import com.emberr.domain.model.hasPoster
@@ -78,10 +86,12 @@ import com.emberr.domain.model.youtubeLink
 import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTab
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
@@ -114,7 +124,10 @@ private val CastPortraitMinWidthPhone = 88.dp
 private val CastColumnGap = 24.dp
 private val CastRowGap = 28.dp
 private val BackdropHeightDesktop = 320.dp
-private val BackdropHeightPhone = 230.dp
+private val DesktopHorizontalPadding = 32.dp
+private val DetailsSheetPadding = 20.dp
+private val StatusBarHeight = 50.dp
+private val StatusBarOuterPadding = 14.dp
 private val BackdropContentOverlap = 96.dp
 private val BackdropCropAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.6f)
 private val SectionGap = 32.dp
@@ -172,6 +185,17 @@ internal fun MovieDetailsDialog(
     isPreview: Boolean = false,
     liveLoad: LiveTmdbLoadState<*>? = null
 ) {
+    if (!isDesktopPlatform) {
+        MovieDetailsSheet(
+            block = block,
+            details = details,
+            editor = editor,
+            onDismiss = onDismiss,
+            isPreview = isPreview,
+            liveLoad = liveLoad
+        )
+        return
+    }
     Dialog(
         onDismissRequest = onDismiss,
         properties = fullScreenDialogProperties()
@@ -182,20 +206,10 @@ internal fun MovieDetailsDialog(
             MaterialTheme.colorScheme.background
         }
         val colors = detailsColors()
-        val horizontalPadding = if (isDesktopPlatform) 32.dp else 24.dp
         val hazeState = remember { HazeState() }
-        var selectedTab by remember { mutableStateOf(MovieDetailsTab.OVERVIEW) }
+        val tabs = rememberMovieDetailsTabs(details, liveLoad)
         var openCastMember by remember { mutableStateOf<MovieCastMember?>(null) }
         var titleToPreview by remember { mutableStateOf<MovieTitleToPreview?>(null) }
-        var hasOpenedLiveTab by remember { mutableStateOf(false) }
-        val shownTabs = shownTabsOf(details)
-        val shownTab = selectedTab.takeIf { it in shownTabs } ?: shownTabs.firstOrNull()
-        val titleSource = koinInject<MovieTitleSource>()
-        val liveExtras = if (liveLoad == null && (hasOpenedLiveTab || shownTab?.needsLiveExtras == true)) {
-            rememberLiveTmdbLoad(details.titleKey()) { titleSource.loadTitleExtras(details.tmdbId, details.kind) }
-        } else {
-            null
-        }
         val watchlistAdder = if (isPreview) LocalWatchlistAdder.current else null
 
         Box(
@@ -210,10 +224,10 @@ internal fun MovieDetailsDialog(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(if (isDesktopPlatform) 0.6f else 0.94f)
+                    .fillMaxWidth(0.6f)
                     .widthIn(max = 760.dp)
-                    .fillMaxHeight(if (isDesktopPlatform) 0.8f else 0.92f)
-                    .heightIn(max = if (isDesktopPlatform) 720.dp else Dp.Unspecified)
+                    .fillMaxHeight(0.8f)
+                    .heightIn(max = 720.dp)
                     .safeDrawingPadding()
                     .clip(DialogShape)
                     .background(dialogBackgroundColor)
@@ -229,15 +243,14 @@ internal fun MovieDetailsDialog(
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                     ) {
-                        val backdropHeight = if (isDesktopPlatform) BackdropHeightDesktop else BackdropHeightPhone
                         if (details.hasBackdrop) {
-                            MovieBackdropBanner(details = details, height = backdropHeight)
+                            MovieBackdropBanner(details = details, height = BackdropHeightDesktop)
                         }
                         Column(
                             modifier = Modifier.padding(
-                                start = horizontalPadding,
-                                end = horizontalPadding,
-                                top = if (details.hasBackdrop) backdropHeight - BackdropContentOverlap else 72.dp,
+                                start = DesktopHorizontalPadding,
+                                end = DesktopHorizontalPadding,
+                                top = if (details.hasBackdrop) BackdropHeightDesktop - BackdropContentOverlap else 72.dp,
                                 bottom = 32.dp
                             ),
                             verticalArrangement = Arrangement.spacedBy(SectionGap)
@@ -250,55 +263,14 @@ internal fun MovieDetailsDialog(
                                 showsWatchState = !isPreview,
                                 watchlistAdder = watchlistAdder
                             )
-                            val hasRatingPanelContent = !isPreview || details.tmdbRating != null || watchlistAdder != null
-                            if (!isDesktopPlatform && hasRatingPanelContent) {
-                                MovieRatingPanel(
-                                    block = block,
-                                    details = details,
-                                    editor = editor,
-                                    colors = colors,
-                                    showsWatchState = !isPreview,
-                                    watchlistAdder = watchlistAdder
-                                )
-                            }
-                            if (liveLoad?.load == LiveTmdbLoad.Loading) {
-                                MovieOverviewSkeleton(colors = colors)
-                            } else if (liveLoad != null) {
-                                LiveTmdbLoadMessage(state = liveLoad, textColor = colors.text, chipBackground = colors.chipBackground)
-                            } else if (shownTab != null) {
-                                Column(verticalArrangement = Arrangement.spacedBy(TabContentGap)) {
-                                    if (shownTabs.size > 1) {
-                                        MovieDetailsTabRow(
-                                            tabs = shownTabs,
-                                            selectedTab = shownTab,
-                                            contentColor = colors.text,
-                                            onSelectTab = { tab ->
-                                                selectedTab = tab
-                                                if (tab.needsLiveExtras) hasOpenedLiveTab = true
-                                            }
-                                        )
-                                    }
-                                    when (shownTab) {
-                                        MovieDetailsTab.OVERVIEW -> MovieOverviewTab(details = details, colors = colors)
-                                        MovieDetailsTab.CAST -> MovieCastGrid(
-                                            cast = details.cast,
-                                            colors = colors,
-                                            onOpenPerson = { member -> openCastMember = member }
-                                        )
-                                        MovieDetailsTab.SEASONS -> MovieSeasonsTab(details = details, colors = colors)
-                                        MovieDetailsTab.MORE_LIKE_THIS -> liveExtras?.let { extras ->
-                                            MovieMoreLikeThisTab(
-                                                liveExtras = extras,
-                                                colors = colors,
-                                                onOpenTitle = { result -> titleToPreview = result.toTitleToPreview() }
-                                            )
-                                        }
-                                        MovieDetailsTab.REVIEWS -> liveExtras?.let { extras ->
-                                            MovieReviewsTab(liveExtras = extras, colors = colors)
-                                        }
-                                    }
-                                }
-                            }
+                            MovieDetailsBody(
+                                details = details,
+                                colors = colors,
+                                liveLoad = liveLoad,
+                                tabs = tabs,
+                                onOpenPerson = { member -> openCastMember = member },
+                                onOpenTitle = { title -> titleToPreview = title }
+                            )
                         }
                     }
                 }
@@ -334,12 +306,269 @@ internal fun MovieDetailsDialog(
             }
         }
 
-        openCastMember?.let { member ->
-            member.personId?.let { personId ->
-                MoviePersonSheet(member = member, personId = personId, onDismiss = { openCastMember = null })
+        MovieDetailsPopups(
+            openCastMember = openCastMember,
+            titleToPreview = titleToPreview,
+            onClosePerson = { openCastMember = null },
+            onClosePreview = { titleToPreview = null }
+        )
+    }
+}
+
+@Composable
+private fun MovieDetailsSheet(
+    block: MovieBlock,
+    details: MovieDetails,
+    editor: MovieBlockEditor?,
+    onDismiss: () -> Unit,
+    isPreview: Boolean,
+    liveLoad: LiveTmdbLoadState<*>?
+) {
+    val colors = detailsColors()
+    val tabs = rememberMovieDetailsTabs(details, liveLoad)
+    var openCastMember by remember { mutableStateOf<MovieCastMember?>(null) }
+    var titleToPreview by remember { mutableStateOf<MovieTitleToPreview?>(null) }
+    val watchlistAdder = if (isPreview) LocalWatchlistAdder.current else null
+    val contentHazeState = remember { HazeState() }
+    var statusBarHeightPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+
+    EmberrBottomSheet(
+        expanded = true,
+        onDismiss = onDismiss,
+        contentHorizontalPadding = 0.dp,
+        scrollsContent = false
+    ) { closeAnd ->
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hazeSource(contentHazeState)
+                    .verticalScroll(rememberScrollState())
+                    .padding(
+                        start = DetailsSheetPadding,
+                        end = DetailsSheetPadding,
+                        top = DetailsSheetPadding,
+                        bottom = with(density) { statusBarHeightPx.toDp() } + DetailsSheetPadding
+                    )
+                    .then(if (isPreview) Modifier.navigationBarsPadding() else Modifier),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                MovieDetailsTicket(
+                    details = details,
+                    facts = ticketFactsOf(details),
+                    background = colors.panel,
+                    onClose = { closeAnd {} }
+                )
+                if (!isPreview) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Your rating",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = colors.text,
+                            modifier = Modifier.weight(1f)
+                        )
+                        StarRatingPicker(
+                            ratingHalfStars = block.ratingHalfStars,
+                            emptyColor = colors.emptyStar,
+                            onRate = editor?.let { { halfStars: Int? -> it.setRating(block, halfStars) } }
+                        )
+                    }
+                }
+                val trailer = details.trailer
+                if (trailer != null || watchlistAdder != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        trailer?.let { MovieTrailerChip(trailer = it, colors = colors) }
+                        watchlistAdder?.let { adder -> MovieAddToWatchlistButton(details = details, adder = adder, colors = colors) }
+                    }
+                }
+                MovieDetailsBody(
+                    details = details,
+                    colors = colors,
+                    liveLoad = liveLoad,
+                    tabs = tabs,
+                    onOpenPerson = { member -> openCastMember = member },
+                    onOpenTitle = { title -> titleToPreview = title }
+                )
+            }
+            if (!isPreview) {
+                WatchStatusBar(
+                    selectedStatus = block.watchStatus,
+                    colors = colors,
+                    hazeState = contentHazeState,
+                    onSelect = editor?.let { { status: WatchStatus -> it.setWatchStatus(block, status) } },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .onSizeChanged { statusBarHeightPx = it.height }
+                        .navigationBarsPadding()
+                        .padding(StatusBarOuterPadding)
+                )
             }
         }
-        titleToPreview?.let { title -> MovieTitlePreviewDialog(title = title, onDismiss = { titleToPreview = null }) }
+    }
+
+    MovieDetailsPopups(
+        openCastMember = openCastMember,
+        titleToPreview = titleToPreview,
+        onClosePerson = { openCastMember = null },
+        onClosePreview = { titleToPreview = null }
+    )
+}
+
+@Stable
+private class MovieDetailsTabs(
+    val shown: List<MovieDetailsTab>,
+    val selected: MovieDetailsTab?,
+    val liveExtras: LiveTmdbLoadState<MovieTitleExtras>?,
+    val onSelect: (MovieDetailsTab) -> Unit
+)
+
+@Composable
+private fun rememberMovieDetailsTabs(details: MovieDetails, liveLoad: LiveTmdbLoadState<*>?): MovieDetailsTabs {
+    var selectedTab by remember { mutableStateOf(MovieDetailsTab.OVERVIEW) }
+    var hasOpenedLiveTab by remember { mutableStateOf(false) }
+    val shownTabs = shownTabsOf(details)
+    val shownTab = selectedTab.takeIf { it in shownTabs } ?: shownTabs.firstOrNull()
+    val titleSource = koinInject<MovieTitleSource>()
+    val liveExtras = if (liveLoad == null && (hasOpenedLiveTab || shownTab?.needsLiveExtras == true)) {
+        rememberLiveTmdbLoad(details.titleKey()) { titleSource.loadTitleExtras(details.tmdbId, details.kind) }
+    } else {
+        null
+    }
+    return MovieDetailsTabs(
+        shown = shownTabs,
+        selected = shownTab,
+        liveExtras = liveExtras,
+        onSelect = { tab ->
+            selectedTab = tab
+            if (tab.needsLiveExtras) hasOpenedLiveTab = true
+        }
+    )
+}
+
+@Composable
+private fun MovieDetailsBody(
+    details: MovieDetails,
+    colors: DetailsColors,
+    liveLoad: LiveTmdbLoadState<*>?,
+    tabs: MovieDetailsTabs,
+    onOpenPerson: (MovieCastMember) -> Unit,
+    onOpenTitle: (MovieTitleToPreview) -> Unit
+) {
+    val shownTab = tabs.selected
+    if (liveLoad?.load == LiveTmdbLoad.Loading) {
+        MovieOverviewSkeleton(colors = colors)
+    } else if (liveLoad != null) {
+        LiveTmdbLoadMessage(state = liveLoad, textColor = colors.text, chipBackground = colors.chipBackground)
+    } else if (shownTab != null) {
+        Column(verticalArrangement = Arrangement.spacedBy(TabContentGap)) {
+            if (tabs.shown.size > 1) {
+                MovieDetailsTabRow(
+                    tabs = tabs.shown,
+                    selectedTab = shownTab,
+                    contentColor = colors.text,
+                    selectedBackground = colors.chipBackground,
+                    onSelectTab = tabs.onSelect
+                )
+            }
+            when (shownTab) {
+                MovieDetailsTab.OVERVIEW -> MovieOverviewTab(details = details, colors = colors)
+                MovieDetailsTab.CAST -> MovieCastGrid(cast = details.cast, colors = colors, onOpenPerson = onOpenPerson)
+                MovieDetailsTab.SEASONS -> MovieSeasonsTab(details = details, colors = colors)
+                MovieDetailsTab.MORE_LIKE_THIS -> tabs.liveExtras?.let { extras ->
+                    MovieMoreLikeThisTab(
+                        liveExtras = extras,
+                        colors = colors,
+                        onOpenTitle = { result -> onOpenTitle(result.toTitleToPreview()) }
+                    )
+                }
+                MovieDetailsTab.REVIEWS -> tabs.liveExtras?.let { extras ->
+                    MovieReviewsTab(liveExtras = extras, colors = colors)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MovieDetailsPopups(
+    openCastMember: MovieCastMember?,
+    titleToPreview: MovieTitleToPreview?,
+    onClosePerson: () -> Unit,
+    onClosePreview: () -> Unit
+) {
+    openCastMember?.let { member ->
+        member.personId?.let { personId ->
+            MoviePersonSheet(member = member, personId = personId, onDismiss = onClosePerson)
+        }
+    }
+    titleToPreview?.let { title -> MovieTitlePreviewDialog(title = title, onDismiss = onClosePreview) }
+}
+
+@Composable
+private fun WatchStatusBar(
+    selectedStatus: WatchStatus,
+    colors: DetailsColors,
+    hazeState: HazeState,
+    onSelect: ((WatchStatus) -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(StatusBarHeight)
+            .emberrBorder(CircleShape)
+            .customEmberrShadow(CircleShape)
+            .clip(CircleShape)
+            .emberrBlur(hazeState, EmberrBlur.Regular)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        WatchStatus.entries.forEach { status ->
+            val isSelected = status == selectedStatus
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(if (isSelected) colors.chipBackground else Color.Transparent)
+                    .then(if (onSelect != null) Modifier.clickable { onSelect(status) } else Modifier)
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.size(8.dp).background(status.dotColor(), CircleShape))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = status.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+                    color = if (isSelected) colors.text else colors.secondaryText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MovieTrailerChip(trailer: MovieTrailer, colors: DetailsColors) {
+    val uriHandler = LocalUriHandler.current
+    MovieChip(
+        label = "Trailer",
+        onClick = { uriHandler.openUri(trailer.youtubeLink) },
+        modifier = Modifier.height(movieChipHeight()),
+        background = colors.chipBackground,
+        contentColor = colors.chipText
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.logo_youtube),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier.size(14.dp)
+        )
     }
 }
 
@@ -348,6 +577,7 @@ private fun MovieDetailsTabRow(
     tabs: List<MovieDetailsTab>,
     selectedTab: MovieDetailsTab,
     contentColor: Color,
+    selectedBackground: Color,
     onSelectTab: (MovieDetailsTab) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -363,6 +593,7 @@ private fun MovieDetailsTabRow(
                 label = tab.label,
                 isSelected = tab == selectedTab,
                 contentColor = contentColor,
+                selectedBackground = selectedBackground,
                 onClick = { onSelectTab(tab) }
             )
         }
@@ -414,69 +645,58 @@ private fun MovieDetailsHeader(
     showsWatchState: Boolean,
     watchlistAdder: WatchlistAdder?
 ) {
-    val posterWidth = if (isDesktopPlatform) 150.dp else 104.dp
-
-    val factChips: @Composable () -> Unit = {
-        val facts = headerFactsOf(details)
-        if (facts.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                facts.forEach { fact -> MovieFactChip(text = fact, colors = colors) }
-            }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Box(modifier = if (details.hasPoster) Modifier.shadow(16.dp, DefaultBlockShape) else Modifier) {
+            MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = 150.dp, cornerRadius = PosterCornerRadius)
         }
-    }
-
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) 24.dp else 18.dp),
-            verticalAlignment = Alignment.Bottom
+        Column(
+            modifier = Modifier.weight(1f).padding(end = 36.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(modifier = if (details.hasPoster) Modifier.shadow(16.dp, DefaultBlockShape) else Modifier) {
-                MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = posterWidth, cornerRadius = PosterCornerRadius)
+            Text(text = details.title, style = MaterialTheme.typography.titleLarge, color = colors.text)
+            if (details.tagline.isNotBlank()) {
+                Text(
+                    text = details.tagline,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontStyle = FontStyle.Italic,
+                    color = colors.secondaryText
+                )
             }
-            Column(
-                modifier = Modifier.weight(1f).padding(end = if (isDesktopPlatform) 36.dp else 0.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(text = details.title, style = MaterialTheme.typography.titleLarge, color = colors.text)
-                if (isDesktopPlatform) {
-                    if (details.tagline.isNotBlank()) {
-                        Text(
-                            text = details.tagline,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontStyle = FontStyle.Italic,
-                            color = colors.secondaryText
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    factChips()
-                    FlowRow(
-                        modifier = Modifier.padding(top = 14.dp),
-                        horizontalArrangement = Arrangement.spacedBy(32.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        MovieRatingItems(
-                            block = block,
-                            details = details,
-                            editor = editor,
-                            colors = colors,
-                            showsWatchState = showsWatchState
-                        )
-                    }
-                    watchlistAdder?.let { adder ->
-                        MovieAddToWatchlistButton(
-                            details = details,
-                            adder = adder,
-                            colors = colors,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
+            Spacer(modifier = Modifier.height(6.dp))
+            val facts = headerFactsOf(details)
+            if (facts.isNotEmpty()) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    facts.forEach { fact -> MovieFactChip(text = fact, colors = colors) }
                 }
             }
+            FlowRow(
+                modifier = Modifier.padding(top = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(32.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                MovieRatingItems(
+                    block = block,
+                    details = details,
+                    editor = editor,
+                    colors = colors,
+                    showsWatchState = showsWatchState
+                )
+            }
+            watchlistAdder?.let { adder ->
+                MovieAddToWatchlistButton(
+                    details = details,
+                    adder = adder,
+                    colors = colors,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
         }
-        if (!isDesktopPlatform) factChips()
     }
 }
 
@@ -492,40 +712,6 @@ private fun MovieFactChip(text: String, colors: DetailsColors) {
             .background(colors.chipBackground)
             .padding(horizontal = 10.dp, vertical = 4.dp)
     )
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun MovieRatingPanel(
-    block: MovieBlock,
-    details: MovieDetails,
-    editor: MovieBlockEditor?,
-    colors: DetailsColors,
-    showsWatchState: Boolean,
-    watchlistAdder: WatchlistAdder?
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(DefaultBlockShape)
-            .background(colors.panel)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(32.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            MovieRatingItems(
-                block = block,
-                details = details,
-                editor = editor,
-                colors = colors,
-                showsWatchState = showsWatchState
-            )
-        }
-        watchlistAdder?.let { adder -> MovieAddToWatchlistButton(details = details, adder = adder, colors = colors) }
-    }
 }
 
 @Composable
@@ -652,14 +838,14 @@ internal fun StarRatingPicker(ratingHalfStars: Int?, emptyColor: Color, onRate: 
             val halvesInThisStar = (filledHalves - starIndex * 2).coerceIn(0, 2)
             Box(modifier = Modifier.size(28.dp)) {
                 Icon(
-                    painter = painterResource(Res.drawable.star),
+                    imageVector = Icons.Filled.Star,
                     contentDescription = null,
                     tint = emptyColor,
                     modifier = Modifier.fillMaxSize()
                 )
                 if (halvesInThisStar > 0) {
                     Icon(
-                        painter = painterResource(Res.drawable.star),
+                        imageVector = Icons.Filled.Star,
                         contentDescription = null,
                         tint = RatingStarColor,
                         modifier = Modifier
@@ -1084,9 +1270,10 @@ private fun MovieCastPortrait(
     }
 }
 
-private fun headerFactsOf(details: MovieDetails): List<String> = listOfNotNull(
-    details.kind.label,
-    details.yearText,
+private fun headerFactsOf(details: MovieDetails): List<String> =
+    listOf(details.kind.label, details.yearText).filter { it.isNotBlank() } + ticketFactsOf(details)
+
+private fun ticketFactsOf(details: MovieDetails): List<String> = listOfNotNull(
     details.ageRating,
     details.lengthText(),
     details.episodeCount?.takeIf { details.kind == MovieKind.SHOW }?.let { episodes -> episodeCountText(episodes) },
