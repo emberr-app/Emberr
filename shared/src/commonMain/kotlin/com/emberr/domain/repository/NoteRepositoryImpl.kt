@@ -1048,9 +1048,9 @@ class NoteRepositoryImpl(
                 noteDao.getNotesByIdsIncludingTemplates(noteIds)
             }
             val parentsByDatabaseId = parentsOf(DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER, loadAnyParents) { it.shownDatabaseIdOrNull() }
-            val parentsByLinkedNoteId = parentsOf(LINKED_NOTE_BLOCK_JSON_MARKER, loadAnyParents) { (it as? LinkedNoteBlock)?.linkedNoteId } +
+            val parentsByLinkedOrWatchlistNoteId = parentsOf(LINKED_NOTE_BLOCK_JSON_MARKER, loadAnyParents) { (it as? LinkedNoteBlock)?.linkedNoteId } +
                 parentsOf(WatchlistCleanup.WATCHLIST_NOTE_ID_FIELD, loadAnyParents) { (it as? WatchlistBlock)?.watchlistNoteId }
-            notes.subNoteParentTitles(parentsByDatabaseId, parentsByLinkedNoteId)
+            notes.subNoteParentTitles(parentsByDatabaseId, parentsByLinkedOrWatchlistNoteId)
         }
 
     private fun NoteBlock.shownDatabaseIdOrNull(): String? = (this as? DatabaseBlock)?.takeUnless { it.holdsSharedSettings }?.databaseId
@@ -1246,10 +1246,10 @@ class NoteRepositoryImpl(
 
     private suspend fun shareNewestWatchStates(metadata: NoteMetadataEntity, blocks: List<NoteBlock>) {
         if (metadata.isTemplate || metadata.trashedAt != null) return
-        val movieBlocks = blocks.filterIsInstance<MovieBlock>().filter { !it.isDeleted && it.details != null }
-        if (movieBlocks.isEmpty()) return
-
+        val movieBlocks = blocks.filterIsInstance<MovieBlock>().filter { !it.isDeleted }
         val titleKeys = movieBlocks.mapNotNull { it.titleKey() }.distinct()
+        if (titleKeys.isEmpty()) return
+
         val linkedRows = movieBlockDao.getLinkedMovieBlocks(metadata.spaceId, titleKeys, exceptNoteId = metadata.noteId)
         if (linkedRows.isEmpty()) return
 
@@ -1276,7 +1276,7 @@ class NoteRepositoryImpl(
         val now = System.currentTimeMillis()
         val updatedBlocks = blocks.map { block ->
             if (block is MovieBlock && !block.isDeleted && block.isOlderThan(newestByTitle)) {
-                block.withWatchState(newestByTitle.getValue(block.titleKey()!!), now)
+                block.titleKey()?.let { titleKey -> block.withWatchState(newestByTitle.getValue(titleKey), now) } ?: block
             } else {
                 block
             }
@@ -1412,13 +1412,12 @@ class NoteRepositoryImpl(
     private suspend fun parkWatchlistBlocksNoOtherNoteShows(noteId: String, blocksOfNote: List<NoteBlock>) {
         val watchlistBlocks = blocksOfNote.filterIsInstance<WatchlistBlock>().filter { it.watchlistNoteId != noteId }
         if (watchlistBlocks.isEmpty()) return
-        val usedWatchlistIds = blockDao.findBlocksContainingIncludingDeleted(WatchlistCleanup.WATCHLIST_NOTE_ID_FIELD)
+        val watchlistBlocksInOtherNotes = blockDao.findBlocksContainingIncludingDeleted(WatchlistCleanup.WATCHLIST_NOTE_ID_FIELD)
             .filter { it.noteId != noteId }
             .mapNotNull { decodeBlockOrNull(it.blockDataJson) as? WatchlistBlock }
-            .filter { !it.isDeleted }
-            .mapTo(HashSet()) { it.watchlistNoteId }
+        val watchlistIdsNoOtherNoteShows = WatchlistCleanup.watchlistsNoLiveBlockUses(watchlistBlocks.mapTo(HashSet()) { it.watchlistNoteId }, watchlistBlocksInOtherNotes)
         val now = System.currentTimeMillis()
-        watchlistBlocks.filter { it.watchlistNoteId !in usedWatchlistIds }.forEach { watchlistBlock -> parkWatchlistBlock(watchlistBlock, now) }
+        watchlistBlocks.filter { it.watchlistNoteId in watchlistIdsNoOtherNoteShows }.forEach { watchlistBlock -> parkWatchlistBlock(watchlistBlock, now) }
     }
 
     private suspend fun parkWatchlistBlock(watchlistBlock: WatchlistBlock, now: Long) {

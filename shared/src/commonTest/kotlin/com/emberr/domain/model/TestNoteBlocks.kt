@@ -281,8 +281,7 @@ object TestNoteBlocks {
                         photoUrl = "https://example.com/bryan.jpg",
                         photoFilePath = "/media/bryan.jpg"
                     )
-                ),
-                refreshedAt = 1_700_000_000_000L
+                )
             ),
             watchStatus = WatchStatus.WATCHING,
             ratingHalfStars = 9,

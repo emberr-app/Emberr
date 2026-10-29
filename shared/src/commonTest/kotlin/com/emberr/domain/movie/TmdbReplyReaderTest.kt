@@ -19,7 +19,7 @@ class TmdbReplyReaderTest {
 
     @Test
     fun aMovieReplyBecomesMovieDetails() {
-        val details = TmdbReplyReader.movieDetailsFrom(SAVED_MOVIE_REPLY, language = "en", region = "GB", refreshedAt = 42L)
+        val details = TmdbReplyReader.movieDetailsFrom(SAVED_MOVIE_REPLY, language = "en", region = "GB")
 
         assertEquals(155L, details.tmdbId)
         assertEquals(MovieKind.MOVIE, details.kind)
@@ -36,7 +36,6 @@ class TmdbReplyReaderTest {
         assertEquals(listOf("United Kingdom", "United States of America"), details.countries)
         assertEquals(LocalDate(2008, 7, 16), details.releaseDate)
         assertEquals("https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", details.posterUrl)
-        assertEquals("https://image.tmdb.org/t/p/w1280/dqK9Hag1054tghRQSqLSaJ6PcAD.jpg", details.backdropUrl)
         assertEquals(
             listOf(
                 MovieCastMember("Christian Bale", "Bruce Wayne", "https://image.tmdb.org/t/p/w185/bale.jpg", personId = 1),
@@ -45,11 +44,10 @@ class TmdbReplyReaderTest {
             ),
             details.cast
         )
-        assertEquals(42L, details.refreshedAt)
         assertEquals(MovieTrailer(youtubeKey = "EXeTwQWrcwY", name = "Official Trailer"), details.trailer)
         assertEquals(
-            listOf("tt0468569", "https://www.warnerbros.com/movies/dark-knight", "thedarkknight", "thedarkknight", "thedarkknight", "Q163872"),
-            listOf(details.imdbId, details.homepage, details.instagramHandle, details.facebookHandle, details.xHandle, details.wikidataId)
+            listOf("tt0468569", "https://www.warnerbros.com/movies/dark-knight", "thedarkknight", "thedarkknight", "thedarkknight"),
+            listOf(details.imdbId, details.homepage, details.instagramHandle, details.facebookHandle, details.xHandle)
         )
         assertEquals(
             listOf("The Dark Knight Collection", 185_000_000L, 1_004_558_444L, "Released"),
@@ -67,7 +65,6 @@ class TmdbReplyReaderTest {
         val appleTv = MovieNamedLogo("Apple TV", "https://image.tmdb.org/t/p/w92/apple.jpg")
         assertEquals(
             MovieWatchProviders(
-                regionCode = "GB",
                 link = "https://www.themoviedb.org/movie/155-the-dark-knight/watch?locale=GB",
                 stream = listOf(
                     MovieNamedLogo("Max", "https://image.tmdb.org/t/p/w92/max.jpg"),
@@ -78,12 +75,11 @@ class TmdbReplyReaderTest {
             ),
             details.watchProviders
         )
-        assertEquals("https://image.tmdb.org/t/p/w500/logo-en.png", details.titleLogoUrl)
     }
 
     @Test
     fun aShowReplyInAnotherLanguageBecomesShowDetailsWithEnglishText() {
-        val details = TmdbReplyReader.showDetailsFrom(SAVED_SHOW_REPLY, language = "de", region = "DE", refreshedAt = 42L)
+        val details = TmdbReplyReader.showDetailsFrom(SAVED_SHOW_REPLY, language = "de", region = "DE")
 
         assertEquals(1396L, details.tmdbId)
         assertEquals(MovieKind.SHOW, details.kind)

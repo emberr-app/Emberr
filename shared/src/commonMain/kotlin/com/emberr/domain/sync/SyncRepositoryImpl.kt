@@ -26,13 +26,7 @@ import com.emberr.domain.cloud.account.CloudSignInSignal
 import com.emberr.domain.canvas.liveImageFileNames
 import com.emberr.domain.ai.external.ExternalAiProvider
 import com.emberr.domain.ai.external.ExternalAiProviderConfig
-import com.emberr.domain.model.DocumentBlock
-import com.emberr.domain.model.ImageBlock
-import com.emberr.domain.model.MovieBlock
-import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
-import com.emberr.domain.model.VoiceBlock
-import com.emberr.domain.model.mediaFilePaths
 import com.emberr.domain.media.MediaReferenceIndex
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.SpaceRepository
@@ -42,6 +36,7 @@ import com.emberr.domain.model.FAVORITE_NOTE_ORDER_ENTITY_ID
 import com.emberr.domain.model.FavoriteNoteOrderBySpace
 import com.emberr.domain.repository.BookmarkCategoryOrderStore
 import com.emberr.domain.repository.FavoriteNoteOrderStore
+import com.emberr.domain.selfhost.media.MediaReferenceScanner
 import com.emberr.domain.selfhost.sync.ApiConfigSyncEntry
 import com.emberr.domain.selfhost.translation.EmbeddedBlockPayload
 import com.emberr.domain.util.sync.ChatSyncEventBus
@@ -120,26 +115,6 @@ class SyncRepositoryImpl(
                 }
             }
         }
-    }
-
-    private fun extractMediaFileNames(content: NoteContent): List<String> {
-        val mediaFiles = mutableListOf<String>()
-
-        fun scan(blocks: List<NoteBlock>) {
-            blocks.forEach { block ->
-                if (block.isDeleted) return@forEach
-                when (block) {
-                    is ImageBlock -> block.localFilePath?.substringAfterLast("/")?.let { mediaFiles.add(it) }
-                    is DocumentBlock -> block.localFilePath?.substringAfterLast("/")?.let { mediaFiles.add(it) }
-                    is VoiceBlock -> block.localFilePath?.substringAfterLast("/")?.let { mediaFiles.add(it) }
-                    is MovieBlock -> block.mediaFilePaths().forEach { mediaFiles.add(it.substringAfterLast("/")) }
-                    else -> {}
-                }
-            }
-        }
-
-        scan(content.blocks)
-        return mediaFiles.distinct()
     }
 
     private fun downloadMissingMedia(fileNames: Collection<String>) {
@@ -616,7 +591,7 @@ class SyncRepositoryImpl(
 
                 // Triggers background downloads for media referenced by newly applied notes.
                 try {
-                    pendingMediaContent?.let { downloadMissingMedia(extractMediaFileNames(it)) }
+                    pendingMediaContent?.let { downloadMissingMedia(MediaReferenceScanner.extractMediaFileNames(it.blocks)) }
                     downloadMissingMedia(pendingCanvasImageFileNames)
                     pendingCoverImagePath?.let { path ->
                         val file = File(mediaStorageHelper.getAbsoluteMediaPath(path))
@@ -790,7 +765,7 @@ class SyncRepositoryImpl(
                 val canvas = if (meta.kind == NoteKind.CANVAS) canvasRepository.loadCanvasIncludingDeleted(meta.noteId) else null
 
                 if (uploadMedia) {
-                    uploadLocalMedia(extractMediaFileNames(content) + canvas?.liveImageFileNames().orEmpty(), remoteFileNames)
+                    uploadLocalMedia(MediaReferenceScanner.extractMediaFileNames(content.blocks) + canvas?.liveImageFileNames().orEmpty(), remoteFileNames)
 
                     val coverPath = meta.coverImagePath
                     if (!meta.isDaily && coverPath != null && coverPath !in remoteFileNames) {
