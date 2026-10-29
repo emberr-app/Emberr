@@ -15,7 +15,9 @@ import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.NoteContent
+import com.emberr.domain.model.WatchState
 import com.emberr.domain.model.WatchStatus
+import com.emberr.domain.model.titleKey
 import com.emberr.domain.space.ActiveSpaceStore
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -114,11 +116,16 @@ class NoteRepositoryLinkedWatchStateTest {
         repository.getNoteContent(noteId)!!.blocks.filterIsInstance<MovieBlock>().single()
 
     @Test
-    fun aNewerStatusReachesTheSameTitleInItsSpaceButNotInAnotherSpace() = runTest {
+    fun aSharedStatusReachesTheSameTitleInItsSpaceButNotInAnotherSpace() = runTest {
         saveNoteWithInterstellar("space-one", "older-note", WatchStatus.NOT_WATCHED, ratingHalfStars = null, changedAt = 100L)
         saveNoteWithInterstellar("space-two", "other-space-note", WatchStatus.NOT_WATCHED, ratingHalfStars = null, changedAt = 100L)
 
-        saveNoteWithInterstellar("space-one", "newer-note", WatchStatus.WATCHED, ratingHalfStars = 9, changedAt = 200L)
+        repository.shareWatchStateWithOtherNotes(
+            spaceId = "space-one",
+            titleKey = interstellar.titleKey(),
+            state = WatchState(WatchStatus.WATCHED, ratingHalfStars = 9, changedAt = 200L),
+            blockIdsAlreadyChanged = emptySet()
+        )
 
         val linked = interstellarIn("older-note")
         assertEquals(WatchStatus.WATCHED, linked.watchStatus)
@@ -128,14 +135,12 @@ class NoteRepositoryLinkedWatchStateTest {
     }
 
     @Test
-    fun aNoteSavedWithAnOlderStatusTakesTheNewerOneFromItsSpace() = runTest {
-        saveNoteWithInterstellar("space-one", "newer-note", WatchStatus.WATCHING, ratingHalfStars = 6, changedAt = 200L)
-
+    fun savingANoteLikeSyncDoesNotRewriteOtherNotes() = runTest {
         saveNoteWithInterstellar("space-one", "older-note", WatchStatus.NOT_WATCHED, ratingHalfStars = null, changedAt = 100L)
 
-        val adopted = interstellarIn("older-note")
-        assertEquals(WatchStatus.WATCHING, adopted.watchStatus)
-        assertEquals(6, adopted.ratingHalfStars)
-        assertEquals(WatchStatus.WATCHING, interstellarIn("newer-note").watchStatus)
+        saveNoteWithInterstellar("space-one", "newer-note", WatchStatus.WATCHED, ratingHalfStars = 9, changedAt = 200L)
+
+        assertEquals(WatchStatus.NOT_WATCHED, interstellarIn("older-note").watchStatus)
+        assertEquals(WatchStatus.WATCHED, interstellarIn("newer-note").watchStatus)
     }
 }

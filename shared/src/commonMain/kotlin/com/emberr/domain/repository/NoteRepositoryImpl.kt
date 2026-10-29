@@ -88,7 +88,6 @@ import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.WatchState
 import com.emberr.domain.model.titleKey
-import com.emberr.domain.model.watchState
 import com.emberr.domain.model.withWatchState
 import com.emberr.domain.model.deepCopyWithNewIds
 import com.emberr.domain.model.WatchlistBlock
@@ -970,7 +969,6 @@ class NoteRepositoryImpl(
                     noteUpdatedAt = metadata.lastEditedAtForDisplay()
                 )
                 syncMovieBlocks(noteId = noteId, blocks = content.blocks)
-                shareNewestWatchStates(metadata = metadata, blocks = content.blocks)
             }
         }
 
@@ -1206,7 +1204,6 @@ class NoteRepositoryImpl(
                     syncDocumentBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.DAILY, noteCreatedAt = metadata.createdAt)
                     syncBookmarkBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.DAILY, noteUpdatedAt = metadata.lastEditedAtForDisplay())
                     syncMovieBlocks(noteId = metadata.noteId, blocks = blocks)
-                    shareNewestWatchStates(metadata = metadata, blocks = blocks)
                 }
             } else {
                 syncCalendarTasks(spaceId = metadata.spaceId, noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.NOTE, dailyDateString = null)
@@ -1214,7 +1211,6 @@ class NoteRepositoryImpl(
                 syncDocumentBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.NOTE, noteCreatedAt = metadata.createdAt)
                 syncBookmarkBlocks(noteId = metadata.noteId, blocks = blocks, sourceType = TaskSource.NOTE, noteUpdatedAt = metadata.lastEditedAtForDisplay())
                 syncMovieBlocks(noteId = metadata.noteId, blocks = blocks)
-                shareNewestWatchStates(metadata = metadata, blocks = blocks)
             }
         }
 
@@ -1244,39 +1240,34 @@ class NoteRepositoryImpl(
         }
     }
 
-    private suspend fun shareNewestWatchStates(metadata: NoteMetadataEntity, blocks: List<NoteBlock>) {
-        if (metadata.isTemplate || metadata.trashedAt != null) return
-        val movieBlocks = blocks.filterIsInstance<MovieBlock>().filter { !it.isDeleted }
-        val titleKeys = movieBlocks.mapNotNull { it.titleKey() }.distinct()
-        if (titleKeys.isEmpty()) return
-
-        val linkedRows = movieBlockDao.getLinkedMovieBlocks(metadata.spaceId, titleKeys, exceptNoteId = metadata.noteId)
-        if (linkedRows.isEmpty()) return
-
-        val newestByTitle = newestWatchStateByTitle(
-            movieBlocks.mapNotNull { block -> block.titleKey()?.let { it to block.watchState() } } +
-                linkedRows.map { row -> row.titleKey to row.watchState() }
-        )
-
-        if (movieBlocks.any { it.isOlderThan(newestByTitle) }) {
-            rewriteWatchStatesInNote(metadata.noteId, newestByTitle)
+    override suspend fun shareWatchStateWithOtherNotes(
+        spaceId: String,
+        titleKey: String,
+        state: WatchState,
+        blockIdsAlreadyChanged: Set<String>
+    ) = withContext(Dispatchers.IO) {
+        try {
+            movieBlockDao.getMovieBlocksOfTitle(spaceId, titleKey)
+                .filter { row -> row.blockId !in blockIdsAlreadyChanged && row.watchStateChangedAt < state.changedAt }
+                .map { it.noteId }
+                .distinct()
+                .forEach { noteId -> rewriteWatchStateInNote(noteId, titleKey, state) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        linkedRows
-            .filter { row -> row.watchStateChangedAt < newestByTitle.getValue(row.titleKey).changedAt }
-            .map { it.noteId }
-            .distinct()
-            .forEach { noteId -> rewriteWatchStatesInNote(noteId, newestByTitle) }
     }
 
-    private suspend fun rewriteWatchStatesInNote(noteId: String, newestByTitle: Map<String, WatchState>) {
+    private suspend fun rewriteWatchStateInNote(noteId: String, titleKey: String, state: WatchState) {
         val metadata = noteDao.getNoteById(noteId) ?: return
         val dailyDateString = metadata.dateString?.takeIf { metadata.isDaily }
         val blocks = (if (dailyDateString != null) getDailyNote(dailyDateString) else getNoteContent(noteId))
             ?.blocks ?: return
         val now = System.currentTimeMillis()
         val updatedBlocks = blocks.map { block ->
-            if (block is MovieBlock && !block.isDeleted && block.isOlderThan(newestByTitle)) {
-                block.titleKey()?.let { titleKey -> block.withWatchState(newestByTitle.getValue(titleKey), now) } ?: block
+            if (block is MovieBlock && !block.isDeleted && block.titleKey() == titleKey && block.watchStateChangedAt < state.changedAt) {
+                block.withWatchState(state, now)
             } else {
                 block
             }
@@ -1288,16 +1279,6 @@ class NoteRepositoryImpl(
         } else {
             saveNote(metadata, updatedContent)
         }
-    }
-
-    private fun newestWatchStateByTitle(statesByTitle: List<Pair<String, WatchState>>): Map<String, WatchState> =
-        statesByTitle
-            .groupBy({ (titleKey, _) -> titleKey }, { (_, state) -> state })
-            .mapValues { (_, states) -> states.maxBy { it.changedAt } }
-
-    private fun MovieBlock.isOlderThan(newestByTitle: Map<String, WatchState>): Boolean {
-        val newest = titleKey()?.let(newestByTitle::get) ?: return false
-        return newest.changedAt > watchStateChangedAt
     }
 
     override suspend fun saveNote(metadata: NoteMetadataEntity, content: NoteContent, stampUpdatedAt: Boolean) =
@@ -3141,6 +3122,15 @@ class NoteRepositoryImpl(
 
     override fun getAllLinkableNotes(): Flow<List<NoteMetadataEntity>> =
         inActiveSpace { noteDao.getAllLinkableNotes(it) }
+            .map { notes -> notes.withoutWatchlistPages() }
+            .flowOn(Dispatchers.IO)
+
+    private suspend fun List<NoteMetadataEntity>.withoutWatchlistPages(): List<NoteMetadataEntity> {
+        if (none { it.isSubNote && it.title.isEmpty() }) return this
+        val watchlistPageIds = blockDao.findBlocksContainingIncludingDeleted(WatchlistCleanup.WATCHLIST_NOTE_ID_FIELD)
+            .mapNotNullTo(HashSet()) { entity -> (decodeBlockOrNull(entity.blockDataJson) as? WatchlistBlock)?.watchlistNoteId }
+        return filterNot { it.noteId in watchlistPageIds }
+    }
 
     override suspend fun getLinkableCanvases(): List<NoteMetadataEntity> =
         withContext(Dispatchers.IO) { noteDao.getLinkableCanvases(activeSpaceAndAccountIds()) }

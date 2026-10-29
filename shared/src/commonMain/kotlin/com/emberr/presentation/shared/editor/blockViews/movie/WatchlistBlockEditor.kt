@@ -18,6 +18,8 @@ import com.emberr.domain.movie.withViewAdded
 import com.emberr.domain.movie.withViewAddedAfter
 import com.emberr.domain.movie.withViewChanged
 import com.emberr.domain.movie.withViewRemoved
+import com.emberr.domain.movie.idsOfBlocksShowingTitle
+import com.emberr.domain.movie.titleKeyOfBlock
 import com.emberr.domain.movie.withWatchStateOnAllCopiesOf
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
@@ -161,11 +163,21 @@ class WatchlistBlockEditor(
         override fun applyWatchStateToTitle(blockId: String, state: WatchState) {
             appScope.launch {
                 changeTitles(watchlistNoteId) { blocks, now -> blocks.withWatchStateOnAllCopiesOf(blockId, state, now) }
+                shareWatchStateWithOtherNotes(watchlistNoteId, blockId, state)
             }
         }
 
         override suspend fun newestWatchStateInThisSpace(details: MovieDetails): WatchState? =
             newestWatchState(watchlistNoteId, details)
+    }
+
+    private suspend fun shareWatchStateWithOtherNotes(watchlistNoteId: String, blockId: String, state: WatchState) {
+        val blocks = repository.getNoteContent(watchlistNoteId)?.blocks.orEmpty()
+        val titleKey = blocks.titleKeyOfBlock(blockId) ?: return
+        val spaceId = repository.getNoteById(watchlistNoteId)?.spaceId ?: return
+        SyncCoordinator.mutex.withLock {
+            repository.shareWatchStateWithOtherNotes(spaceId, titleKey, state, blocks.idsOfBlocksShowingTitle(titleKey))
+        }
     }
 
     private suspend fun newestWatchState(watchlistNoteId: String, details: MovieDetails): WatchState? {
