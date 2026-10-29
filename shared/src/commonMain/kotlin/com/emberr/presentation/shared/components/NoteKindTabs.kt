@@ -34,13 +34,14 @@ fun EmberrTab(
     label: String,
     isSelected: Boolean,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    selectedBackground: Color = contentColor.copy(alpha = 0.11f),
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) contentColor.copy(alpha = 0.11f) else Color.Transparent
+    val backgroundColor = if (isSelected) selectedBackground else Color.Transparent
     val textColor = if (isSelected) contentColor else contentColor.copy(alpha = 0.6f)
     Text(
         text = label,
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodyLarge,
         fontWeight = FontWeight.Medium,
         color = textColor,
         modifier = Modifier
