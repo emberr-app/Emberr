@@ -336,8 +336,6 @@ fun MovieBlock.withWatchState(state: WatchState, now: Long): MovieBlock =
 
 val MovieDetails.hasPoster: Boolean get() = posterFilePath != null || posterUrl != null
 
-val MovieDetails.hasBackdrop: Boolean get() = backdropFilePath != null || backdropUrl != null
-
 val MovieTrailer.youtubeLink: String get() = "https://www.youtube.com/watch?v=$youtubeKey"
 
 val MovieWatchProviders.allProviders: List<MovieNamedLogo> get() = stream + rent + buy

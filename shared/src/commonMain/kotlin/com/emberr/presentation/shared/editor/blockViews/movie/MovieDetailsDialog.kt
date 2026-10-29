@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,11 +41,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -59,7 +56,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -78,8 +74,6 @@ import com.emberr.domain.model.MovieTitleExtras
 import com.emberr.domain.model.MovieWatchProviders
 import com.emberr.domain.model.WatchStatus
 import com.emberr.domain.model.allProviders
-import com.emberr.domain.model.hasBackdrop
-import com.emberr.domain.model.hasPoster
 import com.emberr.domain.model.starsTextOf
 import com.emberr.domain.model.titleKey
 import com.emberr.domain.model.youtubeLink
@@ -87,10 +81,8 @@ import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
-import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTab
 import com.emberr.presentation.shared.components.IconTooltip
-import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
@@ -108,7 +100,6 @@ import emberr.shared.generated.resources.logo_instagram
 import emberr.shared.generated.resources.logo_x
 import emberr.shared.generated.resources.logo_youtube
 import emberr.shared.generated.resources.plus
-import emberr.shared.generated.resources.star
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -117,19 +108,15 @@ import kotlin.math.roundToInt
 
 private val DialogShape = RoundedCornerShape(24.dp)
 private val FactShape = RoundedCornerShape(8.dp)
-private val TrailerButtonShape = RoundedCornerShape(12.dp)
-private val TrailerButtonHeight = 44.dp
 private val CastPortraitMinWidthDesktop = 140.dp
 private val CastPortraitMinWidthPhone = 88.dp
 private val CastColumnGap = 24.dp
 private val CastRowGap = 28.dp
-private val BackdropHeightDesktop = 320.dp
 private val DesktopHorizontalPadding = 32.dp
 private val DetailsSheetPadding = 20.dp
 private val StatusBarHeight = 50.dp
 private val StatusBarOuterPadding = 14.dp
-private val BackdropContentOverlap = 96.dp
-private val BackdropCropAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.6f)
+private val StatusBarMaxWidth = 520.dp
 private val SectionGap = 32.dp
 private val TabContentGap = 20.dp
 private val ScrollFadeWidth = 40.dp
@@ -144,7 +131,6 @@ private val CompanyLogoHeight = 24.dp
 private val CompanyChipHeight = 32.dp
 private const val MAXIMUM_STAR_HALVES = 10
 private const val SKELETON_FACT_ROWS = 4
-private val BackdropFade = Brush.verticalGradient(0.5f to Color.Black, 1f to Color.Transparent)
 
 private enum class MovieDetailsTab(val label: String, val needsLiveExtras: Boolean = false) {
     OVERVIEW("Overview"),
@@ -185,127 +171,71 @@ internal fun MovieDetailsDialog(
     isPreview: Boolean = false,
     liveLoad: LiveTmdbLoadState<*>? = null
 ) {
-    if (!isDesktopPlatform) {
-        MovieDetailsSheet(
+    var openCastMember by remember { mutableStateOf<MovieCastMember?>(null) }
+    var titleToPreview by remember { mutableStateOf<MovieTitleToPreview?>(null) }
+    val showDetails: @Composable (onClose: () -> Unit, modifier: Modifier) -> Unit = { onClose, modifier ->
+        MovieDetailsContent(
             block = block,
             details = details,
             editor = editor,
-            onDismiss = onDismiss,
             isPreview = isPreview,
-            liveLoad = liveLoad
+            liveLoad = liveLoad,
+            onClose = onClose,
+            onOpenPerson = { member -> openCastMember = member },
+            onOpenTitle = { title -> titleToPreview = title },
+            modifier = modifier
         )
-        return
     }
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = fullScreenDialogProperties()
-    ) {
-        val dialogBackgroundColor = if (LocalAppIsDark.current) {
-            MaterialTheme.colorScheme.surface
-        } else {
-            MaterialTheme.colorScheme.background
-        }
-        val colors = detailsColors()
-        val hazeState = remember { HazeState() }
-        val tabs = rememberMovieDetailsTabs(details, liveLoad)
-        var openCastMember by remember { mutableStateOf<MovieCastMember?>(null) }
-        var titleToPreview by remember { mutableStateOf<MovieTitleToPreview?>(null) }
-        val watchlistAdder = if (isPreview) LocalWatchlistAdder.current else null
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onDismiss
-                ),
-            contentAlignment = Alignment.Center
+    if (isDesktopPlatform) {
+        Dialog(
+            onDismissRequest = onDismiss,
+            properties = fullScreenDialogProperties()
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.6f)
-                    .widthIn(max = 760.dp)
-                    .fillMaxHeight(0.8f)
-                    .heightIn(max = 720.dp)
-                    .safeDrawingPadding()
-                    .clip(DialogShape)
-                    .background(dialogBackgroundColor)
+                    .fillMaxSize()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = {}
-                    )
+                        onClick = onDismiss
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Box(modifier = Modifier.matchParentSize().hazeSource(hazeState)) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        if (details.hasBackdrop) {
-                            MovieBackdropBanner(details = details, height = BackdropHeightDesktop)
-                        }
-                        Column(
-                            modifier = Modifier.padding(
-                                start = DesktopHorizontalPadding,
-                                end = DesktopHorizontalPadding,
-                                top = if (details.hasBackdrop) BackdropHeightDesktop - BackdropContentOverlap else 72.dp,
-                                bottom = 32.dp
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(SectionGap)
-                        ) {
-                            MovieDetailsHeader(
-                                block = block,
-                                details = details,
-                                editor = editor,
-                                colors = colors,
-                                showsWatchState = !isPreview,
-                                watchlistAdder = watchlistAdder
-                            )
-                            MovieDetailsBody(
-                                details = details,
-                                colors = colors,
-                                liveLoad = liveLoad,
-                                tabs = tabs,
-                                onOpenPerson = { member -> openCastMember = member },
-                                onOpenTitle = { title -> titleToPreview = title }
-                            )
-                        }
-                    }
-                }
-
-                details.trailer?.let { trailer ->
-                    MovieTrailerButton(
-                        trailer = trailer,
-                        hazeState = hazeState,
-                        textColor = colors.text,
-                        modifier = Modifier.align(Alignment.TopStart).padding(14.dp)
-                    )
-                }
-
                 Box(
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(14.dp)
-                        .emberrBorder(CircleShape)
-                        .clip(CircleShape)
+                        .fillMaxWidth(0.6f)
+                        .widthIn(max = 760.dp)
+                        .fillMaxHeight(0.8f)
+                        .heightIn(max = 720.dp)
+                        .safeDrawingPadding()
+                        .clip(DialogShape)
+                        .background(detailsBackgroundColor())
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {}
+                        )
                 ) {
-                    TopBarIconButton(
-                        icon = Icons.Default.Close,
-                        contentDescription = "Close details",
-                        bgColor = Color.Transparent,
-                        tint = colors.text,
-                        hazeState = hazeState,
-                        hazeStyle = EmberrBlur.Regular,
-                        shadowElevation = EmberrShadowElevation.None,
-                        tooltip = "Close",
-                        onClick = onDismiss
-                    )
+                    showDetails(onDismiss, Modifier.fillMaxSize())
                 }
             }
+            MovieDetailsPopups(
+                openCastMember = openCastMember,
+                titleToPreview = titleToPreview,
+                onClosePerson = { openCastMember = null },
+                onClosePreview = { titleToPreview = null }
+            )
         }
-
+    } else {
+        EmberrBottomSheet(
+            expanded = true,
+            onDismiss = onDismiss,
+            contentHorizontalPadding = 0.dp,
+            scrollsContent = false
+        ) { closeAnd ->
+            showDetails({ closeAnd {} }, Modifier.fillMaxWidth())
+        }
         MovieDetailsPopups(
             openCastMember = openCastMember,
             titleToPreview = titleToPreview,
@@ -316,104 +246,97 @@ internal fun MovieDetailsDialog(
 }
 
 @Composable
-private fun MovieDetailsSheet(
+private fun detailsBackgroundColor(): Color =
+    if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
+
+@Composable
+private fun MovieDetailsContent(
     block: MovieBlock,
     details: MovieDetails,
     editor: MovieBlockEditor?,
-    onDismiss: () -> Unit,
     isPreview: Boolean,
-    liveLoad: LiveTmdbLoadState<*>?
+    liveLoad: LiveTmdbLoadState<*>?,
+    onClose: () -> Unit,
+    onOpenPerson: (MovieCastMember) -> Unit,
+    onOpenTitle: (MovieTitleToPreview) -> Unit,
+    modifier: Modifier
 ) {
     val colors = detailsColors()
     val tabs = rememberMovieDetailsTabs(details, liveLoad)
-    var openCastMember by remember { mutableStateOf<MovieCastMember?>(null) }
-    var titleToPreview by remember { mutableStateOf<MovieTitleToPreview?>(null) }
     val watchlistAdder = if (isPreview) LocalWatchlistAdder.current else null
     val contentHazeState = remember { HazeState() }
     var statusBarHeightPx by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
+    val sidePadding = if (isDesktopPlatform) DesktopHorizontalPadding else DetailsSheetPadding
 
-    EmberrBottomSheet(
-        expanded = true,
-        onDismiss = onDismiss,
-        contentHorizontalPadding = 0.dp,
-        scrollsContent = false
-    ) { closeAnd ->
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .hazeSource(contentHazeState)
-                    .verticalScroll(rememberScrollState())
-                    .padding(
-                        start = DetailsSheetPadding,
-                        end = DetailsSheetPadding,
-                        top = DetailsSheetPadding,
-                        bottom = with(density) { statusBarHeightPx.toDp() } + DetailsSheetPadding
-                    )
-                    .then(if (isPreview) Modifier.navigationBarsPadding() else Modifier),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                MovieDetailsTicket(
-                    details = details,
-                    facts = ticketFactsOf(details),
-                    background = colors.panel,
-                    onClose = { closeAnd {} }
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .hazeSource(contentHazeState)
+                .verticalScroll(rememberScrollState())
+                .padding(
+                    start = sidePadding,
+                    end = sidePadding,
+                    top = sidePadding,
+                    bottom = with(density) { statusBarHeightPx.toDp() } + sidePadding
                 )
-                if (!isPreview) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Your rating",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = colors.text,
-                            modifier = Modifier.weight(1f)
-                        )
-                        StarRatingPicker(
-                            ratingHalfStars = block.ratingHalfStars,
-                            emptyColor = colors.emptyStar,
-                            onRate = editor?.let { { halfStars: Int? -> it.setRating(block, halfStars) } }
-                        )
-                    }
-                }
-                val trailer = details.trailer
-                if (trailer != null || watchlistAdder != null) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        trailer?.let { MovieTrailerChip(trailer = it, colors = colors) }
-                        watchlistAdder?.let { adder -> MovieAddToWatchlistButton(details = details, adder = adder, colors = colors) }
-                    }
-                }
-                MovieDetailsBody(
-                    details = details,
-                    colors = colors,
-                    liveLoad = liveLoad,
-                    tabs = tabs,
-                    onOpenPerson = { member -> openCastMember = member },
-                    onOpenTitle = { title -> titleToPreview = title }
-                )
-            }
+                .then(if (isPreview) Modifier.navigationBarsPadding() else Modifier),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            MovieDetailsTicket(
+                details = details,
+                facts = ticketFactsOf(details),
+                background = colors.panel,
+                onClose = onClose
+            )
             if (!isPreview) {
-                WatchStatusBar(
-                    selectedStatus = block.watchStatus,
-                    colors = colors,
-                    hazeState = contentHazeState,
-                    onSelect = editor?.let { { status: WatchStatus -> it.setWatchStatus(block, status) } },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .onSizeChanged { statusBarHeightPx = it.height }
-                        .navigationBarsPadding()
-                        .padding(StatusBarOuterPadding)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Your rating",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = colors.text,
+                        modifier = Modifier.weight(1f)
+                    )
+                    StarRatingPicker(
+                        ratingHalfStars = block.ratingHalfStars,
+                        emptyColor = colors.emptyStar,
+                        onRate = editor?.let { { halfStars: Int? -> it.setRating(block, halfStars) } }
+                    )
+                }
             }
+            val trailer = details.trailer
+            if (trailer != null || watchlistAdder != null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    trailer?.let { MovieTrailerChip(trailer = it, colors = colors) }
+                    watchlistAdder?.let { adder -> MovieAddToWatchlistButton(details = details, adder = adder, colors = colors) }
+                }
+            }
+            MovieDetailsBody(
+                details = details,
+                colors = colors,
+                liveLoad = liveLoad,
+                tabs = tabs,
+                onOpenPerson = onOpenPerson,
+                onOpenTitle = onOpenTitle
+            )
+        }
+        if (!isPreview) {
+            WatchStatusBar(
+                selectedStatus = block.watchStatus,
+                colors = colors,
+                hazeState = contentHazeState,
+                onSelect = editor?.let { { status: WatchStatus -> it.setWatchStatus(block, status) } },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .onSizeChanged { statusBarHeightPx = it.height }
+                    .navigationBarsPadding()
+                    .padding(StatusBarOuterPadding)
+                    .widthIn(max = StatusBarMaxWidth)
+            )
         }
     }
-
-    MovieDetailsPopups(
-        openCastMember = openCastMember,
-        titleToPreview = titleToPreview,
-        onClosePerson = { openCastMember = null },
-        onClosePreview = { titleToPreview = null }
-    )
 }
 
 @Stable
@@ -619,88 +542,6 @@ internal fun Modifier.fadesWhereItScrolls(scrollState: ScrollState): Modifier =
         }
 
 @Composable
-private fun MovieBackdropBanner(details: MovieDetails, height: Dp) {
-    MovieImage(
-        filePath = details.backdropFilePath,
-        url = details.backdropUrl,
-        alignment = BackdropCropAlignment,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height)
-            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-            .drawWithContent {
-                drawContent()
-                drawRect(BackdropFade, blendMode = BlendMode.DstIn)
-            }
-    )
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun MovieDetailsHeader(
-    block: MovieBlock,
-    details: MovieDetails,
-    editor: MovieBlockEditor?,
-    colors: DetailsColors,
-    showsWatchState: Boolean,
-    watchlistAdder: WatchlistAdder?
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalAlignment = Alignment.Bottom
-    ) {
-        Box(modifier = if (details.hasPoster) Modifier.shadow(16.dp, DefaultBlockShape) else Modifier) {
-            MoviePoster(filePath = details.posterFilePath, url = details.posterUrl, width = 150.dp, cornerRadius = PosterCornerRadius)
-        }
-        Column(
-            modifier = Modifier.weight(1f).padding(end = 36.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(text = details.title, style = MaterialTheme.typography.titleLarge, color = colors.text)
-            if (details.tagline.isNotBlank()) {
-                Text(
-                    text = details.tagline,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontStyle = FontStyle.Italic,
-                    color = colors.secondaryText
-                )
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            val facts = headerFactsOf(details)
-            if (facts.isNotEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    facts.forEach { fact -> MovieFactChip(text = fact, colors = colors) }
-                }
-            }
-            FlowRow(
-                modifier = Modifier.padding(top = 14.dp),
-                horizontalArrangement = Arrangement.spacedBy(32.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                MovieRatingItems(
-                    block = block,
-                    details = details,
-                    editor = editor,
-                    colors = colors,
-                    showsWatchState = showsWatchState
-                )
-            }
-            watchlistAdder?.let { adder ->
-                MovieAddToWatchlistButton(
-                    details = details,
-                    adder = adder,
-                    colors = colors,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun MovieFactChip(text: String, colors: DetailsColors) {
     Text(
         text = text,
@@ -740,93 +581,6 @@ private fun MovieAddToWatchlistButton(
             tint = colors.chipText,
             modifier = Modifier.size(12.dp)
         )
-    }
-}
-
-@Composable
-private fun MovieTrailerButton(
-    trailer: MovieTrailer,
-    hazeState: HazeState,
-    textColor: Color,
-    modifier: Modifier = Modifier
-) {
-    val uriHandler = LocalUriHandler.current
-    Row(
-        modifier = modifier
-            .height(TrailerButtonHeight)
-            .emberrBorder(TrailerButtonShape)
-            .clip(TrailerButtonShape)
-            .emberrBlur(hazeState, EmberrBlur.Regular)
-            .clickable { uriHandler.openUri(trailer.youtubeLink) }
-            .padding(horizontal = 14.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.logo_youtube),
-            contentDescription = null,
-            tint = Color.Unspecified,
-            modifier = Modifier.size(20.dp)
-        )
-        Text(text = "Trailer", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium, color = textColor)
-    }
-}
-
-@Composable
-private fun MovieRatingItems(
-    block: MovieBlock,
-    details: MovieDetails,
-    editor: MovieBlockEditor?,
-    colors: DetailsColors,
-    showsWatchState: Boolean
-) {
-    details.tmdbRating?.let { rating ->
-        MovieRatingItem(label = "TMDB", colors = colors) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(Res.drawable.star),
-                    contentDescription = null,
-                    tint = RatingStarColor,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(text = tmdbRatingText(rating), style = MaterialTheme.typography.titleLarge, color = colors.text)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "/ 10", style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)
-            }
-        }
-    }
-    if (!showsWatchState) return
-    MovieRatingItem(label = "Your rating", colors = colors) {
-        StarRatingPicker(
-            ratingHalfStars = block.ratingHalfStars,
-            emptyColor = colors.emptyStar,
-            onRate = editor?.let { { halfStars: Int? -> it.setRating(block, halfStars) } }
-        )
-    }
-    MovieRatingItem(label = "Status", colors = colors) {
-        MovieChip(
-            label = block.watchStatus.label,
-            onClick = editor?.let { { it.showNextWatchStatus(block) } },
-            modifier = Modifier.height(movieChipHeight()),
-            background = colors.chipBackground,
-            contentColor = colors.chipText
-        ) {
-            Box(modifier = Modifier.size(8.dp).background(block.watchStatus.dotColor(), CircleShape))
-        }
-    }
-}
-
-@Composable
-private fun MovieRatingItem(
-    label: String,
-    colors: DetailsColors,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)
-        content()
     }
 }
 
@@ -1269,9 +1023,6 @@ private fun MovieCastPortrait(
         }
     }
 }
-
-private fun headerFactsOf(details: MovieDetails): List<String> =
-    listOf(details.kind.label, details.yearText).filter { it.isNotBlank() } + ticketFactsOf(details)
 
 private fun ticketFactsOf(details: MovieDetails): List<String> = listOfNotNull(
     details.ageRating,
