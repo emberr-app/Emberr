@@ -10,12 +10,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 
-private const val TMDB_FILE_NAME_PREFIX = "tmdb_"
 private const val MOST_DOWNLOADS_AT_ONCE = 6
 
 suspend fun MovieDetails.withImagesSavedBy(webImageFetcher: WebImageFetcher): MovieDetails {
     val logos = productionCompanies + networks + watchProviders?.allProviders.orEmpty()
-    val imageUrls = listOfNotNull(posterUrl, backdropUrl, titleLogoUrl) +
+    val imageUrls = listOfNotNull(posterUrl) +
         cast.mapNotNull { it.photoUrl } +
         seasons.mapNotNull { it.posterUrl } +
         logos.mapNotNull { it.logoUrl }
@@ -25,8 +24,6 @@ suspend fun MovieDetails.withImagesSavedBy(webImageFetcher: WebImageFetcher): Mo
 
     return copy(
         posterFilePath = savedFileNameOf(posterUrl),
-        backdropFilePath = savedFileNameOf(backdropUrl),
-        titleLogoFilePath = savedFileNameOf(titleLogoUrl),
         cast = cast.map { it.copy(photoFilePath = savedFileNameOf(it.photoUrl)) },
         seasons = seasons.map { it.copy(posterFilePath = savedFileNameOf(it.posterUrl)) },
         productionCompanies = productionCompanies.withSavedLogos(),
@@ -46,7 +43,7 @@ private suspend fun saveImagesIntoMedia(urls: List<String>, webImageFetcher: Web
         val downloadSlots = Semaphore(MOST_DOWNLOADS_AT_ONCE)
         urls.map { url ->
             async {
-                downloadSlots.withPermit { webImageFetcher.fetchIntoMedia(url, TMDB_FILE_NAME_PREFIX) }
+                downloadSlots.withPermit { webImageFetcher.fetchIntoMedia(url) }
                     ?.let { savedImage -> url to savedImage.localFileName }
             }
         }.awaitAll().filterNotNull().toMap()

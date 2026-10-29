@@ -108,12 +108,7 @@ class MarkdownNotesImporterTest {
 
         val fileNamesSavedFromBytes = mutableListOf<String>()
 
-        override suspend fun saveBytesToInternalStorage(
-            bytes: ByteArray,
-            extension: String,
-            mimeType: String,
-            fileNamePrefix: String
-        ): MediaInfo {
+        override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo {
             val fileName = "media_${savedFileNames.size + 1}.$extension"
             savedFileNames += fileName
             fileNamesSavedFromBytes += fileName
@@ -189,7 +184,7 @@ class MarkdownNotesImporterTest {
         val savedImagesByUrl = mutableMapOf<String, MediaInfo>()
         val requestedUrls = mutableListOf<String>()
 
-        override suspend fun fetchIntoMedia(url: String, fileNamePrefix: String): MediaInfo? {
+        override suspend fun fetchIntoMedia(url: String): MediaInfo? {
             requestedUrls += url
             return savedImagesByUrl[url]
         }
@@ -586,7 +581,7 @@ class MarkdownNotesImporterTest {
         val existingAuthor = repository.createCustomPropertyInSpace(IMPORT_SPACE_ID, "author", PropertyValueType.TEXT)
         repository.createPropertyTagsInSpace(IMPORT_SPACE_ID, "TAGS", listOf("project"))
         val webImageSaver = object : WebImageFetcher {
-            override suspend fun fetchIntoMedia(url: String, fileNamePrefix: String): MediaInfo =
+            override suspend fun fetchIntoMedia(url: String): MediaInfo =
                 mediaStorage.saveBytesToInternalStorage("web bytes".encodeToByteArray(), "png", "image/png")
         }
         val importer = importer(backgroundScope, webImageFetcher = webImageSaver)

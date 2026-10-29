@@ -23,7 +23,7 @@ fun webImageAddressOrNull(text: String): String? {
 }
 
 interface WebImageFetcher {
-    suspend fun fetchIntoMedia(url: String, fileNamePrefix: String = ""): MediaInfo?
+    suspend fun fetchIntoMedia(url: String): MediaInfo?
 }
 
 class KtorWebImageFetcher(private val mediaStorageHelper: MediaStorageHelper) : WebImageFetcher {
@@ -38,16 +38,16 @@ class KtorWebImageFetcher(private val mediaStorageHelper: MediaStorageHelper) : 
         }
     }
 
-    override suspend fun fetchIntoMedia(url: String, fileNamePrefix: String): MediaInfo? =
+    override suspend fun fetchIntoMedia(url: String): MediaInfo? =
         try {
-            saveImageFrom(httpClient.get(url), fileNamePrefix)
+            saveImageFrom(httpClient.get(url))
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (_: Exception) {
             null
         }
 
-    private suspend fun saveImageFrom(response: HttpResponse, fileNamePrefix: String): MediaInfo? {
+    private suspend fun saveImageFrom(response: HttpResponse): MediaInfo? {
         if (!response.status.isSuccess()) return null
         val mimeType = response.contentType()?.let { "${it.contentType}/${it.contentSubtype}" }?.lowercase() ?: return null
         val extension = imageExtensionForMimeType(mimeType) ?: return null
@@ -55,6 +55,6 @@ class KtorWebImageFetcher(private val mediaStorageHelper: MediaStorageHelper) : 
 
         val bytes = response.body<ByteArray>()
         if (bytes.isEmpty() || bytes.size > LARGEST_WEB_IMAGE_BYTES) return null
-        return withContext(NonCancellable) { mediaStorageHelper.saveBytesToInternalStorage(bytes, extension, mimeType, fileNamePrefix) }
+        return withContext(NonCancellable) { mediaStorageHelper.saveBytesToInternalStorage(bytes, extension, mimeType) }
     }
 }

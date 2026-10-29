@@ -42,15 +42,10 @@ class DesktopMediaStorageHelper : MediaStorageHelper {
         }
     }
 
-    override suspend fun saveBytesToInternalStorage(
-        bytes: ByteArray,
-        extension: String,
-        mimeType: String,
-        fileNamePrefix: String
-    ): MediaInfo? =
+    override suspend fun saveBytesToInternalStorage(bytes: ByteArray, extension: String, mimeType: String): MediaInfo? =
         withContext(Dispatchers.IO) {
             try {
-                val localFileName = "${fileNamePrefix}media_${UUID.randomUUID()}${if (extension.isNotEmpty()) ".$extension" else ""}"
+                val localFileName = "media_${UUID.randomUUID()}${if (extension.isNotEmpty()) ".$extension" else ""}"
                 val destFile = File(mediaStorageDir, localFileName)
                 destFile.writeBytes(bytes)
 
