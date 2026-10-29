@@ -78,6 +78,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.KmpBackHandler
+import com.emberr.presentation.shared.components.LoadMoreButton
+import com.emberr.presentation.shared.components.NewItemButtonColor
 import com.emberr.domain.database.DatabaseRow
 import com.emberr.domain.database.activeView
 import com.emberr.domain.database.applyFiltersAndSort
@@ -105,7 +107,6 @@ import com.emberr.ui.theme.LocalEmberrFontStyle
 import com.emberr.ui.theme.fontFamilyFor
 import com.emberr.ui.theme.tableGridLineColor
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.funnel
 import emberr.shared.generated.resources.list_sort_descending
@@ -130,7 +131,6 @@ internal val DatabaseSidePadding = 18.dp
 private val DatabaseVerticalPadding = 12.dp
 private val HeaderEndPadding = 10.dp
 private val BoardSidePaddingInset = 6.dp
-private val NewRowButtonColor = Color(0xFF4F5B8A)
 private val HeaderButtonGap = 6.dp
 internal val HeaderButtonInnerPadding = 8.dp
 private const val NotesColumnDefaultWidth = 240
@@ -469,7 +469,7 @@ private fun DatabaseBlockContent(
                         modifier = Modifier.padding(horizontal = DatabaseSidePadding)
                     )
                     if (galleryRows.size < orderedRows.size) {
-                        DatabaseLoadMoreButton(
+                        LoadMoreButton(
                             onClick = { loadedRowCount += activeView.loadLimit },
                             modifier = Modifier.padding(start = DatabaseSidePadding, top = 6.dp)
                         )
@@ -591,7 +591,7 @@ private fun DatabaseBlockContent(
                                         }
                                     }
                                     if (loadedTableRows.size < orderedRows.size) {
-                                        DatabaseLoadMoreButton(
+                                        LoadMoreButton(
                                             onClick = { loadedRowCount += activeView.loadLimit },
                                             modifier = Modifier.padding(vertical = 2.dp)
                                         )
@@ -820,7 +820,7 @@ private fun DatabaseNewRowButton(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
-                .background(NewRowButtonColor),
+                .background(NewItemButtonColor),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconTooltip(text = "New note") {
@@ -875,26 +875,6 @@ private fun DatabaseNewRowLine(
 
 private fun rowCountLabel(shownRowCount: Int, totalRowCount: Int): String =
     if (shownRowCount == totalRowCount) rowCountText(totalRowCount) else "$shownRowCount of ${rowCountText(totalRowCount)}"
-
-@Composable
-internal fun DatabaseLoadMoreButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 7.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.arrow_down),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(7.dp))
-        Text(text = "Load more", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
-    }
-}
 
 @Composable
 internal fun DatabaseAddRowButton(onClick: () -> Unit) {

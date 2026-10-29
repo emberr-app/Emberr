@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
+import com.emberr.presentation.shared.components.GestureCoordinates
+import com.emberr.presentation.shared.components.boardDragGesture
 import com.emberr.presentation.shared.cover.coverAlignmentFor
 import com.emberr.presentation.shared.cover.rememberSavedCoverPosition
 import coil3.compose.LocalPlatformContext

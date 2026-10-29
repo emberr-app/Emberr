@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalDensity
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-actual fun openKeyboardHeightPx(): Int {
+actual fun fullKeyboardHeightPx(): Int {
     val density = LocalDensity.current
     return maxOf(WindowInsets.imeAnimationSource.getBottom(density), WindowInsets.imeAnimationTarget.getBottom(density))
 }

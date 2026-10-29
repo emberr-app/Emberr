@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor.blockViews.movie
+package com.emberr.presentation.shared.components
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -22,6 +22,7 @@ import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.editor.GlobalEditorState
 import kotlinx.coroutines.CancellationException
 
 private val ViewDropLineWidth = 2.dp
@@ -31,13 +32,15 @@ internal data class ViewPillSpan(val left: Float, val right: Float) {
 }
 
 @Stable
-internal class WatchlistViewDragState {
+internal class ViewPillDragState {
     var draggedViewId by mutableStateOf<String?>(null)
         private set
     var pointerX by mutableFloatStateOf(0f)
         private set
     private var grabX by mutableFloatStateOf(0f)
     val pillSpans = mutableStateMapOf<String, ViewPillSpan>()
+
+    val isDragging: Boolean get() = draggedViewId != null
 
     fun start(viewId: String, grabXInPill: Float) {
         val pillLeft = pillSpans[viewId]?.left ?: return
@@ -50,6 +53,10 @@ internal class WatchlistViewDragState {
         if (draggedViewId != viewId) return
         val pillLeft = pillSpans[viewId]?.left ?: return
         pointerX = pillLeft + pointerXInPill
+    }
+
+    fun shiftPointerBy(distance: Float) {
+        pointerX += distance
     }
 
     fun offsetOf(viewId: String): Float {
@@ -75,7 +82,7 @@ internal fun viewsWithDroppedView(viewIds: List<String>, draggedViewId: String, 
     return withoutDragged.toMutableList().apply { add(insertAt, draggedViewId) }
 }
 
-internal fun Modifier.watchlistViewDropLine(dragState: WatchlistViewDragState, viewIds: List<String>, lineColor: Color): Modifier =
+internal fun Modifier.viewDropLine(dragState: ViewPillDragState, viewIds: List<String>, lineColor: Color): Modifier =
     drawWithContent {
         drawContent()
         val draggedViewId = dragState.draggedViewId ?: return@drawWithContent
@@ -91,8 +98,8 @@ internal fun Modifier.watchlistViewDropLine(dragState: WatchlistViewDragState, v
         drawLine(lineColor, Offset(lineX, 0f), Offset(lineX, size.height), ViewDropLineWidth.toPx())
     }
 
-internal fun Modifier.watchlistViewPillDrag(
-    dragState: WatchlistViewDragState,
+internal fun Modifier.viewPillDragGesture(
+    dragState: ViewPillDragState,
     viewId: String,
     isEnabled: Boolean,
     onDrop: () -> Unit,
@@ -110,6 +117,7 @@ internal fun Modifier.watchlistViewPillDrag(
             return@awaitEachGesture
         }
 
+        GlobalEditorState.pressStartedOnViewPill = true
         val longPress = awaitLongPressOrCancellation(down.id) ?: return@awaitEachGesture
         longPress.consume()
         while (true) {
@@ -133,7 +141,7 @@ internal fun Modifier.watchlistViewPillDrag(
 }
 
 private suspend fun AwaitPointerEventScope.followDragUntilDrop(
-    dragState: WatchlistViewDragState,
+    dragState: ViewPillDragState,
     viewId: String,
     pointerId: PointerId,
     onDrop: () -> Unit

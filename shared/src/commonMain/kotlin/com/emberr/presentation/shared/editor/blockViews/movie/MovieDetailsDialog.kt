@@ -8,7 +8,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -107,6 +106,8 @@ import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 private val DialogShape = RoundedCornerShape(24.dp)
+private val DesktopDialogMaxWidth = 760.dp
+private val DesktopDialogMaxHeight = 720.dp
 private val FactShape = RoundedCornerShape(8.dp)
 private val CastPortraitMinWidthDesktop = 140.dp
 private val CastPortraitMinWidthPhone = 88.dp
@@ -129,6 +130,8 @@ private val CompanyLogoShape = RoundedCornerShape(4.dp)
 private val CompanyLogoWidth = 48.dp
 private val CompanyLogoHeight = 24.dp
 private val CompanyChipHeight = 32.dp
+private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.6f
+private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.8f
 private const val MAXIMUM_STAR_HALVES = 10
 private const val SKELETON_FACT_ROWS = 4
 
@@ -144,22 +147,16 @@ internal data class DetailsColors(
     val text: Color,
     val secondaryText: Color,
     val panel: Color,
-    val chipBackground: Color,
-    val chipText: Color,
-    val emptyStar: Color,
-    val avatarBackground: Color
+    val chipBackground: Color
 )
 
 @Composable
-private fun detailsColors(): DetailsColors =
+internal fun detailsColors(): DetailsColors =
     DetailsColors(
         text = MaterialTheme.colorScheme.onSurface,
         secondaryText = MaterialTheme.colorScheme.outline,
         panel = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
-        chipBackground = chipContainerColor(),
-        chipText = MaterialTheme.colorScheme.onSurface,
-        emptyStar = chipContainerColor(),
-        avatarBackground = chipContainerColor()
+        chipBackground = chipContainerColor()
     )
 
 @Composable
@@ -204,10 +201,10 @@ internal fun MovieDetailsDialog(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .widthIn(max = 760.dp)
-                        .fillMaxHeight(0.8f)
-                        .heightIn(max = 720.dp)
+                        .fillMaxWidth(DESKTOP_DIALOG_WIDTH_FRACTION)
+                        .widthIn(max = DesktopDialogMaxWidth)
+                        .fillMaxHeight(DESKTOP_DIALOG_HEIGHT_FRACTION)
+                        .heightIn(max = DesktopDialogMaxHeight)
                         .safeDrawingPadding()
                         .clip(DialogShape)
                         .background(detailsBackgroundColor())
@@ -301,7 +298,7 @@ private fun MovieDetailsContent(
                     )
                     StarRatingPicker(
                         ratingHalfStars = block.ratingHalfStars,
-                        emptyColor = colors.emptyStar,
+                        emptyColor = colors.chipBackground,
                         onRate = editor?.let { { halfStars: Int? -> it.setRating(block, halfStars) } }
                     )
                 }
@@ -342,7 +339,7 @@ private fun MovieDetailsContent(
 @Stable
 private class MovieDetailsTabs(
     val shown: List<MovieDetailsTab>,
-    val selected: MovieDetailsTab?,
+    val selected: MovieDetailsTab,
     val liveExtras: LiveTmdbLoadState<MovieTitleExtras>?,
     val onSelect: (MovieDetailsTab) -> Unit
 )
@@ -352,9 +349,9 @@ private fun rememberMovieDetailsTabs(details: MovieDetails, liveLoad: LiveTmdbLo
     var selectedTab by remember { mutableStateOf(MovieDetailsTab.OVERVIEW) }
     var hasOpenedLiveTab by remember { mutableStateOf(false) }
     val shownTabs = shownTabsOf(details)
-    val shownTab = selectedTab.takeIf { it in shownTabs } ?: shownTabs.firstOrNull()
+    val shownTab = selectedTab.takeIf { it in shownTabs } ?: shownTabs.first()
     val titleSource = koinInject<MovieTitleSource>()
-    val liveExtras = if (liveLoad == null && (hasOpenedLiveTab || shownTab?.needsLiveExtras == true)) {
+    val liveExtras = if (liveLoad == null && (hasOpenedLiveTab || shownTab.needsLiveExtras)) {
         rememberLiveTmdbLoad(details.titleKey()) { titleSource.loadTitleExtras(details.tmdbId, details.kind) }
     } else {
         null
@@ -384,17 +381,15 @@ private fun MovieDetailsBody(
         MovieOverviewSkeleton(colors = colors)
     } else if (liveLoad != null) {
         LiveTmdbLoadMessage(state = liveLoad, textColor = colors.text, chipBackground = colors.chipBackground)
-    } else if (shownTab != null) {
+    } else {
         Column(verticalArrangement = Arrangement.spacedBy(TabContentGap)) {
-            if (tabs.shown.size > 1) {
-                MovieDetailsTabRow(
-                    tabs = tabs.shown,
-                    selectedTab = shownTab,
-                    contentColor = colors.text,
-                    selectedBackground = colors.chipBackground,
-                    onSelectTab = tabs.onSelect
-                )
-            }
+            MovieDetailsTabRow(
+                tabs = tabs.shown,
+                selectedTab = shownTab,
+                contentColor = colors.text,
+                selectedBackground = colors.chipBackground,
+                onSelectTab = tabs.onSelect
+            )
             when (shownTab) {
                 MovieDetailsTab.OVERVIEW -> MovieOverviewTab(details = details, colors = colors)
                 MovieDetailsTab.CAST -> MovieCastGrid(cast = details.cast, colors = colors, onOpenPerson = onOpenPerson)
@@ -484,7 +479,7 @@ private fun MovieTrailerChip(trailer: MovieTrailer, colors: DetailsColors) {
         onClick = { uriHandler.openUri(trailer.youtubeLink) },
         modifier = Modifier.height(movieChipHeight()),
         background = colors.chipBackground,
-        contentColor = colors.chipText
+        contentColor = colors.text
     ) {
         Icon(
             painter = painterResource(Res.drawable.logo_youtube),
@@ -546,7 +541,7 @@ private fun MovieFactChip(text: String, colors: DetailsColors) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelSmall,
-        color = colors.chipText,
+        color = colors.text,
         maxLines = 1,
         modifier = Modifier
             .clip(FactShape)
@@ -573,12 +568,12 @@ private fun MovieAddToWatchlistButton(
         onClick = if (isInWatchlist || adder.isAdding) null else ({ adder.add(details.toSearchResult()) }),
         modifier = modifier.height(movieChipHeight()),
         background = colors.chipBackground,
-        contentColor = colors.chipText
+        contentColor = colors.text
     ) {
         Icon(
             painter = painterResource(if (isInWatchlist) Res.drawable.check else Res.drawable.plus),
             contentDescription = null,
-            tint = colors.chipText,
+            tint = colors.text,
             modifier = Modifier.size(12.dp)
         )
     }
@@ -654,7 +649,7 @@ private fun MovieOverviewTab(details: MovieDetails, colors: DetailsColors) {
     Column(verticalArrangement = Arrangement.spacedBy(SectionGap)) {
         val links = linksOf(details)
         if (links.isNotEmpty()) {
-            MovieLinkChips(links = links, background = colors.chipBackground, contentColor = colors.chipText)
+            MovieLinkChips(links = links, background = colors.chipBackground, contentColor = colors.text)
         }
         if (details.overview.isNotBlank()) {
             Text(text = details.overview, style = MaterialTheme.typography.bodyLarge, color = colors.text)
@@ -726,7 +721,7 @@ private fun MovieOverviewSkeleton(colors: DetailsColors) {
             MovieSkeletonLine(widthFraction = 0.25f, height = 14.dp, progress = progress, colors = shimmerColors)
             repeat(SKELETON_FACT_ROWS) { index ->
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Box(modifier = Modifier.width(if (isDesktopPlatform) FactLabelWidthDesktop else FactLabelWidthPhone).padding(end = 24.dp)) {
+                    Box(modifier = Modifier.width(factLabelWidth()).padding(end = 24.dp)) {
                         MovieSkeletonLine(widthFraction = 1f, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
                     }
                     MovieSkeletonLine(widthFraction = 0.6f, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
@@ -920,7 +915,7 @@ private fun MovieCompanyChip(company: MovieNamedLogo, colors: DetailsColors) {
         Text(
             text = company.name,
             style = MaterialTheme.typography.labelSmall,
-            color = colors.chipText,
+            color = colors.text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -934,7 +929,7 @@ private fun MovieFactRow(label: String, value: String, colors: DetailsColors) {
             text = label,
             style = MaterialTheme.typography.bodyLarge,
             color = colors.secondaryText,
-            modifier = Modifier.width(if (isDesktopPlatform) FactLabelWidthDesktop else FactLabelWidthPhone)
+            modifier = Modifier.width(factLabelWidth())
         )
         Text(
             text = value,
@@ -945,28 +940,22 @@ private fun MovieFactRow(label: String, value: String, colors: DetailsColors) {
     }
 }
 
+private fun factLabelWidth(): Dp = if (isDesktopPlatform) FactLabelWidthDesktop else FactLabelWidthPhone
+
 @Composable
 private fun MovieCastGrid(cast: List<MovieCastMember>, colors: DetailsColors, onOpenPerson: (MovieCastMember) -> Unit) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val portraitMinWidth = if (isDesktopPlatform) CastPortraitMinWidthDesktop else CastPortraitMinWidthPhone
-        val columnCount = ((maxWidth + CastColumnGap) / (portraitMinWidth + CastColumnGap)).toInt().coerceAtLeast(1)
-        Column(verticalArrangement = Arrangement.spacedBy(CastRowGap)) {
-            cast.chunked(columnCount).forEach { rowMembers ->
-                Row(horizontalArrangement = Arrangement.spacedBy(CastColumnGap)) {
-                    rowMembers.forEach { member ->
-                        MovieCastPortrait(
-                            member = member,
-                            colors = colors,
-                            onClick = member.personId?.let { { onOpenPerson(member) } },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    repeat(columnCount - rowMembers.size) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-        }
+    MovieAdaptiveGrid(
+        items = cast,
+        minimumCellWidth = if (isDesktopPlatform) CastPortraitMinWidthDesktop else CastPortraitMinWidthPhone,
+        columnGap = CastColumnGap,
+        rowGap = CastRowGap
+    ) { member, portraitWidth ->
+        MovieCastPortrait(
+            member = member,
+            colors = colors,
+            onClick = member.personId?.let { { onOpenPerson(member) } },
+            modifier = Modifier.width(portraitWidth)
+        )
     }
 }
 
@@ -983,24 +972,7 @@ private fun MovieCastPortrait(
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f)
-                .clip(DefaultBlockShape)
-                .background(colors.avatarBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = initialsOf(member.name),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = colors.text
-            )
-            if (member.photoFilePath != null || member.photoUrl != null) {
-                MovieImage(filePath = member.photoFilePath, url = member.photoUrl, modifier = Modifier.fillMaxSize())
-            }
-        }
+        MoviePersonPhoto(member = member, colors = colors, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = member.name,
@@ -1020,6 +992,27 @@ private fun MovieCastPortrait(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+    }
+}
+
+@Composable
+internal fun MoviePersonPhoto(member: MovieCastMember, colors: DetailsColors, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .aspectRatio(PosterAspectRatio)
+            .clip(DefaultBlockShape)
+            .background(colors.chipBackground),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = initialsOf(member.name),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = colors.text
+        )
+        if (member.photoFilePath != null || member.photoUrl != null) {
+            MovieImage(filePath = member.photoFilePath, url = member.photoUrl, modifier = Modifier.fillMaxSize())
         }
     }
 }

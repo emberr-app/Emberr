@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -45,9 +44,11 @@ import com.emberr.domain.movie.isUsable
 import com.emberr.domain.movie.newWatchlistFilter
 import com.emberr.domain.movie.withCondition
 import com.emberr.presentation.shared.components.EmberrTextField
-import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.MenuChoiceButton
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
 import com.emberr.presentation.shared.components.SelectedOptionBackground
+import com.emberr.presentation.shared.components.SmallRoundedCornerShape
+import com.emberr.presentation.shared.components.subtleFillColor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.x
@@ -57,13 +58,14 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
-import java.util.UUID
 import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val FilterValueShape = RoundedCornerShape(12.dp)
-private val ChipShape = RoundedCornerShape(8.dp)
 private const val TMDB_HIGHEST_RATING = 10.0
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 internal fun WatchlistFilterMenu(
     expanded: Boolean,
@@ -77,7 +79,7 @@ internal fun WatchlistFilterMenu(
         editor.changeView(block.id, openView.id) { view -> view.copy(filters = change(view.filters)) }
     }
     fun addFilter(field: WatchlistFilterField) {
-        changeFilters { filters -> filters + newWatchlistFilter(UUID.randomUUID().toString(), field) }
+        changeFilters { filters -> filters + newWatchlistFilter(Uuid.random().toString(), field) }
     }
 
     MovieMenu(expanded = expanded, title = "Filter", onDismiss = onDismiss) { _ ->
@@ -130,7 +132,7 @@ private fun WatchlistFilterEditor(
                 MovieMenuLayer(
                     title = filter.field.label,
                     anchorIsMenuRow = false,
-                    anchor = { openLayer -> WatchlistFilterChoiceButton(text = filter.condition.label, onClick = openLayer) }
+                    anchor = { openLayer -> MenuChoiceButton(text = filter.condition.label, onClick = openLayer) }
                 ) { closeLayerAnd ->
                     filter.field.conditions.forEach { condition ->
                         MovieMenuOption(
@@ -149,18 +151,7 @@ private fun WatchlistFilterEditor(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            IconTooltip(text = "Remove filter") {
-                Icon(
-                    painter = painterResource(Res.drawable.x),
-                    contentDescription = "Remove filter",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .clickable(onClick = onRemove)
-                        .padding(4.dp)
-                        .size(14.dp)
-                )
-            }
+            WatchlistCloseButton(label = "Remove filter", touchPadding = 4.dp, onClick = onRemove)
         }
         WatchlistFilterValue(filter = filter, titles = titles, onChange = onChange)
     }
@@ -237,7 +228,8 @@ private fun pickChoicesOf(filter: WatchlistFilter, titles: List<MovieBlock>): Li
     val choices = when (filter.field) {
         WatchlistFilterField.TYPE -> MovieKind.entries.map { it.name }
         WatchlistFilterField.STATUS -> WatchStatus.entries.map { it.name }
-        else -> titles.genreChoices()
+        WatchlistFilterField.GENRE -> titles.genreChoices()
+        else -> emptyList()
     }
     return choices + filter.picks.filter { it !in choices }
 }
@@ -341,26 +333,12 @@ private fun WatchlistFilterNumberValue(
 }
 
 @Composable
-private fun WatchlistFilterChoiceButton(text: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(ChipShape)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 5.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
-    }
-}
-
-@Composable
 private fun WatchlistFilterValueBox(onClick: () -> Unit, content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(FilterValueShape)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+            .background(subtleFillColor())
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
@@ -404,7 +382,7 @@ internal fun WatchlistFilterChips(
 private fun WatchlistFilterChip(label: String, isEnabled: Boolean, onRemove: () -> Unit) {
     Row(
         modifier = Modifier
-            .clip(ChipShape)
+            .clip(SmallRoundedCornerShape)
             .background(SelectedOptionBackground)
             .clickable(enabled = isEnabled, onClick = onRemove)
             .padding(start = 10.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),

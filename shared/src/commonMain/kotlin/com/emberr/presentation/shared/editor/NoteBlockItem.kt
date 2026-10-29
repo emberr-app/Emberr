@@ -569,7 +569,7 @@ fun NoteBlockItem(
                 onLongClick = if (isDesktopPlatform) {
                     null
                 } else {
-                    { if (!GlobalEditorState.pressStartedOnDatabaseViewPill) actions.onToggleSelection(block.id) }
+                    { if (!GlobalEditorState.pressStartedOnViewPill) actions.onToggleSelection(block.id) }
                 }
             )
     ) {

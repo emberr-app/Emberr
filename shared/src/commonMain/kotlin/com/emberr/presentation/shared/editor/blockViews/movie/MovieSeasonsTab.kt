@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieEpisode
@@ -50,6 +51,8 @@ private val EpisodeStillWidthPhone = 120.dp
 private val EpisodeStillShape = RoundedCornerShape(8.dp)
 private const val SHORT_OVERVIEW_LINES = 3
 private const val SKELETON_EPISODES = 3
+
+private fun episodeStillWidth(): Dp = if (isDesktopPlatform) EpisodeStillWidthDesktop else EpisodeStillWidthPhone
 
 internal fun hasSeasonsToShow(details: MovieDetails): Boolean =
     details.kind == MovieKind.SHOW &&
@@ -198,7 +201,7 @@ private fun MovieEpisodesSkeleton(colors: DetailsColors) {
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .width(if (isDesktopPlatform) EpisodeStillWidthDesktop else EpisodeStillWidthPhone)
+                    .width(episodeStillWidth())
                     .aspectRatio(16f / 9f)
                     .clip(EpisodeStillShape)
                     .shimmer(progress, shimmerColors, itemIndex = index)
@@ -217,7 +220,7 @@ private fun MovieEpisodeRow(episode: MovieEpisode, colors: DetailsColors) {
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .width(if (isDesktopPlatform) EpisodeStillWidthDesktop else EpisodeStillWidthPhone)
+                    .width(episodeStillWidth())
                     .aspectRatio(16f / 9f)
                     .clip(EpisodeStillShape)
                     .background(colors.chipBackground),

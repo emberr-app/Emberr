@@ -21,7 +21,9 @@ internal data class PosterColor(val hue: Float, val saturation: Float)
 
 private val foundPosterColors = mutableStateMapOf<String, PosterColor>()
 
-internal val MovieDetails.posterColorKey: String? get() = posterFilePath ?: posterUrl
+internal fun posterColorKeyOf(filePath: String?, url: String?): String? = filePath ?: url
+
+internal val MovieDetails.posterColorKey: String? get() = posterColorKeyOf(posterFilePath, posterUrl)
 
 internal fun savedPosterColor(key: String?): PosterColor? = key?.let { foundPosterColors[it] }
 

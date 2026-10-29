@@ -43,6 +43,7 @@ import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.tagPoolKey
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.MenuChoiceButton
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagChip
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
@@ -136,7 +137,7 @@ internal fun DatabaseFilterEditor(
             DatabaseMenuLayer(
                 title = columnLabel,
                 anchor = { openLayer ->
-                    DatabaseChoiceButton(text = filter.condition.label, onClick = openLayer)
+                    MenuChoiceButton(text = filter.condition.label, onClick = openLayer)
                 },
                 anchorIsMenuRow = false
             ) { closeLayerAnd ->
@@ -196,20 +197,6 @@ internal fun DatabaseFilterEditor(
                 )
             }
         }
-    }
-}
-
-@Composable
-internal fun DatabaseChoiceButton(text: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 5.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
     }
 }
 

@@ -2,15 +2,8 @@ package com.emberr.presentation.shared.editor.blockViews.movie
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,30 +28,23 @@ internal fun WatchlistGallery(
     titleSelection: WatchlistSelection
 ) {
     val titleIdsInShownOrder = titles.map { it.id }
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val minimumCellWidth = if (isDesktopPlatform) GalleryCellMinWidthDesktop else GalleryCellMinWidthPhone
-        val columnCount = maxOf(1, ((maxWidth + GalleryColumnGap) / (minimumCellWidth + GalleryColumnGap)).toInt())
-        val cellWidth = (maxWidth - GalleryColumnGap * (columnCount - 1)) / columnCount
-
-        Column(verticalArrangement = Arrangement.spacedBy(GalleryRowGap)) {
-            titles.chunked(columnCount).forEach { rowOfTitles ->
-                Row(horizontalArrangement = Arrangement.spacedBy(GalleryColumnGap)) {
-                    rowOfTitles.forEach { title ->
-                        val details = title.details ?: return@forEach
-                        key(title.id) {
-                            WatchlistGalleryCell(
-                                title = title,
-                                details = details,
-                                width = cellWidth,
-                                movieEditor = movieEditor,
-                                inSelectionMode = inSelectionMode,
-                                onToggleSelection = onToggleSelection,
-                                selection = if (inSelectionMode) null else titleSelection.forTitle(title.id, titleIdsInShownOrder)
-                            )
-                        }
-                    }
-                }
-            }
+    MovieAdaptiveGrid(
+        items = titles,
+        minimumCellWidth = if (isDesktopPlatform) GalleryCellMinWidthDesktop else GalleryCellMinWidthPhone,
+        columnGap = GalleryColumnGap,
+        rowGap = GalleryRowGap,
+        itemKey = { title -> title.id }
+    ) { title, cellWidth ->
+        title.details?.let { details ->
+            WatchlistGalleryCell(
+                title = title,
+                details = details,
+                width = cellWidth,
+                movieEditor = movieEditor,
+                inSelectionMode = inSelectionMode,
+                onToggleSelection = onToggleSelection,
+                selection = if (inSelectionMode) null else titleSelection.forTitle(title.id, titleIdsInShownOrder)
+            )
         }
     }
 }
@@ -99,7 +85,7 @@ private fun WatchlistGalleryCell(
         )
 
     GalleryTicketCard(
-        title = title,
+        block = title,
         details = details,
         width = width,
         selection = selection,
@@ -107,7 +93,7 @@ private fun WatchlistGalleryCell(
             when {
                 inSelectionMode -> onToggleSelection()
                 selection?.isSelecting == true -> selection.onToggle()
-                else -> movieEditor.showNextWatchStatus(title)
+                else -> movieEditor.moveToNextWatchStatus(title)
             }
         },
         clickModifier = clickModifier

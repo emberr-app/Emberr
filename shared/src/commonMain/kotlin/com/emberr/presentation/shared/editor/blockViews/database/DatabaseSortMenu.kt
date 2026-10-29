@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.MenuChoiceButton
 import com.emberr.domain.database.activeView
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseColumnTarget
@@ -123,7 +124,7 @@ private fun DatabaseSortEditor(
     ) {
         DatabaseMenuLayer(
             title = "Sort by",
-            anchor = { openLayer -> DatabaseChoiceButton(text = block.labelOf(sort.target), onClick = openLayer) },
+            anchor = { openLayer -> MenuChoiceButton(text = block.labelOf(sort.target), onClick = openLayer) },
             anchorIsMenuRow = false
         ) { closeLayerAnd ->
             DatabaseColumnChoices(
@@ -137,7 +138,7 @@ private fun DatabaseSortEditor(
         DatabaseMenuLayer(
             title = "Order",
             anchor = { openLayer ->
-                DatabaseChoiceButton(text = if (sort.isDescending) "Descending" else "Ascending", onClick = openLayer)
+                MenuChoiceButton(text = if (sort.isDescending) "Descending" else "Ascending", onClick = openLayer)
             },
             anchorIsMenuRow = false
         ) { closeLayerAnd ->

@@ -51,6 +51,12 @@ import com.emberr.domain.model.DatabaseView
 import com.emberr.domain.model.DatabaseViewType
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.ViewPillDragState
+import com.emberr.presentation.shared.components.ViewPillSpan
+import com.emberr.presentation.shared.components.dropKeepsViewInPlace
+import com.emberr.presentation.shared.components.viewDropLine
+import com.emberr.presentation.shared.components.viewPillDragGesture
+import com.emberr.presentation.shared.components.viewToDropBefore
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.kanban
@@ -81,7 +87,7 @@ internal fun DatabaseViewTabs(
     val activeViewId = block.activeView().id
     val viewIds = views.map { it.id }
     val latestViewIds by rememberUpdatedState(viewIds)
-    val dragState = remember { DatabaseViewDragState() }
+    val dragState = remember { ViewPillDragState() }
     val dropLineColor = MaterialTheme.colorScheme.primary
     val scrollState = rememberScrollState()
     var viewportWidth by remember { mutableIntStateOf(0) }
@@ -147,7 +153,7 @@ private fun DatabaseViewTab(
     canDelete: Boolean,
     enabled: Boolean,
     canEdit: Boolean,
-    dragState: DatabaseViewDragState,
+    dragState: ViewPillDragState,
     onDrop: () -> Unit,
     editor: DatabaseBlockEditor,
     runAfterKeyboardCloses: (() -> Unit) -> Unit
@@ -172,7 +178,7 @@ private fun DatabaseViewTab(
         modifier = Modifier
             .onPlaced { coordinates ->
                 val pillLeft = coordinates.positionInParent().x
-                val span = HeaderSpan(left = pillLeft, right = pillLeft + coordinates.size.width)
+                val span = ViewPillSpan(left = pillLeft, right = pillLeft + coordinates.size.width)
                 if (dragState.pillSpans[view.id] != span) dragState.pillSpans[view.id] = span
             }
             .zIndex(if (isDragged) 1f else 0f)

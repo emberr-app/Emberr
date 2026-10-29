@@ -39,15 +39,7 @@ class MovieBlockEditor(
         loadDetails(blockId, result.tmdbId, result.kind) { details ->
             val linkedState = host.newestWatchStateInThisSpace(details)
             val now = System.currentTimeMillis()
-            host.changeMovieBlock(blockId) { block ->
-                block.copy(
-                    details = details,
-                    addedAt = now,
-                    watchStatus = linkedState?.status ?: WatchStatus.NOT_WATCHED,
-                    ratingHalfStars = linkedState?.ratingHalfStars,
-                    watchStateChangedAt = linkedState?.changedAt ?: 0L
-                )
-            }
+            host.changeMovieBlock(blockId) { block -> block.withChosenTitle(details, linkedState, now) }
         }
     }
 
@@ -77,7 +69,7 @@ class MovieBlockEditor(
         host.applyWatchStateToTitle(block.id, WatchState(block.watchStatus, ratingHalfStars, System.currentTimeMillis()))
     }
 
-    fun showNextWatchStatus(block: MovieBlock) {
+    fun moveToNextWatchStatus(block: MovieBlock) {
         val nextStatus = WatchStatus.entries[(block.watchStatus.ordinal + 1) % WatchStatus.entries.size]
         setWatchStatus(block, nextStatus)
     }
@@ -92,19 +84,39 @@ class MovieBlockEditor(
         _loadingBlockIds.update { it + blockId }
         scope.launch {
             try {
-                val details = titleSource.loadDetails(tmdbId, kind)?.withImagesSavedBy(webImageFetcher)
-                if (details == null) {
-                    showNativeToast("couldn't find this title")
-                } else {
-                    useDetails(details)
-                }
-            } catch (cancellation: CancellationException) {
-                throw cancellation
-            } catch (_: Exception) {
-                showNativeToast("couldn't load this title, check your internet")
+                titleSource.loadDetailsWithImages(tmdbId, kind, webImageFetcher, useDetails)
             } finally {
                 _loadingBlockIds.update { it - blockId }
             }
         }
     }
 }
+
+internal suspend fun MovieTitleSource.loadDetailsWithImages(
+    tmdbId: Long,
+    kind: MovieKind,
+    webImageFetcher: WebImageFetcher,
+    useDetails: suspend (MovieDetails) -> Unit
+) {
+    try {
+        val details = loadDetails(tmdbId, kind)?.withImagesSavedBy(webImageFetcher)
+        if (details == null) {
+            showNativeToast("couldn't find this title")
+        } else {
+            useDetails(details)
+        }
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (_: Exception) {
+        showNativeToast("couldn't load this title, check your internet")
+    }
+}
+
+internal fun MovieBlock.withChosenTitle(details: MovieDetails, linkedState: WatchState?, now: Long): MovieBlock =
+    copy(
+        details = details,
+        addedAt = now,
+        watchStatus = linkedState?.status ?: WatchStatus.NOT_WATCHED,
+        ratingHalfStars = linkedState?.ratingHalfStars,
+        watchStateChangedAt = linkedState?.changedAt ?: 0L
+    )

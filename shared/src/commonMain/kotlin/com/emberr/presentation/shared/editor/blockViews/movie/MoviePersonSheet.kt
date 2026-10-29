@@ -1,21 +1,16 @@
 package com.emberr.presentation.shared.editor.blockViews.movie
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +53,7 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
     val livePerson = rememberLiveTmdbLoad(personId) { titleSource.loadPerson(personId) }
     var titleToPreview by remember { mutableStateOf<MovieTitleToPreview?>(null) }
     val person = livePerson.loadedValue
+    val colors = detailsColors()
 
     EmberrBottomSheet(
         expanded = true,
@@ -83,7 +78,7 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
                     MoviePersonSection(title = "Biography") {
                         MovieReadMoreText(
                             text = person.biography,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = colors.text,
                             shortLines = SHORT_BIOGRAPHY_LINES
                         )
                     }
@@ -97,8 +92,8 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
                 if (links.isNotEmpty()) {
                     MovieLinkChips(
                         links = links,
-                        background = chipContainerColor(),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        background = colors.chipBackground,
+                        contentColor = colors.text,
                         modifier = Modifier.padding(horizontal = PersonSheetSidePadding)
                     )
                 }
@@ -119,36 +114,20 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
 @Composable
 private fun MoviePersonHeader(member: MovieCastMember, person: MoviePerson?, livePerson: LiveTmdbLoadState<MoviePerson>) {
     val photoWidth = if (isDesktopPlatform) PersonPhotoWidthDesktop else PersonPhotoWidthPhone
+    val colors = detailsColors()
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = PersonSheetSidePadding),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .width(photoWidth)
-                .aspectRatio(2f / 3f)
-                .clip(DefaultBlockShape)
-                .background(chipContainerColor()),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = initialsOf(member.name),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            if (member.photoFilePath != null || member.photoUrl != null) {
-                MovieImage(filePath = member.photoFilePath, url = member.photoUrl, modifier = Modifier.fillMaxSize())
-            }
-        }
+        MoviePersonPhoto(member = member, colors = colors, modifier = Modifier.width(photoWidth))
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             if (livePerson.load == LiveTmdbLoad.Loading) {
                 MoviePersonFactsSkeleton()
             } else if (person == null) {
                 LiveTmdbLoadMessage(
                     state = livePerson,
-                    textColor = MaterialTheme.colorScheme.onSurface,
-                    chipBackground = chipContainerColor()
+                    textColor = colors.text,
+                    chipBackground = colors.chipBackground
                 )
             } else {
                 personFactsOf(person).forEach { (label, value) -> MoviePersonFact(label = label, value = value) }
@@ -159,20 +138,22 @@ private fun MoviePersonHeader(member: MovieCastMember, person: MoviePerson?, liv
 
 @Composable
 private fun MoviePersonFact(label: String, value: String) {
+    val colors = detailsColors()
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-        Text(text = value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)
+        Text(text = value, style = MaterialTheme.typography.bodyLarge, color = colors.text)
     }
 }
 
 @Composable
 private fun MoviePersonSection(title: String, padsContent: Boolean = true, content: @Composable () -> Unit) {
+    val colors = detailsColors()
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = colors.text,
             modifier = Modifier.padding(horizontal = PersonSheetSidePadding)
         )
         Box(modifier = if (padsContent) Modifier.padding(horizontal = PersonSheetSidePadding) else Modifier) {
@@ -192,17 +173,14 @@ private fun MoviePersonRoles(roles: List<MoviePersonRole>, onOpenRole: (MoviePer
 @Composable
 private fun MoviePersonRolesLayout(itemCount: Int, item: @Composable (index: Int, posterWidth: Dp) -> Unit) {
     if (isDesktopPlatform) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(horizontal = PersonSheetSidePadding)) {
-            val columnCount = ((maxWidth + RoleGap) / (RolePosterMinWidthDesktop + RoleGap)).toInt().coerceAtLeast(1)
-            val posterWidth = (maxWidth - RoleGap * (columnCount - 1)) / columnCount
-            Column(verticalArrangement = Arrangement.spacedBy(RoleRowGap)) {
-                (0 until itemCount).chunked(columnCount).forEach { rowIndexes ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(RoleGap)) {
-                        rowIndexes.forEach { index -> item(index, posterWidth) }
-                    }
-                }
-            }
-        }
+        MovieAdaptiveGrid(
+            items = (0 until itemCount).toList(),
+            minimumCellWidth = RolePosterMinWidthDesktop,
+            columnGap = RoleGap,
+            rowGap = RoleRowGap,
+            modifier = Modifier.padding(horizontal = PersonSheetSidePadding),
+            cell = item
+        )
     } else {
         LazyRow(
             contentPadding = PaddingValues(horizontal = PersonSheetSidePadding),
@@ -216,7 +194,8 @@ private fun MoviePersonRolesLayout(itemCount: Int, item: @Composable (index: Int
 @Composable
 private fun MoviePersonFactsSkeleton() {
     val progress = rememberShimmerProgress()
-    val shimmerColors = shimmerColorsOf(chipContainerColor(), MaterialTheme.colorScheme.onSurface)
+    val colors = detailsColors()
+    val shimmerColors = shimmerColorsOf(colors.chipBackground, colors.text)
     repeat(SKELETON_PERSON_FACTS) { index ->
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             MovieSkeletonLine(widthFraction = 0.3f, height = 10.dp, progress = progress, colors = shimmerColors, itemIndex = index)
@@ -228,7 +207,8 @@ private fun MoviePersonFactsSkeleton() {
 @Composable
 private fun MoviePersonBodySkeleton() {
     val progress = rememberShimmerProgress()
-    val shimmerColors = shimmerColorsOf(chipContainerColor(), MaterialTheme.colorScheme.onSurface)
+    val colors = detailsColors()
+    val shimmerColors = shimmerColorsOf(colors.chipBackground, colors.text)
     MoviePersonSection(title = "Biography") {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             listOf(1f, 1f, 1f, 0.9f, 0.55f).forEachIndexed { index, widthFraction ->
@@ -238,23 +218,14 @@ private fun MoviePersonBodySkeleton() {
     }
     MoviePersonSection(title = "Best known for", padsContent = false) {
         MoviePersonRolesLayout(itemCount = SKELETON_PERSON_ROLES) { index, posterWidth ->
-            Column(modifier = Modifier.width(posterWidth), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(2f / 3f)
-                        .clip(RoundedCornerShape(PosterCornerRadius))
-                        .shimmer(progress, shimmerColors, itemIndex = index)
-                )
-                MovieSkeletonLine(widthFraction = 0.85f, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
-                MovieSkeletonLine(widthFraction = 0.5f, height = 10.dp, progress = progress, colors = shimmerColors, itemIndex = index)
-            }
+            MoviePosterSkeleton(width = posterWidth, progress = progress, shimmerColors = shimmerColors, itemIndex = index)
         }
     }
 }
 
 @Composable
 private fun MovieRolePoster(role: MoviePersonRole, width: Dp, onClick: () -> Unit) {
+    val colors = detailsColors()
     Column(
         modifier = Modifier
             .width(width)
@@ -267,7 +238,7 @@ private fun MovieRolePoster(role: MoviePersonRole, width: Dp, onClick: () -> Uni
             text = role.title,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = colors.text,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -276,7 +247,7 @@ private fun MovieRolePoster(role: MoviePersonRole, width: Dp, onClick: () -> Uni
             Text(
                 text = roleLine,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
+                color = colors.secondaryText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
