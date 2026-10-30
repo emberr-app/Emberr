@@ -21,6 +21,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import com.emberr.presentation.shared.editor.centeredWithMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -77,6 +80,8 @@ import com.emberr.presentation.calendar.EventEditorSheetHost
 import com.emberr.presentation.calendar.RecurrenceScopeChooser
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrBottomSheetOption
+import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.editor.EditorToolbar
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -141,10 +146,11 @@ import emberr.shared.generated.resources.textalign_center2
 import emberr.shared.generated.resources.textalign_justifycenter2
 import emberr.shared.generated.resources.textalign_left2
 import emberr.shared.generated.resources.textalign_right2
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.milliseconds
 
-enum class MenuLevel { MAIN, EXPORT, ICON, COVER }
+enum class MenuLevel { MAIN, EXPORT, ICON, COVER, ALIGNMENT }
 
 private val WordCountPillShape = RoundedCornerShape(20.dp)
 
@@ -246,6 +252,11 @@ fun NoteScreen(
     )
     val subNoteOpenMode = runCatching { SubNoteOpenMode.valueOf(subNoteOpenModeName) }
         .getOrDefault(SubNoteOpenMode.SIDE_PANEL)
+    val desktopNoteWidth by settingsManager.desktopNoteWidthFlow.collectAsState(
+        initial = settingsManager.getDesktopNoteWidth()
+    )
+    val noteContentMaxWidth =
+        if (isDesktopPlatform && desktopNoteWidth < SyncConstants.FULL_DESKTOP_NOTE_WIDTH) desktopNoteWidth.dp else Dp.Unspecified
     var showNoteLinkMenu by remember { mutableStateOf(false) }
     var showCanvasLinkMenu by remember { mutableStateOf(false) }
     var showDatabaseLinkMenu by remember { mutableStateOf(false) }
@@ -297,14 +308,8 @@ fun NoteScreen(
 
     val scope = rememberCoroutineScope()
 
-    val handleToggleFavorite: () -> Unit = {
-        showOptionsMenu = false
-        scope.launch { if (!isDesktopPlatform) delay(250.milliseconds); viewModel.toggleFavorite() }
-    }
-    val handleToggleWordCount: () -> Unit = {
-        showOptionsMenu = false
-        viewModel.toggleWordCount()
-    }
+    val handleToggleFavorite: () -> Unit = { viewModel.toggleFavorite() }
+    val handleToggleWordCount: () -> Unit = { viewModel.toggleWordCount() }
     val handleSetAlignment: (TextAlignment) -> Unit = { viewModel.setAllBlocksAlignment(it) }
     val handleAddIcon: () -> Unit = {
         showOptionsMenu = false
@@ -610,7 +615,8 @@ fun NoteScreen(
                             onIconChange = { viewModel.updateIcon(it) },
                             onTitleChange = { viewModel.updateTitle(it) },
                             onIconClick = { showIconPicker = true },
-                            onTitlePositioned = { titleTopPx = it.positionInRoot().y }
+                            onTitlePositioned = { titleTopPx = it.positionInRoot().y },
+                            contentMaxWidth = noteContentMaxWidth
                         )
                     },
                     modifier = Modifier
@@ -620,7 +626,8 @@ fun NoteScreen(
                     listState = editorListState,
                     onUndo = { viewModel.undo() },
                     onRedo = { viewModel.redo() },
-                    emptyNotePlaceholder = "Type something..."
+                    emptyNotePlaceholder = "Type something...",
+                    contentMaxWidth = noteContentMaxWidth
                 )
 
 
@@ -790,6 +797,8 @@ fun NoteScreen(
                                         coverLinkFetch = coverLinkFetch,
                                         onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                                         onToggleWordCount = handleToggleWordCount,
+                                        noteWidth = desktopNoteWidth,
+                                        onNoteWidthChange = settingsManager::saveDesktopNoteWidth,
                                         onSetAlignment = handleSetAlignment,
                                         onMoveToTrash = handleMoveToTrash,
                                         onCopyPlain = handleCopyPlain,
@@ -965,7 +974,8 @@ private fun NoteHeader(
     onIconChange: (String?) -> Unit,
     onTitleChange: (String) -> Unit,
     onIconClick: () -> Unit,
-    onTitlePositioned: (androidx.compose.ui.layout.LayoutCoordinates) -> Unit = {}
+    onTitlePositioned: (androidx.compose.ui.layout.LayoutCoordinates) -> Unit = {},
+    contentMaxWidth: Dp = Dp.Unspecified
 ) {
     val topPadding by animateDpAsState(
         targetValue = if (noteIcon != null) 48.dp else 16.dp,
@@ -998,26 +1008,33 @@ private fun NoteHeader(
                     if (noteIcon != null) {
                         Box(
                             modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(start = if (isDesktopPlatform) 36.dp else 12.dp)
-                                .graphicsLayer {
-                                    translationY = 36.dp.toPx()
-                                }
-                                .size(80.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable { onIconClick() },
-                            contentAlignment =
-                                if (isDesktopPlatform) Alignment.CenterStart else Alignment.Center
+                                .align(Alignment.BottomCenter)
+                                .centeredWithMaxWidth(contentMaxWidth)
+                                .fillMaxWidth()
                         ) {
-                            Text(
-                                text = noteIcon,
-                                style = TextStyle(
-                                    fontSize = 58.sp,
-                                    textAlign = TextAlign.Center,
-                                    lineHeight = 58.sp
-                                ),
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(start = if (isDesktopPlatform) 36.dp else 12.dp)
+                                    .graphicsLayer {
+                                        translationY = 36.dp.toPx()
+                                    }
+                                    .size(80.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { onIconClick() },
+                                contentAlignment =
+                                    if (isDesktopPlatform) Alignment.CenterStart else Alignment.Center
+                            ) {
+                                Text(
+                                    text = noteIcon,
+                                    style = TextStyle(
+                                        fontSize = 58.sp,
+                                        textAlign = TextAlign.Center,
+                                        lineHeight = 58.sp
+                                    ),
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -1049,7 +1066,10 @@ private fun NoteHeader(
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = if (isDesktopPlatform) 36.dp else 16.dp)
+            modifier = Modifier
+                .centeredWithMaxWidth(contentMaxWidth)
+                .fillMaxWidth()
+                .padding(horizontal = if (isDesktopPlatform) 36.dp else 16.dp)
         ) {
             Spacer(modifier = Modifier.height(topPadding))
 
@@ -1388,6 +1408,8 @@ fun NoteOptionsDesktopMenu(
     coverLinkFetch: ImageLinkFetch?,
     onCoverLinkSubmitted: (address: String) -> Unit,
     onToggleWordCount: () -> Unit,
+    noteWidth: Float,
+    onNoteWidthChange: (Float) -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onMoveToTrash: () -> Unit,
     onCopyPlain: () -> Unit = {},
@@ -1424,6 +1446,47 @@ fun NoteOptionsDesktopMenu(
             }
         }
 
+        OptionsGroupDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+        val wordCountText =
+            if (showWordCount) "Hide Word Count" else "Show Word Count"
+        DesktopMenuItem(
+            Icons.Default.FormatSize,
+            wordCountText
+        ) { onToggleWordCount() }
+
+        DesktopSubmenuItem(painterResource(Res.drawable.textalign_left2), "Alignment") {
+            ALIGNMENT_OPTIONS.forEach { option ->
+                val isSelected = option.alignment == blockAlignment
+                EmberrDesktopMenuOption(
+                    label = option.label,
+                    isSelected = isSelected,
+                    icon = { AlignmentOptionIcon(option, isSelected) },
+                    onClick = { onSetAlignment(option.alignment) }
+                )
+            }
+        }
+
+        DesktopSubmenuItem(rememberVectorPainter(Icons.Default.Straighten), "Note Width") {
+            NoteWidthSlider(
+                noteWidth = noteWidth,
+                onNoteWidthChange = onNoteWidthChange,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+            )
+        }
+
+        if (showStickyNoteOption || !isEditingTemplate) {
+            OptionsGroupDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        }
+
+        val favIcon =
+            if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder
+        val favText =
+            if (isFavorite) "Unfavorite" else "Favorite"
+
+        if (!isEditingTemplate) {
+        DesktopMenuItem(favIcon, favText) { onToggleFavorite() }}
+
         if (showStickyNoteOption) {
             DesktopMenuItem(
                 painterResource(Res.drawable.square_arrow_out_up_right),
@@ -1431,33 +1494,7 @@ fun NoteOptionsDesktopMenu(
             ) { onOpenAsStickyNote() }
         }
 
-        val favIcon =
-            if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder
-        val favText =
-            if (isFavorite) "Remove from Favorites" else "Add to Favorites"
-
         if (!isEditingTemplate) {
-        DesktopMenuItem(favIcon, favText) { onDismiss(); onToggleFavorite() }}
-
-        val wordCountText =
-            if (showWordCount) "Hide Word Count" else "Show Word Count"
-        DesktopMenuItem(
-            Icons.Default.FormatSize,
-            wordCountText
-        ) { onDismiss(); onToggleWordCount() }
-
-        AlignmentIconRow(
-            currentAlignment = blockAlignment,
-            onSelect = onSetAlignment,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
-
-        if (!isEditingTemplate) {
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-            )
-
             DesktopSubmenuItem(painterResource(Res.drawable.share), "Export Note") {
                 DesktopMenuItem(painterResource(Res.drawable.copy), "Copy Text") { onDismiss(); onCopyPlain() }
                 DesktopMenuItem(painterResource(Res.drawable.code), "Copy as Markdown") { onDismiss(); onCopyMarkdown() }
@@ -1465,10 +1502,7 @@ fun NoteOptionsDesktopMenu(
                 DesktopMenuItem(painterResource(Res.drawable.file_pdf), "Download PDF") { onDismiss(); onDownloadPdf() }
             }
 
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-            )
+            OptionsGroupDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             DesktopMenuItem(
                 painterResource(Res.drawable.trash),
@@ -1579,42 +1613,57 @@ private fun DesktopMenuItem(
     }
 }
 
+@Composable
+private fun OptionsGroupDivider(modifier: Modifier = Modifier) {
+    HorizontalDivider(
+        modifier = modifier.padding(vertical = 4.dp),
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+    )
+}
+
+private const val NARROWEST_NOTE_WIDTH = 600f
+
+@Composable
+private fun NoteWidthSlider(
+    noteWidth: Float,
+    onNoteWidthChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Slider(
+            value = noteWidth.coerceIn(NARROWEST_NOTE_WIDTH, SyncConstants.FULL_DESKTOP_NOTE_WIDTH),
+            onValueChange = onNoteWidthChange,
+            valueRange = NARROWEST_NOTE_WIDTH..SyncConstants.FULL_DESKTOP_NOTE_WIDTH,
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            )
+        )
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Narrow", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            Text("Full", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+        }
+    }
+}
+
+private class AlignmentOption(val alignment: TextAlignment, val icon: DrawableResource, val label: String)
+
 private val ALIGNMENT_OPTIONS = listOf(
-    TextAlignment.LEFT to Res.drawable.textalign_left2,
-    TextAlignment.RIGHT to Res.drawable.textalign_right2,
-    TextAlignment.CENTER to Res.drawable.textalign_center2,
-    TextAlignment.JUSTIFY to Res.drawable.textalign_justifycenter2
+    AlignmentOption(TextAlignment.LEFT, Res.drawable.textalign_left2, "Left"),
+    AlignmentOption(TextAlignment.CENTER, Res.drawable.textalign_center2, "Center"),
+    AlignmentOption(TextAlignment.RIGHT, Res.drawable.textalign_right2, "Right"),
+    AlignmentOption(TextAlignment.JUSTIFY, Res.drawable.textalign_justifycenter2, "Justify")
 )
 
 @Composable
-private fun AlignmentIconRow(
-    currentAlignment: TextAlignment?,
-    onSelect: (TextAlignment) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        ALIGNMENT_OPTIONS.forEach { (alignment, icon) ->
-            val isSelected = alignment == currentAlignment
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
-                    .clickable { onSelect(alignment) },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = alignment.name,
-                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-    }
+private fun AlignmentOptionIcon(option: AlignmentOption, isSelected: Boolean) {
+    Icon(
+        painter = painterResource(option.icon),
+        contentDescription = null,
+        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.size(20.dp)
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1674,38 +1723,30 @@ fun NoteOptionsBottomSheet(
                 "Cover Options"
             ) { currentMenu = MenuLevel.COVER }
 
-            val favIcon = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder
-            val favText = if (isFavorite) "Remove from Favorites" else "Add to Favorites"
-            if (!isEditingTemplate) {
-                BottomSheetOptionItem(favIcon, favText) { closeAnd { onToggleFavorite() } }
-            }
+            OptionsGroupDivider()
 
             val wordCountText = if (showWordCount) "Hide Word Count" else "Show Word Count"
             BottomSheetOptionItem(Icons.Default.FormatSize, wordCountText) {
-                closeAnd { onToggleWordCount() }
+                onToggleWordCount()
             }
 
-            AlignmentIconRow(
-                currentAlignment = blockAlignment,
-                onSelect = onSetAlignment,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-            )
+            BottomSheetOptionItem(
+                painterResource(Res.drawable.textalign_left2),
+                "Alignment"
+            ) { currentMenu = MenuLevel.ALIGNMENT }
 
             if (!isEditingTemplate) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                )
+                OptionsGroupDivider()
+                val favIcon = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder
+                val favText = if (isFavorite) "Unfavorite" else "Favorite"
+                BottomSheetOptionItem(favIcon, favText) { onToggleFavorite() }
                 BottomSheetOptionItem(
                     painterResource(Res.drawable.share),
                     "Export Note"
                 ) { currentMenu = MenuLevel.EXPORT }
             }
 
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-            )
+            OptionsGroupDivider()
 
             BottomSheetOptionItem(
                 painterResource(Res.drawable.trash),
@@ -1752,6 +1793,37 @@ fun NoteOptionsBottomSheet(
                 onClick = { currentMenu = MenuLevel.MAIN },
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp, horizontal = 20.dp)
+            )
+        }
+      }
+    }
+
+    EmberrBottomSheet(
+        expanded = currentMenu == MenuLevel.ALIGNMENT,
+        onDismiss = { currentMenu = MenuLevel.MAIN },
+        title = "Alignment",
+    ) { _ ->
+      CompositionLocalProvider(
+        LocalIndication provides NoRippleIndicationNodeFactory,
+        LocalRippleConfiguration provides null
+      ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            ALIGNMENT_OPTIONS.forEach { option ->
+                val isSelected = option.alignment == blockAlignment
+                EmberrBottomSheetOption(
+                    label = option.label,
+                    isSelected = isSelected,
+                    icon = { AlignmentOptionIcon(option, isSelected) },
+                    outerHorizontalPadding = 0.dp,
+                    onClick = { onSetAlignment(option.alignment) }
+                )
+            }
+
+            EmberrButtonPrimary(
+                text = "Close",
+                onClick = { currentMenu = MenuLevel.MAIN },
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 12.dp)
             )
         }
       }

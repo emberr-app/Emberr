@@ -41,6 +41,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -542,7 +544,8 @@ fun EditorScreen(
     listState: LazyListState = rememberLazyListState(),
     topBarClearancePx: Float = 0f,
     onUndo: () -> Unit = {},
-    onRedo: () -> Unit = {}
+    onRedo: () -> Unit = {},
+    contentMaxWidth: Dp = Dp.Unspecified
 ) {
     val isSelectionMode = selectedBlockIds.isNotEmpty()
     val focusManager = LocalFocusManager.current
@@ -1338,6 +1341,7 @@ fun EditorScreen(
 
                         Row(
                             modifier = Modifier
+                                .centeredWithMaxWidth(contentMaxWidth)
                                 .fillMaxWidth()
                                 .padding(horizontal = if (isDesktopPlatform) 36.dp else 16.dp)
                                 .padding(bottom = 20.dp, top = 6.dp),
@@ -1376,6 +1380,7 @@ fun EditorScreen(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 modifier = Modifier
+                                    .centeredWithMaxWidth(contentMaxWidth)
                                     .fillMaxWidth()
                                     .padding(horizontal = if (isDesktopPlatform) 36.dp else 16.dp)
                                     .padding(top = if (index == 0) 0.dp else 20.dp, bottom = 8.dp)
@@ -1397,6 +1402,7 @@ fun EditorScreen(
                         }
                     Box(
                         modifier = Modifier
+                            .centeredWithMaxWidth(contentMaxWidth)
                             .fillMaxWidth()
                             .drawCalloutFrames(calloutFrames[index], MaterialTheme.colorScheme.surface)
                             .then(crossBlockSelectionModifier)
@@ -2989,3 +2995,6 @@ fun BlockStyleBar(
         }
     }
 }
+
+internal fun Modifier.centeredWithMaxWidth(maxWidth: Dp): Modifier =
+    fillMaxWidth().wrapContentWidth().widthIn(max = maxWidth)

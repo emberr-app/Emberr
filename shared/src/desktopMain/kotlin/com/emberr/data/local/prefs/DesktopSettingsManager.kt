@@ -380,6 +380,17 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _subNoteOpenMode.value = mode
     }
 
+    private val _desktopNoteWidth = MutableStateFlow(
+        prefs.getFloat(SyncConstants.KEY_DESKTOP_NOTE_WIDTH, SyncConstants.DEFAULT_DESKTOP_NOTE_WIDTH)
+    )
+    override val desktopNoteWidthFlow: Flow<Float> = _desktopNoteWidth
+    override fun getDesktopNoteWidth(): Float = _desktopNoteWidth.value
+
+    override fun saveDesktopNoteWidth(width: Float) {
+        prefs.putFloat(SyncConstants.KEY_DESKTOP_NOTE_WIDTH, width)
+        _desktopNoteWidth.value = width
+    }
+
     private val _showScrollbar = MutableStateFlow(
         prefs.getBoolean(SyncConstants.KEY_SHOW_SCROLLBAR, SyncConstants.DEFAULT_SHOW_SCROLLBAR)
     )
