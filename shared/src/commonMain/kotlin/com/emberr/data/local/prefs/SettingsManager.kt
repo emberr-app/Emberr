@@ -133,6 +133,10 @@ interface SettingsManager {
     val subNoteOpenModeFlow: Flow<String>
     fun saveSubNoteOpenMode(mode: String)
 
+    val desktopNoteWidthFlow: Flow<Float>
+    fun getDesktopNoteWidth(): Float
+    fun saveDesktopNoteWidth(width: Float)
+
     val showScrollbarFlow: Flow<Boolean>
     fun isShowScrollbarEnabled(): Boolean
     fun saveShowScrollbar(enabled: Boolean)

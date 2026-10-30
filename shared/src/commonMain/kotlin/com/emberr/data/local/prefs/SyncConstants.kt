@@ -32,6 +32,9 @@ object SyncConstants {
     const val DEFAULT_TOP_BAR_FADE_PROGRESSIVE = true
     const val KEY_SUBNOTE_OPEN_MODE = "subnote_open_mode"
     const val DEFAULT_SUBNOTE_OPEN_MODE = "SIDE_PANEL"
+    const val KEY_DESKTOP_NOTE_WIDTH = "desktop_note_width"
+    const val FULL_DESKTOP_NOTE_WIDTH = 1400f
+    const val DEFAULT_DESKTOP_NOTE_WIDTH = 1000f
     // AI generation
     const val KEY_AI_GENERATION_MODE = "ai_generation_mode"
     const val DEFAULT_AI_GENERATION_MODE = "LOCAL"

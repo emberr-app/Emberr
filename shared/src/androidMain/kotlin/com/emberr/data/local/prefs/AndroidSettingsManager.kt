@@ -449,6 +449,10 @@ class AndroidSettingsManager(
         _subNoteOpenMode.value = mode
     }
 
+    override val desktopNoteWidthFlow: Flow<Float> = MutableStateFlow(SyncConstants.FULL_DESKTOP_NOTE_WIDTH)
+    override fun getDesktopNoteWidth(): Float = SyncConstants.FULL_DESKTOP_NOTE_WIDTH
+    override fun saveDesktopNoteWidth(width: Float) { }
+
     private val _showScrollbar = MutableStateFlow(
         sharedPreferences.getBoolean(SyncConstants.KEY_SHOW_SCROLLBAR, SyncConstants.DEFAULT_SHOW_SCROLLBAR)
     )
