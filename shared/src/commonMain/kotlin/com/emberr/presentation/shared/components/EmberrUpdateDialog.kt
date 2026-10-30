@@ -13,22 +13,26 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -57,7 +61,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -69,12 +72,10 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.maximize_2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.milliseconds
 
 private val UpdatePeekGhostSize = 56.dp
@@ -83,16 +84,19 @@ private val UpdatePeekDelayAfterLaunch = 800.milliseconds
 private val UpdatePeekGoodbyeDuration = 1500.milliseconds
 private val UpdatePillGrowsFromBottom = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 1f)
 private val UpdateDialogShape = RoundedCornerShape(22.dp)
-private val UpdateDialogMaxHeight = 620.dp
 private val UpdateDialogDesktopMaxWidth = 760.dp
 private val UpdateDialogDesktopMaxHeight = 720.dp
 private const val UpdateDialogDesktopWidthFraction = 0.6f
 private const val UpdateDialogDesktopHeightFraction = 0.8f
+private val UpdateDialogMobileMaxWidth = 720.dp
+private const val UpdateDialogMobileWidthFraction = 0.94f
+private const val UpdateDialogMobileHeightFraction = 0.92f
 private val UpdateDialogPadding = 24.dp
 private val UpdateDialogHeaderBlurHeight = 110.dp
 private val UpdateDialogHeaderGradientHeight = 130.dp
 private val UpdateScreenshotShape = RoundedCornerShape(12.dp)
-private const val UpdateScreenshotWidthToHeightRatio = 1834f / 1019f
+private val UpdateScreenshotWidthToHeightRatio = if (isDesktopPlatform) 1834f / 1019f else 407f / 858f
+private val UpdateScreenshotMaxHeight = if (isDesktopPlatform) 400.dp else 360.dp
 
 private class UpdateNotesSection(
     val heading: String,
@@ -113,12 +117,22 @@ private val CurrentUpdateNotes = listOf(
             "Watch status and rating shared across notes in a space",
             "Ticket-style cards tinted by the poster"
         ),
-        screenshotPaths = listOf(
-            "files/whats_new/movies0.png",
-            "files/whats_new/movies1.png",
-            "files/whats_new/movies2.png",
-            "files/whats_new/movies3.png"
-        )
+        screenshotPaths = if (isDesktopPlatform) {
+            listOf(
+                "files/whats_new/movies0.png",
+                "files/whats_new/movies1.png",
+                "files/whats_new/movies2.png",
+                "files/whats_new/movies3.png"
+            )
+        } else {
+            listOf(
+                "files/whats_new/mobile/movie1.png",
+                "files/whats_new/mobile/movie2.png",
+                "files/whats_new/mobile/movie3.png",
+                "files/whats_new/mobile/movie4.png",
+                "files/whats_new/mobile/movie5.png"
+            )
+        }
     ),
     UpdateNotesSection(
         heading = "Editor",
@@ -129,10 +143,17 @@ private val CurrentUpdateNotes = listOf(
         } else {
             listOf("Time and date buttons on the keyboard toolbar")
         },
-        screenshotPaths = listOf(
-            "files/whats_new/editor1.png",
-            "files/whats_new/editor2.png"
-        )
+        screenshotPaths = if (isDesktopPlatform) {
+            listOf(
+                "files/whats_new/editor1.png",
+                "files/whats_new/editor2.png"
+            )
+        } else {
+            listOf(
+                "files/whats_new/mobile/editor1.png",
+                "files/whats_new/mobile/editor2.png"
+            )
+        }
     ),
     UpdateNotesSection(
         heading = "Self-Host Sync",
@@ -294,110 +315,127 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
 
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = fullScreenDialogProperties()
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .then(
-                    if (isDesktopPlatform) {
-                        Modifier
-                            .fillMaxWidth(UpdateDialogDesktopWidthFraction)
-                            .widthIn(max = UpdateDialogDesktopMaxWidth)
-                            .fillMaxHeight(UpdateDialogDesktopHeightFraction)
-                            .heightIn(max = UpdateDialogDesktopMaxHeight)
-                    } else {
-                        Modifier
-                            .widthIn(max = 560.dp)
-                            .fillMaxWidth(0.92f)
-                            .heightIn(max = UpdateDialogMaxHeight)
-                    }
-                )
-                .clip(UpdateDialogShape)
-                .background(dialogColor)
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onDismissRequest
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Box(modifier = Modifier.weight(1f, fill = false)) {
-                val dialogHazeState = remember { HazeState() }
-                var headerHeightPx by remember { mutableFloatStateOf(0f) }
-                var buttonAreaHeightPx by remember { mutableFloatStateOf(0f) }
-                val notesScrollState = rememberScrollState()
-                val headerFadeAlpha by remember {
-                    derivedStateOf { if (notesScrollState.value > 0) 1f else 0f }
-                }
-                val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
-                val buttonAreaHeight = with(LocalDensity.current) { buttonAreaHeightPx.toDp() }
-                val headerBlurStyle = EmberrBlur.Regular.copy(
-                    backgroundColor = dialogColor,
-                    tints = listOf(HazeTint(dialogColor.copy(alpha = 0.45f))),
-                    fallbackTint = HazeTint(dialogColor)
-                )
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hazeSource(state = dialogHazeState)
-                        .verticalScroll(notesScrollState)
-                        .padding(horizontal = UpdateDialogPadding)
-                        .padding(top = headerHeight + 16.dp, bottom = buttonAreaHeight),
-                    verticalArrangement = Arrangement.spacedBy(40.dp)
-                ) {
-                    CurrentUpdateNotes.forEach { section ->
-                        UpdateNotesSectionView(section)
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .fillMaxWidth()
-                        .onGloballyPositioned { coordinates -> headerHeightPx = coordinates.size.height.toFloat() }
-                ) {
-                    EmberrTopHeaderBar(
-                        titlePlacement = TopHeaderTitlePlacement.Start,
-                        showBackButton = false,
-                        reserveBackButtonSpace = false,
-                        showsSidebarToggle = false,
-                        topEdgeFadeAlpha = headerFadeAlpha,
-                        topEdgeColor = dialogColor,
-                        topEdgeBlurHeight = UpdateDialogHeaderBlurHeight,
-                        topEdgeGradientHeight = UpdateDialogHeaderGradientHeight,
-                        flatFadeHeight = headerHeight + 4.dp,
-                        hazeState = dialogHazeState,
-                        hazeStyle = headerBlurStyle,
-                        applyStatusBarPadding = false,
-                        contentPadding = topHeaderBarPadding(
-                            top = UpdateDialogPadding,
-                            horizontal = UpdateDialogPadding,
-                            bottom = 8.dp
-                        ),
-                        leadingContent = {
-                            Column {
-                                Text(
-                                    text = "What's new",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                appVersionName?.let { version ->
-                                    Text(
-                                        text = "Version $version",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.outline
-                                    )
-                                }
-                            }
+            Column(
+                modifier = Modifier
+                    .then(
+                        if (isDesktopPlatform) {
+                            Modifier
+                                .fillMaxWidth(UpdateDialogDesktopWidthFraction)
+                                .widthIn(max = UpdateDialogDesktopMaxWidth)
+                                .fillMaxHeight(UpdateDialogDesktopHeightFraction)
+                                .heightIn(max = UpdateDialogDesktopMaxHeight)
+                        } else {
+                            Modifier
+                                .fillMaxWidth(UpdateDialogMobileWidthFraction)
+                                .widthIn(max = UpdateDialogMobileMaxWidth)
+                                .fillMaxHeight(UpdateDialogMobileHeightFraction)
+                                .safeDrawingPadding()
                         }
                     )
-                }
+                    .clip(UpdateDialogShape)
+                    .background(dialogColor)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {}
+                    )
+            ) {
+                Box(modifier = Modifier.weight(1f, fill = false)) {
+                    val dialogHazeState = remember { HazeState() }
+                    var headerHeightPx by remember { mutableFloatStateOf(0f) }
+                    var buttonAreaHeightPx by remember { mutableFloatStateOf(0f) }
+                    val notesScrollState = rememberScrollState()
+                    val headerFadeAlpha by remember {
+                        derivedStateOf { if (notesScrollState.value > 0) 1f else 0f }
+                    }
+                    val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+                    val buttonAreaHeight = with(LocalDensity.current) { buttonAreaHeightPx.toDp() }
+                    val headerBlurStyle = EmberrBlur.Regular.copy(
+                        backgroundColor = dialogColor,
+                        tints = listOf(HazeTint(dialogColor.copy(alpha = 0.45f))),
+                        fallbackTint = HazeTint(dialogColor)
+                    )
 
-                EmberrButtonPrimary(
-                    text = "Got it",
-                    onClick = onDismissRequest,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .onGloballyPositioned { coordinates -> buttonAreaHeightPx = coordinates.size.height.toFloat() }
-                        .fillMaxWidth()
-                        .padding(UpdateDialogPadding)
-                )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .hazeSource(state = dialogHazeState)
+                            .verticalScroll(notesScrollState)
+                            .padding(horizontal = UpdateDialogPadding)
+                            .padding(top = headerHeight + 16.dp, bottom = buttonAreaHeight),
+                        verticalArrangement = Arrangement.spacedBy(40.dp)
+                    ) {
+                        CurrentUpdateNotes.forEach { section ->
+                            UpdateNotesSectionView(section)
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .fillMaxWidth()
+                            .onGloballyPositioned { coordinates -> headerHeightPx = coordinates.size.height.toFloat() }
+                    ) {
+                        EmberrTopHeaderBar(
+                            titlePlacement = TopHeaderTitlePlacement.Start,
+                            showBackButton = false,
+                            reserveBackButtonSpace = false,
+                            showsSidebarToggle = false,
+                            topEdgeFadeAlpha = headerFadeAlpha,
+                            topEdgeColor = dialogColor,
+                            topEdgeBlurHeight = UpdateDialogHeaderBlurHeight,
+                            topEdgeGradientHeight = UpdateDialogHeaderGradientHeight,
+                            flatFadeHeight = headerHeight + 4.dp,
+                            hazeState = dialogHazeState,
+                            hazeStyle = headerBlurStyle,
+                            applyStatusBarPadding = false,
+                            contentPadding = topHeaderBarPadding(
+                                top = UpdateDialogPadding,
+                                horizontal = UpdateDialogPadding,
+                                bottom = 8.dp
+                            ),
+                            leadingContent = {
+                                Column {
+                                    Text(
+                                        text = "What's new",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    appVersionName?.let { version ->
+                                        Text(
+                                            text = "Version $version",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.outline
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    EmberrButtonPrimary(
+                        text = "Got it",
+                        onClick = onDismissRequest,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .onGloballyPositioned { coordinates -> buttonAreaHeightPx = coordinates.size.height.toFloat() }
+                            .fillMaxWidth()
+                            .padding(UpdateDialogPadding)
+                    )
+                }
             }
         }
     }
@@ -445,43 +483,25 @@ private fun UpdateScreenshotCarousel(screenshotPaths: List<String>) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(UpdateScreenshotWidthToHeightRatio)
-                .clip(UpdateScreenshotShape)
-                .emberrBorder(UpdateScreenshotShape)
-        ) {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val pageWidth = minOf(maxWidth, UpdateScreenshotMaxHeight * UpdateScreenshotWidthToHeightRatio)
+            val sidePadding = (maxWidth - pageWidth) / 2
+
             HorizontalPager(
                 state = pagerState,
+                pageSize = PageSize.Fixed(pageWidth),
                 pageSpacing = 12.dp,
-                modifier = Modifier.fillMaxSize()
+                contentPadding = PaddingValues(horizontal = sidePadding),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(pageWidth / UpdateScreenshotWidthToHeightRatio)
             ) { page ->
                 UpdateScreenshot(
                     path = screenshotPaths[page],
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable {
-                            coroutineScope.launch { pagerState.animateScrollToPage((page + 1) % screenshotPaths.size) }
-                        }
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                TopBarIconButton(
-                    icon = painterResource(Res.drawable.maximize_2),
-                    contentDescription = "View full screen",
-                    bgColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                    tint = MaterialTheme.colorScheme.primary,
-                    size = 32.dp,
-                    iconSize = 16.dp,
-                    tooltip = "View full screen",
-                    tooltipPosition = IconTooltipPosition.Start,
-                    onClick = { fullScreenScreenshotPath = screenshotPaths[pagerState.currentPage] }
+                        .clip(UpdateScreenshotShape)
+                        .clickable { fullScreenScreenshotPath = screenshotPaths[page] }
                 )
             }
         }
