@@ -7,12 +7,14 @@ import com.emberr.data.local.room.AppDatabase
 import com.emberr.data.local.room.getDatabaseBuilder
 import com.emberr.data.local.room.getRoomDatabase
 import com.emberr.domain.backup.exportPlainSqliteCopy
+import com.emberr.domain.credentials.CredentialVault
 import java.io.File
 import java.io.IOException
 
 class AndroidManualBackupExporter(
     private val context: Context,
-    private val appDatabase: AppDatabase
+    private val appDatabase: AppDatabase,
+    private val credentialVault: CredentialVault
 ) {
 
     suspend fun exportToZip(uri: Uri, choice: BackupContentChoice) {
@@ -35,9 +37,10 @@ class AndroidManualBackupExporter(
             exportPlainSqliteCopy(appDatabase, plainDbFile)
             check(plainDbFile.length() > 0L) { "sqlcipher_export produced an empty file" }
             val mediaFileNames = keepOnlyChosenContentInCopy(plainDbFile, choice)
+            val credentialKeys = credentialVault.allReadableKeys()
             val outputStream = context.contentResolver.openOutputStream(uri)
                 ?: throw IOException("Couldn't open the chosen file for saving.")
-            outputStream.use { writeBackupZip(it, plainDbFile, File(context.filesDir, "media"), mediaFileNames) }
+            outputStream.use { writeBackupZip(it, plainDbFile, File(context.filesDir, "media"), mediaFileNames, credentialKeys) }
         } finally {
             plainDbFile.delete()
             plainDbJournalFile.delete()

@@ -59,6 +59,31 @@ class CredentialVaultTest {
         assertEquals(SECRET_PASSWORD, vaultAfterKeyringReset.decrypt(fieldFromOtherDevice))
     }
 
+    @Test
+    fun twoDevicesThatExchangeKeysShareOneKeyringAndReadEachOthersValues() = runTest {
+        val vaultA = vaultWith(InMemoryCredentialKeyStore())
+        val vaultB = vaultWith(InMemoryCredentialKeyStore())
+        val fieldFromA = passwordFieldFrom(vaultA.encrypt(CredentialFieldKind.PASSWORD, SECRET_PASSWORD))
+        val fieldFromB = passwordFieldFrom(vaultB.encrypt(CredentialFieldKind.PASSWORD, OWN_PASSWORD))
+        val versionBeforeMerge = vaultA.keyringVersion.value
+
+        val keysFromA = vaultA.allReadableKeys()
+        val keysFromB = vaultB.allReadableKeys()
+        assertTrue(vaultA.mergeKeys(keysFromB))
+        assertTrue(vaultB.mergeKeys(keysFromA))
+
+        val bothKeyIds = setOf(fieldFromA.keyId, fieldFromB.keyId)
+        assertEquals(bothKeyIds, vaultA.allReadableKeys().map { key -> key.id }.toSet())
+        assertEquals(bothKeyIds, vaultB.allReadableKeys().map { key -> key.id }.toSet())
+        assertTrue(vaultA.keyringVersion.value > versionBeforeMerge)
+        assertEquals(
+            passwordFieldFrom(vaultA.encrypt(CredentialFieldKind.PASSWORD, "new")).keyId,
+            passwordFieldFrom(vaultB.encrypt(CredentialFieldKind.PASSWORD, "new")).keyId
+        )
+        assertEquals(OWN_PASSWORD, vaultA.decrypt(fieldFromB))
+        assertEquals(SECRET_PASSWORD, vaultB.decrypt(fieldFromA))
+    }
+
     private fun vaultWith(keyStore: CredentialKeyStore) = CredentialVault(
         keyStore = keyStore,
         syncEncryptionManager = AesGcmEncryptionManager(),

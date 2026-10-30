@@ -6,6 +6,8 @@ import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.inOneTransaction
 import com.emberr.domain.canvas.CanvasContent
+import com.emberr.domain.credentials.CredentialVault
+import com.emberr.domain.model.CredentialKey
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.repository.NoteRepository
@@ -34,6 +36,7 @@ enum class BackupMediaCopyOutcome { COPIED, ALREADY_ON_DEVICE, NOT_IN_BACKUP }
 interface EmberrBackupFile : AutoCloseable {
     val pickedName: String
     val backupData: EmberrBackupData
+    val credentialKeys: List<CredentialKey>
     suspend fun copyMediaFileIfMissing(fileName: String): BackupMediaCopyOutcome
 }
 
@@ -68,6 +71,7 @@ class EmberrBackupImporter(
     private val repository: NoteRepository,
     private val mediaStorageHelper: MediaStorageHelper,
     private val reminderRescheduler: ReminderRescheduler,
+    private val credentialVault: CredentialVault,
     private val appScope: CoroutineScope
 ) {
 
@@ -122,6 +126,11 @@ class EmberrBackupImporter(
         val now = System.currentTimeMillis()
         val newId = { Uuid.random().toString() }
         val backup = backupFile.backupData
+        if (backupFile.credentialKeys.isNotEmpty()) {
+            check(credentialVault.mergeKeys(backupFile.credentialKeys)) {
+                "Couldn't save this backup's login keys on this device, so nothing was imported. Try again."
+            }
+        }
         val categories = resolveCategoriesForImport(
             backupCategories = backup.categories,
             localCategoriesIncludingDeleted = appDatabase.backupDao().getAllCategoriesIncludingDeleted(),

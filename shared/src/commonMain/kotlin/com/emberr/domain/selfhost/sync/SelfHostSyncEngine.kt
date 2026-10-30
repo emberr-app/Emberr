@@ -29,7 +29,9 @@ import com.emberr.domain.ai.external.ExternalAiProvider
 import com.emberr.domain.ai.external.ExternalAiProviderConfig
 import com.emberr.domain.canvas.CanvasRepository
 import com.emberr.domain.cloud.account.CloudSignInSignal
+import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.model.BookmarkCategoryOrderBySpace
+import com.emberr.domain.model.CredentialKey
 import com.emberr.domain.model.FavoriteNoteOrderBySpace
 import com.emberr.domain.repository.BookmarkCategoryOrderStore
 import com.emberr.domain.repository.FavoriteNoteOrderStore
@@ -143,7 +145,8 @@ class SelfHostSyncEngine(
     private val favoriteNoteOrderStore: FavoriteNoteOrderStore,
     private val mediaReferenceIndex: MediaReferenceIndex,
     private val canvasRepository: CanvasRepository,
-    private val meteredNetworkChecker: MeteredNetworkChecker
+    private val meteredNetworkChecker: MeteredNetworkChecker,
+    private val credentialVault: CredentialVault
 ) {
 
     private val database by lazyDatabase
@@ -186,7 +189,8 @@ class SelfHostSyncEngine(
             WebDavSyncPaths.EVENT_EXCEPTIONS_FILE,
             WebDavSyncPaths.API_CONFIGS_FILE,
             WebDavSyncPaths.BOOKMARK_CATEGORY_ORDER_FILE,
-            WebDavSyncPaths.FAVORITE_NOTE_ORDER_FILE
+            WebDavSyncPaths.FAVORITE_NOTE_ORDER_FILE,
+            WebDavSyncPaths.CREDENTIAL_KEYS_FILE
         )
     }
 
@@ -752,6 +756,7 @@ class SelfHostSyncEngine(
                 withSyncCoordinatorWaitingAtMost(syncLockWaitForThisRun, block)
                     .also { result -> if (result == null) syncLockWaitForThisRun = Duration.ZERO }
 
+            reconcileCredentialKeys()
             if (withSyncLock { reconcileSpaces() } == null) {
                 SelfHostSyncLog.d("TextSync: spaces skipped this cycle, SyncCoordinator.mutex busy - will retry next trigger")
             }
@@ -1294,6 +1299,51 @@ class SelfHostSyncEngine(
             throw cause
         } catch (cause: Exception) {
             SelfHostSyncLog.e("ApiConfigSync: failed to sync api configs: ${cause.message}", cause)
+        }
+    }
+
+    private suspend fun reconcileCredentialKeys() {
+        try {
+            val localKeys = credentialVault.allReadableKeys()
+            if (listFileSyncMemory.isAlreadyInSync(WebDavSyncPaths.CREDENTIAL_KEYS_FILE, localKeys.toSet())) {
+                SelfHostSyncLog.d("CredentialKeySync: unchanged on this device and the server, skipped")
+                return
+            }
+            val remoteJsonWithEtag = webDavSyncClient.downloadAndDecryptJsonWithEtag(WebDavSyncPaths.CREDENTIAL_KEYS_FILE)
+            val remoteKeys = remoteJsonWithEtag?.first
+                ?.let { collectionJson.decodeFromString(ListSerializer(CredentialKey.serializer()), it) }
+                .orEmpty()
+                .distinctBy { it.id }
+            val localKeyIds = localKeys.mapTo(HashSet()) { it.id }
+            val remoteKeyIds = remoteKeys.mapTo(HashSet()) { it.id }
+
+            val keysNewToThisDevice = remoteKeys.filter { it.id !in localKeyIds }
+            val savedNewKeys = keysNewToThisDevice.isEmpty() || credentialVault.mergeKeys(keysNewToThisDevice)
+            if (!savedNewKeys) {
+                SelfHostSyncLog.e("CredentialKeySync: some keys from the server could not be saved on this device, will retry next cycle")
+            }
+
+            val keysMissingOnServer = localKeys.filter { it.id !in remoteKeyIds }
+            if (keysMissingOnServer.isNotEmpty()) {
+                webDavSyncClient.uploadEncryptedJson(
+                    WebDavSyncPaths.CREDENTIAL_KEYS_FILE,
+                    collectionJson.encodeToString(ListSerializer(CredentialKey.serializer()), remoteKeys + keysMissingOnServer),
+                    remoteJsonWithEtag?.second
+                )
+            }
+            listFileSyncMemory.rememberIfNothingChanged(
+                path = WebDavSyncPaths.CREDENTIAL_KEYS_FILE,
+                downloaded = remoteJsonWithEtag,
+                localState = localKeys.toSet(),
+                changedNothing = keysMissingOnServer.isEmpty() && keysNewToThisDevice.isEmpty()
+            )
+            SelfHostSyncLog.d("CredentialKeySync: complete, ${keysNewToThisDevice.size} key(s) received, ${keysMissingOnServer.size} key(s) sent")
+        } catch (cause: WebDavConflictException) {
+            SelfHostSyncLog.d("CredentialKeySync: remote credential_keys.json changed concurrently, will retry next cycle")
+        } catch (cause: CancellationException) {
+            throw cause
+        } catch (cause: Exception) {
+            SelfHostSyncLog.e("CredentialKeySync: failed to sync credential keys: ${cause.message}", cause)
         }
     }
 

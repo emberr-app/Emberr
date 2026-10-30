@@ -85,7 +85,7 @@ class EmberrBackupZipTest {
         }
         File(sourceMediaFolder, "a.jpg").writeText("picture of a")
         File(sourceMediaFolder, "b.jpg").writeText("picture of b")
-        zipFile.outputStream().use { output -> writeBackupZip(output, databaseFile, sourceMediaFolder, mediaFileNames) }
+        zipFile.outputStream().use { output -> writeBackupZip(output, databaseFile, sourceMediaFolder, mediaFileNames, credentialKeys = emptyList()) }
     }
 
     private suspend fun openBackup() =

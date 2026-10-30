@@ -394,6 +394,7 @@ val sharedModule = module {
             repository = get(),
             mediaStorageHelper = get(),
             reminderRescheduler = get(),
+            credentialVault = get(),
             appScope = get(named("AppScope"))
         )
     }
@@ -466,7 +467,8 @@ val sharedModule = module {
             favoriteNoteOrderStore = get(),
             mediaReferenceIndex = get(),
             canvasRepository = get(),
-            meteredNetworkChecker = get()
+            meteredNetworkChecker = get(),
+            credentialVault = get()
         )
     }
     single {

@@ -3,6 +3,7 @@ package com.emberr.domain.backup.manual
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.emberr.core.security.AesGcmEncryptionManager
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.AppDatabase
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
@@ -15,7 +16,10 @@ import com.emberr.database.EmberrDatabase
 import com.emberr.domain.ai.LocalAiEngine
 import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.ai.external.AiSettingsRepository
+import com.emberr.domain.credentials.CredentialKeyStore
+import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.model.CheckboxBlock
+import com.emberr.domain.model.CredentialKey
 import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteBlockSerializer
@@ -23,6 +27,7 @@ import com.emberr.domain.model.TextBlock
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.repository.NoteRepositoryImpl
+import com.emberr.domain.selfhost.crypto.Pbkdf2KeyDerivationManager
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.util.media.MediaInfo
 import com.emberr.domain.util.media.MediaStorageHelper
@@ -117,6 +122,7 @@ class EmberrBackupImporterTest {
         private val mediaThatFailsToCopy: String? = null
     ) : EmberrBackupFile {
         override val pickedName = "backup.emberr"
+        override val credentialKeys = emptyList<CredentialKey>()
         var isClosed = false
 
         override suspend fun copyMediaFileIfMissing(fileName: String): BackupMediaCopyOutcome = when {
@@ -143,6 +149,13 @@ class EmberrBackupImporterTest {
             calendarEventExceptionDao = appDatabase.calendarEventExceptionDao(),
             noteDao = appDatabase.noteDao(),
             reminderScheduler = reminderScheduler
+        ),
+        credentialVault = CredentialVault(
+            keyStore = stubOf<CredentialKeyStore> { methodName, _ ->
+                error("These tests do not expect CredentialKeyStore.$methodName to be called")
+            },
+            syncEncryptionManager = AesGcmEncryptionManager(),
+            keyDerivationManager = Pbkdf2KeyDerivationManager()
         ),
         appScope = appScope
     )
