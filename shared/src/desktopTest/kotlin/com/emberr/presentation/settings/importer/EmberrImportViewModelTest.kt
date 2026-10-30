@@ -2,6 +2,7 @@ package com.emberr.presentation.settings.importer
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.emberr.core.security.AesGcmEncryptionManager
 import com.emberr.data.local.room.AppDatabase
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.backup.manual.BackupMediaCopyOutcome
@@ -9,9 +10,13 @@ import com.emberr.domain.backup.manual.EmberrBackupData
 import com.emberr.domain.backup.manual.EmberrBackupFile
 import com.emberr.domain.backup.manual.EmberrBackupFileReader
 import com.emberr.domain.backup.manual.EmberrBackupImporter
+import com.emberr.domain.credentials.CredentialKeyStore
+import com.emberr.domain.credentials.CredentialVault
+import com.emberr.domain.model.CredentialKey
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.domain.selfhost.crypto.Pbkdf2KeyDerivationManager
 import com.emberr.domain.util.media.MediaStorageHelper
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -62,6 +67,7 @@ class EmberrImportViewModelTest {
     private class FakeBackupFile(spaces: List<SpaceEntity>) : EmberrBackupFile {
         override val pickedName = "backup.emberr"
         override val backupData = EmberrBackupData(exportTimestamp = 1L, spaces = spaces)
+        override val credentialKeys = emptyList<CredentialKey>()
         var isClosed = false
 
         override suspend fun copyMediaFileIfMissing(fileName: String) = BackupMediaCopyOutcome.NOT_IN_BACKUP
@@ -85,6 +91,11 @@ class EmberrImportViewModelTest {
                 calendarEventExceptionDao = appDatabase.calendarEventExceptionDao(),
                 noteDao = appDatabase.noteDao(),
                 reminderScheduler = stubOf<ReminderScheduler>()
+            ),
+            credentialVault = CredentialVault(
+                keyStore = stubOf<CredentialKeyStore>(),
+                syncEncryptionManager = AesGcmEncryptionManager(),
+                keyDerivationManager = Pbkdf2KeyDerivationManager()
             ),
             appScope = CoroutineScope(Job())
         )

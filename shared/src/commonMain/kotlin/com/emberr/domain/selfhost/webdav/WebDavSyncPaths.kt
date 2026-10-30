@@ -20,6 +20,7 @@ object WebDavSyncPaths {
     const val API_CONFIGS_FILE = "$ROOT/api_configs.json"
     const val BOOKMARK_CATEGORY_ORDER_FILE = "$ROOT/bookmark_category_order.json"
     const val FAVORITE_NOTE_ORDER_FILE = "$ROOT/favorite_note_order.json"
+    const val CREDENTIAL_KEYS_FILE = "$ROOT/credential_keys.json"
 
     fun notePath(noteId: String) = "$NOTES_DIR/note_$noteId.enc"
     fun dailyPath(spaceId: String, dateString: String) = "$DAILY_DIR/daily_${spaceId}_$dateString.enc"

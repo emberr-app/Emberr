@@ -2,9 +2,12 @@ package com.emberr.domain.backup.manual
 
 import com.emberr.data.local.room.APP_DATABASE_VERSION
 import com.emberr.data.local.room.AppDatabase
+import com.emberr.domain.model.CredentialKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.OutputStream
 import java.io.RandomAccessFile
@@ -17,6 +20,8 @@ import java.util.zip.ZipOutputStream
 
 private const val DATABASE_ENTRY_NAME = "emberr_database.db"
 private const val MEDIA_ENTRY_PREFIX = "media/"
+private const val CREDENTIAL_KEYS_ENTRY_NAME = "credential_keys.json"
+private val credentialKeysJson = Json { ignoreUnknownKeys = true }
 private const val SQLITE_HEADER_SIZE = 100
 private const val SQLITE_USER_VERSION_OFFSET = 60L
 private val SQLITE_FILE_START = "SQLite format 3\u0000".toByteArray(Charsets.US_ASCII)
@@ -45,11 +50,18 @@ fun writeBackupZip(
     outputStream: OutputStream,
     databaseFile: File,
     mediaDirectory: File,
-    mediaFileNames: Set<String>
+    mediaFileNames: Set<String>,
+    credentialKeys: List<CredentialKey>
 ) {
     ZipOutputStream(outputStream).use { zipOut ->
         zipOut.putNextEntry(ZipEntry(DATABASE_ENTRY_NAME))
         databaseFile.inputStream().use { input -> input.copyTo(zipOut) }
+        zipOut.closeEntry()
+
+        zipOut.putNextEntry(ZipEntry(CREDENTIAL_KEYS_ENTRY_NAME))
+        zipOut.write(
+            credentialKeysJson.encodeToString(ListSerializer(CredentialKey.serializer()), credentialKeys).toByteArray()
+        )
         zipOut.closeEntry()
 
         mediaFileNames.sorted().forEach { fileName ->
@@ -83,7 +95,7 @@ suspend fun openEmberrBackupZip(
         }
         checkBackupDatabaseCanBeRestored(temporaryDatabaseFile)
         val backupData = readAllData(openDatabaseCopy(temporaryDatabaseFile.absolutePath))
-        ZipEmberrBackupFile(pickedName, zipFile, backupData, mediaDirectory, releaseResources)
+        ZipEmberrBackupFile(pickedName, zipFile, backupData, readCredentialKeys(zipFile), mediaDirectory, releaseResources)
     } catch (error: Throwable) {
         zipFile.close()
         releaseResources()
@@ -116,6 +128,12 @@ private suspend fun readAllData(database: AppDatabase): EmberrBackupData =
         database.close()
     }
 
+private fun readCredentialKeys(zipFile: ZipFile): List<CredentialKey> {
+    val credentialKeysEntry = zipFile.getEntry(CREDENTIAL_KEYS_ENTRY_NAME) ?: return emptyList()
+    val keysJson = zipFile.getInputStream(credentialKeysEntry).use { input -> input.readBytes().decodeToString() }
+    return credentialKeysJson.decodeFromString(ListSerializer(CredentialKey.serializer()), keysJson)
+}
+
 private fun deleteDatabaseFiles(databaseFile: File) {
     listOf("", "-journal", "-wal", "-shm").forEach { suffix -> File(databaseFile.path + suffix).delete() }
 }
@@ -124,6 +142,7 @@ private class ZipEmberrBackupFile(
     override val pickedName: String,
     private val zipFile: ZipFile,
     override val backupData: EmberrBackupData,
+    override val credentialKeys: List<CredentialKey>,
     private val mediaDirectory: File,
     private val releaseResources: () -> Unit
 ) : EmberrBackupFile {

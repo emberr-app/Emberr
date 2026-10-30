@@ -59,7 +59,7 @@ class LanSyncSchemaTest {
     fun theKindsOfDataSentBetweenDevicesHaveNotChangedWithoutAReview() {
         val reviewedKinds =
             "NOTE, SPACE, DAILY_NOTE, FOLDER, CATEGORY, PROPERTY_TAG, CUSTOM_PROPERTY, EVENT_EXCEPTION, " +
-                    "NOTE_TOMBSTONE, CHAT_SESSION, EXTERNAL_API_CONFIG, BOOKMARK_CATEGORY_ORDER, FAVORITE_NOTE_ORDER"
+                    "NOTE_TOMBSTONE, CHAT_SESSION, EXTERNAL_API_CONFIG, BOOKMARK_CATEGORY_ORDER, FAVORITE_NOTE_ORDER, CREDENTIAL_KEY"
 
         assertEquals(
             reviewedKinds,

@@ -6,6 +6,10 @@ import com.emberr.domain.model.CredentialFieldKind
 import com.emberr.domain.model.CredentialKey
 import com.emberr.domain.selfhost.crypto.KeyDerivationManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -28,6 +32,9 @@ class CredentialVault(
 
     private val keyringLock = Mutex()
     private val readableKeysById = mutableMapOf<String, String>()
+
+    private val _keyringVersion = MutableStateFlow(0)
+    val keyringVersion: StateFlow<Int> = _keyringVersion.asStateFlow()
 
     suspend fun encrypt(kind: CredentialFieldKind, text: String): CredentialEncryption =
         withContext(Dispatchers.IO) {
@@ -54,6 +61,16 @@ class CredentialVault(
 
     suspend fun mergeKeys(incoming: List<CredentialKey>): Boolean = withContext(Dispatchers.IO) {
         keyringLock.withLock { addMissingKeys(incoming) }
+    }
+
+    suspend fun allReadableKeys(): List<CredentialKey> = withContext(Dispatchers.IO) {
+        keyringLock.withLock {
+            runCatching { keyStore.listKeyIndex() }.getOrNull().orEmpty()
+                .distinctBy { entry -> entry.id }
+                .mapNotNull { entry ->
+                    readableKey(entry.id)?.let { key -> CredentialKey(entry.id, key, entry.createdAt) }
+                }
+        }
     }
 
     private fun keyForNewValues(): CredentialKey? {
@@ -86,9 +103,13 @@ class CredentialVault(
     }
 
     private fun addKey(key: CredentialKey): Boolean {
-        val wasAdded = runCatching { keyStore.addKey(key) }.isSuccess
-        if (wasAdded) readableKeysById[key.id] = key.key
-        return wasAdded
+        val wasSaved = runCatching { keyStore.addKey(key) }.isSuccess &&
+            runCatching { keyStore.readKey(key.id) }.getOrNull() == key.key
+        if (wasSaved) {
+            readableKeysById[key.id] = key.key
+            _keyringVersion.update { version -> version + 1 }
+        }
+        return wasSaved
     }
 
     @OptIn(ExperimentalUuidApi::class, ExperimentalEncodingApi::class)

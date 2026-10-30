@@ -23,9 +23,11 @@ import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.canvas.CanvasContent
 import com.emberr.domain.canvas.CanvasRepository
 import com.emberr.domain.cloud.account.CloudSignInSignal
+import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.canvas.liveImageFileNames
 import com.emberr.domain.ai.external.ExternalAiProvider
 import com.emberr.domain.ai.external.ExternalAiProviderConfig
+import com.emberr.domain.model.CredentialKey
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.media.MediaReferenceIndex
 import com.emberr.domain.repository.NoteRepository
@@ -79,7 +81,8 @@ class SyncRepositoryImpl(
     private val favoriteNoteOrderStore: FavoriteNoteOrderStore,
     private val mediaReferenceIndex: MediaReferenceIndex,
     private val canvasRepository: CanvasRepository,
-    private val unappliedSyncChangeDao: UnappliedSyncChangeDao
+    private val unappliedSyncChangeDao: UnappliedSyncChangeDao,
+    private val credentialVault: CredentialVault
 ) : SyncRepository {
 
     private val database by lazyDatabase
@@ -578,6 +581,13 @@ class SyncRepositoryImpl(
                                 favoriteNoteOrderStore.applyRemoteOrders(remoteOrders)
                             }
 
+                            SyncType.CREDENTIAL_KEY -> {
+                                val remoteKey = json.decodeFromString<CredentialKey>(decryptedMetaJson)
+                                check(credentialVault.mergeKeys(listOf(remoteKey))) {
+                                    "credential key ${remoteKey.id} could not be saved on this device"
+                                }
+                            }
+
                         }
                         RemoteChangeOutcome.APPLIED
                     } catch (e: SerializationException) {
@@ -740,6 +750,17 @@ class SyncRepositoryImpl(
                 syncClient.listRemoteMedia().map { it.fileName }.toSet()
             } else {
                 emptySet()
+            }
+
+            credentialVault.allReadableKeys().forEach { key ->
+                val encryptedKey = encryptionManager.encryptPayload(json.encodeToString(key), syncKey)
+                changes.add(
+                    SyncEnvelope(
+                        entityId = key.id, entityType = SyncType.CREDENTIAL_KEY,
+                        metadataJson = encryptedKey, contentJson = "",
+                        updatedAt = key.createdAt, isDeleted = false
+                    )
+                )
             }
 
             val modifiedSpaces = spaceDao.getSpacesModifiedSince(lastSyncTime)

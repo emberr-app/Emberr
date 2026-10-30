@@ -7,11 +7,13 @@ import com.emberr.core.desktop.DesktopAppStorage
 import com.emberr.data.local.room.AppDatabase
 import com.emberr.data.local.room.getDatabaseBuilder
 import com.emberr.data.local.room.getRoomDatabase
+import com.emberr.domain.credentials.CredentialVault
 import java.io.File
 import java.io.FileOutputStream
 
 class DesktopManualBackupExporter(
-    private val appDatabase: AppDatabase
+    private val appDatabase: AppDatabase,
+    private val credentialVault: CredentialVault
 ) {
 
     suspend fun exportToZip(destinationFile: File, choice: BackupContentChoice) {
@@ -25,8 +27,9 @@ class DesktopManualBackupExporter(
             }
             check(plainDbFile.length() > 0L) { "VACUUM INTO produced an empty file" }
             val mediaFileNames = keepOnlyChosenContentInCopy(plainDbFile, choice)
+            val credentialKeys = credentialVault.allReadableKeys()
             FileOutputStream(destinationFile).use { outputStream ->
-                writeBackupZip(outputStream, plainDbFile, DesktopAppStorage.mediaDirectory, mediaFileNames)
+                writeBackupZip(outputStream, plainDbFile, DesktopAppStorage.mediaDirectory, mediaFileNames, credentialKeys)
             }
         } finally {
             plainDbFile.delete()
