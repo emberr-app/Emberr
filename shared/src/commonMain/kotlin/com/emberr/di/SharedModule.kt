@@ -34,6 +34,8 @@ import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.reminders.ReminderTargetResolver
 import com.emberr.domain.selfhost.crypto.VaultKeyLock
+import com.emberr.domain.credentials.CredentialVault
+import com.emberr.domain.credentials.SecureCredentialKeyStorage
 import com.emberr.domain.selfhost.sync.ForegroundSyncPoller
 import com.emberr.domain.selfhost.sync.SelfHostSyncEngine
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
@@ -483,6 +485,13 @@ val sharedModule = module {
     }
 
     single { VaultKeyLock(keyDerivationManager = get(), syncEncryptionManager = get()) }
+    single {
+        CredentialVault(
+            keyStore = get<SecureCredentialKeyStorage>(),
+            syncEncryptionManager = get(),
+            keyDerivationManager = get()
+        )
+    }
 
     single { CloudCrypto() }
     single { CloudAccountKeyManager(cloudCrypto = get()) }

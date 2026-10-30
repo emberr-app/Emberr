@@ -1,4 +1,4 @@
-// Describes where secrets are currently kept, and names the four groups of secrets.
+// Describes where secrets are currently kept, and names the five groups of secrets.
 package com.emberr.core.security.secrets
 
 import com.emberr.core.desktop.DesktopAppStorage
@@ -16,7 +16,8 @@ enum class SecretNamespace(private val releaseKeyringServiceName: String) {
     AiProviders("EmberrAiKeyVault"),
     SelfHostSync("EmberrSelfHostSyncVault"),
     AppSettings("EmberrAppVault"),
-    EmberrCloud("EmberrCloudVault");
+    EmberrCloud("EmberrCloudVault"),
+    CredentialKeys("EmberrCredentialKeyVault");
 
     val keyringServiceName: String
         get() = keyringServiceNameFor(DesktopAppStorage.isDebugBuild)
