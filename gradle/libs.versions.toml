@@ -1,6 +1,6 @@
 [versions]
 # Emberr release
-appVersion = "1.2.2"
+appVersion = "1.2.3"
 
 # Build toolchain
 agp = "9.4.0"

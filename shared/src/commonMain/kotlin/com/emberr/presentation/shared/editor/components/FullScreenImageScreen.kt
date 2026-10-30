@@ -97,7 +97,8 @@ fun FullScreenImageScreen(
     onDownload: () -> Unit,
     onCopy: () -> Unit,
     onDelete: () -> Unit,
-    onOpenSourceLink: (() -> Unit)? = null
+    onOpenSourceLink: (() -> Unit)? = null,
+    showsActionBar: Boolean = true
 ) {
     val density = LocalDensity.current
     val gestureScope = rememberCoroutineScope()
@@ -356,72 +357,74 @@ fun FullScreenImageScreen(
             onBackClick = closeFullScreen
         )
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .graphicsLayer { alpha = currentExpansion() }
-                .navigationBarsPadding()
-                .padding(bottom = 32.dp, start = 24.dp, end = 24.dp)
-                .emberrBorder(DefaultBlockShape)
-                .clip(DefaultBlockShape)
-                .emberrBlur(hazeState, EmberrBlur.Regular)
-                .background(Color.Transparent)
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(22.dp)
+        if (showsActionBar) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .graphicsLayer { alpha = currentExpansion() }
+                    .navigationBarsPadding()
+                    .padding(bottom = 32.dp, start = 24.dp, end = 24.dp)
+                    .emberrBorder(DefaultBlockShape)
+                    .clip(DefaultBlockShape)
+                    .emberrBlur(hazeState, EmberrBlur.Regular)
+                    .background(Color.Transparent)
             ) {
-                val iconSize = 18.dp
+                Row(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(22.dp)
+                ) {
+                    val iconSize = 18.dp
 
-                IconTooltip(text = "Download", position = IconTooltipPosition.Above) {
-                    Icon(
-                        painter = painterResource(Res.drawable.download),
-                        contentDescription = "Download",
-                        modifier = Modifier.size(iconSize).clickable {
-                            if (hasLocalFile) onDownload()
-                        },
-                        tint = tint
-                    )
-                }
-
-                if (onOpenSourceLink != null) {
-                    Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
-
-                    IconTooltip(text = "Open link", position = IconTooltipPosition.Above) {
+                    IconTooltip(text = "Download", position = IconTooltipPosition.Above) {
                         Icon(
-                            painter = painterResource(Res.drawable.square_top_down),
-                            contentDescription = "Open Link",
-                            modifier = Modifier.size(iconSize).clickable { onOpenSourceLink() },
+                            painter = painterResource(Res.drawable.download),
+                            contentDescription = "Download",
+                            modifier = Modifier.size(iconSize).clickable {
+                                if (hasLocalFile) onDownload()
+                            },
                             tint = tint
                         )
                     }
-                }
 
-                Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
+                    if (onOpenSourceLink != null) {
+                        Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
 
-                IconTooltip(text = "Copy image", position = IconTooltipPosition.Above) {
-                    Icon(
-                        painter = painterResource(Res.drawable.copy),
-                        contentDescription = "Copy Image",
-                        modifier = Modifier.size(iconSize).clickable {
-                            if (hasLocalFile) onCopy()
-                        },
-                        tint = tint
-                    )
-                }
+                        IconTooltip(text = "Open link", position = IconTooltipPosition.Above) {
+                            Icon(
+                                painter = painterResource(Res.drawable.square_top_down),
+                                contentDescription = "Open Link",
+                                modifier = Modifier.size(iconSize).clickable { onOpenSourceLink() },
+                                tint = tint
+                            )
+                        }
+                    }
 
-                Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
+                    Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
 
-                IconTooltip(text = "Delete", position = IconTooltipPosition.Above) {
-                    Icon(
-                        painter = painterResource(Res.drawable.trash),
-                        contentDescription = "Delete",
-                        modifier = Modifier.size(iconSize).clickable {
-                            onDelete()
-                        },
-                        tint = tint
-                    )
+                    IconTooltip(text = "Copy image", position = IconTooltipPosition.Above) {
+                        Icon(
+                            painter = painterResource(Res.drawable.copy),
+                            contentDescription = "Copy Image",
+                            modifier = Modifier.size(iconSize).clickable {
+                                if (hasLocalFile) onCopy()
+                            },
+                            tint = tint
+                        )
+                    }
+
+                    Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
+
+                    IconTooltip(text = "Delete", position = IconTooltipPosition.Above) {
+                        Icon(
+                            painter = painterResource(Res.drawable.trash),
+                            contentDescription = "Delete",
+                            modifier = Modifier.size(iconSize).clickable {
+                                onDelete()
+                            },
+                            tint = tint
+                        )
+                    }
                 }
             }
         }
