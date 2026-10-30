@@ -275,6 +275,9 @@ val androidModule = module {
     single<com.emberr.domain.ai.external.SecureAiKeyStorage> {
         com.emberr.domain.ai.external.SecureAiKeyStorage(androidContext(), get())
     }
+    single<com.emberr.domain.credentials.SecureCredentialKeyStorage> {
+        com.emberr.domain.credentials.SecureCredentialKeyStorage(androidContext(), get())
+    }
     single { com.emberr.domain.ai.models.LocalModelUploadManager(androidContext()) }
     single { com.emberr.domain.ai.models.ModelDownloadScheduler(androidContext()) }
     worker {

@@ -119,6 +119,9 @@ val desktopModule = module {
     single { PlaintextSecretBackend(DesktopAppStorage.emberrDirectory) }
     single { SecretBackendSelector(probe = get(), plaintextBackend = get()) }
     single { DesktopSecretStore(backendSelector = get(), plaintextBackend = get()) }
+    single<com.emberr.domain.credentials.SecureCredentialKeyStorage> {
+        com.emberr.domain.credentials.SecureCredentialKeyStorage(get(), DesktopAppStorage.emberrDirectory)
+    }
 
     // Platform implementations
     single<SettingsManager> { DesktopSettingsManager(get()) }
