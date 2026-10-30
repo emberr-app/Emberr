@@ -255,8 +255,11 @@ fun NoteScreen(
     val desktopNoteWidth by settingsManager.desktopNoteWidthFlow.collectAsState(
         initial = settingsManager.getDesktopNoteWidth()
     )
+    var noteWidthBeingDragged by remember { mutableStateOf<Float?>(null) }
+    LaunchedEffect(desktopNoteWidth) { noteWidthBeingDragged = null }
+    val shownNoteWidth = noteWidthBeingDragged ?: desktopNoteWidth
     val noteContentMaxWidth =
-        if (isDesktopPlatform && desktopNoteWidth < SyncConstants.FULL_DESKTOP_NOTE_WIDTH) desktopNoteWidth.dp else Dp.Unspecified
+        if (isDesktopPlatform && shownNoteWidth < SyncConstants.FULL_DESKTOP_NOTE_WIDTH) shownNoteWidth.dp else Dp.Unspecified
     var showNoteLinkMenu by remember { mutableStateOf(false) }
     var showCanvasLinkMenu by remember { mutableStateOf(false) }
     var showDatabaseLinkMenu by remember { mutableStateOf(false) }
@@ -797,8 +800,11 @@ fun NoteScreen(
                                         coverLinkFetch = coverLinkFetch,
                                         onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                                         onToggleWordCount = handleToggleWordCount,
-                                        noteWidth = desktopNoteWidth,
-                                        onNoteWidthChange = settingsManager::saveDesktopNoteWidth,
+                                        noteWidth = shownNoteWidth,
+                                        onNoteWidthChange = { noteWidthBeingDragged = it },
+                                        onNoteWidthChangeFinished = {
+                                            noteWidthBeingDragged?.let(settingsManager::saveDesktopNoteWidth)
+                                        },
                                         onSetAlignment = handleSetAlignment,
                                         onMoveToTrash = handleMoveToTrash,
                                         onCopyPlain = handleCopyPlain,
@@ -1410,6 +1416,7 @@ fun NoteOptionsDesktopMenu(
     onToggleWordCount: () -> Unit,
     noteWidth: Float,
     onNoteWidthChange: (Float) -> Unit,
+    onNoteWidthChangeFinished: () -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onMoveToTrash: () -> Unit,
     onCopyPlain: () -> Unit = {},
@@ -1471,6 +1478,7 @@ fun NoteOptionsDesktopMenu(
             NoteWidthSlider(
                 noteWidth = noteWidth,
                 onNoteWidthChange = onNoteWidthChange,
+                onNoteWidthChangeFinished = onNoteWidthChangeFinished,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
             )
         }
@@ -1627,12 +1635,14 @@ private const val NARROWEST_NOTE_WIDTH = 600f
 private fun NoteWidthSlider(
     noteWidth: Float,
     onNoteWidthChange: (Float) -> Unit,
+    onNoteWidthChangeFinished: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Slider(
             value = noteWidth.coerceIn(NARROWEST_NOTE_WIDTH, SyncConstants.FULL_DESKTOP_NOTE_WIDTH),
             onValueChange = onNoteWidthChange,
+            onValueChangeFinished = onNoteWidthChangeFinished,
             valueRange = NARROWEST_NOTE_WIDTH..SyncConstants.FULL_DESKTOP_NOTE_WIDTH,
             colors = SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.primary,
