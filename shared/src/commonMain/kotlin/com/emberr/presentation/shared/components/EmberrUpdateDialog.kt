@@ -166,7 +166,7 @@ private val CurrentUpdateNotes = listOf(
         ) + if (isDesktopPlatform) {
             emptyList()
         } else {
-            listOf("Background sync every 30 minutes when something changed")
+            listOf("Syncs every 30 minutes while the app is closed")
         }
     ),
     UpdateNotesSection(
