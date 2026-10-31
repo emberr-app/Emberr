@@ -125,6 +125,13 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         prefs.put(SyncConstants.KEY_CANVAS_TOOL_SETTINGS_PREFIX + toolName, json)
     }
 
+    override fun getPasswordGeneratorOptionsJson(): String? =
+        prefs.getOrNull(SyncConstants.KEY_PASSWORD_GENERATOR_OPTIONS)
+
+    override fun savePasswordGeneratorOptionsJson(json: String) {
+        prefs.put(SyncConstants.KEY_PASSWORD_GENERATOR_OPTIONS, json)
+    }
+
     override fun getLastPushedTimestamp(): Long {
         return prefs.getLong(SyncConstants.KEY_SYNC_PUSHED_TIMESTAMP, 0L)
     }
