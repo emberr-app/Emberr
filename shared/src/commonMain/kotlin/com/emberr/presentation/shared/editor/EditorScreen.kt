@@ -609,7 +609,7 @@ fun EditorScreen(
     var isSlashKilled by remember { mutableStateOf(false) }
     val previousTextMap = remember { mutableMapOf<String, String>() }
     val customProperties = rememberCustomProperties()
-    val slashMenuLabels = remember(customProperties) {
+    val slashMenuSearchTexts = remember(customProperties) {
         buildSlashMenuSections(
             onChangeBlockType = {},
             onToggleFormat = {},
@@ -619,7 +619,7 @@ fun EditorScreen(
             onInsertText = {},
             usesTwentyFourHourClock = false,
             customProperties = customProperties
-        ).flatMap { section -> section.items.map { it.label } }
+        ).flatMap { section -> section.items.flatMap { item -> listOf(item.label) + item.searchWords } }
     }
 
     val isScrolled by remember {
@@ -753,7 +753,7 @@ fun EditorScreen(
                     }
 
                     if (!isSlashKilled && textAfterSlash.length > 2) {
-                        val hasMatch = slashMenuLabels.any { it.contains(textAfterSlash, ignoreCase = true) }
+                        val hasMatch = slashMenuSearchTexts.any { it.contains(textAfterSlash, ignoreCase = true) }
                         if (!hasMatch) {
                             isSlashKilled = true
                         }
