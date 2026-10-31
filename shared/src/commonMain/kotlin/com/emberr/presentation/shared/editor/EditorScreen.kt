@@ -225,7 +225,7 @@ import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.database
 import emberr.shared.generated.resources.document_text_12
 import emberr.shared.generated.resources.ellipsis
-import emberr.shared.generated.resources.eye3
+import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.film
 import emberr.shared.generated.resources.tv
 import emberr.shared.generated.resources.format_bold
@@ -2841,7 +2841,7 @@ fun BlockSelectionPill(
                     Box {
                         IconTooltip(text = "Preview", position = IconTooltipPosition.Above) {
                             Icon(
-                                painterResource(Res.drawable.eye3),
+                                painterResource(Res.drawable.eye_open),
                                 "Preview",
                                 modifier = Modifier.size(iconSize + 3.dp).clickable { showLinkedNoteOptions = true },
                                 tint = tint

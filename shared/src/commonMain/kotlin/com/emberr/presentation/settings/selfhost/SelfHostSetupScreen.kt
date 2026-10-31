@@ -26,8 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.LinkOff
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
@@ -79,6 +77,8 @@ import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
+import emberr.shared.generated.resources.eye_closed
+import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.refresh_cw
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -687,7 +687,7 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
                 IconTooltip(text = if (isPasswordVisible) "Hide password" else "Show password") {
                     IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
-                            imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            painter = painterResource(if (isPasswordVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                             contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
@@ -782,7 +782,7 @@ private fun PassphraseField(value: String, onValueChange: (String) -> Unit, onSu
             IconTooltip(text = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase") {
                 IconButton(onClick = { isPassphraseVisible = !isPassphraseVisible }) {
                     Icon(
-                        imageVector = if (isPassphraseVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        painter = painterResource(if (isPassphraseVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                         contentDescription = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase",
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )

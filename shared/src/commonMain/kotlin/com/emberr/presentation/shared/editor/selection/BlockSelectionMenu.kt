@@ -21,7 +21,8 @@ import emberr.shared.generated.resources.card_edit2
 import emberr.shared.generated.resources.check_square
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.copy
-import emberr.shared.generated.resources.eye3
+import emberr.shared.generated.resources.eye_closed
+import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.format_bold
 import emberr.shared.generated.resources.indent_left
 import emberr.shared.generated.resources.indent_right
@@ -121,7 +122,7 @@ fun BlockSelectionMenuContent(
                     items = listOf(
                         SlashMenuItemData(
                             label = if (selectedLinkedNote.showIcon) "Hide Note Icon" else "Show Note Icon",
-                            icon = Res.drawable.eye3,
+                            icon = if (selectedLinkedNote.showIcon) Res.drawable.eye_closed else Res.drawable.eye_open,
                             action = closeThen {
                                 onUpdateLinkedNoteOptions(
                                     selectedLinkedNote.id,
@@ -132,7 +133,7 @@ fun BlockSelectionMenuContent(
                         ),
                         SlashMenuItemData(
                             label = if (selectedLinkedNote.showCoverImage) "Hide Cover Image" else "Show Cover Image",
-                            icon = Res.drawable.eye3,
+                            icon = if (selectedLinkedNote.showCoverImage) Res.drawable.eye_closed else Res.drawable.eye_open,
                             action = closeThen {
                                 onUpdateLinkedNoteOptions(
                                     selectedLinkedNote.id,

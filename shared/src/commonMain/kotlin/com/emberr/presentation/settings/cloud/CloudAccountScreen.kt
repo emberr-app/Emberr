@@ -22,9 +22,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -83,7 +80,8 @@ import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.eye3
+import emberr.shared.generated.resources.eye_closed
+import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.lock
 import emberr.shared.generated.resources.mail
 import emberr.shared.generated.resources.trash
@@ -523,7 +521,7 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
             )
             SettingsDivider()
             SettingsActionRow(
-                icon = painterResource(Res.drawable.eye3),
+                icon = painterResource(Res.drawable.eye_open),
                 title = "Recovery words",
                 isEnabled = !state.isWorking,
                 onClick = {
@@ -910,7 +908,7 @@ internal fun PasswordField(
             IconTooltip(text = if (isPasswordVisible) "Hide password" else "Show password") {
                 IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                     Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        painter = painterResource(if (isPasswordVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                         contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )

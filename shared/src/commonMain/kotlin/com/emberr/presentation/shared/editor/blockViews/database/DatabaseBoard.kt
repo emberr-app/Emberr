@@ -94,7 +94,7 @@ import com.emberr.presentation.shared.editor.blockViews.property.rememberPropert
 import com.emberr.presentation.shared.editor.blockViews.property.rememberPropertyTagColorName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_right
-import emberr.shared.generated.resources.eye3
+import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.minimize_2
 import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.plus
@@ -725,7 +725,7 @@ private fun DatabaseBoardColumnHeader(
                 )
                 DatabaseMenuOption(
                     label = "Hide group",
-                    icon = { DatabaseOptionIcon(Res.drawable.eye3) },
+                    icon = { DatabaseOptionIcon(Res.drawable.eye_closed) },
                     onClick = { closeAnd(onHide) }
                 )
             }
