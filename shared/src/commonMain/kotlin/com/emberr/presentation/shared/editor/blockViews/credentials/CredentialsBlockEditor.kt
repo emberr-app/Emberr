@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -96,8 +98,8 @@ import emberr.shared.generated.resources.lock_password
 import emberr.shared.generated.resources.notes2
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.refresh_cw
+import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.user2
-import emberr.shared.generated.resources.x
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -112,6 +114,11 @@ private val StrengthBarWidth = 24.dp
 private val KindMenuMinWidth = 220.dp
 private val KindMenuMaxWidth = 300.dp
 private val DesktopFooterButtonMinWidth = 112.dp
+private val TrailingIconGap = 8.dp
+private val TrailingIconsEndPadding = 14.dp
+private val RemoveButtonStartPadding = 14.dp
+private val RemoveButtonEndPadding = 2.dp
+private val AndroidLabelPullTowardIcon = 6.dp
 internal val SheetRowInset = 8.dp
 internal val SheetBottomPadding = 16.dp
 private val SheetButtonHorizontalPadding = 20.dp
@@ -487,29 +494,22 @@ private fun CredentialFieldEditorRow(
             modifier = modifier
         )
     }
-    val actions = @Composable {
-        if (draft.kind == CredentialFieldKind.PASSWORD) {
-            Box {
-                CredentialIconButton(
-                    painter = painterResource(Res.drawable.refresh_cw),
-                    description = "Generate a password",
-                    onClick = { runAfterKeyboardCloses { isGeneratorOpen = true } }
-                )
-                PasswordGeneratorMenu(
-                    expanded = isGeneratorOpen,
-                    onDismiss = { isGeneratorOpen = false },
-                    onUsePassword = { generatedPassword ->
-                        draft.value = generatedPassword
-                        draft.isValueVisible = true
-                    }
-                )
-            }
+    val generatorButton = @Composable {
+        Box {
+            CredentialIconButton(
+                painter = painterResource(Res.drawable.refresh_cw),
+                description = "Generate a password",
+                onClick = { runAfterKeyboardCloses { isGeneratorOpen = true } }
+            )
+            PasswordGeneratorMenu(
+                expanded = isGeneratorOpen,
+                onDismiss = { isGeneratorOpen = false },
+                onUsePassword = { generatedPassword ->
+                    draft.value = generatedPassword
+                    draft.isValueVisible = true
+                }
+            )
         }
-        CredentialIconButton(
-            painter = painterResource(Res.drawable.x),
-            description = "Remove field",
-            onClick = onRemove
-        )
     }
 
     if (isDesktopPlatform) {
@@ -525,30 +525,49 @@ private fun CredentialFieldEditorRow(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
-                CredentialValueInput(draft = draft, modifier = Modifier.fillMaxWidth())
+                CredentialValueInput(
+                    draft = draft,
+                    generatorButton = generatorButton.takeIf { draft.kind == CredentialFieldKind.PASSWORD },
+                    modifier = Modifier.fillMaxWidth()
+                )
                 if (draft.kind == CredentialFieldKind.PASSWORD) PasswordStrengthMeter(password = draft.value)
             }
-            Spacer(modifier = Modifier.width(4.dp))
-            Row(modifier = Modifier.height(TextFieldHeight), verticalAlignment = Alignment.CenterVertically) {
-                actions()
+            Box(
+                modifier = Modifier.height(TextFieldHeight).padding(start = RemoveButtonStartPadding, end = RemoveButtonEndPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CredentialIconButton(
+                    painter = painterResource(Res.drawable.trash),
+                    description = "Remove field",
+                    onClick = onRemove
+                )
             }
         }
     } else {
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 kindButton()
-                labelInput(Modifier.weight(1f))
-                actions()
+                labelInput(Modifier.weight(1f).offset(x = -AndroidLabelPullTowardIcon))
+                if (draft.kind == CredentialFieldKind.PASSWORD) generatorButton()
+                CredentialIconButton(
+                    painter = painterResource(Res.drawable.trash),
+                    description = "Remove field",
+                    onClick = onRemove
+                )
             }
             Spacer(modifier = Modifier.height(4.dp))
-            CredentialValueInput(draft = draft, modifier = Modifier.fillMaxWidth())
+            CredentialValueInput(draft = draft, generatorButton = null, modifier = Modifier.fillMaxWidth())
             if (draft.kind == CredentialFieldKind.PASSWORD) PasswordStrengthMeter(password = draft.value)
         }
     }
 }
 
 @Composable
-private fun CredentialValueInput(draft: CredentialFieldDraft, modifier: Modifier) {
+private fun CredentialValueInput(
+    draft: CredentialFieldDraft,
+    generatorButton: (@Composable () -> Unit)?,
+    modifier: Modifier
+) {
     val bodyLarge = MaterialTheme.typography.bodyLarge
     EmberrTextField(
         value = draft.value,
@@ -563,11 +582,18 @@ private fun CredentialValueInput(draft: CredentialFieldDraft, modifier: Modifier
         },
         trailingIcon = if (draft.kind.hidesValue) {
             {
-                CredentialIconButton(
-                    painter = painterResource(if (draft.isValueVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
-                    description = if (draft.isValueVisible) "Hide" else "Show",
-                    onClick = { draft.isValueVisible = !draft.isValueVisible }
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(TrailingIconGap),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = if (generatorButton != null) TrailingIconsEndPadding else 0.dp)
+                ) {
+                    generatorButton?.invoke()
+                    CredentialIconButton(
+                        painter = painterResource(if (draft.isValueVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
+                        description = if (draft.isValueVisible) "Hide" else "Show",
+                        onClick = { draft.isValueVisible = !draft.isValueVisible }
+                    )
+                }
             }
         } else {
             null
