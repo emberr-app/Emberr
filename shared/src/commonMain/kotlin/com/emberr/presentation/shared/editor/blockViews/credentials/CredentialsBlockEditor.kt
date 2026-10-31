@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -108,6 +109,9 @@ import kotlin.uuid.Uuid
 private val TextFieldHeight = 56.dp
 private val DesktopLabelInputWidth = 128.dp
 private val StrengthBarWidth = 24.dp
+private val KindMenuMinWidth = 220.dp
+private val KindMenuMaxWidth = 300.dp
+private val DesktopFooterButtonMinWidth = 112.dp
 internal val SheetRowInset = 8.dp
 internal val SheetBottomPadding = 16.dp
 private val SheetButtonHorizontalPadding = 20.dp
@@ -630,9 +634,9 @@ private fun CredentialsEditorFooter(
         ) {
             addFieldButton()
             Spacer(modifier = Modifier.weight(1f))
-            EmberrButtonSecondary(text = "Cancel", onClick = onCancel, enabled = !isSaving)
+            EmberrButtonSecondary(text = "Cancel", onClick = onCancel, enabled = !isSaving, modifier = Modifier.widthIn(min = DesktopFooterButtonMinWidth))
             Spacer(modifier = Modifier.width(8.dp))
-            EmberrButtonPrimary(text = "Save", onClick = onSave, enabled = !isSaving)
+            EmberrButtonPrimary(text = "Save", onClick = onSave, enabled = !isSaving, modifier = Modifier.widthIn(min = DesktopFooterButtonMinWidth))
         }
     } else {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -692,7 +696,7 @@ private fun CredentialFieldKindMenu(
         EmberrDesktopMenu(
             expanded = expanded,
             onDismissRequest = onDismiss,
-            modifier = Modifier.width(220.dp)
+            modifier = Modifier.widthIn(min = KindMenuMinWidth, max = KindMenuMaxWidth)
         ) {
             CredentialFieldKind.entries.forEach { kind ->
                 EmberrDesktopMenuOption(
