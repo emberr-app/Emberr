@@ -40,7 +40,6 @@ import com.emberr.domain.credentials.CredentialUnlockSession
 import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.CredentialsEdit
-import com.emberr.domain.model.hasNothingFilledIn
 import com.emberr.domain.model.openableLoginUrl
 import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.system.isDesktopPlatform
@@ -84,11 +83,9 @@ fun CredentialsBlockView(
     val deviceLockPrompt = rememberDeviceLockPrompt()
     val scope = rememberCoroutineScope()
     var editStart by remember {
-        val opensBlankForm = onSave != null &&
-            block.hasNothingFilledIn() &&
-            block.id !in GlobalEditorState.credentialsBlocksWithBlankFormShown
-        if (opensBlankForm) GlobalEditorState.credentialsBlocksWithBlankFormShown += block.id
-        mutableStateOf(if (opensBlankForm) CredentialsEditStart(decryptedSecretsByFieldId = emptyMap()) else null)
+        val opensFormForNewCard = onSave != null && block.id in GlobalEditorState.newCredentialsBlocksAwaitingForm
+        if (opensFormForNewCard) GlobalEditorState.newCredentialsBlocksAwaitingForm -= block.id
+        mutableStateOf(if (opensFormForNewCard) CredentialsEditStart(decryptedSecretsByFieldId = emptyMap()) else null)
     }
     var isOpeningEditor by remember { mutableStateOf(false) }
 
@@ -101,7 +98,7 @@ fun CredentialsBlockView(
                     .filter { field -> field.encryptedValue != null }
                     .associate { field ->
                         val decryptedValue = credentialVault.decrypt(field) ?: run {
-                            showNativeToast("This login is locked until its key arrives from your other device.")
+                            showNativeToast("These credentials are locked until their key arrives from your other device.")
                             return@launch
                         }
                         field.id to decryptedValue
@@ -224,7 +221,7 @@ private fun CredentialsViewHeader(
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = block.serviceName.ifBlank { "Untitled login" },
+                text = block.serviceName.ifBlank { "Untitled credentials" },
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = if (block.serviceName.isBlank()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
@@ -255,7 +252,7 @@ private fun CredentialsViewHeader(
                 )
                 CredentialsOptionsMenu(
                     expanded = isMenuOpen,
-                    title = block.serviceName.ifBlank { "Login" },
+                    title = block.serviceName.ifBlank { "Credentials" },
                     updatedAt = block.updatedAt,
                     onDismiss = { isMenuOpen = false },
                     onEditFields = onEditFields
