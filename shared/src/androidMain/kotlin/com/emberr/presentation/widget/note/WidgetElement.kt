@@ -175,7 +175,7 @@ private fun convertBlockToElements(
 
     is WatchlistBlock -> textLine(block, block.title.ifBlank { "Watchlist" }, WidgetTextStyleName.SUBTLE)
 
-    is CredentialsBlock -> textLine(block, block.serviceName.ifBlank { "Login" }, WidgetTextStyleName.SUBTLE)
+    is CredentialsBlock -> textLine(block, block.serviceName.ifBlank { "Credentials" }, WidgetTextStyleName.SUBTLE)
 
     is PropertyBlock -> {
         val value = block.valueAsText()

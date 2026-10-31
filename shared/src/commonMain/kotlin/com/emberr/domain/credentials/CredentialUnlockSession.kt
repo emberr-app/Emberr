@@ -10,8 +10,8 @@ class CredentialUnlockSession {
     suspend fun unlock(deviceLockPrompt: DeviceLockPrompt): Boolean {
         if (isUnlocked) return true
         val confirmation = deviceLockPrompt.confirm(
-            title = "Unlock logins",
-            description = "Confirm it's you to see your saved logins."
+            title = "Unlock credentials",
+            description = "Confirm it's you to see your saved credentials."
         )
         if (confirmation == DeviceLockConfirmation.NOT_CONFIRMED) return false
         isUnlocked = true
