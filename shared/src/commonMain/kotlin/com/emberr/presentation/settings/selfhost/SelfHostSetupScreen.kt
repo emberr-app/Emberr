@@ -72,6 +72,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.EmberrTextFieldIconButton
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -685,7 +686,7 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             trailingIcon = {
                 IconTooltip(text = if (isPasswordVisible) "Hide password" else "Show password") {
-                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                    EmberrTextFieldIconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
                             painter = painterResource(if (isPasswordVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                             contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
@@ -780,7 +781,7 @@ private fun PassphraseField(value: String, onValueChange: (String) -> Unit, onSu
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
             IconTooltip(text = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase") {
-                IconButton(onClick = { isPassphraseVisible = !isPassphraseVisible }) {
+                EmberrTextFieldIconButton(onClick = { isPassphraseVisible = !isPassphraseVisible }) {
                     Icon(
                         painter = painterResource(if (isPassphraseVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                         contentDescription = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase",

@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.EmberrTextFieldIconButton
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.ai.external.ExternalAiProvider
 import com.emberr.domain.ai.external.ExternalAiProviderConfig
@@ -168,7 +168,7 @@ internal fun ExternalAiSettingsSheet(
                 visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconTooltip(text = if (isApiKeyVisible) "Hide API key" else "Show API key") {
-                        IconButton(onClick = { isApiKeyVisible = !isApiKeyVisible }) {
+                        EmberrTextFieldIconButton(onClick = { isApiKeyVisible = !isApiKeyVisible }) {
                             Icon(
                                 painter = painterResource(if (isApiKeyVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                                 contentDescription = if (isApiKeyVisible) "Hide API key" else "Show API key",

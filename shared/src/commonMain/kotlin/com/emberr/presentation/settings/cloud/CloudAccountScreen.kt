@@ -25,7 +25,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -72,6 +71,7 @@ import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.EmberrSwitch
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.EmberrTextFieldIconButton
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.KmpBackHandler
@@ -906,7 +906,7 @@ internal fun PasswordField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
             IconTooltip(text = if (isPasswordVisible) "Hide password" else "Show password") {
-                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                EmberrTextFieldIconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                     Icon(
                         painter = painterResource(if (isPasswordVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                         contentDescription = if (isPasswordVisible) "Hide password" else "Show password",

@@ -543,7 +543,7 @@ private fun MovieSearchCloseIcon(onClick: () -> Unit) {
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier
                 .clip(CircleShape)
-                .clickable(onClick = onClick)
+                .clickable(interactionSource = null, indication = null, onClick = onClick)
                 .padding(4.dp)
                 .size(14.dp)
         )

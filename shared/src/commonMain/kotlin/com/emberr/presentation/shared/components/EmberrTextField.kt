@@ -236,6 +236,19 @@ fun EmberrSearchTextField(
 }
 
 @Composable
+fun EmberrTextFieldIconButton(onClick: () -> Unit, content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .clickable(interactionSource = null, indication = null, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        content()
+    }
+}
+
+@Composable
 fun EmberrSearchTextFieldAction(
     icon: Painter,
     contentDescription: String,
