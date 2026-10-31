@@ -55,3 +55,45 @@ fun CredentialsBlock.searchableText(): String =
 
 fun CredentialsBlock.hasNothingFilledIn(): Boolean =
     serviceName.isBlank() && loginUrl.isBlank() && fields.none { it.plainValue.isNotBlank() || it.encryptedValue != null }
+
+data class ChangedCredentialField(
+    val field: CredentialField,
+    val labelChanged: Boolean,
+    val valueChanged: Boolean
+)
+
+data class CredentialsEdit(
+    val serviceName: String? = null,
+    val loginUrl: String? = null,
+    val changedFields: List<ChangedCredentialField> = emptyList(),
+    val addedFields: List<CredentialField> = emptyList(),
+    val removedFieldIds: Set<String> = emptySet()
+)
+
+fun applyCredentialsEdit(latest: CredentialsBlock, edit: CredentialsEdit): CredentialsBlock {
+    val changesByFieldId = edit.changedFields.associateBy { change -> change.field.id }
+    val keptFields = latest.fields
+        .filterNot { field -> field.id in edit.removedFieldIds }
+        .map { field ->
+            val change = changesByFieldId[field.id] ?: return@map field
+            val withNewLabel = if (change.labelChanged) field.copy(label = change.field.label) else field
+            if (change.valueChanged) {
+                withNewLabel.copy(
+                    plainValue = change.field.plainValue,
+                    encryptedValue = change.field.encryptedValue,
+                    keyId = change.field.keyId
+                )
+            } else {
+                withNewLabel
+            }
+        }
+    val latestFieldIds = latest.fields.map { field -> field.id }.toSet()
+    val changedValuesOfFieldsRemovedElsewhere = edit.changedFields
+        .filter { change -> change.valueChanged && change.field.id !in latestFieldIds }
+        .map { change -> change.field }
+    return latest.copy(
+        serviceName = edit.serviceName ?: latest.serviceName,
+        loginUrl = edit.loginUrl ?: latest.loginUrl,
+        fields = keptFields + changedValuesOfFieldsRemovedElsewhere + edit.addedFields
+    )
+}

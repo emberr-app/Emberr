@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -54,9 +55,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.credentials.CredentialEncryption
 import com.emberr.domain.credentials.CredentialVault
+import com.emberr.domain.model.ChangedCredentialField
 import com.emberr.domain.model.CredentialField
 import com.emberr.domain.model.CredentialFieldKind
 import com.emberr.domain.model.CredentialsBlock
+import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.shared.components.EmberrBottomSheet
@@ -66,6 +69,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.editor.GlobalEditorState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.notes2
 import emberr.shared.generated.resources.plus
@@ -84,10 +88,10 @@ class CredentialsEditStart(val decryptedSecretsByFieldId: Map<String, String>)
 private class CredentialFieldDraft(
     val id: String,
     val kind: CredentialFieldKind,
-    label: String,
+    val originalLabel: String,
     val originalValue: String
 ) {
-    var label by mutableStateOf(label)
+    var label by mutableStateOf(originalLabel)
     var value by mutableStateOf(originalValue)
     var isValueVisible by mutableStateOf(false)
     val focusRequester = FocusRequester()
@@ -95,7 +99,7 @@ private class CredentialFieldDraft(
 
 @OptIn(ExperimentalUuidApi::class)
 private fun newFieldDraft(kind: CredentialFieldKind) =
-    CredentialFieldDraft(id = Uuid.random().toString(), kind = kind, label = kind.defaultLabel(), originalValue = "")
+    CredentialFieldDraft(id = Uuid.random().toString(), kind = kind, originalLabel = kind.defaultLabel(), originalValue = "")
 
 internal fun CredentialFieldKind.defaultLabel(): String = when (this) {
     CredentialFieldKind.USERNAME -> "Username"
@@ -138,20 +142,20 @@ private fun finishesEditing(event: KeyEvent): Boolean {
 fun CredentialsBlockEditor(
     block: CredentialsBlock,
     editStart: CredentialsEditStart,
-    onDone: (CredentialsBlock) -> Unit,
+    onDone: (CredentialsEdit) -> Unit,
     runAfterKeyboardCloses: (action: () -> Unit) -> Unit
 ) {
     val credentialVault = koinInject<CredentialVault>()
     val scope = rememberCoroutineScope()
-    val fieldsAtStart = remember { block.fields }
-    var serviceName by remember { mutableStateOf(block.serviceName) }
-    var loginUrl by remember { mutableStateOf(block.loginUrl) }
+    val blockAtStart = remember { block }
+    var serviceName by remember { mutableStateOf(blockAtStart.serviceName) }
+    var loginUrl by remember { mutableStateOf(blockAtStart.loginUrl) }
     val fieldDrafts = remember {
-        fieldsAtStart.map { field ->
+        blockAtStart.fields.map { field ->
             CredentialFieldDraft(
                 id = field.id,
                 kind = field.kind,
-                label = field.label,
+                originalLabel = field.label,
                 originalValue = if (field.kind == CredentialFieldKind.USERNAME) {
                     field.plainValue
                 } else {
@@ -164,6 +168,11 @@ fun CredentialsBlockEditor(
     var isSaving by remember { mutableStateOf(false) }
     var isAddFieldMenuOpen by remember { mutableStateOf(false) }
 
+    DisposableEffect(Unit) {
+        GlobalEditorState.openCredentialsFormCount += 1
+        onDispose { GlobalEditorState.openCredentialsFormCount -= 1 }
+    }
+
     LaunchedEffect(fieldIdToFocus) {
         val fieldId = fieldIdToFocus ?: return@LaunchedEffect
         withFrameNanos { }
@@ -175,12 +184,12 @@ fun CredentialsBlockEditor(
         if (isSaving) return
         isSaving = true
         scope.launch {
-            val savedFields = lockedFields(fieldDrafts.toList(), fieldsAtStart, credentialVault)
-            if (savedFields == null) {
+            val edit = credentialsEdit(serviceName, loginUrl, fieldDrafts.toList(), blockAtStart, credentialVault)
+            if (edit == null) {
                 showNativeToast("Couldn't lock this login on this device. Try again.")
                 isSaving = false
             } else {
-                onDone(block.copy(serviceName = serviceName, loginUrl = loginUrl, fields = savedFields))
+                onDone(edit)
             }
         }
     }
@@ -234,29 +243,56 @@ fun CredentialsBlockEditor(
     }
 }
 
-private suspend fun lockedFields(
+private suspend fun credentialsEdit(
+    serviceName: String,
+    loginUrl: String,
     drafts: List<CredentialFieldDraft>,
-    fieldsAtStart: List<CredentialField>,
+    blockAtStart: CredentialsBlock,
     credentialVault: CredentialVault
-): List<CredentialField>? = drafts.map { draft ->
-    val savedField = fieldsAtStart.firstOrNull { field -> field.id == draft.id }
-    when {
-        draft.kind == CredentialFieldKind.USERNAME ->
-            CredentialField(id = draft.id, kind = draft.kind, label = draft.label, plainValue = draft.value)
-        draft.value.isEmpty() ->
-            CredentialField(id = draft.id, kind = draft.kind, label = draft.label)
-        savedField != null && draft.value == draft.originalValue ->
-            savedField.copy(label = draft.label)
-        else -> when (val encryption = credentialVault.encrypt(draft.kind, draft.value)) {
-            is CredentialEncryption.Encrypted -> CredentialField(
-                id = draft.id,
-                kind = draft.kind,
-                label = draft.label,
-                encryptedValue = encryption.encryptedValue,
-                keyId = encryption.keyId
+): CredentialsEdit? {
+    val fieldIdsAtStart = blockAtStart.fields.map { field -> field.id }.toSet()
+    val changedFields = mutableListOf<ChangedCredentialField>()
+    val addedFields = mutableListOf<CredentialField>()
+    for (draft in drafts) {
+        val labelChanged = draft.label != draft.originalLabel
+        val valueChanged = draft.value != draft.originalValue
+        when {
+            draft.id !in fieldIdsAtStart -> addedFields += lockedField(draft, credentialVault) ?: return null
+            valueChanged -> changedFields += ChangedCredentialField(
+                field = lockedField(draft, credentialVault) ?: return null,
+                labelChanged = labelChanged,
+                valueChanged = true
             )
-            CredentialEncryption.KeyringUnavailable -> return null
+            labelChanged -> changedFields += ChangedCredentialField(
+                field = CredentialField(id = draft.id, kind = draft.kind, label = draft.label),
+                labelChanged = true,
+                valueChanged = false
+            )
         }
+    }
+    return CredentialsEdit(
+        serviceName = serviceName.takeIf { it != blockAtStart.serviceName },
+        loginUrl = loginUrl.takeIf { it != blockAtStart.loginUrl },
+        changedFields = changedFields,
+        addedFields = addedFields,
+        removedFieldIds = fieldIdsAtStart - drafts.map { draft -> draft.id }.toSet()
+    )
+}
+
+private suspend fun lockedField(draft: CredentialFieldDraft, credentialVault: CredentialVault): CredentialField? = when {
+    draft.kind == CredentialFieldKind.USERNAME ->
+        CredentialField(id = draft.id, kind = draft.kind, label = draft.label, plainValue = draft.value)
+    draft.value.isEmpty() ->
+        CredentialField(id = draft.id, kind = draft.kind, label = draft.label)
+    else -> when (val encryption = credentialVault.encrypt(draft.kind, draft.value)) {
+        is CredentialEncryption.Encrypted -> CredentialField(
+            id = draft.id,
+            kind = draft.kind,
+            label = draft.label,
+            encryptedValue = encryption.encryptedValue,
+            keyId = encryption.keyId
+        )
+        CredentialEncryption.KeyringUnavailable -> null
     }
 }
 

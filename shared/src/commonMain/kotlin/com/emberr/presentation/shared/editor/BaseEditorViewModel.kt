@@ -30,6 +30,8 @@ import com.emberr.domain.model.CodeBlock
 import com.emberr.domain.model.CredentialField
 import com.emberr.domain.model.CredentialFieldKind
 import com.emberr.domain.model.CredentialsBlock
+import com.emberr.domain.model.CredentialsEdit
+import com.emberr.domain.model.applyCredentialsEdit
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -2736,17 +2738,12 @@ abstract class BaseEditorViewModel(
         scheduleAutosave()
     }
 
-    fun updateCredentials(blockId: String, editedBlock: CredentialsBlock) {
+    fun updateCredentials(blockId: String, edit: CredentialsEdit) {
         val now = System.currentTimeMillis()
         modifyBlocks { list ->
             mapBlockById(list, blockId) {
                 if (it is CredentialsBlock) {
-                    it.copy(
-                        serviceName = editedBlock.serviceName,
-                        loginUrl = editedBlock.loginUrl,
-                        fields = editedBlock.fields,
-                        updatedAt = now
-                    )
+                    applyCredentialsEdit(it, edit).copy(updatedAt = now)
                 } else it
             }
         }

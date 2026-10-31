@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.credentials.CredentialUnlockSession
 import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.model.CredentialsBlock
+import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.model.hasNothingFilledIn
 import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.system.isDesktopPlatform
@@ -66,13 +67,14 @@ import kotlin.time.Instant
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private val UrlSchemePattern = Regex("^([a-zA-Z][a-zA-Z0-9+.-]*):")
+private val WebSchemePrefixPattern = Regex("^https?://", RegexOption.IGNORE_CASE)
 
 @Composable
 fun CredentialsBlockView(
     block: CredentialsBlock,
     inSelectionMode: Boolean,
     onToggleSelection: () -> Unit,
-    onSave: ((CredentialsBlock) -> Unit)? = null,
+    onSave: ((CredentialsEdit) -> Unit)? = null,
     runAfterKeyboardCloses: (action: () -> Unit) -> Unit = { action -> action() }
 ) {
     val credentialVault = koinInject<CredentialVault>()
@@ -128,9 +130,9 @@ fun CredentialsBlockView(
             CredentialsBlockEditor(
                 block = block,
                 editStart = currentEditStart,
-                onDone = { editedBlock ->
+                onDone = { edit ->
                     editStart = null
-                    onSave(editedBlock)
+                    onSave(edit)
                 },
                 runAfterKeyboardCloses = runAfterKeyboardCloses
             )
@@ -271,7 +273,7 @@ private fun CredentialsViewHeader(
 }
 
 private fun shownLoginUrl(loginUrl: String): String =
-    loginUrl.trim().removePrefix("https://").removeSuffix("/")
+    loginUrl.trim().replace(WebSchemePrefixPattern, "").removeSuffix("/")
 
 private fun openableLoginUrl(loginUrl: String): String? {
     val trimmedUrl = loginUrl.trim()
