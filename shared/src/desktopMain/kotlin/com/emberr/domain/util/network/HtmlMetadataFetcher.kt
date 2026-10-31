@@ -3,6 +3,7 @@ package com.emberr.domain.util.network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
+import java.net.URI
 
 actual object HtmlMetadataFetcher {
     actual suspend fun fetchMetadata(url: String): UrlMetadata = withContext(Dispatchers.IO) {
@@ -46,7 +47,15 @@ actual object HtmlMetadataFetcher {
                 imageUrl = imageUrl.replace("http://", "https://")
             }
 
-            UrlMetadata(title = title, description = description, imageUrl = imageUrl)
+            val linksWithRel = document.select("link[rel][href]")
+            val touchIconLinks = linksWithRel.filter { link -> link.attr("rel").contains("apple-touch-icon", ignoreCase = true) }
+            val iconLinks = linksWithRel.filter { link -> "icon" in link.attr("rel").lowercase().split(" ") }
+            val iconUrl = (touchIconLinks + iconLinks)
+                .map { link -> link.attr("abs:href") }
+                .firstOrNull { href -> href.startsWith("https://") && !href.substringBefore('?').endsWith(".svg", ignoreCase = true) }
+                ?: runCatching { URI(document.location()).resolve("/favicon.ico").toString() }.getOrNull()
+
+            UrlMetadata(title = title, description = description, imageUrl = imageUrl, iconUrl = iconUrl)
 
         } catch (e: Exception) {
             UrlMetadata(
