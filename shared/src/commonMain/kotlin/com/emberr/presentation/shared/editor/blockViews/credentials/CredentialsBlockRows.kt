@@ -91,7 +91,7 @@ private class CredentialSecretReader(
     suspend fun read(field: CredentialField): String? {
         if (!unlockSession.unlock(deviceLockPrompt)) return null
         val value = credentialVault.decrypt(field)
-        if (value == null) showNativeToast("This login is locked until its key arrives from your other device.")
+        if (value == null) showNativeToast("These credentials are locked until their key arrives from your other device.")
         return value
     }
 

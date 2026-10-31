@@ -313,7 +313,7 @@ object NoteMarkdownWriter {
             .filter { it.kind == CredentialFieldKind.USERNAME && it.plainValue.isNotBlank() }
             .map { field -> "- ${flattenLineBreaks(field.label).ifBlank { "Username" }}: ${flattenLineBreaks(field.plainValue)}" }
         if (block.serviceName.isBlank() && block.loginUrl.isBlank() && usernameLines.isEmpty()) return ""
-        val title = "**${flattenLineBreaks(block.serviceName).ifBlank { "Login" }}**"
+        val title = "**${flattenLineBreaks(block.serviceName).ifBlank { "Credentials" }}**"
         val header = if (block.loginUrl.isBlank()) title else "$title [${escapeLinkLabel(block.loginUrl)}](${escapeLinkTarget(block.loginUrl)})"
         return (listOf(header) + usernameLines).joinToString("\n")
     }

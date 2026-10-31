@@ -128,7 +128,7 @@ class EmberrBackupImporter(
         val backup = backupFile.backupData
         if (backupFile.credentialKeys.isNotEmpty()) {
             check(credentialVault.mergeKeys(backupFile.credentialKeys)) {
-                "Couldn't save this backup's login keys on this device, so nothing was imported. Try again."
+                "Couldn't save this backup's credential keys on this device, so nothing was imported. Try again."
             }
         }
         val categories = resolveCategoriesForImport(

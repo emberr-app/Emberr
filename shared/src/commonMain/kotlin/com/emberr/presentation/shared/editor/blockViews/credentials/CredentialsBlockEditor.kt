@@ -224,7 +224,7 @@ fun CredentialsBlockEditor(
         scope.launch {
             val edit = credentialsEdit(serviceName, loginUrl, fieldDrafts.toList(), blockAtStart, credentialVault)
             if (edit == null) {
-                showNativeToast("Couldn't lock this login on this device. Try again.")
+                showNativeToast("Couldn't lock these credentials on this device. Try again.")
                 isSaving = false
             } else {
                 onDone(edit)
