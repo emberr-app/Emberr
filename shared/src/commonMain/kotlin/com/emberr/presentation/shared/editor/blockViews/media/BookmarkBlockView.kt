@@ -50,6 +50,7 @@ import coil3.network.httpHeaders
 import coil3.request.crossfade
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.BookmarkBlock
+import com.emberr.domain.util.network.BROWSER_USER_AGENT
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -231,7 +232,7 @@ fun BookmarkBlockView(
                                 .crossfade(true)
                                 .httpHeaders(
                                     coil3.network.NetworkHeaders.Builder()
-                                        .set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+                                        .set("User-Agent", BROWSER_USER_AGENT)
                                         .set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
                                         .build()
                                 )

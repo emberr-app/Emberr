@@ -36,15 +36,12 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.emberr.domain.credentials.CredentialUnlockSession
 import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.model.openableLoginUrl
 import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.domain.util.system.rememberDeviceLockPrompt
-import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
@@ -78,9 +75,7 @@ fun CredentialsBlockView(
     onSave: ((CredentialsEdit) -> Unit)? = null,
     runAfterKeyboardCloses: (action: () -> Unit) -> Unit = { action -> action() }
 ) {
-    val credentialVault = koinInject<CredentialVault>()
-    val unlockSession = koinInject<CredentialUnlockSession>()
-    val deviceLockPrompt = rememberDeviceLockPrompt()
+    val secretReader = rememberCredentialSecretReader()
     val scope = rememberCoroutineScope()
     var editStart by remember {
         val opensFormForNewCard = onSave != null && block.id in GlobalEditorState.newCredentialsBlocksAwaitingForm
@@ -95,16 +90,7 @@ fun CredentialsBlockView(
         val blockAtStart = block
         scope.launch {
             try {
-                val decryptedSecretsByFieldId = blockAtStart.fields
-                    .filter { field -> field.encryptedValue != null }
-                    .associate { field ->
-                        val decryptedValue = credentialVault.decrypt(field) ?: run {
-                            showNativeToast("These credentials are locked until their key arrives from your other device.")
-                            return@launch
-                        }
-                        field.id to decryptedValue
-                    }
-                if (decryptedSecretsByFieldId.isNotEmpty() && !unlockSession.unlock(deviceLockPrompt)) return@launch
+                val decryptedSecretsByFieldId = secretReader.readAllAfterUnlock(blockAtStart.fields) ?: return@launch
                 editStart = CredentialsEditStart(blockAtStart, decryptedSecretsByFieldId)
             } finally {
                 isOpeningEditor = false
