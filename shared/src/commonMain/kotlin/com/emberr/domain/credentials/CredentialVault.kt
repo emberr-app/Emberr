@@ -59,6 +59,10 @@ class CredentialVault(
         }.getOrNull()
     }
 
+    suspend fun hasReadableKey(keyId: String): Boolean = withContext(Dispatchers.IO) {
+        keyringLock.withLock { readableKey(keyId) != null }
+    }
+
     suspend fun mergeKeys(incoming: List<CredentialKey>): Boolean = withContext(Dispatchers.IO) {
         keyringLock.withLock { addMissingKeys(incoming) }
     }

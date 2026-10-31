@@ -54,7 +54,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.credentials.CredentialEncryption
 import com.emberr.domain.credentials.CredentialVault
-import com.emberr.domain.credentials.oneTimeCodeFor
 import com.emberr.domain.model.CredentialField
 import com.emberr.domain.model.CredentialFieldKind
 import com.emberr.domain.model.CredentialsBlock
@@ -68,24 +67,19 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.notes2
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.trash
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
-import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private val TextFieldHeight = 56.dp
 private val DesktopLabelInputWidth = 132.dp
 
-class CredentialsEditStart(
-    val decryptedSecretsByFieldId: Map<String, String>,
-    val focusesNewOneTimeCode: Boolean
-)
+class CredentialsEditStart(val decryptedSecretsByFieldId: Map<String, String>)
 
 private class CredentialFieldDraft(
     val id: String,
@@ -103,10 +97,9 @@ private class CredentialFieldDraft(
 private fun newFieldDraft(kind: CredentialFieldKind) =
     CredentialFieldDraft(id = Uuid.random().toString(), kind = kind, label = kind.defaultLabel(), originalValue = "")
 
-private fun CredentialFieldKind.defaultLabel(): String = when (this) {
+internal fun CredentialFieldKind.defaultLabel(): String = when (this) {
     CredentialFieldKind.USERNAME -> "Username"
     CredentialFieldKind.PASSWORD -> "Password"
-    CredentialFieldKind.ONE_TIME_CODE -> "One-time code"
     CredentialFieldKind.NOTE -> "Note"
 }
 
@@ -116,25 +109,22 @@ private fun CredentialFieldKind.addFieldLabel(): String =
 private fun CredentialFieldKind.valuePlaceholder(): String = when (this) {
     CredentialFieldKind.USERNAME -> "Username or email"
     CredentialFieldKind.PASSWORD -> "Password"
-    CredentialFieldKind.ONE_TIME_CODE -> "Setup key or otpauth:// link"
     CredentialFieldKind.NOTE -> "Add a note"
 }
 
 private fun CredentialFieldKind.valueKeyboardOptions(): KeyboardOptions = when (this) {
     CredentialFieldKind.USERNAME -> KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrectEnabled = false)
-    CredentialFieldKind.PASSWORD,
-    CredentialFieldKind.ONE_TIME_CODE -> KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false)
+    CredentialFieldKind.PASSWORD -> KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false)
     CredentialFieldKind.NOTE -> KeyboardOptions.Default
 }
 
 private val CredentialFieldKind.hidesValue: Boolean
-    get() = this == CredentialFieldKind.PASSWORD || this == CredentialFieldKind.ONE_TIME_CODE
+    get() = this == CredentialFieldKind.PASSWORD
 
 @Composable
-private fun CredentialFieldKind.icon(): Painter = when (this) {
+internal fun CredentialFieldKind.icon(): Painter = when (this) {
     CredentialFieldKind.USERNAME -> rememberVectorPainter(Icons.Outlined.Person)
     CredentialFieldKind.PASSWORD -> rememberVectorPainter(Icons.Outlined.Key)
-    CredentialFieldKind.ONE_TIME_CODE -> painterResource(Res.drawable.clock_circle)
     CredentialFieldKind.NOTE -> painterResource(Res.drawable.notes2)
 }
 
@@ -157,7 +147,7 @@ fun CredentialsBlockEditor(
     var serviceName by remember { mutableStateOf(block.serviceName) }
     var loginUrl by remember { mutableStateOf(block.loginUrl) }
     val fieldDrafts = remember {
-        val savedDrafts = fieldsAtStart.map { field ->
+        fieldsAtStart.map { field ->
             CredentialFieldDraft(
                 id = field.id,
                 kind = field.kind,
@@ -168,14 +158,9 @@ fun CredentialsBlockEditor(
                     editStart.decryptedSecretsByFieldId[field.id].orEmpty()
                 }
             )
-        }
-        val addedDrafts = if (editStart.focusesNewOneTimeCode) listOf(newFieldDraft(CredentialFieldKind.ONE_TIME_CODE)) else emptyList()
-        (savedDrafts + addedDrafts).toMutableStateList()
+        }.toMutableStateList()
     }
-    var fieldIdToFocus by remember {
-        mutableStateOf(if (editStart.focusesNewOneTimeCode) fieldDrafts.lastOrNull()?.id else null)
-    }
-    var invalidCodeFieldIds by remember { mutableStateOf(emptySet<String>()) }
+    var fieldIdToFocus by remember { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
     var isAddFieldMenuOpen by remember { mutableStateOf(false) }
 
@@ -188,16 +173,6 @@ fun CredentialsBlockEditor(
 
     fun finish() {
         if (isSaving) return
-        val now = Clock.System.now().toEpochMilliseconds()
-        invalidCodeFieldIds = fieldDrafts
-            .filter { draft ->
-                draft.kind == CredentialFieldKind.ONE_TIME_CODE &&
-                    draft.value.isNotBlank() &&
-                    oneTimeCodeFor(draft.value, now) == null
-            }
-            .map { draft -> draft.id }
-            .toSet()
-        if (invalidCodeFieldIds.isNotEmpty()) return
         isSaving = true
         scope.launch {
             val savedFields = lockedFields(fieldDrafts.toList(), fieldsAtStart, credentialVault)
@@ -234,15 +209,8 @@ fun CredentialsBlockEditor(
                 Spacer(modifier = Modifier.height(12.dp))
                 CredentialFieldEditorRow(
                     draft = draft,
-                    showsInvalidCodeError = draft.id in invalidCodeFieldIds,
-                    onValueChange = { newValue ->
-                        draft.value = newValue
-                        invalidCodeFieldIds = invalidCodeFieldIds - draft.id
-                    },
-                    onRemove = {
-                        fieldDrafts.remove(draft)
-                        invalidCodeFieldIds = invalidCodeFieldIds - draft.id
-                    }
+                    onValueChange = { newValue -> draft.value = newValue },
+                    onRemove = { fieldDrafts.remove(draft) }
                 )
             }
         }
@@ -325,7 +293,7 @@ private fun CredentialsEditorHeader(
 }
 
 @Composable
-private fun CredentialServiceTile(serviceName: String, modifier: Modifier = Modifier) {
+internal fun CredentialServiceTile(serviceName: String, modifier: Modifier = Modifier) {
     val firstLetter = serviceName.trim().firstOrNull()?.uppercaseChar()
     Box(
         modifier = modifier
@@ -355,7 +323,6 @@ private fun CredentialServiceTile(serviceName: String, modifier: Modifier = Modi
 @Composable
 private fun CredentialFieldEditorRow(
     draft: CredentialFieldDraft,
-    showsInvalidCodeError: Boolean,
     onValueChange: (String) -> Unit,
     onRemove: () -> Unit
 ) {
@@ -363,10 +330,7 @@ private fun CredentialFieldEditorRow(
         Row(verticalAlignment = Alignment.Top) {
             CredentialLabelInput(draft = draft, modifier = Modifier.width(DesktopLabelInputWidth))
             Spacer(modifier = Modifier.width(8.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                CredentialValueInput(draft = draft, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth())
-                if (showsInvalidCodeError) InvalidCodeKeyError()
-            }
+            CredentialValueInput(draft = draft, onValueChange = onValueChange, modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.width(4.dp))
             Box(modifier = Modifier.height(TextFieldHeight), contentAlignment = Alignment.Center) {
                 RemoveFieldButton(onRemove = onRemove)
@@ -381,7 +345,6 @@ private fun CredentialFieldEditorRow(
             }
             Spacer(modifier = Modifier.height(8.dp))
             CredentialValueInput(draft = draft, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth())
-            if (showsInvalidCodeError) InvalidCodeKeyError()
         }
     }
 }
@@ -429,16 +392,6 @@ private fun CredentialValueInput(
         },
         textStyle = if (draft.kind.hidesValue) bodyLarge.copy(fontFamily = FontFamily.Monospace) else bodyLarge,
         modifier = modifier.focusRequester(draft.focusRequester)
-    )
-}
-
-@Composable
-private fun InvalidCodeKeyError() {
-    Text(
-        text = "This setup key isn't valid",
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.error,
-        modifier = Modifier.padding(start = 4.dp, top = 4.dp)
     )
 }
 
