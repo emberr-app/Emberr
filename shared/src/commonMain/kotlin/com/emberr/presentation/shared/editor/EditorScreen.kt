@@ -2179,14 +2179,16 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Web Bookmark", Res.drawable.bookmark) { onInsertMediaBlock("bookmark") },
         SlashMenuItemData("Movie or Show", Res.drawable.film) { onInsertMediaBlock("movie") },
         SlashMenuItemData("Watchlist", Res.drawable.tv) { onInsertMediaBlock("watchlist") },
-        SlashMenuItemData("Credentials", Res.drawable.lock_password) { onInsertMediaBlock("credentials") }
-            .copy(searchWords = listOf("login", "password", "credentials", "account")),
-        SlashMenuItemData("Simple Table", Res.drawable.table) { onInsertMediaBlock("table") },
-        SlashMenuItemData("Database", Res.drawable.database) { onInsertMediaBlock("database") },
-        SlashMenuItemData("Canvas", Res.drawable.group) { onInsertMediaBlock("canvas") },
         SlashMenuItemData("Link to Note", Res.drawable.link) { onInsertMediaBlock("linked_note") },
         SlashMenuItemData("Link to Canvas", Res.drawable.group) { onInsertMediaBlock("linked_canvas") },
         SlashMenuItemData("Link to Database", Res.drawable.database) { onInsertMediaBlock("linked_database") }
+    )),
+    SlashMenuSectionData("Advanced Blocks", listOf(
+        SlashMenuItemData("Simple Table", Res.drawable.table) { onInsertMediaBlock("table") },
+        SlashMenuItemData("Database", Res.drawable.database) { onInsertMediaBlock("database") },
+        SlashMenuItemData("Canvas", Res.drawable.group) { onInsertMediaBlock("canvas") },
+        SlashMenuItemData("Credentials", Res.drawable.lock_password) { onInsertMediaBlock("credentials") }
+            .copy(searchWords = listOf("login", "password", "credentials", "account"))
     )),
     SlashMenuSectionData("Date & Time", listOf(
         SlashMenuItemData("Current Time", Res.drawable.clock_circle) { onInsertText(currentTimeText(usesTwentyFourHourClock)) },
