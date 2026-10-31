@@ -3,7 +3,8 @@ package com.emberr.domain.util.network
 data class UrlMetadata(
     val title: String?,
     val description: String?,
-    val imageUrl: String?
+    val imageUrl: String?,
+    val iconUrl: String? = null
 )
 
 expect object HtmlMetadataFetcher {

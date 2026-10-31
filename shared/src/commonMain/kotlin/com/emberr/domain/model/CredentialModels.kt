@@ -36,6 +36,7 @@ data class CredentialsBlock(
     override val id: String,
     val serviceName: String = "",
     val loginUrl: String = "",
+    val iconUrl: String? = null,
     val fields: List<CredentialField> = emptyList(),
     override val indentationLevel: Int = 0,
     override val isBold: Boolean = false,
@@ -79,6 +80,7 @@ fun applyCredentialsEdit(latest: CredentialsBlock, edit: CredentialsEdit): Crede
             val withNewLabel = if (change.labelChanged) field.copy(label = change.field.label) else field
             if (change.valueChanged) {
                 withNewLabel.copy(
+                    kind = change.field.kind,
                     plainValue = change.field.plainValue,
                     encryptedValue = change.field.encryptedValue,
                     keyId = change.field.keyId
@@ -91,9 +93,24 @@ fun applyCredentialsEdit(latest: CredentialsBlock, edit: CredentialsEdit): Crede
     val changedValuesOfFieldsRemovedElsewhere = edit.changedFields
         .filter { change -> change.valueChanged && change.field.id !in latestFieldIds }
         .map { change -> change.field }
+    val loginUrlChanged = edit.loginUrl != null && edit.loginUrl != latest.loginUrl
     return latest.copy(
         serviceName = edit.serviceName ?: latest.serviceName,
         loginUrl = edit.loginUrl ?: latest.loginUrl,
+        iconUrl = if (loginUrlChanged) null else latest.iconUrl,
         fields = keptFields + changedValuesOfFieldsRemovedElsewhere + edit.addedFields
     )
+}
+
+private val UrlSchemePattern = Regex("^([a-zA-Z][a-zA-Z0-9+.-]*):")
+
+fun openableLoginUrl(loginUrl: String): String? {
+    val trimmedUrl = loginUrl.trim()
+    if (trimmedUrl.isEmpty()) return null
+    val schemeMatch = UrlSchemePattern.find(trimmedUrl) ?: return "https://$trimmedUrl"
+    val restAfterScheme = trimmedUrl.substring(schemeMatch.value.length)
+    val isHostWithPort = !restAfterScheme.startsWith("//") && restAfterScheme.firstOrNull()?.isDigit() == true
+    if (isHostWithPort) return "https://$trimmedUrl"
+    val scheme = schemeMatch.groupValues[1].lowercase()
+    return trimmedUrl.takeIf { scheme == "http" || scheme == "https" }
 }

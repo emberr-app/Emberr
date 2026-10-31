@@ -32,6 +32,7 @@ import com.emberr.domain.model.CredentialFieldKind
 import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.model.applyCredentialsEdit
+import com.emberr.domain.model.openableLoginUrl
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -2740,14 +2741,30 @@ abstract class BaseEditorViewModel(
 
     fun updateCredentials(blockId: String, edit: CredentialsEdit) {
         val now = System.currentTimeMillis()
+        var savedBlock: CredentialsBlock? = null
         modifyBlocks { list ->
             mapBlockById(list, blockId) {
                 if (it is CredentialsBlock) {
-                    applyCredentialsEdit(it, edit).copy(updatedAt = now)
+                    applyCredentialsEdit(it, edit).copy(updatedAt = now).also { updated -> savedBlock = updated }
                 } else it
             }
         }
         scheduleAutosave()
+        savedBlock?.takeIf { block -> block.iconUrl == null }?.let { block -> fetchCredentialsIcon(blockId, block.loginUrl) }
+    }
+
+    private fun fetchCredentialsIcon(blockId: String, loginUrl: String) {
+        val pageUrl = openableLoginUrl(loginUrl) ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val iconUrl = HtmlMetadataFetcher.fetchMetadata(pageUrl).iconUrl ?: return@launch
+            val fetchedAt = System.currentTimeMillis()
+            modifyBlocks { list ->
+                mapBlockById(list, blockId) {
+                    if (it is CredentialsBlock && it.loginUrl == loginUrl) it.copy(iconUrl = iconUrl, updatedAt = fetchedAt) else it
+                }
+            }
+            scheduleAutosave()
+        }
     }
 
     fun updateTableStyle(
