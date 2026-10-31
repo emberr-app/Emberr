@@ -134,6 +134,7 @@ import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
@@ -178,6 +179,7 @@ import com.emberr.presentation.shared.editor.blockViews.media.ImageBlockView
 import com.emberr.presentation.shared.editor.blockViews.LinkedNoteBlockView
 import com.emberr.presentation.shared.editor.blockViews.TableBlockView
 import com.emberr.presentation.shared.editor.blockViews.UnknownBlockView
+import com.emberr.presentation.shared.editor.blockViews.credentials.CredentialsBlockView
 import com.emberr.presentation.shared.editor.blockViews.callout.accentColor
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockView
 import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockView
@@ -364,7 +366,7 @@ fun NoteBlockItem(
         }
     }
 
-    val isTextBased = block !is BookmarkBlock && block !is ImageBlock && block !is DocumentBlock && block !is TableBlock && block !is VoiceBlock && block !is SolidDividerBlock && block !is ThreeDotDividerBlock && block !is LinkedNoteBlock && block !is CanvasBlock && block !is PropertyBlock && block !is DatabaseBlock && block !is MovieBlock && block !is WatchlistBlock && block !is UnknownBlock
+    val isTextBased = block !is BookmarkBlock && block !is ImageBlock && block !is DocumentBlock && block !is TableBlock && block !is VoiceBlock && block !is SolidDividerBlock && block !is ThreeDotDividerBlock && block !is LinkedNoteBlock && block !is CanvasBlock && block !is PropertyBlock && block !is DatabaseBlock && block !is MovieBlock && block !is WatchlistBlock && block !is CredentialsBlock && block !is UnknownBlock
     LaunchedEffect(focusRequest?.nonce) {
         if (focusRequest == null || focusRequest.id != block.id) return@LaunchedEffect
 
@@ -1181,6 +1183,11 @@ fun NoteBlockItem(
                                 onToggleSelection = { actions.onToggleSelection(block.id) },
                                 onDelete = { actions.onDeleteBlock(block.id) },
                                 runAfterKeyboardCloses = afterKeyboardCloses
+                            )
+                            is CredentialsBlock -> CredentialsBlockView(
+                                block = block,
+                                inSelectionMode = inSelectionMode,
+                                onToggleSelection = { actions.onToggleSelection(block.id) }
                             )
                             is UnknownBlock -> UnknownBlockView()
                         }

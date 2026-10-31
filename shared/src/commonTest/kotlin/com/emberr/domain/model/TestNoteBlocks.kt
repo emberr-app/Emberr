@@ -329,6 +329,24 @@ object TestNoteBlocks {
             indentationLevel = 1,
             updatedAt = 121L
         ),
+        CredentialsBlock(
+            id = "credentials-1",
+            serviceName = "GitHub",
+            loginUrl = "https://github.com/login",
+            fields = listOf(
+                CredentialField(id = "credential-field-1", kind = CredentialFieldKind.USERNAME, label = "Username", plainValue = "octocat"),
+                CredentialField(
+                    id = "credential-field-2",
+                    kind = CredentialFieldKind.PASSWORD,
+                    label = "Password",
+                    encryptedValue = "c2VhbGVkLXBhc3N3b3Jk",
+                    keyId = "credential-key-1"
+                )
+            ),
+            indentationLevel = 1,
+            isPinned = true,
+            updatedAt = 122L
+        ),
         SolidDividerBlock(
             id = "solid-divider-1",
             indentationLevel = 1,

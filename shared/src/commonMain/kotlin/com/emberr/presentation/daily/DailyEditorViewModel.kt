@@ -811,6 +811,7 @@ private fun isBlockHiddenFromTimeline(block: NoteBlock): Boolean = when (block) 
     is VoiceBlock -> block.localFilePath.isNullOrBlank()
     is MovieBlock -> block.details == null
     is WatchlistBlock -> true
+    is CredentialsBlock -> block.hasNothingFilledIn()
     else -> false
 }
 
@@ -831,6 +832,7 @@ private fun isBlockEmptyForTimeline(block: NoteBlock): Boolean = when (block) {
     is TableBlock -> block.rows.all { row -> row.all { cell -> cell.isBlank() } }
     is PropertyBlock -> block.valueAsText().isBlank()
     is MovieBlock -> block.details == null
+    is CredentialsBlock -> block.hasNothingFilledIn()
     is SolidDividerBlock -> true
     is ThreeDotDividerBlock -> true
     else -> false

@@ -68,6 +68,7 @@ import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
@@ -105,6 +106,7 @@ import com.emberr.presentation.shared.editor.blockViews.media.BookmarkBlockView
 import com.emberr.presentation.shared.editor.blockViews.media.DocumentBlockView
 import com.emberr.presentation.shared.editor.blockViews.media.ImageBlockView
 import com.emberr.presentation.shared.editor.blockViews.LinkedNoteBlockView
+import com.emberr.presentation.shared.editor.blockViews.credentials.CredentialsBlockView
 import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockView
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyBlockView
 import com.emberr.presentation.shared.editor.blockViews.TableBlockView
@@ -672,6 +674,12 @@ private fun TimelineBlockContent(
             onDelete = {}
         )
 
+        is CredentialsBlock -> CredentialsBlockView(
+            block = block,
+            inSelectionMode = false,
+            onToggleSelection = {}
+        )
+
         is ThreeDotDividerBlock -> Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -866,6 +874,7 @@ private fun timelineBlockSearchText(block: NoteBlock): String = when (block) {
     is TableBlock -> block.rows.joinToString(" ") { row -> row.joinToString(" ") }
     is PropertyBlock -> block.valueAsText()
     is MovieBlock -> block.details?.title.orEmpty()
+    is CredentialsBlock -> block.serviceName
     else -> ""
 }
 

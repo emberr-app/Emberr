@@ -34,6 +34,7 @@ class LanSyncSchemaTest {
         "canvas" to "id, canvasNoteId, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "movie" to "id, details, watchStatus, ratingHalfStars, watchStateChangedAt, addedAt, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "watchlist" to "id, watchlistNoteId, title, views, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
+        "credentials" to "id, serviceName, loginUrl, fields, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "property" to "id, propertyType, customPropertyId, customLabel, customValueType, text, date, endDate, time, endTime, tags, isChecked, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "database" to "id, databaseId, isLinkedDatabase, title, columns, notesColumnAfterKey, customProperties, columnWidths, defaultTemplateId, calculations, formulas, numberFormats, colorRules, repeatingTemplates, isLocked, showsRowCount, views, activeViewId, cellStyles, rowStyles, columnStyles, settingTimes, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "solid_divider" to "id, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",

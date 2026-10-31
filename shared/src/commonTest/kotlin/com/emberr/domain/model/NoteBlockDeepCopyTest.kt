@@ -57,6 +57,7 @@ class NoteBlockDeepCopyTest {
         is DatabaseBlock -> copy(id = other.id)
         is MovieBlock -> copy(id = other.id)
         is WatchlistBlock -> copy(id = other.id)
+        is CredentialsBlock -> copy(id = other.id)
         is SolidDividerBlock -> copy(id = other.id)
         is ThreeDotDividerBlock -> copy(id = other.id)
         is UnknownBlock -> copy(id = other.id)
