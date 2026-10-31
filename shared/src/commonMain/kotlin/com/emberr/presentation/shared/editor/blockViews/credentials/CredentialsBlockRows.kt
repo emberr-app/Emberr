@@ -2,6 +2,7 @@ package com.emberr.presentation.shared.editor.blockViews.credentials
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -78,6 +80,8 @@ private const val COPIED_CHECK_MILLIS = 1_300L
 private const val HIDDEN_PASSWORD = "••••••••••••"
 private val DesktopLabelWidth = 120.dp
 private val DesktopRowMinHeight = 38.dp
+private val RevealTimerSpace = 12.dp
+private val RevealTimerBottomGap = 8.dp
 
 private class CredentialSecretReader(
     private val credentialVault: CredentialVault,
@@ -153,6 +157,8 @@ private fun CredentialFieldRow(
     val canUseValue = hasValue && !isLocked
     val isRevealed = revealedValue != null
     val revealTimeLeft = remember(isRevealed) { Animatable(1f) }
+    val showsRevealTimer = isRevealed && field.kind == CredentialFieldKind.PASSWORD
+    val revealTimerSpace by animateDpAsState(if (showsRevealTimer) RevealTimerSpace else 0.dp)
 
     LaunchedEffect(isRevealed) {
         if (!isRevealed || field.kind != CredentialFieldKind.PASSWORD) return@LaunchedEffect
@@ -247,7 +253,7 @@ private fun CredentialFieldRow(
     ) {
         if (isDesktopPlatform) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 4.dp, bottom = revealTimerSpace),
                 verticalAlignment = Alignment.Top
             ) {
                 Box(
@@ -270,13 +276,13 @@ private fun CredentialFieldRow(
                 if (showsActions) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.heightIn(min = DesktopRowMinHeight), contentAlignment = Alignment.Center) {
-                        actions(Modifier.alpha(if (isHovered || (isRevealed && field.kind == CredentialFieldKind.PASSWORD) || showsCopied) 1f else 0f))
+                        actions(Modifier.alpha(if (isHovered || showsRevealTimer || showsCopied) 1f else 0f))
                     }
                 }
             }
         } else {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp + revealTimerSpace),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -289,15 +295,21 @@ private fun CredentialFieldRow(
                 if (showsActions) actions(Modifier)
             }
         }
-        if (isRevealed && field.kind == CredentialFieldKind.PASSWORD) {
+        if (showsRevealTimer) {
             val barColor = MaterialTheme.colorScheme.primary
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
+                    .padding(horizontal = if (isDesktopPlatform) 8.dp else 16.dp)
+                    .padding(bottom = RevealTimerBottomGap)
                     .height(2.dp)
                     .drawBehind {
-                        drawRect(color = barColor, size = size.copy(width = size.width * revealTimeLeft.value))
+                        drawRoundRect(
+                            color = barColor,
+                            size = size.copy(width = size.width * revealTimeLeft.value),
+                            cornerRadius = CornerRadius(size.height / 2)
+                        )
                     }
             )
         }
