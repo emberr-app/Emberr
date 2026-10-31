@@ -13,7 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.emberr.domain.model.CredentialsBlock
+import com.emberr.domain.model.CredentialsEdit
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -249,8 +249,8 @@ fun DailyEditorPane(
             override fun onTogglePin() = viewModel.togglePinSelectedBlocks()
             override fun onUpdateTable(id: String, rows: List<List<String>>) =
                 viewModel.updateTable(id, rows)
-            override fun onUpdateCredentials(id: String, block: CredentialsBlock) =
-                viewModel.updateCredentials(id, block)
+            override fun onUpdateCredentials(id: String, edit: CredentialsEdit) =
+                viewModel.updateCredentials(id, edit)
             override fun onUpdateTableStyle(
                 id: String,
                 cellStyles: Map<String, TableCellStyle>,

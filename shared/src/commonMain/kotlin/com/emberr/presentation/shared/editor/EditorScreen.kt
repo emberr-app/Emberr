@@ -137,6 +137,7 @@ import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CredentialsBlock
+import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -365,6 +366,8 @@ object GlobalEditorState {
 
     var focusedCanvasBlockId: String? = null
 
+    var openCredentialsFormCount by mutableIntStateOf(0)
+
     var pressStartedOnCanvasBlock: Boolean = false
 
     var pressStartedOnNewDatabaseRow: Boolean = false
@@ -482,7 +485,7 @@ interface EditorActions {
     fun onOpenFile(filePath: String, mimeType: String)
     fun onTogglePin()
     fun onUpdateTable(id: String, rows: List<List<String>>)
-    fun onUpdateCredentials(id: String, block: CredentialsBlock)
+    fun onUpdateCredentials(id: String, edit: CredentialsEdit)
     fun onUpdateTableStyle(
         id: String,
         cellStyles: Map<String, com.emberr.domain.model.TableCellStyle>,
@@ -650,7 +653,8 @@ fun EditorScreen(
         { keyEvent ->
             val isUsableShortcut = keyEvent.type == KeyEventType.KeyDown &&
                 keyEvent.isCtrlPressed &&
-                GlobalEditorState.focusedCanvasBlockId == null
+                GlobalEditorState.focusedCanvasBlockId == null &&
+                GlobalEditorState.openCredentialsFormCount == 0
             when {
                 !isUsableShortcut -> false
                 keyEvent.key == Key.Z -> {
@@ -1783,8 +1787,8 @@ fun EditorToolbar(
                                             ToolbarDivider(tint)
                                         } else {
                                             val isItemEnabled = when (item) {
-                                                KeyboardToolbarItem.UNDO -> canUndo
-                                                KeyboardToolbarItem.REDO -> canRedo
+                                                KeyboardToolbarItem.UNDO -> canUndo && GlobalEditorState.openCredentialsFormCount == 0
+                                                KeyboardToolbarItem.REDO -> canRedo && GlobalEditorState.openCredentialsFormCount == 0
                                                 else -> isEnabled
                                             }
                                             val itemTint = when (item) {

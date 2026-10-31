@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.emberr.domain.model.CredentialsBlock
+import com.emberr.domain.model.CredentialsEdit
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
@@ -237,7 +237,7 @@ fun TasksScreen(
                         override fun onRequestDocumentPicker(blockId: String) {}
                         override fun onTogglePin() {}
                         override fun onUpdateTable(id: String, rows: List<List<String>>) {}
-                        override fun onUpdateCredentials(id: String, block: CredentialsBlock) {}
+                        override fun onUpdateCredentials(id: String, edit: CredentialsEdit) {}
                         override fun onUpdateTableStyle(
                             id: String,
                             cellStyles: Map<String, com.emberr.domain.model.TableCellStyle>,

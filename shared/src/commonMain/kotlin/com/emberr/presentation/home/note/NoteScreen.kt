@@ -23,7 +23,7 @@ import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import com.emberr.domain.model.CredentialsBlock
+import com.emberr.domain.model.CredentialsEdit
 import com.emberr.presentation.shared.editor.centeredWithMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -499,8 +499,8 @@ fun NoteScreen(
             override fun onTogglePin() = viewModel.togglePinSelectedBlocks()
             override fun onUpdateTable(id: String, rows: List<List<String>>) =
                 viewModel.updateTable(id, rows)
-            override fun onUpdateCredentials(id: String, block: CredentialsBlock) =
-                viewModel.updateCredentials(id, block)
+            override fun onUpdateCredentials(id: String, edit: CredentialsEdit) =
+                viewModel.updateCredentials(id, edit)
             override fun onUpdateTableStyle(
                 id: String,
                 cellStyles: Map<String, com.emberr.domain.model.TableCellStyle>,
