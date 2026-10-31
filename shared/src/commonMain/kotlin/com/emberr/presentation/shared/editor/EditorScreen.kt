@@ -236,7 +236,7 @@ import emberr.shared.generated.resources.indent_right
 import emberr.shared.generated.resources.italic
 import emberr.shared.generated.resources.keyboard
 import emberr.shared.generated.resources.link
-import emberr.shared.generated.resources.lock
+import emberr.shared.generated.resources.lock_password
 import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.minus
 import emberr.shared.generated.resources.ordered_list
@@ -2179,7 +2179,7 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Web Bookmark", Res.drawable.bookmark) { onInsertMediaBlock("bookmark") },
         SlashMenuItemData("Movie or Show", Res.drawable.film) { onInsertMediaBlock("movie") },
         SlashMenuItemData("Watchlist", Res.drawable.tv) { onInsertMediaBlock("watchlist") },
-        SlashMenuItemData("Credentials", Res.drawable.lock) { onInsertMediaBlock("credentials") }
+        SlashMenuItemData("Credentials", Res.drawable.lock_password) { onInsertMediaBlock("credentials") }
             .copy(searchWords = listOf("login", "password", "credentials", "account")),
         SlashMenuItemData("Simple Table", Res.drawable.table) { onInsertMediaBlock("table") },
         SlashMenuItemData("Database", Res.drawable.database) { onInsertMediaBlock("database") },

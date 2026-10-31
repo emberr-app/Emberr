@@ -19,11 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Key
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,7 +43,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -95,9 +89,13 @@ import com.emberr.presentation.shared.components.emberrBorderColor
 import com.emberr.presentation.shared.components.subtleFillColor
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.eye_closed
+import emberr.shared.generated.resources.eye_open
+import emberr.shared.generated.resources.lock_password
 import emberr.shared.generated.resources.notes2
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.refresh_cw
+import emberr.shared.generated.resources.user2
 import emberr.shared.generated.resources.x
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -165,8 +163,8 @@ private val CredentialFieldKind.hidesValue: Boolean
 
 @Composable
 internal fun CredentialFieldKind.icon(): Painter = when (this) {
-    CredentialFieldKind.USERNAME -> rememberVectorPainter(Icons.Outlined.Person)
-    CredentialFieldKind.PASSWORD -> rememberVectorPainter(Icons.Outlined.Key)
+    CredentialFieldKind.USERNAME -> painterResource(Res.drawable.user2)
+    CredentialFieldKind.PASSWORD -> painterResource(Res.drawable.lock_password)
     CredentialFieldKind.NOTE -> painterResource(Res.drawable.notes2)
 }
 
@@ -393,7 +391,7 @@ internal fun CredentialServiceTile(serviceName: String, iconUrl: String?, modifi
     ) {
         if (!hasLoadedIcon && firstLetter == null) {
             Icon(
-                imageVector = Icons.Outlined.Key,
+                painter = painterResource(Res.drawable.lock_password),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(18.dp)
@@ -562,9 +560,7 @@ private fun CredentialValueInput(draft: CredentialFieldDraft, modifier: Modifier
         trailingIcon = if (draft.kind.hidesValue) {
             {
                 CredentialIconButton(
-                    painter = rememberVectorPainter(
-                        if (draft.isValueVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility
-                    ),
+                    painter = painterResource(if (draft.isValueVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                     description = if (draft.isValueVisible) "Hide" else "Show",
                     onClick = { draft.isValueVisible = !draft.isValueVisible }
                 )
