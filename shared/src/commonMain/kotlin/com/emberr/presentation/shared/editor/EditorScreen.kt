@@ -368,7 +368,7 @@ object GlobalEditorState {
 
     var openCredentialsFormCount by mutableIntStateOf(0)
 
-    val credentialsBlocksWithBlankFormShown = mutableSetOf<String>()
+    val newCredentialsBlocksAwaitingForm = mutableSetOf<String>()
 
     var pressStartedOnCanvasBlock: Boolean = false
 
@@ -2179,7 +2179,7 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Web Bookmark", Res.drawable.bookmark) { onInsertMediaBlock("bookmark") },
         SlashMenuItemData("Movie or Show", Res.drawable.film) { onInsertMediaBlock("movie") },
         SlashMenuItemData("Watchlist", Res.drawable.tv) { onInsertMediaBlock("watchlist") },
-        SlashMenuItemData("Login", Res.drawable.lock) { onInsertMediaBlock("credentials") }
+        SlashMenuItemData("Credentials", Res.drawable.lock) { onInsertMediaBlock("credentials") }
             .copy(searchWords = listOf("login", "password", "credentials", "account")),
         SlashMenuItemData("Simple Table", Res.drawable.table) { onInsertMediaBlock("table") },
         SlashMenuItemData("Database", Res.drawable.database) { onInsertMediaBlock("database") },

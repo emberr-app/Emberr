@@ -2599,7 +2599,7 @@ abstract class BaseEditorViewModel(
                     indentationLevel = indent,
                     isPinned = isPinnedContext,
                     updatedAt = now
-                )
+                ).also { GlobalEditorState.newCredentialsBlocksAwaitingForm += newId }
                 "watchlist" -> {
                     if (watchlistNoteId == null) return@modifyBlocks list
                     WatchlistBlock(id = newId, watchlistNoteId = watchlistNoteId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
