@@ -12,32 +12,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicSecureTextField
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.KeyboardActionHandler
-import androidx.compose.foundation.text.input.TextFieldDecorator
-import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
@@ -47,8 +37,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -72,133 +60,75 @@ fun EmberrTextField(
     hasBackground: Boolean = true,
     onSubmit: (() -> Unit)? = null
 ) {
-    val textField = rememberTextFieldStateFor(value, onValueChange)
-    val hidesText = visualTransformation is PasswordVisualTransformation
-    val isSingleLine = singleLine || hidesText
-    val submit = onSubmit?.let { submitAction ->
-        {
-            textField.reportTypedTextNow()
-            submitAction()
-        }
-    }
-    val keyboardActionHandler = submitOnDoneAction(submit, keyboardOptions, isSingleLine)
-    val focusRequester = remember { FocusRequester() }
-    val fieldFocus = remember { FieldFocus() }
-    val wasFocusedBeforeSwap = remember(hidesText) { fieldFocus.isFocused }
-    LaunchedEffect(hidesText) {
-        if (wasFocusedBeforeSwap) runCatching { focusRequester.requestFocus() }
-    }
-    val fieldModifier = modifier
-        .focusRequester(focusRequester)
-        .onFocusChanged { focusState -> fieldFocus.isFocused = focusState.isFocused }
-        .submitOnEnter(submit, isSingleLine)
-    val shownTextStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface)
-
     if (!hasBackground) {
         PlainEmberrTextField(
-            state = textField.state,
-            modifier = fieldModifier,
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier,
             placeholder = placeholder,
-            isSingleLine = isSingleLine,
+            singleLine = singleLine,
             keyboardOptions = keyboardOptions,
-            hidesText = hidesText,
+            visualTransformation = visualTransformation,
             trailingIcon = trailingIcon,
             textStyle = textStyle,
-            keyboardActionHandler = keyboardActionHandler
+            onSubmit = onSubmit
         )
         return
     }
 
-    if (hidesText) {
-        OutlinedSecureTextField(
-            state = textField.state,
-            placeholder = { EmberrTextFieldPlaceholder(placeholder, textStyle) },
-            textObfuscationMode = TextObfuscationMode.Hidden,
-            keyboardOptions = keyboardOptions,
-            onKeyboardAction = keyboardActionHandler,
-            trailingIcon = trailingIcon,
-            textStyle = shownTextStyle,
-            shape = RoundedCornerShape(12.dp),
-            colors = emberrTextFieldColors(),
-            modifier = fieldModifier
-        )
-    } else {
-        OutlinedTextField(
-            state = textField.state,
-            placeholder = { EmberrTextFieldPlaceholder(placeholder, textStyle) },
-            lineLimits = if (isSingleLine) TextFieldLineLimits.SingleLine else TextFieldLineLimits.Default,
-            keyboardOptions = keyboardOptions,
-            onKeyboardAction = keyboardActionHandler,
-            trailingIcon = trailingIcon,
-            textStyle = shownTextStyle,
-            shape = RoundedCornerShape(12.dp),
-            colors = emberrTextFieldColors(),
-            modifier = fieldModifier
-        )
-    }
-}
-
-private class FieldFocus {
-    var isFocused = false
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { EmberrTextFieldPlaceholder(placeholder, textStyle) },
+        singleLine = singleLine,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = KeyboardActions(onDone = { onSubmit?.invoke() }),
+        visualTransformation = visualTransformation,
+        trailingIcon = trailingIcon,
+        textStyle = textStyle.copy(
+            color = MaterialTheme.colorScheme.onSurface
+        ),
+        shape = RoundedCornerShape(12.dp),
+        colors = emberrTextFieldColors(),
+        modifier = modifier.submitOnEnter(onSubmit, singleLine)
+    )
 }
 
 @Composable
 private fun PlainEmberrTextField(
-    state: TextFieldState,
+    value: String,
+    onValueChange: (String) -> Unit,
     modifier: Modifier,
     placeholder: String,
-    isSingleLine: Boolean,
+    singleLine: Boolean,
     keyboardOptions: KeyboardOptions,
-    hidesText: Boolean,
+    visualTransformation: VisualTransformation,
     trailingIcon: @Composable (() -> Unit)?,
     textStyle: TextStyle,
-    keyboardActionHandler: KeyboardActionHandler
+    onSubmit: (() -> Unit)?
 ) {
-    val shownTextStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface)
-    val cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
-    val decorator = TextFieldDecorator { innerTextField ->
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.weight(1f)) {
-                if (state.text.isEmpty()) EmberrTextFieldPlaceholder(placeholder, textStyle)
-                innerTextField()
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = singleLine,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = KeyboardActions(onDone = { onSubmit?.invoke() }),
+        visualTransformation = visualTransformation,
+        textStyle = textStyle.copy(
+            color = MaterialTheme.colorScheme.onSurface
+        ),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        modifier = modifier.submitOnEnter(onSubmit, singleLine),
+        decorationBox = { innerTextField ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.weight(1f)) {
+                    if (value.isEmpty()) EmberrTextFieldPlaceholder(placeholder, textStyle)
+                    innerTextField()
+                }
+                trailingIcon?.invoke()
             }
-            trailingIcon?.invoke()
         }
-    }
-
-    if (hidesText) {
-        BasicSecureTextField(
-            state = state,
-            modifier = modifier,
-            textStyle = shownTextStyle,
-            keyboardOptions = keyboardOptions,
-            onKeyboardAction = keyboardActionHandler,
-            cursorBrush = cursorBrush,
-            decorator = decorator,
-            textObfuscationMode = TextObfuscationMode.Hidden
-        )
-    } else {
-        BasicTextField(
-            state = state,
-            modifier = modifier,
-            textStyle = shownTextStyle,
-            keyboardOptions = keyboardOptions,
-            onKeyboardAction = keyboardActionHandler,
-            lineLimits = if (isSingleLine) TextFieldLineLimits.SingleLine else TextFieldLineLimits.Default,
-            cursorBrush = cursorBrush,
-            decorator = decorator
-        )
-    }
-}
-
-private fun submitOnDoneAction(
-    onSubmit: (() -> Unit)?,
-    keyboardOptions: KeyboardOptions,
-    isSingleLine: Boolean
-): KeyboardActionHandler = KeyboardActionHandler { performDefaultAction ->
-    val imeAction = keyboardOptions.imeAction
-    val isDoneAction = imeAction == ImeAction.Done || (imeAction == ImeAction.Default && isSingleLine)
-    if (isDoneAction) onSubmit?.invoke() else performDefaultAction()
+    )
 }
 
 private fun Modifier.submitOnEnter(onSubmit: (() -> Unit)?, singleLine: Boolean): Modifier =
@@ -248,13 +178,6 @@ fun EmberrSearchTextField(
     onSubmit: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
-    val searchField = rememberTextFieldStateFor(value, onValueChange)
-    val submit = onSubmit?.let { submitAction ->
-        {
-            searchField.reportTypedTextNow()
-            submitAction()
-        }
-    }
     Box(
         modifier = modifier
             .height(50.dp)
@@ -277,18 +200,19 @@ fun EmberrSearchTextField(
             )
             Spacer(modifier = Modifier.width(12.dp))
             BasicTextField(
-                state = searchField.state,
-                onKeyboardAction = submitOnDoneAction(submit, keyboardOptions, isSingleLine = true),
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
                 keyboardOptions = keyboardOptions,
-                lineLimits = TextFieldLineLimits.SingleLine,
+                keyboardActions = KeyboardActions(onDone = { onSubmit?.invoke() }),
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.primary
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.weight(1f).then(textFieldModifier).submitOnEnter(submit, singleLine = true),
-                decorator = { innerTextField ->
+                modifier = Modifier.weight(1f).then(textFieldModifier).submitOnEnter(onSubmit, singleLine = true),
+                decorationBox = { innerTextField ->
                     Box(contentAlignment = Alignment.CenterStart) {
-                        if (searchField.state.text.isEmpty()) {
+                        if (value.isEmpty()) {
                             Text(
                                 text = placeholder,
                                 style = MaterialTheme.typography.bodyLarge,
