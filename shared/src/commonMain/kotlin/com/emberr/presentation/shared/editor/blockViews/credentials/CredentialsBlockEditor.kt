@@ -388,7 +388,7 @@ internal fun CredentialServiceTile(serviceName: String, iconUrl: String?, modifi
         modifier = modifier
             .size(CredentialTileSize)
             .clip(RoundedCornerShape(8.dp))
-            .background(if (hasLoadedIcon) Color.White else MaterialTheme.colorScheme.primary),
+            .background(if (hasLoadedIcon) Color.Transparent else MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center
     ) {
         if (!hasLoadedIcon && firstLetter == null) {
@@ -422,7 +422,6 @@ internal fun CredentialServiceTile(serviceName: String, iconUrl: String?, modifi
                 onState = { state -> hasLoadedIcon = state is AsyncImagePainter.State.Success },
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(5.dp)
                     .alpha(if (hasLoadedIcon) 1f else 0f)
             )
         }
