@@ -368,6 +368,8 @@ object GlobalEditorState {
 
     var openCredentialsFormCount by mutableIntStateOf(0)
 
+    val credentialsBlocksWithBlankFormShown = mutableSetOf<String>()
+
     var pressStartedOnCanvasBlock: Boolean = false
 
     var pressStartedOnNewDatabaseRow: Boolean = false
