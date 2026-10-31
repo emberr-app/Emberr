@@ -46,9 +46,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.emberr.domain.credentials.CredentialUnlockSession
 import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.model.CredentialField
@@ -57,8 +59,10 @@ import com.emberr.domain.util.system.DeviceLockPrompt
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.rememberDeviceLockPrompt
 import com.emberr.domain.util.system.showNativeToast
+import com.emberr.presentation.shared.components.EmberrBorderWidth
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.SmallRoundedCornerShape
+import com.emberr.presentation.shared.components.emberrBorderColor
 import com.emberr.presentation.shared.components.subtleFillColor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
@@ -72,8 +76,8 @@ import org.koin.compose.koinInject
 private const val PASSWORD_REVEAL_MILLIS = 20_000
 private const val COPIED_CHECK_MILLIS = 1_300L
 private const val HIDDEN_PASSWORD = "••••••••••••"
-private val DesktopLabelWidth = 132.dp
-private val DesktopRowLineHeight = 28.dp
+private val DesktopLabelWidth = 120.dp
+private val DesktopRowMinHeight = 38.dp
 
 private class CredentialSecretReader(
     private val credentialVault: CredentialVault,
@@ -110,10 +114,11 @@ internal fun CredentialFieldRows(
         CredentialSecretReader(credentialVault, unlockSession, deviceLockPrompt)
     }
 
-    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp)) {
-        fields.forEach { field ->
+    CredentialsDivider()
+    Column(modifier = Modifier.fillMaxWidth().padding(if (isDesktopPlatform) 6.dp else 0.dp)) {
+        fields.forEachIndexed { index, field ->
             key(field.id) {
+                if (index > 0 && !isDesktopPlatform) CredentialsDivider(modifier = Modifier.padding(start = 16.dp))
                 CredentialFieldRow(
                     field = field,
                     isLocked = field.id in lockedFieldIds,
@@ -242,33 +247,40 @@ private fun CredentialFieldRow(
     ) {
         if (isDesktopPlatform) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 4.dp),
                 verticalAlignment = Alignment.Top
             ) {
                 Box(
-                    modifier = Modifier.width(DesktopLabelWidth).heightIn(min = DesktopRowLineHeight),
+                    modifier = Modifier.width(DesktopLabelWidth).heightIn(min = DesktopRowMinHeight),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    CredentialFieldLabel(field = field)
+                    CredentialFieldLabel(field = field, style = MaterialTheme.typography.bodyLarge)
                 }
+                Spacer(modifier = Modifier.width(12.dp))
                 Box(
-                    modifier = Modifier.weight(1f).heightIn(min = DesktopRowLineHeight).then(valueModifier),
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = DesktopRowMinHeight)
+                        .then(valueModifier)
+                        .padding(vertical = 8.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
                     CredentialFieldValue(field = field, revealedValue = revealedValue, isLocked = isLocked)
                 }
                 if (showsActions) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    actions(Modifier.alpha(if (isHovered || (isRevealed && field.kind == CredentialFieldKind.PASSWORD) || showsCopied) 1f else 0f))
+                    Box(modifier = Modifier.heightIn(min = DesktopRowMinHeight), contentAlignment = Alignment.Center) {
+                        actions(Modifier.alpha(if (isHovered || (isRevealed && field.kind == CredentialFieldKind.PASSWORD) || showsCopied) 1f else 0f))
+                    }
                 }
             }
         } else {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    CredentialFieldLabel(field = field)
+                    CredentialFieldLabel(field = field, style = MaterialTheme.typography.labelSmall)
                     Spacer(modifier = Modifier.height(2.dp))
                     Box(modifier = Modifier.fillMaxWidth().then(valueModifier)) {
                         CredentialFieldValue(field = field, revealedValue = revealedValue, isLocked = isLocked)
@@ -293,23 +305,19 @@ private fun CredentialFieldRow(
 }
 
 @Composable
-private fun CredentialFieldLabel(field: CredentialField) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            painter = field.kind.icon(),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(14.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = field.label.ifBlank { field.kind.defaultLabel() },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.outline,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
+private fun CredentialFieldLabel(field: CredentialField, style: TextStyle) {
+    Text(
+        text = field.label.ifBlank { field.kind.defaultLabel() },
+        style = style,
+        color = MaterialTheme.colorScheme.outline,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+internal fun CredentialsDivider(modifier: Modifier = Modifier) {
+    HorizontalDivider(modifier = modifier, thickness = EmberrBorderWidth, color = emberrBorderColor)
 }
 
 @Composable
@@ -343,7 +351,7 @@ private fun CredentialFieldValue(field: CredentialField, revealedValue: String?,
             style = bodyLarge.copy(fontFamily = FontFamily.Monospace),
             color = onSurface
         )
-        else -> Text(text = HIDDEN_PASSWORD, style = bodyLarge, color = outline, maxLines = 1)
+        else -> Text(text = HIDDEN_PASSWORD, style = bodyLarge.copy(letterSpacing = 2.sp), color = outline, maxLines = 1)
     }
 }
 

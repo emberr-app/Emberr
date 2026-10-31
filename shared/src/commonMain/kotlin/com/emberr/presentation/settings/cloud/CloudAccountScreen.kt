@@ -1043,6 +1043,6 @@ private fun WorkingIndicator() {
     }
 }
 
-private val ModerateColor = Color(0xFFFFA726)
+internal val ModerateColor = Color(0xFFFFA726)
 
-private val StrongColor = Color(0xFF4CAF50)
+internal val StrongColor = Color(0xFF4CAF50)
