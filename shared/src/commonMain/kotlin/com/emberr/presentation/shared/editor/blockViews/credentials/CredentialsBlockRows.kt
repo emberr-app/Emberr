@@ -22,9 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +42,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -69,6 +65,8 @@ import com.emberr.presentation.shared.components.subtleFillColor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.copy
+import emberr.shared.generated.resources.eye_closed
+import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.lock
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -380,7 +378,7 @@ private fun CredentialRowActions(
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         if (field.kind == CredentialFieldKind.PASSWORD) {
             CredentialIconButton(
-                painter = rememberVectorPainter(if (isRevealed) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility),
+                painter = painterResource(if (isRevealed) Res.drawable.eye_closed else Res.drawable.eye_open),
                 description = if (isRevealed) "Hide $noun" else "Show $noun",
                 onClick = onToggleReveal
             )
