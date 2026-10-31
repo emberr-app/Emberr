@@ -386,14 +386,16 @@ private fun CredentialRowActions(
             CredentialIconButton(
                 painter = painterResource(if (isRevealed) Res.drawable.eye_closed else Res.drawable.eye_open),
                 description = if (isRevealed) "Hide $noun" else "Show $noun",
-                onClick = onToggleReveal
+                onClick = onToggleReveal,
+                showsRipple = false
             )
         }
         CredentialIconButton(
             painter = painterResource(if (showsCopied) Res.drawable.check else Res.drawable.copy),
             description = "Copy $noun",
             tint = if (showsCopied) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-            onClick = onCopy
+            onClick = onCopy,
+            showsRipple = false
         )
     }
 }
