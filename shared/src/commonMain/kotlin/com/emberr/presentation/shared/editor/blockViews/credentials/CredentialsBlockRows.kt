@@ -83,19 +83,41 @@ private val RevealTimerSpace = 12.dp
 private val RowActionGap = 8.dp
 private val RevealTimerBottomGap = 8.dp
 
-private class CredentialSecretReader(
+internal class CredentialSecretReader(
     private val credentialVault: CredentialVault,
     private val unlockSession: CredentialUnlockSession,
     private val deviceLockPrompt: DeviceLockPrompt
 ) {
-    suspend fun read(field: CredentialField): String? {
+    suspend fun readAfterUnlock(field: CredentialField): String? {
         if (!unlockSession.unlock(deviceLockPrompt)) return null
+        return decryptOrShowLocked(field)
+    }
+
+    suspend fun readAllAfterUnlock(fields: List<CredentialField>): Map<String, String>? {
+        val decryptedSecretsByFieldId = fields
+            .filter { field -> field.encryptedValue != null }
+            .associate { field -> field.id to (decryptOrShowLocked(field) ?: return null) }
+        if (decryptedSecretsByFieldId.isNotEmpty() && !unlockSession.unlock(deviceLockPrompt)) return null
+        return decryptedSecretsByFieldId
+    }
+
+    suspend fun readWithoutUnlock(field: CredentialField): String? = credentialVault.decrypt(field)
+
+    private suspend fun decryptOrShowLocked(field: CredentialField): String? {
         val value = credentialVault.decrypt(field)
         if (value == null) showNativeToast("These credentials are locked until their key arrives from your other device.")
         return value
     }
+}
 
-    suspend fun readShownOnCard(field: CredentialField): String? = credentialVault.decrypt(field)
+@Composable
+internal fun rememberCredentialSecretReader(): CredentialSecretReader {
+    val credentialVault = koinInject<CredentialVault>()
+    val unlockSession = koinInject<CredentialUnlockSession>()
+    val deviceLockPrompt = rememberDeviceLockPrompt()
+    return remember(credentialVault, unlockSession, deviceLockPrompt) {
+        CredentialSecretReader(credentialVault, unlockSession, deviceLockPrompt)
+    }
 }
 
 private fun CredentialFieldKind.noun(): String = when (this) {
@@ -111,12 +133,7 @@ internal fun CredentialFieldRows(
     inSelectionMode: Boolean,
     onToggleSelection: () -> Unit
 ) {
-    val credentialVault = koinInject<CredentialVault>()
-    val unlockSession = koinInject<CredentialUnlockSession>()
-    val deviceLockPrompt = rememberDeviceLockPrompt()
-    val secretReader = remember(credentialVault, unlockSession, deviceLockPrompt) {
-        CredentialSecretReader(credentialVault, unlockSession, deviceLockPrompt)
-    }
+    val secretReader = rememberCredentialSecretReader()
 
     CredentialsDivider()
     Column(modifier = Modifier.fillMaxWidth().padding(if (isDesktopPlatform) 6.dp else 0.dp)) {
@@ -148,30 +165,30 @@ private fun CredentialFieldRow(
     val scope = rememberCoroutineScope()
     val hoverSource = remember { MutableInteractionSource() }
     val isHovered by hoverSource.collectIsHoveredAsState()
-    var revealedValue by remember(field.encryptedValue) { mutableStateOf<String?>(null) }
+    var revealedPassword by remember(field.encryptedValue) { mutableStateOf<String?>(null) }
+    var noteText by remember(field.encryptedValue) { mutableStateOf<String?>(null) }
     var isReadingSecret by remember { mutableStateOf(false) }
     var showsCopied by remember { mutableStateOf(false) }
 
     val isSecret = field.kind != CredentialFieldKind.USERNAME
     val hasValue = if (isSecret) field.encryptedValue != null else field.plainValue.isNotEmpty()
     val canUseValue = hasValue && !isLocked
-    val isRevealed = revealedValue != null
+    val isRevealed = revealedPassword != null
     val revealTimeLeft = remember(isRevealed) { Animatable(1f) }
-    val showsRevealTimer = isRevealed && field.kind == CredentialFieldKind.PASSWORD
-    val revealTimerSpace by animateDpAsState(if (showsRevealTimer) RevealTimerSpace else 0.dp)
+    val revealTimerSpace by animateDpAsState(if (isRevealed) RevealTimerSpace else 0.dp)
 
     LaunchedEffect(isRevealed) {
-        if (!isRevealed || field.kind != CredentialFieldKind.PASSWORD) return@LaunchedEffect
+        if (!isRevealed) return@LaunchedEffect
         launch {
             revealTimeLeft.animateTo(0f, tween(durationMillis = PASSWORD_REVEAL_MILLIS, easing = LinearEasing))
         }
         delay(PASSWORD_REVEAL_MILLIS.toLong())
-        revealedValue = null
+        revealedPassword = null
     }
 
     LaunchedEffect(field.encryptedValue, isLocked) {
         if (field.kind != CredentialFieldKind.NOTE || field.encryptedValue == null || isLocked) return@LaunchedEffect
-        revealedValue = secretReader.readShownOnCard(field)
+        noteText = secretReader.readWithoutUnlock(field)
     }
 
     LaunchedEffect(showsCopied) {
@@ -188,7 +205,11 @@ private fun CredentialFieldRow(
 
     fun copyValue() {
         if (!canUseValue || isReadingSecret) return
-        val valueOnScreen = if (isSecret) revealedValue else field.plainValue
+        val valueOnScreen = when (field.kind) {
+            CredentialFieldKind.USERNAME -> field.plainValue
+            CredentialFieldKind.PASSWORD -> revealedPassword
+            CredentialFieldKind.NOTE -> noteText
+        }
         if (valueOnScreen != null) {
             copyToClipboard(valueOnScreen)
             return
@@ -196,7 +217,7 @@ private fun CredentialFieldRow(
         isReadingSecret = true
         scope.launch {
             try {
-                secretReader.read(field)?.let { secret -> copyToClipboard(secret) }
+                secretReader.readAfterUnlock(field)?.let { secret -> copyToClipboard(secret) }
             } finally {
                 isReadingSecret = false
             }
@@ -204,15 +225,15 @@ private fun CredentialFieldRow(
     }
 
     fun toggleReveal() {
-        if (revealedValue != null) {
-            revealedValue = null
+        if (revealedPassword != null) {
+            revealedPassword = null
             return
         }
         if (!canUseValue || isReadingSecret) return
         isReadingSecret = true
         scope.launch {
             try {
-                revealedValue = secretReader.read(field)
+                revealedPassword = secretReader.readAfterUnlock(field)
             } finally {
                 isReadingSecret = false
             }
@@ -271,12 +292,12 @@ private fun CredentialFieldRow(
                         .padding(vertical = 8.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    CredentialFieldValue(field = field, revealedValue = revealedValue, isLocked = isLocked)
+                    CredentialFieldValue(field = field, revealedPassword = revealedPassword, noteText = noteText, isLocked = isLocked)
                 }
                 if (showsActions) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.heightIn(min = DesktopRowMinHeight), contentAlignment = Alignment.Center) {
-                        actions(Modifier.alpha(if (isHovered || showsRevealTimer || showsCopied) 1f else 0f))
+                        actions(Modifier.alpha(if (isHovered || isRevealed || showsCopied) 1f else 0f))
                     }
                 }
             }
@@ -289,13 +310,13 @@ private fun CredentialFieldRow(
                     CredentialFieldLabel(field = field, style = MaterialTheme.typography.labelSmall)
                     Spacer(modifier = Modifier.height(2.dp))
                     Box(modifier = Modifier.fillMaxWidth().then(valueModifier)) {
-                        CredentialFieldValue(field = field, revealedValue = revealedValue, isLocked = isLocked)
+                        CredentialFieldValue(field = field, revealedPassword = revealedPassword, noteText = noteText, isLocked = isLocked)
                     }
                 }
                 if (showsActions) actions(Modifier)
             }
         }
-        if (showsRevealTimer) {
+        if (isRevealed) {
             val barColor = MaterialTheme.colorScheme.primary
             Box(
                 modifier = Modifier
@@ -333,7 +354,7 @@ internal fun CredentialsDivider(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun CredentialFieldValue(field: CredentialField, revealedValue: String?, isLocked: Boolean) {
+private fun CredentialFieldValue(field: CredentialField, revealedPassword: String?, noteText: String?, isLocked: Boolean) {
     val bodyLarge = MaterialTheme.typography.bodyLarge
     val outline = MaterialTheme.colorScheme.outline
     val onSurface = MaterialTheme.colorScheme.onSurface
@@ -357,9 +378,9 @@ private fun CredentialFieldValue(field: CredentialField, revealedValue: String?,
         )
         field.kind == CredentialFieldKind.USERNAME || field.encryptedValue == null ->
             Text(text = "Empty", style = bodyLarge, color = outline)
-        field.kind == CredentialFieldKind.NOTE -> Text(text = revealedValue.orEmpty(), style = bodyLarge, color = onSurface)
-        revealedValue != null -> Text(
-            text = revealedValue,
+        field.kind == CredentialFieldKind.NOTE -> Text(text = noteText.orEmpty(), style = bodyLarge, color = onSurface)
+        revealedPassword != null -> Text(
+            text = revealedPassword,
             style = bodyLarge.copy(fontFamily = FontFamily.Monospace),
             color = onSurface
         )

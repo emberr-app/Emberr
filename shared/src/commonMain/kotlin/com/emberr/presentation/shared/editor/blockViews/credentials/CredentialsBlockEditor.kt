@@ -77,6 +77,7 @@ import com.emberr.domain.model.CredentialFieldKind
 import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.model.changesNothing
+import com.emberr.domain.util.network.BROWSER_USER_AGENT
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.settings.cloud.ModerateColor
@@ -124,7 +125,7 @@ internal val SheetRowInset = 8.dp
 internal val SheetBottomPadding = 16.dp
 private val SheetButtonHorizontalPadding = 20.dp
 
-class CredentialsEditStart(val blockAtStart: CredentialsBlock, val decryptedSecretsByFieldId: Map<String, String>)
+internal class CredentialsEditStart(val blockAtStart: CredentialsBlock, val decryptedSecretsByFieldId: Map<String, String>)
 
 private class CredentialFieldDraft(
     val id: String,
@@ -170,11 +171,8 @@ private fun CredentialFieldKind.valueKeyboardOptions(): KeyboardOptions = when (
     CredentialFieldKind.NOTE -> KeyboardOptions.Default
 }
 
-private val CredentialFieldKind.hidesValue: Boolean
-    get() = this == CredentialFieldKind.PASSWORD
-
 @Composable
-internal fun CredentialFieldKind.icon(): Painter = when (this) {
+private fun CredentialFieldKind.icon(): Painter = when (this) {
     CredentialFieldKind.USERNAME -> painterResource(Res.drawable.user2)
     CredentialFieldKind.PASSWORD -> painterResource(Res.drawable.lock_password)
     CredentialFieldKind.NOTE -> painterResource(Res.drawable.notes2)
@@ -192,7 +190,7 @@ private fun cancelsForm(event: KeyEvent): Boolean =
     isDesktopKeyDown(event) && event.key == Key.Escape
 
 @Composable
-fun CredentialsBlockEditor(
+internal fun CredentialsBlockEditor(
     editStart: CredentialsEditStart,
     onDone: (CredentialsEdit) -> Unit,
     onCancel: () -> Unit,
@@ -398,7 +396,7 @@ private fun CredentialsEditorHeader(
     }
 }
 
-internal val CredentialTileSize: Dp
+private val CredentialTileSize: Dp
     get() = if (isDesktopPlatform) 32.dp else 36.dp
 
 @Composable
@@ -433,7 +431,7 @@ internal fun CredentialServiceTile(serviceName: String, iconUrl: String?, modifi
                     .data(iconUrl)
                     .httpHeaders(
                         NetworkHeaders.Builder()
-                            .set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+                            .set("User-Agent", BROWSER_USER_AGENT)
                             .set("Accept", "image/avif,image/webp,image/apng,image/*,*/*;q=0.8")
                             .build()
                     )
@@ -592,12 +590,12 @@ private fun CredentialValueInput(
         placeholder = draft.kind.valuePlaceholder(),
         singleLine = draft.kind != CredentialFieldKind.NOTE,
         keyboardOptions = draft.kind.valueKeyboardOptions(),
-        visualTransformation = if (draft.kind.hidesValue && !draft.isValueVisible) {
+        visualTransformation = if (draft.kind == CredentialFieldKind.PASSWORD && !draft.isValueVisible) {
             PasswordVisualTransformation()
         } else {
             VisualTransformation.None
         },
-        trailingIcon = if (draft.kind.hidesValue) {
+        trailingIcon = if (draft.kind == CredentialFieldKind.PASSWORD) {
             {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(TrailingIconGap),
@@ -616,7 +614,7 @@ private fun CredentialValueInput(
         } else {
             null
         },
-        textStyle = if (draft.kind.hidesValue) bodyLarge.copy(fontFamily = FontFamily.Monospace) else bodyLarge,
+        textStyle = if (draft.kind == CredentialFieldKind.PASSWORD) bodyLarge.copy(fontFamily = FontFamily.Monospace) else bodyLarge,
         modifier = modifier.focusRequester(draft.focusRequester)
     )
 }
