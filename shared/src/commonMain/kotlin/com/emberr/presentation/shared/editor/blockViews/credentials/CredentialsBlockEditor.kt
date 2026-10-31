@@ -76,6 +76,7 @@ import com.emberr.domain.model.CredentialField
 import com.emberr.domain.model.CredentialFieldKind
 import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.CredentialsEdit
+import com.emberr.domain.model.changesNothing
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.settings.cloud.ModerateColor
@@ -123,7 +124,7 @@ internal val SheetRowInset = 8.dp
 internal val SheetBottomPadding = 16.dp
 private val SheetButtonHorizontalPadding = 20.dp
 
-class CredentialsEditStart(val decryptedSecretsByFieldId: Map<String, String>)
+class CredentialsEditStart(val blockAtStart: CredentialsBlock, val decryptedSecretsByFieldId: Map<String, String>)
 
 private class CredentialFieldDraft(
     val id: String,
@@ -179,15 +180,19 @@ internal fun CredentialFieldKind.icon(): Painter = when (this) {
     CredentialFieldKind.NOTE -> painterResource(Res.drawable.notes2)
 }
 
-private fun finishesEditing(event: KeyEvent): Boolean {
-    if (!isDesktopPlatform || event.type != KeyEventType.KeyDown) return false
+private fun isDesktopKeyDown(event: KeyEvent): Boolean =
+    isDesktopPlatform && event.type == KeyEventType.KeyDown
+
+private fun savesForm(event: KeyEvent): Boolean {
     val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
-    return event.key == Key.Escape || (event.isCtrlPressed && isEnter)
+    return isDesktopKeyDown(event) && event.isCtrlPressed && isEnter
 }
+
+private fun cancelsForm(event: KeyEvent): Boolean =
+    isDesktopKeyDown(event) && event.key == Key.Escape
 
 @Composable
 fun CredentialsBlockEditor(
-    block: CredentialsBlock,
     editStart: CredentialsEditStart,
     onDone: (CredentialsEdit) -> Unit,
     onCancel: () -> Unit,
@@ -195,7 +200,7 @@ fun CredentialsBlockEditor(
 ) {
     val credentialVault = koinInject<CredentialVault>()
     val scope = rememberCoroutineScope()
-    val blockAtStart = remember { block }
+    val blockAtStart = editStart.blockAtStart
     var serviceName by remember { mutableStateOf(blockAtStart.serviceName) }
     var loginUrl by remember { mutableStateOf(blockAtStart.loginUrl) }
     val fieldDrafts = remember {
@@ -232,11 +237,13 @@ fun CredentialsBlockEditor(
         isSaving = true
         scope.launch {
             val edit = credentialsEdit(serviceName, loginUrl, fieldDrafts.toList(), blockAtStart, credentialVault)
-            if (edit == null) {
-                showNativeToast("Couldn't lock these credentials on this device. Try again.")
-                isSaving = false
-            } else {
-                onDone(edit)
+            when {
+                edit == null -> {
+                    showNativeToast("Couldn't lock these credentials on this device. Try again.")
+                    isSaving = false
+                }
+                edit.changesNothing() -> onCancel()
+                else -> onDone(edit)
             }
         }
     }
@@ -245,11 +252,16 @@ fun CredentialsBlockEditor(
         modifier = Modifier
             .fillMaxWidth()
             .onPreviewKeyEvent { event ->
-                if (finishesEditing(event)) {
-                    finish()
-                    true
-                } else {
-                    false
+                when {
+                    savesForm(event) -> {
+                        finish()
+                        true
+                    }
+                    cancelsForm(event) -> {
+                        onCancel()
+                        true
+                    }
+                    else -> false
                 }
             }
     ) {

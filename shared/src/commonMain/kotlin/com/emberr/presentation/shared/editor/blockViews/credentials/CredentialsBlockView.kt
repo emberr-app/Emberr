@@ -85,16 +85,17 @@ fun CredentialsBlockView(
     var editStart by remember {
         val opensFormForNewCard = onSave != null && block.id in GlobalEditorState.newCredentialsBlocksAwaitingForm
         if (opensFormForNewCard) GlobalEditorState.newCredentialsBlocksAwaitingForm -= block.id
-        mutableStateOf(if (opensFormForNewCard) CredentialsEditStart(decryptedSecretsByFieldId = emptyMap()) else null)
+        mutableStateOf(if (opensFormForNewCard) CredentialsEditStart(blockAtStart = block, decryptedSecretsByFieldId = emptyMap()) else null)
     }
     var isOpeningEditor by remember { mutableStateOf(false) }
 
     fun openEditor() {
         if (isOpeningEditor) return
         isOpeningEditor = true
+        val blockAtStart = block
         scope.launch {
             try {
-                val decryptedSecretsByFieldId = block.fields
+                val decryptedSecretsByFieldId = blockAtStart.fields
                     .filter { field -> field.encryptedValue != null }
                     .associate { field ->
                         val decryptedValue = credentialVault.decrypt(field) ?: run {
@@ -104,7 +105,7 @@ fun CredentialsBlockView(
                         field.id to decryptedValue
                     }
                 if (decryptedSecretsByFieldId.isNotEmpty() && !unlockSession.unlock(deviceLockPrompt)) return@launch
-                editStart = CredentialsEditStart(decryptedSecretsByFieldId)
+                editStart = CredentialsEditStart(blockAtStart, decryptedSecretsByFieldId)
             } finally {
                 isOpeningEditor = false
             }
@@ -122,7 +123,6 @@ fun CredentialsBlockView(
         if (currentEditStart != null && onSave != null) {
             Box(modifier = cardModifier) {
                 CredentialsBlockEditor(
-                    block = block,
                     editStart = currentEditStart,
                     onDone = { edit ->
                         editStart = null
@@ -218,7 +218,7 @@ private fun CredentialsViewHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         CredentialServiceTile(serviceName = block.serviceName, iconUrl = block.iconUrl)
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(if (isDesktopPlatform) 16.dp else 12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = block.serviceName.ifBlank { "Untitled credentials" },

@@ -71,6 +71,8 @@ data class CredentialsEdit(
     val removedFieldIds: Set<String> = emptySet()
 )
 
+fun CredentialsEdit.changesNothing(): Boolean = this == CredentialsEdit()
+
 fun applyCredentialsEdit(latest: CredentialsBlock, edit: CredentialsEdit): CredentialsBlock {
     val changesByFieldId = edit.changedFields.associateBy { change -> change.field.id }
     val keptFields = latest.fields
