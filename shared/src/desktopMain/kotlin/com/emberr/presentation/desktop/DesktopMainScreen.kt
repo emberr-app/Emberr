@@ -55,6 +55,7 @@ import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
+import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.model.NoteContent
@@ -2194,6 +2195,7 @@ fun DesktopMainScreen(
                             override fun onStopAudio() = dailyViewModel.stopAudio()
                             override fun onTogglePin() = dailyViewModel.togglePinSelectedBlocks()
                             override fun onUpdateTable(id: String, rows: List<List<String>>) = dailyViewModel.updateTable(id, rows)
+                            override fun onUpdateCredentials(id: String, block: CredentialsBlock) = dailyViewModel.updateCredentials(id, block)
                             override fun onUpdateTableStyle(
                                 id: String,
                                 cellStyles: Map<String, com.emberr.domain.model.TableCellStyle>,
