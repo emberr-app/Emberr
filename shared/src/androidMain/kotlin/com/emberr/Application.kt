@@ -2,6 +2,9 @@ package com.emberr
 
 import android.app.Application
 import android.content.SharedPreferences
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.emberr.core.android.eraseAppDataKeepingCloudAccountIfRequested
 import com.emberr.data.local.room.AppDatabase
 import com.emberr.di.androidModule
@@ -9,6 +12,7 @@ import com.emberr.di.sharedModule
 import com.emberr.domain.backup.automatic.BackupScheduler
 import com.emberr.domain.backup.manual.deleteBackupImportCopiesLeftFromEarlierRuns
 import com.emberr.domain.cloud.sync.CloudSyncScheduler
+import com.emberr.domain.credentials.CredentialUnlockSession
 import com.emberr.domain.importer.deleteImportCopiesLeftFromEarlierRuns
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.reminders.ReminderRescheduler
@@ -37,6 +41,10 @@ class EmberrApplication : Application() {
             workManagerFactory()
             modules(sharedModule, androidModule)
         }
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStop(owner: LifecycleOwner) = getKoin().get<CredentialUnlockSession>().lockAgain()
+        })
 
         CoroutineScope(Dispatchers.IO).launch {
             getKoin().get<AppDatabase>()

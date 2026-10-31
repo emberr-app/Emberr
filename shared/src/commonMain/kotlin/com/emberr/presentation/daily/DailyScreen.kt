@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.emberr.domain.model.CredentialsBlock
 import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
@@ -327,6 +328,8 @@ fun DailyScreen(
             override fun onTogglePin() = viewModel.togglePinSelectedBlocks()
             override fun onUpdateTable(id: String, rows: List<List<String>>) =
                 viewModel.updateTable(id, rows)
+            override fun onUpdateCredentials(id: String, block: CredentialsBlock) =
+                viewModel.updateCredentials(id, block)
             override fun onUpdateTableStyle(
                 id: String,
                 cellStyles: Map<String, TableCellStyle>,

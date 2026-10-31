@@ -2736,6 +2736,23 @@ abstract class BaseEditorViewModel(
         scheduleAutosave()
     }
 
+    fun updateCredentials(blockId: String, editedBlock: CredentialsBlock) {
+        val now = System.currentTimeMillis()
+        modifyBlocks { list ->
+            mapBlockById(list, blockId) {
+                if (it is CredentialsBlock) {
+                    it.copy(
+                        serviceName = editedBlock.serviceName,
+                        loginUrl = editedBlock.loginUrl,
+                        fields = editedBlock.fields,
+                        updatedAt = now
+                    )
+                } else it
+            }
+        }
+        scheduleAutosave()
+    }
+
     fun updateTableStyle(
         blockId: String,
         cellStyles: Map<String, TableCellStyle>,

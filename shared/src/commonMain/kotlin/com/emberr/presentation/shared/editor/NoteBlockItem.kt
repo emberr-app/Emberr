@@ -1187,7 +1187,9 @@ fun NoteBlockItem(
                             is CredentialsBlock -> CredentialsBlockView(
                                 block = block,
                                 inSelectionMode = inSelectionMode,
-                                onToggleSelection = { actions.onToggleSelection(block.id) }
+                                onToggleSelection = { actions.onToggleSelection(block.id) },
+                                onSave = { editedBlock -> actions.onUpdateCredentials(block.id, editedBlock) },
+                                runAfterKeyboardCloses = afterKeyboardCloses
                             )
                             is UnknownBlock -> UnknownBlockView()
                         }

@@ -34,6 +34,7 @@ import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.reminders.ReminderTargetResolver
 import com.emberr.domain.selfhost.crypto.VaultKeyLock
+import com.emberr.domain.credentials.CredentialUnlockSession
 import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.credentials.SecureCredentialKeyStorage
 import com.emberr.domain.selfhost.sync.ForegroundSyncPoller
@@ -494,6 +495,7 @@ val sharedModule = module {
             keyDerivationManager = get()
         )
     }
+    single { CredentialUnlockSession() }
 
     single { CloudCrypto() }
     single { CloudAccountKeyManager(cloudCrypto = get()) }
