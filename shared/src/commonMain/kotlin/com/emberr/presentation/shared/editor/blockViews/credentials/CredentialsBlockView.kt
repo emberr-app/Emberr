@@ -53,6 +53,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.LocalSitsOnCard
 import com.emberr.presentation.shared.components.SmallRoundedCornerShape
 import com.emberr.presentation.shared.editor.DefaultBlockShape
+import com.emberr.presentation.shared.editor.GlobalEditorState
 import com.emberr.presentation.shared.editor.links.rememberWebLinkActions
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.ellipsis
@@ -83,13 +84,11 @@ fun CredentialsBlockView(
     val deviceLockPrompt = rememberDeviceLockPrompt()
     val scope = rememberCoroutineScope()
     var editStart by remember {
-        mutableStateOf(
-            if (onSave != null && block.hasNothingFilledIn()) {
-                CredentialsEditStart(decryptedSecretsByFieldId = emptyMap())
-            } else {
-                null
-            }
-        )
+        val opensBlankForm = onSave != null &&
+            block.hasNothingFilledIn() &&
+            block.id !in GlobalEditorState.credentialsBlocksWithBlankFormShown
+        if (opensBlankForm) GlobalEditorState.credentialsBlocksWithBlankFormShown += block.id
+        mutableStateOf(if (opensBlankForm) CredentialsEditStart(decryptedSecretsByFieldId = emptyMap()) else null)
     }
     var isOpeningEditor by remember { mutableStateOf(false) }
 
