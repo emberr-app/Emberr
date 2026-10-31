@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -43,7 +40,11 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.eye_closed
+import emberr.shared.generated.resources.eye_open
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun ExternalAiSettingsSheet(
@@ -169,7 +170,7 @@ internal fun ExternalAiSettingsSheet(
                     IconTooltip(text = if (isApiKeyVisible) "Hide API key" else "Show API key") {
                         IconButton(onClick = { isApiKeyVisible = !isApiKeyVisible }) {
                             Icon(
-                                imageVector = if (isApiKeyVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                painter = painterResource(if (isApiKeyVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                                 contentDescription = if (isApiKeyVisible) "Hide API key" else "Show API key",
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )

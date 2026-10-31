@@ -33,7 +33,8 @@ import com.emberr.presentation.shared.editor.blockViews.rememberDeviceTableLayou
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.calendar_day
-import emberr.shared.generated.resources.eye3
+import emberr.shared.generated.resources.eye_closed
+import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.ghost_smile
 import emberr.shared.generated.resources.hash
 import emberr.shared.generated.resources.image
@@ -147,7 +148,7 @@ internal fun DatabaseSettingsMenu(
             anchor = { openLayer ->
                 DatabaseMenuOption(
                     label = "Show / hide columns",
-                    icon = { DatabaseOptionIcon(Res.drawable.eye3) },
+                    icon = { DatabaseOptionIcon(Res.drawable.eye_open) },
                     trailing = if (hiddenColumnCount == 0) null else {
                         {
                             Text(
@@ -320,7 +321,7 @@ private fun DatabaseBoardGroupingOptions(block: DatabaseBlock, view: DatabaseVie
 
     DatabaseMenuOption(
         label = "Hide empty groups",
-        icon = { DatabaseOptionIcon(Res.drawable.eye3) },
+        icon = { DatabaseOptionIcon(Res.drawable.eye_closed) },
         trailing = { EmberrSwitch(isOn = view.hidesEmptyGroups) },
         onClick = { editor.changeView(block.id, view.id) { it.copy(hidesEmptyGroups = !it.hidesEmptyGroups) } }
     )
