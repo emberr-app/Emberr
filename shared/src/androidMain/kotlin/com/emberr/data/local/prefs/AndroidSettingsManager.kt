@@ -166,6 +166,13 @@ class AndroidSettingsManager(
         sharedPreferences.edit { putString(SyncConstants.KEY_CANVAS_TOOL_SETTINGS_PREFIX + toolName, json) }
     }
 
+    override fun getPasswordGeneratorOptionsJson(): String? =
+        sharedPreferences.getString(SyncConstants.KEY_PASSWORD_GENERATOR_OPTIONS, null)
+
+    override fun savePasswordGeneratorOptionsJson(json: String) {
+        sharedPreferences.edit { putString(SyncConstants.KEY_PASSWORD_GENERATOR_OPTIONS, json) }
+    }
+
     override fun getLastPushedTimestamp(): Long {
         return sharedPreferences.getLong(SyncConstants.KEY_SYNC_PUSHED_TIMESTAMP, 0L)
     }

@@ -39,6 +39,9 @@ interface SettingsManager {
     fun getCanvasToolSettingsJson(toolName: String): String?
     fun saveCanvasToolSettingsJson(toolName: String, json: String)
 
+    fun getPasswordGeneratorOptionsJson(): String?
+    fun savePasswordGeneratorOptionsJson(json: String)
+
     fun getLastPushedTimestamp(): Long
     fun saveLastPushedTimestamp(timestamp: Long)
     fun getLastFetchedTimestamp(): Long
