@@ -764,7 +764,7 @@ private fun DatabaseSearchField(
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier
                     .clip(CircleShape)
-                    .clickable(onClick = onClose)
+                    .clickable(interactionSource = null, indication = null, onClick = onClose)
                     .padding(4.dp)
                     .size(14.dp)
             )
