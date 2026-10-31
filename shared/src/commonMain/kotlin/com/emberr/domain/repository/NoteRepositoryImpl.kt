@@ -79,6 +79,7 @@ import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.DocumentBlock
@@ -111,6 +112,7 @@ import com.emberr.domain.model.withPropertyTagReplaced
 import com.emberr.domain.model.withCustomPropertyRenamed
 import com.emberr.domain.model.withCustomPropertyRemoved
 import com.emberr.domain.model.valueAsText
+import com.emberr.domain.model.searchableText
 import com.emberr.domain.model.lastDate
 import com.emberr.domain.sample.lastEditedAtForDisplay
 import com.emberr.domain.search.LINKED_NOTE_BLOCK_JSON_MARKER
@@ -1147,6 +1149,7 @@ class NoteRepositoryImpl(
         is DatabaseBlock -> block.title
         is MovieBlock -> block.details?.title
         is WatchlistBlock -> block.title
+        is CredentialsBlock -> block.searchableText()
         else -> null
     }.let { text -> text?.takeIf { it.isNotBlank() } }
 

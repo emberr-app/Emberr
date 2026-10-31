@@ -136,6 +136,7 @@ import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
+import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -234,6 +235,7 @@ import emberr.shared.generated.resources.indent_right
 import emberr.shared.generated.resources.italic
 import emberr.shared.generated.resources.keyboard
 import emberr.shared.generated.resources.link
+import emberr.shared.generated.resources.lock
 import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.minus
 import emberr.shared.generated.resources.ordered_list
@@ -311,7 +313,8 @@ data class SlashMenuItemData(
     val label: String,
     val icon: SlashMenuIcon,
     val action: () -> Unit,
-    val submenuSections: List<SlashMenuSectionData>?
+    val submenuSections: List<SlashMenuSectionData>?,
+    val searchWords: List<String> = emptyList()
 ) {
     constructor(label: String, icon: SlashMenuIcon, action: () -> Unit) : this(label, icon, action, null)
 }
@@ -1312,6 +1315,7 @@ fun EditorScreen(
                                         || lastBlock is DatabaseBlock
                                         || lastBlock is MovieBlock
                                         || lastBlock is WatchlistBlock
+                                        || lastBlock is CredentialsBlock
 
                                 if (isMediaBlock) {
                                     wrappedActions.onFocusBlock(lastBlock.id)
@@ -1457,6 +1461,7 @@ fun EditorScreen(
                                                     || lastBlock is DatabaseBlock
                                                     || lastBlock is MovieBlock
                                                     || lastBlock is WatchlistBlock
+                                                    || lastBlock is CredentialsBlock
 
                                             if (isMediaBlock) {
                                                 wrappedActions.onFocusBlock(lastBlock.id)
@@ -2167,6 +2172,8 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Web Bookmark", Res.drawable.bookmark) { onInsertMediaBlock("bookmark") },
         SlashMenuItemData("Movie or Show", Res.drawable.film) { onInsertMediaBlock("movie") },
         SlashMenuItemData("Watchlist", Res.drawable.tv) { onInsertMediaBlock("watchlist") },
+        SlashMenuItemData("Login", Res.drawable.lock) { onInsertMediaBlock("credentials") }
+            .copy(searchWords = listOf("login", "password", "credentials", "account")),
         SlashMenuItemData("Simple Table", Res.drawable.table) { onInsertMediaBlock("table") },
         SlashMenuItemData("Database", Res.drawable.database) { onInsertMediaBlock("database") },
         SlashMenuItemData("Canvas", Res.drawable.group) { onInsertMediaBlock("canvas") },
@@ -2232,7 +2239,7 @@ fun filteredSlashMenuSections(
     customProperties
 ).map { section ->
     section.copy(items = section.items.filter { item ->
-        query.isBlank() || item.label.contains(query, ignoreCase = true)
+        query.isBlank() || item.label.contains(query, ignoreCase = true) || item.searchWords.any { it.contains(query, ignoreCase = true) }
     })
 }.filter { it.items.isNotEmpty() }
 

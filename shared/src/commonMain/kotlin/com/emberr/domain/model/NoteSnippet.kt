@@ -35,6 +35,7 @@ fun extractTextFromBlock(block: NoteBlock): String? {
         is NumberedListBlock -> block.text
         is ToggleBlock -> block.text
         is CalloutBlock -> block.text
+        is CredentialsBlock -> block.serviceName
         else -> null
     }
 }

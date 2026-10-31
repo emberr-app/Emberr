@@ -27,6 +27,9 @@ import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.CredentialField
+import com.emberr.domain.model.CredentialFieldKind
+import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -235,6 +238,7 @@ abstract class BaseEditorViewModel(
                     is DatabaseBlock -> "${block.id}:${block.title}"
                     is MovieBlock -> "${block.id}:${block.summaryLine()}"
                     is WatchlistBlock -> "${block.id}:${block.title}"
+                    is CredentialsBlock -> "${block.id}:${block.serviceName}:${block.loginUrl}"
                     else -> block.id
                 }
             }
@@ -2111,6 +2115,7 @@ abstract class BaseEditorViewModel(
         is DatabaseBlock -> "database"
         is MovieBlock -> "movie"
         is WatchlistBlock -> "watchlist"
+        is CredentialsBlock -> "credentials"
         else -> null
     }
 
@@ -2582,6 +2587,16 @@ abstract class BaseEditorViewModel(
                 "document" -> DocumentBlock(id = newId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
                 "bookmark" -> BookmarkBlock(id = newId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
                 "movie" -> MovieBlock(id = newId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)
+                "credentials" -> CredentialsBlock(
+                    id = newId,
+                    fields = listOf(
+                        CredentialField(id = UUID.randomUUID().toString(), kind = CredentialFieldKind.USERNAME, label = "Username"),
+                        CredentialField(id = UUID.randomUUID().toString(), kind = CredentialFieldKind.PASSWORD, label = "Password")
+                    ),
+                    indentationLevel = indent,
+                    isPinned = isPinnedContext,
+                    updatedAt = now
+                )
                 "watchlist" -> {
                     if (watchlistNoteId == null) return@modifyBlocks list
                     WatchlistBlock(id = newId, watchlistNoteId = watchlistNoteId, indentationLevel = indent, isPinned = isPinnedContext, updatedAt = now)

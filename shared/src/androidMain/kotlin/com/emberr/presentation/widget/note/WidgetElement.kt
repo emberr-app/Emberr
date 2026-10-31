@@ -7,6 +7,7 @@ import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -173,6 +174,8 @@ private fun convertBlockToElements(
     is MovieBlock -> block.summaryLine()?.let { textLine(block, it, WidgetTextStyleName.SUBTLE) } ?: emptyList()
 
     is WatchlistBlock -> textLine(block, block.title.ifBlank { "Watchlist" }, WidgetTextStyleName.SUBTLE)
+
+    is CredentialsBlock -> textLine(block, block.serviceName.ifBlank { "Login" }, WidgetTextStyleName.SUBTLE)
 
     is PropertyBlock -> {
         val value = block.valueAsText()

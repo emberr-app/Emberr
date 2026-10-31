@@ -272,6 +272,7 @@ class NoteIndexer(
             }
         }
         is WatchlistBlock -> block.title.takeIf { it.isNotBlank() }?.let { "Watchlist: $it" }
+        is CredentialsBlock -> listOf(block.serviceName, block.loginUrl).filter { it.isNotBlank() }.joinToString(" ").ifBlank { null }?.let { "Login: $it" }
         is UnknownBlock -> null
     }
 

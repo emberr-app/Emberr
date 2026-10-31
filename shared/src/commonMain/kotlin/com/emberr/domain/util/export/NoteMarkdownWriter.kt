@@ -6,6 +6,8 @@ import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.CredentialFieldKind
+import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -178,6 +180,7 @@ object NoteMarkdownWriter {
             is DatabaseBlock -> ""
             is MovieBlock -> renderMovie(block, options)
             is WatchlistBlock -> ""
+            is CredentialsBlock -> renderCredentials(block)
             is TableBlock -> renderTable(block)
             is SolidDividerBlock -> SOLID_DIVIDER_LINE
             is ThreeDotDividerBlock -> DOT_DIVIDER_LINE
@@ -303,6 +306,16 @@ object NoteMarkdownWriter {
         val summaryLine = "$MOVIE_MARKER${flattenLineBreaks(summary)}"
         val posterTarget = mediaLinkTargetFor(block.details?.posterFilePath, options)
         return if (posterTarget.isEmpty()) summaryLine else "![]($posterTarget)\n\n$summaryLine"
+    }
+
+    private fun renderCredentials(block: CredentialsBlock): String {
+        val usernameLines = block.fields
+            .filter { it.kind == CredentialFieldKind.USERNAME && it.plainValue.isNotBlank() }
+            .map { field -> "- ${flattenLineBreaks(field.label).ifBlank { "Username" }}: ${flattenLineBreaks(field.plainValue)}" }
+        if (block.serviceName.isBlank() && block.loginUrl.isBlank() && usernameLines.isEmpty()) return ""
+        val title = "**${flattenLineBreaks(block.serviceName).ifBlank { "Login" }}**"
+        val header = if (block.loginUrl.isBlank()) title else "$title [${escapeLinkLabel(block.loginUrl)}](${escapeLinkTarget(block.loginUrl)})"
+        return (listOf(header) + usernameLines).joinToString("\n")
     }
 
     private fun renderProperty(block: PropertyBlock): String {
