@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
 enum class CredentialFieldKind {
     USERNAME,
     PASSWORD,
-    ONE_TIME_CODE,
     NOTE
 }
 
