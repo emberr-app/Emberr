@@ -243,6 +243,7 @@ private fun CredentialsViewHeader(
             OpenSignInPageButton(onClick = { webLinkActions.openLink(openableUrl) })
         }
         if (showsOptions) {
+            if (openableUrl != null) Spacer(modifier = Modifier.width(8.dp))
             Box {
                 CredentialIconButton(
                     painter = painterResource(Res.drawable.ellipsis),

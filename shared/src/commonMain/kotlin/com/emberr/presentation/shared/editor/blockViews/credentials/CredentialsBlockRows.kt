@@ -11,6 +11,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -79,6 +80,7 @@ private const val HIDDEN_PASSWORD = "••••••••••••"
 private val DesktopLabelWidth = 120.dp
 private val DesktopRowMinHeight = 38.dp
 private val RevealTimerSpace = 12.dp
+private val RowActionGap = 8.dp
 private val RevealTimerBottomGap = 8.dp
 
 private class CredentialSecretReader(
@@ -251,7 +253,7 @@ private fun CredentialFieldRow(
     ) {
         if (isDesktopPlatform) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 4.dp, bottom = revealTimerSpace),
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, bottom = revealTimerSpace),
                 verticalAlignment = Alignment.Top
             ) {
                 Box(
@@ -375,7 +377,11 @@ private fun CredentialRowActions(
     modifier: Modifier
 ) {
     val noun = field.kind.noun()
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) RowActionGap else 0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         if (field.kind == CredentialFieldKind.PASSWORD) {
             CredentialIconButton(
                 painter = painterResource(if (isRevealed) Res.drawable.eye_closed else Res.drawable.eye_open),
@@ -398,14 +404,21 @@ internal fun CredentialIconButton(
     description: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    tint: Color = MaterialTheme.colorScheme.outline
+    tint: Color = MaterialTheme.colorScheme.outline,
+    showsRipple: Boolean = true
 ) {
     IconTooltip(text = description) {
         Box(
             modifier = modifier
                 .size(if (isDesktopPlatform) 28.dp else 40.dp)
                 .clip(CircleShape)
-                .clickable(onClick = onClick),
+                .then(
+                    if (showsRipple) {
+                        Modifier.clickable(onClick = onClick)
+                    } else {
+                        Modifier.clickable(interactionSource = null, indication = null, onClick = onClick)
+                    }
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(

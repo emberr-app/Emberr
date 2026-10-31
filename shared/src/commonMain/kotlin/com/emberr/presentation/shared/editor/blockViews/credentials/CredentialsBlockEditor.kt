@@ -494,12 +494,13 @@ private fun CredentialFieldEditorRow(
             modifier = modifier
         )
     }
-    val generatorButton = @Composable {
+    val generatorButton = @Composable { showsRipple: Boolean ->
         Box {
             CredentialIconButton(
                 painter = painterResource(Res.drawable.refresh_cw),
                 description = "Generate a password",
-                onClick = { runAfterKeyboardCloses { isGeneratorOpen = true } }
+                onClick = { runAfterKeyboardCloses { isGeneratorOpen = true } },
+                showsRipple = showsRipple
             )
             PasswordGeneratorMenu(
                 expanded = isGeneratorOpen,
@@ -527,7 +528,11 @@ private fun CredentialFieldEditorRow(
             Column(modifier = Modifier.weight(1f)) {
                 CredentialValueInput(
                     draft = draft,
-                    generatorButton = generatorButton.takeIf { draft.kind == CredentialFieldKind.PASSWORD },
+                    generatorButton = if (draft.kind == CredentialFieldKind.PASSWORD) {
+                        { generatorButton(false) }
+                    } else {
+                        null
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
                 if (draft.kind == CredentialFieldKind.PASSWORD) PasswordStrengthMeter(password = draft.value)
@@ -548,7 +553,7 @@ private fun CredentialFieldEditorRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 kindButton()
                 labelInput(Modifier.weight(1f).offset(x = -AndroidLabelPullTowardIcon))
-                if (draft.kind == CredentialFieldKind.PASSWORD) generatorButton()
+                if (draft.kind == CredentialFieldKind.PASSWORD) generatorButton(true)
                 CredentialIconButton(
                     painter = painterResource(Res.drawable.trash),
                     description = "Remove field",
@@ -591,7 +596,8 @@ private fun CredentialValueInput(
                     CredentialIconButton(
                         painter = painterResource(if (draft.isValueVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
                         description = if (draft.isValueVisible) "Hide" else "Show",
-                        onClick = { draft.isValueVisible = !draft.isValueVisible }
+                        onClick = { draft.isValueVisible = !draft.isValueVisible },
+                        showsRipple = false
                     )
                 }
             }
