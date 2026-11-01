@@ -14,6 +14,7 @@ import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.people.PeopleRepository
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
@@ -49,7 +50,8 @@ class CalendarViewModel(
     private val repository: NoteRepository,
     private val reminderScheduler: ReminderScheduler,
     private val settingsManager: SettingsManager,
-    private val spaceRepository: SpaceRepository
+    private val spaceRepository: SpaceRepository,
+    private val peopleRepository: PeopleRepository
 ) : ViewModel() {
 
     val categories: StateFlow<List<CalendarCategory>> = repository.getAllCategories()
@@ -77,6 +79,20 @@ class CalendarViewModel(
 
     val spaces: StateFlow<List<SpaceEntity>> = spaceRepository.observeSpaces()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val people: StateFlow<List<EventPerson>> = peopleRepository.observePeople()
+        .map { people -> people.map { person -> EventPerson(id = person.noteId, name = person.title) } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    fun createPerson(name: String, onCreated: (personNoteId: String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                onCreated(peopleRepository.createPerson(name))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     private val categoryVisibility: Flow<CalendarCategoryVisibility> = combine(
         hiddenCategoryVisibilityKeys,
@@ -190,6 +206,7 @@ class CalendarViewModel(
         url: String?,
         description: String?,
         allDay: AllDaySpan?,
+        personNoteIds: List<String>,
         recurrenceRule: RecurrenceRule? = null,
         editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
     ) {
@@ -213,7 +230,8 @@ class CalendarViewModel(
                         durationMinutes = durationMinutes,
                         url = normalizedUrl,
                         description = normalizedDescription,
-                        allDay = allDay
+                        allDay = allDay,
+                        personNoteIds = personNoteIds
                     )
                     SyncEventBus.emitSyncCompleted(original.dateString)
                     return@launch
@@ -238,6 +256,7 @@ class CalendarViewModel(
                             url = url,
                             description = description,
                             allDay = allDay,
+                            personNoteIds = personNoteIds,
                             recurrenceRule = recurrenceRule,
                             editScope = editScope
                         )
@@ -264,6 +283,7 @@ class CalendarViewModel(
                             description = normalizedDescription,
                             recurrenceRule = recurrenceRule,
                             allDay = allDay,
+                            personNoteIds = personNoteIds,
                             updatedAt = now
                         )
                         val updatedBlocks = content.blocks.map { if (it.id == blockId) updatedBlock else it }
@@ -293,6 +313,7 @@ class CalendarViewModel(
                     description = normalizedDescription,
                     recurrenceRule = recurrenceRule,
                     allDay = allDay,
+                    personNoteIds = personNoteIds,
                     updatedAt = now
                 )
 
@@ -350,7 +371,8 @@ class CalendarViewModel(
                 durationMinutes = newTimeRange.durationMinutes,
                 url = event.url,
                 description = event.description,
-                allDay = allDay
+                allDay = allDay,
+                personNoteIds = event.personNoteIds
             )
             return
         }
@@ -366,7 +388,8 @@ class CalendarViewModel(
                     durationMinutes = newTimeRange.durationMinutes,
                     url = event.url,
                     description = event.description,
-                    allDay = allDay
+                    allDay = allDay,
+                    personNoteIds = event.personNoteIds
                 )
                 SyncEventBus.emitSyncCompleted(event.dateString)
             } catch (e: Exception) {
@@ -420,7 +443,8 @@ class CalendarViewModel(
             durationMinutes = newTimeRange.durationMinutes,
             url = event.url,
             description = event.description,
-            allDay = allDay
+            allDay = allDay,
+            personNoteIds = event.personNoteIds
         )
     }
 

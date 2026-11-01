@@ -33,6 +33,7 @@ import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.SelfHostDeletedNoteEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.data.local.room.entity.toEntityColumns
+import com.emberr.data.local.room.entity.personNoteIdList
 import com.emberr.data.local.room.entity.toPersonNoteIdsColumn
 import com.emberr.data.local.room.entity.shownOnDateString
 import com.emberr.data.local.room.entity.toRecurrenceRule
@@ -2502,7 +2503,12 @@ class NoteRepositoryImpl(
             description = exception?.overrideDescription ?: task.description,
             isAllDay = exception?.overrideIsAllDay ?: task.isAllDay,
             allDayLengthInDays = exception?.overrideAllDayLengthInDays ?: task.allDayLengthInDays,
-            isAllDayReminderOn = exception?.overrideIsAllDayReminderOn ?: task.isAllDayReminderOn
+            isAllDayReminderOn = exception?.overrideIsAllDayReminderOn ?: task.isAllDayReminderOn,
+            personNoteIds = if (exception?.overridePersonNoteIds != null) {
+                exception.overridePersonNoteIds.ifEmpty { null }
+            } else {
+                task.personNoteIds
+            }
         )
     }
 
@@ -2699,13 +2705,14 @@ class NoteRepositoryImpl(
         durationMinutes: Int,
         url: String?,
         description: String?,
-        allDay: AllDaySpan?
+        allDay: AllDaySpan?,
+        personNoteIds: List<String>
     ) = withContext(Dispatchers.IO) {
         SyncCoordinator.mutex.withLock {
             val task = calendarTaskDao.getTaskById(blockId) ?: return@withLock
             val rule = task.toRecurrenceRule()
             if (rule == null || scope == RecurrenceEditScope.ALL_EVENTS) {
-                editEntireSeries(task, text, timestamp, categoryId, durationMinutes, url, description, allDay)
+                editEntireSeries(task, text, timestamp, categoryId, durationMinutes, url, description, allDay, personNoteIds)
                 return@withLock
             }
 
@@ -2725,20 +2732,22 @@ class NoteRepositoryImpl(
                             overrideDescription = description,
                             overrideIsAllDay = allDay != null,
                             overrideAllDayLengthInDays = allDay?.lengthInDays,
-                            overrideIsAllDayReminderOn = allDay?.isReminderOn
+                            overrideIsAllDayReminderOn = allDay?.isReminderOn,
+                            overridePersonNoteIds = personNoteIds.joinToString(",")
                         )
                     }
                 }
                 RecurrenceEditScope.ALL_FUTURE_EVENTS -> {
                     if (d == anchor) {
-                        editEntireSeries(task, text, timestamp, categoryId, durationMinutes, url, description, allDay)
+                        editEntireSeries(task, text, timestamp, categoryId, durationMinutes, url, description, allDay, personNoteIds)
                     } else {
                         val previous = RecurrenceEngine.previousOccurrence(rule, anchor, before = d)
                         truncateSeriesUntil(task, previous?.toString())
                         val newBlockId = createSplitSeries(
                             task, rule, anchor = d, until = rule.untilDateString,
                             text = text, timestamp = timestamp, categoryId = categoryId,
-                            durationMinutes = durationMinutes, url = url, description = description, allDay = allDay
+                            durationMinutes = durationMinutes, url = url, description = description, allDay = allDay,
+                            personNoteIds = personNoteIds
                         )
                         calendarEventExceptionDao.rekeyExceptionsFrom(blockId, newBlockId, occurrenceDate, System.currentTimeMillis())
                     }
@@ -2748,7 +2757,8 @@ class NoteRepositoryImpl(
                     val newBlockId = createSplitSeries(
                         task, rule, anchor = anchor, until = occurrenceDate,
                         text = text, timestamp = timestamp, categoryId = categoryId,
-                        durationMinutes = durationMinutes, url = url, description = description, allDay = allDay
+                        durationMinutes = durationMinutes, url = url, description = description, allDay = allDay,
+                        personNoteIds = personNoteIds
                     )
                     calendarEventExceptionDao.rekeyExceptionsUpTo(blockId, newBlockId, occurrenceDate, System.currentTimeMillis())
                     if (next == null) {
@@ -2860,7 +2870,7 @@ class NoteRepositoryImpl(
             task, shift.rule, anchor = shift.anchor, until = shift.rule.untilDateString,
             text = task.text, timestamp = timestamp, categoryId = task.categoryId,
             durationMinutes = task.durationMinutes, url = task.url, description = task.description,
-            allDay = allDay
+            allDay = allDay, personNoteIds = task.personNoteIdList()
         )
 
     private suspend fun copyShiftedExceptions(
@@ -2916,7 +2926,7 @@ class NoteRepositoryImpl(
 
     private suspend fun editEntireSeries(
         task: CalendarTaskEntity, text: String, timestamp: Long, categoryId: String?,
-        durationMinutes: Int, url: String?, description: String?, allDay: AllDaySpan?
+        durationMinutes: Int, url: String?, description: String?, allDay: AllDaySpan?, personNoteIds: List<String>
     ) {
         val blocks = loadOwnerBlocks(task)
         val now = System.currentTimeMillis()
@@ -2927,7 +2937,7 @@ class NoteRepositoryImpl(
                 block.copy(
                     text = text, reminderTimestamp = timestampOnAnchorDate, categoryId = categoryId,
                     durationMinutes = durationMinutes, url = url, description = description, allDay = allDay,
-                    updatedAt = now
+                    personNoteIds = personNoteIds, updatedAt = now
                 )
             } else block
         }
@@ -2977,7 +2987,7 @@ class NoteRepositoryImpl(
     private suspend fun createSplitSeries(
         task: CalendarTaskEntity, rule: RecurrenceRule, anchor: LocalDate, until: String?,
         text: String, timestamp: Long, categoryId: String?, durationMinutes: Int, url: String?, description: String?,
-        allDay: AllDaySpan?
+        allDay: AllDaySpan?, personNoteIds: List<String>
     ): String {
         val newBlockId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
@@ -2991,6 +3001,7 @@ class NoteRepositoryImpl(
             description = description,
             recurrenceRule = rule.copy(untilDateString = until),
             allDay = allDay,
+            personNoteIds = personNoteIds,
             updatedAt = now
         )
 

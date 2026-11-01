@@ -2,6 +2,7 @@ package com.emberr.presentation.calendar
 
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
+import com.emberr.data.local.room.entity.personNoteIdList
 import com.emberr.data.local.room.entity.shownOnDateString
 import com.emberr.data.local.room.entity.toAllDaySpan
 import com.emberr.data.local.room.entity.toRecurrenceRule
@@ -30,7 +31,8 @@ data class CalendarEvent(
     val url: String?,
     val description: String?,
     val recurrenceRule: RecurrenceRule?,
-    val allDay: AllDaySpan?
+    val allDay: AllDaySpan?,
+    val personNoteIds: List<String> = emptyList()
 )
 
 fun CalendarEvent.lastShownDate(): LocalDate {
@@ -67,6 +69,7 @@ fun CalendarTaskEntity.toCalendarEvent(): CalendarEvent? {
         url = url,
         description = description,
         recurrenceRule = toRecurrenceRule(),
-        allDay = toAllDaySpan()
+        allDay = toAllDaySpan(),
+        personNoteIds = personNoteIdList()
     )
 }

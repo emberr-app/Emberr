@@ -130,6 +130,7 @@ import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.link
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.trash
+import emberr.shared.generated.resources.user2
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
@@ -151,6 +152,8 @@ internal val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
 private val EventChipShape = RoundedCornerShape(8.dp)
 private val EventChipHeightForTwoLines = 52.dp
+private val EventChipLabelsVerticalPadding = 4.dp
+private val EventChipLabelsSpacing = 4.dp
 private val DesktopResizeHandleHeight = 6.dp
 internal const val MouseMoveStartSlopRatio = 0.1f
 private val TouchResizeHandleHeight = 12.dp
@@ -164,6 +167,7 @@ private val EventTitleStyle: TextStyle
 private val EventSheetDesktopMaxWidth = 480.dp
 private val ChipShape = RoundedCornerShape(8.dp)
 private val ChipSpacing = 8.dp
+private val PeopleRowSpacing = 12.dp
 private val ChipHorizontalPadding = 10.dp
 private val ChipVerticalPadding = 5.dp
 private val PillMenuGap = 6.dp
@@ -185,6 +189,7 @@ fun EventChip(
     onResizeEnd: () -> Unit,
     onResizeCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    people: List<EventPerson> = emptyList(),
     onMoveStart: ((pointerInWindow: Offset, pointerId: PointerId, cardTopLeftInWindow: Offset, cardSize: IntSize) -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit
@@ -223,7 +228,15 @@ fun EventChip(
             }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            EventChipLabels(text = text, timeText = timeText, textColor = textColor, isChecked = isChecked, height = height)
+            EventChipLabels(
+                text = text,
+                timeText = timeText,
+                textColor = textColor,
+                isChecked = isChecked,
+                height = height,
+                people = people,
+                chipColor = color
+            )
 
             if (isDesktopPlatform || isInResizeMode) {
                 EventResizeHandle(
@@ -303,10 +316,23 @@ fun EventMovePreviewChip(
 }
 
 @Composable
-private fun EventChipLabels(text: String, timeText: String, textColor: Color, isChecked: Boolean, height: Dp) {
+private fun EventChipLabels(
+    text: String,
+    timeText: String,
+    textColor: Color,
+    isChecked: Boolean,
+    height: Dp,
+    people: List<EventPerson> = emptyList(),
+    chipColor: Color = Color.Unspecified
+) {
+    val typography = MaterialTheme.typography
+    val heightForAvatars = with(LocalDensity.current) {
+        EventChipLabelsVerticalPadding * 2 + typography.bodyLarge.lineHeight.toDp() + typography.labelSmall.lineHeight.toDp() +
+            EventChipLabelsSpacing * 2 + EventChipAvatarSize
+    }
     Column(
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = EventChipLabelsVerticalPadding),
+        verticalArrangement = Arrangement.spacedBy(EventChipLabelsSpacing)
     ) {
         Text(
             text = text.ifBlank { "Untitled event" },
@@ -324,6 +350,9 @@ private fun EventChipLabels(text: String, timeText: String, textColor: Color, is
                 color = textColor.copy(alpha = 0.7f),
                 maxLines = 1
             )
+        }
+        if (people.isNotEmpty() && height >= heightForAvatars) {
+            EventChipAvatars(people = people, ringColor = chipColor)
         }
     }
 }
@@ -389,6 +418,7 @@ data class EventEditorState(
     val description: String = "",
     val recurrenceRule: RecurrenceRule? = null,
     val allDay: AllDaySpan? = null,
+    val personNoteIds: List<String> = emptyList(),
     val editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS,
     val isEditing: Boolean = original == null
 )
@@ -408,7 +438,8 @@ fun CalendarEvent.toEditorState(): EventEditorState {
         url = url.orEmpty(),
         description = description.orEmpty(),
         recurrenceRule = recurrenceRule,
-        allDay = allDay
+        allDay = allDay,
+        personNoteIds = personNoteIds
     )
 }
 
@@ -448,7 +479,8 @@ fun EventEditorState.viewAfterSaving(): EventEditorState? {
         url = url.trim().takeIf { it.isNotEmpty() }?.let(::normalizeEventUrl),
         description = description.trim().takeIf { it.isNotEmpty() },
         recurrenceRule = recurrenceRule,
-        allDay = allDay
+        allDay = allDay,
+        personNoteIds = personNoteIds
     )
     return savedEvent.toEditorState()
 }
@@ -505,6 +537,7 @@ private fun formatEditorDate(date: LocalDate): String {
 fun EventEditorSheet(
     state: EventEditorState?,
     categories: List<CalendarCategory>,
+    people: List<EventPerson>,
     onNameChange: (String) -> Unit,
     onDateChange: (LocalDate) -> Unit,
     onTimeChange: (hour: Int, minute: Int) -> Unit,
@@ -514,6 +547,8 @@ fun EventEditorSheet(
     onDescriptionChange: (String) -> Unit,
     onRecurrenceChange: (RecurrenceRule?) -> Unit,
     onAllDayChange: (AllDaySpan?) -> Unit,
+    onPeopleChange: (List<String>) -> Unit,
+    onCreatePerson: (name: String) -> Unit,
     onEditClick: () -> Unit,
     onCancelEdit: () -> Unit,
     onSave: () -> Unit,
@@ -536,6 +571,7 @@ fun EventEditorSheet(
                 EventEditorFields(
                     state = state,
                     categories = categories,
+                    people = people,
                     onNameChange = onNameChange,
                     onDateChange = onDateChange,
                     onTimeChange = onTimeChange,
@@ -545,6 +581,8 @@ fun EventEditorSheet(
                     onDescriptionChange = onDescriptionChange,
                     onRecurrenceChange = onRecurrenceChange,
                     onAllDayChange = onAllDayChange,
+                    onPeopleChange = onPeopleChange,
+                    onCreatePerson = onCreatePerson,
                     onEditClick = onEditClick,
                     onCancel = { if (state.isEditing && state.original != null) onCancelEdit() else closeAnd(onDismiss) },
                     onSave = { if (state.keepsSheetOpenAfterSave()) onSave() else closeAnd(onSave) },
@@ -563,6 +601,7 @@ fun EventEditorSheet(
 private fun EventEditorFields(
     state: EventEditorState,
     categories: List<CalendarCategory>,
+    people: List<EventPerson>,
     onNameChange: (String) -> Unit,
     onDateChange: (LocalDate) -> Unit,
     onTimeChange: (hour: Int, minute: Int) -> Unit,
@@ -572,6 +611,8 @@ private fun EventEditorFields(
     onDescriptionChange: (String) -> Unit,
     onRecurrenceChange: (RecurrenceRule?) -> Unit,
     onAllDayChange: (AllDaySpan?) -> Unit,
+    onPeopleChange: (List<String>) -> Unit,
+    onCreatePerson: (name: String) -> Unit,
     onEditClick: () -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
@@ -579,10 +620,14 @@ private fun EventEditorFields(
     sourceNoteTitle: String?,
     onOpenSourceNote: (() -> Unit)?
 ) {
+    val peopleById = remember(people) { people.associateBy { it.id } }
+    val shownPeople = peopleShownOnEvent(state.personNoteIds, peopleById)
+
     if (!state.isEditing) {
         EventViewFields(
             state = state,
             categories = categories,
+            shownPeople = shownPeople,
             onEditClick = onEditClick,
             onDelete = onDelete,
             onClose = onCancel,
@@ -635,25 +680,41 @@ private fun EventEditorFields(
             onTimeChange = onTimeChange
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
-            verticalAlignment = Alignment.Top
-        ) {
-            FlowRow(
-                modifier = Modifier.weight(1f),
+        Column(verticalArrangement = Arrangement.spacedBy(PeopleRowSpacing)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
-                verticalArrangement = Arrangement.spacedBy(ChipSpacing)
+                verticalAlignment = Alignment.Top
             ) {
-                CategoryChoiceChip(categoryId = state.categoryId, categories = categories, onCategoryChange = onCategoryChange)
-                if (allDay == null) {
-                    DurationChip(state = state, onDurationChange = onDurationChange)
-                } else {
-                    AllDayLengthChip(state = state, allDay = allDay, onAllDayChange = onAllDayChange)
-                    AllDayReminderChip(state = state, allDay = allDay, onAllDayChange = onAllDayChange, onTimeChange = onTimeChange)
+                FlowRow(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
+                    verticalArrangement = Arrangement.spacedBy(ChipSpacing)
+                ) {
+                    CategoryChoiceChip(categoryId = state.categoryId, categories = categories, onCategoryChange = onCategoryChange)
+                    if (allDay == null) {
+                        DurationChip(state = state, onDurationChange = onDurationChange)
+                    } else {
+                        AllDayLengthChip(state = state, allDay = allDay, onAllDayChange = onAllDayChange)
+                        AllDayReminderChip(state = state, allDay = allDay, onAllDayChange = onAllDayChange, onTimeChange = onTimeChange)
+                    }
+                    PeopleChoiceChip(
+                        personNoteIds = state.personNoteIds,
+                        shownPeople = shownPeople,
+                        people = people,
+                        onPeopleChange = onPeopleChange,
+                        onCreatePerson = onCreatePerson
+                    )
                 }
+                DetailsTogglePill(showsDetails = showsDetails, onClick = { showsDetails = !showsDetails })
             }
-            DetailsTogglePill(showsDetails = showsDetails, onClick = { showsDetails = !showsDetails })
+
+            if (shownPeople.isNotEmpty()) {
+                EventPeopleRow(
+                    people = shownPeople,
+                    onRemovePerson = { personNoteId -> onPeopleChange(state.personNoteIds - personNoteId) }
+                )
+            }
         }
 
         if (showsDetails) {
@@ -937,6 +998,37 @@ private fun CategoryChoiceChip(
 }
 
 @Composable
+private fun PeopleChoiceChip(
+    personNoteIds: List<String>,
+    shownPeople: List<EventPerson>,
+    people: List<EventPerson>,
+    onPeopleChange: (List<String>) -> Unit,
+    onCreatePerson: (name: String) -> Unit
+) {
+    var showPicker by remember { mutableStateOf(false) }
+    Box {
+        EventEditorChip(
+            label = when (shownPeople.size) {
+                0 -> "People"
+                1 -> shownPeople.single().displayName()
+                else -> "${shownPeople.size} people"
+            },
+            icon = painterResource(Res.drawable.user2),
+            onClick = { showPicker = true }
+        )
+        if (showPicker) BelowPill {
+            PeoplePicker(
+                personNoteIds = personNoteIds,
+                people = people,
+                onPeopleChange = onPeopleChange,
+                onCreatePerson = onCreatePerson,
+                onDismiss = { showPicker = false }
+            )
+        }
+    }
+}
+
+@Composable
 private fun RepeatChip(state: EventEditorState, isEnabled: Boolean, onRecurrenceChange: (RecurrenceRule?) -> Unit) {
     var showRepeatDialog by remember { mutableStateOf(false) }
     Box {
@@ -1209,6 +1301,7 @@ private fun EventChoiceMenu(
 private fun EventViewFields(
     state: EventEditorState,
     categories: List<CalendarCategory>,
+    shownPeople: List<EventPerson>,
     onEditClick: () -> Unit,
     onDelete: (() -> Unit)?,
     onClose: () -> Unit,
@@ -1251,47 +1344,53 @@ private fun EventViewFields(
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
-            verticalArrangement = Arrangement.spacedBy(ChipSpacing)
-        ) {
-            if (category != null) {
-                EventEditorChip(
-                    label = category.name,
-                    dotColor = category.colorHex.toCategoryColor(),
-                    opensMenu = false,
-                    onClick = null
-                )
+        Column(verticalArrangement = Arrangement.spacedBy(PeopleRowSpacing)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ChipSpacing),
+                verticalArrangement = Arrangement.spacedBy(ChipSpacing)
+            ) {
+                if (category != null) {
+                    EventEditorChip(
+                        label = category.name,
+                        dotColor = category.colorHex.toCategoryColor(),
+                        opensMenu = false,
+                        onClick = null
+                    )
+                }
+                if (allDay == null) {
+                    EventEditorChip(
+                        label = formatDuration(state.durationMinutes),
+                        icon = painterResource(Res.drawable.clock_circle),
+                        opensMenu = false,
+                        onClick = null
+                    )
+                } else {
+                    EventEditorChip(
+                        label = if (allDay.lengthInDays == 1) "1 day" else "${allDay.lengthInDays} days",
+                        icon = painterResource(Res.drawable.calendar),
+                        opensMenu = false,
+                        onClick = null
+                    )
+                    EventEditorChip(
+                        label = if (allDay.isReminderOn) formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock) else "No reminder",
+                        icon = painterResource(if (allDay.isReminderOn) Res.drawable.bell else Res.drawable.bell_off2),
+                        opensMenu = false,
+                        onClick = null
+                    )
+                }
+                state.recurrenceRule?.let { rule ->
+                    EventEditorChip(
+                        label = formatRecurrenceSummary(rule),
+                        icon = painterResource(Res.drawable.refresh_cw),
+                        opensMenu = false,
+                        onClick = null
+                    )
+                }
             }
-            if (allDay == null) {
-                EventEditorChip(
-                    label = formatDuration(state.durationMinutes),
-                    icon = painterResource(Res.drawable.clock_circle),
-                    opensMenu = false,
-                    onClick = null
-                )
-            } else {
-                EventEditorChip(
-                    label = if (allDay.lengthInDays == 1) "1 day" else "${allDay.lengthInDays} days",
-                    icon = painterResource(Res.drawable.calendar),
-                    opensMenu = false,
-                    onClick = null
-                )
-                EventEditorChip(
-                    label = if (allDay.isReminderOn) formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock) else "No reminder",
-                    icon = painterResource(if (allDay.isReminderOn) Res.drawable.bell else Res.drawable.bell_off2),
-                    opensMenu = false,
-                    onClick = null
-                )
-            }
-            state.recurrenceRule?.let { rule ->
-                EventEditorChip(
-                    label = formatRecurrenceSummary(rule),
-                    icon = painterResource(Res.drawable.refresh_cw),
-                    opensMenu = false,
-                    onClick = null
-                )
+
+            if (shownPeople.isNotEmpty()) {
+                EventPeopleRow(people = shownPeople, onRemovePerson = null)
             }
         }
 
