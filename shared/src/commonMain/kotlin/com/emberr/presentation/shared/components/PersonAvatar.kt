@@ -4,17 +4,27 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import com.emberr.presentation.people.personAvatarColors
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.user2
+import org.jetbrains.compose.resources.painterResource
 
-private const val InitialsSizeRatio = 0.4f
+private const val InitialsSizeRatio = 0.37f
+private const val EmojiSizeRatio = 0.52f
+private const val BlankNameIconSizeRatio = 0.45f
+private const val BlankNameIconAlpha = 0.7f
+private const val MorePeopleTextSizeRatio = 0.4f
 
 fun personInitials(name: String): String {
     val wordInitials = name.trim()
@@ -27,18 +37,62 @@ fun personInitials(name: String): String {
 }
 
 @Composable
-fun PersonAvatar(name: String, size: Dp, modifier: Modifier = Modifier) {
-    AvatarCircle(text = personInitials(name), size = size, modifier = modifier)
+fun PersonAvatar(
+    personNoteId: String,
+    name: String,
+    icon: String?,
+    size: Dp,
+    modifier: Modifier = Modifier
+) {
+    val colors = personAvatarColors(personNoteId)
+    val density = LocalDensity.current
+    val emoji = icon?.takeIf { it.isNotBlank() }
+    val background = if (emoji != null) {
+        Modifier.background(colors.emojiBackground)
+    } else {
+        Modifier.background(Brush.linearGradient(listOf(colors.gradientStart, colors.gradientEnd)))
+    }
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .then(background),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            emoji != null -> {
+                val emojiSize = with(density) { (size * EmojiSizeRatio).toSp() }
+                Text(
+                    text = emoji,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = emojiSize, lineHeight = emojiSize),
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+            name.isBlank() -> Icon(
+                painter = painterResource(Res.drawable.user2),
+                contentDescription = null,
+                tint = colors.initials.copy(alpha = BlankNameIconAlpha),
+                modifier = Modifier.size(size * BlankNameIconSizeRatio)
+            )
+            else -> {
+                val initialsSize = with(density) { (size * InitialsSizeRatio).toSp() }
+                Text(
+                    text = personInitials(name),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = initialsSize, lineHeight = initialsSize),
+                    fontWeight = FontWeight.Bold,
+                    color = colors.initials,
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+        }
+    }
 }
 
 @Composable
 fun MorePeopleAvatar(hiddenCount: Int, size: Dp, modifier: Modifier = Modifier) {
-    AvatarCircle(text = "+$hiddenCount", size = size, modifier = modifier)
-}
-
-@Composable
-private fun AvatarCircle(text: String, size: Dp, modifier: Modifier) {
-    val fontSize = with(LocalDensity.current) { (size * InitialsSizeRatio).toSp() }
+    val fontSize = with(LocalDensity.current) { (size * MorePeopleTextSizeRatio).toSp() }
     Box(
         modifier = modifier
             .size(size)
@@ -47,7 +101,7 @@ private fun AvatarCircle(text: String, size: Dp, modifier: Modifier) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = text,
+            text = "+$hiddenCount",
             style = MaterialTheme.typography.labelSmall.copy(fontSize = fontSize, lineHeight = fontSize),
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface,

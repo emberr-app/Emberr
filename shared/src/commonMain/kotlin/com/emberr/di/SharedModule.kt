@@ -141,7 +141,6 @@ val sharedModule = module {
         PeopleRepositoryImpl(
             noteDao = get(),
             blockDao = get(),
-            calendarTaskDao = get(),
             noteRepository = get()
         )
     }
@@ -443,6 +442,12 @@ val sharedModule = module {
             settingsManager = get(),
             spaceRepository = get(),
             peopleRepository = get()
+        )
+    }
+    viewModel {
+        com.emberr.presentation.people.PeopleViewModel(
+            peopleRepository = get(),
+            appScope = get(named("AppScope"))
         )
     }
     single<TaskExtractor> { HeuristicTaskExtractor() }

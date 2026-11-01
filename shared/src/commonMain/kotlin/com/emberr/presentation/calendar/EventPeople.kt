@@ -178,7 +178,7 @@ private fun PeoplePickerRow(person: EventPerson, isSelected: Boolean, onClick: (
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PersonAvatar(name = person.name, size = PeoplePickerAvatarSize)
+        PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = PeoplePickerAvatarSize)
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = person.displayName(),
@@ -232,7 +232,11 @@ private fun CreatePersonRow(name: String, onClick: () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun EventPeopleRow(people: List<EventPerson>, onRemovePerson: ((personNoteId: String) -> Unit)?) {
+internal fun EventPeopleRow(
+    people: List<EventPerson>,
+    onRemovePerson: ((personNoteId: String) -> Unit)?,
+    onOpenPerson: (personNoteId: String) -> Unit
+) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -247,6 +251,7 @@ internal fun EventPeopleRow(people: List<EventPerson>, onRemovePerson: ((personN
         people.forEach { person ->
             EventPersonPill(
                 person = person,
+                onOpen = { onOpenPerson(person.id) },
                 onRemove = onRemovePerson?.let { removePerson -> { removePerson(person.id) } }
             )
         }
@@ -254,16 +259,17 @@ internal fun EventPeopleRow(people: List<EventPerson>, onRemovePerson: ((personN
 }
 
 @Composable
-private fun EventPersonPill(person: EventPerson, onRemove: (() -> Unit)?) {
+private fun EventPersonPill(person: EventPerson, onOpen: () -> Unit, onRemove: (() -> Unit)?) {
     Row(
         modifier = Modifier
             .clip(CircleShape)
             .emberrBorder(CircleShape)
+            .clickable(onClick = onOpen)
             .padding(start = 3.dp, top = 3.dp, bottom = 3.dp, end = if (onRemove != null) 3.dp else 10.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PersonAvatar(name = person.name, size = EventPersonPillAvatarSize)
+        PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = EventPersonPillAvatarSize)
         Text(
             text = person.displayName(),
             style = MaterialTheme.typography.labelSmall,
@@ -293,7 +299,13 @@ internal fun EventChipAvatars(people: List<EventPerson>, ringColor: Color) {
     val ringModifier = Modifier.border(EventChipAvatarRingWidth, ringColor, CircleShape)
     Row(horizontalArrangement = Arrangement.spacedBy(-EventChipAvatarOverlap)) {
         people.take(MaxAvatarsOnEventChip).forEach { person ->
-            PersonAvatar(name = person.name, size = EventChipAvatarSize, modifier = ringModifier)
+            PersonAvatar(
+                personNoteId = person.id,
+                name = person.name,
+                icon = person.icon,
+                size = EventChipAvatarSize,
+                modifier = ringModifier
+            )
         }
         if (people.size > MaxAvatarsOnEventChip) {
             MorePeopleAvatar(hiddenCount = people.size - MaxAvatarsOnEventChip, size = EventChipAvatarSize, modifier = ringModifier)

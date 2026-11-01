@@ -46,7 +46,4 @@ interface CalendarTaskDao {
 
     @Query("SELECT * FROM calendar_tasks")
     suspend fun getAllTasksAcrossSpaces(): List<CalendarTaskEntity>
-
-    @Query("SELECT * FROM calendar_tasks WHERE (',' || personNoteIds || ',') LIKE '%,' || :personNoteId || ',%' AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
-    fun observeTasksWithPerson(personNoteId: String): Flow<List<CalendarTaskEntity>>
 }

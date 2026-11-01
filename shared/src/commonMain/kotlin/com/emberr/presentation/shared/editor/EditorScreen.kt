@@ -554,7 +554,8 @@ fun EditorScreen(
     topBarClearancePx: Float = 0f,
     onUndo: () -> Unit = {},
     onRedo: () -> Unit = {},
-    contentMaxWidth: Dp = Dp.Unspecified
+    contentMaxWidth: Dp = Dp.Unspecified,
+    extraBlockSidePadding: Dp = 0.dp
 ) {
     val isSelectionMode = selectedBlockIds.isNotEmpty()
     val focusManager = LocalFocusManager.current
@@ -1354,7 +1355,7 @@ fun EditorScreen(
                             modifier = Modifier
                                 .centeredWithMaxWidth(contentMaxWidth)
                                 .fillMaxWidth()
-                                .padding(horizontal = if (isDesktopPlatform) 36.dp else 16.dp)
+                                .padding(horizontal = (if (isDesktopPlatform) 36.dp else 16.dp) + extraBlockSidePadding)
                                 .padding(bottom = 20.dp, top = 6.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -1393,7 +1394,7 @@ fun EditorScreen(
                                 modifier = Modifier
                                     .centeredWithMaxWidth(contentMaxWidth)
                                     .fillMaxWidth()
-                                    .padding(horizontal = if (isDesktopPlatform) 36.dp else 16.dp)
+                                    .padding(horizontal = (if (isDesktopPlatform) 36.dp else 16.dp) + extraBlockSidePadding)
                                     .padding(top = if (index == 0) 0.dp else 20.dp, bottom = 8.dp)
                             )
                         }
@@ -1415,6 +1416,7 @@ fun EditorScreen(
                         modifier = Modifier
                             .centeredWithMaxWidth(contentMaxWidth)
                             .fillMaxWidth()
+                            .padding(horizontal = extraBlockSidePadding)
                             .drawCalloutFrames(calloutFrames[index], MaterialTheme.colorScheme.surface)
                             .then(crossBlockSelectionModifier)
                     ) {

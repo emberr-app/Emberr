@@ -94,6 +94,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -182,6 +183,9 @@ fun NoteScreen(
     desktopTopMargin: Dp = 0.dp,
     isSearchActive: Boolean = false,
     hideWordCount: Boolean = false,
+    customHeader: (@Composable LazyItemScope.() -> Unit)? = null,
+    emptyNotePlaceholder: String = "Type something...",
+    extraBlockSidePadding: Dp = 0.dp,
     viewModel: NoteEditorViewModel = koinViewModel(key = noteId)
 ) {
 
@@ -260,7 +264,7 @@ fun NoteScreen(
     LaunchedEffect(desktopNoteWidth) { noteWidthBeingDragged = null }
     val shownNoteWidth = noteWidthBeingDragged ?: desktopNoteWidth
     val noteContentMaxWidth =
-        if (isDesktopPlatform && shownNoteWidth < SyncConstants.FULL_DESKTOP_NOTE_WIDTH) shownNoteWidth.dp else Dp.Unspecified
+        if (customHeader == null && isDesktopPlatform && shownNoteWidth < SyncConstants.FULL_DESKTOP_NOTE_WIDTH) shownNoteWidth.dp else Dp.Unspecified
     var showNoteLinkMenu by remember { mutableStateOf(false) }
     var showCanvasLinkMenu by remember { mutableStateOf(false) }
     var showDatabaseLinkMenu by remember { mutableStateOf(false) }
@@ -609,7 +613,7 @@ fun NoteScreen(
                             }
                         }
                     },
-                    headerContent = {
+                    headerContent = customHeader ?: {
                         NoteHeader(
                             noteId = noteId,
                             isEditorFocused = isEditorFocused,
@@ -632,8 +636,9 @@ fun NoteScreen(
                     listState = editorListState,
                     onUndo = { viewModel.undo() },
                     onRedo = { viewModel.redo() },
-                    emptyNotePlaceholder = "Type something...",
-                    contentMaxWidth = noteContentMaxWidth
+                    emptyNotePlaceholder = emptyNotePlaceholder,
+                    contentMaxWidth = noteContentMaxWidth,
+                    extraBlockSidePadding = extraBlockSidePadding
                 )
 
 
@@ -710,7 +715,7 @@ fun NoteScreen(
 
                 // Word Count Overlay
                 AnimatedVisibility(
-                    visible = showWordCount && !isSelectionMode && !hideWordCount,
+                    visible = showWordCount && !isSelectionMode && !hideWordCount && customHeader == null,
                     enter = fadeIn(tween(200)),
                     exit = fadeOut(tween(200)),
                     modifier = Modifier
@@ -738,7 +743,7 @@ fun NoteScreen(
                     }
                 }
 
-                EmberrTopHeaderBar(
+                if (customHeader == null) EmberrTopHeaderBar(
                     title = noteTitle.ifBlank { "Untitled" },
                     titleVisibility = if (isEditingTemplate) 0f else titleCollapseProgress,
                     titleColor = topBarContentColor ?: MaterialTheme.colorScheme.onSurface,

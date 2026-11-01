@@ -27,6 +27,7 @@ sealed class Screen(val route: String, val title: String? = null, val icon: Imag
     object Images : Screen("images")
     object Documents : Screen("documents")
     object Calendar : Screen("calendar_screen")
+    object People : Screen("people")
 
     object Settings : Screen("settings")
 
