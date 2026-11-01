@@ -71,7 +71,8 @@ interface NoteRepository {
         durationMinutes: Int,
         url: String?,
         description: String?,
-        allDay: AllDaySpan?
+        allDay: AllDaySpan?,
+        personNoteIds: List<String>
     )
 
     suspend fun applyRecurrenceScopedMove(

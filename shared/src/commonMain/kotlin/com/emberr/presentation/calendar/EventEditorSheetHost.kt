@@ -25,6 +25,7 @@ fun EventEditorSheetHost(
     calendarViewModel: CalendarViewModel = koinViewModel()
 ) {
     val categories by calendarViewModel.categories.collectAsState()
+    val people by calendarViewModel.people.collectAsState()
     var eventEditorState by remember { mutableStateOf<EventEditorState?>(null) }
     var pendingScopeAction by remember { mutableStateOf<((RecurrenceEditScope) -> Unit)?>(null) }
 
@@ -58,7 +59,8 @@ fun EventEditorSheetHost(
             url = event.url.orEmpty(),
             description = event.description.orEmpty(),
             recurrenceRule = event.recurrenceRule,
-            allDay = event.allDay
+            allDay = event.allDay,
+            personNoteIds = event.personNoteIds
         )
     }
 
@@ -70,6 +72,7 @@ fun EventEditorSheetHost(
     EventEditorSheet(
         state = eventEditorState,
         categories = categories,
+        people = people,
         onNameChange = { name -> eventEditorState = eventEditorState?.copy(name = name) },
         onDateChange = { date -> eventEditorState = eventEditorState?.copy(date = date) },
         onTimeChange = { hour, minute -> eventEditorState = eventEditorState?.copy(hour = hour, minute = minute) },
@@ -79,6 +82,12 @@ fun EventEditorSheetHost(
         onDescriptionChange = { description -> eventEditorState = eventEditorState?.copy(description = description) },
         onRecurrenceChange = { rule -> eventEditorState = eventEditorState?.copy(recurrenceRule = rule) },
         onAllDayChange = { allDay -> eventEditorState = eventEditorState?.copy(allDay = allDay) },
+        onPeopleChange = { personNoteIds -> eventEditorState = eventEditorState?.copy(personNoteIds = personNoteIds) },
+        onCreatePerson = { name ->
+            calendarViewModel.createPerson(name) { personNoteId ->
+                eventEditorState = eventEditorState?.let { state -> state.copy(personNoteIds = state.personNoteIds + personNoteId) }
+            }
+        },
         onEditClick = {
             val recurring = eventEditorState?.original?.recurrenceRule != null
             if (recurring) {
@@ -100,6 +109,7 @@ fun EventEditorSheetHost(
                     url = state.url,
                     description = state.description,
                     allDay = state.allDay,
+                    personNoteIds = state.personNoteIds,
                     recurrenceRule = state.recurrenceRule,
                     editScope = state.editScope
                 )

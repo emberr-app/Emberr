@@ -441,7 +441,8 @@ val sharedModule = module {
             repository = get(),
             reminderScheduler = get(),
             settingsManager = get(),
-            spaceRepository = get()
+            spaceRepository = get(),
+            peopleRepository = get()
         )
     }
     single<TaskExtractor> { HeuristicTaskExtractor() }

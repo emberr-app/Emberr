@@ -773,7 +773,8 @@ class DailyEditorViewModel(
                         durationMinutes = current.durationMinutes,
                         url = current.url,
                         description = current.description,
-                        allDay = current.allDay
+                        allDay = current.allDay,
+                        personNoteIds = current.personNoteIds
                     )
                 } else {
                     repository.updateTaskText(blockId, text)

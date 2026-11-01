@@ -171,6 +171,8 @@ fun CalendarScreen(
     val viewMode by viewModel.viewMode.collectAsState()
     var selectedDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     val categories by viewModel.categories.collectAsState()
+    val people by viewModel.people.collectAsState()
+    val peopleById = remember(people) { people.associateBy { it.id } }
     val hiddenCategoryVisibilityKeys by viewModel.hiddenCategoryVisibilityKeys.collectAsState()
     val spaces by viewModel.spaces.collectAsState()
     val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
@@ -323,6 +325,7 @@ fun CalendarScreen(
                             slideDirection = slideDirection,
                             events = events,
                             categories = categories,
+                            peopleById = peopleById,
                             scrollState = scrollState,
                             topBarHeightDp = topBarHeightDp,
                             headerHeight = timelineHeaderHeightDp,
@@ -394,6 +397,7 @@ fun CalendarScreen(
                             slideDirection = slideDirection,
                             viewModel = viewModel,
                             categories = categories,
+                            peopleById = peopleById,
                             scrollState = scrollState,
                             topBarHeightDp = topBarHeightDp,
                             headerHeight = timelineHeaderHeightDp,
@@ -701,6 +705,7 @@ fun CalendarScreen(
     EventEditorSheet(
         state = eventEditorState,
         categories = categories,
+        people = people,
         onNameChange = { name -> eventEditorState = eventEditorState?.copy(name = name) },
         onDateChange = { date -> eventEditorState = eventEditorState?.copy(date = date) },
         onTimeChange = { hour, minute -> eventEditorState = eventEditorState?.copy(hour = hour, minute = minute) },
@@ -710,6 +715,12 @@ fun CalendarScreen(
         onDescriptionChange = { description -> eventEditorState = eventEditorState?.copy(description = description) },
         onRecurrenceChange = { rule -> eventEditorState = eventEditorState?.copy(recurrenceRule = rule) },
         onAllDayChange = { allDay -> eventEditorState = eventEditorState?.copy(allDay = allDay) },
+        onPeopleChange = { personNoteIds -> eventEditorState = eventEditorState?.copy(personNoteIds = personNoteIds) },
+        onCreatePerson = { name ->
+            viewModel.createPerson(name) { personNoteId ->
+                eventEditorState = eventEditorState?.let { state -> state.copy(personNoteIds = state.personNoteIds + personNoteId) }
+            }
+        },
         onEditClick = {
             val recurring = eventEditorState?.original?.recurrenceRule != null
             if (recurring) {
@@ -731,6 +742,7 @@ fun CalendarScreen(
                     url = state.url,
                     description = state.description,
                     allDay = state.allDay,
+                    personNoteIds = state.personNoteIds,
                     recurrenceRule = state.recurrenceRule,
                     editScope = state.editScope
                 )
@@ -991,6 +1003,7 @@ private fun CalendarTimeGrid(
     slideDirection: AnimatedContentTransitionScope.SlideDirection,
     events: List<CalendarEvent>,
     categories: List<CalendarCategory>,
+    peopleById: Map<String, EventPerson>,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
     headerHeight: Dp,
@@ -1049,6 +1062,7 @@ private fun CalendarTimeGrid(
                 date = date,
                 events = events,
                 categories = categories,
+                peopleById = peopleById,
                 nowMillis = nowMillis,
                 scrollState = scrollState,
                 topBarHeightDp = topBarHeightDp,
@@ -1069,6 +1083,7 @@ private fun DayHourGrid(
     date: LocalDate,
     events: List<CalendarEvent>,
     categories: List<CalendarCategory>,
+    peopleById: Map<String, EventPerson>,
     nowMillis: Long,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
@@ -1109,6 +1124,7 @@ private fun DayHourGrid(
                 hourHeightPx = hourHeightPx,
                 events = events,
                 categories = categories,
+                peopleById = peopleById,
                 nowMillis = nowMillis,
                 resizeState = resizeState,
                 resizeAutoScroll = resizeAutoScroll,
@@ -1170,6 +1186,7 @@ private fun DayColumnBody(
     hourHeightPx: Float,
     events: List<CalendarEvent>,
     categories: List<CalendarCategory>,
+    peopleById: Map<String, EventPerson>,
     nowMillis: Long,
     resizeState: EventResizeState,
     resizeAutoScroll: EventResizeAutoScroll,
@@ -1263,6 +1280,7 @@ private fun DayColumnBody(
 
                 EventChip(
                     text = event.text,
+                    people = peopleShownOnEvent(event.personNoteIds, peopleById),
                     timeText = formatEventTimeRange(timeRange, usesTwentyFourHourClock),
                     color = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.surface,
                     hasCategory = category != null,
@@ -1399,6 +1417,7 @@ private fun MultiDayTimeGrid(
     slideDirection: AnimatedContentTransitionScope.SlideDirection,
     viewModel: CalendarViewModel,
     categories: List<CalendarCategory>,
+    peopleById: Map<String, EventPerson>,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
     headerHeight: Dp,
@@ -1459,6 +1478,7 @@ private fun MultiDayTimeGrid(
                 dayCount = dayCount,
                 viewModel = viewModel,
                 categories = categories,
+                peopleById = peopleById,
                 nowMillis = nowMillis,
                 scrollState = scrollState,
                 topBarHeightDp = topBarHeightDp,
@@ -1480,6 +1500,7 @@ private fun MultiDayGridContent(
     dayCount: Int,
     viewModel: CalendarViewModel,
     categories: List<CalendarCategory>,
+    peopleById: Map<String, EventPerson>,
     nowMillis: Long,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
@@ -1536,6 +1557,7 @@ private fun MultiDayGridContent(
                     hourHeightPx = hourHeightPx,
                     events = eventsByDate[date] ?: emptyList(),
                     categories = categories,
+                    peopleById = peopleById,
                     nowMillis = nowMillis,
                     resizeState = resizeState,
                     resizeAutoScroll = resizeAutoScroll,
