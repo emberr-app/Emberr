@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "2e6594d3f24bff8c2b21594b6415608d",
+    "identityHash": "19ede772c424ffb583ada66641343be9",
     "entities": [
       {
         "tableName": "spaces",
@@ -1143,7 +1143,7 @@
       },
       {
         "tableName": "calendar_event_exceptions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`blockId` TEXT NOT NULL, `occurrenceDate` TEXT NOT NULL, `isCancelled` INTEGER NOT NULL, `isChecked` INTEGER NOT NULL, `completedAt` INTEGER, `overrideTimestamp` INTEGER, `overrideDurationMinutes` INTEGER, `overrideText` TEXT, `overrideCategoryId` TEXT, `overrideUrl` TEXT, `overrideDescription` TEXT, `overrideIsAllDay` INTEGER, `overrideAllDayLengthInDays` INTEGER, `overrideIsAllDayReminderOn` INTEGER, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`blockId`, `occurrenceDate`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`blockId` TEXT NOT NULL, `occurrenceDate` TEXT NOT NULL, `isCancelled` INTEGER NOT NULL, `isChecked` INTEGER NOT NULL, `completedAt` INTEGER, `overrideTimestamp` INTEGER, `overrideDurationMinutes` INTEGER, `overrideText` TEXT, `overrideCategoryId` TEXT, `overrideUrl` TEXT, `overrideDescription` TEXT, `overrideIsAllDay` INTEGER, `overrideAllDayLengthInDays` INTEGER, `overrideIsAllDayReminderOn` INTEGER, `overridePersonNoteIds` TEXT, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`blockId`, `occurrenceDate`))",
         "fields": [
           {
             "fieldPath": "blockId",
@@ -1218,6 +1218,11 @@
             "fieldPath": "overrideIsAllDayReminderOn",
             "columnName": "overrideIsAllDayReminderOn",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "overridePersonNoteIds",
+            "columnName": "overridePersonNoteIds",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "updatedAt",
@@ -1879,7 +1884,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2e6594d3f24bff8c2b21594b6415608d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '19ede772c424ffb583ada66641343be9')"
     ]
   }
 }
