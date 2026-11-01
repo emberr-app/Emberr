@@ -168,6 +168,7 @@ data class CheckboxBlock(
     val description: String? = null,
     val recurrenceRule: RecurrenceRule? = null,
     val allDay: AllDaySpan? = null,
+    val personNoteIds: List<String> = emptyList(),
     override val isDeleted: Boolean = false,
     override val isPinned: Boolean = false,
     override val updatedAt: Long = 0L
@@ -670,6 +671,49 @@ data class ThreeDotDividerBlock(
     override val updatedAt: Long = 0L
 ) : NoteBlock()
 
+@Serializable
+enum class PersonDetailKind(val label: String) {
+    PHONE("Phone"),
+    EMAIL("Email"),
+    BIRTHDAY("Birthday"),
+    ADDRESS("Address"),
+    COMPANY("Company"),
+    ROLE("Role"),
+    WEBSITE("Website"),
+    SOCIAL("Social"),
+    RELATIONSHIP("Relationship"),
+    CUSTOM("Custom")
+}
+
+@Immutable
+@Serializable
+@SerialName("person_detail")
+data class PersonDetailBlock(
+    override val id: String,
+    val kind: PersonDetailKind,
+    val label: String? = null,
+    val value: String = "",
+    override val indentationLevel: Int = 0,
+    override val isBold: Boolean = false,
+    override val isItalic: Boolean = false,
+    override val isStrikeThrough: Boolean = false,
+    override val isUnderlined: Boolean = false,
+    override val isHighlighted: Boolean = false,
+    override val isDeleted: Boolean = false,
+    override val isPinned: Boolean = false,
+    override val updatedAt: Long = 0L
+) : NoteBlock()
+
+fun PersonDetailBlock.plainLine(): String {
+    val name = label?.takeIf { it.isNotBlank() }
+    val heading = when {
+        kind == PersonDetailKind.CUSTOM && name != null -> name
+        name != null -> "${kind.label} ($name)"
+        else -> kind.label
+    }
+    return "$heading: $value"
+}
+
 fun NoteBlock.markDeleted(): NoteBlock = when (this) {
     is TextBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
     is HeadingBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
@@ -691,6 +735,7 @@ fun NoteBlock.markDeleted(): NoteBlock = when (this) {
     is MovieBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
     is WatchlistBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
     is CredentialsBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
+    is PersonDetailBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
     is QuoteBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
     is SolidDividerBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
     is ThreeDotDividerBlock -> copy(isDeleted = true, updatedAt = System.currentTimeMillis())
@@ -818,6 +863,7 @@ fun NoteBlock.withPin(pinned: Boolean, now: Long): NoteBlock = when (this) {
     is MovieBlock -> copy(isPinned = pinned, updatedAt = now)
     is WatchlistBlock -> copy(isPinned = pinned, updatedAt = now)
     is CredentialsBlock -> copy(isPinned = pinned, updatedAt = now)
+    is PersonDetailBlock -> copy(isPinned = pinned, updatedAt = now)
     is QuoteBlock -> copy(isPinned = pinned, updatedAt = now)
     is SolidDividerBlock -> copy(isPinned = pinned, updatedAt = now)
     is ThreeDotDividerBlock -> copy(isPinned = pinned, updatedAt = now)
@@ -845,6 +891,7 @@ fun NoteBlock.withUpdatedAt(now: Long): NoteBlock = when (this) {
     is MovieBlock -> copy(updatedAt = now)
     is WatchlistBlock -> copy(updatedAt = now)
     is CredentialsBlock -> copy(updatedAt = now)
+    is PersonDetailBlock -> copy(updatedAt = now)
     is QuoteBlock -> copy(updatedAt = now)
     is SolidDividerBlock -> copy(updatedAt = now)
     is ThreeDotDividerBlock -> copy(updatedAt = now)
@@ -872,6 +919,7 @@ fun NoteBlock.withDeleted(deleted: Boolean, now: Long): NoteBlock = when (this) 
     is MovieBlock -> copy(isDeleted = deleted, updatedAt = now)
     is WatchlistBlock -> copy(isDeleted = deleted, updatedAt = now)
     is CredentialsBlock -> copy(isDeleted = deleted, updatedAt = now)
+    is PersonDetailBlock -> copy(isDeleted = deleted, updatedAt = now)
     is QuoteBlock -> copy(isDeleted = deleted, updatedAt = now)
     is SolidDividerBlock -> copy(isDeleted = deleted, updatedAt = now)
     is ThreeDotDividerBlock -> copy(isDeleted = deleted, updatedAt = now)
@@ -908,6 +956,7 @@ fun NoteBlock.withIndentationLevel(level: Int): NoteBlock = when (this) {
     is MovieBlock -> copy(indentationLevel = level)
     is WatchlistBlock -> copy(indentationLevel = level)
     is CredentialsBlock -> copy(indentationLevel = level)
+    is PersonDetailBlock -> copy(indentationLevel = level)
     is SolidDividerBlock -> copy(indentationLevel = level)
     is ThreeDotDividerBlock -> copy(indentationLevel = level)
     is UnknownBlock -> copy(indentationLevel = level)
@@ -936,6 +985,7 @@ fun NoteBlock.withId(newId: String): NoteBlock {
         is MovieBlock -> copy(id = newId)
         is WatchlistBlock -> copy(id = newId)
         is CredentialsBlock -> copy(id = newId)
+        is PersonDetailBlock -> copy(id = newId)
         is SolidDividerBlock -> copy(id = newId)
         is ThreeDotDividerBlock -> copy(id = newId)
         is UnknownBlock -> copy(id = newId)

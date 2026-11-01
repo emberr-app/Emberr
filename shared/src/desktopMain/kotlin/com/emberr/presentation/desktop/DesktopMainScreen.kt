@@ -1844,7 +1844,7 @@ fun DesktopMainScreen(
                         noteId = d.noteId,
                         onNavigateBack = closeDetailPane
                     )
-                    NoteKind.NOTE, NoteKind.DATABASE -> NoteScreen(
+                    NoteKind.NOTE, NoteKind.DATABASE, NoteKind.PERSON -> NoteScreen(
                         noteId = d.noteId,
                         onNavigateBack = closeDetailPane,
                         onSelectionModeChange = onSelectionModeChange,

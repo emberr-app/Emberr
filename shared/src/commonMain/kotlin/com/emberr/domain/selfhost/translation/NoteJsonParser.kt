@@ -3,6 +3,7 @@ package com.emberr.domain.selfhost.translation
 import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.canvas.CanvasContent
+import com.emberr.domain.people.kindRecognizingPersonNote
 import com.emberr.domain.selfhost.sync.PreparedSyncOperations
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -50,7 +51,7 @@ object NoteJsonParser {
             sortOrder = payload.sortOrder,
             isTemplate = payload.isTemplate,
             spaceId = payload.spaceId,
-            kind = payload.kind,
+            kind = kindRecognizingPersonNote(payload.kind, payload.spaceId, payload.blocks.map { it.content }),
             databaseId = payload.databaseId,
             isDatabaseTemplate = payload.isDatabaseTemplate,
             titleUpdatedAt = payload.titleUpdatedAt,

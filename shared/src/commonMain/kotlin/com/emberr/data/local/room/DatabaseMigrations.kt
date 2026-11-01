@@ -1,5 +1,9 @@
 package com.emberr.data.local.room
 
+import androidx.room.migration.AutoMigrationSpec
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
+
 /**
  * =====================================================================
  * EMBER DATABASE MIGRATION CHEAT SHEET
@@ -48,3 +52,19 @@ package com.emberr.data.local.room
  * 5. Add the migration: AutoMigration(from = X, to = Y, spec = RenameSomethingSpec::class)
  * =====================================================================
  */
+
+class RecognizePersonNotesSpec : AutoMigrationSpec {
+    override fun onPostMigrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            """
+            UPDATE notes_metadata SET kind = 'PERSON'
+            WHERE kind = 'NOTE' AND spaceId = 'account' AND EXISTS (
+                SELECT 1 FROM note_blocks
+                WHERE note_blocks.noteId = notes_metadata.noteId
+                AND note_blocks.isDeleted = 0
+                AND note_blocks.blockDataJson LIKE '%"type":"person_detail"%'
+            )
+            """.trimIndent()
+        )
+    }
+}

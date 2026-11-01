@@ -43,6 +43,7 @@ import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.NumberedListBlock
+import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.PropertyType
@@ -259,7 +260,7 @@ abstract class BaseEditorViewModel(
         val visible = mutableListOf<NoteBlock>()
         var skipUntilLevel: Int? = null
         for (block in allBlocks) {
-            if (block.isDeleted) continue
+            if (block.isDeleted || block is PersonDetailBlock) continue
 
             if (skipUntilLevel != null) {
                 if (block.indentationLevel > skipUntilLevel) continue

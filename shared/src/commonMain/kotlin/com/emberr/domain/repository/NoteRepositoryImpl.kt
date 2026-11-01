@@ -33,6 +33,7 @@ import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.SelfHostDeletedNoteEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.data.local.room.entity.toEntityColumns
+import com.emberr.data.local.room.entity.toPersonNoteIdsColumn
 import com.emberr.data.local.room.entity.shownOnDateString
 import com.emberr.data.local.room.entity.toRecurrenceRule
 import com.emberr.data.local.room.entity.toAllDaySpan
@@ -2426,7 +2427,8 @@ class NoteRepositoryImpl(
                 spaceId = spaceId,
                 isAllDay = block.allDay != null,
                 allDayLengthInDays = block.allDay?.lengthInDays ?: 1,
-                isAllDayReminderOn = block.allDay?.isReminderOn ?: true
+                isAllDayReminderOn = block.allDay?.isReminderOn ?: true,
+                personNoteIds = block.personNoteIds.toPersonNoteIdsColumn()
             )
         }
 

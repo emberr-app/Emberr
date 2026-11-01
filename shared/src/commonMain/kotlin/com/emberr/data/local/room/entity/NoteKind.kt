@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 enum class NoteKind {
     NOTE,
     CANVAS,
-    DATABASE
+    DATABASE,
+    PERSON
 }

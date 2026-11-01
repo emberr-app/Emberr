@@ -25,10 +25,10 @@ interface NoteDao {
     @Query("SELECT coverImagePath FROM notes_metadata WHERE coverImagePath IS NOT NULL")
     suspend fun getAllCoverImagePaths(): List<String?>
 
-    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isSubNote = 0 AND isTemplate = 0 ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isSubNote = 0 AND isTemplate = 0 AND kind != 'PERSON' ORDER BY updatedAt DESC")
     fun getAllNotes(spaceId: String): Flow<List<NoteMetadataEntity>>
 
-    @Query("SELECT * FROM notes_metadata WHERE folderId = :folderId AND trashedAt IS NULL AND isSubNote = 0 AND isTemplate = 0 ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM notes_metadata WHERE folderId = :folderId AND trashedAt IS NULL AND isSubNote = 0 AND isTemplate = 0 AND kind != 'PERSON' ORDER BY updatedAt DESC")
     fun getNotesInFolder(folderId: String): Flow<List<NoteMetadataEntity>>
     @Query(
         """
@@ -56,7 +56,7 @@ interface NoteDao {
     @Query(
         """
         SELECT * FROM notes_metadata
-        WHERE spaceId IN (:spaceIds) AND trashedAt IS NULL AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND isTemplate = 0
+        WHERE spaceId IN (:spaceIds) AND trashedAt IS NULL AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND kind != 'PERSON' AND isTemplate = 0
         AND (title LIKE '%' || :query || '%' OR snippet LIKE '%' || :query || '%')
         ORDER BY updatedAt DESC
         """
@@ -77,12 +77,15 @@ interface NoteDao {
     @Query(
         """
         SELECT * FROM notes_metadata
-        WHERE noteId IN (:ids) AND trashedAt IS NULL AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND isTemplate = 0
+        WHERE noteId IN (:ids) AND trashedAt IS NULL AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND kind != 'PERSON' AND isTemplate = 0
         """
     )
     suspend fun getSearchableNotesByIds(ids: List<String>): List<NoteMetadataEntity>
 
-    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isFavorite = 1 AND trashedAt IS NULL AND isTemplate = 0 ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND kind = 'PERSON' AND trashedAt IS NULL ORDER BY title COLLATE NOCASE ASC")
+    fun observePeople(spaceId: String): Flow<List<NoteMetadataEntity>>
+
+    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isFavorite = 1 AND trashedAt IS NULL AND isTemplate = 0 AND kind != 'PERSON' ORDER BY updatedAt DESC")
     fun getFavoriteNotes(spaceId: String): Flow<List<NoteMetadataEntity>>
 
     @Query("SELECT * FROM notes_metadata WHERE spaceId IN (:spaceIds) AND trashedAt IS NOT NULL AND isTemplate = 0 ORDER BY trashedAt DESC")
@@ -106,7 +109,7 @@ interface NoteDao {
     @Query("SELECT DISTINCT databaseId FROM notes_metadata WHERE databaseId IS NOT NULL")
     suspend fun getDatabaseIdsThatHaveRows(): List<String>
 
-    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isSubNote = 0 AND isTemplate = 0 ORDER BY updatedAt DESC LIMIT :limit")
+    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isSubNote = 0 AND isTemplate = 0 AND kind != 'PERSON' ORDER BY updatedAt DESC LIMIT :limit")
     suspend fun getRecentNotes(spaceId: String, limit: Int): List<NoteMetadataEntity>
 
     @Query("UPDATE notes_metadata SET trashedAt = NULL, updatedAt = :updatedAt WHERE noteId = :noteId")
@@ -159,7 +162,7 @@ interface NoteDao {
     @Query("SELECT COUNT(*) FROM calendar_tasks WHERE isChecked = 0 AND noteId NOT IN (SELECT noteId FROM notes_metadata WHERE trashedAt IS NOT NULL)")
     fun getIncompleteTasksCount(): Flow<Int>
 
-    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isTemplate = 0 AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND databaseId IS NULL")
+    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND trashedAt IS NULL AND isTemplate = 0 AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND kind != 'PERSON' AND databaseId IS NULL")
     fun getAllLinkableNotes(spaceId: String): Flow<List<NoteMetadataEntity>>
 
     @Query(

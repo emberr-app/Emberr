@@ -62,6 +62,7 @@ object ExportEngine {
                 is WatchlistBlock -> block.title.takeIf { it.isNotBlank() }?.let { builder.appendLine("$indent$it") }
                 is CredentialsBlock -> block.searchableText().takeIf { it.isNotBlank() }?.let { builder.appendLine("$indent$it") }
                 is LinkedNoteBlock -> { /* Ignored - only linkedNoteId is available here, no title to render */ }
+                is PersonDetailBlock -> builder.appendLine("$indent${block.plainLine()}")
                 is UnknownBlock -> {}
             }
         }

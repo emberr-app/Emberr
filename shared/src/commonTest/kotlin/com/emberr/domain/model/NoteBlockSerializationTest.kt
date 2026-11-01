@@ -47,6 +47,7 @@ class NoteBlockSerializationTest {
         "MovieBlock" to "movie",
         "WatchlistBlock" to "watchlist",
         "CredentialsBlock" to "credentials",
+        "PersonDetailBlock" to "person_detail",
         "SolidDividerBlock" to "solid_divider",
         "ThreeDotDividerBlock" to "dot_divider"
     )
