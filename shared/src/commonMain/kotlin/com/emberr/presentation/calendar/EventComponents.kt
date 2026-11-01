@@ -92,6 +92,7 @@ import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.model.RecurrenceFrequency
 import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.shared.editor.components.DesktopCursor
 import com.emberr.presentation.shared.editor.components.desktopPointerCursor
 import com.emberr.presentation.shared.components.IconTooltip
@@ -557,6 +558,8 @@ fun EventEditorSheet(
     sourceNoteTitle: String? = null,
     onOpenSourceNote: (() -> Unit)? = null
 ) {
+    var openPersonNoteId by remember { mutableStateOf<String?>(null) }
+
     EmberrBottomSheet(
         expanded = state != null,
         onDismiss = onDismiss,
@@ -583,6 +586,7 @@ fun EventEditorSheet(
                     onAllDayChange = onAllDayChange,
                     onPeopleChange = onPeopleChange,
                     onCreatePerson = onCreatePerson,
+                    onOpenPerson = { personNoteId -> openPersonNoteId = personNoteId },
                     onEditClick = onEditClick,
                     onCancel = { if (state.isEditing && state.original != null) onCancelEdit() else closeAnd(onDismiss) },
                     onSave = { if (state.keepsSheetOpenAfterSave()) onSave() else closeAnd(onSave) },
@@ -593,6 +597,10 @@ fun EventEditorSheet(
             }
         }
       }
+    }
+
+    openPersonNoteId?.let { personNoteId ->
+        PersonView(personNoteId = personNoteId, onDismiss = { openPersonNoteId = null })
     }
 }
 
@@ -613,6 +621,7 @@ private fun EventEditorFields(
     onAllDayChange: (AllDaySpan?) -> Unit,
     onPeopleChange: (List<String>) -> Unit,
     onCreatePerson: (name: String) -> Unit,
+    onOpenPerson: (personNoteId: String) -> Unit,
     onEditClick: () -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
@@ -628,6 +637,7 @@ private fun EventEditorFields(
             state = state,
             categories = categories,
             shownPeople = shownPeople,
+            onOpenPerson = onOpenPerson,
             onEditClick = onEditClick,
             onDelete = onDelete,
             onClose = onCancel,
@@ -712,7 +722,8 @@ private fun EventEditorFields(
             if (shownPeople.isNotEmpty()) {
                 EventPeopleRow(
                     people = shownPeople,
-                    onRemovePerson = { personNoteId -> onPeopleChange(state.personNoteIds - personNoteId) }
+                    onRemovePerson = { personNoteId -> onPeopleChange(state.personNoteIds - personNoteId) },
+                    onOpenPerson = onOpenPerson
                 )
             }
         }
@@ -1302,6 +1313,7 @@ private fun EventViewFields(
     state: EventEditorState,
     categories: List<CalendarCategory>,
     shownPeople: List<EventPerson>,
+    onOpenPerson: (personNoteId: String) -> Unit,
     onEditClick: () -> Unit,
     onDelete: (() -> Unit)?,
     onClose: () -> Unit,
@@ -1390,7 +1402,7 @@ private fun EventViewFields(
             }
 
             if (shownPeople.isNotEmpty()) {
-                EventPeopleRow(people = shownPeople, onRemovePerson = null)
+                EventPeopleRow(people = shownPeople, onRemovePerson = null, onOpenPerson = onOpenPerson)
             }
         }
 

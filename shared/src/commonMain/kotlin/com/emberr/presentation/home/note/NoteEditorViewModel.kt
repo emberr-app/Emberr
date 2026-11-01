@@ -105,7 +105,7 @@ class NoteEditorViewModel(
                     val content = withContext(Dispatchers.IO) { repository.getNoteContent(currentId) }
                     val newBlocks = preserveNewerLocalBlocks(content?.blocks ?: emptyList())
                     val resolved = recalculateNumberedLists(
-                        newBlocks.ifEmpty { listOf(TextBlock(id = java.util.UUID.randomUUID().toString(), text = "")) }
+                        newBlocks.withSomewhereToType()
                     )
                     if (resolved != _blocks.value) {
                         _blocks.value = resolved
@@ -124,7 +124,7 @@ class NoteEditorViewModel(
                     if (isWithinLocalMutationCooldown()) return@collect
 
                     val final = recalculateNumberedLists(
-                        preserveNewerLocalBlocks(freshContent.blocks).ifEmpty { listOf(TextBlock(id = java.util.UUID.randomUUID().toString(), text = "")) }
+                        preserveNewerLocalBlocks(freshContent.blocks).withSomewhereToType()
                     )
                     if (final != _blocks.value) {
                         _blocks.value = final
@@ -142,6 +142,13 @@ class NoteEditorViewModel(
                 }
         }
     }
+
+    private fun List<NoteBlock>.withSomewhereToType(): List<NoteBlock> =
+        if (any { block -> block !is PersonDetailBlock }) this
+        else this + (
+            _blocks.value.firstOrNull { block -> block is TextBlock && block.text.isEmpty() }
+                ?: TextBlock(id = java.util.UUID.randomUUID().toString(), text = "")
+        )
 
     private fun adoptMetadataChangedOutsideEditor(storedMetadata: NoteMetadataEntity) {
         val knownMetadata = currentMetadata ?: return
@@ -300,7 +307,7 @@ class NoteEditorViewModel(
                     val existingBlocks = content?.blocks ?: emptyList()
 
                     _blocks.value = recalculateNumberedLists(
-                        existingBlocks.ifEmpty { listOf(TextBlock(id = java.util.UUID.randomUUID().toString(), text = "")) }
+                        existingBlocks.withSomewhereToType()
                     )
                 }
                 isAiIndexDirty = false
@@ -316,7 +323,7 @@ class NoteEditorViewModel(
             val latestContent = repository.getNoteContent(noteId)
             if (latestContent != null) {
                 val resolved = recalculateNumberedLists(
-                    latestContent.blocks.ifEmpty { listOf(TextBlock(id = java.util.UUID.randomUUID().toString(), text = "")) }
+                    latestContent.blocks.withSomewhereToType()
                 )
                 if (resolved != _blocks.value) {
                     _blocks.value = resolved

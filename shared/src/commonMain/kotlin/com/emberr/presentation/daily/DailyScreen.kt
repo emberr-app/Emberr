@@ -112,6 +112,7 @@ fun DailyScreen(
     onOpenFile: (filePath: String, mimeType: String) -> Unit = { _, _ -> },
     onNavigateToEditor: (String) -> Unit = {},
     onNavigateToCalendar: () -> Unit = {},
+    onNavigateToPeople: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToProperties: () -> Unit = {},
     onNavigateToTrash: () -> Unit = {},
@@ -686,6 +687,7 @@ fun DailyScreen(
                                 UserSettings(
                                     expanded = showSettingsMenu,
                                     onDismiss = { showSettingsMenu = false },
+                                    onNavigateToPeople = onNavigateToPeople,
                                     onNavigateToSettings = onNavigateToSettings,
                                     onNavigateToProperties = onNavigateToProperties,
                                     onNavigateToTrash = onNavigateToTrash

@@ -20,7 +20,7 @@ class EventsWithPersonTest {
         startsAt: LocalDateTime? = null,
         durationMinutes: Int = 30,
         recurrenceFrequency: RecurrenceFrequency? = null,
-        recurrenceUntil: String? = null
+        personNoteIds: String = "maya"
     ) = CalendarTaskEntity(
         blockId = id,
         noteId = "note",
@@ -31,25 +31,27 @@ class EventsWithPersonTest {
         sourceType = TaskSource.NOTE,
         durationMinutes = durationMinutes,
         recurrenceFrequency = recurrenceFrequency,
-        recurrenceUntil = recurrenceUntil,
-        personNoteIds = "maya"
+        personNoteIds = personNoteIds
     )
 
     @Test
-    fun eventsAreSplitIntoUpcomingSoonestFirstAndPastNewestFirst() {
+    fun eventsAreSplitIntoUpcomingSoonestFirstAndPastNewestFirstWithOneRowPerRepeatingEventAhead() {
         val events = listOf(
             event("next week", "2026-11-08", startsAt = LocalDateTime(2026, 11, 8, 9, 0)),
             event("ended this morning", "2026-11-01", startsAt = LocalDateTime(2026, 11, 1, 9, 0)),
             event("still going", "2026-11-01", startsAt = LocalDateTime(2026, 11, 1, 11, 45)),
             event("today, no time", "2026-11-01"),
             event("last month", "2026-10-01", startsAt = LocalDateTime(2026, 10, 1, 9, 0)),
-            event("weekly, still repeating", "2026-01-05", startsAt = LocalDateTime(2026, 1, 5, 9, 0), recurrenceFrequency = RecurrenceFrequency.WEEKLY),
-            event("weekly, finished", "2026-01-06", startsAt = LocalDateTime(2026, 1, 6, 9, 0), recurrenceFrequency = RecurrenceFrequency.WEEKLY, recurrenceUntil = "2026-03-01")
+            event("weekly", "2026-11-03", startsAt = LocalDateTime(2026, 11, 3, 9, 0), recurrenceFrequency = RecurrenceFrequency.WEEKLY),
+            event("weekly", "2026-11-10", startsAt = LocalDateTime(2026, 11, 10, 9, 0), recurrenceFrequency = RecurrenceFrequency.WEEKLY),
+            event("weekly", "2026-10-27", startsAt = LocalDateTime(2026, 10, 27, 9, 0), recurrenceFrequency = RecurrenceFrequency.WEEKLY),
+            event("someone else", "2026-11-02", startsAt = LocalDateTime(2026, 11, 2, 9, 0), personNoteIds = "sam")
         )
 
-        val split = splitEventsWithPerson(events, now, timeZone)
+        val split = eventsWithPerson("maya", events, now, timeZone)
 
-        assertEquals(listOf("weekly, still repeating", "today, no time", "still going", "next week"), split.upcoming.map { it.blockId })
-        assertEquals(listOf("ended this morning", "last month", "weekly, finished"), split.past.map { it.blockId })
+        assertEquals(listOf("today, no time", "still going", "weekly", "next week"), split.upcoming.map { it.blockId })
+        assertEquals("2026-11-03", split.upcoming.single { it.blockId == "weekly" }.targetDate)
+        assertEquals(listOf("ended this morning", "weekly", "last month"), split.past.map { it.blockId })
     }
 }

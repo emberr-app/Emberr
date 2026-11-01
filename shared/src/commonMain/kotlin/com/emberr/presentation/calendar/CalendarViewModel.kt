@@ -81,7 +81,7 @@ class CalendarViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val people: StateFlow<List<EventPerson>> = peopleRepository.observePeople()
-        .map { people -> people.map { person -> EventPerson(id = person.noteId, name = person.title) } }
+        .map { people -> people.map { person -> EventPerson(id = person.noteId, name = person.title, icon = person.icon) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun createPerson(name: String, onCreated: (personNoteId: String) -> Unit) {

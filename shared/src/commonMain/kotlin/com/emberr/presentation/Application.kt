@@ -47,6 +47,7 @@ import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.LocalEmberrBlurSource
 import com.emberr.presentation.shared.components.isBlurFallbackForced
 import com.emberr.presentation.trash.TrashScreen
+import com.emberr.presentation.people.PeopleScreen
 import com.emberr.presentation.properties.PropertiesScreen
 import dev.chrisbanes.haze.HazeState
 import com.emberr.presentation.splash.LoadingScreen
@@ -477,6 +478,7 @@ fun EmberrApp(
                                     navController.navigate(Screen.Note.createRoute(noteId))
                                 },
                                 onNavigateToCalendar = { navController.navigate(Screen.Calendar.route) },
+                                onNavigateToPeople = { navController.navigate(Screen.People.route) },
                                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                                 onNavigateToProperties = { navController.navigate("properties_route") },
                                 onNavigateToTrash = { navController.navigate("trash_route") },
@@ -505,6 +507,7 @@ fun EmberrApp(
                                 onNavigateToBookmarks = { navController.navigate(Screen.Bookmarks.route) },
                                 onNavigateToImages = { navController.navigate(Screen.Images.route) },
                                 onNavigateToDocuments = { navController.navigate(Screen.Documents.route) },
+                                onNavigateToPeople = { navController.navigate(Screen.People.route) },
                                 onNavigateToProperties = { navController.navigate("properties_route") },
                                 onNavigateToTrash = { navController.navigate("trash_route") },
                                 onToggleSidebar = toggleSidebar,
@@ -540,6 +543,36 @@ fun EmberrApp(
                             }
                         ) {
                             TrashScreen(onNavigateBack = { navController.popBackStack() })
+                        }
+
+                        composable(
+                            route = Screen.People.route,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    tween(300)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    tween(300)
+                                )
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    tween(300)
+                                )
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    tween(300)
+                                )
+                            }
+                        ) {
+                            PeopleScreen(onNavigateBack = { navController.popBackStack() })
                         }
 
                         composable(

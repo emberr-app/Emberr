@@ -129,6 +129,7 @@ import com.emberr.presentation.search.favoriteOptionLabel
 import com.emberr.presentation.search.defaultHighlightStyle
 import com.emberr.presentation.search.highlightMatches
 import com.emberr.presentation.trash.TrashScreen
+import com.emberr.presentation.people.PeopleScreen
 import com.emberr.presentation.properties.PropertiesScreen
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
@@ -208,6 +209,7 @@ sealed interface DetailPane {
     data object OpenSourceLicenses : DetailPane
     data object ThirdPartyServices : DetailPane
     data object Trash : DetailPane
+    data object People : DetailPane
     data object Properties : DetailPane
     data object Reminders : DetailPane
     data object Bookmarks : DetailPane
@@ -248,6 +250,7 @@ internal fun DetailPane.encode(): String = when (this) {
     DetailPane.OpenSourceLicenses -> "PANEL:LICENSES"
     DetailPane.ThirdPartyServices -> "PANEL:THIRD_PARTY_SERVICES"
     DetailPane.Trash -> "PANEL:TRASH"
+    DetailPane.People -> "PANEL:PEOPLE"
     DetailPane.Properties -> "PANEL:PROPERTIES"
     DetailPane.Reminders -> "PANEL:REMINDERS"
     DetailPane.Bookmarks -> "PANEL:BOOKMARKS"
@@ -269,6 +272,7 @@ internal fun decodeDetailPane(raw: String, today: LocalDate): DetailPane = when 
     raw == "PANEL:LICENSES" -> DetailPane.OpenSourceLicenses
     raw == "PANEL:THIRD_PARTY_SERVICES" -> DetailPane.ThirdPartyServices
     raw == "PANEL:TRASH" -> DetailPane.Trash
+    raw == "PANEL:PEOPLE" -> DetailPane.People
     raw == "PANEL:PROPERTIES" -> DetailPane.Properties
     raw == "PANEL:REMINDERS" -> DetailPane.Reminders
     raw == "PANEL:BOOKMARKS" -> DetailPane.Bookmarks
@@ -1143,6 +1147,7 @@ fun DesktopMainScreen(
         UserSettings(
             expanded = showSettingsMenu,
             onDismiss = { showSettingsMenu = false },
+            onNavigateToPeople = { showSettingsMenu = false; detail = DetailPane.People },
             onNavigateToSettings = { showSettingsMenu = false; detail = DetailPane.Settings },
             onNavigateToProperties = { showSettingsMenu = false; detail = DetailPane.Properties },
             onNavigateToTrash = { showSettingsMenu = false; detail = DetailPane.Trash }
@@ -1887,6 +1892,11 @@ fun DesktopMainScreen(
             DetailPane.Trash -> key("trash") {
                 Box(Modifier.fillMaxSize()) {
                     TrashScreen(onNavigateBack = closeDetailPane)
+                }
+            }
+            DetailPane.People -> key("people") {
+                Box(Modifier.fillMaxSize()) {
+                    PeopleScreen(onNavigateBack = closeDetailPane)
                 }
             }
             DetailPane.Properties -> key("properties") {

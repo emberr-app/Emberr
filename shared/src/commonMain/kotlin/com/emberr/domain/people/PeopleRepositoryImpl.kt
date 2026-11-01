@@ -1,39 +1,52 @@
 package com.emberr.domain.people
 
 import com.emberr.data.local.room.dao.BlockDao
-import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
+import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.data.local.room.entity.personNoteIdList
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteBlockSerializer
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PersonDetailKind
+import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.sync.SyncCoordinator
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+
+private const val DAYS_OF_REPEATING_EVENTS_LOOKED_AT_EACH_WAY = 366
 
 @OptIn(ExperimentalUuidApi::class)
 class PeopleRepositoryImpl(
     private val noteDao: NoteDao,
     private val blockDao: BlockDao,
-    private val calendarTaskDao: CalendarTaskDao,
-    private val noteRepository: NoteRepository
+    private val noteRepository: NoteRepository,
+    private val clock: Clock = Clock.System
 ) : PeopleRepository {
 
     private val blockJson = Json { ignoreUnknownKeys = true }
@@ -48,9 +61,42 @@ class PeopleRepositoryImpl(
         }.flowOn(Dispatchers.Default)
 
     override fun observeEventsWithPerson(personNoteId: String): Flow<EventsWithPerson> =
-        calendarTaskDao.observeTasksWithPerson(personNoteId).map { events ->
-            splitEventsWithPerson(events, Clock.System.now(), TimeZone.currentSystemDefault())
+        observeEventsWithAnyone()
+            .map { (events, now) -> eventsWithPerson(personNoteId, events, now, TimeZone.currentSystemDefault()) }
+            .flowOn(Dispatchers.Default)
+
+    override fun observeEventsWithEachPerson(): Flow<Map<String, EventsWithPerson>> =
+        observeEventsWithAnyone()
+            .map { (events, now) ->
+                val personNoteIds = events.flatMap { event -> event.personNoteIdList() }.toSet()
+                personNoteIds.associateWith { personNoteId ->
+                    eventsWithPerson(personNoteId, events, now, TimeZone.currentSystemDefault())
+                }
+            }
+            .flowOn(Dispatchers.Default)
+
+    private fun observeEventsWithAnyone(): Flow<Pair<List<CalendarTaskEntity>, Instant>> = flow {
+        val today = clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val firstDateLookedAt = today.minus(DAYS_OF_REPEATING_EVENTS_LOOKED_AT_EACH_WAY, DateTimeUnit.DAY)
+        val lastDateLookedAt = today.plus(DAYS_OF_REPEATING_EVENTS_LOOKED_AT_EACH_WAY, DateTimeUnit.DAY)
+        val eventsAndOccurrences = combine(
+            noteRepository.getAllTasksFlow(),
+            noteRepository.getCalendarTasksInRange(firstDateLookedAt.toString(), lastDateLookedAt.toString()),
+            everyMinute()
+        ) { allEvents, occurrencesNearToday, now ->
+            val oneOffEvents = allEvents.filter { event -> event.recurrenceFrequency == null && event.personNoteIds != null }
+            val repeatingOccurrences = occurrencesNearToday.filter { event -> event.recurrenceFrequency != null && event.personNoteIds != null }
+            (oneOffEvents + repeatingOccurrences) to now
         }
+        emitAll(eventsAndOccurrences)
+    }
+
+    private fun everyMinute(): Flow<Instant> = flow {
+        while (true) {
+            emit(clock.now())
+            delay(1.minutes)
+        }
+    }
 
     override suspend fun createPerson(name: String): String = withContext(Dispatchers.IO) {
         val now = nowMillis()
@@ -120,6 +166,35 @@ class PeopleRepositoryImpl(
         }
     }
 
+    override suspend fun moveToTrash(personNoteId: String) {
+        withContext(Dispatchers.IO) {
+            SyncCoordinator.mutex.withLock {
+                val person = noteDao.getNoteById(personNoteId)
+                    ?.takeIf { it.kind == NoteKind.PERSON && it.trashedAt == null }
+                    ?: return@withLock
+                val content = noteRepository.getNoteContent(personNoteId) ?: NoteContent(blocks = emptyList())
+                val now = nowMillis()
+                noteRepository.saveNoteInSpace(ACCOUNT_SPACE_ID, person.copy(trashedAt = now, updatedAt = now), content)
+            }
+        }
+    }
+
+    override suspend fun deletePersonIfLeftEmpty(personNoteId: String): Boolean = withContext(Dispatchers.IO) {
+        val isLeftEmpty = SyncCoordinator.mutex.withLock {
+            val person = noteDao.getNoteById(personNoteId) ?: return@withLock false
+            val blocks = noteRepository.getNoteContent(personNoteId)?.blocks.orEmpty()
+            isEmptyPerson(person, blocks)
+        }
+        if (isLeftEmpty) noteRepository.deleteNote(personNoteId, filePath = "")
+        isLeftEmpty
+    }
+
+    private fun isEmptyPerson(person: NoteMetadataEntity, blocks: List<NoteBlock>): Boolean =
+        person.kind == NoteKind.PERSON &&
+            person.trashedAt == null &&
+            person.title.isBlank() &&
+            blocks.filterNot { it.isDeleted }.all { block -> block is TextBlock && block.text.isBlank() }
+
     private suspend fun changePerson(
         personNoteId: String,
         change: (NoteMetadataEntity, List<NoteBlock>) -> Pair<NoteMetadataEntity, List<NoteBlock>>?
@@ -133,7 +208,7 @@ class PeopleRepositoryImpl(
         }
     }
 
-    private fun nowMillis(): Long = Clock.System.now().toEpochMilliseconds()
+    private fun nowMillis(): Long = clock.now().toEpochMilliseconds()
 
     private fun decodeBlockOrNull(blockDataJson: String): NoteBlock? =
         try {

@@ -2,6 +2,7 @@ package com.emberr.domain.people
 
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.datesShownOn
+import com.emberr.data.local.room.entity.personNoteIdList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -15,20 +16,24 @@ data class EventsWithPerson(
     val past: List<CalendarTaskEntity>
 )
 
-fun splitEventsWithPerson(events: List<CalendarTaskEntity>, now: Instant, timeZone: TimeZone): EventsWithPerson {
+fun eventsWithPerson(
+    personNoteId: String,
+    eventsAndOccurrences: List<CalendarTaskEntity>,
+    now: Instant,
+    timeZone: TimeZone
+): EventsWithPerson {
     val today = now.toLocalDateTime(timeZone).date
-    val (upcoming, past) = events.partition { event -> isStillAhead(event, now, today) }
+    val eventsWithThisPerson = eventsAndOccurrences.filter { event -> personNoteId in event.personNoteIdList() }
+    val (upcoming, past) = eventsWithThisPerson.partition { event -> isStillAhead(event, now, today) }
     return EventsWithPerson(
-        upcoming = upcoming.sortedWith(compareBy(nullsLast<Long>()) { event -> startMillisOf(event, timeZone) }),
+        upcoming = upcoming
+            .sortedWith(compareBy(nullsLast<Long>()) { event -> startMillisOf(event, timeZone) })
+            .distinctBy { event -> event.blockId },
         past = past.sortedByDescending { event -> startMillisOf(event, timeZone) }
     )
 }
 
 private fun isStillAhead(event: CalendarTaskEntity, now: Instant, today: LocalDate): Boolean {
-    if (event.recurrenceFrequency != null) {
-        val lastRepeatDate = event.recurrenceUntil?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-        return lastRepeatDate == null || lastRepeatDate >= today
-    }
     if (event.isAllDay) {
         val lastDate = event.datesShownOn().lastOrNull() ?: return true
         return lastDate >= today

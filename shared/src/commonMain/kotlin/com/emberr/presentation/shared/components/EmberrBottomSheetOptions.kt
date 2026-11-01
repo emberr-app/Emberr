@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-private val OPTION_SHAPE = RoundedCornerShape(14.dp)
+private val OPTION_SHAPE = RoundedCornerShape(12.dp)
 private val OPTION_VERTICAL_SPACING = 2.dp
 private val OPTION_OUTER_HORIZONTAL_PADDING = 20.dp
 private val OPTION_INNER_HORIZONTAL_PADDING = 12.dp
@@ -51,6 +51,7 @@ fun EmberrBottomSheetOption(
     labelMaxLines: Int = Int.MAX_VALUE,
     subtitleMaxLines: Int = Int.MAX_VALUE,
     outerHorizontalPadding: Dp = OPTION_OUTER_HORIZONTAL_PADDING,
+    innerHorizontalPadding: Dp = OPTION_INNER_HORIZONTAL_PADDING,
     innerVerticalPadding: Dp = OPTION_INNER_VERTICAL_PADDING,
     labelColor: Color? = null
 ) {
@@ -70,7 +71,7 @@ fun EmberrBottomSheetOption(
                 onClick = onClick
             )
             .padding(
-                horizontal = OPTION_INNER_HORIZONTAL_PADDING,
+                horizontal = innerHorizontalPadding,
                 vertical = innerVerticalPadding
             ),
         verticalAlignment = Alignment.CenterVertically
