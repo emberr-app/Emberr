@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.datesShownOn
+import com.emberr.data.local.room.entity.personNoteIdList
 import com.emberr.data.local.room.entity.toAllDaySpan
 import com.emberr.data.local.room.entity.toRecurrenceRule
 import com.emberr.domain.model.*
@@ -714,6 +715,7 @@ class DailyEditorViewModel(
         description = description,
         recurrenceRule = toRecurrenceRule(),
         allDay = toAllDaySpan(),
+        personNoteIds = personNoteIdList(),
         updatedAt = System.currentTimeMillis()
     )
 

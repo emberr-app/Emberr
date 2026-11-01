@@ -30,6 +30,8 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.repository.NoteRepositoryImpl
+import com.emberr.domain.people.PeopleRepository
+import com.emberr.domain.people.PeopleRepositoryImpl
 import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.reminders.ReminderTargetResolver
@@ -132,6 +134,15 @@ val sharedModule = module {
             mediaReferenceDao = get(),
             canvasDao = get(),
             movieBlockDao = get()
+        )
+    }
+
+    single<PeopleRepository> {
+        PeopleRepositoryImpl(
+            noteDao = get(),
+            blockDao = get(),
+            calendarTaskDao = get(),
+            noteRepository = get()
         )
     }
 

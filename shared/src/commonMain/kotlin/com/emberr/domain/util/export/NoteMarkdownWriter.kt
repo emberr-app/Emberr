@@ -16,6 +16,7 @@ import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
+import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.QuoteBlock
 import com.emberr.domain.model.SolidDividerBlock
@@ -29,6 +30,7 @@ import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.model.lastDate
+import com.emberr.domain.model.plainLine
 import com.emberr.domain.model.summaryLine
 import com.emberr.domain.model.valueAsText
 import kotlinx.datetime.TimeZone
@@ -181,6 +183,7 @@ object NoteMarkdownWriter {
             is MovieBlock -> renderMovie(block, options)
             is WatchlistBlock -> ""
             is CredentialsBlock -> renderCredentials(block)
+            is PersonDetailBlock -> flattenLineBreaks(block.plainLine())
             is TableBlock -> renderTable(block)
             is SolidDividerBlock -> SOLID_DIVIDER_LINE
             is ThreeDotDividerBlock -> DOT_DIVIDER_LINE

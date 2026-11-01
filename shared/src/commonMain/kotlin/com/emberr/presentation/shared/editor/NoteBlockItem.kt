@@ -145,6 +145,7 @@ import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
+import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.QuoteBlock
 import com.emberr.domain.model.SolidDividerBlock
@@ -1191,6 +1192,7 @@ fun NoteBlockItem(
                                 onSave = { edit -> actions.onUpdateCredentials(block.id, edit) },
                                 runAfterKeyboardCloses = afterKeyboardCloses
                             )
+                            is PersonDetailBlock -> Unit
                             is UnknownBlock -> UnknownBlockView()
                         }
                     }

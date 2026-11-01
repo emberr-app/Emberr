@@ -19,7 +19,7 @@ class LanSyncSchemaTest {
         "text" to "id, text, indentationLevel, textAlignment, inlineSpans, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, highlightColorName, isDeleted, isPinned, updatedAt",
         "heading" to "id, text, level, indentationLevel, textAlignment, inlineSpans, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, highlightColorName, isDeleted, isPinned, updatedAt",
         "quote" to "id, text, indentationLevel, textAlignment, inlineSpans, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, highlightColorName, isDeleted, isPinned, updatedAt",
-        "checkbox" to "id, text, isChecked, indentationLevel, textAlignment, inlineSpans, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, highlightColorName, reminderTimestamp, completedAt, categoryId, durationMinutes, url, description, recurrenceRule, allDay, isDeleted, isPinned, updatedAt",
+        "checkbox" to "id, text, isChecked, indentationLevel, textAlignment, inlineSpans, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, highlightColorName, reminderTimestamp, completedAt, categoryId, durationMinutes, url, description, recurrenceRule, allDay, personNoteIds, isDeleted, isPinned, updatedAt",
         "bullet" to "id, text, indentationLevel, textAlignment, inlineSpans, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, highlightColorName, isDeleted, isPinned, updatedAt",
         "number" to "id, text, number, indentationLevel, textAlignment, inlineSpans, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, highlightColorName, isDeleted, isPinned, updatedAt",
         "toggle" to "id, text, isExpanded, indentationLevel, textAlignment, inlineSpans, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, highlightColorName, isDeleted, isPinned, updatedAt",
@@ -37,6 +37,7 @@ class LanSyncSchemaTest {
         "credentials" to "id, serviceName, loginUrl, iconUrl, fields, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "property" to "id, propertyType, customPropertyId, customLabel, customValueType, text, date, endDate, time, endTime, tags, isChecked, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "database" to "id, databaseId, isLinkedDatabase, title, columns, notesColumnAfterKey, customProperties, columnWidths, defaultTemplateId, calculations, formulas, numberFormats, colorRules, repeatingTemplates, isLocked, showsRowCount, views, activeViewId, cellStyles, rowStyles, columnStyles, settingTimes, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
+        "person_detail" to "id, kind, label, value, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "solid_divider" to "id, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt",
         "dot_divider" to "id, indentationLevel, isBold, isItalic, isStrikeThrough, isUnderlined, isHighlighted, isDeleted, isPinned, updatedAt"
     )

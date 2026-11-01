@@ -16,6 +16,7 @@ import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NumberedListBlock
+import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.QuoteBlock
 import com.emberr.domain.model.SolidDividerBlock
@@ -195,6 +196,8 @@ private fun convertBlockToElements(
 
     is SolidDividerBlock, is ThreeDotDividerBlock ->
         listOf(WidgetElement.DividerLine(key = "${block.id}#0"))
+
+    is PersonDetailBlock -> emptyList()
 
     is UnknownBlock -> textLine(block, "Needs a newer version of Emberr", WidgetTextStyleName.SUBTLE)
 }

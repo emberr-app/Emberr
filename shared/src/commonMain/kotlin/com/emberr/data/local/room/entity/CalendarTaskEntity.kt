@@ -45,8 +45,14 @@ data class CalendarTaskEntity(
     val spaceId: String = DEFAULT_SPACE_ID,
     @ColumnInfo(defaultValue = "0") val isAllDay: Boolean = false,
     @ColumnInfo(defaultValue = "1") val allDayLengthInDays: Int = 1,
-    @ColumnInfo(defaultValue = "1") val isAllDayReminderOn: Boolean = true
+    @ColumnInfo(defaultValue = "1") val isAllDayReminderOn: Boolean = true,
+    val personNoteIds: String? = null
 )
+
+fun CalendarTaskEntity.personNoteIdList(): List<String> =
+    personNoteIds?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
+
+fun List<String>.toPersonNoteIdsColumn(): String? = takeIf { it.isNotEmpty() }?.joinToString(",")
 
 fun CalendarTaskEntity.toAllDaySpan(): AllDaySpan? =
     if (isAllDay) AllDaySpan(lengthInDays = allDayLengthInDays, isReminderOn = isAllDayReminderOn) else null

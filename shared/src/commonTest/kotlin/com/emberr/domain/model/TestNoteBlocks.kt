@@ -70,6 +70,7 @@ object TestNoteBlocks {
                 daysOfWeek = setOf(DayOfWeek.MONDAY, DayOfWeek.THURSDAY),
                 untilDateString = "2026-12-31"
             ),
+            personNoteIds = listOf("person-1", "person-2"),
             isDeleted = true,
             isPinned = true,
             updatedAt = 104L
@@ -346,6 +347,15 @@ object TestNoteBlocks {
             indentationLevel = 1,
             isPinned = true,
             updatedAt = 122L
+        ),
+        PersonDetailBlock(
+            id = "person-detail-1",
+            kind = PersonDetailKind.PHONE,
+            label = "Mobile",
+            value = "+1 617 555 0142",
+            indentationLevel = 1,
+            isPinned = true,
+            updatedAt = 123L
         ),
         SolidDividerBlock(
             id = "solid-divider-1",
