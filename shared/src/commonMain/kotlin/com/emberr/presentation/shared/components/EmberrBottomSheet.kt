@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
@@ -18,7 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -71,6 +77,25 @@ internal object SheetBringIntoViewSpec : BringIntoViewSpec {
 private val KeepLeftoverUpwardFlingAwayFromSheet = object : NestedScrollConnection {
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity =
         if (available.y < 0f) available else Velocity.Zero
+}
+
+private class KeepScrolledContentAwayFromSheet : NestedScrollConnection {
+    private var contentScrolledDuringGesture = false
+
+    fun startNewGesture() {
+        contentScrolledDuringGesture = false
+    }
+
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+        if (source == NestedScrollSource.UserInput && consumed.y != 0f) contentScrolledDuringGesture = true
+        return if (contentScrolledDuringGesture) available else Offset.Zero
+    }
+
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        val keepsFling = contentScrolledDuringGesture
+        contentScrolledDuringGesture = false
+        return if (keepsFling) available else Velocity.Zero
+    }
 }
 
 @Composable
@@ -276,6 +301,7 @@ private fun EmberrModalBottomSheet(
         confirmValueChange = { newValue -> newValue != SheetValue.Hidden || latestIsDismissible }
     )
     val nonScrollingAreaDragRelay = rememberScrollableState { 0f }
+    val keepScrolledContentAwayFromSheet = remember { KeepScrolledContentAwayFromSheet() }
 
     fun closeAnd(action: () -> Unit) {
         coroutineScope.launch {
@@ -319,6 +345,13 @@ private fun EmberrModalBottomSheet(
         Box(
             modifier = Modifier
                 .nestedScroll(KeepLeftoverUpwardFlingAwayFromSheet)
+                .nestedScroll(keepScrolledContentAwayFromSheet)
+                .pointerInput(keepScrolledContentAwayFromSheet) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        keepScrolledContentAwayFromSheet.startNewGesture()
+                    }
+                }
                 .scrollable(
                     state = nonScrollingAreaDragRelay,
                     orientation = Orientation.Vertical
