@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
+import com.emberr.presentation.shared.components.PersonOption
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import kotlin.math.roundToInt
 import kotlinx.datetime.LocalDate
@@ -263,7 +264,7 @@ fun EventMoveFrameEffect(
 }
 
 @Composable
-fun FloatingMovedEventCard(tracker: EventMoveTracker, categories: List<CalendarCategory>, peopleById: Map<String, EventPerson>) {
+fun FloatingMovedEventCard(tracker: EventMoveTracker, categories: List<CalendarCategory>, peopleById: Map<String, PersonOption>) {
     val move = tracker.activeMove ?: return
     if (tracker.preview?.becomesAllDay == true) return
     val density = LocalDensity.current
