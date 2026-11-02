@@ -4,6 +4,7 @@ import com.emberr.core.desktop.DesktopAppStorage
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
@@ -11,6 +12,43 @@ import java.util.concurrent.TimeUnit
 
 private const val HELP_PROBE_TIMEOUT_SECONDS = 2L
 private const val NOTIFICATION_ICON_RESOURCE = "app_icon.png"
+private const val WINDOWS_TITLE_VARIABLE = "EMBERR_NOTIFICATION_TITLE"
+private const val WINDOWS_MESSAGE_VARIABLE = "EMBERR_NOTIFICATION_MESSAGE"
+private const val WINDOWS_ICON_VARIABLE = "EMBERR_NOTIFICATION_ICON"
+
+private val windowsNotificationScript = """
+    [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+    [Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+
+    ${'$'}template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastImageAndText02)
+    ${'$'}imageNodes = ${'$'}template.GetElementsByTagName('image')
+    ${'$'}imageNodes.Item(0).Attributes.GetNamedItem('src').NodeValue = [string]${'$'}env:$WINDOWS_ICON_VARIABLE
+    ${'$'}textNodes = ${'$'}template.GetElementsByTagName('text')
+    ${'$'}textNodes.Item(0).AppendChild(${'$'}template.CreateTextNode([string]${'$'}env:$WINDOWS_TITLE_VARIABLE)) | Out-Null
+    ${'$'}textNodes.Item(1).AppendChild(${'$'}template.CreateTextNode([string]${'$'}env:$WINDOWS_MESSAGE_VARIABLE)) | Out-Null
+
+    ${'$'}notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Emberr')
+    ${'$'}notifier.Show([Windows.UI.Notifications.ToastNotification]::new(${'$'}template))
+""".trimIndent()
+
+internal fun macNotificationCommand(title: String, message: String): List<String> = listOf(
+    "osascript",
+    "-e", "on run argv",
+    "-e", "display notification (item 2 of argv) with title (item 1 of argv)",
+    "-e", "end run",
+    title,
+    message
+)
+
+internal fun windowsNotificationProcess(title: String, message: String, iconUri: String): ProcessBuilder =
+    ProcessBuilder("powershell", "-NoProfile", "-EncodedCommand", powerShellEncodedCommand(windowsNotificationScript)).apply {
+        environment()[WINDOWS_TITLE_VARIABLE] = title
+        environment()[WINDOWS_MESSAGE_VARIABLE] = message
+        environment()[WINDOWS_ICON_VARIABLE] = iconUri
+    }
+
+internal fun powerShellEncodedCommand(script: String): String =
+    Base64.getEncoder().encodeToString(script.toByteArray(Charsets.UTF_16LE))
 
 class DesktopReminderScheduler : ReminderScheduler {
 
@@ -66,30 +104,10 @@ class DesktopReminderScheduler : ReminderScheduler {
         try {
             when {
                 os.contains("win") -> {
-                    val iconUri = notificationIconFile?.toPath()?.toUri()?.toString().orEmpty().replace("'", "''")
-                    val quotedTitle = title.replace("'", "''")
-                    val quotedMessage = message.replace("'", "''")
-                    val psScript = """
-                        [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-                        [Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-                        
-                        ${'$'}template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastImageAndText02)
-                        ${'$'}imageNodes = ${'$'}template.GetElementsByTagName('image')
-                        ${'$'}imageNodes.Item(0).Attributes.GetNamedItem('src').NodeValue = '$iconUri'
-                        ${'$'}textNodes = ${'$'}template.GetElementsByTagName('text')
-                        ${'$'}textNodes.Item(0).AppendChild(${'$'}template.CreateTextNode('$quotedTitle')) | Out-Null
-                        ${'$'}textNodes.Item(1).AppendChild(${'$'}template.CreateTextNode('$quotedMessage')) | Out-Null
-                        
-                        ${'$'}notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Emberr')
-                        ${'$'}notifier.Show([Windows.UI.Notifications.ToastNotification]::new(${'$'}template))
-                    """.trimIndent()
-
-                    ProcessBuilder("powershell", "-NoProfile", "-Command", psScript).start()
+                    val iconUri = notificationIconFile?.toPath()?.toUri()?.toString().orEmpty()
+                    windowsNotificationProcess(title, message, iconUri).start()
                 }
-                os.contains("mac") -> {
-                    val script = "display notification \"$message\" with title \"$title\""
-                    ProcessBuilder("osascript", "-e", script).start()
-                }
+                os.contains("mac") -> ProcessBuilder(macNotificationCommand(title, message)).start()
                 else -> showClickableLinuxNotification(blockId, title, message)
             }
         } catch (e: Exception) {
