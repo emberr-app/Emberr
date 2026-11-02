@@ -108,6 +108,7 @@ import com.emberr.presentation.home.note.CategorizedEmojiPicker
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import androidx.compose.foundation.layout.navigationBarsPadding
 import emberr.shared.generated.resources.calendar_add
 import emberr.shared.generated.resources.ghost_smile
@@ -664,6 +665,7 @@ private fun PersonNameField(page: PersonPage, isCentered: Boolean, sizeScale: Fl
         .fillMaxWidth()
         .focusRequester(focusRequester)
         .onFocusChanged { focusState -> if (!focusState.isFocused) page.onCommitName() }
+        .hidesEditorToolbarWhileFocused()
     if (isCentered) {
         val placeholderColor = mutedTextColor()
         BasicTextField(
