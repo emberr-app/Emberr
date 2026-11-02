@@ -1096,7 +1096,7 @@ private fun CalendarTimeGrid(
                 onEventResize = onEventResize
             )
         }
-        FloatingMovedEventCard(tracker = moveTracker, categories = categories)
+        FloatingMovedEventCard(tracker = moveTracker, categories = categories, peopleById = peopleById)
     }
 }
 
@@ -1375,6 +1375,7 @@ private fun DayColumnBody(
                 hasCategory = category != null,
                 isChecked = preview.event.isChecked,
                 height = maxOf(24.dp, hourHeight * (preview.timeRange.durationMinutes / 60f)),
+                people = peopleShownOnEvent(preview.event.personNoteIds, peopleById),
                 modifier = Modifier
                     .width(availableWidth)
                     .padding(top = hourHeight * (preview.timeRange.startMinuteOfDay / 60f))
@@ -1512,7 +1513,7 @@ private fun MultiDayTimeGrid(
                 onEventResize = onEventResize
             )
         }
-        FloatingMovedEventCard(tracker = moveTracker, categories = categories)
+        FloatingMovedEventCard(tracker = moveTracker, categories = categories, peopleById = peopleById)
     }
 }
 

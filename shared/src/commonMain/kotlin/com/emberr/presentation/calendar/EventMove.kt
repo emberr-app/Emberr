@@ -263,7 +263,7 @@ fun EventMoveFrameEffect(
 }
 
 @Composable
-fun FloatingMovedEventCard(tracker: EventMoveTracker, categories: List<CalendarCategory>) {
+fun FloatingMovedEventCard(tracker: EventMoveTracker, categories: List<CalendarCategory>, peopleById: Map<String, EventPerson>) {
     val move = tracker.activeMove ?: return
     if (tracker.preview?.becomesAllDay == true) return
     val density = LocalDensity.current
@@ -278,6 +278,7 @@ fun FloatingMovedEventCard(tracker: EventMoveTracker, categories: List<CalendarC
         hasCategory = category != null,
         isChecked = move.event.isChecked,
         height = with(density) { move.cardSize.height.toDp() },
+        people = peopleShownOnEvent(move.event.personNoteIds, peopleById),
         modifier = Modifier
             .offset { tracker.floatingCardOffsetInGrid() }
             .width(with(density) { move.cardSize.width.toDp() })

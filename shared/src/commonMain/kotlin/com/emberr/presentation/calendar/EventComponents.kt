@@ -304,6 +304,7 @@ fun EventMovePreviewChip(
     hasCategory: Boolean,
     isChecked: Boolean,
     height: Dp,
+    people: List<EventPerson>,
     modifier: Modifier = Modifier
 ) {
     val textColor = if (hasCategory) EventChipTextColor else MaterialTheme.colorScheme.onSurface
@@ -313,7 +314,15 @@ fun EventMovePreviewChip(
         shadowElevation = 6.dp,
         modifier = modifier.height(height)
     ) {
-        EventChipLabels(text = text, timeText = timeText, textColor = textColor, isChecked = isChecked, height = height)
+        EventChipLabels(
+            text = text,
+            timeText = timeText,
+            textColor = textColor,
+            isChecked = isChecked,
+            height = height,
+            people = people,
+            chipColor = color
+        )
     }
 }
 
