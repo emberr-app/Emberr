@@ -147,11 +147,14 @@ class CalendarViewModel(
     private val searchQueryState = MutableStateFlow("")
     val searchQuery: StateFlow<String> = searchQueryState.asStateFlow()
 
+    private val peopleWithDetails = peopleRepository.observePeopleWithDetails()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
+
     val searchResults: StateFlow<CalendarSearchResults?> = combine(
         searchQueryState,
         repository.getCalendarTasksForSearch(todayWhenCalendarOpened)
             .map { tasks -> tasks.mapNotNull { it.toCalendarEvent() } },
-        peopleRepository.observePeopleWithDetails()
+        peopleWithDetails
             .map { people -> nextBirthdayEvents(people, todayWhenCalendarOpened) },
         categories
     ) { query, events, birthdayEvents, currentCategories ->
@@ -186,9 +189,6 @@ class CalendarViewModel(
             repository.deleteCategory(id)
         }
     }
-
-    private val peopleWithDetails = peopleRepository.observePeopleWithDetails()
-        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
 
     private fun shownEventsWithBirthdays(
         tasks: Flow<List<CalendarTaskEntity>>,
