@@ -15,6 +15,7 @@ class DesktopNotificationCommandTest {
         val macCommand = macNotificationCommand(trickyTitle, trickyMessage)
         assertEquals(listOf(trickyTitle, trickyMessage), macCommand.takeLast(2))
         assertFalse(macCommand.dropLast(2).any { part -> "Zoltan" in part || "Quincy" in part })
+        assertEquals(listOf("--", "-Weekly", "-starts with a dash"), macNotificationCommand("-Weekly", "-starts with a dash").takeLast(3))
 
         val windowsProcess = windowsNotificationProcess(trickyTitle, trickyMessage, iconUri = "file:///C:/icon.png")
         val encodedScript = windowsProcess.command().last()
