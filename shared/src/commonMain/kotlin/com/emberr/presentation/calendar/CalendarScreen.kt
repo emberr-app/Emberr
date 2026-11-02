@@ -720,67 +720,12 @@ fun CalendarScreen(
         )
     }
 
-    EventEditorSheet(
+    SavingEventEditorSheet(
         state = eventEditorState,
-        categories = categories,
-        people = people,
-        onNameChange = { name -> eventEditorState = eventEditorState?.copy(name = name) },
-        onDateChange = { date -> eventEditorState = eventEditorState?.copy(date = date) },
-        onTimeChange = { hour, minute -> eventEditorState = eventEditorState?.copy(hour = hour, minute = minute) },
-        onDurationChange = { minutes -> eventEditorState = eventEditorState?.copy(durationMinutes = minutes) },
-        onCategoryChange = { categoryId -> eventEditorState = eventEditorState?.copy(categoryId = categoryId) },
-        onUrlChange = { url -> eventEditorState = eventEditorState?.copy(url = url) },
-        onDescriptionChange = { description -> eventEditorState = eventEditorState?.copy(description = description) },
-        onRecurrenceChange = { rule -> eventEditorState = eventEditorState?.copy(recurrenceRule = rule) },
-        onAllDayChange = { allDay -> eventEditorState = eventEditorState?.copy(allDay = allDay) },
-        onPeopleChange = { personNoteIds -> eventEditorState = eventEditorState?.copy(personNoteIds = personNoteIds) },
-        onCreatePerson = { name ->
-            viewModel.createPerson(name) { personNoteId ->
-                eventEditorState = eventEditorState?.let { state -> state.copy(personNoteIds = state.personNoteIds + personNoteId) }
-            }
-        },
-        onEditClick = {
-            val recurring = eventEditorState?.original?.recurrenceRule != null
-            if (recurring) {
-                pendingScopeAction = { scope -> eventEditorState = eventEditorState?.copy(isEditing = true, editScope = scope) }
-            } else {
-                eventEditorState = eventEditorState?.copy(isEditing = true)
-            }
-        },
-        onCancelEdit = { eventEditorState = eventEditorState?.original?.toEditorState() },
-        onSave = {
-            eventEditorState?.let { state ->
-                viewModel.saveEvent(
-                    original = state.original,
-                    dateString = state.date.toString(),
-                    timestamp = state.toEpochMillis(),
-                    name = state.name,
-                    categoryId = state.categoryId,
-                    durationMinutes = state.durationMinutes,
-                    url = state.url,
-                    description = state.description,
-                    allDay = state.allDay,
-                    personNoteIds = state.personNoteIds,
-                    recurrenceRule = state.recurrenceRule,
-                    editScope = state.editScope
-                )
-            }
-            eventEditorState = eventEditorState?.viewAfterSaving()
-        },
-        onDelete = eventEditorState?.original?.let { original ->
-            {
-                if (original.recurrenceRule != null) {
-                    pendingScopeAction = { scope ->
-                        viewModel.deleteEvent(original, scope)
-                        eventEditorState = null
-                    }
-                } else {
-                    viewModel.deleteEvent(original)
-                    eventEditorState = null
-                }
-            }
-        },
+        onStateChange = { newState -> eventEditorState = newState },
+        onChooseScope = { runWithScope -> pendingScopeAction = runWithScope },
         onDismiss = { eventEditorState = null },
+        calendarViewModel = viewModel,
         sourceNoteTitle = sourceNoteTitle,
         onOpenSourceNote = onOpenSourceNote?.let { openSourceNote ->
             shownEvent?.let { event ->
