@@ -19,7 +19,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.cog
-import emberr.shared.generated.resources.group
+import emberr.shared.generated.resources.people2
 import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.painterResource
@@ -73,19 +73,10 @@ private fun UserSettingsDesktopMenu(
 
         UserSettingsMenuRow(
             text = "People",
-            icon = painterResource(Res.drawable.group),
+            icon = painterResource(Res.drawable.people2),
             onClick = {
                 onDismiss()
                 onNavigateToPeople()
-            }
-        )
-
-        UserSettingsMenuRow(
-            text = "Settings",
-            icon = painterResource(Res.drawable.cog),
-            onClick = {
-                onDismiss()
-                onNavigateToSettings()
             }
         )
 
@@ -95,6 +86,15 @@ private fun UserSettingsDesktopMenu(
             onClick = {
                 onDismiss()
                 onNavigateToProperties()
+            }
+        )
+
+        UserSettingsMenuRow(
+            text = "Settings",
+            icon = painterResource(Res.drawable.cog),
+            onClick = {
+                onDismiss()
+                onNavigateToSettings()
             }
         )
 
@@ -155,18 +155,18 @@ private fun UserSettingsBottomSheet(
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             UserSettingsSheetRow(
                 text = "People",
-                icon = painterResource(Res.drawable.group)
+                icon = painterResource(Res.drawable.people2)
             ) { closeAnd { onNavigateToPeople() } }
-
-            UserSettingsSheetRow(
-                text = "Settings",
-                icon = painterResource(Res.drawable.cog)
-            ) { closeAnd { onNavigateToSettings() } }
 
             UserSettingsSheetRow(
                 text = "Properties",
                 icon = painterResource(Res.drawable.sliders_horizontal)
             ) { closeAnd { onNavigateToProperties() } }
+
+            UserSettingsSheetRow(
+                text = "Settings",
+                icon = painterResource(Res.drawable.cog)
+            ) { closeAnd { onNavigateToSettings() } }
 
             UserSettingsSheetRow(
                 text = "Trash",

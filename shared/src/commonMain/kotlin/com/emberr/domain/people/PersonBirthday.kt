@@ -24,3 +24,10 @@ fun readPersonBirthday(text: String): PersonBirthday? {
     }.isSuccess
     return birthday.takeIf { isRealDate }
 }
+
+fun PersonBirthday.toIsoText(): String {
+    val monthAndDay = "${twoDigits(month)}-${twoDigits(day)}"
+    return if (year == null) "--$monthAndDay" else "${year.toString().padStart(4, '0')}-$monthAndDay"
+}
+
+private fun twoDigits(number: Int): String = number.toString().padStart(2, '0')
