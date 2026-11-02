@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.model.NoteSearchResult
+import com.emberr.domain.people.PeopleRepository
+import com.emberr.domain.people.PersonSearchResult
+import com.emberr.domain.people.searchPeople
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.presentation.calendar.CalendarEventSearchResult
@@ -48,6 +51,7 @@ private const val QUERY_SETTLE_MILLIS = 90L
  */
 class SearchViewModel(
     private val repository: NoteRepository,
+    private val peopleRepository: PeopleRepository,
     activeSpaceStore: ActiveSpaceStore,
     settingsManager: SettingsManager
 ) : ViewModel() {
@@ -109,6 +113,21 @@ class SearchViewModel(
                         CalendarEventSearchResult(event, categories.firstOrNull { it.id == event.categoryId })
                     }
                 }
+            }
+        }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val personResults: StateFlow<List<PersonSearchResult>> = _query
+        .debounce(QUERY_SETTLE_MILLIS)
+        .map { query -> query.trim() }
+        .distinctUntilChanged()
+        .flatMapLatest { query ->
+            if (query.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                peopleRepository.observePeopleWithDetails().map { people -> searchPeople(people, query) }
             }
         }
         .flowOn(Dispatchers.Default)

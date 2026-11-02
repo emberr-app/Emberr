@@ -43,12 +43,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.NoteSearchResult
+import com.emberr.domain.people.PersonSearchResult
 import com.emberr.presentation.calendar.CalendarEvent
 import com.emberr.presentation.calendar.CalendarEventSearchResult
 import com.emberr.presentation.calendar.matchingDetail
 import com.emberr.presentation.calendar.searchResultDateLabel
 import com.emberr.presentation.calendar.toCategoryColor
 import com.emberr.presentation.home.RenameBottomSheet
+import com.emberr.presentation.people.personDetailSearchLine
+import com.emberr.presentation.people.personDisplayName
+import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import emberr.shared.generated.resources.Res
@@ -62,6 +66,8 @@ import org.jetbrains.compose.resources.painterResource
 
 private const val EMPTY_MESSAGE_DELAY_MILLIS = 350L
 private const val COLLAPSED_EVENT_RESULT_COUNT = 3
+private const val COLLAPSED_PERSON_RESULT_COUNT = 3
+private val PersonResultAvatarSize = 36.dp
 private val ResultShape = RoundedCornerShape(topStart = 6.dp, topEnd = 18.dp, bottomEnd = 18.dp, bottomStart = 18.dp)
 
 /**
@@ -74,9 +80,11 @@ fun SearchResultsList(
     query: String,
     results: List<NoteSearchResult>,
     eventResults: List<CalendarEventSearchResult>,
+    personResults: List<PersonSearchResult>,
     onNoteClick: (String) -> Unit,
     onDailyNoteClick: (String) -> Unit,
     onEventClick: (CalendarEvent) -> Unit,
+    onPersonClick: (personNoteId: String) -> Unit,
     onRenameNote: (noteId: String, newTitle: String) -> Unit,
     onSetNoteFavorite: (noteId: String, isFavorite: Boolean) -> Unit,
     onTrashNote: (noteId: String) -> Unit,
@@ -88,10 +96,12 @@ fun SearchResultsList(
     var showOptionsSheet by remember { mutableStateOf(false) }
     var showRenameSheet by remember { mutableStateOf(false) }
     var areAllEventsShown by remember(query) { mutableStateOf(false) }
+    var areAllPeopleShown by remember(query) { mutableStateOf(false) }
+    val hasNoResults = results.isEmpty() && eventResults.isEmpty() && personResults.isEmpty()
 
-    LaunchedEffect(query, results, eventResults) {
+    LaunchedEffect(query, results, eventResults, personResults) {
         hasSettledOnNoResults = false
-        if (results.isEmpty() && eventResults.isEmpty()) {
+        if (hasNoResults) {
             delay(EMPTY_MESSAGE_DELAY_MILLIS)
             hasSettledOnNoResults = true
         }
@@ -100,15 +110,48 @@ fun SearchResultsList(
     Box(modifier = modifier) {
         when {
             query.isBlank() -> SearchMessage("Start typing to search titles, snippets, and note content.")
-            results.isEmpty() && eventResults.isEmpty() ->
-                if (hasSettledOnNoResults) SearchMessage("No matching notes or events found.")
+            hasNoResults ->
+                if (hasSettledOnNoResults) SearchMessage("No matching notes, events or people found.")
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                if (personResults.isNotEmpty()) {
+                    item(key = "people_header") { SearchSectionHeader("People") }
+                    val shownPersonResults = if (areAllPeopleShown) {
+                        personResults
+                    } else {
+                        personResults.take(COLLAPSED_PERSON_RESULT_COUNT)
+                    }
+                    items(shownPersonResults, key = { "person_${it.person.noteId}" }) { personResult ->
+                        PersonSearchResultRow(
+                            result = personResult,
+                            query = query,
+                            onClick = { onPersonClick(personResult.person.noteId) }
+                        )
+                    }
+                    if (shownPersonResults.size < personResults.size) {
+                        item(key = "people_show_all") {
+                            Text(
+                                text = "Show all ${personResults.size} people",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { areAllPeopleShown = true }
+                                    .padding(horizontal = 4.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
                 if (eventResults.isNotEmpty()) {
-                    item(key = "events_header") { SearchSectionHeader("Events") }
+                    item(key = "events_header") {
+                        SearchSectionHeader(
+                            "Events",
+                            modifier = if (personResults.isNotEmpty()) Modifier.padding(top = 8.dp) else Modifier
+                        )
+                    }
                     val shownEventResults = if (areAllEventsShown) {
                         eventResults
                     } else {
@@ -134,9 +177,9 @@ fun SearchResultsList(
                             )
                         }
                     }
-                    if (results.isNotEmpty()) {
-                        item(key = "notes_header") { SearchSectionHeader("Notes", modifier = Modifier.padding(top = 8.dp)) }
-                    }
+                }
+                if (results.isNotEmpty() && (eventResults.isNotEmpty() || personResults.isNotEmpty())) {
+                    item(key = "notes_header") { SearchSectionHeader("Notes", modifier = Modifier.padding(top = 8.dp)) }
                 }
                 items(results, key = { it.note.noteId }) { result ->
                     SearchResultRow(
@@ -322,6 +365,54 @@ private fun EventSearchResultRow(
                     contentDescription = "Repeats",
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     modifier = Modifier.size(12.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PersonSearchResultRow(
+    result: PersonSearchResult,
+    query: String,
+    onClick: () -> Unit
+) {
+    val person = result.person
+    val trimmedQuery = query.trim()
+    val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+    val name = personDisplayName(person.title)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(ResultShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        PersonAvatar(personNoteId = person.noteId, name = name, icon = person.icon, size = PersonResultAvatarSize)
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(
+                text = highlightMatches(name, trimmedQuery, highlightStyle),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            result.shownDetail?.let { detail ->
+                Text(
+                    text = highlightMatches(personDetailSearchLine(detail), trimmedQuery, highlightStyle),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp)
                 )
             }
         }

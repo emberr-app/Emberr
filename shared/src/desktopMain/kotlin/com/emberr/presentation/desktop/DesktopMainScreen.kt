@@ -130,6 +130,11 @@ import com.emberr.presentation.search.defaultHighlightStyle
 import com.emberr.presentation.search.highlightMatches
 import com.emberr.presentation.trash.TrashScreen
 import com.emberr.presentation.people.PeopleScreen
+import com.emberr.presentation.people.PersonView
+import com.emberr.presentation.people.personDetailSearchLine
+import com.emberr.presentation.people.personDisplayName
+import com.emberr.presentation.shared.components.PersonAvatar
+import com.emberr.domain.people.PersonSearchResult
 import com.emberr.presentation.properties.PropertiesScreen
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
@@ -300,6 +305,8 @@ private fun Modifier.noRippleClickable(interactionSource: MutableInteractionSour
 private const val SEARCH_EMPTY_MESSAGE_DELAY_MS = 350L
 private val SidebarSearchResultShape = RoundedCornerShape(10.dp)
 private const val COLLAPSED_EVENT_RESULT_COUNT = 3
+private const val COLLAPSED_PERSON_RESULT_COUNT = 3
+private val SidebarPersonResultAvatarSize = 28.dp
 
 @Composable
 private fun SidebarSearchBar(
@@ -392,8 +399,10 @@ private fun SidebarSearchResults(
     query: String,
     results: List<NoteSearchResult>,
     eventResults: List<CalendarEventSearchResult>,
+    personResults: List<PersonSearchResult>,
     onResultClick: (NoteSearchResult) -> Unit,
     onEventClick: (CalendarEvent) -> Unit,
+    onPersonClick: (personNoteId: String) -> Unit,
     openInSplitViewActionFor: (NoteSearchResult) -> (() -> Unit)?,
     onRenameNote: (noteId: String, newTitle: String) -> Unit,
     onSetNoteFavorite: (noteId: String, isFavorite: Boolean) -> Unit,
@@ -406,17 +415,20 @@ private fun SidebarSearchResults(
     val resultsListState = rememberLazyListState()
     var hasSettledOnNoResults by remember { mutableStateOf(false) }
     var areAllEventsShown by remember(query) { mutableStateOf(false) }
+    var areAllPeopleShown by remember(query) { mutableStateOf(false) }
     val shownEventResults = if (areAllEventsShown) eventResults else eventResults.take(COLLAPSED_EVENT_RESULT_COUNT)
     val isShowAllEventsVisible = shownEventResults.size < eventResults.size
-    val rowCountBeforeNotes = if (eventResults.isEmpty()) {
-        0
-    } else {
-        1 + shownEventResults.size + (if (isShowAllEventsVisible) 1 else 0) + (if (results.isNotEmpty()) 1 else 0)
-    }
+    val shownPersonResults = if (areAllPeopleShown) personResults else personResults.take(COLLAPSED_PERSON_RESULT_COUNT)
+    val isShowAllPeopleVisible = shownPersonResults.size < personResults.size
+    val personRowCount = if (personResults.isEmpty()) 0 else 1 + shownPersonResults.size + (if (isShowAllPeopleVisible) 1 else 0)
+    val eventRowCount = if (eventResults.isEmpty()) 0 else 1 + shownEventResults.size + (if (isShowAllEventsVisible) 1 else 0)
+    val isNotesHeaderVisible = results.isNotEmpty() && (personResults.isNotEmpty() || eventResults.isNotEmpty())
+    val rowCountBeforeNotes = personRowCount + eventRowCount + (if (isNotesHeaderVisible) 1 else 0)
+    val hasNoResults = results.isEmpty() && eventResults.isEmpty() && personResults.isEmpty()
 
-    LaunchedEffect(query, results, eventResults) {
+    LaunchedEffect(query, results, eventResults, personResults) {
         hasSettledOnNoResults = false
-        if (results.isEmpty() && eventResults.isEmpty()) {
+        if (hasNoResults) {
             delay(SEARCH_EMPTY_MESSAGE_DELAY_MS)
             hasSettledOnNoResults = true
         }
@@ -427,10 +439,10 @@ private fun SidebarSearchResults(
     }
 
     Box(modifier = modifier) {
-        if (results.isEmpty() && eventResults.isEmpty()) {
+        if (hasNoResults) {
             if (hasSettledOnNoResults) {
                 Text(
-                    text = "No notes or events match \"$query\"",
+                    text = "No notes, events or people match \"$query\"",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     textAlign = TextAlign.Center,
@@ -458,8 +470,45 @@ private fun SidebarSearchResults(
                     .smoothWheelScroll(resultsListState),
                 contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 16.dp)
             ) {
+                if (personResults.isNotEmpty()) {
+                    item(key = "people_header") { SidebarSearchSectionTitle("People") }
+                    itemsIndexed(shownPersonResults, key = { _, personResult -> "person_${personResult.person.noteId}" }) { index, personResult ->
+                        Column {
+                            SidebarPersonSearchResultRow(
+                                result = personResult,
+                                query = query,
+                                onClick = { onPersonClick(personResult.person.noteId) }
+                            )
+                            if (index < shownPersonResults.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 10.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                )
+                            }
+                        }
+                    }
+                    if (isShowAllPeopleVisible) {
+                        item(key = "people_show_all") {
+                            Text(
+                                text = "Show all ${personResults.size} people",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .noRippleClickable { areAllPeopleShown = true }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
                 if (eventResults.isNotEmpty()) {
-                    item(key = "events_header") { SidebarSearchSectionTitle("Events") }
+                    item(key = "events_header") {
+                        SidebarSearchSectionTitle(
+                            "Events",
+                            modifier = if (personResults.isNotEmpty()) Modifier.padding(top = 12.dp) else Modifier
+                        )
+                    }
                     itemsIndexed(
                         shownEventResults,
                         key = { _, eventResult -> "event_${eventResult.event.blockId}_${eventResult.event.dateString}" }
@@ -492,10 +541,10 @@ private fun SidebarSearchResults(
                             )
                         }
                     }
-                    if (results.isNotEmpty()) {
-                        item(key = "notes_header") {
-                            SidebarSearchSectionTitle("Notes", modifier = Modifier.padding(top = 12.dp))
-                        }
+                }
+                if (isNotesHeaderVisible) {
+                    item(key = "notes_header") {
+                        SidebarSearchSectionTitle("Notes", modifier = Modifier.padding(top = 12.dp))
                     }
                 }
                 itemsIndexed(results, key = { _, result -> result.note.noteId }) { index, result ->
@@ -535,6 +584,57 @@ private fun SidebarSearchSectionTitle(title: String, modifier: Modifier = Modifi
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         modifier = modifier.padding(start = 10.dp, bottom = 4.dp)
     )
+}
+
+@Composable
+private fun SidebarPersonSearchResultRow(
+    result: PersonSearchResult,
+    query: String,
+    onClick: () -> Unit
+) {
+    val person = result.person
+    val trimmedQuery = query.trim()
+    val name = personDisplayName(person.title)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val rowBackground by animateColorAsState(
+        sidebarRowBackground(isActive = false, isSelected = false, isHovered = isHovered),
+        tween(180, easing = FastOutSlowInEasing),
+        label = "person_search_result_bg"
+    )
+    val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SidebarSearchResultShape)
+            .background(rowBackground)
+            .noRippleClickable(interactionSource, onClick)
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+    ) {
+        PersonAvatar(personNoteId = person.noteId, name = name, icon = person.icon, size = SidebarPersonResultAvatarSize)
+        Spacer(Modifier.width(10.dp))
+        Column {
+            Text(
+                text = highlightMatches(name, trimmedQuery, highlightStyle),
+                style = sidebarRowTextStyle,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            result.shownDetail?.let { detail ->
+                Text(
+                    text = highlightMatches(personDetailSearchLine(detail), trimmedQuery, highlightStyle),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -977,6 +1077,8 @@ fun DesktopMainScreen(
     val searchQuery by searchViewModel.query.collectAsState()
     val searchResults by searchViewModel.results.collectAsState()
     val eventSearchResults by searchViewModel.eventResults.collectAsState()
+    val personSearchResults by searchViewModel.personResults.collectAsState()
+    var personNoteIdOpenedFromSearch by remember { mutableStateOf<String?>(null) }
     val isSearchActive = searchQuery.isNotBlank()
     val searchFieldFocusRequester = remember { FocusRequester() }
     var shouldFocusSearchField by remember { mutableStateOf(false) }
@@ -1316,6 +1418,7 @@ fun DesktopMainScreen(
                         query = searchQuery,
                         results = searchResults,
                         eventResults = eventSearchResults,
+                        personResults = personSearchResults,
                         onResultClick = { result ->
                             if (result.note.isDaily) result.dailyDateToOpen?.let { openDaily(LocalDate.parse(it)) }
                             else openNote(result.note.noteId)
@@ -1325,6 +1428,7 @@ fun DesktopMainScreen(
                             detail = DetailPane.Calendar
                             isPeeking = false
                         },
+                        onPersonClick = { personNoteId -> personNoteIdOpenedFromSearch = personNoteId },
                         openInSplitViewActionFor = { result -> openInSplitViewActionFor(paneForSearchResult(result)) },
                         onRenameNote = { noteId, newTitle ->
                             homeViewModel.renameNote(noteId, newTitle, onDone = searchViewModel::refreshResults)
@@ -2146,6 +2250,10 @@ fun DesktopMainScreen(
                         }
                     }
                 )
+
+                personNoteIdOpenedFromSearch?.let { personNoteId ->
+                    PersonView(personNoteId = personNoteId, onDismiss = { personNoteIdOpenedFromSearch = null })
+                }
 
                 // Sheets
                 if (showTimelineDialog) {

@@ -60,6 +60,21 @@ class PeopleRepositoryImpl(
             PersonWithDetails(person = person, details = details.filterNot { it.isDeleted })
         }.flowOn(Dispatchers.Default)
 
+    override fun observePeopleWithDetails(): Flow<List<PersonWithDetails>> =
+        combine(
+            noteDao.observePeople(ACCOUNT_SPACE_ID),
+            blockDao.observeLiveDetailBlocksOfPeople(ACCOUNT_SPACE_ID)
+        ) { people, detailRows ->
+            val detailsByPersonNoteId = detailRows.groupBy(
+                keySelector = { row -> row.noteId },
+                valueTransform = { row -> decodeBlockOrNull(row.blockDataJson) as? PersonDetailBlock }
+            )
+            people.map { person ->
+                val details = detailsByPersonNoteId[person.noteId].orEmpty().filterNotNull().filterNot { it.isDeleted }
+                PersonWithDetails(person = person, details = details)
+            }
+        }.flowOn(Dispatchers.Default)
+
     override fun observeEventsWithPerson(personNoteId: String): Flow<EventsWithPerson> =
         observeEventsWithAnyone()
             .map { (events, now) -> eventsWithPerson(personNoteId, events, now, TimeZone.currentSystemDefault()) }
