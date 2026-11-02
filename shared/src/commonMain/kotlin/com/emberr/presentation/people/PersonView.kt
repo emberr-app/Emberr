@@ -383,7 +383,7 @@ private class PersonPage(
     val onNewEvent: () -> Unit,
     val onOpenNote: ((String) -> Unit)?
 ) {
-    val firstName: String get() = personFirstName(savedName)
+    val firstName: String get() = personFirstNameOrThem(savedName)
     val metaLine: String get() = personMetaLine(events?.upcoming?.firstOrNull(), events?.past?.firstOrNull(), today)
     val details: List<PersonDetailBlock> get() = personWithDetails?.details.orEmpty()
 }

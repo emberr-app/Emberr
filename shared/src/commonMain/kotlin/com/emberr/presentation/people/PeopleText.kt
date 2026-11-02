@@ -20,7 +20,7 @@ fun personDetailSearchLine(detail: PersonDetailBlock): String {
     return "$heading · ${detail.value}"
 }
 
-fun personFirstName(title: String): String = title.trim().split(Regex("\\s+")).firstOrNull()?.takeIf { it.isNotEmpty() } ?: "them"
+fun personFirstNameOrThem(title: String): String = title.trim().split(Regex("\\s+")).firstOrNull()?.takeIf { it.isNotEmpty() } ?: "them"
 
 fun personGroupLetter(title: String): String {
     val firstCharacter = title.trim().firstOrNull() ?: return "#"
