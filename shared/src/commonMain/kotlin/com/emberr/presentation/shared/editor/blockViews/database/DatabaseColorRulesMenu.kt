@@ -20,6 +20,8 @@ import com.emberr.domain.model.DatabaseFilterCondition
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.valueTypeOf
+import com.emberr.presentation.shared.components.displayName
+import com.emberr.presentation.shared.components.rememberPeopleToPick
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.palette
@@ -79,12 +81,13 @@ internal fun DatabaseColorRulesOption(block: DatabaseBlock, editor: DatabaseBloc
 @Composable
 private fun DatabaseColorRuleOption(block: DatabaseBlock, rule: DatabaseColorRule, editor: DatabaseBlockEditor) {
     fun changeRule(change: (DatabaseColorRule) -> DatabaseColorRule) = editor.changeColorRule(block.id, rule.id, change)
+    val people = rememberPeopleToPick().orEmpty()
 
     DatabaseMenuLayer(
         title = "Color rule",
         anchor = { openLayer ->
             DatabaseMenuOption(
-                label = block.summaryOf(rule.condition),
+                label = block.summaryOf(rule.condition) { personNoteId -> people.firstOrNull { it.id == personNoteId }?.displayName() },
                 icon = { DatabaseColorRuleSwatch(rule) },
                 onClick = openLayer
             )
@@ -141,15 +144,16 @@ private fun DatabaseColorRuleSwatch(rule: DatabaseColorRule) {
     )
 }
 
-private fun DatabaseBlock.summaryOf(condition: DatabaseFilter): String {
-    val valueText = filterValueText(condition, valueTypeOf(condition.target) ?: PropertyValueType.TEXT)
+private fun DatabaseBlock.summaryOf(condition: DatabaseFilter, personNameOf: (personNoteId: String) -> String?): String {
+    val valueText = filterValueText(condition, valueTypeOf(condition.target) ?: PropertyValueType.TEXT, personNameOf)
     return listOfNotNull(labelOf(condition.target), condition.condition.label, valueText).joinToString(" ")
 }
 
-private fun filterValueText(filter: DatabaseFilter, valueType: PropertyValueType): String? = when {
+private fun filterValueText(filter: DatabaseFilter, valueType: PropertyValueType, personNameOf: (personNoteId: String) -> String?): String? = when {
     !filter.condition.needsValue -> null
     valueType.holdsDate && filter.condition == DatabaseFilterCondition.IS_WITHIN -> filter.dateRange?.label?.lowercase()
     valueType.holdsDate -> filter.relativeDate?.label?.lowercase() ?: filter.date?.let { formatPropertyDate(it) }
     valueType.holdsTags -> filter.tagName
+    valueType.holdsPeople -> filter.personNoteId?.let(personNameOf)
     else -> filter.text.trim().takeIf { it.isNotEmpty() }?.let { "\"$it\"" }
 }

@@ -4,6 +4,7 @@ import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.database.withDatabasesAsTables
+import com.emberr.domain.people.personNamesLinkedIn
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.util.export.ExportEngine
@@ -64,7 +65,13 @@ class NoteToolExecutor(
             .associate { it.categoryId to it.name }
 
         val title = metadata.displayTitle()
-        val markdown = ExportEngine.generateMarkdown(blocks, title, noteTitlesById, categoryNamesById)
+        val markdown = ExportEngine.generateMarkdown(
+            blocks = blocks,
+            title = title,
+            noteTitlesById = noteTitlesById,
+            categoryNamesById = categoryNamesById,
+            personNamesById = personNamesLinkedIn(blocks, noteRepository::getNoteById)
+        )
         val limitedMarkdown = if (markdown.length > MAX_NOTE_CHARACTERS) {
             markdown.take(MAX_NOTE_CHARACTERS) + "\n\n[Note truncated - ${markdown.length} characters total]"
         } else {

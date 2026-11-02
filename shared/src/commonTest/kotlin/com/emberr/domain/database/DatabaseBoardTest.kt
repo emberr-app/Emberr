@@ -57,6 +57,31 @@ class DatabaseBoardTest {
     }
 
     @Test
+    fun peopleGroupsAreSortedByNameSkipPeopleWhoAreGoneAndMovingSwapsThePerson() {
+        val peopleColumn = DatabaseColumnTarget.Property(PropertyType.PEOPLE)
+        val personNamesById = mapOf("ada-id" to "Ada", "bob-id" to "Bob")
+        fun peopleRow(noteId: String, vararg personNoteIds: String) = DatabaseRow(
+            noteId = noteId,
+            title = noteId,
+            createdAt = 0L,
+            cellsByColumn = mapOf(
+                peopleColumn to PropertyBlock(id = "people-$noteId", propertyType = PropertyType.PEOPLE, personNoteIds = personNoteIds.toList())
+            ),
+            personNamesById = personNamesById
+        )
+        val rows = listOf(peopleRow("both", "bob-id", "ada-id"), peopleRow("gone", "trashed-id"), peopleRow("bob", "bob-id"))
+
+        val groups = boardGroups(rows, peopleColumn, PropertyValueType.PERSON, emptyList(), DatabaseDateGrouping.MONTH)
+
+        assertEquals(
+            listOf("person-ada-id" to listOf("both"), "person-bob-id" to listOf("both", "bob"), NO_VALUE_GROUP_KEY to listOf("gone")),
+            groups.summary()
+        )
+        val movedCell = rows[0].cell(peopleColumn)!!.movedBetweenGroups(from = groups[1].value, to = DatabaseBoardGroupValue.Person("carl-id", "Carl"))
+        assertEquals(listOf("ada-id", "carl-id"), movedCell.personNoteIds)
+    }
+
+    @Test
     fun aRowWithTwoTagsShowsInBothTagGroups() {
         val rows = listOf(row("a", tags = listOf("Design", "Urgent")), row("b", tags = listOf("Design")))
 
@@ -327,9 +352,9 @@ class DatabaseBoardTest {
     }
 
     @Test
-    fun onlyChoiceTagsCheckboxAndDatePropertiesCanGroupABoard() {
+    fun onlyChoiceTagsPeopleCheckboxAndDatePropertiesCanGroupABoard() {
         assertEquals(
-            listOf(PropertyValueType.DATE, PropertyValueType.SINGLE_CHOICE, PropertyValueType.TAGS, PropertyValueType.CHECKBOX),
+            listOf(PropertyValueType.DATE, PropertyValueType.SINGLE_CHOICE, PropertyValueType.TAGS, PropertyValueType.PERSON, PropertyValueType.CHECKBOX),
             PropertyValueType.entries.filter(::canGroupBy)
         )
     }

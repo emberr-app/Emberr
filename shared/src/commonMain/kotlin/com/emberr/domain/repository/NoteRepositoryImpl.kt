@@ -75,6 +75,8 @@ import com.emberr.domain.database.todayInThisTimeZone
 import com.emberr.domain.database.withDatabaseColumnShown
 import com.emberr.domain.database.withRowIdsReplaced
 import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
+import com.emberr.domain.people.personNamesById
+import com.emberr.domain.people.personNamesLinkedIn
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
@@ -1873,8 +1875,10 @@ class NoteRepositoryImpl(
     override fun observeDatabaseRows(databaseId: String): Flow<List<DatabaseRow>> =
         combine(
             noteDao.observeRowNotesInTable(databaseId),
-            blockDao.observeLivePropertyBlocksOfRowsInTable(databaseId)
-        ) { rowNotes, propertyBlockEntities ->
+            blockDao.observeLivePropertyBlocksOfRowsInTable(databaseId),
+            noteDao.observePeople(ACCOUNT_SPACE_ID)
+        ) { rowNotes, propertyBlockEntities, people ->
+            val personNamesById = people.personNamesById()
             val blocksByRowNoteId = propertyBlockEntities.groupBy(
                 keySelector = { it.noteId },
                 valueTransform = { decodeBlockOrNull(it.blockDataJson) }
@@ -1886,7 +1890,8 @@ class NoteRepositoryImpl(
                     createdAt = rowNote.createdAt,
                     blocks = blocksByRowNoteId[rowNote.noteId].orEmpty().filterNotNull(),
                     icon = rowNote.icon,
-                    coverImagePath = rowNote.coverImagePath
+                    coverImagePath = rowNote.coverImagePath,
+                    personNamesById = personNamesById
                 )
             }
         }
@@ -2299,7 +2304,12 @@ class NoteRepositoryImpl(
     override suspend fun indexNote(metadata: NoteMetadataEntity, content: NoteContent) =
         withContext(Dispatchers.IO) {
             try {
-                noteIndexer.indexNote(metadata, withDatabaseTitlesFilledIn(content), databaseRowLocationOf(metadata))
+                noteIndexer.indexNote(
+                    metadata = metadata,
+                    content = withDatabaseTitlesFilledIn(content),
+                    rowLocation = databaseRowLocationOf(metadata),
+                    personNamesById = personNamesLinkedIn(content.blocks, noteDao::getNoteById)
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -2374,7 +2384,11 @@ class NoteRepositoryImpl(
     override suspend fun indexDailyNote(dateString: String, content: NoteContent, metadata: NoteMetadataEntity) =
         withContext(Dispatchers.IO) {
             try {
-                noteIndexer.indexNote(metadata, withDatabaseTitlesFilledIn(content))
+                noteIndexer.indexNote(
+                    metadata = metadata,
+                    content = withDatabaseTitlesFilledIn(content),
+                    personNamesById = personNamesLinkedIn(content.blocks, noteDao::getNoteById)
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }

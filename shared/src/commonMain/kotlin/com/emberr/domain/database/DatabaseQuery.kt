@@ -10,7 +10,6 @@ import com.emberr.domain.model.DatabaseRelativeDate
 import com.emberr.domain.model.DatabaseSort
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.numberOrNull
-import com.emberr.domain.model.valueAsText
 import com.emberr.domain.model.valueTypeOf
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -40,6 +39,12 @@ fun filterConditionsFor(valueType: PropertyValueType): List<DatabaseFilterCondit
     PropertyValueType.LINK,
     PropertyValueType.TAGS,
     PropertyValueType.FORMULA -> listOf(
+        DatabaseFilterCondition.CONTAINS,
+        DatabaseFilterCondition.DOES_NOT_CONTAIN,
+        DatabaseFilterCondition.IS_EMPTY,
+        DatabaseFilterCondition.IS_NOT_EMPTY
+    )
+    PropertyValueType.PERSON -> listOf(
         DatabaseFilterCondition.CONTAINS,
         DatabaseFilterCondition.DOES_NOT_CONTAIN,
         DatabaseFilterCondition.IS_EMPTY,
@@ -127,6 +132,7 @@ private fun DatabaseFilter.isUsable(valueType: PropertyValueType): Boolean {
         valueType.holdsDate && condition == DatabaseFilterCondition.IS_WITHIN -> dateRange != null
         valueType.holdsDate -> relativeDate != null || date != null
         valueType.holdsTags -> !tagName.isNullOrBlank()
+        valueType.holdsPeople -> !personNoteId.isNullOrBlank()
         valueType.holdsNumber -> text.trim().toDoubleOrNull() != null
         else -> text.isNotBlank()
     }
@@ -139,6 +145,7 @@ private fun DatabaseRow.matches(filter: DatabaseFilter, valueType: PropertyValue
     filter.condition == DatabaseFilterCondition.IS_UNCHECKED -> !isCheckedAt(filter.target)
     valueType.holdsDate -> dateMatches(dateAt(filter.target), filter, today)
     valueType.holdsTags -> tagsMatch(tagsAt(filter.target), filter)
+    valueType.holdsPeople -> peopleMatch(cell(filter.target)?.personNoteIds.orEmpty(), filter)
     valueType.holdsNumber -> numberMatches(numberAt(filter.target), filter)
     else -> textMatches(displayValueAt(filter.target), filter)
 }
@@ -188,6 +195,15 @@ internal fun tagsMatch(tags: List<String>, filter: DatabaseFilter): Boolean {
     }
 }
 
+internal fun peopleMatch(personNoteIds: List<String>, filter: DatabaseFilter): Boolean {
+    val includesPerson = filter.personNoteId in personNoteIds
+    return when (filter.condition) {
+        DatabaseFilterCondition.CONTAINS -> includesPerson
+        DatabaseFilterCondition.DOES_NOT_CONTAIN -> !includesPerson
+        else -> true
+    }
+}
+
 private fun rowOrder(database: DatabaseBlock, sorts: List<DatabaseSort>): Comparator<DatabaseRow> {
     val creationOrder = compareBy<DatabaseRow>({ it.createdAt }, { it.noteId })
     val sortOrders = sorts.mapNotNull { sort ->
@@ -219,7 +235,7 @@ private fun compareSortValues(first: DatabaseRow, second: DatabaseRow, sort: Dat
 internal fun DatabaseRow.isEmptyAt(target: DatabaseColumnTarget): Boolean = displayValueAt(target).isBlank()
 
 internal fun DatabaseRow.displayValueAt(target: DatabaseColumnTarget): String =
-    if (target == DatabaseColumnTarget.NotesTitle) title else formulaResult(target)?.displayText ?: cell(target)?.valueAsText().orEmpty()
+    if (target == DatabaseColumnTarget.NotesTitle) title else formulaResult(target)?.displayText ?: cellText(target)
 
 internal fun DatabaseRow.dateAt(target: DatabaseColumnTarget): LocalDate? =
     (formulaResult(target) as? FormulaValue.DateValue)?.date ?: cell(target)?.date

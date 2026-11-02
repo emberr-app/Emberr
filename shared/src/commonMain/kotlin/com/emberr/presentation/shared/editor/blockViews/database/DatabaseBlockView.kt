@@ -79,6 +79,7 @@ import androidx.compose.ui.unit.sp
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.LoadMoreButton
+import com.emberr.presentation.shared.components.ProvidePeopleToPick
 import com.emberr.presentation.shared.components.NewItemButtonColor
 import com.emberr.domain.database.DatabaseRow
 import com.emberr.domain.database.activeView
@@ -193,16 +194,18 @@ fun DatabaseBlockView(
                 block.withSharedSettingsFrom(shownSettings.settings).withActiveViewOf(deviceLayout)
             }
             CompositionLocalProvider(LocalBringIntoViewSpec provides ScrollOnlyWhenHiddenBringIntoViewSpec) {
-                DatabaseBlockContent(
-                    block = shownBlock,
-                    savedRows = savedRows,
-                    editor = editor,
-                    inSelectionMode = inSelectionMode,
-                    onToggleSelection = onToggleSelection,
-                    onOpenRow = onOpenRow,
-                    onDelete = onDelete,
-                    runAfterKeyboardCloses = runAfterKeyboardCloses
-                )
+                ProvidePeopleToPick {
+                    DatabaseBlockContent(
+                        block = shownBlock,
+                        savedRows = savedRows,
+                        editor = editor,
+                        inSelectionMode = inSelectionMode,
+                        onToggleSelection = onToggleSelection,
+                        onOpenRow = onOpenRow,
+                        onDelete = onDelete,
+                        runAfterKeyboardCloses = runAfterKeyboardCloses
+                    )
+                }
             }
         }
     }

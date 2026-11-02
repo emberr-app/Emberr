@@ -70,7 +70,12 @@ class NoteIndexer(
     private fun timestampToDate(millis: Long): String =
         dateOnlyFormatter.format(Date(millis))
 
-    suspend fun indexNote(metadata: NoteMetadataEntity, content: NoteContent, rowLocation: DatabaseRowLocation? = null) {
+    suspend fun indexNote(
+        metadata: NoteMetadataEntity,
+        content: NoteContent,
+        rowLocation: DatabaseRowLocation? = null,
+        personNamesById: Map<String, String> = emptyMap()
+    ) {
         if (settingsManager.isAiFeaturesDisabled()) return
         if (aiEngine.unsupportedHardwareReason != null) return
         if (metadata.noteId == "global_pinned") return
@@ -87,7 +92,8 @@ class NoteIndexer(
                 block = block,
                 allBlocks = content.blocks,
                 isDaily = metadata.isDaily,
-                noteDate = metadata.dateString
+                noteDate = metadata.dateString,
+                personNamesById = personNamesById
             )
 
             if (!blockText.isNullOrBlank()) {
@@ -178,7 +184,8 @@ class NoteIndexer(
         block: NoteBlock,
         allBlocks: List<NoteBlock>,
         isDaily: Boolean,
-        noteDate: String?
+        noteDate: String?,
+        personNamesById: Map<String, String>
     ): String? = when (block) {
 
         is TextBlock -> block.text.trim().ifBlank { null }
@@ -204,7 +211,7 @@ class NoteIndexer(
             if (children.isNotEmpty()) {
                 appendLine()
                 children.forEach { child ->
-                    val childText = extractTextFromBlock(child, allBlocks, isDaily, noteDate)
+                    val childText = extractTextFromBlock(child, allBlocks, isDaily, noteDate, personNamesById)
                     if (!childText.isNullOrBlank()) appendLine("  $childText")
                 }
             }
@@ -261,7 +268,7 @@ class NoteIndexer(
         is ThreeDotDividerBlock    -> null
         is LinkedNoteBlock -> null
         is CanvasBlock -> null
-        is PropertyBlock -> block.valueAsText().takeIf { it.isNotBlank() }?.let { "${block.label}: $it" }
+        is PropertyBlock -> block.valueAsText { personNamesById[it] }.takeIf { it.isNotBlank() }?.let { "${block.label}: $it" }
         is DatabaseBlock -> block.title.takeIf { it.isNotBlank() }?.let { "Database: $it" }
         is MovieBlock -> block.details?.let { details ->
             buildString {

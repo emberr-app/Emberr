@@ -240,7 +240,7 @@ abstract class BaseEditorViewModel(
                     is CalloutBlock -> "${block.id}:${block.text}"
                     is CodeBlock -> "${block.id}:${block.code}"
                     is QuoteBlock -> "${block.id}:${block.text}"
-                    is PropertyBlock -> "${block.id}:${block.label}:${block.valueAsText()}"
+                    is PropertyBlock -> "${block.id}:${block.label}:${block.valueAsText()}:${block.personNoteIds.joinToString(",")}"
                     is DatabaseBlock -> "${block.id}:${block.title}"
                     is MovieBlock -> "${block.id}:${block.summaryLine()}"
                     is WatchlistBlock -> "${block.id}:${block.title}"
@@ -2907,6 +2907,14 @@ abstract class BaseEditorViewModel(
         val now = System.currentTimeMillis()
         modifyBlocks { list ->
             mapBlockById(list, blockId) { if (it is PropertyBlock) it.copy(tags = tags, updatedAt = now) else it }
+        }
+        scheduleAutosave()
+    }
+
+    fun updatePropertyPeople(blockId: String, personNoteIds: List<String>) {
+        val now = System.currentTimeMillis()
+        modifyBlocks { list ->
+            mapBlockById(list, blockId) { if (it is PropertyBlock) it.copy(personNoteIds = personNoteIds, updatedAt = now) else it }
         }
         scheduleAutosave()
     }

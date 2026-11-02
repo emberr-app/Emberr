@@ -486,6 +486,10 @@ class DatabaseBlockEditor(
         writeCellNow(blockId, rowNoteId, column) { it.copy(isChecked = isChecked) }
     }
 
+    fun updateCellPeople(blockId: String, rowNoteId: String, column: DatabaseColumnTarget, personNoteIds: List<String>) {
+        writeCellNow(blockId, rowNoteId, column) { it.copy(personNoteIds = personNoteIds) }
+    }
+
     fun finishTyping() {
         writeTextEditsNow()
         writeInOrder { host.endDatabaseTypingStep() }

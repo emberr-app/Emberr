@@ -37,12 +37,13 @@ fun DatabaseBlock.titleMatchingFilters(title: String): String =
         }
 
 private fun PropertyBlock.withValueMatching(filter: DatabaseFilter, today: LocalDate): PropertyBlock = when {
-    filter.condition == DatabaseFilterCondition.IS_EMPTY -> copy(text = "", tags = emptyList()).withDateRange(PropertyDateRange())
+    filter.condition == DatabaseFilterCondition.IS_EMPTY -> copy(text = "", tags = emptyList(), personNoteIds = emptyList()).withDateRange(PropertyDateRange())
     filter.condition == DatabaseFilterCondition.IS_NOT_EMPTY -> this
     filter.condition == DatabaseFilterCondition.IS_CHECKED -> copy(isChecked = true)
     filter.condition == DatabaseFilterCondition.IS_UNCHECKED -> copy(isChecked = false)
     valueType.holdsDate -> withDateMatching(filter, today)
     valueType.holdsTags -> withTagsMatching(filter)
+    valueType.holdsPeople -> withPeopleMatching(filter)
     valueType.holdsNumber -> withNumberMatching(filter)
     else -> copy(text = text.textMatching(filter))
 }
@@ -76,6 +77,16 @@ private fun PropertyBlock.withTagsMatching(filter: DatabaseFilter): PropertyBloc
             copy(tags = if (valueType.allowsManyTags) tags + tagName else listOf(tagName))
         DatabaseFilterCondition.IS_NOT, DatabaseFilterCondition.DOES_NOT_CONTAIN ->
             copy(tags = tags.filterNot { it.equals(tagName, ignoreCase = true) })
+        else -> this
+    }
+}
+
+private fun PropertyBlock.withPeopleMatching(filter: DatabaseFilter): PropertyBlock {
+    val personNoteId = filter.personNoteId ?: return this
+    if (peopleMatch(personNoteIds, filter)) return this
+    return when (filter.condition) {
+        DatabaseFilterCondition.CONTAINS -> copy(personNoteIds = personNoteIds + personNoteId)
+        DatabaseFilterCondition.DOES_NOT_CONTAIN -> copy(personNoteIds = personNoteIds - personNoteId)
         else -> this
     }
 }

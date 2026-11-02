@@ -4,13 +4,13 @@ import com.emberr.domain.model.*
 
 object ExportEngine {
 
-    fun generatePlainText(blocks: List<NoteBlock>, title: String? = null): String {
+    fun generatePlainText(blocks: List<NoteBlock>, title: String? = null, personNamesById: Map<String, String> = emptyMap()): String {
         val builder = StringBuilder()
         if (!title.isNullOrBlank()) {
             builder.appendLine(title)
             builder.appendLine()
         }
-        buildPlainText(blocks, builder)
+        buildPlainText(blocks, builder, personNamesById)
         return builder.toString().trim()
     }
 
@@ -19,16 +19,18 @@ object ExportEngine {
         title: String? = null,
         noteTitlesById: Map<String, String> = emptyMap(),
         categoryNamesById: Map<String, String> = emptyMap(),
-        attachmentPathsByStoredName: Map<String, String> = emptyMap()
+        attachmentPathsByStoredName: Map<String, String> = emptyMap(),
+        personNamesById: Map<String, String> = emptyMap()
     ): String = NoteMarkdownWriter.writeMarkdown(
         blocks = blocks,
         title = title,
         noteTitlesById = noteTitlesById,
         categoryNamesById = categoryNamesById,
-        attachmentPathsByStoredName = attachmentPathsByStoredName
+        attachmentPathsByStoredName = attachmentPathsByStoredName,
+        personNamesById = personNamesById
     )
 
-    private fun buildPlainText(blocks: List<NoteBlock>, builder: StringBuilder) {
+    private fun buildPlainText(blocks: List<NoteBlock>, builder: StringBuilder, personNamesById: Map<String, String>) {
         blocks.filter { !it.isDeleted }.forEach { block ->
             val indent = "\t".repeat(block.indentationLevel)
 
@@ -56,7 +58,7 @@ object ExportEngine {
                 }
                 is VoiceBlock -> { /* Ignored */ }
                 is CanvasBlock -> builder.appendLine("${indent}[Canvas]")
-                is PropertyBlock -> builder.appendLine("$indent${block.label}: ${block.valueAsText()}")
+                is PropertyBlock -> builder.appendLine("$indent${block.label}: ${block.valueAsText { personNamesById[it] }}")
                 is DatabaseBlock -> block.title.takeIf { it.isNotBlank() }?.let { builder.appendLine("$indent$it") }
                 is MovieBlock -> block.summaryLine()?.let { builder.appendLine("$indent$it") }
                 is WatchlistBlock -> block.title.takeIf { it.isNotBlank() }?.let { builder.appendLine("$indent$it") }

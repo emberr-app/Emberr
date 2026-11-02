@@ -52,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.emberr.presentation.shared.components.GestureCoordinates
+import com.emberr.presentation.shared.components.PersonPill
+import com.emberr.presentation.shared.components.rememberPeopleToPick
 import com.emberr.presentation.shared.components.boardDragGesture
 import com.emberr.presentation.shared.cover.coverAlignmentFor
 import com.emberr.presentation.shared.cover.rememberSavedCoverPosition
@@ -70,6 +72,7 @@ import com.emberr.domain.model.columnKey
 import com.emberr.domain.model.numberOrNull
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagChip
+import com.emberr.presentation.shared.editor.blockViews.property.peopleLinkedBy
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDateRange
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import emberr.shared.generated.resources.Res
@@ -325,8 +328,8 @@ internal fun DatabaseRowCard(
                 val numberFormat = block.numberFormats[column.columnKey]
                 if (formulaResult != null) {
                     DatabaseCardFormulaValue(result = formulaResult, numberFormat = numberFormat)
-                } else if (cell != null && cell.hasValueToShowOnCard()) {
-                    DatabaseCardValue(cell = cell, numberFormat = numberFormat)
+                } else if (cell != null && cell.hasValueToShowOnCard(row.personNamesById)) {
+                    DatabaseCardValue(cell = cell, numberFormat = numberFormat, onOpenRow = { if (!inSelectionMode) onOpen() })
                 }
             }
         }
@@ -364,8 +367,9 @@ private fun DatabaseCardCover(noteId: String, coverImagePath: String?, height: D
     }
 }
 
-private fun PropertyBlock.hasValueToShowOnCard(): Boolean = when {
+private fun PropertyBlock.hasValueToShowOnCard(personNamesById: Map<String, String>): Boolean = when {
     valueType.holdsTags -> tags.isNotEmpty()
+    valueType.holdsPeople -> personNoteIds.any { it in personNamesById }
     valueType.holdsCheck -> isChecked
     valueType.holdsDate -> date != null
     else -> text.isNotBlank()
@@ -389,7 +393,7 @@ private fun DatabaseCardFormulaValue(result: FormulaValue, numberFormat: Databas
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun DatabaseCardValue(cell: PropertyBlock, numberFormat: DatabaseNumberFormat?) {
+private fun DatabaseCardValue(cell: PropertyBlock, numberFormat: DatabaseNumberFormat?, onOpenRow: () -> Unit) {
     val valueColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
     val number = cell.numberOrNull()
     when {
@@ -401,6 +405,17 @@ private fun DatabaseCardValue(cell: PropertyBlock, numberFormat: DatabaseNumberF
             ) {
                 cell.tags.forEach { tagName ->
                     PropertyTagChip(tagName = tagName, tagPoolKey = cell.tagPoolKey, textStyle = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
+        cell.valueType.holdsPeople -> {
+            val people = rememberPeopleToPick().orEmpty()
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                peopleLinkedBy(cell, people).forEach { person ->
+                    PersonPill(person = person, onOpen = onOpenRow, onRemove = null)
                 }
             }
         }

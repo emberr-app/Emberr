@@ -198,7 +198,8 @@ data class DatabaseFilter(
     val date: LocalDate? = null,
     val relativeDate: DatabaseRelativeDate? = null,
     val dateRange: DatabaseDateRange? = null,
-    val tagName: String? = null
+    val tagName: String? = null,
+    val personNoteId: String? = null
 )
 
 @Immutable

@@ -14,6 +14,7 @@ import com.emberr.domain.model.DatabaseViewType
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyType
 import com.emberr.domain.model.PropertyValueType
+import com.emberr.domain.model.TableBlock
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -517,6 +518,27 @@ class DatabaseQueryTest {
 
         assertEquals(listOf("bob"), noteIdsOf(applyFiltersAndSort(rows, database.copy(activeViewId = "table"))))
         assertEquals(listOf("bob", "ada"), noteIdsOf(applyFiltersAndSort(rows, database.copy(activeViewId = "board"))))
+    }
+
+    @Test
+    fun aPeopleColumnIsSearchedAndExportedByNameAndHidesPeopleWhoAreGone() {
+        val peopleColumn = DatabaseColumnTarget.Property(PropertyType.PEOPLE)
+        val database = DatabaseBlock(id = "block-1", databaseId = "database-1", columns = listOf(peopleColumn))
+        val linkedRow = DatabaseRow(
+            noteId = "linked",
+            title = "Kickoff",
+            createdAt = 0L,
+            cellsByColumn = mapOf(
+                peopleColumn to PropertyBlock(id = "people-linked", propertyType = PropertyType.PEOPLE, personNoteIds = listOf("ada-id", "trashed-id"))
+            ),
+            personNamesById = mapOf("ada-id" to "Ada Lovelace")
+        )
+        val rows = listOf(linkedRow, row("unlinked", title = "Lunch"))
+
+        assertEquals(listOf("linked"), noteIdsOf(rows.matchingSearch("lovelace", database)))
+        assertEquals(emptyList<String>(), noteIdsOf(rows.matchingSearch("ada-id", database)))
+        val exportedTable = database.asExportBlocks(rows).single() as TableBlock
+        assertEquals(listOf("Kickoff", "Ada Lovelace"), exportedTable.rows[1])
     }
 
     @Test

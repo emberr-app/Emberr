@@ -47,6 +47,9 @@ import com.emberr.domain.model.withDateRange
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
+import com.emberr.presentation.shared.components.PersonAvatar
+import com.emberr.presentation.shared.components.displayName
+import com.emberr.presentation.shared.components.rememberPeopleToPick
 import com.emberr.presentation.shared.editor.blockViews.property.rememberPropertyTagColor
 import com.emberr.ui.theme.tableGridLineColor
 import emberr.shared.generated.resources.Res
@@ -235,6 +238,7 @@ private fun DatabaseBulkValueChoices(
             DatabaseMenuOption(label = "Unchecked", isSelected = false, onClick = { onSet { it.copy(isChecked = false) } })
         }
         valueType.holdsDate -> DatabaseBulkDateChoices(onSet = onSet)
+        valueType.holdsPeople -> DatabaseBulkPeopleChoices(onSet = onSet)
         else -> DatabaseBulkTextChoices(holdsNumber = valueType.holdsNumber, onSet = onSet)
     }
 }
@@ -270,6 +274,25 @@ private fun DatabaseBulkOptionChoices(
     }
     DatabaseMenuSectionDivider()
     DatabaseBulkClearOption(onClear = { onSet { it.copy(tags = emptyList()) } })
+}
+
+@Composable
+private fun DatabaseBulkPeopleChoices(onSet: ((PropertyBlock) -> PropertyBlock) -> Unit) {
+    val people = rememberPeopleToPick().orEmpty()
+
+    if (people.isEmpty()) {
+        DatabaseMenuMessage(text = "No people added yet", color = MaterialTheme.colorScheme.outline)
+    }
+    people.forEach { person ->
+        DatabaseMenuOption(
+            label = person.displayName(),
+            isSelected = false,
+            icon = { PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = 16.dp) },
+            onClick = { onSet { it.copy(personNoteIds = listOf(person.id)) } }
+        )
+    }
+    DatabaseMenuSectionDivider()
+    DatabaseBulkClearOption(onClear = { onSet { it.copy(personNoteIds = emptyList()) } })
 }
 
 @Composable

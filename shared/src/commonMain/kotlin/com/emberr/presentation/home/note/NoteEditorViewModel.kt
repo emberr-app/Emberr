@@ -2,6 +2,7 @@ package com.emberr.presentation.home.note
 
 import androidx.lifecycle.viewModelScope
 import com.emberr.domain.people.PeopleRepository
+import com.emberr.domain.people.personNamesLinkedIn
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.database.withDatabasesAsTables
 import com.emberr.domain.model.*
@@ -441,7 +442,11 @@ class NoteEditorViewModel(
 
     suspend fun generatePlainTextExport(): String {
         val title = _noteTitle.value.ifBlank { "Untitled Note" }
-        val body = com.emberr.domain.util.export.ExportEngine.generatePlainText(blocksForExport())
+        val blocks = blocksForExport()
+        val body = com.emberr.domain.util.export.ExportEngine.generatePlainText(
+            blocks = blocks,
+            personNamesById = personNamesLinkedIn(blocks, repository::getNoteById)
+        )
         return "$title\n\n$body"
     }
 
@@ -463,7 +468,8 @@ class NoteEditorViewModel(
         val body = com.emberr.domain.util.export.ExportEngine.generateMarkdown(
             blocks = blocks,
             categoryNamesById = categoryNamesById,
-            attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport }
+            attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport },
+            personNamesById = personNamesLinkedIn(blocks, repository::getNoteById)
         )
         return "# $title\n\n$body"
     }

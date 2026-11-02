@@ -18,9 +18,11 @@ import kotlinx.datetime.minus
 const val NO_VALUE_GROUP_KEY = "no-value"
 private const val CHECKED_GROUP_KEY = "checked"
 private const val UNCHECKED_GROUP_KEY = "unchecked"
+private const val PERSON_GROUP_KEY_START = "person-"
 
 sealed class DatabaseBoardGroupValue {
     data class Option(val name: String) : DatabaseBoardGroupValue()
+    data class Person(val personNoteId: String, val name: String) : DatabaseBoardGroupValue()
     data class Checkbox(val isChecked: Boolean) : DatabaseBoardGroupValue()
     data class DatePeriod(val start: LocalDate, val grouping: DatabaseDateGrouping) : DatabaseBoardGroupValue()
     data object NoValue : DatabaseBoardGroupValue()
@@ -35,6 +37,7 @@ data class DatabaseBoardGroup(
 val valueTypesThatCanGroupABoard: List<PropertyValueType> = listOf(
     PropertyValueType.SINGLE_CHOICE,
     PropertyValueType.TAGS,
+    PropertyValueType.PERSON,
     PropertyValueType.CHECKBOX,
     PropertyValueType.DATE
 )
@@ -89,6 +92,17 @@ fun boardGroups(
             )
         } + noValueGroup(rows.filter { it.dateAt(column) == null })
     }
+    valueType.holdsPeople -> {
+        val personNamesById = rows.firstOrNull()?.personNamesById.orEmpty()
+        val linkedPersonNoteIds = rows.flatMap { it.livePersonNoteIdsAt(column) }.distinct()
+        linkedPersonNoteIds.sortedBy { personNamesById.getValue(it).lowercase() }.map { personNoteId ->
+            DatabaseBoardGroup(
+                key = "$PERSON_GROUP_KEY_START$personNoteId",
+                value = DatabaseBoardGroupValue.Person(personNoteId, personNamesById.getValue(personNoteId)),
+                rows = rows.filter { row -> personNoteId in row.livePersonNoteIdsAt(column) }
+            )
+        } + noValueGroup(rows.filter { it.livePersonNoteIdsAt(column).isEmpty() })
+    }
     else -> {
         val optionNames = (savedOptionNames + rows.flatMap { it.tagsAt(column) }).distinctBy { it.lowercase() }
         optionNames.map { optionName ->
@@ -125,6 +139,13 @@ fun PropertyBlock.movedBetweenGroups(from: DatabaseBoardGroupValue, to: Database
         copy(tags = movedTags)
     }
     valueType.holdsCheck -> copy(isChecked = to is DatabaseBoardGroupValue.Checkbox && to.isChecked)
+    valueType.holdsPeople -> when (to) {
+        is DatabaseBoardGroupValue.Person -> {
+            val withoutOldGroup = if (from is DatabaseBoardGroupValue.Person) personNoteIds - from.personNoteId else personNoteIds
+            copy(personNoteIds = (withoutOldGroup + to.personNoteId).distinct())
+        }
+        else -> copy(personNoteIds = emptyList())
+    }
     valueType.holdsDate -> when (to) {
         is DatabaseBoardGroupValue.DatePeriod -> {
             val alreadyInPeriod = date?.let { periodStartOf(it, to.grouping) } == to.start
