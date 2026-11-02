@@ -94,6 +94,7 @@ import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
@@ -180,6 +181,11 @@ fun CalendarScreen(
     val events by remember(selectedDate) { viewModel.eventsForDate(selectedDate.toString()) }
         .collectAsState(initial = emptyList())
     var eventEditorState by remember { mutableStateOf<EventEditorState?>(null) }
+    var openedBirthdayPersonNoteId by remember { mutableStateOf<String?>(null) }
+    val openEvent: (CalendarEvent) -> Unit = { event ->
+        val birthdayPersonNoteId = event.birthdayPersonNoteId
+        if (birthdayPersonNoteId != null) openedBirthdayPersonNoteId = birthdayPersonNoteId else eventEditorState = event.toEditorState()
+    }
     val shownEvent = eventEditorState?.original
     val sourceNoteTitle by produceState<String?>(null, shownEvent?.blockId) {
         value = shownEvent?.let { event -> viewModel.sourceNoteTitle(event) }
@@ -307,9 +313,7 @@ fun CalendarScreen(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(start = sidePanelSpace)
             ) {
-                val onEventClick: (CalendarEvent) -> Unit = { event ->
-                    eventEditorState = event.toEditorState()
-                }
+                val onEventClick: (CalendarEvent) -> Unit = openEvent
                 val onEventResize: (CalendarEvent, EventTimeRange) -> Unit = { event, newTimeRange ->
                     if (event.recurrenceRule == null) {
                         viewModel.resizeEvent(event, newTimeRange)
@@ -575,7 +579,7 @@ fun CalendarScreen(
                     slideDirection = slideDirection,
                     viewModel = viewModel,
                     categories = categories,
-                    onEventClick = { event -> eventEditorState = event.toEditorState() },
+                    onEventClick = openEvent,
                     onEmptyAllDayClick = { date ->
                         eventEditorState = EventEditorState(
                             original = null,
@@ -781,9 +785,13 @@ fun CalendarScreen(
         date = allDayListDate,
         events = allDayListEvents.filter { it.allDay != null },
         categories = categories,
-        onEventClick = { event -> eventEditorState = event.toEditorState() },
+        onEventClick = openEvent,
         onDismiss = { allDayListDate = null }
     )
+
+    openedBirthdayPersonNoteId?.let { personNoteId ->
+        PersonView(personNoteId = personNoteId, onDismiss = { openedBirthdayPersonNoteId = null })
+    }
 
     pendingScopeAction?.let { runWithScope ->
         RecurrenceScopeChooser(

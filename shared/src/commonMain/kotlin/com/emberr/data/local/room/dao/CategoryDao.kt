@@ -27,6 +27,9 @@ interface CategoryDao {
     @Query("SELECT * FROM calendar_categories WHERE categoryId = :categoryId LIMIT 1")
     suspend fun getCategoryById(categoryId: String): CategoryEntity?
 
+    @Query("SELECT * FROM calendar_categories WHERE categoryId = :categoryId LIMIT 1")
+    fun observeCategoryById(categoryId: String): Flow<CategoryEntity?>
+
     @Query("SELECT * FROM calendar_categories WHERE updatedAt > :timestamp")
     suspend fun getCategoriesModifiedSince(timestamp: Long): List<CategoryEntity>
 

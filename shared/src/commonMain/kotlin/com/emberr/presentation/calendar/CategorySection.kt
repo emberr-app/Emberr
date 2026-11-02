@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.SpaceEntity
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.settings.SettingsActionRow
 import com.emberr.presentation.settings.SettingsDivider
@@ -127,7 +128,7 @@ fun CategorySection(
                 onColorChange = { editorState = editorState?.copy(colorHex = it) },
                 onCancel = { editorState = null },
                 onSave = { performSave(); editorState = null },
-                onDelete = { onDeleteCategory(category.id); editorState = null }
+                onDelete = if (category.id == BIRTHDAYS_CATEGORY_ID) null else { { onDeleteCategory(category.id); editorState = null } }
             )
             SettingsDivider()
         }
@@ -184,7 +185,7 @@ fun CategorySection(
             expanded = state != null,
             onDismiss = { editorState = null },
             title = if (state?.categoryId == null) "Add Category" else "Edit Category",
-            headerAction = state?.categoryId?.let { id ->
+            headerAction = state?.categoryId?.takeIf { id -> id != BIRTHDAYS_CATEGORY_ID }?.let { id ->
                 EmberrBottomSheetAction(
                     icon = painterResource(Res.drawable.trash),
                     contentDescription = "Delete",
@@ -235,7 +236,7 @@ private fun CategoryRow(
     onColorChange: (String) -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: (() -> Unit)?
 ) {
     val tapAnchor = rememberMenuTapAnchor()
     val shownEditorState = keepShowingWhileClosing(editorState)

@@ -91,6 +91,7 @@ import com.emberr.domain.model.lastDate
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.model.RecurrenceFrequency
 import com.emberr.domain.model.RecurrenceRule
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.shared.editor.components.DesktopCursor
@@ -995,7 +996,7 @@ private fun CategoryChoiceChip(
                         dotColor = noCategoryColor,
                         onClick = { onCategoryChange(null) }
                     )
-                ) + categories.map { choice ->
+                ) + categories.filterNot { choice -> choice.id == BIRTHDAYS_CATEGORY_ID }.map { choice ->
                     EventChoice(
                         label = choice.name,
                         isSelected = choice.id == category?.id,
