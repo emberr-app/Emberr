@@ -116,14 +116,18 @@ class BirthdayReminderScheduler(
                     nextBirthdayReminder(person, reminderMinuteOfDay, nowMillis, timeZone)
                 }
                 val wantedReminderIds = reminders.map { it.reminderId }.toSet()
+                val previouslyScheduledIds = settingsManager.getScheduledBirthdayReminderIds()
+                settingsManager.saveScheduledBirthdayReminderIds(previouslyScheduledIds + wantedReminderIds)
 
-                (settingsManager.getScheduledBirthdayReminderIds() - wantedReminderIds).forEach { reminderId ->
-                    reminderScheduler.cancel(reminderId)
+                val idsThatFailedToCancel = (previouslyScheduledIds - wantedReminderIds).filterNot { reminderId ->
+                    changeOneReminder { reminderScheduler.cancel(reminderId) }
                 }
                 reminders.forEach { reminder ->
-                    reminderScheduler.schedule(reminder.reminderId, BIRTHDAY_NOTIFICATION_TITLE, reminder.text, reminder.timestamp)
+                    changeOneReminder {
+                        reminderScheduler.schedule(reminder.reminderId, BIRTHDAY_NOTIFICATION_TITLE, reminder.text, reminder.timestamp)
+                    }
                 }
-                settingsManager.saveScheduledBirthdayReminderIds(wantedReminderIds)
+                settingsManager.saveScheduledBirthdayReminderIds(wantedReminderIds + idsThatFailedToCancel)
             } catch (cause: CancellationException) {
                 throw cause
             } catch (cause: Exception) {
@@ -131,4 +135,13 @@ class BirthdayReminderScheduler(
             }
         }
     }
+
+    private fun changeOneReminder(change: () -> Unit): Boolean =
+        try {
+            change()
+            true
+        } catch (cause: Exception) {
+            cause.printStackTrace()
+            false
+        }
 }
