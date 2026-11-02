@@ -102,6 +102,7 @@ import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PersonDetailKind
 import com.emberr.domain.util.network.openLinkInRunningBrowser
 import com.emberr.domain.util.system.showNativeToast
+import com.emberr.domain.people.personDisplayName
 import com.emberr.presentation.LocalDocumentPicker
 import com.emberr.presentation.LocalFileOpener
 import com.emberr.presentation.LocalNoteOpener

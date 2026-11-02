@@ -51,7 +51,7 @@ import com.emberr.presentation.calendar.searchResultDateLabel
 import com.emberr.presentation.calendar.toCategoryColor
 import com.emberr.presentation.home.RenameBottomSheet
 import com.emberr.presentation.people.personDetailSearchLine
-import com.emberr.presentation.people.personDisplayName
+import com.emberr.domain.people.personDisplayName
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption

@@ -132,7 +132,7 @@ import com.emberr.presentation.trash.TrashScreen
 import com.emberr.presentation.people.PeopleScreen
 import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.people.personDetailSearchLine
-import com.emberr.presentation.people.personDisplayName
+import com.emberr.domain.people.personDisplayName
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.domain.people.PersonSearchResult
 import com.emberr.domain.people.personNoteIdOfBirthdayReminder

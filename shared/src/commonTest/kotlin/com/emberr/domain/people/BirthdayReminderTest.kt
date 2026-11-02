@@ -73,5 +73,9 @@ class BirthdayReminderTest {
             BirthdayReminder("birthday_blank-id", "It's Untitled's birthday today", millisAt(2027, 3, 14, 9, 0)),
             nextReminder(noYearNoName, nineInTheMorning, now = millisAt(2026, 11, 2, 12, 0))
         )
+        assertEquals(
+            "It's Maya's birthday today",
+            nextReminder(person("spaced-id", "  Maya  ", "--03-14"), nineInTheMorning, now = millisAt(2026, 11, 2, 12, 0))?.text
+        )
     }
 }
