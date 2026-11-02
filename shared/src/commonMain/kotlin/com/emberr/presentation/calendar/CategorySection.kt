@@ -191,6 +191,7 @@ fun CategorySection(
                     contentDescription = "Delete",
                     tint = MaterialTheme.colorScheme.error,
                     tooltip = "Delete category",
+                    closesSheet = true,
                     onClick = {
                         onDeleteCategory(id)
                         editorState = null
