@@ -15,6 +15,9 @@ import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
+import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
+import com.emberr.domain.util.system.movedToTrashMessage
+import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.presentation.shared.editor.BaseEditorViewModel
 import com.emberr.presentation.shared.editor.ImageLinkFetch
@@ -400,23 +403,36 @@ class NoteEditorViewModel(
         val snapshot = _blocks.value.toList()
 
         viewModelScope.launch(Dispatchers.IO) {
-            SyncCoordinator.mutex.withLock {
-                val reconciled = reconcileWithDisk(meta.noteId, snapshot)
-                val trashedMeta = meta.withDetailsFromEditor().copy(
-                    snippet = generateSnippet(reconciled),
-                    trashedAt = System.currentTimeMillis()
-                )
+            val trashedTitle = try {
+                SyncCoordinator.mutex.withLock {
+                    val reconciled = reconcileWithDisk(meta.noteId, snapshot)
+                    val trashedMeta = meta.withDetailsFromEditor().copy(
+                        snippet = generateSnippet(reconciled),
+                        trashedAt = System.currentTimeMillis()
+                    )
 
-                val content = NoteContent(blocks = reconciled)
+                    val content = NoteContent(blocks = reconciled)
 
-                repository.saveNote(trashedMeta, content)
-                repository.indexNote(trashedMeta, content)
+                    repository.saveNote(trashedMeta, content)
+                    repository.indexNote(trashedMeta, content)
 
-                currentMetadata = trashedMeta
+                    currentMetadata = trashedMeta
+                    trashedMeta.title
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
             }
 
             withContext(Dispatchers.Main) {
-                onMoved()
+                if (trashedTitle == null) {
+                    showNativeToast(COULD_NOT_MOVE_TO_TRASH_MESSAGE)
+                } else {
+                    showNativeToast(movedToTrashMessage(trashedTitle))
+                    onMoved()
+                }
             }
         }
     }

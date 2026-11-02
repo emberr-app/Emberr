@@ -22,6 +22,9 @@ import com.emberr.domain.sample.SampleNotesSeeder
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.template.DefaultTemplateSeeder
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
+import com.emberr.domain.util.system.movedToTrashMessage
+import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.presentation.home.overview.OverviewSection
 import com.emberr.presentation.home.overview.visibleOverviewSections
@@ -543,16 +546,21 @@ class HomeViewModel(
 
     fun trashNote(noteId: String, onDone: () -> Unit = {}) {
         viewModelScope.launch(Dispatchers.IO) {
-            try {
+            val trashMessage = try {
                 SyncCoordinator.mutex.withLock {
-                    val meta = repository.getNoteById(noteId) ?: return@withLock
+                    val meta = repository.getNoteById(noteId) ?: return@withLock null
                     val content = repository.getNoteContent(noteId) ?: NoteContent(blocks = emptyList())
                     repository.saveNote(meta.copy(trashedAt = System.currentTimeMillis(), updatedAt = System.currentTimeMillis()), content)
+                    movedToTrashMessage(meta.title)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                COULD_NOT_MOVE_TO_TRASH_MESSAGE
             }
-            withContext(Dispatchers.Main) { onDone() }
+            withContext(Dispatchers.Main) {
+                trashMessage?.let(::showNativeToast)
+                onDone()
+            }
         }
     }
 
