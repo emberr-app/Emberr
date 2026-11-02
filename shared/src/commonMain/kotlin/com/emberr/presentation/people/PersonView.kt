@@ -90,10 +90,10 @@ import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -117,6 +117,9 @@ import emberr.shared.generated.resources.mail
 import emberr.shared.generated.resources.message
 import emberr.shared.generated.resources.phone
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 
 private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.55f
@@ -168,7 +171,7 @@ fun PersonView(
     var detailPopup by remember(personNoteId) { mutableStateOf<PersonDetailPopup?>(null) }
     var showsIconPicker by remember(personNoteId) { mutableStateOf(false) }
     var isAddingEvent by remember(personNoteId) { mutableStateOf(false) }
-    val detailChangesScope = rememberCoroutineScope()
+    val appScope = koinInject<CoroutineScope>(qualifier = named("AppScope"))
     val noteOpener = LocalNoteOpener.current
     val uriHandler = LocalUriHandler.current
     val clipboardManager = LocalClipboardManager.current
@@ -190,14 +193,14 @@ fun PersonView(
     }
 
     val changeDetails: (failureMessage: String, change: suspend () -> Unit) -> Unit = { failureMessage, change ->
-        detailChangesScope.launch {
+        appScope.launch {
             try {
                 change()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 e.printStackTrace()
-                showNativeToast(failureMessage)
+                withContext(Dispatchers.Main) { showNativeToast(failureMessage) }
             }
         }
     }
