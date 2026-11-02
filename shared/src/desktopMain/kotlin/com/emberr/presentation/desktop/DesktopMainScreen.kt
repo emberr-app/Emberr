@@ -1442,9 +1442,14 @@ fun DesktopMainScreen(
                             else openNote(result.note.noteId)
                         },
                         onEventClick = { event ->
-                            WidgetCalendarEventBus.requestEvent(event.blockId, event.dateString)
-                            detail = DetailPane.Calendar
-                            isPeeking = false
+                            val birthdayPersonNoteId = event.birthdayPersonNoteId
+                            if (birthdayPersonNoteId != null) {
+                                openedPersonNoteId = birthdayPersonNoteId
+                            } else {
+                                WidgetCalendarEventBus.requestEvent(event.blockId, event.dateString)
+                                detail = DetailPane.Calendar
+                                isPeeking = false
+                            }
                         },
                         onPersonClick = { personNoteId -> openedPersonNoteId = personNoteId },
                         openInSplitViewActionFor = { result -> openInSplitViewActionFor(paneForSearchResult(result)) },

@@ -1266,8 +1266,13 @@ fun EmberrApp(
                                 },
                                 onEventClick = { event ->
                                     closeSearchBar()
-                                    WidgetCalendarEventBus.requestEvent(event.blockId, event.dateString)
-                                    navController.navigate(Screen.Calendar.route) { launchSingleTop = true }
+                                    val birthdayPersonNoteId = event.birthdayPersonNoteId
+                                    if (birthdayPersonNoteId != null) {
+                                        openedPersonNoteId = birthdayPersonNoteId
+                                    } else {
+                                        WidgetCalendarEventBus.requestEvent(event.blockId, event.dateString)
+                                        navController.navigate(Screen.Calendar.route) { launchSingleTop = true }
+                                    }
                                 },
                                 onPersonClick = { personNoteId ->
                                     closeSearchBar()
