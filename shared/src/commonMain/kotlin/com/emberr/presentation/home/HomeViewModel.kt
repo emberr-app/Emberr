@@ -555,7 +555,8 @@ class HomeViewModel(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                COULD_NOT_MOVE_TO_TRASH_MESSAGE
+                withContext(Dispatchers.Main) { showNativeToast(COULD_NOT_MOVE_TO_TRASH_MESSAGE) }
+                return@launch
             }
             withContext(Dispatchers.Main) {
                 trashMessage?.let(::showNativeToast)
