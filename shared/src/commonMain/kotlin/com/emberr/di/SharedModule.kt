@@ -467,6 +467,14 @@ val sharedModule = module {
             appScope = get(named("AppScope"))
         )
     }
+    viewModel { parameters ->
+        com.emberr.presentation.people.PersonViewModel(
+            personNoteId = parameters.get(),
+            peopleRepository = get(),
+            noteRepository = get(),
+            appScope = get(named("AppScope"))
+        )
+    }
     single<TaskExtractor> { HeuristicTaskExtractor() }
 
     single { com.emberr.domain.sync.SyncPairingState(settingsManager = get()) }

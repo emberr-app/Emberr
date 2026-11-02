@@ -56,9 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.domain.people.EventsWithPerson
-import com.emberr.domain.people.PeopleRepository
 import com.emberr.domain.people.PersonWithDetails
-import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.LocalImagePicker
 import com.emberr.presentation.calendar.EventEditorSheetHost
@@ -89,9 +87,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.koin.compose.koinInject
-import org.koin.core.qualifier.named
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -117,11 +114,6 @@ import emberr.shared.generated.resources.ghost_smile
 import emberr.shared.generated.resources.mail
 import emberr.shared.generated.resources.message
 import emberr.shared.generated.resources.phone
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
 
 private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.55f
 private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.92f
@@ -152,17 +144,16 @@ private val FocusNameAfterSheetOpensDelay = 350.milliseconds
 @Composable
 fun PersonView(
     personNoteId: String,
-    onDismiss: () -> Unit,
+    onDismiss: (notesEditor: NoteEditorViewModel) -> Unit,
     focusNameOnOpen: Boolean = false
 ) {
     val notesEditor: NoteEditorViewModel = koinViewModel(key = personNoteId)
-    val peopleRepository: PeopleRepository = koinInject()
-    val noteRepository: NoteRepository = koinInject()
+    val personViewModel: PersonViewModel = koinViewModel(key = "person-$personNoteId") { parametersOf(personNoteId) }
 
-    val personWithDetails by remember(personNoteId) { peopleRepository.observePerson(personNoteId) }.collectAsState(initial = null)
-    val eventsWithPerson by remember(personNoteId) { peopleRepository.observeEventsWithPerson(personNoteId) }.collectAsState(initial = null)
-    val everyone by remember { peopleRepository.observePeople() }.collectAsState(initial = emptyList())
-    val categories by remember { noteRepository.getAllCategories() }.collectAsState(initial = emptyList())
+    val personWithDetails by personViewModel.person.collectAsState()
+    val eventsWithPerson by personViewModel.events.collectAsState()
+    val everyone by personViewModel.everyone.collectAsState()
+    val categories by personViewModel.categories.collectAsState()
     val savedName by notesEditor.noteTitle.collectAsState()
 
     var nameDraft by remember(personNoteId) { mutableStateOf<String?>(null) }
@@ -172,7 +163,6 @@ fun PersonView(
     var detailPopup by remember(personNoteId) { mutableStateOf<PersonDetailPopup?>(null) }
     var showsIconPicker by remember(personNoteId) { mutableStateOf(false) }
     var isAddingEvent by remember(personNoteId) { mutableStateOf(false) }
-    val appScope = koinInject<CoroutineScope>(qualifier = named("AppScope"))
     val noteOpener = LocalNoteOpener.current
     val uriHandler = LocalUriHandler.current
     val clipboardManager = LocalClipboardManager.current
@@ -186,24 +176,11 @@ fun PersonView(
     }
     val dismiss: () -> Unit = {
         commitName()
-        onDismiss()
+        onDismiss(notesEditor)
     }
     val moveToTrash: () -> Unit = {
         commitName()
-        notesEditor.moveToTrash { onDismiss() }
-    }
-
-    val changeDetails: (failureMessage: String, change: suspend () -> Unit) -> Unit = { failureMessage, change ->
-        appScope.launch {
-            try {
-                change()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) { showNativeToast(failureMessage) }
-            }
-        }
+        notesEditor.moveToTrash { onDismiss(notesEditor) }
     }
 
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -222,18 +199,8 @@ fun PersonView(
                 null
             }
         },
-        onSave = { kind, editedDetail, label, value ->
-            changeDetails("Couldn't save the detail") {
-                if (editedDetail == null) {
-                    peopleRepository.addDetail(personNoteId, kind, label, value)
-                } else {
-                    peopleRepository.updateDetail(personNoteId, editedDetail.copy(label = label, value = value))
-                }
-            }
-        },
-        onRemove = { detail ->
-            changeDetails("Couldn't remove the detail") { peopleRepository.removeDetail(personNoteId, detail.id) }
-        }
+        onSave = personViewModel::saveDetail,
+        onRemove = personViewModel::removeDetail
     )
     val detailActions = remember(uriHandler, clipboardManager) {
         PersonDetailActions(
