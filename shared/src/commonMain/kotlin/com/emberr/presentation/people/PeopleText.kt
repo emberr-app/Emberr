@@ -33,7 +33,7 @@ fun shortWeekdayName(date: LocalDate): String =
 fun shortMonthName(date: LocalDate): String =
     date.month.name.take(SHORT_NAME_LENGTH).lowercase().replaceFirstChar(Char::uppercase)
 
-private fun fullMonthName(monthNumber: Int): String =
+internal fun fullMonthName(monthNumber: Int): String =
     Month(monthNumber).name.lowercase().replaceFirstChar(Char::uppercase)
 
 fun weekdayMonthDay(date: LocalDate, today: LocalDate): String {

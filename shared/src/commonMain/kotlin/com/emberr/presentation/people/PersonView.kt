@@ -94,6 +94,31 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.text.AnnotatedString
+import com.emberr.domain.model.PersonDetailBlock
+import com.emberr.domain.model.PersonDetailKind
+import com.emberr.domain.util.network.openLinkInRunningBrowser
+import com.emberr.domain.util.system.showNativeToast
+import com.emberr.presentation.LocalDocumentPicker
+import com.emberr.presentation.LocalFileOpener
+import com.emberr.presentation.LocalNoteOpener
+import com.emberr.presentation.LocalPhotoTaker
+import com.emberr.presentation.home.note.CategorizedEmojiPicker
+import com.emberr.presentation.shared.components.EmberrButtonSecondary
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.emberrBorder
+import androidx.compose.foundation.layout.navigationBarsPadding
+import emberr.shared.generated.resources.calendar_add
+import emberr.shared.generated.resources.ghost_smile
+import emberr.shared.generated.resources.mail
+import emberr.shared.generated.resources.message
+import emberr.shared.generated.resources.phone
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.55f
 private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.92f
@@ -107,6 +132,12 @@ private val AndroidAvatarSize = 96.dp
 private val DesktopAvatarSize = 108.dp
 private val AvatarRingWidth = 4.dp
 private val AvatarShadowElevation = 16.dp
+private val AvatarBadgeSize = 28.dp
+private val AndroidEmojiPickerHeight = 450.dp
+private val QuickActionMinWidth = 58.dp
+private val QuickActionTileSize = 48.dp
+private val QuickActionShape = RoundedCornerShape(12.dp)
+private val QuickActionIconSize = 20.dp
 private val DesktopDialogMaxWidth = 720.dp
 private val DesktopDialogShape = RoundedCornerShape(24.dp)
 private val DesktopSidePadding = 28.dp
@@ -135,6 +166,13 @@ fun PersonView(
     var showsAllPast by remember(personNoteId) { mutableStateOf(false) }
     var openEvent by remember(personNoteId) { mutableStateOf<CalendarTaskEntity?>(null) }
     var hasFocusedNameOnOpen by remember(personNoteId) { mutableStateOf(!focusNameOnOpen) }
+    var detailPopup by remember(personNoteId) { mutableStateOf<PersonDetailPopup?>(null) }
+    var showsIconPicker by remember(personNoteId) { mutableStateOf(false) }
+    var isAddingEvent by remember(personNoteId) { mutableStateOf(false) }
+    val detailChangesScope = rememberCoroutineScope()
+    val noteOpener = LocalNoteOpener.current
+    val uriHandler = LocalUriHandler.current
+    val clipboardManager = LocalClipboardManager.current
 
     val commitName: () -> Unit = {
         val draft = nameDraft
@@ -156,7 +194,62 @@ fun PersonView(
         }
     }
 
+    val changeDetails: (failureMessage: String, change: suspend () -> Unit) -> Unit = { failureMessage, change ->
+        detailChangesScope.launch {
+            try {
+                change()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showNativeToast(failureMessage)
+            }
+        }
+    }
+
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val details = personWithDetails?.details.orEmpty()
+    val detailEditing = PersonDetailEditing(
+        popup = detailPopup,
+        personName = savedName,
+        hasBirthday = details.any { it.kind == PersonDetailKind.BIRTHDAY },
+        today = today,
+        onPopupChange = { detailPopup = it },
+        onBack = {
+            val shownPopup = detailPopup
+            detailPopup = if (shownPopup is PersonDetailPopup.Editing && shownPopup.isFromPicker) {
+                PersonDetailPopup.ChoosingKind(shownPopup.anchor)
+            } else {
+                null
+            }
+        },
+        onSave = { kind, editedDetail, label, value ->
+            changeDetails("Couldn't save the detail") {
+                if (editedDetail == null) {
+                    peopleRepository.addDetail(personNoteId, kind, label, value)
+                } else {
+                    peopleRepository.updateDetail(personNoteId, editedDetail.copy(label = label, value = value))
+                }
+            }
+        },
+        onRemove = { detail ->
+            changeDetails("Couldn't remove the detail") { peopleRepository.removeDetail(personNoteId, detail.id) }
+        }
+    )
+    val detailActions = remember(uriHandler, clipboardManager) {
+        PersonDetailActions(
+            openLink = { link -> openPersonLink(link, uriHandler) },
+            copy = { text ->
+                try {
+                    clipboardManager.setText(AnnotatedString(text))
+                    showNativeToast("Copied")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    showNativeToast("Couldn't copy")
+                }
+            }
+        )
+    }
     val page = PersonPage(
         personNoteId = personNoteId,
         icon = personWithDetails?.person?.icon,
@@ -177,7 +270,19 @@ fun PersonView(
         shouldFocusName = !hasFocusedNameOnOpen,
         onNameFocused = { hasFocusedNameOnOpen = true },
         onOpenEvent = { event -> openEvent = event },
-        onMoveToTrash = moveToTrash
+        onMoveToTrash = moveToTrash,
+        detailEditing = detailEditing,
+        detailActions = detailActions,
+        showsIconPicker = showsIconPicker,
+        onShowsIconPickerChange = { showsIconPicker = it },
+        onIconChange = { icon -> notesEditor.updateIcon(icon) },
+        onNewEvent = { isAddingEvent = true },
+        onOpenNote = noteOpener?.let { openNote ->
+            { noteId ->
+                dismiss()
+                openNote(noteId)
+            }
+        }
     )
 
     if (isDesktopPlatform) {
@@ -220,6 +325,7 @@ fun PersonView(
                 ) {
                     PersonMoreButton(
                         personName = personDisplayName(page.savedName),
+                        onChangeIcon = { page.onShowsIconPickerChange(true) },
                         onMoveToTrash = page.onMoveToTrash,
                         hazeState = hazeState
                     )
@@ -229,11 +335,28 @@ fun PersonView(
         }
     }
 
+    PersonDetailSheet(editing = detailEditing)
+    AndroidPersonIconSheet(page = page)
+
     EventEditorSheetHost(
         targetBlockId = openEvent?.blockId,
         targetOccurrenceDate = openEvent?.takeIf { it.recurrenceFrequency != null }?.targetDate,
-        onDismissTarget = { openEvent = null }
+        onDismissTarget = {
+            openEvent = null
+            isAddingEvent = false
+        },
+        newEventPersonNoteId = personNoteId.takeIf { isAddingEvent }
     )
+}
+
+private fun openPersonLink(link: String, uriHandler: UriHandler) {
+    if (openLinkInRunningBrowser(link)) return
+    try {
+        uriHandler.openUri(link)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        showNativeToast("Couldn't open the link")
+    }
 }
 
 private class PersonPage(
@@ -252,10 +375,18 @@ private class PersonPage(
     val shouldFocusName: Boolean,
     val onNameFocused: () -> Unit,
     val onOpenEvent: (CalendarTaskEntity) -> Unit,
-    val onMoveToTrash: () -> Unit
+    val onMoveToTrash: () -> Unit,
+    val detailEditing: PersonDetailEditing,
+    val detailActions: PersonDetailActions,
+    val showsIconPicker: Boolean,
+    val onShowsIconPickerChange: (Boolean) -> Unit,
+    val onIconChange: (String?) -> Unit,
+    val onNewEvent: () -> Unit,
+    val onOpenNote: ((String) -> Unit)?
 ) {
     val firstName: String get() = personFirstName(savedName)
     val metaLine: String get() = personMetaLine(events?.upcoming?.firstOrNull(), events?.past?.firstOrNull(), today)
+    val details: List<PersonDetailBlock> get() = personWithDetails?.details.orEmpty()
 }
 
 @Composable
@@ -270,6 +401,10 @@ private fun PersonNotes(
             noteId = page.personNoteId,
             onNavigateBack = {},
             onPickImage = LocalImagePicker.current,
+            onTakePhoto = LocalPhotoTaker.current,
+            onPickDocument = LocalDocumentPicker.current,
+            onOpenFile = LocalFileOpener.current,
+            onNavigateToEditor = page.onOpenNote ?: {},
             customHeader = { header() },
             emptyNotePlaceholder = "Write anything about ${page.firstName}…",
             extraBlockSidePadding = SectionTitleInset,
@@ -292,13 +427,14 @@ private fun AndroidPersonHeader(page: PersonPage) {
                 Spacer(modifier = Modifier.height(14.dp))
                 PersonNameField(page = page, isCentered = true, sizeScale = ANDROID_NAME_SIZE_SCALE)
                 PersonMetaLine(page = page, modifier = Modifier.padding(horizontal = 24.dp, vertical = 3.dp))
+                PersonQuickActions(page = page, modifier = Modifier.padding(top = 20.dp))
             }
         }
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = EditorBlockSidePadding, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(SectionGap)
         ) {
-            PersonDetailsSection(details = page.personWithDetails?.details.orEmpty(), today = page.today)
+            PersonDetailsSection(details = page.details, today = page.today, editing = page.detailEditing, actions = page.detailActions)
             PersonEventSections(page = page)
             PersonSectionHeader(title = "Notes")
         }
@@ -322,6 +458,7 @@ private fun DesktopPersonLayout(page: PersonPage, notesEditor: NoteEditorViewMod
                         PersonNameField(page = page, isCentered = false, sizeScale = DESKTOP_NAME_SIZE_SCALE)
                         PersonMetaLine(page = page, modifier = Modifier.padding(top = 4.dp))
                     }
+                    PersonQuickActions(page = page, modifier = Modifier)
                 }
             }
             Row(
@@ -331,6 +468,7 @@ private fun DesktopPersonLayout(page: PersonPage, notesEditor: NoteEditorViewMod
                 PersonTopBarButton(icon = Res.drawable.chevron_left, description = "Back", hazeState = hazeState, onClick = onBack)
                 PersonMoreButton(
                     personName = personDisplayName(page.savedName),
+                    onChangeIcon = { page.onShowsIconPickerChange(true) },
                     onMoveToTrash = page.onMoveToTrash,
                     hazeState = hazeState
                 )
@@ -345,7 +483,7 @@ private fun DesktopPersonLayout(page: PersonPage, notesEditor: NoteEditorViewMod
                     .verticalScroll(rememberScrollState())
                     .padding(top = 6.dp, bottom = DesktopSidePadding)
             ) {
-                PersonDetailsSection(details = page.personWithDetails?.details.orEmpty(), today = page.today)
+                PersonDetailsSection(details = page.details, today = page.today, editing = page.detailEditing, actions = page.detailActions)
             }
             Box(modifier = Modifier.weight(1f)) {
                 PersonNotes(page = page, notesEditor = notesEditor) {
@@ -382,13 +520,156 @@ private fun PersonEventSections(page: PersonPage) {
 @Composable
 private fun PersonHeroAvatar(page: PersonPage, size: Dp) {
     val glow = personGlowColors(page.personNoteId)
-    Box(
+    Box {
+        Box(
+            modifier = Modifier
+                .shadow(AvatarShadowElevation, CircleShape, ambientColor = glow.avatarShadow, spotColor = glow.avatarShadow)
+                .background(personPageColor(), CircleShape)
+                .padding(AvatarRingWidth)
+                .clip(CircleShape)
+                .clickable { page.onShowsIconPickerChange(true) }
+        ) {
+            PersonAvatar(personNoteId = page.personNoteId, name = page.savedName, icon = page.icon, size = size)
+        }
+        Box(modifier = Modifier.align(Alignment.BottomEnd).padding(end = 2.dp, bottom = 6.dp)) {
+            IconTooltip(text = "Change icon") {
+                Box(
+                    modifier = Modifier
+                        .size(AvatarBadgeSize)
+                        .clip(CircleShape)
+                        .background(personCardColor())
+                        .emberrBorder(CircleShape)
+                        .clickable { page.onShowsIconPickerChange(true) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ghost_smile),
+                        contentDescription = "Change icon",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
+            }
+        }
+        if (isDesktopPlatform) {
+            EmberrDesktopMenu(expanded = page.showsIconPicker, onDismissRequest = { page.onShowsIconPickerChange(false) }) {
+                Box(modifier = Modifier.size(width = 340.dp, height = 380.dp)) {
+                    CategorizedEmojiPicker(
+                        onEmojiSelected = { emoji ->
+                            page.onIconChange(emoji)
+                            page.onShowsIconPickerChange(false)
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                EmberrDesktopMenuOption(
+                    label = "Use initials",
+                    onClick = {
+                        page.onIconChange(null)
+                        page.onShowsIconPickerChange(false)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AndroidPersonIconSheet(page: PersonPage) {
+    if (isDesktopPlatform) return
+    EmberrBottomSheet(
+        expanded = page.showsIconPicker,
+        onDismiss = { page.onShowsIconPickerChange(false) },
+        title = "Change icon"
+    ) { closeAnd ->
+        Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
+            Box(modifier = Modifier.fillMaxWidth().height(AndroidEmojiPickerHeight)) {
+                CategorizedEmojiPicker(
+                    onEmojiSelected = { emoji -> closeAnd { page.onIconChange(emoji) } },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+                EmberrButtonSecondary(
+                    text = "Use initials",
+                    onClick = { closeAnd { page.onIconChange(null) } },
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                EmberrButtonPrimary(
+                    text = "Close",
+                    onClick = { closeAnd {} },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PersonQuickActions(page: PersonPage, modifier: Modifier) {
+    val firstPhone = page.details.firstOrNull { it.kind == PersonDetailKind.PHONE }?.value
+    val firstEmail = page.details.firstOrNull { it.kind == PersonDetailKind.EMAIL }?.value
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+        if (firstPhone != null && !isDesktopPlatform) {
+            QuickActionButton(
+                label = "Call",
+                icon = Res.drawable.phone,
+                onClick = { page.detailActions.openLink(phoneCallLink(firstPhone)) }
+            )
+            QuickActionButton(
+                label = "Message",
+                icon = Res.drawable.message,
+                onClick = { page.detailActions.openLink(phoneMessageLink(firstPhone)) }
+            )
+        }
+        if (firstEmail != null) {
+            QuickActionButton(
+                label = "Email",
+                icon = Res.drawable.mail,
+                onClick = { page.detailActions.openLink(emailLink(firstEmail)) }
+            )
+        }
+        QuickActionButton(
+            label = "New event",
+            icon = Res.drawable.calendar_add,
+            onClick = page.onNewEvent
+        )
+    }
+}
+
+@Composable
+private fun QuickActionButton(label: String, icon: DrawableResource, onClick: () -> Unit) {
+    Column(
         modifier = Modifier
-            .shadow(AvatarShadowElevation, CircleShape, ambientColor = glow.avatarShadow, spotColor = glow.avatarShadow)
-            .background(personPageColor(), CircleShape)
-            .padding(AvatarRingWidth)
+            .widthIn(min = QuickActionMinWidth)
+            .clickable(interactionSource = null, indication = null, onClick = onClick)
+            .padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        PersonAvatar(personNoteId = page.personNoteId, name = page.savedName, icon = page.icon, size = size)
+        Box(
+            modifier = Modifier
+                .size(QuickActionTileSize)
+                .clip(QuickActionShape)
+                .background(personCardColor()),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(QuickActionIconSize)
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false
+        )
     }
 }
 
@@ -474,7 +755,7 @@ private fun PersonTopBarButton(icon: DrawableResource, description: String, haze
 }
 
 @Composable
-private fun PersonMoreButton(personName: String, onMoveToTrash: () -> Unit, hazeState: HazeState) {
+private fun PersonMoreButton(personName: String, onChangeIcon: () -> Unit, onMoveToTrash: () -> Unit, hazeState: HazeState) {
     var showsMenu by remember { mutableStateOf(false) }
     Box {
         PersonTopBarButton(icon = Res.drawable.ellipsis, description = "More", hazeState = hazeState, onClick = { showsMenu = true })
@@ -483,6 +764,7 @@ private fun PersonMoreButton(personName: String, onMoveToTrash: () -> Unit, haze
             expanded = showsMenu,
             onDismiss = { showsMenu = false },
             onOpen = null,
+            onChangeIcon = onChangeIcon,
             onMoveToTrash = onMoveToTrash
         )
     }
@@ -494,7 +776,8 @@ internal fun PersonActionsMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     onOpen: (() -> Unit)?,
-    onMoveToTrash: () -> Unit
+    onMoveToTrash: () -> Unit,
+    onChangeIcon: (() -> Unit)? = null
 ) {
     val trashColor = MaterialTheme.colorScheme.error
     if (isDesktopPlatform) {
@@ -506,6 +789,16 @@ internal fun PersonActionsMenu(
                     onClick = {
                         onDismiss()
                         onOpen()
+                    }
+                )
+            }
+            if (onChangeIcon != null) {
+                EmberrDesktopMenuOption(
+                    label = "Change icon",
+                    icon = { MenuIcon(icon = Res.drawable.ghost_smile, tint = MaterialTheme.colorScheme.onSurface) },
+                    onClick = {
+                        onDismiss()
+                        onChangeIcon()
                     }
                 )
             }
@@ -521,7 +814,7 @@ internal fun PersonActionsMenu(
         }
     } else {
         EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = personName) { closeAnd ->
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
                 if (onOpen != null) {
                     EmberrBottomSheetOption(
                         label = "Open",
@@ -529,6 +822,15 @@ internal fun PersonActionsMenu(
                         outerHorizontalPadding = 0.dp,
                         innerHorizontalPadding = 0.dp,
                         onClick = { closeAnd(onOpen) }
+                    )
+                }
+                if (onChangeIcon != null) {
+                    EmberrBottomSheetOption(
+                        label = "Change icon",
+                        icon = { MenuIcon(icon = Res.drawable.ghost_smile, tint = MaterialTheme.colorScheme.onSurface) },
+                        outerHorizontalPadding = 0.dp,
+                        innerHorizontalPadding = 0.dp,
+                        onClick = { closeAnd(onChangeIcon) }
                     )
                 }
                 EmberrBottomSheetOption(
@@ -542,7 +844,7 @@ internal fun PersonActionsMenu(
                 EmberrButtonPrimary(
                     text = "Close",
                     onClick = { closeAnd(onDismiss) },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                 )
             }
         }

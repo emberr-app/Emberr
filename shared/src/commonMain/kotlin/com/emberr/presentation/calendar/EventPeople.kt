@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,6 +57,7 @@ import org.jetbrains.compose.resources.painterResource
 
 private val PeoplePickerDesktopWidth = 280.dp
 private val PeoplePickerRowShape = RoundedCornerShape(10.dp)
+private val PeoplePickerRowSidePadding = if (isDesktopPlatform) 8.dp else 0.dp
 private val PeoplePickerAvatarSize = 24.dp
 private val EventPersonPillAvatarSize = 20.dp
 internal val EventChipAvatarSize = 16.dp
@@ -63,7 +65,7 @@ private val EventChipAvatarOverlap = 5.dp
 private val EventChipAvatarRingWidth = 1.5.dp
 private const val MaxAvatarsOnEventChip = 3
 
-internal fun EventPerson.displayName(): String = name.trim().ifEmpty { "Unnamed" }
+internal fun EventPerson.displayName(): String = name.trim().ifEmpty { "Untitled" }
 
 internal fun peopleShownOnEvent(personNoteIds: List<String>, peopleById: Map<String, EventPerson>): List<EventPerson> =
     personNoteIds.mapNotNull { personNoteId -> peopleById[personNoteId] }
@@ -127,7 +129,7 @@ internal fun PeoplePicker(
                     text = "Type a name to add a person",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+                    modifier = Modifier.padding(horizontal = PeoplePickerRowSidePadding, vertical = 10.dp)
                 )
             }
         }
@@ -155,7 +157,7 @@ internal fun PeoplePicker(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
         ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
                 pickerContent(Modifier)
                 EmberrButtonPrimary(
                     text = "Done",
@@ -175,7 +177,7 @@ private fun PeoplePickerRow(person: EventPerson, isSelected: Boolean, onClick: (
             .then(if (!isDesktopPlatform) Modifier.heightIn(min = 48.dp) else Modifier)
             .clip(PeoplePickerRowShape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(horizontal = PeoplePickerRowSidePadding, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = PeoplePickerAvatarSize)
@@ -207,7 +209,7 @@ private fun CreatePersonRow(name: String, onClick: () -> Unit) {
             .then(if (!isDesktopPlatform) Modifier.heightIn(min = 48.dp) else Modifier)
             .clip(PeoplePickerRowShape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(horizontal = PeoplePickerRowSidePadding, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(modifier = Modifier.size(PeoplePickerAvatarSize), contentAlignment = Alignment.Center) {

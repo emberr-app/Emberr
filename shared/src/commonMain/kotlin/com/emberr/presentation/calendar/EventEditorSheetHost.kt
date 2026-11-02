@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.emberr.domain.model.RecurrenceEditScope
 import kotlinx.coroutines.flow.flowOf
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -22,6 +23,7 @@ fun EventEditorSheetHost(
     targetBlockId: String?,
     targetOccurrenceDate: String? = null,
     onDismissTarget: () -> Unit,
+    newEventPersonNoteId: String? = null,
     calendarViewModel: CalendarViewModel = koinViewModel()
 ) {
     val categories by calendarViewModel.categories.collectAsState()
@@ -61,6 +63,20 @@ fun EventEditorSheetHost(
             recurrenceRule = event.recurrenceRule,
             allDay = event.allDay,
             personNoteIds = event.personNoteIds
+        )
+    }
+
+    LaunchedEffect(newEventPersonNoteId) {
+        val personNoteId = newEventPersonNoteId ?: return@LaunchedEffect
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        eventEditorState = EventEditorState(
+            original = null,
+            name = "",
+            date = now.date,
+            hour = now.hour,
+            minute = 0,
+            categoryId = null,
+            personNoteIds = listOf(personNoteId)
         )
     }
 

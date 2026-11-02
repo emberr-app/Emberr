@@ -83,6 +83,10 @@ val LocalImageOverlay = staticCompositionLocalOf<(((@Composable () -> Unit)?) ->
 val LocalCanvasFullScreenOverlay = staticCompositionLocalOf<(((@Composable () -> Unit)?) -> Unit)?> { null }
 
 val LocalImagePicker = staticCompositionLocalOf<(onPathSelected: (String) -> Unit) -> Unit> { {} }
+val LocalPhotoTaker = staticCompositionLocalOf<(onPathSelected: (String) -> Unit) -> Unit> { {} }
+val LocalDocumentPicker = staticCompositionLocalOf<(onPathSelected: (String) -> Unit) -> Unit> { {} }
+val LocalFileOpener = staticCompositionLocalOf<(filePath: String, mimeType: String) -> Unit> { { _, _ -> } }
+val LocalNoteOpener = staticCompositionLocalOf<((noteId: String) -> Unit)?> { null }
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -329,6 +333,10 @@ fun EmberrApp(
     CompositionLocalProvider(
         LocalImageOverlay provides { content -> fullScreenContent = content },
         LocalImagePicker provides onPickImage,
+        LocalPhotoTaker provides onTakePhoto,
+        LocalDocumentPicker provides onPickDocument,
+        LocalFileOpener provides onOpenFile,
+        LocalNoteOpener provides if (isDesktopPlatform) null else { noteId -> navController.navigate(Screen.Note.createRoute(noteId)) },
         LocalEmberrBlurSource provides if (isDesktopPlatform) null else hazeState
     ) {
         if (isDesktopPlatform) {
