@@ -97,6 +97,9 @@ import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.shared.editor.components.DesktopCursor
 import com.emberr.presentation.shared.editor.components.desktopPointerCursor
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.PeoplePicker
+import com.emberr.presentation.shared.components.PersonOption
+import com.emberr.presentation.shared.components.displayName
 import com.emberr.presentation.shared.components.EmberrBlur
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.isoDayNumber
@@ -191,7 +194,7 @@ fun EventChip(
     onResizeEnd: () -> Unit,
     onResizeCancel: () -> Unit,
     modifier: Modifier = Modifier,
-    people: List<EventPerson> = emptyList(),
+    people: List<PersonOption> = emptyList(),
     onMoveStart: ((pointerInWindow: Offset, pointerId: PointerId, cardTopLeftInWindow: Offset, cardSize: IntSize) -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit
@@ -304,7 +307,7 @@ fun EventMovePreviewChip(
     hasCategory: Boolean,
     isChecked: Boolean,
     height: Dp,
-    people: List<EventPerson>,
+    people: List<PersonOption>,
     modifier: Modifier = Modifier
 ) {
     val textColor = if (hasCategory) EventChipTextColor else MaterialTheme.colorScheme.onSurface
@@ -333,7 +336,7 @@ private fun EventChipLabels(
     textColor: Color,
     isChecked: Boolean,
     height: Dp,
-    people: List<EventPerson> = emptyList(),
+    people: List<PersonOption> = emptyList(),
     chipColor: Color = Color.Unspecified
 ) {
     val typography = MaterialTheme.typography
@@ -548,7 +551,7 @@ private fun formatEditorDate(date: LocalDate): String {
 fun EventEditorSheet(
     state: EventEditorState?,
     categories: List<CalendarCategory>,
-    people: List<EventPerson>,
+    people: List<PersonOption>,
     onNameChange: (String) -> Unit,
     onDateChange: (LocalDate) -> Unit,
     onTimeChange: (hour: Int, minute: Int) -> Unit,
@@ -619,7 +622,7 @@ fun EventEditorSheet(
 private fun EventEditorFields(
     state: EventEditorState,
     categories: List<CalendarCategory>,
-    people: List<EventPerson>,
+    people: List<PersonOption>,
     onNameChange: (String) -> Unit,
     onDateChange: (LocalDate) -> Unit,
     onTimeChange: (hour: Int, minute: Int) -> Unit,
@@ -1021,8 +1024,8 @@ private fun CategoryChoiceChip(
 @Composable
 private fun PeopleChoiceChip(
     personNoteIds: List<String>,
-    shownPeople: List<EventPerson>,
-    people: List<EventPerson>,
+    shownPeople: List<PersonOption>,
+    people: List<PersonOption>,
     onPeopleChange: (List<String>) -> Unit,
     onCreatePerson: (name: String) -> Unit
 ) {
@@ -1322,7 +1325,7 @@ private fun EventChoiceMenu(
 private fun EventViewFields(
     state: EventEditorState,
     categories: List<CalendarCategory>,
-    shownPeople: List<EventPerson>,
+    shownPeople: List<PersonOption>,
     onOpenPerson: (personNoteId: String) -> Unit,
     onEditClick: () -> Unit,
     onDelete: (() -> Unit)?,

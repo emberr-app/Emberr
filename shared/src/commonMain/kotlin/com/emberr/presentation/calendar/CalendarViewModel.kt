@@ -26,6 +26,7 @@ import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
+import com.emberr.presentation.shared.components.PersonOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,8 +86,8 @@ class CalendarViewModel(
     val spaces: StateFlow<List<SpaceEntity>> = spaceRepository.observeSpaces()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val people: StateFlow<List<EventPerson>> = peopleRepository.observePeople()
-        .map { people -> people.map { person -> EventPerson(id = person.noteId, name = person.title, icon = person.icon) } }
+    val people: StateFlow<List<PersonOption>> = peopleRepository.observePeople()
+        .map { people -> people.map { person -> PersonOption(id = person.noteId, name = person.title, icon = person.icon) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun createPerson(name: String, onCreated: (personNoteId: String) -> Unit) {

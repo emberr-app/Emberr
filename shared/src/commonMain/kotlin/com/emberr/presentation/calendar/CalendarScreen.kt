@@ -96,6 +96,7 @@ import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.PersonOption
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
 import com.emberr.presentation.shared.components.customEmberrShadow
@@ -970,7 +971,7 @@ private fun CalendarTimeGrid(
     slideDirection: AnimatedContentTransitionScope.SlideDirection,
     events: List<CalendarEvent>,
     categories: List<CalendarCategory>,
-    peopleById: Map<String, EventPerson>,
+    peopleById: Map<String, PersonOption>,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
     headerHeight: Dp,
@@ -1050,7 +1051,7 @@ private fun DayHourGrid(
     date: LocalDate,
     events: List<CalendarEvent>,
     categories: List<CalendarCategory>,
-    peopleById: Map<String, EventPerson>,
+    peopleById: Map<String, PersonOption>,
     nowMillis: Long,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
@@ -1153,7 +1154,7 @@ private fun DayColumnBody(
     hourHeightPx: Float,
     events: List<CalendarEvent>,
     categories: List<CalendarCategory>,
-    peopleById: Map<String, EventPerson>,
+    peopleById: Map<String, PersonOption>,
     nowMillis: Long,
     resizeState: EventResizeState,
     resizeAutoScroll: EventResizeAutoScroll,
@@ -1385,7 +1386,7 @@ private fun MultiDayTimeGrid(
     slideDirection: AnimatedContentTransitionScope.SlideDirection,
     viewModel: CalendarViewModel,
     categories: List<CalendarCategory>,
-    peopleById: Map<String, EventPerson>,
+    peopleById: Map<String, PersonOption>,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
     headerHeight: Dp,
@@ -1468,7 +1469,7 @@ private fun MultiDayGridContent(
     dayCount: Int,
     viewModel: CalendarViewModel,
     categories: List<CalendarCategory>,
-    peopleById: Map<String, EventPerson>,
+    peopleById: Map<String, PersonOption>,
     nowMillis: Long,
     scrollState: ScrollState,
     topBarHeightDp: Dp,
