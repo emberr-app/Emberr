@@ -10,6 +10,7 @@ import com.emberr.domain.people.searchPeople
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.presentation.calendar.CalendarEventSearchResult
+import com.emberr.presentation.calendar.nextBirthdayEvents
 import com.emberr.presentation.calendar.searchCalendarEvents
 import com.emberr.presentation.calendar.toCalendarCategory
 import com.emberr.presentation.calendar.toCalendarEvent
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.TimeZone
@@ -93,6 +95,9 @@ class SearchViewModel(
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    private val peopleWithDetails = peopleRepository.observePeopleWithDetails()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val eventResults: StateFlow<List<CalendarEventSearchResult>> = _query
         .debounce(QUERY_SETTLE_MILLIS)
@@ -105,10 +110,12 @@ class SearchViewModel(
                 val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
                 combine(
                     repository.getCalendarTasksForSearch(today),
+                    peopleWithDetails,
                     repository.getAllCategories()
-                ) { tasks, categoryEntities ->
+                ) { tasks, people, categoryEntities ->
                     val categories = categoryEntities.map { it.toCalendarCategory() }
-                    val matches = searchCalendarEvents(tasks.mapNotNull { it.toCalendarEvent() }, categories, query, today)
+                    val events = tasks.mapNotNull { it.toCalendarEvent() } + nextBirthdayEvents(people, today)
+                    val matches = searchCalendarEvents(events, categories, query, today)
                     (matches.upcomingEvents + matches.pastEvents).map { event ->
                         CalendarEventSearchResult(event, categories.firstOrNull { it.id == event.categoryId })
                     }
@@ -127,7 +134,7 @@ class SearchViewModel(
             if (query.isEmpty()) {
                 flowOf(emptyList())
             } else {
-                peopleRepository.observePeopleWithDetails().map { people -> searchPeople(people, query) }
+                peopleWithDetails.map { people -> searchPeople(people, query) }
             }
         }
         .flowOn(Dispatchers.Default)
