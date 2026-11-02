@@ -1,5 +1,6 @@
 package com.emberr.domain.backup.manual
 
+import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
 import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.data.local.room.entity.CategoryEntity
@@ -8,6 +9,7 @@ import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.DEFAULT_SPACE_ID
 import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteBlockEntity
+import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.PropertyTagEntity
 import com.emberr.data.local.room.entity.SpaceEntity
@@ -25,6 +27,8 @@ import com.emberr.domain.model.DatabaseViewType
 import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteBlockSerializer
+import com.emberr.domain.model.PersonDetailBlock
+import com.emberr.domain.model.PersonDetailKind
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.TextBlock
@@ -119,6 +123,7 @@ class BackupImportPreparationTest {
         backup,
         BackupContentChoice(spaceIds, includesDailyNotes = false, includesCalendar = false),
         localCategoryIdByBackupId,
+        emptySet(),
         now,
         ::newId
     ).spaces
@@ -376,5 +381,62 @@ class BackupImportPreparationTest {
         assertEquals(listOf(now), prepared.folders.map { it.updatedAt })
         assertEquals(listOf(now), prepared.propertyTags.map { it.updatedAt })
         assertEquals("TAGS", prepared.propertyTags.single().propertyKey)
+    }
+
+    private val personId = "a1a1a1a1-1111-4222-8333-444444444444"
+    private val personNotInBackupId = "b2b2b2b2-1111-4222-8333-444444444444"
+    private val eventBlockId = "e3e3e3e3-1111-4222-8333-444444444444"
+
+    private fun backupWithAPersonOnAnEvent(): EmberrBackupData {
+        val dayNoteId = "d4d4d4d4-1111-4222-8333-444444444444"
+        return backup(
+            notes = listOf(
+                note(personId, spaceId = ACCOUNT_SPACE_ID).copy(kind = NoteKind.PERSON),
+                note(dayNoteId, spaceId = ACCOUNT_SPACE_ID).copy(isDaily = true, dateString = "2026-11-02")
+            ),
+            blocks = listOf(
+                stored(personId, PersonDetailBlock(id = "f5f5f5f5-1111-4222-8333-444444444444", kind = PersonDetailKind.PHONE, value = "123")),
+                stored(dayNoteId, CheckboxBlock(id = eventBlockId, text = "Lunch", personNoteIds = listOf(personId, personNotInBackupId)))
+            ),
+            exceptions = listOf(
+                CalendarEventExceptionEntity(
+                    blockId = eventBlockId,
+                    occurrenceDate = "2026-11-09",
+                    updatedAt = 1L,
+                    overridePersonNoteIds = "$personId,$personNotInBackupId"
+                )
+            )
+        )
+    }
+
+    private fun importCalendarOnly(backup: EmberrBackupData, localPersonNoteIds: Set<String>) = prepareBackupForImport(
+        backup,
+        BackupContentChoice(emptySet(), includesDailyNotes = false, includesCalendar = true),
+        emptyMap(),
+        localPersonNoteIds,
+        now,
+        ::newId
+    ).accountData
+
+    @Test
+    fun aPersonComesWithTheCalendarUnderANewIdAndTheEventAndItsOverridePointAtThem() {
+        val imported = importCalendarOnly(backupWithAPersonOnAnEvent(), localPersonNoteIds = emptySet())
+
+        val importedPerson = imported.subNotes.single()
+        assertEquals(NoteKind.PERSON, importedPerson.kind)
+        assertTrue(importedPerson.noteId != personId)
+        assertTrue(decoded(imported.subNoteBlocks.single { it.noteId == importedPerson.noteId }) is PersonDetailBlock)
+        assertEquals(listOf(importedPerson.noteId), (decoded(imported.blocksToMerge.single()) as CheckboxBlock).personNoteIds)
+        assertEquals(importedPerson.noteId, imported.calendarEventExceptions.single().overridePersonNoteIds)
+    }
+
+    @Test
+    fun aPersonAlreadyOnThisDeviceIsNotImportedAgainAndTheLinksKeepTheirId() {
+        val imported = importCalendarOnly(backupWithAPersonOnAnEvent(), localPersonNoteIds = setOf(personId))
+
+        assertEquals(emptyList(), imported.subNotes)
+        assertEquals(emptyList(), imported.subNoteBlocks)
+        assertEquals(listOf(personId), (decoded(imported.blocksToMerge.single()) as CheckboxBlock).personNoteIds)
+        assertEquals(personId, imported.calendarEventExceptions.single().overridePersonNoteIds)
     }
 }

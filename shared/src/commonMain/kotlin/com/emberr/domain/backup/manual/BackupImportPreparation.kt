@@ -16,8 +16,10 @@ import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.WatchlistBlock
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
@@ -37,12 +39,13 @@ fun prepareBackupForImport(
     backup: EmberrBackupData,
     choice: BackupContentChoice,
     localCategoryIdByBackupId: Map<String, String>,
+    localPersonNoteIds: Set<String>,
     now: Long,
     newId: () -> String
 ): PreparedBackupImport {
     val spaces = backup.spaces.filter { it.spaceId in choice.spaceIds && !it.isDeleted }
     val spaceIds = spaces.mapTo(HashSet()) { it.spaceId }
-    val accountNotes = accountNotesIn(backup)
+    val accountNotes = accountNotesIn(backup, localPersonNoteIds)
     val notes = backup.notes.filter { it.spaceId in spaceIds && it.trashedAt == null && it.noteId !in accountNotes.noteIds }
     val noteIds = notes.mapTo(HashSet()) { it.noteId }
     val blocks = backup.blocks
@@ -78,7 +81,8 @@ fun prepareBackupForImport(
     }
     val tasksInbox = accountNotes.tasksInbox
     if (choice.includesCalendar && tasksInbox != null) addNoteToMerge(tasksInbox, accountBlocksOf(tasksInbox.noteId) { true })
-    val subNotes = if (choice.includesDailyNotes) accountNotes.subNotes else emptyList()
+    val subNotes = (if (choice.includesDailyNotes) accountNotes.subNotes else emptyList()) +
+            (if (choice.includesCalendar) accountNotes.peopleToImport else emptyList())
     val subNoteIds = subNotes.mapTo(HashSet()) { it.noteId }
     val subNoteBlocks = subNotes.flatMap { subNote -> accountBlocksOf(subNote.noteId) { true } }
 
@@ -90,6 +94,15 @@ fun prepareBackupForImport(
         newId = newId
     )
 
+    val personNoteIdsAfterImport = localPersonNoteIds +
+            subNotes.filter { it.kind == NoteKind.PERSON }.map { rewriter.rewrite(it.noteId) }
+    fun importedPersonLinks(personNoteIdsText: String): String =
+        personNoteIdsText.split(",")
+            .filter { it.isNotBlank() }
+            .map(rewriter::rewrite)
+            .filter { it in personNoteIdsAfterImport }
+            .joinToString(",")
+
     val newBlockIdsByOldBlockId = HashMap<String, String>()
     fun importedBlock(block: NoteBlockEntity, blockJson: JsonObject): NoteBlockEntity {
         val newBlockId = rewriter.rewrite(block.blockId).takeIf { it != block.blockId } ?: newId()
@@ -100,7 +113,10 @@ fun prepareBackupForImport(
             blockId = newBlockId,
             noteId = rewriter.rewrite(block.noteId),
             displayOrder = block.displayOrder,
-            blockDataJson = rewrittenBlockJson.withCategoryIdPointedAtLocal(blockJson.categoryIdOrNull(), localCategoryIdByBackupId).toString(),
+            blockDataJson = rewrittenBlockJson
+                .withCategoryIdPointedAtLocal(blockJson.categoryIdOrNull(), localCategoryIdByBackupId)
+                .withPersonLinksKeptOnlyFor(personNoteIdsAfterImport)
+                .toString(),
             updatedAt = block.updatedAt,
             isDeleted = false
         )
@@ -116,6 +132,7 @@ fun prepareBackupForImport(
             exception.copy(
                 blockId = newBlockId,
                 overrideCategoryId = exception.overrideCategoryId?.let { localCategoryIdByBackupId[it] },
+                overridePersonNoteIds = exception.overridePersonNoteIds?.let(::importedPersonLinks),
                 updatedAt = now
             )
         }
@@ -266,10 +283,17 @@ private fun ownDatabaseIdOf(blockJson: JsonObject): String? {
 
 private const val CATEGORY_ID_FIELD = "categoryId"
 private const val CHECKBOX_BLOCK_TYPE = "checkbox"
+private const val PERSON_NOTE_IDS_FIELD = "personNoteIds"
 
 private fun JsonObject.isCheckbox(): Boolean = (this["type"] as? JsonPrimitive)?.contentOrNull == CHECKBOX_BLOCK_TYPE
 
 private fun JsonObject.categoryIdOrNull(): String? = (this[CATEGORY_ID_FIELD] as? JsonPrimitive)?.contentOrNull
+
+private fun JsonObject.withPersonLinksKeptOnlyFor(personNoteIds: Set<String>): JsonObject {
+    val personLinks = this[PERSON_NOTE_IDS_FIELD] as? JsonArray ?: return this
+    val keptLinks = personLinks.filter { link -> (link as? JsonPrimitive)?.contentOrNull in personNoteIds }
+    return JsonObject(this + (PERSON_NOTE_IDS_FIELD to JsonArray(keptLinks)))
+}
 
 private fun JsonObject.withCategoryIdPointedAtLocal(backupCategoryId: String?, localCategoryIdByBackupId: Map<String, String>): JsonObject {
     if (backupCategoryId == null) return this
@@ -291,13 +315,20 @@ fun resolveCategoriesForImport(
     val oldestFirst = compareBy<CategoryEntity> { it.createdAt }.thenBy { it.categoryId }
     val localCategoryById = localCategoriesIncludingDeleted.associateBy { it.categoryId }
     val liveCategoryIdByName = localCategoriesIncludingDeleted
-        .filter { !it.isDeleted }
+        .filter { !it.isDeleted && it.categoryId != BIRTHDAYS_CATEGORY_ID }
         .groupBy { categoryNameKey(it.name) }
         .mapValuesTo(HashMap()) { (_, sameNamed) -> sameNamed.minWith(oldestFirst).categoryId }
 
     val localCategoryIdByBackupId = HashMap<String, String>()
     val newCategories = mutableListOf<CategoryEntity>()
     for (backupCategory in backupCategories.filter { !it.isDeleted }.sortedWith(oldestFirst)) {
+        if (backupCategory.categoryId == BIRTHDAYS_CATEGORY_ID) {
+            if (localCategoryById[BIRTHDAYS_CATEGORY_ID] == null) {
+                newCategories += backupCategory.copy(spaceId = ACCOUNT_SPACE_ID, updatedAt = now)
+            }
+            localCategoryIdByBackupId[BIRTHDAYS_CATEGORY_ID] = BIRTHDAYS_CATEGORY_ID
+            continue
+        }
         val localCategory = localCategoryById[backupCategory.categoryId]
         val nameKey = categoryNameKey(backupCategory.name)
         localCategoryIdByBackupId[backupCategory.categoryId] = when {
@@ -333,7 +364,7 @@ fun accountContentIn(backup: EmberrBackupData): AccountContentInBackup {
     val pinnedBlocksNoteIds = accountNotes.dailyNotes.filter { it.dateString == PINNED_BLOCKS_DATE_STRING }.mapTo(HashSet()) { it.noteId }
     val datedDailyNoteIds = accountNotes.dailyNotes.mapTo(HashSet()) { it.noteId } - pinnedBlocksNoteIds
     var hasDailyNotes = accountNotes.subNotes.isNotEmpty()
-    var hasCalendar = false
+    var hasCalendar = accountNotes.people.isNotEmpty()
     for (block in backup.blocks) {
         if (hasDailyNotes && hasCalendar) break
         if (block.isDeleted) continue
@@ -353,9 +384,11 @@ fun accountContentIn(backup: EmberrBackupData): AccountContentInBackup {
 private class AccountNotesInBackup(
     val dailyNotes: List<NoteMetadataEntity>,
     val tasksInbox: NoteMetadataEntity?,
-    val subNotes: List<NoteMetadataEntity>
+    val subNotes: List<NoteMetadataEntity>,
+    val people: List<NoteMetadataEntity>,
+    val peopleToImport: List<NoteMetadataEntity>
 ) {
-    val noteIds: Set<String> = (dailyNotes + listOfNotNull(tasksInbox) + subNotes).mapTo(HashSet()) { it.noteId }
+    val noteIds: Set<String> = (dailyNotes + listOfNotNull(tasksInbox) + subNotes + people).mapTo(HashSet()) { it.noteId }
 }
 
 private sealed interface SubNoteGroup {
@@ -363,7 +396,7 @@ private sealed interface SubNoteGroup {
     data class Database(val databaseId: String) : SubNoteGroup
 }
 
-private fun accountNotesIn(backup: EmberrBackupData): AccountNotesInBackup {
+private fun accountNotesIn(backup: EmberrBackupData, localPersonNoteIds: Set<String> = emptySet()): AccountNotesInBackup {
     val liveNotes = backup.notes.filter { it.trashedAt == null }
     val liveNoteById = liveNotes.associateBy { it.noteId }
     val dailyNotes = liveNotes
@@ -415,11 +448,38 @@ private fun accountNotesIn(backup: EmberrBackupData): AccountNotesInBackup {
         }
     } while (foundAnotherGroup)
 
+    fun accountNoteIdsReachedFrom(startNoteIds: Set<String>): Set<String> {
+        val reachedNoteIds = HashSet(startNoteIds)
+        do {
+            var reachedAnotherGroup = false
+            for ((group, hostNoteIds) in hostNoteIdsByGroup) {
+                if (hostNoteIds.none { it in reachedNoteIds }) continue
+                val memberIds = membersOf(group).mapTo(HashSet()) { it.noteId }
+                if (memberIds.any { it !in accountNoteIds } || reachedNoteIds.containsAll(memberIds)) continue
+                reachedNoteIds += memberIds
+                reachedAnotherGroup = true
+            }
+        } while (reachedAnotherGroup)
+        return reachedNoteIds
+    }
+
+    val personNoteIds = liveNotes
+        .filter { it.kind == NoteKind.PERSON && it.spaceId == ACCOUNT_SPACE_ID }
+        .mapTo(HashSet()) { it.noteId }
+    val peopleNoteIds = accountNoteIdsReachedFrom(personNoteIds)
+    val peopleToImportNoteIds = accountNoteIdsReachedFrom(personNoteIds - localPersonNoteIds)
+    val accountSubNotes = liveNotes.filter { it.noteId in accountNoteIds && !it.isDaily && it.noteId != ACCOUNT_TASKS_INBOX_NOTE_ID }
+
     return AccountNotesInBackup(
         dailyNotes = dailyNotes,
         tasksInbox = tasksInbox,
-        subNotes = liveNotes.filter { it.noteId in accountNoteIds && !it.isDaily && it.noteId != ACCOUNT_TASKS_INBOX_NOTE_ID }
+        subNotes = accountSubNotes.filter { it.noteId !in peopleNoteIds },
+        people = accountSubNotes.filter { it.noteId in peopleNoteIds },
+        peopleToImport = accountSubNotes.filter { it.noteId in peopleToImportNoteIds }
     )
 }
+
+internal fun noteIdsOfPeopleAndTheirSubNotes(backup: EmberrBackupData): Set<String> =
+    accountNotesIn(backup).people.mapTo(HashSet()) { it.noteId }
 
 private val SUB_NOTE_POINTER_FIELDS = listOf("canvasNoteId", "linkedNoteId", "databaseId", "watchlistNoteId")

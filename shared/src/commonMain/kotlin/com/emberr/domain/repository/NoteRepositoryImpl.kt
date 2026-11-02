@@ -74,6 +74,7 @@ import com.emberr.domain.database.titleMatchingFilters
 import com.emberr.domain.database.todayInThisTimeZone
 import com.emberr.domain.database.withDatabaseColumnShown
 import com.emberr.domain.database.withRowIdsReplaced
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
@@ -739,6 +740,7 @@ class NoteRepositoryImpl(
         val survivorIdByName = HashMap<String, String>()
         val survivorIdByRemovedId = mutableMapOf<String, String>()
         categoryDao.getAllCategoriesOnceAcrossSpaces()
+            .filter { it.categoryId != BIRTHDAYS_CATEGORY_ID }
             .groupBy { it.name.trim().lowercase() }
             .forEach { (name, sameNamed) ->
                 val survivor = sameNamed.minWith(compareBy<CategoryEntity> { it.createdAt }.thenBy { it.categoryId })
@@ -750,6 +752,7 @@ class NoteRepositoryImpl(
         val dailyNoteDatesPointedToSurvivors = LinkedHashSet<String>()
         var rewroteReferencesToDeletedCategories = false
         val survivorIdByDeletedId = categoryDao.getDeletedCategories()
+            .filter { it.categoryId != BIRTHDAYS_CATEGORY_ID }
             .mapNotNull { deleted -> survivorIdByName[deleted.name.trim().lowercase()]?.let { deleted.categoryId to it } }
             .toMap()
         val deletedIdsStillInUse = deletedCategoryIdsStillInUse(survivorIdByDeletedId.keys)

@@ -24,6 +24,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -137,7 +138,8 @@ class EmberrBackupImporter(
             now = now,
             newId = newId
         )
-        val preparedBackup = prepareBackupForImport(backup, choice, categories.localCategoryIdByBackupId, now, newId)
+        val localPersonNoteIds = appDatabase.noteDao().observePeople(ACCOUNT_SPACE_ID).first().mapTo(HashSet()) { it.noteId }
+        val preparedBackup = prepareBackupForImport(backup, choice, categories.localCategoryIdByBackupId, localPersonNoteIds, now, newId)
         val prepared = preparedBackup.spaces
         val accountData = preparedBackup.accountData
         val mediaFileNames = mediaFileNamesUsedBy(
