@@ -121,35 +121,37 @@ internal fun PersonDetailPopupAt(anchor: String, editing: PersonDetailEditing) {
         action()
         closeAll()
     }
-    EmberrDesktopMenu(
-        expanded = popup is PersonDetailPopup.ChoosingKind,
-        onDismissRequest = closeAll,
-        modifier = Modifier.widthIn(min = KindMenuMinWidth, max = KindMenuMaxWidth)
-    ) {
-        PersonDetailKind.entries.forEach { kind ->
-            if (kind == PersonDetailKind.BIRTHDAY && editing.hasBirthday) {
-                EmberrDesktopMenuOption(
-                    label = kind.label,
-                    subtitle = "Already added",
-                    labelColor = MaterialTheme.colorScheme.outline,
-                    icon = { KindMenuIcon(kind) },
-                    onClick = {}
-                )
-            } else {
-                EmberrDesktopSubmenu(
-                    menuWidthEstimate = DesktopEditorWidth,
-                    anchor = { openEditor, _ ->
-                        EmberrDesktopMenuOption(label = kind.label, icon = { KindMenuIcon(kind) }, onClick = openEditor)
-                    }
-                ) { isEditorOpen, closeEditor ->
-                    EmberrDesktopMenu(expanded = isEditorOpen, onDismissRequest = closeEditor) {
-                        Column(modifier = Modifier.width(DesktopEditorWidth)) {
-                            DetailEditorContent(
-                                popup = PersonDetailPopup.Editing(kind, null, anchor),
-                                editing = editing,
-                                finish = finishAndCloseAll,
-                                cancel = closeEditor
-                            )
+    if (anchor == ADD_DETAIL_ANCHOR) {
+        EmberrDesktopMenu(
+            expanded = popup is PersonDetailPopup.ChoosingKind,
+            onDismissRequest = closeAll,
+            modifier = Modifier.widthIn(min = KindMenuMinWidth, max = KindMenuMaxWidth)
+        ) {
+            PersonDetailKind.entries.forEach { kind ->
+                if (kind == PersonDetailKind.BIRTHDAY && editing.hasBirthday) {
+                    EmberrDesktopMenuOption(
+                        label = kind.label,
+                        subtitle = "Already added",
+                        labelColor = MaterialTheme.colorScheme.outline,
+                        icon = { KindMenuIcon(kind) },
+                        onClick = {}
+                    )
+                } else {
+                    EmberrDesktopSubmenu(
+                        menuWidthEstimate = DesktopEditorWidth,
+                        anchor = { openEditor, _ ->
+                            EmberrDesktopMenuOption(label = kind.label, icon = { KindMenuIcon(kind) }, onClick = openEditor)
+                        }
+                    ) { isEditorOpen, closeEditor ->
+                        EmberrDesktopMenu(expanded = isEditorOpen, onDismissRequest = closeEditor) {
+                            Column(modifier = Modifier.width(DesktopEditorWidth)) {
+                                DetailEditorContent(
+                                    popup = PersonDetailPopup.Editing(kind, null, anchor),
+                                    editing = editing,
+                                    finish = finishAndCloseAll,
+                                    cancel = closeEditor
+                                )
+                            }
                         }
                     }
                 }
