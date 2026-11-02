@@ -1079,7 +1079,7 @@ fun DesktopMainScreen(
     val searchResults by searchViewModel.results.collectAsState()
     val eventSearchResults by searchViewModel.eventResults.collectAsState()
     val personSearchResults by searchViewModel.personResults.collectAsState()
-    var personNoteIdOpenedFromSearch by remember { mutableStateOf<String?>(null) }
+    var openedPersonNoteId by remember { mutableStateOf<String?>(null) }
     val isSearchActive = searchQuery.isNotBlank()
     val searchFieldFocusRequester = remember { FocusRequester() }
     var shouldFocusSearchField by remember { mutableStateOf(false) }
@@ -1202,7 +1202,7 @@ fun DesktopMainScreen(
             val birthdayPersonNoteId = personNoteIdOfBirthdayReminder(blockId)
             if (birthdayPersonNoteId != null) {
                 ReminderClickBus.consumePendingBlockId()
-                personNoteIdOpenedFromSearch = birthdayPersonNoteId
+                openedPersonNoteId = birthdayPersonNoteId
                 isPeeking = false
                 return@collect
             }
@@ -1437,7 +1437,7 @@ fun DesktopMainScreen(
                             detail = DetailPane.Calendar
                             isPeeking = false
                         },
-                        onPersonClick = { personNoteId -> personNoteIdOpenedFromSearch = personNoteId },
+                        onPersonClick = { personNoteId -> openedPersonNoteId = personNoteId },
                         openInSplitViewActionFor = { result -> openInSplitViewActionFor(paneForSearchResult(result)) },
                         onRenameNote = { noteId, newTitle ->
                             homeViewModel.renameNote(noteId, newTitle, onDone = searchViewModel::refreshResults)
@@ -2260,8 +2260,8 @@ fun DesktopMainScreen(
                     }
                 )
 
-                personNoteIdOpenedFromSearch?.let { personNoteId ->
-                    PersonView(personNoteId = personNoteId, onDismiss = { personNoteIdOpenedFromSearch = null })
+                openedPersonNoteId?.let { personNoteId ->
+                    PersonView(personNoteId = personNoteId, onDismiss = { openedPersonNoteId = null })
                 }
 
                 // Sheets
