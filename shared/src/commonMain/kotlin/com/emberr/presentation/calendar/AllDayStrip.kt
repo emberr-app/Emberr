@@ -289,6 +289,7 @@ fun AllDayStrip(
                         startsBeforeWindow = bar.startsBeforeWindow,
                         endsAfterWindow = bar.endsAfterWindow,
                         isSelected = bar.event.isSameOccurrenceAs(dragState.selectedEvent),
+                        canBeChanged = !bar.event.isBirthday,
                         onLongPress = {
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             dragState.selectedEvent = bar.event
@@ -377,6 +378,7 @@ private fun AllDayBarChip(
     startsBeforeWindow: Boolean,
     endsAfterWindow: Boolean,
     isSelected: Boolean,
+    canBeChanged: Boolean,
     onLongPress: () -> Unit,
     onDrag: (kind: AllDayDragKind, dragX: Float, pointerInWindow: Offset, pointerId: PointerId?) -> Unit,
     onDragEnd: (released: Boolean) -> Unit,
@@ -388,7 +390,7 @@ private fun AllDayBarChip(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnDrag by rememberUpdatedState(onDrag)
     val currentOnDragEnd by rememberUpdatedState(onDragEnd)
-    val showsEdgeHandles = isDesktopPlatform || isSelected
+    val showsEdgeHandles = canBeChanged && (isDesktopPlatform || isSelected)
 
     AllDayBarLook(
         event = event,
@@ -400,7 +402,8 @@ private fun AllDayBarChip(
         gestureModifier = Modifier
             .clickable(onClick = onClick)
             .onPlaced { barCoordinates = it }
-            .pointerInput(Unit) {
+            .pointerInput(canBeChanged) {
+                if (!canBeChanged) return@pointerInput
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     if (isDesktopPlatform && !currentEvent.buttons.isPrimaryPressed) return@awaitEachGesture

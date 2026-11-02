@@ -32,8 +32,12 @@ data class CalendarEvent(
     val description: String?,
     val recurrenceRule: RecurrenceRule?,
     val allDay: AllDaySpan?,
-    val personNoteIds: List<String> = emptyList()
+    val personNoteIds: List<String> = emptyList(),
+    val birthdayPersonNoteId: String? = null
 )
+
+val CalendarEvent.isBirthday: Boolean
+    get() = birthdayPersonNoteId != null
 
 fun CalendarEvent.lastShownDate(): LocalDate {
     val startDate = LocalDate.parse(dateString)

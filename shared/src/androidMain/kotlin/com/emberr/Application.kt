@@ -64,6 +64,7 @@ class EmberrApplication : Application() {
             getKoin().get<com.emberr.presentation.widget.calendar.CalendarWidgetCoordinator>().start()
             getKoin().get<com.emberr.presentation.widget.calendaragenda.CalendarAgendaWidgetCoordinator>().start()
             getKoin().get<com.emberr.presentation.widget.upcomingevents.UpcomingEventsWidgetCoordinator>().start()
+            getKoin().get<com.emberr.domain.people.BirthdaysCategoryKeeper>().start()
             getKoin().get<ReminderRescheduler>().rescheduleUpcomingReminders()
             getKoin().get<BackupScheduler>()
             getKoin().get<SelfHostSyncScheduler>()

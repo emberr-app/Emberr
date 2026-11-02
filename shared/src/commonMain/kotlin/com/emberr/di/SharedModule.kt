@@ -146,6 +146,14 @@ val sharedModule = module {
     }
 
     single {
+        com.emberr.domain.people.BirthdaysCategoryKeeper(
+            peopleRepository = get(),
+            categoryDao = get(),
+            appScope = get(named("AppScope"))
+        )
+    }
+
+    single {
         com.emberr.domain.canvas.CanvasRepository(
             canvasDao = get(),
             noteDao = get()

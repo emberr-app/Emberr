@@ -3,6 +3,7 @@ package com.emberr.presentation.calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.CategoryEntity
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.data.local.room.entity.TaskSource
@@ -14,7 +15,9 @@ import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.reminders.scheduleEventReminder
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.people.PeopleRepository
+import com.emberr.domain.people.birthdaysInRange
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
@@ -40,6 +43,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import java.util.UUID
@@ -159,23 +163,37 @@ class CalendarViewModel(
     }
 
     fun deleteCategory(id: String) {
+        if (id == BIRTHDAYS_CATEGORY_ID) return
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteCategory(id)
         }
     }
 
-    fun eventsForDate(dateString: String): Flow<List<CalendarEvent>> =
-        combine(repository.getCalendarTasksForDate(dateString), categoryVisibility) { tasks, visibility ->
-            tasks.filter { task -> visibility.isEventShown(task) }.mapNotNull { it.toCalendarEvent() }
+    private val peopleWithDetails = peopleRepository.observePeopleWithDetails()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
+
+    private fun shownEventsWithBirthdays(
+        tasks: Flow<List<CalendarTaskEntity>>,
+        firstDate: LocalDate,
+        lastDate: LocalDate
+    ): Flow<List<CalendarEvent>> =
+        combine(tasks, categoryVisibility, peopleWithDetails) { taskRows, visibility, people ->
+            val events = taskRows.filter { task -> visibility.isEventShown(task) }.mapNotNull { it.toCalendarEvent() }
+            if (!visibility.areBirthdaysShown) return@combine events
+            events + birthdaysInRange(people, firstDate, lastDate).map { birthday -> birthday.toCalendarEvent() }
         }
+
+    fun eventsForDate(dateString: String): Flow<List<CalendarEvent>> {
+        val date = LocalDate.parse(dateString)
+        return shownEventsWithBirthdays(repository.getCalendarTasksForDate(dateString), date, date)
+    }
     fun eventsInRange(startDate: LocalDate, endDate: LocalDate): Flow<List<CalendarEvent>> =
-        combine(repository.getCalendarTasksInRange(startDate.toString(), endDate.toString()), categoryVisibility) { tasks, visibility ->
-            tasks.filter { task -> visibility.isEventShown(task) }.mapNotNull { it.toCalendarEvent() }
-        }
-    fun eventsForMonth(yearMonth: String): Flow<List<CalendarEvent>> =
-        combine(repository.getCalendarTasksForMonth(yearMonth), categoryVisibility) { tasks, visibility ->
-            tasks.filter { task -> visibility.isEventShown(task) }.mapNotNull { it.toCalendarEvent() }
-        }
+        shownEventsWithBirthdays(repository.getCalendarTasksInRange(startDate.toString(), endDate.toString()), startDate, endDate)
+    fun eventsForMonth(yearMonth: String): Flow<List<CalendarEvent>> {
+        val firstOfMonth = LocalDate.parse("$yearMonth-01")
+        val lastOfMonth = firstOfMonth.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY)
+        return shownEventsWithBirthdays(repository.getCalendarTasksForMonth(yearMonth), firstOfMonth, lastOfMonth)
+    }
 
     suspend fun sourceNoteTitle(event: CalendarEvent): String? {
         if (event.sourceType != TaskSource.NOTE) return null
@@ -210,6 +228,7 @@ class CalendarViewModel(
         recurrenceRule: RecurrenceRule? = null,
         editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
     ) {
+        if (original?.isBirthday == true) return
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val normalizedUrl = url?.trim()?.takeIf { it.isNotEmpty() }?.let(::normalizeEventUrl)
@@ -360,6 +379,7 @@ class CalendarViewModel(
         editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS,
         allDay: AllDaySpan? = event.allDay
     ) {
+        if (event.isBirthday) return
         val newTimestamp = timestampOnDate(event.dateString, newTimeRange.startMinuteOfDay)
         if (event.recurrenceRule == null) {
             saveEvent(
@@ -405,6 +425,7 @@ class CalendarViewModel(
         editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS,
         allDay: AllDaySpan? = event.allDay
     ) {
+        if (event.isBirthday) return
         if (targetDateString == event.dateString) {
             resizeEvent(event, newTimeRange, editScope, allDay)
             return
@@ -454,11 +475,13 @@ class CalendarViewModel(
         newLengthInDays: Int,
         editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS
     ) {
+        if (event.isBirthday) return
         val allDay = event.allDay ?: return
         moveEvent(event, newStartDate.toString(), event.timeRange(), editScope, allDay.copy(lengthInDays = newLengthInDays))
     }
 
     fun deleteEvent(event: CalendarEvent, editScope: RecurrenceEditScope = RecurrenceEditScope.ALL_EVENTS) {
+        if (event.isBirthday) return
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 if (event.recurrenceRule != null) {

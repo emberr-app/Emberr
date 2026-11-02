@@ -160,6 +160,7 @@ private fun runEmberrDesktopApp() = application {
             GlobalContext.get().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
             GlobalContext.get().get<com.emberr.domain.repository.NoteRepository>()
                 .moveDailyNotesAndCategoriesToAccount(GlobalContext.get().get<CoroutineScope>(named("AppScope")))
+            GlobalContext.get().get<com.emberr.domain.people.BirthdaysCategoryKeeper>().start()
         }
     }
 
