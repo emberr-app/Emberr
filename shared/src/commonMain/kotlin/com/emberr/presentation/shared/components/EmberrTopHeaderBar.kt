@@ -421,11 +421,17 @@ private fun TopHeaderBarTitle(
     Row(
         modifier = modifier
             .graphicsLayer { alpha = visibility }
-            .clickable(
-                enabled = onClick != null && visibility > 0f,
-                interactionSource = interactionSource,
-                indication = NoRippleIndicationNodeFactory,
-                onClick = { onClick?.invoke() }
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(
+                        enabled = visibility > 0f,
+                        interactionSource = interactionSource,
+                        indication = NoRippleIndicationNodeFactory,
+                        onClick = onClick
+                    )
+                } else {
+                    Modifier
+                }
             )
             .padding(padding),
         horizontalArrangement = Arrangement.Center,
