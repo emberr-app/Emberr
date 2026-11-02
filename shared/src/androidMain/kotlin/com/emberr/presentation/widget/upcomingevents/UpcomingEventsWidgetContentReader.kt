@@ -1,11 +1,13 @@
 // Builds the ordered, date-labelled list of every upcoming, unchecked calendar event.
 package com.emberr.presentation.widget.upcomingevents
 
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
+import com.emberr.presentation.calendar.CalendarCategoryVisibility
 import com.emberr.presentation.calendar.CalendarEvent
 import com.emberr.presentation.calendar.nextBirthdayEvents
 import com.emberr.presentation.widget.WidgetBirthdays
@@ -28,6 +30,7 @@ class UpcomingEventsWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
     private val categoryDao: CategoryDao,
     private val clockFormat: WidgetClockFormat,
+    private val settingsManager: SettingsManager,
     private val widgetBirthdays: WidgetBirthdays,
 ) {
     suspend fun readContentOnce(): UpcomingEventsWidgetContent? = withContext(Dispatchers.IO) {
@@ -47,13 +50,18 @@ class UpcomingEventsWidgetContentReader(
             emptyMap()
         }
 
-        val birthdayEvents = if (widgetBirthdays.areBirthdaysHidden()) {
-            emptyList()
-        } else {
+        val categoryVisibility = CalendarCategoryVisibility(
+            hiddenVisibilityKeys = settingsManager.getHiddenCalendarCategories(),
+            existingCategoryIds = colorsByCategoryId.keys
+        )
+        val shownTasks = tasks.filter { task -> categoryVisibility.isEventShown(task) }
+        val birthdayEvents = if (categoryVisibility.areBirthdaysShown) {
             nextBirthdayEvents(widgetBirthdays.readPeople(), today)
+        } else {
+            emptyList()
         }
 
-        UpcomingEventsWidgetContent(events = buildEvents(tasks, birthdayEvents, today, colorsByCategoryId))
+        UpcomingEventsWidgetContent(events = buildEvents(shownTasks, birthdayEvents, today, colorsByCategoryId))
     }
 
     private fun buildEvents(

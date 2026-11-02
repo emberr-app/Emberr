@@ -199,6 +199,7 @@ val androidModule = module {
             calendarTaskDao = get(),
             categoryDao = get(),
             clockFormat = get(),
+            settingsManager = get(),
             widgetBirthdays = get()
         )
     }

@@ -33,6 +33,4 @@ class WidgetBirthdays(
             WidgetLog.e("Could not read people for birthdays", cause)
             emptyList()
         }
-
-    fun areBirthdaysHidden(): Boolean = BIRTHDAYS_CATEGORY_ID in settingsManager.getHiddenCalendarCategories()
 }
