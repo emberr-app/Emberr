@@ -476,6 +476,40 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _hiddenCalendarCategories.value = visibilityKeys
     }
 
+    private val _birthdayRemindersEnabled = MutableStateFlow(
+        prefs.getBoolean(SyncConstants.KEY_BIRTHDAY_REMINDERS_ENABLED, SyncConstants.DEFAULT_BIRTHDAY_REMINDERS_ENABLED)
+    )
+    override val birthdayRemindersEnabledFlow: Flow<Boolean> = _birthdayRemindersEnabled
+
+    override fun isBirthdayRemindersEnabled(): Boolean = _birthdayRemindersEnabled.value
+
+    override fun saveBirthdayRemindersEnabled(enabled: Boolean) {
+        prefs.putBoolean(SyncConstants.KEY_BIRTHDAY_REMINDERS_ENABLED, enabled)
+        _birthdayRemindersEnabled.value = enabled
+    }
+
+    private val _birthdayReminderMinuteOfDay = MutableStateFlow(
+        prefs.getInt(SyncConstants.KEY_BIRTHDAY_REMINDER_MINUTE_OF_DAY, SyncConstants.DEFAULT_BIRTHDAY_REMINDER_MINUTE_OF_DAY)
+    )
+    override val birthdayReminderMinuteOfDayFlow: Flow<Int> = _birthdayReminderMinuteOfDay
+
+    override fun getBirthdayReminderMinuteOfDay(): Int = _birthdayReminderMinuteOfDay.value
+
+    override fun saveBirthdayReminderMinuteOfDay(minuteOfDay: Int) {
+        prefs.putInt(SyncConstants.KEY_BIRTHDAY_REMINDER_MINUTE_OF_DAY, minuteOfDay)
+        _birthdayReminderMinuteOfDay.value = minuteOfDay
+    }
+
+    override fun getScheduledBirthdayReminderIds(): Set<String> =
+        prefs.get(SyncConstants.KEY_SCHEDULED_BIRTHDAY_REMINDER_IDS, "")
+            .split(",")
+            .filter { reminderId -> reminderId.isNotBlank() }
+            .toSet()
+
+    override fun saveScheduledBirthdayReminderIds(reminderIds: Set<String>) {
+        prefs.put(SyncConstants.KEY_SCHEDULED_BIRTHDAY_REMINDER_IDS, reminderIds.joinToString(","))
+    }
+
     private val _keyboardToolbarItems = MutableStateFlow(
         prefs.get(SyncConstants.KEY_KEYBOARD_TOOLBAR_ITEMS, SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS)
     )

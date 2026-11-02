@@ -532,6 +532,37 @@ class AndroidSettingsManager(
         _hiddenCalendarCategories.value = visibilityKeys
     }
 
+    private val _birthdayRemindersEnabled = MutableStateFlow(
+        sharedPreferences.getBoolean(SyncConstants.KEY_BIRTHDAY_REMINDERS_ENABLED, SyncConstants.DEFAULT_BIRTHDAY_REMINDERS_ENABLED)
+    )
+    override val birthdayRemindersEnabledFlow: Flow<Boolean> = _birthdayRemindersEnabled
+
+    override fun isBirthdayRemindersEnabled(): Boolean = _birthdayRemindersEnabled.value
+
+    override fun saveBirthdayRemindersEnabled(enabled: Boolean) {
+        sharedPreferences.edit { putBoolean(SyncConstants.KEY_BIRTHDAY_REMINDERS_ENABLED, enabled) }
+        _birthdayRemindersEnabled.value = enabled
+    }
+
+    private val _birthdayReminderMinuteOfDay = MutableStateFlow(
+        sharedPreferences.getInt(SyncConstants.KEY_BIRTHDAY_REMINDER_MINUTE_OF_DAY, SyncConstants.DEFAULT_BIRTHDAY_REMINDER_MINUTE_OF_DAY)
+    )
+    override val birthdayReminderMinuteOfDayFlow: Flow<Int> = _birthdayReminderMinuteOfDay
+
+    override fun getBirthdayReminderMinuteOfDay(): Int = _birthdayReminderMinuteOfDay.value
+
+    override fun saveBirthdayReminderMinuteOfDay(minuteOfDay: Int) {
+        sharedPreferences.edit { putInt(SyncConstants.KEY_BIRTHDAY_REMINDER_MINUTE_OF_DAY, minuteOfDay) }
+        _birthdayReminderMinuteOfDay.value = minuteOfDay
+    }
+
+    override fun getScheduledBirthdayReminderIds(): Set<String> =
+        sharedPreferences.getStringSet(SyncConstants.KEY_SCHEDULED_BIRTHDAY_REMINDER_IDS, emptySet()).orEmpty().toSet()
+
+    override fun saveScheduledBirthdayReminderIds(reminderIds: Set<String>) {
+        sharedPreferences.edit { putStringSet(SyncConstants.KEY_SCHEDULED_BIRTHDAY_REMINDER_IDS, reminderIds) }
+    }
+
     private val _keyboardToolbarItems = MutableStateFlow(
         sharedPreferences.getString(SyncConstants.KEY_KEYBOARD_TOOLBAR_ITEMS, SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS)
             ?: SyncConstants.DEFAULT_KEYBOARD_TOOLBAR_ITEMS

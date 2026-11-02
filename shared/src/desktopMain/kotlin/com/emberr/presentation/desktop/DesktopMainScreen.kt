@@ -135,6 +135,7 @@ import com.emberr.presentation.people.personDetailSearchLine
 import com.emberr.presentation.people.personDisplayName
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.domain.people.PersonSearchResult
+import com.emberr.domain.people.personNoteIdOfBirthdayReminder
 import com.emberr.presentation.properties.PropertiesScreen
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
@@ -1198,6 +1199,14 @@ fun DesktopMainScreen(
 
     LaunchedEffect(Unit) {
         ReminderClickBus.pendingBlockId.filterNotNull().collect { blockId ->
+            val birthdayPersonNoteId = personNoteIdOfBirthdayReminder(blockId)
+            if (birthdayPersonNoteId != null) {
+                ReminderClickBus.consumePendingBlockId()
+                personNoteIdOpenedFromSearch = birthdayPersonNoteId
+                isPeeking = false
+                return@collect
+            }
+
             val target = withContext(Dispatchers.IO) { reminderTargetResolver.resolve(blockId) }
             ReminderClickBus.consumePendingBlockId()
             if (target == null) return@collect

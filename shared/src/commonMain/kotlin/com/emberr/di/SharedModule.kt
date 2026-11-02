@@ -154,6 +154,15 @@ val sharedModule = module {
     }
 
     single {
+        com.emberr.domain.people.BirthdayReminderScheduler(
+            peopleRepository = get(),
+            settingsManager = get(),
+            reminderScheduler = get(),
+            appScope = get(named("AppScope"))
+        )
+    }
+
+    single {
         com.emberr.domain.canvas.CanvasRepository(
             canvasDao = get(),
             noteDao = get()

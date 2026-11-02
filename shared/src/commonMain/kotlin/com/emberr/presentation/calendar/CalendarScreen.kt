@@ -177,6 +177,8 @@ fun CalendarScreen(
     val hiddenCategoryVisibilityKeys by viewModel.hiddenCategoryVisibilityKeys.collectAsState()
     val spaces by viewModel.spaces.collectAsState()
     val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
+    val areBirthdayRemindersOn by viewModel.areBirthdayRemindersOn.collectAsState()
+    val birthdayReminderMinuteOfDay by viewModel.birthdayReminderMinuteOfDay.collectAsState()
     val firstDayOfWeek = LocalFirstDayOfWeek.current
     val events by remember(selectedDate) { viewModel.eventsForDate(selectedDate.toString()) }
         .collectAsState(initial = emptyList())
@@ -679,7 +681,11 @@ fun CalendarScreen(
                         onDeleteCategory = viewModel::deleteCategory,
                         hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
                         onToggleCategoryVisibility = viewModel::toggleCategoryVisibility,
-                        spaces = spaces
+                        spaces = spaces,
+                        areBirthdayRemindersOn = areBirthdayRemindersOn,
+                        onBirthdayRemindersOnChange = viewModel::setBirthdayRemindersOn,
+                        birthdayReminderMinuteOfDay = birthdayReminderMinuteOfDay,
+                        onBirthdayReminderTimeChange = viewModel::setBirthdayReminderTime
                     )
                 }
             }
@@ -702,6 +708,10 @@ fun CalendarScreen(
             hiddenCategoryVisibilityKeys = hiddenCategoryVisibilityKeys,
             onToggleCategoryVisibility = viewModel::toggleCategoryVisibility,
             spaces = spaces,
+            areBirthdayRemindersOn = areBirthdayRemindersOn,
+            onBirthdayRemindersOnChange = viewModel::setBirthdayRemindersOn,
+            birthdayReminderMinuteOfDay = birthdayReminderMinuteOfDay,
+            onBirthdayReminderTimeChange = viewModel::setBirthdayReminderTime,
             modifier = Modifier.padding(bottom = 16.dp)
         )
     }
