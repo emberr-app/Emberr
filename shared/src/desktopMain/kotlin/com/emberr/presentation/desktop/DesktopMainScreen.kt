@@ -1211,6 +1211,13 @@ fun DesktopMainScreen(
             ReminderClickBus.consumePendingBlockId()
             if (target == null) return@collect
 
+            val isPersonNote = withContext(Dispatchers.IO) { noteRepository.getNoteById(target.noteId)?.kind == NoteKind.PERSON }
+            if (isPersonNote) {
+                openedPersonNoteId = target.noteId
+                isPeeking = false
+                return@collect
+            }
+
             if (target.spaceId != activeSpaceId && target.spaceId != ACCOUNT_SPACE_ID) {
                 isOpeningReminderTarget = true
                 spaceViewModel.openSpace(target.spaceId)
