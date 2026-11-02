@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.TextRange
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emberr.domain.people.PeopleRepository
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteKind
@@ -181,7 +182,8 @@ abstract class BaseEditorViewModel(
     protected val audioRecorder: AudioRecorder,
     private val appScope: CoroutineScope,
     private val deviceTableLayoutStore: DeviceTableLayoutStore,
-    movieTitleSource: MovieTitleSource
+    movieTitleSource: MovieTitleSource,
+    peopleRepository: PeopleRepository
 ) : ViewModel() {
 
     // AI event bus
@@ -378,7 +380,10 @@ abstract class BaseEditorViewModel(
     protected abstract fun getNoteTitleForReminder(): String
     protected abstract suspend fun spaceIdOfThisNote(): String?
 
-    val allLinkableNotes: StateFlow<List<NoteMetadataEntity>> = repository.getAllLinkableNotes()
+    val allLinkableNotes: StateFlow<List<NoteMetadataEntity>> = combine(
+        repository.getAllLinkableNotes(),
+        peopleRepository.observePeople()
+    ) { notes, people -> notes + people }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val customProperties: StateFlow<List<CustomPropertyEntity>> = repository.getCustomProperties()

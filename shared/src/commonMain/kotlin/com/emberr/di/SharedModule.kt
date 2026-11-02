@@ -369,7 +369,8 @@ val sharedModule = module {
             audioRecorder = get(),
             appScope = get(named("AppScope")),
             deviceTableLayoutStore = get(),
-            movieTitleSource = get()
+            movieTitleSource = get(),
+            peopleRepository = get()
         )
     }
     viewModel {
@@ -381,7 +382,8 @@ val sharedModule = module {
             audioRecorder = get(),
             appScope = get(named("AppScope")),
             deviceTableLayoutStore = get(),
-            movieTitleSource = get()
+            movieTitleSource = get(),
+            peopleRepository = get()
         )
     }
     single {

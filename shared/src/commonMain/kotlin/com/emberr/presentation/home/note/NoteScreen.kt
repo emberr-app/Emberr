@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.domain.model.CredentialsEdit
 import com.emberr.presentation.shared.editor.centeredWithMaxWidth
 import androidx.compose.material3.*
@@ -78,6 +79,7 @@ import com.emberr.presentation.shared.editor.selection.CrossBlockTextRange
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
 import com.emberr.presentation.shared.editor.SelectionModeObserver
 import com.emberr.presentation.calendar.EventEditorSheetHost
+import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.calendar.RecurrenceScopeChooser
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
@@ -251,6 +253,7 @@ fun NoteScreen(
 
     var showOptionsMenu by remember { mutableStateOf(false) }
     var subNotePanelId by remember { mutableStateOf<String?>(null) }
+    var linkedPersonNoteId by remember { mutableStateOf<String?>(null) }
     val settingsManager: SettingsManager = org.koin.compose.koinInject()
     val subNoteOpenModeName by settingsManager.subNoteOpenModeFlow.collectAsState(
         initial = SyncConstants.DEFAULT_SUBNOTE_OPEN_MODE
@@ -515,7 +518,8 @@ fun NoteScreen(
             override fun onAddBlockBelow(id: String) = viewModel.addBlockBelow(id)
             override fun onNoteLinkClick(noteId: String) {
                 if (isDesktopPlatform) {
-                    subNotePanelId = noteId
+                    val isPersonNote = allLinkableNotes.any { note -> note.noteId == noteId && note.kind == NoteKind.PERSON }
+                    if (isPersonNote) linkedPersonNoteId = noteId else subNotePanelId = noteId
                 } else {
                     onNavigateToEditor(noteId)
                 }
@@ -931,6 +935,10 @@ fun NoteScreen(
                         onExportPdf = onExportPdf,
                         openMode = subNoteOpenMode
                     )
+                }
+
+                linkedPersonNoteId?.let { personNoteId ->
+                    PersonView(personNoteId = personNoteId, onDismiss = { linkedPersonNoteId = null })
                 }
 
                 if (!isDesktopPlatform) {

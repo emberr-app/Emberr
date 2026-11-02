@@ -1892,30 +1892,22 @@ fun EditorToolbar(
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) })
                                 Box(modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).verticalScroll(rememberScrollState())) {
-                                    val filteredNotes = remember(mentionQuery, allLinkableNotes) {
-                                        allLinkableNotes.filter { it.title.contains(mentionQuery, ignoreCase = true) }
+                                    var shownNoteCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
+                                    var shownPeopleCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
+                                    val sections = remember(mentionQuery, allLinkableNotes, shownNoteCount, shownPeopleCount) {
+                                        mentionMenuSections(
+                                            query = mentionQuery,
+                                            mentionableNotes = allLinkableNotes,
+                                            shownNoteCount = shownNoteCount,
+                                            shownPeopleCount = shownPeopleCount,
+                                            onShowMoreNotes = { shownNoteCount += MENTION_RESULTS_PER_STEP },
+                                            onShowMorePeople = { shownPeopleCount += MENTION_RESULTS_PER_STEP },
+                                            onCreateBlankNote = onMentionCreateBlank,
+                                            onCreateNote = onMentionCreateNote,
+                                            onPick = { note -> onMentionNoteSelected(note.noteId) }
+                                        )
                                     }
-                                    val entries = remember(mentionQuery, filteredNotes) {
-                                        buildList {
-                                            add(
-                                                SlashMenuItemData("Create new note", SlashMenuIcon.Vector(Icons.AutoMirrored.Filled.NoteAdd)) {
-                                                    onMentionCreateBlank()
-                                                }
-                                            )
-                                            filteredNotes.forEach { note ->
-                                                val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Vector(Icons.Default.Description)
-                                                add(SlashMenuItemData(note.title.ifEmpty { "Untitled" }, icon) { onMentionNoteSelected(note.noteId) })
-                                            }
-                                            if (mentionQuery.isNotBlank()) {
-                                                add(
-                                                    SlashMenuItemData("New \"$mentionQuery\" note", SlashMenuIcon.Vector(Icons.Default.Add)) {
-                                                        onMentionCreateNote(mentionQuery)
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                    SlashMenuList(sections = listOf(SlashMenuSectionData("Link to Note", entries)))
+                                    SlashMenuList(sections = sections)
                                 }
                             }
                         }

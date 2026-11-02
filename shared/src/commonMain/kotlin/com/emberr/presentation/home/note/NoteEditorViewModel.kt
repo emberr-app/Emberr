@@ -1,6 +1,7 @@
 package com.emberr.presentation.home.note
 
 import androidx.lifecycle.viewModelScope
+import com.emberr.domain.people.PeopleRepository
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.database.withDatabasesAsTables
 import com.emberr.domain.model.*
@@ -39,8 +40,9 @@ class NoteEditorViewModel(
     audioRecorder: AudioRecorder,
     appScope: CoroutineScope,
     deviceTableLayoutStore: DeviceTableLayoutStore,
-    movieTitleSource: MovieTitleSource
-) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore, movieTitleSource) {
+    movieTitleSource: MovieTitleSource,
+    peopleRepository: PeopleRepository
+) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore, movieTitleSource, peopleRepository) {
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
