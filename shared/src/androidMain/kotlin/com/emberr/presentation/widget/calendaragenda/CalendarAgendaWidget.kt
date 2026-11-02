@@ -48,6 +48,7 @@ import com.emberr.MainActivity
 import com.emberr.R
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.calendarEventUriScheme
+import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
 import com.emberr.presentation.widget.highlightColor
 import com.emberr.presentation.widget.onHighlightColor
 import com.emberr.presentation.widget.primaryTextColor
@@ -276,7 +277,7 @@ private fun EventRow(context: Context, event: AgendaEvent) {
         modifier = GlanceModifier
             .fillMaxWidth()
             .padding(bottom = 7.dp)
-            .clickable(actionStartActivity(openEventIntent(context, event.blockId)))
+            .clickable(actionStartActivity(openEventIntent(context, event.blockId, event.birthdayPersonNoteId)))
     ) {
         Box(
             modifier = GlanceModifier
@@ -327,7 +328,8 @@ private fun agendaMonthStepIntent(context: Context, appWidgetId: Int, isForward:
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
     }
 
-private fun openEventIntent(context: Context, blockId: String): Intent =
+private fun openEventIntent(context: Context, blockId: String, birthdayPersonNoteId: String?): Intent =
     Intent(context, MainActivity::class.java)
         .setData("$calendarEventUriScheme://event/$blockId".toUri())
+        .putExtra(widgetBirthdayPersonNoteIdExtra, birthdayPersonNoteId)
         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

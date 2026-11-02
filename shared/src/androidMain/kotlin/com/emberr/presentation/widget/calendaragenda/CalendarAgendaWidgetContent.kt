@@ -25,5 +25,6 @@ data class AgendaEvent(
     val title: String,
     val whenLabel: String,
     val isDone: Boolean,
-    val accentColorHex: String?
+    val accentColorHex: String?,
+    val birthdayPersonNoteId: String? = null
 )

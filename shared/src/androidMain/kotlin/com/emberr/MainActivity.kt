@@ -42,6 +42,7 @@ import com.emberr.presentation.widget.upcomingevents.refreshUpcomingEventsWidget
 import com.emberr.presentation.widget.tasks.refreshTaskWidgets
 import com.emberr.presentation.widget.calendarDateUriScheme
 import com.emberr.presentation.widget.calendarEventUriScheme
+import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
 import com.emberr.presentation.widget.widgetDailyDateExtra
 import com.emberr.presentation.widget.widgetDailyScreenExtra
 import com.emberr.presentation.widget.widgetCalendarScreenExtra
@@ -537,7 +538,9 @@ class MainActivity : ComponentActivity() {
             ?.takeIf { it.isNotBlank() }
 
         if (calendarEvent != null) {
-            WidgetCalendarEventBus.requestEvent(calendarEvent)
+            val birthdayPersonNoteId = intent.getStringExtra(widgetBirthdayPersonNoteIdExtra)?.takeIf { it.isNotBlank() }
+            intent.removeExtra(widgetBirthdayPersonNoteIdExtra)
+            WidgetCalendarEventBus.requestEvent(calendarEvent, birthdayPersonNoteId = birthdayPersonNoteId)
             return Screen.Calendar.route
         }
 

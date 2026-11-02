@@ -5,6 +5,10 @@ import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
+import com.emberr.presentation.calendar.CalendarEvent
+import com.emberr.presentation.calendar.nextBirthdayEvents
+import com.emberr.presentation.widget.WidgetBirthdays
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +28,7 @@ class UpcomingEventsWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
     private val categoryDao: CategoryDao,
     private val clockFormat: WidgetClockFormat,
+    private val widgetBirthdays: WidgetBirthdays,
 ) {
     suspend fun readContentOnce(): UpcomingEventsWidgetContent? = withContext(Dispatchers.IO) {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -42,26 +47,27 @@ class UpcomingEventsWidgetContentReader(
             emptyMap()
         }
 
-        UpcomingEventsWidgetContent(events = buildEvents(tasks, today, colorsByCategoryId))
+        val birthdayEvents = if (widgetBirthdays.areBirthdaysHidden()) {
+            emptyList()
+        } else {
+            nextBirthdayEvents(widgetBirthdays.readPeople(), today)
+        }
+
+        UpcomingEventsWidgetContent(events = buildEvents(tasks, birthdayEvents, today, colorsByCategoryId))
     }
 
     private fun buildEvents(
         tasks: List<CalendarTaskEntity>,
+        birthdayEvents: List<CalendarEvent>,
         today: LocalDate,
         colorsByCategoryId: Map<String, String>
-    ): List<UpcomingEvent> =
-        tasks
-            .sortedWith(
-                compareBy(
-                    { task -> task.targetDate },
-                    { task -> task.reminderTimestamp ?: Long.MAX_VALUE }
-                )
-            )
-            .take(maximumEventsShown)
-            .mapNotNull { task ->
-                val targetDate = task.targetDate?.let(LocalDate::parse) ?: return@mapNotNull null
+    ): List<UpcomingEvent> {
+        val taskEvents = tasks.mapNotNull { task ->
+            val targetDate = task.targetDate?.let(LocalDate::parse) ?: return@mapNotNull null
 
-                UpcomingEvent(
+            SortableUpcomingEvent(
+                timestamp = task.reminderTimestamp ?: Long.MAX_VALUE,
+                event = UpcomingEvent(
                     blockId = task.blockId,
                     title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
                     dateGroupKey = task.targetDate,
@@ -72,7 +78,33 @@ class UpcomingEventsWidgetContentReader(
                         task.reminderTimestamp < System.currentTimeMillis(),
                     accentColorHex = task.categoryId?.let { categoryId -> colorsByCategoryId[categoryId] }
                 )
-            }
+            )
+        }
+        val birthdays = birthdayEvents.map { birthday ->
+            SortableUpcomingEvent(
+                timestamp = birthday.reminderTimestamp ?: Long.MAX_VALUE,
+                event = UpcomingEvent(
+                    blockId = birthday.blockId,
+                    title = birthday.text.take(maximumCharactersPerTitle),
+                    dateGroupKey = birthday.dateString,
+                    dateLabel = formatDateLabel(LocalDate.parse(birthday.dateString), today),
+                    timeLabel = null,
+                    isOverdue = false,
+                    accentColorHex = colorsByCategoryId[BIRTHDAYS_CATEGORY_ID],
+                    birthdayPersonNoteId = birthday.birthdayPersonNoteId
+                )
+            )
+        }
+        return (taskEvents + birthdays)
+            .sortedWith(compareBy({ it.event.dateGroupKey }, { it.timestamp }))
+            .take(maximumEventsShown)
+            .map { it.event }
+    }
+
+    private class SortableUpcomingEvent(
+        val timestamp: Long,
+        val event: UpcomingEvent
+    )
 }
 
 private val shortMonthNames = listOf(

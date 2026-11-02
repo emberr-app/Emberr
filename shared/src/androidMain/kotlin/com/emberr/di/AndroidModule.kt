@@ -136,19 +136,29 @@ val androidModule = module {
     single { com.emberr.presentation.widget.WidgetFirstDayOfWeek(settingsManager = get()) }
 
     single {
+        com.emberr.presentation.widget.WidgetBirthdays(
+            peopleRepository = get(),
+            categoryDao = get(),
+            settingsManager = get()
+        )
+    }
+
+    single {
         com.emberr.presentation.widget.calendaragenda.CalendarAgendaWidgetContentReader(
             calendarTaskDao = get(),
             categoryDao = get(),
             clockFormat = get(),
             firstDayOfWeek = get(),
-            settingsManager = get()
+            settingsManager = get(),
+            widgetBirthdays = get()
         )
     }
 
     single {
         com.emberr.presentation.widget.calendaragenda.CalendarAgendaWidgetCoordinator(
             context = androidContext(),
-            calendarTaskDao = get()
+            calendarTaskDao = get(),
+            widgetBirthdays = get()
         )
     }
 
@@ -157,14 +167,16 @@ val androidModule = module {
             calendarTaskDao = get(),
             categoryDao = get(),
             firstDayOfWeek = get(),
-            settingsManager = get()
+            settingsManager = get(),
+            widgetBirthdays = get()
         )
     }
 
     single {
         com.emberr.presentation.widget.calendar.CalendarWidgetCoordinator(
             context = androidContext(),
-            calendarTaskDao = get()
+            calendarTaskDao = get(),
+            widgetBirthdays = get()
         )
     }
 
@@ -186,14 +198,16 @@ val androidModule = module {
         com.emberr.presentation.widget.upcomingevents.UpcomingEventsWidgetContentReader(
             calendarTaskDao = get(),
             categoryDao = get(),
-            clockFormat = get()
+            clockFormat = get(),
+            widgetBirthdays = get()
         )
     }
 
     single {
         com.emberr.presentation.widget.upcomingevents.UpcomingEventsWidgetCoordinator(
             context = androidContext(),
-            calendarTaskDao = get()
+            calendarTaskDao = get(),
+            widgetBirthdays = get()
         )
     }
 

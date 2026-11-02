@@ -42,6 +42,7 @@ import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
 import com.emberr.presentation.widget.calendarEventUriScheme
+import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
 import com.emberr.presentation.widget.primaryTextColor
 import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.surfaceColor
@@ -180,7 +181,7 @@ private fun EventRow(context: Context, event: UpcomingEvent) {
         modifier = GlanceModifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .clickable(actionStartActivity(openEventIntent(context, event.blockId)))
+            .clickable(actionStartActivity(openEventIntent(context, event.blockId, event.birthdayPersonNoteId)))
     ) {
         Box(
             modifier = GlanceModifier
@@ -229,9 +230,10 @@ private fun accentColorFrom(colorHex: String?): Color {
     return parsed ?: Color(0xFF848484)
 }
 
-private fun openEventIntent(context: Context, blockId: String): Intent =
+private fun openEventIntent(context: Context, blockId: String, birthdayPersonNoteId: String?): Intent =
     Intent(context, MainActivity::class.java)
         .setData("$calendarEventUriScheme://event/$blockId".toUri())
+        .putExtra(widgetBirthdayPersonNoteIdExtra, birthdayPersonNoteId)
         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
 private fun openCalendarScreenIntent(context: Context): Intent =

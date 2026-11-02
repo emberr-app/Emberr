@@ -9,6 +9,7 @@ const val widgetDailyScreenExtra = "widget_daily_screen"
 const val widgetDailyDateExtra = "widget_daily_date"
 const val widgetCalendarScreenExtra = "widget_calendar_screen"
 const val widgetNewEventExtra = "widget_new_event"
+const val widgetBirthdayPersonNoteIdExtra = "widget_birthday_person_note_id"
 
 const val calendarDateUriScheme = "emberr-calendar-day"
 const val calendarEventUriScheme = "emberr-calendar-event"
