@@ -32,9 +32,10 @@ object NoteBlockSerializer : KSerializer<NoteBlock> {
             ?: throw SerializationException("Note blocks can only be read from JSON")
         val blockJson = jsonDecoder.decodeJsonElement().jsonObject
         val blockType = (blockJson[BLOCK_TYPE_FIELD] as? JsonPrimitive)?.contentOrNull
-        return if (blockType != null && blockType in blockTypesThisVersionKnows) {
+        if (blockType == null || blockType !in blockTypesThisVersionKnows) return UnknownBlockSerializer.unknownBlockFrom(blockJson)
+        return try {
             jsonDecoder.json.decodeFromJsonElement(generatedSerializer, blockJson)
-        } else {
+        } catch (unreadableValue: SerializationException) {
             UnknownBlockSerializer.unknownBlockFrom(blockJson)
         }
     }
