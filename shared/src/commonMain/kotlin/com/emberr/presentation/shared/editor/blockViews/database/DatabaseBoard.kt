@@ -77,6 +77,8 @@ import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.tagPoolKey
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.presentation.shared.components.EmberrCheckbox
+import com.emberr.presentation.shared.components.PersonAvatar
+import com.emberr.presentation.shared.components.rememberPeopleToPick
 import com.emberr.presentation.shared.components.EmberrHorizontalScrollbar
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.GestureCoordinates
@@ -187,7 +189,7 @@ internal fun DatabaseBoard(
     val valueType = groupColumn?.let { block.valueTypeOf(it) }
     if (groupColumn == null || valueType == null) {
         Text(
-            text = "Add a Status, Tags, Checkbox or Date column to group this board by.",
+            text = "Add a Status, Tags, People, Checkbox or Date column to group this board by.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.outline,
             modifier = modifier.padding(vertical = 12.dp)
@@ -741,6 +743,18 @@ private fun DatabaseBoardGroupLabel(value: DatabaseBoardGroupValue, columnLabel:
             tagPoolKey = tagPoolKey,
             textStyle = MaterialTheme.typography.bodyMedium
         )
+        is DatabaseBoardGroupValue.Person -> Row(verticalAlignment = Alignment.CenterVertically) {
+            val icon = rememberPeopleToPick()?.firstOrNull { it.id == value.personNoteId }?.icon
+            PersonAvatar(personNoteId = value.personNoteId, name = value.name, icon = icon, size = 20.dp)
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = value.name,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         is DatabaseBoardGroupValue.Checkbox -> Row(verticalAlignment = Alignment.CenterVertically) {
             EmberrCheckbox(checked = value.isChecked, onCheckedChange = null)
             Spacer(modifier = Modifier.width(6.dp))
@@ -926,6 +940,7 @@ private fun DatabaseNewGroupPage(existingNames: List<String>, onCancel: () -> Un
 
 internal fun DatabaseBoardGroupValue.labelText(columnLabel: String): String = when (this) {
     is DatabaseBoardGroupValue.Option -> name
+    is DatabaseBoardGroupValue.Person -> name
     is DatabaseBoardGroupValue.Checkbox -> if (isChecked) "Checked" else "Unchecked"
     is DatabaseBoardGroupValue.DatePeriod -> when (grouping) {
         DatabaseDateGrouping.DAY -> formatPropertyDate(start)

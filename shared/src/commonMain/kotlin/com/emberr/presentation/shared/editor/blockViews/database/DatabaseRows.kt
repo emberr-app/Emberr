@@ -69,6 +69,7 @@ import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.columnKey
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyCheckboxValue
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyDateValue
+import com.emberr.presentation.shared.editor.blockViews.property.PropertyPeopleValue
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagsValue
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTextValue
 import com.emberr.presentation.shared.editor.blockViews.property.toTextAlign
@@ -430,6 +431,16 @@ private fun DatabasePropertyCell(
                 onUpdateChecked = { editor.updateCellChecked(database.id, row.noteId, column, it) },
                 widthModifier = valueModifier,
                 alignment = style.alignment
+            )
+            cell.valueType.holdsPeople -> PropertyPeopleValue(
+                block = cell,
+                inSelectionMode = inSelectionMode,
+                onUpdatePeople = { editor.updateCellPeople(database.id, row.noteId, column, it) },
+                runAfterKeyboardCloses = runAfterKeyboardCloses,
+                widthModifier = valueModifier,
+                pillsOpenPersonPage = false,
+                alignment = style.alignment,
+                wrapsText = wrapsText
             )
             cell.valueType.holdsNumber && numberFormat != null -> DatabaseFormattedNumberCell(
                 cell = cell,

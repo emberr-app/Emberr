@@ -94,6 +94,7 @@ import emberr.shared.generated.resources.square_arrow_out_up_right
 import emberr.shared.generated.resources.square_check
 import emberr.shared.generated.resources.tags
 import emberr.shared.generated.resources.text_type
+import emberr.shared.generated.resources.user2
 import emberr.shared.generated.resources.x
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -114,7 +115,7 @@ internal fun TextAlignment?.toTextAlign(): TextAlign = when (this) {
     else -> TextAlign.Unspecified
 }
 
-private fun TextAlignment?.toBoxAlignment(): Alignment = when (this) {
+internal fun TextAlignment?.toBoxAlignment(): Alignment = when (this) {
     TextAlignment.CENTER -> Alignment.TopCenter
     TextAlignment.RIGHT -> Alignment.TopEnd
     else -> Alignment.TopStart
@@ -127,6 +128,7 @@ fun PropertyType.iconResource(): DrawableResource = when (this) {
     PropertyType.DATE -> Res.drawable.calendar_day
     PropertyType.STATUS -> Res.drawable.flag
     PropertyType.TAGS -> Res.drawable.tags
+    PropertyType.PEOPLE -> Res.drawable.user2
     PropertyType.LINK -> Res.drawable.link
     PropertyType.DESCRIPTION -> Res.drawable.doc_text
     PropertyType.DUE_DATE -> Res.drawable.calendar_clock
@@ -143,6 +145,7 @@ fun PropertyValueType.iconResource(): DrawableResource = when (this) {
     PropertyValueType.DATE -> Res.drawable.calendar_day
     PropertyValueType.SINGLE_CHOICE -> Res.drawable.flag
     PropertyValueType.TAGS -> Res.drawable.tags
+    PropertyValueType.PERSON -> Res.drawable.user2
     PropertyValueType.CHECKBOX -> Res.drawable.square_check
     PropertyValueType.NUMBER -> Res.drawable.hash
     PropertyValueType.FORMULA -> Res.drawable.sigma
@@ -156,6 +159,7 @@ fun PropertyBlockView(
     onUpdateDate: (PropertyDateRange) -> Unit,
     onUpdateTags: (List<String>) -> Unit,
     onUpdateChecked: (Boolean) -> Unit,
+    onUpdatePeople: (List<String>) -> Unit = {},
     runAfterKeyboardCloses: (() -> Unit) -> Unit = { action -> action() }
 ) {
     val labelWidth = if (isDesktopPlatform) 150.dp else 120.dp
@@ -193,6 +197,8 @@ fun PropertyBlockView(
                         PropertyTagsValue(block, inSelectionMode, onUpdateTags, runAfterKeyboardCloses, valueWidthModifier)
                     block.valueType.holdsCheck ->
                         PropertyCheckboxValue(block, inSelectionMode, onUpdateChecked, valueWidthModifier)
+                    block.valueType.holdsPeople ->
+                        PropertyPeopleValue(block, inSelectionMode, onUpdatePeople, runAfterKeyboardCloses, valueWidthModifier)
                     else -> PropertyTextValue(block, inSelectionMode, onUpdateText, valueWidthModifier)
                 }
             }

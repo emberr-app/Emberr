@@ -511,6 +511,7 @@ interface EditorActions {
     fun onUpdatePropertyDate(id: String, range: PropertyDateRange)
     fun onUpdatePropertyTags(id: String, tags: List<String>)
     fun onUpdatePropertyChecked(id: String, isChecked: Boolean)
+    fun onUpdatePropertyPeople(id: String, personNoteIds: List<String>) {}
     val databaseBlockEditor: DatabaseBlockEditor?
     val movieBlockEditor: MovieBlockEditor? get() = null
     val watchlistBlockEditor: WatchlistBlockEditor? get() = null

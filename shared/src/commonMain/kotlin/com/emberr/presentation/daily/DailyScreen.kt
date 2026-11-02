@@ -352,6 +352,7 @@ fun DailyScreen(
             override fun onUpdatePropertyDate(id: String, range: PropertyDateRange) = viewModel.updatePropertyDate(id, range)
             override fun onUpdatePropertyTags(id: String, tags: List<String>) = viewModel.updatePropertyTags(id, tags)
             override fun onUpdatePropertyChecked(id: String, isChecked: Boolean) = viewModel.updatePropertyChecked(id, isChecked)
+            override fun onUpdatePropertyPeople(id: String, personNoteIds: List<String>) = viewModel.updatePropertyPeople(id, personNoteIds)
             override val databaseBlockEditor: DatabaseBlockEditor get() = viewModel.databaseBlockEditor
             override val movieBlockEditor: MovieBlockEditor get() = viewModel.movieBlockEditor
             override val watchlistBlockEditor: WatchlistBlockEditor get() = viewModel.watchlistBlockEditor

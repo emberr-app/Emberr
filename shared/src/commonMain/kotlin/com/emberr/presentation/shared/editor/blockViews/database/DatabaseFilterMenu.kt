@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -45,6 +46,9 @@ import com.emberr.domain.model.valueTypeOf
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.MenuChoiceButton
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
+import com.emberr.presentation.shared.components.PersonAvatar
+import com.emberr.presentation.shared.components.displayName
+import com.emberr.presentation.shared.components.rememberPeopleToPick
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagChip
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
 import com.emberr.presentation.shared.editor.blockViews.property.rememberPropertyTagColor
@@ -188,6 +192,16 @@ internal fun DatabaseFilterEditor(
                         onPick = { tagName -> closeLayerAnd { onChange { it.copy(tagName = tagName) } } }
                     )
                 }
+                valueType.holdsPeople -> DatabaseMenuLayer(
+                    title = columnLabel,
+                    anchor = { openLayer -> DatabaseFilterPersonValue(personNoteId = filter.personNoteId, onClick = openLayer) },
+                    anchorIsMenuRow = false
+                ) { closeLayerAnd ->
+                    DatabaseFilterPersonChoices(
+                        selectedPersonNoteId = filter.personNoteId,
+                        onPick = { personNoteId -> closeLayerAnd { onChange { it.copy(personNoteId = personNoteId) } } }
+                    )
+                }
                 else -> EmberrTextField(
                     value = filter.text,
                     onValueChange = { text -> onChange { it.copy(text = text) } },
@@ -290,6 +304,38 @@ private fun DatabaseFilterOptionValue(tagName: String?, tagPoolKey: String?, onC
         } else {
             PropertyTagChip(tagName = tagName, tagPoolKey = tagPoolKey, textStyle = MaterialTheme.typography.labelSmall)
         }
+    }
+}
+
+@Composable
+private fun DatabaseFilterPersonValue(personNoteId: String?, onClick: () -> Unit) {
+    val person = rememberPeopleToPick()?.firstOrNull { it.id == personNoteId }
+    DatabaseFilterValueBox(onClick = onClick) {
+        if (person == null) {
+            DatabaseFilterValueText(text = "Pick a person", isPlaceholder = true)
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = 20.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+                DatabaseFilterValueText(text = person.displayName(), isPlaceholder = false)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DatabaseFilterPersonChoices(selectedPersonNoteId: String?, onPick: (String) -> Unit) {
+    val people = rememberPeopleToPick().orEmpty()
+    if (people.isEmpty()) {
+        DatabaseMenuMessage(text = "No people added yet", color = MaterialTheme.colorScheme.outline)
+    }
+    people.forEach { person ->
+        DatabaseMenuOption(
+            label = person.displayName(),
+            isSelected = person.id == selectedPersonNoteId,
+            icon = { PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = 16.dp) },
+            onClick = { onPick(person.id) }
+        )
     }
 }
 

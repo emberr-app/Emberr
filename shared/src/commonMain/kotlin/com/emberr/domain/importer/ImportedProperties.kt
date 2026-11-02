@@ -17,7 +17,7 @@ private val keysLeftOut = setOf("title", "updated", "modified", "cssclasses", "c
 private val keysForTags = setOf("tags", "tag")
 private val keysForAliases = setOf("aliases", "alias")
 private val builtInPropertiesByLabel: Map<String, PropertyType> = PropertyType.entries
-    .filterNot { it == PropertyType.DATE || it == PropertyType.TAGS || it == PropertyType.FORMULA }
+    .filterNot { it == PropertyType.DATE || it == PropertyType.TAGS || it == PropertyType.FORMULA || it == PropertyType.PEOPLE }
     .associateBy { it.label.lowercase() }
 
 private val dateAndTimePattern = Regex("""^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?""")

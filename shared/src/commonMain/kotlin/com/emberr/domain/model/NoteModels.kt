@@ -461,6 +461,7 @@ enum class PropertyValueType(val label: String) {
     DATE("Date"),
     SINGLE_CHOICE("Single choice"),
     TAGS("Tags"),
+    PERSON("Person"),
     CHECKBOX("Checkbox"),
     NUMBER("Number"),
     FORMULA("Formula");
@@ -469,6 +470,7 @@ enum class PropertyValueType(val label: String) {
     val holdsCheck: Boolean get() = this == CHECKBOX
     val holdsNumber: Boolean get() = this == NUMBER
     val holdsFormula: Boolean get() = this == FORMULA
+    val holdsPeople: Boolean get() = this == PERSON
     val isOnlyForDatabases: Boolean get() = this == FORMULA
     val holdsTags: Boolean get() = this == SINGLE_CHOICE || this == TAGS
     val allowsManyTags: Boolean get() = this == TAGS
@@ -482,6 +484,7 @@ enum class PropertyType(val label: String, val valueType: PropertyValueType) {
     DATE("Date", PropertyValueType.DATE),
     STATUS("Status", PropertyValueType.SINGLE_CHOICE),
     TAGS("Tags", PropertyValueType.TAGS),
+    PEOPLE("People", PropertyValueType.PERSON),
     LINK("Link", PropertyValueType.LINK),
     DESCRIPTION("Description", PropertyValueType.TEXT),
     DUE_DATE("Due Date", PropertyValueType.DATE),
@@ -508,6 +511,7 @@ data class PropertyBlock(
     val endTime: LocalTime? = null,
     val tags: List<String> = emptyList(),
     val isChecked: Boolean = false,
+    val personNoteIds: List<String> = emptyList(),
     override val indentationLevel: Int = 0,
     override val isBold: Boolean = false,
     override val isItalic: Boolean = false,
@@ -537,9 +541,10 @@ fun PropertyBlock.withStartDateMovedTo(newStart: LocalDate?): PropertyBlock {
     return copy(date = newStart, endDate = endDate?.plus(oldStart.daysUntil(newStart), DateTimeUnit.DAY))
 }
 
-fun PropertyBlock.valueAsText(): String = when {
+fun PropertyBlock.valueAsText(personNameOf: (personNoteId: String) -> String? = { null }): String = when {
     valueType.holdsDate -> dateRange.asText()
     valueType.holdsTags -> tags.joinToString(", ")
+    valueType.holdsPeople -> personNoteIds.mapNotNull(personNameOf).joinToString(", ")
     valueType.holdsCheck -> if (isChecked) CHECKED_PROPERTY_TEXT else ""
     else -> text
 }

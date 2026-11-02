@@ -54,6 +54,7 @@ private data class RenderOptions(
     val noteTitlesById: Map<String, String>,
     val categoryNamesById: Map<String, String>,
     val attachmentPathsByStoredName: Map<String, String>,
+    val personNamesById: Map<String, String>,
     val timeZone: TimeZone
 )
 
@@ -64,13 +65,15 @@ object NoteMarkdownWriter {
         title: String? = null,
         noteTitlesById: Map<String, String> = emptyMap(),
         categoryNamesById: Map<String, String> = emptyMap(),
-        attachmentPathsByStoredName: Map<String, String> = emptyMap()
+        attachmentPathsByStoredName: Map<String, String> = emptyMap(),
+        personNamesById: Map<String, String> = emptyMap()
     ): String {
         val visibleBlocks = blocks.filter { !it.isDeleted }
         val options = RenderOptions(
             noteTitlesById = noteTitlesById,
             categoryNamesById = categoryNamesById,
             attachmentPathsByStoredName = attachmentPathsByStoredName,
+            personNamesById = personNamesById,
             timeZone = TimeZone.currentSystemDefault()
         )
 
@@ -178,7 +181,7 @@ object NoteMarkdownWriter {
             is DocumentBlock -> renderDocument(block, options)
             is VoiceBlock -> renderVoice(block, options)
             is CanvasBlock -> ""
-            is PropertyBlock -> renderProperty(block)
+            is PropertyBlock -> renderProperty(block, options)
             is DatabaseBlock -> ""
             is MovieBlock -> renderMovie(block, options)
             is WatchlistBlock -> ""
@@ -321,8 +324,8 @@ object NoteMarkdownWriter {
         return (listOf(header) + usernameLines).joinToString("\n")
     }
 
-    private fun renderProperty(block: PropertyBlock): String {
-        val value = flattenLineBreaks(block.valueAsText())
+    private fun renderProperty(block: PropertyBlock, options: RenderOptions): String {
+        val value = flattenLineBreaks(block.valueAsText { options.personNamesById[it] })
         return if (value.isBlank()) "" else "**${flattenLineBreaks(block.label)}:** $value"
     }
 

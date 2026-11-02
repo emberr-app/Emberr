@@ -3,6 +3,7 @@ package com.emberr.presentation.shared.editor.markdown
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.people.personNamesById
 import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
@@ -43,7 +44,8 @@ fun ClipboardManager.copyEmberrMarkdown(markdown: String, copiedBlocks: List<Not
 
 fun ClipboardManager.copyEmberrBlocks(blocks: List<NoteBlock>, linkableNotes: List<NoteMetadataEntity>) {
     val noteTitlesById = linkableNotes.associate { it.noteId to it.title }
-    copyEmberrMarkdown(NoteMarkdownWriter.writeMarkdown(blocks, noteTitlesById = noteTitlesById), blocks)
+    val markdown = NoteMarkdownWriter.writeMarkdown(blocks, noteTitlesById = noteTitlesById, personNamesById = linkableNotes.personNamesById())
+    copyEmberrMarkdown(markdown, blocks)
 }
 
 fun blocksEmberrCopiedAs(pastedText: String): List<NoteBlock>? {

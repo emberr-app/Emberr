@@ -143,6 +143,7 @@ private fun DatabaseRow.valuesAt(column: DatabaseColumnTarget): List<String> {
         formulaResult(column) != null -> listOf(displayValueAt(column))
         cell == null -> emptyList()
         cell.valueType.holdsTags -> cell.tags.map { it.lowercase() }
+        cell.valueType.holdsPeople -> livePersonNoteIdsAt(column)
         else -> listOf(displayValueAt(column))
     }
     return values.map { it.trim() }.filter { it.isNotEmpty() }

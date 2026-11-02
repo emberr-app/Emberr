@@ -6,7 +6,6 @@ import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.columnKey
 import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.numberOrNull
-import com.emberr.domain.model.valueAsText
 import com.emberr.domain.model.valueTypeOf
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -108,7 +107,7 @@ private fun DatabaseRow.formulaInputAt(column: DatabaseColumnTarget, valueType: 
         cell == null -> FormulaValue.Empty
         valueType.holdsNumber -> cell.numberOrNull()?.let { FormulaValue.NumberValue(it) } ?: FormulaValue.Empty
         valueType.holdsDate -> cell.date?.let { FormulaValue.DateValue(it) } ?: FormulaValue.Empty
-        else -> textOrEmpty(cell.valueAsText())
+        else -> textOrEmpty(cellText(column))
     }
 }
 
