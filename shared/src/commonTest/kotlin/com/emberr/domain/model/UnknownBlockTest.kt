@@ -27,6 +27,18 @@ class UnknownBlockTest {
     }
 
     @Test
+    fun aKnownBlockWithAValueFromANewerVersionIsKeptAndWrittenBackUnchanged() {
+        val propertyWithANewerValueType =
+            """{"type":"property","id":"property-1","customLabel":"Rating","customValueType":"STARS","text":"5","updatedAt":100}"""
+
+        val block = json.decodeFromString(NoteBlockSerializer, propertyWithANewerValueType)
+        val writtenBack = json.parseToJsonElement(json.encodeToString(NoteBlockSerializer, block))
+
+        assertEquals("property-1", assertIs<UnknownBlock>(block).id)
+        assertEquals(json.parseToJsonElement(propertyWithANewerValueType), writtenBack)
+    }
+
+    @Test
     fun aBlockTypeFromANewerVersionIsWrittenBackExactlyAsItArrived() {
         val block = json.decodeFromString(NoteBlockSerializer, mapBlockFromANewerVersion)
 
