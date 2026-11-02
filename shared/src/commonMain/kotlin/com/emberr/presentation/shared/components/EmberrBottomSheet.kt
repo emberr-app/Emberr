@@ -369,7 +369,7 @@ private fun EmberrModalBottomSheet(
             ) {
                 if (title != null) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 26.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
