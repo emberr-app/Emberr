@@ -2,6 +2,8 @@ package com.emberr.presentation.calendar
 
 import kotlinx.datetime.LocalDate
 
+private const val BIRTHDAYS_SEARCH_WORD = "Birthdays"
+
 data class CalendarSearchResults(
     val upcomingEvents: List<CalendarEvent>,
     val pastEvents: List<CalendarEvent>
@@ -17,7 +19,13 @@ fun searchCalendarEvents(
 ): CalendarSearchResults {
     val categoryNamesById = categories.associate { it.id to it.name }
     val matchingEvents = events.filter { event ->
-        listOfNotNull(event.text, event.description, event.url, categoryNamesById[event.categoryId])
+        listOfNotNull(
+            event.text,
+            event.description,
+            event.url,
+            categoryNamesById[event.categoryId],
+            BIRTHDAYS_SEARCH_WORD.takeIf { event.isBirthday }
+        )
             .any { it.contains(query, ignoreCase = true) }
     }
     val (upcomingEvents, pastEvents) = matchingEvents.partition { it.dateString >= today.toString() }

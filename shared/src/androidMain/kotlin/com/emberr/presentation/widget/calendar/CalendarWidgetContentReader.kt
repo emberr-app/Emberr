@@ -9,6 +9,9 @@ import com.emberr.data.local.room.entity.datesShownOn
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.calendar.CalendarCategoryVisibility
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
+import com.emberr.domain.people.birthdaysInRange
+import com.emberr.presentation.widget.WidgetBirthdays
 import com.emberr.presentation.widget.WidgetFirstDayOfWeek
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +36,7 @@ class CalendarWidgetContentReader(
     private val categoryDao: CategoryDao,
     private val firstDayOfWeek: WidgetFirstDayOfWeek,
     private val settingsManager: SettingsManager,
+    private val widgetBirthdays: WidgetBirthdays,
 ) {
     suspend fun readContentOnce(shownMonth: String?): CalendarWidgetContent? =
         withContext(Dispatchers.IO) {
@@ -60,18 +64,29 @@ class CalendarWidgetContentReader(
                 existingCategoryIds = colorsByCategoryId.keys
             )
 
-            val dotsByDate = tasks
+            val taskDotsByDate = tasks
                 .filter { task -> categoryVisibility.isEventShown(task) }
                 .filterNot { task -> task.isChecked }
                 .flatMap { task -> task.datesShownOn().map { date -> date.toString() to task } }
                 .groupBy({ (dateString, _) -> dateString }, { (_, task) -> task })
                 .mapValues { (_, tasksOnDate) ->
-                    tasksOnDate
-                        .take(maximumDotsPerDay)
-                        .map { task ->
-                            task.categoryId?.let { colorsByCategoryId[it] } ?: neutralDotColorHex
-                        }
+                    tasksOnDate.map { task ->
+                        task.categoryId?.let { colorsByCategoryId[it] } ?: neutralDotColorHex
+                    }
                 }
+
+            val birthdayDotsByDate = if (categoryVisibility.areBirthdaysShown) {
+                val birthdayDotColorHex = colorsByCategoryId[BIRTHDAYS_CATEGORY_ID] ?: neutralDotColorHex
+                val lastOfMonth = firstOfMonth.plus(DatePeriod(months = 1)).minus(DatePeriod(days = 1))
+                birthdaysInRange(widgetBirthdays.readPeople(), firstOfMonth, lastOfMonth)
+                    .groupBy({ birthday -> birthday.date.toString() }, { birthdayDotColorHex })
+            } else {
+                emptyMap()
+            }
+
+            val dotsByDate = (taskDotsByDate.keys + birthdayDotsByDate.keys).associateWith { dateString ->
+                (taskDotsByDate[dateString].orEmpty() + birthdayDotsByDate[dateString].orEmpty()).take(maximumDotsPerDay)
+            }
 
             CalendarWidgetContent(
                 shownMonth = monthKey,

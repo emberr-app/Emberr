@@ -149,12 +149,14 @@ class CalendarViewModel(
         searchQueryState,
         repository.getCalendarTasksForSearch(todayWhenCalendarOpened)
             .map { tasks -> tasks.mapNotNull { it.toCalendarEvent() } },
+        peopleRepository.observePeopleWithDetails()
+            .map { people -> nextBirthdayEvents(people, todayWhenCalendarOpened) },
         categories
-    ) { query, events, currentCategories ->
+    ) { query, events, birthdayEvents, currentCategories ->
         if (query.isBlank()) {
             CalendarSearchResults(upcomingEvents = emptyList(), pastEvents = emptyList())
         } else {
-            searchCalendarEvents(events, currentCategories, query.trim(), todayWhenCalendarOpened)
+            searchCalendarEvents(events + birthdayEvents, currentCategories, query.trim(), todayWhenCalendarOpened)
         }
     }
         .flowOn(Dispatchers.Default)

@@ -230,6 +230,10 @@ fun CalendarScreen(
     LaunchedEffect(Unit) {
         WidgetCalendarEventBus.requestedEvents.collect { request ->
             WidgetCalendarEventBus.consumeRequestedEvent()
+            if (request.birthdayPersonNoteId != null) {
+                openedBirthdayPersonNoteId = request.birthdayPersonNoteId
+                return@collect
+            }
             val event = viewModel.eventForBlock(request.blockId, request.occurrenceDate).first()
             if (event != null) {
                 selectedDate = LocalDate.parse(event.dateString)
@@ -461,7 +465,7 @@ fun CalendarScreen(
                                 AnimatedContentTransitionScope.SlideDirection.Left
                             }
                             selectedDate = eventDate
-                            eventEditorState = event.toEditorState()
+                            openEvent(event)
                         }
                     )
                 }

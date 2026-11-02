@@ -13,6 +13,11 @@ import com.emberr.domain.model.lastDate
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.calendar.CalendarCategoryVisibility
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
+import com.emberr.domain.people.birthdaysInRange
+import com.emberr.presentation.calendar.CalendarEvent
+import com.emberr.presentation.calendar.toCalendarEvent
+import com.emberr.presentation.widget.WidgetBirthdays
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetFirstDayOfWeek
 import com.emberr.presentation.widget.WidgetLog
@@ -41,6 +46,7 @@ class CalendarAgendaWidgetContentReader(
     private val clockFormat: WidgetClockFormat,
     private val firstDayOfWeek: WidgetFirstDayOfWeek,
     private val settingsManager: SettingsManager,
+    private val widgetBirthdays: WidgetBirthdays,
 ) {
     suspend fun readContentOnce(shownMonth: String?): CalendarAgendaWidgetContent? =
         withContext(Dispatchers.IO) {
@@ -68,13 +74,19 @@ class CalendarAgendaWidgetContentReader(
                 existingCategoryIds = colorsByCategoryId.keys
             )
             val shownTasks = tasks.filter { task -> categoryVisibility.isEventShown(task) }
+            val birthdayEvents = if (categoryVisibility.areBirthdaysShown) {
+                val lastOfMonth = firstOfMonth.plus(DatePeriod(months = 1)).minus(DatePeriod(days = 1))
+                birthdaysInRange(widgetBirthdays.readPeople(), firstOfMonth, lastOfMonth).map { birthday -> birthday.toCalendarEvent() }
+            } else {
+                emptyList()
+            }
 
             CalendarAgendaWidgetContent(
                 shownMonth = monthKey,
                 monthLabel = formatMonthLabel(firstOfMonth),
                 weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> day.name.take(1) },
-                weeks = buildWeeks(firstOfMonth, today, weekStartsOn, shownTasks),
-                events = buildEvents(shownTasks, colorsByCategoryId)
+                weeks = buildWeeks(firstOfMonth, today, weekStartsOn, shownTasks, birthdayEvents),
+                events = buildEvents(shownTasks, birthdayEvents, colorsByCategoryId)
             )
         }
 
@@ -82,12 +94,13 @@ class CalendarAgendaWidgetContentReader(
         firstOfMonth: LocalDate,
         today: LocalDate,
         weekStartsOn: DayOfWeek,
-        tasks: List<CalendarTaskEntity>
+        tasks: List<CalendarTaskEntity>,
+        birthdayEvents: List<CalendarEvent>
     ): List<List<AgendaDayCell>> {
         val datesWithEvents = tasks
             .filterNot { task -> task.isChecked }
             .flatMap { task -> task.datesShownOn().map { date -> date.toString() } }
-            .toSet()
+            .toSet() + birthdayEvents.map { birthday -> birthday.dateString }
 
         val leadingBlanks = daysSinceStartOfWeek(firstOfMonth.dayOfWeek, weekStartsOn)
         val gridStart = firstOfMonth.minus(DatePeriod(days = leadingBlanks))
@@ -113,21 +126,53 @@ class CalendarAgendaWidgetContentReader(
 
     private fun buildEvents(
         tasks: List<CalendarTaskEntity>,
+        birthdayEvents: List<CalendarEvent>,
         colorsByCategoryId: Map<String, String>
-    ): List<AgendaEvent> =
-        tasks
+    ): List<AgendaEvent> {
+        val taskEvents = tasks
             .filter { task -> task.reminderTimestamp != null }
-            .sortedWith(compareBy({ task -> task.targetDate }, { task -> !task.isAllDay }, { task -> task.reminderTimestamp }))
-            .take(maximumEventsShown)
             .map { task ->
-                AgendaEvent(
-                    blockId = task.blockId,
-                    title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
-                    whenLabel = formatWhenLabel(task.reminderTimestamp ?: 0L, task.toAllDaySpan(), clockFormat),
-                    isDone = task.isChecked,
-                    accentColorHex = task.categoryId?.let { colorsByCategoryId[it] }
+                SortableAgendaEvent(
+                    dateString = task.targetDate,
+                    isAllDay = task.isAllDay,
+                    timestamp = task.reminderTimestamp ?: 0L,
+                    event = AgendaEvent(
+                        blockId = task.blockId,
+                        title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
+                        whenLabel = formatWhenLabel(task.reminderTimestamp ?: 0L, task.toAllDaySpan(), clockFormat),
+                        isDone = task.isChecked,
+                        accentColorHex = task.categoryId?.let { colorsByCategoryId[it] }
+                    )
                 )
             }
+        val birthdays = birthdayEvents.map { birthday ->
+            val timestamp = birthday.reminderTimestamp ?: 0L
+            SortableAgendaEvent(
+                dateString = birthday.dateString,
+                isAllDay = true,
+                timestamp = timestamp,
+                event = AgendaEvent(
+                    blockId = birthday.blockId,
+                    title = birthday.text.take(maximumCharactersPerTitle),
+                    whenLabel = formatWhenLabel(timestamp, birthday.allDay, clockFormat),
+                    isDone = false,
+                    accentColorHex = colorsByCategoryId[BIRTHDAYS_CATEGORY_ID],
+                    birthdayPersonNoteId = birthday.birthdayPersonNoteId
+                )
+            )
+        }
+        return (taskEvents + birthdays)
+            .sortedWith(compareBy({ it.dateString }, { !it.isAllDay }, { it.timestamp }))
+            .take(maximumEventsShown)
+            .map { it.event }
+    }
+
+    private class SortableAgendaEvent(
+        val dateString: String?,
+        val isAllDay: Boolean,
+        val timestamp: Long,
+        val event: AgendaEvent
+    )
 }
 
 private val monthNames = listOf(

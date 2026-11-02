@@ -58,6 +58,15 @@ fun nextBirthdayReminder(
         }
 }
 
+fun birthdaySummaryOf(people: List<PersonWithDetails>): List<Triple<String, String, List<String>>> =
+    people.filter { person -> person.hasBirthday() }.map { person ->
+        Triple(
+            person.person.noteId,
+            person.person.title,
+            person.details.filter { detail -> detail.kind == PersonDetailKind.BIRTHDAY }.map { it.value }
+        )
+    }
+
 private fun birthdayReminderText(birthday: BirthdayOnDate): String {
     val name = birthday.personName.ifBlank { "Untitled" }
     return birthday.turningAge?.let { age -> "$name turns $age today" } ?: "It's $name's birthday today"
@@ -76,16 +85,7 @@ class BirthdayReminderScheduler(
         if (watchingJob != null) return
         watchingJob = appScope.launch {
             try {
-                val birthdaysThatShapeReminders = peopleRepository.observePeopleWithDetails()
-                    .map { people ->
-                        people.filter { person -> person.hasBirthday() }.map { person ->
-                            Triple(
-                                person.person.noteId,
-                                person.person.title,
-                                person.details.filter { detail -> detail.kind == PersonDetailKind.BIRTHDAY }.map { it.value }
-                            )
-                        }
-                    }
+                val birthdaysThatShapeReminders = peopleRepository.observePeopleWithDetails().map(::birthdaySummaryOf)
                 combine(
                     birthdaysThatShapeReminders,
                     settingsManager.birthdayRemindersEnabledFlow,
