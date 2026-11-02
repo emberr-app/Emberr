@@ -469,8 +469,10 @@ private fun PersonEventRow(
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        eventDate(event)?.let { date -> EventDateTile(date = date, isHighlighted = isSoonest) }
-        Spacer(modifier = Modifier.width(14.dp))
+        eventDate(event)?.let { date ->
+            EventDateTile(date = date, isHighlighted = isSoonest)
+            Spacer(modifier = Modifier.width(14.dp))
+        }
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
