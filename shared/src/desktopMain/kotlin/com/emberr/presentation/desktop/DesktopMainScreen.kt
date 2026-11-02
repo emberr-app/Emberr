@@ -145,6 +145,7 @@ import com.emberr.domain.reminders.ReminderClickBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -1072,6 +1073,7 @@ fun DesktopMainScreen(
 
     // Sheets
     var showTimelineDialog by remember { mutableStateOf(false) }
+    val timelineLinkScope = rememberCoroutineScope()
     val timelineDays by dailyViewModel.timelineDays.collectAsState()
     val isTimelineLoading by dailyViewModel.isTimelineLoading.collectAsState()
     // Sidebar search
@@ -2341,7 +2343,12 @@ fun DesktopMainScreen(
                             override fun onNoteLinkClick(noteId: String) {
                                 showTimelineDialog = false
                                 dailyViewModel.clearTimeline()
-                                openNote(noteId)
+                                timelineLinkScope.launch {
+                                    val isPersonNote = withContext(Dispatchers.IO) {
+                                        runCatching { noteRepository.getNoteById(noteId)?.kind == NoteKind.PERSON }.getOrDefault(false)
+                                    }
+                                    if (isPersonNote) openedPersonNoteId = noteId else openNote(noteId)
+                                }
                             }
                             override fun onCreateLinkedNote(title: String): String = dailyViewModel.createLinkedNote(title)
                             override suspend fun getNoteMetadata(noteId: String) = dailyViewModel.getNoteMetadata(noteId)
