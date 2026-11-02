@@ -56,8 +56,20 @@ interface BackupDao {
     @Query("DELETE FROM notes_metadata WHERE spaceId NOT IN (:spaceIdsToKeep) OR trashedAt IS NOT NULL")
     suspend fun deleteNotesOutsideSpacesOrInTrash(spaceIdsToKeep: List<String>)
 
-    @Query("DELETE FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND noteId != :noteIdToKeep")
-    suspend fun deleteNotesInSpaceThatAreNotDailyExcept(spaceId: String, noteIdToKeep: String)
+    @Query("DELETE FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 0 AND noteId NOT IN (:noteIdsToKeep)")
+    suspend fun deleteNotesInSpaceThatAreNotDailyExcept(spaceId: String, noteIdsToKeep: List<String>)
+
+    @Query("DELETE FROM notes_metadata WHERE noteId IN (:noteIds)")
+    suspend fun deleteNotes(noteIds: List<String>)
+
+    @Query("SELECT * FROM notes_metadata WHERE spaceId = :spaceId")
+    suspend fun getNotesInSpace(spaceId: String): List<NoteMetadataEntity>
+
+    @Query(
+        "SELECT note_blocks.* FROM note_blocks JOIN notes_metadata ON note_blocks.noteId = notes_metadata.noteId " +
+                "WHERE notes_metadata.spaceId = :spaceId"
+    )
+    suspend fun getBlocksInSpace(spaceId: String): List<NoteBlockEntity>
 
     @Query("DELETE FROM notes_metadata WHERE spaceId = :spaceId AND isDaily = 1 AND dateString = :dateString")
     suspend fun deleteDailyNote(spaceId: String, dateString: String)

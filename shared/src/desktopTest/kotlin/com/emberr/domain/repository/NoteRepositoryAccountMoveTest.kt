@@ -32,6 +32,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 
 class NoteRepositoryAccountMoveTest {
 
@@ -226,6 +227,23 @@ class NoteRepositoryAccountMoveTest {
 
         assertEquals(false, secondMerge.categoriesChanged)
         assertEquals(blocksAfterFirstMerge, appDatabase.blockDao().getAllBlocksForNoteIncludingDeleted("plans"))
+    }
+
+    @Test
+    fun aUsersOwnOlderBirthdaysCategoryAndTheFixedBirthdaysRowBothStay() = runTest {
+        val categoryDao = appDatabase.categoryDao()
+        categoryDao.insertOrUpdateCategory(
+            CategoryEntity(categoryId = "my-birthdays", name = "Birthdays", colorHex = "#111111", createdAt = 1L, spaceId = ACCOUNT_SPACE_ID)
+        )
+        categoryDao.insertOrUpdateCategory(
+            CategoryEntity(categoryId = BIRTHDAYS_CATEGORY_ID, name = "Birthdays", colorHex = "#222222", createdAt = 2L, spaceId = ACCOUNT_SPACE_ID)
+        )
+
+        val merge = repository.mergeDailyNotesAndCategoriesIntoAccount()
+
+        assertEquals(false, merge.categoriesChanged)
+        assertEquals(false, categoryDao.getCategoryById("my-birthdays")?.isDeleted)
+        assertEquals(false, categoryDao.getCategoryById(BIRTHDAYS_CATEGORY_ID)?.isDeleted)
     }
 
     @Test

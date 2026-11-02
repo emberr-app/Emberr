@@ -32,11 +32,22 @@ suspend fun AppDatabase.keepOnlySpacesForExport(
 
     inOneTransaction {
         dao.deleteNotesOutsideSpacesOrInTrash(spaceIdsWithAccount)
+        val peopleNoteIds = noteIdsOfPeopleAndTheirSubNotes(
+            EmberrBackupData(
+                exportTimestamp = 0L,
+                notes = dao.getNotesInSpace(ACCOUNT_SPACE_ID),
+                blocks = dao.getBlocksInSpace(ACCOUNT_SPACE_ID)
+            )
+        ).toList()
         if (!keepDailyNotes) {
-            dao.deleteNotesInSpaceThatAreNotDailyExcept(ACCOUNT_SPACE_ID, noteIdToKeep = ACCOUNT_TASKS_INBOX_NOTE_ID)
+            val noteIdsToKeep = listOf(ACCOUNT_TASKS_INBOX_NOTE_ID) + if (keepCalendar) peopleNoteIds else emptyList()
+            dao.deleteNotesInSpaceThatAreNotDailyExcept(ACCOUNT_SPACE_ID, noteIdsToKeep)
             dao.deleteDailyNote(ACCOUNT_SPACE_ID, PINNED_BLOCKS_DATE_STRING)
         }
-        if (!keepCalendar) dao.deleteNote(ACCOUNT_TASKS_INBOX_NOTE_ID)
+        if (!keepCalendar) {
+            dao.deleteNote(ACCOUNT_TASKS_INBOX_NOTE_ID)
+            dao.deleteNotes(peopleNoteIds)
+        }
         if (!keepDailyNotes || !keepCalendar) {
             val dailyBlocksToDrop = dao.getBlocksOfDatedDailyNotes(ACCOUNT_SPACE_ID, PINNED_BLOCKS_DATE_STRING).filter { block ->
                 val isCalendarBlock = decodeBlockOrNull(block.blockDataJson) is CheckboxBlock
