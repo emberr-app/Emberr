@@ -68,7 +68,7 @@ fun birthdaySummaryOf(people: List<PersonWithDetails>): List<Triple<String, Stri
     }
 
 private fun birthdayReminderText(birthday: BirthdayOnDate): String {
-    val name = birthday.personName.ifBlank { "Untitled" }
+    val name = personDisplayName(birthday.personName)
     return birthday.turningAge?.let { age -> "$name turns $age today" } ?: "It's $name's birthday today"
 }
 

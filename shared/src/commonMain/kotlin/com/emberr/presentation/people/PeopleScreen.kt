@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.people.personDisplayName
 import com.emberr.presentation.home.note.NoteEditorViewModel
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary

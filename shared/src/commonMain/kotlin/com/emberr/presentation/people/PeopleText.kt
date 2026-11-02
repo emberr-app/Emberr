@@ -15,8 +15,6 @@ import kotlin.time.Instant
 
 private const val SHORT_NAME_LENGTH = 3
 
-fun personDisplayName(title: String): String = title.trim().ifEmpty { "Untitled" }
-
 fun personDetailSearchLine(detail: PersonDetailBlock): String {
     val heading = detail.label?.trim()?.takeIf { it.isNotEmpty() } ?: detail.kind.label
     return "$heading · ${detail.value}"

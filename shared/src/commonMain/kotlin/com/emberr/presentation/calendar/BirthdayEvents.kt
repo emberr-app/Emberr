@@ -6,6 +6,7 @@ import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.people.BirthdayOnDate
 import com.emberr.domain.people.PersonWithDetails
 import com.emberr.domain.people.birthdaysInRange
+import com.emberr.domain.people.personDisplayName
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -18,7 +19,7 @@ fun nextBirthdayEvents(people: List<PersonWithDetails>, today: LocalDate): List<
         .map { birthday -> birthday.toCalendarEvent() }
 
 fun BirthdayOnDate.toCalendarEvent(): CalendarEvent {
-    val name = personName.trim().ifBlank { "Untitled" }
+    val name = personDisplayName(personName)
     val title = if (turningAge == null) "$name's birthday" else "$name's birthday (turns $turningAge)"
     return CalendarEvent(
         blockId = "birthday_${personNoteId}_${date.year}",

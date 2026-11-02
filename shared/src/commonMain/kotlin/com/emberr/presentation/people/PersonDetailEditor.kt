@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PersonDetailKind
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.people.personDisplayName
 import com.emberr.presentation.shared.components.EmberrBorderWidth
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetAction

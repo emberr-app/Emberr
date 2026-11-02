@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.people.personDisplayName
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
@@ -65,7 +66,7 @@ private val EventChipAvatarOverlap = 5.dp
 private val EventChipAvatarRingWidth = 1.5.dp
 private const val MaxAvatarsOnEventChip = 3
 
-internal fun EventPerson.displayName(): String = name.trim().ifEmpty { "Untitled" }
+internal fun EventPerson.displayName(): String = personDisplayName(name)
 
 internal fun peopleShownOnEvent(personNoteIds: List<String>, peopleById: Map<String, EventPerson>): List<EventPerson> =
     personNoteIds.mapNotNull { personNoteId -> peopleById[personNoteId] }
