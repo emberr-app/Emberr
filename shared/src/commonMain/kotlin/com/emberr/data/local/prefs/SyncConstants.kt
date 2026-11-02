@@ -61,6 +61,11 @@ object SyncConstants {
     const val DEFAULT_MIC_BUTTON_VISIBLE = true
     const val KEY_HIDDEN_OVERVIEW_SECTIONS = "hidden_overview_sections"
     const val KEY_HIDDEN_CALENDAR_CATEGORIES = "hidden_calendar_categories"
+    const val KEY_BIRTHDAY_REMINDERS_ENABLED = "birthday_reminders_enabled"
+    const val DEFAULT_BIRTHDAY_REMINDERS_ENABLED = true
+    const val KEY_BIRTHDAY_REMINDER_MINUTE_OF_DAY = "birthday_reminder_minute_of_day"
+    const val DEFAULT_BIRTHDAY_REMINDER_MINUTE_OF_DAY = 9 * 60
+    const val KEY_SCHEDULED_BIRTHDAY_REMINDER_IDS = "scheduled_birthday_reminder_ids"
     const val KEY_KEYBOARD_TOOLBAR_ITEMS = "keyboard_toolbar_items"
     const val DEFAULT_KEYBOARD_TOOLBAR_ITEMS = "DEFAULT"
     const val KEY_CUSTOM_WINDOW_FRAME = "custom_window_frame"

@@ -127,6 +127,20 @@ class CalendarViewModel(
         settingsManager.saveFirstDayOfWeekPreference(preference.name)
     }
 
+    val areBirthdayRemindersOn: StateFlow<Boolean> = settingsManager.birthdayRemindersEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsManager.isBirthdayRemindersEnabled())
+
+    fun setBirthdayRemindersOn(isOn: Boolean) {
+        settingsManager.saveBirthdayRemindersEnabled(isOn)
+    }
+
+    val birthdayReminderMinuteOfDay: StateFlow<Int> = settingsManager.birthdayReminderMinuteOfDayFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsManager.getBirthdayReminderMinuteOfDay())
+
+    fun setBirthdayReminderTime(hour: Int, minute: Int) {
+        settingsManager.saveBirthdayReminderMinuteOfDay(hour * 60 + minute)
+    }
+
     private val todayWhenCalendarOpened = Clock.System.todayIn(TimeZone.currentSystemDefault())
     private val searchQueryState = MutableStateFlow("")
     val searchQuery: StateFlow<String> = searchQueryState.asStateFlow()

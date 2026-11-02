@@ -164,6 +164,17 @@ interface SettingsManager {
     fun getHiddenCalendarCategories(): Set<String>
     fun saveHiddenCalendarCategories(visibilityKeys: Set<String>)
 
+    val birthdayRemindersEnabledFlow: Flow<Boolean>
+    fun isBirthdayRemindersEnabled(): Boolean
+    fun saveBirthdayRemindersEnabled(enabled: Boolean)
+
+    val birthdayReminderMinuteOfDayFlow: Flow<Int>
+    fun getBirthdayReminderMinuteOfDay(): Int
+    fun saveBirthdayReminderMinuteOfDay(minuteOfDay: Int)
+
+    fun getScheduledBirthdayReminderIds(): Set<String>
+    fun saveScheduledBirthdayReminderIds(reminderIds: Set<String>)
+
     val keyboardToolbarItemsFlow: Flow<String>
     fun getKeyboardToolbarItems(): String
     fun saveKeyboardToolbarItems(savedValue: String)

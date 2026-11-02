@@ -58,9 +58,15 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.presentation.settings.SettingsChoice
+import com.emberr.presentation.settings.SettingsActionRow
 import com.emberr.presentation.settings.SettingsChoiceRow
+import com.emberr.presentation.settings.SettingsDivider
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.SettingsRowIcon
+import com.emberr.presentation.settings.SettingsToggleRow
+import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.presentation.shared.components.MinimalTimePickerDialog
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
@@ -76,10 +82,17 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.bell
 import emberr.shared.generated.resources.calendar
 import emberr.shared.generated.resources.chevron_right
+import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.sidebar
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atTime
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 
@@ -258,11 +271,16 @@ fun CalendarSettingsContent(
     hiddenCategoryVisibilityKeys: Set<String>,
     onToggleCategoryVisibility: (visibilityKey: String) -> Unit,
     spaces: List<SpaceEntity>,
+    areBirthdayRemindersOn: Boolean,
+    onBirthdayRemindersOnChange: (Boolean) -> Unit,
+    birthdayReminderMinuteOfDay: Int,
+    onBirthdayReminderTimeChange: (hour: Int, minute: Int) -> Unit,
     modifier: Modifier = Modifier,
     viewMode: CalendarViewMode? = null,
     onViewModeChange: (CalendarViewMode) -> Unit = {}
 ) {
     var showFirstDayOfWeekOptions by remember { mutableStateOf(false) }
+    var showBirthdayReminderTimePicker by remember { mutableStateOf(false) }
     val cardColor = when {
         LocalAppIsDark.current -> MaterialTheme.colorScheme.surfaceVariant
         !isDesktopPlatform -> MaterialTheme.colorScheme.surface
@@ -319,6 +337,39 @@ fun CalendarSettingsContent(
                 )
             }
         }
+
+        SettingsGroup(title = "Birthdays", cardColor = cardColor) {
+            SettingsToggleRow(
+                icon = painterResource(Res.drawable.bell),
+                title = "Birthday Reminders",
+                isChecked = areBirthdayRemindersOn,
+                onCheckedChange = onBirthdayRemindersOnChange
+            )
+
+            if (areBirthdayRemindersOn) {
+                SettingsDivider()
+                Box {
+                    SettingsActionRow(
+                        icon = painterResource(Res.drawable.clock_circle),
+                        title = "Reminder Time",
+                        trailingLabel = formatTimeOfDay(
+                            hour = birthdayReminderMinuteOfDay / 60,
+                            minute = birthdayReminderMinuteOfDay % 60,
+                            usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
+                        ),
+                        onClick = { showBirthdayReminderTimePicker = true }
+                    )
+
+                    if (showBirthdayReminderTimePicker) {
+                        MinimalTimePickerDialog(
+                            initialTimestamp = todayAtMinuteOfDay(birthdayReminderMinuteOfDay),
+                            onDismiss = { showBirthdayReminderTimePicker = false },
+                            onConfirm = onBirthdayReminderTimeChange
+                        )
+                    }
+                }
+            }
+        }
     }
 
     if (!isDesktopPlatform) {
@@ -349,6 +400,14 @@ fun CalendarSettingsContent(
             }
         }
     }
+}
+
+private fun todayAtMinuteOfDay(minuteOfDay: Int): Long {
+    val timeZone = TimeZone.currentSystemDefault()
+    return Clock.System.todayIn(timeZone)
+        .atTime(hour = minuteOfDay / 60, minute = minuteOfDay % 60)
+        .toInstant(timeZone)
+        .toEpochMilliseconds()
 }
 
 @Composable

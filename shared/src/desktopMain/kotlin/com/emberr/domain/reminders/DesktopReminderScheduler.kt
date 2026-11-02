@@ -67,6 +67,8 @@ class DesktopReminderScheduler : ReminderScheduler {
             when {
                 os.contains("win") -> {
                     val iconUri = notificationIconFile?.toPath()?.toUri()?.toString().orEmpty().replace("'", "''")
+                    val quotedTitle = title.replace("'", "''")
+                    val quotedMessage = message.replace("'", "''")
                     val psScript = """
                         [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
                         [Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
@@ -75,8 +77,8 @@ class DesktopReminderScheduler : ReminderScheduler {
                         ${'$'}imageNodes = ${'$'}template.GetElementsByTagName('image')
                         ${'$'}imageNodes.Item(0).Attributes.GetNamedItem('src').NodeValue = '$iconUri'
                         ${'$'}textNodes = ${'$'}template.GetElementsByTagName('text')
-                        ${'$'}textNodes.Item(0).AppendChild(${'$'}template.CreateTextNode('$title')) | Out-Null
-                        ${'$'}textNodes.Item(1).AppendChild(${'$'}template.CreateTextNode('$message')) | Out-Null
+                        ${'$'}textNodes.Item(0).AppendChild(${'$'}template.CreateTextNode('$quotedTitle')) | Out-Null
+                        ${'$'}textNodes.Item(1).AppendChild(${'$'}template.CreateTextNode('$quotedMessage')) | Out-Null
                         
                         ${'$'}notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Emberr')
                         ${'$'}notifier.Show([Windows.UI.Notifications.ToastNotification]::new(${'$'}template))

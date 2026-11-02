@@ -161,6 +161,7 @@ private fun runEmberrDesktopApp() = application {
             GlobalContext.get().get<com.emberr.domain.repository.NoteRepository>()
                 .moveDailyNotesAndCategoriesToAccount(GlobalContext.get().get<CoroutineScope>(named("AppScope")))
             GlobalContext.get().get<com.emberr.domain.people.BirthdaysCategoryKeeper>().start()
+            GlobalContext.get().get<com.emberr.domain.people.BirthdayReminderScheduler>().start()
         }
     }
 
@@ -168,8 +169,12 @@ private fun runEmberrDesktopApp() = application {
         if (!isBackgroundStartupAllowed) return@LaunchedEffect
         val reminderRescheduler = GlobalContext.get().get<ReminderRescheduler>()
         withContext(Dispatchers.IO) { reminderRescheduler.rescheduleUpcomingReminders() }
+        val birthdayReminderScheduler = GlobalContext.get().get<com.emberr.domain.people.BirthdayReminderScheduler>()
         DesktopReminderShownBus.remindersShown.collect {
-            withContext(Dispatchers.IO) { reminderRescheduler.rescheduleUpcomingReminders() }
+            withContext(Dispatchers.IO) {
+                reminderRescheduler.rescheduleUpcomingReminders()
+                birthdayReminderScheduler.rescheduleBirthdayReminders()
+            }
         }
     }
 

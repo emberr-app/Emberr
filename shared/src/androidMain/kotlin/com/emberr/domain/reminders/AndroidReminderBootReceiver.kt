@@ -3,6 +3,7 @@ package com.emberr.domain.reminders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.emberr.domain.people.BirthdayReminderScheduler
 import com.emberr.domain.reminders.ReminderRescheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ import org.koin.core.component.inject
 class AndroidReminderBootReceiver : BroadcastReceiver(), KoinComponent {
 
     private val reminderRescheduler: ReminderRescheduler by inject()
+    private val birthdayReminderScheduler: BirthdayReminderScheduler by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action !in HANDLED_ACTIONS) return
@@ -21,6 +23,7 @@ class AndroidReminderBootReceiver : BroadcastReceiver(), KoinComponent {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 reminderRescheduler.rescheduleUpcomingReminders()
+                birthdayReminderScheduler.rescheduleBirthdayReminders()
             } finally {
                 pendingResult.finish()
             }

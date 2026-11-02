@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.emberr.R
+import com.emberr.domain.people.BirthdayReminderScheduler
 import com.emberr.domain.reminders.ReminderRescheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ import org.koin.core.component.inject
 class AndroidReminderReceiver : BroadcastReceiver(), KoinComponent {
 
     private val reminderRescheduler: ReminderRescheduler by inject()
+    private val birthdayReminderScheduler: BirthdayReminderScheduler by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
         val noteTitle = intent.getStringExtra("note_title") ?: "Reminder"
@@ -54,6 +56,7 @@ class AndroidReminderReceiver : BroadcastReceiver(), KoinComponent {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 reminderRescheduler.rescheduleUpcomingReminders()
+                birthdayReminderScheduler.rescheduleBirthdayReminders()
             } finally {
                 pendingResult.finish()
             }

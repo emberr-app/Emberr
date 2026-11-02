@@ -23,7 +23,7 @@ fun birthdaysCategoryRowToSave(existingRow: CategoryEntity?, nowMillis: Long): C
         name = BIRTHDAYS_CATEGORY_DEFAULT_NAME,
         colorHex = BIRTHDAYS_CATEGORY_DEFAULT_COLOR_HEX,
         createdAt = nowMillis,
-        updatedAt = nowMillis,
+        updatedAt = 0L,
         isDeleted = false,
         spaceId = ACCOUNT_SPACE_ID
     )
