@@ -1,13 +1,13 @@
 package com.emberr.presentation.shared.editor
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Description
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.people.personDisplayName
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.doc_text
+import emberr.shared.generated.resources.doc_text_plus
 import emberr.shared.generated.resources.user2
 
 const val MENTION_RESULTS_PER_STEP = 5
@@ -28,9 +28,9 @@ fun mentionMenuSections(
         .partition { note -> note.kind == NoteKind.PERSON }
 
     val noteEntries = buildList {
-        add(SlashMenuItemData("Create new note", SlashMenuIcon.Vector(Icons.AutoMirrored.Filled.NoteAdd), onCreateBlankNote))
+        add(SlashMenuItemData("Create new note", SlashMenuIcon.Drawable(Res.drawable.doc_text_plus), onCreateBlankNote))
         notes.take(shownNoteCount).forEach { note ->
-            val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Vector(Icons.Default.Description)
+            val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Drawable(Res.drawable.doc_text)
             add(SlashMenuItemData(note.title.ifEmpty { "Untitled" }, icon) { onPick(note) })
         }
         if (notes.size > shownNoteCount) add(loadMoreEntry(onShowMoreNotes))
