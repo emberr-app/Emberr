@@ -387,7 +387,7 @@ val sharedModule = module {
     }
 
     viewModel { TrashViewModel(repository = get()) }
-    viewModel { SearchViewModel(repository = get(), activeSpaceStore = get(), settingsManager = get()) }
+    viewModel { SearchViewModel(repository = get(), peopleRepository = get(), activeSpaceStore = get(), settingsManager = get()) }
     viewModel {
         com.emberr.presentation.space.SpaceViewModel(
             spaceRepository = get(),

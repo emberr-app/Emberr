@@ -2,6 +2,7 @@ package com.emberr.presentation.people
 
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.shownOnDateString
+import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.people.PersonBirthday
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.calendar.formatDuration
@@ -15,6 +16,11 @@ import kotlin.time.Instant
 private const val SHORT_NAME_LENGTH = 3
 
 fun personDisplayName(title: String): String = title.trim().ifEmpty { "Untitled" }
+
+fun personDetailSearchLine(detail: PersonDetailBlock): String {
+    val heading = detail.label?.trim()?.takeIf { it.isNotEmpty() } ?: detail.kind.label
+    return "$heading · ${detail.value}"
+}
 
 fun personFirstName(title: String): String = title.trim().split(Regex("\\s+")).firstOrNull()?.takeIf { it.isNotEmpty() } ?: "them"
 

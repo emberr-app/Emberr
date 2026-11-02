@@ -57,6 +57,15 @@ interface BlockDao {
     )
     fun observeLivePropertyBlocksOfRowsInTable(databaseId: String): Flow<List<NoteBlockEntity>>
 
+    @Query(
+        "SELECT note_blocks.* FROM note_blocks " +
+            "INNER JOIN notes_metadata ON notes_metadata.noteId = note_blocks.noteId " +
+            "WHERE notes_metadata.spaceId = :spaceId AND notes_metadata.kind = 'PERSON' AND notes_metadata.trashedAt IS NULL " +
+            "AND note_blocks.isDeleted = 0 AND note_blocks.blockDataJson LIKE '%\"type\":\"person_detail\"%' " +
+            "ORDER BY note_blocks.displayOrder ASC"
+    )
+    fun observeLiveDetailBlocksOfPeople(spaceId: String): Flow<List<NoteBlockEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateBlock(block: NoteBlockEntity)
 

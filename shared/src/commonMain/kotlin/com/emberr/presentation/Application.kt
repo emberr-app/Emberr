@@ -48,6 +48,7 @@ import com.emberr.presentation.shared.components.LocalEmberrBlurSource
 import com.emberr.presentation.shared.components.isBlurFallbackForced
 import com.emberr.presentation.trash.TrashScreen
 import com.emberr.presentation.people.PeopleScreen
+import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.properties.PropertiesScreen
 import dev.chrisbanes.haze.HazeState
 import com.emberr.presentation.splash.LoadingScreen
@@ -194,6 +195,8 @@ fun EmberrApp(
     val searchQuery by searchViewModel.query.collectAsState()
     val searchResults by searchViewModel.results.collectAsState()
     val eventSearchResults by searchViewModel.eventResults.collectAsState()
+    val personSearchResults by searchViewModel.personResults.collectAsState()
+    var personNoteIdOpenedFromSearch by remember { mutableStateOf<String?>(null) }
     var isSearchBarOpen by remember { mutableStateOf(false) }
     val areSearchResultsVisible = isSearchBarOpen && searchQuery.isNotBlank()
     val closeSearchBar: () -> Unit = {
@@ -1245,6 +1248,7 @@ fun EmberrApp(
                                 query = searchQuery,
                                 results = searchResults,
                                 eventResults = eventSearchResults,
+                                personResults = personSearchResults,
                                 onNoteClick = { noteId ->
                                     closeSearchBar()
                                     navController.navigate(Screen.Note.createRoute(noteId))
@@ -1261,6 +1265,10 @@ fun EmberrApp(
                                     WidgetCalendarEventBus.requestEvent(event.blockId, event.dateString)
                                     navController.navigate(Screen.Calendar.route) { launchSingleTop = true }
                                 },
+                                onPersonClick = { personNoteId ->
+                                    closeSearchBar()
+                                    personNoteIdOpenedFromSearch = personNoteId
+                                },
                                 onRenameNote = { noteId, newTitle ->
                                     HomeViewModel.renameNote(noteId, newTitle, onDone = searchViewModel::refreshResults)
                                 },
@@ -1276,6 +1284,10 @@ fun EmberrApp(
                     }
 
                     KmpBackHandler(enabled = isSearchBarOpen) { closeSearchBar() }
+
+                    personNoteIdOpenedFromSearch?.let { personNoteId ->
+                        PersonView(personNoteId = personNoteId, onDismiss = { personNoteIdOpenedFromSearch = null })
+                    }
 
                     if (!isDesktopPlatform) {
                         val updatePeekBottomGap by animateDpAsState(
