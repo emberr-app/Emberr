@@ -36,6 +36,7 @@ internal fun macNotificationCommand(title: String, message: String): List<String
     "-e", "on run argv",
     "-e", "display notification (item 2 of argv) with title (item 1 of argv)",
     "-e", "end run",
+    "--",
     title,
     message
 )
