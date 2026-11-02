@@ -58,12 +58,18 @@ fun nextBirthdayReminder(
         }
 }
 
-fun birthdaySummaryOf(people: List<PersonWithDetails>): List<Triple<String, String, List<String>>> =
+data class BirthdaySummary(
+    val personNoteId: String,
+    val name: String,
+    val birthdayValues: List<String>
+)
+
+fun birthdaySummaryOf(people: List<PersonWithDetails>): List<BirthdaySummary> =
     people.filter { person -> person.hasBirthday() }.map { person ->
-        Triple(
-            person.person.noteId,
-            person.person.title,
-            person.details.filter { detail -> detail.kind == PersonDetailKind.BIRTHDAY }.map { it.value }
+        BirthdaySummary(
+            personNoteId = person.person.noteId,
+            name = person.person.title,
+            birthdayValues = person.details.filter { detail -> detail.kind == PersonDetailKind.BIRTHDAY }.map { it.value }
         )
     }
 
