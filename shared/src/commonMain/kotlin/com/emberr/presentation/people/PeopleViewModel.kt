@@ -7,7 +7,6 @@ import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.people.PeopleRepository
 import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
 import com.emberr.domain.util.system.movedToTrashMessage
-import com.emberr.domain.util.system.showFeedback
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.home.note.NoteEditorViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -54,7 +53,7 @@ class PeopleViewModel(
                 onCreated(peopleRepository.createPerson(name))
             } catch (e: Exception) {
                 e.printStackTrace()
-                showFeedback("Couldn't create the person")
+                showNativeToast("Couldn't create the person")
             }
         }
     }

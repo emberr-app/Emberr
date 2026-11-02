@@ -24,6 +24,7 @@ import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
+import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -94,6 +95,7 @@ class CalendarViewModel(
                 onCreated(peopleRepository.createPerson(name))
             } catch (e: Exception) {
                 e.printStackTrace()
+                showNativeToast("Couldn't create the person")
             }
         }
     }
