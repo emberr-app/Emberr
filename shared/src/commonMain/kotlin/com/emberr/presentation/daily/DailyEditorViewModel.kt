@@ -1,6 +1,7 @@
 package com.emberr.presentation.daily
 
 import androidx.lifecycle.viewModelScope
+import com.emberr.domain.people.PeopleRepository
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.datesShownOn
@@ -58,8 +59,9 @@ class DailyEditorViewModel(
     audioRecorder: AudioRecorder,
     appScope: CoroutineScope,
     deviceTableLayoutStore: DeviceTableLayoutStore,
-    movieTitleSource: MovieTitleSource
-) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore, movieTitleSource) {
+    movieTitleSource: MovieTitleSource,
+    peopleRepository: PeopleRepository
+) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore, movieTitleSource, peopleRepository) {
 
     // Date state
     private val _currentDateString = MutableStateFlow<String?>(null)

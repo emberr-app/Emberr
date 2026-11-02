@@ -4,6 +4,7 @@ import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.movie.MovieTitleSource
+import com.emberr.domain.people.PeopleRepository
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -86,7 +88,8 @@ class NoteEditorViewModelTest {
             audioRecorder = neverCalledStub<AudioRecorder>(),
             appScope = CoroutineScope(Job()),
             deviceTableLayoutStore = DeviceTableLayoutStore(neverCalledStub<SettingsManager>()),
-            movieTitleSource = neverCalledStub<MovieTitleSource>()
+            movieTitleSource = neverCalledStub<MovieTitleSource>(),
+            peopleRepository = peopleRepositoryWithNobody()
         )
         viewModel.loadNote("note-1")
         withTimeout(5_000) { viewModel.isLoading.first { isLoading -> !isLoading } }
@@ -118,6 +121,17 @@ class NoteEditorViewModelTest {
                     else error("These tests do not expect NoteRepository.${method.name} to be called")
             }
         } as NoteRepository
+
+    private fun peopleRepositoryWithNobody(): PeopleRepository =
+        Proxy.newProxyInstance(PeopleRepository::class.java.classLoader, arrayOf(PeopleRepository::class.java)) { stub, method, arguments ->
+            when (method.name) {
+                "toString" -> "stub of PeopleRepository"
+                "hashCode" -> System.identityHashCode(stub)
+                "equals" -> stub === arguments?.firstOrNull()
+                "observePeople" -> flowOf(emptyList<NoteMetadataEntity>())
+                else -> error("These tests do not expect PeopleRepository.${method.name} to be called")
+            }
+        } as PeopleRepository
 
     private inline fun <reified T : Any> neverCalledStub(): T =
         Proxy.newProxyInstance(T::class.java.classLoader, arrayOf(T::class.java)) { stub, method, arguments ->

@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.domain.model.CredentialsEdit
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -46,6 +47,7 @@ import com.emberr.presentation.shared.editor.GlobalEditorState
 import com.emberr.presentation.shared.editor.MobileMenuState
 import com.emberr.presentation.shared.editor.EditorEventBus
 import com.emberr.presentation.calendar.EventEditorSheetHost
+import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.calendar.RecurrenceScopeChooser
 import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.presentation.shared.editor.BlockStyleBar
@@ -149,6 +151,7 @@ fun DailyEditorPane(
         (isKeyboardOpen || isDesktopPlatform || mobileMenuState != MobileMenuState.MAIN)
 
     var subNotePanelId by remember { mutableStateOf<String?>(null) }
+    var linkedPersonNoteId by remember { mutableStateOf<String?>(null) }
 
     // Mirrors DailyScreen: the checkbox row's three-dot menu routes through
     // EditorActions.onOpenEventOptions, which just parks the target blockId here for
@@ -261,7 +264,8 @@ fun DailyEditorPane(
             override fun onAddBlockBelow(id: String) = viewModel.addBlockBelow(id)
             override fun onNoteLinkClick(noteId: String) {
                 if (isDesktopPlatform) {
-                    subNotePanelId = noteId
+                    val isPersonNote = allLinkableNotes.any { note -> note.noteId == noteId && note.kind == NoteKind.PERSON }
+                    if (isPersonNote) linkedPersonNoteId = noteId else subNotePanelId = noteId
                 } else {
                     onNavigateToEditor(noteId)
                 }
@@ -494,6 +498,10 @@ fun DailyEditorPane(
                 onExportPdf = onExportPdf,
                 openMode = subNoteOpenMode
             )
+        }
+
+        linkedPersonNoteId?.let { personNoteId ->
+            PersonView(personNoteId = personNoteId, onDismiss = { linkedPersonNoteId = null })
         }
 
         EventEditorSheetHost(

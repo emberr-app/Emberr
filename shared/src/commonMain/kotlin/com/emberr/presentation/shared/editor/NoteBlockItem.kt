@@ -41,10 +41,7 @@ import androidx.compose.foundation.text.contextmenu.modifier.filterTextContextMe
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.NoteAdd
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Icon
@@ -1666,41 +1663,33 @@ fun IsolatedEditorTextField(
         }
     }
 
-    val filteredMentionNotes = remember(mentionQuery, allLinkableNotes) {
-        val query = mentionQuery.orEmpty()
-        allLinkableNotes.filter { it.title.contains(query, ignoreCase = true) }
-    }
-
-    val mentionMenuEntries = remember(mentionQuery, filteredMentionNotes) {
-        val query = mentionQuery.orEmpty()
-        buildList {
-            add(
-                SlashMenuItemData("Create new note", SlashMenuIcon.Vector(Icons.AutoMirrored.Filled.NoteAdd)) {
-                    val newNoteId = onCreateLinkedNote("Untitled")
-                    insertNoteLink("Untitled", newNoteId)
-                    onOpenNote(newNoteId)
-                }
-            )
-            filteredMentionNotes.forEach { note ->
-                val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Vector(Icons.Default.Description)
-                add(
-                    SlashMenuItemData(note.title.ifEmpty { "Untitled" }, icon) {
-                        val safeTitle = note.title.replace("[", "").replace("]", "").ifEmpty { "Untitled" }
-                        insertNoteLink(safeTitle, note.noteId)
-                    }
-                )
+    var shownMentionNoteCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
+    var shownMentionPeopleCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
+    val mentionSections = remember(mentionQuery, allLinkableNotes, shownMentionNoteCount, shownMentionPeopleCount) {
+        mentionMenuSections(
+            query = mentionQuery.orEmpty(),
+            mentionableNotes = allLinkableNotes,
+            shownNoteCount = shownMentionNoteCount,
+            shownPeopleCount = shownMentionPeopleCount,
+            onShowMoreNotes = { shownMentionNoteCount += MENTION_RESULTS_PER_STEP },
+            onShowMorePeople = { shownMentionPeopleCount += MENTION_RESULTS_PER_STEP },
+            onCreateBlankNote = {
+                val newNoteId = onCreateLinkedNote("Untitled")
+                insertNoteLink("Untitled", newNoteId)
+                onOpenNote(newNoteId)
+            },
+            onCreateNote = { query ->
+                val safeTitle = query.replace("[", "").replace("]", "").trim().ifEmpty { "Untitled" }
+                val newNoteId = onCreateLinkedNote(safeTitle)
+                insertNoteLink(safeTitle, newNoteId)
+            },
+            onPick = { note ->
+                val safeTitle = note.title.replace("[", "").replace("]", "").ifEmpty { "Untitled" }
+                insertNoteLink(safeTitle, note.noteId)
             }
-            if (query.isNotBlank()) {
-                add(
-                    SlashMenuItemData("New \"$query\" note", SlashMenuIcon.Vector(Icons.Default.Add)) {
-                        val safeTitle = query.replace("[", "").replace("]", "").trim().ifEmpty { "Untitled" }
-                        val newNoteId = onCreateLinkedNote(safeTitle)
-                        insertNoteLink(safeTitle, newNoteId)
-                    }
-                )
-            }
-        }
+        )
     }
+    val mentionMenuEntries = remember(mentionSections) { mentionSections.flatMap { section -> section.items } }
 
     Box(modifier = modifier.fillMaxWidth()) {
         if (tfv.text.isEmpty() && placeholderText.isNotEmpty()) {
@@ -2029,7 +2018,7 @@ fun IsolatedEditorTextField(
                         .heightIn(max = 400.dp)
                 ) {
                     SlashMenuList(
-                        sections = listOf(SlashMenuSectionData("Link to Note", mentionMenuEntries)),
+                        sections = mentionSections,
                         selectedIndex = mentionSelectedIndex
                     )
                 }
