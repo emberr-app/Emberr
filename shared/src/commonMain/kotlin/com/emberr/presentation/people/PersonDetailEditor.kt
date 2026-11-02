@@ -213,6 +213,7 @@ internal fun PersonDetailSheet(editing: PersonDetailEditing) {
                     icon = painterResource(Res.drawable.trash),
                     contentDescription = "Remove",
                     tint = MaterialTheme.colorScheme.error,
+                    closesSheet = true,
                     onClick = {
                         editing.onRemove(detail)
                         editing.onPopupChange(null)

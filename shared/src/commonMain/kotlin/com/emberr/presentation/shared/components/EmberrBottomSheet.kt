@@ -114,6 +114,7 @@ class EmberrBottomSheetAction(
     val contentDescription: String,
     val tint: Color? = null,
     val tooltip: String? = null,
+    val closesSheet: Boolean = false,
     val onClick: () -> Unit
 )
 
@@ -240,7 +241,7 @@ private fun EmberrFloatingDialog(
                                         tint = headerAction.tint ?: MaterialTheme.colorScheme.onSurface,
                                         shadowElevation = EmberrShadowElevation.None,
                                         tooltip = headerAction.tooltip,
-                                        onClick = headerAction.onClick
+                                        onClick = { if (headerAction.closesSheet) closeAnd(headerAction.onClick) else headerAction.onClick() }
                                     )
                                 }
                             }
@@ -389,7 +390,7 @@ private fun EmberrModalBottomSheet(
                                     tint = headerAction.tint ?: MaterialTheme.colorScheme.onSurface,
                                     shadowElevation = EmberrShadowElevation.None,
                                     tooltip = headerAction.tooltip,
-                                    onClick = headerAction.onClick
+                                    onClick = { if (headerAction.closesSheet) closeAnd(headerAction.onClick) else headerAction.onClick() }
                                 )
                             }
                         }
