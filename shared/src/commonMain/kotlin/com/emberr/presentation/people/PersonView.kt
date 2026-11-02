@@ -60,7 +60,6 @@ import com.emberr.domain.people.PeopleRepository
 import com.emberr.domain.people.PersonWithDetails
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.domain.util.system.showFeedback
 import com.emberr.presentation.LocalImagePicker
 import com.emberr.presentation.calendar.EventEditorSheetHost
 import com.emberr.presentation.calendar.toCategoryColor
@@ -187,11 +186,7 @@ fun PersonView(
     }
     val moveToTrash: () -> Unit = {
         commitName()
-        val shownName = personDisplayName(notesEditor.noteTitle.value)
-        notesEditor.moveToTrash {
-            showFeedback("Moved $shownName to Trash")
-            onDismiss()
-        }
+        notesEditor.moveToTrash { onDismiss() }
     }
 
     val changeDetails: (failureMessage: String, change: suspend () -> Unit) -> Unit = { failureMessage, change ->

@@ -57,6 +57,10 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
+import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
+import com.emberr.domain.util.system.movedToTrashMessage
+import com.emberr.domain.util.system.showNativeToast
 import java.util.UUID
 import kotlin.math.max
 import kotlin.math.min
@@ -160,14 +164,24 @@ class CanvasViewModel(
         saveJob?.cancel()
         saveUnsavedChanges()
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                SyncCoordinator.mutex.withLock {
-                    val metadata = noteRepository.getNoteById(targetNoteId) ?: return@withLock
-                    val content = noteRepository.getNoteContent(targetNoteId) ?: NoteContent(blocks = emptyList())
-                    val now = System.currentTimeMillis()
-                    noteRepository.saveNote(metadata.copy(trashedAt = now, updatedAt = now), content)
+            val trashedTitle = try {
+                withContext(Dispatchers.IO) {
+                    SyncCoordinator.mutex.withLock {
+                        val metadata = noteRepository.getNoteById(targetNoteId) ?: return@withLock null
+                        val content = noteRepository.getNoteContent(targetNoteId) ?: NoteContent(blocks = emptyList())
+                        val now = System.currentTimeMillis()
+                        noteRepository.saveNote(metadata.copy(trashedAt = now, updatedAt = now), content)
+                        metadata.title
+                    }
                 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showNativeToast(COULD_NOT_MOVE_TO_TRASH_MESSAGE)
+                return@launch
             }
+            if (trashedTitle != null) showNativeToast(movedToTrashMessage(trashedTitle))
             onMoved()
         }
     }

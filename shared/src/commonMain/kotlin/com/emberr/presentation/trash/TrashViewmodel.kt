@@ -3,6 +3,10 @@ package com.emberr.presentation.trash
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.domain.util.system.COULD_NOT_RESTORE_MESSAGE
+import com.emberr.domain.util.system.restoredMessage
+import com.emberr.domain.util.system.showNativeToast
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -25,8 +29,17 @@ class TrashViewModel constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
     fun restoreNote(noteId: String) {
+        val title = trashedNotes.value.firstOrNull { it.noteId == noteId }?.title.orEmpty()
         viewModelScope.launch {
-            repository.restoreNote(noteId)
+            try {
+                repository.restoreNote(noteId)
+                showNativeToast(restoredMessage(title))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showNativeToast(COULD_NOT_RESTORE_MESSAGE)
+            }
         }
     }
 
