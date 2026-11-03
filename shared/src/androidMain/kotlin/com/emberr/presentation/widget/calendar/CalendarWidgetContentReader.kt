@@ -1,7 +1,6 @@
 // Builds the month grid, marking today and adding a coloured dot for each task on a day.
 package com.emberr.presentation.widget.calendar
 
-import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
@@ -11,10 +10,12 @@ import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.calendar.CalendarCategoryVisibility
 import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.people.birthdaysInRange
+import com.emberr.domain.repository.NoteRepository
 import com.emberr.presentation.widget.WidgetBirthdays
 import com.emberr.presentation.widget.WidgetFirstDayOfWeek
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
@@ -32,7 +33,7 @@ private const val daysPerWeek = 7
 private const val neutralDotColorHex = "#848484"
 
 class CalendarWidgetContentReader(
-    private val calendarTaskDao: CalendarTaskDao,
+    private val noteRepository: NoteRepository,
     private val categoryDao: CategoryDao,
     private val firstDayOfWeek: WidgetFirstDayOfWeek,
     private val settingsManager: SettingsManager,
@@ -46,7 +47,7 @@ class CalendarWidgetContentReader(
             val weekStartsOn = firstDayOfWeek.firstDayOfWeek()
 
             val tasks = try {
-                calendarTaskDao.getTasksInMonth(monthKey)
+                noteRepository.getCalendarTasksForMonth(monthKey).first()
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read tasks for $monthKey", cause)
                 return@withContext null
