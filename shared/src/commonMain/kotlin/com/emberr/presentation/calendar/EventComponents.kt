@@ -195,6 +195,7 @@ fun EventChip(
     onResizeCancel: () -> Unit,
     modifier: Modifier = Modifier,
     people: List<PersonOption> = emptyList(),
+    resizableEdges: Set<EventResizeEdge> = EventResizeEdge.entries.toSet(),
     onMoveStart: ((pointerInWindow: Offset, pointerId: PointerId, cardTopLeftInWindow: Offset, cardSize: IntSize) -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit
@@ -244,26 +245,30 @@ fun EventChip(
             )
 
             if (isDesktopPlatform || isInResizeMode) {
-                EventResizeHandle(
-                    edge = EventResizeEdge.TOP,
-                    showDash = isInResizeMode,
-                    dashColor = resizeDashColor,
-                    onResizeStart = onResizeStart,
-                    onResizeMove = onResizeMove,
-                    onResizeEnd = onResizeEnd,
-                    onResizeCancel = onResizeCancel,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-                EventResizeHandle(
-                    edge = EventResizeEdge.BOTTOM,
-                    showDash = isInResizeMode,
-                    dashColor = resizeDashColor,
-                    onResizeStart = onResizeStart,
-                    onResizeMove = onResizeMove,
-                    onResizeEnd = onResizeEnd,
-                    onResizeCancel = onResizeCancel,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
+                if (EventResizeEdge.TOP in resizableEdges) {
+                    EventResizeHandle(
+                        edge = EventResizeEdge.TOP,
+                        showDash = isInResizeMode,
+                        dashColor = resizeDashColor,
+                        onResizeStart = onResizeStart,
+                        onResizeMove = onResizeMove,
+                        onResizeEnd = onResizeEnd,
+                        onResizeCancel = onResizeCancel,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
+                if (EventResizeEdge.BOTTOM in resizableEdges) {
+                    EventResizeHandle(
+                        edge = EventResizeEdge.BOTTOM,
+                        showDash = isInResizeMode,
+                        dashColor = resizeDashColor,
+                        onResizeStart = onResizeStart,
+                        onResizeMove = onResizeMove,
+                        onResizeEnd = onResizeEnd,
+                        onResizeCancel = onResizeCancel,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
+                }
             }
         }
     }

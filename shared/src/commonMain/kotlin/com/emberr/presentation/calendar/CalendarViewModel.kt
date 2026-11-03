@@ -208,6 +208,10 @@ class CalendarViewModel(
     }
     fun eventsInRange(startDate: LocalDate, endDate: LocalDate): Flow<List<CalendarEvent>> =
         shownEventsWithBirthdays(repository.getCalendarTasksInRange(startDate.toString(), endDate.toString()), startDate, endDate)
+    fun timeGridEventsForDate(date: LocalDate): Flow<List<CalendarEvent>> =
+        eventsInRange(date.minus(1, DateTimeUnit.DAY), date).map { events ->
+            events.filter { event -> date in event.datesShownOn() || event.continuesInto(date) }
+        }
     fun eventsForMonth(yearMonth: String): Flow<List<CalendarEvent>> {
         val firstOfMonth = LocalDate.parse("$yearMonth-01")
         val lastOfMonth = firstOfMonth.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY)

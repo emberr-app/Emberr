@@ -24,10 +24,11 @@ import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
 import com.emberr.presentation.shared.components.PersonOption
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import kotlin.math.roundToInt
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
 const val MovedEventOriginalAlpha = 0.4f
-private val EdgeHoldCardOvershoot = 16.dp
 private val EdgeHoldPointerZone = 24.dp
 private const val EdgeHoldNanosBeforeSwitch = 600_000_000L
 
@@ -47,7 +48,8 @@ class ActiveEventMove(
     val hourHeightPx: Float,
     val grabOffsetInCard: Offset,
     val cardSize: IntSize,
-    val startedInAllDayStrip: Boolean = false
+    val startedInAllDayStrip: Boolean = false,
+    val daysAfterStart: Int = 0
 )
 
 class EventMoveTracker {
@@ -78,7 +80,8 @@ class EventMoveTracker {
         cardTopLeftInWindow: Offset,
         cardSize: IntSize,
         sourceColumn: LayoutCoordinates,
-        hourHeightPx: Float
+        hourHeightPx: Float,
+        daysAfterStart: Int = 0
     ) {
         val pointerYInColumn = sourceColumn.windowToLocal(pointerInWindow).y
         this.pointerInWindow = pointerInWindow
@@ -88,7 +91,8 @@ class EventMoveTracker {
             startPointerMinuteOfDay = pointerYInColumn / hourHeightPx * 60f,
             hourHeightPx = hourHeightPx,
             grabOffsetInCard = pointerInWindow - cardTopLeftInWindow,
-            cardSize = cardSize
+            cardSize = cardSize,
+            daysAfterStart = daysAfterStart
         )
     }
 
@@ -132,11 +136,21 @@ class EventMoveTracker {
             return
         }
         val pointerMinuteOfDay = targetColumn.windowToLocal(pointerInWindow).y / move.hourHeightPx * 60f
-        preview = EventMovePreview(
-            event = move.event,
-            targetDate = targetDate,
-            timeRange = moveEventTimeRange(move.event.timeRange(), pointerMinuteOfDay - move.startPointerMinuteOfDay)
-        )
+        val draggedMinutes = pointerMinuteOfDay - move.startPointerMinuteOfDay
+        preview = if (move.event.crossesMidnight()) {
+            val moved = moveOvernightEvent(move.event.timeRange(), draggedMinutes)
+            EventMovePreview(
+                event = move.event,
+                targetDate = targetDate.plus(moved.daysLater - move.daysAfterStart, DateTimeUnit.DAY),
+                timeRange = moved.timeRange
+            )
+        } else {
+            EventMovePreview(
+                event = move.event,
+                targetDate = targetDate,
+                timeRange = moveEventTimeRange(move.event.timeRange(), draggedMinutes)
+            )
+        }
     }
 
     fun finish(): EventMovePreview? {
@@ -155,17 +169,15 @@ class EventMoveTracker {
         return finished
     }
 
-    fun edgeHoldDirection(cardOvershootPx: Float, pointerZonePx: Float): EdgeHoldDirection? {
-        val move = activeMove ?: return null
+    fun edgeHoldDirection(pointerZonePx: Float): EdgeHoldDirection? {
+        if (activeMove == null) return null
         val columns = visibleAttachedColumns().values
         if (columns.isEmpty()) return null
         val daysLeft = columns.minOf { it.positionInWindow().x }
         val daysRight = columns.maxOf { it.positionInWindow().x + it.size.width }
-        val cardLeft = pointerInWindow.x - move.grabOffsetInCard.x
-        val cardRight = cardLeft + move.cardSize.width
         return when {
-            cardLeft <= daysLeft - cardOvershootPx || pointerInWindow.x <= daysLeft + pointerZonePx -> EdgeHoldDirection.PREVIOUS
-            cardRight >= daysRight + cardOvershootPx || pointerInWindow.x >= daysRight - pointerZonePx -> EdgeHoldDirection.NEXT
+            pointerInWindow.x <= daysLeft + pointerZonePx -> EdgeHoldDirection.PREVIOUS
+            pointerInWindow.x >= daysRight - pointerZonePx -> EdgeHoldDirection.NEXT
             else -> null
         }
     }
@@ -229,21 +241,20 @@ fun EventMoveFrameEffect(
     onHoldAtNextEdge: () -> Unit
 ) {
     val density = LocalDensity.current
-    val cardOvershootPx = with(density) { EdgeHoldCardOvershoot.toPx() }
     val pointerZonePx = with(density) { EdgeHoldPointerZone.toPx() }
     val currentOnHoldAtPreviousEdge by rememberUpdatedState(onHoldAtPreviousEdge)
     val currentOnHoldAtNextEdge by rememberUpdatedState(onHoldAtNextEdge)
 
-    LaunchedEffect(tracker.activeMove, cardOvershootPx, pointerZonePx) {
+    LaunchedEffect(tracker.activeMove, pointerZonePx) {
         if (tracker.activeMove == null) return@LaunchedEffect
         var heldDirection: EdgeHoldDirection? = null
         var heldSinceNanos = 0L
-        var hasLeftStartingEdge = tracker.edgeHoldDirection(cardOvershootPx, pointerZonePx) == null
+        var hasLeftStartingEdge = tracker.edgeHoldDirection(pointerZonePx) == null
         while (true) {
             val frameNanos = withFrameNanos { it }
             if (tracker.preview?.becomesAllDay != true) tracker.autoScroll?.scrollTowards(tracker.pointerInWindow)
 
-            val edgeUnderPointer = tracker.edgeHoldDirection(cardOvershootPx, pointerZonePx)
+            val edgeUnderPointer = tracker.edgeHoldDirection(pointerZonePx)
                 .takeIf { tracker.activeMove?.startedInAllDayStrip != true }
             if (edgeUnderPointer == null) hasLeftStartingEdge = true
             val direction = edgeUnderPointer.takeIf { hasLeftStartingEdge }
