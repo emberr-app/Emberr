@@ -309,7 +309,7 @@ compose.desktop {
             "--add-opens", "java.desktop/java.awt=ALL-UNNAMED",
             "--add-opens", "java.desktop/sun.awt=ALL-UNNAMED",
             "--add-opens", "java.desktop/sun.awt.X11=ALL-UNNAMED",
-            "-Xmx512m",
+            "-Xmx1g",
             "-XX:MaxMetaspaceSize=256m",
             "-XX:+UseG1GC",
             "-XX:G1PeriodicGCInterval=30000",
