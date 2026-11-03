@@ -18,6 +18,8 @@ data class ContactDetailToImport(
 private val dateWithDashes = Regex("""(\d{4})-(\d{2})-(\d{2})""")
 private val dateWithoutDashes = Regex("""(\d{4})(\d{2})(\d{2})""")
 private val dateWithoutYearWithDashes = Regex("""--(\d{2})-?(\d{2})""")
+private val whitespace = Regex("""\s+""")
+private const val PHONE_DIGITS_COMPARED = 9
 private val pngSignature = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47)
 
 fun nameNotTakenYet(wantedName: String, takenNames: Collection<String>): String {
@@ -30,14 +32,25 @@ fun nameNotTakenYet(wantedName: String, takenNames: Collection<String>): String 
     return "$name ($number)"
 }
 
-fun isExactCopyOfPerson(contact: ContactToImport, personName: String, personDetails: List<ContactDetailToImport>): Boolean =
-    contact.name.trim().equals(personName.trim(), ignoreCase = true) &&
-        contact.details.map(::comparableDetail).toSet() == personDetails.map(::comparableDetail).toSet()
+fun contactAddsNothingNewTo(contact: ContactToImport, personName: String, personDetails: List<ContactDetailToImport>): Boolean {
+    if (!hasSamePersonName(contact.name, personName)) return false
+    return contact.details.all { detail -> personDetails.any { savedDetail -> isSameDetail(detail, savedDetail) } }
+}
 
-private fun comparableDetail(detail: ContactDetailToImport): Triple<PersonDetailKind, String, String> {
-    val value = detail.value.trim().lowercase()
-    val comparableValue = if (detail.kind == PersonDetailKind.PHONE) value.filter { it.isDigit() || it == '+' } else value
-    return Triple(detail.kind, detail.label?.trim()?.lowercase().orEmpty(), comparableValue)
+fun hasSamePersonName(first: String, second: String): Boolean = comparableName(first) == comparableName(second)
+
+private fun comparableName(name: String): String = name.trim().lowercase().split(whitespace).joinToString(" ")
+
+private fun isSameDetail(first: ContactDetailToImport, second: ContactDetailToImport): Boolean {
+    if (first.kind != second.kind) return false
+    if (first.kind != PersonDetailKind.PHONE) return comparableName(first.value) == comparableName(second.value)
+    val firstDigits = first.value.filter { it.isDigit() }
+    val secondDigits = second.value.filter { it.isDigit() }
+    return if (firstDigits.length >= PHONE_DIGITS_COMPARED && secondDigits.length >= PHONE_DIGITS_COMPARED) {
+        firstDigits.takeLast(PHONE_DIGITS_COMPARED) == secondDigits.takeLast(PHONE_DIGITS_COMPARED)
+    } else {
+        firstDigits == secondDigits
+    }
 }
 
 fun contactDateToBirthdayText(text: String): String? {

@@ -3,6 +3,8 @@ package com.emberr.presentation.people
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.shownOnDateString
 import com.emberr.domain.model.PersonDetailBlock
+import com.emberr.domain.people.ContactImportProgress
+import com.emberr.domain.people.ContactImportResult
 import com.emberr.domain.people.PersonBirthday
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.calendar.formatDuration
@@ -26,6 +28,20 @@ fun personGroupLetter(title: String): String {
     val firstCharacter = title.trim().firstOrNull() ?: return "#"
     return if (firstCharacter.isLetter()) firstCharacter.uppercase() else "#"
 }
+
+fun contactImportMessage(result: ContactImportResult): String {
+    val added = result.importedPersonNoteIds.size
+    if (result.foundNoContacts) return "No contacts found"
+    if (added == 0 && result.failures > 0) return "Couldn't add the contacts"
+    if (added == 0) return if (result.copiesSkipped == 1) "Already in People" else "All ${result.copiesSkipped} are already in People"
+    val parts = mutableListOf(if (added == 1) "Added 1 person" else "Added $added people")
+    if (result.copiesSkipped > 0) parts += "skipped ${result.copiesSkipped} already in People"
+    if (result.failures > 0) parts += "couldn't add ${result.failures}"
+    return parts.joinToString(", ")
+}
+
+fun importingContactsLabel(progress: ContactImportProgress.Importing): String =
+    if (progress.totalCount == 0) "Importing contacts…" else "Importing contacts… ${progress.handledCount} of ${progress.totalCount}"
 
 fun peopleCountLabel(count: Int): String = if (count == 1) "1 person" else "$count people"
 

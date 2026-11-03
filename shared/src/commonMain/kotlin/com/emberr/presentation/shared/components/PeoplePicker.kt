@@ -4,18 +4,24 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
@@ -37,12 +43,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.people.PeopleRepository
 import com.emberr.domain.people.personDisplayName
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
+import com.emberr.presentation.shared.fullKeyboardHeightPx
+import com.emberr.presentation.shared.heightWhileKeyboardMoves
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.plus
@@ -53,7 +66,11 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
+private const val SEARCH_PLACEHOLDER = "Search or add a person"
 private val PeoplePickerDesktopWidth = 280.dp
+private val PeoplePickerListMaxHeight = 460.dp
+private val PeoplePickerListMinHeight = 280.dp
+private val PhoneSearchFieldSpace = 78.dp
 private val PeoplePickerRowShape = RoundedCornerShape(10.dp)
 private val PeoplePickerRowSidePadding = if (isDesktopPlatform) 8.dp else 0.dp
 private val PeoplePickerAvatarSize = 24.dp
@@ -143,37 +160,26 @@ fun PeoplePicker(
         }
     }
 
-    val pickerContent = @Composable { searchFieldModifier: Modifier ->
-        Column(modifier = Modifier.fillMaxWidth()) {
-            EmberrTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                placeholder = "Search or add a person",
-                modifier = searchFieldModifier.fillMaxWidth(),
-                onSubmit = { submitSearch() }
+    val peopleRows = @Composable {
+        matchingPeople.forEach { person ->
+            PeoplePickerRow(
+                person = person,
+                isSelected = person.id in personNoteIds,
+                onClick = { togglePerson(person.id) }
             )
-            Spacer(modifier = Modifier.height(8.dp))
+        }
 
-            matchingPeople.forEach { person ->
-                PeoplePickerRow(
-                    person = person,
-                    isSelected = person.id in personNoteIds,
-                    onClick = { togglePerson(person.id) }
-                )
-            }
+        if (canCreatePerson) {
+            CreatePersonRow(name = query, onClick = { createPersonFromSearch() })
+        }
 
-            if (canCreatePerson) {
-                CreatePersonRow(name = query, onClick = { createPersonFromSearch() })
-            }
-
-            if (matchingPeople.isEmpty() && !canCreatePerson) {
-                Text(
-                    text = "Type a name to add a person",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(horizontal = PeoplePickerRowSidePadding, vertical = 10.dp)
-                )
-            }
+        if (matchingPeople.isEmpty() && !canCreatePerson) {
+            Text(
+                text = "Type a name to add a person",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.padding(horizontal = PeoplePickerRowSidePadding, vertical = 10.dp)
+            )
         }
     }
 
@@ -184,8 +190,16 @@ fun PeoplePicker(
             modifier = Modifier.width(PeoplePickerDesktopWidth)
         ) {
             val searchFocusRequester = remember { FocusRequester() }
-            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                pickerContent(Modifier.focusRequester(searchFocusRequester))
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+                EmberrTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    placeholder = SEARCH_PLACEHOLDER,
+                    modifier = Modifier.focusRequester(searchFocusRequester).fillMaxWidth(),
+                    onSubmit = { submitSearch() }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                peopleRows()
             }
             LaunchedEffect(Unit) {
                 runCatching { searchFocusRequester.requestFocus() }
@@ -194,17 +208,49 @@ fun PeoplePicker(
         return
     }
 
-    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = "Add people") { closeAnd ->
+    EmberrBottomSheet(
+        expanded = true,
+        onDismiss = onDismiss,
+        title = "Add people",
+        contentHorizontalPadding = 0.dp,
+        scrollsContent = false
+    ) { _ ->
+        val listHazeState = remember { HazeState() }
+        val density = LocalDensity.current
+        val keyboardHeightNow = WindowInsets.ime.getBottom(density)
+        val fullKeyboardHeight = fullKeyboardHeightPx()
         CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
         ) {
-            Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
-                pickerContent(Modifier)
-                EmberrButtonPrimary(
-                    text = "Done",
-                    onClick = { closeAnd(onDismiss) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val listMaxHeight = with(density) {
+                    heightWhileKeyboardMoves(PeoplePickerListMaxHeight, maxHeight, keyboardHeightNow.toDp(), fullKeyboardHeight.toDp())
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = PeoplePickerListMinHeight.coerceAtMost(listMaxHeight), max = listMaxHeight)
+                        .hazeSource(listHazeState)
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = PhoneSearchFieldSpace)
+                        .navigationBarsPadding()
+                ) {
+                    peopleRows()
+                }
+                EmberrSearchTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    placeholder = SEARCH_PLACEHOLDER,
+                    hazeState = listHazeState,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    onSubmit = { submitSearch() },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 14.dp)
+                        .hidesEditorToolbarWhileFocused()
                 )
             }
         }

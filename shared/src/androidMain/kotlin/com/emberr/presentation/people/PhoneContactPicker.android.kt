@@ -42,7 +42,7 @@ import kotlinx.coroutines.withContext
 private const val ANDROID_17 = 37
 private const val CUSTOM_TYPE = 0
 
-private val phoneLabels = mapOf(Phone.TYPE_MOBILE to "Mobile", Phone.TYPE_HOME to "Home", Phone.TYPE_WORK to "Work", Phone.TYPE_MAIN to "Main")
+private val phoneLabels = mapOf(Phone.TYPE_HOME to "Home", Phone.TYPE_WORK to "Work", Phone.TYPE_MAIN to "Main")
 private val emailLabels = mapOf(Email.TYPE_HOME to "Personal", Email.TYPE_WORK to "Work", Email.TYPE_MOBILE to "Mobile")
 private val addressLabels = mapOf(StructuredPostal.TYPE_HOME to "Home", StructuredPostal.TYPE_WORK to "Work")
 private val eventLabels = mapOf(Event.TYPE_ANNIVERSARY to "Anniversary", Event.TYPE_OTHER to "Date")

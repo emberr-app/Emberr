@@ -15,13 +15,16 @@ class ContactImportTest {
     }
 
     @Test
-    fun onlyAContactWithTheSameNameAndDetailsIsACopy() {
-        val savedDetails = listOf(ContactDetailToImport(PersonDetailKind.PHONE, "Mobile", "+1 (555) 010-0100"))
-        val sameContact = ContactToImport("maya", listOf(ContactDetailToImport(PersonDetailKind.PHONE, "Mobile", "+15550100100")), "", null)
-        val contactWithAnEmail = ContactToImport("Maya", savedDetails + ContactDetailToImport(PersonDetailKind.EMAIL, null, "maya@example.com"), "", null)
+    fun aContactWithNothingNewIsSkippedButOneWithMoreIsNot() {
+        val savedDetails = listOf(
+            ContactDetailToImport(PersonDetailKind.PHONE, "Mobile", "+1 (555) 010-0100"),
+            ContactDetailToImport(PersonDetailKind.EMAIL, "Work", "maya@example.com")
+        )
+        val shorterCard = ContactToImport("maya  ", listOf(ContactDetailToImport(PersonDetailKind.PHONE, null, "555-010-0100")), "", null)
+        val cardWithANewNumber = ContactToImport("Maya", listOf(ContactDetailToImport(PersonDetailKind.PHONE, null, "555-010-0199")), "", null)
 
-        assertTrue(isExactCopyOfPerson(sameContact, "Maya", savedDetails))
-        assertFalse(isExactCopyOfPerson(contactWithAnEmail, "Maya", savedDetails))
+        assertTrue(contactAddsNothingNewTo(shorterCard, "Maya", savedDetails))
+        assertFalse(contactAddsNothingNewTo(cardWithANewNumber, "Maya", savedDetails))
     }
 
     @Test

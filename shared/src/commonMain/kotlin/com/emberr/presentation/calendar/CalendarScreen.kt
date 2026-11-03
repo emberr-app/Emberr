@@ -96,6 +96,7 @@ import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.EmberrExpandingSearchBar
 import com.emberr.presentation.shared.components.PersonOption
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
@@ -655,8 +656,9 @@ fun CalendarScreen(
             }
 
             if (!isDesktopPlatform) {
-                CalendarSearchBar(
+                EmberrExpandingSearchBar(
                     isOpen = isSearchOpen,
+                    placeholder = "Search events",
                     query = searchQuery,
                     onQueryChange = viewModel::onSearchQueryChange,
                     onOpenClick = { isSearchOpen = true },

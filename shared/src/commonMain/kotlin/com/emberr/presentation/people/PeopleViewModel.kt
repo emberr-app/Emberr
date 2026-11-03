@@ -4,27 +4,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
-import com.emberr.domain.importer.TextFileDecoder
+import com.emberr.domain.people.ContactImportProgress
+import com.emberr.domain.people.ContactImporter
 import com.emberr.domain.people.ContactToImport
 import com.emberr.domain.people.PeopleRepository
-import com.emberr.domain.people.contactPhotoExtensionAndMimeType
-import com.emberr.domain.people.readContactsFromVCardText
-import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
 import com.emberr.domain.util.system.movedToTrashMessage
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.home.note.NoteEditorViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val STOP_LISTENING_AFTER_MILLIS = 5_000L
+private const val ALREADY_IMPORTING_MESSAGE = "Already importing contacts"
 
 data class PersonListRow(
     val person: NoteMetadataEntity,
@@ -34,7 +37,7 @@ data class PersonListRow(
 
 class PeopleViewModel(
     private val peopleRepository: PeopleRepository,
-    private val mediaStorageHelper: MediaStorageHelper,
+    private val contactImporter: ContactImporter,
     private val appScope: CoroutineScope
 ) : ViewModel() {
 
@@ -71,58 +74,64 @@ class PeopleViewModel(
         }
     }
 
-    fun importContactFiles(fileContents: List<ByteArray>, onOnePersonImported: (personNoteId: String) -> Unit) {
-        viewModelScope.launch {
-            val contacts = withContext(Dispatchers.Default) {
-                fileContents.flatMap { bytes -> readContactsFromVCardText(TextFileDecoder.decode(bytes)) }
-            }
-            if (contacts.isEmpty()) showNativeToast("No contacts found in the file") else importContacts(contacts, onOnePersonImported)
-        }
+    val contactImportProgress: StateFlow<ContactImportProgress> = contactImporter.progress
+
+    fun importContactFiles(fileContents: List<ByteArray>) {
+        if (!contactImporter.startImportFromFiles(fileContents)) showNativeToast(ALREADY_IMPORTING_MESSAGE)
     }
 
-    fun importContacts(contacts: List<ContactToImport>, onOnePersonImported: (personNoteId: String) -> Unit) {
+    fun importContacts(contacts: List<ContactToImport>) {
         if (contacts.isEmpty()) return
+        if (!contactImporter.startImport(contacts)) showNativeToast(ALREADY_IMPORTING_MESSAGE)
+    }
+
+    fun clearFinishedImport() {
+        contactImporter.clearFinishedImport()
+    }
+
+    private val _selectedPersonNoteIds = MutableStateFlow<Set<String>>(emptySet())
+    val selectedPersonNoteIds: StateFlow<Set<String>> = _selectedPersonNoteIds.asStateFlow()
+
+    fun togglePersonSelection(personNoteId: String) {
+        _selectedPersonNoteIds.update { selected -> if (personNoteId in selected) selected - personNoteId else selected + personNoteId }
+    }
+
+    fun selectPeople(personNoteIds: Set<String>) {
+        _selectedPersonNoteIds.value = personNoteIds
+    }
+
+    fun clearSelection() {
+        _selectedPersonNoteIds.value = emptySet()
+    }
+
+    fun moveSelectedToTrash() {
+        val selectedIds = _selectedPersonNoteIds.value
+        if (selectedIds.isEmpty()) return
+        val selectedPeople = rows.value.orEmpty().map { row -> row.person }.filter { person -> person.noteId in selectedIds }
+        clearSelection()
         viewModelScope.launch {
-            val importedPersonNoteIds = mutableListOf<String>()
-            var copiesSkipped = 0
-            var failures = 0
-            for (contact in contacts) {
-                try {
-                    val photoFileName = savePhotoOrNull(contact.photoBytes)
-                    val personNoteId = peopleRepository.createPersonFromContactUnlessCopy(contact, photoFileName)
-                    if (personNoteId != null) {
-                        importedPersonNoteIds += personNoteId
-                    } else {
-                        copiesSkipped++
-                        photoFileName?.let { mediaStorageHelper.deleteMediaFile(it) }
+            val trashedCount = appScope.async {
+                selectedPeople.count { person ->
+                    try {
+                        peopleRepository.moveToTrash(person.noteId)
+                        true
+                    } catch (cancellation: CancellationException) {
+                        throw cancellation
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        false
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    failures++
                 }
-            }
-            val addedOnlyOnePerson = importedPersonNoteIds.size == 1 && copiesSkipped == 0 && failures == 0
-            if (addedOnlyOnePerson) {
-                onOnePersonImported(importedPersonNoteIds.first())
-            } else {
-                showNativeToast(contactImportMessage(added = importedPersonNoteIds.size, copiesSkipped = copiesSkipped, failures = failures))
-            }
+            }.await()
+            showNativeToast(
+                when {
+                    trashedCount == 0 -> COULD_NOT_MOVE_TO_TRASH_MESSAGE
+                    selectedPeople.size == 1 -> movedToTrashMessage(selectedPeople.first().title)
+                    trashedCount == selectedPeople.size -> "Moved $trashedCount people to Trash"
+                    else -> "Moved $trashedCount of ${selectedPeople.size} people to Trash"
+                }
+            )
         }
-    }
-
-    private fun contactImportMessage(added: Int, copiesSkipped: Int, failures: Int): String {
-        if (added == 0 && failures > 0) return "Couldn't add the contacts"
-        if (added == 0) return if (copiesSkipped == 1) "Already in People" else "All $copiesSkipped are already in People"
-        val parts = mutableListOf(if (added == 1) "Added 1 person" else "Added $added people")
-        if (copiesSkipped > 0) parts += "skipped $copiesSkipped already in People"
-        if (failures > 0) parts += "couldn't add $failures"
-        return parts.joinToString(", ")
-    }
-
-    private suspend fun savePhotoOrNull(photoBytes: ByteArray?): String? {
-        if (photoBytes == null || photoBytes.isEmpty()) return null
-        val (extension, mimeType) = contactPhotoExtensionAndMimeType(photoBytes)
-        return mediaStorageHelper.saveBytesToInternalStorage(photoBytes, extension, mimeType)?.localFileName
     }
 
     fun moveToTrash(person: NoteMetadataEntity) {

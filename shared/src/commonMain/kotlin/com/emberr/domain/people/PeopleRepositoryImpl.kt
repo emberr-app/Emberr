@@ -177,7 +177,7 @@ class PeopleRepositoryImpl(
     }
 
     private suspend fun isCopyOfSomeone(contact: ContactToImport, people: List<NoteMetadataEntity>): Boolean {
-        val sameNamePeople = people.filter { person -> person.title.trim().equals(contact.name.trim(), ignoreCase = true) }
+        val sameNamePeople = people.filter { person -> hasSamePersonName(person.title, contact.name) }
         if (sameNamePeople.isEmpty()) return false
         val sameNamePersonIds = sameNamePeople.map { person -> person.noteId }.toSet()
         val detailsByPersonId = blockDao.observeLiveDetailBlocksOfPeople(ACCOUNT_SPACE_ID).first()
@@ -191,7 +191,7 @@ class PeopleRepositoryImpl(
                 .filterNotNull()
                 .filterNot { it.isDeleted }
                 .map { detail -> ContactDetailToImport(kind = detail.kind, label = detail.label, value = detail.value) }
-            isExactCopyOfPerson(contact, person.title, details)
+            contactAddsNothingNewTo(contact, person.title, details)
         }
     }
 

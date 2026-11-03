@@ -12,14 +12,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.rememberStableStatusBarsPadding
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
@@ -62,10 +59,10 @@ import com.emberr.domain.model.NoteContent
 import com.emberr.domain.util.eventbus.WidgetComposeRequest
 import com.emberr.domain.util.eventbus.WidgetComposeRequestBus
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.home.overview.OverviewSection
 import com.emberr.presentation.shared.UserSettings
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.EmberrSelectionPill
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
@@ -98,8 +95,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTextField
-import com.emberr.presentation.shared.components.customEmberrShadow
-import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.space.SpaceOptionsSheets
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_up_down
@@ -111,7 +106,6 @@ import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.pen
 import emberr.shared.generated.resources.pen_square
-import emberr.shared.generated.resources.star
 import emberr.shared.generated.resources.folder_plus
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.template
@@ -1161,7 +1155,7 @@ fun HomeScreen(
                 onDeleteSpace = { spaceViewModel.deleteSpace(activeSpaceId) }
             )
 
-            NotesSelectionPill(
+            EmberrSelectionPill(
                 isVisible = isSelectionMode,
                 selectedCount = selectedNoteIds.size + selectedFolderIds.size,
                 showRename = selectionMenu.showRename,
@@ -1515,85 +1509,6 @@ fun NoteCard(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(14.dp)
             )
-        }
-    }
-}
-
-@Composable
-fun NotesSelectionPill(
-    isVisible: Boolean,
-    selectedCount: Int,
-    onClearSelection: () -> Unit,
-    onDelete: () -> Unit,
-    hazeState: HazeState,
-    modifier: Modifier = Modifier,
-    showRename: Boolean = false,
-    showFavorite: Boolean = false,
-    favoriteLabel: String = "Add to Favorites",
-    onRename: () -> Unit = {},
-    onToggleFavorite: () -> Unit = {}
-) {
-    val tint = MaterialTheme.colorScheme.primary
-
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-        modifier = modifier.padding(horizontal = 24.dp)
-    ) {
-        Surface(
-            shape = DefaultCornerShape,
-            color = Color.Transparent,
-            modifier = Modifier
-                .navigationBarsPadding()
-                .padding(bottom = BOTTOM_BAR_BOTTOM_PADDING)
-                .emberrBorder(DefaultCornerShape)
-                .customEmberrShadow(DefaultCornerShape)
-                .clip(DefaultCornerShape)
-                .emberrBlur(hazeState, EmberrBlur.Regular)
-        ) {
-            val pillScroll = rememberScrollState()
-            Row(
-                modifier = Modifier.horizontalScroll(pillScroll)
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                Icon(
-                    painterResource(Res.drawable.x),
-                    "Clear",
-                    modifier = Modifier.size(18.dp).noRippleClickable { onClearSelection() },
-                    tint = tint
-                )
-                Text(
-                    "$selectedCount",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = tint
-                )
-                Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
-                if (showRename) {
-                    Icon(
-                        painterResource(Res.drawable.pen),
-                        "Rename",
-                        modifier = Modifier.size(18.dp).noRippleClickable { onRename() },
-                        tint = tint
-                    )
-                }
-                if (showFavorite) {
-                    Icon(
-                        painterResource(Res.drawable.star),
-                        favoriteLabel,
-                        modifier = Modifier.size(18.dp).noRippleClickable { onToggleFavorite() },
-                        tint = tint
-                    )
-                }
-                Icon(
-                    painterResource(Res.drawable.trash),
-                    "Move to Trash",
-                    modifier = Modifier.size(18.dp).noRippleClickable { onDelete() },
-                    tint = tint
-                )
-            }
         }
     }
 }
