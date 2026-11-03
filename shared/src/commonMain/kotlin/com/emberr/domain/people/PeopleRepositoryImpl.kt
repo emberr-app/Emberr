@@ -135,7 +135,7 @@ class PeopleRepositoryImpl(
         person.noteId
     }
 
-    override suspend fun createPersonFromContact(contact: ContactToImport, photoFileName: String?): String = withContext(Dispatchers.IO) {
+    override suspend fun createPersonFromContactUnlessCopy(contact: ContactToImport, photoFileName: String?): String? = withContext(Dispatchers.IO) {
         val now = nowMillis()
         val details = contact.details
             .filter { detail -> detail.value.isNotBlank() }
@@ -153,7 +153,9 @@ class PeopleRepositoryImpl(
             .filter { line -> line.isNotBlank() }
             .map { line -> TextBlock(id = Uuid.random().toString(), text = line, updatedAt = now) }
         SyncCoordinator.mutex.withLock {
-            val takenNames = noteDao.observePeople(ACCOUNT_SPACE_ID).first().map { person -> person.title }
+            val people = noteDao.observePeople(ACCOUNT_SPACE_ID).first()
+            if (isCopyOfSomeone(contact, people)) return@withLock null
+            val takenNames = people.map { person -> person.title }
             val person = NoteMetadataEntity(
                 noteId = Uuid.random().toString(),
                 title = nameNotTakenYet(contact.name, takenNames),
@@ -171,6 +173,25 @@ class PeopleRepositoryImpl(
             )
             noteRepository.saveNoteInSpace(ACCOUNT_SPACE_ID, person, NoteContent(blocks = details + noteLines))
             person.noteId
+        }
+    }
+
+    private suspend fun isCopyOfSomeone(contact: ContactToImport, people: List<NoteMetadataEntity>): Boolean {
+        val sameNamePeople = people.filter { person -> person.title.trim().equals(contact.name.trim(), ignoreCase = true) }
+        if (sameNamePeople.isEmpty()) return false
+        val sameNamePersonIds = sameNamePeople.map { person -> person.noteId }.toSet()
+        val detailsByPersonId = blockDao.observeLiveDetailBlocksOfPeople(ACCOUNT_SPACE_ID).first()
+            .filter { row -> row.noteId in sameNamePersonIds }
+            .groupBy(
+                keySelector = { row -> row.noteId },
+                valueTransform = { row -> decodeBlockOrNull(row.blockDataJson) as? PersonDetailBlock }
+            )
+        return sameNamePeople.any { person ->
+            val details = detailsByPersonId[person.noteId].orEmpty()
+                .filterNotNull()
+                .filterNot { it.isDeleted }
+                .map { detail -> ContactDetailToImport(kind = detail.kind, label = detail.label, value = detail.value) }
+            isExactCopyOfPerson(contact, person.title, details)
         }
     }
 

@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.importer.TextFileDecoder
 import com.emberr.domain.people.ContactToImport
 import com.emberr.domain.people.PeopleRepository
 import com.emberr.domain.people.contactPhotoExtensionAndMimeType
+import com.emberr.domain.people.readContactsFromVCardText
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
 import com.emberr.domain.util.system.movedToTrashMessage
@@ -14,6 +16,7 @@ import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.home.note.NoteEditorViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -35,11 +38,15 @@ class PeopleViewModel(
     private val appScope: CoroutineScope
 ) : ViewModel() {
 
+    private val blankNewPersonNoteId = MutableStateFlow<String?>(null)
+
     val rows: StateFlow<List<PersonListRow>?> = combine(
         peopleRepository.observePeople(),
-        peopleRepository.observeEventsWithEachPerson()
-    ) { people, eventsByPerson ->
+        peopleRepository.observeEventsWithEachPerson(),
+        blankNewPersonNoteId
+    ) { people, eventsByPerson, hiddenPersonNoteId ->
         people
+            .filterNot { person -> person.noteId == hiddenPersonNoteId && person.title.isBlank() }
             .map { person ->
                 val events = eventsByPerson[person.noteId]
                 PersonListRow(
@@ -54,7 +61,9 @@ class PeopleViewModel(
     fun createPerson(name: String, onCreated: (personNoteId: String) -> Unit) {
         viewModelScope.launch {
             try {
-                onCreated(peopleRepository.createPerson(name))
+                val personNoteId = peopleRepository.createPerson(name)
+                if (name.isBlank()) blankNewPersonNoteId.value = personNoteId
+                onCreated(personNoteId)
             } catch (e: Exception) {
                 e.printStackTrace()
                 showNativeToast("Couldn't create the person")
@@ -62,24 +71,52 @@ class PeopleViewModel(
         }
     }
 
+    fun importContactFiles(fileContents: List<ByteArray>, onOnePersonImported: (personNoteId: String) -> Unit) {
+        viewModelScope.launch {
+            val contacts = withContext(Dispatchers.Default) {
+                fileContents.flatMap { bytes -> readContactsFromVCardText(TextFileDecoder.decode(bytes)) }
+            }
+            if (contacts.isEmpty()) showNativeToast("No contacts found in the file") else importContacts(contacts, onOnePersonImported)
+        }
+    }
+
     fun importContacts(contacts: List<ContactToImport>, onOnePersonImported: (personNoteId: String) -> Unit) {
         if (contacts.isEmpty()) return
         viewModelScope.launch {
-            var importedPersonNoteIds = emptyList<String>()
-            try {
-                importedPersonNoteIds = contacts.map { contact ->
-                    peopleRepository.createPersonFromContact(contact, savePhotoOrNull(contact.photoBytes))
+            val importedPersonNoteIds = mutableListOf<String>()
+            var copiesSkipped = 0
+            var failures = 0
+            for (contact in contacts) {
+                try {
+                    val photoFileName = savePhotoOrNull(contact.photoBytes)
+                    val personNoteId = peopleRepository.createPersonFromContactUnlessCopy(contact, photoFileName)
+                    if (personNoteId != null) {
+                        importedPersonNoteIds += personNoteId
+                    } else {
+                        copiesSkipped++
+                        photoFileName?.let { mediaStorageHelper.deleteMediaFile(it) }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    failures++
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
-            when {
-                importedPersonNoteIds.size == 1 -> onOnePersonImported(importedPersonNoteIds.first())
-                importedPersonNoteIds.size == contacts.size -> showNativeToast("Added ${contacts.size} people")
-                importedPersonNoteIds.isEmpty() -> showNativeToast("Couldn't add the contacts")
-                else -> showNativeToast("Added ${importedPersonNoteIds.size} of ${contacts.size} people")
+            val addedOnlyOnePerson = importedPersonNoteIds.size == 1 && copiesSkipped == 0 && failures == 0
+            if (addedOnlyOnePerson) {
+                onOnePersonImported(importedPersonNoteIds.first())
+            } else {
+                showNativeToast(contactImportMessage(added = importedPersonNoteIds.size, copiesSkipped = copiesSkipped, failures = failures))
             }
         }
+    }
+
+    private fun contactImportMessage(added: Int, copiesSkipped: Int, failures: Int): String {
+        if (added == 0 && failures > 0) return "Couldn't add the contacts"
+        if (added == 0) return if (copiesSkipped == 1) "Already in People" else "All $copiesSkipped are already in People"
+        val parts = mutableListOf(if (added == 1) "Added 1 person" else "Added $added people")
+        if (copiesSkipped > 0) parts += "skipped $copiesSkipped already in People"
+        if (failures > 0) parts += "couldn't add $failures"
+        return parts.joinToString(", ")
     }
 
     private suspend fun savePhotoOrNull(photoBytes: ByteArray?): String? {
@@ -108,6 +145,8 @@ class PeopleViewModel(
                 if (wasDeleted) withContext(Dispatchers.Main) { notesEditor.discardPendingWrites() }
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                blankNewPersonNoteId.compareAndSet(personNoteId, null)
             }
         }
     }
