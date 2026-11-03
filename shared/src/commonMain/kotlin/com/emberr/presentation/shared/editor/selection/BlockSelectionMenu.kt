@@ -2,7 +2,6 @@ package com.emberr.presentation.shared.editor.selection
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Subject
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.LinkedNoteBlock
@@ -32,6 +31,7 @@ import emberr.shared.generated.resources.ordered_list
 import emberr.shared.generated.resources.quote_down2
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.scissor2
+import emberr.shared.generated.resources.select_all
 import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.textalign_center2
@@ -82,7 +82,7 @@ fun BlockSelectionMenuContent(
     }
     val selectionItems = listOf(
         SlashMenuItemData("Select More Blocks", Res.drawable.mouse_square2, action = onCloseMenu),
-        SlashMenuItemData("Select All Blocks", Icons.Default.SelectAll, action = closeThen(onSelectAll)),
+        SlashMenuItemData("Select All Blocks", Res.drawable.select_all, action = closeThen(onSelectAll)),
         SlashMenuItemData("Clear Selection", Res.drawable.x, 14.dp, action = closeThen(onClearSelection))
     )
 

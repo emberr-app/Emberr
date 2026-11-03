@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentPaste
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -46,6 +45,7 @@ import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.format_bold
 import emberr.shared.generated.resources.italic
 import emberr.shared.generated.resources.scissor2
+import emberr.shared.generated.resources.select_all
 import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.trash
@@ -145,9 +145,7 @@ private fun SelectionBarContent(
                 }
                 actions.delete?.let { SelectionBarButton(Res.drawable.trash, "Delete", 18.dp, it) }
                 actions.selectAll?.let { selectAll ->
-                    SelectionBarButtonFrame(tooltip = "Select all", onClick = selectAll) {
-                        Icon(Icons.Default.SelectAll, "Select All", modifier = Modifier.size(20.dp), tint = tint)
-                    }
+                    SelectionBarButton(Res.drawable.select_all, "Select all", 18.dp, selectAll)
                 }
                 if (toggleFormat != null) {
                     Box(Modifier.padding(horizontal = 6.dp).width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))

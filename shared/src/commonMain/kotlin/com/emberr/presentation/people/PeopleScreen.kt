@@ -31,8 +31,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -101,6 +99,7 @@ import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.file_down
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.search
+import emberr.shared.generated.resources.select_all
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -280,7 +279,7 @@ fun PeopleScreen(
                             EmberrButtonSecondary(text = selectAllLabel, onClick = toggleSelectAll)
                         } else {
                             TopBarIconButton(
-                                icon = Icons.Default.SelectAll,
+                                icon = painterResource(Res.drawable.select_all),
                                 contentDescription = selectAllLabel,
                                 bgColor = Color.Transparent,
                                 tint = MaterialTheme.colorScheme.primary,

@@ -60,7 +60,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
@@ -242,6 +241,7 @@ import emberr.shared.generated.resources.minus
 import emberr.shared.generated.resources.ordered_list
 import emberr.shared.generated.resources.quote_down2
 import emberr.shared.generated.resources.scissor2
+import emberr.shared.generated.resources.select_all
 import emberr.shared.generated.resources.table
 import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_tool_2
@@ -2875,7 +2875,7 @@ fun BlockSelectionPill(
                 }
 
                 IconTooltip(text = "Select all", position = IconTooltipPosition.Above) {
-                    Icon(Icons.Default.SelectAll, "Select All", modifier = Modifier.size(iconSize + 3.dp).clickable { onSelectAll() }, tint = tint)
+                    Icon(painterResource(Res.drawable.select_all), "Select All", modifier = Modifier.size(iconSize).clickable { onSelectAll() }, tint = tint)
                 }
                 IconTooltip(text = "Copy", position = IconTooltipPosition.Above) {
                     Icon(painterResource(Res.drawable.copy), "Copy", modifier = Modifier.size(iconSize).clickable { onCopy() }, tint = tint)
