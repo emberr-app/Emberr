@@ -30,6 +30,16 @@ fun nameNotTakenYet(wantedName: String, takenNames: Collection<String>): String 
     return "$name ($number)"
 }
 
+fun isExactCopyOfPerson(contact: ContactToImport, personName: String, personDetails: List<ContactDetailToImport>): Boolean =
+    contact.name.trim().equals(personName.trim(), ignoreCase = true) &&
+        contact.details.map(::comparableDetail).toSet() == personDetails.map(::comparableDetail).toSet()
+
+private fun comparableDetail(detail: ContactDetailToImport): Triple<PersonDetailKind, String, String> {
+    val value = detail.value.trim().lowercase()
+    val comparableValue = if (detail.kind == PersonDetailKind.PHONE) value.filter { it.isDigit() || it == '+' } else value
+    return Triple(detail.kind, detail.label?.trim()?.lowercase().orEmpty(), comparableValue)
+}
+
 fun contactDateToBirthdayText(text: String): String? {
     val dateOnly = text.trim().substringBefore('T')
     val birthday = dateWithDashes.matchEntire(dateOnly)?.let { readPersonBirthday(dateOnly) }

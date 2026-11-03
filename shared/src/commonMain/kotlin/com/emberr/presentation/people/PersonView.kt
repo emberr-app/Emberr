@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,7 +83,6 @@ import emberr.shared.generated.resources.image
 import emberr.shared.generated.resources.square_arrow_out_up_right
 import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.x
-import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -91,7 +91,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -142,7 +141,6 @@ private val DesktopSidePadding = 28.dp
 private val DesktopDetailsColumnWidth = 280.dp
 private val EditorBlockSidePadding = if (isDesktopPlatform) 36.dp else 16.dp
 private val SectionGap = 24.dp
-private val FocusNameAfterSheetOpensDelay = 350.milliseconds
 
 @Composable
 fun PersonView(
@@ -656,7 +654,7 @@ private fun PersonNameField(page: PersonPage, isCentered: Boolean, sizeScale: Fl
     )
     LaunchedEffect(page.shouldFocusName) {
         if (!page.shouldFocusName) return@LaunchedEffect
-        delay(FocusNameAfterSheetOpensDelay)
+        withFrameNanos { }
         runCatching { focusRequester.requestFocus() }
         page.onNameFocused()
     }

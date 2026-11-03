@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -74,6 +75,8 @@ import com.emberr.domain.people.personDisplayName
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.PersonAvatar
@@ -83,16 +86,19 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.address_card
+import emberr.shared.generated.resources.file_down
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.search
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 
 private val ListSidePadding = if (isDesktopPlatform) 32.dp else 16.dp
+private val PersonCardCorner = 12.dp
 private val HeaderSidePadding = if (isDesktopPlatform) 22.dp else 16.dp
 private val TopEdgeFadeInDistance = 48.dp
 private val SearchBarSpace = 96.dp
@@ -131,12 +137,14 @@ fun PeopleScreen(
     val openPerson: (String) -> Unit = { personNoteId ->
         openedPerson = OpenedPerson(personNoteId = personNoteId, isNew = false, focusesName = false)
     }
-    val pickPhoneContacts = rememberPhoneContactPicker { contacts ->
-        viewModel.importContacts(contacts) { personNoteId ->
-            searchText = ""
-            openPerson(personNoteId)
-        }
+    val openImportedPerson: (String) -> Unit = { personNoteId ->
+        searchText = ""
+        openPerson(personNoteId)
     }
+    val pickPhoneContacts = rememberPhoneContactPicker { contacts -> viewModel.importContacts(contacts, openImportedPerson) }
+    val pickContactFiles = rememberContactFilePicker { fileContents -> viewModel.importContactFiles(fileContents, openImportedPerson) }
+    var isAddPeopleSheetOpen by remember { mutableStateOf(false) }
+    val importContacts = if (isDesktopPlatform) pickContactFiles else ({ isAddPeopleSheetOpen = true })
 
     val density = LocalDensity.current
     var topAreaHeightPx by remember { mutableFloatStateOf(0f) }
@@ -165,7 +173,7 @@ fun PeopleScreen(
                 allRows == null -> Unit
                 allRows.isEmpty() -> PeopleEmptyState(
                     onNewPerson = { createPerson("") },
-                    onPickPhoneContacts = pickPhoneContacts,
+                    onImportContacts = importContacts,
                     modifier = Modifier.padding(top = topAreaHeight)
                 )
                 else -> {
@@ -217,29 +225,27 @@ fun PeopleScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     if (isDesktopPlatform) {
-                        EmberrButtonPrimary(text = "New person", onClick = { createPerson("") })
-                    } else {
-                        if (pickPhoneContacts != null) {
-                            TopBarIconButton(
-                                icon = painterResource(Res.drawable.address_card),
-                                contentDescription = "Add from contacts",
-                                bgColor = Color.Transparent,
-                                tint = MaterialTheme.colorScheme.primary,
-                                hazeState = hazeState,
-                                hazeStyle = EmberrBlur.Regular,
-                                tooltip = "Add from contacts",
-                                onClick = pickPhoneContacts
-                            )
-                        }
                         TopBarIconButton(
-                            icon = painterResource(Res.drawable.plus),
-                            contentDescription = "New person",
+                            icon = painterResource(Res.drawable.file_down),
+                            contentDescription = "Import from .vcf file",
                             bgColor = Color.Transparent,
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
-                            tooltip = "New person",
-                            onClick = { createPerson("") }
+                            tooltip = "Import from .vcf file",
+                            onClick = pickContactFiles
+                        )
+                        EmberrButtonPrimary(text = "New person", onClick = { createPerson("") })
+                    } else {
+                        TopBarIconButton(
+                            icon = painterResource(Res.drawable.plus),
+                            contentDescription = "Add people",
+                            bgColor = Color.Transparent,
+                            tint = MaterialTheme.colorScheme.primary,
+                            hazeState = hazeState,
+                            hazeStyle = EmberrBlur.Regular,
+                            tooltip = "Add people",
+                            onClick = { isAddPeopleSheetOpen = true }
                         )
                     }
                 }
@@ -265,6 +271,14 @@ fun PeopleScreen(
         }
     }
 
+    AddPeopleSheet(
+        expanded = isAddPeopleSheetOpen,
+        onDismiss = { isAddPeopleSheetOpen = false },
+        onCreateNew = { createPerson("") },
+        onImportFromPhone = pickPhoneContacts,
+        onImportFromFile = pickContactFiles
+    )
+
     openedPerson?.let { opened ->
         PersonView(
             personNoteId = opened.personNoteId,
@@ -277,6 +291,26 @@ fun PeopleScreen(
     }
 }
 
+private sealed interface PeopleListItem {
+    val letter: String
+}
+
+private data class LetterHeaderItem(override val letter: String) : PeopleListItem
+
+private data class PersonItem(
+    override val letter: String,
+    val row: PersonListRow,
+    val isFirstInLetter: Boolean,
+    val isLastInLetter: Boolean
+) : PeopleListItem
+
+private fun peopleListItems(rows: List<PersonListRow>): List<PeopleListItem> =
+    rows.groupBy { row -> personGroupLetter(row.person.title) }.flatMap { (letter, letterRows) ->
+        listOf(LetterHeaderItem(letter)) + letterRows.mapIndexed { index, row ->
+            PersonItem(letter = letter, row = row, isFirstInLetter = index == 0, isLastInLetter = index == letterRows.lastIndex)
+        }
+    }
+
 @Composable
 private fun PeopleList(
     rows: List<PersonListRow>,
@@ -286,53 +320,73 @@ private fun PeopleList(
     onOpen: (String) -> Unit,
     onMoveToTrash: (NoteMetadataEntity) -> Unit
 ) {
-    val groups = remember(rows) { rows.groupBy { row -> personGroupLetter(row.person.title) }.toList() }
+    val listItems = remember(rows) { peopleListItems(rows) }
+    val itemLetters = remember(listItems) { listItems.map { item -> item.letter } }
     val bottomPadding = SearchBarSpace + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    LazyColumn(
-        state = listState,
-        contentPadding = PaddingValues(top = topPadding + SpaceBelowHeader, bottom = bottomPadding),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(groups, key = { (letter, _) -> letter }) { (letter, groupRows) ->
-            Column(
-                modifier = Modifier
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            contentPadding = PaddingValues(top = topPadding + SpaceBelowHeader, bottom = bottomPadding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(
+                items = listItems,
+                key = { item ->
+                    when (item) {
+                        is LetterHeaderItem -> "letter-${item.letter}"
+                        is PersonItem -> item.row.person.noteId
+                    }
+                },
+                contentType = { item -> item is LetterHeaderItem }
+            ) { item ->
+                val itemModifier = Modifier
                     .widthIn(max = DesktopListMaxWidth)
                     .fillMaxWidth()
                     .padding(horizontal = ListSidePadding)
-                    .padding(top = 16.dp)
-            ) {
-                Text(
-                    text = letter,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = mutedTextColor(),
-                    modifier = Modifier.padding(start = 8.dp, bottom = 6.dp)
-                )
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(PersonCardShape)
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    groupRows.forEachIndexed { index, row ->
-                        if (index > 0) {
+                when (item) {
+                    is LetterHeaderItem -> Text(
+                        text = item.letter,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = mutedTextColor(),
+                        modifier = itemModifier.padding(top = 16.dp).padding(start = 8.dp, bottom = 6.dp)
+                    )
+                    is PersonItem -> Column(
+                        modifier = itemModifier
+                            .clip(personRowShape(item))
+                            .background(MaterialTheme.colorScheme.surface)
+                    ) {
+                        if (!item.isFirstInLetter) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(start = RowDividerStart),
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
                             )
                         }
                         PersonListRowItem(
-                            row = row,
+                            row = item.row,
                             today = today,
-                            onOpen = { onOpen(row.person.noteId) },
-                            onMoveToTrash = { onMoveToTrash(row.person) }
+                            onOpen = { onOpen(item.row.person.noteId) },
+                            onMoveToTrash = { onMoveToTrash(item.row.person) }
                         )
                     }
                 }
             }
         }
+        PeopleFastScroller(
+            listState = listState,
+            itemLetters = itemLetters,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = topPadding + SpaceBelowHeader, bottom = bottomPadding)
+        )
     }
+}
+
+private fun personRowShape(item: PersonItem): RoundedCornerShape {
+    val topCorner = if (item.isFirstInLetter) PersonCardCorner else 0.dp
+    val bottomCorner = if (item.isLastInLetter) PersonCardCorner else 0.dp
+    return RoundedCornerShape(topStart = topCorner, topEnd = topCorner, bottomEnd = bottomCorner, bottomStart = bottomCorner)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -439,7 +493,7 @@ private fun PersonListRowItem(
 }
 
 @Composable
-private fun PeopleEmptyState(onNewPerson: () -> Unit, onPickPhoneContacts: (() -> Unit)?, modifier: Modifier) {
+private fun PeopleEmptyState(onNewPerson: () -> Unit, onImportContacts: () -> Unit, modifier: Modifier) {
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 80.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -461,11 +515,39 @@ private fun PeopleEmptyState(onNewPerson: () -> Unit, onPickPhoneContacts: (() -
         )
         Spacer(modifier = Modifier.height(22.dp))
         EmberrButtonPrimary(text = "New person", onClick = onNewPerson, modifier = Modifier.widthIn(min = 160.dp))
-        if (onPickPhoneContacts != null) {
-            Spacer(modifier = Modifier.height(10.dp))
-            EmberrButtonSecondary(text = "Add from contacts", onClick = onPickPhoneContacts, modifier = Modifier.widthIn(min = 160.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+        EmberrButtonSecondary(text = "Import contacts", onClick = onImportContacts, modifier = Modifier.widthIn(min = 160.dp))
+    }
+}
+
+@Composable
+private fun AddPeopleSheet(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onCreateNew: () -> Unit,
+    onImportFromPhone: (() -> Unit)?,
+    onImportFromFile: () -> Unit
+) {
+    EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "Add people") { closeAnd ->
+        Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
+            AddPeopleOption(label = "Create new contact", icon = Res.drawable.plus, onClick = { closeAnd(onCreateNew) })
+            if (onImportFromPhone != null) {
+                AddPeopleOption(label = "Import from phone", icon = Res.drawable.address_card, onClick = { closeAnd(onImportFromPhone) })
+            }
+            AddPeopleOption(label = "Import from .vcf file", icon = Res.drawable.file_down, onClick = { closeAnd(onImportFromFile) })
         }
     }
+}
+
+@Composable
+private fun AddPeopleOption(label: String, icon: DrawableResource, onClick: () -> Unit) {
+    EmberrBottomSheetOption(
+        label = label,
+        icon = { Icon(painter = painterResource(icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp)) },
+        outerHorizontalPadding = 0.dp,
+        innerHorizontalPadding = 0.dp,
+        onClick = onClick
+    )
 }
 
 @Composable
