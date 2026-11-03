@@ -164,7 +164,7 @@ val androidModule = module {
 
     single {
         com.emberr.presentation.widget.calendar.CalendarWidgetContentReader(
-            calendarTaskDao = get(),
+            noteRepository = get(),
             categoryDao = get(),
             firstDayOfWeek = get(),
             settingsManager = get(),

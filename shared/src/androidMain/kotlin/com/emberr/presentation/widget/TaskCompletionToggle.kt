@@ -4,6 +4,7 @@ package com.emberr.presentation.widget
 import android.content.Context
 import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.presentation.widget.calendar.refreshCalendarWidgets
 import com.emberr.presentation.widget.calendaragenda.refreshCalendarAgendaWidgets
 import com.emberr.presentation.widget.tasks.refreshTaskWidgets
 import com.emberr.presentation.widget.todaytasks.refreshTodayTasksWidgets
@@ -30,4 +31,5 @@ suspend fun refreshEveryTaskWidget(context: Context) {
     refreshTodayTasksWidgets(context)
     refreshUpcomingEventsWidgets(context)
     refreshCalendarAgendaWidgets(context)
+    refreshCalendarWidgets(context)
 }
