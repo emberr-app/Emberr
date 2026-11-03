@@ -6,10 +6,12 @@ import androidx.compose.runtime.setValue
 import com.emberr.domain.util.time.formatTimeOfDay
 import kotlin.math.roundToInt
 import kotlin.time.Instant
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
@@ -61,6 +63,39 @@ private fun snapToResizeStep(minuteOfDay: Float): Int =
 fun CalendarEvent.timeRange(): EventTimeRange {
     val start = Instant.fromEpochMilliseconds(reminderTimestamp).toLocalDateTime(TimeZone.currentSystemDefault())
     return EventTimeRange(startMinuteOfDay = start.hour * 60 + start.minute, durationMinutes = durationMinutes)
+}
+
+val EventTimeRange.crossesMidnight: Boolean get() = endMinuteOfDay > MinutesInDay
+
+fun EventTimeRange.partOnDay(daysAfterStart: Int): EventTimeRange = when {
+    daysAfterStart > 0 -> EventTimeRange(startMinuteOfDay = 0, durationMinutes = (endMinuteOfDay - MinutesInDay).coerceAtLeast(0))
+    crossesMidnight -> copy(durationMinutes = MinutesInDay - startMinuteOfDay)
+    else -> this
+}
+
+fun CalendarEvent.crossesMidnight(): Boolean = allDay == null && timeRange().crossesMidnight
+
+fun CalendarEvent.continuesInto(date: LocalDate): Boolean =
+    crossesMidnight() && LocalDate.parse(dateString).plus(1, DateTimeUnit.DAY) == date
+
+fun CalendarEvent.daysAfterStart(date: LocalDate): Int = if (continuesInto(date)) 1 else 0
+
+fun resizeOvernightEventEnd(original: EventTimeRange, draggedMinutes: Float): EventTimeRange {
+    val endOnNextDay = original.endMinuteOfDay - MinutesInDay
+    val latestEndOnNextDay = maxOf(MinimumEventDurationMinutes, original.startMinuteOfDay)
+    val newEndOnNextDay = snapToResizeStep(endOnNextDay + draggedMinutes).coerceIn(MinimumEventDurationMinutes, latestEndOnNextDay)
+    return original.copy(durationMinutes = MinutesInDay + newEndOnNextDay - original.startMinuteOfDay)
+}
+
+data class MovedOvernightEvent(val daysLater: Int, val timeRange: EventTimeRange)
+
+fun moveOvernightEvent(original: EventTimeRange, draggedMinutes: Float): MovedOvernightEvent {
+    val newStart = snapToResizeStep(original.startMinuteOfDay + draggedMinutes)
+        .coerceIn(0, MinutesInDay * 2 - EventResizeSnapMinutes)
+    return MovedOvernightEvent(
+        daysLater = newStart / MinutesInDay,
+        timeRange = original.copy(startMinuteOfDay = newStart % MinutesInDay)
+    )
 }
 
 fun timestampOnDate(dateString: String, minuteOfDay: Int): Long =

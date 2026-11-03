@@ -183,6 +183,8 @@ fun CalendarScreen(
     val firstDayOfWeek = LocalFirstDayOfWeek.current
     val events by remember(selectedDate) { viewModel.eventsForDate(selectedDate.toString()) }
         .collectAsState(initial = emptyList())
+    val timeGridEvents by remember(selectedDate) { viewModel.timeGridEventsForDate(selectedDate) }
+        .collectAsState(initial = emptyList())
     var eventEditorState by remember { mutableStateOf<EventEditorState?>(null) }
     var openedBirthdayPersonNoteId by remember { mutableStateOf<String?>(null) }
     val openEvent: (CalendarEvent) -> Unit = { event ->
@@ -334,7 +336,7 @@ fun CalendarScreen(
                         CalendarTimeGrid(
                             selectedDate = selectedDate,
                             slideDirection = slideDirection,
-                            events = events,
+                            events = timeGridEvents,
                             categories = categories,
                             peopleById = peopleById,
                             scrollState = scrollState,
@@ -1141,7 +1143,8 @@ private class ActiveEventResize(
     val event: CalendarEvent,
     val edge: EventResizeEdge,
     val startYInColumn: Float,
-    var pointerInWindow: Offset
+    var pointerInWindow: Offset,
+    val daysAfterStart: Int
 ) {
     var hasMoved = false
 }
@@ -1171,18 +1174,28 @@ private fun DayColumnBody(
         val pointerYInColumn = columnCoordinates?.takeIf { it.isAttached }
             ?.windowToLocal(resize.pointerInWindow)?.y ?: return
         val draggedMinutes = (pointerYInColumn - resize.startYInColumn) / hourHeightPx * 60f
+        val originalTimeRange = resize.event.timeRange()
         resizeState.preview = EventResizePreview(
             event = resize.event,
-            timeRange = resizeEventTimeRange(resize.event.timeRange(), resize.edge, draggedMinutes)
+            timeRange = if (resize.daysAfterStart > 0) {
+                resizeOvernightEventEnd(originalTimeRange, draggedMinutes)
+            } else {
+                resizeEventTimeRange(originalTimeRange, resize.edge, draggedMinutes)
+            }
         )
     }
 
     LaunchedEffect(events) {
-        if (resizeState.preview?.event?.dateString == date.toString()) resizeState.preview = null
+        val resizedEvent = resizeState.preview?.event
+        if (resizedEvent != null && (resizedEvent.dateString == date.toString() || resizedEvent.continuesInto(date))) {
+            resizeState.preview = null
+        }
         val movePreview = moveTracker.preview
         if (movePreview != null && moveTracker.activeMove == null) {
-            val hasLandedHere = movePreview.targetDate == date
-            val hasLeftHere = movePreview.event.dateString == date.toString() && events.none { it == movePreview.event }
+            val hasLandedHere = movePreview.targetDate == date ||
+                (movePreview.timeRange.crossesMidnight && movePreview.targetDate.plus(1, DateTimeUnit.DAY) == date)
+            val wasShownHere = movePreview.event.dateString == date.toString() || movePreview.event.continuesInto(date)
+            val hasLeftHere = wasShownHere && events.none { it == movePreview.event }
             if (hasLandedHere || hasLeftHere) moveTracker.preview = null
         }
     }
@@ -1237,8 +1250,15 @@ private fun DayColumnBody(
         positionedEvents.forEach { positioned ->
             val event = positioned.event
             key(event.blockId, event.occurrenceDateString) {
-                val timeRange = resizeState.preview?.takeIf { event.isSameOccurrenceAs(it.event) }?.timeRange
+                val fullTimeRange = resizeState.preview?.takeIf { event.isSameOccurrenceAs(it.event) }?.timeRange
                     ?: event.timeRange()
+                val daysAfterStart = event.daysAfterStart(date)
+                val timeRange = fullTimeRange.partOnDay(daysAfterStart)
+                val resizableEdges = when {
+                    daysAfterStart > 0 -> setOf(EventResizeEdge.BOTTOM)
+                    event.crossesMidnight() -> setOf(EventResizeEdge.TOP)
+                    else -> EventResizeEdge.entries.toSet()
+                }
                 val topOffset = hourHeight * (timeRange.startMinuteOfDay / 60f)
                 val chipHeight = maxOf(24.dp, hourHeight * (timeRange.durationMinutes / 60f))
                 val category = categories.firstOrNull { it.id == event.categoryId }
@@ -1249,15 +1269,16 @@ private fun DayColumnBody(
                 EventChip(
                     text = event.text,
                     people = peopleShownOnEvent(event.personNoteIds, peopleById),
-                    timeText = formatEventTimeRange(timeRange, usesTwentyFourHourClock),
+                    timeText = formatEventTimeRange(fullTimeRange, usesTwentyFourHourClock),
                     color = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.surface,
                     hasCategory = category != null,
                     isChecked = event.isChecked,
                     height = chipHeight,
+                    resizableEdges = resizableEdges,
                     isInResizeMode = event.isSameOccurrenceAs(resizeState.eventInResizeMode),
                     onResizeStart = { edge, pointerInWindow ->
                         columnCoordinates?.takeIf { it.isAttached }?.windowToLocal(pointerInWindow)?.y?.let { startY ->
-                            activeResize = ActiveEventResize(event, edge, startY, pointerInWindow)
+                            activeResize = ActiveEventResize(event, edge, startY, pointerInWindow, daysAfterStart)
                         }
                     },
                     onResizeMove = { pointerInWindow ->
@@ -1289,7 +1310,8 @@ private fun DayColumnBody(
                                 cardTopLeftInWindow = cardTopLeftInWindow,
                                 cardSize = cardSize,
                                 sourceColumn = column,
-                                hourHeightPx = hourHeightPx
+                                hourHeightPx = hourHeightPx,
+                                daysAfterStart = daysAfterStart
                             )
                         }
                     },
@@ -1312,7 +1334,13 @@ private fun DayColumnBody(
             }
         }
 
-        moveTracker.preview?.takeIf { it.targetDate == date && moveTracker.activeMove == null && !it.becomesAllDay }?.let { preview ->
+        moveTracker.preview?.takeIf { moveTracker.activeMove == null && !it.becomesAllDay }?.let { preview ->
+            val daysAfterStart = when {
+                preview.targetDate == date -> 0
+                preview.timeRange.crossesMidnight && preview.targetDate.plus(1, DateTimeUnit.DAY) == date -> 1
+                else -> return@let
+            }
+            val partOnThisDay = preview.timeRange.partOnDay(daysAfterStart)
             val category = categories.firstOrNull { it.id == preview.event.categoryId }
             EventMovePreviewChip(
                 text = preview.event.text,
@@ -1320,11 +1348,11 @@ private fun DayColumnBody(
                 color = category?.colorHex?.toCategoryColor() ?: MaterialTheme.colorScheme.surface,
                 hasCategory = category != null,
                 isChecked = preview.event.isChecked,
-                height = maxOf(24.dp, hourHeight * (preview.timeRange.durationMinutes / 60f)),
+                height = maxOf(24.dp, hourHeight * (partOnThisDay.durationMinutes / 60f)),
                 people = peopleShownOnEvent(preview.event.personNoteIds, peopleById),
                 modifier = Modifier
                     .width(availableWidth)
-                    .padding(top = hourHeight * (preview.timeRange.startMinuteOfDay / 60f))
+                    .padding(top = hourHeight * (partOnThisDay.startMinuteOfDay / 60f))
                     .offset(x = horizontalInset)
             )
         }
@@ -1486,7 +1514,7 @@ private fun MultiDayGridContent(
         (0 until dayCount).map { offset -> anchor.plus(offset.toLong(), DateTimeUnit.DAY) }
     }
     val eventsByDate = dates.associateWith { date ->
-        val state by remember(date) { viewModel.eventsForDate(date.toString()) }
+        val state by remember(date) { viewModel.timeGridEventsForDate(date) }
             .collectAsState(initial = emptyList())
         state
     }
