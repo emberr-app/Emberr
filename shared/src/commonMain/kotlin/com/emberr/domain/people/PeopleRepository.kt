@@ -17,7 +17,11 @@ interface PeopleRepository {
     fun observeEventsWithPerson(personNoteId: String): Flow<EventsWithPerson>
     fun observeEventsWithEachPerson(): Flow<Map<String, EventsWithPerson>>
     suspend fun createPerson(name: String): String
-    suspend fun createPersonFromContactUnlessCopy(contact: ContactToImport, photoFileName: String?): String?
+    suspend fun createPeopleFromContacts(
+        contacts: List<ContactToImport>,
+        savePhoto: suspend (ByteArray) -> String?,
+        onContactHandled: (handledCount: Int) -> Unit
+    ): ContactImportResult
     suspend fun renamePerson(personNoteId: String, newName: String)
     suspend fun addDetail(personNoteId: String, kind: PersonDetailKind, label: String?, value: String): PersonDetailBlock?
     suspend fun updateDetail(personNoteId: String, detail: PersonDetailBlock)

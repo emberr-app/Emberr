@@ -31,6 +31,7 @@ fun personGroupLetter(title: String): String {
 
 fun contactImportMessage(result: ContactImportResult): String {
     val added = result.importedPersonNoteIds.size
+    if (result.couldNotReadFile) return "Couldn't read the file"
     if (result.foundNoContacts) return "No contacts found"
     if (added == 0 && result.failures > 0) return "Couldn't add the contacts"
     if (added == 0) return if (result.copiesSkipped == 1) "Already in People" else "All ${result.copiesSkipped} are already in People"

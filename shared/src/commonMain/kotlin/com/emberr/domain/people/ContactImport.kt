@@ -25,10 +25,10 @@ private val pngSignature = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47)
 fun nameNotTakenYet(wantedName: String, takenNames: Collection<String>): String {
     val name = wantedName.trim()
     if (name.isEmpty()) return name
-    val takenLowercaseNames = takenNames.map { it.trim().lowercase() }.toSet()
-    if (name.lowercase() !in takenLowercaseNames) return name
+    val takenComparableNames = takenNames.map { comparableName(it) }.toSet()
+    if (comparableName(name) !in takenComparableNames) return name
     var number = 1
-    while ("$name ($number)".lowercase() in takenLowercaseNames) number++
+    while (comparableName("$name ($number)") in takenComparableNames) number++
     return "$name ($number)"
 }
 

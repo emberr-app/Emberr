@@ -63,6 +63,7 @@ import com.emberr.presentation.home.overview.OverviewSection
 import com.emberr.presentation.shared.UserSettings
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrSelectionPill
+import com.emberr.presentation.shared.components.SelectionPillAction
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
@@ -76,6 +77,7 @@ import com.emberr.presentation.shared.components.EmberrPillShadowSpotColor
 import com.emberr.presentation.shared.components.MobileMenuAnchor
 import com.emberr.presentation.shared.components.mobileMenuArea
 import com.emberr.presentation.shared.components.mobileMenuTrigger
+import com.emberr.presentation.shared.components.noRippleClickable
 import com.emberr.presentation.shared.components.rememberMobileMenuAnchor
 import com.emberr.presentation.shared.canvas.CanvasPreview
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
@@ -106,6 +108,7 @@ import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.pen
 import emberr.shared.generated.resources.pen_square
+import emberr.shared.generated.resources.star
 import emberr.shared.generated.resources.folder_plus
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.template
@@ -161,14 +164,6 @@ private fun Modifier.borderWithoutBottom(width: Dp, color: Color, cornerRadius: 
         }
         drawPath(outline, color, style = Stroke(width = strokeWidth))
     }
-
-@Composable
-private fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier =
-    this.clickable(
-        interactionSource = remember { MutableInteractionSource() },
-        indication = null,
-        onClick = onClick
-    )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -1158,13 +1153,18 @@ fun HomeScreen(
             EmberrSelectionPill(
                 isVisible = isSelectionMode,
                 selectedCount = selectedNoteIds.size + selectedFolderIds.size,
-                showRename = selectionMenu.showRename,
-                showFavorite = selectionMenu.showFavorite,
-                favoriteLabel = selectionMenu.favoriteLabel,
                 onClearSelection = { viewModel.clearSelection() },
-                onRename = { showRenameSheet = true },
-                onToggleFavorite = { viewModel.setNotesFavorite(selectedNoteIds, selectionMenu.makeFavorite) },
-                onDelete = { viewModel.deleteSelectedItems() },
+                actions = buildList {
+                    if (selectionMenu.showRename) {
+                        add(SelectionPillAction(Res.drawable.pen, "Rename") { showRenameSheet = true })
+                    }
+                    if (selectionMenu.showFavorite) {
+                        add(SelectionPillAction(Res.drawable.star, selectionMenu.favoriteLabel) {
+                            viewModel.setNotesFavorite(selectedNoteIds, selectionMenu.makeFavorite)
+                        })
+                    }
+                    add(SelectionPillAction(Res.drawable.trash, "Move to Trash") { viewModel.deleteSelectedItems() })
+                },
                 modifier = Modifier.align(Alignment.BottomCenter),
                 hazeState = hazeState
             )

@@ -22,7 +22,7 @@ private class VCardLine(
         .toSet()
 
     val isQuotedPrintable: Boolean = parameters.any { (key, value) ->
-        (key == "ENCODING" && value.equals("QUOTED-PRINTABLE", ignoreCase = true)) || (key.isEmpty() && value.equals("QUOTED-PRINTABLE", ignoreCase = true))
+        (key == "ENCODING" || key.isEmpty()) && value.equals("QUOTED-PRINTABLE", ignoreCase = true)
     }
 
     val isBase64: Boolean = parameters.any { (key, value) ->

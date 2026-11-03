@@ -26,9 +26,9 @@ import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.presentation.people.personAvatarColors
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.user2
+import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
-import java.io.File
 
 private const val InitialsSizeRatio = 0.37f
 private const val EmojiSizeRatio = 0.52f
@@ -58,9 +58,9 @@ fun PersonAvatar(
     val colors = personAvatarColors(personNoteId)
     val density = LocalDensity.current
     val mediaStorageHelper = koinInject<MediaStorageHelper>()
-    val photoFile = remember(photoPath) { photoPath?.let { File(mediaStorageHelper.getAbsoluteMediaPath(it)) } }
-    var photoFailedToLoad by remember(photoFile) { mutableStateOf(false) }
-    val showsPhoto = photoFile != null && !photoFailedToLoad
+    val localPhotoPath = remember(photoPath) { photoPath?.let { mediaStorageHelper.getAbsoluteMediaPath(it).toPath() } }
+    var photoFailedToLoad by remember(localPhotoPath) { mutableStateOf(false) }
+    val showsPhoto = localPhotoPath != null && !photoFailedToLoad
     val emoji = icon?.takeIf { it.isNotBlank() && !showsPhoto }
     val background = if (emoji != null) {
         Modifier.background(colors.emojiBackground)
@@ -76,7 +76,7 @@ fun PersonAvatar(
     ) {
         when {
             showsPhoto -> AsyncImage(
-                model = photoFile,
+                model = localPhotoPath,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 onError = { photoFailedToLoad = true },

@@ -13,6 +13,7 @@ import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.NoteContent
+import com.emberr.domain.model.PersonDetailKind
 import com.emberr.domain.model.RecurrenceEditScope
 import com.emberr.domain.model.RecurrenceFrequency
 import com.emberr.domain.model.RecurrenceRule
@@ -173,5 +174,26 @@ class PeopleRepositoryTest {
 
         assertNull(noteRepository.getNoteById(emptyPersonId))
         assertNotNull(noteRepository.getNoteById(namedPersonId))
+    }
+
+    @Test
+    fun aBatchSkipsACardThatAddsNothingNewAndNumbersASameNamedCardWithANewPhone() = runTest {
+        fun mayaWithPhone(phone: String) = ContactToImport(
+            name = "Maya",
+            details = listOf(ContactDetailToImport(kind = PersonDetailKind.PHONE, label = null, value = phone)),
+            note = "",
+            photoBytes = null
+        )
+
+        val result = peopleRepository.createPeopleFromContacts(
+            contacts = listOf(mayaWithPhone("555 123 4567"), mayaWithPhone("5551234567"), mayaWithPhone("555 987 6543")),
+            savePhoto = { error("These cards have no photo") },
+            onContactHandled = {}
+        )
+
+        assertEquals(2, result.importedPersonNoteIds.size)
+        assertEquals(1, result.copiesSkipped)
+        assertEquals(0, result.failures)
+        assertEquals(listOf("Maya", "Maya (1)"), result.importedPersonNoteIds.map { noteRepository.getNoteById(it)?.title })
     }
 }

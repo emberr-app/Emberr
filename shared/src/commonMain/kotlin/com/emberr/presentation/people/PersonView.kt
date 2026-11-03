@@ -654,7 +654,7 @@ private fun PersonNameField(page: PersonPage, isCentered: Boolean, sizeScale: Fl
     )
     LaunchedEffect(page.shouldFocusName) {
         if (!page.shouldFocusName) return@LaunchedEffect
-        withFrameNanos { }
+        waitOneFrame()
         runCatching { focusRequester.requestFocus() }
         page.onNameFocused()
     }
@@ -753,105 +753,40 @@ internal fun PersonActionsMenu(
     onRemovePhoto: (() -> Unit)? = null
 ) {
     val trashColor = MaterialTheme.colorScheme.error
+    val options = buildList {
+        if (onOpen != null) add(PersonMenuOption("Open", Res.drawable.square_arrow_out_up_right, color = null, onClick = onOpen))
+        if (onChangeIcon != null) add(PersonMenuOption("Change icon", Res.drawable.ghost_smile, color = null, onClick = onChangeIcon))
+        if (onChangePhoto != null) add(PersonMenuOption("Change photo", Res.drawable.image, color = null, onClick = onChangePhoto))
+        if (onRemovePhoto != null) add(PersonMenuOption("Remove photo", Res.drawable.user2, color = null, onClick = onRemovePhoto))
+        add(PersonMenuOption("Move to Trash", Res.drawable.trash, color = trashColor, onClick = onMoveToTrash))
+    }
     if (isDesktopPlatform) {
         EmberrDesktopMenu(expanded = expanded, onDismissRequest = onDismiss) {
-            if (onOpen != null) {
+            options.forEach { option ->
                 EmberrDesktopMenuOption(
-                    label = "Open",
-                    icon = { MenuIcon(icon = Res.drawable.square_arrow_out_up_right, tint = MaterialTheme.colorScheme.onSurface) },
+                    label = option.label,
+                    icon = { MenuIcon(icon = option.icon, tint = option.color ?: MaterialTheme.colorScheme.onSurface) },
+                    labelColor = option.color,
                     onClick = {
                         onDismiss()
-                        onOpen()
+                        option.onClick()
                     }
                 )
             }
-            if (onChangeIcon != null) {
-                EmberrDesktopMenuOption(
-                    label = "Change icon",
-                    icon = { MenuIcon(icon = Res.drawable.ghost_smile, tint = MaterialTheme.colorScheme.onSurface) },
-                    onClick = {
-                        onDismiss()
-                        onChangeIcon()
-                    }
-                )
-            }
-            if (onChangePhoto != null) {
-                EmberrDesktopMenuOption(
-                    label = "Change photo",
-                    icon = { MenuIcon(icon = Res.drawable.image, tint = MaterialTheme.colorScheme.onSurface) },
-                    onClick = {
-                        onDismiss()
-                        onChangePhoto()
-                    }
-                )
-            }
-            if (onRemovePhoto != null) {
-                EmberrDesktopMenuOption(
-                    label = "Remove photo",
-                    icon = { MenuIcon(icon = Res.drawable.user2, tint = MaterialTheme.colorScheme.onSurface) },
-                    onClick = {
-                        onDismiss()
-                        onRemovePhoto()
-                    }
-                )
-            }
-            EmberrDesktopMenuOption(
-                label = "Move to Trash",
-                icon = { MenuIcon(icon = Res.drawable.trash, tint = trashColor) },
-                labelColor = trashColor,
-                onClick = {
-                    onDismiss()
-                    onMoveToTrash()
-                }
-            )
         }
     } else {
         EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = personName) { closeAnd ->
             Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
-                if (onOpen != null) {
+                options.forEach { option ->
                     EmberrBottomSheetOption(
-                        label = "Open",
-                        icon = { MenuIcon(icon = Res.drawable.square_arrow_out_up_right, tint = MaterialTheme.colorScheme.onSurface) },
+                        label = option.label,
+                        icon = { MenuIcon(icon = option.icon, tint = option.color ?: MaterialTheme.colorScheme.onSurface) },
+                        labelColor = option.color,
                         outerHorizontalPadding = 0.dp,
                         innerHorizontalPadding = 0.dp,
-                        onClick = { closeAnd(onOpen) }
+                        onClick = { closeAnd(option.onClick) }
                     )
                 }
-                if (onChangeIcon != null) {
-                    EmberrBottomSheetOption(
-                        label = "Change icon",
-                        icon = { MenuIcon(icon = Res.drawable.ghost_smile, tint = MaterialTheme.colorScheme.onSurface) },
-                        outerHorizontalPadding = 0.dp,
-                        innerHorizontalPadding = 0.dp,
-                        onClick = { closeAnd(onChangeIcon) }
-                    )
-                }
-                if (onChangePhoto != null) {
-                    EmberrBottomSheetOption(
-                        label = "Change photo",
-                        icon = { MenuIcon(icon = Res.drawable.image, tint = MaterialTheme.colorScheme.onSurface) },
-                        outerHorizontalPadding = 0.dp,
-                        innerHorizontalPadding = 0.dp,
-                        onClick = { closeAnd(onChangePhoto) }
-                    )
-                }
-                if (onRemovePhoto != null) {
-                    EmberrBottomSheetOption(
-                        label = "Remove photo",
-                        icon = { MenuIcon(icon = Res.drawable.user2, tint = MaterialTheme.colorScheme.onSurface) },
-                        outerHorizontalPadding = 0.dp,
-                        innerHorizontalPadding = 0.dp,
-                        onClick = { closeAnd(onRemovePhoto) }
-                    )
-                }
-                EmberrBottomSheetOption(
-                    label = "Move to Trash",
-                    icon = { MenuIcon(icon = Res.drawable.trash, tint = trashColor) },
-                    labelColor = trashColor,
-                    outerHorizontalPadding = 0.dp,
-                    innerHorizontalPadding = 0.dp,
-                    onClick = { closeAnd(onMoveToTrash) }
-                )
                 EmberrButtonPrimary(
                     text = "Close",
                     onClick = { closeAnd(onDismiss) },
@@ -861,6 +796,13 @@ internal fun PersonActionsMenu(
         }
     }
 }
+
+private class PersonMenuOption(
+    val label: String,
+    val icon: DrawableResource,
+    val color: Color?,
+    val onClick: () -> Unit
+)
 
 @Composable
 private fun MenuIcon(icon: DrawableResource, tint: Color) {
@@ -903,4 +845,8 @@ private fun Modifier.personGlow(personNoteId: String): Modifier {
             )
         )
     }
+}
+
+private suspend fun waitOneFrame() {
+    withFrameNanos { }
 }

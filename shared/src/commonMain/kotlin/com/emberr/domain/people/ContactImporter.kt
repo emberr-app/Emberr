@@ -18,9 +18,10 @@ sealed interface ContactImportProgress {
 data class ContactImportResult(
     val importedPersonNoteIds: List<String>,
     val copiesSkipped: Int,
-    val failures: Int
+    val failures: Int,
+    val couldNotReadFile: Boolean = false
 ) {
-    val foundNoContacts: Boolean get() = importedPersonNoteIds.isEmpty() && copiesSkipped == 0 && failures == 0
+    val foundNoContacts: Boolean get() = importedPersonNoteIds.isEmpty() && copiesSkipped == 0 && failures == 0 && !couldNotReadFile
 }
 
 class ContactImporter(
@@ -37,8 +38,9 @@ class ContactImporter(
     fun startImportFromFiles(fileContents: List<ByteArray>): Boolean =
         start { fileContents.flatMap { bytes -> readContactsFromVCardText(TextFileDecoder.decode(bytes)) } }
 
-    fun clearFinishedImport() {
-        if (_progress.value is ContactImportProgress.Finished) _progress.value = ContactImportProgress.Idle
+    fun takeFinishedResult(): ContactImportResult? {
+        val currentProgress = _progress.value as? ContactImportProgress.Finished ?: return null
+        return if (_progress.compareAndSet(currentProgress, ContactImportProgress.Idle)) currentProgress.result else null
     }
 
     private fun start(readContacts: () -> List<ContactToImport>): Boolean {
@@ -55,7 +57,7 @@ class ContactImporter(
                 null
             }
             val result = if (contacts == null) {
-                ContactImportResult(importedPersonNoteIds = emptyList(), copiesSkipped = 0, failures = 1)
+                ContactImportResult(importedPersonNoteIds = emptyList(), copiesSkipped = 0, failures = 0, couldNotReadFile = true)
             } else {
                 addContacts(contacts)
             }
@@ -64,33 +66,16 @@ class ContactImporter(
         return true
     }
 
-    private suspend fun addContacts(contacts: List<ContactToImport>): ContactImportResult {
-        val importedPersonNoteIds = mutableListOf<String>()
-        var copiesSkipped = 0
-        var failures = 0
-        contacts.sortedByDescending { contact -> contact.details.size }.forEachIndexed { index, contact ->
-            try {
-                val photoFileName = savePhotoOrNull(contact.photoBytes)
-                val personNoteId = peopleRepository.createPersonFromContactUnlessCopy(contact, photoFileName)
-                if (personNoteId != null) {
-                    importedPersonNoteIds += personNoteId
-                } else {
-                    copiesSkipped++
-                    photoFileName?.let { mediaStorageHelper.deleteMediaFile(it) }
-                }
-            } catch (cancellation: CancellationException) {
-                throw cancellation
-            } catch (e: Exception) {
-                e.printStackTrace()
-                failures++
+    private suspend fun addContacts(contacts: List<ContactToImport>): ContactImportResult =
+        peopleRepository.createPeopleFromContacts(
+            contacts = contacts,
+            savePhoto = ::savePhoto,
+            onContactHandled = { handledCount ->
+                _progress.value = ContactImportProgress.Importing(handledCount = handledCount, totalCount = contacts.size)
             }
-            _progress.value = ContactImportProgress.Importing(handledCount = index + 1, totalCount = contacts.size)
-        }
-        return ContactImportResult(importedPersonNoteIds = importedPersonNoteIds, copiesSkipped = copiesSkipped, failures = failures)
-    }
+        )
 
-    private suspend fun savePhotoOrNull(photoBytes: ByteArray?): String? {
-        if (photoBytes == null || photoBytes.isEmpty()) return null
+    private suspend fun savePhoto(photoBytes: ByteArray): String? {
         val (extension, mimeType) = contactPhotoExtensionAndMimeType(photoBytes)
         return mediaStorageHelper.saveBytesToInternalStorage(photoBytes, extension, mimeType)?.localFileName
     }

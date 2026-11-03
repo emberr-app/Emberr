@@ -47,6 +47,7 @@ import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.LocalEmberrBlurSource
 import com.emberr.presentation.shared.components.isBlurFallbackForced
 import com.emberr.presentation.trash.TrashScreen
+import com.emberr.presentation.people.ContactImportResultToasts
 import com.emberr.presentation.people.PeopleScreen
 import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.properties.PropertiesScreen
@@ -113,6 +114,8 @@ fun EmberrApp(
     val isDailyNotesEnabled by settingsManager.dailyNotesEnabledFlow.collectAsState(
         initial = settingsManager.isDailyNotesEnabled()
     )
+
+    ContactImportResultToasts()
 
     LaunchedEffect(settingsManager) {
         settingsManager.topBarFadeStyleFlow.collect { styleName ->
