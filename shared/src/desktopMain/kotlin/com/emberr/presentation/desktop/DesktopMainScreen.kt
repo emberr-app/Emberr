@@ -615,7 +615,7 @@ private fun SidebarPersonSearchResultRow(
             .noRippleClickable(interactionSource, onClick)
             .padding(horizontal = 10.dp, vertical = 8.dp)
     ) {
-        PersonAvatar(personNoteId = person.noteId, name = name, icon = person.icon, size = SidebarPersonResultAvatarSize)
+        PersonAvatar(personNoteId = person.noteId, name = name, icon = person.icon, photoPath = person.coverImagePath, size = SidebarPersonResultAvatarSize)
         Spacer(Modifier.width(10.dp))
         Column {
             Text(

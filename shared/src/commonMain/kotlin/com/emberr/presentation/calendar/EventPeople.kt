@@ -65,6 +65,7 @@ internal fun EventChipAvatars(people: List<PersonOption>, ringColor: Color) {
                 personNoteId = person.id,
                 name = person.name,
                 icon = person.icon,
+                photoPath = person.photoPath,
                 size = EventChipAvatarSize,
                 modifier = ringModifier
             )

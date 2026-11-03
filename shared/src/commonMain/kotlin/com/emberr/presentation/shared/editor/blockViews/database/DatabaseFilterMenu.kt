@@ -315,7 +315,7 @@ private fun DatabaseFilterPersonValue(personNoteId: String?, onClick: () -> Unit
             DatabaseFilterValueText(text = "Pick a person", isPlaceholder = true)
         } else {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = 20.dp)
+                PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, photoPath = person.photoPath, size = 20.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 DatabaseFilterValueText(text = person.displayName(), isPlaceholder = false)
             }
@@ -333,7 +333,7 @@ private fun DatabaseFilterPersonChoices(selectedPersonNoteId: String?, onPick: (
         DatabaseMenuOption(
             label = person.displayName(),
             isSelected = person.id == selectedPersonNoteId,
-            icon = { PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = 16.dp) },
+            icon = { PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, photoPath = person.photoPath, size = 16.dp) },
             onClick = { onPick(person.id) }
         )
     }

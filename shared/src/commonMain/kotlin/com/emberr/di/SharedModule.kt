@@ -466,6 +466,7 @@ val sharedModule = module {
     viewModel {
         com.emberr.presentation.people.PeopleViewModel(
             peopleRepository = get(),
+            mediaStorageHelper = get(),
             appScope = get(named("AppScope"))
         )
     }

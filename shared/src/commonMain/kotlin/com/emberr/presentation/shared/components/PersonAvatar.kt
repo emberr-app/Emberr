@@ -2,23 +2,33 @@ package com.emberr.presentation.shared.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import coil3.compose.AsyncImage
+import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.presentation.people.personAvatarColors
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.user2
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
+import java.io.File
 
 private const val InitialsSizeRatio = 0.37f
 private const val EmojiSizeRatio = 0.52f
@@ -42,11 +52,16 @@ fun PersonAvatar(
     name: String,
     icon: String?,
     size: Dp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    photoPath: String? = null
 ) {
     val colors = personAvatarColors(personNoteId)
     val density = LocalDensity.current
-    val emoji = icon?.takeIf { it.isNotBlank() }
+    val mediaStorageHelper = koinInject<MediaStorageHelper>()
+    val photoFile = remember(photoPath) { photoPath?.let { File(mediaStorageHelper.getAbsoluteMediaPath(it)) } }
+    var photoFailedToLoad by remember(photoFile) { mutableStateOf(false) }
+    val showsPhoto = photoFile != null && !photoFailedToLoad
+    val emoji = icon?.takeIf { it.isNotBlank() && !showsPhoto }
     val background = if (emoji != null) {
         Modifier.background(colors.emojiBackground)
     } else {
@@ -60,6 +75,13 @@ fun PersonAvatar(
         contentAlignment = Alignment.Center
     ) {
         when {
+            showsPhoto -> AsyncImage(
+                model = photoFile,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                onError = { photoFailedToLoad = true },
+                modifier = Modifier.fillMaxSize()
+            )
             emoji != null -> {
                 val emojiSize = with(density) { (size * EmojiSizeRatio).toSp() }
                 Text(

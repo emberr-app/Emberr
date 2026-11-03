@@ -62,7 +62,8 @@ private val PersonPillAvatarSize = 20.dp
 data class PersonOption(
     val id: String,
     val name: String,
-    val icon: String? = null
+    val icon: String? = null,
+    val photoPath: String? = null
 )
 
 fun PersonOption.displayName(): String = personDisplayName(name)
@@ -74,7 +75,7 @@ private fun collectPeopleToPick(): State<List<PersonOption>?> {
     val peopleRepository = koinInject<PeopleRepository>()
     return remember(peopleRepository) {
         peopleRepository.observePeople().map { personNotes ->
-            personNotes.map { person -> PersonOption(id = person.noteId, name = person.title, icon = person.icon) }
+            personNotes.map { person -> PersonOption(id = person.noteId, name = person.title, icon = person.icon, photoPath = person.coverImagePath) }
         }
     }.collectAsState(initial = null)
 }
@@ -221,7 +222,7 @@ private fun PeoplePickerRow(person: PersonOption, isSelected: Boolean, onClick: 
             .padding(horizontal = PeoplePickerRowSidePadding, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = PeoplePickerAvatarSize)
+        PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, photoPath = person.photoPath, size = PeoplePickerAvatarSize)
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = person.displayName(),
@@ -284,7 +285,7 @@ fun PersonPill(person: PersonOption, onOpen: () -> Unit, onRemove: (() -> Unit)?
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = PersonPillAvatarSize)
+        PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, photoPath = person.photoPath, size = PersonPillAvatarSize)
         Text(
             text = person.displayName(),
             style = MaterialTheme.typography.labelSmall,

@@ -78,6 +78,7 @@ import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.ellipsis
+import emberr.shared.generated.resources.image
 import emberr.shared.generated.resources.square_arrow_out_up_right
 import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.x
@@ -115,6 +116,7 @@ import emberr.shared.generated.resources.ghost_smile
 import emberr.shared.generated.resources.mail
 import emberr.shared.generated.resources.message
 import emberr.shared.generated.resources.phone
+import emberr.shared.generated.resources.user2
 
 private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.55f
 private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.92f
@@ -156,6 +158,8 @@ fun PersonView(
     val everyone by personViewModel.everyone.collectAsState()
     val categories by personViewModel.categories.collectAsState()
     val savedName by notesEditor.noteTitle.collectAsState()
+    val photoPath by notesEditor.coverImagePath.collectAsState()
+    val pickImage = LocalImagePicker.current
 
     var nameDraft by remember(personNoteId) { mutableStateOf<String?>(null) }
     var showsAllPast by remember(personNoteId) { mutableStateOf(false) }
@@ -220,6 +224,7 @@ fun PersonView(
     val page = PersonPage(
         personNoteId = personNoteId,
         icon = personWithDetails?.person?.icon,
+        photoPath = photoPath,
         shownName = nameDraft ?: savedName,
         savedName = savedName,
         personWithDetails = personWithDetails,
@@ -242,7 +247,12 @@ fun PersonView(
         detailActions = detailActions,
         showsIconPicker = showsIconPicker,
         onShowsIconPickerChange = { showsIconPicker = it },
-        onIconChange = { icon -> notesEditor.updateIcon(icon) },
+        onIconChange = { icon ->
+            notesEditor.updateIcon(icon)
+            if (photoPath != null) notesEditor.removeCoverImage()
+        },
+        onChangePhoto = { pickImage { path -> notesEditor.handleCoverImagePicked(path) } },
+        onRemovePhoto = if (photoPath != null) notesEditor::removeCoverImage else null,
         onNewEvent = { isAddingEvent = true },
         onOpenNote = noteOpener?.let { openNote ->
             { noteId ->
@@ -290,12 +300,7 @@ fun PersonView(
                     modifier = Modifier.align(Alignment.TopEnd).padding(TopButtonsPadding),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    PersonMoreButton(
-                        personName = personDisplayName(page.savedName),
-                        onChangeIcon = { page.onShowsIconPickerChange(true) },
-                        onMoveToTrash = page.onMoveToTrash,
-                        hazeState = hazeState
-                    )
+                    PersonMoreButton(page = page, hazeState = hazeState)
                     PersonTopBarButton(icon = Res.drawable.x, description = "Close", hazeState = hazeState, onClick = { closeAnd {} })
                 }
             }
@@ -329,6 +334,7 @@ private fun openPersonLink(link: String, uriHandler: UriHandler) {
 private class PersonPage(
     val personNoteId: String,
     val icon: String?,
+    val photoPath: String?,
     val shownName: String,
     val savedName: String,
     val personWithDetails: PersonWithDetails?,
@@ -348,6 +354,8 @@ private class PersonPage(
     val showsIconPicker: Boolean,
     val onShowsIconPickerChange: (Boolean) -> Unit,
     val onIconChange: (String?) -> Unit,
+    val onChangePhoto: () -> Unit,
+    val onRemovePhoto: (() -> Unit)?,
     val onNewEvent: () -> Unit,
     val onOpenNote: ((String) -> Unit)?
 ) {
@@ -433,12 +441,7 @@ private fun DesktopPersonLayout(page: PersonPage, notesEditor: NoteEditorViewMod
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 PersonTopBarButton(icon = Res.drawable.chevron_left, description = "Back", hazeState = hazeState, onClick = onBack)
-                PersonMoreButton(
-                    personName = personDisplayName(page.savedName),
-                    onChangeIcon = { page.onShowsIconPickerChange(true) },
-                    onMoveToTrash = page.onMoveToTrash,
-                    hazeState = hazeState
-                )
+                PersonMoreButton(page = page, hazeState = hazeState)
             }
         }
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -496,7 +499,7 @@ private fun PersonHeroAvatar(page: PersonPage, size: Dp) {
                 .clip(CircleShape)
                 .clickable { page.onShowsIconPickerChange(true) }
         ) {
-            PersonAvatar(personNoteId = page.personNoteId, name = page.savedName, icon = page.icon, size = size)
+            PersonAvatar(personNoteId = page.personNoteId, name = page.savedName, icon = page.icon, photoPath = page.photoPath, size = size)
         }
         Box(modifier = Modifier.align(Alignment.BottomEnd).padding(end = 2.dp, bottom = 6.dp)) {
             IconTooltip(text = "Change icon") {
@@ -723,17 +726,19 @@ private fun PersonTopBarButton(icon: DrawableResource, description: String, haze
 }
 
 @Composable
-private fun PersonMoreButton(personName: String, onChangeIcon: () -> Unit, onMoveToTrash: () -> Unit, hazeState: HazeState) {
+private fun PersonMoreButton(page: PersonPage, hazeState: HazeState) {
     var showsMenu by remember { mutableStateOf(false) }
     Box {
         PersonTopBarButton(icon = Res.drawable.ellipsis, description = "More", hazeState = hazeState, onClick = { showsMenu = true })
         PersonActionsMenu(
-            personName = personName,
+            personName = personDisplayName(page.savedName),
             expanded = showsMenu,
             onDismiss = { showsMenu = false },
             onOpen = null,
-            onChangeIcon = onChangeIcon,
-            onMoveToTrash = onMoveToTrash
+            onChangeIcon = { page.onShowsIconPickerChange(true) },
+            onChangePhoto = page.onChangePhoto,
+            onRemovePhoto = page.onRemovePhoto,
+            onMoveToTrash = page.onMoveToTrash
         )
     }
 }
@@ -745,7 +750,9 @@ internal fun PersonActionsMenu(
     onDismiss: () -> Unit,
     onOpen: (() -> Unit)?,
     onMoveToTrash: () -> Unit,
-    onChangeIcon: (() -> Unit)? = null
+    onChangeIcon: (() -> Unit)? = null,
+    onChangePhoto: (() -> Unit)? = null,
+    onRemovePhoto: (() -> Unit)? = null
 ) {
     val trashColor = MaterialTheme.colorScheme.error
     if (isDesktopPlatform) {
@@ -767,6 +774,26 @@ internal fun PersonActionsMenu(
                     onClick = {
                         onDismiss()
                         onChangeIcon()
+                    }
+                )
+            }
+            if (onChangePhoto != null) {
+                EmberrDesktopMenuOption(
+                    label = "Change photo",
+                    icon = { MenuIcon(icon = Res.drawable.image, tint = MaterialTheme.colorScheme.onSurface) },
+                    onClick = {
+                        onDismiss()
+                        onChangePhoto()
+                    }
+                )
+            }
+            if (onRemovePhoto != null) {
+                EmberrDesktopMenuOption(
+                    label = "Remove photo",
+                    icon = { MenuIcon(icon = Res.drawable.user2, tint = MaterialTheme.colorScheme.onSurface) },
+                    onClick = {
+                        onDismiss()
+                        onRemovePhoto()
                     }
                 )
             }
@@ -799,6 +826,24 @@ internal fun PersonActionsMenu(
                         outerHorizontalPadding = 0.dp,
                         innerHorizontalPadding = 0.dp,
                         onClick = { closeAnd(onChangeIcon) }
+                    )
+                }
+                if (onChangePhoto != null) {
+                    EmberrBottomSheetOption(
+                        label = "Change photo",
+                        icon = { MenuIcon(icon = Res.drawable.image, tint = MaterialTheme.colorScheme.onSurface) },
+                        outerHorizontalPadding = 0.dp,
+                        innerHorizontalPadding = 0.dp,
+                        onClick = { closeAnd(onChangePhoto) }
+                    )
+                }
+                if (onRemovePhoto != null) {
+                    EmberrBottomSheetOption(
+                        label = "Remove photo",
+                        icon = { MenuIcon(icon = Res.drawable.user2, tint = MaterialTheme.colorScheme.onSurface) },
+                        outerHorizontalPadding = 0.dp,
+                        innerHorizontalPadding = 0.dp,
+                        onClick = { closeAnd(onRemovePhoto) }
                     )
                 }
                 EmberrBottomSheetOption(
