@@ -97,6 +97,7 @@ import com.emberr.presentation.shared.components.SelectedOptionBackground
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import com.emberr.presentation.shared.fullKeyboardHeightPx
+import com.emberr.presentation.shared.heightWhileKeyboardMoves
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
@@ -430,7 +431,7 @@ internal fun MovieSearchSheet(
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val resultsMaxHeight = with(density) {
-                resultsHeightWhileKeyboardMoves(maxHeight, currentKeyboardHeight.toDp(), fullKeyboardHeight.toDp())
+                heightWhileKeyboardMoves(PhoneResultsMaxHeight, maxHeight, currentKeyboardHeight.toDp(), fullKeyboardHeight.toDp())
             }
             Column(
                 modifier = Modifier
@@ -557,13 +558,6 @@ private class ResultsBelowField(private val gapPx: Int) : PopupPositionProvider 
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize
     ): IntOffset = IntOffset(anchorBounds.left, anchorBounds.bottom + gapPx)
-}
-
-private fun resultsHeightWhileKeyboardMoves(spaceNow: Dp, keyboardNow: Dp, keyboardOpen: Dp): Dp {
-    val spaceWithKeyboardOpen = spaceNow - (keyboardOpen - keyboardNow)
-    val shrinkWithKeyboardOpen = (PhoneResultsMaxHeight - spaceWithKeyboardOpen).coerceAtLeast(0.dp)
-    val keyboardProgress = if (keyboardOpen > 0.dp) (keyboardNow / keyboardOpen).coerceIn(0f, 1f) else 0f
-    return (PhoneResultsMaxHeight - shrinkWithKeyboardOpen * keyboardProgress).coerceAtMost(spaceNow)
 }
 
 @Composable

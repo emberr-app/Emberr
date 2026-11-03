@@ -31,11 +31,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -71,12 +75,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.people.ContactImportProgress
 import com.emberr.domain.people.personDisplayName
+import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
+import com.emberr.presentation.shared.components.EmberrExpandingSearchBar
+import com.emberr.presentation.shared.components.EmberrSelectionPill
+import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.PersonAvatar
@@ -85,7 +96,8 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.address_card
+import emberr.shared.generated.resources.phone3
+import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.file_down
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.search
@@ -105,6 +117,8 @@ private val SearchBarSpace = 96.dp
 private val SpaceBelowHeader = 12.dp
 private val DesktopListMaxWidth = 760.dp
 private val RowAvatarSize = 44.dp
+private val RowCheckIconSize = 16.dp
+private const val SelectedRowTintAlpha = 0.08f
 private val RowDividerStart = if (isDesktopPlatform) 72.dp else 70.dp
 private val EmptyArtAvatarSize = 48.dp
 private val EmptyArtPlusSize = 56.dp
@@ -123,6 +137,7 @@ fun PeopleScreen(
     viewModel: PeopleViewModel = koinViewModel()
 ) {
     val rows by viewModel.rows.collectAsState()
+    val selectedPersonNoteIds by viewModel.selectedPersonNoteIds.collectAsState()
     var searchText by rememberSaveable { mutableStateOf("") }
     var openedPerson by remember { mutableStateOf<OpenedPerson?>(null) }
     val query = searchText.trim()
@@ -141,8 +156,19 @@ fun PeopleScreen(
         searchText = ""
         openPerson(personNoteId)
     }
-    val pickPhoneContacts = rememberPhoneContactPicker { contacts -> viewModel.importContacts(contacts, openImportedPerson) }
-    val pickContactFiles = rememberContactFilePicker { fileContents -> viewModel.importContactFiles(fileContents, openImportedPerson) }
+    val pickPhoneContacts = rememberPhoneContactPicker { contacts -> viewModel.importContacts(contacts) }
+    val pickContactFiles = rememberContactFilePicker { fileContents -> viewModel.importContactFiles(fileContents) }
+    val contactImportProgress by viewModel.contactImportProgress.collectAsState()
+    LaunchedEffect(contactImportProgress) {
+        val result = (contactImportProgress as? ContactImportProgress.Finished)?.result ?: return@LaunchedEffect
+        val onlyImportedPersonNoteId = result.importedPersonNoteIds.singleOrNull()
+        if (onlyImportedPersonNoteId != null && result.copiesSkipped == 0 && result.failures == 0) {
+            openImportedPerson(onlyImportedPersonNoteId)
+        } else {
+            showNativeToast(contactImportMessage(result))
+        }
+        viewModel.clearFinishedImport()
+    }
     var isAddPeopleSheetOpen by remember { mutableStateOf(false) }
     val importContacts = if (isDesktopPlatform) pickContactFiles else ({ isAddPeopleSheetOpen = true })
 
@@ -160,9 +186,31 @@ fun PeopleScreen(
     }
     val focusManager = LocalFocusManager.current
     val backgroundColor = if (isDesktopPlatform) Color.Transparent else MaterialTheme.colorScheme.background
+    val allRows = rows
+    val matchingRows = when {
+        allRows == null -> emptyList()
+        query.isEmpty() -> allRows
+        else -> allRows.filter { row -> row.person.title.contains(query, ignoreCase = true) }
+    }
+    val selectedCount = allRows.orEmpty().count { row -> row.person.noteId in selectedPersonNoteIds }
+    val isSelecting = selectedCount > 0
+    val matchingPersonNoteIds = matchingRows.map { row -> row.person.noteId }.toSet()
+    val areAllMatchingSelected = matchingPersonNoteIds.isNotEmpty() && selectedPersonNoteIds.containsAll(matchingPersonNoteIds)
+    val toggleSelectAll = {
+        viewModel.selectPeople(if (areAllMatchingSelected) emptySet() else selectedPersonNoteIds + matchingPersonNoteIds)
+    }
+
+    var isSearchOpen by rememberSaveable { mutableStateOf(false) }
+    val closeSearch: () -> Unit = {
+        focusManager.clearFocus()
+        searchText = ""
+        isSearchOpen = false
+    }
+
+    KmpBackHandler(enabled = isSelecting) { viewModel.clearSelection() }
+    KmpBackHandler(enabled = isSearchOpen && !isSelecting, onBack = closeSearch)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        val allRows = rows
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -177,7 +225,6 @@ fun PeopleScreen(
                     modifier = Modifier.padding(top = topAreaHeight)
                 )
                 else -> {
-                    val matchingRows = if (query.isEmpty()) allRows else allRows.filter { row -> row.person.title.contains(query, ignoreCase = true) }
                     if (matchingRows.isEmpty()) {
                         PeopleNoResults(
                             query = query,
@@ -190,7 +237,10 @@ fun PeopleScreen(
                             today = today,
                             listState = listState,
                             topPadding = topAreaHeight,
+                            selectedPersonNoteIds = selectedPersonNoteIds,
+                            isSelecting = isSelecting,
                             onOpen = openPerson,
+                            onToggleSelection = viewModel::togglePersonSelection,
                             onMoveToTrash = viewModel::moveToTrash
                         )
                     }
@@ -215,16 +265,32 @@ fun PeopleScreen(
                 .onGloballyPositioned { coordinates -> topAreaHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = "People",
-                titleTrailingIcon = if (isDesktopPlatform && peopleCount > 0) peopleCountBadge else null,
+                title = if (isSelecting) "$selectedCount selected" else "People",
+                titleTrailingIcon = if (isDesktopPlatform && peopleCount > 0 && !isSelecting) peopleCountBadge else null,
                 topEdgeFadeAlpha = topEdgeFadeAlpha,
                 hazeState = hazeState,
                 hazeStyle = EmberrBlur.Regular,
                 contentPadding = topHeaderBarPadding(horizontal = HeaderSidePadding),
-                backTooltip = "Back",
-                onBackClick = onNavigateBack,
+                backTooltip = if (isSelecting) "Clear selection" else "Back",
+                onBackClick = if (isSelecting) viewModel::clearSelection else onNavigateBack,
                 actions = {
-                    if (isDesktopPlatform) {
+                    if (isSelecting) {
+                        val selectAllLabel = if (areAllMatchingSelected) "Deselect all" else "Select all"
+                        if (isDesktopPlatform) {
+                            EmberrButtonSecondary(text = selectAllLabel, onClick = toggleSelectAll)
+                        } else {
+                            TopBarIconButton(
+                                icon = Icons.Default.SelectAll,
+                                contentDescription = selectAllLabel,
+                                bgColor = Color.Transparent,
+                                tint = MaterialTheme.colorScheme.primary,
+                                hazeState = hazeState,
+                                hazeStyle = EmberrBlur.Regular,
+                                tooltip = selectAllLabel,
+                                onClick = toggleSelectAll
+                            )
+                        }
+                    } else if (isDesktopPlatform) {
                         TopBarIconButton(
                             icon = painterResource(Res.drawable.file_down),
                             contentDescription = "Import from .vcf file",
@@ -252,23 +318,53 @@ fun PeopleScreen(
             )
         }
 
-        if (!allRows.isNullOrEmpty()) {
-            EmberrSearchTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                placeholder = "Search people",
+        (contactImportProgress as? ContactImportProgress.Importing)?.let { importing ->
+            ImportingContactsPill(
+                progress = importing,
                 hazeState = hazeState,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                onSubmit = { focusManager.clearFocus() },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .imePadding()
-                    .navigationBarsPadding()
-                    .widthIn(max = DesktopListMaxWidth)
-                    .fillMaxWidth()
-                    .padding(horizontal = ListSidePadding, vertical = 14.dp)
+                modifier = Modifier.align(Alignment.TopCenter).zIndex(11f).padding(top = topAreaHeight + 4.dp)
             )
         }
+
+        if (!allRows.isNullOrEmpty() && !isSelecting) {
+            if (isDesktopPlatform) {
+                EmberrSearchTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    placeholder = "Search people",
+                    hazeState = hazeState,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    onSubmit = { focusManager.clearFocus() },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .imePadding()
+                        .navigationBarsPadding()
+                        .widthIn(max = DesktopListMaxWidth)
+                        .fillMaxWidth()
+                        .padding(horizontal = ListSidePadding, vertical = 14.dp)
+                )
+            } else {
+                EmberrExpandingSearchBar(
+                    isOpen = isSearchOpen,
+                    placeholder = "Search people",
+                    query = searchText,
+                    onQueryChange = { searchText = it },
+                    onOpenClick = { isSearchOpen = true },
+                    onCloseClick = closeSearch,
+                    hazeState = hazeState,
+                    modifier = Modifier.align(Alignment.BottomCenter).zIndex(20f)
+                )
+            }
+        }
+
+        EmberrSelectionPill(
+            isVisible = isSelecting,
+            selectedCount = selectedCount,
+            onClearSelection = viewModel::clearSelection,
+            onDelete = viewModel::moveSelectedToTrash,
+            hazeState = hazeState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 
     AddPeopleSheet(
@@ -317,7 +413,10 @@ private fun PeopleList(
     today: LocalDate,
     listState: LazyListState,
     topPadding: Dp,
+    selectedPersonNoteIds: Set<String>,
+    isSelecting: Boolean,
     onOpen: (String) -> Unit,
+    onToggleSelection: (String) -> Unit,
     onMoveToTrash: (NoteMetadataEntity) -> Unit
 ) {
     val listItems = remember(rows) { peopleListItems(rows) }
@@ -366,7 +465,10 @@ private fun PeopleList(
                         PersonListRowItem(
                             row = item.row,
                             today = today,
+                            isSelected = item.row.person.noteId in selectedPersonNoteIds,
+                            isSelecting = isSelecting,
                             onOpen = { onOpen(item.row.person.noteId) },
+                            onToggleSelection = { onToggleSelection(item.row.person.noteId) },
                             onMoveToTrash = { onMoveToTrash(item.row.person) }
                         )
                     }
@@ -394,12 +496,17 @@ private fun personRowShape(item: PersonItem): RoundedCornerShape {
 private fun PersonListRowItem(
     row: PersonListRow,
     today: LocalDate,
+    isSelected: Boolean,
+    isSelecting: Boolean,
     onOpen: () -> Unit,
+    onToggleSelection: () -> Unit,
     onMoveToTrash: () -> Unit
 ) {
     var showsMenu by remember { mutableStateOf(false) }
     var menuPosition by remember { mutableStateOf(DpOffset.Zero) }
-    val gestures = if (isDesktopPlatform) {
+    val gestures = if (isSelecting) {
+        Modifier.clickable(onClick = onToggleSelection)
+    } else if (isDesktopPlatform) {
         Modifier
             .pointerInput(Unit) {
                 awaitEachGesture {
@@ -423,11 +530,34 @@ private fun PersonListRowItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = SelectedRowTintAlpha) else Color.Transparent)
                 .then(gestures)
                 .padding(horizontal = if (isDesktopPlatform) 16.dp else 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PersonAvatar(personNoteId = row.person.noteId, name = name, icon = row.person.icon, photoPath = row.person.coverImagePath, size = RowAvatarSize)
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(RowAvatarSize)
+                    .clip(CircleShape)
+                    .clickable(onClick = onToggleSelection)
+            ) {
+                if (isSelected) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary, CircleShape)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.check),
+                            contentDescription = "Selected",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(RowCheckIconSize)
+                        )
+                    }
+                } else {
+                    PersonAvatar(personNoteId = row.person.noteId, name = name, icon = row.person.icon, photoPath = row.person.coverImagePath, size = RowAvatarSize)
+                }
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -521,6 +651,26 @@ private fun PeopleEmptyState(onNewPerson: () -> Unit, onImportContacts: () -> Un
 }
 
 @Composable
+private fun ImportingContactsPill(progress: ContactImportProgress.Importing, hazeState: HazeState, modifier: Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = modifier
+            .emberrBorder(CircleShape)
+            .clip(CircleShape)
+            .emberrBlur(hazeState, EmberrBlur.Regular)
+            .padding(horizontal = 14.dp, vertical = 8.dp)
+    ) {
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, strokeWidth = 2.dp, modifier = Modifier.size(14.dp))
+        Text(
+            text = importingContactsLabel(progress),
+            style = MaterialTheme.typography.labelSmall,
+            color = secondaryTextColor()
+        )
+    }
+}
+
+@Composable
 private fun AddPeopleSheet(
     expanded: Boolean,
     onDismiss: () -> Unit,
@@ -532,7 +682,7 @@ private fun AddPeopleSheet(
         Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
             AddPeopleOption(label = "Create new contact", icon = Res.drawable.plus, onClick = { closeAnd(onCreateNew) })
             if (onImportFromPhone != null) {
-                AddPeopleOption(label = "Import from phone", icon = Res.drawable.address_card, onClick = { closeAnd(onImportFromPhone) })
+                AddPeopleOption(label = "Import from phone", icon = Res.drawable.phone3, onClick = { closeAnd(onImportFromPhone) })
             }
             AddPeopleOption(label = "Import from .vcf file", icon = Res.drawable.file_down, onClick = { closeAnd(onImportFromFile) })
         }

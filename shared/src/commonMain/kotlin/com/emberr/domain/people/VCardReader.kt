@@ -4,7 +4,7 @@ import com.emberr.domain.importer.TextFileDecoder
 import com.emberr.domain.model.PersonDetailKind
 import kotlin.io.encoding.Base64
 
-private val phoneLabels = mapOf("CELL" to "Mobile", "MOBILE" to "Mobile", "HOME" to "Home", "WORK" to "Work", "MAIN" to "Main")
+private val phoneLabels = mapOf("HOME" to "Home", "WORK" to "Work", "MAIN" to "Main")
 private val emailLabels = mapOf("HOME" to "Personal", "WORK" to "Work")
 private val addressLabels = mapOf("HOME" to "Home", "WORK" to "Work")
 private val lenientBase64 = Base64.Default.withPadding(Base64.PaddingOption.PRESENT_OPTIONAL)

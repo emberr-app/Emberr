@@ -146,6 +146,14 @@ val sharedModule = module {
     }
 
     single {
+        com.emberr.domain.people.ContactImporter(
+            peopleRepository = get(),
+            mediaStorageHelper = get(),
+            appScope = get(named("AppScope"))
+        )
+    }
+
+    single {
         com.emberr.domain.people.BirthdaysCategoryKeeper(
             peopleRepository = get(),
             categoryDao = get(),
@@ -466,7 +474,7 @@ val sharedModule = module {
     viewModel {
         com.emberr.presentation.people.PeopleViewModel(
             peopleRepository = get(),
-            mediaStorageHelper = get(),
+            contactImporter = get(),
             appScope = get(named("AppScope"))
         )
     }
