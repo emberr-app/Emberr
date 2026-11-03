@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.people.ContactImportProgress
+import com.emberr.domain.people.ContactImportResult
 import com.emberr.domain.people.ContactImporter
 import com.emberr.domain.people.ContactToImport
 import com.emberr.domain.people.PeopleRepository
@@ -61,6 +62,11 @@ class PeopleViewModel(
             .sortedWith(compareBy({ row -> row.person.title.isBlank() }, { row -> row.person.title.trim().lowercase() }))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_LISTENING_AFTER_MILLIS), null)
 
+    val contactImportProgress: StateFlow<ContactImportProgress> = contactImporter.progress
+
+    private val _selectedPersonNoteIds = MutableStateFlow<Set<String>>(emptySet())
+    val selectedPersonNoteIds: StateFlow<Set<String>> = _selectedPersonNoteIds.asStateFlow()
+
     fun createPerson(name: String, onCreated: (personNoteId: String) -> Unit) {
         viewModelScope.launch {
             try {
@@ -74,8 +80,6 @@ class PeopleViewModel(
         }
     }
 
-    val contactImportProgress: StateFlow<ContactImportProgress> = contactImporter.progress
-
     fun importContactFiles(fileContents: List<ByteArray>) {
         if (!contactImporter.startImportFromFiles(fileContents)) showNativeToast(ALREADY_IMPORTING_MESSAGE)
     }
@@ -85,12 +89,7 @@ class PeopleViewModel(
         if (!contactImporter.startImport(contacts)) showNativeToast(ALREADY_IMPORTING_MESSAGE)
     }
 
-    fun clearFinishedImport() {
-        contactImporter.clearFinishedImport()
-    }
-
-    private val _selectedPersonNoteIds = MutableStateFlow<Set<String>>(emptySet())
-    val selectedPersonNoteIds: StateFlow<Set<String>> = _selectedPersonNoteIds.asStateFlow()
+    fun takeFinishedImportResult(): ContactImportResult? = contactImporter.takeFinishedResult()
 
     fun togglePersonSelection(personNoteId: String) {
         _selectedPersonNoteIds.update { selected -> if (personNoteId in selected) selected - personNoteId else selected + personNoteId }

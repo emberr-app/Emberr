@@ -25,9 +25,9 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.emberr.domain.model.PersonDetailKind
@@ -52,7 +52,7 @@ actual fun rememberPhoneContactPicker(onContactsPicked: (List<ContactToImport>) 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val latestOnContactsPicked by rememberUpdatedState(onContactsPicked)
-    var isNewPickerOpen by remember { mutableStateOf(false) }
+    var isNewPickerOpen by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val pickedUri = result.data?.data
         if (result.resultCode != Activity.RESULT_OK || pickedUri == null) return@rememberLauncherForActivityResult
@@ -129,7 +129,6 @@ private fun readContactsFromPickerSession(context: Context, sessionUri: Uri): Li
         Data.DATA2,
         Data.DATA3,
         Data.DATA4,
-        Data.DATA14,
         Data.DATA15
     )
     context.contentResolver.query(sessionUri, projection, null, null, null)?.use { cursor ->

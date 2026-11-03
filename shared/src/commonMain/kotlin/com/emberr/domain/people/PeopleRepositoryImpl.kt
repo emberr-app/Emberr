@@ -16,6 +16,7 @@ import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.sync.SyncCoordinator
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -135,7 +136,64 @@ class PeopleRepositoryImpl(
         person.noteId
     }
 
-    override suspend fun createPersonFromContactUnlessCopy(contact: ContactToImport, photoFileName: String?): String? = withContext(Dispatchers.IO) {
+    override suspend fun createPeopleFromContacts(
+        contacts: List<ContactToImport>,
+        savePhoto: suspend (ByteArray) -> String?,
+        onContactHandled: (handledCount: Int) -> Unit
+    ): ContactImportResult = withContext(Dispatchers.IO) {
+        val knownPeople = loadPeopleForCopyCheck().toMutableList()
+        val importedPersonNoteIds = mutableListOf<String>()
+        var copiesSkipped = 0
+        var failures = 0
+        contacts.sortedByDescending { contact -> contact.details.size }.forEachIndexed { index, contact ->
+            try {
+                val isCopy = knownPeople.any { known -> contactAddsNothingNewTo(contact, known.name, known.details) }
+                if (isCopy) {
+                    copiesSkipped++
+                } else {
+                    val photoFileName = contact.photoBytes?.takeIf { it.isNotEmpty() }?.let { savePhoto(it) }
+                    val createdPerson = createPersonFromContact(contact, photoFileName, knownPeople.map { known -> known.name })
+                    knownPeople += createdPerson
+                    importedPersonNoteIds += createdPerson.noteId
+                }
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (e: Exception) {
+                e.printStackTrace()
+                failures++
+            }
+            onContactHandled(index + 1)
+        }
+        ContactImportResult(importedPersonNoteIds = importedPersonNoteIds, copiesSkipped = copiesSkipped, failures = failures)
+    }
+
+    private class PersonForCopyCheck(
+        val noteId: String,
+        val name: String,
+        val details: List<ContactDetailToImport>
+    )
+
+    private suspend fun loadPeopleForCopyCheck(): List<PersonForCopyCheck> {
+        val people = noteDao.observePeople(ACCOUNT_SPACE_ID).first()
+        val detailsByPersonId = blockDao.observeLiveDetailBlocksOfPeople(ACCOUNT_SPACE_ID).first()
+            .groupBy(
+                keySelector = { row -> row.noteId },
+                valueTransform = { row -> decodeBlockOrNull(row.blockDataJson) as? PersonDetailBlock }
+            )
+        return people.map { person ->
+            val details = detailsByPersonId[person.noteId].orEmpty()
+                .filterNotNull()
+                .filterNot { it.isDeleted }
+                .map { detail -> ContactDetailToImport(kind = detail.kind, label = detail.label, value = detail.value) }
+            PersonForCopyCheck(noteId = person.noteId, name = person.title, details = details)
+        }
+    }
+
+    private suspend fun createPersonFromContact(
+        contact: ContactToImport,
+        photoFileName: String?,
+        takenNames: List<String>
+    ): PersonForCopyCheck {
         val now = nowMillis()
         val details = contact.details
             .filter { detail -> detail.value.isNotBlank() }
@@ -152,47 +210,29 @@ class PeopleRepositoryImpl(
             .map { line -> line.trimEnd() }
             .filter { line -> line.isNotBlank() }
             .map { line -> TextBlock(id = Uuid.random().toString(), text = line, updatedAt = now) }
+        val person = NoteMetadataEntity(
+            noteId = Uuid.random().toString(),
+            title = nameNotTakenYet(contact.name, takenNames),
+            folderId = null,
+            isDaily = false,
+            dateString = null,
+            createdAt = now,
+            updatedAt = now,
+            filePath = "",
+            coverImagePath = photoFileName,
+            spaceId = ACCOUNT_SPACE_ID,
+            kind = NoteKind.PERSON,
+            titleUpdatedAt = now,
+            coverImageUpdatedAt = if (photoFileName != null) now else 0L
+        )
         SyncCoordinator.mutex.withLock {
-            val people = noteDao.observePeople(ACCOUNT_SPACE_ID).first()
-            if (isCopyOfSomeone(contact, people)) return@withLock null
-            val takenNames = people.map { person -> person.title }
-            val person = NoteMetadataEntity(
-                noteId = Uuid.random().toString(),
-                title = nameNotTakenYet(contact.name, takenNames),
-                folderId = null,
-                isDaily = false,
-                dateString = null,
-                createdAt = now,
-                updatedAt = now,
-                filePath = "",
-                coverImagePath = photoFileName,
-                spaceId = ACCOUNT_SPACE_ID,
-                kind = NoteKind.PERSON,
-                titleUpdatedAt = now,
-                coverImageUpdatedAt = if (photoFileName != null) now else 0L
-            )
             noteRepository.saveNoteInSpace(ACCOUNT_SPACE_ID, person, NoteContent(blocks = details + noteLines))
-            person.noteId
         }
-    }
-
-    private suspend fun isCopyOfSomeone(contact: ContactToImport, people: List<NoteMetadataEntity>): Boolean {
-        val sameNamePeople = people.filter { person -> hasSamePersonName(person.title, contact.name) }
-        if (sameNamePeople.isEmpty()) return false
-        val sameNamePersonIds = sameNamePeople.map { person -> person.noteId }.toSet()
-        val detailsByPersonId = blockDao.observeLiveDetailBlocksOfPeople(ACCOUNT_SPACE_ID).first()
-            .filter { row -> row.noteId in sameNamePersonIds }
-            .groupBy(
-                keySelector = { row -> row.noteId },
-                valueTransform = { row -> decodeBlockOrNull(row.blockDataJson) as? PersonDetailBlock }
-            )
-        return sameNamePeople.any { person ->
-            val details = detailsByPersonId[person.noteId].orEmpty()
-                .filterNotNull()
-                .filterNot { it.isDeleted }
-                .map { detail -> ContactDetailToImport(kind = detail.kind, label = detail.label, value = detail.value) }
-            contactAddsNothingNewTo(contact, person.title, details)
-        }
+        return PersonForCopyCheck(
+            noteId = person.noteId,
+            name = person.title,
+            details = details.map { detail -> ContactDetailToImport(kind = detail.kind, label = detail.label, value = detail.value) }
+        )
     }
 
     override suspend fun renamePerson(personNoteId: String, newName: String) {

@@ -40,7 +40,7 @@ actual fun rememberBackupFilePicker(onFilePicked: (String) -> Unit): () -> Unit 
     }
 }
 
-private fun fileDialogAboveActiveWindow(title: String): FileDialog =
+internal fun fileDialogAboveActiveWindow(title: String): FileDialog =
     when (val activeWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().activeWindow) {
         is Dialog -> FileDialog(activeWindow, title, FileDialog.LOAD)
         is Frame -> FileDialog(activeWindow, title, FileDialog.LOAD)

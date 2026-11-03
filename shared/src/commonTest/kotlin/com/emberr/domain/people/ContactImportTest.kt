@@ -12,6 +12,7 @@ class ContactImportTest {
     fun aTakenNameGetsTheNextFreeNumber() {
         assertEquals("Maya", nameNotTakenYet("Maya", listOf("Sam")))
         assertEquals("Maya (2)", nameNotTakenYet("Maya", listOf("maya", "Maya (1)")))
+        assertEquals("Maya Chen (1)", nameNotTakenYet("Maya Chen", listOf("maya  chen")))
     }
 
     @Test

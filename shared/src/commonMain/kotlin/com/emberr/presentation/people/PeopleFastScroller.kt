@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.triggerHapticFeedback
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.floor
@@ -88,35 +89,14 @@ fun PeopleFastScroller(
                 .align(Alignment.TopEnd)
                 .offset { IntOffset(0, thumbTopPx) }
                 .size(ThumbTouchWidth, ThumbHeight)
-                .then(
-                    if (isShown || isDragging) {
-                        Modifier.pointerInput(listState, trackHeightPx, itemLetters) {
-                            var lastLetter: String? = null
-                            detectVerticalDragGestures(
-                                onDragStart = {
-                                    draggedFraction = listFraction
-                                    lastLetter = letterAtFraction(listState, itemLetters, listFraction)
-                                },
-                                onDragEnd = { draggedFraction = null },
-                                onDragCancel = { draggedFraction = null },
-                                onVerticalDrag = { change, dragAmount ->
-                                    change.consume()
-                                    val fraction = ((draggedFraction ?: listFraction) + dragAmount / trackHeightPx).coerceIn(0f, 1f)
-                                    draggedFraction = fraction
-                                    scope.launch {
-                                        scrollToFraction(listState, fraction)
-                                        val letter = letterAtFraction(listState, itemLetters, fraction)
-                                        if (letter != lastLetter) {
-                                            lastLetter = letter
-                                            triggerHapticFeedback()
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                    } else {
-                        Modifier
-                    }
+                .dragThumbToScroll(
+                    isEnabled = isShown || isDragging,
+                    listState = listState,
+                    itemLetters = itemLetters,
+                    trackHeightPx = trackHeightPx,
+                    scope = scope,
+                    listFraction = { listFraction },
+                    onDraggedFractionChange = { fraction -> draggedFraction = fraction }
                 )
         ) {
             Box(
@@ -130,8 +110,8 @@ fun PeopleFastScroller(
             )
         }
 
-        val bubbleLetter = letterAtFraction(listState, itemLetters, thumbFraction)
-        if (isDragging && bubbleLetter != null) {
+        val bubbleLetter = if (isDragging) letterAtFraction(listState, itemLetters, thumbFraction) else null
+        if (bubbleLetter != null) {
             val bubbleTopPx = thumbTopPx + with(density) { (ThumbHeight / 2 - BubbleSize).roundToPx() }
             val bubbleEndShiftPx = with(density) { (ThumbTouchWidth + BubbleGap).roundToPx() }
             Box(
@@ -150,6 +130,45 @@ fun PeopleFastScroller(
                 )
             }
         }
+    }
+}
+
+private fun Modifier.dragThumbToScroll(
+    isEnabled: Boolean,
+    listState: LazyListState,
+    itemLetters: List<String>,
+    trackHeightPx: Float,
+    scope: CoroutineScope,
+    listFraction: () -> Float,
+    onDraggedFractionChange: (Float?) -> Unit
+): Modifier {
+    if (!isEnabled) return this
+    return pointerInput(listState, trackHeightPx, itemLetters) {
+        var draggedFraction = 0f
+        var lastLetter: String? = null
+        detectVerticalDragGestures(
+            onDragStart = {
+                draggedFraction = listFraction()
+                onDraggedFractionChange(draggedFraction)
+                lastLetter = letterAtFraction(listState, itemLetters, draggedFraction)
+            },
+            onDragEnd = { onDraggedFractionChange(null) },
+            onDragCancel = { onDraggedFractionChange(null) },
+            onVerticalDrag = { change, dragAmount ->
+                change.consume()
+                val fraction = (draggedFraction + dragAmount / trackHeightPx).coerceIn(0f, 1f)
+                draggedFraction = fraction
+                onDraggedFractionChange(fraction)
+                scope.launch {
+                    scrollToFraction(listState, fraction)
+                    val letter = letterAtFraction(listState, itemLetters, fraction)
+                    if (letter != lastLetter) {
+                        lastLetter = letter
+                        triggerHapticFeedback()
+                    }
+                }
+            }
+        )
     }
 }
 
