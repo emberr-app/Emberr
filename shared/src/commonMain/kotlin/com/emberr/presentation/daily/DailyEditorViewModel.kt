@@ -42,8 +42,6 @@ import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.number
 import kotlinx.coroutines.flow.flatMapLatest
@@ -546,59 +544,6 @@ class DailyEditorViewModel(
             val existingBlocks = content?.blocks?.filter { !it.isDeleted } ?: emptyList()
 
             try {
-                val targetDate = LocalDate.parse(dateString)
-                if (targetDate == Clock.System.todayIn(TimeZone.currentSystemDefault())) {
-                    val yesterdayString = targetDate.minus(1, DateTimeUnit.DAY).toString()
-                    val yesterdayContent = repository.getDailyNote(yesterdayString)
-                    val allYesterdayBlocks = yesterdayContent?.blocks ?: emptyList()
-                    val unfinishedTasks = allYesterdayBlocks
-                        .filterIsInstance<CheckboxBlock>()
-                        .filter { !it.isChecked && !it.isDeleted }
-
-                    if (unfinishedTasks.isNotEmpty()) {
-                        val cleanExistingBlocks =
-                            if (isNoteActuallyEmpty(existingBlocks)) emptyList() else existingBlocks
-                        val existingIds = cleanExistingBlocks.mapTo(HashSet()) { it.id }
-                        val rolledOverTasks = unfinishedTasks
-                            .map { it.copy(id = "rollover_${it.id}_$dateString") }
-                            .filter { it.id !in existingIds }
-
-                        var mergedBlocks = pinnedBlocks + rolledOverTasks + cleanExistingBlocks
-                        mergedBlocks = ensureTrailingEmptyBlock(mergedBlocks, dateString)
-
-                        val finalBlocks = recalculateNumberedLists(mergedBlocks)
-                        if (currentDateString != dateString) return@launch
-                        _blocks.value = finalBlocks
-                        cachePreviewBlocks(dateString, finalBlocks)
-                        _loadedDateString.value = dateString
-                        lastIndexedContentHash = 0
-
-                        val rolledIds = unfinishedTasks.mapTo(HashSet()) { it.id }
-                        val updatedYesterdayBlocks = allYesterdayBlocks
-                            .map { if (it.id in rolledIds) it.markDeleted() else it }
-
-                        try {
-                            SyncCoordinator.mutex.withLock {
-                                repository.saveDailyNote(
-                                    yesterdayString,
-                                    NoteContent(blocks = updatedYesterdayBlocks)
-                                )
-                            }
-
-                            val yesterdayMeta = repository.getDailyNoteMetadata(yesterdayString)
-                            if (yesterdayMeta != null) {
-                                repository.indexDailyNote(yesterdayString, NoteContent(blocks = updatedYesterdayBlocks), yesterdayMeta)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-
-                        performSave()
-                        refreshBlocksIfStale(dateString)
-                        return@launch
-                    }
-                }
-
                 val cleanExistingBlocks = if (isNoteActuallyEmpty(existingBlocks)) emptyList() else existingBlocks
                 var mergedBlocks = pinnedBlocks + cleanExistingBlocks
 
