@@ -15,5 +15,6 @@ data class TodayTaskRow(
     val title: String,
     val isChecked: Boolean,
     val scheduleLabel: String?,
-    val isOverdue: Boolean
+    val isOverdue: Boolean,
+    val occurrenceDate: String? = null
 )

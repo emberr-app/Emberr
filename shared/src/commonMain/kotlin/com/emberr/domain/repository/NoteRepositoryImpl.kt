@@ -197,6 +197,8 @@ import kotlinx.serialization.json.put
 // autosave debounce window). BaseEditorViewModel.onCleared() fires a final save on
 // normal process death, so real-world data loss is essentially zero.
 
+private const val daysSearchedForNextRepeatDay = 366
+
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class NoteRepositoryImpl(
     private val activeSpaceStore: com.emberr.domain.space.ActiveSpaceStore,
@@ -2579,6 +2581,24 @@ class NoteRepositoryImpl(
 
     override fun getAllTasksFlow(): Flow<List<CalendarTaskEntity>> =
         calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow()
+
+    override fun getTasksWithCurrentRepeatDays(today: LocalDate): Flow<List<CalendarTaskEntity>> =
+        combine(
+            calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow(),
+            calendarEventExceptionDao.getAllExceptionsFlow()
+        ) { tasks, exceptions ->
+            val lastSearchedDay = today.plus(daysSearchedForNextRepeatDay, DateTimeUnit.DAY)
+            tasks.flatMap { task ->
+                val firstDay = task.targetDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                if (task.toRecurrenceRule() == null || firstDay == null) return@flatMap listOf(task)
+                val repeatDays = expandOccurrences(listOf(task), exceptions, firstDay, maxOf(firstDay, lastSearchedDay))
+                    .sortedBy { day -> day.targetDate }
+                listOfNotNull(
+                    repeatDays.firstOrNull { day -> !day.isChecked },
+                    repeatDays.lastOrNull { day -> day.isChecked }
+                )
+            }
+        }
 
     override fun getCalendarTasksForSearch(today: LocalDate): Flow<List<CalendarTaskEntity>> =
         combine(

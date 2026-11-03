@@ -53,6 +53,7 @@ import com.emberr.presentation.widget.separatorColor
 import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.taskBlockIdExtra
 import com.emberr.presentation.widget.taskIsCheckedExtra
+import com.emberr.presentation.widget.taskOccurrenceDateExtra
 import com.emberr.presentation.widget.widgetDailyDateExtra
 import com.emberr.presentation.widget.widgetDailyScreenExtra
 import kotlin.time.Clock
@@ -220,6 +221,7 @@ private fun TodayTaskRowItem(
                             context = context,
                             appWidgetId = appWidgetId,
                             blockId = row.blockId,
+                            occurrenceDate = row.occurrenceDate,
                             isChecked = !row.isChecked
                         )
                     )
@@ -287,6 +289,7 @@ private fun toggleTaskIntent(
     context: Context,
     appWidgetId: Int,
     blockId: String,
+    occurrenceDate: String?,
     isChecked: Boolean
 ): Intent =
     Intent(context, TodayTasksWidgetActionReceiver::class.java).apply {
@@ -295,6 +298,7 @@ private fun toggleTaskIntent(
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         putExtra(taskBlockIdExtra, blockId)
         putExtra(taskIsCheckedExtra, isChecked)
+        putExtra(taskOccurrenceDateExtra, occurrenceDate)
     }
 
 private fun openDailyScreenIntent(context: Context): Intent {

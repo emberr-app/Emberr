@@ -10,6 +10,7 @@ import com.emberr.presentation.widget.applyTaskCompletion
 import com.emberr.presentation.widget.refreshEveryTaskWidget
 import com.emberr.presentation.widget.taskBlockIdExtra
 import com.emberr.presentation.widget.taskIsCheckedExtra
+import com.emberr.presentation.widget.taskOccurrenceDateExtra
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,12 +29,13 @@ class TodayTasksWidgetActionReceiver : BroadcastReceiver() {
 
         val blockId = intent.getStringExtra(taskBlockIdExtra) ?: return
         val isChecked = intent.getBooleanExtra(taskIsCheckedExtra, false)
+        val occurrenceDate = intent.getStringExtra(taskOccurrenceDateExtra)
         val pendingResult = goAsync()
         val applicationContext = context.applicationContext
 
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
             try {
-                applyTaskCompletion(blockId, isChecked)
+                applyTaskCompletion(blockId, isChecked, occurrenceDate)
                 refreshEveryTaskWidget(applicationContext)
             } catch (cause: Exception) {
                 WidgetLog.e("Could not tick off task $blockId", cause)

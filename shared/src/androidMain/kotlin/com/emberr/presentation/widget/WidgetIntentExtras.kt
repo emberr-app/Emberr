@@ -18,3 +18,4 @@ const val widgetNewNoteExtra = "widget_new_note"
 
 const val taskBlockIdExtra = "widget_task_block_id"
 const val taskIsCheckedExtra = "widget_task_is_checked"
+const val taskOccurrenceDateExtra = "widget_task_occurrence_date"

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
+import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.domain.model.AllDaySpan
@@ -31,9 +32,11 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -72,6 +75,13 @@ class TasksViewModel(
 
     private val localEditTimestamps = mutableMapOf<String, Long>()
     private val localToggleTimestamps = mutableMapOf<String, Long>()
+    private val unfinishedRepeatDaysByBlockId = MutableStateFlow<Map<String, String>>(emptyMap())
+    private val finishedRepeatDaysByBlockId = MutableStateFlow<Map<String, String>>(emptyMap())
+
+    val visibleRepeatDaysByBlockId: StateFlow<Map<String, String>> =
+        combine(unfinishedRepeatDaysByBlockId, finishedRepeatDaysByBlockId, _isShowingCompleted) { unfinished, finished, isShowing ->
+            if (isShowing) finished else unfinished
+        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
     private var typingJob: Job? = null
     private val dirtyBlocks = mutableSetOf<String>()
@@ -152,8 +162,13 @@ class TasksViewModel(
         viewModelScope.launch {
             _isLoading.value = true
 
-            repository.getAllTasksFlow().collectLatest { allTasks ->
-                val dbTasksMap = allTasks.associateBy { it.blockId }
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            repository.getTasksWithCurrentRepeatDays(today).collectLatest { allTasks ->
+                val (completedTasks, activeTasks) = allTasks.partition { it.isChecked }
+                val activeTasksById = activeTasks.associateBy { it.blockId }
+                val completedTasksById = completedTasks.associateBy { it.blockId }
+                unfinishedRepeatDaysByBlockId.value = repeatDaysByBlockId(activeTasks)
+                finishedRepeatDaysByBlockId.value = repeatDaysByBlockId(completedTasks)
                 val currentTime = System.currentTimeMillis()
 
                 allTasks.forEach { task ->
@@ -172,24 +187,24 @@ class TasksViewModel(
                         if (isRecentToggle) {
                             block
                         } else {
-                            val dbTask = dbTasksMap[block.id]
+                            val dbTask = activeTasksById[block.id]
                             if (dbTask != null) {
-                                if (dbTask.isChecked) null
-                                else {
-                                    val lastEdit = localEditTimestamps[block.id] ?: 0L
-                                    val isRecentEdit = (currentTime - lastEdit) < 3000L || dirtyBlocks.contains(block.id)
-                                    val textToUse = if (isRecentEdit) (block as CheckboxBlock).text else dbTask.text
-                                    (block as CheckboxBlock).copy(text = textToUse, isChecked = false)
-                                }
+                                val lastEdit = localEditTimestamps[block.id] ?: 0L
+                                val isRecentEdit = (currentTime - lastEdit) < 3000L || dirtyBlocks.contains(block.id)
+                                val textToUse = if (isRecentEdit) (block as CheckboxBlock).text else dbTask.text
+                                val reminderToUse = if (dbTask.recurrenceFrequency != null) dbTask.reminderTimestamp else (block as CheckboxBlock).reminderTimestamp
+                                (block as CheckboxBlock).copy(text = textToUse, isChecked = false, reminderTimestamp = reminderToUse)
+                            } else if (completedTasksById.containsKey(block.id)) {
+                                null
                             } else {
                                 if (sessionBlockCache.containsKey(block.id)) block else null
                             }
                         }
                     }.toMutableList()
 
-                    allTasks.forEach { task ->
+                    activeTasks.forEach { task ->
                         val lastToggle = localToggleTimestamps[task.blockId] ?: 0L
-                        if ((currentTime - lastToggle) >= 2000L && !task.isChecked && updatedList.none { it.id == task.blockId }) {
+                        if ((currentTime - lastToggle) >= 2000L && updatedList.none { it.id == task.blockId }) {
                             updatedList.add(CheckboxBlock(task.blockId, task.text, false, 0, reminderTimestamp = task.reminderTimestamp))
                         }
                     }
@@ -204,24 +219,24 @@ class TasksViewModel(
                         if (isRecentToggle) {
                             block
                         } else {
-                            val dbTask = dbTasksMap[block.id]
+                            val dbTask = completedTasksById[block.id]
                             if (dbTask != null) {
-                                if (!dbTask.isChecked) null
-                                else {
-                                    val lastEdit = localEditTimestamps[block.id] ?: 0L
-                                    val isRecentEdit = (currentTime - lastEdit) < 3000L || dirtyBlocks.contains(block.id)
-                                    val textToUse = if (isRecentEdit) (block as CheckboxBlock).text else dbTask.text
-                                    (block as CheckboxBlock).copy(text = textToUse, isChecked = true)
-                                }
+                                val lastEdit = localEditTimestamps[block.id] ?: 0L
+                                val isRecentEdit = (currentTime - lastEdit) < 3000L || dirtyBlocks.contains(block.id)
+                                val textToUse = if (isRecentEdit) (block as CheckboxBlock).text else dbTask.text
+                                val reminderToUse = if (dbTask.recurrenceFrequency != null) dbTask.reminderTimestamp else (block as CheckboxBlock).reminderTimestamp
+                                (block as CheckboxBlock).copy(text = textToUse, isChecked = true, reminderTimestamp = reminderToUse)
+                            } else if (activeTasksById.containsKey(block.id)) {
+                                null
                             } else {
                                 if (sessionBlockCache.containsKey(block.id)) block else null
                             }
                         }
                     }.toMutableList()
 
-                    allTasks.forEach { task ->
+                    completedTasks.forEach { task ->
                         val lastToggle = localToggleTimestamps[task.blockId] ?: 0L
-                        if ((currentTime - lastToggle) >= 2000L && task.isChecked && updatedList.none { it.id == task.blockId }) {
+                        if ((currentTime - lastToggle) >= 2000L && updatedList.none { it.id == task.blockId }) {
                             updatedList.add(CheckboxBlock(task.blockId, task.text, true, 0, reminderTimestamp = task.reminderTimestamp))
                         }
                     }
@@ -294,8 +309,41 @@ class TasksViewModel(
         }
     }
 
+    private fun repeatDaysByBlockId(tasks: List<CalendarTaskEntity>): Map<String, String> =
+        tasks
+            .filter { task -> task.recurrenceFrequency != null }
+            .mapNotNull { task -> task.targetDate?.let { day -> task.blockId to day } }
+            .toMap()
+
+    private fun toggleRepeatDay(blockId: String, repeatDay: String, isChecked: Boolean) {
+        val fromList = if (isChecked) _activeBlocks else _completedBlocks
+        val toList = if (isChecked) _completedBlocks else _activeBlocks
+        val original = fromList.value.find { it.id == blockId } as? CheckboxBlock ?: return
+        val replacedInToList = toList.value.find { it.id == blockId }
+
+        fromList.update { list -> list.filterNot { it.id == blockId } }
+        toList.update { list -> listOf(original.copy(isChecked = isChecked)) + list.filterNot { it.id == blockId } }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.upsertOccurrenceCompletion(blockId, repeatDay, isChecked)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                toList.update { list -> listOfNotNull(replacedInToList) + list.filterNot { it.id == blockId } }
+                fromList.update { list -> listOf(original) + list }
+            }
+        }
+    }
+
     fun toggleCheckbox(blockId: String, isChecked: Boolean) {
         val loc = blockSourceMap[blockId] ?: return
+        val repeatDay = if (isChecked) unfinishedRepeatDaysByBlockId.value[blockId] else finishedRepeatDaysByBlockId.value[blockId]
+        if (repeatDay != null) {
+            toggleRepeatDay(blockId, repeatDay, isChecked)
+            return
+        }
         val timestamp = if (isChecked) System.currentTimeMillis() else null
 
         localToggleTimestamps[blockId] = System.currentTimeMillis()

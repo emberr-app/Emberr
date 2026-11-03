@@ -216,6 +216,15 @@ private fun EventRow(context: Context, event: UpcomingEvent) {
                 )
             }
         }
+
+        if (event.dayLabel != null) {
+            Text(
+                text = event.dayLabel,
+                maxLines = 1,
+                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp),
+                modifier = GlanceModifier.padding(start = 8.dp, top = 2.dp)
+            )
+        }
     }
 }
 

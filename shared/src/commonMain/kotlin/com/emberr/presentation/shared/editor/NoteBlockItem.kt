@@ -298,6 +298,7 @@ fun NoteBlockItem(
     validNoteIds: Set<String> = emptySet(),
     onRightClick: ((Offset) -> Unit)? = null,
     onShiftClick: ((String) -> Unit)? = null,
+    trailingLabel: String? = null,
 ) {
     // STANDARD BLOCK LOGIC
     val density = LocalDensity.current
@@ -1214,6 +1215,16 @@ fun NoteBlockItem(
                             indication = null
                         ) { actions.onToggleExpand(block.id) }
                         .rotate(foldRotation)
+                )
+            }
+
+            if (trailingLabel != null) {
+                Text(
+                    text = trailingLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 8.dp, top = 4.dp)
                 )
             }
         }

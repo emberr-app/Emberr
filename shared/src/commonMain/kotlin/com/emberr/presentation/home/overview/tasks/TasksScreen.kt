@@ -28,6 +28,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
+import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.TextAlignment
@@ -72,16 +73,18 @@ fun TasksScreen(
     val focusRequest: FocusRequest? by viewModel.focusRequest.collectAsState()
     val allLinkableNotes by viewModel.allLinkableNotes.collectAsState(emptyList())
     val blockLocations by viewModel.blockLocations.collectAsState()
+    val repeatDaysByBlockId by viewModel.visibleRepeatDaysByBlockId.collectAsState()
 
     val noteTitleById by viewModel.noteTitlesById.collectAsState()
     val noteHeadingById by viewModel.noteHeadingsById.collectAsState()
     val inboxNoteIds = remember(noteTitleById) {
         noteTitleById.filterValues { it.equals("Inbox", ignoreCase = true) }.keys + ACCOUNT_TASKS_INBOX_NOTE_ID
     }
-    val sectionLabelFor = remember(blockLocations, inboxNoteIds, noteHeadingById) {
+    val sectionLabelFor = remember(blockLocations, inboxNoteIds, noteHeadingById, repeatDaysByBlockId) {
         { block: NoteBlock ->
             val location = blockLocations[block.id]
             when {
+                block.id in repeatDaysByBlockId -> "Repeating"
                 location == null -> null
                 !location.isDaily && location.noteId in inboxNoteIds -> null
                 location.isDaily -> dailyDateLabel(location.noteId)
@@ -89,8 +92,18 @@ fun TasksScreen(
             }
         }
     }
-    val groupedBlocks = remember(blocks, blockLocations, inboxNoteIds, noteHeadingById) {
-        val (rest, located) = blocks.partition { block ->
+    val trailingLabelFor = remember(repeatDaysByBlockId) {
+        { block: NoteBlock -> repeatDaysByBlockId[block.id]?.let(::dailyDateLabel) }
+    }
+    val groupedBlocks = remember(blocks, blockLocations, inboxNoteIds, noteHeadingById, repeatDaysByBlockId) {
+        val (repeatingBlocks, nonRepeatingBlocks) = blocks.partition { block -> block.id in repeatDaysByBlockId }
+        val sortedRepeatingBlocks = repeatingBlocks.sortedWith(
+            compareBy(
+                { block -> repeatDaysByBlockId[block.id] },
+                { block -> (block as? CheckboxBlock)?.reminderTimestamp ?: Long.MAX_VALUE }
+            )
+        )
+        val (rest, located) = nonRepeatingBlocks.partition { block ->
             val location = blockLocations[block.id]
             location == null || (!location.isDaily && location.noteId in inboxNoteIds)
         }
@@ -105,7 +118,7 @@ fun TasksScreen(
                     { blockLocations[it.id]?.noteId ?: "" }
                 )
             )
-        rest + dailyBlocks + noteBlocks
+        rest + sortedRepeatingBlocks + dailyBlocks + noteBlocks
     }
 
     KmpBackHandler(enabled = isSelectionMode) {
@@ -291,6 +304,7 @@ fun TasksScreen(
                     topContentPadding = topPadding,
                     allLinkableNotes = allLinkableNotes,
                     sectionLabelFor = sectionLabelFor,
+                    trailingLabelFor = trailingLabelFor,
                     headerContent = {
                         ScreenTitle(
                             isShowingCompleted,

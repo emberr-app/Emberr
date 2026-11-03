@@ -1,7 +1,6 @@
 // Builds the compact month grid and the ordered list of that month's events.
 package com.emberr.presentation.widget.calendaragenda
 
-import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
@@ -15,6 +14,7 @@ import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.presentation.calendar.CalendarCategoryVisibility
 import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.people.birthdaysInRange
+import com.emberr.domain.repository.NoteRepository
 import com.emberr.presentation.calendar.CalendarEvent
 import com.emberr.presentation.calendar.toCalendarEvent
 import com.emberr.presentation.widget.WidgetBirthdays
@@ -22,6 +22,7 @@ import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetFirstDayOfWeek
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
@@ -41,7 +42,7 @@ private const val maximumEventsShown = 40
 private const val maximumCharactersPerTitle = 80
 
 class CalendarAgendaWidgetContentReader(
-    private val calendarTaskDao: CalendarTaskDao,
+    private val noteRepository: NoteRepository,
     private val categoryDao: CategoryDao,
     private val clockFormat: WidgetClockFormat,
     private val firstDayOfWeek: WidgetFirstDayOfWeek,
@@ -56,7 +57,7 @@ class CalendarAgendaWidgetContentReader(
             val weekStartsOn = firstDayOfWeek.firstDayOfWeek()
 
             val tasks = try {
-                calendarTaskDao.getTasksInMonth(monthKey)
+                noteRepository.getCalendarTasksForMonth(monthKey).first()
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read events for $monthKey", cause)
                 return@withContext null
@@ -86,7 +87,7 @@ class CalendarAgendaWidgetContentReader(
                 monthLabel = formatMonthLabel(firstOfMonth),
                 weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> day.name.take(1) },
                 weeks = buildWeeks(firstOfMonth, today, weekStartsOn, shownTasks, birthdayEvents),
-                events = buildEvents(shownTasks, birthdayEvents, colorsByCategoryId)
+                events = buildEvents(shownTasks, birthdayEvents, colorsByCategoryId, today)
             )
         }
 
@@ -127,17 +128,45 @@ class CalendarAgendaWidgetContentReader(
     private fun buildEvents(
         tasks: List<CalendarTaskEntity>,
         birthdayEvents: List<CalendarEvent>,
-        colorsByCategoryId: Map<String, String>
+        colorsByCategoryId: Map<String, String>,
+        today: LocalDate
     ): List<AgendaEvent> {
-        val taskEvents = tasks
+        val (repeatingTasks, oneTimeTasks) = tasks
             .filter { task -> task.reminderTimestamp != null }
+            .partition { task -> task.recurrenceFrequency != null }
+        val repeatingEvents = repeatingTasks
+            .groupBy { task -> task.blockId }
+            .values
+            .map { occurrences -> shownRepeatDay(occurrences, today) }
+            .map { task ->
+                val timestamp = task.reminderTimestamp ?: 0L
+                SortableAgendaEvent(
+                    isRepeating = true,
+                    dateString = task.targetDate,
+                    isAllDay = task.isAllDay,
+                    timestamp = timestamp,
+                    event = AgendaEvent(
+                        blockId = task.blockId,
+                        occurrenceDate = task.targetDate,
+                        title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
+                        whenLabel = if (task.isAllDay) "All day" else clockFormat.clockTimeOf(timestamp),
+                        isDone = task.isChecked,
+                        accentColorHex = task.categoryId?.let { colorsByCategoryId[it] },
+                        isRepeating = true,
+                        dayLabel = task.targetDate?.let { date -> formatDayLabel(LocalDate.parse(date), today) }
+                    )
+                )
+            }
+        val taskEvents = oneTimeTasks
             .map { task ->
                 SortableAgendaEvent(
+                    isRepeating = false,
                     dateString = task.targetDate,
                     isAllDay = task.isAllDay,
                     timestamp = task.reminderTimestamp ?: 0L,
                     event = AgendaEvent(
                         blockId = task.blockId,
+                        occurrenceDate = task.targetDate,
                         title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
                         whenLabel = formatWhenLabel(task.reminderTimestamp ?: 0L, task.toAllDaySpan(), clockFormat),
                         isDone = task.isChecked,
@@ -148,6 +177,7 @@ class CalendarAgendaWidgetContentReader(
         val birthdays = birthdayEvents.map { birthday ->
             val timestamp = birthday.reminderTimestamp ?: 0L
             SortableAgendaEvent(
+                isRepeating = false,
                 dateString = birthday.dateString,
                 isAllDay = true,
                 timestamp = timestamp,
@@ -161,13 +191,22 @@ class CalendarAgendaWidgetContentReader(
                 )
             )
         }
-        return (taskEvents + birthdays)
-            .sortedWith(compareBy({ it.dateString }, { !it.isAllDay }, { it.timestamp }))
+        return (repeatingEvents + taskEvents + birthdays)
+            .sortedWith(compareBy({ !it.isRepeating }, { it.dateString }, { !it.isAllDay }, { it.timestamp }))
             .take(maximumEventsShown)
             .map { it.event }
     }
 
+    private fun shownRepeatDay(occurrences: List<CalendarTaskEntity>, today: LocalDate): CalendarTaskEntity {
+        val sortedOccurrences = occurrences.sortedBy { occurrence -> occurrence.targetDate }
+        val todayString = today.toString()
+        return sortedOccurrences.firstOrNull { occurrence -> !occurrence.isChecked && (occurrence.targetDate ?: "") >= todayString }
+            ?: sortedOccurrences.firstOrNull { occurrence -> (occurrence.targetDate ?: "") >= todayString }
+            ?: sortedOccurrences.last()
+    }
+
     private class SortableAgendaEvent(
+        val isRepeating: Boolean,
         val dateString: String?,
         val isAllDay: Boolean,
         val timestamp: Long,
@@ -217,6 +256,13 @@ private fun formatWhenLabel(timestamp: Long, allDay: AllDaySpan?, clockFormat: W
         "${shortDateLabel(moment.date)} – ${shortDateLabel(lastDate)}, All day"
     }
 }
+
+private fun formatDayLabel(date: LocalDate, today: LocalDate): String =
+    when (date) {
+        today -> "Today"
+        today.plus(DatePeriod(days = 1)) -> "Tomorrow"
+        else -> shortDateLabel(date)
+    }
 
 private fun shortDateLabel(date: LocalDate): String {
     val month = shortMonthNames.getOrNull(date.month.number - 1) ?: date.month.name.take(3)

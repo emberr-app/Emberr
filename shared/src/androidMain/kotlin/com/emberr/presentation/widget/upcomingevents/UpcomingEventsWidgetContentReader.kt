@@ -7,6 +7,7 @@ import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
+import com.emberr.domain.repository.NoteRepository
 import com.emberr.presentation.calendar.CalendarCategoryVisibility
 import com.emberr.presentation.calendar.CalendarEvent
 import com.emberr.presentation.calendar.nextBirthdayEvents
@@ -14,6 +15,7 @@ import com.emberr.presentation.widget.WidgetBirthdays
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
@@ -25,9 +27,13 @@ import kotlinx.datetime.number
 
 private const val maximumEventsShown = 60
 private const val maximumCharactersPerTitle = 100
+private const val daysSearchedForNextRepeat = 366
+private const val repeatingGroupKey = "repeating"
+private const val repeatingSectionTitle = "Repeating"
 
 class UpcomingEventsWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
+    private val noteRepository: NoteRepository,
     private val categoryDao: CategoryDao,
     private val clockFormat: WidgetClockFormat,
     private val settingsManager: SettingsManager,
@@ -37,7 +43,9 @@ class UpcomingEventsWidgetContentReader(
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
         val tasks = try {
-            calendarTaskDao.getUpcomingTasks(today.toString())
+            val oneTimeTasks = calendarTaskDao.getUpcomingTasks(today.toString())
+                .filter { task -> task.recurrenceFrequency == null }
+            oneTimeTasks + nextUnfinishedRepeats(today)
         } catch (cause: Exception) {
             WidgetLog.e("Could not read upcoming events", cause)
             return@withContext null
@@ -64,6 +72,19 @@ class UpcomingEventsWidgetContentReader(
         UpcomingEventsWidgetContent(events = buildEvents(shownTasks, birthdayEvents, today, colorsByCategoryId))
     }
 
+    private suspend fun nextUnfinishedRepeats(today: LocalDate): List<CalendarTaskEntity> {
+        val lastSearchedDay = today.plus(DatePeriod(days = daysSearchedForNextRepeat))
+        return noteRepository.getCalendarTasksInRange(today.toString(), lastSearchedDay.toString()).first()
+            .filter { occurrence ->
+                occurrence.recurrenceFrequency != null &&
+                    !occurrence.isChecked &&
+                    occurrence.targetDate != null &&
+                    occurrence.targetDate >= today.toString()
+            }
+            .sortedBy { occurrence -> occurrence.targetDate }
+            .distinctBy { occurrence -> occurrence.blockId }
+    }
+
     private fun buildEvents(
         tasks: List<CalendarTaskEntity>,
         birthdayEvents: List<CalendarEvent>,
@@ -72,14 +93,18 @@ class UpcomingEventsWidgetContentReader(
     ): List<UpcomingEvent> {
         val taskEvents = tasks.mapNotNull { task ->
             val targetDate = task.targetDate?.let(LocalDate::parse) ?: return@mapNotNull null
+            val isRepeating = task.recurrenceFrequency != null
 
             SortableUpcomingEvent(
+                isRepeating = isRepeating,
+                dateString = task.targetDate,
                 timestamp = task.reminderTimestamp ?: Long.MAX_VALUE,
                 event = UpcomingEvent(
                     blockId = task.blockId,
                     title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
-                    dateGroupKey = task.targetDate,
-                    dateLabel = formatDateLabel(targetDate, today),
+                    dateGroupKey = if (isRepeating) repeatingGroupKey else task.targetDate,
+                    dateLabel = if (isRepeating) repeatingSectionTitle else formatDateLabel(targetDate, today),
+                    dayLabel = if (isRepeating) formatDateLabel(targetDate, today) else null,
                     timeLabel = task.reminderTimestamp?.let { timestamp -> clockFormat.clockTimeOf(timestamp) },
                     isOverdue = targetDate == today &&
                         task.reminderTimestamp != null &&
@@ -90,6 +115,8 @@ class UpcomingEventsWidgetContentReader(
         }
         val birthdays = birthdayEvents.map { birthday ->
             SortableUpcomingEvent(
+                isRepeating = false,
+                dateString = birthday.dateString,
                 timestamp = birthday.reminderTimestamp ?: Long.MAX_VALUE,
                 event = UpcomingEvent(
                     blockId = birthday.blockId,
@@ -104,12 +131,14 @@ class UpcomingEventsWidgetContentReader(
             )
         }
         return (taskEvents + birthdays)
-            .sortedWith(compareBy({ it.event.dateGroupKey }, { it.timestamp }))
+            .sortedWith(compareBy({ !it.isRepeating }, { it.dateString }, { it.timestamp }))
             .take(maximumEventsShown)
             .map { it.event }
     }
 
     private class SortableUpcomingEvent(
+        val isRepeating: Boolean,
+        val dateString: String,
         val timestamp: Long,
         val event: UpcomingEvent
     )
