@@ -28,6 +28,7 @@ import coil3.memory.MemoryCache
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.emberr.core.desktop.DesktopAppStorage
 import com.emberr.core.desktop.DesktopSingleInstance
+import com.emberr.core.desktop.UiThreadStallWatchdog
 import com.emberr.core.desktop.eraseAppDataIfRequested
 import com.emberr.core.security.secrets.DesktopSecretStore
 import com.emberr.data.local.prefs.SettingsManager
@@ -48,6 +49,8 @@ import com.emberr.domain.update.detectStagedUpdateInstallation
 import com.emberr.presentation.desktop.SmoothShrinkImageDecoder
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDebugBuild
+import com.emberr.domain.util.system.StartupLog
+import com.emberr.domain.util.system.timeStartupStep
 import com.emberr.domain.util.time.desktopSystemUsesTwentyFourHourClock
 import com.emberr.domain.util.time.timeFormatPreferenceNamed
 import com.emberr.domain.util.time.desktopSystemFirstDayOfWeek
@@ -128,8 +131,16 @@ fun main() {
 private fun runEmberrDesktopApp() = application {
 
     remember {
-        startKoin {
-            modules(sharedModule, desktopModule)
+        StartupLog.step(
+            "Emberr $appVersionName on ${System.getProperty("os.name")} ${System.getProperty("os.version")}, " +
+                "Java ${System.getProperty("java.version")}, ${Runtime.getRuntime().availableProcessors()} processors, " +
+                "process ${ProcessHandle.current().pid()}"
+        )
+        UiThreadStallWatchdog.watchForTheNextFewMinutes()
+        timeStartupStep("Koin startup") {
+            startKoin {
+                modules(sharedModule, desktopModule)
+            }
         }
         Unit
     }
@@ -138,6 +149,7 @@ private fun runEmberrDesktopApp() = application {
 
     LaunchedEffect(Unit) {
         delay(MILLIS_TO_WAIT_FOR_FIRST_FRAME_BEFORE_STARTING_ANYWAY)
+        if (!isBackgroundStartupAllowed) StartupLog.step("No first frame after 4 s, starting background work anyway")
         isBackgroundStartupAllowed = true
     }
 
@@ -157,18 +169,28 @@ private fun runEmberrDesktopApp() = application {
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            GlobalContext.get().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
-            GlobalContext.get().get<com.emberr.domain.repository.NoteRepository>()
-                .moveDailyNotesAndCategoriesToAccount(GlobalContext.get().get<CoroutineScope>(named("AppScope")))
-            GlobalContext.get().get<com.emberr.domain.people.BirthdaysCategoryKeeper>().start()
-            GlobalContext.get().get<com.emberr.domain.people.BirthdayReminderScheduler>().start()
+            timeStartupStep("Space preparation") {
+                GlobalContext.get().get<com.emberr.domain.space.SpaceRepository>().prepareSpacesForLaunch()
+            }
+            timeStartupStep("Daily note and category move to account") {
+                GlobalContext.get().get<com.emberr.domain.repository.NoteRepository>()
+                    .moveDailyNotesAndCategoriesToAccount(GlobalContext.get().get<CoroutineScope>(named("AppScope")))
+            }
+            timeStartupStep("Birthdays category keeper start") {
+                GlobalContext.get().get<com.emberr.domain.people.BirthdaysCategoryKeeper>().start()
+            }
+            timeStartupStep("Birthday reminder start") {
+                GlobalContext.get().get<com.emberr.domain.people.BirthdayReminderScheduler>().start()
+            }
         }
     }
 
     LaunchedEffect(isBackgroundStartupAllowed) {
         if (!isBackgroundStartupAllowed) return@LaunchedEffect
         val reminderRescheduler = GlobalContext.get().get<ReminderRescheduler>()
-        withContext(Dispatchers.IO) { reminderRescheduler.rescheduleUpcomingReminders() }
+        timeStartupStep("Reminder rescheduling") {
+            withContext(Dispatchers.IO) { reminderRescheduler.rescheduleUpcomingReminders() }
+        }
         val birthdayReminderScheduler = GlobalContext.get().get<com.emberr.domain.people.BirthdayReminderScheduler>()
         DesktopReminderShownBus.remindersShown.collect {
             withContext(Dispatchers.IO) {
@@ -183,10 +205,14 @@ private fun runEmberrDesktopApp() = application {
         delay(MILLIS_TO_WAIT_BEFORE_SECRET_STORE_AND_LAN_SYNC)
         withContext(Dispatchers.IO) {
             val koin = GlobalContext.get()
-            val desktopSecretStore = koin.get<DesktopSecretStore>()
-            desktopSecretStore.initialise()
-            desktopSecretStore.awaitReadyState()
-            koin.get<LanSyncServerController>().startIfPaired()
+            timeStartupStep("Secret store startup") {
+                val desktopSecretStore = koin.get<DesktopSecretStore>()
+                desktopSecretStore.initialise()
+                desktopSecretStore.awaitReadyState()
+            }
+            timeStartupStep("LAN sync startup") {
+                koin.get<LanSyncServerController>().startIfPaired()
+            }
         }
     }
 
@@ -219,7 +245,9 @@ private fun runEmberrDesktopApp() = application {
         if (!isBackgroundStartupAllowed) return@LaunchedEffect
         delay(MILLIS_TO_WAIT_BEFORE_UPDATE_CHECK)
         withContext(Dispatchers.IO) {
-            GlobalContext.get().get<AppUpdateController>().checkOnLaunch()
+            timeStartupStep("Update check") {
+                GlobalContext.get().get<AppUpdateController>().checkOnLaunch()
+            }
         }
     }
 
@@ -240,6 +268,10 @@ private fun runEmberrDesktopApp() = application {
     val mainWindowState = rememberWindowState(width = 1200.dp, height = 800.dp)
 
     val showMainWindow = {
+        if (!isMainWindowOpen) {
+            StartupLog.step("Main window reopened")
+            UiThreadStallWatchdog.watchForTheNextFewMinutes()
+        }
         isMainWindowOpen = true
         mainWindowState.isMinimized = false
     }
@@ -309,6 +341,7 @@ private fun runEmberrDesktopApp() = application {
 
         LaunchedEffect(Unit) {
             withFrameNanos { }
+            StartupLog.step("First frame of the main window drawn")
             isBackgroundStartupAllowed = true
         }
 

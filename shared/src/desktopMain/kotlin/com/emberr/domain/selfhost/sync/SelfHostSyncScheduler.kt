@@ -1,6 +1,7 @@
 package com.emberr.domain.selfhost.sync
 
 import com.emberr.domain.sync.AutoSyncTrigger
+import com.emberr.domain.util.system.timeStartupStep
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -50,7 +51,7 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
 
         newScope.launch {
             if (syncsRightAway) {
-                selfHostSyncEngine.runSync()
+                timeStartupStep("First self-host text sync") { selfHostSyncEngine.runSync() }
                 SelfHostSyncLog.d("Scheduler: first text sync finished, starting media sync")
                 scheduleMediaSync(syncsRightAway = true)
             }
