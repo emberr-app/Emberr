@@ -25,6 +25,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
 import com.emberr.domain.util.system.movedToTrashMessage
 import com.emberr.domain.util.system.showNativeToast
+import com.emberr.domain.util.system.timeStartupStep
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.presentation.home.overview.OverviewSection
 import com.emberr.presentation.home.overview.visibleOverviewSections
@@ -447,23 +448,15 @@ class HomeViewModel(
                 startLoadingHomeLists()
             }
         }
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.cleanupOldTrashedNotes()
-            templateSeeder.seedIfMissing()
-            sampleNotesSeeder.seedIfNeeded()
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            delay(2_000.milliseconds)
-            localMediaGarbageCollector.collectAndDeleteOrphanedMedia()
-            embeddedCanvasCleaner.deleteCanvasesOfRemovedBlocks()
-            embeddedCanvasCleaner.forgetViewPositionsOfDeletedCanvases()
-            watchlistCleaner.deleteWatchlistsOfRemovedBlocks()
-            databaseRowCleaner.deleteRowsOfRemovedDatabases()
-            com.emberr.domain.ai.models.cleanupPendingModelDeletions()
+        val launchMaintenance = if (hasStartedLaunchMaintenance) {
+            null
+        } else {
+            hasStartedLaunchMaintenance = true
+            viewModelScope.launch(Dispatchers.IO) { runLaunchMaintenance() }
         }
         viewModelScope.launch {
             FirstContentRenderSignal.awaitFirstContentOrTimeout()
-            repository.createMissingDatabaseNotes()
+            launchMaintenance?.join()
             while (true) {
                 val nextCheck = repeatingTemplateRowCreator.createRowsDueAt(localNow())
                 withTimeoutOrNull(millisecondsUntil(nextCheck).milliseconds) {
@@ -494,6 +487,20 @@ class HomeViewModel(
         viewModelScope.launch {
             repository.getBookmarksCount().collect { _bookmarksCount.value = it }
         }
+    }
+
+    private suspend fun runLaunchMaintenance() {
+        timeStartupStep("Old trash cleanup") { repository.cleanupOldTrashedNotes() }
+        timeStartupStep("Template seeding") { templateSeeder.seedIfMissing() }
+        timeStartupStep("Sample note seeding") { sampleNotesSeeder.seedIfNeeded() }
+        delay(2_000.milliseconds)
+        timeStartupStep("Unused media cleanup") { localMediaGarbageCollector.collectAndDeleteOrphanedMedia() }
+        timeStartupStep("Removed canvas cleanup") { embeddedCanvasCleaner.deleteCanvasesOfRemovedBlocks() }
+        timeStartupStep("Canvas view position cleanup") { embeddedCanvasCleaner.forgetViewPositionsOfDeletedCanvases() }
+        timeStartupStep("Removed watchlist cleanup") { watchlistCleaner.deleteWatchlistsOfRemovedBlocks() }
+        timeStartupStep("Removed database row cleanup") { databaseRowCleaner.deleteRowsOfRemovedDatabases() }
+        timeStartupStep("Pending AI model deletion") { com.emberr.domain.ai.models.cleanupPendingModelDeletions() }
+        timeStartupStep("Missing database note repair") { repository.createMissingDatabaseNotes() }
     }
 
     private fun startLoadingHomeLists() {
@@ -827,5 +834,6 @@ class HomeViewModel(
 
     companion object {
         private const val MAXIMUM_RECENT_NOTES_SHOWN = 10
+        private var hasStartedLaunchMaintenance = false
     }
 }
