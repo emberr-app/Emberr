@@ -17,6 +17,7 @@ interface PeopleRepository {
     fun observeEventsWithPerson(personNoteId: String): Flow<EventsWithPerson>
     fun observeEventsWithEachPerson(): Flow<Map<String, EventsWithPerson>>
     suspend fun createPerson(name: String): String
+    suspend fun createPersonFromContact(contact: ContactToImport, photoFileName: String?): String
     suspend fun renamePerson(personNoteId: String, newName: String)
     suspend fun addDetail(personNoteId: String, kind: PersonDetailKind, label: String?, value: String): PersonDetailBlock?
     suspend fun updateDetail(personNoteId: String, detail: PersonDetailBlock)

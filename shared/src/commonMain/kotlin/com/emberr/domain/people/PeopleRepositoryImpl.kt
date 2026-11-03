@@ -21,6 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -132,6 +133,45 @@ class PeopleRepositoryImpl(
             noteRepository.saveNoteInSpace(ACCOUNT_SPACE_ID, person, NoteContent(blocks = emptyList()))
         }
         person.noteId
+    }
+
+    override suspend fun createPersonFromContact(contact: ContactToImport, photoFileName: String?): String = withContext(Dispatchers.IO) {
+        val now = nowMillis()
+        val details = contact.details
+            .filter { detail -> detail.value.isNotBlank() }
+            .map { detail ->
+                PersonDetailBlock(
+                    id = Uuid.random().toString(),
+                    kind = detail.kind,
+                    label = detail.label?.trim()?.takeIf { it.isNotEmpty() },
+                    value = detail.value.trim(),
+                    updatedAt = now
+                )
+            }
+        val noteLines = contact.note.lines()
+            .map { line -> line.trimEnd() }
+            .filter { line -> line.isNotBlank() }
+            .map { line -> TextBlock(id = Uuid.random().toString(), text = line, updatedAt = now) }
+        SyncCoordinator.mutex.withLock {
+            val takenNames = noteDao.observePeople(ACCOUNT_SPACE_ID).first().map { person -> person.title }
+            val person = NoteMetadataEntity(
+                noteId = Uuid.random().toString(),
+                title = nameNotTakenYet(contact.name, takenNames),
+                folderId = null,
+                isDaily = false,
+                dateString = null,
+                createdAt = now,
+                updatedAt = now,
+                filePath = "",
+                coverImagePath = photoFileName,
+                spaceId = ACCOUNT_SPACE_ID,
+                kind = NoteKind.PERSON,
+                titleUpdatedAt = now,
+                coverImageUpdatedAt = if (photoFileName != null) now else 0L
+            )
+            noteRepository.saveNoteInSpace(ACCOUNT_SPACE_ID, person, NoteContent(blocks = details + noteLines))
+            person.noteId
+        }
     }
 
     override suspend fun renamePerson(personNoteId: String, newName: String) {

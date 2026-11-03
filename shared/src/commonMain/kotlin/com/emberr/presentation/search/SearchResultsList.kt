@@ -395,7 +395,7 @@ private fun PersonSearchResultRow(
             )
             .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
-        PersonAvatar(personNoteId = person.noteId, name = name, icon = person.icon, size = PersonResultAvatarSize)
+        PersonAvatar(personNoteId = person.noteId, name = name, icon = person.icon, photoPath = person.coverImagePath, size = PersonResultAvatarSize)
         Spacer(modifier = Modifier.width(12.dp))
         Column {
             Text(

@@ -82,6 +82,7 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.address_card
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.search
 import kotlinx.datetime.LocalDate
@@ -130,6 +131,12 @@ fun PeopleScreen(
     val openPerson: (String) -> Unit = { personNoteId ->
         openedPerson = OpenedPerson(personNoteId = personNoteId, isNew = false, focusesName = false)
     }
+    val pickPhoneContacts = rememberPhoneContactPicker { contacts ->
+        viewModel.importContacts(contacts) { personNoteId ->
+            searchText = ""
+            openPerson(personNoteId)
+        }
+    }
 
     val density = LocalDensity.current
     var topAreaHeightPx by remember { mutableFloatStateOf(0f) }
@@ -158,6 +165,7 @@ fun PeopleScreen(
                 allRows == null -> Unit
                 allRows.isEmpty() -> PeopleEmptyState(
                     onNewPerson = { createPerson("") },
+                    onPickPhoneContacts = pickPhoneContacts,
                     modifier = Modifier.padding(top = topAreaHeight)
                 )
                 else -> {
@@ -211,6 +219,18 @@ fun PeopleScreen(
                     if (isDesktopPlatform) {
                         EmberrButtonPrimary(text = "New person", onClick = { createPerson("") })
                     } else {
+                        if (pickPhoneContacts != null) {
+                            TopBarIconButton(
+                                icon = painterResource(Res.drawable.address_card),
+                                contentDescription = "Add from contacts",
+                                bgColor = Color.Transparent,
+                                tint = MaterialTheme.colorScheme.primary,
+                                hazeState = hazeState,
+                                hazeStyle = EmberrBlur.Regular,
+                                tooltip = "Add from contacts",
+                                onClick = pickPhoneContacts
+                            )
+                        }
                         TopBarIconButton(
                             icon = painterResource(Res.drawable.plus),
                             contentDescription = "New person",
@@ -353,7 +373,7 @@ private fun PersonListRowItem(
                 .padding(horizontal = if (isDesktopPlatform) 16.dp else 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PersonAvatar(personNoteId = row.person.noteId, name = name, icon = row.person.icon, size = RowAvatarSize)
+            PersonAvatar(personNoteId = row.person.noteId, name = name, icon = row.person.icon, photoPath = row.person.coverImagePath, size = RowAvatarSize)
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -419,7 +439,7 @@ private fun PersonListRowItem(
 }
 
 @Composable
-private fun PeopleEmptyState(onNewPerson: () -> Unit, modifier: Modifier) {
+private fun PeopleEmptyState(onNewPerson: () -> Unit, onPickPhoneContacts: (() -> Unit)?, modifier: Modifier) {
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 80.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -441,6 +461,10 @@ private fun PeopleEmptyState(onNewPerson: () -> Unit, modifier: Modifier) {
         )
         Spacer(modifier = Modifier.height(22.dp))
         EmberrButtonPrimary(text = "New person", onClick = onNewPerson, modifier = Modifier.widthIn(min = 160.dp))
+        if (onPickPhoneContacts != null) {
+            Spacer(modifier = Modifier.height(10.dp))
+            EmberrButtonSecondary(text = "Add from contacts", onClick = onPickPhoneContacts, modifier = Modifier.widthIn(min = 160.dp))
+        }
     }
 }
 

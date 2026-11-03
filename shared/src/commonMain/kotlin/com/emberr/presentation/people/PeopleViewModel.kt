@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.people.ContactToImport
 import com.emberr.domain.people.PeopleRepository
+import com.emberr.domain.people.contactPhotoExtensionAndMimeType
+import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
 import com.emberr.domain.util.system.movedToTrashMessage
 import com.emberr.domain.util.system.showNativeToast
@@ -28,6 +31,7 @@ data class PersonListRow(
 
 class PeopleViewModel(
     private val peopleRepository: PeopleRepository,
+    private val mediaStorageHelper: MediaStorageHelper,
     private val appScope: CoroutineScope
 ) : ViewModel() {
 
@@ -56,6 +60,32 @@ class PeopleViewModel(
                 showNativeToast("Couldn't create the person")
             }
         }
+    }
+
+    fun importContacts(contacts: List<ContactToImport>, onOnePersonImported: (personNoteId: String) -> Unit) {
+        if (contacts.isEmpty()) return
+        viewModelScope.launch {
+            var importedPersonNoteIds = emptyList<String>()
+            try {
+                importedPersonNoteIds = contacts.map { contact ->
+                    peopleRepository.createPersonFromContact(contact, savePhotoOrNull(contact.photoBytes))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            when {
+                importedPersonNoteIds.size == 1 -> onOnePersonImported(importedPersonNoteIds.first())
+                importedPersonNoteIds.size == contacts.size -> showNativeToast("Added ${contacts.size} people")
+                importedPersonNoteIds.isEmpty() -> showNativeToast("Couldn't add the contacts")
+                else -> showNativeToast("Added ${importedPersonNoteIds.size} of ${contacts.size} people")
+            }
+        }
+    }
+
+    private suspend fun savePhotoOrNull(photoBytes: ByteArray?): String? {
+        if (photoBytes == null || photoBytes.isEmpty()) return null
+        val (extension, mimeType) = contactPhotoExtensionAndMimeType(photoBytes)
+        return mediaStorageHelper.saveBytesToInternalStorage(photoBytes, extension, mimeType)?.localFileName
     }
 
     fun moveToTrash(person: NoteMetadataEntity) {

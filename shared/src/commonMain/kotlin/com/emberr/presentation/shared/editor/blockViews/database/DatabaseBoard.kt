@@ -744,8 +744,8 @@ private fun DatabaseBoardGroupLabel(value: DatabaseBoardGroupValue, columnLabel:
             textStyle = MaterialTheme.typography.bodyMedium
         )
         is DatabaseBoardGroupValue.Person -> Row(verticalAlignment = Alignment.CenterVertically) {
-            val icon = rememberPeopleToPick()?.firstOrNull { it.id == value.personNoteId }?.icon
-            PersonAvatar(personNoteId = value.personNoteId, name = value.name, icon = icon, size = 20.dp)
+            val person = rememberPeopleToPick()?.firstOrNull { it.id == value.personNoteId }
+            PersonAvatar(personNoteId = value.personNoteId, name = value.name, icon = person?.icon, photoPath = person?.photoPath, size = 20.dp)
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = value.name,

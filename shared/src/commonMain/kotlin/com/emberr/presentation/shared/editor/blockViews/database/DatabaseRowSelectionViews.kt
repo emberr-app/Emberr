@@ -287,7 +287,7 @@ private fun DatabaseBulkPeopleChoices(onSet: ((PropertyBlock) -> PropertyBlock) 
         DatabaseMenuOption(
             label = person.displayName(),
             isSelected = false,
-            icon = { PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, size = 16.dp) },
+            icon = { PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, photoPath = person.photoPath, size = 16.dp) },
             onClick = { onSet { it.copy(personNoteIds = listOf(person.id)) } }
         )
     }
