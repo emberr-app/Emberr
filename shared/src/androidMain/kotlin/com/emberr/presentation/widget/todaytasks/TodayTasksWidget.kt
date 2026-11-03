@@ -45,6 +45,7 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetCheckbox
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.elevatedSurfaceColor
 import com.emberr.presentation.widget.primaryTextColor
@@ -210,13 +211,12 @@ private fun TodayTaskRowItem(
         modifier = GlanceModifier.fillMaxWidth().padding(vertical = 7.dp),
         verticalAlignment = Alignment.Vertical.CenterVertically
     ) {
-        Text(
-            text = if (row.isChecked) "☑" else "☐",
-            style = TextStyle(color = primaryTextColor, fontSize = 23.sp),
+        WidgetCheckbox(
+            isChecked = row.isChecked,
             modifier = GlanceModifier
                 .width(checkboxWidth)
                 .clickable(
-                    actionSendBroadcast(
+                    onClick = actionSendBroadcast(
                         toggleTaskIntent(
                             context = context,
                             appWidgetId = appWidgetId,
@@ -224,7 +224,8 @@ private fun TodayTaskRowItem(
                             occurrenceDate = row.occurrenceDate,
                             isChecked = !row.isChecked
                         )
-                    )
+                    ),
+                    rippleOverride = R.drawable.widget_no_ripple
                 )
         )
 
