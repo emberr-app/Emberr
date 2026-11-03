@@ -258,7 +258,7 @@ private fun TaskRow(task: TasksWidgetRow.Task, appWidgetId: Int, context: Contex
                 text = task.dayLabel,
                 maxLines = 1,
                 style = TextStyle(color = secondaryTextColor, fontSize = 13.sp),
-                modifier = GlanceModifier.padding(start = 8.dp, top = 2.dp)
+                modifier = GlanceModifier.padding(start = 8.dp, top = 2.dp, end = 8.dp)
             )
         }
     }
