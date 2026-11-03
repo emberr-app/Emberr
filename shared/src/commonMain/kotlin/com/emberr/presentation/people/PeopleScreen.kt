@@ -427,7 +427,7 @@ private fun BoxScope.PeopleSearch(
             onOpenClick = onOpenSearch,
             onCloseClick = onCloseSearch,
             hazeState = hazeState,
-            modifier = Modifier.align(Alignment.BottomCenter).zIndex(20f)
+            modifier = Modifier.align(Alignment.BottomCenter).zIndex(20f).padding(end = if (isSearchOpen) 0.dp else 4.dp)
         )
     }
 }
