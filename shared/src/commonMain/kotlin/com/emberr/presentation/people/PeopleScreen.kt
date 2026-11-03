@@ -109,7 +109,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 
 private val ListSidePadding = if (isDesktopPlatform) 32.dp else 16.dp
-private val PersonCardCorner = 12.dp
+private val PersonCardCorner = 18.dp
 private val HeaderSidePadding = if (isDesktopPlatform) 22.dp else 16.dp
 private val TopEdgeFadeInDistance = 48.dp
 private val SearchBarSpace = 96.dp
