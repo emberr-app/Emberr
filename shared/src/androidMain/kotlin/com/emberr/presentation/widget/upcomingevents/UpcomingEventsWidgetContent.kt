@@ -17,5 +17,6 @@ data class UpcomingEvent(
     val timeLabel: String?,
     val isOverdue: Boolean,
     val accentColorHex: String?,
-    val birthdayPersonNoteId: String? = null
+    val birthdayPersonNoteId: String? = null,
+    val dayLabel: String? = null
 )

@@ -48,6 +48,7 @@ import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.taskBlockIdExtra
 import com.emberr.presentation.widget.taskIsCheckedExtra
+import com.emberr.presentation.widget.taskOccurrenceDateExtra
 import com.emberr.presentation.widget.widgetNewTaskExtra
 import com.emberr.presentation.widget.widgetTasksScreenExtra
 import org.koin.core.component.KoinComponent
@@ -222,6 +223,7 @@ private fun TaskRow(task: TasksWidgetRow.Task, appWidgetId: Int, context: Contex
                             context = context,
                             appWidgetId = appWidgetId,
                             blockId = task.blockId,
+                            occurrenceDate = task.occurrenceDate,
                             isChecked = !task.isChecked
                         )
                     )
@@ -246,6 +248,15 @@ private fun TaskRow(task: TasksWidgetRow.Task, appWidgetId: Int, context: Contex
                     style = TextStyle(color = secondaryTextColor, fontSize = 13.sp)
                 )
             }
+        }
+
+        if (task.dayLabel != null) {
+            Text(
+                text = task.dayLabel,
+                maxLines = 1,
+                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp),
+                modifier = GlanceModifier.padding(start = 8.dp, top = 2.dp)
+            )
         }
     }
 }
@@ -274,6 +285,7 @@ private fun toggleTaskIntent(
     context: Context,
     appWidgetId: Int,
     blockId: String,
+    occurrenceDate: String?,
     isChecked: Boolean
 ): Intent =
     Intent(context, TasksWidgetActionReceiver::class.java).apply {
@@ -282,4 +294,5 @@ private fun toggleTaskIntent(
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         putExtra(taskBlockIdExtra, blockId)
         putExtra(taskIsCheckedExtra, isChecked)
+        putExtra(taskOccurrenceDateExtra, occurrenceDate)
     }

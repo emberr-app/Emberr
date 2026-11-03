@@ -28,6 +28,8 @@ sealed interface TasksWidgetRow {
         val blockId: String,
         val text: String,
         val isChecked: Boolean,
-        val timeLabel: String?
+        val timeLabel: String?,
+        val occurrenceDate: String? = null,
+        val dayLabel: String? = null
     ) : TasksWidgetRow
 }

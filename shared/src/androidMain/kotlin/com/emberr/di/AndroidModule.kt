@@ -145,7 +145,7 @@ val androidModule = module {
 
     single {
         com.emberr.presentation.widget.calendaragenda.CalendarAgendaWidgetContentReader(
-            calendarTaskDao = get(),
+            noteRepository = get(),
             categoryDao = get(),
             clockFormat = get(),
             firstDayOfWeek = get(),
@@ -182,7 +182,7 @@ val androidModule = module {
 
     single {
         com.emberr.presentation.widget.todaytasks.TodayTasksWidgetContentReader(
-            calendarTaskDao = get(),
+            noteRepository = get(),
             clockFormat = get()
         )
     }
@@ -197,6 +197,7 @@ val androidModule = module {
     single {
         com.emberr.presentation.widget.upcomingevents.UpcomingEventsWidgetContentReader(
             calendarTaskDao = get(),
+            noteRepository = get(),
             categoryDao = get(),
             clockFormat = get(),
             settingsManager = get(),
@@ -232,7 +233,7 @@ val androidModule = module {
 
     single {
         com.emberr.presentation.widget.tasks.TasksWidgetContentReader(
-            calendarTaskDao = get(),
+            noteRepository = get(),
             noteDao = get(),
             spaceDao = get(),
             clockFormat = get()

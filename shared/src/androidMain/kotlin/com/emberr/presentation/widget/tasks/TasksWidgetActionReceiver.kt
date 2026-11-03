@@ -11,6 +11,7 @@ import com.emberr.presentation.widget.applyTaskCompletion
 import com.emberr.presentation.widget.refreshEveryTaskWidget
 import com.emberr.presentation.widget.taskBlockIdExtra
 import com.emberr.presentation.widget.taskIsCheckedExtra
+import com.emberr.presentation.widget.taskOccurrenceDateExtra
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,6 +29,7 @@ class TasksWidgetActionReceiver : BroadcastReceiver() {
         val action = intent.action ?: return
         val blockId = intent.getStringExtra(taskBlockIdExtra)
         val isChecked = intent.getBooleanExtra(taskIsCheckedExtra, false)
+        val occurrenceDate = intent.getStringExtra(taskOccurrenceDateExtra)
         val pendingResult = goAsync()
         val applicationContext = context.applicationContext
 
@@ -36,7 +38,7 @@ class TasksWidgetActionReceiver : BroadcastReceiver() {
                 when (action) {
                     toggleCompletedViewAction -> switchCompletedView(applicationContext, appWidgetId)
                     toggleTaskAction -> if (blockId != null) {
-                        markTask(applicationContext, blockId, isChecked)
+                        markTask(applicationContext, blockId, isChecked, occurrenceDate)
                     }
                 }
             } catch (cause: Exception) {
@@ -53,8 +55,8 @@ class TasksWidgetActionReceiver : BroadcastReceiver() {
         refreshTaskWidget(context, glanceId)
     }
 
-    private suspend fun markTask(context: Context, blockId: String, isChecked: Boolean) {
-        applyTaskCompletion(blockId, isChecked)
+    private suspend fun markTask(context: Context, blockId: String, isChecked: Boolean, occurrenceDate: String?) {
+        applyTaskCompletion(blockId, isChecked, occurrenceDate)
         refreshEveryTaskWidget(context)
     }
 }

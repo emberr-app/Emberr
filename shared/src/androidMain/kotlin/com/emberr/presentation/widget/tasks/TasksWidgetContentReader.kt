@@ -1,16 +1,17 @@
 // Loads the task list from storage and groups it into rows the widget can draw.
 package com.emberr.presentation.widget.tasks
 
-import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.data.local.room.dao.SpaceDao
 import com.emberr.data.local.room.entity.ACCOUNT_TASKS_INBOX_NOTE_ID
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.TaskSource
+import com.emberr.domain.repository.NoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
@@ -27,22 +28,23 @@ import com.emberr.presentation.home.overview.tasks.taskHeadingsByNoteId
 private const val maximumTasksShown = 40
 private const val maximumCharactersPerTask = 160
 private const val inboxNoteTitle = "Inbox"
+private const val repeatingSectionTitle = "Repeating"
 
 class TasksWidgetContentReader(
-    private val calendarTaskDao: CalendarTaskDao,
+    private val noteRepository: NoteRepository,
     private val noteDao: NoteDao,
     private val spaceDao: SpaceDao,
     private val clockFormat: WidgetClockFormat
 ) {
     fun observeTasks(): Flow<List<CalendarTaskEntity>> =
-        calendarTaskDao.getTasksOutsideTrashAcrossSpacesFlow()
+        noteRepository.getTasksWithCurrentRepeatDays(Clock.System.todayIn(TimeZone.currentSystemDefault()))
             .flowOn(Dispatchers.IO)
             .catch { cause -> WidgetLog.e("Stopped observing the task list", cause) }
 
     suspend fun readContentOnce(isShowingCompleted: Boolean): TasksWidgetContent? =
         withContext(Dispatchers.IO) {
             val tasks = try {
-                calendarTaskDao.getTasksOutsideTrashAcrossSpaces()
+                noteRepository.getTasksWithCurrentRepeatDays(Clock.System.todayIn(TimeZone.currentSystemDefault())).first()
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read the task list", cause)
                 return@withContext null
@@ -73,14 +75,21 @@ class TasksWidgetContentReader(
             headingFor(task, noteHeadingsById, inboxNoteIds) == null
         }
 
-        val dailyTasks = labelled
+        val (repeatingTasks, nonRepeatingTasks) = labelled.partition { task -> task.recurrenceFrequency != null }
+        val sortedRepeatingTasks = repeatingTasks.sortedWith(
+            compareBy(
+                { task -> task.targetDate },
+                { task -> task.reminderTimestamp ?: Long.MAX_VALUE }
+            )
+        )
+        val dailyTasks = nonRepeatingTasks
             .filter { task -> task.sourceType == TaskSource.DAILY }
             .sortedBy { task -> task.noteId }
-        val noteTasks = labelled
+        val noteTasks = nonRepeatingTasks
             .filter { task -> task.sourceType != TaskSource.DAILY }
             .sortedWith(compareBy({ task -> noteHeadingsById[task.noteId].orEmpty() }, { task -> task.noteId }))
 
-        val orderedTasks = (sortedWithinGroup(unlabelled) + dailyTasks + noteTasks)
+        val orderedTasks = (sortedWithinGroup(unlabelled) + sortedRepeatingTasks + dailyTasks + noteTasks)
             .take(maximumTasksShown)
 
         val rows = mutableListOf<TasksWidgetRow>()
@@ -98,7 +107,9 @@ class TasksWidgetContentReader(
                 blockId = task.blockId,
                 text = task.text.trim().take(maximumCharactersPerTask).ifBlank { "Untitled task" },
                 isChecked = task.isChecked,
-                timeLabel = task.reminderTimestamp?.let { timestamp -> clockFormat.clockTimeOf(timestamp) }
+                timeLabel = task.reminderTimestamp?.let { timestamp -> clockFormat.clockTimeOf(timestamp) },
+                occurrenceDate = task.targetDate,
+                dayLabel = if (task.recurrenceFrequency != null) task.targetDate?.let(::dailyDateLabel) else null
             )
         }
 
@@ -144,6 +155,7 @@ class TasksWidgetContentReader(
         noteHeadingsById: Map<String, String>,
         inboxNoteIds: Set<String>
     ): String? = when {
+        task.recurrenceFrequency != null -> repeatingSectionTitle
         task.sourceType == TaskSource.DAILY -> dailyDateLabel(task.noteId)
         task.noteId in inboxNoteIds -> null
         else -> noteHeadingsById[task.noteId] ?: "Note"

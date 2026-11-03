@@ -43,6 +43,7 @@ interface NoteRepository {
     fun getCalendarTasksInRange(startDateString: String, endDateString: String): Flow<List<CalendarTaskEntity>>
     fun getAllTasksFlow(): Flow<List<CalendarTaskEntity>>
     fun getCalendarTasksForSearch(today: LocalDate): Flow<List<CalendarTaskEntity>>
+    fun getTasksWithCurrentRepeatDays(today: LocalDate): Flow<List<CalendarTaskEntity>>
 
     // Marks a single occurrence of a recurring checkbox as done/undone without touching the
     // base block or any other occurrence - see CalendarEventExceptionEntity.

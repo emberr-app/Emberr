@@ -1,11 +1,12 @@
 // Loads today's tasks and turns them into the date heading and rows the widget draws.
 package com.emberr.presentation.widget.todaytasks
 
-import com.emberr.data.local.room.dao.CalendarTaskDao
 import com.emberr.data.local.room.entity.CalendarTaskEntity
+import com.emberr.domain.repository.NoteRepository
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
@@ -17,7 +18,7 @@ private const val maximumTasksShown = 12
 private const val maximumCharactersPerTitle = 120
 
 class TodayTasksWidgetContentReader(
-    private val calendarTaskDao: CalendarTaskDao,
+    private val noteRepository: NoteRepository,
     private val clockFormat: WidgetClockFormat
 ) {
 
@@ -25,7 +26,7 @@ class TodayTasksWidgetContentReader(
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
         val tasks = try {
-            calendarTaskDao.getTasksOnDate(today.toString())
+            noteRepository.getCalendarTasksForDate(today.toString()).first()
         } catch (cause: Exception) {
             WidgetLog.e("Could not read today's tasks", cause)
             return@withContext null
@@ -53,6 +54,7 @@ class TodayTasksWidgetContentReader(
 
                 TodayTaskRow(
                     blockId = task.blockId,
+                    occurrenceDate = task.targetDate,
                     title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled task" },
                     isChecked = task.isChecked,
                     scheduleLabel = when {

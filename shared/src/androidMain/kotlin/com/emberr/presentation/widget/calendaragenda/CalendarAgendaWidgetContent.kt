@@ -26,5 +26,8 @@ data class AgendaEvent(
     val whenLabel: String,
     val isDone: Boolean,
     val accentColorHex: String?,
-    val birthdayPersonNoteId: String? = null
+    val birthdayPersonNoteId: String? = null,
+    val occurrenceDate: String? = null,
+    val isRepeating: Boolean = false,
+    val dayLabel: String? = null
 )

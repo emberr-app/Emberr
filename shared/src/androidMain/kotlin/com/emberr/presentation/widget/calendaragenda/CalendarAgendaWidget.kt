@@ -62,6 +62,8 @@ private val chevronSize = 18.dp
 private val dayHighlightSize = 17.dp
 private val eventAccentWidth = 3.dp
 private val headerHeight = 24.dp
+private const val repeatingHeaderItemId = -1L
+private const val otherEventsHeaderItemId = -2L
 
 class CalendarAgendaWidget : GlanceAppWidget(), KoinComponent {
 
@@ -264,11 +266,36 @@ private fun EventList(context: Context, content: CalendarAgendaWidgetContent?) {
         return
     }
 
+    val (repeatingEvents, otherEvents) = events.partition { event -> event.isRepeating }
+
     LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-        items(items = events, itemId = { event -> event.blockId.hashCode().toLong() }) { event ->
+        if (repeatingEvents.isNotEmpty()) {
+            item(itemId = repeatingHeaderItemId) { SectionHeader(label = "Repeating") }
+            items(items = repeatingEvents, itemId = { event -> "repeating/${event.blockId}".hashCode().toLong() }) { event ->
+                EventRow(context = context, event = event)
+            }
+            if (otherEvents.isNotEmpty()) {
+                item(itemId = otherEventsHeaderItemId) { SectionHeader(label = "Events") }
+            }
+        }
+        items(items = otherEvents, itemId = { event -> "${event.blockId}/${event.occurrenceDate}".hashCode().toLong() }) { event ->
             EventRow(context = context, event = event)
         }
     }
+}
+
+@Composable
+private fun SectionHeader(label: String) {
+    Text(
+        text = label,
+        maxLines = 1,
+        style = TextStyle(
+            color = secondaryTextColor,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+        ),
+        modifier = GlanceModifier.padding(top = 4.dp, bottom = 4.dp)
+    )
 }
 
 @Composable
@@ -305,6 +332,15 @@ private fun EventRow(context: Context, event: AgendaEvent) {
                 text = event.whenLabel,
                 maxLines = 1,
                 style = TextStyle(color = secondaryTextColor, fontSize = 13.sp)
+            )
+        }
+
+        if (event.dayLabel != null) {
+            Text(
+                text = event.dayLabel,
+                maxLines = 1,
+                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp),
+                modifier = GlanceModifier.padding(start = 8.dp, top = 2.dp)
             )
         }
     }

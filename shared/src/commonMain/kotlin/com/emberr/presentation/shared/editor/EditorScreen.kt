@@ -535,6 +535,7 @@ fun EditorScreen(
     toolbarOffset: Dp = 0.dp,
     headerContent: (@Composable LazyItemScope.() -> Unit)? = null,
     sectionLabelFor: ((NoteBlock) -> String?)? = null,
+    trailingLabelFor: ((NoteBlock) -> String?)? = null,
     emptyContent: (@Composable () -> Unit)? = null,
     emptyNotePlaceholder: String = "",
     mobileMenuState: MobileMenuState = MobileMenuState.MAIN,
@@ -1448,7 +1449,8 @@ fun EditorScreen(
                             selectionRequest = localSelectionRequest ?: selectionRequest,
                             validNoteIds = validNoteIds,
                             onRightClick = if (showsSelectionMenuOnRightClick) openSelectionMenuAt else null,
-                            onShiftClick = selectBlockRangeTo
+                            onShiftClick = selectBlockRangeTo,
+                            trailingLabel = trailingLabelFor?.invoke(block)
                         )
                     }
                 }
