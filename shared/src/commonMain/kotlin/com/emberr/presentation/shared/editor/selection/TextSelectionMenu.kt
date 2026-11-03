@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentPaste
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +27,7 @@ import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.format_bold
 import emberr.shared.generated.resources.italic
 import emberr.shared.generated.resources.scissor2
+import emberr.shared.generated.resources.select_all
 import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.trash
@@ -85,7 +85,7 @@ fun TextSelectionMenu(
                     actions.cut?.let { SlashMenuItemData("Cut", Res.drawable.scissor2, action = closeThen(it)) },
                     actions.paste?.let { SlashMenuItemData("Paste", Icons.Default.ContentPaste, action = closeThen(it)) },
                     actions.delete?.let { SlashMenuItemData("Delete", Res.drawable.trash, action = closeThen(it)) },
-                    actions.selectAll?.let { SlashMenuItemData("Select All", Icons.Default.SelectAll, action = closeThen(it)) }
+                    actions.selectAll?.let { SlashMenuItemData("Select All", Res.drawable.select_all, action = closeThen(it)) }
                 )
                 val formattingItems = if (toggleFormat == null) {
                     emptyList()
