@@ -284,7 +284,8 @@ private fun DatabaseInsertColumnOption(
         title = "Add property",
         anchor = { openLayer ->
             DatabaseMenuOption(label = label, icon = { DatabaseOptionIcon(icon) }, onClick = openLayer)
-        }
+        },
+        hasSearchBar = true
     ) { closeLayerAnd ->
         DatabaseAddColumnChoices(
             block = block,
