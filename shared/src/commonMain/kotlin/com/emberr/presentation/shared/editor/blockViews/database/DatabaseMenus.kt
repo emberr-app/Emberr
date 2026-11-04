@@ -84,6 +84,7 @@ internal fun DatabaseMenu(
     onDismiss: () -> Unit,
     desktopWidth: Dp? = null,
     showsCloseButton: Boolean = true,
+    hasSearchBar: Boolean = false,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     if (isDesktopPlatform) {
@@ -110,17 +111,22 @@ internal fun DatabaseMenu(
             expanded = expanded,
             onDismiss = onDismiss,
             title = title,
-            contentHorizontalPadding = 0.dp
+            contentHorizontalPadding = 0.dp,
+            scrollsContent = !hasSearchBar
         ) { closeAnd ->
-            Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = SheetBottomPadding)) {
+            if (hasSearchBar) {
                 content(closeAnd)
-                if (showsCloseButton) {
-                    DatabaseMenuContent {
-                        EmberrButtonPrimary(
-                            text = "Close",
-                            onClick = { closeAnd { } },
-                            modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-                        )
+            } else {
+                Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = SheetBottomPadding)) {
+                    content(closeAnd)
+                    if (showsCloseButton) {
+                        DatabaseMenuContent {
+                            EmberrButtonPrimary(
+                                text = "Close",
+                                onClick = { closeAnd { } },
+                                modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -135,6 +141,7 @@ internal fun DatabaseMenuLayer(
     desktopWidth: Dp? = null,
     showsCloseButton: Boolean = true,
     anchorIsMenuRow: Boolean = true,
+    hasSearchBar: Boolean = false,
     content: @Composable ColumnScope.(closeLayerAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     EmberrDesktopSubmenu(
@@ -148,6 +155,7 @@ internal fun DatabaseMenuLayer(
             onDismiss = closeLayer,
             desktopWidth = desktopWidth,
             showsCloseButton = showsCloseButton,
+            hasSearchBar = hasSearchBar,
             content = content
         )
     }
