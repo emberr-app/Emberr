@@ -1,5 +1,6 @@
 package com.emberr.presentation.home.note
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -11,9 +12,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -33,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -65,6 +70,8 @@ import androidx.compose.ui.unit.sp
 import com.emberr.presentation.shared.components.emberrBorder
 import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.presentation.shared.stableStatusBarsPadding
+import com.emberr.presentation.shared.fullKeyboardHeightPx
+import com.emberr.presentation.shared.heightWhileKeyboardMoves
 import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.selection.BlockSelectionMenuContent
 import com.emberr.presentation.shared.editor.selection.LocalCrossBlockSelection
@@ -97,12 +104,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.WindowInsets
@@ -131,6 +138,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.ui.graphics.painter.Painter
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import com.emberr.presentation.shared.components.EmberrSearchTextField
+import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
+import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.editor.BlockStyleBar
 import dev.chrisbanes.haze.hazeSource
@@ -947,33 +958,19 @@ fun NoteScreen(
                         expanded = showIconPicker,
                         onDismiss = { showIconPicker = false },
                         title = "Choose Icon",
+                        contentHorizontalPadding = 0.dp,
+                        scrollsContent = false
                     ) { _ ->
                       CompositionLocalProvider(
                         LocalIndication provides NoRippleIndicationNodeFactory,
                         LocalRippleConfiguration provides null
                       ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(450.dp)
-                            ) {
-                                CategorizedEmojiPicker(
-                                    onEmojiSelected = { emoji ->
-                                        viewModel.updateIcon(emoji)
-                                        showIconPicker = false
-                                    },
-                                    modifier = Modifier.fillMaxSize()
-                                )
+                        EmojiPickerSheetContent(
+                            onEmojiSelected = { emoji ->
+                                viewModel.updateIcon(emoji)
+                                showIconPicker = false
                             }
-
-                            EmberrButtonPrimary(
-                                text = "Close",
-                                onClick = { showIconPicker = false },
-                                modifier = Modifier.fillMaxWidth()
-                                    .padding(vertical = 12.dp, horizontal = 20.dp)
-                            )
-                        }
+                        )
                       }
                     }
                 }
@@ -983,6 +980,9 @@ fun NoteScreen(
 }
 
 private val NoteTopBarSidePadding = if (isDesktopPlatform) 22.dp else 16.dp
+private val PhoneEmojiSearchBarSpace = 78.dp
+private val EmojiPickerSheetHeight = 450.dp
+private val PhoneEmojiPickerSidePadding = 20.dp
 
 // Note header — cover image, icon, title
 @Composable
@@ -1071,18 +1071,32 @@ private fun NoteHeader(
             }
 
             if (isDesktopPlatform) {
-                EmberrDesktopMenu(
-                    expanded = showIconPicker,
-                    onDismissRequest = onDismissIconPicker
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .centeredWithMaxWidth(contentMaxWidth)
+                        .fillMaxWidth()
                 ) {
-                    Box(modifier = Modifier.size(width = 340.dp, height = 380.dp)) {
-                        CategorizedEmojiPicker(
-                            onEmojiSelected = { emoji ->
-                                onIconChange(emoji)
-                                onDismissIconPicker()
-                            },
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(start = 36.dp)
+                            .offset(y = 36.dp)
+                    ) {
+                        EmberrDesktopMenu(
+                            expanded = showIconPicker,
+                            onDismissRequest = onDismissIconPicker
+                        ) {
+                            Box(modifier = Modifier.size(width = 340.dp, height = 380.dp).padding(horizontal = 8.dp, vertical = 6.dp)) {
+                                CategorizedEmojiPicker(
+                                    onEmojiSelected = { emoji ->
+                                        onIconChange(emoji)
+                                        onDismissIconPicker()
+                                    },
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -1209,6 +1223,21 @@ private fun NoteTitleField(
 
 // CategorizedEmojiPicker
 @Composable
+fun EmojiPickerSheetContent(onEmojiSelected: (String) -> Unit) {
+    val density = LocalDensity.current
+    val keyboardHeightNow = WindowInsets.ime.getBottom(density)
+    val fullKeyboardHeight = fullKeyboardHeightPx()
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val pickerHeight = with(density) {
+            heightWhileKeyboardMoves(EmojiPickerSheetHeight, maxHeight, keyboardHeightNow.toDp(), fullKeyboardHeight.toDp())
+        }
+        Box(modifier = Modifier.fillMaxWidth().height(pickerHeight).navigationBarsPadding()) {
+            CategorizedEmojiPicker(onEmojiSelected = onEmojiSelected, modifier = Modifier.fillMaxSize())
+        }
+    }
+}
+
+@Composable
 fun CategorizedEmojiPicker(
     onEmojiSelected: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -1256,124 +1285,158 @@ fun CategorizedEmojiPicker(
         { index -> coroutineScope.launch { pagerState.animateScrollToPage(index) } }
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Box(modifier = Modifier.padding(bottom = 4.dp)) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = {
-                    Text(
-                        "Search emojis...",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
-                    focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+    val focusManager = LocalFocusManager.current
+    val emojiGridHazeState = remember { HazeState() }
+    val tabRowState = rememberLazyListState()
+    val density = LocalDensity.current
+    var pillRowHeightPx by remember { mutableIntStateOf(0) }
+    val gridBottomPadding = navBarPadding + if (isDesktopPlatform) 16.dp else PhoneEmojiSearchBarSpace
+    val pillRowHeight = with(density) { pillRowHeightPx.toDp() }
+    val sidePadding = if (isDesktopPlatform) 0.dp else PhoneEmojiPickerSidePadding
+    val categoryGridPadding = if (isDesktopPlatform) {
+        PaddingValues(top = pillRowHeight + 12.dp, bottom = gridBottomPadding)
+    } else {
+        PaddingValues(start = sidePadding, top = 12.dp, end = sidePadding, bottom = gridBottomPadding + pillRowHeight + 8.dp)
+    }
 
-        if (searchQuery.isNotEmpty()) {
-            if (searchResults.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "No emojis found",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+    LaunchedEffect(pagerState.currentPage) {
+        tabRowState.animateScrollToItem((pagerState.currentPage - 1).coerceAtLeast(0))
+    }
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (isDesktopPlatform) {
+                EmberrTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = "Search emojis",
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                )
+            }
+
+            if (searchQuery.isNotEmpty()) {
+                if (searchResults.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "No emojis found",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 44.dp),
+                        modifier = Modifier.fillMaxSize().hazeSource(emojiGridHazeState),
+                        contentPadding = PaddingValues(
+                            start = sidePadding,
+                            top = 8.dp,
+                            end = sidePadding,
+                            bottom = gridBottomPadding
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(
+                            items = searchResults,
+                            key = { it },
+                            contentType = { "emoji_item" }
+                        ) { emoji ->
+                            EmojiGridItem(emoji = emoji, onClick = { onEmojiSelected(emoji) })
+                        }
+                    }
                 }
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 44.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        top = 8.dp,
-                        bottom = navBarPadding + 16.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(
-                        items = searchResults,
-                        key = { it },
-                        contentType = { "emoji_item" }
-                    ) { emoji ->
-                        EmojiGridItem(emoji = emoji, onClick = { onEmojiSelected(emoji) })
+                Box(modifier = Modifier.fillMaxSize()) {
+                    HorizontalPager(
+                        state = pagerState,
+                        beyondViewportPageCount = 0,
+                        modifier = Modifier.fillMaxSize().hazeSource(emojiGridHazeState)
+                    ) { page ->
+                        val activeEmojis = categoryEmojiLists[page]
+
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 44.dp),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = categoryGridPadding,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            items(
+                                items = activeEmojis,
+                                key = { it },
+                                contentType = { "emoji_item" }
+                            ) { emoji ->
+                                EmojiGridItem(emoji = emoji, onClick = { onEmojiSelected(emoji) })
+                            }
+                        }
                     }
-                }
-            }
-        } else {
-            SecondaryScrollableTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                containerColor = Color.Transparent,
-                edgePadding = 8.dp,
-                indicator = {
-                    TabRowDefaults.SecondaryIndicator(
-                        Modifier.tabIndicatorOffset(pagerState.currentPage),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                },
-                divider = {}
-            ) {
-                categoryNames.forEachIndexed { index, title ->
-                    val selected = pagerState.currentPage == index
-                    Tab(
-                        selected = selected,
-                        onClick = { onTabClick(index) },
-                        text = {
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+
+                    LazyRow(
+                        state = tabRowState,
+                        contentPadding = PaddingValues(horizontal = sidePadding),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .align(if (isDesktopPlatform) Alignment.TopCenter else Alignment.BottomCenter)
+                            .padding(bottom = if (isDesktopPlatform) 0.dp else PhoneEmojiSearchBarSpace)
+                            .fillMaxWidth()
+                            .horizontalScrollFromBackAndForwardButtons(tabRowState)
+                            .onSizeChanged { size -> pillRowHeightPx = size.height }
+                    ) {
+                        itemsIndexed(categoryNames) { index, title ->
+                            EmojiCategoryPill(
+                                label = title,
+                                isSelected = pagerState.currentPage == index,
+                                hazeState = emojiGridHazeState,
+                                onClick = { onTabClick(index) }
                             )
                         }
-                    )
-                }
-            }
-
-            HorizontalPager(
-                state = pagerState,
-                beyondViewportPageCount = 0,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
-                val activeEmojis = categoryEmojiLists[page]
-
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 44.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        top = 12.dp,
-                        bottom = navBarPadding + 16.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(
-                        items = activeEmojis,
-                        key = { it },
-                        contentType = { "emoji_item" }
-                    ) { emoji ->
-                        EmojiGridItem(emoji = emoji, onClick = { onEmojiSelected(emoji) })
                     }
                 }
             }
         }
+
+        if (!isDesktopPlatform) {
+            EmberrSearchTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = "Search emojis",
+                hazeState = emojiGridHazeState,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                onSubmit = { focusManager.clearFocus() },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = sidePadding, vertical = 14.dp)
+                    .hidesEditorToolbarWhileFocused()
+            )
+        }
     }
+}
+
+@Composable
+private fun EmojiCategoryPill(label: String, isSelected: Boolean, hazeState: HazeState, onClick: () -> Unit) {
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        label = "EmojiCategoryPillBackground"
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        label = "EmojiCategoryPillContent"
+    )
+    val borderColor = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall,
+        color = contentColor,
+        maxLines = 1,
+        modifier = Modifier
+            .clip(CircleShape)
+            .emberrBlur(hazeState, EmberrBlur.Regular)
+            .background(backgroundColor)
+            .border(width = 0.5.dp, color = borderColor, shape = CircleShape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp)
+    )
 }
 
 @Composable
