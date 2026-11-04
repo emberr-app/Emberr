@@ -360,27 +360,101 @@ fun DailyScreen(
         }
     }
 
+    var mobileMenuState by remember { mutableStateOf(MobileMenuState.MAIN) }
+    var slashQuery by remember { mutableStateOf("") }
+    var mentionQuery by remember { mutableStateOf<String?>(null) }
+
+    val onMobileMenuStateChange: (MobileMenuState) -> Unit = { newState ->
+        if (mobileMenuState == MobileMenuState.MENTION && newState != MobileMenuState.MENTION) {
+            EditorEventBus.cancelMentionEvent.tryEmit(Unit)
+        }
+        mobileMenuState = newState
+    }
+
+    LaunchedEffect(isKeyboardOpen) {
+        if (isKeyboardOpen) return@LaunchedEffect
+        delay(250.milliseconds)
+        if (!isKeyboardOpen && mobileMenuState != MobileMenuState.MAIN) {
+            onMobileMenuStateChange(MobileMenuState.MAIN)
+        }
+    }
+
+    val isToolbarShown = showToolbar || mobileMenuState != MobileMenuState.MAIN
+
+    val dailyToolbar: @Composable BoxScope.() -> Unit = {
+        AnimatedVisibility(
+            visible = isToolbarShown,
+            enter = slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = tween(durationMillis = 250, delayMillis = 100, easing = FastOutSlowInEasing)
+            ) + fadeIn(tween(durationMillis = 250, delayMillis = 100)),
+            exit = slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+            ) + fadeOut(tween(durationMillis = 200)),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .imePadding()
+                .navigationBarsPadding()
+                .padding(bottom = 8.dp, start = 6.dp, end = 6.dp)
+        ) {
+            EditorToolbar(
+                mobileMenuState = mobileMenuState,
+                onMenuStateChange = onMobileMenuStateChange,
+                query = slashQuery,
+                hazeState = hazeState,
+                onChangeBlockType = { sharedEditorActions.onChangeBlockType(it) },
+                onToggleFormat = { sharedEditorActions.onToggleFormat(it) },
+                onAdjustIndentation = { sharedEditorActions.onAdjustIndentation(it) },
+                onSetAlignment = { sharedEditorActions.onSetBlockAlignment(it) },
+                onInsertMediaBlock = { sharedEditorActions.onInsertMediaBlock(it) },
+                allLinkableNotes = allLinkableNotes,
+                mentionQuery = mentionQuery ?: "",
+                onMentionNoteSelected = { noteId ->
+                    val note = allLinkableNotes.find { it.noteId == noteId }
+                    val safeTitle = (note?.title ?: "").replace("[", "").replace("]", "").ifEmpty { "Untitled" }
+                    EditorEventBus.confirmMentionEvent.tryEmit(safeTitle to noteId)
+                },
+                onMentionCreateNote = { title ->
+                    val safeTitle = title.replace("[", "").replace("]", "").trim().ifEmpty { "Untitled" }
+                    val newNoteId = sharedEditorActions.onCreateLinkedNote(safeTitle)
+                    EditorEventBus.confirmMentionEvent.tryEmit(safeTitle to newNoteId)
+                },
+                onMentionCreateBlank = {
+                    val newNoteId = sharedEditorActions.onCreateLinkedNote("Untitled")
+                    EditorEventBus.confirmMentionAndOpenEvent.tryEmit("Untitled" to newNoteId)
+                },
+                onNoteLinkSelected = { noteId -> sharedEditorActions.onInsertLinkedNoteBlock(noteId) },
+                onNoteLinkCreateNote = { title ->
+                    val newNoteId = sharedEditorActions.onCreateLinkedNote(title)
+                    sharedEditorActions.onInsertLinkedNoteBlock(newNoteId)
+                },
+                onNoteLinkCreateBlank = {
+                    val newNoteId = sharedEditorActions.onCreateLinkedNote("Untitled")
+                    sharedEditorActions.onInsertLinkedNoteBlock(newNoteId)
+                    sharedEditorActions.onNoteLinkClick(newNoteId)
+                },
+                onCanvasLinkSelected = { canvasNoteId -> sharedEditorActions.onInsertCanvasBlock(canvasNoteId) },
+                loadLinkableCanvases = { sharedEditorActions.getLinkableCanvases() },
+                onDatabaseLinkSelected = { databaseId -> sharedEditorActions.onInsertLinkedDatabaseBlock(databaseId) },
+                loadLinkableDatabases = { sharedEditorActions.getLinkableDatabases() },
+                onSelectCurrentBlock = {
+                    GlobalEditorState.currentlyFocusedBlockId?.let { id ->
+                        sharedEditorActions.onToggleSelection(id)
+                    }
+                },
+                onClearSlashQuery = { sharedEditorActions.onClearSlashQuery() },
+                onReplaceSlashQuery = { sharedEditorActions.onReplaceSlashQuery(it) },
+                canUndo = canUndo,
+                canRedo = canRedo,
+                onUndo = { viewModel.undo() },
+                onRedo = { viewModel.redo() },
+                showHistory = true
+            )
+        }
+    }
+
     val rightPanelContent: @Composable (Dp) -> Unit = { editorTopContentPadding ->
-        var mobileMenuState by remember { mutableStateOf(MobileMenuState.MAIN) }
-        var slashQuery by remember { mutableStateOf("") }
-        var mentionQuery by remember { mutableStateOf<String?>(null) }
-
-        val onMobileMenuStateChange: (MobileMenuState) -> Unit = { newState ->
-            if (mobileMenuState == MobileMenuState.MENTION && newState != MobileMenuState.MENTION) {
-                EditorEventBus.cancelMentionEvent.tryEmit(Unit)
-            }
-            mobileMenuState = newState
-        }
-
-        LaunchedEffect(isKeyboardOpen) {
-            if (isKeyboardOpen) return@LaunchedEffect
-            delay(250.milliseconds)
-            if (!isKeyboardOpen && mobileMenuState != MobileMenuState.MAIN) {
-                onMobileMenuStateChange(MobileMenuState.MAIN)
-            }
-        }
-
-        val showToolbar = showToolbar || mobileMenuState != MobileMenuState.MAIN
 
         Box(
             modifier = Modifier
@@ -474,77 +548,6 @@ fun DailyScreen(
                 }
             }
 
-            AnimatedVisibility(
-                visible = showToolbar,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(durationMillis = 250, delayMillis = 100, easing = FastOutSlowInEasing)
-                ) + fadeIn(tween(durationMillis = 250, delayMillis = 100)),
-                exit = slideOutVertically(
-                    targetOffsetY = { it },
-                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                ) + fadeOut(tween(durationMillis = 200)),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .imePadding()
-                    .navigationBarsPadding()
-                    .padding(bottom = 8.dp, start = 6.dp, end = 6.dp)
-            ) {
-                EditorToolbar(
-                    mobileMenuState = mobileMenuState,
-                    onMenuStateChange = onMobileMenuStateChange,
-                    query = slashQuery,
-                    hazeState = hazeState,
-                    onChangeBlockType = { sharedEditorActions.onChangeBlockType(it) },
-                    onToggleFormat = { sharedEditorActions.onToggleFormat(it) },
-                    onAdjustIndentation = { sharedEditorActions.onAdjustIndentation(it) },
-                    onSetAlignment = { sharedEditorActions.onSetBlockAlignment(it) },
-                    onInsertMediaBlock = { sharedEditorActions.onInsertMediaBlock(it) },
-                    allLinkableNotes = allLinkableNotes,
-                    mentionQuery = mentionQuery ?: "",
-                    onMentionNoteSelected = { noteId ->
-                        val note = allLinkableNotes.find { it.noteId == noteId }
-                        val safeTitle = (note?.title ?: "").replace("[", "").replace("]", "").ifEmpty { "Untitled" }
-                        EditorEventBus.confirmMentionEvent.tryEmit(safeTitle to noteId)
-                    },
-                    onMentionCreateNote = { title ->
-                        val safeTitle = title.replace("[", "").replace("]", "").trim().ifEmpty { "Untitled" }
-                        val newNoteId = sharedEditorActions.onCreateLinkedNote(safeTitle)
-                        EditorEventBus.confirmMentionEvent.tryEmit(safeTitle to newNoteId)
-                    },
-                    onMentionCreateBlank = {
-                        val newNoteId = sharedEditorActions.onCreateLinkedNote("Untitled")
-                        EditorEventBus.confirmMentionAndOpenEvent.tryEmit("Untitled" to newNoteId)
-                    },
-                    onNoteLinkSelected = { noteId -> sharedEditorActions.onInsertLinkedNoteBlock(noteId) },
-                    onNoteLinkCreateNote = { title ->
-                        val newNoteId = sharedEditorActions.onCreateLinkedNote(title)
-                        sharedEditorActions.onInsertLinkedNoteBlock(newNoteId)
-                    },
-                    onNoteLinkCreateBlank = {
-                        val newNoteId = sharedEditorActions.onCreateLinkedNote("Untitled")
-                        sharedEditorActions.onInsertLinkedNoteBlock(newNoteId)
-                        sharedEditorActions.onNoteLinkClick(newNoteId)
-                    },
-                    onCanvasLinkSelected = { canvasNoteId -> sharedEditorActions.onInsertCanvasBlock(canvasNoteId) },
-                    loadLinkableCanvases = { sharedEditorActions.getLinkableCanvases() },
-                    onDatabaseLinkSelected = { databaseId -> sharedEditorActions.onInsertLinkedDatabaseBlock(databaseId) },
-                    loadLinkableDatabases = { sharedEditorActions.getLinkableDatabases() },
-                    onSelectCurrentBlock = {
-                        GlobalEditorState.currentlyFocusedBlockId?.let { id ->
-                            sharedEditorActions.onToggleSelection(id)
-                        }
-                    },
-                    onClearSlashQuery = { sharedEditorActions.onClearSlashQuery() },
-                    onReplaceSlashQuery = { sharedEditorActions.onReplaceSlashQuery(it) },
-                    canUndo = canUndo,
-                    canRedo = canRedo,
-                    onUndo = { viewModel.undo() },
-                    onRedo = { viewModel.redo() },
-                    showHistory = true
-                )
-            }
-
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -606,141 +609,145 @@ fun DailyScreen(
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0),
-        topBar = {
-            val calendarStripHeightAllowance = 44.dp
-            val headerBlurHeight = DailyHeaderBaseBlurHeight + calendarStripHeightAllowance
-            val headerGradientHeight = DailyHeaderBaseGradientHeight + calendarStripHeightAllowance
-            var headerWithStripHeightPx by remember { mutableIntStateOf(0) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets(0),
+            topBar = {
+                val calendarStripHeightAllowance = 44.dp
+                val headerBlurHeight = DailyHeaderBaseBlurHeight + calendarStripHeightAllowance
+                val headerGradientHeight = DailyHeaderBaseGradientHeight + calendarStripHeightAllowance
+                var headerWithStripHeightPx by remember { mutableIntStateOf(0) }
 
-            Column(modifier = Modifier.onSizeChanged { headerWithStripHeightPx = it.height }) {
-                EmberrTopHeaderBar(
-                    modifier = Modifier.pointerInput(Unit) { detectTapGestures {} },
-                    title = dailyHeaderTitle(selectedDate),
-                    titlePlacement = TopHeaderTitlePlacement.Start,
-                    titleStyle = MaterialTheme.typography.titleLarge,
-                    titleColor = MaterialTheme.colorScheme.onBackground,
-                    titlePadding = PaddingValues(top = 10.dp, bottom = 8.dp),
-                    onTitleClick = { showCalendarSheet = true },
-                    showBackButton = false,
-                    reserveBackButtonSpace = false,
-                    hazeState = hazeState,
-                    applyStatusBarPadding = true,
-                    contentPadding = topHeaderBarPadding(top = 8.dp, bottom = 14.dp),
-                    topEdgeBlurHeight = headerBlurHeight,
-                    topEdgeGradientHeight = headerGradientHeight,
-                    flatFadeHeight = with(density) { headerWithStripHeightPx.toDp() },
-                    topEdgeFadeAlpha = topEdgeFadeAlpha,
-                    actions = {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            TopBarIconButton(
-                                icon = painterResource(Res.drawable.history2),
-                                contentDescription = "Open timeline",
-                                bgColor = Color.Transparent,
-                                tint = MaterialTheme.colorScheme.primary,
-                                hazeState = hazeState,
-                                hazeStyle = EmberrBlur.Regular,
-                                tooltip = "Timeline",
-                                onClick = {
-                                    viewModel.loadTimeline()
-                                    showTimelineDialog = true
-                                }
-                            )
-
-                            Box {
-                                TopBarIconButtonGroup(
+                Column(modifier = Modifier.onSizeChanged { headerWithStripHeightPx = it.height }) {
+                    EmberrTopHeaderBar(
+                        modifier = Modifier.pointerInput(Unit) { detectTapGestures {} },
+                        title = dailyHeaderTitle(selectedDate),
+                        titlePlacement = TopHeaderTitlePlacement.Start,
+                        titleStyle = MaterialTheme.typography.titleLarge,
+                        titleColor = MaterialTheme.colorScheme.onBackground,
+                        titlePadding = PaddingValues(top = 10.dp, bottom = 8.dp),
+                        onTitleClick = { showCalendarSheet = true },
+                        showBackButton = false,
+                        reserveBackButtonSpace = false,
+                        hazeState = hazeState,
+                        applyStatusBarPadding = true,
+                        contentPadding = topHeaderBarPadding(top = 8.dp, bottom = 14.dp),
+                        topEdgeBlurHeight = headerBlurHeight,
+                        topEdgeGradientHeight = headerGradientHeight,
+                        flatFadeHeight = with(density) { headerWithStripHeightPx.toDp() },
+                        topEdgeFadeAlpha = topEdgeFadeAlpha,
+                        actions = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TopBarIconButton(
+                                    icon = painterResource(Res.drawable.history2),
+                                    contentDescription = "Open timeline",
                                     bgColor = Color.Transparent,
                                     tint = MaterialTheme.colorScheme.primary,
                                     hazeState = hazeState,
                                     hazeStyle = EmberrBlur.Regular,
-                                    items = listOf(
-                                        TopBarIconButtonItem(
-                                            icon = painterResource(Res.drawable.calendar),
-                                            contentDescription = "Open Calendar",
-                                            onClick = onNavigateToCalendar,
-                                            tooltip = "Calendar"
-                                        ),
-                                        TopBarIconButtonItem(
-                                            icon = painterResource(Res.drawable.ellipsis),
-                                            contentDescription = "Settings",
-                                            onClick = { showSettingsMenu = true },
-                                            tooltip = "More settings"
+                                    tooltip = "Timeline",
+                                    onClick = {
+                                        viewModel.loadTimeline()
+                                        showTimelineDialog = true
+                                    }
+                                )
+
+                                Box {
+                                    TopBarIconButtonGroup(
+                                        bgColor = Color.Transparent,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        hazeState = hazeState,
+                                        hazeStyle = EmberrBlur.Regular,
+                                        items = listOf(
+                                            TopBarIconButtonItem(
+                                                icon = painterResource(Res.drawable.calendar),
+                                                contentDescription = "Open Calendar",
+                                                onClick = onNavigateToCalendar,
+                                                tooltip = "Calendar"
+                                            ),
+                                            TopBarIconButtonItem(
+                                                icon = painterResource(Res.drawable.ellipsis),
+                                                contentDescription = "Settings",
+                                                onClick = { showSettingsMenu = true },
+                                                tooltip = "More settings"
+                                            )
                                         )
                                     )
-                                )
 
-                                UserSettings(
-                                    expanded = showSettingsMenu,
-                                    onDismiss = { showSettingsMenu = false },
-                                    onNavigateToPeople = onNavigateToPeople,
-                                    onNavigateToSettings = onNavigateToSettings,
-                                    onNavigateToProperties = onNavigateToProperties,
-                                    onNavigateToTrash = onNavigateToTrash
-                                )
+                                    UserSettings(
+                                        expanded = showSettingsMenu,
+                                        onDismiss = { showSettingsMenu = false },
+                                        onNavigateToPeople = onNavigateToPeople,
+                                        onNavigateToSettings = onNavigateToSettings,
+                                        onNavigateToProperties = onNavigateToProperties,
+                                        onNavigateToTrash = onNavigateToTrash
+                                    )
+                                }
                             }
                         }
-                    }
-                )
-
-                val fadeStyle = rememberTopBarFadeStyle()
-                CompositionLocalProvider(
-                    LocalTopHeaderButtonTint provides TopHeaderButtonTint(
-                        fadeProgress = if (fadeStyle != TopBarFadeStyle.NONE) topEdgeFadeAlpha else 0f,
-                        fullTintAlpha = if (fadeStyle == TopBarFadeStyle.COLOR) 0.75f else 0.55f
                     )
-                ) {
-                    DailyBottomWeekStrip(
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+
+                    val fadeStyle = rememberTopBarFadeStyle()
+                    CompositionLocalProvider(
+                        LocalTopHeaderButtonTint provides TopHeaderButtonTint(
+                            fadeProgress = if (fadeStyle != TopBarFadeStyle.NONE) topEdgeFadeAlpha else 0f,
+                            fullTintAlpha = if (fadeStyle == TopBarFadeStyle.COLOR) 0.75f else 0.55f
+                        )
+                    ) {
+                        DailyBottomWeekStrip(
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                            selectedDate = selectedDate,
+                            onDateSelected = { viewModel.selectDate(it) },
+                            hazeState = hazeState
+                        )
+                    }
+                }
+            }
+        ) { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Box(Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        rightPanelContent(paddingValues.calculateTopPadding())
+                    }
+                }
+
+                if (showTimelineDialog) {
+                    DailyTimelineDialog(
+                        days = timelineDays,
+                        isLoading = isTimelineLoading,
+                        anchorDate = selectedDate,
+                        today = initialDate,
+                        editorActions = sharedEditorActions,
+                        onDismiss = {
+                            showTimelineDialog = false
+                            viewModel.clearTimeline()
+                        },
+                        onBlockClick = { date, blockId ->
+                            showTimelineDialog = false
+                            viewModel.clearTimeline()
+                            viewModel.openTimelineBlock(date, blockId)
+                        }
+                    )
+                }
+
+                if (showCalendarSheet) {
+                    DailyCalendarSheet(
                         selectedDate = selectedDate,
+                        initialDate = initialDate,
+                        calendarTaskMap = calendarTaskMap,
+                        onDismiss = { showCalendarSheet = false },
                         onDateSelected = { viewModel.selectDate(it) },
-                        hazeState = hazeState
+                        onGoToToday = { viewModel.selectDate(initialDate) }
                     )
                 }
             }
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    rightPanelContent(paddingValues.calculateTopPadding())
-                }
-            }
 
-            if (showTimelineDialog) {
-                DailyTimelineDialog(
-                    days = timelineDays,
-                    isLoading = isTimelineLoading,
-                    anchorDate = selectedDate,
-                    today = initialDate,
-                    editorActions = sharedEditorActions,
-                    onDismiss = {
-                        showTimelineDialog = false
-                        viewModel.clearTimeline()
-                    },
-                    onBlockClick = { date, blockId ->
-                        showTimelineDialog = false
-                        viewModel.clearTimeline()
-                        viewModel.openTimelineBlock(date, blockId)
-                    }
-                )
-            }
-
-            if (showCalendarSheet) {
-                DailyCalendarSheet(
-                    selectedDate = selectedDate,
-                    initialDate = initialDate,
-                    calendarTaskMap = calendarTaskMap,
-                    onDismiss = { showCalendarSheet = false },
-                    onDateSelected = { viewModel.selectDate(it) },
-                    onGoToToday = { viewModel.selectDate(initialDate) }
-                )
-            }
-        }
+        dailyToolbar()
     }
 }
 
