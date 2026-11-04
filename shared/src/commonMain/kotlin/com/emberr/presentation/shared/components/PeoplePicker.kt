@@ -219,21 +219,24 @@ fun PeoplePicker(
         val density = LocalDensity.current
         val keyboardHeightNow = WindowInsets.ime.getBottom(density)
         val fullKeyboardHeight = fullKeyboardHeightPx()
+        val sheetHeaderHeight = LocalEmberrSheetHeaderSpace.current?.height ?: 0.dp
+        val listScrollState = rememberScrollState()
+        ReportSheetContentScrolled(listScrollState)
         CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
         ) {
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                 val listMaxHeight = with(density) {
-                    heightWhileKeyboardMoves(PeoplePickerListMaxHeight, maxHeight, keyboardHeightNow.toDp(), fullKeyboardHeight.toDp())
+                    heightWhileKeyboardMoves(PeoplePickerListMaxHeight + sheetHeaderHeight, maxHeight, keyboardHeightNow.toDp(), fullKeyboardHeight.toDp())
                 }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = PeoplePickerListMinHeight.coerceAtMost(listMaxHeight), max = listMaxHeight)
+                        .heightIn(min = (PeoplePickerListMinHeight + sheetHeaderHeight).coerceAtMost(listMaxHeight), max = listMaxHeight)
                         .hazeSource(listHazeState)
-                        .verticalScroll(rememberScrollState())
-                        .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = PhoneSearchFieldSpace)
+                        .verticalScroll(listScrollState)
+                        .padding(start = 20.dp, end = 20.dp, top = sheetHeaderHeight + 8.dp, bottom = PhoneSearchFieldSpace)
                         .navigationBarsPadding()
                 ) {
                     peopleRows()

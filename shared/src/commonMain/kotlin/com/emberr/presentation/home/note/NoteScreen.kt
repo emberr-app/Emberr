@@ -110,6 +110,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.WindowInsets
@@ -140,6 +141,8 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.LocalEmberrSheetHeaderSpace
+import com.emberr.presentation.shared.components.ReportSheetContentScrolled
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import com.emberr.presentation.shared.components.emberrBlur
@@ -1227,9 +1230,10 @@ fun EmojiPickerSheetContent(onEmojiSelected: (String) -> Unit) {
     val density = LocalDensity.current
     val keyboardHeightNow = WindowInsets.ime.getBottom(density)
     val fullKeyboardHeight = fullKeyboardHeightPx()
+    val sheetHeaderHeight = LocalEmberrSheetHeaderSpace.current?.height ?: 0.dp
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val pickerHeight = with(density) {
-            heightWhileKeyboardMoves(EmojiPickerSheetHeight, maxHeight, keyboardHeightNow.toDp(), fullKeyboardHeight.toDp())
+            heightWhileKeyboardMoves(EmojiPickerSheetHeight + sheetHeaderHeight, maxHeight, keyboardHeightNow.toDp(), fullKeyboardHeight.toDp())
         }
         Box(modifier = Modifier.fillMaxWidth().height(pickerHeight).navigationBarsPadding()) {
             CategorizedEmojiPicker(onEmojiSelected = onEmojiSelected, modifier = Modifier.fillMaxSize())
@@ -1293,11 +1297,15 @@ fun CategorizedEmojiPicker(
     val gridBottomPadding = navBarPadding + if (isDesktopPlatform) 16.dp else PhoneEmojiSearchBarSpace
     val pillRowHeight = with(density) { pillRowHeightPx.toDp() }
     val sidePadding = if (isDesktopPlatform) 0.dp else PhoneEmojiPickerSidePadding
+    val sheetHeaderHeight = LocalEmberrSheetHeaderSpace.current?.height ?: 0.dp
     val categoryGridPadding = if (isDesktopPlatform) {
         PaddingValues(top = pillRowHeight + 12.dp, bottom = gridBottomPadding)
     } else {
-        PaddingValues(start = sidePadding, top = 12.dp, end = sidePadding, bottom = gridBottomPadding + pillRowHeight + 8.dp)
+        PaddingValues(start = sidePadding, top = sheetHeaderHeight + 12.dp, end = sidePadding, bottom = gridBottomPadding + pillRowHeight + 8.dp)
     }
+    val searchGridState = rememberLazyGridState()
+    val categoryGridStates = categoryNames.map { rememberLazyGridState() }
+    ReportSheetContentScrolled(if (searchQuery.isNotEmpty()) searchGridState else categoryGridStates[pagerState.currentPage])
 
     LaunchedEffect(pagerState.currentPage) {
         tabRowState.animateScrollToItem((pagerState.currentPage - 1).coerceAtLeast(0))
@@ -1316,7 +1324,7 @@ fun CategorizedEmojiPicker(
 
             if (searchQuery.isNotEmpty()) {
                 if (searchResults.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.fillMaxSize().padding(top = sheetHeaderHeight), contentAlignment = Alignment.Center) {
                         Text(
                             text = "No emojis found",
                             style = MaterialTheme.typography.labelSmall,
@@ -1326,10 +1334,11 @@ fun CategorizedEmojiPicker(
                 } else {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(minSize = 44.dp),
+                        state = searchGridState,
                         modifier = Modifier.fillMaxSize().hazeSource(emojiGridHazeState),
                         contentPadding = PaddingValues(
                             start = sidePadding,
-                            top = 8.dp,
+                            top = sheetHeaderHeight + 8.dp,
                             end = sidePadding,
                             bottom = gridBottomPadding
                         ),
@@ -1356,6 +1365,7 @@ fun CategorizedEmojiPicker(
 
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 44.dp),
+                            state = categoryGridStates[page],
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = categoryGridPadding,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
