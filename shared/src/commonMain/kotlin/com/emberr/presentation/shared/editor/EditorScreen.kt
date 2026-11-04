@@ -401,6 +401,7 @@ object GlobalEditorState {
 object EditorEventBus {
     val insertSlashEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val cleanupSlashEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val refocusActiveBlockEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     var insertMentionSignal by mutableStateOf<Pair<String, Long>?>(null)
         private set
@@ -845,6 +846,12 @@ fun EditorScreen(
                         localFocusRequest = FocusRequest(id = targetId, placeCursorAtEnd = true)
                     }
                 }
+            }
+        }
+        launch {
+            EditorEventBus.refocusActiveBlockEvent.collect {
+                val targetId = GlobalEditorState.currentlyFocusedBlockId ?: latestActiveBlockId
+                if (targetId != null) localFocusRequest = FocusRequest(id = targetId, placeCursorAtEnd = true)
             }
         }
         launch {
@@ -1669,7 +1676,24 @@ fun EditorToolbar(
     val toolbarItems = remember(savedToolbarItems, showHistory) {
         keyboardToolbarItemsToShow(keyboardToolbarItemsFrom(savedToolbarItems), showHistory)
     }
+    var isLinkPanelFromSlash by remember { mutableStateOf(false) }
+    val finishSlashLink: () -> Unit = {
+        if (isLinkPanelFromSlash) {
+            isLinkPanelFromSlash = false
+            onClearSlashQuery()
+        }
+    }
+    val leaveLinkPanel: () -> Unit = {
+        if (isLinkPanelFromSlash) {
+            isLinkPanelFromSlash = false
+            onMenuStateChange(MobileMenuState.SLASH)
+            EditorEventBus.refocusActiveBlockEvent.tryEmit(Unit)
+        } else {
+            onMenuStateChange(MobileMenuState.MENU)
+        }
+    }
     val insertBlockFromToolbar: (String) -> Unit = { type ->
+        isLinkPanelFromSlash = false
         onInsertMediaBlock(type)
         onMenuStateChange(mobileMenuStateAfterInserting(type))
     }
@@ -1847,9 +1871,11 @@ fun EditorToolbar(
                                             onMenuStateChange(MobileMenuState.MAIN)
                                         },
                                         onInsertMediaBlock = {
-                                            onClearSlashQuery()
+                                            val nextMenuState = mobileMenuStateAfterInserting(it)
+                                            isLinkPanelFromSlash = nextMenuState != MobileMenuState.MAIN
+                                            if (!isLinkPanelFromSlash) onClearSlashQuery()
                                             onInsertMediaBlock(it)
-                                            onMenuStateChange(mobileMenuStateAfterInserting(it))
+                                            onMenuStateChange(nextMenuState)
                                         },
                                         onInsertText = {
                                             onReplaceSlashQuery("$it ")
@@ -1883,6 +1909,7 @@ fun EditorToolbar(
                                             onMenuStateChange(MobileMenuState.MAIN)
                                         },
                                         onInsertMediaBlock = {
+                                            isLinkPanelFromSlash = false
                                             onInsertMediaBlock(it)
                                             onMenuStateChange(mobileMenuStateAfterInserting(it))
                                         },
@@ -1924,19 +1951,22 @@ fun EditorToolbar(
                                 NoteLinkMenuContent(
                                     allLinkableNotes = allLinkableNotes,
                                     onNoteSelected = {
+                                        finishSlashLink()
                                         onNoteLinkSelected(it)
                                         onMenuStateChange(MobileMenuState.MAIN)
                                     },
                                     onCreateNote = {
+                                        finishSlashLink()
                                         onNoteLinkCreateNote(it)
                                         onMenuStateChange(MobileMenuState.MAIN)
                                     },
                                     onCreateBlankNote = {
+                                        finishSlashLink()
                                         onNoteLinkCreateBlank()
                                         onMenuStateChange(MobileMenuState.MAIN)
                                     },
                                     autoFocusSearch = false,
-                                    onBack = { onMenuStateChange(MobileMenuState.MENU) }
+                                    onBack = leaveLinkPanel
                                 )
                             }
                         }
@@ -1946,11 +1976,12 @@ fun EditorToolbar(
                                 CanvasLinkMenuContent(
                                     loadCanvases = loadLinkableCanvases,
                                     onCanvasSelected = {
+                                        finishSlashLink()
                                         onCanvasLinkSelected(it)
                                         onMenuStateChange(MobileMenuState.MAIN)
                                     },
                                     autoFocusSearch = false,
-                                    onBack = { onMenuStateChange(MobileMenuState.MENU) }
+                                    onBack = leaveLinkPanel
                                 )
                             }
                         }
@@ -1960,11 +1991,12 @@ fun EditorToolbar(
                                 DatabaseLinkMenuContent(
                                     loadDatabases = loadLinkableDatabases,
                                     onDatabaseSelected = {
+                                        finishSlashLink()
                                         onDatabaseLinkSelected(it)
                                         onMenuStateChange(MobileMenuState.MAIN)
                                     },
                                     autoFocusSearch = false,
-                                    onBack = { onMenuStateChange(MobileMenuState.MENU) }
+                                    onBack = leaveLinkPanel
                                 )
                             }
                         }
