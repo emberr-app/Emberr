@@ -95,6 +95,8 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.LocalEmberrSheetHeaderSpace
+import com.emberr.presentation.shared.components.ReportSheetContentScrolled
 import com.emberr.presentation.shared.components.SelectedOptionBackground
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
@@ -439,18 +441,21 @@ internal fun MovieSearchSheet(
         val resultsHazeState = remember { HazeState() }
         val density = LocalDensity.current
         val fullKeyboardHeight = fullKeyboardHeightPx()
+        val sheetHeaderHeight = LocalEmberrSheetHeaderSpace.current?.height ?: 0.dp
+        val resultsScrollState = rememberScrollState()
+        ReportSheetContentScrolled(resultsScrollState)
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val resultsMaxHeight = with(density) {
-                heightWhileKeyboardMoves(PhoneResultsMaxHeight, maxHeight, currentKeyboardHeight.toDp(), fullKeyboardHeight.toDp())
+                heightWhileKeyboardMoves(PhoneResultsMaxHeight + sheetHeaderHeight, maxHeight, currentKeyboardHeight.toDp(), fullKeyboardHeight.toDp())
             }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = PhoneResultsMinHeight.coerceAtMost(resultsMaxHeight), max = resultsMaxHeight)
+                    .heightIn(min = (PhoneResultsMinHeight + sheetHeaderHeight).coerceAtMost(resultsMaxHeight), max = resultsMaxHeight)
                     .hazeSource(resultsHazeState)
-                    .verticalScroll(rememberScrollState())
-                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = PhoneSearchFieldSpace)
+                    .verticalScroll(resultsScrollState)
+                    .padding(start = 12.dp, end = 12.dp, top = sheetHeaderHeight + 8.dp, bottom = PhoneSearchFieldSpace)
                     .navigationBarsPadding(),
                 verticalArrangement = if (showsMessage) Arrangement.Center else Arrangement.spacedBy(4.dp)
             ) {
