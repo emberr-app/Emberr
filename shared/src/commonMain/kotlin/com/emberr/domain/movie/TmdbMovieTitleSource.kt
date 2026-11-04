@@ -10,6 +10,7 @@ import com.emberr.domain.model.MovieSearchResult
 import com.emberr.domain.model.MovieTitleExtras
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -26,6 +27,8 @@ import kotlinx.coroutines.withContext
 private const val TMDB_PROXY_ADDRESS = "https://emberr-tmdb.emberr.workers.dev"
 private const val CONNECT_TIMEOUT_MILLIS = 15_000L
 private const val REQUEST_TIMEOUT_MILLIS = 30_000L
+private const val SEARCH_CONNECT_TIMEOUT_MILLIS = 5_000L
+private const val SEARCH_REQUEST_TIMEOUT_MILLIS = 8_000L
 private const val MOST_SEARCH_RESULTS = 10
 private const val MOST_PERSON_ROLES = 12
 private const val MOST_SIMILAR_TITLES = 20
@@ -93,6 +96,7 @@ class TmdbMovieTitleSource : MovieTitleSource {
         val response = requestTmdb("search/multi") {
             parameter("query", trimmedQuery)
             parameter("include_adult", false)
+            useSearchTimeouts()
         }
         return searchResultsFrom(response)
     }
@@ -104,7 +108,7 @@ class TmdbMovieTitleSource : MovieTitleSource {
         if (saved != null && saved.languageTag == languageTag && now - saved.savedAtMillis < TRENDING_KEEP_MILLIS) {
             return@withLock saved.results
         }
-        val results = searchResultsFrom(requestTmdb("trending/all/week"))
+        val results = searchResultsFrom(requestTmdb("trending/all/week") { useSearchTimeouts() })
         savedTrending = SavedTrending(languageTag, results, now)
         results
     }
@@ -195,6 +199,11 @@ class TmdbMovieTitleSource : MovieTitleSource {
             parameter("language", language)
             addParameters()
         }
+
+    private fun HttpRequestBuilder.useSearchTimeouts() = timeout {
+        connectTimeoutMillis = SEARCH_CONNECT_TIMEOUT_MILLIS
+        requestTimeoutMillis = SEARCH_REQUEST_TIMEOUT_MILLIS
+    }
 
     private suspend fun successfulReplyText(response: HttpResponse): String {
         if (response.status == HttpStatusCode.TooManyRequests) throw TmdbTooManyRequestsException()
