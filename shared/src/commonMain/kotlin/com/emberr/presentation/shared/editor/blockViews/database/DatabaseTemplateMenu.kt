@@ -24,6 +24,8 @@ import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseTemplateRepeat
+import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.EmberrSearchSheetBody
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import emberr.shared.generated.resources.Res
@@ -52,53 +54,66 @@ internal fun DatabaseTemplateMenu(
     var searchQuery by remember(expanded) { mutableStateOf("") }
     val matchingTemplates = templates.filter { templateLabel(it).contains(searchQuery.trim(), ignoreCase = true) }
 
-    DatabaseMenu(expanded = expanded, title = "Templates", onDismiss = onDismiss) { closeAnd ->
-        DatabaseMenuContent {
-            EmberrTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = "Search templates...",
-                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
-            )
-        }
-
-        if (searchQuery.isBlank()) {
-            DatabaseTemplateOption(
-                label = "Empty",
-                icon = Res.drawable.doc_text,
-                isDefault = defaultTemplateId == null,
-                onUse = { closeAnd { editor.addRowFromTemplate(block.id, null) } },
-                onSetDefault = { editor.setDefaultTemplate(block.id, null) },
-                repeat = null,
-                onRepeatChange = null,
-                onEdit = null,
-                onDelete = null
-            )
-        } else if (matchingTemplates.isEmpty()) {
-            DatabaseMenuMessage(text = "No templates match \"${searchQuery.trim()}\"", color = MaterialTheme.colorScheme.outline)
-        }
-
-        matchingTemplates.forEach { template ->
-            key(template.noteId) {
+    DatabaseMenu(expanded = expanded, title = "Templates", onDismiss = onDismiss, hasSearchBar = true) { closeAnd ->
+        val templateChoices = @Composable {
+            if (searchQuery.isBlank()) {
                 DatabaseTemplateOption(
-                    label = templateLabel(template),
-                    icon = Res.drawable.file_text,
-                    isDefault = template.noteId == defaultTemplateId,
-                    onUse = { closeAnd { editor.addRowFromTemplate(block.id, template.noteId) } },
-                    onSetDefault = { editor.setDefaultTemplate(block.id, template.noteId) },
-                    repeat = block.repeatingTemplates[template.noteId],
-                    onRepeatChange = { repeat -> editor.setTemplateRepeat(block.id, template.noteId, repeat) },
-                    onEdit = { closeAnd { onOpenTemplate(template.noteId) } },
-                    onDelete = { editor.deleteTemplate(template.noteId) }
+                    label = "Empty",
+                    icon = Res.drawable.doc_text,
+                    isDefault = defaultTemplateId == null,
+                    onUse = { closeAnd { editor.addRowFromTemplate(block.id, null) } },
+                    onSetDefault = { editor.setDefaultTemplate(block.id, null) },
+                    repeat = null,
+                    onRepeatChange = null,
+                    onEdit = null,
+                    onDelete = null
+                )
+            } else if (matchingTemplates.isEmpty()) {
+                DatabaseMenuMessage(text = "No templates match \"${searchQuery.trim()}\"", color = MaterialTheme.colorScheme.outline)
+            }
+
+            matchingTemplates.forEach { template ->
+                key(template.noteId) {
+                    DatabaseTemplateOption(
+                        label = templateLabel(template),
+                        icon = Res.drawable.file_text,
+                        isDefault = template.noteId == defaultTemplateId,
+                        onUse = { closeAnd { editor.addRowFromTemplate(block.id, template.noteId) } },
+                        onSetDefault = { editor.setDefaultTemplate(block.id, template.noteId) },
+                        repeat = block.repeatingTemplates[template.noteId],
+                        onRepeatChange = { repeat -> editor.setTemplateRepeat(block.id, template.noteId, repeat) },
+                        onEdit = { closeAnd { onOpenTemplate(template.noteId) } },
+                        onDelete = { editor.deleteTemplate(template.noteId) }
+                    )
+                }
+            }
+
+            DatabaseMenuOption(
+                label = "New template",
+                icon = { DatabaseOptionIcon(Res.drawable.plus) },
+                onClick = { closeAnd { editor.createTemplate(block.id, onOpenTemplate) } }
+            )
+        }
+
+        if (isDesktopPlatform) {
+            DatabaseMenuContent {
+                EmberrTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = "Search templates...",
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
                 )
             }
+            templateChoices()
+        } else {
+            EmberrSearchSheetBody(
+                searchText = searchQuery,
+                onSearchTextChange = { searchQuery = it },
+                placeholder = "Search templates"
+            ) {
+                templateChoices()
+            }
         }
-
-        DatabaseMenuOption(
-            label = "New template",
-            icon = { DatabaseOptionIcon(Res.drawable.plus) },
-            onClick = { closeAnd { editor.createTemplate(block.id, onOpenTemplate) } }
-        )
     }
 }
 
