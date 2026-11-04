@@ -104,7 +104,7 @@ import emberr.shared.generated.resources.arrow_up_down
 import emberr.shared.generated.resources.calendar
 import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.chevron_right
-import emberr.shared.generated.resources.circle_plus
+import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.pen
@@ -1714,28 +1714,6 @@ fun TemplatesMenuContent(
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = if (isDesktopPlatform) 8.dp else 0.dp, vertical = 2.dp)
-                .then(if (!isDesktopPlatform) Modifier.heightIn(min = 48.dp) else Modifier)
-                .clip(RoundedCornerShape(12.dp))
-                .clickable {(onCreateNewTemplate())}
-                .padding(horizontal = if (isDesktopPlatform) 12.dp else 0.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.circle_plus),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(Modifier.width(10.dp))
-            Text("Create New Template", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-
         if (templates.isEmpty()) {
             Text(
                 text = if (searchQuery.isBlank()) "No templates yet." else "No templates match \"$searchQuery\".",
@@ -1753,7 +1731,31 @@ fun TemplatesMenuContent(
                 )
             }
         }
+        NewTemplateRow(onClick = onCreateNewTemplate)
         Spacer(Modifier.height(4.dp))
+    }
+}
+
+@Composable
+private fun NewTemplateRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = if (isDesktopPlatform) 8.dp else 0.dp, vertical = 2.dp)
+            .then(if (!isDesktopPlatform) Modifier.heightIn(min = 48.dp) else Modifier)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = if (isDesktopPlatform) 12.dp else 0.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.plus),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(Modifier.width(10.dp))
+        Text("New template", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
