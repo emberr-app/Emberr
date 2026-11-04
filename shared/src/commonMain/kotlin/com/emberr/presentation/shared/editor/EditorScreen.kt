@@ -53,12 +53,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material.icons.automirrored.filled.Subject
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -98,6 +95,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -214,6 +212,8 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
+import emberr.shared.generated.resources.doc_text
+import emberr.shared.generated.resources.doc_text_plus
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_right2
 import emberr.shared.generated.resources.arrow_up
@@ -1845,8 +1845,8 @@ fun EditorToolbar(
                             }
                         }
                         MobileMenuState.SLASH -> {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) })
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
                                 Box(modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).verticalScroll(rememberScrollState())) {
                                     DesktopSlashMenuContent(
                                         query = query,
@@ -1887,8 +1887,8 @@ fun EditorToolbar(
                             }
                         }
                         MobileMenuState.MENU -> {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) })
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
                                 Box(modifier = Modifier.fillMaxWidth().heightIn(max = 360.dp).verticalScroll(rememberScrollState())) {
                                     DesktopSlashMenuContent(
                                         query = "",
@@ -1923,8 +1923,8 @@ fun EditorToolbar(
                             }
                         }
                         MobileMenuState.MENTION -> {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) })
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
                                 Box(modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).verticalScroll(rememberScrollState())) {
                                     var shownNoteCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
                                     var shownPeopleCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
@@ -1946,8 +1946,8 @@ fun EditorToolbar(
                             }
                         }
                         MobileMenuState.LINK_TO_NOTE -> {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) })
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
                                 NoteLinkMenuContent(
                                     allLinkableNotes = allLinkableNotes,
                                     onNoteSelected = {
@@ -1971,8 +1971,8 @@ fun EditorToolbar(
                             }
                         }
                         MobileMenuState.LINK_TO_CANVAS -> {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) })
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
                                 CanvasLinkMenuContent(
                                     loadCanvases = loadLinkableCanvases,
                                     onCanvasSelected = {
@@ -1986,8 +1986,8 @@ fun EditorToolbar(
                             }
                         }
                         MobileMenuState.LINK_TO_DATABASE -> {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) })
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
                                 DatabaseLinkMenuContent(
                                     loadDatabases = loadLinkableDatabases,
                                     onDatabaseSelected = {
@@ -2150,10 +2150,10 @@ private fun ToolbarDivider(tint: Color) {
 }
 
 @Composable
-private fun MenuDragHandle(onClose: () -> Unit) {
+private fun MenuDragHandle(onClose: () -> Unit, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
+            .width(MenuHandleTouchWidth)
             .padding(top = 10.dp, bottom = 8.dp)
             .pointerInput(Unit) {
                 detectVerticalDragGestures { _, dragAmount ->
@@ -2429,6 +2429,7 @@ private sealed interface SlashMenuRow {
 
 private val SlashSubmenuWidth = 260.dp
 private val LinkPanelHeight = 300.dp
+private val MenuHandleTouchWidth = 80.dp
 private val LinkSearchBarPadding = 8.dp
 private val LinkSearchBarHeight = 50.dp
 private val LinkSearchBarSpace = LinkSearchBarHeight + LinkSearchBarPadding * 2
@@ -2586,17 +2587,17 @@ fun NoteLinkMenuContent(
     val entries = remember(query, filteredNotes) {
         buildList {
             add(
-                SlashMenuItemData("Create new note", SlashMenuIcon.Vector(Icons.AutoMirrored.Filled.NoteAdd)) {
+                SlashMenuItemData("Create new note", Res.drawable.doc_text_plus) {
                     onCreateBlankNote()
                 }
             )
             filteredNotes.forEach { note ->
-                val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Vector(Icons.Default.Description)
+                val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Drawable(Res.drawable.doc_text)
                 add(SlashMenuItemData(note.title.ifEmpty { "Untitled" }, icon) { onNoteSelected(note.noteId) })
             }
             if (query.isNotBlank()) {
                 add(
-                    SlashMenuItemData("New \"$query\" note", SlashMenuIcon.Vector(Icons.Default.Add)) {
+                    SlashMenuItemData("New \"$query\" note", Res.drawable.doc_text_plus) {
                         onCreateNote(query.trim())
                     }
                 )
