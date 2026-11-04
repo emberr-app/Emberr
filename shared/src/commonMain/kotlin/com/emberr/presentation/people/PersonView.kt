@@ -1,6 +1,7 @@
 package com.emberr.presentation.people
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
@@ -645,6 +647,7 @@ private fun QuickActionButton(label: String, icon: DrawableResource, onClick: ()
 private fun PersonNameField(page: PersonPage, isCentered: Boolean, sizeScale: Float) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    var isNameFocused by remember { mutableStateOf(false) }
     val titleStyle = MaterialTheme.typography.titleLarge
     val nameStyle: TextStyle = titleStyle.copy(
         fontSize = titleStyle.fontSize * sizeScale,
@@ -665,15 +668,20 @@ private fun PersonNameField(page: PersonPage, isCentered: Boolean, sizeScale: Fl
     val fieldModifier = Modifier
         .fillMaxWidth()
         .focusRequester(focusRequester)
-        .onFocusChanged { focusState -> if (!focusState.isFocused) page.onCommitName() }
+        .onFocusChanged { focusState ->
+            isNameFocused = focusState.isFocused
+            if (!focusState.isFocused) page.onCommitName()
+        }
         .hidesEditorToolbarWhileFocused()
     if (isCentered) {
         val placeholderColor = mutedTextColor()
+        val shownNameStyle = nameStyle.copy(color = MaterialTheme.colorScheme.onSurface)
+        val showsScrollingName = !isNameFocused && page.shownName.isNotEmpty()
         BasicTextField(
             value = page.shownName,
             onValueChange = page.onNameChange,
             singleLine = true,
-            textStyle = nameStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+            textStyle = shownNameStyle,
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { submitName() }),
@@ -681,7 +689,15 @@ private fun PersonNameField(page: PersonPage, isCentered: Boolean, sizeScale: Fl
             decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     if (page.shownName.isEmpty()) Text(text = "Name", style = nameStyle, color = placeholderColor)
-                    innerTextField()
+                    Box(modifier = Modifier.alpha(if (showsScrollingName) 0f else 1f)) { innerTextField() }
+                    if (showsScrollingName) {
+                        Text(
+                            text = page.shownName,
+                            style = shownNameStyle,
+                            maxLines = 1,
+                            modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+                        )
+                    }
                 }
             }
         )
