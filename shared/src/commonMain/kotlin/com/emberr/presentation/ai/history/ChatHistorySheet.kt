@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,7 +25,7 @@ import com.emberr.presentation.ai.components.DesktopMenuRowHorizontalPadding
 import com.emberr.presentation.ai.components.RagDesktopMenuItem
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
-import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import com.emberr.presentation.shared.components.EmberrSearchSheetBody
 import com.emberr.presentation.shared.components.EmberrTextField
 
 private val SheetEdgePadding = 20.dp
@@ -41,7 +40,8 @@ internal fun ChatHistorySheet(
         expanded = expanded,
         onDismiss = onDismiss,
         title = "Chat History",
-        contentHorizontalPadding = 0.dp
+        contentHorizontalPadding = 0.dp,
+        scrollsContent = false
     ) { closeAnd ->
         ChatHistoryMenuContent(viewModel = viewModel, closeAnd = closeAnd)
     }
@@ -58,58 +58,12 @@ internal fun ChatHistoryMenuContent(
     val rowHorizontalPadding = if (isDesktopPlatform) DesktopMenuRowHorizontalPadding else SheetEdgePadding
     val sectionLabelHorizontalPadding = if (isDesktopPlatform) 0.dp else SheetEdgePadding
 
-    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-        Spacer(Modifier.height(10.dp))
-        EmberrTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            placeholder = "Search chats",
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = rowHorizontalPadding)
-        )
-        Spacer(Modifier.height(10.dp))
+    val filteredSessions = remember(sessions, searchQuery) {
+        if (searchQuery.isBlank()) sessions
+        else sessions.filter { it.title.contains(searchQuery, ignoreCase = true) }
+    }
 
-        if (isDesktopPlatform) {
-            RagDesktopMenuItem(
-                icon = {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                },
-                text = "New Chat",
-                onClick = { closeAnd { viewModel.clearChat() } }
-            )
-        } else {
-            EmberrBottomSheetOption(
-                label = "New Chat",
-                icon = {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                },
-                onClick = { closeAnd { viewModel.clearChat() } }
-            )
-        }
-        HorizontalDivider(
-            modifier = Modifier.padding(
-                vertical = 10.dp,
-                horizontal = if (isDesktopPlatform) 16.dp else SheetEdgePadding
-            ),
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-        )
-        Spacer(Modifier.height(10.dp))
-
-        val filteredSessions = remember(sessions, searchQuery) {
-            if (searchQuery.isBlank()) sessions
-            else sessions.filter { it.title.contains(searchQuery, ignoreCase = true) }
-        }
-
+    val historyRows = @Composable {
         Text(
             text = "Recent Chats",
             style = MaterialTheme.typography.labelSmall,
@@ -139,13 +93,41 @@ internal fun ChatHistoryMenuContent(
             }
         }
 
-        if (!isDesktopPlatform) {
-            Spacer(Modifier.height(12.dp))
-            EmberrButtonPrimary(
-                text = "Close",
-                onClick = { closeAnd { } },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = SheetEdgePadding)
+        val newChatIcon = @Composable {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(20.dp)
             )
+        }
+        if (isDesktopPlatform) {
+            RagDesktopMenuItem(icon = newChatIcon, text = "New chat", onClick = { closeAnd { viewModel.clearChat() } })
+        } else {
+            EmberrBottomSheetOption(label = "New chat", icon = newChatIcon, onClick = { closeAnd { viewModel.clearChat() } })
+        }
+    }
+
+    if (isDesktopPlatform) {
+        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+            Spacer(Modifier.height(10.dp))
+            EmberrTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = "Search chats",
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = rowHorizontalPadding)
+            )
+            Spacer(Modifier.height(10.dp))
+            historyRows()
+        }
+    } else {
+        EmberrSearchSheetBody(
+            searchText = searchQuery,
+            onSearchTextChange = { searchQuery = it },
+            placeholder = "Search chats"
+        ) {
+            historyRows()
         }
     }
 }
