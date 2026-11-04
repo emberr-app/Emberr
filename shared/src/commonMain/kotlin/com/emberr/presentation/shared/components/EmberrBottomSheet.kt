@@ -152,7 +152,8 @@ fun EmberrBottomSheet(
     scrollsContent: Boolean = true,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
-    if (!expanded) return
+    val showsSheet = if (isDesktopPlatform) expanded else rememberShowAfterKeyboardCloses(isRequested = expanded)
+    if (!showsSheet) return
 
     CompositionLocalProvider(LocalBringIntoViewSpec provides SheetBringIntoViewSpec) {
         if (isDesktopPlatform) {
