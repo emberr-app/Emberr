@@ -159,6 +159,8 @@ import com.emberr.domain.model.idsOfBlocksInsideAToggleOrCallout
 import com.emberr.domain.model.shortDateText
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.EmberrSearchTextField
+import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -209,7 +211,9 @@ import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_right2
 import emberr.shared.generated.resources.arrow_up
@@ -1931,7 +1935,8 @@ fun EditorToolbar(
                                         onNoteLinkCreateBlank()
                                         onMenuStateChange(MobileMenuState.MAIN)
                                     },
-                                    autoFocusSearch = false
+                                    autoFocusSearch = false,
+                                    onBack = { onMenuStateChange(MobileMenuState.MENU) }
                                 )
                             }
                         }
@@ -1944,7 +1949,8 @@ fun EditorToolbar(
                                         onCanvasLinkSelected(it)
                                         onMenuStateChange(MobileMenuState.MAIN)
                                     },
-                                    autoFocusSearch = false
+                                    autoFocusSearch = false,
+                                    onBack = { onMenuStateChange(MobileMenuState.MENU) }
                                 )
                             }
                         }
@@ -1957,7 +1963,8 @@ fun EditorToolbar(
                                         onDatabaseLinkSelected(it)
                                         onMenuStateChange(MobileMenuState.MAIN)
                                     },
-                                    autoFocusSearch = false
+                                    autoFocusSearch = false,
+                                    onBack = { onMenuStateChange(MobileMenuState.MENU) }
                                 )
                             }
                         }
@@ -2290,7 +2297,7 @@ fun DesktopSlashMenuContent(
 }
 
 @Composable
-fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1, maxHeight: Dp = 320.dp) {
+fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1, maxHeight: Dp = 320.dp, bottomPadding: Dp = 0.dp) {
     val rows = remember(sections) {
         buildList {
             var flatIndex = 0
@@ -2332,7 +2339,7 @@ fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1,
             .heightIn(max = maxHeight)
             .onGloballyPositioned { viewportHeightPx = it.size.height.toFloat() }
             .verticalScroll(scrollState)
-            .padding(vertical = 4.dp)
+            .padding(top = 4.dp, bottom = 4.dp + bottomPadding)
     ) {
         if (sections.isEmpty()) {
             Text(
@@ -2389,6 +2396,10 @@ private sealed interface SlashMenuRow {
 }
 
 private val SlashSubmenuWidth = 260.dp
+private val LinkPanelHeight = 300.dp
+private val LinkSearchBarPadding = 8.dp
+private val LinkSearchBarHeight = 50.dp
+private val LinkSearchBarSpace = LinkSearchBarHeight + LinkSearchBarPadding * 2
 
 @Composable
 private fun SlashMenuItemWithSubmenu(
@@ -2531,7 +2542,8 @@ fun NoteLinkMenuContent(
     onCreateNote: (title: String) -> Unit,
     onCreateBlankNote: () -> Unit,
     onDismissRequest: () -> Unit = {},
-    autoFocusSearch: Boolean = true
+    autoFocusSearch: Boolean = true,
+    onBack: (() -> Unit)? = null
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -2567,7 +2579,8 @@ fun NoteLinkMenuContent(
         sectionTitle = "Link to Note",
         entries = entries,
         onDismissRequest = onDismissRequest,
-        autoFocusSearch = autoFocusSearch
+        autoFocusSearch = autoFocusSearch,
+        onBack = onBack
     )
 }
 
@@ -2601,7 +2614,8 @@ fun CanvasLinkMenuContent(
     loadCanvases: suspend () -> List<NoteMetadataEntity>,
     onCanvasSelected: (canvasNoteId: String) -> Unit,
     onDismissRequest: () -> Unit = {},
-    autoFocusSearch: Boolean = true
+    autoFocusSearch: Boolean = true,
+    onBack: (() -> Unit)? = null
 ) {
     var query by remember { mutableStateOf("") }
     val canvases by produceState(initialValue = emptyList<NoteMetadataEntity>()) { value = loadCanvases() }
@@ -2620,7 +2634,8 @@ fun CanvasLinkMenuContent(
         sectionTitle = "Link to Canvas",
         entries = entries,
         onDismissRequest = onDismissRequest,
-        autoFocusSearch = autoFocusSearch
+        autoFocusSearch = autoFocusSearch,
+        onBack = onBack
     )
 }
 
@@ -2654,7 +2669,8 @@ fun DatabaseLinkMenuContent(
     loadDatabases: suspend () -> List<LinkableDatabase>,
     onDatabaseSelected: (databaseId: String) -> Unit,
     onDismissRequest: () -> Unit = {},
-    autoFocusSearch: Boolean = true
+    autoFocusSearch: Boolean = true,
+    onBack: (() -> Unit)? = null
 ) {
     var query by remember { mutableStateOf("") }
     val databases by produceState(initialValue = emptyList<LinkableDatabase>()) { value = loadDatabases() }
@@ -2676,7 +2692,8 @@ fun DatabaseLinkMenuContent(
         sectionTitle = "Link to Database",
         entries = entries,
         onDismissRequest = onDismissRequest,
-        autoFocusSearch = autoFocusSearch
+        autoFocusSearch = autoFocusSearch,
+        onBack = onBack
     )
 }
 
@@ -2688,50 +2705,90 @@ private fun SearchableLinkList(
     sectionTitle: String,
     entries: List<SlashMenuItemData>,
     onDismissRequest: () -> Unit,
-    autoFocusSearch: Boolean
+    autoFocusSearch: Boolean,
+    onBack: (() -> Unit)?
 ) {
-    var selectedIndex by remember(query) { mutableIntStateOf(0) }
-
-    val searchFocusRequester = remember { FocusRequester() }
-    LaunchedEffect(autoFocusSearch) {
-        if (autoFocusSearch) searchFocusRequester.requestFocus()
-    }
-
-    EmberrTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        placeholder = searchPlaceholder,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .focusRequester(searchFocusRequester)
-            .onPreviewKeyEvent { event ->
-                if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                when (event.key) {
-                    Key.DirectionDown -> {
-                        if (entries.isNotEmpty()) selectedIndex = (selectedIndex + 1) % entries.size
-                        true
-                    }
-                    Key.DirectionUp -> {
-                        if (entries.isNotEmpty()) selectedIndex = (selectedIndex - 1 + entries.size) % entries.size
-                        true
-                    }
-                    Key.Enter, Key.NumPadEnter -> {
-                        entries.getOrNull(selectedIndex)?.action?.invoke()
-                        true
-                    }
-                    Key.Escape -> {
-                        onDismissRequest()
-                        true
-                    }
-                    else -> false
-                }
+    if (!isDesktopPlatform) {
+        val linkListHazeState = remember { HazeState() }
+        Box(modifier = Modifier.fillMaxWidth().height(LinkPanelHeight)) {
+            Box(modifier = Modifier.fillMaxSize().hazeSource(linkListHazeState)) {
+                SlashMenuList(
+                    sections = listOf(SlashMenuSectionData(sectionTitle, entries)),
+                    maxHeight = LinkPanelHeight,
+                    bottomPadding = LinkSearchBarSpace
+                )
             }
-    )
-    SlashMenuList(
-        sections = listOf(SlashMenuSectionData(sectionTitle, entries)),
-        selectedIndex = selectedIndex
-    )
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(LinkSearchBarPadding),
+                horizontalArrangement = Arrangement.spacedBy(LinkSearchBarPadding),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (onBack != null) {
+                    TopBarIconButton(
+                        icon = painterResource(Res.drawable.chevron_left),
+                        contentDescription = "Back",
+                        bgColor = Color.Transparent,
+                        tint = MaterialTheme.colorScheme.primary,
+                        hazeState = linkListHazeState,
+                        size = LinkSearchBarHeight,
+                        onClick = onBack
+                    )
+                }
+                EmberrSearchTextField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    placeholder = searchPlaceholder.removeSuffix("..."),
+                    hazeState = linkListHazeState,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    } else {
+        var selectedIndex by remember(query) { mutableIntStateOf(0) }
+        val searchFocusRequester = remember { FocusRequester() }
+        LaunchedEffect(autoFocusSearch) {
+            if (autoFocusSearch) searchFocusRequester.requestFocus()
+        }
+
+        EmberrTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            placeholder = searchPlaceholder,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .focusRequester(searchFocusRequester)
+                .onPreviewKeyEvent { event ->
+                    if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                    when (event.key) {
+                        Key.DirectionDown -> {
+                            if (entries.isNotEmpty()) selectedIndex = (selectedIndex + 1) % entries.size
+                            true
+                        }
+                        Key.DirectionUp -> {
+                            if (entries.isNotEmpty()) selectedIndex = (selectedIndex - 1 + entries.size) % entries.size
+                            true
+                        }
+                        Key.Enter, Key.NumPadEnter -> {
+                            entries.getOrNull(selectedIndex)?.action?.invoke()
+                            true
+                        }
+                        Key.Escape -> {
+                            onDismissRequest()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+        )
+        SlashMenuList(
+            sections = listOf(SlashMenuSectionData(sectionTitle, entries)),
+            selectedIndex = selectedIndex
+        )
+    }
 }
 
 @Composable
