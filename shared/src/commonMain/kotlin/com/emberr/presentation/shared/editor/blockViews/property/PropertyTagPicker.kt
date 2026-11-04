@@ -56,6 +56,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenuPlacement
+import com.emberr.presentation.shared.components.EmberrSearchSheetBody
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.SheetBringIntoViewSpec
@@ -74,6 +75,7 @@ import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
 private val DesktopTagMenuWidth = 260.dp
+private val TagSheetSidePadding = 20.dp
 
 fun propertyTagColor(tagName: String, isDarkTheme: Boolean, colorName: String? = null): Color {
     val colors = HighlightColor.entries
@@ -219,74 +221,73 @@ fun PropertyTagPicker(
         }
     }
 
-    val tagListContent = @Composable { searchFieldModifier: Modifier ->
-        Column(modifier = Modifier.fillMaxWidth()) {
-            EmberrTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                placeholder = "Search or create...",
-                modifier = searchFieldModifier.fillMaxWidth(),
-                onSubmit = { submitSearch() }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            matchingTagNames.forEach { tagName ->
-                EmberrDesktopSubmenuPlacement(
-                    isFocusable = true,
-                    onPressedInside = {},
-                    onPointerInside = {},
-                    menuWidthEstimate = DesktopTagMenuWidth,
-                    anchor = {
-                        PropertyTagOptionRow(
-                            tagName = tagName,
-                            tagPoolKey = tagPoolKey,
-                            isSelected = isSelected(tagName),
-                            onClick = { toggleTag(tagName) },
-                            onEdit = { openTagEditor(tagName) }
+    val tagRows = @Composable {
+        matchingTagNames.forEach { tagName ->
+            EmberrDesktopSubmenuPlacement(
+                isFocusable = true,
+                onPressedInside = {},
+                onPointerInside = {},
+                menuWidthEstimate = DesktopTagMenuWidth,
+                anchor = {
+                    PropertyTagOptionRow(
+                        tagName = tagName,
+                        tagPoolKey = tagPoolKey,
+                        isSelected = isSelected(tagName),
+                        onClick = { toggleTag(tagName) },
+                        onEdit = { openTagEditor(tagName) }
+                    )
+                }
+            ) {
+                if (tagName == tagBeingEdited) {
+                    PropertyTagLayer(
+                        title = "Edit tag",
+                        onDismiss = { closeTagEditor() }
+                    ) { closeEditorAnd ->
+                        EditTagContent(
+                            originalTagName = tagName,
+                            colorName = savedTags.firstOrNull { it.name.equals(tagName, ignoreCase = true) }?.colorName,
+                            onColorChosen = { colorName -> chooseTagColor(tagName, colorName) },
+                            tagName = editedTagName,
+                            onTagNameChange = { editedTagName = it },
+                            isNameTaken = editedNameIsTaken,
+                            canSave = canSaveRename,
+                            onSave = { saveRename(closeEditorAnd) },
+                            onCancel = { closeEditorAnd { } },
+                            onDeleteConfirmed = { deleteEditedTag(closeEditorAnd) }
                         )
-                    }
-                ) {
-                    if (tagName == tagBeingEdited) {
-                        PropertyTagLayer(
-                            title = "Edit tag",
-                            onDismiss = { closeTagEditor() }
-                        ) { closeEditorAnd ->
-                            EditTagContent(
-                                originalTagName = tagName,
-                                colorName = savedTags.firstOrNull { it.name.equals(tagName, ignoreCase = true) }?.colorName,
-                                onColorChosen = { colorName -> chooseTagColor(tagName, colorName) },
-                                tagName = editedTagName,
-                                onTagNameChange = { editedTagName = it },
-                                isNameTaken = editedNameIsTaken,
-                                canSave = canSaveRename,
-                                onSave = { saveRename(closeEditorAnd) },
-                                onCancel = { closeEditorAnd { } },
-                                onDeleteConfirmed = { deleteEditedTag(closeEditorAnd) }
-                            )
-                        }
                     }
                 }
             }
+        }
 
-            if (canCreateTag) {
-                CreatePropertyTagRow(tagName = cleanedSearch, onClick = { createTagFromSearch() })
-            }
+        if (canCreateTag) {
+            CreatePropertyTagRow(tagName = cleanedSearch, onClick = { createTagFromSearch() })
+        }
 
-            if (matchingTagNames.isEmpty() && !canCreateTag) {
-                Text(
-                    text = "Type a name to create one",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
-                )
-            }
+        if (matchingTagNames.isEmpty() && !canCreateTag) {
+            Text(
+                text = "Type a name to create one",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+            )
         }
     }
 
-    PropertyTagLayer(title = title, onDismiss = onDismiss) { closeAnd ->
+    PropertyTagLayer(title = title, onDismiss = onDismiss, hasSearchBar = true) { _ ->
         if (isDesktopPlatform) {
             val searchFocusRequester = remember { FocusRequester() }
-            tagListContent(Modifier.focusRequester(searchFocusRequester))
+            Column(modifier = Modifier.fillMaxWidth()) {
+                EmberrTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    placeholder = "Search or create...",
+                    modifier = Modifier.focusRequester(searchFocusRequester).fillMaxWidth(),
+                    onSubmit = { submitSearch() }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                tagRows()
+            }
             LaunchedEffect(Unit) {
                 runCatching { searchFocusRequester.requestFocus() }
             }
@@ -295,12 +296,15 @@ fun PropertyTagPicker(
                 LocalIndication provides NoRippleIndicationNodeFactory,
                 LocalRippleConfiguration provides null
             ) {
-                tagListContent(Modifier)
-                EmberrButtonPrimary(
-                    text = "Done",
-                    onClick = { closeAnd(onDismiss) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-                )
+                EmberrSearchSheetBody(
+                    searchText = searchText,
+                    onSearchTextChange = { searchText = it },
+                    placeholder = "Search or create",
+                    contentHorizontalPadding = TagSheetSidePadding,
+                    onSubmit = { submitSearch() }
+                ) {
+                    tagRows()
+                }
             }
         }
     }
@@ -310,6 +314,7 @@ fun PropertyTagPicker(
 private fun PropertyTagLayer(
     title: String,
     onDismiss: () -> Unit,
+    hasSearchBar: Boolean = false,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     if (isDesktopPlatform) {
@@ -328,9 +333,19 @@ private fun PropertyTagLayer(
             }
         }
     } else {
-        EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = title) { closeAnd ->
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+        EmberrBottomSheet(
+            expanded = true,
+            onDismiss = onDismiss,
+            title = title,
+            contentHorizontalPadding = if (hasSearchBar) 0.dp else TagSheetSidePadding,
+            scrollsContent = !hasSearchBar
+        ) { closeAnd ->
+            if (hasSearchBar) {
                 content(closeAnd)
+            } else {
+                Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+                    content(closeAnd)
+                }
             }
         }
     }
