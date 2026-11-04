@@ -292,6 +292,7 @@ fun NoteBlockItem(
     onDismissCanvasLinkMenu: () -> Unit = {},
     showDatabaseLinkMenu: Boolean = false,
     onDismissDatabaseLinkMenu: () -> Unit = {},
+    onLinkMenuBack: (() -> Unit)? = null,
     isFirstChildOfToggleOrCallout: Boolean = false,
     emptyNotePlaceholder: String = "",
     selectionRequest: SelectionRequest? = null,
@@ -587,53 +588,6 @@ fun NoteBlockItem(
             }
         }
 
-        if (isNoteLinkMenuActiveHere) {
-            NoteLinkMenu(
-                expanded = true,
-                onDismissRequest = onDismissNoteLinkMenu,
-                allLinkableNotes = allLinkableNotes,
-                onNoteSelected = { noteId ->
-                    actions.onInsertLinkedNoteBlock(noteId)
-                    onDismissNoteLinkMenu()
-                },
-                onCreateNote = { title ->
-                    val newNoteId = actions.onCreateLinkedNote(title)
-                    actions.onInsertLinkedNoteBlock(newNoteId)
-                    onDismissNoteLinkMenu()
-                },
-                onCreateBlankNote = {
-                    val newNoteId = actions.onCreateLinkedNote("Untitled")
-                    actions.onInsertLinkedNoteBlock(newNoteId)
-                    onDismissNoteLinkMenu()
-                    actions.onNoteLinkClick(newNoteId)
-                }
-            )
-        }
-
-        if (isCanvasLinkMenuActiveHere) {
-            CanvasLinkMenu(
-                expanded = true,
-                onDismissRequest = onDismissCanvasLinkMenu,
-                loadCanvases = { actions.getLinkableCanvases() },
-                onCanvasSelected = { canvasNoteId ->
-                    actions.onInsertCanvasBlock(canvasNoteId)
-                    onDismissCanvasLinkMenu()
-                }
-            )
-        }
-
-        if (isDatabaseLinkMenuActiveHere) {
-            DatabaseLinkMenu(
-                expanded = true,
-                onDismissRequest = onDismissDatabaseLinkMenu,
-                loadDatabases = { actions.getLinkableDatabases() },
-                onDatabaseSelected = { databaseId ->
-                    actions.onInsertLinkedDatabaseBlock(databaseId)
-                    onDismissDatabaseLinkMenu()
-                }
-            )
-        }
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -815,7 +769,7 @@ fun NoteBlockItem(
 
                         }
 
-                        if (isSlashMenuActiveHere) {
+                        if (isSlashMenuActiveHere || isNoteLinkMenuActiveHere || isCanvasLinkMenuActiveHere || isDatabaseLinkMenuActiveHere) {
                             val slashRect = remember(text, richTextTransformation, textLayoutResult) {
                                 displayedCharacterRect(text, text.lastIndexOf('/'), richTextTransformation, textLayoutResult) ?: Rect.Zero
                             }
@@ -824,17 +778,69 @@ fun NoteBlockItem(
                                     .offset { IntOffset(slashRect.left.roundToInt(), slashRect.top.roundToInt()) }
                                     .size(width = 1.dp, height = with(density) { slashRect.height.toDp() })
                             ) {
-                                EmberrDesktopMenu(
-                                    expanded = true,
-                                    onDismissRequest = onDismissSlashMenu,
-                                    properties = PopupProperties(focusable = false),
-                                    modifier = Modifier
-                                        .width(290.dp)
-                                        .heightIn(max = 400.dp)
-                                ) {
-                                    SlashMenuList(
-                                        sections = slashMenuSections,
-                                        selectedIndex = slashMenuSelectedIndex
+                                if (isSlashMenuActiveHere) {
+                                    EmberrDesktopMenu(
+                                        expanded = true,
+                                        onDismissRequest = onDismissSlashMenu,
+                                        properties = PopupProperties(focusable = false),
+                                        modifier = Modifier
+                                            .width(290.dp)
+                                            .heightIn(max = 400.dp)
+                                    ) {
+                                        SlashMenuList(
+                                            sections = slashMenuSections,
+                                            selectedIndex = slashMenuSelectedIndex
+                                        )
+                                    }
+                                }
+
+                                if (isNoteLinkMenuActiveHere) {
+                                    NoteLinkMenu(
+                                        expanded = true,
+                                        onDismissRequest = onDismissNoteLinkMenu,
+                                        onBack = onLinkMenuBack?.let { goBack -> { onDismissNoteLinkMenu(); goBack() } },
+                                        allLinkableNotes = allLinkableNotes,
+                                        onNoteSelected = { noteId ->
+                                            actions.onInsertLinkedNoteBlock(noteId)
+                                            onDismissNoteLinkMenu()
+                                        },
+                                        onCreateNote = { title ->
+                                            val newNoteId = actions.onCreateLinkedNote(title)
+                                            actions.onInsertLinkedNoteBlock(newNoteId)
+                                            onDismissNoteLinkMenu()
+                                        },
+                                        onCreateBlankNote = {
+                                            val newNoteId = actions.onCreateLinkedNote("Untitled")
+                                            actions.onInsertLinkedNoteBlock(newNoteId)
+                                            onDismissNoteLinkMenu()
+                                            actions.onNoteLinkClick(newNoteId)
+                                        }
+                                    )
+                                }
+
+                                if (isCanvasLinkMenuActiveHere) {
+                                    CanvasLinkMenu(
+                                        expanded = true,
+                                        onDismissRequest = onDismissCanvasLinkMenu,
+                                        onBack = onLinkMenuBack?.let { goBack -> { onDismissCanvasLinkMenu(); goBack() } },
+                                        loadCanvases = { actions.getLinkableCanvases() },
+                                        onCanvasSelected = { canvasNoteId ->
+                                            actions.onInsertCanvasBlock(canvasNoteId)
+                                            onDismissCanvasLinkMenu()
+                                        }
+                                    )
+                                }
+
+                                if (isDatabaseLinkMenuActiveHere) {
+                                    DatabaseLinkMenu(
+                                        expanded = true,
+                                        onDismissRequest = onDismissDatabaseLinkMenu,
+                                        onBack = onLinkMenuBack?.let { goBack -> { onDismissDatabaseLinkMenu(); goBack() } },
+                                        loadDatabases = { actions.getLinkableDatabases() },
+                                        onDatabaseSelected = { databaseId ->
+                                            actions.onInsertLinkedDatabaseBlock(databaseId)
+                                            onDismissDatabaseLinkMenu()
+                                        }
                                     )
                                 }
                             }
