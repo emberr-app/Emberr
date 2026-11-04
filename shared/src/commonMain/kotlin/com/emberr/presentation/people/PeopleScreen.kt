@@ -754,6 +754,11 @@ private fun AddPeopleSheet(
                 AddPeopleOption(label = "Import from phone", icon = Res.drawable.phone3, onClick = { closeAnd(onImportFromPhone) })
             }
             AddPeopleOption(label = "Import from .vcf file", icon = Res.drawable.file_down, onClick = { closeAnd(onImportFromFile) })
+            EmberrButtonPrimary(
+                text = "Close",
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+            )
         }
     }
 }
