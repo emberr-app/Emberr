@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
@@ -74,6 +75,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -109,6 +111,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.io.IOException
 import org.jetbrains.compose.resources.painterResource
 
 private const val SEARCH_DELAY_MILLIS = 250L
@@ -117,6 +120,7 @@ private const val KEYBOARD_CLOSE_WAIT_MILLIS = 400L
 private const val PART_FADE_IN_MILLIS = 220
 private const val PART_FADE_OUT_MILLIS = 120
 private const val PART_RESIZE_MILLIS = 260
+private const val SKELETON_RESULT_ROWS = 5
 
 private val ResultPosterWidth = 30.dp
 private val PhoneResultPosterWidth = 44.dp
@@ -216,6 +220,7 @@ internal fun MovieSearchBox(
 private class MovieSearchState {
     var results by mutableStateOf<List<MovieSearchResult>?>(null)
     var failureMessage by mutableStateOf<String?>(null)
+    var isLoading by mutableStateOf(false)
 }
 
 @Composable
@@ -227,6 +232,7 @@ private fun rememberMovieSearch(
     val state = remember { MovieSearchState() }
     LaunchedEffect(query, isActive) {
         if (!isActive) return@LaunchedEffect
+        state.isLoading = true
         if (query.isNotBlank()) delay(SEARCH_DELAY_MILLIS)
         try {
             state.results = search(query)
@@ -235,9 +241,12 @@ private fun rememberMovieSearch(
             throw cancellation
         } catch (_: TmdbTooManyRequestsException) {
             state.failureMessage = "Too many searches right now. Try again in a minute."
+        } catch (_: IOException) {
+            state.failureMessage = "No internet connection"
         } catch (_: Exception) {
-            state.failureMessage = "Needs internet to search"
+            state.failureMessage = "Couldn't search right now. Try again in a bit."
         }
+        state.isLoading = false
     }
     return state
 }
@@ -260,8 +269,8 @@ private fun DesktopMovieSearchBox(
     val density = LocalDensity.current
     val resultsGapPx = with(density) { ResultsPanelGap.roundToPx() }
     val searchState = rememberMovieSearch(query = query, isActive = isFocused, search = search)
-    val visibleResults = if (searchState.failureMessage != null) emptyList() else searchState.results.orEmpty().filter { it.titleKey() !in excludedTitleKeys }
-    val hasSomethingToShow = searchState.failureMessage != null || visibleResults.isNotEmpty() || (searchState.results != null && query.isNotBlank())
+    val visibleResults = if (searchState.failureMessage != null || searchState.isLoading) emptyList() else searchState.results.orEmpty().filter { it.titleKey() !in excludedTitleKeys }
+    val hasSomethingToShow = searchState.isLoading || searchState.failureMessage != null || visibleResults.isNotEmpty() || (searchState.results != null && query.isNotBlank())
 
     LaunchedEffect(focusRequestNonce) {
         if (focusRequestNonce != null) runCatching { focusRequester.requestFocus() }
@@ -344,6 +353,7 @@ private fun DesktopMovieSearchBox(
                         query = query,
                         results = visibleResults,
                         failureMessage = searchState.failureMessage,
+                        isLoading = searchState.isLoading,
                         highlightedIndex = highlightedIndex,
                         onHighlight = { highlightedIndex = it },
                         onChoose = ::choose
@@ -423,7 +433,8 @@ internal fun MovieSearchSheet(
                 closeAnd { onChoose(result) }
             }
         }
-        val visibleResults = if (searchState.failureMessage != null) emptyList() else searchState.results.orEmpty().filter { it.titleKey() !in excludedTitleKeys }
+        val visibleResults = if (searchState.failureMessage != null || searchState.isLoading) emptyList() else searchState.results.orEmpty().filter { it.titleKey() !in excludedTitleKeys }
+        val showsMessage = !searchState.isLoading && (searchState.failureMessage != null || (searchState.results != null && visibleResults.isEmpty()))
 
         val resultsHazeState = remember { HazeState() }
         val density = LocalDensity.current
@@ -441,13 +452,14 @@ internal fun MovieSearchSheet(
                     .verticalScroll(rememberScrollState())
                     .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = PhoneSearchFieldSpace)
                     .navigationBarsPadding(),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = if (showsMessage) Arrangement.Center else Arrangement.spacedBy(4.dp)
             ) {
-                if (searchState.results != null || searchState.failureMessage != null) {
+                if (searchState.isLoading || searchState.results != null || searchState.failureMessage != null) {
                     MovieSearchResultsList(
                         query = query,
                         results = visibleResults,
                         failureMessage = searchState.failureMessage,
+                        isLoading = searchState.isLoading,
                         highlightedIndex = -1,
                         onHighlight = {},
                         onChoose = ::chooseAfterKeyboardCloses,
@@ -565,6 +577,7 @@ private fun MovieSearchResultsList(
     query: String,
     results: List<MovieSearchResult>,
     failureMessage: String?,
+    isLoading: Boolean,
     highlightedIndex: Int,
     onHighlight: (Int) -> Unit,
     onChoose: (MovieSearchResult) -> Unit,
@@ -573,6 +586,10 @@ private fun MovieSearchResultsList(
 ) {
     val trimmedQuery = query.trim()
     when {
+        isLoading -> {
+            MovieSearchResultsHeader(trimmedQuery)
+            MovieSearchResultsSkeleton(rowVerticalPadding = rowVerticalPadding, posterWidth = posterWidth)
+        }
         failureMessage != null -> MovieSearchResultsMessage(failureMessage)
         results.isEmpty() -> MovieSearchResultsMessage(
             if (trimmedQuery.isEmpty()) {
@@ -582,12 +599,7 @@ private fun MovieSearchResultsList(
             }
         )
         else -> {
-            Text(
-                text = if (trimmedQuery.isEmpty()) "Suggestions" else "Results",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
-            )
+            MovieSearchResultsHeader(trimmedQuery)
             results.forEachIndexed { index, result ->
                 MovieSearchResultRow(
                     result = result,
@@ -598,6 +610,42 @@ private fun MovieSearchResultsList(
                     verticalPadding = rowVerticalPadding,
                     posterWidth = posterWidth
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MovieSearchResultsHeader(trimmedQuery: String) {
+    Text(
+        text = if (trimmedQuery.isEmpty()) "Suggestions" else "Results",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.outline,
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
+private fun MovieSearchResultsSkeleton(rowVerticalPadding: Dp, posterWidth: Dp) {
+    val progress = rememberShimmerProgress()
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val shimmerColors = shimmerColorsOf(textColor.copy(alpha = 0.06f), textColor)
+    repeat(SKELETON_RESULT_ROWS) { index ->
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = rowVerticalPadding),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(posterWidth)
+                    .aspectRatio(PosterAspectRatio)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmer(progress, shimmerColors, itemIndex = index)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                MovieSkeletonLine(widthFraction = 0.65f, height = 14.dp, progress = progress, colors = shimmerColors, itemIndex = index)
+                MovieSkeletonLine(widthFraction = 0.35f, height = 10.dp, progress = progress, colors = shimmerColors, itemIndex = index)
             }
         }
     }
@@ -658,7 +706,8 @@ private fun MovieSearchResultsMessage(text: String) {
         text = text,
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.outline,
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp)
     )
 }
 
