@@ -107,7 +107,7 @@ import com.emberr.presentation.LocalFileOpener
 import com.emberr.presentation.LocalNoteOpener
 import com.emberr.presentation.LocalPhotoTaker
 import com.emberr.presentation.home.note.CategorizedEmojiPicker
-import com.emberr.presentation.shared.components.EmberrButtonSecondary
+import com.emberr.presentation.home.note.EmojiPickerSheetContent
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
@@ -132,7 +132,6 @@ private val DesktopAvatarSize = 108.dp
 private val AvatarRingWidth = 4.dp
 private val AvatarShadowElevation = 16.dp
 private val AvatarBadgeSize = 28.dp
-private val AndroidEmojiPickerHeight = 450.dp
 private val QuickActionMinWidth = 58.dp
 private val QuickActionTileSize = 48.dp
 private val QuickActionShape = RoundedCornerShape(12.dp)
@@ -501,20 +500,22 @@ private fun PersonHeroAvatar(page: PersonPage, size: Dp) {
         ) {
             PersonAvatar(personNoteId = page.personNoteId, name = page.savedName, icon = page.icon, photoPath = page.photoPath, size = size)
         }
+        val hasIcon = !page.icon.isNullOrBlank()
+        val badgeLabel = if (hasIcon) "Remove icon" else "Change icon"
         Box(modifier = Modifier.align(Alignment.BottomEnd).padding(end = 2.dp, bottom = 6.dp)) {
-            IconTooltip(text = "Change icon") {
+            IconTooltip(text = badgeLabel) {
                 Box(
                     modifier = Modifier
                         .size(AvatarBadgeSize)
                         .clip(CircleShape)
                         .background(personCardColor())
                         .emberrBorder(CircleShape)
-                        .clickable { page.onShowsIconPickerChange(true) },
+                        .clickable { if (hasIcon) page.onIconChange(null) else page.onShowsIconPickerChange(true) },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.ghost_smile),
-                        contentDescription = "Change icon",
+                        painter = painterResource(if (hasIcon) Res.drawable.x else Res.drawable.ghost_smile),
+                        contentDescription = badgeLabel,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(15.dp)
                     )
@@ -523,7 +524,7 @@ private fun PersonHeroAvatar(page: PersonPage, size: Dp) {
         }
         if (isDesktopPlatform) {
             EmberrDesktopMenu(expanded = page.showsIconPicker, onDismissRequest = { page.onShowsIconPickerChange(false) }) {
-                Box(modifier = Modifier.size(width = 340.dp, height = 380.dp)) {
+                Box(modifier = Modifier.size(width = 340.dp, height = 380.dp).padding(horizontal = 8.dp, vertical = 6.dp)) {
                     CategorizedEmojiPicker(
                         onEmojiSelected = { emoji ->
                             page.onIconChange(emoji)
@@ -532,13 +533,6 @@ private fun PersonHeroAvatar(page: PersonPage, size: Dp) {
                         modifier = Modifier.fillMaxSize()
                     )
                 }
-                EmberrDesktopMenuOption(
-                    label = "Use initials",
-                    onClick = {
-                        page.onIconChange(null)
-                        page.onShowsIconPickerChange(false)
-                    }
-                )
             }
         }
     }
@@ -550,29 +544,11 @@ private fun AndroidPersonIconSheet(page: PersonPage) {
     EmberrBottomSheet(
         expanded = page.showsIconPicker,
         onDismiss = { page.onShowsIconPickerChange(false) },
-        title = "Change icon"
+        title = "Change icon",
+        contentHorizontalPadding = 0.dp,
+        scrollsContent = false
     ) { closeAnd ->
-        Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
-            Box(modifier = Modifier.fillMaxWidth().height(AndroidEmojiPickerHeight)) {
-                CategorizedEmojiPicker(
-                    onEmojiSelected = { emoji -> closeAnd { page.onIconChange(emoji) } },
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-            Row(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
-                EmberrButtonSecondary(
-                    text = "Use initials",
-                    onClick = { closeAnd { page.onIconChange(null) } },
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                EmberrButtonPrimary(
-                    text = "Close",
-                    onClick = { closeAnd {} },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
+        EmojiPickerSheetContent(onEmojiSelected = { emoji -> closeAnd { page.onIconChange(emoji) } })
     }
 }
 
