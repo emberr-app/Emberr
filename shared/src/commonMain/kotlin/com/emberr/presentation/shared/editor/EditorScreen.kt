@@ -108,6 +108,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.positionInWindow
@@ -1573,12 +1574,14 @@ fun EditorScreen(
             val hasNothingButOneBlankLine = blocks.size == 1 &&
                     (blocks.first() as? TextBlock)?.text?.isBlank() == true
             val isEditorVisuallyEmpty = blocks.isEmpty() || hasNothingButOneBlankLine
+            val keyboardInsets = WindowInsets.ime
+            val emptyContentHeight = remember { HeightWithoutKeyboard() }
 
             AnimatedVisibility(
                 visible = isEditorVisuallyEmpty && activeBlockId == null,
                 enter = fadeIn(tween(durationMillis = 400, delayMillis = 200)),
                 exit = fadeOut(tween(durationMillis = 180)),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.keepsHeightWhileKeyboardShows(keyboardInsets, emptyContentHeight).fillMaxSize()
             ) {
                 emptyContent()
             }
@@ -2060,6 +2063,19 @@ fun EditorToolbar(
         }
     }
 }
+
+private class HeightWithoutKeyboard {
+    var px = 0
+}
+
+private fun Modifier.keepsHeightWhileKeyboardShows(keyboardInsets: WindowInsets, heightWithoutKeyboard: HeightWithoutKeyboard): Modifier =
+    layout { measurable, constraints ->
+        val isKeyboardShowing = keyboardInsets.getBottom(this) > 0
+        if (!isKeyboardShowing || heightWithoutKeyboard.px == 0) heightWithoutKeyboard.px = constraints.maxHeight
+        val height = maxOf(heightWithoutKeyboard.px, constraints.maxHeight)
+        val placeable = measurable.measure(constraints.copy(minHeight = height, maxHeight = height))
+        layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(0, 0) }
+    }
 
 private fun mobileMenuStateAfterInserting(type: String): MobileMenuState = when (type) {
     "linked_note" -> MobileMenuState.LINK_TO_NOTE
