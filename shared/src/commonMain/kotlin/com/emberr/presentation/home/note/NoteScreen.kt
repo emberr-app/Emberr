@@ -37,6 +37,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -673,6 +674,7 @@ fun NoteScreen(
                     ) + fadeOut(tween(durationMillis = 200)),
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
+                        .zIndex(1f)
                         .imePadding()
                         .then(if (isDesktopPlatform) Modifier else Modifier.navigationBarsPadding())
                         .padding(bottom = 8.dp, start = if (isDesktopPlatform) 16.dp else 6.dp, end = if (isDesktopPlatform) 16.dp else 6.dp)
