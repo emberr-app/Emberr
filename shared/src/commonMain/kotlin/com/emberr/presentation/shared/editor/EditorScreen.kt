@@ -159,6 +159,7 @@ import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.emberrControlContainerColor
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -710,6 +711,38 @@ fun EditorScreen(
         executionBlock()
     }
 
+    var isDesktopLinkMenuFromSlash by remember { mutableStateOf(false) }
+    val reopenSlashMenu: () -> Unit = remember {
+        {
+            showSlashMenu = true
+            activeBlockId?.let { blockId -> localFocusRequest = FocusRequest(id = blockId, placeCursorAtEnd = true) }
+        }
+    }
+    val dismissNoteLinkMenu: () -> Unit = remember(onDismissNoteLinkMenu) {
+        {
+            isDesktopLinkMenuFromSlash = false
+            onDismissNoteLinkMenu()
+        }
+    }
+    val dismissCanvasLinkMenu: () -> Unit = remember(onDismissCanvasLinkMenu) {
+        {
+            isDesktopLinkMenuFromSlash = false
+            onDismissCanvasLinkMenu()
+        }
+    }
+    val dismissDatabaseLinkMenu: () -> Unit = remember(onDismissDatabaseLinkMenu) {
+        {
+            isDesktopLinkMenuFromSlash = false
+            onDismissDatabaseLinkMenu()
+        }
+    }
+    val removeSlashTextBeforeLink: () -> Unit = {
+        if (isDesktopLinkMenuFromSlash) {
+            isDesktopLinkMenuFromSlash = false
+            clearSlashAndExecute {}
+        }
+    }
+
     var pendingCaretAfterEdit by remember { mutableStateOf<TextCaret?>(null) }
     var crossBlockMenuPositionInEditor by remember { mutableStateOf<Offset?>(null) }
 
@@ -811,7 +844,27 @@ fun EditorScreen(
             override fun onToggleFormat(format: String) = clearSlashAndExecute { actions.onToggleFormat(format) }
             override fun onAdjustIndentation(increase: Boolean) = clearSlashAndExecute { actions.onAdjustIndentation(increase) }
             override fun onSetBlockAlignment(alignment: TextAlignment) = clearSlashAndExecute { actions.onSetBlockAlignment(alignment) }
-            override fun onInsertMediaBlock(type: String) = clearSlashAndExecute { actions.onInsertMediaBlock(type) }
+            override fun onInsertMediaBlock(type: String) {
+                if (isDesktopPlatform && type in LinkMenuBlockTypes) {
+                    isDesktopLinkMenuFromSlash = true
+                    showSlashMenu = false
+                    actions.onInsertMediaBlock(type)
+                } else {
+                    clearSlashAndExecute { actions.onInsertMediaBlock(type) }
+                }
+            }
+            override fun onInsertLinkedNoteBlock(noteId: String) {
+                removeSlashTextBeforeLink()
+                actions.onInsertLinkedNoteBlock(noteId)
+            }
+            override fun onInsertCanvasBlock(canvasNoteId: String) {
+                removeSlashTextBeforeLink()
+                actions.onInsertCanvasBlock(canvasNoteId)
+            }
+            override fun onInsertLinkedDatabaseBlock(databaseId: String) {
+                removeSlashTextBeforeLink()
+                actions.onInsertLinkedDatabaseBlock(databaseId)
+            }
             override fun onReplaceSlashQuery(replacement: String) {
                 if (isDesktopPlatform) showSlashMenu = false
                 latestOnMobileMenuStateChange(MobileMenuState.MAIN)
@@ -1450,11 +1503,12 @@ fun EditorScreen(
                             slashQuery = slashQuery,
                             onDismissSlashMenu = onDismissSlash,
                             showNoteLinkMenu = showNoteLinkMenu,
-                            onDismissNoteLinkMenu = onDismissNoteLinkMenu,
+                            onDismissNoteLinkMenu = dismissNoteLinkMenu,
                             showCanvasLinkMenu = showCanvasLinkMenu,
-                            onDismissCanvasLinkMenu = onDismissCanvasLinkMenu,
+                            onDismissCanvasLinkMenu = dismissCanvasLinkMenu,
                             showDatabaseLinkMenu = showDatabaseLinkMenu,
-                            onDismissDatabaseLinkMenu = onDismissDatabaseLinkMenu,
+                            onDismissDatabaseLinkMenu = dismissDatabaseLinkMenu,
+                            onLinkMenuBack = if (isDesktopLinkMenuFromSlash) reopenSlashMenu else null,
                             isFirstChildOfToggleOrCallout = isFirstChildOfToggleOrCallout,
                             emptyNotePlaceholder = if (blocks.size == 1) emptyNotePlaceholder else "",
                             selectionRequest = localSelectionRequest ?: selectionRequest,
@@ -2430,6 +2484,10 @@ private sealed interface SlashMenuRow {
 private val SlashSubmenuWidth = 260.dp
 private val LinkPanelHeight = 300.dp
 private val MenuHandleTouchWidth = 80.dp
+private val DesktopLinkListMaxHeight = 280.dp
+private val DesktopLinkBackButtonSize = 56.dp
+private val DesktopLinkBackButtonShape = RoundedCornerShape(12.dp)
+private val LinkMenuBlockTypes = setOf("linked_note", "linked_canvas", "linked_database")
 private val LinkSearchBarPadding = 8.dp
 private val LinkSearchBarHeight = 50.dp
 private val LinkSearchBarSpace = LinkSearchBarHeight + LinkSearchBarPadding * 2
@@ -2546,7 +2604,8 @@ fun NoteLinkMenu(
     allLinkableNotes: List<NoteMetadataEntity>,
     onNoteSelected: (noteId: String) -> Unit,
     onCreateNote: (title: String) -> Unit,
-    onCreateBlankNote: () -> Unit
+    onCreateBlankNote: () -> Unit,
+    onBack: (() -> Unit)? = null
 ) {
     if (!expanded) return
 
@@ -2563,7 +2622,8 @@ fun NoteLinkMenu(
             onNoteSelected = onNoteSelected,
             onCreateNote = onCreateNote,
             onCreateBlankNote = onCreateBlankNote,
-            onDismissRequest = onDismissRequest
+            onDismissRequest = onDismissRequest,
+            onBack = onBack
         )
     }
 }
@@ -2622,7 +2682,8 @@ fun CanvasLinkMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     loadCanvases: suspend () -> List<NoteMetadataEntity>,
-    onCanvasSelected: (canvasNoteId: String) -> Unit
+    onCanvasSelected: (canvasNoteId: String) -> Unit,
+    onBack: (() -> Unit)? = null
 ) {
     if (!expanded) return
 
@@ -2637,7 +2698,8 @@ fun CanvasLinkMenu(
         CanvasLinkMenuContent(
             loadCanvases = loadCanvases,
             onCanvasSelected = onCanvasSelected,
-            onDismissRequest = onDismissRequest
+            onDismissRequest = onDismissRequest,
+            onBack = onBack
         )
     }
 }
@@ -2677,7 +2739,8 @@ fun DatabaseLinkMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     loadDatabases: suspend () -> List<LinkableDatabase>,
-    onDatabaseSelected: (databaseId: String) -> Unit
+    onDatabaseSelected: (databaseId: String) -> Unit,
+    onBack: (() -> Unit)? = null
 ) {
     if (!expanded) return
 
@@ -2692,7 +2755,8 @@ fun DatabaseLinkMenu(
         DatabaseLinkMenuContent(
             loadDatabases = loadDatabases,
             onDatabaseSelected = onDatabaseSelected,
-            onDismissRequest = onDismissRequest
+            onDismissRequest = onDismissRequest,
+            onBack = onBack
         )
     }
 }
@@ -2786,40 +2850,65 @@ private fun SearchableLinkList(
             if (autoFocusSearch) searchFocusRequester.requestFocus()
         }
 
-        EmberrTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            placeholder = searchPlaceholder,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .focusRequester(searchFocusRequester)
-                .onPreviewKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                    when (event.key) {
-                        Key.DirectionDown -> {
-                            if (entries.isNotEmpty()) selectedIndex = (selectedIndex + 1) % entries.size
-                            true
-                        }
-                        Key.DirectionUp -> {
-                            if (entries.isNotEmpty()) selectedIndex = (selectedIndex - 1 + entries.size) % entries.size
-                            true
-                        }
-                        Key.Enter, Key.NumPadEnter -> {
-                            entries.getOrNull(selectedIndex)?.action?.invoke()
-                            true
-                        }
-                        Key.Escape -> {
-                            onDismissRequest()
-                            true
-                        }
-                        else -> false
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(LinkSearchBarPadding),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (onBack != null) {
+                IconTooltip(text = "Back to commands") {
+                    Box(
+                        modifier = Modifier
+                            .size(DesktopLinkBackButtonSize)
+                            .clip(DesktopLinkBackButtonShape)
+                            .background(emberrControlContainerColor())
+                            .clickable(onClick = onBack),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.chevron_left),
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
-        )
+            }
+            EmberrTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                placeholder = searchPlaceholder,
+                modifier = Modifier
+                    .weight(1f)
+                    .focusRequester(searchFocusRequester)
+                    .onPreviewKeyEvent { event ->
+                        if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                        when (event.key) {
+                            Key.DirectionDown -> {
+                                if (entries.isNotEmpty()) selectedIndex = (selectedIndex + 1) % entries.size
+                                true
+                            }
+                            Key.DirectionUp -> {
+                                if (entries.isNotEmpty()) selectedIndex = (selectedIndex - 1 + entries.size) % entries.size
+                                true
+                            }
+                            Key.Enter, Key.NumPadEnter -> {
+                                entries.getOrNull(selectedIndex)?.action?.invoke()
+                                true
+                            }
+                            Key.Escape -> {
+                                onDismissRequest()
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+            )
+        }
         SlashMenuList(
             sections = listOf(SlashMenuSectionData(sectionTitle, entries)),
-            selectedIndex = selectedIndex
+            selectedIndex = selectedIndex,
+            maxHeight = DesktopLinkListMaxHeight
         )
     }
 }
