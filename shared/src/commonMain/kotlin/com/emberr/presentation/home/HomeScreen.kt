@@ -66,6 +66,7 @@ import com.emberr.presentation.shared.components.EmberrSelectionPill
 import com.emberr.presentation.shared.components.SelectionPillAction
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrSearchSheetBody
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
@@ -120,6 +121,7 @@ import org.jetbrains.compose.resources.painterResource
 private val HORIZONTAL_PADDING = 16.dp
 private val SECTION_HEADER_START_PADDING = HORIZONTAL_PADDING + 4.dp
 private val DefaultCornerShape = RoundedCornerShape(12.dp)
+private val TemplatesSheetSidePadding = 20.dp
 
 @Composable
 private fun SectionToggleIcon(isExpanded: Boolean, contentDescription: String) {
@@ -1703,15 +1705,14 @@ fun TemplatesMenuContent(
     onCreateNewTemplate: () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        EmberrTextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChange,
-            placeholder = "Search templates...",
-            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp).padding(
-                horizontal = if (isDesktopPlatform) 12.dp else 0.dp,
-                vertical = if (isDesktopPlatform) 12.dp else 0.dp,
+        if (isDesktopPlatform) {
+            EmberrTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                placeholder = "Search templates...",
+                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp).padding(horizontal = 12.dp, vertical = 12.dp)
             )
-        )
+        }
 
         Row(
             modifier = Modifier
@@ -1826,8 +1827,20 @@ fun TemplatesBottomSheet(
     onDeleteTemplate: (String) -> Unit,
     onCreateNewTemplate: () -> Unit
 ) {
-    EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "Templates", subtitle = "Start a new note from a template.") { closeAnd ->
-        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+    EmberrBottomSheet(
+        expanded = expanded,
+        onDismiss = onDismiss,
+        title = "Templates",
+        subtitle = "Start a new note from a template.",
+        contentHorizontalPadding = 0.dp,
+        scrollsContent = false
+    ) { closeAnd ->
+        EmberrSearchSheetBody(
+            searchText = searchQuery,
+            onSearchTextChange = onSearchQueryChange,
+            placeholder = "Search templates",
+            contentHorizontalPadding = TemplatesSheetSidePadding
+        ) {
             TemplatesMenuContent(
                 templates = templates,
                 searchQuery = searchQuery,
@@ -1836,13 +1849,6 @@ fun TemplatesBottomSheet(
                 onEditTemplate = { id -> closeAnd { onEditTemplate(id) } },
                 onDeleteTemplate = onDeleteTemplate,
                 onCreateNewTemplate = { closeAnd(onCreateNewTemplate) }
-            )
-
-            EmberrButtonPrimary(
-                text = "Close",
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 12.dp)
             )
         }
     }
