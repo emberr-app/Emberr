@@ -75,14 +75,18 @@ class SyncViewModel(
 
     val isSignedInToCloud = CloudSignInSignal.isSignedIn
 
+    private val serverStartStopDispatcher = Dispatchers.IO.limitedParallelism(1)
+
     fun startServerForPairing() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(serverStartStopDispatcher) {
             lanSyncServerController.startForPairing()
         }
     }
 
     fun stopServerUnlessPaired() {
-        lanSyncServerController.stopIfNotPaired()
+        viewModelScope.launch(serverStartStopDispatcher) {
+            lanSyncServerController.stopIfNotPaired()
+        }
     }
 
     fun resetSyncStatus() {
