@@ -420,7 +420,7 @@ private fun ScreenTitle(isShowingCompleted: Boolean, modifier: Modifier = Modifi
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onBackground,
         modifier = modifier
-            .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp)
+            .padding(horizontal = if (isDesktopPlatform) 40.dp else 19.dp)
             .padding(bottom = 8.dp)
     )
 }
