@@ -30,7 +30,7 @@ import org.koin.compose.koinInject
 @Composable
 actual fun AppLockSettingsSection() {
     val appLockManager = koinInject<AppLockManager>()
-    val isAppLockOn by appLockManager.isEnabled.collectAsState()
+    val isAppLockOn by appLockManager.isAppLockOn.collectAsState()
     val autoLockDelay by appLockManager.autoLockDelay.collectAsState()
     val isScreenSecurityOn by appLockManager.isScreenSecurityOn.collectAsState()
     val systemUnlockPrompt = (LocalActivity.current as? MainActivity)?.systemUnlockPrompt

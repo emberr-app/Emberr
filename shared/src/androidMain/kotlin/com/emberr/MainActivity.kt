@@ -5,29 +5,27 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.fragment.app.FragmentActivity
-import com.emberr.domain.applock.AppLockManager
-import com.emberr.presentation.applock.SystemUnlockPrompt
-import com.emberr.presentation.applock.openAppLockScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.gif.AnimatedImageDecoder
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
+import com.emberr.domain.applock.AppLockManager
 import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.model.PendingShare
 import com.emberr.domain.util.eventbus.WidgetComposeRequest
@@ -36,6 +34,8 @@ import com.emberr.domain.util.eventbus.WidgetCalendarDateBus
 import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
 import com.emberr.domain.util.eventbus.WidgetNavigationBus
 import com.emberr.domain.util.eventbus.ShareEventBus
+import com.emberr.presentation.applock.SystemUnlockPrompt
+import com.emberr.presentation.applock.openAppLockScreen
 import com.emberr.presentation.settings.selfhost.SelfHostUpdateRequiredDialog
 import com.emberr.presentation.shared.FirstContentRenderSignal
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
@@ -169,7 +169,7 @@ class MainActivity : FragmentActivity() {
             overridePendingTransition(0, 0)
         }
         enableEdgeToEdge()
-        systemUnlockPrompt = SystemUnlockPrompt(this, onUnlockedWithNobodyWaiting = {})
+        systemUnlockPrompt = SystemUnlockPrompt(this)
 
         lifecycleScope.launch {
             appLockManager.isScreenSecurityOn.collect { isScreenSecurityOn -> hideContentInRecents(isScreenSecurityOn) }
@@ -528,7 +528,7 @@ class MainActivity : FragmentActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        appLockManager.onReturnedFromOwnScreen()
+        appLockManager.onReturnedFromEmberrPicker()
         super.onActivityResult(requestCode, resultCode, data)
     }
 

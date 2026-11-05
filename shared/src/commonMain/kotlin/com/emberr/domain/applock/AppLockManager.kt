@@ -1,6 +1,7 @@
 package com.emberr.domain.applock
 
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.data.local.prefs.SyncConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,18 +17,19 @@ enum class AutoLockDelay(val waitBeforeLocking: Duration) {
     ONE_HOUR(1.hours);
 
     companion object {
-        fun named(name: String): AutoLockDelay = entries.firstOrNull { it.name == name } ?: ONE_MINUTE
+        fun named(name: String): AutoLockDelay =
+            entries.firstOrNull { it.name == name } ?: valueOf(SyncConstants.DEFAULT_APP_LOCK_DELAY)
     }
 }
 
-val shortestWaitAfterOwnScreen: Duration = 5.minutes
+private val shortestWaitAfterEmberrPicker: Duration = 5.minutes
 
 class AppLockManager(
     private val settingsManager: SettingsManager,
     private val timeSinceDeviceStarted: () -> Duration
 ) {
-    private val mutableIsEnabled = MutableStateFlow(settingsManager.isAppLockEnabled())
-    val isEnabled: StateFlow<Boolean> = mutableIsEnabled.asStateFlow()
+    private val mutableIsAppLockOn = MutableStateFlow(settingsManager.isAppLockEnabled())
+    val isAppLockOn: StateFlow<Boolean> = mutableIsAppLockOn.asStateFlow()
 
     private val mutableAutoLockDelay = MutableStateFlow(AutoLockDelay.named(settingsManager.getAppLockDelay()))
     val autoLockDelay: StateFlow<AutoLockDelay> = mutableAutoLockDelay.asStateFlow()
@@ -35,31 +37,31 @@ class AppLockManager(
     private val mutableIsScreenSecurityOn = MutableStateFlow(settingsManager.isScreenSecurityEnabled())
     val isScreenSecurityOn: StateFlow<Boolean> = mutableIsScreenSecurityOn.asStateFlow()
 
-    private val mutableIsLocked = MutableStateFlow(mutableIsEnabled.value)
+    private val mutableIsLocked = MutableStateFlow(mutableIsAppLockOn.value)
     val isLocked: StateFlow<Boolean> = mutableIsLocked.asStateFlow()
 
     private var leftAppAt: Duration? = null
-    private var cameBackFromOwnScreen = false
+    private var cameBackFromEmberrPicker = false
 
     fun onAppLeft() {
-        if (mutableIsEnabled.value && !mutableIsLocked.value) {
+        if (mutableIsAppLockOn.value && !mutableIsLocked.value) {
             leftAppAt = timeSinceDeviceStarted()
         }
     }
 
-    fun onReturnedFromOwnScreen() {
-        cameBackFromOwnScreen = true
+    fun onReturnedFromEmberrPicker() {
+        cameBackFromEmberrPicker = true
     }
 
     fun onAppReturned() {
         val leftAt = leftAppAt
-        val wasOwnScreen = cameBackFromOwnScreen
+        val wasEmberrPicker = cameBackFromEmberrPicker
         leftAppAt = null
-        cameBackFromOwnScreen = false
-        if (leftAt == null || !mutableIsEnabled.value) return
+        cameBackFromEmberrPicker = false
+        if (leftAt == null) return
 
         val chosenWait = mutableAutoLockDelay.value.waitBeforeLocking
-        val allowedTimeAway = if (wasOwnScreen) maxOf(chosenWait, shortestWaitAfterOwnScreen) else chosenWait
+        val allowedTimeAway = if (wasEmberrPicker) maxOf(chosenWait, shortestWaitAfterEmberrPicker) else chosenWait
         if (timeSinceDeviceStarted() - leftAt >= allowedTimeAway) {
             mutableIsLocked.value = true
         }
@@ -72,12 +74,12 @@ class AppLockManager(
 
     fun turnOn() {
         settingsManager.saveAppLockEnabled(true)
-        mutableIsEnabled.value = true
+        mutableIsAppLockOn.value = true
     }
 
     fun turnOff() {
         settingsManager.saveAppLockEnabled(false)
-        mutableIsEnabled.value = false
+        mutableIsAppLockOn.value = false
         unlock()
     }
 

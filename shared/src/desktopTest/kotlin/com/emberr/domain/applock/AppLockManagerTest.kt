@@ -40,13 +40,13 @@ class AppLockManagerTest {
     }
 
     @Test
-    fun returningFromOwnPickerGetsFiveMinutesEvenWhenSetToImmediately() {
+    fun returningFromEmberrPickerGetsFiveMinutesEvenWhenSetToImmediately() {
         val manager = unlockedManager()
         manager.changeAutoLockDelay(AutoLockDelay.IMMEDIATELY)
 
         manager.onAppLeft()
         now += 4.minutes
-        manager.onReturnedFromOwnScreen()
+        manager.onReturnedFromEmberrPicker()
         manager.onAppReturned()
         assertFalse(manager.isLocked.value)
 
