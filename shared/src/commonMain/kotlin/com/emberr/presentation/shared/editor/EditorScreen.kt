@@ -1446,7 +1446,7 @@ fun EditorScreen(
                             modifier = Modifier
                                 .centeredWithMaxWidth(contentMaxWidth)
                                 .fillMaxWidth()
-                                .padding(horizontal = (if (isDesktopPlatform) 32.dp else 19.dp) + extraBlockSidePadding)
+                                .padding(horizontal = (if (isDesktopPlatform) 32.dp else 17.dp) + extraBlockSidePadding)
                                 .padding(bottom = 20.dp, top = if (isDesktopPlatform) 0.dp else 6.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -1485,7 +1485,10 @@ fun EditorScreen(
                                 modifier = Modifier
                                     .centeredWithMaxWidth(contentMaxWidth)
                                     .fillMaxWidth()
-                                    .padding(horizontal = (if (isDesktopPlatform) 36.dp else 16.dp) + extraBlockSidePadding)
+                                    .padding(
+                                        start = (if (isDesktopPlatform) 36.dp else 20.dp) + extraBlockSidePadding,
+                                        end = (if (isDesktopPlatform) 36.dp else 16.dp) + extraBlockSidePadding
+                                    )
                                     .padding(top = if (index == 0) 0.dp else 20.dp, bottom = 8.dp)
                             )
                         }
