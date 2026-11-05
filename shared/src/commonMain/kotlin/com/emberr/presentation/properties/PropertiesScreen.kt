@@ -51,6 +51,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.settings.SettingsActionRow
 import com.emberr.presentation.settings.SettingsDivider
 import com.emberr.presentation.settings.SettingsGroup
+import com.emberr.presentation.settings.settingsRowSize
 import com.emberr.presentation.settings.SettingsRowIcon
 import com.emberr.presentation.settings.SettingsValuePill
 import com.emberr.presentation.shared.components.EmberrBottomSheet
@@ -265,7 +266,7 @@ private fun PropertyRow(
         modifier = Modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 14.dp, vertical = 17.dp),
+            .settingsRowSize(desktopVerticalPadding = 17.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         SettingsRowIcon(icon = painterResource(icon))

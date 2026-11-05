@@ -121,7 +121,7 @@ private val DesktopListMaxWidth = 760.dp
 private val RowAvatarSize = 44.dp
 private val RowCheckIconSize = 16.dp
 private const val SelectedRowTintAlpha = 0.08f
-private val RowDividerStart = if (isDesktopPlatform) 72.dp else 70.dp
+private val RowDividerStart = if (isDesktopPlatform) 72.dp else 0.dp
 private val EmptyArtAvatarSize = 48.dp
 private val EmptyArtPlusSize = 56.dp
 private val DashLength = 6.dp
@@ -566,7 +566,7 @@ private fun PersonListRowItem(
                     },
                     onLongClick = { showsMenu = true }
                 )
-                .padding(horizontal = if (isDesktopPlatform) 16.dp else 14.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp, vertical = if (isDesktopPlatform) 10.dp else 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             SelectableAvatar(person = row.person, name = name, isSelected = isSelected, onToggleSelection = onToggleSelection)
