@@ -14,6 +14,7 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -1044,14 +1045,17 @@ private fun NoteHeader(
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.BottomStart)
-                                    .padding(start = if (isDesktopPlatform) 32.dp else 19.dp)
+                                    .padding(start = if (isDesktopPlatform) 30.dp else 17.dp)
                                     .graphicsLayer {
                                         translationY = 36.dp.toPx()
                                     }
-                                    .size(80.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable { onIconClick() },
-                                contentAlignment = Alignment.Center
+                                    .height(80.dp)
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                        onClick = onIconClick
+                                    ),
+                                contentAlignment = Alignment.CenterStart
                             ) {
                                 Text(
                                     text = noteIcon,
@@ -1085,7 +1089,7 @@ private fun NoteHeader(
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(start = 32.dp)
+                            .padding(start = 30.dp)
                             .offset(y = 36.dp)
                     ) {
                         EmberrDesktopMenu(
@@ -1111,7 +1115,7 @@ private fun NoteHeader(
             modifier = Modifier
                 .centeredWithMaxWidth(contentMaxWidth)
                 .fillMaxWidth()
-                .padding(horizontal = if (isDesktopPlatform) 32.dp else 19.dp)
+                .padding(horizontal = if (isDesktopPlatform) 35.dp else 19.dp)
         ) {
             Spacer(modifier = Modifier.height(topPadding))
 

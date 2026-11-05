@@ -166,7 +166,7 @@ fun DocumentsScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier
-                                    .padding(horizontal = if (isDesktopPlatform) 40.dp else 20.5.dp)
+                                    .padding(horizontal = if (isDesktopPlatform) 41.dp else 20.5.dp)
                                     .padding(bottom = 12.dp)
                             )
 
