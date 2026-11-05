@@ -42,6 +42,10 @@ class AndroidUpdateChecker(
     private val checkScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val hasCheckedOnLaunch = AtomicBoolean(false)
 
+    val isInstalledFromPlayStore: Boolean by lazy {
+        context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName == PLAY_STORE_PACKAGE_NAME
+    }
+
     private val httpClient by lazy {
         HttpClient {
             expectSuccess = false
@@ -62,6 +66,7 @@ class AndroidUpdateChecker(
     fun setAutomaticCheckEnabled(enabled: Boolean) = settingsManager.saveAutomaticUpdateCheckEnabled(enabled)
 
     fun checkOnLaunchOnce() {
+        if (isInstalledFromPlayStore) return
         if (!hasCheckedOnLaunch.compareAndSet(false, true)) return
         if (settingsManager.isAutomaticUpdateCheckEnabled()) {
             checkForUpdate(notifyWhenAvailable = true)
@@ -130,9 +135,17 @@ class AndroidUpdateChecker(
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun releasePageIntent(): Intent = Intent(Intent.ACTION_VIEW, Uri.parse(LATEST_RELEASE_PAGE_URL))
+    private fun releasePageIntent(): Intent {
+        val pageUrl = if (isInstalledFromPlayStore) {
+            "https://play.google.com/store/apps/details?id=${context.packageName}"
+        } else {
+            LATEST_RELEASE_PAGE_URL
+        }
+        return Intent(Intent.ACTION_VIEW, Uri.parse(pageUrl))
+    }
 
     private companion object {
+        const val PLAY_STORE_PACKAGE_NAME = "com.android.vending"
         const val CHANNEL_ID = "emberr_app_updates"
         const val NOTIFICATION_ID = 7301
         const val CONNECT_TIMEOUT_MS = 30_000L

@@ -14,7 +14,7 @@ import org.koin.compose.koinInject
 @Composable
 actual fun AppUpdateSettingsSection() {
     val updateChecker = koinInject<AndroidUpdateChecker>()
-    if (updateChecker.installedVersion == null) return
+    if (updateChecker.installedVersion == null || updateChecker.isInstalledFromPlayStore) return
 
     val checkState by updateChecker.state.collectAsState()
     val isAutomaticCheckEnabled by updateChecker.automaticCheckEnabledFlow
