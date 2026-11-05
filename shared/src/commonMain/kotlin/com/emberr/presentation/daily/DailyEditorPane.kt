@@ -298,7 +298,7 @@ fun DailyEditorPane(
             .background(MaterialTheme.colorScheme.background)
     ) {
         val editorTopPadding = if (isDesktopPlatform) {
-            if (!isSidebarVisible) 72.dp else 16.dp
+            if (!isSidebarVisible) 72.dp else 24.dp
         } else {
             rememberStableStatusBarsPadding().calculateTopPadding() + 150.dp
         }
