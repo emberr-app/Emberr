@@ -242,6 +242,28 @@
             ]
         },
         {
+            "uniqueId": "androidx.biometric:biometric",
+            "artifactVersion": "1.1.0",
+            "name": "Biometric",
+            "description": "The Biometric library is a static library that you can add to your Android application. It invokes BiometricPrompt on devices running P and greater, and on older devices will show a compat dialog. Compatible on devices running API 14 or later.",
+            "website": "https://developer.android.com/jetpack/androidx/releases/biometric#1.1.0",
+            "developers": [
+                {
+                    "name": "The Android Open Source Project"
+                }
+            ],
+            "scm": {
+                "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
+                "url": "https://cs.android.com/androidx/platform/frameworks/support"
+            },
+            "licenses": [
+                "Apache-2.0"
+            ],
+            "funding": [
+                
+            ]
+        },
+        {
             "uniqueId": "androidx.camera.featurecombinationquery:featurecombinationquery",
             "artifactVersion": "1.6.2",
             "name": "Camera Feature Combination Query",

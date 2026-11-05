@@ -83,6 +83,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".presentation.applock.AppLockActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Emberr.AppLock" />
+
         <receiver
             android:name=".domain.reminders.AndroidReminderReceiver"
             android:enabled="true"
