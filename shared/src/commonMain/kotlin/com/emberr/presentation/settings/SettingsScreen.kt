@@ -134,6 +134,8 @@ import org.koin.compose.viewmodel.koinViewModel
 private const val PRIVACY_POLICY_URL = "https://github.com/emberr-app/Emberr/blob/main/PRIVACY.md"
 private val SettingsCardShape = RoundedCornerShape(18.dp)
 private val SettingsSidebarWidth = 244.dp
+private val MobileSettingsRowMinHeight = 62.dp
+private val MobileSettingsRowSidePadding = 16.dp
 private val SettingsPaneMaxWidth = 760.dp
 private const val SUB_PAGE_FADE_MILLIS = 150
 
@@ -1037,31 +1039,38 @@ private fun SyncSettingsSection(
         SettingsActionRow(
             icon = painterResource(Res.drawable.refresh_cw),
             title = "Self-Host",
+            subtitle = when {
+                isPaired -> "Unpair LAN Sync to use Self-Host."
+                isSignedInToCloud -> "Sign out of Emberr Cloud to use Self-Host."
+                else -> null
+            },
             isEnabled = !isPaired && !isSignedInToCloud,
             onClick = onOpenSelfHostSetup
         )
-        when {
-            isPaired -> SettingsFootnote(text = "Unpair LAN Sync to use Self-Host.")
-            isSignedInToCloud -> SettingsFootnote(text = "Sign out of Emberr Cloud to use Self-Host.")
-        }
         if (isDebugBuild) {
             SettingsDivider()
             SettingsActionRow(
                 icon = painterResource(Res.drawable.lock),
                 title = "Emberr Cloud",
+                subtitle = when {
+                    isSignedInToCloud -> null
+                    isSelfHostConnected -> "Disconnect Self-Host to use Emberr Cloud."
+                    isPaired -> "Unpair LAN Sync to use Emberr Cloud."
+                    else -> null
+                },
                 isEnabled = isSignedInToCloud || (!isSelfHostConnected && !isPaired),
                 onClick = onOpenEmberrCloud
             )
-            if (!isSignedInToCloud) {
-                when {
-                    isSelfHostConnected -> SettingsFootnote(text = "Disconnect Self-Host to use Emberr Cloud.")
-                    isPaired -> SettingsFootnote(text = "Unpair LAN Sync to use Emberr Cloud.")
-                }
-            }
         }
     }
 
     SettingsGroup(title = "LAN Sync") {
+        val lanSyncBlockedReason = when {
+            isSelfHostConnected -> "Disconnect Self-Host to use LAN Sync."
+            isSignedInToCloud -> "Sign out of Emberr Cloud to use LAN Sync."
+            else -> null
+        }
+
         if (isDesktopPlatform && serverUnavailableReason != null) {
             SettingsWarningNotice(message = serverUnavailableReason)
         }
@@ -1120,6 +1129,7 @@ private fun SyncSettingsSection(
                 SettingsActionRow(
                     icon = painterResource(Res.drawable.qr_code),
                     title = "Pair Mobile Device",
+                    subtitle = lanSyncBlockedReason,
                     isEnabled = !isSelfHostConnected && !isSignedInToCloud,
                     onClick = onPairMobileDevice
                 )
@@ -1129,16 +1139,10 @@ private fun SyncSettingsSection(
                 SettingsActionRow(
                     icon = painterResource(Res.drawable.scan_line),
                     title = "Pair with Desktop",
+                    subtitle = lanSyncBlockedReason,
                     isEnabled = !isSelfHostConnected && !isSignedInToCloud,
                     onClick = onPairWithDesktop
                 )
-            }
-        }
-
-        if (!isPaired) {
-            when {
-                isSelfHostConnected -> SettingsFootnote(text = "Disconnect Self-Host to use LAN Sync.")
-                isSignedInToCloud -> SettingsFootnote(text = "Sign out of Emberr Cloud to use LAN Sync.")
             }
         }
     }
@@ -1230,10 +1234,9 @@ private fun AppearanceSettingsSection(
             icon = painterResource(Res.drawable.calendar),
             title = "First Day of Week",
             value = firstDayOfWeekLabel,
-            choices = firstDayOfWeekChoices
+            choices = firstDayOfWeekChoices,
+            subtitle = "Same setting as First Day of Week in Calendar settings."
         )
-
-        SettingsFootnote(text = "Same setting as First Day of Week in Calendar settings.")
     }
 
     SettingsGroup(title = "Layout") {
@@ -1390,24 +1393,18 @@ private fun AiSettingsSection(
             icon = painterResource(Res.drawable.astroid),
             title = "Turn Off AI Features",
             isChecked = aiFeaturesDisabled,
+            subtitle = when {
+                isPurgingAiData -> "Removing models, embeddings and saved keys…"
+                !isDesktopPlatform -> null
+                aiFeaturesDisabled -> "AI is off. The assistant button is hidden, notes are no longer indexed, and all model files, embeddings and API keys have been removed. Saved chats are kept."
+                else -> "Hides the AI assistant, stops note indexing, and permanently deletes downloaded models, the search index and stored API keys to free up storage. Saved chats are kept."
+            },
             onCheckedChange = { isChecked ->
                 if (!isPurgingAiData) {
                     if (isChecked) onDisableRequested() else onEnableRequested()
                 }
             }
         )
-
-        if (isPurgingAiData) {
-            SettingsFootnote(text = "Removing models, embeddings and saved keys…")
-        } else if (isDesktopPlatform) {
-            SettingsFootnote(
-                text = if (aiFeaturesDisabled) {
-                    "AI is off. The assistant button is hidden, notes are no longer indexed, and all model files, embeddings and API keys have been removed. Saved chats are kept."
-                } else {
-                    "Hides the AI assistant, stops note indexing, and permanently deletes downloaded models, the search index and stored API keys to free up storage. Saved chats are kept."
-                }
-            )
-        }
     }
 }
 
@@ -1543,7 +1540,7 @@ private fun EraseCloudDataDialog(
 @Composable
 internal fun SettingsDivider() {
     HorizontalDivider(
-        modifier = Modifier.padding(start = 50.dp, end = 16.dp),
+        modifier = if (isDesktopPlatform) Modifier.padding(start = 50.dp, end = 16.dp) else Modifier,
         thickness = 1.dp,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
     )
@@ -1694,45 +1691,82 @@ fun SettingsActionRow(
     icon: Painter,
     title: String,
     trailingLabel: String? = null,
+    subtitle: String? = null,
     isDestructive: Boolean = false,
     isEnabled: Boolean = true,
     onClick: () -> Unit
 ) {
     val titleColor = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .alpha(if (isEnabled) 1f else 0.38f)
-            .clickable(enabled = isEnabled) { onClick() }
-            .padding(horizontal = 14.dp, vertical = 17.dp),
-        verticalAlignment = Alignment.CenterVertically
+    SettingsRowLayout(
+        modifier = Modifier.clickable(enabled = isEnabled) { onClick() },
+        desktopVerticalPadding = 17.dp,
+        subtitle = subtitle
     ) {
-        SettingsRowIcon(icon = icon, isDestructive = isDestructive)
+        Row(
+            modifier = Modifier.weight(1f).alpha(if (isEnabled) 1f else 0.38f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SettingsRowIcon(icon = icon, isDestructive = isDestructive)
 
-        Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = if (isDestructive) FontWeight.Medium else FontWeight.Normal,
-            color = titleColor,
-            modifier = Modifier.weight(1f)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isDestructive) FontWeight.Medium else FontWeight.Normal,
+                color = titleColor,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (trailingLabel != null) {
+                SettingsValuePill(label = trailingLabel, isDestructive = isDestructive)
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            if (!isDestructive) {
+                Icon(
+                    painterResource(Res.drawable.chevron_right),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsRowLayout(
+    modifier: Modifier,
+    desktopVerticalPadding: Dp,
+    subtitle: String?,
+    content: @Composable RowScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .settingsRowSize(desktopVerticalPadding = desktopVerticalPadding),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            content = content
         )
 
-        if (trailingLabel != null) {
-            SettingsValuePill(label = trailingLabel, isDestructive = isDestructive)
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
-        if (!isDestructive) {
-            Icon(
-                painterResource(Res.drawable.chevron_right),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                modifier = Modifier.size(18.dp)
+        if (subtitle != null && !isDesktopPlatform) {
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                modifier = Modifier.padding(start = 36.dp, top = 2.dp)
             )
         }
+    }
+
+    if (subtitle != null && isDesktopPlatform) {
+        SettingsFootnote(text = subtitle)
     }
 }
 
@@ -1755,7 +1789,8 @@ internal fun SettingsChoiceRow(
     title: String,
     value: String,
     choices: List<SettingsChoice>,
-    menuToggle: SettingsMenuToggle? = null
+    menuToggle: SettingsMenuToggle? = null,
+    subtitle: String? = null
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
 
@@ -1800,8 +1835,18 @@ internal fun SettingsChoiceRow(
                 }
             }
         }
+
+        if (subtitle != null) {
+            SettingsFootnote(text = subtitle)
+        }
     } else {
-        SettingsActionRow(icon = icon, title = title, trailingLabel = value, onClick = { isMenuOpen = true })
+        SettingsActionRow(
+            icon = icon,
+            title = title,
+            trailingLabel = value,
+            subtitle = subtitle,
+            onClick = { isMenuOpen = true }
+        )
 
         EmberrBottomSheet(
             expanded = isMenuOpen,
@@ -1846,14 +1891,13 @@ fun SettingsToggleRow(
     icon: Painter,
     title: String,
     isChecked: Boolean,
+    subtitle: String? = null,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onCheckedChange(!isChecked) }
-            .padding(horizontal = 14.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+    SettingsRowLayout(
+        modifier = Modifier.clickable { onCheckedChange(!isChecked) },
+        desktopVerticalPadding = 14.dp,
+        subtitle = subtitle
     ) {
         SettingsRowIcon(icon = icon)
 
@@ -1866,20 +1910,30 @@ fun SettingsToggleRow(
             modifier = Modifier.weight(1f)
         )
 
-        Switch(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.surface,
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                checkedBorderColor = Color.Transparent,
-                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
-                uncheckedBorderColor = Color.Transparent
+        val switchTouchSize = if (isDesktopPlatform) LocalMinimumInteractiveComponentSize.current else 0.dp
+        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides switchTouchSize) {
+            Switch(
+                checked = isChecked,
+                onCheckedChange = onCheckedChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.surface,
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    checkedBorderColor = Color.Transparent,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+                    uncheckedBorderColor = Color.Transparent
+                )
             )
-        )
+        }
     }
 }
+
+private fun Modifier.settingsRowSize(desktopVerticalPadding: Dp): Modifier =
+    if (isDesktopPlatform) {
+        padding(horizontal = 14.dp, vertical = desktopVerticalPadding)
+    } else {
+        heightIn(min = MobileSettingsRowMinHeight).padding(horizontal = MobileSettingsRowSidePadding, vertical = 12.dp)
+    }
 
 private fun fontSizeDisplayNameFor(preferenceName: String): String =
     FontSizeOptions.firstOrNull { it.first == preferenceName }?.second

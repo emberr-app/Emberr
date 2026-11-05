@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.presentation.settings.SettingsActionRow
 import com.emberr.presentation.settings.SettingsDivider
-import com.emberr.presentation.settings.SettingsFootnote
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.desktopSettingsSidePadding
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
@@ -77,12 +76,12 @@ fun ImportScreen(
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.file_text),
                         title = "Text & Markdown",
+                        subtitle = "Also works for Obsidian and Bear notes.\nSome Obsidian features may not import fully.",
                         onClick = {
                             viewModel.prepareMarkdownImport()
                             showMarkdownImportSheet = true
                         }
                     )
-                    SettingsFootnote(text = "Also works for Obsidian and Bear notes.\nSome Obsidian features may not import fully.")
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.emberr_ghost),
