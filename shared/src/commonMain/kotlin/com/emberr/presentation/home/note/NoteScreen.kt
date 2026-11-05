@@ -1051,7 +1051,7 @@ private fun NoteHeader(
                                     .size(80.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .clickable { onIconClick() },
-                                contentAlignment = Alignment.CenterStart
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = noteIcon,
