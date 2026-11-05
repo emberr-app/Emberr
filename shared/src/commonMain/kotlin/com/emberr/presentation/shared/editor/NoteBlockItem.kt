@@ -377,7 +377,6 @@ fun NoteBlockItem(
         ) {
             BlockLeadingMarker(block = block, textStyle = textStyle, actions = actions, afterKeyboardCloses = afterKeyboardCloses)
 
-            val primaryColor = MaterialTheme.colorScheme.primary
             val textFieldWrapperModifier = blockContentModifier(block)
                 .onFocusChanged { focusState ->
                     val currentlyFocused = focusState.isFocused || focusState.hasFocus
