@@ -59,6 +59,8 @@ object SyncConstants {
     const val DEFAULT_START_ON_HOME = false
     const val KEY_MIC_BUTTON_VISIBLE = "mic_button_visible"
     const val DEFAULT_MIC_BUTTON_VISIBLE = true
+    const val KEY_DAILY_QUOTE_VISIBLE = "daily_quote_visible"
+    const val DEFAULT_DAILY_QUOTE_VISIBLE = true
     const val KEY_HIDDEN_OVERVIEW_SECTIONS = "hidden_overview_sections"
     const val KEY_HIDDEN_CALENDAR_CATEGORIES = "hidden_calendar_categories"
     const val KEY_BIRTHDAY_REMINDERS_ENABLED = "birthday_reminders_enabled"

@@ -508,6 +508,18 @@ class AndroidSettingsManager(
         _micButtonVisible.value = visible
     }
 
+    private val _dailyQuoteVisible = MutableStateFlow(
+        sharedPreferences.getBoolean(SyncConstants.KEY_DAILY_QUOTE_VISIBLE, SyncConstants.DEFAULT_DAILY_QUOTE_VISIBLE)
+    )
+    override val dailyQuoteVisibleFlow: Flow<Boolean> = _dailyQuoteVisible
+
+    override fun isDailyQuoteVisible(): Boolean = _dailyQuoteVisible.value
+
+    override fun saveDailyQuoteVisible(visible: Boolean) {
+        sharedPreferences.edit { putBoolean(SyncConstants.KEY_DAILY_QUOTE_VISIBLE, visible) }
+        _dailyQuoteVisible.value = visible
+    }
+
     private val _hiddenOverviewSections = MutableStateFlow(
         sharedPreferences.getStringSet(SyncConstants.KEY_HIDDEN_OVERVIEW_SECTIONS, emptySet()).orEmpty().toSet()
     )
