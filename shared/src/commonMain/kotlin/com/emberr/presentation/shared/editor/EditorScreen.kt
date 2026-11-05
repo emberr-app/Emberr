@@ -104,6 +104,7 @@ import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -1318,6 +1319,18 @@ fun EditorScreen(
                             if (deleteSelectedBlocksOnDeleteKey(keyEvent)) return@onPreviewKeyEvent true
                             if (moveCaretFromSelectedBlock(keyEvent)) return@onPreviewKeyEvent true
                             undoOrRedoOnShortcut(keyEvent)
+                        }
+                        .onKeyEvent { keyEvent ->
+                            val isEscapeWhileTyping = keyEvent.type == KeyEventType.KeyDown &&
+                                keyEvent.key == Key.Escape &&
+                                activeBlockId != null
+                            if (!isEscapeWhileTyping) return@onKeyEvent false
+                            focusManager.clearFocus()
+                            activeBlockId = null
+                            GlobalEditorState.currentlyFocusedBlockId = null
+                            localFocusRequest = null
+                            showSlashMenu = false
+                            true
                         }
                 } else {
                     Modifier.pointerInput(Unit) {
