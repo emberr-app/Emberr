@@ -505,7 +505,7 @@ fun EmberrApp(
                             com.emberr.presentation.home.HomeScreen(
                                 viewModel = HomeViewModel,
                                 gridState = homeGridState,
-                                bottomContentPadding = if (isBottomBarVisible) bottomBarHeightDp else 0.dp,
+                                bottomContentPadding = if (isSelectionActive) 0.dp else bottomBarHeightDp,
                                 onNavigateToEditor = { noteId ->
                                     navController.navigate(
                                         Screen.Note.createRoute(
