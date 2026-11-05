@@ -482,7 +482,7 @@ fun EmberrApp(
                             arguments = listOf(navArgument("date") { type = NavType.StringType; nullable = true })
                         ) { backStackEntry ->
                             DailyScreen(
-                                bottomContentPadding = if (isBottomBarVisible) bottomBarHeightDp else 0.dp,
+                                bottomContentPadding = if (isSelectionActive) 0.dp else bottomBarHeightDp,
                                 onSelectionModeChange = { isActive -> isSelectionActive = isActive },
                                 onPickImage = onPickImage,
                                 onTakePhoto = onTakePhoto,
