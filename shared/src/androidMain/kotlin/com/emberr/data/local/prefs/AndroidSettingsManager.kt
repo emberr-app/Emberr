@@ -621,6 +621,28 @@ class AndroidSettingsManager(
         _automaticUpdateCheckEnabled.value = enabled
     }
 
+    override fun isAppLockEnabled(): Boolean =
+        sharedPreferences.getBoolean(SyncConstants.KEY_APP_LOCK_ENABLED, SyncConstants.DEFAULT_APP_LOCK_ENABLED)
+
+    override fun saveAppLockEnabled(enabled: Boolean) {
+        sharedPreferences.edit(commit = true) { putBoolean(SyncConstants.KEY_APP_LOCK_ENABLED, enabled) }
+    }
+
+    override fun getAppLockDelay(): String =
+        sharedPreferences.getString(SyncConstants.KEY_APP_LOCK_DELAY, SyncConstants.DEFAULT_APP_LOCK_DELAY)
+            ?: SyncConstants.DEFAULT_APP_LOCK_DELAY
+
+    override fun saveAppLockDelay(delayName: String) {
+        sharedPreferences.edit { putString(SyncConstants.KEY_APP_LOCK_DELAY, delayName) }
+    }
+
+    override fun isScreenSecurityEnabled(): Boolean =
+        sharedPreferences.getBoolean(SyncConstants.KEY_SCREEN_SECURITY_ENABLED, SyncConstants.DEFAULT_SCREEN_SECURITY_ENABLED)
+
+    override fun saveScreenSecurityEnabled(enabled: Boolean) {
+        sharedPreferences.edit { putBoolean(SyncConstants.KEY_SCREEN_SECURITY_ENABLED, enabled) }
+    }
+
     private val _aiGenerationMode = MutableStateFlow(
         sharedPreferences.getString(SyncConstants.KEY_AI_GENERATION_MODE, SyncConstants.DEFAULT_AI_GENERATION_MODE)
             ?: SyncConstants.DEFAULT_AI_GENERATION_MODE

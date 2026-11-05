@@ -74,6 +74,12 @@ object SyncConstants {
     const val DEFAULT_AUTO_HIDE_TITLE_BAR = true
     const val KEY_AUTOMATIC_UPDATE_CHECK = "automatic_update_check"
     const val DEFAULT_AUTOMATIC_UPDATE_CHECK = true
+    const val KEY_APP_LOCK_ENABLED = "app_lock_enabled"
+    const val DEFAULT_APP_LOCK_ENABLED = false
+    const val KEY_APP_LOCK_DELAY = "app_lock_delay"
+    const val DEFAULT_APP_LOCK_DELAY = "ONE_MINUTE"
+    const val KEY_SCREEN_SECURITY_ENABLED = "screen_security_enabled"
+    const val DEFAULT_SCREEN_SECURITY_ENABLED = false
     const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
     const val DEFAULT_ONBOARDING_COMPLETED = false
     const val KEY_LAST_UPDATE_PEEK_VERSION = "last_update_peek_version"

@@ -567,6 +567,27 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _automaticUpdateCheckEnabled.value = enabled
     }
 
+    override fun isAppLockEnabled(): Boolean =
+        prefs.getBoolean(SyncConstants.KEY_APP_LOCK_ENABLED, SyncConstants.DEFAULT_APP_LOCK_ENABLED)
+
+    override fun saveAppLockEnabled(enabled: Boolean) {
+        prefs.putBoolean(SyncConstants.KEY_APP_LOCK_ENABLED, enabled)
+    }
+
+    override fun getAppLockDelay(): String =
+        prefs.get(SyncConstants.KEY_APP_LOCK_DELAY, SyncConstants.DEFAULT_APP_LOCK_DELAY)
+
+    override fun saveAppLockDelay(delayName: String) {
+        prefs.put(SyncConstants.KEY_APP_LOCK_DELAY, delayName)
+    }
+
+    override fun isScreenSecurityEnabled(): Boolean =
+        prefs.getBoolean(SyncConstants.KEY_SCREEN_SECURITY_ENABLED, SyncConstants.DEFAULT_SCREEN_SECURITY_ENABLED)
+
+    override fun saveScreenSecurityEnabled(enabled: Boolean) {
+        prefs.putBoolean(SyncConstants.KEY_SCREEN_SECURITY_ENABLED, enabled)
+    }
+
     private val _aiGenerationMode = MutableStateFlow(
         prefs.get(SyncConstants.KEY_AI_GENERATION_MODE, SyncConstants.DEFAULT_AI_GENERATION_MODE)
     )
