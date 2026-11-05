@@ -77,7 +77,7 @@ import com.emberr.presentation.shared.heightWhileKeyboardMoves
 import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.selection.BlockSelectionMenuContent
 import com.emberr.presentation.shared.editor.selection.LocalCrossBlockSelection
-import com.emberr.presentation.shared.editor.BlockSelectionPill
+import com.emberr.presentation.shared.editor.selection.BlockSelectionPill
 import com.emberr.presentation.shared.editor.EditorScreen
 import com.emberr.presentation.shared.editor.ImageLinkFetch
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
@@ -86,7 +86,7 @@ import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEdit
 import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.selection.CrossBlockTextRange
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
-import com.emberr.presentation.shared.editor.SelectionModeObserver
+import com.emberr.presentation.shared.editor.selection.SelectionModeObserver
 import com.emberr.presentation.calendar.EventEditorSheetHost
 import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.calendar.RecurrenceScopeChooser
@@ -94,12 +94,12 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
-import com.emberr.presentation.shared.editor.EditorToolbar
+import com.emberr.presentation.shared.editor.toolbar.EditorToolbar
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.editor.GlobalEditorState
-import com.emberr.presentation.shared.editor.MobileMenuState
+import com.emberr.presentation.shared.editor.toolbar.MobileMenuState
 import com.emberr.presentation.shared.editor.EditorEventBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -148,7 +148,7 @@ import com.emberr.presentation.shared.components.ReportSheetContentScrolled
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import com.emberr.presentation.shared.components.emberrBlur
-import com.emberr.presentation.shared.editor.BlockStyleBar
+import com.emberr.presentation.shared.editor.selection.BlockStyleBar
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_right

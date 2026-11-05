@@ -26,7 +26,7 @@ import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.KmpBackHandler
-import com.emberr.presentation.shared.editor.BlockSelectionPill
+import com.emberr.presentation.shared.editor.selection.BlockSelectionPill
 import com.emberr.presentation.shared.editor.blockViews.media.ImageBlockView
 import dev.chrisbanes.haze.HazeState
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar

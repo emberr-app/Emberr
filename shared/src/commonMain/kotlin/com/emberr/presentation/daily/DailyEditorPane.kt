@@ -34,7 +34,7 @@ import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.selection.BlockSelectionMenuContent
-import com.emberr.presentation.shared.editor.BlockSelectionPill
+import com.emberr.presentation.shared.editor.selection.BlockSelectionPill
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEditor
@@ -42,15 +42,15 @@ import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.selection.CrossBlockTextRange
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
 import com.emberr.presentation.shared.editor.EditorScreen
-import com.emberr.presentation.shared.editor.EditorToolbar
+import com.emberr.presentation.shared.editor.toolbar.EditorToolbar
 import com.emberr.presentation.shared.editor.GlobalEditorState
-import com.emberr.presentation.shared.editor.MobileMenuState
+import com.emberr.presentation.shared.editor.toolbar.MobileMenuState
 import com.emberr.presentation.shared.editor.EditorEventBus
 import com.emberr.presentation.calendar.EventEditorSheetHost
 import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.calendar.RecurrenceScopeChooser
 import com.emberr.presentation.shared.SubNoteOpenMode
-import com.emberr.presentation.shared.editor.BlockStyleBar
+import com.emberr.presentation.shared.editor.selection.BlockStyleBar
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.koinInject

@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.presentation.shared.editor.BlockSelectionPill
+import com.emberr.presentation.shared.editor.selection.BlockSelectionPill
 import androidx.compose.ui.text.AnnotatedString
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.KmpBackHandler

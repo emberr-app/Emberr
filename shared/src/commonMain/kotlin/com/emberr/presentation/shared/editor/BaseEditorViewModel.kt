@@ -138,6 +138,8 @@ import kotlinx.datetime.toLocalDateTime
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
+import com.emberr.presentation.shared.editor.slash.customPropertyInsertKey
+import com.emberr.presentation.shared.editor.slash.propertyInsertKey
 
 @Stable
 data class FocusRequest(
