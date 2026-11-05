@@ -92,7 +92,7 @@ class AndroidAudioRecorder(private val context: Context) : AudioRecorder {
         }
 
         val durationSecs = ((System.currentTimeMillis() - recordingStartTime) / 1000).toInt()
-        val savedName = currentFile?.name
+        val savedName = currentFile?.takeIf { it.exists() }?.name
         currentFile = null
 
         return savedName?.let { Pair(it, durationSecs) }
