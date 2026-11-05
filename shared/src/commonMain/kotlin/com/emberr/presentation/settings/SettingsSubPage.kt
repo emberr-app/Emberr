@@ -4,11 +4,11 @@ internal const val DATA_CATEGORY_TITLE = "Data"
 internal const val SYNC_CATEGORY_TITLE = "Sync"
 internal const val HELP_CATEGORY_TITLE = "Help"
 
-enum class SettingsSubPage(val categoryTitle: String, val parentPage: SettingsSubPage?) {
-    SELF_HOST(categoryTitle = SYNC_CATEGORY_TITLE, parentPage = null),
-    EMBERR_CLOUD(categoryTitle = SYNC_CATEGORY_TITLE, parentPage = null),
-    IMPORT(categoryTitle = DATA_CATEGORY_TITLE, parentPage = null),
-    ABOUT(categoryTitle = HELP_CATEGORY_TITLE, parentPage = null),
-    OPEN_SOURCE_LICENSES(categoryTitle = HELP_CATEGORY_TITLE, parentPage = ABOUT),
-    THIRD_PARTY_SERVICES(categoryTitle = HELP_CATEGORY_TITLE, parentPage = ABOUT)
+enum class SettingsSubPage(val parentPage: SettingsSubPage?) {
+    SELF_HOST(parentPage = null),
+    EMBERR_CLOUD(parentPage = null),
+    IMPORT(parentPage = null),
+    ABOUT(parentPage = null),
+    OPEN_SOURCE_LICENSES(parentPage = ABOUT),
+    THIRD_PARTY_SERVICES(parentPage = ABOUT)
 }
