@@ -1928,7 +1928,7 @@ fun SettingsToggleRow(
     }
 }
 
-private fun Modifier.settingsRowSize(desktopVerticalPadding: Dp): Modifier =
+internal fun Modifier.settingsRowSize(desktopVerticalPadding: Dp): Modifier =
     if (isDesktopPlatform) {
         padding(horizontal = 14.dp, vertical = desktopVerticalPadding)
     } else {
