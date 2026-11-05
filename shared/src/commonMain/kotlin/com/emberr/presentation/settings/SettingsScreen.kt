@@ -1173,7 +1173,7 @@ private fun AppearanceSettingsSection(
             title = "First Day of Week",
             value = firstDayOfWeekLabel,
             choices = firstDayOfWeekChoices,
-            subtitle = "Same setting as First Day of Week in Calendar settings."
+            subtitle = if (isDesktopPlatform) "Same setting as First Day of Week in Calendar settings." else null
         )
     }
 
