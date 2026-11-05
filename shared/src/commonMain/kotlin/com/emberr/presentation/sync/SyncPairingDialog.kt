@@ -10,10 +10,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.sync.SyncPairingData
+import com.emberr.presentation.shared.components.EmberrAlertDialog
+import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import kotlinx.serialization.json.Json
 
 @Composable
@@ -27,61 +28,51 @@ fun SyncPairingDialog(
         Json.encodeToString(pairingData)
     }
 
-    AlertDialog(
+    EmberrAlertDialog(
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(12.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
-        title = {
+        title = "Pair Mobile Device"
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
-                text = "Pair Mobile Device",
-                style = MaterialTheme.typography.titleLarge,
+                text = "Scan this QR code using the Emberr mobile app to connect securely to your desktop.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(200.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                QrCodeDisplay(
+                    data = jsonString,
+                    size = 180,
+                    modifier = Modifier
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Secret Token: ${pairingData.authToken.take(8)}...",
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Scan this QR code using the Emberr mobile app to connect securely to your desktop.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
 
-                Box(
-                    modifier = Modifier
-                        .size(200.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
-                ) {
-                    QrCodeDisplay(
-                        data = jsonString,
-                        size = 180,
-                        modifier = Modifier
-                    )
-                }
+            Spacer(modifier = Modifier.height(20.dp))
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = "Secret Token: ${pairingData.authToken.take(8)}...",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    text = "Close",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            EmberrButtonPrimary(
+                text = "Close",
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
-    )
+    }
 }
