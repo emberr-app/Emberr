@@ -47,7 +47,7 @@ fun AppLockScreen(
                 modifier = Modifier
                     .size(72.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                    .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -75,7 +75,7 @@ fun AppLockScreen(
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = unlockFailureMessage,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.widthIn(max = 320.dp)
