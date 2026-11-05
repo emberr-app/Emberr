@@ -37,7 +37,9 @@ import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.domain.model.VoiceBlock
 import com.emberr.domain.sync.MediaRetryCoordinator
 import com.emberr.domain.util.media.MediaStorageHelper
+import com.emberr.domain.util.system.AppPermission
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.util.system.rememberAppPermissionCoordinator
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.circle_x
@@ -64,6 +66,7 @@ fun AudioBlockView(
 ) {
     val mediaStorageHelper = koinInject<MediaStorageHelper>()
     val mediaRetryCoordinator = koinInject<MediaRetryCoordinator>()
+    val hasMicPermission = rememberAppPermissionCoordinator().isGranted(AppPermission.Microphone)
     var isRecording by remember { mutableStateOf(false) }
     var recordingDuration by remember { mutableIntStateOf(0) }
     var isPlaying by remember { mutableStateOf(false) }
@@ -132,7 +135,7 @@ fun AudioBlockView(
                             modifier = Modifier
                                 .size(if (isRecording) 18.dp else 20.dp)
                                 .clickable {
-                                    if (!inSelectionMode) {
+                                    if (!inSelectionMode && (isRecording || hasMicPermission)) {
                                         if (isRecording) {
                                             isRecording = false
                                             onStopRecording(false)
@@ -154,6 +157,12 @@ fun AudioBlockView(
                             text = "Recording... ${mins}:${secs.toString().padStart(2, '0')}",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else if (!hasMicPermission) {
+                        Text(
+                            text = "Microphone permission denied",
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
                     } else {
