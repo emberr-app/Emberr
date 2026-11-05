@@ -368,6 +368,7 @@ fun DailyEditorPane(
             onUndo = { viewModel.undo() },
             onRedo = { viewModel.redo() },
             emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type / for commands...",
+            singleTapStartsTyping = true,
             emptyContent = if (isDailyQuoteVisible) {
                 {
                     DailyEmptyDayMessage(

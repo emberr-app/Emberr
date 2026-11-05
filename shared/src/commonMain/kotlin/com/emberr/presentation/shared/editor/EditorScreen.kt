@@ -545,6 +545,7 @@ fun EditorScreen(
     trailingLabelFor: ((NoteBlock) -> String?)? = null,
     emptyContent: (@Composable () -> Unit)? = null,
     emptyNotePlaceholder: String = "",
+    singleTapStartsTyping: Boolean = false,
     mobileMenuState: MobileMenuState = MobileMenuState.MAIN,
     onMobileMenuStateChange: (MobileMenuState) -> Unit = {},
     slashQuery: String = "",
@@ -1351,6 +1352,52 @@ fun EditorScreen(
     ) {
         val calloutFrames = remember(blocks) { calloutFramesByRow(blocks) }
         val idsOfChildBlocks = remember(blocks) { blocks.idsOfBlocksInsideAToggleOrCallout() }
+        val stopTypingOnEmptySpaceTap: () -> Unit = {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+            activeBlockId = null
+            GlobalEditorState.currentlyFocusedBlockId = null
+            localFocusRequest = null
+            showSlashMenu = false
+            onMobileMenuStateChange(MobileMenuState.MAIN)
+            clearSelectionOnTap()
+            wrappedActions.onOutsideTap()
+        }
+        val startTypingAtEndOfNote: () -> Unit = {
+            val lastBlock = currentBlocks.lastOrNull()
+            if (lastBlock == null) {
+                wrappedActions.onAddBlankBlock()
+            } else {
+                val isMediaBlock = lastBlock is BookmarkBlock
+                        || lastBlock is ImageBlock
+                        || lastBlock is DocumentBlock
+                        || lastBlock is VoiceBlock
+                        || lastBlock is CanvasBlock
+                        || lastBlock is PropertyBlock
+                        || lastBlock is DatabaseBlock
+                        || lastBlock is MovieBlock
+                        || lastBlock is WatchlistBlock
+                        || lastBlock is CredentialsBlock
+
+                if (isMediaBlock) {
+                    wrappedActions.onFocusBlock(lastBlock.id)
+                    wrappedActions.onAddBlankBlock()
+                } else {
+                    activeBlockId = lastBlock.id
+                    GlobalEditorState.currentlyFocusedBlockId = lastBlock.id
+                    wrappedActions.onFocusBlock(lastBlock.id)
+                    localFocusRequest = FocusRequest(id = lastBlock.id, placeCursorAtEnd = true)
+                }
+            }
+        }
+        val latestOnEmptySpaceTap by rememberUpdatedState {
+            if (singleTapStartsTyping && latestSelectedBlockIds.isEmpty()) {
+                showSlashMenu = false
+                startTypingAtEndOfNote()
+            } else {
+                stopTypingOnEmptySpaceTap()
+            }
+        }
         CompositionLocalProvider(
             LocalBringIntoViewSpec provides bringIntoViewSpec,
             LocalCrossBlockSelection provides crossBlockSelection
@@ -1362,46 +1409,10 @@ fun EditorScreen(
                     .background(MaterialTheme.colorScheme.background)
                     .smoothWheelScroll(listState)
                     .then(crossBlockDragModifier)
-                    .pointerInput(Unit) {
+                    .pointerInput(singleTapStartsTyping) {
                         detectTapGestures(
-                            onTap = {
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
-                                activeBlockId = null
-                                GlobalEditorState.currentlyFocusedBlockId = null
-                                localFocusRequest = null
-                                showSlashMenu = false
-                                onMobileMenuStateChange(MobileMenuState.MAIN)
-                                clearSelectionOnTap()
-                                wrappedActions.onOutsideTap()
-                            },
-                            onDoubleTap = {
-                                val lastBlock = currentBlocks.lastOrNull()
-                                if (lastBlock == null) {
-                                    wrappedActions.onAddBlankBlock()
-                                    return@detectTapGestures
-                                }
-                                val isMediaBlock = lastBlock is BookmarkBlock
-                                        || lastBlock is ImageBlock
-                                        || lastBlock is DocumentBlock
-                                        || lastBlock is VoiceBlock
-                                        || lastBlock is CanvasBlock
-                                        || lastBlock is PropertyBlock
-                                        || lastBlock is DatabaseBlock
-                                        || lastBlock is MovieBlock
-                                        || lastBlock is WatchlistBlock
-                                        || lastBlock is CredentialsBlock
-
-                                if (isMediaBlock) {
-                                    wrappedActions.onFocusBlock(lastBlock.id)
-                                    wrappedActions.onAddBlankBlock()
-                                } else {
-                                    activeBlockId = lastBlock.id
-                                    GlobalEditorState.currentlyFocusedBlockId = lastBlock.id
-                                    wrappedActions.onFocusBlock(lastBlock.id)
-                                    localFocusRequest = FocusRequest(id = lastBlock.id, placeCursorAtEnd = true)
-                                }
-                            }
+                            onTap = { latestOnEmptySpaceTap() },
+                            onDoubleTap = if (singleTapStartsTyping) null else { _ -> startTypingAtEndOfNote() }
                         )
                     },
                 contentPadding = PaddingValues(top = topContentPadding, bottom = 0.dp)
@@ -1526,42 +1537,10 @@ fun EditorScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(dynamicBottomPadding + bottomContentPadding + toolbarOffset)
-                                .pointerInput(Unit) {
+                                .pointerInput(singleTapStartsTyping) {
                                     detectTapGestures(
-                                        onDoubleTap = {
-                                            val lastBlock = currentBlocks.lastOrNull() ?: return@detectTapGestures
-                                            val isMediaBlock = lastBlock is BookmarkBlock
-                                                    || lastBlock is ImageBlock
-                                                    || lastBlock is DocumentBlock
-                                                    || lastBlock is VoiceBlock
-                                                    || lastBlock is CanvasBlock
-                                                    || lastBlock is PropertyBlock
-                                                    || lastBlock is DatabaseBlock
-                                                    || lastBlock is MovieBlock
-                                                    || lastBlock is WatchlistBlock
-                                                    || lastBlock is CredentialsBlock
-
-                                            if (isMediaBlock) {
-                                                wrappedActions.onFocusBlock(lastBlock.id)
-                                                wrappedActions.onAddBlankBlock()
-                                            } else {
-                                                activeBlockId = lastBlock.id
-                                                GlobalEditorState.currentlyFocusedBlockId = lastBlock.id
-                                                wrappedActions.onFocusBlock(lastBlock.id)
-                                                localFocusRequest = FocusRequest(id = lastBlock.id, placeCursorAtEnd = true)
-                                            }
-                                        },
-                                        onTap = {
-                                            focusManager.clearFocus()
-                                            keyboardController?.hide()
-                                            activeBlockId = null
-                                            GlobalEditorState.currentlyFocusedBlockId = null
-                                            localFocusRequest = null
-                                            showSlashMenu = false
-                                            onMobileMenuStateChange(MobileMenuState.MAIN)
-                                            clearSelectionOnTap()
-                                            wrappedActions.onOutsideTap()
-                                        }
+                                        onTap = { latestOnEmptySpaceTap() },
+                                        onDoubleTap = if (singleTapStartsTyping) null else { _ -> startTypingAtEndOfNote() }
                                     )
                                 }
                         )

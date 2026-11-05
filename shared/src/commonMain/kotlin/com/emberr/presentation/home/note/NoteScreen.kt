@@ -657,6 +657,7 @@ fun NoteScreen(
                     onUndo = { viewModel.undo() },
                     onRedo = { viewModel.redo() },
                     emptyNotePlaceholder = emptyNotePlaceholder,
+                    singleTapStartsTyping = true,
                     contentMaxWidth = noteContentMaxWidth,
                     extraBlockSidePadding = extraBlockSidePadding
                 )

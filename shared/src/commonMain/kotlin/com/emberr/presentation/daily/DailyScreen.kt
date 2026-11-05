@@ -543,6 +543,7 @@ fun DailyScreen(
                             onUndo = { viewModel.undo() },
                             onRedo = { viewModel.redo() },
                             emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type / for commands...",
+                            singleTapStartsTyping = true,
                             emptyContent = if (isDailyQuoteVisible) {
                                 {
                                     DailyEmptyDayMessage(
@@ -863,7 +864,7 @@ fun DailyEmptyDayMessage(
         }
 
         Text(
-            text = if (isDesktopPlatform) "Double click to write your thoughts" else "Double tap to write your thoughts",
+            text = if (isDesktopPlatform) "Click to write your thoughts" else "Tap to write your thoughts",
             style = MaterialTheme.typography.labelSmall,
             color = textColor.copy(alpha = 0.3f),
             textAlign = TextAlign.Center,
