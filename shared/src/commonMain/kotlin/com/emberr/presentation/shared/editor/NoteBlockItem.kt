@@ -14,10 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -77,9 +74,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.BookmarkBlock
@@ -128,23 +123,18 @@ import com.emberr.presentation.shared.editor.markdown.inlineMarkdownOf
 import com.emberr.presentation.shared.editor.selection.LocalCrossBlockSelection
 import com.emberr.presentation.shared.editor.text.ScrollOnlyWhenHiddenBringIntoViewSpec
 import com.emberr.ui.theme.LocalAppIsDark
-import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
-import com.emberr.presentation.shared.editor.links.CanvasLinkMenu
-import com.emberr.presentation.shared.editor.links.DatabaseLinkMenu
-import com.emberr.presentation.shared.editor.links.NoteLinkMenu
-import com.emberr.presentation.shared.editor.slash.SlashMenuList
-import com.emberr.presentation.shared.editor.slash.filteredSlashMenuSections
 import com.emberr.presentation.shared.editor.selection.BlockSelectionOverlay
 import com.emberr.presentation.shared.editor.blockViews.checkbox.CheckboxReminderPickerDialogs
 import com.emberr.presentation.shared.editor.blockViews.checkbox.CheckboxReminderRow
 import com.emberr.presentation.shared.editor.blockViews.checkbox.ReminderPickerState
+import com.emberr.presentation.shared.editor.slash.DesktopSlashMenuPopups
+import com.emberr.presentation.shared.editor.slash.rememberSlashMenuSections
 
 val DefaultBlockShape = RoundedCornerShape(12.dp)
 
@@ -280,31 +270,14 @@ fun NoteBlockItem(
 
     var isChoosingHighlightColor by remember { mutableStateOf(false) }
 
-    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
-    val slashMenuSections = remember(slashQuery, isSlashMenuActiveHere, customProperties, usesTwentyFourHourClock) {
-        if (isSlashMenuActiveHere) {
-            filteredSlashMenuSections(
-                query = slashQuery,
-                onChangeBlockType = { actions.onChangeBlockType(it) },
-                onToggleFormat = { format ->
-                    if (format == "highlight") {
-                        onDismissSlashMenu()
-                        isChoosingHighlightColor = true
-                    } else {
-                        actions.onToggleFormat(format)
-                    }
-                },
-                onAdjustIndentation = { actions.onAdjustIndentation(it) },
-                onSetAlignment = { actions.onSetBlockAlignment(it) },
-                onInsertMediaBlock = { actions.onInsertMediaBlock(it) },
-                onInsertText = { actions.onReplaceSlashQuery("$it ") },
-                usesTwentyFourHourClock = usesTwentyFourHourClock,
-                customProperties = customProperties
-            )
-        } else {
-            emptyList()
-        }
-    }
+    val slashMenuSections = rememberSlashMenuSections(
+        isSlashMenuActiveHere = isSlashMenuActiveHere,
+        slashQuery = slashQuery,
+        customProperties = customProperties,
+        actions = actions,
+        onDismissSlashMenu = onDismissSlashMenu,
+        onChooseHighlightColor = { isChoosingHighlightColor = true }
+    )
     val slashMenuFilteredItems = remember(slashMenuSections) { slashMenuSections.flatMap { it.items } }
     var slashMenuSelectedIndex by remember(slashQuery) { mutableIntStateOf(0) }
 
@@ -507,77 +480,22 @@ fun NoteBlockItem(
                             val slashRect = remember(text, richTextTransformation, textLayoutResult) {
                                 displayedCharacterRect(text, text.lastIndexOf('/'), richTextTransformation, textLayoutResult) ?: Rect.Zero
                             }
-                            Box(
-                                modifier = Modifier
-                                    .offset { IntOffset(slashRect.left.roundToInt(), slashRect.top.roundToInt()) }
-                                    .size(width = 1.dp, height = with(density) { slashRect.height.toDp() })
-                            ) {
-                                if (isSlashMenuActiveHere) {
-                                    EmberrDesktopMenu(
-                                        expanded = true,
-                                        onDismissRequest = onDismissSlashMenu,
-                                        properties = PopupProperties(focusable = false),
-                                        modifier = Modifier
-                                            .width(290.dp)
-                                            .heightIn(max = 400.dp)
-                                    ) {
-                                        SlashMenuList(
-                                            sections = slashMenuSections,
-                                            selectedIndex = slashMenuSelectedIndex
-                                        )
-                                    }
-                                }
-
-                                if (isNoteLinkMenuActiveHere) {
-                                    NoteLinkMenu(
-                                        expanded = true,
-                                        onDismissRequest = onDismissNoteLinkMenu,
-                                        onBack = onLinkMenuBack?.let { goBack -> { onDismissNoteLinkMenu(); goBack() } },
-                                        allLinkableNotes = allLinkableNotes,
-                                        onNoteSelected = { noteId ->
-                                            actions.onInsertLinkedNoteBlock(noteId)
-                                            onDismissNoteLinkMenu()
-                                        },
-                                        onCreateNote = { title ->
-                                            val newNoteId = actions.onCreateLinkedNote(title)
-                                            actions.onInsertLinkedNoteBlock(newNoteId)
-                                            onDismissNoteLinkMenu()
-                                        },
-                                        onCreateBlankNote = {
-                                            val newNoteId = actions.onCreateLinkedNote("Untitled")
-                                            actions.onInsertLinkedNoteBlock(newNoteId)
-                                            onDismissNoteLinkMenu()
-                                            actions.onNoteLinkClick(newNoteId)
-                                        }
-                                    )
-                                }
-
-                                if (isCanvasLinkMenuActiveHere) {
-                                    CanvasLinkMenu(
-                                        expanded = true,
-                                        onDismissRequest = onDismissCanvasLinkMenu,
-                                        onBack = onLinkMenuBack?.let { goBack -> { onDismissCanvasLinkMenu(); goBack() } },
-                                        loadCanvases = { actions.getLinkableCanvases() },
-                                        onCanvasSelected = { canvasNoteId ->
-                                            actions.onInsertCanvasBlock(canvasNoteId)
-                                            onDismissCanvasLinkMenu()
-                                        }
-                                    )
-                                }
-
-                                if (isDatabaseLinkMenuActiveHere) {
-                                    DatabaseLinkMenu(
-                                        expanded = true,
-                                        onDismissRequest = onDismissDatabaseLinkMenu,
-                                        onBack = onLinkMenuBack?.let { goBack -> { onDismissDatabaseLinkMenu(); goBack() } },
-                                        loadDatabases = { actions.getLinkableDatabases() },
-                                        onDatabaseSelected = { databaseId ->
-                                            actions.onInsertLinkedDatabaseBlock(databaseId)
-                                            onDismissDatabaseLinkMenu()
-                                        }
-                                    )
-                                }
-                            }
+                            DesktopSlashMenuPopups(
+                                anchorRect = slashRect,
+                                isSlashMenuActiveHere = isSlashMenuActiveHere,
+                                slashMenuSections = slashMenuSections,
+                                slashMenuSelectedIndex = slashMenuSelectedIndex,
+                                onDismissSlashMenu = onDismissSlashMenu,
+                                isNoteLinkMenuActiveHere = isNoteLinkMenuActiveHere,
+                                onDismissNoteLinkMenu = onDismissNoteLinkMenu,
+                                isCanvasLinkMenuActiveHere = isCanvasLinkMenuActiveHere,
+                                onDismissCanvasLinkMenu = onDismissCanvasLinkMenu,
+                                isDatabaseLinkMenuActiveHere = isDatabaseLinkMenuActiveHere,
+                                onDismissDatabaseLinkMenu = onDismissDatabaseLinkMenu,
+                                onLinkMenuBack = onLinkMenuBack,
+                                allLinkableNotes = allLinkableNotes,
+                                actions = actions
+                            )
                         }
 
                         if (!isFocused && !inSelectionMode) {
