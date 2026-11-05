@@ -58,7 +58,12 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
@@ -101,91 +106,71 @@ private val UpdateScreenshotMaxHeight = if (isDesktopPlatform) 400.dp else 360.d
 private class UpdateNotesSection(
     val heading: String,
     val items: List<String>,
+    val isNew: Boolean = false,
     val screenshotPaths: List<String> = emptyList()
 )
 
-private val CurrentUpdateNotes = listOf(
+private val CurrentUpdateNotes = listOfNotNull(
     UpdateNotesSection(
-        heading = "Movies and Shows",
+        heading = "Credential Block",
+        isNew = true,
         items = listOf(
-            "Movie and Watchlist blocks",
-            "Search movies and shows from TMDB",
-            "Details with trailer, cast, seasons, reviews and where to watch",
-            "Actor pages with their best-known roles",
-            "List, board and gallery views",
-            "Watchlist views, each with its own sort and filters",
-            "Watch status and rating shared across notes in a space",
-            "Ticket-style cards tinted by the poster"
-        ),
-        screenshotPaths = if (isDesktopPlatform) {
-            listOf(
-                "files/whats_new/movies0.png",
-                "files/whats_new/movies1.png",
-                "files/whats_new/movies2.png",
-                "files/whats_new/movies3.png"
+            "Save logins right in your notes. Type **/** and pick **Advanced Blocks → Credentials**.",
+            "Comes with a password generator, and you can copy fields with a tap.",
+            "Passwords and notes stay encrypted and never show up in search, AI chat or widgets."
+        )
+    ),
+    if (isDesktopPlatform) {
+        null
+    } else {
+        UpdateNotesSection(
+            heading = "App Lock",
+            isNew = true,
+            items = listOf(
+                "Lock Emberr with your fingerprint, face or screen lock. Turn it on in **Settings → Security**."
             )
-        } else {
-            listOf(
-                "files/whats_new/mobile/movie1.png",
-                "files/whats_new/mobile/movie2.png",
-                "files/whats_new/mobile/movie3.png",
-                "files/whats_new/mobile/movie4.png",
-                "files/whats_new/mobile/movie5.png"
-            )
-        }
+        )
+    },
+    UpdateNotesSection(
+        heading = "People",
+        isNew = true,
+        items = listOf(
+            "Add someone once and use them everywhere. Assign them in databases, add them to meetings, and mention them in notes with **@**.",
+            "Each person has their own page with their details and events. Find it under **⋯ → People** on Home.",
+            "Import your phone contacts or a .vcf file with the **+** button."
+        )
+    ),
+    UpdateNotesSection(
+        heading = "Calendar",
+        items = listOf(
+            "Events that go past midnight now show on both days.",
+            "Repeating events and tasks now show up in widgets.",
+            "Unfinished daily items stay on their day and don't move to the next one."
+        )
     ),
     UpdateNotesSection(
         heading = "Editor",
-        items = listOf(
-            "Insert the current time or date from the slash menu"
-        ) + if (isDesktopPlatform) {
+        items = (if (isDesktopPlatform) {
+            listOf("Change how wide notes are from a note's **⋯ → Note Width**.")
+        } else {
             emptyList()
-        } else {
-            listOf("Time and date buttons on the keyboard toolbar")
-        },
-        screenshotPaths = if (isDesktopPlatform) {
-            listOf(
-                "files/whats_new/editor1.png",
-                "files/whats_new/editor2.png"
-            )
-        } else {
-            listOf(
-                "files/whats_new/mobile/editor1.png",
-                "files/whats_new/mobile/editor2.png"
-            )
-        }
-    ),
-    UpdateNotesSection(
-        heading = "Self-Host Sync",
-        items = listOf(
-            "Faster setup with live progress",
-            "See the recovery passphrase again on connected devices",
-            "Server address with a copy button",
-            "Faster syncs that skip unchanged files",
-            "Count of notes waiting to sync"
-        ) + if (isDesktopPlatform) {
-            emptyList()
-        } else {
-            listOf("Syncs every 30 minutes while the app is closed")
-        }
-    ),
-    UpdateNotesSection(
-        heading = "Export",
-        items = listOf(
-            "Notes with attachments export as a zip with an attachments folder"
+        }) + listOf(
+            "Tap anywhere on an empty page to start typing.",
+            "Don't want the daily quote? Turn it off in **Settings → Appearance**."
         )
     ),
     UpdateNotesSection(
         heading = "Others",
-        items = (if (isDesktopPlatform) {
-            listOf(
-                "Smoother, sharper small images",
-                "No more syncing every time a screen opens"
-            )
+        items = listOf(
+            "UI and UX improvements across the app.",
+            "New emoji picker.",
+            "Cleaner settings."
+        ) + (if (isDesktopPlatform) {
+            listOf("Faster startup.")
         } else {
-            listOf("Back button clears selected database rows first")
+            emptyList()
         }) + listOf(
-            "Light mode fixes in the self-host dialogs"
+            "Plenty of small fixes."
         )
     )
 )
@@ -445,7 +430,12 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
 private fun UpdateNotesSectionView(section: UpdateNotesSection) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            text = section.heading,
+            text = buildAnnotatedString {
+                append(section.heading)
+                if (section.isNew) {
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(" (New)") }
+                }
+            },
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
@@ -463,11 +453,21 @@ private fun UpdateNotesSectionView(section: UpdateNotesSection) {
                     color = MaterialTheme.colorScheme.outline
                 )
                 Text(
-                    text = item,
+                    text = textWithBoldMarkedParts(item),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+        }
+    }
+}
+
+private fun textWithBoldMarkedParts(text: String): AnnotatedString = buildAnnotatedString {
+    text.split("**").forEachIndexed { index, part ->
+        if (index % 2 == 1) {
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part) }
+        } else {
+            append(part)
         }
     }
 }
