@@ -165,6 +165,9 @@ fun DailyEditorPane(
     )
     val subNoteOpenMode = runCatching { SubNoteOpenMode.valueOf(subNoteOpenModeName) }
         .getOrDefault(SubNoteOpenMode.SIDE_PANEL)
+    val isDailyQuoteVisible by settingsManager.dailyQuoteVisibleFlow.collectAsState(
+        initial = settingsManager.isDailyQuoteVisible()
+    )
 
     val actions = remember(viewModel, onOpenFile) {
         object : EditorActions {
@@ -364,12 +367,17 @@ fun DailyEditorPane(
             modifier = Modifier.fillMaxSize().hazeSource(state = hazeState),
             onUndo = { viewModel.undo() },
             onRedo = { viewModel.redo() },
-            emptyContent = {
-                DailyEmptyDayMessage(
-                    date = selectedDate,
-                    topPadding = editorTopPadding,
-                    bottomPadding = bottomContentPadding
-                )
+            emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type something...",
+            emptyContent = if (isDailyQuoteVisible) {
+                {
+                    DailyEmptyDayMessage(
+                        date = selectedDate,
+                        topPadding = editorTopPadding,
+                        bottomPadding = bottomContentPadding
+                    )
+                }
+            } else {
+                null
             }
         )
 

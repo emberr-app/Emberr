@@ -446,6 +446,18 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _micButtonVisible.value = visible
     }
 
+    private val _dailyQuoteVisible = MutableStateFlow(
+        prefs.getBoolean(SyncConstants.KEY_DAILY_QUOTE_VISIBLE, SyncConstants.DEFAULT_DAILY_QUOTE_VISIBLE)
+    )
+    override val dailyQuoteVisibleFlow: Flow<Boolean> = _dailyQuoteVisible
+
+    override fun isDailyQuoteVisible(): Boolean = _dailyQuoteVisible.value
+
+    override fun saveDailyQuoteVisible(visible: Boolean) {
+        prefs.putBoolean(SyncConstants.KEY_DAILY_QUOTE_VISIBLE, visible)
+        _dailyQuoteVisible.value = visible
+    }
+
     private val _hiddenOverviewSections = MutableStateFlow(
         prefs.get(SyncConstants.KEY_HIDDEN_OVERVIEW_SECTIONS, "")
             .split(",")

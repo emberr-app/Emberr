@@ -112,6 +112,7 @@ import emberr.shared.generated.resources.info
 import emberr.shared.generated.resources.keyboard
 import emberr.shared.generated.resources.lock
 import emberr.shared.generated.resources.microphone
+import emberr.shared.generated.resources.quote_down2
 import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.qr_code
 import emberr.shared.generated.resources.refresh_cw
@@ -212,6 +213,7 @@ fun SettingsScreen(
     val dailyNotesEnabled by viewModel.dailyNotesEnabled.collectAsState()
     val startOnHome by viewModel.startOnHome.collectAsState()
     val micButtonVisible by viewModel.micButtonVisible.collectAsState()
+    val dailyQuoteVisible by viewModel.dailyQuoteVisible.collectAsState()
     val hiddenOverviewSections by viewModel.hiddenOverviewSections.collectAsState()
     val customWindowFrameEnabled by viewModel.customWindowFrameEnabled.collectAsState()
     val autoHideTitleBar by viewModel.autoHideTitleBar.collectAsState()
@@ -352,6 +354,7 @@ fun SettingsScreen(
                     dailyNotesEnabled = dailyNotesEnabled,
                     startOnHome = startOnHome,
                     micButtonVisible = micButtonVisible,
+                    dailyQuoteVisible = dailyQuoteVisible,
                     hiddenOverviewSections = hiddenOverviewSections,
                     customWindowFrameEnabled = customWindowFrameEnabled,
                     autoHideTitleBar = autoHideTitleBar,
@@ -406,6 +409,7 @@ fun SettingsScreen(
                     onDailyNotesEnabledChange = { viewModel.setDailyNotesEnabled(it) },
                     onStartOnHomeChange = { viewModel.setStartOnHome(it) },
                     onMicButtonVisibleChange = { viewModel.setMicButtonVisible(it) },
+                    onDailyQuoteVisibleChange = { viewModel.setDailyQuoteVisible(it) },
                     onOverviewSectionVisibleChange = { section, isVisible ->
                         viewModel.setOverviewSectionVisible(section, isVisible)
                     },
@@ -1093,6 +1097,7 @@ private fun AppearanceSettingsSection(
     dailyNotesEnabled: Boolean,
     startOnHome: Boolean,
     micButtonVisible: Boolean,
+    dailyQuoteVisible: Boolean,
     hiddenOverviewSections: Set<String>,
     customWindowFrameEnabled: Boolean,
     autoHideTitleBar: Boolean,
@@ -1109,6 +1114,7 @@ private fun AppearanceSettingsSection(
     onDailyNotesEnabledChange: (Boolean) -> Unit,
     onStartOnHomeChange: (Boolean) -> Unit,
     onMicButtonVisibleChange: (Boolean) -> Unit,
+    onDailyQuoteVisibleChange: (Boolean) -> Unit,
     onOverviewSectionVisibleChange: (OverviewSection, Boolean) -> Unit,
     onCustomWindowFrameChange: (Boolean) -> Unit,
     onAutoHideTitleBarChange: (Boolean) -> Unit
@@ -1179,6 +1185,17 @@ private fun AppearanceSettingsSection(
             subtitle = if (isDesktopPlatform) "Hides daily notes. Existing ones are kept." else null,
             onCheckedChange = onDailyNotesEnabledChange
         )
+
+        if (dailyNotesEnabled) {
+            SettingsDivider()
+            SettingsToggleRow(
+                icon = painterResource(Res.drawable.quote_down2),
+                title = "Daily Quote",
+                isChecked = dailyQuoteVisible,
+                subtitle = "Shows a quote on empty days.",
+                onCheckedChange = onDailyQuoteVisibleChange
+            )
+        }
 
         if (!isDesktopPlatform && dailyNotesEnabled) {
             SettingsDivider()

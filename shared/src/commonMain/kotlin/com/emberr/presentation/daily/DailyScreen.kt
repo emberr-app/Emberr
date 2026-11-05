@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.CredentialsEdit
+import com.emberr.data.local.prefs.SettingsManager
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.CalloutType
@@ -454,6 +456,11 @@ fun DailyScreen(
         }
     }
 
+    val settingsManager: SettingsManager = koinInject()
+    val isDailyQuoteVisible by settingsManager.dailyQuoteVisibleFlow.collectAsState(
+        initial = settingsManager.isDailyQuoteVisible()
+    )
+
     val rightPanelContent: @Composable (Dp) -> Unit = { editorTopContentPadding ->
 
         Box(
@@ -535,13 +542,18 @@ fun DailyScreen(
                             topContentPadding = editorTopContentPadding,
                             onUndo = { viewModel.undo() },
                             onRedo = { viewModel.redo() },
-                            emptyContent = {
-                                DailyEmptyDayMessage(
-                                    date = pageDate,
-                                    topPadding = editorTopContentPadding,
-                                    bottomPadding = bottomContentPadding +
-                                            if (bottomContentPadding > 0.dp) 40.dp else 0.dp
-                                )
+                            emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type something...",
+                            emptyContent = if (isDailyQuoteVisible) {
+                                {
+                                    DailyEmptyDayMessage(
+                                        date = pageDate,
+                                        topPadding = editorTopContentPadding,
+                                        bottomPadding = bottomContentPadding +
+                                                if (bottomContentPadding > 0.dp) 40.dp else 0.dp
+                                    )
+                                }
+                            } else {
+                                null
                             }
                         )
                     }

@@ -204,6 +204,16 @@ class SettingsViewModel(
         settingsManager.saveMicButtonVisible(visible)
     }
 
+    val dailyQuoteVisible: StateFlow<Boolean> = settingsManager.dailyQuoteVisibleFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.isDailyQuoteVisible()
+    )
+
+    fun setDailyQuoteVisible(visible: Boolean) {
+        settingsManager.saveDailyQuoteVisible(visible)
+    }
+
     val hiddenOverviewSections: StateFlow<Set<String>> = settingsManager.hiddenOverviewSectionsFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

@@ -156,6 +156,10 @@ interface SettingsManager {
     fun isMicButtonVisible(): Boolean
     fun saveMicButtonVisible(visible: Boolean)
 
+    val dailyQuoteVisibleFlow: Flow<Boolean>
+    fun isDailyQuoteVisible(): Boolean
+    fun saveDailyQuoteVisible(visible: Boolean)
+
     val hiddenOverviewSectionsFlow: Flow<Set<String>>
     fun getHiddenOverviewSections(): Set<String>
     fun saveHiddenOverviewSections(storageKeys: Set<String>)
