@@ -1,21 +1,14 @@
 package com.emberr.presentation.shared.editor
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,13 +21,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -54,8 +45,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -87,20 +76,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import com.emberr.data.local.room.entity.CustomPropertyEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
-import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.BookmarkBlock
 import com.emberr.domain.model.BulletedListBlock
 import com.emberr.domain.model.CalloutBlock
@@ -108,7 +89,6 @@ import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
 import com.emberr.domain.model.CredentialsBlock
-import com.emberr.domain.model.DEFAULT_ALL_DAY_REMINDER_HOUR
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
@@ -121,30 +101,16 @@ import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.QuoteBlock
 import com.emberr.domain.model.SolidDividerBlock
 import com.emberr.domain.model.TableBlock
-import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.ThreeDotDividerBlock
 import com.emberr.domain.model.ToggleBlock
 import com.emberr.domain.model.UnknownBlock
 import com.emberr.domain.model.VoiceBlock
 import com.emberr.domain.model.WatchlistBlock
-import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
-import com.emberr.domain.model.lastDate
-import com.emberr.domain.model.textAlignmentOrNull
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.domain.util.system.triggerHapticFeedback
-import com.emberr.domain.util.time.formatTimeOfDay
-import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
-import com.emberr.presentation.shared.components.IconTooltip
-import com.emberr.presentation.shared.components.MinimalDatePickerDialog
-import com.emberr.presentation.shared.components.MinimalTimePickerDialog
-import com.emberr.presentation.shared.components.ReminderPresetMenu
-import com.emberr.presentation.shared.components.TimePresetMenu
-import com.emberr.presentation.shared.editor.blockViews.callout.CalloutOptionsMenu
 import com.emberr.presentation.shared.editor.blockViews.callout.accentColor
-import com.emberr.presentation.shared.editor.blockViews.callout.icon
 import com.emberr.presentation.shared.editor.formatting.HighlightColorCircles
 import com.emberr.presentation.shared.editor.formatting.HighlightColorMenuWidth
 import com.emberr.presentation.shared.editor.formatting.TextFormatContextMenu
@@ -162,45 +128,25 @@ import com.emberr.presentation.shared.editor.markdown.inlineMarkdownOf
 import com.emberr.presentation.shared.editor.selection.LocalCrossBlockSelection
 import com.emberr.presentation.shared.editor.text.ScrollOnlyWhenHiddenBringIntoViewSpec
 import com.emberr.ui.theme.LocalAppIsDark
-import com.emberr.ui.theme.LocalEmberrFontStyle
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
-import com.emberr.ui.theme.fontFamilyFor
-import com.emberr.ui.theme.highlightBackgroundFor
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.calendar_add
-import emberr.shared.generated.resources.clock_circle
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.todayIn
-import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
-import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Instant
 import com.emberr.presentation.shared.editor.links.CanvasLinkMenu
 import com.emberr.presentation.shared.editor.links.DatabaseLinkMenu
 import com.emberr.presentation.shared.editor.links.NoteLinkMenu
 import com.emberr.presentation.shared.editor.slash.SlashMenuList
 import com.emberr.presentation.shared.editor.slash.filteredSlashMenuSections
 import com.emberr.presentation.shared.editor.selection.BlockSelectionOverlay
+import com.emberr.presentation.shared.editor.blockViews.checkbox.CheckboxReminderPickerDialogs
+import com.emberr.presentation.shared.editor.blockViews.checkbox.CheckboxReminderRow
+import com.emberr.presentation.shared.editor.blockViews.checkbox.ReminderPickerState
 
 val DefaultBlockShape = RoundedCornerShape(12.dp)
-
-private fun TextAlignment.toComposeTextAlign(): TextAlign = when (this) {
-    TextAlignment.LEFT -> TextAlign.Left
-    TextAlignment.RIGHT -> TextAlign.Right
-    TextAlignment.CENTER -> TextAlign.Center
-    TextAlignment.JUSTIFY -> TextAlign.Justify
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -267,12 +213,7 @@ fun NoteBlockItem(
         else -> emptyNotePlaceholder
     }
 
-    var showPresetMenu by remember { mutableStateOf(false) }
-    var showTimePresetMenu by remember { mutableStateOf(false) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
-    var isReminderPickerOpening by remember { mutableStateOf(false) }
-    var showCalloutOptions by remember { mutableStateOf(false) }
+    val reminderPickerState = remember { ReminderPickerState() }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val webLinkActions = rememberWebLinkActions()
@@ -284,7 +225,7 @@ fun NoteBlockItem(
         if (!isKeyboardOpen) {
             action()
         } else {
-            isReminderPickerOpening = true
+            reminderPickerState.isReminderPickerOpening = true
             focusManager.clearFocus()
             keyboardController?.hide()
             scope.launch {
@@ -293,7 +234,7 @@ fun NoteBlockItem(
                 }
                 delay(50L.milliseconds)
                 action()
-                isReminderPickerOpening = false
+                reminderPickerState.isReminderPickerOpening = false
             }
         }
     }
@@ -316,64 +257,10 @@ fun NoteBlockItem(
         actions.onClearFocusRequest()
     }
 
-    val baseStyle = when (block) {
-        is HeadingBlock -> TextStyle(
-            fontFamily = fontFamilyFor(LocalEmberrFontStyle.current),
-            fontSize = if (block.level == 1) {
-                if (isDesktopPlatform) 32.sp else 26.sp
-            } else {
-                if (isDesktopPlatform) 24.sp else 20.sp
-            },
-            lineHeight = if (block.level == 1) {
-                if (isDesktopPlatform) 40.sp else 32.sp
-            } else {
-                if (isDesktopPlatform) 32.sp else 26.sp
-            },
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        is CodeBlock -> MaterialTheme.typography.bodyLarge.copy(
-            fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        is QuoteBlock -> MaterialTheme.typography.bodyLarge.copy(
-            fontStyle = FontStyle.Italic,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        is CalloutBlock -> MaterialTheme.typography.bodyLarge.copy(
-            fontWeight = FontWeight.SemiBold,
-            color = block.calloutType.accentColor()
-        )
-        else -> MaterialTheme.typography.bodyLarge.copy(
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-
-    val isCheckboxChecked = block is CheckboxBlock && block.isChecked
-    val applyStrikeThrough = block.isStrikeThrough || isCheckboxChecked
     val isDarkTheme = LocalAppIsDark.current
+    val textStyle = blockTextStyle(block, isDarkTheme)
 
-    val textStyle = baseStyle.copy(
-        fontWeight = if (block.isBold) FontWeight.Bold else baseStyle.fontWeight,
-        fontStyle = if (block.isItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = when {
-            applyStrikeThrough && block.isUnderlined -> TextDecoration.LineThrough + TextDecoration.Underline
-            applyStrikeThrough -> TextDecoration.LineThrough
-            block.isUnderlined -> TextDecoration.Underline
-            else -> TextDecoration.None
-        },
-        textAlign = block.textAlignmentOrNull()?.toComposeTextAlign() ?: TextAlign.Unspecified,
-        color = if (isCheckboxChecked) MaterialTheme.colorScheme.outline else baseStyle.color,
-        background = if (block.isHighlighted) {
-            highlightBackgroundFor(block.highlightColorNameOrNull(), isDarkTheme)
-        } else Color.Unspecified
-    )
-
-    val internalVerticalPadding = when (block) {
-        is HeadingBlock -> 8.dp
-        is CodeBlock -> 4.dp
-        else -> 4.dp
-    }
+    val internalVerticalPadding = blockVerticalPadding(block)
 
     val clipboardManager = LocalClipboardManager.current
     val markdownClipboardActions = remember { MarkdownClipboardActions() }
@@ -383,15 +270,8 @@ fun NoteBlockItem(
     )
 
     val desktopExtraPadding = if (isDesktopPlatform) 16.dp else 0.dp
-    val startPadding = when {
-        block is TableBlock || block is DatabaseBlock -> (displayedIndentationLevel * 28).dp + desktopExtraPadding
-        block is CheckboxBlock -> (18 + (displayedIndentationLevel * 28)).dp + desktopExtraPadding
-        block is BulletedListBlock -> (18 + (displayedIndentationLevel * 28)).dp + desktopExtraPadding
-        block is NumberedListBlock -> (18 + (displayedIndentationLevel * 28)).dp + desktopExtraPadding
-        block is ToggleBlock -> (18 + (displayedIndentationLevel * 28)).dp + desktopExtraPadding
-        else -> (16 + (displayedIndentationLevel * 28)).dp + desktopExtraPadding
-    }
-    val endPadding = (if (block is TableBlock || block is DatabaseBlock) 0.dp else 16.dp) + desktopExtraPadding
+    val startPadding = blockStartPadding(block, displayedIndentationLevel, desktopExtraPadding)
+    val endPadding = blockEndPadding(block, desktopExtraPadding)
 
     val isSlashMenuActiveHere = isDesktopPlatform && isActiveBlock && showSlashMenu
     val isNoteLinkMenuActiveHere = isDesktopPlatform && isActiveBlock && showNoteLinkMenu
@@ -522,76 +402,10 @@ fun NoteBlockItem(
                 .padding(vertical = internalVerticalPadding),
             verticalAlignment = Alignment.Top
         ) {
-            val iconOffset = when (block) {
-                is HeadingBlock -> if (block.level == 1) 4.dp else 2.dp
-                is CodeBlock -> 12.dp
-                else -> (-2).dp
-            }
-
-            if (block is CheckboxBlock || block is BulletedListBlock || block is NumberedListBlock || block is ToggleBlock || block is CalloutBlock) {
-                Box(
-                    modifier = Modifier
-                        .padding(end = 4.dp)
-                        .offset(y = iconOffset)
-                        .size(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when (block) {
-                        is CheckboxBlock -> EmberrCheckbox(
-                            checked = block.isChecked,
-                            onCheckedChange = {
-                                triggerHapticFeedback()
-                                actions.onToggleCheckbox(block.id, it)
-                            }
-                        )
-                        is BulletedListBlock -> Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(textStyle.color))
-                        is NumberedListBlock -> Text("${block.number}.", style = textStyle.copy(fontSize = 17.sp))
-                        is ToggleBlock -> {
-                            val rotation by animateFloatAsState(if (block.isExpanded) 90f else 0f, label = "toggleRotation")
-                            Icon(
-                                Icons.Default.ChevronRight, null,
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(32.dp).rotate(rotation).clickable { actions.onToggleExpand(block.id) }
-                            )
-                        }
-                        is CalloutBlock -> {
-                            Icon(
-                                painterResource(block.calloutType.icon()), "Callout options",
-                                tint = block.calloutType.accentColor(),
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null
-                                    ) { afterKeyboardCloses { showCalloutOptions = true } }
-                                    .padding(2.dp)
-                            )
-                            CalloutOptionsMenu(
-                                expanded = showCalloutOptions,
-                                block = block,
-                                onDismiss = { showCalloutOptions = false },
-                                onUpdateStyle = { calloutType, isFoldable -> actions.onUpdateCalloutStyle(block.id, calloutType, isFoldable) }
-                            )
-                        }
-                    }
-                }
-            }
+            BlockLeadingMarker(block = block, textStyle = textStyle, actions = actions, afterKeyboardCloses = afterKeyboardCloses)
 
             val primaryColor = MaterialTheme.colorScheme.primary
-            val quoteAccentColor = Color(0xFFFFD54F)
-            val DefaultBlockShape = RoundedCornerShape(12.dp)
-            val textFieldWrapperModifier = (if (block is CodeBlock) {
-                Modifier.weight(1f).padding(horizontal = 4.dp)
-                    .background(MaterialTheme.colorScheme.surface, DefaultBlockShape).padding(12.dp)
-            } else if (block is QuoteBlock) {
-                Modifier.weight(1f).padding(horizontal = 4.dp).drawBehind {
-                    drawLine(color = quoteAccentColor, start = Offset(0f, 0f), end = Offset(0f, size.height), strokeWidth = 2.dp.toPx())
-                }.padding(start = 16.dp, top = 4.dp, bottom = 4.dp)
-            } else if (block is TableBlock) {
-                Modifier.weight(1f)
-            } else {
-                Modifier.weight(1f).padding(horizontal = 4.dp)
-            })
+            val textFieldWrapperModifier = blockContentModifier(block)
                 .onFocusChanged { focusState ->
                     val currentlyFocused = focusState.isFocused || focusState.hasFocus
                     isFocused = currentlyFocused
@@ -819,172 +633,14 @@ fun NoteBlockItem(
                     }
 
                     if (block is CheckboxBlock) {
-                        val hasReminder = block.reminderTimestamp != null
-                        val isPickerOpen = showPresetMenu || showTimePresetMenu || showDatePicker ||
-                            showTimePicker || isReminderPickerOpening
-                        AnimatedVisibility(
-                            visible = isActiveBlock || hasReminder || isPickerOpen,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                if (hasReminder) {
-                                    IconTooltip(text = "More details") {
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(5.dp))
-                                                .background(MaterialTheme.colorScheme.surface)
-                                            .clickable {
-                                                val occurrenceDate = block.reminderTimestamp.let {
-                                                    Instant.fromEpochMilliseconds(it)
-                                                        .toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
-                                                }
-                                                afterKeyboardCloses {
-                                                    actions.onOpenEventOptions(block.id, occurrenceDate)
-                                                }
-                                            }
-                                                .padding(horizontal = 8.dp, vertical = 6.dp)
-                                        ) {
-                                            Icon(
-                                                Icons.Default.MoreVert, "Event options",
-                                                modifier = Modifier.size(15.dp),
-                                                tint = MaterialTheme.colorScheme.onBackground
-                                            )
-                                        }
-                                    }
-                                }
-                                Box {
-                                    IconTooltip(text = "Date") {
-                                        Row(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(5.dp))
-                                                .background(MaterialTheme.colorScheme.surface)
-                                                .clickable {
-                                                    isReminderPickerOpening = true
-                                                    focusManager.clearFocus()
-                                                    keyboardController?.hide()
-                                                    scope.launch {
-                                                        if (isKeyboardOpen) delay(500L.milliseconds) else delay(
-                                                            50L.milliseconds
-                                                        )
-                                                        showPresetMenu = true
-                                                        isReminderPickerOpening = false
-                                                    }
-                                                }
-                                                .padding(horizontal = 8.dp, vertical = 6.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                painterResource(Res.drawable.calendar_add), "Date",
-                                                modifier = Modifier.size(15.dp),
-                                                tint = if (hasReminder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface
-                                            )
-                                        }
-                                    }
-                                    ReminderPresetMenu(
-                                        expanded = showPresetMenu,
-                                        onDismiss = { showPresetMenu = false },
-                                        onPresetSelected = {
-                                            actions.onUpdateReminder(
-                                                block.id,
-                                                block.reminderTimestampOnNewDate(it),
-                                                block.allDay
-                                            )
-                                        },
-                                        onCustomSelected = { showDatePicker = true },
-                                        customDateInitialTimestamp = block.reminderTimestamp,
-                                        onCustomDateChosen = { timestamp ->
-                                            actions.onUpdateReminder(block.id, block.reminderTimestampOnNewDate(timestamp), block.allDay)
-                                        },
-                                        onRemove = if (hasReminder) {
-                                            { actions.onUpdateReminder(block.id, null, null) }
-                                        } else null
-                                    )
-                                }
-                                Box {
-                                    IconTooltip(text = "Time") {
-                                        Row(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(5.dp))
-                                                .background(MaterialTheme.colorScheme.surface)
-                                                .clickable {
-                                                    isReminderPickerOpening = true
-                                                    focusManager.clearFocus()
-                                                    keyboardController?.hide()
-                                                    scope.launch {
-                                                        if (isKeyboardOpen) delay(500L.milliseconds) else delay(
-                                                            50L.milliseconds
-                                                        )
-                                                        showTimePresetMenu = true
-                                                        isReminderPickerOpening = false
-                                                    }
-                                                }
-                                                .padding(horizontal = 8.dp, vertical = 6.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                painterResource(Res.drawable.clock_circle), "Time",
-                                                modifier = Modifier.size(16.dp),
-                                                tint = if (hasReminder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface
-                                            )
-                                        }
-                                    }
-                                    TimePresetMenu(
-                                        expanded = showTimePresetMenu,
-                                        onDismiss = { showTimePresetMenu = false },
-                                        onPresetSelected = {
-                                            actions.onUpdateReminder(
-                                                block.id,
-                                                it,
-                                                null
-                                            )
-                                        },
-                                        onCustomSelected = { showTimePicker = true },
-                                        customTimeInitialTimestamp = block.reminderTimestamp,
-                                        onCustomTimeChosen = { hour, minute ->
-                                            actions.onUpdateReminder(block.id, reminderTimestampAtTime(block.reminderTimestamp, hour, minute), null)
-                                        },
-                                        isAllDay = block.allDay != null,
-                                        onAllDaySelected = {
-                                            if (block.allDay == null) {
-                                                actions.onUpdateReminder(
-                                                    block.id,
-                                                    reminderTimestampAtTime(block.reminderTimestamp, DEFAULT_ALL_DAY_REMINDER_HOUR, 0),
-                                                    AllDaySpan()
-                                                )
-                                            }
-                                        }
-                                    )
-                                }
-                                if (hasReminder) {
-                                    val timeText = remember(block.reminderTimestamp, block.allDay, usesTwentyFourHourClock) {
-                                        val instant = Instant.fromEpochMilliseconds(block.reminderTimestamp)
-                                        val dt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                                        val allDay = block.allDay
-                                        when {
-                                            allDay == null -> "${shortDateLabel(dt.date)}, ${formatTimeOfDay(dt.hour, dt.minute, usesTwentyFourHourClock)}"
-                                            allDay.lengthInDays > 1 -> "${shortDateLabel(dt.date)} – ${shortDateLabel(allDay.lastDate(dt.date))}, All day"
-                                            else -> "${shortDateLabel(dt.date)}, All day"
-                                        }
-                                    }
-                                    val timeZone = TimeZone.currentSystemDefault()
-                                    val reminderDate = Instant.fromEpochMilliseconds(block.reminderTimestamp)
-                                        .toLocalDateTime(timeZone).date
-                                    val lastReminderDate = block.allDay?.lastDate(reminderDate) ?: reminderDate
-                                    val isOverdue = !block.isChecked && lastReminderDate < Clock.System.todayIn(timeZone)
-                                    Text(
-                                        text = timeText,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = if (isOverdue) MaterialTheme.colorScheme.error
-                                        else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                                    )
-                                }
-                            }
-                        }
+                        CheckboxReminderRow(
+                            block = block,
+                            actions = actions,
+                            isActiveBlock = isActiveBlock,
+                            pickerState = reminderPickerState,
+                            isKeyboardOpen = isKeyboardOpen,
+                            afterKeyboardCloses = afterKeyboardCloses
+                        )
                     }
                 } else {
                     key(block.id) {
@@ -1042,26 +698,7 @@ fun NoteBlockItem(
         }
 
         if (block is CheckboxBlock) {
-            if (showDatePicker) {
-                MinimalDatePickerDialog(
-                    initialTimestamp = block.reminderTimestamp,
-                    onDismiss = { showDatePicker = false },
-                    onConfirm = { timestamp ->
-                        actions.onUpdateReminder(block.id, block.reminderTimestampOnNewDate(timestamp), block.allDay)
-                        showDatePicker = false
-                    }
-                )
-            }
-            if (showTimePicker) {
-                MinimalTimePickerDialog(
-                    initialTimestamp = block.reminderTimestamp,
-                    onDismiss = { showTimePicker = false },
-                    onConfirm = { hour, minute ->
-                        actions.onUpdateReminder(block.id, reminderTimestampAtTime(block.reminderTimestamp, hour, minute), null)
-                        showTimePicker = false
-                    }
-                )
-            }
+            CheckboxReminderPickerDialogs(block = block, actions = actions, pickerState = reminderPickerState)
         }
 
         BlockSelectionOverlay(
@@ -1090,25 +727,4 @@ private fun storedWordAt(
     if (displayedWord.collapsed) return null
     val offsetMapping = visualTransformation.filter(AnnotatedString(text)).offsetMapping
     return TextRange(offsetMapping.transformedToOriginal(displayedWord.start), offsetMapping.transformedToOriginal(displayedWord.end))
-}
-
-private fun shortDateLabel(date: LocalDate): String =
-    "${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.day}"
-
-private fun CheckboxBlock.reminderTimestampOnNewDate(newTimestamp: Long): Long {
-    val currentTimestamp = reminderTimestamp
-    if (allDay == null || currentTimestamp == null) return newTimestamp
-    val currentTime = Instant.fromEpochMilliseconds(currentTimestamp).toLocalDateTime(TimeZone.currentSystemDefault())
-    return reminderTimestampAtTime(newTimestamp, currentTime.hour, currentTime.minute)
-}
-
-private fun reminderTimestampAtTime(currentTimestamp: Long?, hour: Int, minute: Int): Long {
-    val timeZone = TimeZone.currentSystemDefault()
-    val currentInstant = currentTimestamp?.let { Instant.fromEpochMilliseconds(it) } ?: Clock.System.now()
-    val currentDateTime = currentInstant.toLocalDateTime(timeZone)
-    val newDateTime = LocalDateTime(
-        currentDateTime.year, currentDateTime.month.number, currentDateTime.day,
-        hour, minute, 0, 0
-    )
-    return newDateTime.toInstant(timeZone).toEpochMilliseconds()
 }
