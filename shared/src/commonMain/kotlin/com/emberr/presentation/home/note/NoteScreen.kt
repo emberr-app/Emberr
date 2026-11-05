@@ -201,7 +201,7 @@ fun NoteScreen(
     isSearchActive: Boolean = false,
     hideWordCount: Boolean = false,
     customHeader: (@Composable LazyItemScope.() -> Unit)? = null,
-    emptyNotePlaceholder: String = "Type something...",
+    emptyNotePlaceholder: String = "Type / for commands...",
     extraBlockSidePadding: Dp = 0.dp,
     viewModel: NoteEditorViewModel = koinViewModel(key = noteId)
 ) {
