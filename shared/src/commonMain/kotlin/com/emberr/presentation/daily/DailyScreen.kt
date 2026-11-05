@@ -542,7 +542,7 @@ fun DailyScreen(
                             topContentPadding = editorTopContentPadding,
                             onUndo = { viewModel.undo() },
                             onRedo = { viewModel.redo() },
-                            emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type something...",
+                            emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type / for commands...",
                             emptyContent = if (isDailyQuoteVisible) {
                                 {
                                     DailyEmptyDayMessage(
