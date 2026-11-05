@@ -33,7 +33,7 @@ import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
-import com.emberr.presentation.shared.editor.BlockSelectionPill
+import com.emberr.presentation.shared.editor.selection.BlockSelectionPill
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEditor
@@ -41,8 +41,8 @@ import com.emberr.presentation.shared.editor.EditorActions
 import com.emberr.presentation.shared.editor.selection.CrossBlockTextRange
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
 import com.emberr.presentation.shared.editor.EditorScreen
-import com.emberr.presentation.shared.editor.SelectionModeObserver
-import com.emberr.presentation.shared.editor.MobileMenuState
+import com.emberr.presentation.shared.editor.selection.SelectionModeObserver
+import com.emberr.presentation.shared.editor.toolbar.MobileMenuState
 import com.emberr.presentation.shared.editor.EditorEventBus
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -54,7 +54,7 @@ import kotlinx.datetime.todayIn
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.plus
 import kotlinx.datetime.daysUntil
-import com.emberr.presentation.shared.editor.EditorToolbar
+import com.emberr.presentation.shared.editor.toolbar.EditorToolbar
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import kotlinx.datetime.LocalDate
 import kotlin.math.abs
@@ -80,7 +80,7 @@ import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.components.TopBarIconButtonGroup
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
-import com.emberr.presentation.shared.editor.BlockStyleBar
+import com.emberr.presentation.shared.editor.selection.BlockStyleBar
 import com.emberr.presentation.sync.SyncViewModel
 import com.emberr.domain.util.system.showNativeToast
 import dev.chrisbanes.haze.hazeSource

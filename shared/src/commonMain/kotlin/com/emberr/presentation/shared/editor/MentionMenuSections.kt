@@ -9,6 +9,9 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.doc_text_plus
 import emberr.shared.generated.resources.user2
+import com.emberr.presentation.shared.editor.slash.SlashMenuIcon
+import com.emberr.presentation.shared.editor.slash.SlashMenuItemData
+import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
 
 const val MENTION_RESULTS_PER_STEP = 5
 

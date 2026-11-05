@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
-import com.emberr.presentation.shared.editor.SlashMenuItemData
-import com.emberr.presentation.shared.editor.SlashMenuList
-import com.emberr.presentation.shared.editor.SlashMenuSectionData
+import com.emberr.presentation.shared.editor.slash.SlashMenuItemData
+import com.emberr.presentation.shared.editor.slash.SlashMenuList
+import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
 import com.emberr.presentation.shared.editor.formatting.HighlightColorCircles
 import com.emberr.presentation.shared.editor.formatting.HighlightColorMenuWidth
 import emberr.shared.generated.resources.Res

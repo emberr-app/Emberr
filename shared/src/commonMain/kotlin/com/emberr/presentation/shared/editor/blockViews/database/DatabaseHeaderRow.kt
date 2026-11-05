@@ -77,7 +77,7 @@ import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
 import com.emberr.presentation.shared.editor.components.DesktopCursor
 import com.emberr.presentation.shared.editor.components.desktopPointerCursor
-import com.emberr.presentation.shared.editor.rememberCustomProperties
+import com.emberr.presentation.shared.editor.slash.rememberCustomProperties
 import com.emberr.ui.theme.tableGridLineColor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.funnel

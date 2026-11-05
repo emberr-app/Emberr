@@ -8,10 +8,10 @@ import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.textAlignmentOrNull
-import com.emberr.presentation.shared.editor.SlashMenuIcon
-import com.emberr.presentation.shared.editor.SlashMenuItemData
-import com.emberr.presentation.shared.editor.SlashMenuList
-import com.emberr.presentation.shared.editor.SlashMenuSectionData
+import com.emberr.presentation.shared.editor.slash.SlashMenuIcon
+import com.emberr.presentation.shared.editor.slash.SlashMenuItemData
+import com.emberr.presentation.shared.editor.slash.SlashMenuList
+import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_right2

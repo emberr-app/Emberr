@@ -238,6 +238,11 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 import kotlin.time.TimeSource
+import com.emberr.presentation.shared.editor.links.CanvasLinkMenu
+import com.emberr.presentation.shared.editor.links.DatabaseLinkMenu
+import com.emberr.presentation.shared.editor.links.NoteLinkMenu
+import com.emberr.presentation.shared.editor.slash.SlashMenuList
+import com.emberr.presentation.shared.editor.slash.filteredSlashMenuSections
 
 val DefaultBlockShape = RoundedCornerShape(12.dp)
 
