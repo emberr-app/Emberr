@@ -48,6 +48,8 @@ import kotlin.math.abs
 
 private val BottomSheetCornerRadius = 26.dp
 private val BottomSheetShape = RoundedCornerShape(topEnd = BottomSheetCornerRadius, topStart = BottomSheetCornerRadius)
+private val FloatingBottomSheetShape = RoundedCornerShape(BottomSheetCornerRadius)
+private val FloatingBottomSheetEdgeGap = 12.dp
 private val FloatingDialogShape = RoundedCornerShape(22.dp)
 private val FloatingDialogMaxWidth = 480.dp
 private val SheetHorizontalPadding = 20.dp
@@ -150,6 +152,7 @@ fun EmberrBottomSheet(
     isDismissible: Boolean = true,
     desktopMaxWidth: Dp = FloatingDialogMaxWidth,
     scrollsContent: Boolean = true,
+    floats: Boolean = false,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     val showsSheet = if (isDesktopPlatform) expanded else rememberShowAfterKeyboardCloses(isRequested = expanded)
@@ -178,6 +181,7 @@ fun EmberrBottomSheet(
                 contentHorizontalPadding = contentHorizontalPadding,
                 isDismissible = isDismissible,
                 scrollsContent = scrollsContent,
+                floats = floats,
                 content = content
             )
         }
@@ -295,6 +299,7 @@ private fun EmberrModalBottomSheet(
     contentHorizontalPadding: Dp,
     isDismissible: Boolean,
     scrollsContent: Boolean,
+    floats: Boolean,
     content: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -377,7 +382,16 @@ private fun EmberrModalBottomSheet(
                 )
                 .stableStatusBarsPadding()
                 .fillMaxWidth()
-                .clip(BottomSheetShape)
+                .then(
+                    if (floats) {
+                        Modifier
+                            .navigationBarsPadding()
+                            .padding(start = FloatingBottomSheetEdgeGap, end = FloatingBottomSheetEdgeGap, bottom = FloatingBottomSheetEdgeGap)
+                    } else {
+                        Modifier
+                    }
+                )
+                .clip(if (floats) FloatingBottomSheetShape else BottomSheetShape)
                 .sheetCardBackground()
         ) {
             Box(

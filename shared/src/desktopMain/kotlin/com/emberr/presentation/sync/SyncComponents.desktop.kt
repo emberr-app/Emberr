@@ -46,6 +46,15 @@ actual @Composable fun QrCodeDisplay(
     }
 }
 
+@Composable
+actual fun rememberCameraPermissionState(): CameraPermissionState = remember {
+    object : CameraPermissionState {
+        override val isGranted: Boolean = false
+        override val canShowPermissionPopup: Boolean = false
+        override fun request() = Unit
+    }
+}
+
 actual @Composable fun QrScannerView(
     onQrScanned: (String) -> Unit,
     modifier: Modifier
