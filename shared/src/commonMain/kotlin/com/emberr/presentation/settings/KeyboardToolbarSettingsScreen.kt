@@ -62,11 +62,11 @@ import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.topHeaderBarPadding
-import com.emberr.presentation.shared.editor.DefaultKeyboardToolbarItems
-import com.emberr.presentation.shared.editor.KeyboardToolbarItem
-import com.emberr.presentation.shared.editor.KeyboardToolbarItemIcon
-import com.emberr.presentation.shared.editor.keyboardToolbarItemsFrom
-import com.emberr.presentation.shared.editor.keyboardToolbarSavedValueOf
+import com.emberr.presentation.shared.editor.toolbar.DefaultKeyboardToolbarItems
+import com.emberr.presentation.shared.editor.toolbar.KeyboardToolbarItem
+import com.emberr.presentation.shared.editor.toolbar.KeyboardToolbarItemIcon
+import com.emberr.presentation.shared.editor.toolbar.keyboardToolbarItemsFrom
+import com.emberr.presentation.shared.editor.toolbar.keyboardToolbarSavedValueOf
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res

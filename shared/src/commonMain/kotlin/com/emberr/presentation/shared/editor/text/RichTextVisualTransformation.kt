@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor
+package com.emberr.presentation.shared.editor.text
 
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color

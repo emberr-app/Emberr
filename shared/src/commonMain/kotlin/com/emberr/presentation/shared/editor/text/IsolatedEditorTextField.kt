@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor
+package com.emberr.presentation.shared.editor.text
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -76,12 +76,17 @@ import com.emberr.presentation.shared.editor.selection.SelectableTextField
 import com.emberr.presentation.shared.editor.selection.SelectionStep
 import com.emberr.presentation.shared.editor.selection.selectionStepFor
 import com.emberr.presentation.shared.editor.selection.textInsertedBetween
-import com.emberr.presentation.shared.editor.text.showCursorLineInsteadOfOtherLines
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
+import com.emberr.presentation.shared.editor.EditorEventBus
+import com.emberr.presentation.shared.editor.FocusRequest
+import com.emberr.presentation.shared.editor.GlobalEditorState
+import com.emberr.presentation.shared.editor.SelectionRequest
+import com.emberr.presentation.shared.editor.mention.DesktopMentionMenu
+import com.emberr.presentation.shared.editor.mention.rememberMentionMenuSections
 
 private val TrailingNoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)$""".toRegex()
 private val EmptyLineSelectionWidth = 6.dp
