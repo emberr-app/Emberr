@@ -129,7 +129,7 @@ fun DocumentsScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier
-                            .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp)
+                            .padding(horizontal = if (isDesktopPlatform) 40.dp else 19.dp)
                             .padding(bottom = 8.dp)
                             .onGloballyPositioned { titleTopPx = it.positionInRoot().y }
                     )
@@ -166,7 +166,7 @@ fun DocumentsScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier
-                                    .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp)
+                                    .padding(horizontal = if (isDesktopPlatform) 40.dp else 20.5.dp)
                                     .padding(bottom = 12.dp)
                             )
 
@@ -254,7 +254,7 @@ fun DocumentGrid(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp)
+            .padding(horizontal = if (isDesktopPlatform) 40.dp else 20.dp)
     ) {
         val minItemWidth = if (isDesktopPlatform) 280f else 150f
         val spacing = 12f

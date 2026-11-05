@@ -228,7 +228,7 @@ fun BookmarksScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier
-                            .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp)
+                            .padding(horizontal = if (isDesktopPlatform) 40.dp else 19.dp)
                             .padding(bottom = 8.dp)
                             .onGloballyPositioned { titleTopPx = it.positionInRoot().y }
                     )
@@ -269,7 +269,7 @@ fun BookmarksScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier
-                                    .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp)
+                                    .padding(horizontal = if (isDesktopPlatform) 40.dp else 20.5.dp)
                                     .padding(bottom = 12.dp)
                             )
                             BookmarkGrid(
@@ -475,7 +475,7 @@ fun BookmarkGrid(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp),
+            .padding(horizontal = if (isDesktopPlatform) 40.dp else 20.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         val chunkedBlocks = blocks.chunked(columns)
@@ -594,7 +594,7 @@ private fun BookmarkCategoryPills(
             .fillMaxWidth()
             .onGloballyPositioned { rowViewportBounds = it.boundsInWindow() }
             .horizontalScroll(scrollState)
-            .padding(horizontal = if (isDesktopPlatform) 40.dp else 16.dp),
+            .padding(horizontal = if (isDesktopPlatform) 40.dp else 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
