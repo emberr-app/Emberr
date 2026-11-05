@@ -1446,8 +1446,8 @@ fun EditorScreen(
                             modifier = Modifier
                                 .centeredWithMaxWidth(contentMaxWidth)
                                 .fillMaxWidth()
-                                .padding(horizontal = (if (isDesktopPlatform) 36.dp else 16.dp) + extraBlockSidePadding)
-                                .padding(bottom = 20.dp, top = 6.dp),
+                                .padding(horizontal = (if (isDesktopPlatform) 32.dp else 16.dp) + extraBlockSidePadding)
+                                .padding(bottom = 20.dp, top = if (isDesktopPlatform) 0.dp else 6.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             TaskBadge(
