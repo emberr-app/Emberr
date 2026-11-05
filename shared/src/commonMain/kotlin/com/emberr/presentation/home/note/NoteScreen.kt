@@ -1044,15 +1044,14 @@ private fun NoteHeader(
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.BottomStart)
-                                    .padding(start = if (isDesktopPlatform) 36.dp else 12.dp)
+                                    .padding(start = if (isDesktopPlatform) 32.dp else 19.dp)
                                     .graphicsLayer {
                                         translationY = 36.dp.toPx()
                                     }
                                     .size(80.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .clickable { onIconClick() },
-                                contentAlignment =
-                                    if (isDesktopPlatform) Alignment.CenterStart else Alignment.Center
+                                contentAlignment = Alignment.CenterStart
                             ) {
                                 Text(
                                     text = noteIcon,
@@ -1086,7 +1085,7 @@ private fun NoteHeader(
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(start = 36.dp)
+                            .padding(start = 32.dp)
                             .offset(y = 36.dp)
                     ) {
                         EmberrDesktopMenu(
@@ -1112,7 +1111,7 @@ private fun NoteHeader(
             modifier = Modifier
                 .centeredWithMaxWidth(contentMaxWidth)
                 .fillMaxWidth()
-                .padding(horizontal = if (isDesktopPlatform) 36.dp else 16.dp)
+                .padding(horizontal = if (isDesktopPlatform) 32.dp else 19.dp)
         ) {
             Spacer(modifier = Modifier.height(topPadding))
 
