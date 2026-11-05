@@ -88,9 +88,9 @@ actual fun AppLockSettingsSection() {
             icon = painterResource(Res.drawable.eye_closed),
             title = "Screen Security",
             isChecked = isScreenSecurityOn,
+            subtitle = screenSecurityFootnote,
             onCheckedChange = appLockManager::changeScreenSecurity
         )
-        SettingsFootnote(text = screenSecurityFootnote)
     }
 }
 
