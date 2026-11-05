@@ -712,7 +712,7 @@ fun DailyScreen(
                         )
                     ) {
                         DailyBottomWeekStrip(
-                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                            modifier = Modifier.padding(bottom = 12.dp),
                             selectedDate = selectedDate,
                             onDateSelected = { viewModel.selectDate(it) },
                             hazeState = hazeState

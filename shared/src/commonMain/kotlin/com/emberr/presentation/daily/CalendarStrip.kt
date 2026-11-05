@@ -1,5 +1,6 @@
 package com.emberr.presentation.daily
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,7 +19,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -171,9 +174,24 @@ fun DailyBottomWeekStrip(
         }
     }
 
+    val restingSidePadding = 16.dp
+    val visibleSideInset by animateDpAsState(
+        targetValue = if (listState.isScrollInProgress) 0.dp else restingSidePadding,
+        label = "WeekStripSideInset"
+    )
+
     LazyRow(
         state = listState,
-        modifier = modifier.fillMaxWidth().height(pillHeight),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(pillHeight)
+            .drawWithContent {
+                val insetPx = visibleSideInset.toPx()
+                clipRect(left = insetPx, right = size.width - insetPx) {
+                    this@drawWithContent.drawContent()
+                }
+            },
+        contentPadding = PaddingValues(horizontal = restingSidePadding),
         horizontalArrangement = Arrangement.spacedBy(pillSpacing),
         verticalAlignment = Alignment.CenterVertically
     ) {
