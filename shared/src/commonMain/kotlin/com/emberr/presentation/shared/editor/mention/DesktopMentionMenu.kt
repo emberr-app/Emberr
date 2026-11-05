@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor
+package com.emberr.presentation.shared.editor.mention
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn

@@ -135,6 +135,15 @@ import com.emberr.presentation.shared.editor.blockViews.checkbox.CheckboxReminde
 import com.emberr.presentation.shared.editor.blockViews.checkbox.ReminderPickerState
 import com.emberr.presentation.shared.editor.slash.DesktopSlashMenuPopups
 import com.emberr.presentation.shared.editor.slash.rememberSlashMenuSections
+import com.emberr.presentation.shared.editor.text.BlockLeadingMarker
+import com.emberr.presentation.shared.editor.text.IsolatedEditorTextField
+import com.emberr.presentation.shared.editor.text.RichTextVisualTransformation
+import com.emberr.presentation.shared.editor.text.blockContentModifier
+import com.emberr.presentation.shared.editor.text.blockEndPadding
+import com.emberr.presentation.shared.editor.text.blockStartPadding
+import com.emberr.presentation.shared.editor.text.blockTextStyle
+import com.emberr.presentation.shared.editor.text.blockVerticalPadding
+import com.emberr.presentation.shared.editor.text.displayedCharacterRect
 
 val DefaultBlockShape = RoundedCornerShape(12.dp)
 

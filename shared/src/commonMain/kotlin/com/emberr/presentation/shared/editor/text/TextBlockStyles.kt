@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor
+package com.emberr.presentation.shared.editor.text
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
@@ -37,6 +37,7 @@ import com.emberr.ui.theme.fontFamilyFor
 import com.emberr.ui.theme.highlightBackgroundFor
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.unit.Dp
+import com.emberr.presentation.shared.editor.DefaultBlockShape
 
 private fun TextAlignment.toComposeTextAlign(): TextAlign = when (this) {
     TextAlignment.LEFT -> TextAlign.Left

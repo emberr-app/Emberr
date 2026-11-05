@@ -59,15 +59,11 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import com.emberr.presentation.shared.editor.EditorEventBus
 import com.emberr.presentation.shared.editor.GlobalEditorState
-import com.emberr.presentation.shared.editor.KeyboardToolbarItem
-import com.emberr.presentation.shared.editor.KeyboardToolbarItemIcon
-import com.emberr.presentation.shared.editor.keyboardToolbarItemsFrom
-import com.emberr.presentation.shared.editor.keyboardToolbarItemsToShow
 import com.emberr.presentation.shared.editor.links.CanvasLinkMenuContent
 import com.emberr.presentation.shared.editor.links.DatabaseLinkMenuContent
 import com.emberr.presentation.shared.editor.links.NoteLinkMenuContent
-import com.emberr.presentation.shared.editor.MENTION_RESULTS_PER_STEP
-import com.emberr.presentation.shared.editor.mentionMenuSections
+import com.emberr.presentation.shared.editor.mention.MENTION_RESULTS_PER_STEP
+import com.emberr.presentation.shared.editor.mention.mentionMenuSections
 import com.emberr.presentation.shared.editor.slash.DesktopSlashMenuContent
 import com.emberr.presentation.shared.editor.slash.SlashMenuList
 import com.emberr.presentation.shared.editor.slash.rememberCustomProperties

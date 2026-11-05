@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor
+package com.emberr.presentation.shared.editor.text
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -40,6 +40,7 @@ import com.emberr.presentation.shared.editor.blockViews.callout.CalloutOptionsMe
 import com.emberr.presentation.shared.editor.blockViews.callout.accentColor
 import com.emberr.presentation.shared.editor.blockViews.callout.icon
 import org.jetbrains.compose.resources.painterResource
+import com.emberr.presentation.shared.editor.EditorActions
 
 @Composable
 internal fun BlockLeadingMarker(

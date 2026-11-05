@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor
+package com.emberr.presentation.shared.editor.toolbar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

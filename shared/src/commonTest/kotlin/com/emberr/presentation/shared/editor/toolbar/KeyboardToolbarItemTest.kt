@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.editor
+package com.emberr.presentation.shared.editor.toolbar
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
