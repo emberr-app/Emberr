@@ -33,7 +33,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -77,6 +76,8 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.people.ContactImportProgress
 import com.emberr.domain.people.personDisplayName
 import com.emberr.domain.util.system.showNativeToast
+import com.emberr.presentation.settings.SettingsDivider
+import com.emberr.presentation.settings.settingsRowSize
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -111,7 +112,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 
-private val ListSidePadding = if (isDesktopPlatform) 32.dp else 16.dp
+private val ListSidePadding = 16.dp
 private val PersonCardCorner = 18.dp
 private val HeaderSidePadding = if (isDesktopPlatform) 22.dp else 16.dp
 private val TopEdgeFadeInDistance = 48.dp
@@ -121,7 +122,6 @@ private val DesktopListMaxWidth = 760.dp
 private val RowAvatarSize = 44.dp
 private val RowCheckIconSize = 16.dp
 private const val SelectedRowTintAlpha = 0.08f
-private val RowDividerStart = if (isDesktopPlatform) 72.dp else 0.dp
 private val EmptyArtAvatarSize = 48.dp
 private val EmptyArtPlusSize = 56.dp
 private val DashLength = 6.dp
@@ -502,10 +502,7 @@ private fun PeopleList(
                             .background(MaterialTheme.colorScheme.surface)
                     ) {
                         if (!item.isFirstInLetter) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(start = RowDividerStart),
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                            )
+                            SettingsDivider()
                         }
                         PersonListRowItem(
                             row = item.row,
@@ -566,7 +563,7 @@ private fun PersonListRowItem(
                     },
                     onLongClick = { showsMenu = true }
                 )
-                .padding(horizontal = 16.dp, vertical = if (isDesktopPlatform) 10.dp else 12.dp),
+                .settingsRowSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             SelectableAvatar(person = row.person, name = name, isSelected = isSelected, onToggleSelection = onToggleSelection)

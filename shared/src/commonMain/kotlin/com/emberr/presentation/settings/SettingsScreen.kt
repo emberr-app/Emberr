@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -74,8 +75,6 @@ import com.emberr.presentation.shared.components.SelectedOptionBackground
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
-import com.emberr.presentation.shared.components.TopEdgeBlurHeight
-import com.emberr.presentation.shared.components.TopEdgeGradientHeight
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.sync.SyncPairingDialog
 import com.emberr.presentation.sync.SyncScannerDialog
@@ -127,15 +126,13 @@ import emberr.shared.generated.resources.timer_reset
 import emberr.shared.generated.resources.triangle_alert
 import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.presentation.shared.TopBarFadeStyle
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
 private const val PRIVACY_POLICY_URL = "https://github.com/emberr-app/Emberr/blob/main/PRIVACY.md"
 private val SettingsCardShape = RoundedCornerShape(18.dp)
-private val SettingsSidebarWidth = 244.dp
-private val MobileSettingsRowMinHeight = 62.dp
-private val MobileSettingsRowSidePadding = 16.dp
+private val SettingsRowMinHeight = 62.dp
+private val SettingsRowSidePadding = 16.dp
 private val SettingsPaneMaxWidth = 760.dp
 private const val SUB_PAGE_FADE_MILLIS = 150
 
@@ -153,8 +150,6 @@ private val FontSizeOptions = listOf(
 
 private class SettingsCategory(
     val title: String,
-    val icon: DrawableResource,
-    val isDestructive: Boolean = false,
     val content: @Composable () -> Unit
 )
 
@@ -245,6 +240,10 @@ fun SettingsScreen(
 
     val hazeState = remember { HazeState() }
     val listState = rememberLazyListState()
+    val desktopListScrollState = rememberScrollState()
+    val desktopTopEdgeFadeAlpha by remember(desktopSubPage) {
+        derivedStateOf { if (desktopSubPage == null && desktopListScrollState.value > 0) 1f else 0f }
+    }
     val density = LocalDensity.current
     var topBarHeightPx by remember { mutableFloatStateOf(0f) }
     val topBarHeightDp = with(density) { topBarHeightPx.toDp() }
@@ -252,14 +251,14 @@ fun SettingsScreen(
     val categories = buildList {
         if (!isDesktopPlatform) {
             add(
-                SettingsCategory(title = "Reminders", icon = Res.drawable.bell) {
+                SettingsCategory(title = "Reminders") {
                     RemindersSettingsSection()
                 }
             )
         }
 
         add(
-            SettingsCategory(title = DATA_CATEGORY_TITLE, icon = Res.drawable.files) {
+            SettingsCategory(title = DATA_CATEGORY_TITLE) {
                 DataSettingsSection(
                     autoBackupEnabled = autoBackupEnabled,
                     backupFrequency = backupFrequency,
@@ -285,7 +284,7 @@ fun SettingsScreen(
         )
 
         add(
-            SettingsCategory(title = SYNC_CATEGORY_TITLE, icon = Res.drawable.folder_sync) {
+            SettingsCategory(title = SYNC_CATEGORY_TITLE) {
                 SyncSettingsSection(
                     isPaired = isPaired,
                     isSelfHostConnected = isSelfHostConnected,
@@ -316,7 +315,7 @@ fun SettingsScreen(
         )
 
         add(
-            SettingsCategory(title = "Security", icon = Res.drawable.shield_alert) {
+            SettingsCategory(title = "Security") {
                 SecretStorageSettingsSection()
                 AppLockSettingsSection()
             }
@@ -324,14 +323,14 @@ fun SettingsScreen(
 
         if (!isDesktopPlatform) {
             add(
-                SettingsCategory(title = "Editor", icon = Res.drawable.keyboard) {
+                SettingsCategory(title = "Editor") {
                     EditorSettingsSection(onKeyboardToolbarClick = onNavigateToKeyboardToolbarSettings)
                 }
             )
         }
 
         add(
-            SettingsCategory(title = "Appearance", icon = Res.drawable.palette) {
+            SettingsCategory(title = "Appearance") {
                 val selectedTheme = runCatching { ThemePreference.valueOf(themePreference) }
                     .getOrDefault(ThemePreference.SYSTEM)
                 val selectedFontStyle = runCatching { FontStylePreference.valueOf(fontStylePreference) }
@@ -417,7 +416,7 @@ fun SettingsScreen(
         )
 
         add(
-            SettingsCategory(title = "AI", icon = Res.drawable.astroid) {
+            SettingsCategory(title = "AI") {
                 AiSettingsSection(
                     aiFeaturesDisabled = aiFeaturesDisabled,
                     isPurgingAiData = isPurgingAiData,
@@ -428,7 +427,7 @@ fun SettingsScreen(
         )
 
         add(
-            SettingsCategory(title = HELP_CATEGORY_TITLE, icon = Res.drawable.badge_question_mark) {
+            SettingsCategory(title = HELP_CATEGORY_TITLE) {
                 Column {
                     HelpSettingsSection(onAboutClick = onNavigateToAbout)
                     AppUpdateSettingsSection()
@@ -437,11 +436,7 @@ fun SettingsScreen(
         )
 
         add(
-            SettingsCategory(
-                title = "Danger Zone",
-                icon = Res.drawable.triangle_alert,
-                isDestructive = true
-            ) {
+            SettingsCategory(title = "Danger Zone") {
                 DangerZoneSettingsSection(onClearAllData = { showClearAllDataConfirmation = true })
             }
         )
@@ -480,6 +475,7 @@ fun SettingsScreen(
                         SettingsSubPage.THIRD_PARTY_SERVICES -> ThirdPartyServicesScreen(onNavigateBack = goBack, showTopBar = false)
                     }
                 },
+                listScrollState = desktopListScrollState,
                 modifier = surfaceModifier
             )
         } else {
@@ -501,8 +497,7 @@ fun SettingsScreen(
             EmberrTopHeaderBar(
                 title = "Settings",
                 hazeState = hazeState,
-                topEdgeBlurHeight = if (isDesktopPlatform) topBarHeightDp else TopEdgeBlurHeight,
-                topEdgeGradientHeight = if (isDesktopPlatform) topBarHeightDp else TopEdgeGradientHeight,
+                topEdgeFadeAlpha = if (isDesktopPlatform) desktopTopEdgeFadeAlpha else 1f,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 showBackButton = showBackButton,
                 backTooltip = "Back",
@@ -794,61 +789,52 @@ private fun DesktopSettingsPanes(
     subPage: SettingsSubPage?,
     onSubPageChange: (SettingsSubPage?) -> Unit,
     subPageContent: @Composable (SettingsSubPage) -> Unit,
+    listScrollState: ScrollState,
     modifier: Modifier = Modifier
 ) {
-    var selectedCategoryTitle by remember { mutableStateOf(categories.first().title) }
-    LaunchedEffect(subPage) {
-        if (subPage != null) selectedCategoryTitle = subPage.categoryTitle
-    }
-    val shownCategoryTitle = subPage?.categoryTitle ?: selectedCategoryTitle
-    val selectedCategory = categories.firstOrNull { it.title == shownCategoryTitle } ?: categories.first()
-
-    Box(modifier = modifier.padding(top = contentTopPadding), contentAlignment = Alignment.TopCenter) {
-        Row(modifier = Modifier.widthIn(max = SettingsSidebarWidth + SettingsPaneMaxWidth).fillMaxSize()) {
-            SettingsCategorySidebar(
-                categories = categories,
-                selectedCategoryTitle = selectedCategory.title,
-                onCategorySelected = { title ->
-                    selectedCategoryTitle = title
-                    if (subPage != null) onSubPageChange(null)
-                }
-            )
-
-            val paneScrollState = remember(selectedCategory.title) { ScrollState(0) }
-
-            AnimatedContent(
-                targetState = subPage,
-                transitionSpec = {
-                    fadeIn(tween(SUB_PAGE_FADE_MILLIS)) togetherWith fadeOut(tween(SUB_PAGE_FADE_MILLIS))
-                },
-                modifier = Modifier.weight(1f).fillMaxHeight()
-            ) { shownSubPage ->
-                if (shownSubPage == null) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(paneScrollState)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .widthIn(max = SettingsPaneMaxWidth)
-                                    .padding(bottom = 48.dp)
-                            ) {
-                                key(selectedCategory.title) { selectedCategory.content() }
-                            }
+    AnimatedContent(
+        targetState = subPage,
+        transitionSpec = {
+            fadeIn(tween(SUB_PAGE_FADE_MILLIS)) togetherWith fadeOut(tween(SUB_PAGE_FADE_MILLIS))
+        },
+        modifier = modifier
+    ) { shownSubPage ->
+        if (shownSubPage == null) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(listScrollState),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .widthIn(max = SettingsPaneMaxWidth)
+                            .fillMaxWidth()
+                            .padding(top = contentTopPadding, bottom = 48.dp)
+                    ) {
+                        categories.forEach { category ->
+                            key(category.title) { category.content() }
                         }
+                    }
+                }
 
-                        EmberrVerticalScrollbar(
-                            scrollState = paneScrollState,
-                            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(vertical = 8.dp)
-                        )
-                    }
-                } else {
-                    Column(modifier = Modifier.widthIn(max = SettingsPaneMaxWidth).fillMaxHeight()) {
-                        SettingsSubPageBackButton(onClick = { onSubPageChange(shownSubPage.parentPage) })
-                        Box(modifier = Modifier.weight(1f)) { subPageContent(shownSubPage) }
-                    }
+                EmberrVerticalScrollbar(
+                    scrollState = listScrollState,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .fillMaxHeight()
+                        .padding(top = contentTopPadding + 8.dp, bottom = 8.dp)
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(top = contentTopPadding),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Column(modifier = Modifier.widthIn(max = SettingsPaneMaxWidth).fillMaxSize()) {
+                    SettingsSubPageBackButton(onClick = { onSubPageChange(shownSubPage.parentPage) })
+                    Box(modifier = Modifier.weight(1f)) { subPageContent(shownSubPage) }
                 }
             }
         }
@@ -867,60 +853,6 @@ private fun SettingsSubPageBackButton(onClick: () -> Unit) {
             tooltip = "Back",
             onClick = onClick
         )
-    }
-}
-
-@Composable
-private fun SettingsCategorySidebar(
-    categories: List<SettingsCategory>,
-    selectedCategoryTitle: String,
-    onCategorySelected: (String) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .width(SettingsSidebarWidth)
-            .padding(start = 16.dp, end = 4.dp, top = 20.dp, bottom = 20.dp)
-            .clip(SettingsCardShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        categories.forEach { category ->
-            val isSelected = category.title == selectedCategoryTitle
-            val accentColor = if (category.isDestructive) {
-                MaterialTheme.colorScheme.error
-            } else {
-                MaterialTheme.colorScheme.primary
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(if (isSelected) accentColor.copy(alpha = 0.10f) else Color.Transparent)
-                    .clickable { onCategorySelected(category.title) }
-                    .padding(horizontal = 12.dp, vertical = 11.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painterResource(category.icon),
-                    contentDescription = null,
-                    tint = if (isSelected) accentColor else accentColor.copy(alpha = 0.45f),
-                    modifier = Modifier.size(18.dp)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Text(
-                    text = category.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                    color = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
     }
 }
 
@@ -1244,12 +1176,9 @@ private fun AppearanceSettingsSection(
             icon = painterResource(Res.drawable.daily),
             title = "Daily Notes",
             isChecked = dailyNotesEnabled,
+            subtitle = if (isDesktopPlatform) "Hides daily notes. Existing ones are kept." else null,
             onCheckedChange = onDailyNotesEnabledChange
         )
-
-        if (isDesktopPlatform) {
-            SettingsFootnote(text = "Hides daily notes. Existing ones are kept.")
-        }
 
         if (!isDesktopPlatform && dailyNotesEnabled) {
             SettingsDivider()
@@ -1302,12 +1231,8 @@ private fun AppearanceSettingsSection(
                 icon = painterResource(Res.drawable.sidebar),
                 title = "Show Scrollbar",
                 isChecked = showScrollbar,
+                subtitle = "Shows scrollbars in lists, notes and tables.",
                 onCheckedChange = onShowScrollbarChange
-            )
-
-            SettingsFootnote(
-                text = "Shows scrollbars in the sidebar, editor, note lists and tables. " +
-                    "Scrolling with the wheel or trackpad works either way."
             )
 
             SettingsDivider()
@@ -1318,16 +1243,11 @@ private fun AppearanceSettingsSection(
                 icon = painterResource(Res.drawable.sidebar),
                 title = "Custom Title Bar",
                 isChecked = customWindowFrameEnabled,
+                subtitle = "Uses Emberr's own title bar. Applies after restart.",
                 onCheckedChange = { enabled ->
                     onCustomWindowFrameChange(enabled)
                     showCustomWindowFrameNotice = true
                 }
-            )
-
-            SettingsFootnote(
-                text = "Draws the window corners and the minimise, maximise and close buttons " +
-                    "inside Emberr instead of letting the desktop draw a separate title bar. " +
-                    "Takes effect the next time you start Emberr."
             )
 
             if (customWindowFrameEnabled) {
@@ -1336,13 +1256,8 @@ private fun AppearanceSettingsSection(
                     icon = painterResource(Res.drawable.sidebar),
                     title = "Auto-hide Title Bar",
                     isChecked = autoHideTitleBar,
+                    subtitle = "Shows the title bar when you point at the top edge.",
                     onCheckedChange = onAutoHideTitleBarChange
-                )
-
-                SettingsFootnote(
-                    text = "Keeps the title bar out of the way and slides it in when you move " +
-                        "the pointer to the top of the window. Turn this off to keep it on " +
-                        "screen all the time."
                 )
             }
 
@@ -1396,8 +1311,8 @@ private fun AiSettingsSection(
             subtitle = when {
                 isPurgingAiData -> "Removing models, embeddings and saved keys…"
                 !isDesktopPlatform -> null
-                aiFeaturesDisabled -> "AI is off. The assistant button is hidden, notes are no longer indexed, and all model files, embeddings and API keys have been removed. Saved chats are kept."
-                else -> "Hides the AI assistant, stops note indexing, and permanently deletes downloaded models, the search index and stored API keys to free up storage. Saved chats are kept."
+                aiFeaturesDisabled -> "AI is off. Models and keys are removed. Chats are kept."
+                else -> "Hides the assistant and deletes models and keys. Chats are kept."
             },
             onCheckedChange = { isChecked ->
                 if (!isPurgingAiData) {
@@ -1462,15 +1377,14 @@ private fun DangerZoneSettingsSection(onClearAllData: () -> Unit) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.triangle_alert),
             title = "Clear All Data",
+            subtitle = if (isDesktopPlatform) {
+                "Deletes every note, reminder and attachment stored on this device. This cannot be undone."
+            } else {
+                null
+            },
             isDestructive = true,
             onClick = onClearAllData
         )
-
-        if (isDesktopPlatform) {
-            SettingsFootnote(
-                text = "Deletes every note, reminder and attachment stored on this device. This cannot be undone."
-            )
-        }
     }
 }
 
@@ -1540,7 +1454,6 @@ private fun EraseCloudDataDialog(
 @Composable
 internal fun SettingsDivider() {
     HorizontalDivider(
-        modifier = if (isDesktopPlatform) Modifier.padding(start = 50.dp, end = 16.dp) else Modifier,
         thickness = 1.dp,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
     )
@@ -1698,27 +1611,28 @@ fun SettingsActionRow(
 ) {
     val titleColor = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
 
-    SettingsRowLayout(
-        modifier = Modifier.clickable(enabled = isEnabled) { onClick() },
-        desktopVerticalPadding = 17.dp,
-        subtitle = subtitle
-    ) {
+    val contentAlpha = if (isEnabled) 1f else 0.38f
+
+    SettingsRowLayout(modifier = Modifier.clickable(enabled = isEnabled) { onClick() }) {
+        Box(modifier = Modifier.alpha(contentAlpha)) {
+            SettingsRowIcon(icon = icon, isDestructive = isDestructive)
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        SettingsRowTitle(
+            title = title,
+            subtitle = subtitle,
+            titleColor = titleColor,
+            titleFontWeight = if (isDestructive) FontWeight.Medium else FontWeight.Normal,
+            titleAlpha = contentAlpha,
+            modifier = Modifier.weight(1f)
+        )
+
         Row(
-            modifier = Modifier.weight(1f).alpha(if (isEnabled) 1f else 0.38f),
+            modifier = Modifier.alpha(contentAlpha),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SettingsRowIcon(icon = icon, isDestructive = isDestructive)
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (isDestructive) FontWeight.Medium else FontWeight.Normal,
-                color = titleColor,
-                modifier = Modifier.weight(1f)
-            )
-
             if (trailingLabel != null) {
                 SettingsValuePill(label = trailingLabel, isDestructive = isDestructive)
                 Spacer(modifier = Modifier.width(8.dp))
@@ -1739,34 +1653,43 @@ fun SettingsActionRow(
 @Composable
 private fun SettingsRowLayout(
     modifier: Modifier,
-    desktopVerticalPadding: Dp,
-    subtitle: String?,
     content: @Composable RowScope.() -> Unit
 ) {
-    Column(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .settingsRowSize(desktopVerticalPadding = desktopVerticalPadding),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            content = content
+            .settingsRowSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content
+    )
+}
+
+@Composable
+private fun SettingsRowTitle(
+    title: String,
+    subtitle: String?,
+    modifier: Modifier = Modifier,
+    titleColor: Color = MaterialTheme.colorScheme.onSurface,
+    titleFontWeight: FontWeight = FontWeight.Normal,
+    titleAlpha: Float = 1f
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = titleFontWeight,
+            color = titleColor,
+            modifier = Modifier.alpha(titleAlpha)
         )
 
-        if (subtitle != null && !isDesktopPlatform) {
+        if (subtitle != null) {
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                modifier = Modifier.padding(start = 36.dp, top = 2.dp)
+                modifier = Modifier.padding(top = 2.dp)
             )
         }
-    }
-
-    if (subtitle != null && isDesktopPlatform) {
-        SettingsFootnote(text = subtitle)
     }
 }
 
@@ -1795,22 +1718,14 @@ internal fun SettingsChoiceRow(
     var isMenuOpen by remember { mutableStateOf(false) }
 
     if (isDesktopPlatform) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 15.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        SettingsRowLayout(modifier = Modifier) {
             SettingsRowIcon(icon = icon)
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
+            SettingsRowTitle(title = title, subtitle = subtitle, modifier = Modifier.weight(1f))
+
+            Spacer(modifier = Modifier.width(12.dp))
 
             EmberrChoiceValueMenu(
                 value = value,
@@ -1834,10 +1749,6 @@ internal fun SettingsChoiceRow(
                     )
                 }
             }
-        }
-
-        if (subtitle != null) {
-            SettingsFootnote(text = subtitle)
         }
     } else {
         SettingsActionRow(
@@ -1894,24 +1805,16 @@ fun SettingsToggleRow(
     subtitle: String? = null,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    SettingsRowLayout(
-        modifier = Modifier.clickable { onCheckedChange(!isChecked) },
-        desktopVerticalPadding = 14.dp,
-        subtitle = subtitle
-    ) {
+    SettingsRowLayout(modifier = Modifier.clickable { onCheckedChange(!isChecked) }) {
         SettingsRowIcon(icon = icon)
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
+        SettingsRowTitle(title = title, subtitle = subtitle, modifier = Modifier.weight(1f))
 
-        val switchTouchSize = if (isDesktopPlatform) LocalMinimumInteractiveComponentSize.current else 0.dp
-        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides switchTouchSize) {
+        Spacer(modifier = Modifier.width(12.dp))
+
+        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
             Switch(
                 checked = isChecked,
                 onCheckedChange = onCheckedChange,
@@ -1928,12 +1831,8 @@ fun SettingsToggleRow(
     }
 }
 
-internal fun Modifier.settingsRowSize(desktopVerticalPadding: Dp): Modifier =
-    if (isDesktopPlatform) {
-        padding(horizontal = 14.dp, vertical = desktopVerticalPadding)
-    } else {
-        heightIn(min = MobileSettingsRowMinHeight).padding(horizontal = MobileSettingsRowSidePadding, vertical = 12.dp)
-    }
+internal fun Modifier.settingsRowSize(): Modifier =
+    heightIn(min = SettingsRowMinHeight).padding(horizontal = SettingsRowSidePadding, vertical = 12.dp)
 
 private fun fontSizeDisplayNameFor(preferenceName: String): String =
     FontSizeOptions.firstOrNull { it.first == preferenceName }?.second

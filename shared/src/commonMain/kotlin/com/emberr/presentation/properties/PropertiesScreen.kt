@@ -266,7 +266,7 @@ private fun PropertyRow(
         modifier = Modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .settingsRowSize(desktopVerticalPadding = 17.dp),
+            .settingsRowSize(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         SettingsRowIcon(icon = painterResource(icon))
