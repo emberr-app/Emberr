@@ -313,13 +313,12 @@ fun SettingsScreen(
             }
         )
 
-        if (isDesktopPlatform) {
-            add(
-                SettingsCategory(title = "Security", icon = Res.drawable.shield_alert) {
-                    SecretStorageSettingsSection()
-                }
-            )
-        }
+        add(
+            SettingsCategory(title = "Security", icon = Res.drawable.shield_alert) {
+                SecretStorageSettingsSection()
+                AppLockSettingsSection()
+            }
+        )
 
         if (!isDesktopPlatform) {
             add(
