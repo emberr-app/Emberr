@@ -5,12 +5,8 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.BasicTextField
@@ -66,12 +62,9 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.editor.markdown.MarkdownClipboardActions
 import com.emberr.presentation.shared.editor.markdown.MarkdownShortcut
 import com.emberr.presentation.shared.editor.markdown.PastedText
@@ -87,10 +80,8 @@ import com.emberr.presentation.shared.editor.text.showCursorLineInsteadOfOtherLi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
-import com.emberr.presentation.shared.editor.slash.SlashMenuList
 
 private val TrailingNoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)$""".toRegex()
 private val EmptyLineSelectionWidth = 6.dp
@@ -480,32 +471,24 @@ fun IsolatedEditorTextField(
         }
     }
 
-    var shownMentionNoteCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
-    var shownMentionPeopleCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
-    val mentionSections = remember(mentionQuery, allLinkableNotes, shownMentionNoteCount, shownMentionPeopleCount) {
-        mentionMenuSections(
-            query = mentionQuery.orEmpty(),
-            mentionableNotes = allLinkableNotes,
-            shownNoteCount = shownMentionNoteCount,
-            shownPeopleCount = shownMentionPeopleCount,
-            onShowMoreNotes = { shownMentionNoteCount += MENTION_RESULTS_PER_STEP },
-            onShowMorePeople = { shownMentionPeopleCount += MENTION_RESULTS_PER_STEP },
-            onCreateBlankNote = {
-                val newNoteId = onCreateLinkedNote("Untitled")
-                insertNoteLink("Untitled", newNoteId)
-                onOpenNote(newNoteId)
-            },
-            onCreateNote = { query ->
-                val safeTitle = query.replace("[", "").replace("]", "").trim().ifEmpty { "Untitled" }
-                val newNoteId = onCreateLinkedNote(safeTitle)
-                insertNoteLink(safeTitle, newNoteId)
-            },
-            onPick = { note ->
-                val safeTitle = note.title.replace("[", "").replace("]", "").ifEmpty { "Untitled" }
-                insertNoteLink(safeTitle, note.noteId)
-            }
-        )
-    }
+    val mentionSections = rememberMentionMenuSections(
+        mentionQuery = mentionQuery,
+        allLinkableNotes = allLinkableNotes,
+        onCreateBlankNote = {
+            val newNoteId = onCreateLinkedNote("Untitled")
+            insertNoteLink("Untitled", newNoteId)
+            onOpenNote(newNoteId)
+        },
+        onCreateNote = { query ->
+            val safeTitle = query.replace("[", "").replace("]", "").trim().ifEmpty { "Untitled" }
+            val newNoteId = onCreateLinkedNote(safeTitle)
+            insertNoteLink(safeTitle, newNoteId)
+        },
+        onPick = { note ->
+            val safeTitle = note.title.replace("[", "").replace("]", "").ifEmpty { "Untitled" }
+            insertNoteLink(safeTitle, note.noteId)
+        }
+    )
     val mentionMenuEntries = remember(mentionSections) { mentionSections.flatMap { section -> section.items } }
 
     Box(modifier = modifier.fillMaxWidth()) {
@@ -821,25 +804,12 @@ fun IsolatedEditorTextField(
             val mentionRect = remember(tfv.text, mentionStartIndex, visualTransformation, localTextLayoutResult) {
                 displayedCharacterRect(tfv.text, mentionStartIndex, visualTransformation, localTextLayoutResult) ?: Rect.Zero
             }
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(mentionRect.left.roundToInt(), mentionRect.top.roundToInt()) }
-                    .size(width = 1.dp, height = with(density) { mentionRect.height.toDp() })
-            ) {
-                EmberrDesktopMenu(
-                    expanded = true,
-                    onDismissRequest = { mentionQuery = null; mentionStartIndex = -1 },
-                    properties = PopupProperties(focusable = false),
-                    modifier = Modifier
-                        .width(290.dp)
-                        .heightIn(max = 400.dp)
-                ) {
-                    SlashMenuList(
-                        sections = mentionSections,
-                        selectedIndex = mentionSelectedIndex
-                    )
-                }
-            }
+            DesktopMentionMenu(
+                anchorRect = mentionRect,
+                sections = mentionSections,
+                selectedIndex = mentionSelectedIndex,
+                onDismiss = { mentionQuery = null; mentionStartIndex = -1 }
+            )
         }
     }
 }
