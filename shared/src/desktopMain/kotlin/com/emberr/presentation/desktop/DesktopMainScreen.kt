@@ -116,7 +116,9 @@ import com.emberr.presentation.home.note.NoteScreen
 import com.emberr.presentation.home.overview.OverviewSection
 import com.emberr.presentation.home.overview.bookmarks.BookmarksScreen
 import com.emberr.presentation.home.overview.documents.DocumentsScreen
+import com.emberr.presentation.home.overview.documents.DocumentsViewModel
 import com.emberr.presentation.home.overview.images.ImagesScreen
+import com.emberr.presentation.home.overview.images.ImagesViewModel
 import com.emberr.presentation.home.overview.tasks.TasksScreen
 import com.emberr.domain.model.NoteSearchResult
 import com.emberr.domain.model.PropertyDateRange
@@ -2038,12 +2040,23 @@ fun DesktopMainScreen(
             }
             DetailPane.Images -> key("images") {
                 Box(Modifier.fillMaxSize()) {
-                    ImagesScreen(onNavigateBack = closeDetailPane, onTriggerImagePicker = { onPickImage { } })
+                    val imagesViewModel: ImagesViewModel = koinViewModel()
+                    ImagesScreen(
+                        onNavigateBack = closeDetailPane,
+                        onTriggerImagePicker = { onPickImage { path -> imagesViewModel.createNewImageWithFile(path) } },
+                        viewModel = imagesViewModel
+                    )
                 }
             }
             DetailPane.Documents -> key("documents") {
                 Box(Modifier.fillMaxSize()) {
-                    DocumentsScreen(onNavigateBack = closeDetailPane, onTriggerDocumentPicker = { onPickDocument { } }, onOpenFile = onOpenFile)
+                    val documentsViewModel: DocumentsViewModel = koinViewModel()
+                    DocumentsScreen(
+                        onNavigateBack = closeDetailPane,
+                        onTriggerDocumentPicker = { onPickDocument { path -> documentsViewModel.createNewDocumentWithFile(path) } },
+                        onOpenFile = onOpenFile,
+                        viewModel = documentsViewModel
+                    )
                 }
             }
             DetailPane.Bookmarks -> key("bookmarks") {
