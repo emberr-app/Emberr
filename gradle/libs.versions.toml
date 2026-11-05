@@ -66,6 +66,8 @@ zxing = "3.5.4"
 coreKtx = "1.19.0"
 documentfile = "1.1.0"
 coreSplashscreen = "1.2.0"
+biometric = "1.1.0"
+fragment = "1.8.9"
 
 # Desktop only
 javaKeyring = "1.0.4"
@@ -166,6 +168,8 @@ zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
+androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 
 # Desktop only
 java-keyring = { group = "com.github.javakeyring", name = "java-keyring", version.ref = "javaKeyring" }

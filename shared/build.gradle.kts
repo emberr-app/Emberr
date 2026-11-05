@@ -195,6 +195,8 @@ kotlin {
                 implementation(libs.guava)
 
                 implementation(libs.androidx.core.splashscreen)
+                implementation(libs.androidx.biometric)
+                implementation(libs.androidx.fragment)
                 implementation(libs.sqldelight.android.driver)
                 compileOnly(libs.jna)
             }

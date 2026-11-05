@@ -5,6 +5,10 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
+    <style name="Theme.Emberr.AppLock" parent="Theme.Emberr">
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
+
     <style name="Theme.Emberr.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>

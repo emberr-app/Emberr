@@ -6,12 +6,19 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import android.view.WindowManager
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.fragment.app.FragmentActivity
+import com.emberr.domain.applock.AppLockManager
+import com.emberr.presentation.applock.SystemUnlockPrompt
+import com.emberr.presentation.applock.openAppLockScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -113,7 +120,7 @@ import android.provider.OpenableColumns
 private val updateCheckDelayAfterOpening = 30000L.milliseconds
 private val lanSyncDelayAfterOpening = 2000L.milliseconds
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private val pickImage = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -146,6 +153,10 @@ class MainActivity : ComponentActivity() {
     private val updateChecker: AndroidUpdateChecker by inject()
     private val settingsManager: com.emberr.data.local.prefs.SettingsManager by inject()
     private val noteRepository: com.emberr.domain.repository.NoteRepository by inject()
+    private val appLockManager: AppLockManager by inject()
+
+    lateinit var systemUnlockPrompt: SystemUnlockPrompt
+        private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -158,6 +169,11 @@ class MainActivity : ComponentActivity() {
             overridePendingTransition(0, 0)
         }
         enableEdgeToEdge()
+        systemUnlockPrompt = SystemUnlockPrompt(this, onUnlockedWithNobodyWaiting = {})
+
+        lifecycleScope.launch {
+            appLockManager.isScreenSecurityOn.collect { isScreenSecurityOn -> hideContentInRecents(isScreenSecurityOn) }
+        }
 
         lifecycleScope.launch {
             delay(updateCheckDelayAfterOpening)
@@ -194,6 +210,8 @@ class MainActivity : ComponentActivity() {
         lifecycle.addObserver(LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
+                    appLockManager.onAppReturned()
+                    if (appLockManager.isLocked.value) openAppLockScreen()
                     systemUsesTwentyFourHourClock = DateFormat.is24HourFormat(this@MainActivity)
                     systemFirstDayOfWeek = androidSystemFirstDayOfWeek()
                     val waitBeforeLanSync = if (hasResumedBefore) Duration.ZERO else lanSyncDelayAfterOpening
@@ -218,6 +236,9 @@ class MainActivity : ComponentActivity() {
                         refreshCalendarAgendaWidgets(this@MainActivity)
                         refreshUpcomingEventsWidgets(this@MainActivity)
                     }
+                }
+                Lifecycle.Event.ON_STOP -> {
+                    if (!systemUnlockPrompt.isShowing) appLockManager.onAppLeft()
                 }
                 else -> {}
             }
@@ -481,6 +502,11 @@ class MainActivity : ComponentActivity() {
                     )
 
                     SelfHostUpdateRequiredDialog(onUpdateClick = updateChecker::openReleasePage)
+
+                    val isAppLocked by appLockManager.isLocked.collectAsState()
+                    if (isAppLocked) {
+                        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+                    }
                 }
             }
         }
@@ -497,6 +523,22 @@ class MainActivity : ComponentActivity() {
             datesDailyScreenReadsOnOpen.forEach { dateString -> noteRepository.getDailyNote(dateString) }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        appLockManager.onReturnedFromOwnScreen()
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun hideContentInRecents(hide: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            setRecentsScreenshotEnabled(!hide)
+        } else if (hide) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
     }
 

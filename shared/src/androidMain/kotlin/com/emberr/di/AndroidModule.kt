@@ -2,6 +2,8 @@ package com.emberr.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.SystemClock
+import com.emberr.domain.applock.AppLockManager
 import app.cash.sqldelight.db.SqlDriver
 import com.emberr.core.security.AesGcmEncryptionManager
 import com.emberr.core.security.AndroidSecretCipher
@@ -69,6 +71,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.dsl.worker
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import kotlin.time.Duration.Companion.milliseconds
 
 val androidModule = module {
 
@@ -100,6 +103,13 @@ val androidModule = module {
 
     single<SettingsManager> {
         AndroidSettingsManager(sharedPreferences = get(), secretStore = get())
+    }
+
+    single {
+        AppLockManager(
+            settingsManager = get(),
+            timeSinceDeviceStarted = { SystemClock.elapsedRealtime().milliseconds }
+        )
     }
 
     // Room
