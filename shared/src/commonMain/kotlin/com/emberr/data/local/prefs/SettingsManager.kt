@@ -191,6 +191,13 @@ interface SettingsManager {
     fun isAutomaticUpdateCheckEnabled(): Boolean
     fun saveAutomaticUpdateCheckEnabled(enabled: Boolean)
 
+    fun isAppLockEnabled(): Boolean
+    fun saveAppLockEnabled(enabled: Boolean)
+    fun getAppLockDelay(): String
+    fun saveAppLockDelay(delayName: String)
+    fun isScreenSecurityEnabled(): Boolean
+    fun saveScreenSecurityEnabled(enabled: Boolean)
+
     // AI generation
     val aiGenerationModeFlow: Flow<String>
     fun saveAiGenerationMode(mode: String)
