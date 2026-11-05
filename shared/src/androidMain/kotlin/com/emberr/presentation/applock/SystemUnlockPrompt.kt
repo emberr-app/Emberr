@@ -27,10 +27,7 @@ private val errorCodesThatMeanCancelled = setOf(
     BiometricPrompt.ERROR_CANCELED
 )
 
-class SystemUnlockPrompt(
-    activity: FragmentActivity,
-    private val onUnlockedWithNobodyWaiting: () -> Unit
-) {
+class SystemUnlockPrompt(activity: FragmentActivity) {
     private var waitingCaller: CancellableContinuation<SystemUnlockResult>? = null
 
     private val biometricPrompt = BiometricPrompt(
@@ -38,7 +35,7 @@ class SystemUnlockPrompt(
         ContextCompat.getMainExecutor(activity),
         object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                if (waitingCaller == null) onUnlockedWithNobodyWaiting() else finishWith(SystemUnlockResult.Unlocked)
+                finishWith(SystemUnlockResult.Unlocked)
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {

@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.emberr.domain.applock.AppLockManager
+import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.settings.SettingsViewModel
 import com.emberr.ui.theme.EmberrTheme
 import com.emberr.ui.theme.FontSizePreference
@@ -23,8 +23,6 @@ import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-
-private const val hasAskedSinceShownKey = "has_asked_since_shown"
 
 fun Activity.openAppLockScreen() {
     startActivity(Intent(this, AppLockActivity::class.java))
@@ -43,8 +41,7 @@ class AppLockActivity : FragmentActivity() {
         skipOpenAndCloseAnimations()
         enableEdgeToEdge()
 
-        hasAskedSinceShown = savedInstanceState?.getBoolean(hasAskedSinceShownKey) ?: false
-        systemUnlockPrompt = SystemUnlockPrompt(this, onUnlockedWithNobodyWaiting = ::closeUnlocked)
+        systemUnlockPrompt = SystemUnlockPrompt(this)
         onBackPressedDispatcher.addCallback(this) { moveTaskToBack(true) }
 
         setContent {
@@ -76,13 +73,13 @@ class AppLockActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()
         if (!appLockManager.isLocked.value) {
-            closeUnlocked()
+            unlockAndClose()
             return
         }
         if (!phoneHasScreenLock()) {
             appLockManager.turnOff()
-            Toast.makeText(this, "App Lock is off because this phone has no screen lock.", Toast.LENGTH_LONG).show()
-            closeUnlocked()
+            showNativeToast("App Lock is off because this phone has no screen lock.")
+            unlockAndClose()
             return
         }
         if (!hasAskedSinceShown) {
@@ -96,23 +93,18 @@ class AppLockActivity : FragmentActivity() {
         if (!systemUnlockPrompt.isShowing) hasAskedSinceShown = false
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(hasAskedSinceShownKey, hasAskedSinceShown)
-    }
-
     private fun askToUnlock() {
         unlockFailureMessage = null
         lifecycleScope.launch {
             when (val result = systemUnlockPrompt.ask(title = "Unlock Emberr")) {
-                SystemUnlockResult.Unlocked -> closeUnlocked()
+                SystemUnlockResult.Unlocked -> unlockAndClose()
                 SystemUnlockResult.Cancelled -> Unit
                 is SystemUnlockResult.Failed -> unlockFailureMessage = result.message
             }
         }
     }
 
-    private fun closeUnlocked() {
+    private fun unlockAndClose() {
         appLockManager.unlock()
         finish()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {

@@ -3,7 +3,6 @@ package com.emberr.di
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.SystemClock
-import com.emberr.domain.applock.AppLockManager
 import app.cash.sqldelight.db.SqlDriver
 import com.emberr.core.security.AesGcmEncryptionManager
 import com.emberr.core.security.AndroidSecretCipher
@@ -24,6 +23,7 @@ import com.emberr.data.local.room.dao.FolderDao
 import com.emberr.data.local.room.dao.ImageBlockDao
 import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.data.local.room.dao.SelfHostDeletedNoteDao
+import com.emberr.domain.applock.AppLockManager
 import com.emberr.domain.sync.SyncRepositoryImpl
 import com.emberr.domain.backup.automatic.AndroidBackupRescheduler
 import com.emberr.domain.backup.automatic.BackupNotifier
