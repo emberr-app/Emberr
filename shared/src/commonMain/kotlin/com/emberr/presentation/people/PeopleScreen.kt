@@ -83,6 +83,8 @@ import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
+import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrExpandingSearchBar
 import com.emberr.presentation.shared.components.EmberrSelectionPill
 import com.emberr.presentation.shared.components.SelectionPillAction
@@ -244,7 +246,8 @@ fun PeopleScreen(
                             isSelecting = isSelecting,
                             onOpen = openPerson,
                             onToggleSelection = viewModel::togglePersonSelection,
-                            onMoveToTrash = viewModel::moveToTrash
+                            onMoveToTrash = viewModel::moveToTrash,
+                            onMoveSelectedToTrash = viewModel::moveSelectedToTrash
                         )
                     }
                 }
@@ -311,7 +314,7 @@ fun PeopleScreen(
         }
 
         EmberrSelectionPill(
-            isVisible = isSelecting,
+            isVisible = isSelecting && !isDesktopPlatform,
             selectedCount = selectedCount,
             onClearSelection = viewModel::clearSelection,
             actions = listOf(SelectionPillAction(Res.drawable.trash, "Move to Trash", viewModel::moveSelectedToTrash)),
@@ -366,30 +369,51 @@ private fun PeopleHeaderActions(
                 onClick = onToggleSelectAll
             )
         }
-    } else if (isDesktopPlatform) {
-        TopBarIconButton(
-            icon = painterResource(Res.drawable.file_down),
-            contentDescription = "Import from .vcf file",
-            bgColor = Color.Transparent,
-            tint = MaterialTheme.colorScheme.primary,
-            hazeState = hazeState,
-            hazeStyle = EmberrBlur.Regular,
-            tooltip = "Import from .vcf file",
-            onClick = onImportFromFile
-        )
-        EmberrButtonPrimary(text = "New person", onClick = onNewPerson)
     } else {
-        TopBarIconButton(
-            icon = painterResource(Res.drawable.plus),
-            contentDescription = "Add people",
-            bgColor = Color.Transparent,
-            tint = MaterialTheme.colorScheme.primary,
-            hazeState = hazeState,
-            hazeStyle = EmberrBlur.Regular,
-            tooltip = "Add people",
-            onClick = onAddPeople
-        )
+        var isDesktopAddMenuOpen by remember { mutableStateOf(false) }
+        Box {
+            TopBarIconButton(
+                icon = painterResource(Res.drawable.plus),
+                contentDescription = "Add people",
+                bgColor = Color.Transparent,
+                tint = MaterialTheme.colorScheme.primary,
+                hazeState = hazeState,
+                hazeStyle = EmberrBlur.Regular,
+                tooltip = "Add people",
+                onClick = { if (isDesktopPlatform) isDesktopAddMenuOpen = true else onAddPeople() }
+            )
+            if (isDesktopPlatform) {
+                AddPeopleDesktopMenu(
+                    expanded = isDesktopAddMenuOpen,
+                    onDismiss = { isDesktopAddMenuOpen = false },
+                    onCreateNew = onNewPerson,
+                    onImportFromFile = onImportFromFile
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun AddPeopleDesktopMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onCreateNew: () -> Unit,
+    onImportFromFile: () -> Unit
+) {
+    EmberrDesktopMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        AddPeopleDesktopMenuOption(label = "Create new contact", icon = Res.drawable.plus, onClick = { onDismiss(); onCreateNew() })
+        AddPeopleDesktopMenuOption(label = "Import from .vcf file", icon = Res.drawable.file_down, onClick = { onDismiss(); onImportFromFile() })
+    }
+}
+
+@Composable
+private fun AddPeopleDesktopMenuOption(label: String, icon: DrawableResource, onClick: () -> Unit) {
+    EmberrDesktopMenuOption(
+        label = label,
+        icon = { Icon(painter = painterResource(icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp)) },
+        onClick = onClick
+    )
 }
 
 @Composable
@@ -462,7 +486,8 @@ private fun PeopleList(
     isSelecting: Boolean,
     onOpen: (String) -> Unit,
     onToggleSelection: (String) -> Unit,
-    onMoveToTrash: (NoteMetadataEntity) -> Unit
+    onMoveToTrash: (NoteMetadataEntity) -> Unit,
+    onMoveSelectedToTrash: () -> Unit
 ) {
     val listItems = remember(rows) { peopleListItems(rows) }
     val itemLetters = remember(listItems) { listItems.map { item -> item.letter } }
@@ -511,7 +536,8 @@ private fun PeopleList(
                             isSelecting = isSelecting,
                             onOpen = { onOpen(item.row.person.noteId) },
                             onToggleSelection = { onToggleSelection(item.row.person.noteId) },
-                            onMoveToTrash = { onMoveToTrash(item.row.person) }
+                            onMoveToTrash = { onMoveToTrash(item.row.person) },
+                            onMoveSelectedToTrash = onMoveSelectedToTrash
                         )
                     }
                 }
@@ -541,7 +567,8 @@ private fun PersonListRowItem(
     isSelecting: Boolean,
     onOpen: () -> Unit,
     onToggleSelection: () -> Unit,
-    onMoveToTrash: () -> Unit
+    onMoveToTrash: () -> Unit,
+    onMoveSelectedToTrash: () -> Unit
 ) {
     var showsMenu by remember { mutableStateOf(false) }
     var menuPosition by remember { mutableStateOf(DpOffset.Zero) }
@@ -611,13 +638,21 @@ private fun PersonListRowItem(
 
         if (isDesktopPlatform) {
             Box(modifier = Modifier.offset(x = menuPosition.x, y = menuPosition.y)) {
-                PersonActionsMenu(
-                    personName = personDisplayName(name),
-                    expanded = showsMenu,
-                    onDismiss = { showsMenu = false },
-                    onOpen = onOpen,
-                    onMoveToTrash = onMoveToTrash
-                )
+                if (isSelecting) {
+                    SelectedPeopleDesktopMenu(
+                        expanded = showsMenu,
+                        onDismiss = { showsMenu = false },
+                        onMoveSelectedToTrash = onMoveSelectedToTrash
+                    )
+                } else {
+                    PersonActionsMenu(
+                        personName = personDisplayName(name),
+                        expanded = showsMenu,
+                        onDismiss = { showsMenu = false },
+                        onOpen = onOpen,
+                        onMoveToTrash = onMoveToTrash
+                    )
+                }
             }
         } else {
             PersonActionsMenu(
@@ -631,6 +666,22 @@ private fun PersonListRowItem(
     }
 }
 
+@Composable
+private fun SelectedPeopleDesktopMenu(expanded: Boolean, onDismiss: () -> Unit, onMoveSelectedToTrash: () -> Unit) {
+    val trashColor = MaterialTheme.colorScheme.error
+    EmberrDesktopMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        EmberrDesktopMenuOption(
+            label = "Move to Trash",
+            icon = { Icon(painter = painterResource(Res.drawable.trash), contentDescription = null, tint = trashColor, modifier = Modifier.size(20.dp)) },
+            labelColor = trashColor,
+            onClick = {
+                onDismiss()
+                onMoveSelectedToTrash()
+            }
+        )
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 private fun Modifier.personRowGestures(
     isSelecting: Boolean,
@@ -638,9 +689,7 @@ private fun Modifier.personRowGestures(
     onToggleSelection: () -> Unit,
     onRightClick: (DpOffset) -> Unit,
     onLongClick: () -> Unit
-): Modifier = if (isSelecting) {
-    clickable(onClick = onToggleSelection)
-} else if (isDesktopPlatform) {
+): Modifier = if (isDesktopPlatform) {
     pointerInput(Unit) {
         awaitEachGesture {
             val event = awaitPointerEvent()
@@ -651,7 +700,9 @@ private fun Modifier.personRowGestures(
             }
         }
     }
-        .clickable(onClick = onOpen)
+        .clickable(onClick = if (isSelecting) onToggleSelection else onOpen)
+} else if (isSelecting) {
+    clickable(onClick = onToggleSelection)
 } else {
     combinedClickable(onClick = onOpen, onLongClick = onLongClick)
 }
