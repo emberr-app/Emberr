@@ -87,6 +87,7 @@ private suspend fun markShortcutNoteDeleted(context: Context, glanceId: GlanceId
 
     writeShortcutNoteDeleted(context, glanceId)
     pushRenderedShortcut(context, glanceId, readCachedShortcut(context, glanceId), isNoteDeleted = true)
+    NoteShortcutWidget().update(context, glanceId)
 }
 
 @OptIn(ExperimentalGlanceRemoteViewsApi::class)
@@ -143,6 +144,7 @@ suspend fun refreshNoteShortcutWidget(context: Context, glanceId: GlanceId) {
 
         writeCachedShortcut(context, glanceId, freshContent)
         pushRenderedShortcut(context, glanceId, freshContent)
+        NoteShortcutWidget().update(context, glanceId)
     } catch (cause: Exception) {
         WidgetLog.e("Could not refresh a shortcut widget", cause)
     }

@@ -27,6 +27,7 @@ import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
@@ -35,13 +36,24 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetAddButton
+import com.emberr.presentation.widget.elevatedSurfaceColor
 import com.emberr.presentation.widget.primaryTextColor
+import com.emberr.presentation.widget.widgetBottomPadding
+import com.emberr.presentation.widget.widgetCornerRadius
+import com.emberr.presentation.widget.widgetSidePadding
+import com.emberr.presentation.widget.widgetTopPadding
+import com.emberr.presentation.widget.footerSpaceItem
+import com.emberr.presentation.widget.headerSpaceItem
+import com.emberr.presentation.widget.widgetHeaderRowHeight
+import com.emberr.presentation.widget.widgetListTopSpace
 import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.widgetHomeScreenExtra
@@ -55,7 +67,10 @@ import com.emberr.presentation.widget.readWidgetSpaceId
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-private val topBarIconSize = 22.dp
+private val headerIconSize = 18.dp
+private val noteCardCornerRadius = 14.dp
+private val rowIconSize = 20.dp
+private val rowIconSlotWidth = 32.dp
 
 class NoteListWidget : GlanceAppWidget(), KoinComponent {
 
@@ -117,47 +132,19 @@ internal fun NoteListWidgetBody(
         return
     }
 
-    Column(
+    Box(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
-            .cornerRadius(20.dp)
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .cornerRadius(widgetCornerRadius)
+            .padding(start = widgetSidePadding)
     ) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Vertical.CenterVertically
-        ) {
-            Text(
-                text = "Notes",
-                maxLines = 1,
-                style = TextStyle(
-                    color = primaryTextColor,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = GlanceModifier
-                    .defaultWeight()
-                    .clickable(actionStartActivity(openHomeScreenIntent(context, spaceId)))
-            )
-
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_circle_plus),
-                contentDescription = "New note",
-                colorFilter = ColorFilter.tint(primaryTextColor),
-                modifier = GlanceModifier
-                    .size(topBarIconSize)
-                    .clickable(actionStartActivity(newNoteIntent(context, spaceId)))
-            )
-        }
-
-        Spacer(modifier = GlanceModifier.height(10.dp))
-
         val notes = content?.notes.orEmpty()
         if (notes.isEmpty()) {
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
+                    .padding(top = widgetListTopSpace, end = widgetSidePadding)
                     .clickable(actionStartActivity(openHomeScreenIntent(context, spaceId))),
                 verticalAlignment = Alignment.Vertical.CenterVertically,
                 horizontalAlignment = Alignment.Horizontal.CenterHorizontally
@@ -173,11 +160,53 @@ internal fun NoteListWidgetBody(
             }
         } else {
             LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                headerSpaceItem()
                 items(items = notes, itemId = { note -> note.noteId.hashCode().toLong() }) { note ->
                     NoteRow(context = context, note = note)
                 }
+                footerSpaceItem()
             }
         }
+
+        Row(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .height(widgetHeaderRowHeight)
+                .padding(top = widgetTopPadding, end = widgetSidePadding),
+            verticalAlignment = Alignment.Vertical.CenterVertically
+        ) {
+            Row(
+                modifier = GlanceModifier
+                    .defaultWeight()
+                    .clickable(actionStartActivity(openHomeScreenIntent(context, spaceId))),
+                verticalAlignment = Alignment.Vertical.CenterVertically
+            ) {
+                Image(
+                    provider = ImageProvider(R.drawable.ic_widget_ghost),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(primaryTextColor),
+                    modifier = GlanceModifier.size(headerIconSize)
+                )
+
+                Spacer(modifier = GlanceModifier.width(10.dp))
+
+                Text(
+                    text = "Notes",
+                    maxLines = 1,
+                    style = TextStyle(
+                        color = primaryTextColor,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+
+            WidgetAddButton(
+                contentDescription = "New note",
+                onClick = actionStartActivity(newNoteIntent(context, spaceId))
+            )
+        }
+
     }
 }
 
@@ -187,8 +216,9 @@ private fun DeletedSpaceNoteList(context: Context, appWidgetId: Int) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
-            .cornerRadius(20.dp)
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .cornerRadius(widgetCornerRadius)
+            .padding(horizontal = widgetSidePadding)
+            .padding(top = widgetTopPadding, bottom = widgetBottomPadding)
             .clickable(actionStartActivity(openSpacePickerIntent(context, appWidgetId)))
     ) {
         Row(
@@ -224,23 +254,54 @@ private fun DeletedSpaceNoteList(context: Context, appWidgetId: Int) {
 
 @Composable
 private fun NoteRow(context: Context, note: NoteListWidgetRow) {
-    Column(
-        modifier = GlanceModifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .clickable(actionStartActivity(openNoteIntent(context, note.noteId)))
-    ) {
-        Text(
-            text = note.title,
-            maxLines = 1,
-            style = TextStyle(color = primaryTextColor, fontSize = 16.sp)
-        )
+    Column(modifier = GlanceModifier.fillMaxWidth().padding(end = widgetSidePadding, bottom = 6.dp)) {
+        Row(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .background(elevatedSurfaceColor)
+                .cornerRadius(noteCardCornerRadius)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .clickable(actionStartActivity(openNoteIntent(context, note.noteId))),
+            verticalAlignment = Alignment.Vertical.CenterVertically
+        ) {
+            NoteRowIcon(icon = note.icon)
 
-        if (note.snippet.isNotBlank()) {
-            Text(
-                text = note.snippet,
-                maxLines = 1,
-                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp)
+            Spacer(modifier = GlanceModifier.width(6.dp))
+
+            Column(modifier = GlanceModifier.defaultWeight()) {
+                Text(
+                    text = note.title,
+                    maxLines = 1,
+                    style = TextStyle(
+                        color = primaryTextColor,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+
+                if (note.snippet.isNotBlank()) {
+                    Text(
+                        text = note.snippet,
+                        maxLines = 1,
+                        style = TextStyle(color = secondaryTextColor, fontSize = 12.sp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoteRowIcon(icon: String?) {
+    Box(modifier = GlanceModifier.width(rowIconSlotWidth), contentAlignment = Alignment.Center) {
+        if (icon != null) {
+            Text(text = icon, style = TextStyle(color = primaryTextColor, fontSize = 20.sp))
+        } else {
+            Image(
+                provider = ImageProvider(R.drawable.ic_widget_doc_text),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(secondaryTextColor),
+                modifier = GlanceModifier.size(rowIconSize)
             )
         }
     }

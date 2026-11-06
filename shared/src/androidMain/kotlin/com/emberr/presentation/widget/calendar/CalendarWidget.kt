@@ -15,6 +15,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.action.Action
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -45,7 +46,12 @@ import com.emberr.R
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.highlightColor
 import com.emberr.presentation.widget.onHighlightColor
+import com.emberr.presentation.widget.elevatedSurfaceColor
 import com.emberr.presentation.widget.primaryTextColor
+import com.emberr.presentation.widget.widgetBottomPadding
+import com.emberr.presentation.widget.widgetCornerRadius
+import com.emberr.presentation.widget.widgetSidePadding
+import com.emberr.presentation.widget.widgetTopPadding
 import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.calendarDateUriScheme
@@ -53,8 +59,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import androidx.core.graphics.toColorInt
 
-private val chevronSize = 24.dp
-private val dayHighlightSize = 29.dp
+private val chevronSize = 16.dp
+private val monthStepButtonSize = 32.dp
+private val dayHighlightSize = 30.dp
 private val dotSize = 6.dp
 
 class CalendarWidget : GlanceAppWidget(), KoinComponent {
@@ -111,28 +118,24 @@ internal fun CalendarWidgetBody(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
-            .cornerRadius(24.dp)
-            .padding(horizontal = 14.dp)
-            .padding(top = 22.dp, bottom = 16.dp)
+            .cornerRadius(widgetCornerRadius)
+            .padding(horizontal = widgetSidePadding)
+            .padding(top = widgetTopPadding, bottom = widgetBottomPadding)
     ) {
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
             verticalAlignment = Alignment.Vertical.CenterVertically
         ) {
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_chevron_left),
+            MonthStepButton(
+                iconResource = R.drawable.ic_widget_chevron_left,
                 contentDescription = "Previous month",
-                colorFilter = ColorFilter.tint(primaryTextColor),
-                modifier = GlanceModifier
-                    .size(chevronSize)
-                    .clickable(
-                        actionSendBroadcast(monthStepIntent(context, appWidgetId, isForward = false))
-                    )
+                onClick = actionSendBroadcast(monthStepIntent(context, appWidgetId, isForward = false))
             )
 
-            Box(
+            Row(
                 modifier = GlanceModifier.defaultWeight(),
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+                verticalAlignment = Alignment.Vertical.CenterVertically
             ) {
                 Text(
                     text = content?.monthLabel.orEmpty(),
@@ -143,21 +146,27 @@ internal fun CalendarWidgetBody(
                         fontWeight = FontWeight.Bold
                     )
                 )
+
+                val yearLabel = content?.yearLabel.orEmpty()
+                if (yearLabel.isNotBlank()) {
+                    Spacer(modifier = GlanceModifier.width(6.dp))
+
+                    Text(
+                        text = yearLabel,
+                        maxLines = 1,
+                        style = TextStyle(color = secondaryTextColor, fontSize = 18.sp)
+                    )
+                }
             }
 
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_chevron_right),
+            MonthStepButton(
+                iconResource = R.drawable.ic_widget_chevron_right,
                 contentDescription = "Next month",
-                colorFilter = ColorFilter.tint(primaryTextColor),
-                modifier = GlanceModifier
-                    .size(chevronSize)
-                    .clickable(
-                        actionSendBroadcast(monthStepIntent(context, appWidgetId, isForward = true))
-                    )
+                onClick = actionSendBroadcast(monthStepIntent(context, appWidgetId, isForward = true))
             )
         }
 
-        Spacer(modifier = GlanceModifier.height(26.dp))
+        Spacer(modifier = GlanceModifier.height(20.dp))
 
         Row(modifier = GlanceModifier.fillMaxWidth()) {
             content?.weekdayLabels.orEmpty().forEach { label ->
@@ -168,7 +177,7 @@ internal fun CalendarWidgetBody(
                     Text(
                         text = label,
                         maxLines = 1,
-                        style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
+                        style = TextStyle(color = secondaryTextColor, fontSize = 12.sp)
                     )
                 }
             }
@@ -206,6 +215,25 @@ internal fun CalendarWidgetBody(
 }
 
 @Composable
+private fun MonthStepButton(iconResource: Int, contentDescription: String, onClick: Action) {
+    Box(
+        modifier = GlanceModifier
+            .size(monthStepButtonSize)
+            .background(elevatedSurfaceColor)
+            .cornerRadius(monthStepButtonSize / 2)
+            .clickable(onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            provider = ImageProvider(iconResource),
+            contentDescription = contentDescription,
+            colorFilter = ColorFilter.tint(primaryTextColor),
+            modifier = GlanceModifier.size(chevronSize)
+        )
+    }
+}
+
+@Composable
 private fun DayCell(cell: CalendarDayCell) {
     if (cell.dayNumber == null) {
         Spacer(modifier = GlanceModifier.size(dayHighlightSize))
@@ -218,7 +246,7 @@ private fun DayCell(cell: CalendarDayCell) {
                 .size(dayHighlightSize)
                 .then(
                     if (cell.isToday) {
-                        GlanceModifier.background(highlightColor).cornerRadius(9.dp)
+                        GlanceModifier.background(highlightColor).cornerRadius(dayHighlightSize / 2)
                     } else {
                         GlanceModifier
                     }

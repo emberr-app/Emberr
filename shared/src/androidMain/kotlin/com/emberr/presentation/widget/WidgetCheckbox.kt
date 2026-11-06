@@ -9,26 +9,34 @@ import androidx.glance.ImageProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.size
+import androidx.glance.unit.ColorProvider
 import com.emberr.R
 
 private val checkboxIconSize = 24.dp
 
 @Composable
-fun WidgetCheckbox(isChecked: Boolean, modifier: GlanceModifier = GlanceModifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+fun WidgetCheckbox(
+    isChecked: Boolean,
+    modifier: GlanceModifier = GlanceModifier,
+    checkedFillColor: ColorProvider = elevatedSurfaceColor,
+    iconAlignment: Alignment = Alignment.CenterStart
+) {
+    Box(modifier = modifier, contentAlignment = iconAlignment) {
         if (isChecked) {
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_checkbox_filled),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(elevatedSurfaceColor),
-                modifier = GlanceModifier.size(checkboxIconSize)
-            )
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_checkbox_tick),
-                contentDescription = "Done",
-                colorFilter = ColorFilter.tint(highlightColor),
-                modifier = GlanceModifier.size(checkboxIconSize)
-            )
+            Box {
+                Image(
+                    provider = ImageProvider(R.drawable.ic_widget_checkbox_filled),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(checkedFillColor),
+                    modifier = GlanceModifier.size(checkboxIconSize)
+                )
+                Image(
+                    provider = ImageProvider(R.drawable.ic_widget_checkbox_tick),
+                    contentDescription = "Done",
+                    colorFilter = ColorFilter.tint(highlightColor),
+                    modifier = GlanceModifier.size(checkboxIconSize)
+                )
+            }
         } else {
             Image(
                 provider = ImageProvider(R.drawable.ic_widget_checkbox_empty),

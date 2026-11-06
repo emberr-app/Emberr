@@ -40,7 +40,8 @@ class NoteListWidgetContentReader(
                 NoteListWidgetRow(
                     noteId = note.noteId,
                     title = note.title.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled" },
-                    snippet = note.snippet.trim().take(maximumCharactersPerSnippet)
+                    snippet = note.snippet.trim().take(maximumCharactersPerSnippet),
+                    icon = note.icon?.trim()?.takeIf { it.isNotEmpty() }
                 )
             }
         )

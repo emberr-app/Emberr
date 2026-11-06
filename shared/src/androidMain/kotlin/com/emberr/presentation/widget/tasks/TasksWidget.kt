@@ -26,9 +26,11 @@ import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -42,7 +44,17 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetAddButton
 import com.emberr.presentation.widget.WidgetCheckbox
+import com.emberr.presentation.widget.WidgetLabelPill
+import com.emberr.presentation.widget.elevatedSurfaceColor
+import com.emberr.presentation.widget.widgetCornerRadius
+import com.emberr.presentation.widget.widgetSidePadding
+import com.emberr.presentation.widget.widgetTopPadding
+import com.emberr.presentation.widget.footerSpaceItem
+import com.emberr.presentation.widget.headerSpaceItem
+import com.emberr.presentation.widget.widgetHeaderRowHeight
+import com.emberr.presentation.widget.widgetListTopSpace
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.primaryTextColor
 import com.emberr.presentation.widget.secondaryTextColor
@@ -55,8 +67,9 @@ import com.emberr.presentation.widget.widgetTasksScreenExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-private val topBarIconSize = 22.dp
-private val checkboxWidth = 26.dp
+private val topBarIconSize = 20.dp
+private val checkboxTapWidth = 36.dp
+private val rowVerticalPadding = 5.dp
 
 class TasksWidget : GlanceAppWidget(), KoinComponent {
 
@@ -113,15 +126,54 @@ internal fun TasksWidgetBody(
     val isShowingCompleted = content?.isShowingCompleted == true
     val openTasksScreen = actionStartActivity(openTasksScreenIntent(context))
 
-    Column(
+    Box(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
-            .cornerRadius(20.dp)
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .cornerRadius(widgetCornerRadius)
+            .padding(start = widgetSidePadding)
     ) {
+        val rows = content?.rows.orEmpty()
+        if (rows.isEmpty()) {
+            Column(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .padding(top = widgetListTopSpace, end = widgetSidePadding)
+                    .clickable(openTasksScreen),
+                verticalAlignment = Alignment.Vertical.CenterVertically,
+                horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+            ) {
+                Text(
+                    text = when {
+                        content == null -> "Open Emberr to load your tasks"
+                        isShowingCompleted -> "No completed tasks yet."
+                        else -> "All caught up!"
+                    },
+                    style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
+                )
+            }
+        } else {
+            LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                headerSpaceItem(height = widgetHeaderRowHeight + 8.dp)
+                items(items = rows, itemId = { row -> row.key.hashCode().toLong() }) { row ->
+                    when (row) {
+                        is TasksWidgetRow.SectionHeading -> SectionHeadingRow(row)
+                        is TasksWidgetRow.Task -> TaskRow(
+                            task = row,
+                            appWidgetId = appWidgetId,
+                            context = context
+                        )
+                    }
+                }
+                footerSpaceItem()
+            }
+        }
+
         Row(
-            modifier = GlanceModifier.fillMaxWidth(),
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .height(widgetHeaderRowHeight)
+                .padding(top = widgetTopPadding, end = widgetSidePadding),
             verticalAlignment = Alignment.Vertical.CenterVertically
         ) {
             Text(
@@ -129,7 +181,7 @@ internal fun TasksWidgetBody(
                 maxLines = 1,
                 style = TextStyle(
                     color = primaryTextColor,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 ),
                 modifier = GlanceModifier.defaultWeight().clickable(openTasksScreen)
@@ -146,50 +198,14 @@ internal fun TasksWidgetBody(
                     .clickable(actionSendBroadcast(toggleCompletedViewIntent(context, appWidgetId)))
             )
 
-            Spacer(modifier = GlanceModifier.width(14.dp))
+            Spacer(modifier = GlanceModifier.width(12.dp))
 
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_circle_plus),
+            WidgetAddButton(
                 contentDescription = "Add task",
-                colorFilter = ColorFilter.tint(primaryTextColor),
-                modifier = GlanceModifier
-                    .size(topBarIconSize)
-                    .clickable(actionStartActivity(addTaskIntent(context)))
+                onClick = actionStartActivity(addTaskIntent(context))
             )
         }
 
-        Spacer(modifier = GlanceModifier.height(10.dp))
-
-        val rows = content?.rows.orEmpty()
-        if (rows.isEmpty()) {
-            Column(
-                modifier = GlanceModifier.fillMaxSize().clickable(openTasksScreen),
-                verticalAlignment = Alignment.Vertical.CenterVertically,
-                horizontalAlignment = Alignment.Horizontal.CenterHorizontally
-            ) {
-                Text(
-                    text = when {
-                        content == null -> "Open Emberr to load your tasks"
-                        isShowingCompleted -> "No completed tasks yet."
-                        else -> "All caught up!"
-                    },
-                    style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
-                )
-            }
-        } else {
-            LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                items(items = rows, itemId = { row -> row.key.hashCode().toLong() }) { row ->
-                    when (row) {
-                        is TasksWidgetRow.SectionHeading -> SectionHeadingRow(row)
-                        is TasksWidgetRow.Task -> TaskRow(
-                            task = row,
-                            appWidgetId = appWidgetId,
-                            context = context
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -200,23 +216,26 @@ private fun SectionHeadingRow(heading: TasksWidgetRow.SectionHeading) {
         maxLines = 1,
         style = TextStyle(
             color = secondaryTextColor,
-            fontSize = 13.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.Medium
         ),
-        modifier = GlanceModifier.fillMaxWidth().padding(top = 10.dp, bottom = 2.dp)
+        modifier = GlanceModifier.fillMaxWidth().padding(top = 8.dp, bottom = 2.dp, end = widgetSidePadding)
     )
 }
 
 @Composable
 private fun TaskRow(task: TasksWidgetRow.Task, appWidgetId: Int, context: Context) {
     Row(
-        modifier = GlanceModifier.fillMaxWidth().padding(vertical = 5.dp),
+        modifier = GlanceModifier.fillMaxWidth().padding(end = widgetSidePadding),
         verticalAlignment = Alignment.Vertical.Top
     ) {
         WidgetCheckbox(
             isChecked = task.isChecked,
+            iconAlignment = Alignment.TopStart,
             modifier = GlanceModifier
-                .width(checkboxWidth)
+                .width(checkboxTapWidth)
+                .fillMaxHeight()
+                .padding(top = rowVerticalPadding)
                 .clickable(
                     onClick = actionSendBroadcast(
                         toggleTaskIntent(
@@ -231,35 +250,31 @@ private fun TaskRow(task: TasksWidgetRow.Task, appWidgetId: Int, context: Contex
                 )
         )
 
-        Spacer(modifier = GlanceModifier.width(8.dp))
-
-        Column(modifier = GlanceModifier.defaultWeight()) {
+        Column(modifier = GlanceModifier.defaultWeight().padding(top = rowVerticalPadding, bottom = rowVerticalPadding)) {
             Text(
                 text = task.text,
                 maxLines = 2,
                 style = TextStyle(
-                    color = primaryTextColor,
-                    fontSize = 16.sp,
+                    color = if (task.isChecked) secondaryTextColor else primaryTextColor,
+                    fontSize = 15.sp,
                     textDecoration = if (task.isChecked) TextDecoration.LineThrough else TextDecoration.None
-                )
+                ),
+                modifier = GlanceModifier.padding(top = 1.dp)
             )
 
             if (task.timeLabel != null) {
                 Text(
                     text = task.timeLabel,
                     maxLines = 1,
-                    style = TextStyle(color = secondaryTextColor, fontSize = 13.sp)
+                    style = TextStyle(color = secondaryTextColor, fontSize = 12.sp)
                 )
             }
         }
 
         if (task.dayLabel != null) {
-            Text(
-                text = task.dayLabel,
-                maxLines = 1,
-                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp),
-                modifier = GlanceModifier.padding(start = 8.dp, top = 2.dp, end = 8.dp)
-            )
+            Box(modifier = GlanceModifier.padding(start = 8.dp, top = 1.dp)) {
+                WidgetLabelPill(text = task.dayLabel, background = elevatedSurfaceColor, textColor = primaryTextColor)
+            }
         }
     }
 }

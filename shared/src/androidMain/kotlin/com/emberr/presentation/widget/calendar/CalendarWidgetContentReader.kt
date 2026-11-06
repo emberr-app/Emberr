@@ -92,10 +92,9 @@ class CalendarWidgetContentReader(
             CalendarWidgetContent(
                 shownMonth = monthKey,
                 monthLabel = formatMonthLabel(firstOfMonth),
-                weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day ->
-                    day.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-                },
-                weeks = buildWeeks(firstOfMonth, today, weekStartsOn, dotsByDate)
+                weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> day.name.take(1) },
+                weeks = buildWeeks(firstOfMonth, today, weekStartsOn, dotsByDate),
+                yearLabel = firstOfMonth.year.toString()
             )
         }
 
@@ -161,7 +160,5 @@ private fun firstOfMonthFor(date: LocalDate): LocalDate =
 private fun monthKeyOf(date: LocalDate): String =
     "${date.year}-${date.month.number.toString().padStart(2, '0')}"
 
-private fun formatMonthLabel(firstOfMonth: LocalDate): String {
-    val month = monthNames.getOrNull(firstOfMonth.month.number - 1) ?: firstOfMonth.month.name
-    return "$month ${firstOfMonth.year}"
-}
+private fun formatMonthLabel(firstOfMonth: LocalDate): String =
+    monthNames.getOrNull(firstOfMonth.month.number - 1) ?: firstOfMonth.month.name

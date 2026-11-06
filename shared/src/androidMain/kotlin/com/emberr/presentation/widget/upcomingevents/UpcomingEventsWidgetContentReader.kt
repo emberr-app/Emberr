@@ -109,7 +109,9 @@ class UpcomingEventsWidgetContentReader(
                     isOverdue = targetDate == today &&
                         task.reminderTimestamp != null &&
                         task.reminderTimestamp < System.currentTimeMillis(),
-                    accentColorHex = task.categoryId?.let { categoryId -> colorsByCategoryId[categoryId] }
+                    accentColorHex = task.categoryId?.let { categoryId -> colorsByCategoryId[categoryId] },
+                    weekdayShortLabel = weekdayShortLabelOf(targetDate),
+                    dayOfMonthLabel = targetDate.day.toString()
                 )
             )
         }
@@ -126,7 +128,9 @@ class UpcomingEventsWidgetContentReader(
                     timeLabel = null,
                     isOverdue = false,
                     accentColorHex = colorsByCategoryId[BIRTHDAYS_CATEGORY_ID],
-                    birthdayPersonNoteId = birthday.birthdayPersonNoteId
+                    birthdayPersonNoteId = birthday.birthdayPersonNoteId,
+                    weekdayShortLabel = weekdayShortLabelOf(LocalDate.parse(birthday.dateString)),
+                    dayOfMonthLabel = LocalDate.parse(birthday.dateString).day.toString()
                 )
             )
         }
@@ -143,6 +147,9 @@ class UpcomingEventsWidgetContentReader(
         val event: UpcomingEvent
     )
 }
+
+private fun weekdayShortLabelOf(date: LocalDate): String =
+    date.dayOfWeek.name.take(3)
 
 private val shortMonthNames = listOf(
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"

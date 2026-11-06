@@ -4,7 +4,7 @@
     android:description="@string/note_shortcut_widget_description"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:minHeight="40dp"
-    android:minResizeWidth="110dp"
+    android:minResizeWidth="40dp"
     android:minWidth="110dp"
     android:maxResizeWidth="600dp"
     android:resizeMode="horizontal"
