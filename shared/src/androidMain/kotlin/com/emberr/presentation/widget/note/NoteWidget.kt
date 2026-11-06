@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.widgetCornerRadius
-import com.emberr.presentation.widget.widgetSidePadding
 import com.emberr.presentation.widget.widgetTopPadding
 import com.emberr.presentation.widget.footerSpaceItem
 import com.emberr.presentation.widget.headerSpaceItem
@@ -73,6 +72,7 @@ import com.emberr.presentation.widget.widgetNoteIdExtra
 private const val maximumIndentationLevels = 4
 private const val indentationStepInDp = 12
 private val recordLabelWidth = 92.dp
+private val noteSidePadding = 22.dp
 private val markerColumnWidth = 24.dp
 private val noteTitleLineHeight = 20.dp
 private val noteListTopSpace = widgetTopPadding + noteTitleLineHeight + 4.dp
@@ -213,7 +213,7 @@ private fun DeletedNoteContent(title: String?, chooseAnotherNoteAction: Action) 
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .padding(top = widgetTopPadding, end = widgetSidePadding)
+            .padding(top = widgetTopPadding, end = noteSidePadding)
             .clickable(chooseAnotherNoteAction)
     ) {
         Row(
@@ -256,7 +256,7 @@ private fun NoteSurface(content: @Composable () -> Unit) {
             .fillMaxSize()
             .background(surfaceColor)
             .cornerRadius(widgetCornerRadius)
-            .padding(start = widgetSidePadding)
+            .padding(start = noteSidePadding)
     ) {
         content()
     }
@@ -265,7 +265,7 @@ private fun NoteSurface(content: @Composable () -> Unit) {
 @Composable
 private fun CenteredMessage(message: String, tapAction: Action? = null) {
     Column(
-        modifier = GlanceModifier.fillMaxSize().padding(end = widgetSidePadding).thenClickable(tapAction),
+        modifier = GlanceModifier.fillMaxSize().padding(end = noteSidePadding).thenClickable(tapAction),
         verticalAlignment = Alignment.Vertical.CenterVertically,
         horizontalAlignment = Alignment.Horizontal.CenterHorizontally
     ) {
@@ -287,7 +287,7 @@ private fun NoteContent(
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .padding(top = noteListTopSpace, end = widgetSidePadding)
+                    .padding(top = noteListTopSpace, end = noteSidePadding)
                     .thenClickable(openNoteAction)
             ) {
                 Text(
@@ -311,7 +311,7 @@ private fun NoteContent(
             style = TextStyle(color = secondaryTextColor, fontSize = 14.sp),
             modifier = GlanceModifier
                 .fillMaxWidth()
-                .padding(top = widgetTopPadding, end = widgetSidePadding)
+                .padding(top = widgetTopPadding, end = noteSidePadding)
                 .thenClickable(openNoteAction)
         )
     }
@@ -329,7 +329,7 @@ private fun NoteElementList(
             items = content.elements,
             itemId = { element -> element.key.hashCode().toLong() }
         ) { element ->
-            Box(modifier = GlanceModifier.fillMaxWidth().padding(end = widgetSidePadding)) {
+            Box(modifier = GlanceModifier.fillMaxWidth().padding(end = noteSidePadding)) {
                 ContentElement(
                     element = element,
                     openNoteAction = openNoteAction,
@@ -528,7 +528,7 @@ private fun PartlyHighlightedTextLine(
     val sharedTextStyle = resolveTextStyle(line)
     val indentation = startPaddingFor(line.indentationLevel)
     val widgetWidth = reportedWidgetWidth ?: LocalSize.current.width
-    val availableWidth = widgetWidth - widgetSidePadding * 2 - indentation - spaceTakenByMarker
+    val availableWidth = widgetWidth - noteSidePadding * 2 - indentation - spaceTakenByMarker
 
     val wrappedRows = wrapRunsIntoRows(
         runs = splitIntoHighlightRuns(line),
