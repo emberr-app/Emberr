@@ -12,6 +12,8 @@
     <string name="note_card_widget_description">Show one note as a card with its cover and preview</string>
     <string name="daily_jot_widget_label">Jot it down</string>
     <string name="daily_jot_widget_description">Open today\'s daily note and keep typing where you left off</string>
+    <string name="daily_quote_widget_label">Quote of the day</string>
+    <string name="daily_quote_widget_description">Today\'s quote from your daily page on a gradient card</string>
     <string name="today_tasks_widget_label">Today\'s Tasks</string>
     <string name="today_tasks_widget_description">See what is planned for today at a glance</string>
     <string name="calendar_widget_label">Calendar</string>
