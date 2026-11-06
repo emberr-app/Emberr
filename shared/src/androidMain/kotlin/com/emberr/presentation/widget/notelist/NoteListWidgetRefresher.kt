@@ -1,14 +1,9 @@
 // Reads and writes each widget's saved note list, and pushes freshly drawn rows to the home screen.
 package com.emberr.presentation.widget.notelist
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
-import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.GlanceRemoteViews
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -21,7 +16,6 @@ import org.koin.core.context.GlobalContext
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
-private const val fallbackWidgetSideDp = 180
 
 val deletedSpaceNoteList = NoteListWidgetContent(notes = emptyList(), isSpaceDeleted = true)
 
@@ -56,39 +50,6 @@ suspend fun writeCachedNoteList(context: Context, glanceId: GlanceId, content: N
     }
 }
 
-@OptIn(ExperimentalGlanceRemoteViewsApi::class)
-suspend fun pushRenderedNoteList(context: Context, glanceId: GlanceId, content: NoteListWidgetContent) {
-    try {
-        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
-
-        val widgetManager = AppWidgetManager.getInstance(context)
-        val options = widgetManager.getAppWidgetOptions(appWidgetId)
-        val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            .takeIf { it > 0 } ?: fallbackWidgetSideDp
-        val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
-            .takeIf { it > 0 } ?: fallbackWidgetSideDp
-
-        val pinnedSpaceId = readWidgetSpaceId(context, glanceId)
-
-        val rendered = GlanceRemoteViews().compose(
-            context = context,
-            size = DpSize(widthDp.dp, heightDp.dp)
-        ) {
-            NoteListWidgetBody(
-                context = context,
-                spaceId = pinnedSpaceId,
-                content = content,
-                appWidgetId = appWidgetId
-            )
-        }
-
-        widgetManager.updateAppWidget(appWidgetId, rendered.remoteViews)
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not push the rendered note list", cause)
-    }
-}
-
 suspend fun pushNoteListToWidgets(context: Context, notes: List<NoteMetadataEntity>) {
     try {
         val contentReader = GlobalContext.get().get<NoteListWidgetContentReader>()
@@ -103,7 +64,7 @@ suspend fun pushNoteListToWidgets(context: Context, notes: List<NoteMetadataEnti
                 }
                 if (content != readCachedNoteList(context, glanceId)) {
                     writeCachedNoteList(context, glanceId, content)
-                    pushRenderedNoteList(context, glanceId, content)
+                    NoteListWidget().update(context, glanceId)
                 }
             }
     } catch (cause: Exception) {
@@ -123,7 +84,7 @@ suspend fun refreshNoteListWidget(context: Context, glanceId: GlanceId) {
         if (freshContent == readCachedNoteList(context, glanceId)) return
 
         writeCachedNoteList(context, glanceId, freshContent)
-        pushRenderedNoteList(context, glanceId, freshContent)
+        NoteListWidget().update(context, glanceId)
     } catch (cause: Exception) {
         WidgetLog.e("Could not refresh a note list widget", cause)
     }
