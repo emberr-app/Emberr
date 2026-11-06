@@ -8,6 +8,6 @@ internal val widgetSidePadding = 16.dp
 internal val widgetTopPadding = 12.dp
 internal val widgetBottomPadding = 14.dp
 internal val widgetHeaderHeight = 32.dp
-internal val widgetGapBelowHeader = 12.dp
+internal val widgetGapBelowHeader = 4.dp
 internal val widgetListTopSpace = widgetTopPadding + widgetHeaderHeight + widgetGapBelowHeader
 internal val widgetHeaderRowHeight = widgetTopPadding + widgetHeaderHeight

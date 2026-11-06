@@ -43,6 +43,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.WidgetAddButton
 import com.emberr.presentation.widget.elevatedSurfaceColor
 import com.emberr.presentation.widget.primaryTextColor
@@ -167,6 +168,8 @@ internal fun NoteListWidgetBody(
                 footerSpaceItem()
             }
         }
+
+        WidgetTopFade(height = widgetListTopSpace)
 
         Row(
             modifier = GlanceModifier

@@ -12,7 +12,7 @@ private const val footerSpaceItemId = headerSpaceItemId - 1
 
 internal fun LazyListScope.headerSpaceItem(height: Dp = widgetListTopSpace) {
     item(itemId = headerSpaceItemId) {
-        Spacer(modifier = GlanceModifier.height(height))
+        Spacer(modifier = GlanceModifier.height(height + widgetTopFadeSpread))
     }
 }
 

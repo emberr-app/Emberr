@@ -44,6 +44,7 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.WidgetAddButton
 import com.emberr.presentation.widget.WidgetCheckbox
 import com.emberr.presentation.widget.WidgetLabelPill
@@ -154,7 +155,7 @@ internal fun TasksWidgetBody(
             }
         } else {
             LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                headerSpaceItem(height = widgetHeaderRowHeight + 8.dp)
+                headerSpaceItem(height = widgetHeaderRowHeight)
                 items(items = rows, itemId = { row -> row.key.hashCode().toLong() }) { row ->
                     when (row) {
                         is TasksWidgetRow.SectionHeading -> SectionHeadingRow(row)
@@ -168,6 +169,8 @@ internal fun TasksWidgetBody(
                 footerSpaceItem()
             }
         }
+
+        WidgetTopFade(height = widgetHeaderRowHeight)
 
         Row(
             modifier = GlanceModifier

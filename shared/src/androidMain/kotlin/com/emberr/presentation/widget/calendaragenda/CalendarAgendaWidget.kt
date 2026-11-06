@@ -46,6 +46,7 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.calendarEventUriScheme
 import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
@@ -69,7 +70,7 @@ private val eventDotSize = 8.dp
 private val monthCardCornerRadius = 16.dp
 private val agendaEdgePadding = 12.dp
 private val agendaHeaderRowHeight = agendaEdgePadding + 28.dp
-private val agendaListTopSpace = agendaHeaderRowHeight + 12.dp
+private val agendaListTopSpace = agendaHeaderRowHeight + 4.dp
 private val headerHeight = 24.dp
 private const val repeatingHeaderItemId = -1L
 private const val otherEventsHeaderItemId = -2L
@@ -151,6 +152,8 @@ internal fun CalendarAgendaWidgetBody(
 
         Box(modifier = GlanceModifier.defaultWeight().fillMaxHeight()) {
             EventList(context = context, content = content)
+
+            WidgetTopFade(height = agendaListTopSpace)
 
             Row(
                 modifier = GlanceModifier
