@@ -866,7 +866,7 @@ fun DailyEmptyDayMessage(
                     if (quote.author.isNotEmpty()) {
                         Spacer(Modifier.height(14.dp))
                         Text(
-                            text = "— ${quote.author}",
+                            text = quote.author,
                             style = MaterialTheme.typography.labelSmall,
                             color = textColor.copy(alpha = 0.35f),
                             textAlign = TextAlign.Center
