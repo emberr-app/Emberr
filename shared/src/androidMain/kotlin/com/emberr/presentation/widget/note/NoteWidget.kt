@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -16,6 +17,7 @@ import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
+import androidx.glance.currentState
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
@@ -46,6 +48,7 @@ import com.emberr.MainActivity
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import androidx.core.net.toUri
+import androidx.datastore.preferences.core.Preferences
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.highlightedTextBackgroundColor
 import com.emberr.presentation.widget.primaryTextColor
@@ -68,20 +71,23 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val storedNoteId = readSelectedNoteId(context, id)?.takeIf { it.isNotBlank() }
-
-        val content = storedNoteId?.let { noteId ->
-            loadAndCacheContent(context, id, noteId) ?: readCachedContent(context, id)
-        }
+        readSelectedNoteId(context, id)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { noteId -> loadAndCacheContent(context, id, noteId) }
 
         val appWidgetId = resolveAppWidgetId(context, id)
         val reportedWidgetWidth = readWidgetWidth(context, appWidgetId)
 
         provideContent {
+            val savedState = currentState<Preferences>()
+            val storedNoteId = savedState[selectedNoteIdKey]?.takeIf { it.isNotBlank() }
+            val rawCachedContent = savedState[cachedContentKey]
+            val content = remember(rawCachedContent) { decodeCachedContent(rawCachedContent) }
+
             WidgetBody(
                 context = context,
                 chosenNoteId = storedNoteId,
-                content = content,
+                content = if (storedNoteId == null) null else content,
                 appWidgetId = appWidgetId,
                 reportedWidgetWidth = reportedWidgetWidth
             )
