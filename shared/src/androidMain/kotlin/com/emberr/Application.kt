@@ -60,6 +60,7 @@ class EmberrApplication : Application() {
             getKoin().get<com.emberr.presentation.widget.tasks.TasksWidgetCoordinator>().start()
             getKoin().get<com.emberr.presentation.widget.notelist.NoteListWidgetCoordinator>().start()
             getKoin().get<com.emberr.presentation.widget.noteshortcut.NoteShortcutWidgetCoordinator>().start()
+            getKoin().get<com.emberr.presentation.widget.notecard.NoteCardWidgetCoordinator>().start()
             getKoin().get<com.emberr.presentation.widget.todaytasks.TodayTasksWidgetCoordinator>().start()
             getKoin().get<com.emberr.presentation.widget.calendar.CalendarWidgetCoordinator>().start()
             getKoin().get<com.emberr.presentation.widget.calendaragenda.CalendarAgendaWidgetCoordinator>().start()

@@ -194,6 +194,30 @@
         </activity>
 
         <receiver
+            android:name=".presentation.widget.notecard.NoteCardWidgetReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/note_card_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/note_card_widget_info" />
+        </receiver>
+
+        <activity
+            android:name=".presentation.widget.notecard.NoteCardWidgetPickerActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true"
+            android:label="@string/note_card_widget_label"
+            android:theme="@style/Theme.Emberr">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <receiver
             android:name=".presentation.widget.todaytasks.TodayTasksWidgetReceiver"
             android:enabled="true"
             android:exported="true"
