@@ -6,6 +6,9 @@ import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.glance.currentState
+import androidx.datastore.preferences.core.Preferences
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,10 +90,13 @@ class CalendarAgendaWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
+            val rawCachedContent = currentState<Preferences>()[cachedAgendaKey]
+            val savedContent = remember(rawCachedContent) { decodeCachedAgenda(rawCachedContent) }
+
             CalendarAgendaWidgetBody(
                 context = context,
                 appWidgetId = appWidgetId,
-                content = content
+                content = savedContent ?: content
             )
         }
     }

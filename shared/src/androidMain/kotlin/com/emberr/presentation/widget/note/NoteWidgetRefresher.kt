@@ -1,14 +1,9 @@
 // Reads and writes each widget's saved content, and pushes freshly drawn content to the home screen.
 package com.emberr.presentation.widget.note
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
-import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.GlanceRemoteViews
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -19,7 +14,6 @@ import com.emberr.presentation.widget.WidgetNoteSource
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
-private const val fallbackWidgetSideDp = 180
 
 fun decodeCachedContent(rawCache: String?): WidgetNoteContent? {
     if (rawCache.isNullOrBlank()) return null
@@ -85,13 +79,7 @@ suspend fun markWidgetNoteDeleted(context: Context, glanceId: GlanceId, noteId: 
     if (readNoteDeleted(context, glanceId)) return
 
     writeNoteDeleted(context, glanceId)
-    pushRenderedContent(
-        context = context,
-        glanceId = glanceId,
-        chosenNoteId = noteId,
-        content = readCachedContent(context, glanceId),
-        isNoteDeleted = true
-    )
+    NoteWidget().update(context, glanceId)
 }
 
 suspend fun findWidgetsShowingNote(context: Context, noteId: String): List<GlanceId> =
@@ -115,52 +103,13 @@ suspend fun readAllSelectedNoteIds(context: Context): Set<String> =
         emptySet()
     }
 
-@OptIn(ExperimentalGlanceRemoteViewsApi::class)
-suspend fun pushRenderedContent(
-    context: Context,
-    glanceId: GlanceId,
-    chosenNoteId: String,
-    content: WidgetNoteContent?,
-    isNoteDeleted: Boolean = false
-) {
-    try {
-        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
-
-        val widgetManager = AppWidgetManager.getInstance(context)
-        val options = widgetManager.getAppWidgetOptions(appWidgetId)
-        val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            .takeIf { it > 0 } ?: fallbackWidgetSideDp
-        val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
-            .takeIf { it > 0 } ?: fallbackWidgetSideDp
-
-        val rendered = GlanceRemoteViews().compose(
-            context = context,
-            size = DpSize(widthDp.dp, heightDp.dp)
-        ) {
-            WidgetBody(
-                context = context,
-                chosenNoteId = chosenNoteId,
-                content = content,
-                isNoteDeleted = isNoteDeleted,
-                appWidgetId = appWidgetId,
-                reportedWidgetWidth = widthDp.dp
-            )
-        }
-
-        widgetManager.updateAppWidget(appWidgetId, rendered.remoteViews)
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not push rendered content", cause)
-    }
-}
-
 suspend fun pushContentToWidgets(context: Context, noteId: String, content: WidgetNoteContent) {
     val targets = findWidgetsShowingNote(context, noteId)
     if (targets.isEmpty()) return
 
     for (glanceId in targets) {
         writeCachedContent(context, glanceId, content)
-        pushRenderedContent(context, glanceId, noteId, content)
+        NoteWidget().update(context, glanceId)
     }
 }
 
@@ -184,7 +133,7 @@ suspend fun refreshNoteWidgets(context: Context) {
             if (isUnchanged) continue
 
             writeCachedContent(context, glanceId, freshContent)
-            pushRenderedContent(context, glanceId, noteId, freshContent)
+            NoteWidget().update(context, glanceId)
         }
     } catch (cause: Exception) {
         WidgetLog.e("Could not refresh the note widgets", cause)

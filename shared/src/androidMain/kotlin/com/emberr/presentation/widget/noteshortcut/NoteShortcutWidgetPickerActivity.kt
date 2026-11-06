@@ -97,7 +97,6 @@ class NoteShortcutWidgetPickerActivity : ComponentActivity() {
 
                 contentReader?.readContentOnce(noteId)?.let { content ->
                     writeCachedShortcut(this@NoteShortcutWidgetPickerActivity, glanceId, content)
-                    pushRenderedShortcut(this@NoteShortcutWidgetPickerActivity, glanceId, content)
                 }
 
                 NoteShortcutWidget().update(this@NoteShortcutWidgetPickerActivity, glanceId)

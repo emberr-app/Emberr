@@ -4,6 +4,9 @@ package com.emberr.presentation.widget.upcomingevents
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.glance.currentState
+import androidx.datastore.preferences.core.Preferences
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.glance.color.ColorProvider
@@ -74,7 +77,10 @@ class UpcomingEventsWidget : GlanceAppWidget(), KoinComponent {
         val content = loadAndCacheUpcomingEvents(context, id) ?: readCachedUpcomingEvents(context, id)
 
         provideContent {
-            UpcomingEventsWidgetBody(context = context, content = content)
+            val rawCachedContent = currentState<Preferences>()[cachedUpcomingEventsKey]
+            val savedContent = remember(rawCachedContent) { decodeCachedUpcomingEvents(rawCachedContent) }
+
+            UpcomingEventsWidgetBody(context = context, content = savedContent ?: content)
         }
     }
 
