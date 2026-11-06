@@ -89,7 +89,10 @@ class NoteShortcutWidgetPickerActivity : ComponentActivity() {
                     definition = PreferencesGlanceStateDefinition,
                     glanceId = glanceId
                 ) { preferences ->
-                    preferences.toMutablePreferences().apply { this[shortcutNoteIdKey] = noteId }
+                    preferences.toMutablePreferences().apply {
+                        this[shortcutNoteIdKey] = noteId
+                        remove(shortcutNoteDeletedKey)
+                    }
                 }
 
                 contentReader?.readContentOnce(noteId)?.let { content ->

@@ -79,7 +79,6 @@ import com.emberr.domain.media.LocalMediaGarbageCollector
 import com.emberr.domain.media.LocalMediaGcTrigger
 import com.emberr.domain.space.DeletedSpaceTrigger
 import com.emberr.domain.sync.AutoSyncTrigger
-import com.emberr.presentation.widget.clearWidgetPinsForSpace
 import com.emberr.domain.sync.discovery.SyncDiscoveryManager
 import com.emberr.presentation.sync.SyncViewModel
 import kotlinx.coroutines.FlowPreview
@@ -254,8 +253,8 @@ class MainActivity : FragmentActivity() {
         }
 
         lifecycleScope.launch {
-            DeletedSpaceTrigger.deletedSpaceIds.collect { deletedSpaceId ->
-                clearWidgetPinsForSpace(this@MainActivity, deletedSpaceId)
+            DeletedSpaceTrigger.deletedSpaceIds.collect {
+                refreshNoteListWidgets(this@MainActivity)
             }
         }
 
