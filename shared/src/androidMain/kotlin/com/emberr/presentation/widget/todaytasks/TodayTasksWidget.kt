@@ -9,6 +9,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.glance.currentState
+import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.action.Action
@@ -90,10 +93,13 @@ class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
+            val rawCachedContent = currentState<Preferences>()[cachedTodayTasksKey]
+            val savedContent = remember(rawCachedContent) { decodeCachedTodayTasks(rawCachedContent) }
+
             TodayTasksWidgetBody(
                 context = context,
                 appWidgetId = appWidgetId,
-                content = content
+                content = savedContent ?: content
             )
         }
     }

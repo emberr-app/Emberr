@@ -1,14 +1,9 @@
 // Reads and writes each widget's saved note name, and pushes a freshly drawn shortcut to the home screen.
 package com.emberr.presentation.widget.noteshortcut
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
-import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.GlanceRemoteViews
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -19,8 +14,6 @@ import org.koin.core.context.GlobalContext
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
-private const val fallbackWidgetWidthDp = 180
-private const val fallbackWidgetHeightDp = 60
 
 fun decodeCachedShortcut(rawCache: String?): NoteShortcutWidgetContent? {
     if (rawCache.isNullOrBlank()) return null
@@ -86,44 +79,7 @@ private suspend fun markShortcutNoteDeleted(context: Context, glanceId: GlanceId
     if (readShortcutNoteDeleted(context, glanceId)) return
 
     writeShortcutNoteDeleted(context, glanceId)
-    pushRenderedShortcut(context, glanceId, readCachedShortcut(context, glanceId), isNoteDeleted = true)
     NoteShortcutWidget().update(context, glanceId)
-}
-
-@OptIn(ExperimentalGlanceRemoteViewsApi::class)
-suspend fun pushRenderedShortcut(
-    context: Context,
-    glanceId: GlanceId,
-    content: NoteShortcutWidgetContent?,
-    isNoteDeleted: Boolean = false
-) {
-    try {
-        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
-
-        val widgetManager = AppWidgetManager.getInstance(context)
-        val options = widgetManager.getAppWidgetOptions(appWidgetId)
-        val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            .takeIf { it > 0 } ?: fallbackWidgetWidthDp
-        val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
-            .takeIf { it > 0 } ?: fallbackWidgetHeightDp
-
-        val rendered = GlanceRemoteViews().compose(
-            context = context,
-            size = DpSize(widthDp.dp, heightDp.dp)
-        ) {
-            NoteShortcutWidgetBody(
-                context = context,
-                content = content,
-                isNoteDeleted = isNoteDeleted,
-                appWidgetId = appWidgetId
-            )
-        }
-
-        widgetManager.updateAppWidget(appWidgetId, rendered.remoteViews)
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not push the rendered shortcut", cause)
-    }
 }
 
 suspend fun refreshNoteShortcutWidget(context: Context, glanceId: GlanceId) {
@@ -143,7 +99,6 @@ suspend fun refreshNoteShortcutWidget(context: Context, glanceId: GlanceId) {
         if (isUnchanged) return
 
         writeCachedShortcut(context, glanceId, freshContent)
-        pushRenderedShortcut(context, glanceId, freshContent)
         NoteShortcutWidget().update(context, glanceId)
     } catch (cause: Exception) {
         WidgetLog.e("Could not refresh a shortcut widget", cause)

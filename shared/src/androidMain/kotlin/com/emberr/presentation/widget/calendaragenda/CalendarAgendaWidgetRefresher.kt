@@ -1,14 +1,9 @@
 // Reads and writes each widget's shown month and content, and pushes a freshly drawn month to the home screen.
 package com.emberr.presentation.widget.calendaragenda
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
-import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.GlanceRemoteViews
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -17,9 +12,6 @@ import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
-
-private const val fallbackWidgetWidthDp = 250
-private const val fallbackWidgetHeightDp = 110
 
 fun decodeCachedAgenda(rawCache: String?): CalendarAgendaWidgetContent? {
     if (rawCache.isNullOrBlank()) return null
@@ -74,40 +66,6 @@ suspend fun writeCachedAgenda(
     }
 }
 
-@OptIn(ExperimentalGlanceRemoteViewsApi::class)
-suspend fun pushRenderedAgenda(
-    context: Context,
-    glanceId: GlanceId,
-    content: CalendarAgendaWidgetContent
-) {
-    try {
-        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
-
-        val widgetManager = AppWidgetManager.getInstance(context)
-        val options = widgetManager.getAppWidgetOptions(appWidgetId)
-        val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            .takeIf { it > 0 } ?: fallbackWidgetWidthDp
-        val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
-            .takeIf { it > 0 } ?: fallbackWidgetHeightDp
-
-        val rendered = GlanceRemoteViews().compose(
-            context = context,
-            size = DpSize(widthDp.dp, heightDp.dp)
-        ) {
-            CalendarAgendaWidgetBody(
-                context = context,
-                appWidgetId = appWidgetId,
-                content = content
-            )
-        }
-
-        widgetManager.updateAppWidget(appWidgetId, rendered.remoteViews)
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not push the rendered agenda", cause)
-    }
-}
-
 suspend fun refreshCalendarAgendaWidget(context: Context, glanceId: GlanceId) {
     try {
         val contentReader = GlobalContext.get().get<CalendarAgendaWidgetContentReader>()
@@ -117,7 +75,7 @@ suspend fun refreshCalendarAgendaWidget(context: Context, glanceId: GlanceId) {
         if (freshContent == readCachedAgenda(context, glanceId)) return
 
         writeCachedAgenda(context, glanceId, freshContent)
-        pushRenderedAgenda(context, glanceId, freshContent)
+        CalendarAgendaWidget().update(context, glanceId)
     } catch (cause: Exception) {
         WidgetLog.e("Could not refresh an agenda widget", cause)
     }

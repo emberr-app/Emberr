@@ -103,7 +103,6 @@ class NoteWidgetPickerActivity : ComponentActivity() {
 
                 content?.let {
                     writeCachedContent(this@NoteWidgetPickerActivity, glanceId, it)
-                    pushRenderedContent(this@NoteWidgetPickerActivity, glanceId, noteId, it)
                 }
 
                 NoteWidget().update(this@NoteWidgetPickerActivity, glanceId)

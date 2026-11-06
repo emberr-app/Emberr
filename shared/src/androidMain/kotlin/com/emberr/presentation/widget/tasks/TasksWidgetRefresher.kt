@@ -1,15 +1,10 @@
 // Reads and writes each widget's saved task list, and pushes freshly drawn rows to the home screen.
 package com.emberr.presentation.widget.tasks
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
 import com.emberr.data.local.room.entity.CalendarTaskEntity
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
-import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.GlanceRemoteViews
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -18,8 +13,6 @@ import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
-
-private const val fallbackWidgetSideDp = 180
 
 fun decodeCachedTasks(rawCache: String?): TasksWidgetContent? {
     if (rawCache.isNullOrBlank()) return null
@@ -70,36 +63,6 @@ suspend fun writeCachedTasks(context: Context, glanceId: GlanceId, content: Task
     }
 }
 
-@OptIn(ExperimentalGlanceRemoteViewsApi::class)
-suspend fun pushRenderedTasks(context: Context, glanceId: GlanceId, content: TasksWidgetContent) {
-    try {
-        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
-
-        val widgetManager = AppWidgetManager.getInstance(context)
-        val options = widgetManager.getAppWidgetOptions(appWidgetId)
-        val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            .takeIf { it > 0 } ?: fallbackWidgetSideDp
-        val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
-            .takeIf { it > 0 } ?: fallbackWidgetSideDp
-
-        val rendered = GlanceRemoteViews().compose(
-            context = context,
-            size = DpSize(widthDp.dp, heightDp.dp)
-        ) {
-            TasksWidgetBody(
-                context = context,
-                appWidgetId = appWidgetId,
-                content = content
-            )
-        }
-
-        widgetManager.updateAppWidget(appWidgetId, rendered.remoteViews)
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not push the rendered task list", cause)
-    }
-}
-
 suspend fun refreshTaskWidget(context: Context, glanceId: GlanceId) {
     try {
         val contentReader = GlobalContext.get().get<TasksWidgetContentReader>()
@@ -109,7 +72,7 @@ suspend fun refreshTaskWidget(context: Context, glanceId: GlanceId) {
         if (freshContent == readCachedTasks(context, glanceId)) return
 
         writeCachedTasks(context, glanceId, freshContent)
-        pushRenderedTasks(context, glanceId, freshContent)
+        TasksWidget().update(context, glanceId)
     } catch (cause: Exception) {
         WidgetLog.e("Could not refresh a task widget", cause)
     }
@@ -134,7 +97,7 @@ suspend fun pushTasksToWidgets(context: Context, tasks: List<CalendarTaskEntity>
             val freshContent = contentReader.buildContent(tasks, isShowingCompleted)
             if (freshContent != readCachedTasks(context, glanceId)) {
                 writeCachedTasks(context, glanceId, freshContent)
-                pushRenderedTasks(context, glanceId, freshContent)
+                TasksWidget().update(context, glanceId)
             }
         }
     } catch (cause: Exception) {

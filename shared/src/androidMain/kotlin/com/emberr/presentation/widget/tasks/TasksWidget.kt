@@ -6,6 +6,9 @@ import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.glance.currentState
+import androidx.datastore.preferences.core.Preferences
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -87,10 +90,13 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
+            val rawCachedContent = currentState<Preferences>()[cachedTasksKey]
+            val savedContent = remember(rawCachedContent) { decodeCachedTasks(rawCachedContent) }
+
             TasksWidgetBody(
                 context = context,
                 appWidgetId = appWidgetId,
-                content = content
+                content = savedContent ?: content
             )
         }
     }
