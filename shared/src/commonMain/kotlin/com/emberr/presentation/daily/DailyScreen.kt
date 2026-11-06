@@ -1,5 +1,7 @@
 package com.emberr.presentation.daily
 
+import com.emberr.domain.util.eventbus.WidgetComposeRequest
+import com.emberr.domain.util.eventbus.WidgetComposeRequestBus
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -169,6 +171,15 @@ fun DailyScreen(
             isKeyboardOpen = false
         }
         previousImeBottom = imeBottom
+    }
+
+    val pendingWidgetRequest by WidgetComposeRequestBus.pendingRequests.collectAsState()
+    var startTypingAtEndOnDate by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(pendingWidgetRequest) {
+        val isContinueRequest = pendingWidgetRequest == WidgetComposeRequest.CONTINUE_DAILY
+        if (isContinueRequest && WidgetComposeRequestBus.consume(WidgetComposeRequest.CONTINUE_DAILY)) {
+            startTypingAtEndOnDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
+        }
     }
 
     // Lets a search result (or any other future deep link) jump straight to a specific day.
@@ -544,6 +555,8 @@ fun DailyScreen(
                             onRedo = { viewModel.redo() },
                             emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type / for commands...",
                             singleTapStartsTyping = true,
+                            startTypingAtEndRequested = isCurrentActivePage && pageDateString == startTypingAtEndOnDate,
+                            onStartedTypingAtEnd = { startTypingAtEndOnDate = null },
                             emptyContent = if (isDailyQuoteVisible) {
                                 {
                                     DailyEmptyDayMessage(

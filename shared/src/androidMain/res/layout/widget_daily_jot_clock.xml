@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextClock xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/daily_jot_clock"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:format12Hour="MMM d"
+    android:format24Hour="MMM d"
+    android:gravity="end"
+    android:maxLines="1"
+    android:textColor="#E6FFFFFF"
+    android:textSize="13sp" />

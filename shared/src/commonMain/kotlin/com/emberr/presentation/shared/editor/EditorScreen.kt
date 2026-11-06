@@ -198,7 +198,9 @@ fun EditorScreen(
     onUndo: () -> Unit = {},
     onRedo: () -> Unit = {},
     contentMaxWidth: Dp = Dp.Unspecified,
-    extraBlockSidePadding: Dp = 0.dp
+    extraBlockSidePadding: Dp = 0.dp,
+    startTypingAtEndRequested: Boolean = false,
+    onStartedTypingAtEnd: () -> Unit = {}
 ) {
     val isSelectionMode = selectedBlockIds.isNotEmpty()
     val focusManager = LocalFocusManager.current
@@ -1029,6 +1031,13 @@ fun EditorScreen(
                     wrappedActions.onFocusBlock(lastBlock.id)
                     localFocusRequest = FocusRequest(id = lastBlock.id, placeCursorAtEnd = true)
                 }
+            }
+        }
+        LaunchedEffect(startTypingAtEndRequested) {
+            if (startTypingAtEndRequested) {
+                withFrameNanos {}
+                startTypingAtEndOfNote()
+                onStartedTypingAtEnd()
             }
         }
         val latestOnEmptySpaceTap by rememberUpdatedState {
