@@ -15,6 +15,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
 import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.widget.WidgetNoteSource
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
@@ -52,11 +53,45 @@ suspend fun writeCachedContent(context: Context, glanceId: GlanceId, content: Wi
     try {
         val encoded = cacheJson.encodeToString(WidgetNoteContent.serializer(), content)
         updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { preferences ->
-            preferences.toMutablePreferences().apply { this[cachedContentKey] = encoded }
+            preferences.toMutablePreferences().apply {
+                this[cachedContentKey] = encoded
+                remove(noteDeletedKey)
+            }
         }
     } catch (cause: Exception) {
         WidgetLog.e("Could not write the content cache", cause)
     }
+}
+
+suspend fun readNoteDeleted(context: Context, glanceId: GlanceId): Boolean =
+    try {
+        getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)[noteDeletedKey] == true
+    } catch (cause: Exception) {
+        WidgetLog.e("Could not read whether the widget's note was deleted", cause)
+        false
+    }
+
+suspend fun writeNoteDeleted(context: Context, glanceId: GlanceId) {
+    try {
+        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { preferences ->
+            preferences.toMutablePreferences().apply { this[noteDeletedKey] = true }
+        }
+    } catch (cause: Exception) {
+        WidgetLog.e("Could not mark the widget's note as deleted", cause)
+    }
+}
+
+suspend fun markWidgetNoteDeleted(context: Context, glanceId: GlanceId, noteId: String) {
+    if (readNoteDeleted(context, glanceId)) return
+
+    writeNoteDeleted(context, glanceId)
+    pushRenderedContent(
+        context = context,
+        glanceId = glanceId,
+        chosenNoteId = noteId,
+        content = readCachedContent(context, glanceId),
+        isNoteDeleted = true
+    )
 }
 
 suspend fun findWidgetsShowingNote(context: Context, noteId: String): List<GlanceId> =
@@ -85,7 +120,8 @@ suspend fun pushRenderedContent(
     context: Context,
     glanceId: GlanceId,
     chosenNoteId: String,
-    content: WidgetNoteContent
+    content: WidgetNoteContent?,
+    isNoteDeleted: Boolean = false
 ) {
     try {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
@@ -106,6 +142,7 @@ suspend fun pushRenderedContent(
                 context = context,
                 chosenNoteId = chosenNoteId,
                 content = content,
+                isNoteDeleted = isNoteDeleted,
                 appWidgetId = appWidgetId,
                 reportedWidgetWidth = widthDp.dp
             )
@@ -133,11 +170,18 @@ suspend fun refreshNoteWidgets(context: Context) {
         if (glanceIds.isEmpty()) return
 
         val contentReader = GlobalContext.get().get<WidgetContentReader>()
+        val noteSource = GlobalContext.get().get<WidgetNoteSource>()
 
         for (glanceId in glanceIds) {
             val noteId = readSelectedNoteId(context, glanceId)?.takeIf { it.isNotBlank() } ?: continue
-            val freshContent = contentReader.readNoteContentOnce(noteId) ?: continue
-            if (freshContent == readCachedContent(context, glanceId)) continue
+            val freshContent = contentReader.readNoteContentOnce(noteId)
+            if (freshContent == null) {
+                if (noteSource.isNoteDeleted(noteId)) markWidgetNoteDeleted(context, glanceId, noteId)
+                continue
+            }
+            val isUnchanged = freshContent == readCachedContent(context, glanceId) &&
+                !readNoteDeleted(context, glanceId)
+            if (isUnchanged) continue
 
             writeCachedContent(context, glanceId, freshContent)
             pushRenderedContent(context, glanceId, noteId, freshContent)

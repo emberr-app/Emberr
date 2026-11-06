@@ -15,6 +15,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.widget.WidgetNoteSource
+import kotlinx.coroutines.flow.map
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val contentSettleDelayMillis = 120L
@@ -22,7 +24,8 @@ private const val contentSettleDelayMillis = 120L
 class NoteWidgetCoordinator(
     private val context: Context,
     private val noteRepository: NoteRepository,
-    private val contentReader: WidgetContentReader
+    private val contentReader: WidgetContentReader,
+    private val noteSource: WidgetNoteSource
 ) {
     private val coordinatorScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val watchJobsByNoteId = mutableMapOf<String, Job>()
@@ -30,6 +33,7 @@ class NoteWidgetCoordinator(
 
     fun start() {
         requestResync()
+        watchForDeletedNotes()
     }
 
     fun requestResync() {
@@ -48,6 +52,21 @@ class NoteWidgetCoordinator(
             .forEach { noteId ->
                 watchJobsByNoteId[noteId] = coordinatorScope.launch { watchNote(noteId) }
             }
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun watchForDeletedNotes() {
+        coordinatorScope.launch {
+            try {
+                noteSource.observeSelectableNotes()
+                    .map { notes -> notes.map { entry -> entry.note.noteId }.toSet() }
+                    .distinctUntilChanged()
+                    .debounce(contentSettleDelayMillis.milliseconds)
+                    .collect { refreshNoteWidgets(context) }
+            } catch (cause: Exception) {
+                WidgetLog.e("Stopped watching for deleted notes", cause)
+            }
+        }
     }
 
     @OptIn(FlowPreview::class)

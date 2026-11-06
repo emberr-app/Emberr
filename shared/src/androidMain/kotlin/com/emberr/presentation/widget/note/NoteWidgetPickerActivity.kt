@@ -93,7 +93,10 @@ class NoteWidgetPickerActivity : ComponentActivity() {
                     definition = PreferencesGlanceStateDefinition,
                     glanceId = glanceId
                 ) { preferences ->
-                    preferences.toMutablePreferences().apply { this[selectedNoteIdKey] = noteId }
+                    preferences.toMutablePreferences().apply {
+                        this[selectedNoteIdKey] = noteId
+                        remove(noteDeletedKey)
+                    }
                 }
 
                 val content = contentReader?.readNoteContentOnce(noteId)

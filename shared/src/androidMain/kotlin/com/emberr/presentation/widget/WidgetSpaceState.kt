@@ -6,10 +6,8 @@ import androidx.glance.GlanceId
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.space.SpaceRepository
-import com.emberr.presentation.widget.notelist.NoteListWidget
 import org.koin.core.context.GlobalContext
 
 val selectedSpaceIdKey = stringPreferencesKey("selected_space_id")
@@ -48,15 +46,13 @@ suspend fun readWidgetSpaceId(context: Context, glanceId: GlanceId): String {
     return if (spaceIsStillLive(pinnedSpaceId)) pinnedSpaceId else activeSpaceId()
 }
 
-suspend fun clearWidgetPinsForSpace(context: Context, spaceId: String) {
-    try {
-        GlanceAppWidgetManager(context).getGlanceIds(NoteListWidget::class.java).forEach { glanceId ->
-            if (readPinnedSpaceId(context, glanceId) == spaceId) {
-                clearPinnedSpaceId(context, glanceId)
-            }
-        }
+suspend fun isPinnedSpaceDeleted(context: Context, glanceId: GlanceId): Boolean {
+    val pinnedSpaceId = readPinnedSpaceId(context, glanceId) ?: return false
+    return try {
+        GlobalContext.get().get<SpaceRepository>().getSpace(pinnedSpaceId)?.isDeleted != false
     } catch (cause: Exception) {
-        WidgetLog.e("Could not clear pinned spaces for NoteListWidget", cause)
+        WidgetLog.e("Could not check whether the pinned space was deleted", cause)
+        false
     }
 }
 

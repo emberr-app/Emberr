@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 data class SelectableWidgetNote(
     val note: NoteMetadataEntity,
@@ -41,4 +42,15 @@ class WidgetNoteSource(
                 WidgetLog.e("Could not list notes for a widget setup screen", cause)
                 emit(emptyList())
             }
+
+    suspend fun isNoteDeleted(noteId: String): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                val note = noteDao.getNoteById(noteId)
+                note == null || note.trashedAt != null
+            } catch (cause: Exception) {
+                WidgetLog.e("Could not check whether note $noteId was deleted", cause)
+                false
+            }
+        }
 }

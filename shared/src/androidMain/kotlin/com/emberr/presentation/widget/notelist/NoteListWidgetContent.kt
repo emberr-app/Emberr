@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NoteListWidgetContent(
-    val notes: List<NoteListWidgetRow>
+    val notes: List<NoteListWidgetRow>,
+    val isSpaceDeleted: Boolean = false
 )
 
 @Serializable

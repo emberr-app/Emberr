@@ -49,7 +49,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
+import com.emberr.presentation.widget.WidgetDeletedBadge
 import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.widget.WidgetNoteSource
 import com.emberr.presentation.widget.highlightedTextBackgroundColor
 import com.emberr.presentation.widget.primaryTextColor
 import com.emberr.presentation.widget.secondaryTextColor
@@ -71,9 +73,11 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        readSelectedNoteId(context, id)
-            ?.takeIf { it.isNotBlank() }
-            ?.let { noteId -> loadAndCacheContent(context, id, noteId) }
+        val noteIdAtStart = readSelectedNoteId(context, id)?.takeIf { it.isNotBlank() }
+        if (noteIdAtStart != null && loadAndCacheContent(context, id, noteIdAtStart) == null) {
+            val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
+            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeNoteDeleted(context, id)
+        }
 
         val appWidgetId = resolveAppWidgetId(context, id)
         val reportedWidgetWidth = readWidgetWidth(context, appWidgetId)
@@ -88,6 +92,7 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
                 context = context,
                 chosenNoteId = storedNoteId,
                 content = if (storedNoteId == null) null else content,
+                isNoteDeleted = savedState[noteDeletedKey] == true,
                 appWidgetId = appWidgetId,
                 reportedWidgetWidth = reportedWidgetWidth
             )
@@ -159,6 +164,7 @@ internal fun WidgetBody(
     context: Context,
     chosenNoteId: String?,
     content: WidgetNoteContent?,
+    isNoteDeleted: Boolean,
     appWidgetId: Int,
     reportedWidgetWidth: Dp? = null
 ) {
@@ -167,6 +173,11 @@ internal fun WidgetBody(
             chosenNoteId == null -> CenteredMessage(
                 message = "Tap to choose a note",
                 tapAction = actionStartActivity(openPickerIntent(context, appWidgetId))
+            )
+
+            isNoteDeleted -> DeletedNoteContent(
+                title = content?.title,
+                chooseAnotherNoteAction = actionStartActivity(openPickerIntent(context, appWidgetId))
             )
 
             content == null -> CenteredMessage(
@@ -178,6 +189,43 @@ internal fun WidgetBody(
                 content = content,
                 openNoteAction = actionStartActivity(openNoteIntent(context, chosenNoteId)),
                 reportedWidgetWidth = reportedWidgetWidth
+            )
+        }
+    }
+}
+
+@Composable
+private fun DeletedNoteContent(title: String?, chooseAnotherNoteAction: Action) {
+    Column(modifier = GlanceModifier.fillMaxSize().clickable(chooseAnotherNoteAction)) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Vertical.CenterVertically
+        ) {
+            Text(
+                text = title ?: "Untitled",
+                maxLines = 1,
+                style = TextStyle(
+                    color = secondaryTextColor,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = TextDecoration.LineThrough
+                ),
+                modifier = GlanceModifier.defaultWeight()
+            )
+
+            Spacer(modifier = GlanceModifier.width(8.dp))
+
+            WidgetDeletedBadge()
+        }
+
+        Column(
+            modifier = GlanceModifier.fillMaxSize(),
+            verticalAlignment = Alignment.Vertical.CenterVertically,
+            horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+        ) {
+            Text(
+                text = "This note was deleted. Tap to choose another",
+                style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
             )
         }
     }

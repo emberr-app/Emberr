@@ -1,18 +1,23 @@
 // The home screen widget itself: draws the list of notes with a title and an add button.
 package com.emberr.presentation.widget.notelist
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.datastore.preferences.core.Preferences
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
+import androidx.glance.currentState
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
@@ -43,6 +48,9 @@ import com.emberr.presentation.widget.widgetHomeScreenExtra
 import com.emberr.presentation.widget.widgetNewNoteExtra
 import com.emberr.presentation.widget.widgetNoteIdExtra
 import com.emberr.presentation.widget.widgetSpaceIdExtra
+import com.emberr.presentation.widget.WidgetDeletedBadge
+import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.widget.isPinnedSpaceDeleted
 import com.emberr.presentation.widget.readWidgetSpaceId
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -56,28 +64,59 @@ class NoteListWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val content = loadAndCacheNoteList(context, id) ?: readCachedNoteList(context, id)
+        val loadedContent = loadAndCacheNoteList(context, id) ?: readCachedNoteList(context, id)
         val spaceId = readWidgetSpaceId(context, id)
+        val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
-            NoteListWidgetBody(context = context, spaceId = spaceId, content = content)
+            val savedState = currentState<Preferences>()
+            val rawCachedNoteList = savedState[cachedNoteListKey]
+            val cachedContent = remember(rawCachedNoteList) { decodeCachedNoteList(rawCachedNoteList) }
+
+            NoteListWidgetBody(
+                context = context,
+                spaceId = spaceId,
+                content = cachedContent ?: loadedContent,
+                appWidgetId = appWidgetId
+            )
         }
     }
 
     private suspend fun loadAndCacheNoteList(context: Context, id: GlanceId): NoteListWidgetContent? {
         val contentReader = runCatching { get<NoteListWidgetContentReader>() }.getOrNull() ?: return null
-        val spaceId = readWidgetSpaceId(context, id)
-        val freshContent = contentReader.readContentOnce(spaceId) ?: return null
+        val freshContent = if (isPinnedSpaceDeleted(context, id)) {
+            deletedSpaceNoteList
+        } else {
+            contentReader.readContentOnce(readWidgetSpaceId(context, id)) ?: return null
+        }
 
         if (freshContent != readCachedNoteList(context, id)) {
             writeCachedNoteList(context, id, freshContent)
         }
         return freshContent
     }
+
+    private suspend fun resolveAppWidgetId(context: Context, id: GlanceId): Int =
+        try {
+            GlanceAppWidgetManager(context).getAppWidgetId(id)
+        } catch (cause: Exception) {
+            WidgetLog.e("Could not resolve the widget id", cause)
+            AppWidgetManager.INVALID_APPWIDGET_ID
+        }
 }
 
 @Composable
-internal fun NoteListWidgetBody(context: Context, spaceId: String, content: NoteListWidgetContent?) {
+internal fun NoteListWidgetBody(
+    context: Context,
+    spaceId: String,
+    content: NoteListWidgetContent?,
+    appWidgetId: Int
+) {
+    if (content?.isSpaceDeleted == true) {
+        DeletedSpaceNoteList(context = context, appWidgetId = appWidgetId)
+        return
+    }
+
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
@@ -143,6 +182,47 @@ internal fun NoteListWidgetBody(context: Context, spaceId: String, content: Note
 }
 
 @Composable
+private fun DeletedSpaceNoteList(context: Context, appWidgetId: Int) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(surfaceColor)
+            .cornerRadius(20.dp)
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .clickable(actionStartActivity(openSpacePickerIntent(context, appWidgetId)))
+    ) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Vertical.CenterVertically
+        ) {
+            Text(
+                text = "Notes",
+                maxLines = 1,
+                style = TextStyle(
+                    color = secondaryTextColor,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = GlanceModifier.defaultWeight()
+            )
+
+            WidgetDeletedBadge()
+        }
+
+        Column(
+            modifier = GlanceModifier.fillMaxSize(),
+            verticalAlignment = Alignment.Vertical.CenterVertically,
+            horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+        ) {
+            Text(
+                text = "This space was deleted. Tap to choose another",
+                style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
+            )
+        }
+    }
+}
+
+@Composable
 private fun NoteRow(context: Context, note: NoteListWidgetRow) {
     Column(
         modifier = GlanceModifier
@@ -165,6 +245,11 @@ private fun NoteRow(context: Context, note: NoteListWidgetRow) {
         }
     }
 }
+
+private fun openSpacePickerIntent(context: Context, appWidgetId: Int): Intent =
+    Intent(context, NoteListWidgetPickerActivity::class.java)
+        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
 private fun openHomeScreenIntent(context: Context, spaceId: String): Intent =
     Intent(context, MainActivity::class.java)

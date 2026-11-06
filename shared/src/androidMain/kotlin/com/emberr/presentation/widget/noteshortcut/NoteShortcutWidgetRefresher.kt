@@ -13,6 +13,7 @@ import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.widget.WidgetNoteSource
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
 
@@ -53,15 +54,48 @@ suspend fun writeCachedShortcut(context: Context, glanceId: GlanceId, content: N
     try {
         val encoded = cacheJson.encodeToString(NoteShortcutWidgetContent.serializer(), content)
         updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { preferences ->
-            preferences.toMutablePreferences().apply { this[cachedShortcutKey] = encoded }
+            preferences.toMutablePreferences().apply {
+                this[cachedShortcutKey] = encoded
+                remove(shortcutNoteDeletedKey)
+            }
         }
     } catch (cause: Exception) {
         WidgetLog.e("Could not write the shortcut cache", cause)
     }
 }
 
+suspend fun readShortcutNoteDeleted(context: Context, glanceId: GlanceId): Boolean =
+    try {
+        getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)[shortcutNoteDeletedKey] == true
+    } catch (cause: Exception) {
+        WidgetLog.e("Could not read whether the shortcut's note was deleted", cause)
+        false
+    }
+
+suspend fun writeShortcutNoteDeleted(context: Context, glanceId: GlanceId) {
+    try {
+        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { preferences ->
+            preferences.toMutablePreferences().apply { this[shortcutNoteDeletedKey] = true }
+        }
+    } catch (cause: Exception) {
+        WidgetLog.e("Could not mark the shortcut's note as deleted", cause)
+    }
+}
+
+private suspend fun markShortcutNoteDeleted(context: Context, glanceId: GlanceId) {
+    if (readShortcutNoteDeleted(context, glanceId)) return
+
+    writeShortcutNoteDeleted(context, glanceId)
+    pushRenderedShortcut(context, glanceId, readCachedShortcut(context, glanceId), isNoteDeleted = true)
+}
+
 @OptIn(ExperimentalGlanceRemoteViewsApi::class)
-suspend fun pushRenderedShortcut(context: Context, glanceId: GlanceId, content: NoteShortcutWidgetContent) {
+suspend fun pushRenderedShortcut(
+    context: Context,
+    glanceId: GlanceId,
+    content: NoteShortcutWidgetContent?,
+    isNoteDeleted: Boolean = false
+) {
     try {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
@@ -77,7 +111,12 @@ suspend fun pushRenderedShortcut(context: Context, glanceId: GlanceId, content: 
             context = context,
             size = DpSize(widthDp.dp, heightDp.dp)
         ) {
-            NoteShortcutWidgetBody(context = context, content = content)
+            NoteShortcutWidgetBody(
+                context = context,
+                content = content,
+                isNoteDeleted = isNoteDeleted,
+                appWidgetId = appWidgetId
+            )
         }
 
         widgetManager.updateAppWidget(appWidgetId, rendered.remoteViews)
@@ -90,9 +129,17 @@ suspend fun refreshNoteShortcutWidget(context: Context, glanceId: GlanceId) {
     try {
         val noteId = readShortcutNoteId(context, glanceId)?.takeIf { it.isNotBlank() } ?: return
         val contentReader = GlobalContext.get().get<NoteShortcutWidgetContentReader>()
-        val freshContent = contentReader.readContentOnce(noteId) ?: return
+        val freshContent = contentReader.readContentOnce(noteId)
+        if (freshContent == null) {
+            if (GlobalContext.get().get<WidgetNoteSource>().isNoteDeleted(noteId)) {
+                markShortcutNoteDeleted(context, glanceId)
+            }
+            return
+        }
 
-        if (freshContent == readCachedShortcut(context, glanceId)) return
+        val isUnchanged = freshContent == readCachedShortcut(context, glanceId) &&
+            !readShortcutNoteDeleted(context, glanceId)
+        if (isUnchanged) return
 
         writeCachedShortcut(context, glanceId, freshContent)
         pushRenderedShortcut(context, glanceId, freshContent)

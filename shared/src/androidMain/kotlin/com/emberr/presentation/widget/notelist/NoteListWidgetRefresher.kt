@@ -14,6 +14,7 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.widget.isPinnedSpaceDeleted
 import com.emberr.presentation.widget.readWidgetSpaceId
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
@@ -21,6 +22,8 @@ import org.koin.core.context.GlobalContext
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
 private const val fallbackWidgetSideDp = 180
+
+val deletedSpaceNoteList = NoteListWidgetContent(notes = emptyList(), isSpaceDeleted = true)
 
 fun decodeCachedNoteList(rawCache: String?): NoteListWidgetContent? {
     if (rawCache.isNullOrBlank()) return null
@@ -75,7 +78,8 @@ suspend fun pushRenderedNoteList(context: Context, glanceId: GlanceId, content: 
             NoteListWidgetBody(
                 context = context,
                 spaceId = pinnedSpaceId,
-                content = content
+                content = content,
+                appWidgetId = appWidgetId
             )
         }
 
@@ -92,8 +96,11 @@ suspend fun pushNoteListToWidgets(context: Context, notes: List<NoteMetadataEnti
         GlanceAppWidgetManager(context)
             .getGlanceIds(NoteListWidget::class.java)
             .forEach { glanceId ->
-                val spaceId = readWidgetSpaceId(context, glanceId)
-                val content = contentReader.buildContent(spaceId, notes)
+                val content = if (isPinnedSpaceDeleted(context, glanceId)) {
+                    deletedSpaceNoteList
+                } else {
+                    contentReader.buildContent(readWidgetSpaceId(context, glanceId), notes)
+                }
                 if (content != readCachedNoteList(context, glanceId)) {
                     writeCachedNoteList(context, glanceId, content)
                     pushRenderedNoteList(context, glanceId, content)
@@ -107,8 +114,11 @@ suspend fun pushNoteListToWidgets(context: Context, notes: List<NoteMetadataEnti
 suspend fun refreshNoteListWidget(context: Context, glanceId: GlanceId) {
     try {
         val contentReader = GlobalContext.get().get<NoteListWidgetContentReader>()
-        val spaceId = readWidgetSpaceId(context, glanceId)
-        val freshContent = contentReader.readContentOnce(spaceId) ?: return
+        val freshContent = if (isPinnedSpaceDeleted(context, glanceId)) {
+            deletedSpaceNoteList
+        } else {
+            contentReader.readContentOnce(readWidgetSpaceId(context, glanceId)) ?: return
+        }
 
         if (freshContent == readCachedNoteList(context, glanceId)) return
 

@@ -261,7 +261,8 @@ val androidModule = module {
         com.emberr.presentation.widget.note.NoteWidgetCoordinator(
             context = androidContext(),
             noteRepository = get(),
-            contentReader = get()
+            contentReader = get(),
+            noteSource = get()
         )
     }
     single<CalendarTaskDao> { get<AppDatabase>().calendarTaskDao() }

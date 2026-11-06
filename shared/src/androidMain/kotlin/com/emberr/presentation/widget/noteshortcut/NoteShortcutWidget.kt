@@ -24,6 +24,7 @@ import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Row
+import androidx.glance.layout.RowScope
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
@@ -33,9 +34,12 @@ import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
+import com.emberr.presentation.widget.WidgetDeletedBadge
 import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.widget.WidgetNoteSource
 import com.emberr.presentation.widget.primaryTextColor
 import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.surfaceColor
@@ -53,9 +57,11 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        readShortcutNoteId(context, id)
-            ?.takeIf { it.isNotBlank() }
-            ?.let { noteId -> loadAndCacheShortcut(context, id, noteId) }
+        val noteIdAtStart = readShortcutNoteId(context, id)?.takeIf { it.isNotBlank() }
+        if (noteIdAtStart != null && loadAndCacheShortcut(context, id, noteIdAtStart) == null) {
+            val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
+            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeShortcutNoteDeleted(context, id)
+        }
 
         val appWidgetId = resolveAppWidgetId(context, id)
 
@@ -68,7 +74,9 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
             } else {
                 NoteShortcutWidgetBody(
                     context = context,
-                    content = decodeCachedShortcut(savedState[cachedShortcutKey])
+                    content = decodeCachedShortcut(savedState[cachedShortcutKey]),
+                    isNoteDeleted = savedState[shortcutNoteDeletedKey] == true,
+                    appWidgetId = appWidgetId
                 )
             }
         }
@@ -98,7 +106,17 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
 }
 
 @Composable
-internal fun NoteShortcutWidgetBody(context: Context, content: NoteShortcutWidgetContent?) {
+internal fun NoteShortcutWidgetBody(
+    context: Context,
+    content: NoteShortcutWidgetContent?,
+    isNoteDeleted: Boolean,
+    appWidgetId: Int
+) {
+    if (isNoteDeleted) {
+        DeletedShortcut(context = context, content = content, appWidgetId = appWidgetId)
+        return
+    }
+
     if (content == null) {
         ShortcutSurface(tapModifier = GlanceModifier) {
             Text(
@@ -133,6 +151,36 @@ internal fun NoteShortcutWidgetBody(context: Context, content: NoteShortcutWidge
 }
 
 @Composable
+private fun DeletedShortcut(context: Context, content: NoteShortcutWidgetContent?, appWidgetId: Int) {
+    ShortcutSurface(
+        tapModifier = GlanceModifier.clickable(
+            actionStartActivity(openPickerIntent(context, appWidgetId))
+        )
+    ) {
+        if (content?.icon != null) {
+            Text(text = content.icon, style = TextStyle(color = secondaryTextColor, fontSize = 22.sp))
+            Spacer(modifier = GlanceModifier.width(12.dp))
+        }
+
+        Text(
+            text = content?.title ?: "Untitled",
+            maxLines = 1,
+            style = TextStyle(
+                color = secondaryTextColor,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Medium,
+                textDecoration = TextDecoration.LineThrough
+            ),
+            modifier = GlanceModifier.defaultWeight()
+        )
+
+        Spacer(modifier = GlanceModifier.width(8.dp))
+
+        WidgetDeletedBadge()
+    }
+}
+
+@Composable
 private fun NoteShortcutSetupPrompt(context: Context, appWidgetId: Int) {
     ShortcutSurface(
         tapModifier = GlanceModifier.clickable(
@@ -148,7 +196,7 @@ private fun NoteShortcutSetupPrompt(context: Context, appWidgetId: Int) {
 }
 
 @Composable
-private fun ShortcutSurface(tapModifier: GlanceModifier, content: @Composable () -> Unit) {
+private fun ShortcutSurface(tapModifier: GlanceModifier, content: @Composable RowScope.() -> Unit) {
     Box(
         modifier = GlanceModifier.fillMaxSize(),
         contentAlignment = Alignment.Center
