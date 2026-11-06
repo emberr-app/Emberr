@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.emberr.presentation.widget.dailyquote.refreshDailyQuoteWidgets
 import com.emberr.presentation.widget.calendar.refreshCalendarWidgets
 import com.emberr.presentation.widget.calendaragenda.refreshCalendarAgendaWidgets
 import com.emberr.presentation.widget.tasks.refreshTaskWidgets
@@ -56,6 +57,7 @@ class WidgetDayChangeReceiver : BroadcastReceiver() {
                 refreshUpcomingEventsWidgets(applicationContext)
                 refreshCalendarWidgets(applicationContext)
                 refreshCalendarAgendaWidgets(applicationContext)
+                refreshDailyQuoteWidgets(applicationContext)
             } catch (cause: Exception) {
                 WidgetLog.e("Could not refresh the widgets for the new day", cause)
             } finally {

@@ -230,6 +230,29 @@
                 android:resource="@xml/daily_jot_widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".presentation.widget.dailyquote.DailyQuoteWidgetReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/daily_quote_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/daily_quote_widget_info" />
+        </receiver>
+
+        <activity
+            android:name=".presentation.widget.dailyquote.DailyQuoteWidgetSetupActivity"
+            android:exported="true"
+            android:label="@string/daily_quote_widget_label"
+            android:theme="@style/Theme.Emberr.WidgetSetup">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".presentation.widget.dailyjot.DailyJotWidgetSetupActivity"
             android:exported="true"

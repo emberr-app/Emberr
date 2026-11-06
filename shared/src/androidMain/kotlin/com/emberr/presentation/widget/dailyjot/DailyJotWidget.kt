@@ -2,13 +2,10 @@
 package com.emberr.presentation.widget.dailyjot
 
 import android.content.Context
-import android.content.Intent
-import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
@@ -18,7 +15,6 @@ import androidx.glance.ImageProvider
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
 import androidx.glance.currentState
-import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
@@ -26,9 +22,7 @@ import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
-import androidx.glance.layout.Box
 import androidx.glance.layout.Column
-import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
@@ -42,16 +36,9 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.emberr.MainActivity
 import com.emberr.R
-import com.emberr.presentation.widget.widgetContinueDailyExtra
-import com.emberr.presentation.widget.widgetCornerRadius
-import com.emberr.presentation.widget.widgetDailyScreenExtra
 
-private val onGradientTextColor = ColorProvider(Color.White)
 private val buttonGlassColor = ColorProvider(Color(0x33FFFFFF))
-private val ghostIconSize = 22.dp
-private val dateOpticalInset = 2.dp
 private val jotButtonHeight = 42.dp
 private val penIconSize = 16.dp
 
@@ -76,32 +63,11 @@ private fun DailyJotWidgetBody(context: Context, gradient: DailyJotGradient) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(
-                imageProvider = ImageProvider(gradient.drawableResource),
-                contentScale = ContentScale.FillBounds
-            )
-            .cornerRadius(widgetCornerRadius)
-            .padding(horizontal = 18.dp, vertical = 18.dp)
+            .gradientCardBackground(gradient)
+            .padding(gradientCardPadding)
             .clickable(continueTypingAction)
     ) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Vertical.CenterVertically
-        ) {
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_ghost),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(onGradientTextColor),
-                modifier = GlanceModifier.size(ghostIconSize)
-            )
-
-            Box(
-                modifier = GlanceModifier.defaultWeight().padding(end = dateOpticalInset),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                AndroidRemoteViews(remoteViews = RemoteViews(context.packageName, R.layout.widget_daily_jot_clock))
-            }
-        }
+        GradientCardHeader(context = context)
 
         Spacer(modifier = GlanceModifier.height(16.dp))
 
@@ -154,10 +120,3 @@ private fun JotButton(onClick: Action) {
         )
     }
 }
-
-private fun continueTodaysDailyIntent(context: Context): Intent =
-    Intent(context, MainActivity::class.java)
-        .setData("emberr://daily/continue".toUri())
-        .putExtra(widgetDailyScreenExtra, true)
-        .putExtra(widgetContinueDailyExtra, true)
-        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
