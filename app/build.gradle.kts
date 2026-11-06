@@ -6,10 +6,13 @@ val javaToolchainVersion = libs.versions.javaToolchain.get()
 val appVersion = libs.versions.appVersion.get()
 val releaseKeystorePath = providers.environmentVariable("EMBERR_RELEASE_KEYSTORE_FILE").orNull
 
-fun versionCodeFor(version: String): Int {
+val androidBuildNumber = 0
+
+fun versionCodeFor(version: String, buildNumber: Int): Int {
     val (major, minor, patch) = version.split('.').map { it.toInt() }
     require(minor < 100 && patch < 100) { "appVersion $version needs minor and patch below 100 to fit versionCode" }
-    return major * 10_000 + minor * 100 + patch
+    require(buildNumber in 0..99) { "androidBuildNumber $buildNumber needs to be between 0 and 99 to fit versionCode" }
+    return (major * 10_000 + minor * 100 + patch) * 100 + buildNumber
 }
 
 android {
@@ -31,7 +34,7 @@ android {
         applicationId = "com.emberr"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = versionCodeFor(appVersion)
+        versionCode = versionCodeFor(appVersion, androidBuildNumber)
         versionName = appVersion
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
