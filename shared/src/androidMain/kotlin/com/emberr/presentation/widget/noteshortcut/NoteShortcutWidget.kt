@@ -9,9 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.action.clickable
+import androidx.glance.currentState
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
@@ -51,19 +53,23 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val storedNoteId = readShortcutNoteId(context, id)?.takeIf { it.isNotBlank() }
-
-        val content = storedNoteId?.let { noteId ->
-            loadAndCacheShortcut(context, id, noteId) ?: readCachedShortcut(context, id)
-        }
+        readShortcutNoteId(context, id)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { noteId -> loadAndCacheShortcut(context, id, noteId) }
 
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
+            val savedState = currentState<Preferences>()
+            val storedNoteId = savedState[shortcutNoteIdKey]?.takeIf { it.isNotBlank() }
+
             if (storedNoteId == null) {
                 NoteShortcutSetupPrompt(context = context, appWidgetId = appWidgetId)
             } else {
-                NoteShortcutWidgetBody(context = context, content = content)
+                NoteShortcutWidgetBody(
+                    context = context,
+                    content = decodeCachedShortcut(savedState[cachedShortcutKey])
+                )
             }
         }
     }
