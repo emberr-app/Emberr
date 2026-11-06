@@ -8,7 +8,8 @@ data class CalendarWidgetContent(
     val shownMonth: String,
     val monthLabel: String,
     val weekdayLabels: List<String>,
-    val weeks: List<List<CalendarDayCell>>
+    val weeks: List<List<CalendarDayCell>>,
+    val yearLabel: String = ""
 )
 
 @Serializable

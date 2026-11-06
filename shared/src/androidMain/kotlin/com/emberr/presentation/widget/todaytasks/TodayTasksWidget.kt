@@ -9,11 +9,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.compose.runtime.Composable
-import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
-import androidx.glance.Image
-import androidx.glance.ImageProvider
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -26,26 +23,33 @@ import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
+import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextDecoration
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
 import com.emberr.presentation.widget.WidgetCheckbox
+import com.emberr.presentation.widget.WidgetLabelPill
+import com.emberr.presentation.widget.widgetCornerRadius
+import com.emberr.presentation.widget.widgetSidePadding
+import com.emberr.presentation.widget.widgetTopPadding
+import com.emberr.presentation.widget.footerSpaceItem
+import com.emberr.presentation.widget.headerSpaceItem
+import com.emberr.ui.theme.HighlightColor
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.elevatedSurfaceColor
 import com.emberr.presentation.widget.primaryTextColor
@@ -63,9 +67,16 @@ import kotlinx.datetime.todayIn
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-private val dateBandHeight = 42.dp
-private val checkboxWidth = 34.dp
-private val clockIconSize = 12.dp
+private val checkboxTapWidth = 36.dp
+private val cardInset = 8.dp
+private val cardTopPadding = 14.dp
+private val cardTitleHeight = 24.dp
+private val cardListTopSpace = cardTopPadding + cardTitleHeight + 10.dp
+private val tasksCardCornerRadius = 20.dp
+private val overduePillColor = ColorProvider(
+    day = HighlightColor.RED.lightBackground,
+    night = HighlightColor.RED.darkBackground
+)
 
 class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
 
@@ -120,58 +131,26 @@ internal fun TodayTasksWidgetBody(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
-            .cornerRadius(26.dp)
-            .padding(horizontal = 12.dp)
-            .padding(top = 4.dp, bottom = 12.dp)
+            .cornerRadius(widgetCornerRadius)
+            .padding(horizontal = cardInset)
+            .padding(bottom = cardInset)
     ) {
-        Box(
-            modifier = GlanceModifier.fillMaxWidth().height(dateBandHeight),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = content?.dateLabel.orEmpty(),
-                maxLines = 1,
-                style = TextStyle(
-                    color = secondaryTextColor,
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center
-                )
-            )
-        }
+        DateHeader(content = content, openDailyScreen = openDailyScreen)
 
-        Column(
+        Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(elevatedSurfaceColor)
-                .cornerRadius(22.dp)
-                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .cornerRadius(tasksCardCornerRadius)
+                .padding(start = widgetSidePadding)
         ) {
-            Text(
-                text = "Today's Tasks",
-                maxLines = 1,
-                style = TextStyle(
-                    color = primaryTextColor,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = GlanceModifier.fillMaxWidth().clickable(openDailyScreen)
-            )
-
-            Spacer(modifier = GlanceModifier.height(10.dp))
-
-            Spacer(
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(separatorColor)
-            )
-
-            Spacer(modifier = GlanceModifier.height(6.dp))
-
             val rows = content?.rows.orEmpty()
             if (rows.isEmpty()) {
                 Column(
-                    modifier = GlanceModifier.fillMaxSize().clickable(openDailyScreen),
+                    modifier = GlanceModifier
+                        .fillMaxSize()
+                        .padding(top = cardListTopSpace, end = widgetSidePadding)
+                        .clickable(openDailyScreen),
                     verticalAlignment = Alignment.Vertical.CenterVertically,
                     horizontalAlignment = Alignment.Horizontal.CenterHorizontally
                 ) {
@@ -186,6 +165,7 @@ internal fun TodayTasksWidgetBody(
                 }
             } else {
                 LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                    headerSpaceItem(height = cardListTopSpace)
                     items(items = rows, itemId = { row -> row.blockId.hashCode().toLong() }) { row ->
                         TodayTaskRowItem(
                             context = context,
@@ -194,9 +174,96 @@ internal fun TodayTasksWidgetBody(
                             openDailyScreen = openDailyScreen
                         )
                     }
+                    footerSpaceItem()
                 }
             }
+
+            Row(
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .height(cardTopPadding + cardTitleHeight)
+                    .padding(top = cardTopPadding, end = widgetSidePadding)
+                    .clickable(openDailyScreen),
+                verticalAlignment = Alignment.Vertical.CenterVertically
+            ) {
+                Text(
+                    text = "Today's tasks",
+                    maxLines = 1,
+                    style = TextStyle(
+                        color = primaryTextColor,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = GlanceModifier.defaultWeight()
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun DateHeader(content: TodayTasksWidgetContent?, openDailyScreen: Action) {
+    Row(
+        modifier = GlanceModifier
+            .fillMaxWidth()
+            .padding(
+                start = widgetSidePadding - cardInset,
+                end = widgetSidePadding - cardInset,
+                top = widgetTopPadding,
+                bottom = 16.dp
+            )
+            .clickable(openDailyScreen),
+        verticalAlignment = Alignment.Vertical.CenterVertically
+    ) {
+        Row(
+            modifier = GlanceModifier.defaultWeight(),
+            verticalAlignment = Alignment.Vertical.CenterVertically
+        ) {
+            val weekdayLabel = content?.weekdayLabel.orEmpty()
+            if (weekdayLabel.isNotBlank()) {
+                Text(
+                    text = weekdayLabel,
+                    maxLines = 1,
+                    style = TextStyle(
+                        color = primaryTextColor,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+
+                Spacer(modifier = GlanceModifier.width(8.dp))
+            }
+
+            Text(
+                text = content?.dateLabel.orEmpty(),
+                maxLines = 1,
+                style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
+            )
+        }
+
+        if (content != null && content.totalCount > 0) {
+            DoneCountPill(doneCount = content.doneCount, totalCount = content.totalCount)
+        }
+    }
+}
+
+@Composable
+private fun DoneCountPill(doneCount: Int, totalCount: Int) {
+    Box(
+        modifier = GlanceModifier
+            .background(separatorColor)
+            .cornerRadius(12.dp)
+            .padding(1.dp)
+    ) {
+        Text(
+            text = "$doneCount of $totalCount done",
+            maxLines = 1,
+            style = TextStyle(color = primaryTextColor, fontSize = 12.sp),
+            modifier = GlanceModifier
+                .background(surfaceColor)
+                .cornerRadius(11.dp)
+                .padding(horizontal = 10.dp, vertical = 4.dp)
+        )
     }
 }
 
@@ -208,13 +275,15 @@ private fun TodayTaskRowItem(
     openDailyScreen: Action
 ) {
     Row(
-        modifier = GlanceModifier.fillMaxWidth().padding(vertical = 7.dp),
+        modifier = GlanceModifier.fillMaxWidth().padding(end = widgetSidePadding),
         verticalAlignment = Alignment.Vertical.CenterVertically
     ) {
         WidgetCheckbox(
             isChecked = row.isChecked,
+            checkedFillColor = surfaceColor,
             modifier = GlanceModifier
-                .width(checkboxWidth)
+                .width(checkboxTapWidth)
+                .fillMaxHeight()
                 .clickable(
                     onClick = actionSendBroadcast(
                         toggleTaskIntent(
@@ -229,8 +298,6 @@ private fun TodayTaskRowItem(
                 )
         )
 
-        Spacer(modifier = GlanceModifier.width(6.dp))
-
         Text(
             text = row.title,
             maxLines = 2,
@@ -244,45 +311,26 @@ private fun TodayTaskRowItem(
                     TextDecoration.None
                 }
             ),
-            modifier = GlanceModifier.defaultWeight().clickable(openDailyScreen)
+            modifier = GlanceModifier
+                .defaultWeight()
+                .padding(top = 7.dp, bottom = 7.dp)
+                .clickable(openDailyScreen)
         )
 
         if (row.scheduleLabel != null) {
             Spacer(modifier = GlanceModifier.width(8.dp))
-            SchedulePill(label = row.scheduleLabel, isOverdue = row.isOverdue)
+
+            if (row.isOverdue) {
+                WidgetLabelPill(
+                    text = row.scheduleLabel,
+                    background = overduePillColor,
+                    textColor = primaryTextColor,
+                    isEmphasized = true
+                )
+            } else {
+                WidgetLabelPill(text = row.scheduleLabel, background = surfaceColor)
+            }
         }
-    }
-}
-
-@Composable
-private fun SchedulePill(label: String, isOverdue: Boolean) {
-    val labelColor = if (isOverdue) primaryTextColor else secondaryTextColor
-
-    Row(
-        modifier = GlanceModifier
-            .background(surfaceColor)
-            .cornerRadius(11.dp)
-            .padding(horizontal = 8.dp, vertical = 5.dp),
-        verticalAlignment = Alignment.Vertical.CenterVertically
-    ) {
-        Image(
-            provider = ImageProvider(R.drawable.ic_widget_clock),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(labelColor),
-            modifier = GlanceModifier.size(clockIconSize)
-        )
-
-        Spacer(modifier = GlanceModifier.width(4.dp))
-
-        Text(
-            text = label,
-            maxLines = 1,
-            style = TextStyle(
-                color = labelColor,
-                fontSize = 12.sp,
-                fontWeight = if (isOverdue) FontWeight.Medium else FontWeight.Normal
-            )
-        )
     }
 }
 

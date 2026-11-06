@@ -12,6 +12,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
+import com.emberr.presentation.widget.widgetCornerRadius
+import com.emberr.presentation.widget.widgetSidePadding
+import com.emberr.presentation.widget.widgetTopPadding
+import com.emberr.presentation.widget.footerSpaceItem
+import com.emberr.presentation.widget.headerSpaceItem
+import com.emberr.R
+import androidx.glance.layout.size
+import androidx.glance.ImageProvider
+import androidx.glance.Image
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
@@ -62,7 +72,10 @@ import com.emberr.presentation.widget.widgetNoteIdExtra
 private const val maximumIndentationLevels = 4
 private const val indentationStepInDp = 12
 private val recordLabelWidth = 92.dp
-private val surfaceHorizontalPadding = 14.dp
+private val markerColumnWidth = 24.dp
+private val noteTitleLineHeight = 20.dp
+private val noteListTopSpace = widgetTopPadding + noteTitleLineHeight + 8.dp
+private val checklistBoxSize = 17.dp
 private val highlightHorizontalPadding = 2.dp
 private const val safeRowWidthFraction = 0.94f
 
@@ -196,7 +209,12 @@ internal fun WidgetBody(
 
 @Composable
 private fun DeletedNoteContent(title: String?, chooseAnotherNoteAction: Action) {
-    Column(modifier = GlanceModifier.fillMaxSize().clickable(chooseAnotherNoteAction)) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .padding(top = widgetTopPadding, end = widgetSidePadding)
+            .clickable(chooseAnotherNoteAction)
+    ) {
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
             verticalAlignment = Alignment.Vertical.CenterVertically
@@ -206,8 +224,7 @@ private fun DeletedNoteContent(title: String?, chooseAnotherNoteAction: Action) 
                 maxLines = 1,
                 style = TextStyle(
                     color = secondaryTextColor,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
                     textDecoration = TextDecoration.LineThrough
                 ),
                 modifier = GlanceModifier.defaultWeight()
@@ -237,8 +254,8 @@ private fun NoteSurface(content: @Composable () -> Unit) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
-            .cornerRadius(20.dp)
-            .padding(horizontal = surfaceHorizontalPadding, vertical = 12.dp)
+            .cornerRadius(widgetCornerRadius)
+            .padding(start = widgetSidePadding)
     ) {
         content()
     }
@@ -247,7 +264,7 @@ private fun NoteSurface(content: @Composable () -> Unit) {
 @Composable
 private fun CenteredMessage(message: String, tapAction: Action? = null) {
     Column(
-        modifier = GlanceModifier.fillMaxSize().thenClickable(tapAction),
+        modifier = GlanceModifier.fillMaxSize().padding(end = widgetSidePadding).thenClickable(tapAction),
         verticalAlignment = Alignment.Vertical.CenterVertically,
         horizontalAlignment = Alignment.Horizontal.CenterHorizontally
     ) {
@@ -264,42 +281,60 @@ private fun NoteContent(
     openNoteAction: Action?,
     reportedWidgetWidth: Dp?
 ) {
-    Text(
-        text = content.title,
-        maxLines = 1,
-        style = TextStyle(
-            color = primaryTextColor,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        ),
-        modifier = GlanceModifier.fillMaxWidth().thenClickable(openNoteAction)
-    )
-
-    Spacer(modifier = GlanceModifier.height(8.dp))
-
-    if (content.elements.isEmpty()) {
-        Column(
-            modifier = GlanceModifier.fillMaxSize().thenClickable(openNoteAction)
-        ) {
-            Text(
-                text = "This note is empty",
-                style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
-            )
-        }
-        return
-    }
-
-    LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-        items(
-            items = content.elements,
-            itemId = { element -> element.key.hashCode().toLong() }
-        ) { element ->
-            ContentElement(
-                element = element,
+    Box(modifier = GlanceModifier.fillMaxSize()) {
+        if (content.elements.isEmpty()) {
+            Column(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .padding(top = noteListTopSpace, end = widgetSidePadding)
+                    .thenClickable(openNoteAction)
+            ) {
+                Text(
+                    text = "This note is empty",
+                    style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
+                )
+            }
+        } else {
+            NoteElementList(
+                content = content,
                 openNoteAction = openNoteAction,
                 reportedWidgetWidth = reportedWidgetWidth
             )
         }
+
+        Text(
+            text = content.title,
+            maxLines = 1,
+            style = TextStyle(color = secondaryTextColor, fontSize = 14.sp),
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .padding(top = widgetTopPadding, end = widgetSidePadding)
+                .thenClickable(openNoteAction)
+        )
+    }
+}
+
+@Composable
+private fun NoteElementList(
+    content: WidgetNoteContent,
+    openNoteAction: Action?,
+    reportedWidgetWidth: Dp?
+) {
+    LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+        headerSpaceItem(height = noteListTopSpace)
+        items(
+            items = content.elements,
+            itemId = { element -> element.key.hashCode().toLong() }
+        ) { element ->
+            Box(modifier = GlanceModifier.fillMaxWidth().padding(end = widgetSidePadding)) {
+                ContentElement(
+                    element = element,
+                    openNoteAction = openNoteAction,
+                    reportedWidgetWidth = reportedWidgetWidth
+                )
+            }
+        }
+        footerSpaceItem()
     }
 }
 
@@ -310,40 +345,150 @@ private fun ContentElement(
     reportedWidgetWidth: Dp?
 ) {
     when (element) {
-        is WidgetElement.DividerLine -> Column(
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .thenClickable(openNoteAction)
-        ) {
-            Spacer(
+        is WidgetElement.DividerLine -> if (element.isDotted) {
+            DottedDivider(openNoteAction = openNoteAction)
+        } else {
+            Column(
                 modifier = GlanceModifier
                     .fillMaxWidth()
-                    .height(1.dp)
-                    .background(separatorColor)
-            )
+                    .padding(vertical = 8.dp)
+                    .thenClickable(openNoteAction)
+            ) {
+                Spacer(
+                    modifier = GlanceModifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(separatorColor)
+                )
+            }
         }
 
-        is WidgetElement.TextLine -> when {
-            element.isHighlighted -> HighlightedTextLine(line = element, openNoteAction = openNoteAction)
-
-            element.highlightedRanges.isNotEmpty() -> PartlyHighlightedTextLine(
-                line = element,
-                openNoteAction = openNoteAction,
-                reportedWidgetWidth = reportedWidgetWidth
-            )
-
-            else -> Text(
-                text = element.text,
-                style = resolveTextStyle(element),
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .padding(start = startPaddingFor(element.indentationLevel), top = 4.dp, bottom = 4.dp)
-                    .thenClickable(openNoteAction)
-            )
+        is WidgetElement.TextLine -> {
+            val marker = element.marker
+            if (marker == null) {
+                TextLineContent(
+                    line = element,
+                    openNoteAction = openNoteAction,
+                    reportedWidgetWidth = reportedWidgetWidth
+                )
+            } else {
+                MarkedTextLine(
+                    line = element,
+                    marker = marker,
+                    openNoteAction = openNoteAction,
+                    reportedWidgetWidth = reportedWidgetWidth
+                )
+            }
         }
 
         is WidgetElement.Record -> RecordElement(record = element, openNoteAction = openNoteAction)
+    }
+}
+
+@Composable
+private fun TextLineContent(
+    line: WidgetElement.TextLine,
+    openNoteAction: Action?,
+    reportedWidgetWidth: Dp?,
+    spaceTakenByMarker: Dp = 0.dp
+) {
+    when {
+        line.isHighlighted -> HighlightedTextLine(line = line, openNoteAction = openNoteAction)
+
+        line.highlightedRanges.isNotEmpty() -> PartlyHighlightedTextLine(
+            line = line,
+            openNoteAction = openNoteAction,
+            reportedWidgetWidth = reportedWidgetWidth,
+            spaceTakenByMarker = spaceTakenByMarker
+        )
+
+        else -> Text(
+            text = line.text,
+            style = resolveTextStyle(line),
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .padding(start = startPaddingFor(line.indentationLevel), top = 4.dp, bottom = 4.dp)
+                .thenClickable(openNoteAction)
+        )
+    }
+}
+
+@Composable
+private fun MarkedTextLine(
+    line: WidgetElement.TextLine,
+    marker: WidgetLineMarker,
+    openNoteAction: Action?,
+    reportedWidgetWidth: Dp?
+) {
+    val indentation = startPaddingFor(line.indentationLevel)
+
+    Row(
+        modifier = GlanceModifier
+            .fillMaxWidth()
+            .padding(start = indentation)
+            .thenClickable(openNoteAction),
+        verticalAlignment = Alignment.Vertical.Top
+    ) {
+        Box(
+            modifier = GlanceModifier.width(markerColumnWidth).padding(top = markerTopPaddingFor(marker)),
+            contentAlignment = Alignment.TopStart
+        ) {
+            LineMarker(marker = marker)
+        }
+
+        Box(modifier = GlanceModifier.defaultWeight()) {
+            TextLineContent(
+                line = line.copy(indentationLevel = 0),
+                openNoteAction = openNoteAction,
+                reportedWidgetWidth = reportedWidgetWidth,
+                spaceTakenByMarker = indentation + markerColumnWidth
+            )
+        }
+    }
+}
+
+@Composable
+private fun LineMarker(marker: WidgetLineMarker) {
+    when (marker) {
+        WidgetLineMarker.BULLET -> Text(
+            text = "•",
+            style = TextStyle(color = primaryTextColor, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        )
+
+        WidgetLineMarker.UNCHECKED_BOX -> Image(
+            provider = ImageProvider(R.drawable.ic_widget_checkbox_empty),
+            contentDescription = "Not done",
+            colorFilter = ColorFilter.tint(primaryTextColor),
+            modifier = GlanceModifier.size(checklistBoxSize)
+        )
+
+        WidgetLineMarker.CHECKED_BOX -> Image(
+            provider = ImageProvider(R.drawable.ic_widget_checkbox_filled),
+            contentDescription = "Done",
+            colorFilter = ColorFilter.tint(primaryTextColor),
+            modifier = GlanceModifier.size(checklistBoxSize)
+        )
+    }
+}
+
+private fun markerTopPaddingFor(marker: WidgetLineMarker) = when (marker) {
+    WidgetLineMarker.BULLET -> 4.dp
+    WidgetLineMarker.UNCHECKED_BOX, WidgetLineMarker.CHECKED_BOX -> 6.dp
+}
+
+@Composable
+private fun DottedDivider(openNoteAction: Action?) {
+    Box(
+        modifier = GlanceModifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .thenClickable(openNoteAction),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "•  •  •",
+            style = TextStyle(color = secondaryTextColor, fontSize = 12.sp)
+        )
     }
 }
 
@@ -372,14 +517,15 @@ private fun HighlightedTextLine(line: WidgetElement.TextLine, openNoteAction: Ac
 private fun PartlyHighlightedTextLine(
     line: WidgetElement.TextLine,
     openNoteAction: Action?,
-    reportedWidgetWidth: Dp?
+    reportedWidgetWidth: Dp?,
+    spaceTakenByMarker: Dp
 ) {
     val context = LocalContext.current
     val pixelsPerDp = context.resources.displayMetrics.density
     val sharedTextStyle = resolveTextStyle(line)
     val indentation = startPaddingFor(line.indentationLevel)
     val widgetWidth = reportedWidgetWidth ?: LocalSize.current.width
-    val availableWidth = widgetWidth - surfaceHorizontalPadding * 2 - indentation
+    val availableWidth = widgetWidth - widgetSidePadding * 2 - indentation - spaceTakenByMarker
 
     val wrappedRows = wrapRunsIntoRows(
         runs = splitIntoHighlightRuns(line),
@@ -473,7 +619,7 @@ private fun resolveTextStyle(line: WidgetElement.TextLine): TextStyle {
     val appearance = appearanceFor(line.style)
 
     return TextStyle(
-        color = textColorFor(line.style),
+        color = textColorFor(line),
         fontSize = appearance.fontSizeInSp.sp,
         fontWeight = glanceFontWeightFor(appearance.fontWeight),
         fontStyle = if (appearance.isItalic) FontStyle.Italic else FontStyle.Normal,
@@ -482,8 +628,9 @@ private fun resolveTextStyle(line: WidgetElement.TextLine): TextStyle {
     )
 }
 
-private fun textColorFor(style: WidgetTextStyleName) = when (style) {
-    WidgetTextStyleName.QUOTE, WidgetTextStyleName.SUBTLE -> secondaryTextColor
+private fun textColorFor(line: WidgetElement.TextLine) = when {
+    line.marker == WidgetLineMarker.CHECKED_BOX -> secondaryTextColor
+    line.style == WidgetTextStyleName.QUOTE || line.style == WidgetTextStyleName.SUBTLE -> secondaryTextColor
     else -> primaryTextColor
 }
 

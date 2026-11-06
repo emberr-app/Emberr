@@ -38,6 +38,9 @@ import kotlinx.serialization.Serializable
 enum class WidgetTextStyleName { HEADING, SUBHEADING, BODY, QUOTE, CODE, SUBTLE }
 
 @Serializable
+enum class WidgetLineMarker { BULLET, UNCHECKED_BOX, CHECKED_BOX }
+
+@Serializable
 sealed interface WidgetElement {
     val key: String
 
@@ -51,12 +54,16 @@ sealed interface WidgetElement {
         val isStruckThrough: Boolean,
         val isHighlighted: Boolean = false,
         val highlightColorName: String? = null,
-        val highlightedRanges: List<HighlightedRange> = emptyList()
+        val highlightedRanges: List<HighlightedRange> = emptyList(),
+        val marker: WidgetLineMarker? = null
     ) : WidgetElement
 
     @Serializable
     @SerialName("divider")
-    data class DividerLine(override val key: String) : WidgetElement
+    data class DividerLine(
+        override val key: String,
+        val isDotted: Boolean = false
+    ) : WidgetElement
 
     @Serializable
     @SerialName("record")
@@ -126,9 +133,13 @@ private fun convertBlockToElements(
 
     is TextBlock -> textLine(block, block.text, WidgetTextStyleName.BODY)
 
-    is QuoteBlock -> textLine(block, block.text, WidgetTextStyleName.QUOTE)
+    is QuoteBlock -> if (block.text.isBlank()) {
+        emptyList()
+    } else {
+        textLine(block, block.text.trimEnd() + "\u201D", WidgetTextStyleName.QUOTE, prefix = "\u201C")
+    }
 
-    is BulletedListBlock -> textLine(block, block.text, WidgetTextStyleName.BODY, prefix = "•  ")
+    is BulletedListBlock -> textLine(block, block.text, WidgetTextStyleName.BODY, marker = WidgetLineMarker.BULLET)
 
     is NumberedListBlock -> textLine(block, block.text, WidgetTextStyleName.BODY, prefix = "${block.number}.  ")
 
@@ -140,8 +151,8 @@ private fun convertBlockToElements(
         block = block,
         text = block.text,
         style = WidgetTextStyleName.BODY,
-        prefix = if (block.isChecked) "☑  " else "☐  ",
-        isStruckThrough = block.isChecked || block.isStrikeThrough
+        isStruckThrough = block.isChecked || block.isStrikeThrough,
+        marker = if (block.isChecked) WidgetLineMarker.CHECKED_BOX else WidgetLineMarker.UNCHECKED_BOX
     )
 
     is CodeBlock -> block.code.lines().mapIndexed { index, codeLine ->
@@ -194,8 +205,9 @@ private fun convertBlockToElements(
 
     is TableBlock -> convertTableToElements(block)
 
-    is SolidDividerBlock, is ThreeDotDividerBlock ->
-        listOf(WidgetElement.DividerLine(key = "${block.id}#0"))
+    is SolidDividerBlock -> listOf(WidgetElement.DividerLine(key = "${block.id}#0"))
+
+    is ThreeDotDividerBlock -> listOf(WidgetElement.DividerLine(key = "${block.id}#0", isDotted = true))
 
     is PersonDetailBlock -> emptyList()
 
@@ -207,7 +219,8 @@ private fun textLine(
     text: String,
     style: WidgetTextStyleName,
     prefix: String = "",
-    isStruckThrough: Boolean = block.isStrikeThrough
+    isStruckThrough: Boolean = block.isStrikeThrough,
+    marker: WidgetLineMarker? = null
 ): List<WidgetElement> {
     val trimmedLine = (prefix + text).trim()
     if (trimmedLine.isBlank()) return emptyList()
@@ -222,7 +235,8 @@ private fun textLine(
             isStruckThrough = isStruckThrough,
             isHighlighted = block.isHighlighted,
             highlightColorName = block.highlightColorNameOrNull(),
-            highlightedRanges = highlightedRangesIn(block, prefix, text, renderedText)
+            highlightedRanges = highlightedRangesIn(block, prefix, text, renderedText),
+            marker = marker
         )
     )
 }

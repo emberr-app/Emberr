@@ -6,7 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TodayTasksWidgetContent(
     val dateLabel: String,
-    val rows: List<TodayTaskRow>
+    val rows: List<TodayTaskRow>,
+    val weekdayLabel: String = "",
+    val doneCount: Int = 0,
+    val totalCount: Int = 0
 )
 
 @Serializable

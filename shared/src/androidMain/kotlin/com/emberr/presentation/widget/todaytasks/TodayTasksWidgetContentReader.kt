@@ -33,8 +33,11 @@ class TodayTasksWidgetContentReader(
         }
 
         TodayTasksWidgetContent(
-            dateLabel = formatDateHeading(today),
-            rows = buildRows(tasks, System.currentTimeMillis())
+            dateLabel = formatMonthAndDay(today),
+            rows = buildRows(tasks, System.currentTimeMillis()),
+            weekdayLabel = dayNames.getOrNull(today.dayOfWeek.ordinal) ?: today.dayOfWeek.name,
+            doneCount = tasks.count { task -> task.isChecked },
+            totalCount = tasks.size
         )
     }
 
@@ -76,18 +79,17 @@ private val dayNames = listOf(
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
 )
 
-private fun formatDateHeading(date: LocalDate): String {
+private fun formatMonthAndDay(date: LocalDate): String {
     val month = monthNames.getOrNull(date.month.number - 1) ?: date.month.name
-    val day = dayNames.getOrNull(date.dayOfWeek.ordinal) ?: date.dayOfWeek.name
-    return "$month ${date.day}, $day"
+    return "$month ${date.day}"
 }
 
 private fun formatOverdueLabel(elapsedMillis: Long): String {
     val elapsedMinutes = (elapsedMillis / 60_000L).coerceAtLeast(1L)
 
-    if (elapsedMinutes < 60) return "Due $elapsedMinutes min ago"
+    if (elapsedMinutes < 60) return "$elapsedMinutes min ago"
 
     val hours = elapsedMinutes / 60
     val hourLabel = if (hours == 1L) "1 hour" else "$hours hours"
-    return "Due $hourLabel ago"
+    return "$hourLabel ago"
 }

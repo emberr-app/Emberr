@@ -248,12 +248,12 @@ private fun formatMonthLabel(firstOfMonth: LocalDate): String =
 private fun formatWhenLabel(timestamp: Long, allDay: AllDaySpan?, clockFormat: WidgetClockFormat): String {
     val moment = Instant.fromEpochMilliseconds(timestamp)
         .toLocalDateTime(TimeZone.currentSystemDefault())
-    if (allDay == null) return "${shortDateLabel(moment.date)}, ${clockFormat.clockTimeOf(moment)}"
+    if (allDay == null) return "${shortDateLabel(moment.date)} · ${clockFormat.clockTimeOf(moment)}"
     val lastDate = allDay.lastDate(moment.date)
     return if (lastDate == moment.date) {
-        "${shortDateLabel(moment.date)}, All day"
+        "${shortDateLabel(moment.date)} · All day"
     } else {
-        "${shortDateLabel(moment.date)} – ${shortDateLabel(lastDate)}, All day"
+        "${shortDateLabel(moment.date)} – ${shortDateLabel(lastDate)} · All day"
     }
 }
 

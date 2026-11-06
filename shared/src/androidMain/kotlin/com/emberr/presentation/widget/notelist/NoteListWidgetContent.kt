@@ -13,5 +13,6 @@ data class NoteListWidgetContent(
 data class NoteListWidgetRow(
     val noteId: String,
     val title: String,
-    val snippet: String
+    val snippet: String,
+    val icon: String? = null
 )

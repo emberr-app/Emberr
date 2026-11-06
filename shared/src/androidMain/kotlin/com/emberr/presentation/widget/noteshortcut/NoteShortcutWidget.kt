@@ -7,6 +7,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
+import androidx.glance.action.Action
+import androidx.glance.LocalSize
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
@@ -36,6 +39,15 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
+import androidx.glance.ColorFilter
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.color.ColorProvider
+import androidx.glance.layout.size
+import androidx.glance.unit.ColorProvider
+import com.emberr.R
+import com.emberr.presentation.widget.elevatedSurfaceColor
+import com.emberr.ui.theme.HighlightColor
 import com.emberr.MainActivity
 import com.emberr.presentation.widget.WidgetDeletedBadge
 import com.emberr.presentation.widget.WidgetLog
@@ -49,12 +61,17 @@ import org.koin.core.component.get
 
 private val pillHeight = 66.dp
 private val pillCornerRadius = 33.dp
+private val iconCircleSize = 48.dp
+private val compactWidthThreshold = 100.dp
+private val compactCircleMargin = 8.dp
+private val minimumCompactCircleSize = 36.dp
+private val maximumCompactCircleSize = 64.dp
 
 class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
 
     override val stateDefinition = PreferencesGlanceStateDefinition
 
-    override val sizeMode = SizeMode.Single
+    override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val noteIdAtStart = readShortcutNoteId(context, id)?.takeIf { it.isNotBlank() }
@@ -112,6 +129,25 @@ internal fun NoteShortcutWidgetBody(
     isNoteDeleted: Boolean,
     appWidgetId: Int
 ) {
+    if (isCompactSize()) {
+        when {
+            isNoteDeleted -> CompactShortcut(
+                icon = content?.icon,
+                circleColor = elevatedSurfaceColor,
+                tapAction = actionStartActivity(openPickerIntent(context, appWidgetId))
+            )
+
+            content == null -> CompactShortcut(icon = null, circleColor = elevatedSurfaceColor, tapAction = null)
+
+            else -> CompactShortcut(
+                icon = content.icon,
+                circleColor = iconCircleColorFor(content.noteId),
+                tapAction = actionStartActivity(openNoteIntent(context, content.noteId))
+            )
+        }
+        return
+    }
+
     if (isNoteDeleted) {
         DeletedShortcut(context = context, content = content, appWidgetId = appWidgetId)
         return
@@ -131,12 +167,12 @@ internal fun NoteShortcutWidgetBody(
     ShortcutSurface(
         tapModifier = GlanceModifier.clickable(
             actionStartActivity(openNoteIntent(context, content.noteId))
-        )
+        ),
+        hasIconCircle = true
     ) {
-        if (content.icon != null) {
-            Text(text = content.icon, style = TextStyle(color = primaryTextColor, fontSize = 22.sp))
-            Spacer(modifier = GlanceModifier.width(12.dp))
-        }
+        NoteIconCircle(icon = content.icon, circleColor = iconCircleColorFor(content.noteId))
+
+        Spacer(modifier = GlanceModifier.width(12.dp))
 
         Text(
             text = content.title,
@@ -144,8 +180,9 @@ internal fun NoteShortcutWidgetBody(
             style = TextStyle(
                 color = primaryTextColor,
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Medium
-            )
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = GlanceModifier.defaultWeight()
         )
     }
 }
@@ -155,12 +192,12 @@ private fun DeletedShortcut(context: Context, content: NoteShortcutWidgetContent
     ShortcutSurface(
         tapModifier = GlanceModifier.clickable(
             actionStartActivity(openPickerIntent(context, appWidgetId))
-        )
+        ),
+        hasIconCircle = true
     ) {
-        if (content?.icon != null) {
-            Text(text = content.icon, style = TextStyle(color = secondaryTextColor, fontSize = 22.sp))
-            Spacer(modifier = GlanceModifier.width(12.dp))
-        }
+        NoteIconCircle(icon = content?.icon, circleColor = elevatedSurfaceColor)
+
+        Spacer(modifier = GlanceModifier.width(12.dp))
 
         Text(
             text = content?.title ?: "Untitled",
@@ -168,7 +205,7 @@ private fun DeletedShortcut(context: Context, content: NoteShortcutWidgetContent
             style = TextStyle(
                 color = secondaryTextColor,
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 textDecoration = TextDecoration.LineThrough
             ),
             modifier = GlanceModifier.defaultWeight()
@@ -182,6 +219,16 @@ private fun DeletedShortcut(context: Context, content: NoteShortcutWidgetContent
 
 @Composable
 private fun NoteShortcutSetupPrompt(context: Context, appWidgetId: Int) {
+    if (isCompactSize()) {
+        CompactShortcut(
+            icon = null,
+            circleColor = elevatedSurfaceColor,
+            tapAction = actionStartActivity(openPickerIntent(context, appWidgetId)),
+            fallbackIconResource = R.drawable.ic_widget_plus
+        )
+        return
+    }
+
     ShortcutSurface(
         tapModifier = GlanceModifier.clickable(
             actionStartActivity(openPickerIntent(context, appWidgetId))
@@ -196,7 +243,74 @@ private fun NoteShortcutSetupPrompt(context: Context, appWidgetId: Int) {
 }
 
 @Composable
-private fun ShortcutSurface(tapModifier: GlanceModifier, content: @Composable RowScope.() -> Unit) {
+private fun isCompactSize(): Boolean = LocalSize.current.width < compactWidthThreshold
+
+@Composable
+private fun CompactShortcut(
+    icon: String?,
+    circleColor: ColorProvider,
+    tapAction: Action?,
+    fallbackIconResource: Int = R.drawable.ic_widget_ghost
+) {
+    val widgetSize = LocalSize.current
+    val circleSize = (minOf(widgetSize.width, widgetSize.height) - compactCircleMargin)
+        .coerceIn(minimumCompactCircleSize, maximumCompactCircleSize)
+
+    Box(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .then(if (tapAction == null) GlanceModifier else GlanceModifier.clickable(tapAction)),
+        contentAlignment = Alignment.Center
+    ) {
+        NoteIconCircle(
+            icon = icon,
+            circleColor = circleColor,
+            circleSize = circleSize,
+            fallbackIconResource = fallbackIconResource
+        )
+    }
+}
+
+@Composable
+private fun NoteIconCircle(
+    icon: String?,
+    circleColor: ColorProvider,
+    circleSize: Dp = iconCircleSize,
+    fallbackIconResource: Int = R.drawable.ic_widget_ghost
+) {
+    Box(
+        modifier = GlanceModifier
+            .size(circleSize)
+            .background(circleColor)
+            .cornerRadius(circleSize / 2),
+        contentAlignment = Alignment.Center
+    ) {
+        if (icon != null) {
+            Text(text = icon, style = TextStyle(color = primaryTextColor, fontSize = (circleSize.value * 0.46f).sp))
+        } else {
+            Image(
+                provider = ImageProvider(fallbackIconResource),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(primaryTextColor),
+                modifier = GlanceModifier.size(circleSize * 0.46f)
+            )
+        }
+    }
+}
+
+private val iconCirclePalette = HighlightColor.entries.filter { color -> color != HighlightColor.GREY }
+
+private fun iconCircleColorFor(noteId: String): ColorProvider {
+    val paletteColor = iconCirclePalette[Math.floorMod(noteId.hashCode(), iconCirclePalette.size)]
+    return ColorProvider(day = paletteColor.lightBackground, night = paletteColor.darkBackground)
+}
+
+@Composable
+private fun ShortcutSurface(
+    tapModifier: GlanceModifier,
+    hasIconCircle: Boolean = false,
+    content: @Composable RowScope.() -> Unit
+) {
     Box(
         modifier = GlanceModifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -207,7 +321,7 @@ private fun ShortcutSurface(tapModifier: GlanceModifier, content: @Composable Ro
                 .height(pillHeight)
                 .background(surfaceColor)
                 .cornerRadius(pillCornerRadius)
-                .padding(horizontal = 20.dp)
+                .padding(start = if (hasIconCircle) 9.dp else 20.dp, end = 20.dp)
                 .then(tapModifier),
             verticalAlignment = Alignment.Vertical.CenterVertically,
             horizontalAlignment = Alignment.Horizontal.Start

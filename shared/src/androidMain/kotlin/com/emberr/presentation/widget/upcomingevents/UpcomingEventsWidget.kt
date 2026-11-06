@@ -5,15 +5,15 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.glance.color.ColorProvider
+import androidx.glance.unit.ColorProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
-import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
-import androidx.glance.Image
-import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
@@ -28,22 +28,28 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
-import com.emberr.R
 import com.emberr.presentation.widget.calendarEventUriScheme
 import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
+import com.emberr.presentation.widget.WidgetAddButton
+import com.emberr.presentation.widget.elevatedSurfaceColor
 import com.emberr.presentation.widget.primaryTextColor
+import com.emberr.presentation.widget.widgetCornerRadius
+import com.emberr.presentation.widget.widgetSidePadding
+import com.emberr.presentation.widget.widgetTopPadding
+import com.emberr.presentation.widget.footerSpaceItem
+import com.emberr.presentation.widget.headerSpaceItem
+import com.emberr.presentation.widget.widgetHeaderRowHeight
+import com.emberr.presentation.widget.widgetListTopSpace
 import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.widgetCalendarScreenExtra
@@ -51,8 +57,11 @@ import com.emberr.presentation.widget.widgetNewEventExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-private val eventAccentWidth = 3.dp
-private val topBarIconSize = 22.dp
+private val dateColumnWidth = 30.dp
+private val eventCardCornerRadius = 10.dp
+private const val lightCardWhiteBlend = 0.5f
+private val eventCardTitleColor = ColorProvider(Color(0xFF1A1A1A))
+private val eventCardTimeColor = ColorProvider(Color(0xB31A1A1A))
 
 class UpcomingEventsWidget : GlanceAppWidget(), KoinComponent {
 
@@ -87,23 +96,28 @@ internal fun UpcomingEventsWidgetBody(
     context: Context,
     content: UpcomingEventsWidgetContent?
 ) {
-    Column(
+    Box(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
-            .cornerRadius(24.dp)
-            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .cornerRadius(widgetCornerRadius)
+            .padding(start = widgetSidePadding)
     ) {
+        EventList(context = context, content = content)
+
         Row(
-            modifier = GlanceModifier.fillMaxWidth(),
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .height(widgetHeaderRowHeight)
+                .padding(top = widgetTopPadding, end = widgetSidePadding),
             verticalAlignment = Alignment.Vertical.CenterVertically
         ) {
             Text(
-                text = "Upcoming Events",
+                text = "Upcoming",
                 maxLines = 1,
                 style = TextStyle(
                     color = primaryTextColor,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 ),
                 modifier = GlanceModifier
@@ -111,19 +125,11 @@ internal fun UpcomingEventsWidgetBody(
                     .clickable(actionStartActivity(openCalendarScreenIntent(context)))
             )
 
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_circle_plus),
+            WidgetAddButton(
                 contentDescription = "New event",
-                colorFilter = ColorFilter.tint(primaryTextColor),
-                modifier = GlanceModifier
-                    .size(topBarIconSize)
-                    .clickable(actionStartActivity(newEventIntent(context)))
+                onClick = actionStartActivity(newEventIntent(context))
             )
         }
-
-        Spacer(modifier = GlanceModifier.height(10.dp))
-
-        EventList(context = context, content = content)
     }
 }
 
@@ -133,7 +139,7 @@ private fun EventList(context: Context, content: UpcomingEventsWidgetContent?) {
 
     if (events.isEmpty()) {
         Column(
-            modifier = GlanceModifier.fillMaxSize(),
+            modifier = GlanceModifier.fillMaxSize().padding(top = widgetListTopSpace, end = widgetSidePadding),
             verticalAlignment = Alignment.Vertical.CenterVertically,
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
@@ -149,57 +155,92 @@ private fun EventList(context: Context, content: UpcomingEventsWidgetContent?) {
     val eventsByDate = events.groupBy { event -> event.dateGroupKey }
 
     LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+        headerSpaceItem()
         eventsByDate.forEach { (dateGroupKey, eventsOnDate) ->
-            item(itemId = dateGroupKey.hashCode().toLong()) {
-                DateHeader(label = eventsOnDate.first().dateLabel)
+            val firstEvent = eventsOnDate.first()
+            val isRepeatingGroup = firstEvent.dayLabel != null
+            val needsHeader = isRepeatingGroup || firstEvent.weekdayShortLabel.isBlank()
+
+            if (needsHeader) {
+                item(itemId = dateGroupKey.hashCode().toLong()) {
+                    SectionHeader(label = firstEvent.dateLabel)
+                }
             }
 
             items(items = eventsOnDate, itemId = { event -> event.blockId.hashCode().toLong() }) { event ->
-                EventRow(context = context, event = event)
+                EventRow(
+                    context = context,
+                    event = event,
+                    showsDate = isRepeatingGroup || event == firstEvent
+                )
             }
         }
+        footerSpaceItem()
     }
 }
 
 @Composable
-private fun DateHeader(label: String) {
+private fun SectionHeader(label: String) {
     Text(
         text = label,
         maxLines = 1,
         style = TextStyle(
             color = secondaryTextColor,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
         ),
-        modifier = GlanceModifier.padding(top = 6.dp, bottom = 4.dp)
+        modifier = GlanceModifier.padding(top = 2.dp, bottom = 4.dp, end = widgetSidePadding)
     )
 }
 
 @Composable
-private fun EventRow(context: Context, event: UpcomingEvent) {
+private fun EventRow(context: Context, event: UpcomingEvent, showsDate: Boolean) {
+    val categoryColor = categoryColorOf(event.accentColorHex)
+
     Row(
         modifier = GlanceModifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
-            .clickable(actionStartActivity(openEventIntent(context, event.blockId, event.birthdayPersonNoteId)))
+            .padding(bottom = 6.dp, end = widgetSidePadding)
+            .clickable(actionStartActivity(openEventIntent(context, event.blockId, event.birthdayPersonNoteId))),
+        verticalAlignment = Alignment.Vertical.Top
     ) {
-        Box(
+        Column(
+            modifier = GlanceModifier.width(dateColumnWidth).padding(top = 4.dp),
+            horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+        ) {
+            if (showsDate && event.weekdayShortLabel.isNotBlank()) {
+                Text(
+                    text = event.weekdayShortLabel,
+                    maxLines = 1,
+                    style = TextStyle(color = secondaryTextColor, fontSize = 10.sp)
+                )
+                Text(
+                    text = event.dayOfMonthLabel,
+                    maxLines = 1,
+                    style = TextStyle(
+                        color = primaryTextColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = GlanceModifier.width(6.dp))
+
+        Column(
             modifier = GlanceModifier
-                .width(eventAccentWidth)
-                .fillMaxHeight()
-                .background(accentColorFrom(event.accentColorHex))
-                .cornerRadius(eventAccentWidth)
-        ) {}
-
-        Spacer(modifier = GlanceModifier.width(8.dp))
-
-        Column(modifier = GlanceModifier.defaultWeight()) {
+                .defaultWeight()
+                .background(categoryColor?.let(::eventCardColorFor) ?: elevatedSurfaceColor)
+                .cornerRadius(eventCardCornerRadius)
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+        ) {
             Text(
                 text = event.title,
                 maxLines = 1,
                 style = TextStyle(
-                    color = primaryTextColor,
-                    fontSize = 16.sp,
+                    color = if (categoryColor != null) eventCardTitleColor else primaryTextColor,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
                 )
             )
@@ -209,35 +250,30 @@ private fun EventRow(context: Context, event: UpcomingEvent) {
                     text = event.timeLabel,
                     maxLines = 1,
                     style = TextStyle(
-                        color = if (event.isOverdue) primaryTextColor else secondaryTextColor,
-                        fontSize = 13.sp,
+                        color = if (categoryColor != null) eventCardTimeColor else secondaryTextColor,
+                        fontSize = 12.sp,
                         fontWeight = if (event.isOverdue) FontWeight.Medium else FontWeight.Normal
                     )
                 )
             }
         }
-
-        if (event.dayLabel != null) {
-            Text(
-                text = event.dayLabel,
-                maxLines = 1,
-                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp),
-                modifier = GlanceModifier.padding(start = 8.dp, top = 2.dp, end = 8.dp)
-            )
-        }
     }
 }
 
-private fun accentColorFrom(colorHex: String?): Color {
-    val parsed = colorHex?.let { hex ->
+private fun categoryColorOf(colorHex: String?): Color? =
+    colorHex?.let { hex ->
         try {
             Color(hex.toColorInt())
         } catch (_: IllegalArgumentException) {
             null
         }
     }
-    return parsed ?: Color(0xFF848484)
-}
+
+private fun eventCardColorFor(categoryColor: Color): ColorProvider =
+    ColorProvider(
+        day = lerp(categoryColor, Color.White, lightCardWhiteBlend),
+        night = categoryColor
+    )
 
 private fun openEventIntent(context: Context, blockId: String, birthdayPersonNoteId: String?): Intent =
     Intent(context, MainActivity::class.java)

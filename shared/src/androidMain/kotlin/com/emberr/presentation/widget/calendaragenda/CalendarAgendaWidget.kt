@@ -51,7 +51,12 @@ import com.emberr.presentation.widget.calendarEventUriScheme
 import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
 import com.emberr.presentation.widget.highlightColor
 import com.emberr.presentation.widget.onHighlightColor
+import com.emberr.presentation.widget.WidgetLabelPill
+import com.emberr.presentation.widget.elevatedSurfaceColor
 import com.emberr.presentation.widget.primaryTextColor
+import com.emberr.presentation.widget.footerSpaceItem
+import com.emberr.presentation.widget.headerSpaceItem
+import com.emberr.presentation.widget.widgetCornerRadius
 import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.surfaceColor
 import org.koin.core.component.KoinComponent
@@ -59,8 +64,12 @@ import org.koin.core.component.get
 import androidx.core.graphics.toColorInt
 
 private val chevronSize = 18.dp
-private val dayHighlightSize = 17.dp
-private val eventAccentWidth = 3.dp
+private val dayHighlightSize = 18.dp
+private val eventDotSize = 8.dp
+private val monthCardCornerRadius = 16.dp
+private val agendaEdgePadding = 12.dp
+private val agendaHeaderRowHeight = agendaEdgePadding + 28.dp
+private val agendaListTopSpace = agendaHeaderRowHeight + 12.dp
 private val headerHeight = 24.dp
 private const val repeatingHeaderItemId = -1L
 private const val otherEventsHeaderItemId = -2L
@@ -118,18 +127,36 @@ internal fun CalendarAgendaWidgetBody(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
-            .cornerRadius(24.dp)
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .cornerRadius(widgetCornerRadius)
+            .padding(start = agendaEdgePadding)
     ) {
-        Column(modifier = GlanceModifier.defaultWeight().fillMaxHeight()) {
-            MonthGrid(content = content)
+        Box(
+            modifier = GlanceModifier
+                .defaultWeight()
+                .fillMaxHeight()
+                .padding(top = agendaEdgePadding, bottom = agendaEdgePadding)
+        ) {
+            Column(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .background(elevatedSurfaceColor)
+                    .cornerRadius(monthCardCornerRadius)
+                    .padding(horizontal = 4.dp, vertical = 4.dp)
+            ) {
+                MonthGrid(content = content)
+            }
         }
 
-        Spacer(modifier = GlanceModifier.width(14.dp))
+        Spacer(modifier = GlanceModifier.width(12.dp))
 
-        Column(modifier = GlanceModifier.defaultWeight().fillMaxHeight()) {
+        Box(modifier = GlanceModifier.defaultWeight().fillMaxHeight()) {
+            EventList(context = context, content = content)
+
             Row(
-                modifier = GlanceModifier.fillMaxWidth(),
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .height(agendaHeaderRowHeight)
+                    .padding(top = agendaEdgePadding, end = agendaEdgePadding),
                 verticalAlignment = Alignment.Vertical.CenterVertically
             ) {
                 Text(
@@ -137,10 +164,10 @@ internal fun CalendarAgendaWidgetBody(
                     maxLines = 1,
                     style = TextStyle(
                         color = primaryTextColor,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    modifier = GlanceModifier.defaultWeight()
+                    modifier = GlanceModifier.defaultWeight().padding(top = 4.dp)
                 )
 
                 Image(
@@ -154,7 +181,7 @@ internal fun CalendarAgendaWidgetBody(
                         )
                 )
 
-                Spacer(modifier = GlanceModifier.width(6.dp))
+                Spacer(modifier = GlanceModifier.width(12.dp))
 
                 Image(
                     provider = ImageProvider(R.drawable.ic_widget_chevron_right),
@@ -167,10 +194,6 @@ internal fun CalendarAgendaWidgetBody(
                         )
                 )
             }
-
-            Spacer(modifier = GlanceModifier.height(8.dp))
-
-            EventList(context = context, content = content)
         }
     }
 }
@@ -224,7 +247,7 @@ private fun DayCell(cell: AgendaDayCell) {
             .size(dayHighlightSize)
             .then(
                 if (cell.isToday) {
-                    GlanceModifier.background(highlightColor).cornerRadius(6.dp)
+                    GlanceModifier.background(highlightColor).cornerRadius(dayHighlightSize / 2)
                 } else {
                     GlanceModifier
                 }
@@ -253,7 +276,7 @@ private fun EventList(context: Context, content: CalendarAgendaWidgetContent?) {
 
     if (events.isEmpty()) {
         Column(
-            modifier = GlanceModifier.fillMaxSize(),
+            modifier = GlanceModifier.fillMaxSize().padding(top = agendaListTopSpace, end = agendaEdgePadding),
             verticalAlignment = Alignment.Vertical.CenterVertically,
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
@@ -269,6 +292,7 @@ private fun EventList(context: Context, content: CalendarAgendaWidgetContent?) {
     val (repeatingEvents, otherEvents) = events.partition { event -> event.isRepeating }
 
     LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+        headerSpaceItem(height = agendaListTopSpace)
         if (repeatingEvents.isNotEmpty()) {
             item(itemId = repeatingHeaderItemId) { SectionHeader(label = "Repeating") }
             items(items = repeatingEvents, itemId = { event -> "repeating/${event.blockId}".hashCode().toLong() }) { event ->
@@ -281,6 +305,7 @@ private fun EventList(context: Context, content: CalendarAgendaWidgetContent?) {
         items(items = otherEvents, itemId = { event -> "${event.blockId}/${event.occurrenceDate}".hashCode().toLong() }) { event ->
             EventRow(context = context, event = event)
         }
+        footerSpaceItem(height = agendaEdgePadding)
     }
 }
 
@@ -291,10 +316,10 @@ private fun SectionHeader(label: String) {
         maxLines = 1,
         style = TextStyle(
             color = secondaryTextColor,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
         ),
-        modifier = GlanceModifier.padding(top = 4.dp, bottom = 4.dp)
+        modifier = GlanceModifier.padding(top = 4.dp, bottom = 4.dp, end = agendaEdgePadding)
     )
 }
 
@@ -303,18 +328,18 @@ private fun EventRow(context: Context, event: AgendaEvent) {
     Row(
         modifier = GlanceModifier
             .fillMaxWidth()
-            .padding(bottom = 7.dp)
+            .padding(bottom = 7.dp, end = agendaEdgePadding)
             .clickable(actionStartActivity(openEventIntent(context, event.blockId, event.birthdayPersonNoteId)))
     ) {
         Box(
             modifier = GlanceModifier
-                .width(eventAccentWidth)
-                .fillMaxHeight()
+                .padding(top = 7.dp)
+                .size(eventDotSize)
                 .background(accentColorFrom(event.accentColorHex))
-                .cornerRadius(eventAccentWidth)
+                .cornerRadius(eventDotSize / 2)
         ) {}
 
-        Spacer(modifier = GlanceModifier.width(7.dp))
+        Spacer(modifier = GlanceModifier.width(8.dp))
 
         Column(modifier = GlanceModifier.defaultWeight()) {
             Text(
@@ -322,7 +347,7 @@ private fun EventRow(context: Context, event: AgendaEvent) {
                 maxLines = 1,
                 style = TextStyle(
                     color = if (event.isDone) secondaryTextColor else primaryTextColor,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     textDecoration = if (event.isDone) TextDecoration.LineThrough else TextDecoration.None
                 )
@@ -331,17 +356,14 @@ private fun EventRow(context: Context, event: AgendaEvent) {
             Text(
                 text = event.whenLabel,
                 maxLines = 1,
-                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp)
+                style = TextStyle(color = secondaryTextColor, fontSize = 12.sp)
             )
         }
 
         if (event.dayLabel != null) {
-            Text(
-                text = event.dayLabel,
-                maxLines = 1,
-                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp),
-                modifier = GlanceModifier.padding(start = 8.dp, top = 2.dp, end = 8.dp)
-            )
+            Box(modifier = GlanceModifier.padding(start = 8.dp, top = 4.dp)) {
+                WidgetLabelPill(text = event.dayLabel, background = elevatedSurfaceColor, textColor = primaryTextColor)
+            }
         }
     }
 }
