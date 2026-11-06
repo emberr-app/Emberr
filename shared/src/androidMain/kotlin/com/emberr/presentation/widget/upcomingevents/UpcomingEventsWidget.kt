@@ -38,6 +38,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
+import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.calendarEventUriScheme
 import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
 import com.emberr.presentation.widget.WidgetAddButton
@@ -104,6 +105,8 @@ internal fun UpcomingEventsWidgetBody(
             .padding(start = widgetSidePadding)
     ) {
         EventList(context = context, content = content)
+
+        WidgetTopFade(height = widgetListTopSpace)
 
         Row(
             modifier = GlanceModifier

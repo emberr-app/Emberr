@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
+import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.widgetCornerRadius
 import com.emberr.presentation.widget.widgetSidePadding
 import com.emberr.presentation.widget.widgetTopPadding
@@ -74,7 +75,7 @@ private const val indentationStepInDp = 12
 private val recordLabelWidth = 92.dp
 private val markerColumnWidth = 24.dp
 private val noteTitleLineHeight = 20.dp
-private val noteListTopSpace = widgetTopPadding + noteTitleLineHeight + 8.dp
+private val noteListTopSpace = widgetTopPadding + noteTitleLineHeight + 4.dp
 private val checklistBoxSize = 17.dp
 private val highlightHorizontalPadding = 2.dp
 private const val safeRowWidthFraction = 0.94f
@@ -301,6 +302,8 @@ private fun NoteContent(
                 reportedWidgetWidth = reportedWidgetWidth
             )
         }
+
+        WidgetTopFade(height = noteListTopSpace)
 
         Text(
             text = content.title,

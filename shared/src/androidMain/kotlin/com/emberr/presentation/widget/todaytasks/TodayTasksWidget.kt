@@ -42,6 +42,7 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.WidgetCheckbox
 import com.emberr.presentation.widget.WidgetLabelPill
 import com.emberr.presentation.widget.widgetCornerRadius
@@ -71,7 +72,7 @@ private val checkboxTapWidth = 36.dp
 private val cardInset = 8.dp
 private val cardTopPadding = 14.dp
 private val cardTitleHeight = 24.dp
-private val cardListTopSpace = cardTopPadding + cardTitleHeight + 10.dp
+private val cardListTopSpace = cardTopPadding + cardTitleHeight + 4.dp
 private val tasksCardCornerRadius = 20.dp
 private val overduePillColor = ColorProvider(
     day = HighlightColor.RED.lightBackground,
@@ -177,6 +178,8 @@ internal fun TodayTasksWidgetBody(
                     footerSpaceItem()
                 }
             }
+
+            WidgetTopFade(height = cardListTopSpace, fadeColor = elevatedSurfaceColor)
 
             Row(
                 modifier = GlanceModifier
