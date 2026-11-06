@@ -51,6 +51,7 @@ import com.emberr.presentation.widget.tasks.refreshTaskWidgets
 import com.emberr.presentation.widget.calendarDateUriScheme
 import com.emberr.presentation.widget.calendarEventUriScheme
 import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
+import com.emberr.presentation.widget.widgetContinueDailyExtra
 import com.emberr.presentation.widget.widgetDailyDateExtra
 import com.emberr.presentation.widget.widgetDailyScreenExtra
 import com.emberr.presentation.widget.widgetCalendarScreenExtra
@@ -608,9 +609,16 @@ class MainActivity : FragmentActivity() {
 
         if (intent.getBooleanExtra(widgetDailyScreenExtra, false)) {
             intent.removeExtra(widgetDailyScreenExtra)
-            val dateString = intent.getStringExtra(widgetDailyDateExtra)
+            val requestedDateString = intent.getStringExtra(widgetDailyDateExtra)
             intent.removeExtra(widgetDailyDateExtra)
-            return Screen.Daily.createRoute(dateString)
+            val continuesTodaysDaily = intent.getBooleanExtra(widgetContinueDailyExtra, false)
+            intent.removeExtra(widgetContinueDailyExtra)
+            if (continuesTodaysDaily) {
+                WidgetComposeRequestBus.request(WidgetComposeRequest.CONTINUE_DAILY)
+                val todayString = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
+                return Screen.Daily.createRoute(todayString)
+            }
+            return Screen.Daily.createRoute(requestedDateString)
         }
 
         if (intent.getBooleanExtra(widgetHomeScreenExtra, false)) {

@@ -163,7 +163,7 @@
             android:name=".presentation.widget.notelist.NoteListWidgetPickerActivity"
             android:exported="true"
             android:label="@string/note_list_widget_label"
-            android:theme="@style/Theme.Emberr">
+            android:theme="@style/Theme.Emberr.WidgetSetup">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
@@ -187,7 +187,7 @@
             android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:label="@string/note_shortcut_widget_label"
-            android:theme="@style/Theme.Emberr">
+            android:theme="@style/Theme.Emberr.WidgetSetup">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
@@ -211,7 +211,30 @@
             android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:label="@string/note_card_widget_label"
-            android:theme="@style/Theme.Emberr">
+            android:theme="@style/Theme.Emberr.WidgetSetup">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".presentation.widget.dailyjot.DailyJotWidgetReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/daily_jot_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/daily_jot_widget_info" />
+        </receiver>
+
+        <activity
+            android:name=".presentation.widget.dailyjot.DailyJotWidgetSetupActivity"
+            android:exported="true"
+            android:label="@string/daily_jot_widget_label"
+            android:theme="@style/Theme.Emberr.WidgetSetup">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
@@ -313,7 +336,7 @@
             android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:label="@string/note_widget_label"
-            android:theme="@style/Theme.Emberr">
+            android:theme="@style/Theme.Emberr.WidgetSetup">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
