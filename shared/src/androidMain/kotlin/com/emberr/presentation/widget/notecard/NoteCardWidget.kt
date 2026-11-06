@@ -1,0 +1,341 @@
+// The home screen widget itself: draws one note as a card like the favorite note cards in the app.
+package com.emberr.presentation.widget.notecard
+
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
+import androidx.datastore.preferences.core.Preferences
+import androidx.glance.ColorFilter
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.LocalSize
+import androidx.glance.action.Action
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.color.ColorProvider
+import androidx.glance.currentState
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
+import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.layout.width
+import androidx.glance.state.PreferencesGlanceStateDefinition
+import androidx.glance.text.FontWeight
+import androidx.glance.text.Text
+import androidx.glance.text.TextDecoration
+import androidx.glance.text.TextStyle
+import com.emberr.MainActivity
+import com.emberr.R
+import com.emberr.presentation.widget.WidgetDeletedBadge
+import com.emberr.presentation.widget.WidgetLog
+import com.emberr.presentation.widget.WidgetNoteSource
+import com.emberr.presentation.widget.surfaceColor
+import com.emberr.presentation.widget.highlightColor
+import com.emberr.presentation.widget.primaryTextColor
+import com.emberr.presentation.widget.secondaryTextColor
+import com.emberr.presentation.widget.widgetCornerRadius
+import com.emberr.presentation.widget.widgetNoteIdExtra
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+
+private const val coverBandHeightFraction = 0.5f
+private val minimumCoverBandHeight = 76.dp
+private val maximumCoverBandHeight = 240.dp
+private val iconOverhang = 12.dp
+private val cardSidePadding = 14.dp
+private val favoriteStarSize = 14.dp
+private val canvasIconSize = 22.dp
+private const val coverBitmapTargetWidthPixels = 600
+private val coverBandTint = ColorProvider(day = Color(0x0D000000), night = Color(0x0DFFFFFF))
+
+class NoteCardWidget : GlanceAppWidget(), KoinComponent {
+
+    override val stateDefinition = PreferencesGlanceStateDefinition
+
+    override val sizeMode = SizeMode.Exact
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val noteIdAtStart = readCardNoteId(context, id)?.takeIf { it.isNotBlank() }
+        if (noteIdAtStart != null && loadAndCacheCard(context, id, noteIdAtStart) == null) {
+            val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
+            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeCardNoteDeleted(context, id)
+        }
+
+        val appWidgetId = resolveAppWidgetId(context, id)
+
+        provideContent {
+            val savedState = currentState<Preferences>()
+            val rawCachedCard = savedState[cachedCardKey]
+            val content = remember(rawCachedCard) { decodeCachedCard(rawCachedCard) }
+
+            NoteCardWidgetBody(
+                context = context,
+                appWidgetId = appWidgetId,
+                chosenNoteId = savedState[cardNoteIdKey]?.takeIf { it.isNotBlank() },
+                content = content,
+                isNoteDeleted = savedState[cardNoteDeletedKey] == true
+            )
+        }
+    }
+
+    private suspend fun loadAndCacheCard(context: Context, id: GlanceId, noteId: String): NoteCardWidgetContent? {
+        val contentReader = runCatching { get<NoteCardWidgetContentReader>() }.getOrNull() ?: return null
+        val freshContent = contentReader.readContentOnce(noteId) ?: return null
+
+        if (freshContent != readCachedCard(context, id)) {
+            writeCachedCard(context, id, freshContent)
+        }
+        return freshContent
+    }
+
+    private suspend fun resolveAppWidgetId(context: Context, id: GlanceId): Int =
+        try {
+            GlanceAppWidgetManager(context).getAppWidgetId(id)
+        } catch (cause: Exception) {
+            WidgetLog.e("Could not resolve the widget id", cause)
+            INVALID_APPWIDGET_ID
+        }
+}
+
+@Composable
+internal fun NoteCardWidgetBody(
+    context: Context,
+    appWidgetId: Int,
+    chosenNoteId: String?,
+    content: NoteCardWidgetContent?,
+    isNoteDeleted: Boolean
+) {
+    val chooseNoteAction = actionStartActivity(openPickerIntent(context, appWidgetId))
+
+    when {
+        chosenNoteId == null -> CardMessage(message = "Tap to choose a note", tapAction = chooseNoteAction)
+
+        isNoteDeleted -> DeletedCard(title = content?.title, chooseAnotherNoteAction = chooseNoteAction)
+
+        content == null -> CardMessage(message = "Open Emberr to load this note", tapAction = null)
+
+        else -> NoteCard(
+            content = content,
+            openNoteAction = actionStartActivity(openNoteIntent(context, content.noteId))
+        )
+    }
+}
+
+@Composable
+private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
+    val hasIcon = content.icon != null
+    val hasCanvasIcon = content.isCanvas && !hasIcon
+    val hasCoverBand = content.coverImageAbsolutePath != null || content.isCanvas || hasIcon
+    val coverBandHeight = (LocalSize.current.height * coverBandHeightFraction)
+        .coerceIn(minimumCoverBandHeight, maximumCoverBandHeight)
+    val coverBitmap = remember(content.coverImageAbsolutePath) {
+        content.coverImageAbsolutePath?.let(::loadCoverBitmap)
+    }
+
+    Box(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(surfaceColor)
+            .cornerRadius(widgetCornerRadius)
+            .clickable(openNoteAction)
+    ) {
+        Column(modifier = GlanceModifier.fillMaxSize()) {
+            if (hasCoverBand) {
+                Box(
+                    modifier = GlanceModifier
+                        .fillMaxWidth()
+                        .height(coverBandHeight)
+                        .background(coverBandTint)
+                ) {
+                    if (coverBitmap != null) {
+                        Image(
+                            provider = ImageProvider(coverBitmap),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = GlanceModifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
+
+            Column(
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .defaultWeight()
+                    .padding(
+                        start = cardSidePadding,
+                        end = if (content.isFavorite && !hasCoverBand) cardSidePadding + 16.dp else cardSidePadding,
+                        top = if (hasIcon || hasCanvasIcon) iconOverhang + 12.dp else 12.dp,
+                        bottom = 12.dp
+                    )
+            ) {
+                Text(
+                    text = content.title,
+                    maxLines = 1,
+                    style = TextStyle(
+                        color = primaryTextColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+
+                Spacer(modifier = GlanceModifier.height(4.dp))
+
+                Text(
+                    text = content.snippet,
+                    maxLines = if (hasCoverBand) 3 else 7,
+                    style = TextStyle(color = secondaryTextColor, fontSize = 12.sp)
+                )
+            }
+        }
+
+        if (hasIcon) {
+            Text(
+                text = content.icon.orEmpty(),
+                style = TextStyle(color = primaryTextColor, fontSize = 24.sp),
+                modifier = GlanceModifier.padding(start = cardSidePadding - 2.dp, top = coverBandHeight - iconOverhang - 6.dp)
+            )
+        }
+
+        if (hasCanvasIcon) {
+            Box(modifier = GlanceModifier.padding(start = cardSidePadding, top = coverBandHeight - iconOverhang)) {
+                Image(
+                    provider = ImageProvider(R.drawable.ic_widget_canvas),
+                    contentDescription = "Canvas",
+                    colorFilter = ColorFilter.tint(primaryTextColor),
+                    modifier = GlanceModifier.size(canvasIconSize)
+                )
+            }
+        }
+
+        if (content.isFavorite) {
+            Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
+                Box(modifier = GlanceModifier.padding(10.dp)) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_widget_star),
+                        contentDescription = "Favorite",
+                        colorFilter = ColorFilter.tint(highlightColor),
+                        modifier = GlanceModifier.size(favoriteStarSize)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeletedCard(title: String?, chooseAnotherNoteAction: Action) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(surfaceColor)
+            .cornerRadius(widgetCornerRadius)
+            .padding(cardSidePadding)
+            .clickable(chooseAnotherNoteAction)
+    ) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Vertical.CenterVertically
+        ) {
+            Text(
+                text = title ?: "Untitled",
+                maxLines = 1,
+                style = TextStyle(
+                    color = secondaryTextColor,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    textDecoration = TextDecoration.LineThrough
+                ),
+                modifier = GlanceModifier.defaultWeight()
+            )
+
+            Spacer(modifier = GlanceModifier.width(8.dp))
+
+            WidgetDeletedBadge()
+        }
+
+        Column(
+            modifier = GlanceModifier.fillMaxSize(),
+            verticalAlignment = Alignment.Vertical.CenterVertically,
+            horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+        ) {
+            Text(
+                text = "This note was deleted. Tap to choose another",
+                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun CardMessage(message: String, tapAction: Action?) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(surfaceColor)
+            .cornerRadius(widgetCornerRadius)
+            .padding(cardSidePadding)
+            .then(if (tapAction == null) GlanceModifier else GlanceModifier.clickable(tapAction)),
+        verticalAlignment = Alignment.Vertical.CenterVertically,
+        horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+    ) {
+        Text(
+            text = message,
+            style = TextStyle(color = secondaryTextColor, fontSize = 14.sp)
+        )
+    }
+}
+
+private fun loadCoverBitmap(absolutePath: String): Bitmap? =
+    try {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(absolutePath, bounds)
+
+        if (bounds.outWidth <= 0) {
+            null
+        } else {
+            var sampleSize = 1
+            while (bounds.outWidth / (sampleSize * 2) >= coverBitmapTargetWidthPixels) {
+                sampleSize *= 2
+            }
+            BitmapFactory.decodeFile(absolutePath, BitmapFactory.Options().apply { inSampleSize = sampleSize })
+        }
+    } catch (cause: Exception) {
+        WidgetLog.e("Could not load the cover image for a note card", cause)
+        null
+    }
+
+private fun openNoteIntent(context: Context, noteId: String): Intent =
+    Intent(context, MainActivity::class.java)
+        .setData("emberr://note/$noteId".toUri())
+        .putExtra(widgetNoteIdExtra, noteId)
+        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+private fun openPickerIntent(context: Context, appWidgetId: Int): Intent =
+    Intent(context, NoteCardWidgetPickerActivity::class.java)
+        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)

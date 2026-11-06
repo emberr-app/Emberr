@@ -235,6 +235,20 @@ val androidModule = module {
     }
 
     single {
+        com.emberr.presentation.widget.notecard.NoteCardWidgetContentReader(
+            noteDao = get(),
+            mediaStorageHelper = get()
+        )
+    }
+
+    single {
+        com.emberr.presentation.widget.notecard.NoteCardWidgetCoordinator(
+            context = androidContext(),
+            noteSource = get()
+        )
+    }
+
+    single {
         com.emberr.presentation.widget.notelist.NoteListWidgetCoordinator(
             context = androidContext(),
             contentReader = get()

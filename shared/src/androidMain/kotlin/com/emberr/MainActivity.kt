@@ -44,6 +44,7 @@ import com.emberr.presentation.widget.calendaragenda.refreshCalendarAgendaWidget
 import com.emberr.presentation.widget.note.refreshNoteWidgets
 import com.emberr.presentation.widget.notelist.refreshNoteListWidgets
 import com.emberr.presentation.widget.noteshortcut.refreshNoteShortcutWidgets
+import com.emberr.presentation.widget.notecard.refreshNoteCardWidgets
 import com.emberr.presentation.widget.todaytasks.refreshTodayTasksWidgets
 import com.emberr.presentation.widget.upcomingevents.refreshUpcomingEventsWidgets
 import com.emberr.presentation.widget.tasks.refreshTaskWidgets
@@ -230,6 +231,7 @@ class MainActivity : FragmentActivity() {
                         refreshTaskWidgets(this@MainActivity)
                         refreshNoteListWidgets(this@MainActivity)
                         refreshNoteShortcutWidgets(this@MainActivity)
+                        refreshNoteCardWidgets(this@MainActivity)
                         refreshTodayTasksWidgets(this@MainActivity)
                         refreshCalendarWidgets(this@MainActivity)
                         refreshCalendarAgendaWidgets(this@MainActivity)
