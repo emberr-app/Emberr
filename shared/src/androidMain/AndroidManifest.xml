@@ -184,6 +184,7 @@
 
         <activity
             android:name=".presentation.widget.noteshortcut.NoteShortcutWidgetPickerActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:label="@string/note_shortcut_widget_label"
             android:theme="@style/Theme.Emberr">
@@ -285,6 +286,7 @@
 
         <activity
             android:name=".presentation.widget.note.NoteWidgetPickerActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:label="@string/note_widget_label"
             android:theme="@style/Theme.Emberr">

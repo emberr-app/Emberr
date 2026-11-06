@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -55,6 +56,8 @@ class NoteWidgetPickerActivity : ComponentActivity() {
             return
         }
 
+        enableEdgeToEdge()
+
         setContent {
             EmberrTheme {
                 Surface(
@@ -70,7 +73,8 @@ class NoteWidgetPickerActivity : ComponentActivity() {
 
                         WidgetNoteChooser(
                             notes = notes,
-                            onNoteChosen = { noteId -> applySelection(appWidgetId, noteId) }
+                            onNoteChosen = { noteId -> applySelection(appWidgetId, noteId) },
+                            onClose = { finish() }
                         )
                     }
                 }

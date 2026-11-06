@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.flowOn
 
 data class SelectableWidgetNote(
     val note: NoteMetadataEntity,
-    val spaceName: String
+    val spaceName: String,
+    val spacePosition: Int
 )
 
 class WidgetNoteSource(
@@ -26,10 +27,12 @@ class WidgetNoteSource(
             spaceDao.getAllSpaces()
         ) { notes, spaces ->
             val spaceNamesById = spaces.associate { space -> space.spaceId to space.displayName }
+            val spacePositionsById = spaces.withIndex().associate { (position, space) -> space.spaceId to position }
             notes.map { note ->
                 SelectableWidgetNote(
                     note = note,
-                    spaceName = spaceNamesById[note.spaceId].orEmpty()
+                    spaceName = spaceNamesById[note.spaceId].orEmpty(),
+                    spacePosition = spacePositionsById[note.spaceId] ?: Int.MAX_VALUE
                 )
             }
         }
