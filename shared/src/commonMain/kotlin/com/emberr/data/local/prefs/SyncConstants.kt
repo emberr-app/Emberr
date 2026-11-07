@@ -18,6 +18,12 @@ object SyncConstants {
     // Appearance
     const val KEY_THEME_PREFERENCE = "theme_preference"
     const val DEFAULT_THEME_PREFERENCE = "SYSTEM"
+    const val KEY_COLOR_THEME_PREFERENCE = "color_theme_preference"
+    const val DEFAULT_COLOR_THEME_PREFERENCE = "EMBERR"
+    const val KEY_THEMED_TEXT_AND_ICONS = "themed_text_and_icons"
+    const val DEFAULT_THEMED_TEXT_AND_ICONS = true
+    const val KEY_COLOR_THEME_STRENGTH = "color_theme_strength"
+    const val DEFAULT_COLOR_THEME_STRENGTH = 100
     const val KEY_FONT_SIZE_PREFERENCE = "font_size_preference"
     const val DEFAULT_FONT_SIZE_PREFERENCE = "DEFAULT"
     const val KEY_FONT_STYLE_PREFERENCE = "font_style_preference"

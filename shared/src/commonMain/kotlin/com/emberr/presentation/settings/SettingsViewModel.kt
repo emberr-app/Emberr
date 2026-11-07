@@ -94,6 +94,36 @@ class SettingsViewModel(
         settingsManager.saveThemePreference(preference)
     }
 
+    val colorThemePreference: StateFlow<String> = settingsManager.colorThemePreferenceFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.getColorThemePreference()
+    )
+
+    fun setColorThemePreference(preference: String) {
+        settingsManager.saveColorThemePreference(preference)
+    }
+
+    val themedTextAndIcons: StateFlow<Boolean> = settingsManager.themedTextAndIconsFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.isThemedTextAndIconsEnabled()
+    )
+
+    fun setThemedTextAndIcons(enabled: Boolean) {
+        settingsManager.saveThemedTextAndIcons(enabled)
+    }
+
+    val colorThemeStrength: StateFlow<Int> = settingsManager.colorThemeStrengthFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.getColorThemeStrength()
+    )
+
+    fun setColorThemeStrength(strengthPercent: Int) {
+        settingsManager.saveColorThemeStrength(strengthPercent)
+    }
+
     val fontSizePreference: StateFlow<String> = settingsManager.fontSizePreferenceFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

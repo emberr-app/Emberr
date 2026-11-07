@@ -21,6 +21,7 @@ import com.emberr.ui.theme.EmberrTheme
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
+import com.emberr.ui.theme.colorThemePreferenceNamed
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -48,6 +49,9 @@ class AppLockActivity : FragmentActivity() {
             val themePreferenceName by settingsViewModel.themePreference.collectAsState()
             val fontSizePreferenceName by settingsViewModel.fontSizePreference.collectAsState()
             val fontStylePreferenceName by settingsViewModel.fontStylePreference.collectAsState()
+            val colorThemePreferenceName by settingsViewModel.colorThemePreference.collectAsState()
+            val themedTextAndIcons by settingsViewModel.themedTextAndIcons.collectAsState()
+            val colorThemeStrength by settingsViewModel.colorThemeStrength.collectAsState()
 
             val darkTheme = when (runCatching { ThemePreference.valueOf(themePreferenceName) }.getOrDefault(ThemePreference.SYSTEM)) {
                 ThemePreference.LIGHT -> false
@@ -60,7 +64,10 @@ class AppLockActivity : FragmentActivity() {
                 fontSizePreference = runCatching { FontSizePreference.valueOf(fontSizePreferenceName) }
                     .getOrDefault(FontSizePreference.DEFAULT),
                 fontStylePreference = runCatching { FontStylePreference.valueOf(fontStylePreferenceName) }
-                    .getOrDefault(FontStylePreference.POPPINS)
+                    .getOrDefault(FontStylePreference.POPPINS),
+                colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
+                themedTextAndIcons = themedTextAndIcons,
+                colorThemeStrength = colorThemeStrength
             ) {
                 AppLockScreen(
                     unlockFailureMessage = unlockFailureMessage,

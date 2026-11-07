@@ -81,6 +81,7 @@ import com.emberr.domain.theme.resolveLinuxSystemIsDark
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
+import com.emberr.ui.theme.colorThemePreferenceNamed
 import com.emberr.ui.theme.EmberrTheme
 import com.emberr.domain.util.export.handleExportBackup
 import com.emberr.domain.util.export.handleExportMarkdown
@@ -396,11 +397,24 @@ private fun runEmberrDesktopApp() = application {
             ThemePreference.SYSTEM -> linuxSystemIsDark ?: systemIsDark
         }
 
+        val colorThemePreferenceName by settingsManager.colorThemePreferenceFlow.collectAsState(
+            initial = settingsManager.getColorThemePreference()
+        )
+        val themedTextAndIcons by settingsManager.themedTextAndIconsFlow.collectAsState(
+            initial = settingsManager.isThemedTextAndIconsEnabled()
+        )
+        val colorThemeStrength by settingsManager.colorThemeStrengthFlow.collectAsState(
+            initial = settingsManager.getColorThemeStrength()
+        )
+
         FollowLiveDisplayScale(mainWindowState) {
         EmberrTheme(
             darkTheme = darkTheme,
             fontSizePreference = fontSizePreference,
             fontStylePreference = fontStylePreference,
+            colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
+            themedTextAndIcons = themedTextAndIcons,
+            colorThemeStrength = colorThemeStrength,
             usesTwentyFourHourClock = usesTwentyFourHourClock,
             firstDayOfWeek = firstDayOfWeek
         ) {
@@ -540,6 +554,16 @@ private fun runEmberrDesktopApp() = application {
                     ThemePreference.SYSTEM -> linuxSystemIsDark ?: systemIsDark
                 }
 
+                val colorThemePreferenceName by settingsManager.colorThemePreferenceFlow.collectAsState(
+                    initial = settingsManager.getColorThemePreference()
+                )
+                val themedTextAndIcons by settingsManager.themedTextAndIconsFlow.collectAsState(
+                    initial = settingsManager.isThemedTextAndIconsEnabled()
+                )
+                val colorThemeStrength by settingsManager.colorThemeStrengthFlow.collectAsState(
+                    initial = settingsManager.getColorThemeStrength()
+                )
+
                 val stickyWindow = this.window as Frame
 
                 FollowLiveDisplayScale(stickyNoteWindowState) {
@@ -547,6 +571,9 @@ private fun runEmberrDesktopApp() = application {
                     darkTheme = darkTheme,
                     fontSizePreference = fontSizePreference,
                     fontStylePreference = fontStylePreference,
+                    colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
+                    themedTextAndIcons = themedTextAndIcons,
+                    colorThemeStrength = colorThemeStrength,
                     usesTwentyFourHourClock = usesTwentyFourHourClock,
                     firstDayOfWeek = firstDayOfWeek
                 ) {

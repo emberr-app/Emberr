@@ -111,6 +111,18 @@ interface SettingsManager {
     val themePreferenceFlow: Flow<String>
     fun saveThemePreference(preference: String)
 
+    val colorThemePreferenceFlow: Flow<String>
+    fun getColorThemePreference(): String
+    fun saveColorThemePreference(preference: String)
+
+    val themedTextAndIconsFlow: Flow<Boolean>
+    fun isThemedTextAndIconsEnabled(): Boolean
+    fun saveThemedTextAndIcons(enabled: Boolean)
+
+    val colorThemeStrengthFlow: Flow<Int>
+    fun getColorThemeStrength(): Int
+    fun saveColorThemeStrength(strengthPercent: Int)
+
     val fontSizePreferenceFlow: Flow<String>
     fun saveFontSizePreference(preference: String)
 
