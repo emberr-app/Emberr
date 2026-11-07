@@ -154,7 +154,7 @@ import com.emberr.ui.theme.PaperTextureArea
 import com.emberr.ui.theme.paperTextureToggleLabelFor
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.dot_grid
+import emberr.shared.generated.resources.paper_texture
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.copy
@@ -1574,7 +1574,7 @@ fun NoteOptionsDesktopMenu(
         ) { onToggleWordCount() }
 
         DesktopMenuItem(
-            painterResource(Res.drawable.dot_grid),
+            painterResource(Res.drawable.paper_texture),
             paperTextureToggleLabelFor(isPaperTextureOn)
         ) { onTogglePaperTexture() }
 
@@ -1858,7 +1858,7 @@ fun NoteOptionsBottomSheet(
                 onToggleWordCount()
             }
 
-            BottomSheetOptionItem(painterResource(Res.drawable.dot_grid), paperTextureToggleLabelFor(isPaperTextureOn)) {
+            BottomSheetOptionItem(painterResource(Res.drawable.paper_texture), paperTextureToggleLabelFor(isPaperTextureOn)) {
                 onTogglePaperTexture()
             }
 

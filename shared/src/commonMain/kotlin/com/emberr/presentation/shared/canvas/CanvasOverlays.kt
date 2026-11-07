@@ -112,6 +112,7 @@ import com.emberr.ui.theme.paperTextureToggleLabelFor
 import com.emberr.data.local.prefs.SettingsManager
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.paper_texture
 import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.arrow_left
 import emberr.shared.generated.resources.dot_grid
@@ -292,7 +293,7 @@ private fun CanvasDesktopOptionsMenus(
     EmberrDesktopMenu(expanded = showOptionsMenu, onDismissRequest = onDismissOptions) {
         Column(Modifier.width(240.dp).padding(vertical = 4.dp)) {
             DesktopMenuItem(painterResource(Res.drawable.pen), "Rename") { onOpenRename() }
-            DesktopMenuItem(painterResource(Res.drawable.dot_grid), paperTextureToggleLabelFor(isPaperTextureOn)) {
+            DesktopMenuItem(painterResource(Res.drawable.paper_texture), paperTextureToggleLabelFor(isPaperTextureOn)) {
                 onTogglePaperTexture()
             }
             if (showFavoriteOption) {
@@ -368,7 +369,7 @@ private fun CanvasMobileOptionsSheets(
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
                 BottomSheetOptionItem(painterResource(Res.drawable.pen), "Rename") { closeAnd(onOpenRename) }
-                BottomSheetOptionItem(painterResource(Res.drawable.dot_grid), paperTextureToggleLabelFor(isPaperTextureOn)) {
+                BottomSheetOptionItem(painterResource(Res.drawable.paper_texture), paperTextureToggleLabelFor(isPaperTextureOn)) {
                     onTogglePaperTexture()
                 }
                 if (showFavoriteOption) {
