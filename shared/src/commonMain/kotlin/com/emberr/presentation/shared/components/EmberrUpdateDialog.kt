@@ -73,6 +73,7 @@ import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.editor.components.FullScreenImageScreen
 import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.ui.theme.PaperTexturePanel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
@@ -312,7 +313,7 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Column(
+            PaperTexturePanel(
                 modifier = Modifier
                     .then(
                         if (isDesktopPlatform) {
@@ -337,89 +338,91 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                         onClick = {}
                     )
             ) {
-                Box(modifier = Modifier.weight(1f, fill = false)) {
-                    val dialogHazeState = remember { HazeState() }
-                    var headerHeightPx by remember { mutableFloatStateOf(0f) }
-                    var buttonAreaHeightPx by remember { mutableFloatStateOf(0f) }
-                    val notesScrollState = rememberScrollState()
-                    val headerFadeAlpha by remember {
-                        derivedStateOf { if (notesScrollState.value > 0) 1f else 0f }
-                    }
-                    val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
-                    val buttonAreaHeight = with(LocalDensity.current) { buttonAreaHeightPx.toDp() }
-                    val headerBlurStyle = EmberrBlur.Regular.copy(
-                        backgroundColor = dialogColor,
-                        tints = listOf(HazeTint(dialogColor.copy(alpha = 0.45f))),
-                        fallbackTint = HazeTint(dialogColor)
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .hazeSource(state = dialogHazeState)
-                            .verticalScroll(notesScrollState)
-                            .padding(horizontal = UpdateDialogPadding)
-                            .padding(top = headerHeight + 16.dp, bottom = buttonAreaHeight),
-                        verticalArrangement = Arrangement.spacedBy(40.dp)
-                    ) {
-                        CurrentUpdateNotes.forEach { section ->
-                            UpdateNotesSectionView(section)
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.weight(1f, fill = false)) {
+                        val dialogHazeState = remember { HazeState() }
+                        var headerHeightPx by remember { mutableFloatStateOf(0f) }
+                        var buttonAreaHeightPx by remember { mutableFloatStateOf(0f) }
+                        val notesScrollState = rememberScrollState()
+                        val headerFadeAlpha by remember {
+                            derivedStateOf { if (notesScrollState.value > 0) 1f else 0f }
                         }
-                    }
+                        val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+                        val buttonAreaHeight = with(LocalDensity.current) { buttonAreaHeightPx.toDp() }
+                        val headerBlurStyle = EmberrBlur.Regular.copy(
+                            backgroundColor = dialogColor,
+                            tints = listOf(HazeTint(dialogColor.copy(alpha = 0.45f))),
+                            fallbackTint = HazeTint(dialogColor)
+                        )
 
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .fillMaxWidth()
-                            .onGloballyPositioned { coordinates -> headerHeightPx = coordinates.size.height.toFloat() }
-                    ) {
-                        EmberrTopHeaderBar(
-                            titlePlacement = TopHeaderTitlePlacement.Start,
-                            showBackButton = false,
-                            reserveBackButtonSpace = false,
-                            showsSidebarToggle = false,
-                            topEdgeFadeAlpha = headerFadeAlpha,
-                            topEdgeColor = dialogColor,
-                            topEdgeBlurHeight = UpdateDialogHeaderBlurHeight,
-                            topEdgeGradientHeight = UpdateDialogHeaderGradientHeight,
-                            flatFadeHeight = headerHeight + 4.dp,
-                            hazeState = dialogHazeState,
-                            hazeStyle = headerBlurStyle,
-                            applyStatusBarPadding = false,
-                            contentPadding = topHeaderBarPadding(
-                                top = UpdateDialogPadding,
-                                horizontal = UpdateDialogPadding,
-                                bottom = 8.dp
-                            ),
-                            leadingContent = {
-                                Column {
-                                    Text(
-                                        text = "What's new",
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    appVersionName?.let { version ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .hazeSource(state = dialogHazeState)
+                                .verticalScroll(notesScrollState)
+                                .padding(horizontal = UpdateDialogPadding)
+                                .padding(top = headerHeight + 16.dp, bottom = buttonAreaHeight),
+                            verticalArrangement = Arrangement.spacedBy(40.dp)
+                        ) {
+                            CurrentUpdateNotes.forEach { section ->
+                                UpdateNotesSectionView(section)
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .fillMaxWidth()
+                                .onGloballyPositioned { coordinates -> headerHeightPx = coordinates.size.height.toFloat() }
+                        ) {
+                            EmberrTopHeaderBar(
+                                titlePlacement = TopHeaderTitlePlacement.Start,
+                                showBackButton = false,
+                                reserveBackButtonSpace = false,
+                                showsSidebarToggle = false,
+                                topEdgeFadeAlpha = headerFadeAlpha,
+                                topEdgeColor = dialogColor,
+                                topEdgeBlurHeight = UpdateDialogHeaderBlurHeight,
+                                topEdgeGradientHeight = UpdateDialogHeaderGradientHeight,
+                                flatFadeHeight = headerHeight + 4.dp,
+                                hazeState = dialogHazeState,
+                                hazeStyle = headerBlurStyle,
+                                applyStatusBarPadding = false,
+                                contentPadding = topHeaderBarPadding(
+                                    top = UpdateDialogPadding,
+                                    horizontal = UpdateDialogPadding,
+                                    bottom = 8.dp
+                                ),
+                                leadingContent = {
+                                    Column {
                                         Text(
-                                            text = "Version $version",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.outline
+                                            text = "What's new",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
+                                        appVersionName?.let { version ->
+                                            Text(
+                                                text = "Version $version",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.outline
+                                            )
+                                        }
                                     }
                                 }
-                            }
+                            )
+                        }
+
+                        EmberrButtonPrimary(
+                            text = "Got it",
+                            onClick = onDismissRequest,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .onGloballyPositioned { coordinates -> buttonAreaHeightPx = coordinates.size.height.toFloat() }
+                                .fillMaxWidth()
+                                .padding(UpdateDialogPadding)
                         )
                     }
-
-                    EmberrButtonPrimary(
-                        text = "Got it",
-                        onClick = onDismissRequest,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .onGloballyPositioned { coordinates -> buttonAreaHeightPx = coordinates.size.height.toFloat() }
-                            .fillMaxWidth()
-                            .padding(UpdateDialogPadding)
-                    )
                 }
             }
         }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -111,6 +112,7 @@ import com.emberr.presentation.home.note.EmojiPickerSheetContent
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
+import com.emberr.ui.theme.PaperTexturePanel
 import androidx.compose.foundation.layout.navigationBarsPadding
 import emberr.shared.generated.resources.calendar_add
 import emberr.shared.generated.resources.ghost_smile
@@ -119,8 +121,8 @@ import emberr.shared.generated.resources.message
 import emberr.shared.generated.resources.phone
 import emberr.shared.generated.resources.user2
 
-private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.55f
-private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.92f
+private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.6f
+private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.8f
 private const val ANDROID_NAME_SIZE_SCALE = 1.3f
 private const val DESKTOP_NAME_SIZE_SCALE = 1.5f
 private const val GLOW_FADE_START = 0.45f
@@ -136,7 +138,8 @@ private val QuickActionMinWidth = 58.dp
 private val QuickActionTileSize = 48.dp
 private val QuickActionShape = RoundedCornerShape(12.dp)
 private val QuickActionIconSize = 20.dp
-private val DesktopDialogMaxWidth = 720.dp
+private val DesktopDialogMaxWidth = 760.dp
+private val DesktopDialogMaxHeight = 720.dp
 private val DesktopDialogShape = RoundedCornerShape(24.dp)
 private val DesktopSidePadding = 28.dp
 private val DesktopDetailsColumnWidth = 280.dp
@@ -269,11 +272,12 @@ fun PersonView(
                     .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = dismiss),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
+                PaperTexturePanel(
                     modifier = Modifier
                         .fillMaxWidth(DESKTOP_DIALOG_WIDTH_FRACTION)
                         .widthIn(max = DesktopDialogMaxWidth)
                         .fillMaxHeight(DESKTOP_DIALOG_HEIGHT_FRACTION)
+                        .heightIn(max = DesktopDialogMaxHeight)
                         .safeDrawingPadding()
                         .clip(DesktopDialogShape)
                         .background(personPageColor())
