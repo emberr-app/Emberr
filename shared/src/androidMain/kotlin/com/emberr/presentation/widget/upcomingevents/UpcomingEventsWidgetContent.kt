@@ -21,4 +21,6 @@ data class UpcomingEvent(
     val dayLabel: String? = null,
     val weekdayShortLabel: String = "",
     val dayOfMonthLabel: String = ""
-)
+) {
+    val isRepeating: Boolean get() = dayLabel != null
+}

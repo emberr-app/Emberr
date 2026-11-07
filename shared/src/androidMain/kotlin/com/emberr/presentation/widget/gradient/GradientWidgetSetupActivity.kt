@@ -1,5 +1,5 @@
 // The shared setup screen for gradient widgets, opened when one is added or reconfigured, for choosing its background gradient.
-package com.emberr.presentation.widget.dailyjot
+package com.emberr.presentation.widget.gradient
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
@@ -41,10 +41,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource as androidPainterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -70,13 +72,12 @@ import org.jetbrains.compose.resources.painterResource
 
 private val swatchHeight = 112.dp
 private val swatchCornerRadius = 20.dp
-private const val gradientSolidTopFraction = 0.3f
 
 abstract class GradientWidgetSetupActivity : ComponentActivity() {
 
     protected abstract fun widgetToRedraw(): GlanceAppWidget
 
-    private var selectedGradient by mutableStateOf(DailyJotGradient.defaultGradient)
+    private var selectedGradient by mutableStateOf(WidgetGradient.defaultGradient)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,15 +115,15 @@ abstract class GradientWidgetSetupActivity : ComponentActivity() {
                     this@GradientWidgetSetupActivity,
                     PreferencesGlanceStateDefinition,
                     glanceId
-                )[dailyJotGradientKey]
-                withContext(Dispatchers.Main) { selectedGradient = DailyJotGradient.named(savedName) }
+                )[widgetGradientKey]
+                withContext(Dispatchers.Main) { selectedGradient = WidgetGradient.named(savedName) }
             } catch (cause: Exception) {
                 WidgetLog.e("Could not read the widget's gradient", cause)
             }
         }
     }
 
-    private fun applyGradient(appWidgetId: Int, gradient: DailyJotGradient) {
+    private fun applyGradient(appWidgetId: Int, gradient: WidgetGradient) {
         selectedGradient = gradient
         lifecycleScope.launch(Dispatchers.Default) {
             try {
@@ -132,7 +133,7 @@ abstract class GradientWidgetSetupActivity : ComponentActivity() {
                     definition = PreferencesGlanceStateDefinition,
                     glanceId = glanceId
                 ) { preferences ->
-                    preferences.toMutablePreferences().apply { this[dailyJotGradientKey] = gradient.storageName }
+                    preferences.toMutablePreferences().apply { this[widgetGradientKey] = gradient.storageName }
                 }
                 widgetToRedraw().update(this@GradientWidgetSetupActivity, glanceId)
                 withContext(Dispatchers.Main) { setResult(RESULT_OK, resultIntentFor(appWidgetId)) }
@@ -149,8 +150,8 @@ abstract class GradientWidgetSetupActivity : ComponentActivity() {
 
 @Composable
 private fun GradientChooser(
-    selectedGradient: DailyJotGradient,
-    onGradientChosen: (DailyJotGradient) -> Unit,
+    selectedGradient: WidgetGradient,
+    onGradientChosen: (WidgetGradient) -> Unit,
     onClose: () -> Unit
 ) {
     val hazeState = remember { HazeState() }
@@ -183,7 +184,7 @@ private fun GradientChooser(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(items = DailyJotGradient.entries, key = { gradient -> gradient.storageName }) { gradient ->
+            items(items = WidgetGradient.entries, key = { gradient -> gradient.storageName }) { gradient ->
                 GradientSwatch(
                     gradient = gradient,
                     isSelected = gradient == selectedGradient,
@@ -211,7 +212,7 @@ private fun GradientChooser(
 }
 
 @Composable
-private fun GradientSwatch(gradient: DailyJotGradient, isSelected: Boolean, onClick: () -> Unit) {
+private fun GradientSwatch(gradient: WidgetGradient, isSelected: Boolean, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -223,12 +224,9 @@ private fun GradientSwatch(gradient: DailyJotGradient, isSelected: Boolean, onCl
                 .fillMaxWidth()
                 .height(swatchHeight)
                 .clip(RoundedCornerShape(swatchCornerRadius))
-                .background(
-                    Brush.verticalGradient(
-                        0f to gradient.topColor,
-                        gradientSolidTopFraction to gradient.topColor,
-                        1f to gradient.bottomColor
-                    )
+                .paint(
+                    painter = androidPainterResource(gradient.drawableResource),
+                    contentScale = ContentScale.FillBounds
                 )
                 .padding(12.dp)
         ) {
@@ -251,7 +249,7 @@ private fun GradientSwatch(gradient: DailyJotGradient, isSelected: Boolean, onCl
                     Icon(
                         painter = painterResource(Res.drawable.check),
                         contentDescription = "Selected",
-                        tint = gradient.topColor,
+                        tint = Color.Black,
                         modifier = Modifier.size(16.dp)
                     )
                 }

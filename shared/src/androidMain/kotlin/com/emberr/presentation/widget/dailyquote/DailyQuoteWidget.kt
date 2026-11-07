@@ -39,12 +39,12 @@ import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.emberr.R
 import com.emberr.presentation.widget.WidgetLog
-import com.emberr.presentation.widget.dailyjot.DailyJotGradient
-import com.emberr.presentation.widget.dailyjot.GradientCardHeader
-import com.emberr.presentation.widget.dailyjot.continueTodaysDailyIntent
-import com.emberr.presentation.widget.dailyjot.dailyJotGradientKey
-import com.emberr.presentation.widget.dailyjot.gradientCardBackground
-import com.emberr.presentation.widget.dailyjot.gradientCardPadding
+import com.emberr.presentation.widget.gradient.WidgetGradient
+import com.emberr.presentation.widget.gradient.GradientCardHeader
+import com.emberr.presentation.widget.gradient.continueTodaysDailyIntent
+import com.emberr.presentation.widget.gradient.widgetGradientKey
+import com.emberr.presentation.widget.gradient.gradientCardBackground
+import com.emberr.presentation.widget.gradient.gradientCardPadding
 
 private const val maximumQuoteLines = 4
 private val quoteFontSizeStepsInSp = listOf(18f, 17f, 16f, 15f, 14f, 13f)
@@ -72,7 +72,7 @@ class DailyQuoteWidget : GlanceAppWidget() {
             val savedState = currentState<Preferences>()
             DailyQuoteWidgetBody(
                 context = context,
-                gradient = DailyJotGradient.named(savedState[dailyJotGradientKey]),
+                gradient = WidgetGradient.named(savedState[widgetGradientKey]),
                 quoteText = savedState[quoteTextKey],
                 quoteAuthor = savedState[quoteAuthorKey]
             )
@@ -83,7 +83,7 @@ class DailyQuoteWidget : GlanceAppWidget() {
 @Composable
 private fun DailyQuoteWidgetBody(
     context: Context,
-    gradient: DailyJotGradient,
+    gradient: WidgetGradient,
     quoteText: String?,
     quoteAuthor: String?
 ) {
@@ -156,20 +156,19 @@ private fun renderQuoteImage(context: Context, quote: String, author: String?, w
         val gapInPixels = if (authorLayout != null) gapBetweenQuoteAndAuthorInDp * pixelsPerDp else 0f
         val heightLeftForQuote = availableHeightInPixels - gapInPixels - (authorLayout?.height ?: 0)
 
+        fun quoteLayoutAt(fontSizeInSp: Float) = buildCenteredLayout(
+            quote,
+            textPaint(quoteTypeface, fontSizeInSp * pixelsPerSp, quoteTextColor),
+            availableWidthInPixels,
+            maximumQuoteLines,
+            quoteLineSpacingMultiplier
+        )
+
         val quoteLayout = quoteFontSizeStepsInSp
             .asSequence()
-            .map { fontSizeInSp ->
-                val quotePaint = textPaint(quoteTypeface, fontSizeInSp * pixelsPerSp, quoteTextColor)
-                buildCenteredLayout(quote, quotePaint, availableWidthInPixels, maximumQuoteLines, quoteLineSpacingMultiplier)
-            }
+            .map(::quoteLayoutAt)
             .firstOrNull { layout -> layout.fitsWithoutCutting() && layout.height <= heightLeftForQuote }
-            ?: buildCenteredLayout(
-                quote,
-                textPaint(quoteTypeface, quoteFontSizeStepsInSp.last() * pixelsPerSp, quoteTextColor),
-                availableWidthInPixels,
-                maximumQuoteLines,
-                quoteLineSpacingMultiplier
-            )
+            ?: quoteLayoutAt(quoteFontSizeStepsInSp.last())
 
         val totalHeightInPixels = (quoteLayout.height + gapInPixels + (authorLayout?.height ?: 0)).toInt().coerceAtLeast(1)
         val bitmap = Bitmap.createBitmap(availableWidthInPixels, totalHeightInPixels, Bitmap.Config.ARGB_8888)

@@ -49,7 +49,8 @@ suspend fun readWidgetSpaceId(context: Context, glanceId: GlanceId): String {
 suspend fun isPinnedSpaceDeleted(context: Context, glanceId: GlanceId): Boolean {
     val pinnedSpaceId = readPinnedSpaceId(context, glanceId) ?: return false
     return try {
-        GlobalContext.get().get<SpaceRepository>().getSpace(pinnedSpaceId)?.isDeleted != false
+        val space = GlobalContext.get().get<SpaceRepository>().getSpace(pinnedSpaceId)
+        space == null || space.isDeleted
     } catch (cause: Exception) {
         WidgetLog.e("Could not check whether the pinned space was deleted", cause)
         false

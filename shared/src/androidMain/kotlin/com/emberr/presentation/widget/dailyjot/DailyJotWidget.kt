@@ -37,6 +37,13 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.emberr.R
+import com.emberr.presentation.widget.gradient.GradientCardHeader
+import com.emberr.presentation.widget.gradient.WidgetGradient
+import com.emberr.presentation.widget.gradient.continueTodaysDailyIntent
+import com.emberr.presentation.widget.gradient.gradientCardBackground
+import com.emberr.presentation.widget.gradient.gradientCardPadding
+import com.emberr.presentation.widget.gradient.onGradientTextColor
+import com.emberr.presentation.widget.gradient.widgetGradientKey
 
 private val buttonGlassColor = ColorProvider(Color(0x33FFFFFF))
 private val jotButtonHeight = 42.dp
@@ -50,14 +57,14 @@ class DailyJotWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val gradient = DailyJotGradient.named(currentState<Preferences>()[dailyJotGradientKey])
+            val gradient = WidgetGradient.named(currentState<Preferences>()[widgetGradientKey])
             DailyJotWidgetBody(context = context, gradient = gradient)
         }
     }
 }
 
 @Composable
-private fun DailyJotWidgetBody(context: Context, gradient: DailyJotGradient) {
+private fun DailyJotWidgetBody(context: Context, gradient: WidgetGradient) {
     val continueTypingAction = actionStartActivity(continueTodaysDailyIntent(context))
 
     Column(

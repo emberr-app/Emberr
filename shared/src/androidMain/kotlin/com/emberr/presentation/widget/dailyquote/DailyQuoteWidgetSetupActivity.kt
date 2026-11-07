@@ -2,7 +2,7 @@
 package com.emberr.presentation.widget.dailyquote
 
 import androidx.glance.appwidget.GlanceAppWidget
-import com.emberr.presentation.widget.dailyjot.GradientWidgetSetupActivity
+import com.emberr.presentation.widget.gradient.GradientWidgetSetupActivity
 
 class DailyQuoteWidgetSetupActivity : GradientWidgetSetupActivity() {
     override fun widgetToRedraw(): GlanceAppWidget = DailyQuoteWidget()

@@ -58,6 +58,7 @@ import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.widgetNoteIdExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import com.emberr.presentation.widget.writeDeletedFlag
 
 private val pillHeight = 66.dp
 private val pillCornerRadius = 33.dp
@@ -78,7 +79,7 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
         val noteIdAtStart = readShortcutNoteId(context, id)?.takeIf { it.isNotBlank() }
         if (noteIdAtStart != null && loadAndCacheShortcut(context, id, noteIdAtStart) == null) {
             val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
-            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeShortcutNoteDeleted(context, id)
+            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeDeletedFlag(context, id, shortcutNoteDeletedKey)
         }
 
         val appWidgetId = resolveAppWidgetId(context, id)
