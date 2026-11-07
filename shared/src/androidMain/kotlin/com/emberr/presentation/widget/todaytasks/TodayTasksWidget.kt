@@ -45,6 +45,7 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.WidgetCheckbox
 import com.emberr.presentation.widget.WidgetLabelPill
@@ -94,24 +95,28 @@ class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
-            val rawCachedContent = currentState<Preferences>()[cachedTodayTasksKey]
-            val savedContent = remember(rawCachedContent) { decodeCachedTodayTasks(rawCachedContent) }
+            WidgetColorTheme {
+                val rawCachedContent = currentState<Preferences>()[cachedTodayTasksKey]
+                val savedContent = remember(rawCachedContent) { decodeCachedTodayTasks(rawCachedContent) }
 
-            TodayTasksWidgetBody(
-                context = context,
-                appWidgetId = appWidgetId,
-                content = savedContent ?: content
-            )
+                TodayTasksWidgetBody(
+                    context = context,
+                    appWidgetId = appWidgetId,
+                    content = savedContent ?: content
+                )
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            TodayTasksWidgetBody(
-                context = context,
-                appWidgetId = INVALID_APPWIDGET_ID,
-                content = previewTodayTasksContent()
-            )
+            WidgetColorTheme {
+                TodayTasksWidgetBody(
+                    context = context,
+                    appWidgetId = INVALID_APPWIDGET_ID,
+                    content = previewTodayTasksContent()
+                )
+            }
         }
     }
 

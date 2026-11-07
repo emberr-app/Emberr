@@ -38,6 +38,7 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.gradient.WidgetGradient
 import com.emberr.presentation.widget.gradient.GradientCardHeader
@@ -71,24 +72,28 @@ class DailyQuoteWidget : GlanceAppWidget() {
         saveTodaysQuoteIfNeeded(context, id)
 
         provideContent {
-            val savedState = currentState<Preferences>()
-            DailyQuoteWidgetBody(
-                context = context,
-                gradient = WidgetGradient.named(savedState[widgetGradientKey]),
-                quoteText = savedState[quoteTextKey],
-                quoteAuthor = savedState[quoteAuthorKey]
-            )
+            WidgetColorTheme {
+                val savedState = currentState<Preferences>()
+                DailyQuoteWidgetBody(
+                    context = context,
+                    gradient = WidgetGradient.named(savedState[widgetGradientKey]),
+                    quoteText = savedState[quoteTextKey],
+                    quoteAuthor = savedState[quoteAuthorKey]
+                )
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            DailyQuoteWidgetBody(
-                context = context,
-                gradient = WidgetGradient.defaultGradient,
-                quoteText = previewQuoteText,
-                quoteAuthor = previewQuoteAuthor
-            )
+            WidgetColorTheme {
+                DailyQuoteWidgetBody(
+                    context = context,
+                    gradient = WidgetGradient.defaultGradient,
+                    quoteText = previewQuoteText,
+                    quoteAuthor = previewQuoteAuthor
+                )
+            }
         }
     }
 }

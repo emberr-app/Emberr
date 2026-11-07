@@ -48,6 +48,7 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.WidgetNoteSource
 import com.emberr.presentation.widget.surfaceColor
@@ -92,29 +93,33 @@ class NoteCardWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
-            val savedState = currentState<Preferences>()
-            val rawCachedCard = savedState[cachedCardKey]
-            val content = remember(rawCachedCard) { decodeCachedCard(rawCachedCard) }
+            WidgetColorTheme {
+                val savedState = currentState<Preferences>()
+                val rawCachedCard = savedState[cachedCardKey]
+                val content = remember(rawCachedCard) { decodeCachedCard(rawCachedCard) }
 
-            NoteCardWidgetBody(
-                context = context,
-                appWidgetId = appWidgetId,
-                chosenNoteId = savedState[cardNoteIdKey]?.takeIf { it.isNotBlank() },
-                content = content,
-                isNoteDeleted = savedState[cardNoteDeletedKey] == true
-            )
+                NoteCardWidgetBody(
+                    context = context,
+                    appWidgetId = appWidgetId,
+                    chosenNoteId = savedState[cardNoteIdKey]?.takeIf { it.isNotBlank() },
+                    content = content,
+                    isNoteDeleted = savedState[cardNoteDeletedKey] == true
+                )
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            NoteCardWidgetBody(
-                context = context,
-                appWidgetId = INVALID_APPWIDGET_ID,
-                chosenNoteId = previewNoteCardContent.noteId,
-                content = previewNoteCardContent,
-                isNoteDeleted = false
-            )
+            WidgetColorTheme {
+                NoteCardWidgetBody(
+                    context = context,
+                    appWidgetId = INVALID_APPWIDGET_ID,
+                    chosenNoteId = previewNoteCardContent.noteId,
+                    content = previewNoteCardContent,
+                    isNoteDeleted = false
+                )
+            }
         }
     }
 

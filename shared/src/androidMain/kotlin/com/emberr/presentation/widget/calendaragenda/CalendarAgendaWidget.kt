@@ -49,6 +49,7 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.calendarEventUriScheme
@@ -91,24 +92,28 @@ class CalendarAgendaWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
-            val rawCachedContent = currentState<Preferences>()[cachedAgendaKey]
-            val savedContent = remember(rawCachedContent) { decodeCachedAgenda(rawCachedContent) }
+            WidgetColorTheme {
+                val rawCachedContent = currentState<Preferences>()[cachedAgendaKey]
+                val savedContent = remember(rawCachedContent) { decodeCachedAgenda(rawCachedContent) }
 
-            CalendarAgendaWidgetBody(
-                context = context,
-                appWidgetId = appWidgetId,
-                content = savedContent ?: content
-            )
+                CalendarAgendaWidgetBody(
+                    context = context,
+                    appWidgetId = appWidgetId,
+                    content = savedContent ?: content
+                )
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            CalendarAgendaWidgetBody(
-                context = context,
-                appWidgetId = INVALID_APPWIDGET_ID,
-                content = previewCalendarAgendaContent()
-            )
+            WidgetColorTheme {
+                CalendarAgendaWidgetBody(
+                    context = context,
+                    appWidgetId = INVALID_APPWIDGET_ID,
+                    content = previewCalendarAgendaContent()
+                )
+            }
         }
     }
 

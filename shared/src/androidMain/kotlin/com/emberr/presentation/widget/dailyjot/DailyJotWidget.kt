@@ -37,6 +37,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.gradient.GradientCardHeader
 import com.emberr.presentation.widget.gradient.WidgetGradient
 import com.emberr.presentation.widget.gradient.continueTodaysDailyIntent
@@ -57,14 +58,18 @@ class DailyJotWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val gradient = WidgetGradient.named(currentState<Preferences>()[widgetGradientKey])
-            DailyJotWidgetBody(context = context, gradient = gradient)
+            WidgetColorTheme {
+                val gradient = WidgetGradient.named(currentState<Preferences>()[widgetGradientKey])
+                DailyJotWidgetBody(context = context, gradient = gradient)
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            DailyJotWidgetBody(context = context, gradient = WidgetGradient.defaultGradient)
+            WidgetColorTheme {
+                DailyJotWidgetBody(context = context, gradient = WidgetGradient.defaultGradient)
+            }
         }
     }
 }
