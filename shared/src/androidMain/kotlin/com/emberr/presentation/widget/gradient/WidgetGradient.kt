@@ -13,7 +13,7 @@ enum class WidgetGradient(
     @DrawableRes val drawableResource: Int
 ) {
     DUSK("dusk", "Dusk", R.drawable.widget_daily_jot_gradient_dusk),
-    EMBER("ember", "Ember", R.drawable.widget_daily_jot_gradient_ember),
+    COPPER("ember", "Copper", R.drawable.widget_daily_jot_gradient_copper),
     FOREST("forest", "Forest", R.drawable.widget_daily_jot_gradient_forest),
     LAGOON("lagoon", "Lagoon", R.drawable.widget_daily_jot_gradient_lagoon),
     MIDNIGHT("midnight", "Midnight", R.drawable.widget_daily_jot_gradient_midnight),
