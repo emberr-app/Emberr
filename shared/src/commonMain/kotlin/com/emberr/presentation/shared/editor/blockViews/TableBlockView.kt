@@ -823,7 +823,7 @@ private fun TableGridCell(
             visualTransformation = webLinkTransformation,
             onTextLayout = { textLayoutResult = it },
             textStyle = textStyle,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { tapToCursor.textAreaCoordinates = it }

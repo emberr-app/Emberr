@@ -376,7 +376,7 @@ private fun WatchlistHeader(
         },
         singleLine = true,
         textStyle = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
         modifier = Modifier
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },

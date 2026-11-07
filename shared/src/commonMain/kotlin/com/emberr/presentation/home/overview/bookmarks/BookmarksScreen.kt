@@ -364,7 +364,7 @@ fun BookmarksScreen(
                                     color = MaterialTheme.colorScheme.primary
                                 ),
                                 singleLine = true,
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
                                 modifier = Modifier
                                     .weight(1f)
                                     .focusRequester(inputFocusRequester),

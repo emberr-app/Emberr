@@ -169,7 +169,7 @@ internal fun ChatInputBar(
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.onBackground
                     ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
                     maxLines = 6,
                     modifier = Modifier

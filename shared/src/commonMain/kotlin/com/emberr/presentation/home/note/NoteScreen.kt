@@ -1200,7 +1200,7 @@ private fun NoteTitleField(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { moveCaretIntoNote(windowX = null) }),
             onTextLayout = { titleLayout = it },
@@ -1741,9 +1741,9 @@ private fun NoteWidthSlider(
             onValueChangeFinished = onNoteWidthChangeFinished,
             valueRange = NARROWEST_NOTE_WIDTH..SyncConstants.FULL_DESKTOP_NOTE_WIDTH,
             colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                thumbColor = MaterialTheme.colorScheme.secondary,
+                activeTrackColor = MaterialTheme.colorScheme.secondary,
+                inactiveTrackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
             )
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

@@ -658,7 +658,7 @@ private fun PersonNameField(page: PersonPage, isCentered: Boolean, sizeScale: Fl
             onValueChange = page.onNameChange,
             singleLine = true,
             textStyle = shownNameStyle,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { submitName() }),
             modifier = fieldModifier.padding(horizontal = 24.dp),
