@@ -71,11 +71,11 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
-import emberr.shared.generated.resources.dot_grid
+import emberr.shared.generated.resources.theme_strength
+import emberr.shared.generated.resources.texture_strength
+import emberr.shared.generated.resources.show_on
+import emberr.shared.generated.resources.paper_texture
 import emberr.shared.generated.resources.moon_cloud
-import emberr.shared.generated.resources.notes2
-import emberr.shared.generated.resources.palette
-import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.sun
 import emberr.shared.generated.resources.text_type
 import org.jetbrains.compose.resources.painterResource
@@ -151,7 +151,7 @@ fun ColorThemeSettingsScreen(
                 item(key = "strength") {
                     SettingsGroup(title = "Strength") {
                         PercentSliderRow(
-                            icon = painterResource(Res.drawable.palette),
+                            icon = painterResource(Res.drawable.theme_strength),
                             title = "Theme Strength",
                             percent = colorThemeStrength,
                             onPercentChange = { newStrength ->
@@ -177,7 +177,7 @@ fun ColorThemeSettingsScreen(
             item(key = "texture") {
                 SettingsGroup(title = "Texture") {
                     SettingsToggleRow(
-                        icon = painterResource(Res.drawable.dot_grid),
+                        icon = painterResource(Res.drawable.paper_texture),
                         title = "Paper Texture",
                         isChecked = paperTextureEnabled,
                         subtitle = "Adds a soft grain, like paper.",
@@ -195,7 +195,7 @@ fun ColorThemeSettingsScreen(
                         )
                         SettingsDivider()
                         PercentSliderRow(
-                            icon = painterResource(Res.drawable.sliders_horizontal),
+                            icon = painterResource(Res.drawable.texture_strength),
                             title = "Texture Strength",
                             percent = paperTextureStrength,
                             onPercentChange = { newStrength ->
@@ -281,7 +281,7 @@ private fun PaperTextureAreasRow(
 
     if (isDesktopPlatform) {
         Row(modifier = Modifier.fillMaxWidth().settingsRowSize(), verticalAlignment = Alignment.CenterVertically) {
-            SettingsRowIcon(icon = painterResource(Res.drawable.notes2))
+            SettingsRowIcon(icon = painterResource(Res.drawable.show_on))
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "Show On",
@@ -297,7 +297,7 @@ private fun PaperTextureAreasRow(
         }
     } else {
         SettingsActionRow(
-            icon = painterResource(Res.drawable.notes2),
+            icon = painterResource(Res.drawable.show_on),
             title = "Show On",
             trailingLabel = paperTextureAreasLabel(areas),
             onClick = { isMenuOpen = true }
