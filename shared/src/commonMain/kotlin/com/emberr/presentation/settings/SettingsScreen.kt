@@ -84,7 +84,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
-import com.emberr.ui.theme.ThemePreference
+import com.emberr.ui.theme.colorThemePreferenceNamed
 import com.emberr.ui.theme.fontFamilyFor
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.domain.util.time.TimeFormatPreference
@@ -164,6 +164,7 @@ fun SettingsScreen(
     onNavigateToAbout: () -> Unit = {},
     onNavigateToImportNotes: () -> Unit = {},
     onNavigateToKeyboardToolbarSettings: () -> Unit = {},
+    onNavigateToColorThemeSettings: () -> Unit = {},
     desktopSubPage: SettingsSubPage? = null,
     onDesktopSubPageChange: (SettingsSubPage?) -> Unit = {},
     showBackButton: Boolean = true,
@@ -194,7 +195,7 @@ fun SettingsScreen(
     var showTimePicker by remember { mutableStateOf(false) }
     var showDayPicker by remember { mutableStateOf(false) }
 
-    val themePreference by viewModel.themePreference.collectAsState()
+    val colorThemePreference by viewModel.colorThemePreference.collectAsState()
 
     val fontSizePreference by viewModel.fontSizePreference.collectAsState()
     val fontStylePreference by viewModel.fontStylePreference.collectAsState()
@@ -333,8 +334,6 @@ fun SettingsScreen(
 
         add(
             SettingsCategory(title = "Appearance") {
-                val selectedTheme = runCatching { ThemePreference.valueOf(themePreference) }
-                    .getOrDefault(ThemePreference.SYSTEM)
                 val selectedFontStyle = runCatching { FontStylePreference.valueOf(fontStylePreference) }
                     .getOrDefault(FontStylePreference.POPPINS)
                 val selectedTimeFormat = timeFormatPreferenceNamed(timeFormatPreference)
@@ -343,7 +342,7 @@ fun SettingsScreen(
                     .getOrDefault(SubNoteOpenMode.SIDE_PANEL)
 
                 AppearanceSettingsSection(
-                    themeLabel = selectedTheme.displayName,
+                    colorThemeLabel = colorThemePreferenceNamed(colorThemePreference).displayName,
                     fontSizeLabel = fontSizeDisplayNameFor(fontSizePreference),
                     fontStyleLabel = selectedFontStyle.displayName,
                     timeFormatLabel = selectedTimeFormat.displayName,
@@ -358,11 +357,6 @@ fun SettingsScreen(
                     hiddenOverviewSections = hiddenOverviewSections,
                     customWindowFrameEnabled = customWindowFrameEnabled,
                     autoHideTitleBar = autoHideTitleBar,
-                    themeChoices = ThemePreference.entries.map { option ->
-                        SettingsChoice(label = option.displayName, isSelected = option == selectedTheme) {
-                            viewModel.setThemePreference(option.name)
-                        }
-                    },
                     fontSizeChoices = FontSizeOptions.map { (preferenceName, displayName) ->
                         SettingsChoice(label = displayName, isSelected = preferenceName == fontSizePreference) {
                             viewModel.setFontSizePreference(preferenceName)
@@ -404,6 +398,7 @@ fun SettingsScreen(
                             viewModel.setTopBarFadeProgressive(!topBarFadeProgressive)
                         }
                     },
+                    onColorThemeClick = onNavigateToColorThemeSettings,
                     onTopBarFadeStyleClick = { showTopBarFadeStyleSheet = true },
                     onShowScrollbarChange = { viewModel.setShowScrollbar(it) },
                     onDailyNotesEnabledChange = { viewModel.setDailyNotesEnabled(it) },
@@ -475,6 +470,7 @@ fun SettingsScreen(
                             onThirdPartyServicesClick = { onDesktopSubPageChange(SettingsSubPage.THIRD_PARTY_SERVICES) },
                             showTopBar = false
                         )
+                        SettingsSubPage.COLOR_THEME -> ColorThemeSettingsScreen(onNavigateBack = goBack, showTopBar = false)
                         SettingsSubPage.OPEN_SOURCE_LICENSES -> OpenSourceLicensesScreen(onNavigateBack = goBack, showTopBar = false)
                         SettingsSubPage.THIRD_PARTY_SERVICES -> ThirdPartyServicesScreen(onNavigateBack = goBack, showTopBar = false)
                     }
@@ -1086,7 +1082,7 @@ private fun SyncSettingsSection(
 
 @Composable
 private fun AppearanceSettingsSection(
-    themeLabel: String,
+    colorThemeLabel: String,
     fontSizeLabel: String,
     fontStyleLabel: String,
     timeFormatLabel: String,
@@ -1101,7 +1097,6 @@ private fun AppearanceSettingsSection(
     hiddenOverviewSections: Set<String>,
     customWindowFrameEnabled: Boolean,
     autoHideTitleBar: Boolean,
-    themeChoices: List<SettingsChoice>,
     fontSizeChoices: List<SettingsChoice>,
     fontStyleChoices: List<SettingsChoice>,
     timeFormatChoices: List<SettingsChoice>,
@@ -1109,6 +1104,7 @@ private fun AppearanceSettingsSection(
     subNoteOpenModeChoices: List<SettingsChoice>,
     topBarFadeStyleChoices: List<SettingsChoice>,
     topBarFadeProgressiveToggle: SettingsMenuToggle?,
+    onColorThemeClick: () -> Unit,
     onTopBarFadeStyleClick: () -> Unit,
     onShowScrollbarChange: (Boolean) -> Unit,
     onDailyNotesEnabledChange: (Boolean) -> Unit,
@@ -1120,11 +1116,11 @@ private fun AppearanceSettingsSection(
     onAutoHideTitleBarChange: (Boolean) -> Unit
 ) {
     SettingsGroup(title = "Appearance") {
-        SettingsChoiceRow(
+        SettingsActionRow(
             icon = painterResource(Res.drawable.palette),
             title = "Theme",
-            value = themeLabel,
-            choices = themeChoices
+            trailingLabel = colorThemeLabel,
+            onClick = onColorThemeClick
         )
         SettingsDivider()
         SettingsChoiceRow(
@@ -1837,7 +1833,7 @@ fun SettingsToggleRow(
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.surface,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    checkedTrackColor = MaterialTheme.colorScheme.secondary,
                     checkedBorderColor = Color.Transparent,
                     uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                     uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),

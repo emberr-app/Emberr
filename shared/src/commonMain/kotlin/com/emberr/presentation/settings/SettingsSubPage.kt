@@ -9,6 +9,7 @@ enum class SettingsSubPage(val parentPage: SettingsSubPage?) {
     EMBERR_CLOUD(parentPage = null),
     IMPORT(parentPage = null),
     ABOUT(parentPage = null),
+    COLOR_THEME(parentPage = null),
     OPEN_SOURCE_LICENSES(parentPage = ABOUT),
     THIRD_PARTY_SERVICES(parentPage = ABOUT)
 }

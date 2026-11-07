@@ -1,0 +1,354 @@
+package com.emberr.presentation.settings
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
+import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.topHeaderBarPadding
+import com.emberr.ui.theme.ColorThemePreference
+import com.emberr.ui.theme.FULL_THEME_STRENGTH
+import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.ui.theme.ThemePreference
+import com.emberr.ui.theme.colorThemePreferenceNamed
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.check
+import emberr.shared.generated.resources.moon_cloud
+import emberr.shared.generated.resources.palette
+import emberr.shared.generated.resources.sun
+import emberr.shared.generated.resources.text_type
+import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.roundToInt
+
+private const val DESKTOP_THEME_COLUMNS = 3
+private const val MOBILE_THEME_COLUMNS = 2
+private const val PREVIEW_ASPECT_RATIO = 1.25f
+private const val STRENGTH_SLIDER_STEPS = 9
+private val PreviewCardShape = RoundedCornerShape(14.dp)
+private val PreviewLineShape = RoundedCornerShape(50)
+private val PreviewSurfaceShape = RoundedCornerShape(6.dp)
+private val SelectedPreviewBorderWidth = 2.dp
+private val ThemeCardSpacing = 14.dp
+
+@Composable
+fun ColorThemeSettingsScreen(
+    onNavigateBack: () -> Unit,
+    showTopBar: Boolean = true,
+    viewModel: SettingsViewModel = koinViewModel()
+) {
+    val hazeState = remember { HazeState() }
+    val listState = rememberLazyListState()
+    val density = LocalDensity.current
+    var topBarHeightPx by remember { mutableFloatStateOf(0f) }
+    val topBarHeightDp = with(density) { topBarHeightPx.toDp() }
+    val colorThemePreferenceName by viewModel.colorThemePreference.collectAsState()
+    val selectedColorTheme = colorThemePreferenceNamed(colorThemePreferenceName)
+    val themeModeName by viewModel.themePreference.collectAsState()
+    val selectedThemeMode = ThemePreference.entries.firstOrNull { it.name == themeModeName } ?: ThemePreference.SYSTEM
+    val themedTextAndIcons by viewModel.themedTextAndIcons.collectAsState()
+    val colorThemeStrength by viewModel.colorThemeStrength.collectAsState()
+    val columnCount = if (isDesktopPlatform) DESKTOP_THEME_COLUMNS else MOBILE_THEME_COLUMNS
+    val colorThemeRows = remember(columnCount) { ColorThemePreference.entries.chunked(columnCount) }
+
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val sidePadding = desktopSettingsSidePadding(maxWidth)
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .hazeSource(state = hazeState)
+                .background(MaterialTheme.colorScheme.background),
+            contentPadding = PaddingValues(
+                start = sidePadding,
+                top = topBarHeightDp,
+                end = sidePadding,
+                bottom = 48.dp
+            )
+        ) {
+            item(key = "mode") {
+                SettingsGroup(title = "Mode") {
+                    SettingsChoiceRow(
+                        icon = painterResource(if (LocalAppIsDark.current) Res.drawable.moon_cloud else Res.drawable.sun),
+                        title = "Mode",
+                        value = selectedThemeMode.displayName,
+                        choices = ThemePreference.entries.map { option ->
+                            SettingsChoice(label = option.displayName, isSelected = option == selectedThemeMode) {
+                                viewModel.setThemePreference(option.name)
+                            }
+                        }
+                    )
+                }
+            }
+
+            if (selectedColorTheme != ColorThemePreference.EMBERR) {
+                item(key = "strength") {
+                    SettingsGroup(title = "Strength") {
+                        ColorThemeStrengthRow(
+                            strengthPercent = colorThemeStrength,
+                            onStrengthChange = { newStrength ->
+                                if (newStrength != colorThemeStrength) viewModel.setColorThemeStrength(newStrength)
+                            }
+                        )
+                    }
+                }
+            }
+
+            item(key = "text_and_icons") {
+                SettingsGroup(title = "Text & Icons") {
+                    SettingsToggleRow(
+                        icon = painterResource(Res.drawable.text_type),
+                        title = "Theme Text & Icons",
+                        isChecked = themedTextAndIcons,
+                        subtitle = "When off, text and icons stay black and white.",
+                        onCheckedChange = { viewModel.setThemedTextAndIcons(it) }
+                    )
+                }
+            }
+
+            item(key = "colors_title") {
+                Box(modifier = Modifier.padding(start = 16.dp, top = 22.dp, end = 16.dp)) {
+                    SettingsGroupTitle(title = "Colors")
+                }
+            }
+
+            items(colorThemeRows, key = { row -> row.first().name }) { row ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = ThemeCardSpacing, end = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(ThemeCardSpacing)
+                ) {
+                    row.forEach { colorTheme ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            ColorThemePreviewCard(
+                                colorTheme = colorTheme,
+                                themedTextAndIcons = themedTextAndIcons,
+                                strengthPercent = colorThemeStrength,
+                                isSelected = colorTheme == selectedColorTheme,
+                                onSelect = { viewModel.setColorThemePreference(colorTheme.name) }
+                            )
+                        }
+                    }
+                    repeat(columnCount - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+                }
+            }
+        }
+
+        EmberrVerticalScrollbar(
+            listState = listState,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = topBarHeightDp, bottom = 8.dp)
+        )
+
+        if (showTopBar) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .zIndex(10f)
+                    .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
+            ) {
+                EmberrTopHeaderBar(
+                    title = "Theme",
+                    hazeState = hazeState,
+                    contentPadding = topHeaderBarPadding(bottom = 16.dp),
+                    backTooltip = "Back",
+                    onBackClick = onNavigateBack
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColorThemeStrengthRow(
+    strengthPercent: Int,
+    onStrengthChange: (Int) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().settingsRowSize()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SettingsRowIcon(icon = painterResource(Res.drawable.palette))
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Theme Strength",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            SettingsValuePill(label = "$strengthPercent%")
+        }
+        Slider(
+            value = strengthPercent.toFloat(),
+            onValueChange = { newValue -> onStrengthChange(newValue.roundToInt()) },
+            valueRange = 0f..FULL_THEME_STRENGTH.toFloat(),
+            steps = STRENGTH_SLIDER_STEPS,
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.secondary,
+                activeTrackColor = MaterialTheme.colorScheme.secondary,
+                inactiveTrackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                activeTickColor = Color.Transparent,
+                inactiveTickColor = Color.Transparent
+            )
+        )
+    }
+}
+
+@Composable
+private fun ColorThemePreviewCard(
+    colorTheme: ColorThemePreference,
+    themedTextAndIcons: Boolean,
+    strengthPercent: Int,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    val previewBorderModifier = if (isSelected) {
+        Modifier.border(SelectedPreviewBorderWidth, MaterialTheme.colorScheme.primary, PreviewCardShape)
+    } else {
+        Modifier.emberrBorder(PreviewCardShape)
+    }
+
+    Column(
+        modifier = Modifier
+            .clip(PreviewCardShape)
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onSelect)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(PREVIEW_ASPECT_RATIO)
+                .clip(PreviewCardShape)
+                .then(previewBorderModifier)
+        ) {
+            ColorThemePreviewHalf(
+                colors = colorTheme.colorSchemeFor(
+                    darkTheme = false,
+                    themedTextAndIcons = themedTextAndIcons,
+                    strengthPercent = strengthPercent
+                ),
+                modifier = Modifier.weight(1f)
+            )
+            ColorThemePreviewHalf(
+                colors = colorTheme.colorSchemeFor(
+                    darkTheme = true,
+                    themedTextAndIcons = themedTextAndIcons,
+                    strengthPercent = strengthPercent
+                ),
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 6.dp, top = 8.dp, end = 6.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = colorTheme.displayName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f)
+            )
+            if (isSelected) {
+                Icon(
+                    painter = painterResource(Res.drawable.check),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColorThemePreviewHalf(colors: ColorScheme, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+            .background(colors.background)
+            .padding(10.dp)
+    ) {
+        PreviewLine(color = colors.onBackground, widthFraction = 0.7f, height = 6.dp)
+        Spacer(modifier = Modifier.height(8.dp))
+        PreviewLine(color = colors.onBackground.copy(alpha = 0.35f), widthFraction = 0.9f, height = 4.dp)
+        Spacer(modifier = Modifier.height(4.dp))
+        PreviewLine(color = colors.onBackground.copy(alpha = 0.35f), widthFraction = 0.6f, height = 4.dp)
+        Spacer(modifier = Modifier.height(10.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .clip(PreviewSurfaceShape)
+                .background(colors.surface)
+                .padding(6.dp)
+        ) {
+            PreviewLine(color = colors.onSurface.copy(alpha = 0.5f), widthFraction = 0.8f, height = 4.dp)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .width(28.dp)
+                .height(8.dp)
+                .clip(PreviewLineShape)
+                .background(colors.secondary)
+        )
+    }
+}
+
+@Composable
+private fun PreviewLine(color: Color, widthFraction: Float, height: Dp) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(widthFraction)
+            .height(height)
+            .clip(PreviewLineShape)
+            .background(color)
+    )
+}

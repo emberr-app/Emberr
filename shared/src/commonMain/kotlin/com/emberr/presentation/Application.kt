@@ -888,7 +888,7 @@ fun EmberrApp(
                                 )
                             },
                             exitTransition = {
-                                if (targetState.destination.route in listOf(Screen.SelfHostSetup.route, Screen.EmberrCloud.route, Screen.About.route, Screen.ImportNotes.route, Screen.KeyboardToolbarSettings.route)) {
+                                if (targetState.destination.route in listOf(Screen.SelfHostSetup.route, Screen.EmberrCloud.route, Screen.About.route, Screen.ImportNotes.route, Screen.KeyboardToolbarSettings.route, Screen.ColorThemeSettings.route)) {
                                     ExitTransition.None
                                 } else {
                                     slideOutOfContainer(
@@ -898,7 +898,7 @@ fun EmberrApp(
                                 }
                             },
                             popEnterTransition = {
-                                if (initialState.destination.route in listOf(Screen.SelfHostSetup.route, Screen.EmberrCloud.route, Screen.About.route, Screen.ImportNotes.route, Screen.KeyboardToolbarSettings.route)) {
+                                if (initialState.destination.route in listOf(Screen.SelfHostSetup.route, Screen.EmberrCloud.route, Screen.About.route, Screen.ImportNotes.route, Screen.KeyboardToolbarSettings.route, Screen.ColorThemeSettings.route)) {
                                     EnterTransition.None
                                 } else {
                                     slideIntoContainer(
@@ -935,7 +935,40 @@ fun EmberrApp(
                                 onNavigateToEmberrCloud = { navController.navigate(Screen.EmberrCloud.route) },
                                 onNavigateToAbout = { navController.navigate(Screen.About.route) },
                                 onNavigateToImportNotes = { navController.navigate(Screen.ImportNotes.route) },
-                                onNavigateToKeyboardToolbarSettings = { navController.navigate(Screen.KeyboardToolbarSettings.route) }
+                                onNavigateToKeyboardToolbarSettings = { navController.navigate(Screen.KeyboardToolbarSettings.route) },
+                                onNavigateToColorThemeSettings = { navController.navigate(Screen.ColorThemeSettings.route) }
+                            )
+                        }
+
+                        composable(
+                            route = Screen.ColorThemeSettings.route,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    tween(300)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    tween(300)
+                                )
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    tween(300)
+                                )
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    tween(300)
+                                )
+                            }
+                        ) {
+                            com.emberr.presentation.settings.ColorThemeSettingsScreen(
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
 

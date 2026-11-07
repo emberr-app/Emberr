@@ -114,6 +114,7 @@ private val settingsScreenPanes = setOf(
     DetailPane.SelfHostSetup,
     DetailPane.EmberrCloud,
     DetailPane.About,
+    DetailPane.ColorTheme,
     DetailPane.ImportNotes,
     DetailPane.OpenSourceLicenses,
     DetailPane.ThirdPartyServices
