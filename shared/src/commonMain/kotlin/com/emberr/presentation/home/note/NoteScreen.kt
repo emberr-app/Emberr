@@ -152,6 +152,7 @@ import com.emberr.presentation.shared.editor.selection.BlockStyleBar
 import com.emberr.ui.theme.NotePaperTextureBox
 import com.emberr.ui.theme.PaperTextureArea
 import com.emberr.ui.theme.paperTextureToggleLabelFor
+import com.emberr.presentation.shared.components.EmberrSlider
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.paper_texture
@@ -1755,16 +1756,11 @@ private fun NoteWidthSlider(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Slider(
+        EmberrSlider(
             value = noteWidth.coerceIn(NARROWEST_NOTE_WIDTH, SyncConstants.FULL_DESKTOP_NOTE_WIDTH),
             onValueChange = onNoteWidthChange,
             onValueChangeFinished = onNoteWidthChangeFinished,
-            valueRange = NARROWEST_NOTE_WIDTH..SyncConstants.FULL_DESKTOP_NOTE_WIDTH,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.secondary,
-                activeTrackColor = MaterialTheme.colorScheme.secondary,
-                inactiveTrackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-            )
+            valueRange = NARROWEST_NOTE_WIDTH..SyncConstants.FULL_DESKTOP_NOTE_WIDTH
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Narrow", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)

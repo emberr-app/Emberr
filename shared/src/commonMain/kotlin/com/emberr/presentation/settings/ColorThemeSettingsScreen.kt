@@ -26,8 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,6 +50,7 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrCheckboxOption
 import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
+import com.emberr.presentation.shared.components.EmberrSlider
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
@@ -339,20 +338,13 @@ private fun PercentSliderRow(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
-            SettingsValuePill(label = "$percent%")
         }
-        Slider(
+        EmberrSlider(
             value = percent.toFloat(),
             onValueChange = { newValue -> onPercentChange(newValue.roundToInt()) },
             valueRange = 0f..FULL_PERCENT.toFloat(),
             steps = STRENGTH_SLIDER_STEPS,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.secondary,
-                activeTrackColor = MaterialTheme.colorScheme.secondary,
-                inactiveTrackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                activeTickColor = Color.Transparent,
-                inactiveTickColor = Color.Transparent
-            )
+            valueLabel = { shownValue -> "${shownValue.roundToInt()}%" }
         )
     }
 }

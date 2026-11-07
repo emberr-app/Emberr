@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -44,6 +42,7 @@ import com.emberr.presentation.shared.components.EmberrSwitch
 import com.emberr.presentation.shared.components.LocalSitsOnCard
 import com.emberr.presentation.shared.components.SmallRoundedCornerShape
 import com.emberr.presentation.shared.components.emberrControlContainerColor
+import com.emberr.presentation.shared.components.EmberrSlider
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.minus
 import emberr.shared.generated.resources.plus
@@ -173,16 +172,9 @@ private fun PasswordGeneratorContent(
             }
 
             Spacer(modifier = Modifier.height(SectionGap))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                GeneratorSectionLabel(text = "Length", modifier = Modifier.weight(1f))
-                Text(
-                    text = options.shownLength.toString(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            GeneratorSectionLabel(text = "Length")
             Spacer(modifier = Modifier.height(4.dp))
-            Slider(
+            EmberrSlider(
                 value = options.shownLength.toFloat(),
                 onValueChange = { newLength ->
                     val length = newLength.roundToInt().coerceAtLeast(options.shortestAllowedLength)
@@ -190,12 +182,8 @@ private fun PasswordGeneratorContent(
                 },
                 onValueChangeFinished = onLengthChangeFinished,
                 valueRange = SHORTEST_GENERATED_PASSWORD.toFloat()..LONGEST_GENERATED_PASSWORD.toFloat(),
-                colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.secondary,
-                    activeTrackColor = MaterialTheme.colorScheme.secondary,
-                    inactiveTrackColor = emberrControlContainerColor()
-                ),
-                modifier = Modifier.fillMaxWidth()
+                steps = LONGEST_GENERATED_PASSWORD - SHORTEST_GENERATED_PASSWORD - 1,
+                valueLabel = { shownLength -> shownLength.roundToInt().toString() }
             )
 
             Spacer(modifier = Modifier.height(SectionGap))

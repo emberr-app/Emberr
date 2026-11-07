@@ -38,8 +38,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -110,6 +108,7 @@ import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.paperTextureToggleLabelFor
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.presentation.shared.components.EmberrSlider
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.paper_texture
@@ -181,7 +180,7 @@ private val TextSizePreviewSizes = listOf(11.sp, 14.sp, 17.sp)
 private val MobilePillHorizontalPadding = 8.dp
 private val MobilePillItemSpacing = 4.dp
 private val MobilePillSelectedBackgroundWidth = 36.dp + MobilePillHorizontalPadding * 2
-private val MobileOpacitySliderWidth = 150.dp
+private val MobileOpacitySliderWidth = 194.dp
 private val TextBackgroundColors = listOf(HighlightColor.YELLOW, HighlightColor.GREEN, HighlightColor.BLUE, HighlightColor.PINK)
 
 @Composable
@@ -712,8 +711,6 @@ fun CanvasStrokeStylePanel(
     onInteractionFinished: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tint = MaterialTheme.colorScheme.primary
-
     fun change(newStyle: CanvasStrokeStyle) {
         onStyleChange(newStyle)
         onInteractionFinished()
@@ -758,15 +755,11 @@ fun CanvasStrokeStylePanel(
             }
         }
         ToolPanelSection("Opacity") {
-            Slider(
+            EmberrSlider(
                 value = style.opacity,
                 onValueChange = { opacity -> onStyleChange(style.copy(opacity = opacity)) },
                 onValueChangeFinished = onInteractionFinished,
-                colors = SliderDefaults.colors(
-                    thumbColor = tint,
-                    activeTrackColor = tint,
-                    inactiveTrackColor = tint.copy(alpha = 0.2f)
-                )
+                valueLabel = { shownOpacity -> "${(shownOpacity * 100).roundToInt()}%" }
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("0", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
@@ -1109,22 +1102,11 @@ fun CanvasMobileStrokeSettings(
                 ) { color -> PressurePreview(usesPressure = true, color = color) }
             }
             CanvasStrokeSettingsCategory.OPACITY -> CanvasMobilePill(hazeState) {
-                val tint = MaterialTheme.colorScheme.primary
-                Slider(
+                EmberrSlider(
                     value = style.opacity,
                     onValueChange = { opacity -> onStyleChange(style.copy(opacity = opacity)) },
-                    colors = SliderDefaults.colors(
-                        thumbColor = tint,
-                        activeTrackColor = tint,
-                        inactiveTrackColor = tint.copy(alpha = 0.2f)
-                    ),
-                    modifier = Modifier.width(MobileOpacitySliderWidth).padding(start = 8.dp)
-                )
-                Text(
-                    text = "${(style.opacity * 100).roundToInt()}%",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.width(44.dp).padding(start = 8.dp)
+                    valueLabel = { shownOpacity -> "${(shownOpacity * 100).roundToInt()}%" },
+                    modifier = Modifier.width(MobileOpacitySliderWidth).padding(horizontal = 8.dp)
                 )
             }
             null -> Unit
