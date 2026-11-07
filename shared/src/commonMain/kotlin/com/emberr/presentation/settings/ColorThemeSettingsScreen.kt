@@ -2,6 +2,7 @@ package com.emberr.presentation.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
@@ -258,7 +260,13 @@ private fun ColorThemePreviewCard(
     Column(
         modifier = Modifier
             .clip(PreviewCardShape)
-            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onSelect)
+            .selectable(
+                selected = isSelected,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = NoRippleIndicationNodeFactory,
+                role = Role.RadioButton,
+                onClick = onSelect
+            )
     ) {
         Row(
             modifier = Modifier
