@@ -13,9 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import com.emberr.ui.theme.LocalAppIsDark
 
 private const val FRONT_GHOST_SIDE_INSET = 0.1f
 private const val FRONT_GHOST_HEAD_TOP = 0.05f
@@ -29,7 +27,7 @@ private const val FRONT_GHOST_EYE_RADIUS_Y = 0.075f
 
 @Composable
 fun EmberrFrontGhost(modifier: Modifier = Modifier) {
-    val bodyColor = if (LocalAppIsDark.current) Color.White else Color.Black
+    val bodyColor = MaterialTheme.colorScheme.onBackground
     val eyeColor = MaterialTheme.colorScheme.background
     val bodyPath = remember { Path() }
     var phase by remember { mutableFloatStateOf(0f) }

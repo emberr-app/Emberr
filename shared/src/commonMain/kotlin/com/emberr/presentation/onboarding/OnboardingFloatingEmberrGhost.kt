@@ -11,14 +11,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.drawEmberrGhostEyes
 import com.emberr.presentation.shared.components.traceEmberrGhost
-import com.emberr.ui.theme.LocalAppIsDark
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -27,7 +25,7 @@ private val FloatingSpot = Offset(0.15f, 0.12f)
 
 @Composable
 internal fun FloatingEmberrGhost(modifier: Modifier = Modifier) {
-    val emberrGhostColor = if (LocalAppIsDark.current) Color.White else Color.Black
+    val emberrGhostColor = MaterialTheme.colorScheme.onBackground
     val eyeColor = MaterialTheme.colorScheme.background
     val emberrGhostPath = remember { Path() }
     var phase by remember { mutableFloatStateOf(0f) }
