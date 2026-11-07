@@ -70,6 +70,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import com.emberr.presentation.widget.previewTodayTasksContent
 
 private val checkboxTapWidth = 36.dp
 private val cardInset = 8.dp
@@ -100,6 +101,16 @@ class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
                 context = context,
                 appWidgetId = appWidgetId,
                 content = savedContent ?: content
+            )
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            TodayTasksWidgetBody(
+                context = context,
+                appWidgetId = INVALID_APPWIDGET_ID,
+                content = previewTodayTasksContent()
             )
         }
     }

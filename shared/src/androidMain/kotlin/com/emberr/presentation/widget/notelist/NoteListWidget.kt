@@ -67,6 +67,7 @@ import com.emberr.presentation.widget.readWidgetSpaceId
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import com.emberr.presentation.widget.WidgetDeletedState
+import com.emberr.presentation.widget.previewNoteListContent
 
 private val headerIconSize = 18.dp
 private val noteCardCornerRadius = 14.dp
@@ -94,6 +95,17 @@ class NoteListWidget : GlanceAppWidget(), KoinComponent {
                 spaceId = spaceId,
                 content = cachedContent ?: loadedContent,
                 appWidgetId = appWidgetId
+            )
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            NoteListWidgetBody(
+                context = context,
+                spaceId = "",
+                content = previewNoteListContent,
+                appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
             )
         }
     }

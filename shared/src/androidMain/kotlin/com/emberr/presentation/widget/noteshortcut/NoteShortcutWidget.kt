@@ -59,6 +59,7 @@ import com.emberr.presentation.widget.widgetNoteIdExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import com.emberr.presentation.widget.writeDeletedFlag
+import com.emberr.presentation.widget.previewNoteShortcutContent
 
 private val pillHeight = 66.dp
 private val pillCornerRadius = 33.dp
@@ -98,6 +99,17 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
                     appWidgetId = appWidgetId
                 )
             }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            NoteShortcutWidgetBody(
+                context = context,
+                content = previewNoteShortcutContent,
+                isNoteDeleted = false,
+                appWidgetId = INVALID_APPWIDGET_ID
+            )
         }
     }
 

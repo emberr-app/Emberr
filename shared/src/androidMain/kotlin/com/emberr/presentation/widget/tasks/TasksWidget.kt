@@ -70,6 +70,7 @@ import com.emberr.presentation.widget.widgetNewTaskExtra
 import com.emberr.presentation.widget.widgetTasksScreenExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import com.emberr.presentation.widget.previewTasksContent
 
 private val topBarIconSize = 20.dp
 private val checkboxTapWidth = 36.dp
@@ -97,6 +98,16 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
                 context = context,
                 appWidgetId = appWidgetId,
                 content = savedContent ?: content
+            )
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            TasksWidgetBody(
+                context = context,
+                appWidgetId = INVALID_APPWIDGET_ID,
+                content = previewTasksContent
             )
         }
     }
