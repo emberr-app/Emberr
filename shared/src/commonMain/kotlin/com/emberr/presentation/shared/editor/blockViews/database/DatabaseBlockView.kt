@@ -686,7 +686,7 @@ private fun DatabaseTitleField(
         },
         enabled = !inSelectionMode,
         textStyle = titleStyle,
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         modifier = modifier.onPreviewKeyEvent { event ->
@@ -740,7 +740,7 @@ private fun DatabaseSearchField(
             onValueChange = onSearchTextChange,
             singleLine = true,
             textStyle = textStyle,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
             modifier = Modifier

@@ -299,7 +299,7 @@ internal fun PropertyTextValue(
             enabled = !inSelectionMode,
             singleLine = !wrapsText,
             textStyle = textStyle,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
             keyboardOptions = KeyboardOptions(
                 capitalization = capitalization,
                 keyboardType = keyboardType,

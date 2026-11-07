@@ -507,7 +507,7 @@ internal fun MovieSearchField(
             value = query,
             onValueChange = onQueryChange,
             textStyle = textStyle,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { onSearchAction() }),

@@ -191,8 +191,8 @@ private fun PasswordGeneratorContent(
                 onValueChangeFinished = onLengthChangeFinished,
                 valueRange = SHORTEST_GENERATED_PASSWORD.toFloat()..LONGEST_GENERATED_PASSWORD.toFloat(),
                 colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.primary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    thumbColor = MaterialTheme.colorScheme.secondary,
+                    activeTrackColor = MaterialTheme.colorScheme.secondary,
                     inactiveTrackColor = emberrControlContainerColor()
                 ),
                 modifier = Modifier.fillMaxWidth()

@@ -296,7 +296,7 @@ private fun DatabaseTitleCell(
                     enabled = !inSelectionMode,
                     singleLine = !wrapsText,
                     textStyle = textStyle,
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     modifier = Modifier

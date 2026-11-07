@@ -24,7 +24,7 @@ fun EmberrSwitch(isOn: Boolean) {
                 modifier = Modifier.scale(0.75f),
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.surface,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    checkedTrackColor = MaterialTheme.colorScheme.secondary,
                     checkedBorderColor = Color.Transparent,
                     uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                     uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),

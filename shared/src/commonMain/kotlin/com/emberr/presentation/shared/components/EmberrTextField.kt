@@ -117,7 +117,7 @@ private fun PlainEmberrTextField(
         textStyle = textStyle.copy(
             color = MaterialTheme.colorScheme.onSurface
         ),
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
         modifier = modifier.submitOnEnter(onSubmit, singleLine),
         decorationBox = { innerTextField ->
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -208,7 +208,7 @@ fun EmberrSearchTextField(
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.primary
                 ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
                 modifier = Modifier.weight(1f).then(textFieldModifier).submitOnEnter(onSubmit, singleLine = true),
                 decorationBox = { innerTextField ->
                     Box(contentAlignment = Alignment.CenterStart) {
@@ -293,6 +293,6 @@ private fun emberrTextFieldColors(): TextFieldColors {
         focusedBorderColor = Color.Transparent,
         unfocusedContainerColor = containerColor,
         focusedContainerColor = containerColor,
-        cursorColor = MaterialTheme.colorScheme.primary
+        cursorColor = MaterialTheme.colorScheme.secondary
     )
 }

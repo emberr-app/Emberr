@@ -264,7 +264,7 @@ fun NoteBlockItem(
     val clipboardManager = LocalClipboardManager.current
     val markdownClipboardActions = remember { MarkdownClipboardActions() }
     val customTextSelectionColors = TextSelectionColors(
-        handleColor = MaterialTheme.colorScheme.primary,
+        handleColor = MaterialTheme.colorScheme.secondary,
         backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
     )
 

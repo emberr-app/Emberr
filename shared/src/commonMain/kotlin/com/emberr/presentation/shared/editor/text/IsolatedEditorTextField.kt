@@ -801,7 +801,7 @@ fun IsolatedEditorTextField(
                     false
                 },
             textStyle = textStyle,
-            cursorBrush = SolidColor(if (isTextSelectedAcrossBlocks) Color.Transparent else MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(if (isTextSelectedAcrossBlocks) Color.Transparent else MaterialTheme.colorScheme.secondary),
             enabled = !inSelectionMode
         )
 
