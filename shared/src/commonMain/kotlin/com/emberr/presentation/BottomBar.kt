@@ -70,6 +70,7 @@ import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.ui.theme.stillPaperGrain
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.first
 import emberr.shared.generated.resources.Res
@@ -214,6 +215,7 @@ fun EmberrBottomBar(
                                 )
                             }
                         )
+                        .stillPaperGrain(CircleShape, holdsStill = true)
                         .emberrBorder(CircleShape)
                         .customEmberrShadow(CircleShape, elevation = shadowElevation)
                         .clip(CircleShape)

@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
+import com.emberr.ui.theme.stillPaperGrain
 
 object NoRippleIndicationNodeFactory : IndicationNodeFactory {
     private class NoRippleIndicationNode : Modifier.Node(), DrawModifierNode {
@@ -136,6 +137,7 @@ fun TopBarIconButton(
             contentColor = tint,
             modifier = Modifier
                 .size(size)
+                .stillPaperGrain(CircleShape)
                 .emberrBorder(CircleShape)
                 .customEmberrShadow(CircleShape, shadowElevation)
                 .clip(CircleShape)
@@ -229,6 +231,7 @@ fun TopBarIconButtonGroup(
         contentColor = tint,
         modifier = Modifier
             .then(if (isVertical) Modifier.width(44.dp) else Modifier.height(44.dp))
+            .stillPaperGrain(CircleShape)
             .emberrBorder(CircleShape)
             .customEmberrShadow(CircleShape, shadowElevation, shadowSpotColor, shadowAmbientColor)
             .clip(CircleShape)
