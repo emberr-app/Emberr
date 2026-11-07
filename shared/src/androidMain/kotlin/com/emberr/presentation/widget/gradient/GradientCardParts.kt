@@ -1,5 +1,5 @@
 // The pieces every gradient card widget shares: its background, the ghost and date row, its text color and its tap action.
-package com.emberr.presentation.widget.dailyjot
+package com.emberr.presentation.widget.gradient
 
 import android.content.Context
 import android.content.Intent
@@ -35,7 +35,7 @@ internal val gradientCardPadding = 18.dp
 private val ghostIconSize = 22.dp
 private val dateOpticalInset = 2.dp
 
-internal fun GlanceModifier.gradientCardBackground(gradient: DailyJotGradient): GlanceModifier =
+internal fun GlanceModifier.gradientCardBackground(gradient: WidgetGradient): GlanceModifier =
     this
         .background(
             imageProvider = ImageProvider(gradient.drawableResource),

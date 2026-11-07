@@ -11,6 +11,8 @@ import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.WidgetNoteSource
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
+import com.emberr.presentation.widget.markDeletedOnce
+import com.emberr.presentation.widget.readDeletedFlag
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
@@ -54,40 +56,20 @@ suspend fun writeCachedCard(context: Context, glanceId: GlanceId, content: NoteC
     }
 }
 
-suspend fun readCardNoteDeleted(context: Context, glanceId: GlanceId): Boolean =
-    try {
-        getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)[cardNoteDeletedKey] == true
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not read whether the card's note was deleted", cause)
-        false
-    }
-
-suspend fun writeCardNoteDeleted(context: Context, glanceId: GlanceId) {
-    try {
-        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { preferences ->
-            preferences.toMutablePreferences().apply { this[cardNoteDeletedKey] = true }
-        }
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not mark the card's note as deleted", cause)
-    }
-}
-
 suspend fun refreshNoteCardWidget(context: Context, glanceId: GlanceId) {
     try {
         val noteId = readCardNoteId(context, glanceId)?.takeIf { it.isNotBlank() } ?: return
         val freshContent = GlobalContext.get().get<NoteCardWidgetContentReader>().readContentOnce(noteId)
 
         if (freshContent == null) {
-            val isDeleted = GlobalContext.get().get<WidgetNoteSource>().isNoteDeleted(noteId)
-            if (isDeleted && !readCardNoteDeleted(context, glanceId)) {
-                writeCardNoteDeleted(context, glanceId)
-                NoteCardWidget().update(context, glanceId)
+            if (GlobalContext.get().get<WidgetNoteSource>().isNoteDeleted(noteId)) {
+                markDeletedOnce(context, glanceId, cardNoteDeletedKey, NoteCardWidget())
             }
             return
         }
 
         val isUnchanged = freshContent == readCachedCard(context, glanceId) &&
-            !readCardNoteDeleted(context, glanceId)
+            !readDeletedFlag(context, glanceId, cardNoteDeletedKey)
         if (isUnchanged) return
 
         writeCachedCard(context, glanceId, freshContent)

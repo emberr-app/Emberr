@@ -59,7 +59,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
-import com.emberr.presentation.widget.WidgetDeletedBadge
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.WidgetNoteSource
 import com.emberr.presentation.widget.highlightedTextBackgroundColor
@@ -68,6 +67,8 @@ import com.emberr.presentation.widget.secondaryTextColor
 import com.emberr.presentation.widget.separatorColor
 import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.widgetNoteIdExtra
+import com.emberr.presentation.widget.writeDeletedFlag
+import com.emberr.presentation.widget.WidgetDeletedState
 
 private const val maximumIndentationLevels = 4
 private const val indentationStepInDp = 12
@@ -90,7 +91,7 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
         val noteIdAtStart = readSelectedNoteId(context, id)?.takeIf { it.isNotBlank() }
         if (noteIdAtStart != null && loadAndCacheContent(context, id, noteIdAtStart) == null) {
             val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
-            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeNoteDeleted(context, id)
+            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeDeletedFlag(context, id, noteDeletedKey)
         }
 
         val appWidgetId = resolveAppWidgetId(context, id)
@@ -210,43 +211,20 @@ internal fun WidgetBody(
 
 @Composable
 private fun DeletedNoteContent(title: String?, chooseAnotherNoteAction: Action) {
-    Column(
+    WidgetDeletedState(
+        headerText = title ?: "Untitled",
+        headerStyle = TextStyle(
+            color = secondaryTextColor,
+            fontSize = 14.sp,
+            textDecoration = TextDecoration.LineThrough
+        ),
+        message = "This note was deleted. Tap to choose another",
+        messageFontSize = 15.sp,
         modifier = GlanceModifier
             .fillMaxSize()
             .padding(top = widgetTopPadding, end = noteSidePadding)
             .clickable(chooseAnotherNoteAction)
-    ) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Vertical.CenterVertically
-        ) {
-            Text(
-                text = title ?: "Untitled",
-                maxLines = 1,
-                style = TextStyle(
-                    color = secondaryTextColor,
-                    fontSize = 14.sp,
-                    textDecoration = TextDecoration.LineThrough
-                ),
-                modifier = GlanceModifier.defaultWeight()
-            )
-
-            Spacer(modifier = GlanceModifier.width(8.dp))
-
-            WidgetDeletedBadge()
-        }
-
-        Column(
-            modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.Vertical.CenterVertically,
-            horizontalAlignment = Alignment.Horizontal.CenterHorizontally
-        ) {
-            Text(
-                text = "This note was deleted. Tap to choose another",
-                style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
-            )
-        }
-    }
+    )
 }
 
 @Composable

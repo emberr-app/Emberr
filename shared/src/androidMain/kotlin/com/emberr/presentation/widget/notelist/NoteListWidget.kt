@@ -61,12 +61,12 @@ import com.emberr.presentation.widget.widgetHomeScreenExtra
 import com.emberr.presentation.widget.widgetNewNoteExtra
 import com.emberr.presentation.widget.widgetNoteIdExtra
 import com.emberr.presentation.widget.widgetSpaceIdExtra
-import com.emberr.presentation.widget.WidgetDeletedBadge
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.isPinnedSpaceDeleted
 import com.emberr.presentation.widget.readWidgetSpaceId
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import com.emberr.presentation.widget.WidgetDeletedState
 
 private val headerIconSize = 18.dp
 private val noteCardCornerRadius = 14.dp
@@ -214,7 +214,15 @@ internal fun NoteListWidgetBody(
 
 @Composable
 private fun DeletedSpaceNoteList(context: Context, appWidgetId: Int) {
-    Column(
+    WidgetDeletedState(
+        headerText = "Notes",
+        headerStyle = TextStyle(
+            color = secondaryTextColor,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        ),
+        message = "This space was deleted. Tap to choose another",
+        messageFontSize = 15.sp,
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
@@ -222,36 +230,7 @@ private fun DeletedSpaceNoteList(context: Context, appWidgetId: Int) {
             .padding(horizontal = widgetSidePadding)
             .padding(top = widgetTopPadding, bottom = widgetBottomPadding)
             .clickable(actionStartActivity(openSpacePickerIntent(context, appWidgetId)))
-    ) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Vertical.CenterVertically
-        ) {
-            Text(
-                text = "Notes",
-                maxLines = 1,
-                style = TextStyle(
-                    color = secondaryTextColor,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = GlanceModifier.defaultWeight()
-            )
-
-            WidgetDeletedBadge()
-        }
-
-        Column(
-            modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.Vertical.CenterVertically,
-            horizontalAlignment = Alignment.Horizontal.CenterHorizontally
-        ) {
-            Text(
-                text = "This space was deleted. Tap to choose another",
-                style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
-            )
-        }
-    }
+    )
 }
 
 @Composable

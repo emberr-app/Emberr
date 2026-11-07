@@ -167,7 +167,7 @@ private fun EventList(context: Context, content: UpcomingEventsWidgetContent?) {
         headerSpaceItem()
         eventsByDate.forEach { (dateGroupKey, eventsOnDate) ->
             val firstEvent = eventsOnDate.first()
-            val isRepeatingGroup = firstEvent.dayLabel != null
+            val isRepeatingGroup = firstEvent.isRepeating
             val needsHeader = isRepeatingGroup || firstEvent.weekdayShortLabel.isBlank()
 
             if (needsHeader) {

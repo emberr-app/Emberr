@@ -11,6 +11,8 @@ import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.WidgetNoteSource
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
+import com.emberr.presentation.widget.markDeletedOnce
+import com.emberr.presentation.widget.readDeletedFlag
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
@@ -56,31 +58,6 @@ suspend fun writeCachedShortcut(context: Context, glanceId: GlanceId, content: N
     }
 }
 
-suspend fun readShortcutNoteDeleted(context: Context, glanceId: GlanceId): Boolean =
-    try {
-        getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)[shortcutNoteDeletedKey] == true
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not read whether the shortcut's note was deleted", cause)
-        false
-    }
-
-suspend fun writeShortcutNoteDeleted(context: Context, glanceId: GlanceId) {
-    try {
-        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { preferences ->
-            preferences.toMutablePreferences().apply { this[shortcutNoteDeletedKey] = true }
-        }
-    } catch (cause: Exception) {
-        WidgetLog.e("Could not mark the shortcut's note as deleted", cause)
-    }
-}
-
-private suspend fun markShortcutNoteDeleted(context: Context, glanceId: GlanceId) {
-    if (readShortcutNoteDeleted(context, glanceId)) return
-
-    writeShortcutNoteDeleted(context, glanceId)
-    NoteShortcutWidget().update(context, glanceId)
-}
-
 suspend fun refreshNoteShortcutWidget(context: Context, glanceId: GlanceId) {
     try {
         val noteId = readShortcutNoteId(context, glanceId)?.takeIf { it.isNotBlank() } ?: return
@@ -88,13 +65,13 @@ suspend fun refreshNoteShortcutWidget(context: Context, glanceId: GlanceId) {
         val freshContent = contentReader.readContentOnce(noteId)
         if (freshContent == null) {
             if (GlobalContext.get().get<WidgetNoteSource>().isNoteDeleted(noteId)) {
-                markShortcutNoteDeleted(context, glanceId)
+                markDeletedOnce(context, glanceId, shortcutNoteDeletedKey, NoteShortcutWidget())
             }
             return
         }
 
         val isUnchanged = freshContent == readCachedShortcut(context, glanceId) &&
-            !readShortcutNoteDeleted(context, glanceId)
+            !readDeletedFlag(context, glanceId, shortcutNoteDeletedKey)
         if (isUnchanged) return
 
         writeCachedShortcut(context, glanceId, freshContent)

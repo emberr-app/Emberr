@@ -35,14 +35,12 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
-import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
-import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -50,7 +48,6 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
-import com.emberr.presentation.widget.WidgetDeletedBadge
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.WidgetNoteSource
 import com.emberr.presentation.widget.surfaceColor
@@ -61,12 +58,18 @@ import com.emberr.presentation.widget.widgetCornerRadius
 import com.emberr.presentation.widget.widgetNoteIdExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import com.emberr.presentation.widget.writeDeletedFlag
+import com.emberr.presentation.widget.WidgetDeletedState
 
 private const val coverBandHeightFraction = 0.5f
 private val minimumCoverBandHeight = 76.dp
 private val maximumCoverBandHeight = 240.dp
 private val iconOverhang = 12.dp
 private val cardSidePadding = 14.dp
+private val favoriteStarReservedWidth = 16.dp
+private val cardTextVerticalPadding = 12.dp
+private val emojiIconStartNudge = 2.dp
+private val emojiIconTopNudge = 6.dp
 private val favoriteStarSize = 14.dp
 private val canvasIconSize = 22.dp
 private const val coverBitmapTargetWidthPixels = 600
@@ -82,7 +85,7 @@ class NoteCardWidget : GlanceAppWidget(), KoinComponent {
         val noteIdAtStart = readCardNoteId(context, id)?.takeIf { it.isNotBlank() }
         if (noteIdAtStart != null && loadAndCacheCard(context, id, noteIdAtStart) == null) {
             val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
-            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeCardNoteDeleted(context, id)
+            if (noteSource?.isNoteDeleted(noteIdAtStart) == true) writeDeletedFlag(context, id, cardNoteDeletedKey)
         }
 
         val appWidgetId = resolveAppWidgetId(context, id)
@@ -188,9 +191,9 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
                     .defaultWeight()
                     .padding(
                         start = cardSidePadding,
-                        end = if (content.isFavorite && !hasCoverBand) cardSidePadding + 16.dp else cardSidePadding,
-                        top = if (hasIcon || hasCanvasIcon) iconOverhang + 12.dp else 12.dp,
-                        bottom = 12.dp
+                        end = if (content.isFavorite && !hasCoverBand) cardSidePadding + favoriteStarReservedWidth else cardSidePadding,
+                        top = if (hasIcon || hasCanvasIcon) iconOverhang + cardTextVerticalPadding else cardTextVerticalPadding,
+                        bottom = cardTextVerticalPadding
                     )
             ) {
                 Text(
@@ -217,7 +220,7 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
             Text(
                 text = content.icon.orEmpty(),
                 style = TextStyle(color = primaryTextColor, fontSize = 24.sp),
-                modifier = GlanceModifier.padding(start = cardSidePadding - 2.dp, top = coverBandHeight - iconOverhang - 6.dp)
+                modifier = GlanceModifier.padding(start = cardSidePadding - emojiIconStartNudge, top = coverBandHeight - iconOverhang - emojiIconTopNudge)
             )
         }
 
@@ -249,46 +252,23 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
 
 @Composable
 private fun DeletedCard(title: String?, chooseAnotherNoteAction: Action) {
-    Column(
+    WidgetDeletedState(
+        headerText = title ?: "Untitled",
+        headerStyle = TextStyle(
+            color = secondaryTextColor,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            textDecoration = TextDecoration.LineThrough
+        ),
+        message = "This note was deleted. Tap to choose another",
+        messageFontSize = 13.sp,
         modifier = GlanceModifier
             .fillMaxSize()
             .background(surfaceColor)
             .cornerRadius(widgetCornerRadius)
             .padding(cardSidePadding)
             .clickable(chooseAnotherNoteAction)
-    ) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Vertical.CenterVertically
-        ) {
-            Text(
-                text = title ?: "Untitled",
-                maxLines = 1,
-                style = TextStyle(
-                    color = secondaryTextColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    textDecoration = TextDecoration.LineThrough
-                ),
-                modifier = GlanceModifier.defaultWeight()
-            )
-
-            Spacer(modifier = GlanceModifier.width(8.dp))
-
-            WidgetDeletedBadge()
-        }
-
-        Column(
-            modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.Vertical.CenterVertically,
-            horizontalAlignment = Alignment.Horizontal.CenterHorizontally
-        ) {
-            Text(
-                text = "This note was deleted. Tap to choose another",
-                style = TextStyle(color = secondaryTextColor, fontSize = 13.sp)
-            )
-        }
-    }
+    )
 }
 
 @Composable
