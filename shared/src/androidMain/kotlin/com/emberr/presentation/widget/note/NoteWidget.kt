@@ -69,6 +69,8 @@ import com.emberr.presentation.widget.surfaceColor
 import com.emberr.presentation.widget.widgetNoteIdExtra
 import com.emberr.presentation.widget.writeDeletedFlag
 import com.emberr.presentation.widget.WidgetDeletedState
+import com.emberr.presentation.widget.previewNoteId
+import com.emberr.presentation.widget.previewNoteContent
 
 private const val maximumIndentationLevels = 4
 private const val indentationStepInDp = 12
@@ -110,6 +112,18 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
                 isNoteDeleted = savedState[noteDeletedKey] == true,
                 appWidgetId = appWidgetId,
                 reportedWidgetWidth = reportedWidgetWidth
+            )
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            WidgetBody(
+                context = context,
+                chosenNoteId = previewNoteId,
+                content = previewNoteContent,
+                isNoteDeleted = false,
+                appWidgetId = INVALID_APPWIDGET_ID
             )
         }
     }

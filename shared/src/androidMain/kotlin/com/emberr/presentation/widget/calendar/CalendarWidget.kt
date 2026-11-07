@@ -61,6 +61,7 @@ import com.emberr.presentation.widget.calendarDateUriScheme
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import androidx.core.graphics.toColorInt
+import com.emberr.presentation.widget.previewCalendarContent
 
 private val chevronSize = 16.dp
 private val monthStepButtonSize = 32.dp
@@ -87,6 +88,16 @@ class CalendarWidget : GlanceAppWidget(), KoinComponent {
                 context = context,
                 appWidgetId = appWidgetId,
                 content = savedContent ?: content
+            )
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            CalendarWidgetBody(
+                context = context,
+                appWidgetId = INVALID_APPWIDGET_ID,
+                content = previewCalendarContent()
             )
         }
     }

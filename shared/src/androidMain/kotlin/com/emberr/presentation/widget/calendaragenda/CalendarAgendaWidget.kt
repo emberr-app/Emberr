@@ -66,6 +66,7 @@ import com.emberr.presentation.widget.surfaceColor
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import androidx.core.graphics.toColorInt
+import com.emberr.presentation.widget.previewCalendarAgendaContent
 
 private val chevronSize = 18.dp
 private val dayHighlightSize = 18.dp
@@ -97,6 +98,16 @@ class CalendarAgendaWidget : GlanceAppWidget(), KoinComponent {
                 context = context,
                 appWidgetId = appWidgetId,
                 content = savedContent ?: content
+            )
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            CalendarAgendaWidgetBody(
+                context = context,
+                appWidgetId = INVALID_APPWIDGET_ID,
+                content = previewCalendarAgendaContent()
             )
         }
     }

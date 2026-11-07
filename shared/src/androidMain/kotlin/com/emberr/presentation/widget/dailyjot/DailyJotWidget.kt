@@ -61,6 +61,12 @@ class DailyJotWidget : GlanceAppWidget() {
             DailyJotWidgetBody(context = context, gradient = gradient)
         }
     }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            DailyJotWidgetBody(context = context, gradient = WidgetGradient.defaultGradient)
+        }
+    }
 }
 
 @Composable

@@ -60,6 +60,7 @@ import com.emberr.presentation.widget.widgetCalendarScreenExtra
 import com.emberr.presentation.widget.widgetNewEventExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import com.emberr.presentation.widget.previewUpcomingEventsContent
 
 private val dateColumnWidth = 30.dp
 private val eventCardCornerRadius = 10.dp
@@ -81,6 +82,12 @@ class UpcomingEventsWidget : GlanceAppWidget(), KoinComponent {
             val savedContent = remember(rawCachedContent) { decodeCachedUpcomingEvents(rawCachedContent) }
 
             UpcomingEventsWidgetBody(context = context, content = savedContent ?: content)
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            UpcomingEventsWidgetBody(context = context, content = previewUpcomingEventsContent())
         }
     }
 

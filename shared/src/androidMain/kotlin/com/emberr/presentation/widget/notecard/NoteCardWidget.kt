@@ -60,6 +60,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import com.emberr.presentation.widget.writeDeletedFlag
 import com.emberr.presentation.widget.WidgetDeletedState
+import com.emberr.presentation.widget.previewNoteCardContent
 
 private const val coverBandHeightFraction = 0.5f
 private val minimumCoverBandHeight = 76.dp
@@ -101,6 +102,18 @@ class NoteCardWidget : GlanceAppWidget(), KoinComponent {
                 chosenNoteId = savedState[cardNoteIdKey]?.takeIf { it.isNotBlank() },
                 content = content,
                 isNoteDeleted = savedState[cardNoteDeletedKey] == true
+            )
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            NoteCardWidgetBody(
+                context = context,
+                appWidgetId = INVALID_APPWIDGET_ID,
+                chosenNoteId = previewNoteCardContent.noteId,
+                content = previewNoteCardContent,
+                isNoteDeleted = false
             )
         }
     }
