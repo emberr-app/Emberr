@@ -52,6 +52,8 @@ class AppLockActivity : FragmentActivity() {
             val colorThemePreferenceName by settingsViewModel.colorThemePreference.collectAsState()
             val themedTextAndIcons by settingsViewModel.themedTextAndIcons.collectAsState()
             val colorThemeStrength by settingsViewModel.colorThemeStrength.collectAsState()
+            val paperTextureEnabled by settingsViewModel.paperTextureEnabled.collectAsState()
+            val paperTextureStrength by settingsViewModel.paperTextureStrength.collectAsState()
 
             val darkTheme = when (runCatching { ThemePreference.valueOf(themePreferenceName) }.getOrDefault(ThemePreference.SYSTEM)) {
                 ThemePreference.LIGHT -> false
@@ -67,7 +69,8 @@ class AppLockActivity : FragmentActivity() {
                     .getOrDefault(FontStylePreference.POPPINS),
                 colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
                 themedTextAndIcons = themedTextAndIcons,
-                colorThemeStrength = colorThemeStrength
+                colorThemeStrength = colorThemeStrength,
+                paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0
             ) {
                 AppLockScreen(
                     unlockFailureMessage = unlockFailureMessage,

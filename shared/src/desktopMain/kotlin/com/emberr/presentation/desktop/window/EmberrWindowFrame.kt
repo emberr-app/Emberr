@@ -78,6 +78,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrWindowShadow
 import com.emberr.presentation.shared.components.LocalDialogWindowTitleBar
+import com.emberr.ui.theme.paperTexture
 
 private val CloseHoverColor = Color(0xFFE04B4B)
 private val TitleBarRevealBand = 22.dp
@@ -122,7 +123,9 @@ fun WindowScope.EmberrWindowFrame(
     content: @Composable () -> Unit
 ) {
     if (!isEnabled) {
-        content()
+        Box(modifier = Modifier.fillMaxSize().paperTexture(), propagateMinConstraints = true) {
+            content()
+        }
         return
     }
 
@@ -200,7 +203,7 @@ fun WindowScope.EmberrWindowFrame(
             }
         }
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().clip(frameShape).paperTexture(),
             shape = frameShape,
             color = MaterialTheme.colorScheme.background,
             shadowElevation = EmberrShadowElevation.None

@@ -406,6 +406,12 @@ private fun runEmberrDesktopApp() = application {
         val colorThemeStrength by settingsManager.colorThemeStrengthFlow.collectAsState(
             initial = settingsManager.getColorThemeStrength()
         )
+        val paperTextureEnabled by settingsManager.paperTextureEnabledFlow.collectAsState(
+            initial = settingsManager.isPaperTextureEnabled()
+        )
+        val paperTextureStrength by settingsManager.paperTextureStrengthFlow.collectAsState(
+            initial = settingsManager.getPaperTextureStrength()
+        )
 
         FollowLiveDisplayScale(mainWindowState) {
         EmberrTheme(
@@ -415,6 +421,7 @@ private fun runEmberrDesktopApp() = application {
             colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
             themedTextAndIcons = themedTextAndIcons,
             colorThemeStrength = colorThemeStrength,
+            paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
             usesTwentyFourHourClock = usesTwentyFourHourClock,
             firstDayOfWeek = firstDayOfWeek
         ) {
@@ -563,6 +570,12 @@ private fun runEmberrDesktopApp() = application {
                 val colorThemeStrength by settingsManager.colorThemeStrengthFlow.collectAsState(
                     initial = settingsManager.getColorThemeStrength()
                 )
+                val paperTextureEnabled by settingsManager.paperTextureEnabledFlow.collectAsState(
+                    initial = settingsManager.isPaperTextureEnabled()
+                )
+                val paperTextureStrength by settingsManager.paperTextureStrengthFlow.collectAsState(
+                    initial = settingsManager.getPaperTextureStrength()
+                )
 
                 val stickyWindow = this.window as Frame
 
@@ -574,6 +587,7 @@ private fun runEmberrDesktopApp() = application {
                     colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
                     themedTextAndIcons = themedTextAndIcons,
                     colorThemeStrength = colorThemeStrength,
+                    paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
                     usesTwentyFourHourClock = usesTwentyFourHourClock,
                     firstDayOfWeek = firstDayOfWeek
                 ) {
