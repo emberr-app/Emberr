@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -52,7 +53,6 @@ import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.ui.theme.ColorThemePreference
-import com.emberr.ui.theme.FULL_THEME_STRENGTH
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.colorThemePreferenceNamed
@@ -60,8 +60,10 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
+import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.moon_cloud
 import emberr.shared.generated.resources.palette
+import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.sun
 import emberr.shared.generated.resources.text_type
 import org.jetbrains.compose.resources.painterResource
@@ -72,6 +74,7 @@ private const val DESKTOP_THEME_COLUMNS = 3
 private const val MOBILE_THEME_COLUMNS = 2
 private const val PREVIEW_ASPECT_RATIO = 1.25f
 private const val STRENGTH_SLIDER_STEPS = 9
+private const val FULL_PERCENT = 100
 private val PreviewCardShape = RoundedCornerShape(14.dp)
 private val PreviewLineShape = RoundedCornerShape(50)
 private val PreviewSurfaceShape = RoundedCornerShape(6.dp)
@@ -95,6 +98,8 @@ fun ColorThemeSettingsScreen(
     val selectedThemeMode = ThemePreference.entries.firstOrNull { it.name == themeModeName } ?: ThemePreference.SYSTEM
     val themedTextAndIcons by viewModel.themedTextAndIcons.collectAsState()
     val colorThemeStrength by viewModel.colorThemeStrength.collectAsState()
+    val paperTextureEnabled by viewModel.paperTextureEnabled.collectAsState()
+    val paperTextureStrength by viewModel.paperTextureStrength.collectAsState()
     val columnCount = if (isDesktopPlatform) DESKTOP_THEME_COLUMNS else MOBILE_THEME_COLUMNS
     val colorThemeRows = remember(columnCount) { ColorThemePreference.entries.chunked(columnCount) }
 
@@ -131,9 +136,11 @@ fun ColorThemeSettingsScreen(
             if (selectedColorTheme != ColorThemePreference.EMBERR) {
                 item(key = "strength") {
                     SettingsGroup(title = "Strength") {
-                        ColorThemeStrengthRow(
-                            strengthPercent = colorThemeStrength,
-                            onStrengthChange = { newStrength ->
+                        PercentSliderRow(
+                            icon = painterResource(Res.drawable.palette),
+                            title = "Theme Strength",
+                            percent = colorThemeStrength,
+                            onPercentChange = { newStrength ->
                                 if (newStrength != colorThemeStrength) viewModel.setColorThemeStrength(newStrength)
                             }
                         )
@@ -150,6 +157,29 @@ fun ColorThemeSettingsScreen(
                         subtitle = "When off, text and icons stay black and white.",
                         onCheckedChange = { viewModel.setThemedTextAndIcons(it) }
                     )
+                }
+            }
+
+            item(key = "texture") {
+                SettingsGroup(title = "Texture") {
+                    SettingsToggleRow(
+                        icon = painterResource(Res.drawable.dot_grid),
+                        title = "Paper Texture",
+                        isChecked = paperTextureEnabled,
+                        subtitle = "Adds a soft grain, like paper.",
+                        onCheckedChange = { viewModel.setPaperTextureEnabled(it) }
+                    )
+                    if (paperTextureEnabled) {
+                        SettingsDivider()
+                        PercentSliderRow(
+                            icon = painterResource(Res.drawable.sliders_horizontal),
+                            title = "Texture Strength",
+                            percent = paperTextureStrength,
+                            onPercentChange = { newStrength ->
+                                if (newStrength != paperTextureStrength) viewModel.setPaperTextureStrength(newStrength)
+                            }
+                        )
+                    }
                 }
             }
 
@@ -211,26 +241,28 @@ fun ColorThemeSettingsScreen(
 }
 
 @Composable
-private fun ColorThemeStrengthRow(
-    strengthPercent: Int,
-    onStrengthChange: (Int) -> Unit
+private fun PercentSliderRow(
+    icon: Painter,
+    title: String,
+    percent: Int,
+    onPercentChange: (Int) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth().settingsRowSize()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SettingsRowIcon(icon = painterResource(Res.drawable.palette))
+            SettingsRowIcon(icon = icon)
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "Theme Strength",
+                text = title,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
-            SettingsValuePill(label = "$strengthPercent%")
+            SettingsValuePill(label = "$percent%")
         }
         Slider(
-            value = strengthPercent.toFloat(),
-            onValueChange = { newValue -> onStrengthChange(newValue.roundToInt()) },
-            valueRange = 0f..FULL_THEME_STRENGTH.toFloat(),
+            value = percent.toFloat(),
+            onValueChange = { newValue -> onPercentChange(newValue.roundToInt()) },
+            valueRange = 0f..FULL_PERCENT.toFloat(),
             steps = STRENGTH_SLIDER_STEPS,
             colors = SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.secondary,
