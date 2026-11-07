@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -50,6 +52,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import kotlin.random.Random
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 const val FULL_PAPER_TEXTURE_STRENGTH = 100
 
@@ -158,8 +164,20 @@ fun Modifier.stillPaperGrain(shape: Shape, holdsStill: Boolean = LocalHoldsPaper
 private fun paperTextureShownHere(): Boolean =
     PaperTextureArea.WHOLE_APP in LocalPaperTextureAreas.current || LocalInsideTexturedNote.current
 
-private val paperNoiseBrush: ShaderBrush by lazy {
-    ShaderBrush(ImageShader(createPaperNoiseTile(), TileMode.Repeated, TileMode.Repeated))
+private val paperNoiseBrushState = mutableStateOf<ShaderBrush?>(null)
+private val paperNoiseTileLock = Mutex()
+
+@Composable
+private fun rememberPaperNoiseBrush(): ShaderBrush? {
+    val paperNoiseBrush = paperNoiseBrushState.value
+    LaunchedEffect(Unit) {
+        paperNoiseTileLock.withLock {
+            if (paperNoiseBrushState.value != null) return@withLock
+            val noiseTile = withContext(Dispatchers.Default) { createPaperNoiseTile() }
+            paperNoiseBrushState.value = ShaderBrush(ImageShader(noiseTile, TileMode.Repeated, TileMode.Repeated))
+        }
+    }
+    return paperNoiseBrush
 }
 
 private fun createPaperNoiseTile(): ImageBitmap {
@@ -192,7 +210,12 @@ private fun createPaperNoiseTile(): ImageBitmap {
 
 private fun grainScaleFor(density: Float): Float = (density * GRAIN_SIZE_DP).coerceAtLeast(1f)
 
-private fun DrawScope.drawPaperGrain(grainScale: Float, tileSpan: Float, textureAlpha: Float) {
+private fun DrawScope.drawPaperGrain(
+    paperNoiseBrush: ShaderBrush,
+    grainScale: Float,
+    tileSpan: Float,
+    textureAlpha: Float
+) {
     translate(left = -tileSpan, top = -tileSpan) {
         scale(grainScale, pivot = Offset.Zero) {
             drawRect(
@@ -288,26 +311,32 @@ private fun PaperTextureLayerBox(
     val density = LocalDensity.current.density
     val grainScale = grainScaleFor(density)
     val tileSpan = NOISE_TILE_SIZE * grainScale
+    val drawsGrain = textureStrength > 0
     val grainScrollFollower = remember(tileSpan) { GrainScrollFollower(tileSpan) }
     val parentGrainMover = LocalPaperGrainMover.current
-    val grainMover = if (isShown) grainScrollFollower else parentGrainMover
     val stillRegions = remember { StillPaperGrainRegions() }
     val parentStillRegions = LocalStillPaperGrainRegions.current
+    val grainTrackingModifier = if (drawsGrain) {
+        Modifier
+            .nestedScroll(grainScrollFollower)
+            .onPlaced { coordinates -> stillRegions.boxCoordinates = coordinates }
+    } else {
+        Modifier
+    }
 
     Box(
-        modifier = modifier
-            .nestedScroll(grainScrollFollower)
-            .onPlaced { coordinates -> stillRegions.boxCoordinates = coordinates },
+        modifier = modifier.then(grainTrackingModifier),
         contentAlignment = contentAlignment,
         propagateMinConstraints = propagateMinConstraints
     ) {
         CompositionLocalProvider(
-            LocalPaperGrainMover provides grainMover,
-            LocalStillPaperGrainRegions provides (if (isShown) stillRegions else parentStillRegions)
+            LocalPaperGrainMover provides (if (drawsGrain) grainScrollFollower else parentGrainMover),
+            LocalStillPaperGrainRegions provides (if (drawsGrain) stillRegions else parentStillRegions)
         ) {
             content()
         }
-        if (textureStrength > 0) {
+        val paperNoiseBrush = if (drawsGrain) rememberPaperNoiseBrush() else null
+        if (paperNoiseBrush != null) {
             val textureAlpha = textureStrength / FULL_PAPER_TEXTURE_STRENGTH.toFloat() * STRONGEST_TEXTURE_ALPHA
             Box(
                 modifier = Modifier
@@ -329,7 +358,7 @@ private fun PaperTextureLayerBox(
                             translationX = grainScrollFollower.offsetX
                             translationY = grainScrollFollower.offsetY
                         }
-                        .drawBehind { drawPaperGrain(grainScale, tileSpan, textureAlpha) }
+                        .drawBehind { drawPaperGrain(paperNoiseBrush, grainScale, tileSpan, textureAlpha) }
                 )
             }
             Spacer(
@@ -337,7 +366,7 @@ private fun PaperTextureLayerBox(
                     .matchParentSize()
                     .drawBehind {
                         val stillPath = stillRegions.outlinePath(this, layoutDirection) ?: return@drawBehind
-                        clipPath(stillPath) { drawPaperGrain(grainScale, tileSpan, textureAlpha) }
+                        clipPath(stillPath) { drawPaperGrain(paperNoiseBrush, grainScale, tileSpan, textureAlpha) }
                     }
             )
         }
