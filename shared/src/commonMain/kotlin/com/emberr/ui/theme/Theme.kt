@@ -1,14 +1,12 @@
 package com.emberr.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextContextMenu
@@ -101,11 +99,8 @@ fun EmberrTheme(
                 backgroundColor = colorScheme.primary.copy(alpha = TEXT_SELECTION_BACKGROUND_ALPHA)
             )
             CompositionLocalProvider(LocalTextSelectionColors provides accentTextSelectionColors) {
-                val windowTextureModifier = if (isDesktopPlatform) Modifier else Modifier.paperTexture()
                 EmberrTextContextMenu {
-                    Box(modifier = windowTextureModifier, propagateMinConstraints = true) {
-                        content()
-                    }
+                    if (isDesktopPlatform) content() else PaperTextureBox(propagateMinConstraints = true, content = content)
                 }
             }
         }
