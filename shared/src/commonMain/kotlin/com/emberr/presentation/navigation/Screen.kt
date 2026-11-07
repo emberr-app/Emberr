@@ -39,6 +39,8 @@ sealed class Screen(val route: String, val title: String? = null, val icon: Imag
 
     object KeyboardToolbarSettings : Screen("keyboard_toolbar_settings")
 
+    object ColorThemeSettings : Screen("color_theme_settings")
+
     object ImportNotes : Screen("import_notes")
 
     object OpenSourceLicenses : Screen("open_source_licenses")

@@ -214,6 +214,7 @@ sealed interface DetailPane {
     data object SelfHostSetup : DetailPane
     data object EmberrCloud : DetailPane
     data object About : DetailPane
+    data object ColorTheme : DetailPane
     data object ImportNotes : DetailPane
     data object OpenSourceLicenses : DetailPane
     data object ThirdPartyServices : DetailPane
@@ -232,6 +233,7 @@ private fun DetailPane?.settingsSubPage(): SettingsSubPage? = when (this) {
     DetailPane.EmberrCloud -> if (isDebugBuild) SettingsSubPage.EMBERR_CLOUD else null
     DetailPane.ImportNotes -> SettingsSubPage.IMPORT
     DetailPane.About -> SettingsSubPage.ABOUT
+    DetailPane.ColorTheme -> SettingsSubPage.COLOR_THEME
     DetailPane.OpenSourceLicenses -> SettingsSubPage.OPEN_SOURCE_LICENSES
     DetailPane.ThirdPartyServices -> SettingsSubPage.THIRD_PARTY_SERVICES
     else -> null
@@ -243,6 +245,7 @@ private fun SettingsSubPage?.toDetailPane(): DetailPane = when (this) {
     SettingsSubPage.EMBERR_CLOUD -> if (isDebugBuild) DetailPane.EmberrCloud else DetailPane.Settings
     SettingsSubPage.IMPORT -> DetailPane.ImportNotes
     SettingsSubPage.ABOUT -> DetailPane.About
+    SettingsSubPage.COLOR_THEME -> DetailPane.ColorTheme
     SettingsSubPage.OPEN_SOURCE_LICENSES -> DetailPane.OpenSourceLicenses
     SettingsSubPage.THIRD_PARTY_SERVICES -> DetailPane.ThirdPartyServices
 }
@@ -255,6 +258,7 @@ internal fun DetailPane.encode(): String = when (this) {
     DetailPane.SelfHostSetup -> "PANEL:SELFHOST"
     DetailPane.EmberrCloud -> "PANEL:EMBERR_CLOUD"
     DetailPane.About -> "PANEL:ABOUT"
+    DetailPane.ColorTheme -> "PANEL:COLOR_THEME"
     DetailPane.ImportNotes -> "PANEL:IMPORT_NOTES"
     DetailPane.OpenSourceLicenses -> "PANEL:LICENSES"
     DetailPane.ThirdPartyServices -> "PANEL:THIRD_PARTY_SERVICES"
@@ -277,6 +281,7 @@ internal fun decodeDetailPane(raw: String, today: LocalDate): DetailPane = when 
     raw == "PANEL:SELFHOST" -> DetailPane.SelfHostSetup
     raw == "PANEL:EMBERR_CLOUD" -> if (isDebugBuild) DetailPane.EmberrCloud else DetailPane.Settings
     raw == "PANEL:ABOUT" -> DetailPane.About
+    raw == "PANEL:COLOR_THEME" -> DetailPane.ColorTheme
     raw == "PANEL:IMPORT_NOTES" -> DetailPane.ImportNotes
     raw == "PANEL:LICENSES" -> DetailPane.OpenSourceLicenses
     raw == "PANEL:THIRD_PARTY_SERVICES" -> DetailPane.ThirdPartyServices
@@ -350,7 +355,7 @@ private fun SidebarSearchBar(
             onValueChange = onQueryChange,
             singleLine = true,
             textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
             modifier = Modifier
                 .weight(1f)
                 .focusRequester(focusRequester)
@@ -1995,6 +2000,7 @@ fun DesktopMainScreen(
             DetailPane.SelfHostSetup,
             DetailPane.EmberrCloud,
             DetailPane.About,
+            DetailPane.ColorTheme,
             DetailPane.ImportNotes,
             DetailPane.OpenSourceLicenses,
             DetailPane.ThirdPartyServices -> key("settings") {
@@ -2012,6 +2018,7 @@ fun DesktopMainScreen(
                         onNavigateToEmberrCloud = { if (isDebugBuild) detail = DetailPane.EmberrCloud },
                         onNavigateToAbout = { detail = DetailPane.About },
                         onNavigateToImportNotes = { detail = DetailPane.ImportNotes },
+                        onNavigateToColorThemeSettings = { detail = DetailPane.ColorTheme },
                         desktopSubPage = d.settingsSubPage(),
                         onDesktopSubPageChange = { page -> detail = page.toDetailPane() },
                         syncViewModel = syncViewModel
