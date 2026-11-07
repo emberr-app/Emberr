@@ -24,6 +24,10 @@ object SyncConstants {
     const val DEFAULT_THEMED_TEXT_AND_ICONS = true
     const val KEY_COLOR_THEME_STRENGTH = "color_theme_strength"
     const val DEFAULT_COLOR_THEME_STRENGTH = 100
+    const val KEY_PAPER_TEXTURE_ENABLED = "paper_texture_enabled"
+    const val DEFAULT_PAPER_TEXTURE_ENABLED = false
+    const val KEY_PAPER_TEXTURE_STRENGTH = "paper_texture_strength"
+    const val DEFAULT_PAPER_TEXTURE_STRENGTH = 50
     const val KEY_FONT_SIZE_PREFERENCE = "font_size_preference"
     const val DEFAULT_FONT_SIZE_PREFERENCE = "DEFAULT"
     const val KEY_FONT_STYLE_PREFERENCE = "font_style_preference"

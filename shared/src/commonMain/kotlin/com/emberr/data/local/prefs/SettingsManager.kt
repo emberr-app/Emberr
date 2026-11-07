@@ -123,6 +123,14 @@ interface SettingsManager {
     fun getColorThemeStrength(): Int
     fun saveColorThemeStrength(strengthPercent: Int)
 
+    val paperTextureEnabledFlow: Flow<Boolean>
+    fun isPaperTextureEnabled(): Boolean
+    fun savePaperTextureEnabled(enabled: Boolean)
+
+    val paperTextureStrengthFlow: Flow<Int>
+    fun getPaperTextureStrength(): Int
+    fun savePaperTextureStrength(strengthPercent: Int)
+
     val fontSizePreferenceFlow: Flow<String>
     fun saveFontSizePreference(preference: String)
 
