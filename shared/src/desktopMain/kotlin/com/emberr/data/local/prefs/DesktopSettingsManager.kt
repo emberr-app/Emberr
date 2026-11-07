@@ -309,6 +309,42 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _themePreference.value = preference
     }
 
+    private val _colorThemePreference = MutableStateFlow(
+        prefs.get(SyncConstants.KEY_COLOR_THEME_PREFERENCE, SyncConstants.DEFAULT_COLOR_THEME_PREFERENCE)
+    )
+    override val colorThemePreferenceFlow: Flow<String> = _colorThemePreference
+
+    override fun getColorThemePreference(): String = _colorThemePreference.value
+
+    override fun saveColorThemePreference(preference: String) {
+        prefs.put(SyncConstants.KEY_COLOR_THEME_PREFERENCE, preference)
+        _colorThemePreference.value = preference
+    }
+
+    private val _themedTextAndIcons = MutableStateFlow(
+        prefs.getBoolean(SyncConstants.KEY_THEMED_TEXT_AND_ICONS, SyncConstants.DEFAULT_THEMED_TEXT_AND_ICONS)
+    )
+    override val themedTextAndIconsFlow: Flow<Boolean> = _themedTextAndIcons
+
+    override fun isThemedTextAndIconsEnabled(): Boolean = _themedTextAndIcons.value
+
+    override fun saveThemedTextAndIcons(enabled: Boolean) {
+        prefs.putBoolean(SyncConstants.KEY_THEMED_TEXT_AND_ICONS, enabled)
+        _themedTextAndIcons.value = enabled
+    }
+
+    private val _colorThemeStrength = MutableStateFlow(
+        prefs.getInt(SyncConstants.KEY_COLOR_THEME_STRENGTH, SyncConstants.DEFAULT_COLOR_THEME_STRENGTH)
+    )
+    override val colorThemeStrengthFlow: Flow<Int> = _colorThemeStrength
+
+    override fun getColorThemeStrength(): Int = _colorThemeStrength.value
+
+    override fun saveColorThemeStrength(strengthPercent: Int) {
+        prefs.putInt(SyncConstants.KEY_COLOR_THEME_STRENGTH, strengthPercent)
+        _colorThemeStrength.value = strengthPercent
+    }
+
     private val _fontSizePreference = MutableStateFlow(
         prefs.get(SyncConstants.KEY_FONT_SIZE_PREFERENCE, SyncConstants.DEFAULT_FONT_SIZE_PREFERENCE)
     )

@@ -1,9 +1,9 @@
 package com.emberr.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -11,6 +11,8 @@ import androidx.compose.ui.graphics.Color
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextContextMenu
 import kotlinx.datetime.DayOfWeek
+
+private const val TEXT_SELECTION_BACKGROUND_ALPHA = 0.4f
 
 // Base color palette
 
@@ -23,30 +25,6 @@ val HighlightLimeDark  = Color(0xFF6B5F10)
 const val HighlightCellBackgroundHex = "#FDFFB6"
 val TableGridLineLight = Color(0xFFDADADA)
 val TableGridLineDark  = Color(0xFF3A3A3A)
-
-private val LightColorScheme = lightColorScheme(
-    primary          = CharcoalNoir,
-    onPrimary        = CloudVeil,
-    background       = Color.White,
-    onBackground     = Color.Black,
-    surface          = CloudVeil,
-    onSurface        = CharcoalNoir,
-    outline          = UrbanFog,
-    surfaceVariant = CloudVeil,
-    surfaceContainerHigh = Color(0xFFD8D8D8)
-)
-
-private val DarkColorScheme = darkColorScheme(
-    primary          = CloudVeil,
-    onPrimary        = CharcoalNoir,
-    background       = Color.Black,
-    onBackground     = Color.White,
-    surface          = IroncladGrey,
-    onSurface        = CloudVeil,
-    outline          = UrbanFog,
-    surfaceVariant = Color(0xFF363636),
-    surfaceContainerHigh = Color(0xFF363636)
-)
 
 val LocalAppIsDark = staticCompositionLocalOf { false }
 
@@ -72,16 +50,14 @@ fun EmberrTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     fontSizePreference: FontSizePreference = FontSizePreference.DEFAULT,
     fontStylePreference: FontStylePreference = FontStylePreference.POPPINS,
+    colorThemePreference: ColorThemePreference = ColorThemePreference.EMBERR,
+    themedTextAndIcons: Boolean = true,
+    colorThemeStrength: Int = FULL_THEME_STRENGTH,
     usesTwentyFourHourClock: Boolean = false,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
     content: @Composable () -> Unit
 ) {
-    val baseColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-    val colorScheme = if (darkTheme && isDesktopPlatform) {
-        baseColorScheme.copy(background = Color.Black)
-    } else {
-        baseColorScheme
-    }
+    val colorScheme = colorThemePreference.colorSchemeFor(darkTheme, themedTextAndIcons, colorThemeStrength)
 
     val currentFontSizes = when {
         isDesktopPlatform -> when (fontSizePreference) {
@@ -116,7 +92,13 @@ fun EmberrTheme(
             colorScheme = colorScheme,
             typography = AppTypography
         ) {
-            EmberrTextContextMenu(content)
+            val accentTextSelectionColors = TextSelectionColors(
+                handleColor = colorScheme.secondary,
+                backgroundColor = colorScheme.primary.copy(alpha = TEXT_SELECTION_BACKGROUND_ALPHA)
+            )
+            CompositionLocalProvider(LocalTextSelectionColors provides accentTextSelectionColors) {
+                EmberrTextContextMenu(content)
+            }
         }
     }
 }
