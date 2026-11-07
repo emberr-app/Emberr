@@ -82,6 +82,7 @@ import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.colorThemePreferenceNamed
+import com.emberr.ui.theme.paperTextureAreasNamed
 import com.emberr.ui.theme.EmberrTheme
 import com.emberr.domain.util.export.handleExportBackup
 import com.emberr.domain.util.export.handleExportMarkdown
@@ -412,6 +413,9 @@ private fun runEmberrDesktopApp() = application {
         val paperTextureStrength by settingsManager.paperTextureStrengthFlow.collectAsState(
             initial = settingsManager.getPaperTextureStrength()
         )
+        val savedPaperTextureAreas by settingsManager.paperTextureAreasFlow.collectAsState(
+            initial = settingsManager.getPaperTextureAreas()
+        )
 
         FollowLiveDisplayScale(mainWindowState) {
         EmberrTheme(
@@ -422,6 +426,7 @@ private fun runEmberrDesktopApp() = application {
             themedTextAndIcons = themedTextAndIcons,
             colorThemeStrength = colorThemeStrength,
             paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
+            paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas),
             usesTwentyFourHourClock = usesTwentyFourHourClock,
             firstDayOfWeek = firstDayOfWeek
         ) {
@@ -576,6 +581,9 @@ private fun runEmberrDesktopApp() = application {
                 val paperTextureStrength by settingsManager.paperTextureStrengthFlow.collectAsState(
                     initial = settingsManager.getPaperTextureStrength()
                 )
+                val savedPaperTextureAreas by settingsManager.paperTextureAreasFlow.collectAsState(
+                    initial = settingsManager.getPaperTextureAreas()
+                )
 
                 val stickyWindow = this.window as Frame
 
@@ -588,6 +596,7 @@ private fun runEmberrDesktopApp() = application {
                     themedTextAndIcons = themedTextAndIcons,
                     colorThemeStrength = colorThemeStrength,
                     paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
+                    paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas),
                     usesTwentyFourHourClock = usesTwentyFourHourClock,
                     firstDayOfWeek = firstDayOfWeek
                 ) {

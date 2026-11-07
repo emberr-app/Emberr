@@ -49,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -107,8 +108,11 @@ import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.ui.theme.paperTextureToggleLabelFor
+import com.emberr.data.local.prefs.SettingsManager
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.arrow_left
 import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.dot_grid_off
@@ -141,6 +145,7 @@ import emberr.shared.generated.resources.yuyushort_regular
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -201,6 +206,11 @@ fun CanvasOptionsButton(
 ) {
     var showOptionsMenu by remember { mutableStateOf(false) }
     var showRenamePopup by remember { mutableStateOf(false) }
+    val settingsManager: SettingsManager = koinInject()
+    val isPaperTextureOn by settingsManager.paperTextureEnabledFlow.collectAsState(
+        initial = settingsManager.isPaperTextureEnabled()
+    )
+    val togglePaperTexture: () -> Unit = { settingsManager.savePaperTextureEnabled(!isPaperTextureOn) }
 
     Box(modifier) {
         TopBarIconButton(
@@ -230,6 +240,8 @@ fun CanvasOptionsButton(
                 onDismissRename = { showRenamePopup = false },
                 onRename = onRename,
                 onToggleFavorite = onToggleFavorite,
+                isPaperTextureOn = isPaperTextureOn,
+                onTogglePaperTexture = togglePaperTexture,
                 onMoveToTrash = onMoveToTrash
             )
         } else {
@@ -250,6 +262,8 @@ fun CanvasOptionsButton(
                 onRename = onRename,
                 onToggleFavorite = onToggleFavorite,
                 onOpenAsStickyNote = onOpenAsStickyNote,
+                isPaperTextureOn = isPaperTextureOn,
+                onTogglePaperTexture = togglePaperTexture,
                 onMoveToTrash = onMoveToTrash
             )
         }
@@ -271,11 +285,16 @@ private fun CanvasDesktopOptionsMenus(
     onRename: (String) -> Unit,
     onToggleFavorite: () -> Unit,
     onOpenAsStickyNote: () -> Unit,
+    isPaperTextureOn: Boolean,
+    onTogglePaperTexture: () -> Unit,
     onMoveToTrash: () -> Unit
 ) {
     EmberrDesktopMenu(expanded = showOptionsMenu, onDismissRequest = onDismissOptions) {
         Column(Modifier.width(240.dp).padding(vertical = 4.dp)) {
             DesktopMenuItem(painterResource(Res.drawable.pen), "Rename") { onOpenRename() }
+            DesktopMenuItem(painterResource(Res.drawable.dot_grid), paperTextureToggleLabelFor(isPaperTextureOn)) {
+                onTogglePaperTexture()
+            }
             if (showFavoriteOption) {
                 DesktopMenuItem(favoriteIconFor(isFavorite), favoriteLabelFor(isFavorite)) {
                     onDismissOptions()
@@ -333,6 +352,8 @@ private fun CanvasMobileOptionsSheets(
     onDismissRename: () -> Unit,
     onRename: (String) -> Unit,
     onToggleFavorite: () -> Unit,
+    isPaperTextureOn: Boolean,
+    onTogglePaperTexture: () -> Unit,
     onMoveToTrash: () -> Unit
 ) {
     var currentTitle by remember { mutableStateOf("") }
@@ -347,6 +368,9 @@ private fun CanvasMobileOptionsSheets(
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
                 BottomSheetOptionItem(painterResource(Res.drawable.pen), "Rename") { closeAnd(onOpenRename) }
+                BottomSheetOptionItem(painterResource(Res.drawable.dot_grid), paperTextureToggleLabelFor(isPaperTextureOn)) {
+                    onTogglePaperTexture()
+                }
                 if (showFavoriteOption) {
                     BottomSheetOptionItem(favoriteIconFor(isFavorite), favoriteLabelFor(isFavorite)) { closeAnd(onToggleFavorite) }
                 }

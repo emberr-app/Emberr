@@ -1,6 +1,7 @@
 package com.emberr.ui.theme
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -10,6 +11,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
@@ -49,6 +51,47 @@ fun interface PaperGrainMover {
 }
 
 val LocalPaperGrainMover = staticCompositionLocalOf { PaperGrainMover { } }
+
+enum class PaperTextureArea(val displayName: String) {
+    WHOLE_APP("Whole App"),
+    NOTES("Notes"),
+    CANVAS("Canvas")
+}
+
+fun paperTextureAreasNamed(savedAreas: String): Set<PaperTextureArea> =
+    savedAreas.split(",").mapNotNull { name -> PaperTextureArea.entries.firstOrNull { it.name == name } }.toSet()
+
+fun paperTextureAreasSavedValue(areas: Set<PaperTextureArea>): String = areas.joinToString(",") { it.name }
+
+fun isPaperTextureAreaChecked(areas: Set<PaperTextureArea>, area: PaperTextureArea): Boolean =
+    PaperTextureArea.WHOLE_APP in areas || area in areas
+
+fun paperTextureAreasWithToggled(areas: Set<PaperTextureArea>, tappedArea: PaperTextureArea): Set<PaperTextureArea> = when {
+    tappedArea == PaperTextureArea.WHOLE_APP && PaperTextureArea.WHOLE_APP in areas -> emptySet()
+    tappedArea == PaperTextureArea.WHOLE_APP -> setOf(PaperTextureArea.WHOLE_APP)
+    PaperTextureArea.WHOLE_APP in areas -> PaperTextureArea.entries.toSet() - PaperTextureArea.WHOLE_APP - tappedArea
+    tappedArea in areas -> areas - tappedArea
+    else -> areas + tappedArea
+}
+
+fun paperTextureAreasLabel(areas: Set<PaperTextureArea>): String = when {
+    PaperTextureArea.WHOLE_APP in areas -> PaperTextureArea.WHOLE_APP.displayName
+    PaperTextureArea.NOTES in areas && PaperTextureArea.CANVAS in areas -> "Notes & Canvas"
+    PaperTextureArea.NOTES in areas -> PaperTextureArea.NOTES.displayName
+    PaperTextureArea.CANVAS in areas -> PaperTextureArea.CANVAS.displayName
+    else -> "None"
+}
+
+fun paperTextureToggleLabelFor(isPaperTextureOn: Boolean): String =
+    if (isPaperTextureOn) "Hide Paper Texture" else "Show Paper Texture"
+
+val LocalPaperTextureAreas = staticCompositionLocalOf { setOf(PaperTextureArea.WHOLE_APP) }
+
+private val LocalInsideTexturedNote = staticCompositionLocalOf { false }
+
+@Composable
+private fun paperTextureShownHere(): Boolean =
+    PaperTextureArea.WHOLE_APP in LocalPaperTextureAreas.current || LocalInsideTexturedNote.current
 
 private val paperNoiseBrush: ShaderBrush by lazy {
     ShaderBrush(ImageShader(createPaperNoiseTile(), TileMode.Repeated, TileMode.Repeated))
@@ -107,14 +150,61 @@ fun PaperTextureBox(
     propagateMinConstraints: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val textureStrength = LocalPaperTextureStrength.current.coerceAtMost(FULL_PAPER_TEXTURE_STRENGTH)
+    PaperTextureLayerBox(
+        modifier = modifier,
+        contentAlignment = Alignment.TopStart,
+        propagateMinConstraints = propagateMinConstraints,
+        isShown = paperTextureShownHere()
+    ) {
+        content()
+    }
+}
+
+@Composable
+fun NotePaperTextureBox(
+    area: PaperTextureArea,
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
+    content: @Composable BoxScope.() -> Unit
+) {
+    val paperTextureAreas = LocalPaperTextureAreas.current
+    val showsOnThisPageOnly = PaperTextureArea.WHOLE_APP !in paperTextureAreas && area in paperTextureAreas
+    val isInsideTexturedNote = LocalInsideTexturedNote.current
+    CompositionLocalProvider(LocalInsideTexturedNote provides (showsOnThisPageOnly || isInsideTexturedNote)) {
+        PaperTextureLayerBox(
+            modifier = modifier,
+            contentAlignment = contentAlignment,
+            propagateMinConstraints = false,
+            isShown = showsOnThisPageOnly && !isInsideTexturedNote,
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun PaperTextureLayerBox(
+    modifier: Modifier,
+    contentAlignment: Alignment,
+    propagateMinConstraints: Boolean,
+    isShown: Boolean,
+    content: @Composable BoxScope.() -> Unit
+) {
+    val textureStrength = if (isShown) LocalPaperTextureStrength.current.coerceAtMost(FULL_PAPER_TEXTURE_STRENGTH) else 0
     val density = LocalDensity.current.density
     val grainScale = grainScaleFor(density)
     val tileSpan = NOISE_TILE_SIZE * grainScale
     val grainScrollFollower = remember(tileSpan) { GrainScrollFollower(tileSpan) }
+    val parentGrainMover = LocalPaperGrainMover.current
+    val grainMover = if (isShown) grainScrollFollower else parentGrainMover
 
-    Box(modifier = modifier.nestedScroll(grainScrollFollower), propagateMinConstraints = propagateMinConstraints) {
-        CompositionLocalProvider(LocalPaperGrainMover provides grainScrollFollower, content = content)
+    Box(
+        modifier = modifier.nestedScroll(grainScrollFollower),
+        contentAlignment = contentAlignment,
+        propagateMinConstraints = propagateMinConstraints
+    ) {
+        CompositionLocalProvider(LocalPaperGrainMover provides grainMover) {
+            content()
+        }
         if (textureStrength > 0) {
             val textureAlpha = textureStrength / FULL_PAPER_TEXTURE_STRENGTH.toFloat() * STRONGEST_TEXTURE_ALPHA
             Box(modifier = Modifier.matchParentSize().clipToBounds()) {

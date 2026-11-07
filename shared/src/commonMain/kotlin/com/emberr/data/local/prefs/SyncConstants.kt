@@ -28,6 +28,8 @@ object SyncConstants {
     const val DEFAULT_PAPER_TEXTURE_ENABLED = false
     const val KEY_PAPER_TEXTURE_STRENGTH = "paper_texture_strength"
     const val DEFAULT_PAPER_TEXTURE_STRENGTH = 50
+    const val KEY_PAPER_TEXTURE_AREAS = "paper_texture_areas"
+    const val DEFAULT_PAPER_TEXTURE_AREAS = "WHOLE_APP"
     const val KEY_FONT_SIZE_PREFERENCE = "font_size_preference"
     const val DEFAULT_FONT_SIZE_PREFERENCE = "DEFAULT"
     const val KEY_FONT_STYLE_PREFERENCE = "font_style_preference"

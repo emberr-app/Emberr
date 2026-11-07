@@ -140,6 +140,8 @@ import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
 import com.emberr.ui.theme.LocalPaperGrainMover
+import com.emberr.ui.theme.NotePaperTextureBox
+import com.emberr.ui.theme.PaperTextureArea
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.image
@@ -338,15 +340,6 @@ fun CanvasScreen(
             )
         }
         hasRestoredViewPosition = true
-    }
-
-    val paperGrainMover = LocalPaperGrainMover.current
-    LaunchedEffect(noteId, paperGrainMover) {
-        var previousPanOffset = viewport.panOffset
-        snapshotFlow { viewport.panOffset }.collect { panOffset ->
-            paperGrainMover.moveGrainBy(panOffset - previousPanOffset)
-            previousPanOffset = panOffset
-        }
     }
 
     LaunchedEffect(noteId, hasRestoredViewPosition) {
@@ -619,11 +612,21 @@ fun CanvasScreen(
         return listOf(groupingOption, deleteOption)
     }
 
-    Box(
+    NotePaperTextureBox(
+        area = PaperTextureArea.CANVAS,
         modifier = modifier
             .fillMaxSize()
             .clipToBounds()
     ) {
+        val paperGrainMover = LocalPaperGrainMover.current
+        LaunchedEffect(noteId, paperGrainMover) {
+            var previousPanOffset = viewport.panOffset
+            snapshotFlow { viewport.panOffset }.collect { panOffset ->
+                paperGrainMover.moveGrainBy(panOffset - previousPanOffset)
+                previousPanOffset = panOffset
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
