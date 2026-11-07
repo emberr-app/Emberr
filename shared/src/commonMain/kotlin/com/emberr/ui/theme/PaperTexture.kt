@@ -43,6 +43,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
@@ -114,6 +115,10 @@ private class StillPaperGrainRegions {
     fun place(regionKey: Any, coordinates: LayoutCoordinates, shape: Shape) {
         val box = boxCoordinates ?: return
         if (!box.isAttached || !coordinates.isAttached) return
+        if (box.findRootCoordinates() != coordinates.findRootCoordinates()) {
+            regions.remove(regionKey)
+            return
+        }
         val bounds = box.localBoundingBoxOf(coordinates, clipBounds = false)
         val placedRegion = regions[regionKey]
         if (placedRegion == null || placedRegion.bounds != bounds || placedRegion.shape != shape) {
@@ -233,6 +238,21 @@ fun PaperTextureBox(
     ) {
         content()
     }
+}
+
+@Composable
+fun PaperTexturePanel(
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
+    content: @Composable BoxScope.() -> Unit
+) {
+    PaperTextureLayerBox(
+        modifier = modifier,
+        contentAlignment = contentAlignment,
+        propagateMinConstraints = false,
+        isShown = paperTextureShownHere(),
+        content = content
+    )
 }
 
 @Composable

@@ -88,6 +88,7 @@ import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.ui.theme.PaperTexturePanel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
@@ -199,7 +200,7 @@ internal fun MovieDetailsDialog(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
+                PaperTexturePanel(
                     modifier = Modifier
                         .fillMaxWidth(DESKTOP_DIALOG_WIDTH_FRACTION)
                         .widthIn(max = DesktopDialogMaxWidth)

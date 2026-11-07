@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -112,6 +113,7 @@ import com.emberr.presentation.shared.editor.blockViews.property.PropertyBlockVi
 import com.emberr.presentation.shared.editor.blockViews.TableBlockView
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
+import com.emberr.ui.theme.PaperTexturePanel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
@@ -127,6 +129,13 @@ import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
 
+private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.6f
+private const val MOBILE_DIALOG_WIDTH_FRACTION = 0.94f
+private val DesktopDialogMaxWidth = 760.dp
+private val MobileDialogMaxWidth = 720.dp
+private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.8f
+private const val MOBILE_DIALOG_HEIGHT_FRACTION = 0.92f
+private val DesktopDialogMaxHeight = 720.dp
 private const val NoteLinkPrefix = "](emberr://note/"
 private val NoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)""".toRegex()
 private val DialogShape = RoundedCornerShape(24.dp)
@@ -215,11 +224,12 @@ fun DailyTimelineDialog(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
+                PaperTexturePanel(
                     modifier = Modifier
-                        .fillMaxWidth(if (isDesktopPlatform) 0.55f else 0.94f)
-                        .widthIn(max = 720.dp)
-                        .fillMaxHeight(0.92f)
+                        .fillMaxWidth(if (isDesktopPlatform) DESKTOP_DIALOG_WIDTH_FRACTION else MOBILE_DIALOG_WIDTH_FRACTION)
+                        .widthIn(max = if (isDesktopPlatform) DesktopDialogMaxWidth else MobileDialogMaxWidth)
+                        .fillMaxHeight(if (isDesktopPlatform) DESKTOP_DIALOG_HEIGHT_FRACTION else MOBILE_DIALOG_HEIGHT_FRACTION)
+                        .then(if (isDesktopPlatform) Modifier.heightIn(max = DesktopDialogMaxHeight) else Modifier)
                         .safeDrawingPadding()
                         .clip(DialogShape)
                         .background(dialogBackgroundColor)

@@ -96,6 +96,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.painterResource
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
+import com.emberr.ui.theme.PaperTexturePanel
 
 private val VoiceTaskDialogShape = RoundedCornerShape(24.dp)
 private const val EMBERR_GHOST_SIZE_FRACTION = 0.5f
@@ -158,111 +159,111 @@ fun VoiceTaskDialog(
                 .padding(vertical = 24.dp)
                 .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+            PaperTexturePanel(
                 modifier = Modifier
                     .widthIn(max = 380.dp)
                     .fillMaxWidth(0.88f)
                     .clip(VoiceTaskDialogShape)
                     .background(dialogBackgroundColor)
                     .animateContentSize(tween(durationMillis = 300, easing = FastOutSlowInEasing))
-                    .padding(24.dp)
             ) {
-                ListeningEmberrGhost(
-                    isListening = state.isListening,
-                    eyeColor = dialogBackgroundColor,
-                    onClick = {
-                        focusManager.clearFocus()
-                        onOrbClick()
-                    },
-                    modifier = Modifier.size(orbSize)
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "(add tasks with voice)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-                if (state.errorMessage == VOICE_RECOGNITION_UNAVAILABLE_MESSAGE) {
-                    Spacer(Modifier.height(8.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(24.dp)) {
+                    ListeningEmberrGhost(
+                        isListening = state.isListening,
+                        eyeColor = dialogBackgroundColor,
+                        onClick = {
+                            focusManager.clearFocus()
+                            onOrbClick()
+                        },
+                        modifier = Modifier.size(orbSize)
+                    )
+                    Spacer(Modifier.height(12.dp))
                     Text(
-                        text = "Install a speech recognition app to use voice tasks",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        text = statusText,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center
                     )
-                }
-
-                if (state.tasks.isNotEmpty() || state.partialText.isNotBlank()) {
-                    Spacer(Modifier.height(20.dp))
-                    Column(
-                        modifier = Modifier
-                            .weight(1f, fill = false)
-                            .fillMaxWidth()
-                            .heightIn(max = 280.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
-                            .verticalScroll(taskListScrollState)
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
-                    ) {
-                        state.tasks.forEachIndexed { index, task ->
-                            EditableVoiceTaskRow(
-                                text = task.taskText,
-                                reminder = task.timestamp,
-                                today = today,
-                                timeZone = timeZone,
-                                isKeyboardOpen = editingTaskIndex != null,
-                                onReminderPickerOpen = {
-                                    focusManager.clearFocus()
-                                    onTaskEditStart()
-                                },
-                                onReminderChange = { reminder -> onTaskReminderChange(index, reminder) },
-                                onEditStart = {
-                                    editingTaskIndex = index
-                                    onTaskEditStart()
-                                },
-                                onEditEnd = { if (editingTaskIndex == index) editingTaskIndex = null },
-                                onTextChange = { newText -> onTaskTextChange(index, newText) }
-                            )
-                        }
-                        if (state.partialText.isNotBlank()) {
-                            BeingHeardRow(text = state.partialText)
-                        }
-                    }
-                    if (state.tasks.isNotEmpty()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "(add tasks with voice)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                    if (state.errorMessage == VOICE_RECOGNITION_UNAVAILABLE_MESSAGE) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Tap a task to fix it",
+                            text = "Install a speech recognition app to use voice tasks",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            textAlign = TextAlign.Center
                         )
                     }
-                }
 
-                Spacer(Modifier.height(24.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    EmberrButtonSecondary(
-                        text = "Discard",
-                        onClick = onDiscard,
-                        modifier = Modifier.weight(1f)
-                    )
-                    EmberrButtonPrimary(
-                        text = "Add",
-                        onClick = onAdd,
-                        enabled = state.tasks.any { it.taskText.isNotBlank() },
-                        modifier = Modifier.weight(1f)
-                    )
+                    if (state.tasks.isNotEmpty() || state.partialText.isNotBlank()) {
+                        Spacer(Modifier.height(20.dp))
+                        Column(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .fillMaxWidth()
+                                .heightIn(max = 280.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
+                                .verticalScroll(taskListScrollState)
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            state.tasks.forEachIndexed { index, task ->
+                                EditableVoiceTaskRow(
+                                    text = task.taskText,
+                                    reminder = task.timestamp,
+                                    today = today,
+                                    timeZone = timeZone,
+                                    isKeyboardOpen = editingTaskIndex != null,
+                                    onReminderPickerOpen = {
+                                        focusManager.clearFocus()
+                                        onTaskEditStart()
+                                    },
+                                    onReminderChange = { reminder -> onTaskReminderChange(index, reminder) },
+                                    onEditStart = {
+                                        editingTaskIndex = index
+                                        onTaskEditStart()
+                                    },
+                                    onEditEnd = { if (editingTaskIndex == index) editingTaskIndex = null },
+                                    onTextChange = { newText -> onTaskTextChange(index, newText) }
+                                )
+                            }
+                            if (state.partialText.isNotBlank()) {
+                                BeingHeardRow(text = state.partialText)
+                            }
+                        }
+                        if (state.tasks.isNotEmpty()) {
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Tap a task to fix it",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(24.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        EmberrButtonSecondary(
+                            text = "Discard",
+                            onClick = onDiscard,
+                            modifier = Modifier.weight(1f)
+                        )
+                        EmberrButtonPrimary(
+                            text = "Add",
+                            onClick = onAdd,
+                            enabled = state.tasks.any { it.taskText.isNotBlank() },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }

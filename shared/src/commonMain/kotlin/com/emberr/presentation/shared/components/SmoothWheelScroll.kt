@@ -3,9 +3,12 @@ package com.emberr.presentation.shared.components
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isBackPressed
@@ -16,6 +19,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.canvas.horizontalScrollArrivesAsBackAndForwardButtons
+import com.emberr.ui.theme.LocalPaperGrainMover
 import kotlinx.coroutines.channels.Channel
 import kotlin.math.abs
 
@@ -39,7 +43,7 @@ fun Modifier.smoothWheelScroll(
     val density = LocalDensity.current
     val trackpadDistancePx = with(density) { pixelsPerTrackpadNotch.toPx() }
     val mouseWheelDistancePx = with(density) { pixelsPerMouseWheelNotch.toPx() }
-    val glide = rememberWheelGlide(state)
+    val glide = rememberWheelGlide(state, horizontal)
 
     return this.pointerInput(state, trackpadDistancePx, mouseWheelDistancePx, horizontal) {
         awaitPointerEventScope {
@@ -81,7 +85,7 @@ fun Modifier.horizontalScrollFromBackAndForwardButtons(state: ScrollableState): 
     if (!horizontalScrollArrivesAsBackAndForwardButtons) return this
 
     val stepPx = with(LocalDensity.current) { DefaultMouseWheelNotch.toPx() }
-    val glide = rememberWheelGlide(state)
+    val glide = rememberWheelGlide(state, horizontal = true)
 
     return this.pointerInput(state, stepPx) {
         awaitPointerEventScope {
@@ -102,8 +106,9 @@ fun Modifier.horizontalScrollFromBackAndForwardButtons(state: ScrollableState): 
 }
 
 @Composable
-private fun rememberWheelGlide(state: ScrollableState): WheelGlide {
+private fun rememberWheelGlide(state: ScrollableState, horizontal: Boolean): WheelGlide {
     val glide = remember(state) { WheelGlide() }
+    val paperGrainMover by rememberUpdatedState(LocalPaperGrainMover.current)
 
     LaunchedEffect(state) {
         while (true) {
@@ -118,6 +123,7 @@ private fun rememberWheelGlide(state: ScrollableState): WheelGlide {
                     }
                     val requested = remaining * SETTLE_FRACTION
                     val consumed = scrollBy(if (abs(requested) < MIN_STEP_PX) remaining else requested)
+                    paperGrainMover.moveGrainBy(if (horizontal) Offset(-consumed, 0f) else Offset(0f, -consumed))
                     glide.pendingPx -= consumed
                     if (abs(consumed) < 0.01f) {
                         glide.pendingPx = 0f
