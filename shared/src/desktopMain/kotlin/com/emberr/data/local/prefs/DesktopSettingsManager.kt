@@ -345,6 +345,30 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _colorThemeStrength.value = strengthPercent
     }
 
+    private val _paperTextureEnabled = MutableStateFlow(
+        prefs.getBoolean(SyncConstants.KEY_PAPER_TEXTURE_ENABLED, SyncConstants.DEFAULT_PAPER_TEXTURE_ENABLED)
+    )
+    override val paperTextureEnabledFlow: Flow<Boolean> = _paperTextureEnabled
+
+    override fun isPaperTextureEnabled(): Boolean = _paperTextureEnabled.value
+
+    override fun savePaperTextureEnabled(enabled: Boolean) {
+        prefs.putBoolean(SyncConstants.KEY_PAPER_TEXTURE_ENABLED, enabled)
+        _paperTextureEnabled.value = enabled
+    }
+
+    private val _paperTextureStrength = MutableStateFlow(
+        prefs.getInt(SyncConstants.KEY_PAPER_TEXTURE_STRENGTH, SyncConstants.DEFAULT_PAPER_TEXTURE_STRENGTH)
+    )
+    override val paperTextureStrengthFlow: Flow<Int> = _paperTextureStrength
+
+    override fun getPaperTextureStrength(): Int = _paperTextureStrength.value
+
+    override fun savePaperTextureStrength(strengthPercent: Int) {
+        prefs.putInt(SyncConstants.KEY_PAPER_TEXTURE_STRENGTH, strengthPercent)
+        _paperTextureStrength.value = strengthPercent
+    }
+
     private val _fontSizePreference = MutableStateFlow(
         prefs.get(SyncConstants.KEY_FONT_SIZE_PREFERENCE, SyncConstants.DEFAULT_FONT_SIZE_PREFERENCE)
     )

@@ -124,6 +124,26 @@ class SettingsViewModel(
         settingsManager.saveColorThemeStrength(strengthPercent)
     }
 
+    val paperTextureEnabled: StateFlow<Boolean> = settingsManager.paperTextureEnabledFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.isPaperTextureEnabled()
+    )
+
+    fun setPaperTextureEnabled(enabled: Boolean) {
+        settingsManager.savePaperTextureEnabled(enabled)
+    }
+
+    val paperTextureStrength: StateFlow<Int> = settingsManager.paperTextureStrengthFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.getPaperTextureStrength()
+    )
+
+    fun setPaperTextureStrength(strengthPercent: Int) {
+        settingsManager.savePaperTextureStrength(strengthPercent)
+    }
+
     val fontSizePreference: StateFlow<String> = settingsManager.fontSizePreferenceFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
