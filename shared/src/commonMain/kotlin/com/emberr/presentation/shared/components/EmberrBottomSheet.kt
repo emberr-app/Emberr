@@ -39,7 +39,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import androidx.compose.ui.graphics.painter.Painter
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import com.emberr.ui.theme.LocalAppIsDark
-import com.emberr.ui.theme.paperTexture
+import com.emberr.ui.theme.PaperTextureBox
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
@@ -250,39 +250,40 @@ private fun EmberrFloatingDialog(
                         Modifier.background(surfaceColor)
                     }
                 )
-                .paperTexture()
         ) {
-            dialogWindowTitleBar?.invoke()
-            CompositionLocalProvider(LocalEmberrBlurSource provides dialogContentHazeState) {
-                Box(modifier = Modifier.fillMaxWidth().imePadding()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = FloatingDialogContentMaxHeight + headerHeight)
-                            .hazeSource(state = dialogContentHazeState)
-                            .then(if (scrollsContent) Modifier.verticalScroll(contentScrollState) else Modifier)
-                            .padding(top = contentTopPadding)
-                            .padding(horizontal = contentHorizontalPadding)
-                    ) {
-                        CompositionLocalProvider(LocalEmberrSheetHeaderSpace provides headerSpace.takeUnless { scrollsContent }) {
-                            content { action -> closeAnd(action) }
-                        }
-                    }
-
-                    if (hasHeader) {
-                        EmberrSheetHeader(
-                            title = title,
-                            subtitle = subtitle,
-                            headerAction = headerAction,
-                            cardColor = surfaceColor,
-                            hazeState = dialogContentHazeState,
-                            fadeAlpha = headerFadeAlpha,
-                            headerHeight = headerHeight,
-                            onActionClick = { action -> if (action.closesSheet) closeAnd(action.onClick) else action.onClick() },
+            PaperTextureBox {
+                dialogWindowTitleBar?.invoke()
+                CompositionLocalProvider(LocalEmberrBlurSource provides dialogContentHazeState) {
+                    Box(modifier = Modifier.fillMaxWidth().imePadding()) {
+                        Column(
                             modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .onSizeChanged { size -> headerHeightPx = size.height }
-                        )
+                                .fillMaxWidth()
+                                .heightIn(max = FloatingDialogContentMaxHeight + headerHeight)
+                                .hazeSource(state = dialogContentHazeState)
+                                .then(if (scrollsContent) Modifier.verticalScroll(contentScrollState) else Modifier)
+                                .padding(top = contentTopPadding)
+                                .padding(horizontal = contentHorizontalPadding)
+                        ) {
+                            CompositionLocalProvider(LocalEmberrSheetHeaderSpace provides headerSpace.takeUnless { scrollsContent }) {
+                                content { action -> closeAnd(action) }
+                            }
+                        }
+
+                        if (hasHeader) {
+                            EmberrSheetHeader(
+                                title = title,
+                                subtitle = subtitle,
+                                headerAction = headerAction,
+                                cardColor = surfaceColor,
+                                hazeState = dialogContentHazeState,
+                                fadeAlpha = headerFadeAlpha,
+                                headerHeight = headerHeight,
+                                onActionClick = { action -> if (action.closesSheet) closeAnd(action.onClick) else action.onClick() },
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .onSizeChanged { size -> headerHeightPx = size.height }
+                            )
+                        }
                     }
                 }
             }
@@ -395,44 +396,45 @@ private fun EmberrModalBottomSheet(
                 )
                 .clip(if (floats) FloatingBottomSheetShape else BottomSheetShape)
                 .sheetCardBackground()
-                .paperTexture()
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .imePadding()
-                    .then(if (applyNavPadding) Modifier.padding(bottom = 16.dp) else Modifier)
-            ) {
-                Column(
+            PaperTextureBox {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .hazeSource(state = sheetContentHazeState)
-                        .then(if (scrollsContent) Modifier.verticalScroll(contentScrollState) else Modifier)
-                        .padding(top = contentTopPadding)
-                        .padding(horizontal = contentHorizontalPadding)
+                        .imePadding()
+                        .then(if (applyNavPadding) Modifier.padding(bottom = 16.dp) else Modifier)
                 ) {
-                    CompositionLocalProvider(
-                        LocalIndication provides NoRippleIndicationNodeFactory,
-                        LocalEmberrSheetHeaderSpace provides headerSpace.takeUnless { scrollsContent }
-                    ) {
-                        content { action -> closeAnd(action) }
-                    }
-                }
-
-                if (hasHeader) {
-                    EmberrSheetHeader(
-                        title = title,
-                        subtitle = subtitle,
-                        headerAction = headerAction,
-                        cardColor = sheetCardColor(),
-                        hazeState = sheetContentHazeState,
-                        fadeAlpha = headerFadeAlpha,
-                        headerHeight = headerHeight,
-                        onActionClick = { action -> if (action.closesSheet) closeAnd(action.onClick) else action.onClick() },
+                    Column(
                         modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .onSizeChanged { size -> headerHeightPx = size.height }
-                    )
+                            .fillMaxWidth()
+                            .hazeSource(state = sheetContentHazeState)
+                            .then(if (scrollsContent) Modifier.verticalScroll(contentScrollState) else Modifier)
+                            .padding(top = contentTopPadding)
+                            .padding(horizontal = contentHorizontalPadding)
+                    ) {
+                        CompositionLocalProvider(
+                            LocalIndication provides NoRippleIndicationNodeFactory,
+                            LocalEmberrSheetHeaderSpace provides headerSpace.takeUnless { scrollsContent }
+                        ) {
+                            content { action -> closeAnd(action) }
+                        }
+                    }
+
+                    if (hasHeader) {
+                        EmberrSheetHeader(
+                            title = title,
+                            subtitle = subtitle,
+                            headerAction = headerAction,
+                            cardColor = sheetCardColor(),
+                            hazeState = sheetContentHazeState,
+                            fadeAlpha = headerFadeAlpha,
+                            headerHeight = headerHeight,
+                            onActionClick = { action -> if (action.closesSheet) closeAnd(action.onClick) else action.onClick() },
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .onSizeChanged { size -> headerHeightPx = size.height }
+                        )
+                    }
                 }
             }
         }

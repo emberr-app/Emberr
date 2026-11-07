@@ -78,7 +78,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrWindowShadow
 import com.emberr.presentation.shared.components.LocalDialogWindowTitleBar
-import com.emberr.ui.theme.paperTexture
+import com.emberr.ui.theme.PaperTextureBox
 
 private val CloseHoverColor = Color(0xFFE04B4B)
 private val TitleBarRevealBand = 22.dp
@@ -123,7 +123,7 @@ fun WindowScope.EmberrWindowFrame(
     content: @Composable () -> Unit
 ) {
     if (!isEnabled) {
-        Box(modifier = Modifier.fillMaxSize().paperTexture(), propagateMinConstraints = true) {
+        PaperTextureBox(modifier = Modifier.fillMaxSize(), propagateMinConstraints = true) {
             content()
         }
         return
@@ -202,81 +202,83 @@ fun WindowScope.EmberrWindowFrame(
                 drawWindowShadow(frameSize.cornerRadius.toPx(), shadowStrength)
             }
         }
-        Surface(
-            modifier = Modifier.fillMaxSize().clip(frameShape).paperTexture(),
-            shape = frameShape,
-            color = MaterialTheme.colorScheme.background,
-            shadowElevation = EmberrShadowElevation.None
-        ) {
-            val titleBar: @Composable () -> Unit = {
-                EmberrTitleBar(
-                    windowTitle = windowTitle,
-                    frameSize = frameSize,
-                    isMaximized = isMaximized,
-                    onMinimize = { windowState.isMinimized = true },
-                    onToggleMaximize = {
-                        windowState.placement =
-                            if (isMaximized) WindowPlacement.Floating else WindowPlacement.Maximized
-                    },
-                    onClose = onCloseRequest
-                )
-            }
-
-            if (!autoHideTitleBar) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    titleBar()
-                    Box(modifier = Modifier.fillMaxSize()) { content() }
-                }
-                return@Surface
-            }
-
-            val titleBarHeightPx = with(LocalDensity.current) { frameSize.titleBarHeight.toPx() }
-            val revealBandPx = with(LocalDensity.current) { TitleBarRevealBand.toPx() }
-            val titleBarRevealBlocker = remember { TitleBarRevealBlocker() }
-            val titleBarAboveDialogs: @Composable () -> Unit = {
-                TitleBarAboveDialog(
-                    frameSize = frameSize,
-                    offsetPx = invisibleBorderPx,
-                    widthPx = frameSizeInPixels.width - 2 * invisibleBorderPx,
-                    shape = if (isMaximized) {
-                        RectangleShape
-                    } else {
-                        RoundedCornerShape(topStart = frameSize.cornerRadius, topEnd = frameSize.cornerRadius)
-                    },
-                    titleBar = titleBar
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onPointerEvent(PointerEventType.Move, pass = PointerEventPass.Initial) { event ->
-                        val pointerY = event.changes.first().position.y
-                        val revealLimit = if (isTitleBarVisible) titleBarHeightPx else revealBandPx
-                        isTitleBarVisible = pointerY <= revealLimit && !titleBarRevealBlocker.isPointerOverBlockingElement
-                    }
-                    .onPointerEvent(PointerEventType.Exit, pass = PointerEventPass.Initial) {
-                        isTitleBarVisible = false
-                    }
+        PaperTextureBox(modifier = Modifier.fillMaxSize().clip(frameShape), propagateMinConstraints = true) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                shape = frameShape,
+                color = MaterialTheme.colorScheme.background,
+                shadowElevation = EmberrShadowElevation.None
             ) {
-                CompositionLocalProvider(
-                    LocalTitleBarRevealBlocker provides titleBarRevealBlocker,
-                    LocalDialogWindowTitleBar provides titleBarAboveDialogs
-                ) {
-                    content()
+                val titleBar: @Composable () -> Unit = {
+                    EmberrTitleBar(
+                        windowTitle = windowTitle,
+                        frameSize = frameSize,
+                        isMaximized = isMaximized,
+                        onMinimize = { windowState.isMinimized = true },
+                        onToggleMaximize = {
+                            windowState.placement =
+                                if (isMaximized) WindowPlacement.Floating else WindowPlacement.Maximized
+                        },
+                        onClose = onCloseRequest
+                    )
                 }
 
-                AnimatedVisibility(
-                    visible = isTitleBarVisible && !titleBarRevealBlocker.isPointerOverBlockingElement,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    enter = TitleBarEnterTransition,
-                    exit = TitleBarExitTransition
-                ) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surface,
-                        shadowElevation = EmberrShadowElevation.Standard
-                    ) {
+                if (!autoHideTitleBar) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         titleBar()
+                        Box(modifier = Modifier.fillMaxSize()) { content() }
+                    }
+                    return@Surface
+                }
+
+                val titleBarHeightPx = with(LocalDensity.current) { frameSize.titleBarHeight.toPx() }
+                val revealBandPx = with(LocalDensity.current) { TitleBarRevealBand.toPx() }
+                val titleBarRevealBlocker = remember { TitleBarRevealBlocker() }
+                val titleBarAboveDialogs: @Composable () -> Unit = {
+                    TitleBarAboveDialog(
+                        frameSize = frameSize,
+                        offsetPx = invisibleBorderPx,
+                        widthPx = frameSizeInPixels.width - 2 * invisibleBorderPx,
+                        shape = if (isMaximized) {
+                            RectangleShape
+                        } else {
+                            RoundedCornerShape(topStart = frameSize.cornerRadius, topEnd = frameSize.cornerRadius)
+                        },
+                        titleBar = titleBar
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onPointerEvent(PointerEventType.Move, pass = PointerEventPass.Initial) { event ->
+                            val pointerY = event.changes.first().position.y
+                            val revealLimit = if (isTitleBarVisible) titleBarHeightPx else revealBandPx
+                            isTitleBarVisible = pointerY <= revealLimit && !titleBarRevealBlocker.isPointerOverBlockingElement
+                        }
+                        .onPointerEvent(PointerEventType.Exit, pass = PointerEventPass.Initial) {
+                            isTitleBarVisible = false
+                        }
+                ) {
+                    CompositionLocalProvider(
+                        LocalTitleBarRevealBlocker provides titleBarRevealBlocker,
+                        LocalDialogWindowTitleBar provides titleBarAboveDialogs
+                    ) {
+                        content()
+                    }
+
+                    AnimatedVisibility(
+                        visible = isTitleBarVisible && !titleBarRevealBlocker.isPointerOverBlockingElement,
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        enter = TitleBarEnterTransition,
+                        exit = TitleBarExitTransition
+                    ) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            shadowElevation = EmberrShadowElevation.Standard
+                        ) {
+                            titleBar()
+                        }
                     }
                 }
             }

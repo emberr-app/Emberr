@@ -139,6 +139,7 @@ import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
+import com.emberr.ui.theme.LocalPaperGrainMover
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.image
@@ -337,6 +338,15 @@ fun CanvasScreen(
             )
         }
         hasRestoredViewPosition = true
+    }
+
+    val paperGrainMover = LocalPaperGrainMover.current
+    LaunchedEffect(noteId, paperGrainMover) {
+        var previousPanOffset = viewport.panOffset
+        snapshotFlow { viewport.panOffset }.collect { panOffset ->
+            paperGrainMover.moveGrainBy(panOffset - previousPanOffset)
+            previousPanOffset = panOffset
+        }
     }
 
     LaunchedEffect(noteId, hasRestoredViewPosition) {
