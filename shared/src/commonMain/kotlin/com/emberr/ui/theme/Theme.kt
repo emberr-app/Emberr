@@ -1,12 +1,14 @@
 package com.emberr.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextContextMenu
@@ -53,6 +55,7 @@ fun EmberrTheme(
     colorThemePreference: ColorThemePreference = ColorThemePreference.EMBERR,
     themedTextAndIcons: Boolean = true,
     colorThemeStrength: Int = FULL_THEME_STRENGTH,
+    paperTextureStrength: Int = 0,
     usesTwentyFourHourClock: Boolean = false,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
     content: @Composable () -> Unit
@@ -86,7 +89,8 @@ fun EmberrTheme(
         LocalEmberrFontSizes provides currentFontSizes,
         LocalEmberrFontStyle provides fontStylePreference,
         LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock,
-        LocalFirstDayOfWeek provides firstDayOfWeek
+        LocalFirstDayOfWeek provides firstDayOfWeek,
+        LocalPaperTextureStrength provides paperTextureStrength
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -97,7 +101,12 @@ fun EmberrTheme(
                 backgroundColor = colorScheme.primary.copy(alpha = TEXT_SELECTION_BACKGROUND_ALPHA)
             )
             CompositionLocalProvider(LocalTextSelectionColors provides accentTextSelectionColors) {
-                EmberrTextContextMenu(content)
+                val windowTextureModifier = if (isDesktopPlatform) Modifier else Modifier.paperTexture()
+                EmberrTextContextMenu {
+                    Box(modifier = windowTextureModifier, propagateMinConstraints = true) {
+                        content()
+                    }
+                }
             }
         }
     }

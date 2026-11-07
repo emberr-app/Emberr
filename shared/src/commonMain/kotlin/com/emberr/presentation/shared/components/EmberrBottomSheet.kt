@@ -39,6 +39,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import androidx.compose.ui.graphics.painter.Painter
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.ui.theme.paperTexture
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
@@ -249,6 +250,7 @@ private fun EmberrFloatingDialog(
                         Modifier.background(surfaceColor)
                     }
                 )
+                .paperTexture()
         ) {
             dialogWindowTitleBar?.invoke()
             CompositionLocalProvider(LocalEmberrBlurSource provides dialogContentHazeState) {
@@ -393,6 +395,7 @@ private fun EmberrModalBottomSheet(
                 )
                 .clip(if (floats) FloatingBottomSheetShape else BottomSheetShape)
                 .sheetCardBackground()
+                .paperTexture()
         ) {
             Box(
                 modifier = Modifier

@@ -325,6 +325,8 @@ class MainActivity : FragmentActivity() {
             val colorThemePreferenceName by settingsViewModel.colorThemePreference.collectAsState()
             val themedTextAndIcons by settingsViewModel.themedTextAndIcons.collectAsState()
             val colorThemeStrength by settingsViewModel.colorThemeStrength.collectAsState()
+            val paperTextureEnabled by settingsViewModel.paperTextureEnabled.collectAsState()
+            val paperTextureStrength by settingsViewModel.paperTextureStrength.collectAsState()
 
             EmberrTheme(
                 darkTheme = darkTheme,
@@ -333,6 +335,7 @@ class MainActivity : FragmentActivity() {
                 colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
                 themedTextAndIcons = themedTextAndIcons,
                 colorThemeStrength = colorThemeStrength,
+                paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
                 usesTwentyFourHourClock = usesTwentyFourHourClock,
                 firstDayOfWeek = firstDayOfWeek
             ) {
