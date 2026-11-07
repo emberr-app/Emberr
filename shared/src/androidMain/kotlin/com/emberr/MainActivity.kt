@@ -48,6 +48,7 @@ import com.emberr.presentation.widget.notecard.refreshNoteCardWidgets
 import com.emberr.presentation.widget.todaytasks.refreshTodayTasksWidgets
 import com.emberr.presentation.widget.upcomingevents.refreshUpcomingEventsWidgets
 import com.emberr.presentation.widget.tasks.refreshTaskWidgets
+import com.emberr.presentation.widget.redrawAllWidgets
 import com.emberr.presentation.widget.calendarDateUriScheme
 import com.emberr.presentation.widget.calendarEventUriScheme
 import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
@@ -85,6 +86,8 @@ import com.emberr.domain.sync.discovery.SyncDiscoveryManager
 import com.emberr.presentation.sync.SyncViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.merge
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -98,6 +101,7 @@ import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
+import com.emberr.ui.theme.colorThemePreferenceNamed
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import com.emberr.domain.model.NoteBlock
@@ -261,6 +265,17 @@ class MainActivity : FragmentActivity() {
             }
         }
 
+        @OptIn(FlowPreview::class)
+        lifecycleScope.launch {
+            merge(
+                settingsViewModel.colorThemePreference.drop(1),
+                settingsViewModel.themedTextAndIcons.drop(1),
+                settingsViewModel.colorThemeStrength.drop(1)
+            ).debounce(500L.milliseconds).collect {
+                redrawAllWidgets(this@MainActivity)
+            }
+        }
+
         val localMediaGarbageCollector: LocalMediaGarbageCollector by inject()
         @OptIn(FlowPreview::class)
         lifecycleScope.launch {
@@ -307,10 +322,17 @@ class MainActivity : FragmentActivity() {
                 ThemePreference.SYSTEM -> isSystemInDarkTheme()
             }
 
+            val colorThemePreferenceName by settingsViewModel.colorThemePreference.collectAsState()
+            val themedTextAndIcons by settingsViewModel.themedTextAndIcons.collectAsState()
+            val colorThemeStrength by settingsViewModel.colorThemeStrength.collectAsState()
+
             EmberrTheme(
                 darkTheme = darkTheme,
                 fontSizePreference = fontSizePreference,
                 fontStylePreference = fontStylePreference,
+                colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
+                themedTextAndIcons = themedTextAndIcons,
+                colorThemeStrength = colorThemeStrength,
                 usesTwentyFourHourClock = usesTwentyFourHourClock,
                 firstDayOfWeek = firstDayOfWeek
             ) {

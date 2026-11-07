@@ -46,6 +46,7 @@ import androidx.glance.color.ColorProvider
 import androidx.glance.layout.size
 import androidx.glance.unit.ColorProvider
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.elevatedSurfaceColor
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.MainActivity
@@ -86,30 +87,34 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
-            val savedState = currentState<Preferences>()
-            val storedNoteId = savedState[shortcutNoteIdKey]?.takeIf { it.isNotBlank() }
+            WidgetColorTheme {
+                val savedState = currentState<Preferences>()
+                val storedNoteId = savedState[shortcutNoteIdKey]?.takeIf { it.isNotBlank() }
 
-            if (storedNoteId == null) {
-                NoteShortcutSetupPrompt(context = context, appWidgetId = appWidgetId)
-            } else {
-                NoteShortcutWidgetBody(
-                    context = context,
-                    content = decodeCachedShortcut(savedState[cachedShortcutKey]),
-                    isNoteDeleted = savedState[shortcutNoteDeletedKey] == true,
-                    appWidgetId = appWidgetId
-                )
+                if (storedNoteId == null) {
+                    NoteShortcutSetupPrompt(context = context, appWidgetId = appWidgetId)
+                } else {
+                    NoteShortcutWidgetBody(
+                        context = context,
+                        content = decodeCachedShortcut(savedState[cachedShortcutKey]),
+                        isNoteDeleted = savedState[shortcutNoteDeletedKey] == true,
+                        appWidgetId = appWidgetId
+                    )
+                }
             }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            NoteShortcutWidgetBody(
-                context = context,
-                content = previewNoteShortcutContent,
-                isNoteDeleted = false,
-                appWidgetId = INVALID_APPWIDGET_ID
-            )
+            WidgetColorTheme {
+                NoteShortcutWidgetBody(
+                    context = context,
+                    content = previewNoteShortcutContent,
+                    isNoteDeleted = false,
+                    appWidgetId = INVALID_APPWIDGET_ID
+                )
+            }
         }
     }
 

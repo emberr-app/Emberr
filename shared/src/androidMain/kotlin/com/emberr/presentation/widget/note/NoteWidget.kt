@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.widgetCornerRadius
 import com.emberr.presentation.widget.widgetTopPadding
@@ -100,31 +101,35 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
         val reportedWidgetWidth = readWidgetWidth(context, appWidgetId)
 
         provideContent {
-            val savedState = currentState<Preferences>()
-            val storedNoteId = savedState[selectedNoteIdKey]?.takeIf { it.isNotBlank() }
-            val rawCachedContent = savedState[cachedContentKey]
-            val content = remember(rawCachedContent) { decodeCachedContent(rawCachedContent) }
+            WidgetColorTheme {
+                val savedState = currentState<Preferences>()
+                val storedNoteId = savedState[selectedNoteIdKey]?.takeIf { it.isNotBlank() }
+                val rawCachedContent = savedState[cachedContentKey]
+                val content = remember(rawCachedContent) { decodeCachedContent(rawCachedContent) }
 
-            WidgetBody(
-                context = context,
-                chosenNoteId = storedNoteId,
-                content = if (storedNoteId == null) null else content,
-                isNoteDeleted = savedState[noteDeletedKey] == true,
-                appWidgetId = appWidgetId,
-                reportedWidgetWidth = reportedWidgetWidth
-            )
+                WidgetBody(
+                    context = context,
+                    chosenNoteId = storedNoteId,
+                    content = if (storedNoteId == null) null else content,
+                    isNoteDeleted = savedState[noteDeletedKey] == true,
+                    appWidgetId = appWidgetId,
+                    reportedWidgetWidth = reportedWidgetWidth
+                )
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetBody(
-                context = context,
-                chosenNoteId = previewNoteId,
-                content = previewNoteContent,
-                isNoteDeleted = false,
-                appWidgetId = INVALID_APPWIDGET_ID
-            )
+            WidgetColorTheme {
+                WidgetBody(
+                    context = context,
+                    chosenNoteId = previewNoteId,
+                    content = previewNoteContent,
+                    isNoteDeleted = false,
+                    appWidgetId = INVALID_APPWIDGET_ID
+                )
+            }
         }
     }
 
@@ -610,6 +615,7 @@ private fun GlanceModifier.thenClickable(action: Action?): GlanceModifier =
 private fun startPaddingFor(indentationLevel: Int) =
     (minOf(indentationLevel, maximumIndentationLevels) * indentationStepInDp).dp
 
+@Composable
 private fun resolveTextStyle(line: WidgetElement.TextLine): TextStyle {
     val appearance = appearanceFor(line.style)
 
@@ -623,6 +629,7 @@ private fun resolveTextStyle(line: WidgetElement.TextLine): TextStyle {
     )
 }
 
+@Composable
 private fun textColorFor(line: WidgetElement.TextLine) = when {
     line.marker == WidgetLineMarker.CHECKED_BOX -> secondaryTextColor
     line.style == WidgetTextStyleName.QUOTE || line.style == WidgetTextStyleName.SUBTLE -> secondaryTextColor

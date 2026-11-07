@@ -47,6 +47,7 @@ import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.WidgetAddButton
 import com.emberr.presentation.widget.WidgetCheckbox
@@ -91,24 +92,28 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
-            val rawCachedContent = currentState<Preferences>()[cachedTasksKey]
-            val savedContent = remember(rawCachedContent) { decodeCachedTasks(rawCachedContent) }
+            WidgetColorTheme {
+                val rawCachedContent = currentState<Preferences>()[cachedTasksKey]
+                val savedContent = remember(rawCachedContent) { decodeCachedTasks(rawCachedContent) }
 
-            TasksWidgetBody(
-                context = context,
-                appWidgetId = appWidgetId,
-                content = savedContent ?: content
-            )
+                TasksWidgetBody(
+                    context = context,
+                    appWidgetId = appWidgetId,
+                    content = savedContent ?: content
+                )
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            TasksWidgetBody(
-                context = context,
-                appWidgetId = INVALID_APPWIDGET_ID,
-                content = previewTasksContent
-            )
+            WidgetColorTheme {
+                TasksWidgetBody(
+                    context = context,
+                    appWidgetId = INVALID_APPWIDGET_ID,
+                    content = previewTasksContent
+                )
+            }
         }
     }
 

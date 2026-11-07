@@ -46,6 +46,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.highlightColor
 import com.emberr.presentation.widget.onHighlightColor
@@ -81,24 +82,28 @@ class CalendarWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
-            val rawCachedContent = currentState<Preferences>()[cachedCalendarKey]
-            val savedContent = remember(rawCachedContent) { decodeCachedCalendar(rawCachedContent) }
+            WidgetColorTheme {
+                val rawCachedContent = currentState<Preferences>()[cachedCalendarKey]
+                val savedContent = remember(rawCachedContent) { decodeCachedCalendar(rawCachedContent) }
 
-            CalendarWidgetBody(
-                context = context,
-                appWidgetId = appWidgetId,
-                content = savedContent ?: content
-            )
+                CalendarWidgetBody(
+                    context = context,
+                    appWidgetId = appWidgetId,
+                    content = savedContent ?: content
+                )
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            CalendarWidgetBody(
-                context = context,
-                appWidgetId = INVALID_APPWIDGET_ID,
-                content = previewCalendarContent()
-            )
+            WidgetColorTheme {
+                CalendarWidgetBody(
+                    context = context,
+                    appWidgetId = INVALID_APPWIDGET_ID,
+                    content = previewCalendarContent()
+                )
+            }
         }
     }
 

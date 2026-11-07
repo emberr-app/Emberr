@@ -41,6 +41,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.calendarEventUriScheme
 import com.emberr.presentation.widget.widgetBirthdayPersonNoteIdExtra
@@ -78,16 +79,20 @@ class UpcomingEventsWidget : GlanceAppWidget(), KoinComponent {
         val content = loadAndCacheUpcomingEvents(context, id) ?: readCachedUpcomingEvents(context, id)
 
         provideContent {
-            val rawCachedContent = currentState<Preferences>()[cachedUpcomingEventsKey]
-            val savedContent = remember(rawCachedContent) { decodeCachedUpcomingEvents(rawCachedContent) }
+            WidgetColorTheme {
+                val rawCachedContent = currentState<Preferences>()[cachedUpcomingEventsKey]
+                val savedContent = remember(rawCachedContent) { decodeCachedUpcomingEvents(rawCachedContent) }
 
-            UpcomingEventsWidgetBody(context = context, content = savedContent ?: content)
+                UpcomingEventsWidgetBody(context = context, content = savedContent ?: content)
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            UpcomingEventsWidgetBody(context = context, content = previewUpcomingEventsContent())
+            WidgetColorTheme {
+                UpcomingEventsWidgetBody(context = context, content = previewUpcomingEventsContent())
+            }
         }
     }
 

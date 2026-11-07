@@ -43,6 +43,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.emberr.MainActivity
 import com.emberr.R
+import com.emberr.presentation.widget.WidgetColorTheme
 import com.emberr.presentation.widget.WidgetTopFade
 import com.emberr.presentation.widget.WidgetAddButton
 import com.emberr.presentation.widget.elevatedSurfaceColor
@@ -86,27 +87,31 @@ class NoteListWidget : GlanceAppWidget(), KoinComponent {
         val appWidgetId = resolveAppWidgetId(context, id)
 
         provideContent {
-            val savedState = currentState<Preferences>()
-            val rawCachedNoteList = savedState[cachedNoteListKey]
-            val cachedContent = remember(rawCachedNoteList) { decodeCachedNoteList(rawCachedNoteList) }
+            WidgetColorTheme {
+                val savedState = currentState<Preferences>()
+                val rawCachedNoteList = savedState[cachedNoteListKey]
+                val cachedContent = remember(rawCachedNoteList) { decodeCachedNoteList(rawCachedNoteList) }
 
-            NoteListWidgetBody(
-                context = context,
-                spaceId = spaceId,
-                content = cachedContent ?: loadedContent,
-                appWidgetId = appWidgetId
-            )
+                NoteListWidgetBody(
+                    context = context,
+                    spaceId = spaceId,
+                    content = cachedContent ?: loadedContent,
+                    appWidgetId = appWidgetId
+                )
+            }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            NoteListWidgetBody(
-                context = context,
-                spaceId = "",
-                content = previewNoteListContent,
-                appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
-            )
+            WidgetColorTheme {
+                NoteListWidgetBody(
+                    context = context,
+                    spaceId = "",
+                    content = previewNoteListContent,
+                    appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+                )
+            }
         }
     }
 
