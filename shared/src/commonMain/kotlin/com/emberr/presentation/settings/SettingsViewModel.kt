@@ -144,6 +144,16 @@ class SettingsViewModel(
         settingsManager.savePaperTextureStrength(strengthPercent)
     }
 
+    val paperTextureAreas: StateFlow<String> = settingsManager.paperTextureAreasFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.getPaperTextureAreas()
+    )
+
+    fun setPaperTextureAreas(areas: String) {
+        settingsManager.savePaperTextureAreas(areas)
+    }
+
     val fontSizePreference: StateFlow<String> = settingsManager.fontSizePreferenceFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

@@ -22,6 +22,7 @@ import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.colorThemePreferenceNamed
+import com.emberr.ui.theme.paperTextureAreasNamed
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -54,6 +55,7 @@ class AppLockActivity : FragmentActivity() {
             val colorThemeStrength by settingsViewModel.colorThemeStrength.collectAsState()
             val paperTextureEnabled by settingsViewModel.paperTextureEnabled.collectAsState()
             val paperTextureStrength by settingsViewModel.paperTextureStrength.collectAsState()
+            val savedPaperTextureAreas by settingsViewModel.paperTextureAreas.collectAsState()
 
             val darkTheme = when (runCatching { ThemePreference.valueOf(themePreferenceName) }.getOrDefault(ThemePreference.SYSTEM)) {
                 ThemePreference.LIGHT -> false
@@ -70,7 +72,8 @@ class AppLockActivity : FragmentActivity() {
                 colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
                 themedTextAndIcons = themedTextAndIcons,
                 colorThemeStrength = colorThemeStrength,
-                paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0
+                paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
+                paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas)
             ) {
                 AppLockScreen(
                     unlockFailureMessage = unlockFailureMessage,

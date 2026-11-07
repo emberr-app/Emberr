@@ -149,8 +149,12 @@ import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForw
 import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.editor.selection.BlockStyleBar
+import com.emberr.ui.theme.NotePaperTextureBox
+import com.emberr.ui.theme.PaperTextureArea
+import com.emberr.ui.theme.paperTextureToggleLabelFor
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.copy
@@ -337,6 +341,10 @@ fun NoteScreen(
 
     val handleToggleFavorite: () -> Unit = { viewModel.toggleFavorite() }
     val handleToggleWordCount: () -> Unit = { viewModel.toggleWordCount() }
+    val isPaperTextureOn by settingsManager.paperTextureEnabledFlow.collectAsState(
+        initial = settingsManager.isPaperTextureEnabled()
+    )
+    val handleTogglePaperTexture: () -> Unit = { settingsManager.savePaperTextureEnabled(!isPaperTextureOn) }
     val handleSetAlignment: (TextAlignment) -> Unit = { viewModel.setAllBlocksAlignment(it) }
     val handleAddIcon: () -> Unit = {
         showOptionsMenu = false
@@ -563,7 +571,8 @@ fun NoteScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0),
     ) { paddingValues ->
-        Box(
+        NotePaperTextureBox(
+            area = PaperTextureArea.NOTES,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = paddingValues.calculateBottomPadding())
@@ -831,6 +840,8 @@ fun NoteScreen(
                                         coverLinkFetch = coverLinkFetch,
                                         onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                                         onToggleWordCount = handleToggleWordCount,
+                                        isPaperTextureOn = isPaperTextureOn,
+                                        onTogglePaperTexture = handleTogglePaperTexture,
                                         noteWidth = shownNoteWidth,
                                         onNoteWidthChange = { noteWidthBeingDragged = it },
                                         onNoteWidthChangeFinished = {
@@ -914,6 +925,8 @@ fun NoteScreen(
                         coverLinkFetch = coverLinkFetch,
                         onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                         onToggleWordCount = handleToggleWordCount,
+                        isPaperTextureOn = isPaperTextureOn,
+                        onTogglePaperTexture = handleTogglePaperTexture,
                         onSetAlignment = handleSetAlignment,
                         onMoveToTrash = handleMoveToTrash,
                         onCopyPlain = handleCopyPlain,
@@ -1510,6 +1523,8 @@ fun NoteOptionsDesktopMenu(
     coverLinkFetch: ImageLinkFetch?,
     onCoverLinkSubmitted: (address: String) -> Unit,
     onToggleWordCount: () -> Unit,
+    isPaperTextureOn: Boolean,
+    onTogglePaperTexture: () -> Unit,
     noteWidth: Float,
     onNoteWidthChange: (Float) -> Unit,
     onNoteWidthChangeFinished: () -> Unit,
@@ -1557,6 +1572,11 @@ fun NoteOptionsDesktopMenu(
             Icons.Default.FormatSize,
             wordCountText
         ) { onToggleWordCount() }
+
+        DesktopMenuItem(
+            painterResource(Res.drawable.dot_grid),
+            paperTextureToggleLabelFor(isPaperTextureOn)
+        ) { onTogglePaperTexture() }
 
         DesktopSubmenuItem(painterResource(Res.drawable.textalign_left2), "Alignment") {
             ALIGNMENT_OPTIONS.forEach { option ->
@@ -1790,6 +1810,8 @@ fun NoteOptionsBottomSheet(
     coverLinkFetch: ImageLinkFetch?,
     onCoverLinkSubmitted: (address: String) -> Unit,
     onToggleWordCount: () -> Unit,
+    isPaperTextureOn: Boolean,
+    onTogglePaperTexture: () -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onMoveToTrash: () -> Unit,
     onCopyPlain: () -> Unit = {},
@@ -1834,6 +1856,10 @@ fun NoteOptionsBottomSheet(
             val wordCountText = if (showWordCount) "Hide Word Count" else "Show Word Count"
             BottomSheetOptionItem(Icons.Default.FormatSize, wordCountText) {
                 onToggleWordCount()
+            }
+
+            BottomSheetOptionItem(painterResource(Res.drawable.dot_grid), paperTextureToggleLabelFor(isPaperTextureOn)) {
+                onTogglePaperTexture()
             }
 
             BottomSheetOptionItem(

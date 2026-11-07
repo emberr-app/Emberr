@@ -102,6 +102,7 @@ import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.colorThemePreferenceNamed
+import com.emberr.ui.theme.paperTextureAreasNamed
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import com.emberr.domain.model.NoteBlock
@@ -327,6 +328,7 @@ class MainActivity : FragmentActivity() {
             val colorThemeStrength by settingsViewModel.colorThemeStrength.collectAsState()
             val paperTextureEnabled by settingsViewModel.paperTextureEnabled.collectAsState()
             val paperTextureStrength by settingsViewModel.paperTextureStrength.collectAsState()
+            val savedPaperTextureAreas by settingsViewModel.paperTextureAreas.collectAsState()
 
             EmberrTheme(
                 darkTheme = darkTheme,
@@ -336,6 +338,7 @@ class MainActivity : FragmentActivity() {
                 themedTextAndIcons = themedTextAndIcons,
                 colorThemeStrength = colorThemeStrength,
                 paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
+                paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas),
                 usesTwentyFourHourClock = usesTwentyFourHourClock,
                 firstDayOfWeek = firstDayOfWeek
             ) {

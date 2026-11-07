@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,6 +48,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import com.emberr.presentation.shared.components.EmberrCheckboxOption
+import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
@@ -54,6 +59,12 @@ import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.ui.theme.ColorThemePreference
 import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.ui.theme.PaperTextureArea
+import com.emberr.ui.theme.isPaperTextureAreaChecked
+import com.emberr.ui.theme.paperTextureAreasLabel
+import com.emberr.ui.theme.paperTextureAreasNamed
+import com.emberr.ui.theme.paperTextureAreasSavedValue
+import com.emberr.ui.theme.paperTextureAreasWithToggled
 import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.colorThemePreferenceNamed
 import dev.chrisbanes.haze.HazeState
@@ -62,6 +73,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.moon_cloud
+import emberr.shared.generated.resources.notes2
 import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.sun
@@ -100,6 +112,8 @@ fun ColorThemeSettingsScreen(
     val colorThemeStrength by viewModel.colorThemeStrength.collectAsState()
     val paperTextureEnabled by viewModel.paperTextureEnabled.collectAsState()
     val paperTextureStrength by viewModel.paperTextureStrength.collectAsState()
+    val savedPaperTextureAreas by viewModel.paperTextureAreas.collectAsState()
+    val paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas)
     val columnCount = if (isDesktopPlatform) DESKTOP_THEME_COLUMNS else MOBILE_THEME_COLUMNS
     val colorThemeRows = remember(columnCount) { ColorThemePreference.entries.chunked(columnCount) }
 
@@ -171,6 +185,15 @@ fun ColorThemeSettingsScreen(
                     )
                     if (paperTextureEnabled) {
                         SettingsDivider()
+                        PaperTextureAreasRow(
+                            areas = paperTextureAreas,
+                            onToggleArea = { tappedArea ->
+                                viewModel.setPaperTextureAreas(
+                                    paperTextureAreasSavedValue(paperTextureAreasWithToggled(paperTextureAreas, tappedArea))
+                                )
+                            }
+                        )
+                        SettingsDivider()
                         PercentSliderRow(
                             icon = painterResource(Res.drawable.sliders_horizontal),
                             title = "Texture Strength",
@@ -234,6 +257,65 @@ fun ColorThemeSettingsScreen(
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
                     backTooltip = "Back",
                     onBackClick = onNavigateBack
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PaperTextureAreasRow(
+    areas: Set<PaperTextureArea>,
+    onToggleArea: (PaperTextureArea) -> Unit
+) {
+    var isMenuOpen by remember { mutableStateOf(false) }
+    val areaOptions: @Composable () -> Unit = {
+        PaperTextureArea.entries.forEach { area ->
+            EmberrCheckboxOption(
+                label = area.displayName,
+                isChecked = isPaperTextureAreaChecked(areas, area),
+                onClick = { onToggleArea(area) }
+            )
+        }
+    }
+
+    if (isDesktopPlatform) {
+        Row(modifier = Modifier.fillMaxWidth().settingsRowSize(), verticalAlignment = Alignment.CenterVertically) {
+            SettingsRowIcon(icon = painterResource(Res.drawable.notes2))
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Show On",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            EmberrChoiceValueMenu(
+                value = paperTextureAreasLabel(areas),
+                isMenuOpen = isMenuOpen,
+                onMenuOpenChange = { isOpen -> isMenuOpen = isOpen }
+            ) { areaOptions() }
+        }
+    } else {
+        SettingsActionRow(
+            icon = painterResource(Res.drawable.notes2),
+            title = "Show On",
+            trailingLabel = paperTextureAreasLabel(areas),
+            onClick = { isMenuOpen = true }
+        )
+        EmberrBottomSheet(
+            expanded = isMenuOpen,
+            onDismiss = { isMenuOpen = false },
+            title = "Show On",
+            contentHorizontalPadding = 0.dp
+        ) { closeAnd ->
+            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+                areaOptions()
+                EmberrButtonPrimary(
+                    text = "Close",
+                    onClick = { closeAnd {} },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
                 )
             }
         }

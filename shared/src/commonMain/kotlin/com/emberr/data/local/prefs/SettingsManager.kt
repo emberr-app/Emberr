@@ -131,6 +131,10 @@ interface SettingsManager {
     fun getPaperTextureStrength(): Int
     fun savePaperTextureStrength(strengthPercent: Int)
 
+    val paperTextureAreasFlow: Flow<String>
+    fun getPaperTextureAreas(): String
+    fun savePaperTextureAreas(areas: String)
+
     val fontSizePreferenceFlow: Flow<String>
     fun saveFontSizePreference(preference: String)
 

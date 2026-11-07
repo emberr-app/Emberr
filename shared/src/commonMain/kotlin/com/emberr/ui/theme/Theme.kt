@@ -54,6 +54,7 @@ fun EmberrTheme(
     themedTextAndIcons: Boolean = true,
     colorThemeStrength: Int = FULL_THEME_STRENGTH,
     paperTextureStrength: Int = 0,
+    paperTextureAreas: Set<PaperTextureArea> = setOf(PaperTextureArea.WHOLE_APP),
     usesTwentyFourHourClock: Boolean = false,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
     content: @Composable () -> Unit
@@ -88,7 +89,8 @@ fun EmberrTheme(
         LocalEmberrFontStyle provides fontStylePreference,
         LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock,
         LocalFirstDayOfWeek provides firstDayOfWeek,
-        LocalPaperTextureStrength provides paperTextureStrength
+        LocalPaperTextureStrength provides paperTextureStrength,
+        LocalPaperTextureAreas provides paperTextureAreas
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
