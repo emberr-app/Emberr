@@ -176,8 +176,7 @@ fun DailyScreen(
     val pendingWidgetRequest by WidgetComposeRequestBus.pendingRequests.collectAsState()
     var startTypingAtEndOnDate by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(pendingWidgetRequest) {
-        val isContinueRequest = pendingWidgetRequest == WidgetComposeRequest.CONTINUE_DAILY
-        if (isContinueRequest && WidgetComposeRequestBus.consume(WidgetComposeRequest.CONTINUE_DAILY)) {
+        if (WidgetComposeRequestBus.consume(WidgetComposeRequest.CONTINUE_DAILY)) {
             startTypingAtEndOnDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
         }
     }

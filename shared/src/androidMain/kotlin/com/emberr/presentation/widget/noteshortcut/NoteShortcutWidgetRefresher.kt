@@ -14,7 +14,6 @@ import org.koin.core.context.GlobalContext
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
-
 fun decodeCachedShortcut(rawCache: String?): NoteShortcutWidgetContent? {
     if (rawCache.isNullOrBlank()) return null
     return try {

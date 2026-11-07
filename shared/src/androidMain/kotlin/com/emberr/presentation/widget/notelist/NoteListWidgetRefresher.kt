@@ -16,7 +16,6 @@ import org.koin.core.context.GlobalContext
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
-
 val deletedSpaceNoteList = NoteListWidgetContent(notes = emptyList(), isSpaceDeleted = true)
 
 fun decodeCachedNoteList(rawCache: String?): NoteListWidgetContent? {

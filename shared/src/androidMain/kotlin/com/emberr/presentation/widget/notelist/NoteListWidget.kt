@@ -209,7 +209,6 @@ internal fun NoteListWidgetBody(
                 onClick = actionStartActivity(newNoteIntent(context, spaceId))
             )
         }
-
     }
 }
 

@@ -116,6 +116,7 @@ class UpcomingEventsWidgetContentReader(
             )
         }
         val birthdays = birthdayEvents.map { birthday ->
+            val birthdayDate = LocalDate.parse(birthday.dateString)
             SortableUpcomingEvent(
                 isRepeating = false,
                 dateString = birthday.dateString,
@@ -124,13 +125,13 @@ class UpcomingEventsWidgetContentReader(
                     blockId = birthday.blockId,
                     title = birthday.text.take(maximumCharactersPerTitle),
                     dateGroupKey = birthday.dateString,
-                    dateLabel = formatDateLabel(LocalDate.parse(birthday.dateString), today),
+                    dateLabel = formatDateLabel(birthdayDate, today),
                     timeLabel = null,
                     isOverdue = false,
                     accentColorHex = colorsByCategoryId[BIRTHDAYS_CATEGORY_ID],
                     birthdayPersonNoteId = birthday.birthdayPersonNoteId,
-                    weekdayShortLabel = weekdayShortLabelOf(LocalDate.parse(birthday.dateString)),
-                    dayOfMonthLabel = LocalDate.parse(birthday.dateString).day.toString()
+                    weekdayShortLabel = weekdayShortLabelOf(birthdayDate),
+                    dayOfMonthLabel = birthdayDate.day.toString()
                 )
             )
         }

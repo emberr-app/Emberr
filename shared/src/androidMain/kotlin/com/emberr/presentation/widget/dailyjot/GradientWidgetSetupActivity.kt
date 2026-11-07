@@ -97,7 +97,7 @@ abstract class GradientWidgetSetupActivity : ComponentActivity() {
 
         setContent {
             EmberrTheme {
-                DailyJotGradientChooser(
+                GradientChooser(
                     selectedGradient = selectedGradient,
                     onGradientChosen = { gradient -> applyGradient(appWidgetId, gradient) },
                     onClose = { finish() }
@@ -148,7 +148,7 @@ abstract class GradientWidgetSetupActivity : ComponentActivity() {
 }
 
 @Composable
-private fun DailyJotGradientChooser(
+private fun GradientChooser(
     selectedGradient: DailyJotGradient,
     onGradientChosen: (DailyJotGradient) -> Unit,
     onClose: () -> Unit
