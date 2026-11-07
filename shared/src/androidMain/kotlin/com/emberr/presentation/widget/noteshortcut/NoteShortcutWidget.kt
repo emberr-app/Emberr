@@ -62,6 +62,7 @@ import org.koin.core.component.get
 private val pillHeight = 66.dp
 private val pillCornerRadius = 33.dp
 private val iconCircleSize = 48.dp
+private const val iconToCircleRatio = 0.46f
 private val compactWidthThreshold = 100.dp
 private val compactCircleMargin = 8.dp
 private val minimumCompactCircleSize = 36.dp
@@ -286,13 +287,13 @@ private fun NoteIconCircle(
         contentAlignment = Alignment.Center
     ) {
         if (icon != null) {
-            Text(text = icon, style = TextStyle(color = primaryTextColor, fontSize = (circleSize.value * 0.46f).sp))
+            Text(text = icon, style = TextStyle(color = primaryTextColor, fontSize = (circleSize.value * iconToCircleRatio).sp))
         } else {
             Image(
                 provider = ImageProvider(fallbackIconResource),
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(primaryTextColor),
-                modifier = GlanceModifier.size(circleSize * 0.46f)
+                modifier = GlanceModifier.size(circleSize * iconToCircleRatio)
             )
         }
     }
@@ -301,7 +302,7 @@ private fun NoteIconCircle(
 private val iconCirclePalette = HighlightColor.entries.filter { color -> color != HighlightColor.GREY }
 
 private fun iconCircleColorFor(noteId: String): ColorProvider {
-    val paletteColor = iconCirclePalette[Math.floorMod(noteId.hashCode(), iconCirclePalette.size)]
+    val paletteColor = iconCirclePalette[noteId.hashCode().mod(iconCirclePalette.size)]
     return ColorProvider(day = paletteColor.lightBackground, night = paletteColor.darkBackground)
 }
 

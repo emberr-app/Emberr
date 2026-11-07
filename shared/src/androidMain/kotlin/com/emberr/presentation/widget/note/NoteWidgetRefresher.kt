@@ -14,7 +14,6 @@ import com.emberr.presentation.widget.WidgetNoteSource
 
 private val cacheJson = Json { ignoreUnknownKeys = true }
 
-
 fun decodeCachedContent(rawCache: String?): WidgetNoteContent? {
     if (rawCache.isNullOrBlank()) return null
     return try {
@@ -75,7 +74,7 @@ suspend fun writeNoteDeleted(context: Context, glanceId: GlanceId) {
     }
 }
 
-suspend fun markWidgetNoteDeleted(context: Context, glanceId: GlanceId, noteId: String) {
+suspend fun markWidgetNoteDeleted(context: Context, glanceId: GlanceId) {
     if (readNoteDeleted(context, glanceId)) return
 
     writeNoteDeleted(context, glanceId)
@@ -125,7 +124,7 @@ suspend fun refreshNoteWidgets(context: Context) {
             val noteId = readSelectedNoteId(context, glanceId)?.takeIf { it.isNotBlank() } ?: continue
             val freshContent = contentReader.readNoteContentOnce(noteId)
             if (freshContent == null) {
-                if (noteSource.isNoteDeleted(noteId)) markWidgetNoteDeleted(context, glanceId, noteId)
+                if (noteSource.isNoteDeleted(noteId)) markWidgetNoteDeleted(context, glanceId)
                 continue
             }
             val isUnchanged = freshContent == readCachedContent(context, glanceId) &&

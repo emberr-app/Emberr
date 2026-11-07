@@ -214,7 +214,6 @@ internal fun TasksWidgetBody(
                 onClick = actionStartActivity(addTaskIntent(context))
             )
         }
-
     }
 }
 
