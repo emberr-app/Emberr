@@ -139,6 +139,7 @@ import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
+import com.emberr.ui.theme.LocalHoldsPaperGrainStill
 import com.emberr.ui.theme.LocalPaperGrainMover
 import com.emberr.ui.theme.NotePaperTextureBox
 import com.emberr.ui.theme.PaperTextureArea
@@ -1507,350 +1508,352 @@ fun CanvasScreen(
             )
         }
 
-        val areControlsVisible = !isEmbedded || isActive
-        val isSelectionBarVisible = !isDesktopPlatform && isSelectingMultiple && selection != CanvasSelection.None
+        CompositionLocalProvider(LocalHoldsPaperGrainStill provides true) {
+            val areControlsVisible = !isEmbedded || isActive
+            val isSelectionBarVisible = !isDesktopPlatform && isSelectingMultiple && selection != CanvasSelection.None
 
-        fun undoCanvasStep() {
-            editingNodeId = null
-            viewModel.undo()
-        }
-
-        fun redoCanvasStep() {
-            editingNodeId = null
-            viewModel.redo()
-        }
-
-        AnimatedVisibility(
-            visible = areControlsVisible,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .then(
-                    when {
-                        isDesktopPlatform -> Modifier.padding(top = 20.dp, end = 22.dp)
-                        isEmbedded -> Modifier.padding(top = 10.dp, end = 16.dp)
-                        else -> Modifier.statusBarsPadding().padding(top = 10.dp, end = 16.dp)
-                    }
-                )
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                CanvasOptionsButton(
-                    hazeState = hazeState,
-                    showStickyNoteOption = !isStickyNote && isDesktopPlatform,
-                    showFavoriteOption = !isEmbedded,
-                    showMoveToTrashOption = !isEmbedded,
-                    isFavorite = isFavorite,
-                    loadCurrentTitle = { viewModel.currentTitle() },
-                    onRename = { newTitle -> viewModel.renameCanvas(newTitle) },
-                    onToggleFavorite = { viewModel.toggleFavorite() },
-                    onOpenAsStickyNote = { StickyNoteWindowBus.open(noteId) },
-                    onMoveToTrash = { viewModel.moveCanvasToTrash(onMoved = onNavigateBack) }
-                )
-                if (onToggleFullScreen != null) {
-                    CanvasFullScreenButton(hazeState = hazeState, isFullScreen = isFullScreen, onToggle = onToggleFullScreen)
-                }
-                CanvasZoomButtons(
-                    hazeState = hazeState,
-                    onZoomIn = { zoomAroundBoardCenter(ZOOM_BUTTON_STEP) },
-                    onShowBusiestArea = { showBusiestArea() },
-                    onZoomOut = { zoomAroundBoardCenter(1f / ZOOM_BUTTON_STEP) }
-                )
-                CanvasUndoRedoButtons(
-                    hazeState = hazeState,
-                    onUndo = { undoCanvasStep() },
-                    onRedo = { redoCanvasStep() }
-                )
-                CanvasDotGridButton(
-                    hazeState = hazeState,
-                    isDotGridVisible = isDotGridVisible,
-                    onToggle = {
-                        isDotGridVisible = !isDotGridVisible
-                        viewModel.saveDotGridVisible(noteId, isDotGridVisible)
-                    }
-                )
-            }
-        }
-
-        val isDesktopBackButtonVisible = isDesktopPlatform && !isEmbedded && !isStickyNote && showBackButton
-        if (isDesktopBackButtonVisible) {
-            val onShowSidebar = LocalDesktopSidebarToggle.current
-            Row(
-                modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp, start = 22.dp),
-                horizontalArrangement = Arrangement.spacedBy(DesktopSidebarToggleGap)
-            ) {
-                if (onShowSidebar != null) {
-                    DesktopSidebarToggleButton(onClick = onShowSidebar, hazeState = hazeState)
-                }
-                CanvasBackButton(hazeState = hazeState, onClick = onNavigateBack)
-            }
-        }
-
-        val hasControlAboveToolPanel = isEmbedded || isDesktopBackButtonVisible
-        val toolPanelTop = if (hasControlAboveToolPanel) 76.dp else 20.dp
-        val boardHeight = with(LocalDensity.current) { boardSize.height.toDp() }
-        val toolPanelMaxHeight = (boardHeight - toolPanelTop - TOOL_PANEL_BOTTOM_CLEARANCE).coerceAtLeast(TOOL_PANEL_MIN_HEIGHT)
-        val toolPanelModifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(start = 22.dp, top = toolPanelTop)
-            .heightIn(max = toolPanelMaxHeight)
-        AnimatedVisibility(
-            visible = isDesktopPlatform && activeTool == CanvasTool.PEN,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = toolPanelModifier
-        ) {
-            CanvasStrokeStylePanel(
-                tool = CanvasStrokeTool.PEN,
-                style = penStyle,
-                hazeState = hazeState,
-                onStyleChange = { newStyle -> penStyle = newStyle },
-                onInteractionFinished = { canvasFocusRequester.requestFocus() }
-            )
-        }
-        AnimatedVisibility(
-            visible = isDesktopPlatform && activeTool == CanvasTool.HIGHLIGHTER,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = toolPanelModifier
-        ) {
-            CanvasStrokeStylePanel(
-                tool = CanvasStrokeTool.HIGHLIGHTER,
-                style = highlighterStyle,
-                hazeState = hazeState,
-                onStyleChange = { newStyle -> highlighterStyle = newStyle },
-                onInteractionFinished = { canvasFocusRequester.requestFocus() }
-            )
-        }
-        val selectedFreeText = selection.singleSelectedNodeId?.let { nodeId ->
-            canvas.nodes.firstOrNull { it.nodeId == nodeId && it.isFreeText }
-        }
-        AnimatedVisibility(
-            visible = isDesktopPlatform && (activeTool == CanvasTool.TEXT || selectedFreeText != null),
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = toolPanelModifier
-        ) {
-            CanvasTextStylePanel(
-                style = selectedFreeText?.textStyle ?: textToolStyle,
-                hazeState = hazeState,
-                onStyleChange = { newStyle ->
-                    textToolStyle = newStyle
-                    selectedFreeText?.let { viewModel.setFreeTextStyle(it.nodeId, newStyle) }
-                }
-            )
-        }
-        AnimatedVisibility(
-            visible = isDesktopPlatform && activeTool == CanvasTool.LINE,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = toolPanelModifier
-        ) {
-            CanvasLinePanel(
-                selectedStyle = lineStyle,
-                strokeStyle = lineStrokeStyle,
-                hazeState = hazeState,
-                onStyleChange = { newStyle -> lineStyle = newStyle },
-                onStrokeStyleChange = { newStyle -> lineStrokeStyle = newStyle }
-            )
-        }
-        AnimatedVisibility(
-            visible = isDesktopPlatform && activeTool == CanvasTool.SHAPES,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = toolPanelModifier
-        ) {
-            CanvasShapePanel(hazeState = hazeState, onShapeSelected = { shape -> placeShapeAtBoardCenter(shape) })
-        }
-        AnimatedVisibility(
-            visible = isDesktopPlatform && activeTool == CanvasTool.ERASER,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = toolPanelModifier
-        ) {
-            CanvasEraserSizePanel(
-                radius = eraserRadius,
-                hazeState = hazeState,
-                onRadiusChange = { newRadius -> eraserRadius = newRadius },
-                onInteractionFinished = { canvasFocusRequester.requestFocus() }
-            )
-        }
-
-        if (isEmbedded) {
-            val canvasTitle by viewModel.title.collectAsState()
-            CanvasTitlePill(
-                title = canvasTitle,
-                hazeState = hazeState,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .then(
-                        if (isDesktopPlatform) Modifier.padding(start = 22.dp, top = 20.dp, end = 82.dp)
-                        else Modifier.padding(start = 16.dp, top = 10.dp, end = 76.dp)
-                    )
-            )
-        }
-
-        if (!isDesktopPlatform) {
-            if (!isEmbedded) {
-                CanvasBackButton(
-                    hazeState = hazeState,
-                    onClick = onNavigateBack,
-                    modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(top = 10.dp, start = 16.dp)
-                )
+            fun undoCanvasStep() {
+                editingNodeId = null
+                viewModel.undo()
             }
 
-            CanvasSelectionActionBar(
-                isVisible = isSelectionBarVisible,
-                selectedCount = if (selection is CanvasSelection.Edge) 1 else selection.selectedNodeIds.size,
-                options = contextMenuOptionsFor(selection).map { option ->
-                    option.copy(onClick = {
-                        option.onClick()
-                        isSelectingMultiple = false
-                    })
-                },
-                onClose = { leaveEditingAndSelection() },
-                hazeState = hazeState,
-                modifier = Modifier.align(Alignment.BottomCenter).then(if (isEmbedded) Modifier else Modifier.navigationBarsPadding())
-            )
-        }
+            fun redoCanvasStep() {
+                editingNodeId = null
+                viewModel.redo()
+            }
 
-        val areMobileToolSettingsAllowed = !isDesktopPlatform && areControlsVisible && !isSelectionBarVisible && editingNodeId == null
-        val mobileToolSettingsModifier = Modifier
-            .align(Alignment.BottomStart)
-            .then(if (isEmbedded) Modifier else Modifier.navigationBarsPadding())
-            .padding(start = 16.dp, bottom = 72.dp)
-
-        fun toggleStrokeSettings(category: CanvasStrokeSettingsCategory) {
-            openStrokeSettingsCategory = if (openStrokeSettingsCategory == category) null else category
-        }
-
-        AnimatedVisibility(
-            visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.PEN,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = mobileToolSettingsModifier
-        ) {
-            CanvasMobileStrokeSettings(
-                tool = CanvasStrokeTool.PEN,
-                style = penStyle,
-                openCategory = openStrokeSettingsCategory,
-                hazeState = hazeState,
-                onCategoryClick = { category -> toggleStrokeSettings(category) },
-                onStyleChange = { newStyle -> penStyle = newStyle }
-            )
-        }
-        AnimatedVisibility(
-            visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.HIGHLIGHTER,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = mobileToolSettingsModifier
-        ) {
-            CanvasMobileStrokeSettings(
-                tool = CanvasStrokeTool.HIGHLIGHTER,
-                style = highlighterStyle,
-                openCategory = openStrokeSettingsCategory,
-                hazeState = hazeState,
-                onCategoryClick = { category -> toggleStrokeSettings(category) },
-                onStyleChange = { newStyle -> highlighterStyle = newStyle }
-            )
-        }
-        AnimatedVisibility(
-            visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.LINE,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = mobileToolSettingsModifier
-        ) {
-            CanvasMobileLineSettings(
-                selectedStyle = lineStyle,
-                strokeStyle = lineStrokeStyle,
-                openCategory = openLineSettingsCategory,
-                hazeState = hazeState,
-                onCategoryClick = { category ->
-                    openLineSettingsCategory = if (openLineSettingsCategory == category) null else category
-                },
-                onStyleChange = { newStyle -> lineStyle = newStyle },
-                onStrokeStyleChange = { newStyle -> lineStrokeStyle = newStyle }
-            )
-        }
-        AnimatedVisibility(
-            visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.SHAPES,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = mobileToolSettingsModifier.padding(end = 16.dp)
-        ) {
-            CanvasMobileShapeSettings(hazeState = hazeState, onShapeSelected = { shape -> placeShapeAtBoardCenter(shape) })
-        }
-        AnimatedVisibility(
-            visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.ERASER,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = mobileToolSettingsModifier
-        ) {
-            CanvasMobileEraserSettings(
-                radius = eraserRadius,
-                hazeState = hazeState,
-                onRadiusChange = { newRadius -> eraserRadius = newRadius }
-            )
-        }
-        AnimatedVisibility(
-            visible = areMobileToolSettingsAllowed && (activeTool == CanvasTool.TEXT || selectedFreeText != null),
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = mobileToolSettingsModifier
-        ) {
-            CanvasMobileTextSettings(
-                style = selectedFreeText?.textStyle ?: textToolStyle,
-                openCategory = openTextSettingsCategory,
-                hazeState = hazeState,
-                onCategoryClick = { category ->
-                    openTextSettingsCategory = if (openTextSettingsCategory == category) null else category
-                },
-                onStyleChange = { newStyle ->
-                    textToolStyle = newStyle
-                    selectedFreeText?.let { viewModel.setFreeTextStyle(it.nodeId, newStyle) }
-                }
-            )
-        }
-
-        if (isDesktopPlatform || (!isSelectionBarVisible && editingNodeId == null)) {
             AnimatedVisibility(
                 visible = areControlsVisible,
                 enter = fadeIn(),
                 exit = fadeOut(),
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.TopEnd)
                     .then(
                         when {
-                            isDesktopPlatform -> Modifier.padding(start = 22.dp, end = 22.dp, bottom = 20.dp)
-                            isEmbedded -> Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                            else -> Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                            isDesktopPlatform -> Modifier.padding(top = 20.dp, end = 22.dp)
+                            isEmbedded -> Modifier.padding(top = 10.dp, end = 16.dp)
+                            else -> Modifier.statusBarsPadding().padding(top = 10.dp, end = 16.dp)
                         }
                     )
             ) {
-                CanvasToolbar(
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    CanvasOptionsButton(
+                        hazeState = hazeState,
+                        showStickyNoteOption = !isStickyNote && isDesktopPlatform,
+                        showFavoriteOption = !isEmbedded,
+                        showMoveToTrashOption = !isEmbedded,
+                        isFavorite = isFavorite,
+                        loadCurrentTitle = { viewModel.currentTitle() },
+                        onRename = { newTitle -> viewModel.renameCanvas(newTitle) },
+                        onToggleFavorite = { viewModel.toggleFavorite() },
+                        onOpenAsStickyNote = { StickyNoteWindowBus.open(noteId) },
+                        onMoveToTrash = { viewModel.moveCanvasToTrash(onMoved = onNavigateBack) }
+                    )
+                    if (onToggleFullScreen != null) {
+                        CanvasFullScreenButton(hazeState = hazeState, isFullScreen = isFullScreen, onToggle = onToggleFullScreen)
+                    }
+                    CanvasZoomButtons(
+                        hazeState = hazeState,
+                        onZoomIn = { zoomAroundBoardCenter(ZOOM_BUTTON_STEP) },
+                        onShowBusiestArea = { showBusiestArea() },
+                        onZoomOut = { zoomAroundBoardCenter(1f / ZOOM_BUTTON_STEP) }
+                    )
+                    CanvasUndoRedoButtons(
+                        hazeState = hazeState,
+                        onUndo = { undoCanvasStep() },
+                        onRedo = { redoCanvasStep() }
+                    )
+                    CanvasDotGridButton(
+                        hazeState = hazeState,
+                        isDotGridVisible = isDotGridVisible,
+                        onToggle = {
+                            isDotGridVisible = !isDotGridVisible
+                            viewModel.saveDotGridVisible(noteId, isDotGridVisible)
+                        }
+                    )
+                }
+            }
+
+            val isDesktopBackButtonVisible = isDesktopPlatform && !isEmbedded && !isStickyNote && showBackButton
+            if (isDesktopBackButtonVisible) {
+                val onShowSidebar = LocalDesktopSidebarToggle.current
+                Row(
+                    modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp, start = 22.dp),
+                    horizontalArrangement = Arrangement.spacedBy(DesktopSidebarToggleGap)
+                ) {
+                    if (onShowSidebar != null) {
+                        DesktopSidebarToggleButton(onClick = onShowSidebar, hazeState = hazeState)
+                    }
+                    CanvasBackButton(hazeState = hazeState, onClick = onNavigateBack)
+                }
+            }
+
+            val hasControlAboveToolPanel = isEmbedded || isDesktopBackButtonVisible
+            val toolPanelTop = if (hasControlAboveToolPanel) 76.dp else 20.dp
+            val boardHeight = with(LocalDensity.current) { boardSize.height.toDp() }
+            val toolPanelMaxHeight = (boardHeight - toolPanelTop - TOOL_PANEL_BOTTOM_CLEARANCE).coerceAtLeast(TOOL_PANEL_MIN_HEIGHT)
+            val toolPanelModifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 22.dp, top = toolPanelTop)
+                .heightIn(max = toolPanelMaxHeight)
+            AnimatedVisibility(
+                visible = isDesktopPlatform && activeTool == CanvasTool.PEN,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = toolPanelModifier
+            ) {
+                CanvasStrokeStylePanel(
+                    tool = CanvasStrokeTool.PEN,
+                    style = penStyle,
                     hazeState = hazeState,
-                    activeTool = activeTool,
-                    onToolClick = { tool ->
-                        activeTool = if (activeTool == tool || tool == CanvasTool.IMAGE) null else tool
-                        openStrokeSettingsCategory = null
-                        openTextSettingsCategory = null
-                        openLineSettingsCategory = null
-                        editingNodeId = null
-                        selection = CanvasSelection.None
-                        isSelectingMultiple = false
-                        hoveredNodeId = null
-                        eraserScreenPosition = null
-                        pointerIcon = when {
-                            activeTool.drawsOnBoard -> PointerIcon.Crosshair
-                            activeTool == CanvasTool.TEXT -> PointerIcon.Text
-                            else -> PointerIcon.Default
-                        }
-                        canvasFocusRequester.requestFocus()
-                        if (tool == CanvasTool.IMAGE) {
-                            pickImage { path -> viewModel.addImageFromFile(path, boardCenterInWorld()) }
-                        }
+                    onStyleChange = { newStyle -> penStyle = newStyle },
+                    onInteractionFinished = { canvasFocusRequester.requestFocus() }
+                )
+            }
+            AnimatedVisibility(
+                visible = isDesktopPlatform && activeTool == CanvasTool.HIGHLIGHTER,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = toolPanelModifier
+            ) {
+                CanvasStrokeStylePanel(
+                    tool = CanvasStrokeTool.HIGHLIGHTER,
+                    style = highlighterStyle,
+                    hazeState = hazeState,
+                    onStyleChange = { newStyle -> highlighterStyle = newStyle },
+                    onInteractionFinished = { canvasFocusRequester.requestFocus() }
+                )
+            }
+            val selectedFreeText = selection.singleSelectedNodeId?.let { nodeId ->
+                canvas.nodes.firstOrNull { it.nodeId == nodeId && it.isFreeText }
+            }
+            AnimatedVisibility(
+                visible = isDesktopPlatform && (activeTool == CanvasTool.TEXT || selectedFreeText != null),
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = toolPanelModifier
+            ) {
+                CanvasTextStylePanel(
+                    style = selectedFreeText?.textStyle ?: textToolStyle,
+                    hazeState = hazeState,
+                    onStyleChange = { newStyle ->
+                        textToolStyle = newStyle
+                        selectedFreeText?.let { viewModel.setFreeTextStyle(it.nodeId, newStyle) }
                     }
                 )
+            }
+            AnimatedVisibility(
+                visible = isDesktopPlatform && activeTool == CanvasTool.LINE,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = toolPanelModifier
+            ) {
+                CanvasLinePanel(
+                    selectedStyle = lineStyle,
+                    strokeStyle = lineStrokeStyle,
+                    hazeState = hazeState,
+                    onStyleChange = { newStyle -> lineStyle = newStyle },
+                    onStrokeStyleChange = { newStyle -> lineStrokeStyle = newStyle }
+                )
+            }
+            AnimatedVisibility(
+                visible = isDesktopPlatform && activeTool == CanvasTool.SHAPES,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = toolPanelModifier
+            ) {
+                CanvasShapePanel(hazeState = hazeState, onShapeSelected = { shape -> placeShapeAtBoardCenter(shape) })
+            }
+            AnimatedVisibility(
+                visible = isDesktopPlatform && activeTool == CanvasTool.ERASER,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = toolPanelModifier
+            ) {
+                CanvasEraserSizePanel(
+                    radius = eraserRadius,
+                    hazeState = hazeState,
+                    onRadiusChange = { newRadius -> eraserRadius = newRadius },
+                    onInteractionFinished = { canvasFocusRequester.requestFocus() }
+                )
+            }
+
+            if (isEmbedded) {
+                val canvasTitle by viewModel.title.collectAsState()
+                CanvasTitlePill(
+                    title = canvasTitle,
+                    hazeState = hazeState,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .then(
+                            if (isDesktopPlatform) Modifier.padding(start = 22.dp, top = 20.dp, end = 82.dp)
+                            else Modifier.padding(start = 16.dp, top = 10.dp, end = 76.dp)
+                        )
+                )
+            }
+
+            if (!isDesktopPlatform) {
+                if (!isEmbedded) {
+                    CanvasBackButton(
+                        hazeState = hazeState,
+                        onClick = onNavigateBack,
+                        modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(top = 10.dp, start = 16.dp)
+                    )
+                }
+
+                CanvasSelectionActionBar(
+                    isVisible = isSelectionBarVisible,
+                    selectedCount = if (selection is CanvasSelection.Edge) 1 else selection.selectedNodeIds.size,
+                    options = contextMenuOptionsFor(selection).map { option ->
+                        option.copy(onClick = {
+                            option.onClick()
+                            isSelectingMultiple = false
+                        })
+                    },
+                    onClose = { leaveEditingAndSelection() },
+                    hazeState = hazeState,
+                    modifier = Modifier.align(Alignment.BottomCenter).then(if (isEmbedded) Modifier else Modifier.navigationBarsPadding())
+                )
+            }
+
+            val areMobileToolSettingsAllowed = !isDesktopPlatform && areControlsVisible && !isSelectionBarVisible && editingNodeId == null
+            val mobileToolSettingsModifier = Modifier
+                .align(Alignment.BottomStart)
+                .then(if (isEmbedded) Modifier else Modifier.navigationBarsPadding())
+                .padding(start = 16.dp, bottom = 72.dp)
+
+            fun toggleStrokeSettings(category: CanvasStrokeSettingsCategory) {
+                openStrokeSettingsCategory = if (openStrokeSettingsCategory == category) null else category
+            }
+
+            AnimatedVisibility(
+                visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.PEN,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = mobileToolSettingsModifier
+            ) {
+                CanvasMobileStrokeSettings(
+                    tool = CanvasStrokeTool.PEN,
+                    style = penStyle,
+                    openCategory = openStrokeSettingsCategory,
+                    hazeState = hazeState,
+                    onCategoryClick = { category -> toggleStrokeSettings(category) },
+                    onStyleChange = { newStyle -> penStyle = newStyle }
+                )
+            }
+            AnimatedVisibility(
+                visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.HIGHLIGHTER,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = mobileToolSettingsModifier
+            ) {
+                CanvasMobileStrokeSettings(
+                    tool = CanvasStrokeTool.HIGHLIGHTER,
+                    style = highlighterStyle,
+                    openCategory = openStrokeSettingsCategory,
+                    hazeState = hazeState,
+                    onCategoryClick = { category -> toggleStrokeSettings(category) },
+                    onStyleChange = { newStyle -> highlighterStyle = newStyle }
+                )
+            }
+            AnimatedVisibility(
+                visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.LINE,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = mobileToolSettingsModifier
+            ) {
+                CanvasMobileLineSettings(
+                    selectedStyle = lineStyle,
+                    strokeStyle = lineStrokeStyle,
+                    openCategory = openLineSettingsCategory,
+                    hazeState = hazeState,
+                    onCategoryClick = { category ->
+                        openLineSettingsCategory = if (openLineSettingsCategory == category) null else category
+                    },
+                    onStyleChange = { newStyle -> lineStyle = newStyle },
+                    onStrokeStyleChange = { newStyle -> lineStrokeStyle = newStyle }
+                )
+            }
+            AnimatedVisibility(
+                visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.SHAPES,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = mobileToolSettingsModifier.padding(end = 16.dp)
+            ) {
+                CanvasMobileShapeSettings(hazeState = hazeState, onShapeSelected = { shape -> placeShapeAtBoardCenter(shape) })
+            }
+            AnimatedVisibility(
+                visible = areMobileToolSettingsAllowed && activeTool == CanvasTool.ERASER,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = mobileToolSettingsModifier
+            ) {
+                CanvasMobileEraserSettings(
+                    radius = eraserRadius,
+                    hazeState = hazeState,
+                    onRadiusChange = { newRadius -> eraserRadius = newRadius }
+                )
+            }
+            AnimatedVisibility(
+                visible = areMobileToolSettingsAllowed && (activeTool == CanvasTool.TEXT || selectedFreeText != null),
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = mobileToolSettingsModifier
+            ) {
+                CanvasMobileTextSettings(
+                    style = selectedFreeText?.textStyle ?: textToolStyle,
+                    openCategory = openTextSettingsCategory,
+                    hazeState = hazeState,
+                    onCategoryClick = { category ->
+                        openTextSettingsCategory = if (openTextSettingsCategory == category) null else category
+                    },
+                    onStyleChange = { newStyle ->
+                        textToolStyle = newStyle
+                        selectedFreeText?.let { viewModel.setFreeTextStyle(it.nodeId, newStyle) }
+                    }
+                )
+            }
+
+            if (isDesktopPlatform || (!isSelectionBarVisible && editingNodeId == null)) {
+                AnimatedVisibility(
+                    visible = areControlsVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .then(
+                            when {
+                                isDesktopPlatform -> Modifier.padding(start = 22.dp, end = 22.dp, bottom = 20.dp)
+                                isEmbedded -> Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                                else -> Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                            }
+                        )
+                ) {
+                    CanvasToolbar(
+                        hazeState = hazeState,
+                        activeTool = activeTool,
+                        onToolClick = { tool ->
+                            activeTool = if (activeTool == tool || tool == CanvasTool.IMAGE) null else tool
+                            openStrokeSettingsCategory = null
+                            openTextSettingsCategory = null
+                            openLineSettingsCategory = null
+                            editingNodeId = null
+                            selection = CanvasSelection.None
+                            isSelectingMultiple = false
+                            hoveredNodeId = null
+                            eraserScreenPosition = null
+                            pointerIcon = when {
+                                activeTool.drawsOnBoard -> PointerIcon.Crosshair
+                                activeTool == CanvasTool.TEXT -> PointerIcon.Text
+                                else -> PointerIcon.Default
+                            }
+                            canvasFocusRequester.requestFocus()
+                            if (tool == CanvasTool.IMAGE) {
+                                pickImage { path -> viewModel.addImageFromFile(path, boardCenterInWorld()) }
+                            }
+                        }
+                    )
+                }
             }
         }
     }

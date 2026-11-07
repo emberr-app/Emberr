@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -15,24 +17,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.addOutline
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import kotlin.random.Random
 
 const val FULL_PAPER_TEXTURE_STRENGTH = 100
@@ -54,6 +69,7 @@ val LocalPaperGrainMover = staticCompositionLocalOf { PaperGrainMover { } }
 
 enum class PaperTextureArea(val displayName: String) {
     WHOLE_APP("Whole App"),
+    DAILY_NOTES("Daily Notes"),
     NOTES("Notes"),
     CANVAS("Canvas")
 }
@@ -74,12 +90,10 @@ fun paperTextureAreasWithToggled(areas: Set<PaperTextureArea>, tappedArea: Paper
     else -> areas + tappedArea
 }
 
-fun paperTextureAreasLabel(areas: Set<PaperTextureArea>): String = when {
-    PaperTextureArea.WHOLE_APP in areas -> PaperTextureArea.WHOLE_APP.displayName
-    PaperTextureArea.NOTES in areas && PaperTextureArea.CANVAS in areas -> "Notes & Canvas"
-    PaperTextureArea.NOTES in areas -> PaperTextureArea.NOTES.displayName
-    PaperTextureArea.CANVAS in areas -> PaperTextureArea.CANVAS.displayName
-    else -> "None"
+fun paperTextureAreasLabel(areas: Set<PaperTextureArea>): String {
+    if (PaperTextureArea.WHOLE_APP in areas) return PaperTextureArea.WHOLE_APP.displayName
+    val checkedAreas = PaperTextureArea.entries.filter { it in areas }
+    return if (checkedAreas.isEmpty()) "None" else checkedAreas.joinToString(", ") { it.displayName }
 }
 
 fun paperTextureToggleLabelFor(isPaperTextureOn: Boolean): String =
@@ -88,6 +102,52 @@ fun paperTextureToggleLabelFor(isPaperTextureOn: Boolean): String =
 val LocalPaperTextureAreas = staticCompositionLocalOf { setOf(PaperTextureArea.WHOLE_APP) }
 
 private val LocalInsideTexturedNote = staticCompositionLocalOf { false }
+
+val LocalHoldsPaperGrainStill = staticCompositionLocalOf { false }
+
+private class StillGrainRegion(val bounds: Rect, val shape: Shape)
+
+private class StillPaperGrainRegions {
+    var boxCoordinates: LayoutCoordinates? = null
+    private val regions = mutableStateMapOf<Any, StillGrainRegion>()
+
+    fun place(regionKey: Any, coordinates: LayoutCoordinates, shape: Shape) {
+        val box = boxCoordinates ?: return
+        if (!box.isAttached || !coordinates.isAttached) return
+        val bounds = box.localBoundingBoxOf(coordinates, clipBounds = false)
+        val placedRegion = regions[regionKey]
+        if (placedRegion == null || placedRegion.bounds != bounds || placedRegion.shape != shape) {
+            regions[regionKey] = StillGrainRegion(bounds, shape)
+        }
+    }
+
+    fun remove(regionKey: Any) {
+        regions.remove(regionKey)
+    }
+
+    fun outlinePath(density: Density, layoutDirection: LayoutDirection): Path? {
+        if (regions.isEmpty()) return null
+        val stillPath = Path()
+        regions.values.forEach { region ->
+            val regionOutline = region.shape.createOutline(region.bounds.size, layoutDirection, density)
+            stillPath.addPath(Path().apply { addOutline(regionOutline) }, region.bounds.topLeft)
+        }
+        return stillPath
+    }
+}
+
+private val LocalStillPaperGrainRegions = staticCompositionLocalOf<StillPaperGrainRegions?> { null }
+
+@Composable
+fun Modifier.stillPaperGrain(shape: Shape, holdsStill: Boolean = LocalHoldsPaperGrainStill.current): Modifier {
+    val stillRegions = LocalStillPaperGrainRegions.current
+    if (!holdsStill || stillRegions == null) return this
+    val regionKey = remember { Any() }
+    DisposableEffect(stillRegions, regionKey) {
+        onDispose { stillRegions.remove(regionKey) }
+    }
+    return onGloballyPositioned { coordinates -> stillRegions.place(regionKey, coordinates, shape) }
+}
 
 @Composable
 private fun paperTextureShownHere(): Boolean =
@@ -126,6 +186,21 @@ private fun createPaperNoiseTile(): ImageBitmap {
 }
 
 private fun grainScaleFor(density: Float): Float = (density * GRAIN_SIZE_DP).coerceAtLeast(1f)
+
+private fun DrawScope.drawPaperGrain(grainScale: Float, tileSpan: Float, textureAlpha: Float) {
+    translate(left = -tileSpan, top = -tileSpan) {
+        scale(grainScale, pivot = Offset.Zero) {
+            drawRect(
+                brush = paperNoiseBrush,
+                size = Size(
+                    (size.width + tileSpan * 2) / grainScale,
+                    (size.height + tileSpan * 2) / grainScale
+                ),
+                alpha = textureAlpha
+            )
+        }
+    }
+}
 
 private class GrainScrollFollower(private val tileSpan: Float) : NestedScrollConnection, PaperGrainMover {
     var offsetX by mutableFloatStateOf(0f)
@@ -196,18 +271,37 @@ private fun PaperTextureLayerBox(
     val grainScrollFollower = remember(tileSpan) { GrainScrollFollower(tileSpan) }
     val parentGrainMover = LocalPaperGrainMover.current
     val grainMover = if (isShown) grainScrollFollower else parentGrainMover
+    val stillRegions = remember { StillPaperGrainRegions() }
+    val parentStillRegions = LocalStillPaperGrainRegions.current
 
     Box(
-        modifier = modifier.nestedScroll(grainScrollFollower),
+        modifier = modifier
+            .nestedScroll(grainScrollFollower)
+            .onPlaced { coordinates -> stillRegions.boxCoordinates = coordinates },
         contentAlignment = contentAlignment,
         propagateMinConstraints = propagateMinConstraints
     ) {
-        CompositionLocalProvider(LocalPaperGrainMover provides grainMover) {
+        CompositionLocalProvider(
+            LocalPaperGrainMover provides grainMover,
+            LocalStillPaperGrainRegions provides (if (isShown) stillRegions else parentStillRegions)
+        ) {
             content()
         }
         if (textureStrength > 0) {
             val textureAlpha = textureStrength / FULL_PAPER_TEXTURE_STRENGTH.toFloat() * STRONGEST_TEXTURE_ALPHA
-            Box(modifier = Modifier.matchParentSize().clipToBounds()) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clipToBounds()
+                    .drawWithContent {
+                        val stillPath = stillRegions.outlinePath(this, layoutDirection)
+                        if (stillPath == null) {
+                            drawContent()
+                        } else {
+                            clipPath(stillPath, clipOp = ClipOp.Difference) { this@drawWithContent.drawContent() }
+                        }
+                    }
+            ) {
                 Spacer(
                     modifier = Modifier
                         .fillMaxSize()
@@ -215,22 +309,17 @@ private fun PaperTextureLayerBox(
                             translationX = grainScrollFollower.offsetX
                             translationY = grainScrollFollower.offsetY
                         }
-                        .drawBehind {
-                            translate(left = -tileSpan, top = -tileSpan) {
-                                scale(grainScale, pivot = Offset.Zero) {
-                                    drawRect(
-                                        brush = paperNoiseBrush,
-                                        size = Size(
-                                            (size.width + tileSpan * 2) / grainScale,
-                                            (size.height + tileSpan * 2) / grainScale
-                                        ),
-                                        alpha = textureAlpha
-                                    )
-                                }
-                            }
-                        }
+                        .drawBehind { drawPaperGrain(grainScale, tileSpan, textureAlpha) }
                 )
             }
+            Spacer(
+                modifier = Modifier
+                    .matchParentSize()
+                    .drawBehind {
+                        val stillPath = stillRegions.outlinePath(this, layoutDirection) ?: return@drawBehind
+                        clipPath(stillPath) { drawPaperGrain(grainScale, tileSpan, textureAlpha) }
+                    }
+            )
         }
     }
 }

@@ -46,6 +46,7 @@ import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.TopBarFadeStyle
 import com.emberr.presentation.shared.stableStatusBarsPadding
+import com.emberr.ui.theme.LocalHoldsPaperGrainStill
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
@@ -143,157 +144,159 @@ fun EmberrTopHeaderBar(
         topEdgeBlurHeight > 0.dp
     val blurBandSource = if (showBlurFade) hazeState else null
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(background)
-    ) {
-        if (!isFadeProgressive) {
-            val flatFadeExtraHeight = contentPadding.calculateTopPadding() - contentPadding.calculateBottomPadding() +
-                if (isDesktopPlatform) 0.dp else MobileFlatFadeExtraGap
-
-            if (showColorFade) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .flatFadeBox(flatFadeHeight, flatFadeExtraHeight)
-                        .drawBehind { drawRect(color = topEdgeColor, alpha = topEdgeFadeAlpha.coerceIn(0f, 1f)) }
-                )
-            }
-
-            if (blurBandSource != null) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .flatFadeBox(flatFadeHeight, flatFadeExtraHeight)
-                        .hazeEffect(blurBandSource, hazeStyle) { alpha = topEdgeFadeAlpha.coerceIn(0f, 1f) }
-                )
-            }
-        } else {
-            if (showColorFade) {
-                TopEdgeColorFadeBand(
-                    gradient = topEdgeGradient,
-                    fadeHeight = topEdgeGradientHeight,
-                    fadeAlpha = topEdgeFadeAlpha
-                )
-            }
-
-            if (blurBandSource != null) {
-                TopEdgeBlurBand(
-                    hazeState = blurBandSource,
-                    hazeStyle = hazeStyle,
-                    blurHeight = topEdgeBlurHeight,
-                    blurAlpha = topEdgeFadeAlpha
-                )
-            }
-        }
-
-        CompositionLocalProvider(
-            LocalTopHeaderButtonTint provides when (fadeStyle) {
-                TopBarFadeStyle.COLOR -> TopHeaderButtonTint(topEdgeFadeAlpha.coerceIn(0f, 1f), fullTintAlpha = 0.8f)
-                TopBarFadeStyle.BLUR -> TopHeaderButtonTint(topEdgeFadeAlpha.coerceIn(0f, 1f), fullTintAlpha = 0.65f)
-                else -> TopHeaderButtonTint(fadeProgress = 0f, fullTintAlpha = 0f)
-            }
+    CompositionLocalProvider(LocalHoldsPaperGrainStill provides true) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(background)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(if (applyStatusBarPadding) Modifier.stableStatusBarsPadding() else Modifier)
-                    .padding(contentPadding)
-                    .onGloballyPositioned(onPositioned)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = verticalAlignment
-                ) {
-                    val backButtonSlot: @Composable () -> Unit = {
-                        when {
-                            showBackButton -> TopBarIconButton(
-                                icon = backIcon,
-                                contentDescription = backContentDescription,
-                                bgColor = backButtonBackground,
-                                tint = backButtonTint,
-                                hazeState = hazeState,
-                                hazeStyle = hazeStyle,
-                                size = TopHeaderBarButtonSize,
-                                tooltip = backTooltip,
-                                onClick = onBackClick
-                            )
+            if (!isFadeProgressive) {
+                val flatFadeExtraHeight = contentPadding.calculateTopPadding() - contentPadding.calculateBottomPadding() +
+                    if (isDesktopPlatform) 0.dp else MobileFlatFadeExtraGap
 
-                            reserveBackButtonSpace -> Spacer(Modifier.size(TopHeaderBarButtonSize))
-                        }
-                    }
-                    val onShowSidebar = if (showsSidebarToggle) LocalDesktopSidebarToggle.current else null
-                    if (onShowSidebar != null) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(DesktopSidebarToggleGap),
-                            verticalAlignment = verticalAlignment
-                        ) {
-                            DesktopSidebarToggleButton(
-                                onClick = onShowSidebar,
-                                hazeState = hazeState,
-                                hazeStyle = hazeStyle,
-                                tint = backButtonTint,
-                                bgColor = backButtonBackground
-                            )
-                            backButtonSlot()
-                        }
-                    } else {
-                        backButtonSlot()
-                    }
-
-                    leadingContent()
-
-                    if (titlePlacement == TopHeaderTitlePlacement.Start) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 16.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            TopHeaderBarTitle(
-                                text = title,
-                                style = titleStyle,
-                                color = titleColor,
-                                fontWeight = titleFontWeight,
-                                visibility = titleVisibility,
-                                padding = titlePadding,
-                                leadingIcon = titleLeadingIcon,
-                                trailingIcon = titleTrailingIcon,
-                                onClick = onTitleClick
-                            )
-                        }
-                    }
-
-                    if (centerContent != null) {
-                        centerContent()
-                    } else if (titlePlacement != TopHeaderTitlePlacement.Start) {
-                        Spacer(Modifier.weight(1f))
-                    }
-
-                    actions()
-                }
-
-                if (titlePlacement == TopHeaderTitlePlacement.Center) {
-                    TopHeaderBarTitle(
-                        text = title,
-                        style = titleStyle,
-                        color = titleColor,
-                        fontWeight = titleFontWeight,
-                        visibility = titleVisibility,
-                        padding = titlePadding,
-                        leadingIcon = titleLeadingIcon,
-                        trailingIcon = titleTrailingIcon,
-                        onClick = onTitleClick,
+                if (showColorFade) {
+                    Box(
                         modifier = Modifier
-                            .align(Alignment.Center)
-                            .fillMaxWidth()
-                            .padding(horizontal = titleSideInset)
+                            .matchParentSize()
+                            .flatFadeBox(flatFadeHeight, flatFadeExtraHeight)
+                            .drawBehind { drawRect(color = topEdgeColor, alpha = topEdgeFadeAlpha.coerceIn(0f, 1f)) }
                     )
                 }
 
-                overlayContent()
+                if (blurBandSource != null) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .flatFadeBox(flatFadeHeight, flatFadeExtraHeight)
+                            .hazeEffect(blurBandSource, hazeStyle) { alpha = topEdgeFadeAlpha.coerceIn(0f, 1f) }
+                    )
+                }
+            } else {
+                if (showColorFade) {
+                    TopEdgeColorFadeBand(
+                        gradient = topEdgeGradient,
+                        fadeHeight = topEdgeGradientHeight,
+                        fadeAlpha = topEdgeFadeAlpha
+                    )
+                }
+
+                if (blurBandSource != null) {
+                    TopEdgeBlurBand(
+                        hazeState = blurBandSource,
+                        hazeStyle = hazeStyle,
+                        blurHeight = topEdgeBlurHeight,
+                        blurAlpha = topEdgeFadeAlpha
+                    )
+                }
+            }
+
+            CompositionLocalProvider(
+                LocalTopHeaderButtonTint provides when (fadeStyle) {
+                    TopBarFadeStyle.COLOR -> TopHeaderButtonTint(topEdgeFadeAlpha.coerceIn(0f, 1f), fullTintAlpha = 0.8f)
+                    TopBarFadeStyle.BLUR -> TopHeaderButtonTint(topEdgeFadeAlpha.coerceIn(0f, 1f), fullTintAlpha = 0.65f)
+                    else -> TopHeaderButtonTint(fadeProgress = 0f, fullTintAlpha = 0f)
+                }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(if (applyStatusBarPadding) Modifier.stableStatusBarsPadding() else Modifier)
+                        .padding(contentPadding)
+                        .onGloballyPositioned(onPositioned)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = verticalAlignment
+                    ) {
+                        val backButtonSlot: @Composable () -> Unit = {
+                            when {
+                                showBackButton -> TopBarIconButton(
+                                    icon = backIcon,
+                                    contentDescription = backContentDescription,
+                                    bgColor = backButtonBackground,
+                                    tint = backButtonTint,
+                                    hazeState = hazeState,
+                                    hazeStyle = hazeStyle,
+                                    size = TopHeaderBarButtonSize,
+                                    tooltip = backTooltip,
+                                    onClick = onBackClick
+                                )
+
+                                reserveBackButtonSpace -> Spacer(Modifier.size(TopHeaderBarButtonSize))
+                            }
+                        }
+                        val onShowSidebar = if (showsSidebarToggle) LocalDesktopSidebarToggle.current else null
+                        if (onShowSidebar != null) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(DesktopSidebarToggleGap),
+                                verticalAlignment = verticalAlignment
+                            ) {
+                                DesktopSidebarToggleButton(
+                                    onClick = onShowSidebar,
+                                    hazeState = hazeState,
+                                    hazeStyle = hazeStyle,
+                                    tint = backButtonTint,
+                                    bgColor = backButtonBackground
+                                )
+                                backButtonSlot()
+                            }
+                        } else {
+                            backButtonSlot()
+                        }
+
+                        leadingContent()
+
+                        if (titlePlacement == TopHeaderTitlePlacement.Start) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 16.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                TopHeaderBarTitle(
+                                    text = title,
+                                    style = titleStyle,
+                                    color = titleColor,
+                                    fontWeight = titleFontWeight,
+                                    visibility = titleVisibility,
+                                    padding = titlePadding,
+                                    leadingIcon = titleLeadingIcon,
+                                    trailingIcon = titleTrailingIcon,
+                                    onClick = onTitleClick
+                                )
+                            }
+                        }
+
+                        if (centerContent != null) {
+                            centerContent()
+                        } else if (titlePlacement != TopHeaderTitlePlacement.Start) {
+                            Spacer(Modifier.weight(1f))
+                        }
+
+                        actions()
+                    }
+
+                    if (titlePlacement == TopHeaderTitlePlacement.Center) {
+                        TopHeaderBarTitle(
+                            text = title,
+                            style = titleStyle,
+                            color = titleColor,
+                            fontWeight = titleFontWeight,
+                            visibility = titleVisibility,
+                            padding = titlePadding,
+                            leadingIcon = titleLeadingIcon,
+                            trailingIcon = titleTrailingIcon,
+                            onClick = onTitleClick,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxWidth()
+                                .padding(horizontal = titleSideInset)
+                        )
+                    }
+
+                    overlayContent()
+                }
             }
         }
     }

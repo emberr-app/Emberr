@@ -85,6 +85,8 @@ import com.emberr.presentation.shared.components.TopBarIconButtonItem
 import com.emberr.presentation.shared.editor.selection.BlockStyleBar
 import com.emberr.presentation.sync.SyncViewModel
 import com.emberr.domain.util.system.showNativeToast
+import com.emberr.ui.theme.NotePaperTextureBox
+import com.emberr.ui.theme.PaperTextureArea
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar
@@ -634,7 +636,7 @@ fun DailyScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    NotePaperTextureBox(area = PaperTextureArea.DAILY_NOTES, modifier = Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             contentWindowInsets = WindowInsets(0),

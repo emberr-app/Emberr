@@ -51,6 +51,8 @@ import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.calendar.RecurrenceScopeChooser
 import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.presentation.shared.editor.selection.BlockStyleBar
+import com.emberr.ui.theme.NotePaperTextureBox
+import com.emberr.ui.theme.PaperTextureArea
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.koinInject
@@ -292,7 +294,8 @@ fun DailyEditorPane(
         }
     }
 
-    Box(
+    NotePaperTextureBox(
+        area = PaperTextureArea.DAILY_NOTES,
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
