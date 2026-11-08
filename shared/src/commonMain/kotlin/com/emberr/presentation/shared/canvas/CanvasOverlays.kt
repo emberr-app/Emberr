@@ -180,7 +180,7 @@ private val TextSizePreviewSizes = listOf(11.sp, 14.sp, 17.sp)
 private val MobilePillHorizontalPadding = 8.dp
 private val MobilePillItemSpacing = 4.dp
 private val MobilePillSelectedBackgroundWidth = 36.dp + MobilePillHorizontalPadding * 2
-private val MobileOpacitySliderWidth = 194.dp
+private val MobileOpacitySliderWidth = 150.dp
 private val TextBackgroundColors = listOf(HighlightColor.YELLOW, HighlightColor.GREEN, HighlightColor.BLUE, HighlightColor.PINK)
 
 @Composable
@@ -758,8 +758,7 @@ fun CanvasStrokeStylePanel(
             EmberrSlider(
                 value = style.opacity,
                 onValueChange = { opacity -> onStyleChange(style.copy(opacity = opacity)) },
-                onValueChangeFinished = onInteractionFinished,
-                valueLabel = { shownOpacity -> "${(shownOpacity * 100).roundToInt()}%" }
+                onValueChangeFinished = onInteractionFinished
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("0", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
@@ -1105,8 +1104,13 @@ fun CanvasMobileStrokeSettings(
                 EmberrSlider(
                     value = style.opacity,
                     onValueChange = { opacity -> onStyleChange(style.copy(opacity = opacity)) },
-                    valueLabel = { shownOpacity -> "${(shownOpacity * 100).roundToInt()}%" },
-                    modifier = Modifier.width(MobileOpacitySliderWidth).padding(horizontal = 8.dp)
+                    modifier = Modifier.width(MobileOpacitySliderWidth).padding(start = 8.dp)
+                )
+                Text(
+                    text = "${(style.opacity * 100).roundToInt()}%",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.width(44.dp).padding(start = 8.dp)
                 )
             }
             null -> Unit
