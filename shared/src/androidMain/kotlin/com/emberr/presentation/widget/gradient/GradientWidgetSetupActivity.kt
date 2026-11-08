@@ -60,6 +60,7 @@ import androidx.lifecycle.lifecycleScope
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.widget.WidgetLog
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.ui.theme.EmberrTheme
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -69,6 +70,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
+import org.koin.android.ext.android.get
 
 private val swatchHeight = 112.dp
 private val swatchCornerRadius = 20.dp
@@ -96,8 +98,9 @@ abstract class GradientWidgetSetupActivity : ComponentActivity() {
         loadSavedGradient(appWidgetId)
         enableEdgeToEdge()
 
+        val interfaceScalePercent = get<SettingsManager>().getInterfaceScalePercent()
         setContent {
-            EmberrTheme {
+            EmberrTheme(interfaceScalePercent = interfaceScalePercent) {
                 GradientChooser(
                     selectedGradient = selectedGradient,
                     onGradientChosen = { gradient -> applyGradient(appWidgetId, gradient) },

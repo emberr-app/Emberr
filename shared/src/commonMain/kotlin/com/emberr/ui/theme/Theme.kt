@@ -93,31 +93,31 @@ fun EmberrTheme(
         darkIcons = !darkTheme
     )
 
-    ScaleInterface(interfaceScalePercent) {
-    CompositionLocalProvider(
-        LocalAppIsDark provides darkTheme,
-        LocalColorThemePreference provides colorTheme,
-        LocalEmberrFontSizes provides currentFontSizes,
-        LocalEmberrFontStyle provides fontStylePreference,
-        LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock,
-        LocalFirstDayOfWeek provides firstDayOfWeek,
-        LocalPaperTextureStrength provides colorThemeSettings.paperTextureStrength,
-        LocalPaperTextureAreas provides colorThemeSettings.paperTextureAreas
-    ) {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography = AppTypography
+    ProvideInterfaceScale(interfaceScalePercent) {
+        CompositionLocalProvider(
+            LocalAppIsDark provides darkTheme,
+            LocalColorThemePreference provides colorTheme,
+            LocalEmberrFontSizes provides currentFontSizes,
+            LocalEmberrFontStyle provides fontStylePreference,
+            LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock,
+            LocalFirstDayOfWeek provides firstDayOfWeek,
+            LocalPaperTextureStrength provides colorThemeSettings.paperTextureStrength,
+            LocalPaperTextureAreas provides colorThemeSettings.paperTextureAreas
         ) {
-            val accentTextSelectionColors = TextSelectionColors(
-                handleColor = colorScheme.secondary,
-                backgroundColor = colorScheme.primary.copy(alpha = TEXT_SELECTION_BACKGROUND_ALPHA)
-            )
-            CompositionLocalProvider(LocalTextSelectionColors provides accentTextSelectionColors) {
-                EmberrTextContextMenu {
-                    if (isDesktopPlatform) content() else PaperTextureBox(propagateMinConstraints = true) { content() }
+            MaterialTheme(
+                colorScheme = colorScheme,
+                typography = AppTypography
+            ) {
+                val accentTextSelectionColors = TextSelectionColors(
+                    handleColor = colorScheme.secondary,
+                    backgroundColor = colorScheme.primary.copy(alpha = TEXT_SELECTION_BACKGROUND_ALPHA)
+                )
+                CompositionLocalProvider(LocalTextSelectionColors provides accentTextSelectionColors) {
+                    EmberrTextContextMenu {
+                        if (isDesktopPlatform) content() else PaperTextureBox(propagateMinConstraints = true) { content() }
+                    }
                 }
             }
         }
-    }
     }
 }

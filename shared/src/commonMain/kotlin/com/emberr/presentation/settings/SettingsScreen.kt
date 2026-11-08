@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.emberr.data.local.prefs.SyncConstants
 import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.sync.SyncPairingData
 import com.emberr.domain.sync.SyncServerStatus
@@ -90,7 +92,6 @@ import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.LARGEST_INTERFACE_SCALE_PERCENT
 import com.emberr.ui.theme.SMALLEST_INTERFACE_SCALE_PERCENT
 import com.emberr.ui.theme.interfaceScalePercentMovedBySteps
-import com.emberr.data.local.prefs.SyncConstants
 import com.emberr.ui.theme.colorThemePreferenceNamed
 import com.emberr.ui.theme.fontFamilyFor
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
@@ -1717,7 +1718,12 @@ private fun InterfaceScaleStepperRow(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .widthIn(min = if (isDesktopPlatform) 52.dp else 44.dp)
-                        .clickable(interactionSource = null, indication = null) {
+                        .clickable(
+                            interactionSource = null,
+                            indication = null,
+                            onClickLabel = "Reset to 100%",
+                            role = Role.Button
+                        ) {
                             if (savedPercent != SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT) {
                                 onPercentChosen(SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT)
                             }
