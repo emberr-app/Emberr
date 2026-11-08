@@ -20,6 +20,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.ui.theme.EmberrTheme
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
@@ -58,8 +59,9 @@ class NoteWidgetPickerActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
+        val interfaceScalePercent = get<SettingsManager>().getInterfaceScalePercent()
         setContent {
-            EmberrTheme {
+            EmberrTheme(interfaceScalePercent = interfaceScalePercent) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

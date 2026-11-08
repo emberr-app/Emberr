@@ -71,7 +71,7 @@ import com.emberr.presentation.desktop.window.CustomWindowFrameSupport
 import com.emberr.presentation.desktop.window.DesktopAppRelauncher
 import com.emberr.presentation.desktop.window.EmberrWindowFrame
 import com.emberr.presentation.desktop.window.FollowLiveDisplayScale
-import com.emberr.presentation.desktop.window.changeInterfaceScaleForShortcut
+import com.emberr.presentation.desktop.window.handleInterfaceScaleShortcut
 import com.emberr.presentation.desktop.window.MatchWindowsTitleBarToAppTheme
 import com.emberr.presentation.desktop.window.raiseWindowToFront
 import com.emberr.presentation.desktop.window.WindowFrameSize
@@ -332,7 +332,7 @@ private fun runEmberrDesktopApp() = application {
                 DesktopSearchShortcutBus.requestOpen()
                 true
             } else {
-                changeInterfaceScaleForShortcut(event, mainSettingsManager)
+                handleInterfaceScaleShortcut(event, mainSettingsManager)
             }
         },
         onKeyEvent = { event ->
@@ -513,7 +513,7 @@ private fun runEmberrDesktopApp() = application {
                 undecorated = useCustomWindowFrame,
                 transparent = useCustomWindowFrame,
                 icon = painterResource("app_icon.png"),
-                onPreviewKeyEvent = { event -> changeInterfaceScaleForShortcut(event, mainSettingsManager) }
+                onPreviewKeyEvent = { event -> handleInterfaceScaleShortcut(event, mainSettingsManager) }
             ) {
                 val settingsManager = remember { GlobalContext.get().get<SettingsManager>() }
                 val fontSizePreferenceName by settingsManager.fontSizePreferenceFlow.collectAsState(

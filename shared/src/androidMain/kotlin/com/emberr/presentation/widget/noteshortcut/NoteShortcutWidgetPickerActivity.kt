@@ -22,6 +22,7 @@ import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.widget.WidgetNoteChooser
 import com.emberr.presentation.widget.WidgetNoteSource
 import com.emberr.presentation.widget.WidgetSetupNotice
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.ui.theme.EmberrTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,8 +55,9 @@ class NoteShortcutWidgetPickerActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
+        val interfaceScalePercent = get<SettingsManager>().getInterfaceScalePercent()
         setContent {
-            EmberrTheme {
+            EmberrTheme(interfaceScalePercent = interfaceScalePercent) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

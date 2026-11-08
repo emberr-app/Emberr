@@ -15,7 +15,6 @@ import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.format.formatByteSize
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
-import com.emberr.ui.theme.showInterfaceScaleToast
 import com.emberr.presentation.home.overview.OverviewSection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

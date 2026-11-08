@@ -21,6 +21,7 @@ import com.emberr.presentation.widget.WidgetSetupNotice
 import com.emberr.presentation.widget.WidgetSpaceChooser
 import com.emberr.presentation.widget.clearPinnedSpaceId
 import com.emberr.presentation.widget.writePinnedSpaceId
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.ui.theme.EmberrTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,8 +52,9 @@ class NoteListWidgetPickerActivity : ComponentActivity() {
             return
         }
 
+        val interfaceScalePercent = get<SettingsManager>().getInterfaceScalePercent()
         setContent {
-            EmberrTheme {
+            EmberrTheme(interfaceScalePercent = interfaceScalePercent) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
