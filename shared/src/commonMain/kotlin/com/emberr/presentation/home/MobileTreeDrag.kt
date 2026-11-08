@@ -8,6 +8,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LocalPinnableContainer
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -89,6 +91,13 @@ fun Modifier.mobileTreeDragSource(
     var rowPositionInRoot by remember { mutableStateOf(Offset.Zero) }
     var rowSize by remember { mutableStateOf(IntSize.Zero) }
 
+    val isThisRowDragged = dragState.isDragged(itemKey)
+    val pinnableContainer = LocalPinnableContainer.current
+    DisposableEffect(isThisRowDragged, pinnableContainer) {
+        val keepComposedWhileDragged = if (isThisRowDragged) pinnableContainer?.pin() else null
+        onDispose { keepComposedWhileDragged?.release() }
+    }
+
     return this
         .onGloballyPositioned {
             rowPositionInRoot = it.positionInRoot()
@@ -120,6 +129,7 @@ fun Modifier.mobileTreeDragSource(
 
                 val grabOffsetInsideRow = down.position
                 var pointerId = down.id
+                var gridContentTopInRoot: Float? = null
 
                 while (true) {
                     val event = awaitPointerEvent()
@@ -142,11 +152,14 @@ fun Modifier.mobileTreeDragSource(
                     if (dragState.isDragged(itemKey)) {
                         dragState.floatingTopLeftInRoot = fingerInRoot - grabOffsetInsideRow
 
-                        val rowTopInGrid = rowTopInGrid(itemKey, gridState)
-                        if (rowTopInGrid != null) {
+                        if (gridContentTopInRoot == null) {
+                            gridContentTopInRoot = rowTopInGrid(itemKey, gridState)
+                                ?.let { rowTopInGrid -> rowPositionInRoot.y - rowTopInGrid }
+                        }
+                        gridContentTopInRoot?.let { contentTopInRoot ->
                             dragState.pointerInList = Offset(
                                 x = change.position.x,
-                                y = rowTopInGrid + change.position.y
+                                y = fingerInRoot.y - contentTopInRoot
                             )
                         }
                         resolveTreeDropTarget(
@@ -179,16 +192,18 @@ fun MobileTreeDragState.refreshDropTarget(
 fun MobileTreeDragState.edgeScrollDelta(
     gridState: LazyStaggeredGridState,
     edgeSizePx: Float,
-    maxStepPx: Float
+    maxStepPx: Float,
+    bottomCoveredPx: Float
 ): Float {
     if (!isDragging || edgeSizePx <= 0f) return 0f
     val viewportHeight = gridState.layoutInfo.viewportSize.height.toFloat()
     if (viewportHeight <= 0f) return 0f
 
+    val visibleBottom = gridState.layoutInfo.viewportEndOffset - bottomCoveredPx
     val y = pointerInList.y
     val fraction = when {
         y < edgeSizePx -> -(1f - y / edgeSizePx)
-        y > viewportHeight - edgeSizePx -> (y - (viewportHeight - edgeSizePx)) / edgeSizePx
+        y > visibleBottom - edgeSizePx -> (y - (visibleBottom - edgeSizePx)) / edgeSizePx
         else -> 0f
     }
     return fraction.coerceIn(-1f, 1f) * maxStepPx

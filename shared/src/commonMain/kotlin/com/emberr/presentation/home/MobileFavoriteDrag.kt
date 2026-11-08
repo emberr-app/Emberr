@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LocalPinnableContainer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.withTimeoutOrNull
@@ -85,72 +89,87 @@ fun Modifier.mobileFavoriteDragSource(
     val currentDragEnabled by rememberUpdatedState(dragEnabled)
     val haptics = LocalHapticFeedback.current
 
-    return this.pointerInput(noteId) {
-        awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false)
+    var cardStartInRoot by remember { mutableStateOf(0f) }
 
-            var releasedEarly = false
-            val tap = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
-                waitForUpOrCancellation().also { if (it == null) releasedEarly = true }
-            }
-            if (tap != null) {
-                currentOnClick()
-                return@awaitEachGesture
-            }
-            if (releasedEarly) return@awaitEachGesture
-
-            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-
-            if (!currentDragEnabled) {
-                waitForUpOrCancellation()
-                currentOnLongPress()
-                return@awaitEachGesture
-            }
-
-            currentEvent.changes.forEach { it.consume() }
-
-            val grabOffsetInsideCard = down.position
-            var pointerId = down.id
-
-            while (true) {
-                val event = awaitPointerEvent()
-                val change = event.changes.firstOrNull { it.id == pointerId }
-                    ?: event.changes.firstOrNull { it.pressed }
-                    ?: break
-                pointerId = change.id
-                if (!change.pressed) break
-
-                change.consume()
-
-                if (!dragState.isDragging &&
-                    (change.position - grabOffsetInsideCard).getDistance() > viewConfiguration.touchSlop
-                ) {
-                    dragState.draggedNoteId = noteId
-                }
-
-                if (dragState.isDragged(noteId)) {
-                    dragState.travelX = change.position.x - grabOffsetInsideCard.x
-                    val cardStart = cardStartInRow(noteId, rowState)
-                    if (cardStart != null) {
-                        dragState.pointerXInRow = cardStart + change.position.x
-                    }
-                    resolveFavoriteDropTarget(
-                        pointerXInRow = dragState.pointerXInRow,
-                        rowState      = rowState,
-                        draggedNoteId = noteId,
-                        dragState     = dragState
-                    )
-                }
-            }
-
-            val startedDragHere = dragState.isDragged(noteId)
-            val targetNoteId = dragState.targetNoteId
-            val insertBefore = dragState.insertBefore
-            if (startedDragHere) dragState.reset()
-
-            if (startedDragHere) currentOnDrop(targetNoteId, insertBefore) else currentOnLongPress()
-        }
+    val isThisCardDragged = dragState.isDragged(noteId)
+    val pinnableContainer = LocalPinnableContainer.current
+    DisposableEffect(isThisCardDragged, pinnableContainer) {
+        val keepComposedWhileDragged = if (isThisCardDragged) pinnableContainer?.pin() else null
+        onDispose { keepComposedWhileDragged?.release() }
     }
+
+    return this
+        .onGloballyPositioned { cardStartInRoot = it.positionInRoot().x }
+        .pointerInput(noteId) {
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false)
+
+                var releasedEarly = false
+                val tap = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                    waitForUpOrCancellation().also { if (it == null) releasedEarly = true }
+                }
+                if (tap != null) {
+                    currentOnClick()
+                    return@awaitEachGesture
+                }
+                if (releasedEarly) return@awaitEachGesture
+
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                if (!currentDragEnabled) {
+                    waitForUpOrCancellation()
+                    currentOnLongPress()
+                    return@awaitEachGesture
+                }
+
+                currentEvent.changes.forEach { it.consume() }
+
+                val grabOffsetInsideCard = down.position
+                var pointerId = down.id
+                var rowContentStartInRoot: Float? = null
+
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val change = event.changes.firstOrNull { it.id == pointerId }
+                        ?: event.changes.firstOrNull { it.pressed }
+                        ?: break
+                    pointerId = change.id
+                    if (!change.pressed) break
+
+                    change.consume()
+
+                    if (!dragState.isDragging &&
+                        (change.position - grabOffsetInsideCard).getDistance() > viewConfiguration.touchSlop
+                    ) {
+                        dragState.draggedNoteId = noteId
+                    }
+
+                    if (dragState.isDragged(noteId)) {
+                        dragState.travelX = change.position.x - grabOffsetInsideCard.x
+                        if (rowContentStartInRoot == null) {
+                            rowContentStartInRoot = cardStartInRow(noteId, rowState)
+                                ?.let { cardStartInRow -> cardStartInRoot - cardStartInRow }
+                        }
+                        rowContentStartInRoot?.let { contentStartInRoot ->
+                            dragState.pointerXInRow = cardStartInRoot + change.position.x - contentStartInRoot
+                        }
+                        resolveFavoriteDropTarget(
+                            pointerXInRow = dragState.pointerXInRow,
+                            rowState      = rowState,
+                            draggedNoteId = noteId,
+                            dragState     = dragState
+                        )
+                    }
+                }
+
+                val startedDragHere = dragState.isDragged(noteId)
+                val targetNoteId = dragState.targetNoteId
+                val insertBefore = dragState.insertBefore
+                if (startedDragHere) dragState.reset()
+
+                if (startedDragHere) currentOnDrop(targetNoteId, insertBefore) else currentOnLongPress()
+            }
+        }
 }
 
 fun MobileFavoriteDragState.refreshDropTarget(rowState: LazyListState) {
