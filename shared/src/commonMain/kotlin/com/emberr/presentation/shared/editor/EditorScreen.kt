@@ -421,23 +421,20 @@ fun EditorScreen(
 
                 val lastSlashIndex = text.lastIndexOf('/')
                 val isCalloutTitle = findBlockRecursive(latestBlocks, id) is CalloutBlock
-                val opensASlashCommand = !isCalloutTitle && lastSlashIndex != -1 && (
-                    lastSlashIndex == 0 ||
-                        text[lastSlashIndex - 1] == ' ' ||
-                        text[lastSlashIndex - 1] == '\n'
-                    )
+                val opensASlashCommand = !isCalloutTitle && lastSlashIndex != -1
                 val textAfterSlash = if (opensASlashCommand) text.substring(lastSlashIndex + 1) else ""
 
                 if (opensASlashCommand) {
-                    if (textAfterSlash.contains(" ")) {
-                        isSlashKilled = true
-                    }
+                    val queryCanStillMatch = !textAfterSlash.contains(" ") && (
+                        textAfterSlash.length <= 2 ||
+                            slashMenuSearchTexts.any { it.contains(textAfterSlash, ignoreCase = true) }
+                        )
+                    val textWasDeleted = hasSeenThisBlockBefore && text.length < prevText.length
 
-                    if (!isSlashKilled && textAfterSlash.length > 2) {
-                        val hasMatch = slashMenuSearchTexts.any { it.contains(textAfterSlash, ignoreCase = true) }
-                        if (!hasMatch) {
-                            isSlashKilled = true
-                        }
+                    if (!queryCanStillMatch) {
+                        isSlashKilled = true
+                    } else if (textWasDeleted) {
+                        isSlashKilled = false
                     }
                 }
 
