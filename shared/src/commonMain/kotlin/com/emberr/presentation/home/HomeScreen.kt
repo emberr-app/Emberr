@@ -262,12 +262,13 @@ fun HomeScreen(
 
     val edgeScrollZonePx = with(LocalDensity.current) { 96.dp.toPx() }
     val edgeScrollStepPx = with(LocalDensity.current) { 12.dp.toPx() }
+    val bottomBarCoveredPx = with(LocalDensity.current) { bottomContentPadding.toPx() }
 
     LaunchedEffect(treeDragState.isDragging) {
         if (!treeDragState.isDragging) return@LaunchedEffect
         while (isActive) {
             withFrameNanos { }
-            val delta = treeDragState.edgeScrollDelta(gridState, edgeScrollZonePx, edgeScrollStepPx)
+            val delta = treeDragState.edgeScrollDelta(gridState, edgeScrollZonePx, edgeScrollStepPx, bottomBarCoveredPx)
             if (delta != 0f) {
                 gridState.scrollBy(delta)
                 treeDragState.refreshDropTarget(gridState, currentBlockedDropKeys)
