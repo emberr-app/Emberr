@@ -78,6 +78,7 @@ import com.emberr.presentation.shared.components.TopHeaderBarButtonSize
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
@@ -295,7 +296,7 @@ fun CalendarSettingsContent(
                         HorizontalDivider(
                             modifier = Modifier.padding(start = 14.dp, end = 16.dp),
                             thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f).orHighContrastLine()
                         )
                     }
                     CalendarViewModeRow(

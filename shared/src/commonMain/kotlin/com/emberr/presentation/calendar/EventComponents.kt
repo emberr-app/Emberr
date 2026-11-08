@@ -152,6 +152,7 @@ import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.LocalFirstDayOfWeek
 import com.emberr.ui.theme.LocalAppIsDark
+import com.emberr.presentation.shared.components.orHighContrastLine
 
 internal val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
@@ -747,7 +748,7 @@ private fun EventEditorFields(
         }
 
         if (showsDetails) {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine())
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -1317,7 +1318,7 @@ private fun EventChoiceMenu(
             if (customTime != null) {
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp, horizontal = 20.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                 )
                 EmberrBottomSheetOption(label = customTime.label, onClick = { showsCustomTimePicker = true })
             }
@@ -1775,7 +1776,7 @@ private fun CustomRepeatForm(
     }
 
     val divider = @Composable {
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine())
     }
 
     CompositionLocalProvider(

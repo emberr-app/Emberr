@@ -30,6 +30,7 @@ import com.emberr.domain.model.PendingShare
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.NotePickerDialog
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.download3
 import emberr.shared.generated.resources.floppy
@@ -62,7 +63,7 @@ fun ShareReceiverSheet(
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
             )
 
             ShareTargetRow(

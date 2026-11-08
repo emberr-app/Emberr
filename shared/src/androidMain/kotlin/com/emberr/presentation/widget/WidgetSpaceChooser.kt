@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.SpaceEntity
+import com.emberr.presentation.shared.components.orHighContrastLine
 
 @Composable
 fun WidgetSpaceChooser(
@@ -43,7 +44,7 @@ fun WidgetSpaceChooser(
                     subtitle = "Always shows whichever space you are in",
                     onClick = { onSpaceChosen(null) }
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine())
             }
 
             items(items = spaces, key = { space -> space.spaceId }) { space ->
@@ -52,7 +53,7 @@ fun WidgetSpaceChooser(
                     subtitle = if (space.spaceId == activeSpaceId) "Current space" else null,
                     onClick = { onSpaceChosen(space.spaceId) }
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine())
             }
         }
     }

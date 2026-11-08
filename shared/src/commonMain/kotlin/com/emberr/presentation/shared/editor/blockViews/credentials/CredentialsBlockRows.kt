@@ -58,7 +58,7 @@ import com.emberr.domain.util.system.DeviceLockPrompt
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.rememberDeviceLockPrompt
 import com.emberr.domain.util.system.showNativeToast
-import com.emberr.presentation.shared.components.EmberrBorderWidth
+import com.emberr.presentation.shared.components.emberrBorderWidth
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.SmallRoundedCornerShape
 import com.emberr.presentation.shared.components.emberrBorderColor
@@ -350,7 +350,7 @@ private fun CredentialFieldLabel(field: CredentialField, style: TextStyle) {
 
 @Composable
 internal fun CredentialsDivider(modifier: Modifier = Modifier) {
-    HorizontalDivider(modifier = modifier, thickness = EmberrBorderWidth, color = emberrBorderColor)
+    HorizontalDivider(modifier = modifier, thickness = emberrBorderWidth, color = emberrBorderColor)
 }
 
 @Composable

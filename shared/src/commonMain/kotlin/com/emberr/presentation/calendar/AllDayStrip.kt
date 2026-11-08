@@ -60,6 +60,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.editor.components.DesktopCursor
 import com.emberr.presentation.shared.editor.components.desktopPointerCursor
+import com.emberr.presentation.shared.components.orHighContrastLine
 import kotlin.math.roundToInt
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -271,7 +272,7 @@ fun AllDayStrip(
                     )
                     if (index != windowDates.lastIndex) {
                         VerticalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine(),
                             thickness = ColumnDividerThickness,
                             modifier = Modifier.fillMaxHeight()
                         )

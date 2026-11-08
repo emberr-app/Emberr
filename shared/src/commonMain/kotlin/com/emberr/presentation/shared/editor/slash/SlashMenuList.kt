@@ -40,6 +40,7 @@ import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.copy
@@ -171,7 +172,7 @@ fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1,
                     SlashMenuRow.SectionSpacer -> Spacer(modifier = Modifier.height(12.dp))
                     SlashMenuRow.SectionDivider -> HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                     )
                 }
             }

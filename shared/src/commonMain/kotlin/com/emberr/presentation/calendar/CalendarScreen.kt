@@ -146,6 +146,7 @@ import com.emberr.ui.theme.LocalFirstDayOfWeek
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.domain.util.time.startOfWeek
+import com.emberr.presentation.shared.components.orHighContrastLine
 
 enum class CalendarViewMode { DAY, THREE_DAY, WEEK, MONTH }
 
@@ -914,7 +915,7 @@ private fun TimelineHeader(
                     }
                     if (index != windowDates.lastIndex) {
                         VerticalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine(),
                             modifier = Modifier.fillMaxHeight()
                         )
                     }
@@ -937,7 +938,7 @@ private fun TimelineHeader(
           }
         }
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine(),
             thickness = 1.dp,
             modifier = Modifier.padding(start = 56.dp)
         )
@@ -1236,7 +1237,7 @@ private fun DayColumnBody(
             hours.forEach { _ ->
                 Box(modifier = Modifier.fillMaxWidth().height(hourHeight)) {
                     HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine(),
                         thickness = 1.dp
                     )
                 }
@@ -1568,7 +1569,7 @@ private fun MultiDayGridContent(
             }
             if (index != dates.lastIndex) {
                 VerticalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine(),
                     modifier = Modifier.height(hourHeight * hours.count())
                 )
             }

@@ -66,7 +66,7 @@ fun NotePickerDialog(
             Text("Create new note", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
 
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine())
     }
 
     val listContent: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit = { closeAnd ->
@@ -96,7 +96,7 @@ fun NotePickerDialog(
 
         if (query.isNotBlank()) {
             if (filteredNotes.isNotEmpty()) {
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine())
             }
             Row(
                 modifier = Modifier

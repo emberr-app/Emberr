@@ -127,6 +127,7 @@ import emberr.shared.generated.resources.timer_reset
 import emberr.shared.generated.resources.triangle_alert
 import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.presentation.shared.TopBarFadeStyle
+import com.emberr.presentation.shared.components.orHighContrastLine
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -556,7 +557,7 @@ fun SettingsScreen(
                     wheelContent()
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine()
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
@@ -1468,7 +1469,7 @@ private fun EraseCloudDataDialog(
 internal fun SettingsDivider() {
     HorizontalDivider(
         thickness = 1.dp,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f).orHighContrastLine()
     )
 }
 

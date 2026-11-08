@@ -156,7 +156,7 @@ fun ReminderPresetMenu(
                 }
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                 )
                 PresetSheetItem(
                     painterResource(Res.drawable.calendar_add3),
@@ -165,7 +165,7 @@ fun ReminderPresetMenu(
                 if (onRemove != null) {
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                     )
                     PresetSheetItem(
                         painterResource(Res.drawable.bell_off2),
@@ -264,7 +264,7 @@ fun TimePresetMenu(
                     }
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                     )
                 }
                 PresetSheetItem(painterResource(Res.drawable.history2), "In 15 mins") {
@@ -291,7 +291,7 @@ fun TimePresetMenu(
                 }
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                 )
                 PresetSheetItem(
                     painterResource(Res.drawable.clock_circle),
@@ -656,7 +656,7 @@ fun MinimalDatePickerDialog(
 
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine()
                     )
 
                     Row(
@@ -801,7 +801,7 @@ fun MinimalTimePickerDialog(
 
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine()
                 )
 
                 Row(

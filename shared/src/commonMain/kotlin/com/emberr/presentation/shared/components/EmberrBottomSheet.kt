@@ -508,7 +508,7 @@ private fun EmberrSheetHeader(
         if (!isDesktopPlatform) {
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = SheetHorizontalPadding).padding(bottom = SheetDividerGap),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
             )
         }
     }

@@ -41,6 +41,7 @@ import com.emberr.presentation.home.NoteCard
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.smoothWheelScroll
+import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.delay
@@ -276,7 +277,7 @@ fun ManageNoteBottomSheet(
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 4.dp, horizontal = 20.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
             )
 
             BottomSheetActionItem(

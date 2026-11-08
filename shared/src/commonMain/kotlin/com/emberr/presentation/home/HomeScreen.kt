@@ -99,6 +99,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.space.SpaceOptionsSheets
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_up_down
 import emberr.shared.generated.resources.calendar
@@ -1258,7 +1259,7 @@ fun DesktopSortMenu(currentSortType: SortType, currentSortOrder: SortOrder, onDi
         )
         HorizontalDivider(
             modifier = Modifier.padding(vertical = 6.dp, horizontal = 12.dp),
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
         )
         EmberrDesktopMenuOption(
             label = "Ascending",
@@ -1623,7 +1624,7 @@ private fun NewNoteMobileMenu(
         )
         HorizontalDivider(
             modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
         )
         EmberrMobileMenuOption(
             label = "Templates",
@@ -1924,7 +1925,7 @@ fun SortBottomSheet(expanded: Boolean, currentSortType: SortType, currentSortOrd
             )
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 26.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
             )
             EmberrBottomSheetOption(
                 label = "Ascending",

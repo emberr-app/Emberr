@@ -48,6 +48,7 @@ import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.topHeaderBarPadding
+import com.emberr.presentation.shared.components.orHighContrastLine
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.entity.License
@@ -183,7 +184,7 @@ private fun LibraryRow(
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 thickness = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f).orHighContrastLine()
             )
         }
 
