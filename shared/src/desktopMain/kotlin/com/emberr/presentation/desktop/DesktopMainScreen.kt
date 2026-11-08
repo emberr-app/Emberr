@@ -1896,15 +1896,16 @@ fun DesktopMainScreen(
                         }
 
                         val hasScrolledList by remember { derivedStateOf { sidebarListState.canScrollBackward } }
-                        val topEdgeAlpha by animateFloatAsState(
-                            if (hasScrolledList) 0.09f else 0f,
+                        val topEdgeVisibility by animateFloatAsState(
+                            if (hasScrolledList) 1f else 0f,
                             tween(180, easing = FastOutSlowInEasing),
                             label = "sidebar_top_edge"
                         )
+                        val topEdgeColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f).orHighContrastLine()
                         HorizontalDivider(
                             modifier = Modifier.align(Alignment.TopCenter),
                             thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = topEdgeAlpha)
+                            color = topEdgeColor.copy(alpha = topEdgeColor.alpha * topEdgeVisibility)
                         )
 
                         EmberrVerticalScrollbar(
