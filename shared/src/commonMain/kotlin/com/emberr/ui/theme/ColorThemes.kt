@@ -6,7 +6,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 
-const val FULL_THEME_STRENGTH = 100
+const val FULL_STRENGTH_PERCENT = 100
 
 private val EmberrLightColorScheme = lightColorScheme(
     primary          = CharcoalNoir,
@@ -18,7 +18,7 @@ private val EmberrLightColorScheme = lightColorScheme(
     surface          = CloudVeil,
     onSurface        = CharcoalNoir,
     outline          = UrbanFog,
-    surfaceVariant = CloudVeil,
+    surfaceVariant   = CloudVeil,
     surfaceContainerHigh = Color(0xFFD8D8D8)
 )
 
@@ -32,7 +32,7 @@ private val EmberrDarkColorScheme = darkColorScheme(
     surface          = IroncladGrey,
     onSurface        = CloudVeil,
     outline          = UrbanFog,
-    surfaceVariant = Color(0xFF363636),
+    surfaceVariant   = Color(0xFF363636),
     surfaceContainerHigh = Color(0xFF363636)
 )
 
@@ -48,7 +48,7 @@ private val SoftLightColorScheme = lightColorScheme(
     outline          = UrbanFog,
     outlineVariant   = Color(0xFFCFCFCF),
     onSurfaceVariant = Color(0xFF4A4A4A),
-    surfaceVariant = Color(0xFFE6E6E6),
+    surfaceVariant   = Color(0xFFE6E6E6),
     surfaceContainerHigh = Color(0xFFD4D4D4)
 )
 
@@ -64,7 +64,7 @@ private val SoftDarkColorScheme = darkColorScheme(
     outline          = Color(0xFF8A8A8A),
     outlineVariant   = Color(0xFF2C2C2C),
     onSurfaceVariant = Color(0xFFBDBDBD),
-    surfaceVariant = Color(0xFF313131),
+    surfaceVariant   = Color(0xFF313131),
     surfaceContainerHigh = Color(0xFF313131)
 )
 
@@ -80,7 +80,7 @@ private val HighContrastLightColorScheme = lightColorScheme(
     outline          = Color(0xFF3D3D3D),
     outlineVariant   = Color(0xFF8A8A8A),
     onSurfaceVariant = Color(0xFF1A1A1A),
-    surfaceVariant = Color(0xFFEBEBEB),
+    surfaceVariant   = Color(0xFFEBEBEB),
     surfaceContainerHigh = Color(0xFFD6D6D6)
 )
 
@@ -96,7 +96,7 @@ private val HighContrastDarkColorScheme = darkColorScheme(
     outline          = Color(0xFFC2C2C2),
     outlineVariant   = Color(0xFF7A7A7A),
     onSurfaceVariant = Color(0xFFE6E6E6),
-    surfaceVariant = Color(0xFF2E2E2E),
+    surfaceVariant   = Color(0xFF2E2E2E),
     surfaceContainerHigh = Color(0xFF2E2E2E)
 )
 
@@ -112,7 +112,7 @@ private val TerracottaLightColorScheme = lightColorScheme(
     outline          = Color(0xFF8C7A6E),
     outlineVariant   = Color(0xFFDCCFC4),
     onSurfaceVariant = Color(0xFF5A4A3F),
-    surfaceVariant = Color(0xFFF5EDE6),
+    surfaceVariant   = Color(0xFFF5EDE6),
     surfaceContainerHigh = Color(0xFFE5D8CD)
 )
 
@@ -128,7 +128,7 @@ private val TerracottaDarkColorScheme = darkColorScheme(
     outline          = Color(0xFF8F7F72),
     outlineVariant   = Color(0xFF4A3D33),
     onSurfaceVariant = Color(0xFFD6C6B8),
-    surfaceVariant = Color(0xFF3A2E25),
+    surfaceVariant   = Color(0xFF3A2E25),
     surfaceContainerHigh = Color(0xFF3A2E25)
 )
 
@@ -144,7 +144,7 @@ private val PaperLightColorScheme = lightColorScheme(
     outline          = Color(0xFF8E7F68),
     outlineVariant   = Color(0xFFD6CAB2),
     onSurfaceVariant = Color(0xFF5E5040),
-    surfaceVariant = Color(0xFFECE3D0),
+    surfaceVariant   = Color(0xFFECE3D0),
     surfaceContainerHigh = Color(0xFFDDD1B9)
 )
 
@@ -160,7 +160,7 @@ private val PaperDarkColorScheme = darkColorScheme(
     outline          = Color(0xFF9A8C74),
     outlineVariant   = Color(0xFF4E4538),
     onSurfaceVariant = Color(0xFFD2C5AC),
-    surfaceVariant = Color(0xFF40382C),
+    surfaceVariant   = Color(0xFF40382C),
     surfaceContainerHigh = Color(0xFF40382C)
 )
 
@@ -176,7 +176,7 @@ private val NordLightColorScheme = lightColorScheme(
     outline          = Color(0xFF7B8394),
     outlineVariant   = Color(0xFFBCC3D0),
     onSurfaceVariant = Color(0xFF4C566A),
-    surfaceVariant = Color(0xFFD8DEE9),
+    surfaceVariant   = Color(0xFFD8DEE9),
     surfaceContainerHigh = Color(0xFFCBD2DE)
 )
 
@@ -192,7 +192,7 @@ private val NordDarkColorScheme = darkColorScheme(
     outline          = Color(0xFF8D96A8),
     outlineVariant   = Color(0xFF4C566A),
     onSurfaceVariant = Color(0xFFD8DEE9),
-    surfaceVariant = Color(0xFF434C5E),
+    surfaceVariant   = Color(0xFF434C5E),
     surfaceContainerHigh = Color(0xFF434C5E)
 )
 
@@ -208,7 +208,7 @@ private val ForestLightColorScheme = lightColorScheme(
     outline          = Color(0xFF7A8575),
     outlineVariant   = Color(0xFFCAD3C2),
     onSurfaceVariant = Color(0xFF465246),
-    surfaceVariant = Color(0xFFE6EBE1),
+    surfaceVariant   = Color(0xFFE6EBE1),
     surfaceContainerHigh = Color(0xFFD3DBCC)
 )
 
@@ -224,7 +224,7 @@ private val ForestDarkColorScheme = darkColorScheme(
     outline          = Color(0xFF84907F),
     outlineVariant   = Color(0xFF3F4C3F),
     onSurfaceVariant = Color(0xFFC6D1BF),
-    surfaceVariant = Color(0xFF334033),
+    surfaceVariant   = Color(0xFF334033),
     surfaceContainerHigh = Color(0xFF334033)
 )
 
@@ -240,7 +240,7 @@ private val RosePineDawnColorScheme = lightColorScheme(
     outline          = Color(0xFF9893A5),
     outlineVariant   = Color(0xFFCECACD),
     onSurfaceVariant = Color(0xFF797593),
-    surfaceVariant = Color(0xFFF2E9E1),
+    surfaceVariant   = Color(0xFFF2E9E1),
     surfaceContainerHigh = Color(0xFFDFDAD9)
 )
 
@@ -256,7 +256,7 @@ private val RosePineMainColorScheme = darkColorScheme(
     outline          = Color(0xFF908CAA),
     outlineVariant   = Color(0xFF403D52),
     onSurfaceVariant = Color(0xFF908CAA),
-    surfaceVariant = Color(0xFF403D52),
+    surfaceVariant   = Color(0xFF403D52),
     surfaceContainerHigh = Color(0xFF403D52)
 )
 
@@ -272,7 +272,7 @@ private val CatppuccinLatteColorScheme = lightColorScheme(
     outline          = Color(0xFF8C8FA1),
     outlineVariant   = Color(0xFFCCD0DA),
     onSurfaceVariant = Color(0xFF5C5F77),
-    surfaceVariant = Color(0xFFE6E9EF),
+    surfaceVariant   = Color(0xFFE6E9EF),
     surfaceContainerHigh = Color(0xFFDCE0E8)
 )
 
@@ -288,7 +288,7 @@ private val CatppuccinMochaColorScheme = darkColorScheme(
     outline          = Color(0xFF7F849C),
     outlineVariant   = Color(0xFF45475A),
     onSurfaceVariant = Color(0xFFBAC2DE),
-    surfaceVariant = Color(0xFF45475A),
+    surfaceVariant   = Color(0xFF45475A),
     surfaceContainerHigh = Color(0xFF45475A)
 )
 
@@ -304,7 +304,7 @@ private val CatppuccinFrappeColorScheme = darkColorScheme(
     outline          = Color(0xFF838BA7),
     outlineVariant   = Color(0xFF51576D),
     onSurfaceVariant = Color(0xFFB5BFE2),
-    surfaceVariant = Color(0xFF51576D),
+    surfaceVariant   = Color(0xFF51576D),
     surfaceContainerHigh = Color(0xFF51576D)
 )
 
@@ -320,7 +320,7 @@ private val TokyoNightLightColorScheme = lightColorScheme(
     outline          = Color(0xFF848CB5),
     outlineVariant   = Color(0xFFA8AECB),
     onSurfaceVariant = Color(0xFF6172B0),
-    surfaceVariant = Color(0xFFD0D5E3),
+    surfaceVariant   = Color(0xFFD0D5E3),
     surfaceContainerHigh = Color(0xFFC4C8DA)
 )
 
@@ -336,7 +336,7 @@ private val TokyoNightDarkColorScheme = darkColorScheme(
     outline          = Color(0xFF737AA2),
     outlineVariant   = Color(0xFF3B4261),
     onSurfaceVariant = Color(0xFFA9B1D6),
-    surfaceVariant = Color(0xFF414868),
+    surfaceVariant   = Color(0xFF414868),
     surfaceContainerHigh = Color(0xFF414868)
 )
 
@@ -352,7 +352,7 @@ private val GruvboxLightColorScheme = lightColorScheme(
     outline          = Color(0xFF928374),
     outlineVariant   = Color(0xFFD5C4A1),
     onSurfaceVariant = Color(0xFF7C6F64),
-    surfaceVariant = Color(0xFFF2E5BC),
+    surfaceVariant   = Color(0xFFF2E5BC),
     surfaceContainerHigh = Color(0xFFEBDBB2)
 )
 
@@ -368,7 +368,7 @@ private val GruvboxDarkColorScheme = darkColorScheme(
     outline          = Color(0xFF928374),
     outlineVariant   = Color(0xFF504945),
     onSurfaceVariant = Color(0xFFA89984),
-    surfaceVariant = Color(0xFF3C3836),
+    surfaceVariant   = Color(0xFF3C3836),
     surfaceContainerHigh = Color(0xFF3C3836)
 )
 
@@ -384,7 +384,7 @@ private val EverforestLightColorScheme = lightColorScheme(
     outline          = Color(0xFF939F91),
     outlineVariant   = Color(0xFFBDC3AF),
     onSurfaceVariant = Color(0xFF829181),
-    surfaceVariant = Color(0xFFE6E2CC),
+    surfaceVariant   = Color(0xFFE6E2CC),
     surfaceContainerHigh = Color(0xFFE0DCC7)
 )
 
@@ -400,7 +400,7 @@ private val EverforestDarkColorScheme = darkColorScheme(
     outline          = Color(0xFF859289),
     outlineVariant   = Color(0xFF475258),
     onSurfaceVariant = Color(0xFF9DA9A0),
-    surfaceVariant = Color(0xFF3D484D),
+    surfaceVariant   = Color(0xFF3D484D),
     surfaceContainerHigh = Color(0xFF3D484D)
 )
 
@@ -429,13 +429,13 @@ enum class ColorThemePreference(
     fun colorSchemeFor(
         darkTheme: Boolean,
         themedTextAndIcons: Boolean,
-        strengthPercent: Int = FULL_THEME_STRENGTH,
+        strengthPercent: Int = FULL_STRENGTH_PERCENT,
         sourceColorSchemes: ThemeColorSchemes = ThemeColorSchemes(lightColorScheme, darkColorScheme)
     ): ColorScheme {
         val themedColorScheme = if (darkTheme) sourceColorSchemes.dark else sourceColorSchemes.light
         val neutralColorScheme = if (darkTheme) EmberrDarkColorScheme else EmberrLightColorScheme
         val textAndIconColorScheme = if (themedTextAndIcons) themedColorScheme else neutralColorScheme
-        val strength = strengthPercent.coerceIn(0, FULL_THEME_STRENGTH) / FULL_THEME_STRENGTH.toFloat()
+        val strength = strengthPercent.coerceIn(0, FULL_STRENGTH_PERCENT) / FULL_STRENGTH_PERCENT.toFloat()
 
         fun blend(neutralColor: Color, themedColor: Color): Color = when {
             neutralColor == themedColor || strength >= 1f -> themedColor
@@ -455,7 +455,7 @@ enum class ColorThemePreference(
             outline = blend(neutralColorScheme.outline, textAndIconColorScheme.outline),
             outlineVariant = blend(neutralColorScheme.outlineVariant, themedColorScheme.outlineVariant),
             onSurfaceVariant = blend(neutralColorScheme.onSurfaceVariant, textAndIconColorScheme.onSurfaceVariant),
-            surfaceVariant = blend(neutralColorScheme.surfaceVariant, themedColorScheme.surfaceVariant),
+            surfaceVariant   = blend(neutralColorScheme.surfaceVariant, themedColorScheme.surfaceVariant),
             surfaceContainerHigh = blend(neutralColorScheme.surfaceContainerHigh, themedColorScheme.surfaceContainerHigh)
         )
     }

@@ -13,14 +13,14 @@ import com.emberr.ui.theme.ColorThemePreference
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.LocalColorThemePreference
 
-val EmberrBorderWidth = 0.5.dp
+private val NormalBorderWidth = 0.5.dp
 private val HighContrastBorderWidth = 1.dp
 
 private val isHighContrastTheme: Boolean
     @Composable get() = LocalColorThemePreference.current == ColorThemePreference.HIGH_CONTRAST
 
 val emberrBorderWidth: Dp
-    @Composable get() = if (isHighContrastTheme) HighContrastBorderWidth else EmberrBorderWidth
+    @Composable get() = if (isHighContrastTheme) HighContrastBorderWidth else NormalBorderWidth
 
 val emberrBorderColor: Color
     @Composable get() =

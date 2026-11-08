@@ -58,7 +58,7 @@ fun EmberrTheme(
     fontStylePreference: FontStylePreference = FontStylePreference.POPPINS,
     colorThemePreference: ColorThemePreference = ColorThemePreference.EMBERR,
     themedTextAndIcons: Boolean = true,
-    colorThemeStrength: Int = FULL_THEME_STRENGTH,
+    colorThemeStrength: Int = FULL_STRENGTH_PERCENT,
     paperTextureStrength: Int = 0,
     paperTextureAreas: Set<PaperTextureArea> = setOf(PaperTextureArea.WHOLE_APP),
     usesTwentyFourHourClock: Boolean = false,

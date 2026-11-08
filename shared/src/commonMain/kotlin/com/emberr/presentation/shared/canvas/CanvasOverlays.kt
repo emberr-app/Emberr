@@ -43,11 +43,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.CanvasNodeShape
 import com.emberr.data.local.room.entity.CanvasStrokeTool
 import com.emberr.domain.canvas.CanvasLineStyle
@@ -95,6 +96,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
+import com.emberr.presentation.shared.components.EmberrSlider
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.IconTooltipPosition
@@ -107,12 +109,8 @@ import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.paperTextureToggleLabelFor
-import com.emberr.data.local.prefs.SettingsManager
-import com.emberr.presentation.shared.components.EmberrSlider
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.paper_texture
-import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.arrow_left
 import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.dot_grid_off
@@ -126,6 +124,7 @@ import emberr.shared.generated.resources.maximize_2
 import emberr.shared.generated.resources.minimize_2
 import emberr.shared.generated.resources.minus
 import emberr.shared.generated.resources.palette
+import emberr.shared.generated.resources.paper_texture
 import emberr.shared.generated.resources.pen
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.redo_circle
