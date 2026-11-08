@@ -107,16 +107,17 @@ private val LocalInsideTexturedNote = staticCompositionLocalOf { false }
 
 val LocalHoldsPaperGrainStill = staticCompositionLocalOf { false }
 
-private class StillGrainRegion(val bounds: Rect, val shape: Shape)
+private class StillGrainRegion(val bounds: Rect, val shape: Shape, val drawsStillGrain: Boolean)
 
 private class StillPaperGrainRegions {
     var boxCoordinates: LayoutCoordinates? = null
     private val regions = mutableStateMapOf<Any, StillGrainRegion>()
-    private var cachedOutlinePath: Path? = null
+    private var cachedCoveredPath: Path? = null
+    private var cachedStillGrainPath: Path? = null
     private var cachedOutlineDensity = 0f
     private var cachedOutlineLayoutDirection: LayoutDirection? = null
 
-    fun place(regionKey: Any, coordinates: LayoutCoordinates, shape: Shape) {
+    fun place(regionKey: Any, coordinates: LayoutCoordinates, shape: Shape, drawsStillGrain: Boolean = true) {
         val box = boxCoordinates ?: return
         if (!box.isAttached || !coordinates.isAttached) return
         if (box.findRootCoordinates() != coordinates.findRootCoordinates()) {
@@ -125,31 +126,55 @@ private class StillPaperGrainRegions {
         }
         val bounds = box.localBoundingBoxOf(coordinates, clipBounds = false)
         val placedRegion = regions[regionKey]
-        if (placedRegion == null || placedRegion.bounds != bounds || placedRegion.shape != shape) {
-            regions[regionKey] = StillGrainRegion(bounds, shape)
-            cachedOutlinePath = null
+        val isUnchanged = placedRegion != null && placedRegion.bounds == bounds &&
+            placedRegion.shape == shape && placedRegion.drawsStillGrain == drawsStillGrain
+        if (!isUnchanged) {
+            regions[regionKey] = StillGrainRegion(bounds, shape, drawsStillGrain)
+            forgetCachedPaths()
         }
     }
 
     fun remove(regionKey: Any) {
-        if (regions.remove(regionKey) != null) cachedOutlinePath = null
+        if (regions.remove(regionKey) != null) forgetCachedPaths()
     }
 
-    fun outlinePath(density: Density, layoutDirection: LayoutDirection): Path? {
+    fun coveredPath(density: Density, layoutDirection: LayoutDirection): Path? {
         if (regions.isEmpty()) return null
-        val cachedPath = cachedOutlinePath
-        if (cachedPath != null && cachedOutlineDensity == density.density && cachedOutlineLayoutDirection == layoutDirection) {
-            return cachedPath
-        }
-        val stillPath = Path()
+        refreshCachedPaths(density, layoutDirection)
+        return cachedCoveredPath
+    }
+
+    fun stillGrainPath(density: Density, layoutDirection: LayoutDirection): Path? {
+        if (regions.isEmpty()) return null
+        refreshCachedPaths(density, layoutDirection)
+        return cachedStillGrainPath
+    }
+
+    private fun forgetCachedPaths() {
+        cachedCoveredPath = null
+        cachedStillGrainPath = null
+    }
+
+    private fun refreshCachedPaths(density: Density, layoutDirection: LayoutDirection) {
+        val isCacheFresh = cachedCoveredPath != null && cachedOutlineDensity == density.density &&
+            cachedOutlineLayoutDirection == layoutDirection
+        if (isCacheFresh) return
+        val coveredPath = Path()
+        val stillGrainPath = Path()
+        var hasStillGrain = false
         regions.values.forEach { region ->
             val regionOutline = region.shape.createOutline(region.bounds.size, layoutDirection, density)
-            stillPath.addPath(Path().apply { addOutline(regionOutline) }, region.bounds.topLeft)
+            val regionPath = Path().apply { addOutline(regionOutline) }
+            coveredPath.addPath(regionPath, region.bounds.topLeft)
+            if (region.drawsStillGrain) {
+                stillGrainPath.addPath(regionPath, region.bounds.topLeft)
+                hasStillGrain = true
+            }
         }
-        cachedOutlinePath = stillPath
+        cachedCoveredPath = coveredPath
+        cachedStillGrainPath = if (hasStillGrain) stillGrainPath else null
         cachedOutlineDensity = density.density
         cachedOutlineLayoutDirection = layoutDirection
-        return stillPath
     }
 }
 
@@ -236,19 +261,29 @@ private fun DrawScope.drawPaperGrain(
     }
 }
 
-private class GrainScrollFollower(private val tileSpan: Float) : NestedScrollConnection, PaperGrainMover {
+private class GrainScrollFollower(
+    private val tileSpan: Float,
+    private val parentKeptStill: GrainScrollFollower?
+) : NestedScrollConnection, PaperGrainMover {
     var offsetX by mutableFloatStateOf(0f)
         private set
     var offsetY by mutableFloatStateOf(0f)
         private set
+    private var scrollAlreadyFollowedInside = Offset.Zero
 
     override fun moveGrainBy(delta: Offset) {
         offsetX = (offsetX + delta.x).mod(tileSpan)
         offsetY = (offsetY + delta.y).mod(tileSpan)
     }
 
+    fun skipScrollFollowedInside(delta: Offset) {
+        scrollAlreadyFollowedInside += delta
+    }
+
     override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-        moveGrainBy(consumed)
+        moveGrainBy(consumed - scrollAlreadyFollowedInside)
+        scrollAlreadyFollowedInside = Offset.Zero
+        parentKeptStill?.skipScrollFollowedInside(consumed)
         return Offset.Zero
     }
 }
@@ -265,6 +300,34 @@ fun PaperTextureBox(
         contentAlignment = contentAlignment,
         propagateMinConstraints = propagateMinConstraints,
         isShown = paperTextureShownHere(),
+        content = content
+    )
+}
+
+@Composable
+fun SeparatePaperGrainBox(
+    shape: Shape,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
+    val parentRegions = LocalStillPaperGrainRegions.current
+    val regionKey = remember { Any() }
+    DisposableEffect(parentRegions, regionKey) {
+        onDispose { parentRegions?.remove(regionKey) }
+    }
+    val regionModifier = if (parentRegions == null) {
+        Modifier
+    } else {
+        Modifier.onGloballyPositioned { coordinates ->
+            parentRegions.place(regionKey, coordinates, shape, drawsStillGrain = false)
+        }
+    }
+    PaperTextureLayerBox(
+        modifier = modifier.then(regionModifier),
+        contentAlignment = Alignment.TopStart,
+        propagateMinConstraints = false,
+        isShown = parentRegions != null,
+        keepsParentGrainStill = true,
         content = content
     )
 }
@@ -296,6 +359,7 @@ private fun PaperTextureLayerBox(
     contentAlignment: Alignment,
     propagateMinConstraints: Boolean,
     isShown: Boolean,
+    keepsParentGrainStill: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
     val textureStrength = if (isShown) LocalPaperTextureStrength.current.coerceAtMost(FULL_STRENGTH_PERCENT) else 0
@@ -303,8 +367,11 @@ private fun PaperTextureLayerBox(
     val grainScale = grainScaleFor(density)
     val tileSpan = NOISE_TILE_SIZE * grainScale
     val drawsGrain = textureStrength > 0
-    val grainScrollFollower = remember(tileSpan) { GrainScrollFollower(tileSpan) }
     val parentGrainMover = LocalPaperGrainMover.current
+    val parentFollowerKeptStill = if (keepsParentGrainStill) parentGrainMover as? GrainScrollFollower else null
+    val grainScrollFollower = remember(tileSpan, parentFollowerKeptStill) {
+        GrainScrollFollower(tileSpan, parentFollowerKeptStill)
+    }
     val stillRegions = remember { StillPaperGrainRegions() }
     val parentStillRegions = LocalStillPaperGrainRegions.current
     val grainTrackingModifier = if (drawsGrain) {
@@ -334,11 +401,11 @@ private fun PaperTextureLayerBox(
                     .matchParentSize()
                     .clipToBounds()
                     .drawWithContent {
-                        val stillPath = stillRegions.outlinePath(this, layoutDirection)
-                        if (stillPath == null) {
+                        val coveredPath = stillRegions.coveredPath(this, layoutDirection)
+                        if (coveredPath == null) {
                             drawContent()
                         } else {
-                            clipPath(stillPath, clipOp = ClipOp.Difference) { this@drawWithContent.drawContent() }
+                            clipPath(coveredPath, clipOp = ClipOp.Difference) { this@drawWithContent.drawContent() }
                         }
                     }
             ) {
@@ -356,7 +423,7 @@ private fun PaperTextureLayerBox(
                 modifier = Modifier
                     .matchParentSize()
                     .drawBehind {
-                        val stillPath = stillRegions.outlinePath(this, layoutDirection) ?: return@drawBehind
+                        val stillPath = stillRegions.stillGrainPath(this, layoutDirection) ?: return@drawBehind
                         clipPath(stillPath) { drawPaperGrain(paperNoiseBrush, grainScale, tileSpan, textureAlpha) }
                     }
             )

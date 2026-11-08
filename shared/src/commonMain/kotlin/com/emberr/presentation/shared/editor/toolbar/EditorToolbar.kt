@@ -51,6 +51,7 @@ import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
+import com.emberr.ui.theme.SeparatePaperGrainBox
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
@@ -231,222 +232,224 @@ fun EditorToolbar(
                 .clip(DefaultCornerShape)
                 .emberrBlur(hazeState, EmberrBlur.Regular)
         ) {
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 36.dp) {
-                Column(modifier = Modifier.fillMaxWidth().animateContentSize()) {
-                    when (mobileMenuState) {
-                        MobileMenuState.MAIN -> if (GlobalEditorState.hasTextSelection && !isTextSelectedAcrossBlocks) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                InlineFormatButtons(
-                                    tint = tint,
-                                    iconSize = customIconSize,
-                                    onToggleFormat = onToggleFormat,
-                                    onHighlightClick = { isChoosingHighlightColor = !isChoosingHighlightColor }
-                                )
-                                ToolbarButton(tooltip = "Close keyboard", onClick = { keyboardController?.hide() }) {
-                                    Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
-                                }
-                            }
-                        } else {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
+            SeparatePaperGrainBox(shape = DefaultCornerShape, modifier = Modifier.fillMaxWidth()) {
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 36.dp) {
+                    Column(modifier = Modifier.fillMaxWidth().animateContentSize()) {
+                        when (mobileMenuState) {
+                            MobileMenuState.MAIN -> if (GlobalEditorState.hasTextSelection && !isTextSelectedAcrossBlocks) {
                                 Row(
                                     modifier = Modifier
-                                        .weight(1f)
-                                        .horizontalScroll(rememberScrollState()),
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 2.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                    horizontalArrangement = Arrangement.SpaceEvenly
                                 ) {
-                                    toolbarItems.forEach { item ->
-                                        if (item == KeyboardToolbarItem.DIVIDER) {
-                                            ToolbarDivider(tint)
-                                        } else {
-                                            val isItemEnabled = when (item) {
-                                                KeyboardToolbarItem.UNDO -> canUndo && GlobalEditorState.openCredentialsFormCount == 0
-                                                KeyboardToolbarItem.REDO -> canRedo && GlobalEditorState.openCredentialsFormCount == 0
-                                                else -> isEnabled
-                                            }
-                                            val itemTint = when (item) {
-                                                KeyboardToolbarItem.UNDO, KeyboardToolbarItem.REDO ->
-                                                    if (isItemEnabled) tint else tint.copy(alpha = 0.3f)
-                                                else -> buttonTint
-                                            }
-                                            ToolbarButton(enabled = isItemEnabled, tooltip = item.title, onClick = { onToolbarItemClick(item) }) {
-                                                KeyboardToolbarItemIcon(item, itemTint)
+                                    InlineFormatButtons(
+                                        tint = tint,
+                                        iconSize = customIconSize,
+                                        onToggleFormat = onToggleFormat,
+                                        onHighlightClick = { isChoosingHighlightColor = !isChoosingHighlightColor }
+                                    )
+                                    ToolbarButton(tooltip = "Close keyboard", onClick = { keyboardController?.hide() }) {
+                                        Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
+                                    }
+                                }
+                            } else {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .horizontalScroll(rememberScrollState()),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        toolbarItems.forEach { item ->
+                                            if (item == KeyboardToolbarItem.DIVIDER) {
+                                                ToolbarDivider(tint)
+                                            } else {
+                                                val isItemEnabled = when (item) {
+                                                    KeyboardToolbarItem.UNDO -> canUndo && GlobalEditorState.openCredentialsFormCount == 0
+                                                    KeyboardToolbarItem.REDO -> canRedo && GlobalEditorState.openCredentialsFormCount == 0
+                                                    else -> isEnabled
+                                                }
+                                                val itemTint = when (item) {
+                                                    KeyboardToolbarItem.UNDO, KeyboardToolbarItem.REDO ->
+                                                        if (isItemEnabled) tint else tint.copy(alpha = 0.3f)
+                                                    else -> buttonTint
+                                                }
+                                                ToolbarButton(enabled = isItemEnabled, tooltip = item.title, onClick = { onToolbarItemClick(item) }) {
+                                                    KeyboardToolbarItemIcon(item, itemTint)
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                if (toolbarItems.isNotEmpty()) ToolbarDivider(tint)
-                                ToolbarButton(tooltip = "Close keyboard", onClick = { keyboardController?.hide() }) {
-                                    Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
+                                    if (toolbarItems.isNotEmpty()) ToolbarDivider(tint)
+                                    ToolbarButton(tooltip = "Close keyboard", onClick = { keyboardController?.hide() }) {
+                                        Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
+                                    }
                                 }
                             }
-                        }
-                        MobileMenuState.SLASH -> {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
-                                Box(modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).verticalScroll(rememberScrollState())) {
-                                    DesktopSlashMenuContent(
-                                        query = query,
-                                        onChangeBlockType = {
-                                            onClearSlashQuery()
-                                            onChangeBlockType(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        onToggleFormat = {
-                                            onClearSlashQuery()
-                                            onToggleFormat(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        onAdjustIndentation = {
-                                            onClearSlashQuery()
-                                            onAdjustIndentation(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        onSetAlignment = {
-                                            onClearSlashQuery()
-                                            onSetAlignment(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        onInsertMediaBlock = {
-                                            val nextMenuState = mobileMenuStateAfterInserting(it)
-                                            isLinkPanelFromSlash = nextMenuState != MobileMenuState.MAIN
-                                            if (!isLinkPanelFromSlash) onClearSlashQuery()
-                                            onInsertMediaBlock(it)
-                                            onMenuStateChange(nextMenuState)
-                                        },
-                                        onInsertText = {
-                                            onReplaceSlashQuery("$it ")
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        customProperties = customProperties
-                                    )
-                                }
-                            }
-                        }
-                        MobileMenuState.MENU -> {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
-                                Box(modifier = Modifier.fillMaxWidth().heightIn(max = 360.dp).verticalScroll(rememberScrollState())) {
-                                    DesktopSlashMenuContent(
-                                        query = "",
-                                        onChangeBlockType = {
-                                            onChangeBlockType(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        onToggleFormat = {
-                                            onToggleFormat(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        onAdjustIndentation = {
-                                            onAdjustIndentation(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        onSetAlignment = {
-                                            onSetAlignment(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        onInsertMediaBlock = {
-                                            isLinkPanelFromSlash = false
-                                            onInsertMediaBlock(it)
-                                            onMenuStateChange(mobileMenuStateAfterInserting(it))
-                                        },
-                                        onInsertText = {
-                                            insertTextAtCursor(it)
-                                            onMenuStateChange(MobileMenuState.MAIN)
-                                        },
-                                        customProperties = customProperties
-                                    )
-                                }
-                            }
-                        }
-                        MobileMenuState.MENTION -> {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
-                                Box(modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).verticalScroll(rememberScrollState())) {
-                                    var shownNoteCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
-                                    var shownPeopleCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
-                                    val sections = remember(mentionQuery, allLinkableNotes, shownNoteCount, shownPeopleCount) {
-                                        mentionMenuSections(
-                                            query = mentionQuery,
-                                            mentionableNotes = allLinkableNotes,
-                                            shownNoteCount = shownNoteCount,
-                                            shownPeopleCount = shownPeopleCount,
-                                            onShowMoreNotes = { shownNoteCount += MENTION_RESULTS_PER_STEP },
-                                            onShowMorePeople = { shownPeopleCount += MENTION_RESULTS_PER_STEP },
-                                            onCreateBlankNote = onMentionCreateBlank,
-                                            onCreateNote = onMentionCreateNote,
-                                            onPick = { note -> onMentionNoteSelected(note.noteId) }
+                            MobileMenuState.SLASH -> {
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
+                                    Box(modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).verticalScroll(rememberScrollState())) {
+                                        DesktopSlashMenuContent(
+                                            query = query,
+                                            onChangeBlockType = {
+                                                onClearSlashQuery()
+                                                onChangeBlockType(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            onToggleFormat = {
+                                                onClearSlashQuery()
+                                                onToggleFormat(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            onAdjustIndentation = {
+                                                onClearSlashQuery()
+                                                onAdjustIndentation(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            onSetAlignment = {
+                                                onClearSlashQuery()
+                                                onSetAlignment(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            onInsertMediaBlock = {
+                                                val nextMenuState = mobileMenuStateAfterInserting(it)
+                                                isLinkPanelFromSlash = nextMenuState != MobileMenuState.MAIN
+                                                if (!isLinkPanelFromSlash) onClearSlashQuery()
+                                                onInsertMediaBlock(it)
+                                                onMenuStateChange(nextMenuState)
+                                            },
+                                            onInsertText = {
+                                                onReplaceSlashQuery("$it ")
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            customProperties = customProperties
                                         )
                                     }
-                                    SlashMenuList(sections = sections)
                                 }
                             }
-                        }
-                        MobileMenuState.LINK_TO_NOTE -> {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
-                                NoteLinkMenuContent(
-                                    allLinkableNotes = allLinkableNotes,
-                                    onNoteSelected = {
-                                        finishSlashLink()
-                                        onNoteLinkSelected(it)
-                                        onMenuStateChange(MobileMenuState.MAIN)
-                                    },
-                                    onCreateNote = {
-                                        finishSlashLink()
-                                        onNoteLinkCreateNote(it)
-                                        onMenuStateChange(MobileMenuState.MAIN)
-                                    },
-                                    onCreateBlankNote = {
-                                        finishSlashLink()
-                                        onNoteLinkCreateBlank()
-                                        onMenuStateChange(MobileMenuState.MAIN)
-                                    },
-                                    autoFocusSearch = false,
-                                    onBack = leaveLinkPanel
-                                )
+                            MobileMenuState.MENU -> {
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
+                                    Box(modifier = Modifier.fillMaxWidth().heightIn(max = 360.dp).verticalScroll(rememberScrollState())) {
+                                        DesktopSlashMenuContent(
+                                            query = "",
+                                            onChangeBlockType = {
+                                                onChangeBlockType(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            onToggleFormat = {
+                                                onToggleFormat(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            onAdjustIndentation = {
+                                                onAdjustIndentation(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            onSetAlignment = {
+                                                onSetAlignment(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            onInsertMediaBlock = {
+                                                isLinkPanelFromSlash = false
+                                                onInsertMediaBlock(it)
+                                                onMenuStateChange(mobileMenuStateAfterInserting(it))
+                                            },
+                                            onInsertText = {
+                                                insertTextAtCursor(it)
+                                                onMenuStateChange(MobileMenuState.MAIN)
+                                            },
+                                            customProperties = customProperties
+                                        )
+                                    }
+                                }
                             }
-                        }
-                        MobileMenuState.LINK_TO_CANVAS -> {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
-                                CanvasLinkMenuContent(
-                                    loadCanvases = loadLinkableCanvases,
-                                    onCanvasSelected = {
-                                        finishSlashLink()
-                                        onCanvasLinkSelected(it)
-                                        onMenuStateChange(MobileMenuState.MAIN)
-                                    },
-                                    autoFocusSearch = false,
-                                    onBack = leaveLinkPanel
-                                )
+                            MobileMenuState.MENTION -> {
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
+                                    Box(modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).verticalScroll(rememberScrollState())) {
+                                        var shownNoteCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
+                                        var shownPeopleCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
+                                        val sections = remember(mentionQuery, allLinkableNotes, shownNoteCount, shownPeopleCount) {
+                                            mentionMenuSections(
+                                                query = mentionQuery,
+                                                mentionableNotes = allLinkableNotes,
+                                                shownNoteCount = shownNoteCount,
+                                                shownPeopleCount = shownPeopleCount,
+                                                onShowMoreNotes = { shownNoteCount += MENTION_RESULTS_PER_STEP },
+                                                onShowMorePeople = { shownPeopleCount += MENTION_RESULTS_PER_STEP },
+                                                onCreateBlankNote = onMentionCreateBlank,
+                                                onCreateNote = onMentionCreateNote,
+                                                onPick = { note -> onMentionNoteSelected(note.noteId) }
+                                            )
+                                        }
+                                        SlashMenuList(sections = sections)
+                                    }
+                                }
                             }
-                        }
-                        MobileMenuState.LINK_TO_DATABASE -> {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
-                                DatabaseLinkMenuContent(
-                                    loadDatabases = loadLinkableDatabases,
-                                    onDatabaseSelected = {
-                                        finishSlashLink()
-                                        onDatabaseLinkSelected(it)
-                                        onMenuStateChange(MobileMenuState.MAIN)
-                                    },
-                                    autoFocusSearch = false,
-                                    onBack = leaveLinkPanel
-                                )
+                            MobileMenuState.LINK_TO_NOTE -> {
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
+                                    NoteLinkMenuContent(
+                                        allLinkableNotes = allLinkableNotes,
+                                        onNoteSelected = {
+                                            finishSlashLink()
+                                            onNoteLinkSelected(it)
+                                            onMenuStateChange(MobileMenuState.MAIN)
+                                        },
+                                        onCreateNote = {
+                                            finishSlashLink()
+                                            onNoteLinkCreateNote(it)
+                                            onMenuStateChange(MobileMenuState.MAIN)
+                                        },
+                                        onCreateBlankNote = {
+                                            finishSlashLink()
+                                            onNoteLinkCreateBlank()
+                                            onMenuStateChange(MobileMenuState.MAIN)
+                                        },
+                                        autoFocusSearch = false,
+                                        onBack = leaveLinkPanel
+                                    )
+                                }
+                            }
+                            MobileMenuState.LINK_TO_CANVAS -> {
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
+                                    CanvasLinkMenuContent(
+                                        loadCanvases = loadLinkableCanvases,
+                                        onCanvasSelected = {
+                                            finishSlashLink()
+                                            onCanvasLinkSelected(it)
+                                            onMenuStateChange(MobileMenuState.MAIN)
+                                        },
+                                        autoFocusSearch = false,
+                                        onBack = leaveLinkPanel
+                                    )
+                                }
+                            }
+                            MobileMenuState.LINK_TO_DATABASE -> {
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    MenuDragHandle(onClose = { onMenuStateChange(MobileMenuState.MAIN) }, modifier = Modifier.align(Alignment.TopCenter).zIndex(1f))
+                                    DatabaseLinkMenuContent(
+                                        loadDatabases = loadLinkableDatabases,
+                                        onDatabaseSelected = {
+                                            finishSlashLink()
+                                            onDatabaseLinkSelected(it)
+                                            onMenuStateChange(MobileMenuState.MAIN)
+                                        },
+                                        autoFocusSearch = false,
+                                        onBack = leaveLinkPanel
+                                    )
+                                }
                             }
                         }
                     }
