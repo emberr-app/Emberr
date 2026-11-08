@@ -57,8 +57,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-const val FULL_PAPER_TEXTURE_STRENGTH = 100
-
 private const val NOISE_TILE_SIZE = 256
 private const val NOISE_SEED = 7
 private const val GRAIN_SIZE_DP = 0.75f
@@ -168,7 +166,7 @@ private val paperNoiseBrushState = mutableStateOf<ShaderBrush?>(null)
 private val paperNoiseTileLock = Mutex()
 
 @Composable
-private fun rememberPaperNoiseBrush(): ShaderBrush? {
+private fun loadedPaperNoiseBrush(): ShaderBrush? {
     val paperNoiseBrush = paperNoiseBrushState.value
     LaunchedEffect(Unit) {
         paperNoiseTileLock.withLock {
@@ -307,7 +305,7 @@ private fun PaperTextureLayerBox(
     isShown: Boolean,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val textureStrength = if (isShown) LocalPaperTextureStrength.current.coerceAtMost(FULL_PAPER_TEXTURE_STRENGTH) else 0
+    val textureStrength = if (isShown) LocalPaperTextureStrength.current.coerceAtMost(FULL_STRENGTH_PERCENT) else 0
     val density = LocalDensity.current.density
     val grainScale = grainScaleFor(density)
     val tileSpan = NOISE_TILE_SIZE * grainScale
@@ -335,9 +333,9 @@ private fun PaperTextureLayerBox(
         ) {
             content()
         }
-        val paperNoiseBrush = if (drawsGrain) rememberPaperNoiseBrush() else null
+        val paperNoiseBrush = if (drawsGrain) loadedPaperNoiseBrush() else null
         if (paperNoiseBrush != null) {
-            val textureAlpha = textureStrength / FULL_PAPER_TEXTURE_STRENGTH.toFloat() * STRONGEST_TEXTURE_ALPHA
+            val textureAlpha = textureStrength / FULL_STRENGTH_PERCENT.toFloat() * STRONGEST_TEXTURE_ALPHA
             Box(
                 modifier = Modifier
                     .matchParentSize()

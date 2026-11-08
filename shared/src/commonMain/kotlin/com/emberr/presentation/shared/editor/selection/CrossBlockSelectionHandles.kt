@@ -34,7 +34,7 @@ fun CrossBlockSelectionHandles(
     topInsetPx: Float,
     modifier: Modifier = Modifier
 ) {
-    val handleColor = MaterialTheme.colorScheme.primary
+    val handleColor = MaterialTheme.colorScheme.secondary
     val overlay = remember { OverlayCoordinates() }
     Spacer(
         modifier = modifier

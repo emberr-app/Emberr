@@ -52,33 +52,34 @@ import com.emberr.presentation.shared.components.EmberrCheckboxOption
 import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
 import com.emberr.presentation.shared.components.EmberrSlider
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
-import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
+import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.ui.theme.ColorThemePreference
-import com.emberr.ui.theme.availableColorThemes
-import com.emberr.ui.theme.sourceColorSchemes
+import com.emberr.ui.theme.FULL_STRENGTH_PERCENT
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.PaperTextureArea
+import com.emberr.ui.theme.ThemePreference
+import com.emberr.ui.theme.availableColorThemes
+import com.emberr.ui.theme.colorThemePreferenceNamed
 import com.emberr.ui.theme.isPaperTextureAreaChecked
 import com.emberr.ui.theme.paperTextureAreasLabel
 import com.emberr.ui.theme.paperTextureAreasNamed
 import com.emberr.ui.theme.paperTextureAreasSavedValue
 import com.emberr.ui.theme.paperTextureAreasWithToggled
-import com.emberr.ui.theme.ThemePreference
-import com.emberr.ui.theme.colorThemePreferenceNamed
+import com.emberr.ui.theme.sourceColorSchemes
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
-import emberr.shared.generated.resources.theme_strength
-import emberr.shared.generated.resources.texture_strength
-import emberr.shared.generated.resources.show_on
-import emberr.shared.generated.resources.paper_texture
 import emberr.shared.generated.resources.moon_cloud
+import emberr.shared.generated.resources.paper_texture
+import emberr.shared.generated.resources.show_on
 import emberr.shared.generated.resources.sun
 import emberr.shared.generated.resources.text_type
+import emberr.shared.generated.resources.texture_strength
+import emberr.shared.generated.resources.theme_strength
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
@@ -86,7 +87,6 @@ import kotlin.math.roundToInt
 private const val DESKTOP_THEME_COLUMNS = 3
 private const val MOBILE_THEME_COLUMNS = 2
 private const val PREVIEW_ASPECT_RATIO = 1.25f
-private const val FULL_PERCENT = 100
 private val PreviewCardShape = RoundedCornerShape(14.dp)
 private val PreviewLineShape = RoundedCornerShape(50)
 private val PreviewSurfaceShape = RoundedCornerShape(6.dp)
@@ -344,7 +344,7 @@ private fun PercentSliderRow(
         EmberrSlider(
             value = percent.toFloat(),
             onValueChange = { newValue -> onPercentChange(newValue.roundToInt()) },
-            valueRange = 0f..FULL_PERCENT.toFloat()
+            valueRange = 0f..FULL_STRENGTH_PERCENT.toFloat()
         )
     }
 }

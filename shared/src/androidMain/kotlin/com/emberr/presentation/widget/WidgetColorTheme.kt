@@ -1,7 +1,6 @@
 package com.emberr.presentation.widget
 
 import android.content.Context
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -31,10 +30,8 @@ import com.emberr.ui.theme.colorThemePreferenceNamed
 import kotlinx.coroutines.flow.flowOf
 import org.koin.core.context.GlobalContext
 
-internal class WidgetColorSchemes(val light: ColorScheme, val dark: ColorScheme)
-
 internal val LocalWidgetColorSchemes = staticCompositionLocalOf {
-    WidgetColorSchemes(
+    ThemeColorSchemes(
         light = ColorThemePreference.EMBERR.lightColorScheme,
         dark = ColorThemePreference.EMBERR.darkColorScheme
     )
@@ -69,7 +66,7 @@ internal fun WidgetColorTheme(content: @Composable () -> Unit) {
     }
 
     CompositionLocalProvider(
-        LocalWidgetColorSchemes provides WidgetColorSchemes(
+        LocalWidgetColorSchemes provides ThemeColorSchemes(
             light = colorTheme.colorSchemeFor(
                 darkTheme = false,
                 themedTextAndIcons = themedTextAndIcons,
