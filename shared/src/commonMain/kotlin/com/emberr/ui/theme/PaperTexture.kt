@@ -115,32 +115,43 @@ private class StillGrainRegion(val bounds: Rect, val shape: Shape)
 private class StillPaperGrainRegions {
     var boxCoordinates: LayoutCoordinates? = null
     private val regions = mutableStateMapOf<Any, StillGrainRegion>()
+    private var cachedOutlinePath: Path? = null
+    private var cachedOutlineDensity = 0f
+    private var cachedOutlineLayoutDirection: LayoutDirection? = null
 
     fun place(regionKey: Any, coordinates: LayoutCoordinates, shape: Shape) {
         val box = boxCoordinates ?: return
         if (!box.isAttached || !coordinates.isAttached) return
         if (box.findRootCoordinates() != coordinates.findRootCoordinates()) {
-            regions.remove(regionKey)
+            remove(regionKey)
             return
         }
         val bounds = box.localBoundingBoxOf(coordinates, clipBounds = false)
         val placedRegion = regions[regionKey]
         if (placedRegion == null || placedRegion.bounds != bounds || placedRegion.shape != shape) {
             regions[regionKey] = StillGrainRegion(bounds, shape)
+            cachedOutlinePath = null
         }
     }
 
     fun remove(regionKey: Any) {
-        regions.remove(regionKey)
+        if (regions.remove(regionKey) != null) cachedOutlinePath = null
     }
 
     fun outlinePath(density: Density, layoutDirection: LayoutDirection): Path? {
         if (regions.isEmpty()) return null
+        val cachedPath = cachedOutlinePath
+        if (cachedPath != null && cachedOutlineDensity == density.density && cachedOutlineLayoutDirection == layoutDirection) {
+            return cachedPath
+        }
         val stillPath = Path()
         regions.values.forEach { region ->
             val regionOutline = region.shape.createOutline(region.bounds.size, layoutDirection, density)
             stillPath.addPath(Path().apply { addOutline(regionOutline) }, region.bounds.topLeft)
         }
+        cachedOutlinePath = stillPath
+        cachedOutlineDensity = density.density
+        cachedOutlineLayoutDirection = layoutDirection
         return stillPath
     }
 }
@@ -248,29 +259,14 @@ private class GrainScrollFollower(private val tileSpan: Float) : NestedScrollCon
 @Composable
 fun PaperTextureBox(
     modifier: Modifier = Modifier,
-    propagateMinConstraints: Boolean = false,
-    content: @Composable () -> Unit
-) {
-    PaperTextureLayerBox(
-        modifier = modifier,
-        contentAlignment = Alignment.TopStart,
-        propagateMinConstraints = propagateMinConstraints,
-        isShown = paperTextureShownHere()
-    ) {
-        content()
-    }
-}
-
-@Composable
-fun PaperTexturePanel(
-    modifier: Modifier = Modifier,
     contentAlignment: Alignment = Alignment.TopStart,
+    propagateMinConstraints: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
     PaperTextureLayerBox(
         modifier = modifier,
         contentAlignment = contentAlignment,
-        propagateMinConstraints = false,
+        propagateMinConstraints = propagateMinConstraints,
         isShown = paperTextureShownHere(),
         content = content
     )

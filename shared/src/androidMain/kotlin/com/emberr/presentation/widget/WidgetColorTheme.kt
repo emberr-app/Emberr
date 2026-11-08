@@ -31,10 +31,7 @@ import kotlinx.coroutines.flow.flowOf
 import org.koin.core.context.GlobalContext
 
 internal val LocalWidgetColorSchemes = staticCompositionLocalOf {
-    ThemeColorSchemes(
-        light = ColorThemePreference.EMBERR.lightColorScheme,
-        dark = ColorThemePreference.EMBERR.darkColorScheme
-    )
+    ColorThemePreference.EMBERR.builtInColorSchemes
 }
 
 @Composable
@@ -62,7 +59,7 @@ internal fun WidgetColorTheme(content: @Composable () -> Unit) {
     val widgetContext = LocalContext.current
     val sourceColorSchemes = remember(colorTheme, widgetContext) {
         val wallpaperColorSchemes = if (colorTheme == ColorThemePreference.WALLPAPER) wallpaperColorSchemesFor(widgetContext) else null
-        wallpaperColorSchemes ?: ThemeColorSchemes(colorTheme.lightColorScheme, colorTheme.darkColorScheme)
+        wallpaperColorSchemes ?: colorTheme.builtInColorSchemes
     }
 
     CompositionLocalProvider(

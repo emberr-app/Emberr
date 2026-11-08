@@ -58,7 +58,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -83,12 +82,13 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrTab
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.customEmberrShadow
+import com.emberr.presentation.shared.components.desktopDialogSize
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.ui.theme.LocalAppIsDark
-import com.emberr.ui.theme.PaperTexturePanel
+import com.emberr.ui.theme.PaperTextureBox
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
@@ -107,8 +107,6 @@ import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 private val DialogShape = RoundedCornerShape(24.dp)
-private val DesktopDialogMaxWidth = 760.dp
-private val DesktopDialogMaxHeight = 720.dp
 private val FactShape = RoundedCornerShape(8.dp)
 private val CastPortraitMinWidthDesktop = 140.dp
 private val CastPortraitMinWidthPhone = 88.dp
@@ -131,8 +129,6 @@ private val CompanyLogoShape = RoundedCornerShape(4.dp)
 private val CompanyLogoWidth = 48.dp
 private val CompanyLogoHeight = 24.dp
 private val CompanyChipHeight = 32.dp
-private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.6f
-private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.8f
 private const val MAXIMUM_STAR_HALVES = 10
 private const val SKELETON_FACT_ROWS = 4
 
@@ -200,12 +196,9 @@ internal fun MovieDetailsDialog(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                PaperTexturePanel(
+                PaperTextureBox(
                     modifier = Modifier
-                        .fillMaxWidth(DESKTOP_DIALOG_WIDTH_FRACTION)
-                        .widthIn(max = DesktopDialogMaxWidth)
-                        .fillMaxHeight(DESKTOP_DIALOG_HEIGHT_FRACTION)
-                        .heightIn(max = DesktopDialogMaxHeight)
+                        .desktopDialogSize()
                         .safeDrawingPadding()
                         .clip(DialogShape)
                         .background(detailsBackgroundColor())

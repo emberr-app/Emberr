@@ -234,7 +234,7 @@ private fun EmberrFloatingDialog(
             usePlatformDefaultWidth = false
         )
     ) {
-        Box(
+        PaperTextureBox(
             modifier = Modifier
                 .widthIn(max = maxWidth)
                 .fillMaxWidth(0.9f)
@@ -251,39 +251,37 @@ private fun EmberrFloatingDialog(
                     }
                 )
         ) {
-            PaperTextureBox {
-                dialogWindowTitleBar?.invoke()
-                CompositionLocalProvider(LocalEmberrBlurSource provides dialogContentHazeState) {
-                    Box(modifier = Modifier.fillMaxWidth().imePadding()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = FloatingDialogContentMaxHeight + headerHeight)
-                                .hazeSource(state = dialogContentHazeState)
-                                .then(if (scrollsContent) Modifier.verticalScroll(contentScrollState) else Modifier)
-                                .padding(top = contentTopPadding)
-                                .padding(horizontal = contentHorizontalPadding)
-                        ) {
-                            CompositionLocalProvider(LocalEmberrSheetHeaderSpace provides headerSpace.takeUnless { scrollsContent }) {
-                                content { action -> closeAnd(action) }
-                            }
+            dialogWindowTitleBar?.invoke()
+            CompositionLocalProvider(LocalEmberrBlurSource provides dialogContentHazeState) {
+                Box(modifier = Modifier.fillMaxWidth().imePadding()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = FloatingDialogContentMaxHeight + headerHeight)
+                            .hazeSource(state = dialogContentHazeState)
+                            .then(if (scrollsContent) Modifier.verticalScroll(contentScrollState) else Modifier)
+                            .padding(top = contentTopPadding)
+                            .padding(horizontal = contentHorizontalPadding)
+                    ) {
+                        CompositionLocalProvider(LocalEmberrSheetHeaderSpace provides headerSpace.takeUnless { scrollsContent }) {
+                            content { action -> closeAnd(action) }
                         }
+                    }
 
-                        if (hasHeader) {
-                            EmberrSheetHeader(
-                                title = title,
-                                subtitle = subtitle,
-                                headerAction = headerAction,
-                                cardColor = surfaceColor,
-                                hazeState = dialogContentHazeState,
-                                fadeAlpha = headerFadeAlpha,
-                                headerHeight = headerHeight,
-                                onActionClick = { action -> if (action.closesSheet) closeAnd(action.onClick) else action.onClick() },
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .onSizeChanged { size -> headerHeightPx = size.height }
-                            )
-                        }
+                    if (hasHeader) {
+                        EmberrSheetHeader(
+                            title = title,
+                            subtitle = subtitle,
+                            headerAction = headerAction,
+                            cardColor = surfaceColor,
+                            hazeState = dialogContentHazeState,
+                            fadeAlpha = headerFadeAlpha,
+                            headerHeight = headerHeight,
+                            onActionClick = { action -> if (action.closesSheet) closeAnd(action.onClick) else action.onClick() },
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .onSizeChanged { size -> headerHeightPx = size.height }
+                        )
                     }
                 }
             }
@@ -369,7 +367,7 @@ private fun EmberrModalBottomSheet(
         }
 
         // card
-        Box(
+        PaperTextureBox(
             modifier = Modifier
                 .nestedScroll(KeepLeftoverUpwardFlingAwayFromSheet)
                 .nestedScroll(keepScrolledContentAwayFromSheet)
@@ -397,44 +395,42 @@ private fun EmberrModalBottomSheet(
                 .clip(if (floats) FloatingBottomSheetShape else BottomSheetShape)
                 .sheetCardBackground()
         ) {
-            PaperTextureBox {
-                Box(
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding()
+                    .then(if (applyNavPadding) Modifier.padding(bottom = 16.dp) else Modifier)
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .imePadding()
-                        .then(if (applyNavPadding) Modifier.padding(bottom = 16.dp) else Modifier)
+                        .hazeSource(state = sheetContentHazeState)
+                        .then(if (scrollsContent) Modifier.verticalScroll(contentScrollState) else Modifier)
+                        .padding(top = contentTopPadding)
+                        .padding(horizontal = contentHorizontalPadding)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .hazeSource(state = sheetContentHazeState)
-                            .then(if (scrollsContent) Modifier.verticalScroll(contentScrollState) else Modifier)
-                            .padding(top = contentTopPadding)
-                            .padding(horizontal = contentHorizontalPadding)
+                    CompositionLocalProvider(
+                        LocalIndication provides NoRippleIndicationNodeFactory,
+                        LocalEmberrSheetHeaderSpace provides headerSpace.takeUnless { scrollsContent }
                     ) {
-                        CompositionLocalProvider(
-                            LocalIndication provides NoRippleIndicationNodeFactory,
-                            LocalEmberrSheetHeaderSpace provides headerSpace.takeUnless { scrollsContent }
-                        ) {
-                            content { action -> closeAnd(action) }
-                        }
+                        content { action -> closeAnd(action) }
                     }
+                }
 
-                    if (hasHeader) {
-                        EmberrSheetHeader(
-                            title = title,
-                            subtitle = subtitle,
-                            headerAction = headerAction,
-                            cardColor = sheetCardColor(),
-                            hazeState = sheetContentHazeState,
-                            fadeAlpha = headerFadeAlpha,
-                            headerHeight = headerHeight,
-                            onActionClick = { action -> if (action.closesSheet) closeAnd(action.onClick) else action.onClick() },
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .onSizeChanged { size -> headerHeightPx = size.height }
-                        )
-                    }
+                if (hasHeader) {
+                    EmberrSheetHeader(
+                        title = title,
+                        subtitle = subtitle,
+                        headerAction = headerAction,
+                        cardColor = sheetCardColor(),
+                        hazeState = sheetContentHazeState,
+                        fadeAlpha = headerFadeAlpha,
+                        headerHeight = headerHeight,
+                        onActionClick = { action -> if (action.closesSheet) closeAnd(action.onClick) else action.onClick() },
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .onSizeChanged { size -> headerHeightPx = size.height }
+                    )
                 }
             }
         }

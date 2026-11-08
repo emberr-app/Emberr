@@ -8,7 +8,7 @@ expect fun rememberWallpaperColorSchemes(): ThemeColorSchemes?
 @Composable
 fun ColorThemePreference.sourceColorSchemes(): ThemeColorSchemes {
     val wallpaperColorSchemes = if (this == ColorThemePreference.WALLPAPER) rememberWallpaperColorSchemes() else null
-    return wallpaperColorSchemes ?: ThemeColorSchemes(lightColorScheme, darkColorScheme)
+    return wallpaperColorSchemes ?: builtInColorSchemes
 }
 
 @Composable

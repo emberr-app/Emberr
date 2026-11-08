@@ -96,7 +96,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.painterResource
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
-import com.emberr.ui.theme.PaperTexturePanel
+import com.emberr.ui.theme.PaperTextureBox
 
 private val VoiceTaskDialogShape = RoundedCornerShape(24.dp)
 private const val EMBERR_GHOST_SIZE_FRACTION = 0.5f
@@ -159,7 +159,7 @@ fun VoiceTaskDialog(
                 .padding(vertical = 24.dp)
                 .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
         ) {
-            PaperTexturePanel(
+            PaperTextureBox(
                 modifier = Modifier
                     .widthIn(max = 380.dp)
                     .fillMaxWidth(0.88f)
