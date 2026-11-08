@@ -323,6 +323,7 @@ class MainActivity : FragmentActivity() {
             }
 
             val colorThemeSettings = settingsManager.collectColorThemeSettings()
+            val interfaceScalePercent by settingsViewModel.interfaceScalePercent.collectAsState()
 
             EmberrTheme(
                 darkTheme = darkTheme,
@@ -330,7 +331,8 @@ class MainActivity : FragmentActivity() {
                 fontStylePreference = fontStylePreference,
                 colorThemeSettings = colorThemeSettings,
                 usesTwentyFourHourClock = usesTwentyFourHourClock,
-                firstDayOfWeek = firstDayOfWeek
+                firstDayOfWeek = firstDayOfWeek,
+                interfaceScalePercent = interfaceScalePercent
             ) {
                 Surface(color = Color.Transparent, modifier = Modifier.fillMaxSize()) {
                     val context = LocalContext.current

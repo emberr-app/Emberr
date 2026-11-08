@@ -71,6 +71,7 @@ import com.emberr.presentation.desktop.window.CustomWindowFrameSupport
 import com.emberr.presentation.desktop.window.DesktopAppRelauncher
 import com.emberr.presentation.desktop.window.EmberrWindowFrame
 import com.emberr.presentation.desktop.window.FollowLiveDisplayScale
+import com.emberr.presentation.desktop.window.changeInterfaceScaleForShortcut
 import com.emberr.presentation.desktop.window.MatchWindowsTitleBarToAppTheme
 import com.emberr.presentation.desktop.window.raiseWindowToFront
 import com.emberr.presentation.desktop.window.WindowFrameSize
@@ -331,7 +332,7 @@ private fun runEmberrDesktopApp() = application {
                 DesktopSearchShortcutBus.requestOpen()
                 true
             } else {
-                false
+                changeInterfaceScaleForShortcut(event, mainSettingsManager)
             }
         },
         onKeyEvent = { event ->
@@ -401,6 +402,9 @@ private fun runEmberrDesktopApp() = application {
         }
 
         val colorThemeSettings = settingsManager.collectColorThemeSettings()
+        val interfaceScalePercent by settingsManager.interfaceScalePercentFlow.collectAsState(
+            initial = settingsManager.getInterfaceScalePercent()
+        )
 
         FollowLiveDisplayScale(mainWindowState) {
         EmberrTheme(
@@ -409,7 +413,8 @@ private fun runEmberrDesktopApp() = application {
             fontStylePreference = fontStylePreference,
             colorThemeSettings = colorThemeSettings,
             usesTwentyFourHourClock = usesTwentyFourHourClock,
-            firstDayOfWeek = firstDayOfWeek
+            firstDayOfWeek = firstDayOfWeek,
+            interfaceScalePercent = interfaceScalePercent
         ) {
             MatchWindowsTitleBarToAppTheme(currentWindow)
 
@@ -507,7 +512,8 @@ private fun runEmberrDesktopApp() = application {
                 state = stickyNoteWindowState,
                 undecorated = useCustomWindowFrame,
                 transparent = useCustomWindowFrame,
-                icon = painterResource("app_icon.png")
+                icon = painterResource("app_icon.png"),
+                onPreviewKeyEvent = { event -> changeInterfaceScaleForShortcut(event, mainSettingsManager) }
             ) {
                 val settingsManager = remember { GlobalContext.get().get<SettingsManager>() }
                 val fontSizePreferenceName by settingsManager.fontSizePreferenceFlow.collectAsState(
@@ -548,6 +554,9 @@ private fun runEmberrDesktopApp() = application {
                 }
 
                 val colorThemeSettings = settingsManager.collectColorThemeSettings()
+                val interfaceScalePercent by settingsManager.interfaceScalePercentFlow.collectAsState(
+                    initial = settingsManager.getInterfaceScalePercent()
+                )
 
                 val stickyWindow = this.window as Frame
 
@@ -558,7 +567,8 @@ private fun runEmberrDesktopApp() = application {
                     fontStylePreference = fontStylePreference,
                     colorThemeSettings = colorThemeSettings,
                     usesTwentyFourHourClock = usesTwentyFourHourClock,
-                    firstDayOfWeek = firstDayOfWeek
+                    firstDayOfWeek = firstDayOfWeek,
+                    interfaceScalePercent = interfaceScalePercent
                 ) {
                     MatchWindowsTitleBarToAppTheme(stickyWindow)
 

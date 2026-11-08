@@ -32,6 +32,8 @@ object SyncConstants {
     const val DEFAULT_PAPER_TEXTURE_AREAS = "WHOLE_APP"
     const val KEY_FONT_SIZE_PREFERENCE = "font_size_preference"
     const val DEFAULT_FONT_SIZE_PREFERENCE = "DEFAULT"
+    const val KEY_INTERFACE_SCALE_PERCENT = "interface_scale_percent"
+    const val DEFAULT_INTERFACE_SCALE_PERCENT = 100
     const val KEY_FONT_STYLE_PREFERENCE = "font_style_preference"
     const val DEFAULT_FONT_STYLE_PREFERENCE = "POPPINS"
     const val KEY_TIME_FORMAT_PREFERENCE = "time_format_preference"
