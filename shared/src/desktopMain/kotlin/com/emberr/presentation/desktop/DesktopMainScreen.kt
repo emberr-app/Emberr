@@ -1021,7 +1021,7 @@ fun DesktopMainScreen(
     var detail by splitState::focusedPane
 
     LaunchedEffect(detail) {
-        SlowFrameReporter.currentScreenName = detail::class.simpleName ?: "Unknown"
+        SlowFrameReporter.currentScreenName = detail?.let { pane -> pane::class.simpleName } ?: "Unknown"
     }
     var hasRestored by remember { mutableStateOf(false) }
 
