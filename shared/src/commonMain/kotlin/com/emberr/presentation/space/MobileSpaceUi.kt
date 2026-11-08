@@ -52,6 +52,7 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.pen_square
 import emberr.shared.generated.resources.plus
@@ -110,7 +111,7 @@ fun SpaceOptionsSheets(
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f).orHighContrastLine()
             )
 
             SpaceReorderList(

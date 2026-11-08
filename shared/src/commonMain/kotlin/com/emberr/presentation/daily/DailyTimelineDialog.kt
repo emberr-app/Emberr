@@ -114,6 +114,7 @@ import com.emberr.presentation.shared.editor.blockViews.TableBlockView
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
 import com.emberr.ui.theme.PaperTexturePanel
+import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
@@ -430,7 +431,7 @@ private fun TimelineList(
                         HorizontalDivider(
                             modifier = Modifier.padding(top = 8.dp),
                             thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f).orHighContrastLine()
                         )
                     }
                     Box(
@@ -673,7 +674,7 @@ private fun TimelineBlockContent(
                 .fillMaxWidth()
                 .padding(vertical = 12.dp)
                 .height(1.5.dp)
-                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(1.dp))
+                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine(), RoundedCornerShape(1.dp))
         )
 
         is MovieBlock -> MovieBlockView(
@@ -698,7 +699,7 @@ private fun TimelineBlockContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val dotSize = 6.dp
-            val dotColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+            val dotColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f).orHighContrastLine()
             Box(Modifier.size(dotSize).clip(CircleShape).background(dotColor))
             Spacer(Modifier.width(16.dp))
             Box(Modifier.size(dotSize).clip(CircleShape).background(dotColor))

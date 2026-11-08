@@ -52,6 +52,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.SheetBringIntoViewSpec
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import org.jetbrains.compose.resources.DrawableResource
@@ -254,7 +255,7 @@ internal fun DatabaseMenuSectionLabel(text: String) {
 internal fun DatabaseMenuSectionDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = DatabaseMenuTextInset, vertical = 8.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
     )
 }
 

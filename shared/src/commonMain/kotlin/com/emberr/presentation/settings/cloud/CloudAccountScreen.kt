@@ -77,6 +77,7 @@ import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
+import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
@@ -626,7 +627,7 @@ private fun SessionDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = 16.dp),
         thickness = 1.dp,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f).orHighContrastLine()
     )
 }
 

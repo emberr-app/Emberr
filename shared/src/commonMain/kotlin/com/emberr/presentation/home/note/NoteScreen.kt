@@ -153,6 +153,7 @@ import com.emberr.ui.theme.NotePaperTextureBox
 import com.emberr.ui.theme.PaperTextureArea
 import com.emberr.ui.theme.paperTextureToggleLabelFor
 import com.emberr.presentation.shared.components.EmberrSlider
+import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.paper_texture
@@ -1742,7 +1743,7 @@ private fun DesktopMenuItem(
 private fun OptionsGroupDivider(modifier: Modifier = Modifier) {
     HorizontalDivider(
         modifier = modifier.padding(vertical = 4.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
     )
 }
 

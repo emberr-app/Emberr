@@ -185,6 +185,7 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.LocalEmberrBlurSource
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_up_down
@@ -492,7 +493,7 @@ private fun SidebarSearchResults(
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 10.dp),
                                     thickness = 1.dp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f).orHighContrastLine()
                                 )
                             }
                         }
@@ -532,7 +533,7 @@ private fun SidebarSearchResults(
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 10.dp),
                                     thickness = 1.dp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f).orHighContrastLine()
                                 )
                             }
                         }
@@ -571,7 +572,7 @@ private fun SidebarSearchResults(
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 10.dp),
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f).orHighContrastLine()
                             )
                         }
                     }
@@ -914,7 +915,7 @@ private fun SidebarGroupSeparator() {
     HorizontalDivider(
         modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp),
         thickness = 1.dp,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f).orHighContrastLine()
     )
 }
 

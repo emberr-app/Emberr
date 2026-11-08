@@ -75,6 +75,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.group
@@ -212,7 +213,7 @@ internal fun DesktopNewNoteMenu(
             )
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
             )
             EmberrDesktopSubmenu(
                 menuWidthEstimate = TemplatesMenuWidthEstimate,

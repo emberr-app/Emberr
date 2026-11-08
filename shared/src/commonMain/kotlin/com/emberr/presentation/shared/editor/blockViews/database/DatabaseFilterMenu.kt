@@ -52,6 +52,7 @@ import com.emberr.presentation.shared.components.rememberPeopleToPick
 import com.emberr.presentation.shared.editor.blockViews.property.PropertyTagChip
 import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyDate
 import com.emberr.presentation.shared.editor.blockViews.property.rememberPropertyTagColor
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.x
@@ -88,7 +89,7 @@ internal fun DatabaseFilterMenu(
                     if (index > 0) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = DatabaseMenuRowInset, vertical = 8.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                         )
                     }
                     DatabaseMenuSectionLabel(text = block.labelOf(filter.target))

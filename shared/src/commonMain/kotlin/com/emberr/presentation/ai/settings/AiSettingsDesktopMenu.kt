@@ -21,6 +21,7 @@ import com.emberr.domain.ai.KnowledgeMode
 import com.emberr.presentation.ai.RagViewModel
 import com.emberr.presentation.ai.components.RagDesktopMenuItem
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
 import org.jetbrains.compose.resources.painterResource
@@ -71,7 +72,7 @@ internal fun AiSettingsMenuContent(
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                 )
                 Text(
                     text = "Knowledge Source",
@@ -96,7 +97,7 @@ internal fun AiSettingsMenuContent(
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                 )
                 Text(
                     text = "Response Length",

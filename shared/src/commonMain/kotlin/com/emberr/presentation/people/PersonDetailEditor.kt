@@ -41,7 +41,7 @@ import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PersonDetailKind
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.people.personDisplayName
-import com.emberr.presentation.shared.components.EmberrBorderWidth
+import com.emberr.presentation.shared.components.emberrBorderWidth
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetAction
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
@@ -430,7 +430,7 @@ private fun KindMenuIcon(kind: PersonDetailKind) {
 
 @Composable
 private fun EditorDivider() {
-    HorizontalDivider(thickness = EmberrBorderWidth, color = emberrBorderColor)
+    HorizontalDivider(thickness = emberrBorderWidth, color = emberrBorderColor)
 }
 
 @Composable

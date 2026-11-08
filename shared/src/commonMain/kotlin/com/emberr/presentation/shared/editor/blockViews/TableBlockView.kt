@@ -125,6 +125,7 @@ import com.emberr.presentation.shared.editor.text.TapToCursorPosition
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.tableGridLineColor
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_left
@@ -993,7 +994,7 @@ private fun StyleSectionLabel(text: String) {
 private fun TableMenuDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = MenuTextInset, vertical = if (isDesktopPlatform) 8.dp else 12.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
     )
 }
 

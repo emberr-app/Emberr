@@ -44,6 +44,7 @@ import com.emberr.presentation.shared.components.emberrControlContainerColor
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.highlightBackgroundColor
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.at
 import emberr.shared.generated.resources.calendar_date
@@ -136,7 +137,7 @@ internal fun PersonCard(content: @Composable ColumnScope.() -> Unit) {
 private fun CardRowDivider(start: Dp) {
     HorizontalDivider(
         modifier = Modifier.padding(start = start),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
     )
 }
 

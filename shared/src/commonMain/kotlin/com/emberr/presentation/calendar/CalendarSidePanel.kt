@@ -49,6 +49,7 @@ import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.startOfWeek
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.ui.theme.LocalFirstDayOfWeek
+import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.chevron_right
@@ -139,7 +140,7 @@ internal fun CalendarSidePanel(
         }
 
         VerticalDivider(
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine(),
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
         )
     }

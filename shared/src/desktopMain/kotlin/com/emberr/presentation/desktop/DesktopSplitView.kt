@@ -68,7 +68,7 @@ import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.desktop.window.keepTitleBarHiddenWhileHovered
 import com.emberr.presentation.shared.components.EmberrBlur
-import com.emberr.presentation.shared.components.EmberrBorderWidth
+import com.emberr.presentation.shared.components.emberrBorderWidth
 import com.emberr.presentation.shared.components.EmberrShadowAmbientColor
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrShadowSpotColor
@@ -598,6 +598,7 @@ private fun SplitPaneHandle(
         label = "split_handle_buttons_alpha"
     ) { expanded -> if (expanded) 1f else 0f }
 
+    val pillBorderWidth = emberrBorderWidth
     Box(
         modifier = modifier
             .keepTitleBarHiddenWhileHovered()
@@ -611,7 +612,7 @@ private fun SplitPaneHandle(
                     drawContent()
                     val shapeSize = Size(handleWidth.toPx(), handleHeight.toPx())
                     val shapeTopLeft = Offset((size.width - shapeSize.width) / 2f, 0f)
-                    val borderWidth = ceil(EmberrBorderWidth.toPx())
+                    val borderWidth = ceil(pillBorderWidth.toPx())
                     val halfBorderWidth = borderWidth / 2f
                     drawRoundRect(
                         color = pillBorderColor.copy(alpha = pillBorderColor.alpha * buttonsAlpha),
