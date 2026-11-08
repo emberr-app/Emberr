@@ -84,7 +84,6 @@ import kotlin.math.roundToInt
 private const val DESKTOP_THEME_COLUMNS = 3
 private const val MOBILE_THEME_COLUMNS = 2
 private const val PREVIEW_ASPECT_RATIO = 1.25f
-private const val STRENGTH_SLIDER_STEPS = 9
 private const val FULL_PERCENT = 100
 private val PreviewCardShape = RoundedCornerShape(14.dp)
 private val PreviewLineShape = RoundedCornerShape(50)
@@ -342,9 +341,7 @@ private fun PercentSliderRow(
         EmberrSlider(
             value = percent.toFloat(),
             onValueChange = { newValue -> onPercentChange(newValue.roundToInt()) },
-            valueRange = 0f..FULL_PERCENT.toFloat(),
-            steps = STRENGTH_SLIDER_STEPS,
-            valueLabel = { shownValue -> "${shownValue.roundToInt()}%" }
+            valueRange = 0f..FULL_PERCENT.toFloat()
         )
     }
 }
