@@ -101,9 +101,6 @@ fun paperTextureAreasLabel(areas: Set<PaperTextureArea>): String {
     return if (checkedAreas.isEmpty()) "None" else checkedAreas.joinToString(", ") { it.displayName }
 }
 
-fun paperTextureToggleLabelFor(isPaperTextureOn: Boolean): String =
-    if (isPaperTextureOn) "Hide Paper Texture" else "Show Paper Texture"
-
 val LocalPaperTextureAreas = staticCompositionLocalOf { setOf(PaperTextureArea.WHOLE_APP) }
 
 private val LocalInsideTexturedNote = staticCompositionLocalOf { false }

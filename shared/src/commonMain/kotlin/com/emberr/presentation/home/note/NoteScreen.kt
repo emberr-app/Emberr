@@ -144,7 +144,6 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.EmberrSlider
 import com.emberr.presentation.shared.components.EmberrTextField
-import com.emberr.presentation.shared.components.collectPaperTextureToggle
 import com.emberr.presentation.shared.components.LocalEmberrSheetHeaderSpace
 import com.emberr.presentation.shared.components.ReportSheetContentScrolled
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
@@ -154,7 +153,6 @@ import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.editor.selection.BlockStyleBar
 import com.emberr.ui.theme.NotePaperTextureBox
 import com.emberr.ui.theme.PaperTextureArea
-import com.emberr.ui.theme.paperTextureToggleLabelFor
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_right
@@ -164,7 +162,6 @@ import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.file_pdf
 import emberr.shared.generated.resources.file_code_corner
 import emberr.shared.generated.resources.image
-import emberr.shared.generated.resources.paper_texture
 import emberr.shared.generated.resources.share
 import emberr.shared.generated.resources.ghost_smile
 import emberr.shared.generated.resources.trash
@@ -344,7 +341,6 @@ fun NoteScreen(
 
     val handleToggleFavorite: () -> Unit = { viewModel.toggleFavorite() }
     val handleToggleWordCount: () -> Unit = { viewModel.toggleWordCount() }
-    val paperTextureToggle = collectPaperTextureToggle()
     val handleSetAlignment: (TextAlignment) -> Unit = { viewModel.setAllBlocksAlignment(it) }
     val handleAddIcon: () -> Unit = {
         showOptionsMenu = false
@@ -840,8 +836,6 @@ fun NoteScreen(
                                         coverLinkFetch = coverLinkFetch,
                                         onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                                         onToggleWordCount = handleToggleWordCount,
-                                        isPaperTextureOn = paperTextureToggle.isOn,
-                                        onTogglePaperTexture = paperTextureToggle.toggle,
                                         noteWidth = shownNoteWidth,
                                         onNoteWidthChange = { noteWidthBeingDragged = it },
                                         onNoteWidthChangeFinished = {
@@ -925,8 +919,6 @@ fun NoteScreen(
                         coverLinkFetch = coverLinkFetch,
                         onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                         onToggleWordCount = handleToggleWordCount,
-                        isPaperTextureOn = paperTextureToggle.isOn,
-                        onTogglePaperTexture = paperTextureToggle.toggle,
                         onSetAlignment = handleSetAlignment,
                         onMoveToTrash = handleMoveToTrash,
                         onCopyPlain = handleCopyPlain,
@@ -1523,8 +1515,6 @@ fun NoteOptionsDesktopMenu(
     coverLinkFetch: ImageLinkFetch?,
     onCoverLinkSubmitted: (address: String) -> Unit,
     onToggleWordCount: () -> Unit,
-    isPaperTextureOn: Boolean,
-    onTogglePaperTexture: () -> Unit,
     noteWidth: Float,
     onNoteWidthChange: (Float) -> Unit,
     onNoteWidthChangeFinished: () -> Unit,
@@ -1572,11 +1562,6 @@ fun NoteOptionsDesktopMenu(
             Icons.Default.FormatSize,
             wordCountText
         ) { onToggleWordCount() }
-
-        DesktopMenuItem(
-            painterResource(Res.drawable.paper_texture),
-            paperTextureToggleLabelFor(isPaperTextureOn)
-        ) { onTogglePaperTexture() }
 
         DesktopSubmenuItem(painterResource(Res.drawable.textalign_left2), "Alignment") {
             ALIGNMENT_OPTIONS.forEach { option ->
@@ -1805,8 +1790,6 @@ fun NoteOptionsBottomSheet(
     coverLinkFetch: ImageLinkFetch?,
     onCoverLinkSubmitted: (address: String) -> Unit,
     onToggleWordCount: () -> Unit,
-    isPaperTextureOn: Boolean,
-    onTogglePaperTexture: () -> Unit,
     onSetAlignment: (TextAlignment) -> Unit,
     onMoveToTrash: () -> Unit,
     onCopyPlain: () -> Unit = {},
@@ -1851,10 +1834,6 @@ fun NoteOptionsBottomSheet(
             val wordCountText = if (showWordCount) "Hide Word Count" else "Show Word Count"
             BottomSheetOptionItem(Icons.Default.FormatSize, wordCountText) {
                 onToggleWordCount()
-            }
-
-            BottomSheetOptionItem(painterResource(Res.drawable.paper_texture), paperTextureToggleLabelFor(isPaperTextureOn)) {
-                onTogglePaperTexture()
             }
 
             BottomSheetOptionItem(
