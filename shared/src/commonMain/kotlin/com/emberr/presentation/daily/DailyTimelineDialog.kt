@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -99,6 +96,8 @@ import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.desktopDialogSize
+import com.emberr.presentation.shared.components.mobileDialogSize
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import com.emberr.presentation.shared.editor.EditorActions
@@ -113,7 +112,7 @@ import com.emberr.presentation.shared.editor.blockViews.property.PropertyBlockVi
 import com.emberr.presentation.shared.editor.blockViews.TableBlockView
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
-import com.emberr.ui.theme.PaperTexturePanel
+import com.emberr.ui.theme.PaperTextureBox
 import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
@@ -130,13 +129,6 @@ import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
 
-private const val DESKTOP_DIALOG_WIDTH_FRACTION = 0.6f
-private const val MOBILE_DIALOG_WIDTH_FRACTION = 0.94f
-private val DesktopDialogMaxWidth = 760.dp
-private val MobileDialogMaxWidth = 720.dp
-private const val DESKTOP_DIALOG_HEIGHT_FRACTION = 0.8f
-private const val MOBILE_DIALOG_HEIGHT_FRACTION = 0.92f
-private val DesktopDialogMaxHeight = 720.dp
 private const val NoteLinkPrefix = "](emberr://note/"
 private val NoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)""".toRegex()
 private val DialogShape = RoundedCornerShape(24.dp)
@@ -225,12 +217,9 @@ fun DailyTimelineDialog(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                PaperTexturePanel(
+                PaperTextureBox(
                     modifier = Modifier
-                        .fillMaxWidth(if (isDesktopPlatform) DESKTOP_DIALOG_WIDTH_FRACTION else MOBILE_DIALOG_WIDTH_FRACTION)
-                        .widthIn(max = if (isDesktopPlatform) DesktopDialogMaxWidth else MobileDialogMaxWidth)
-                        .fillMaxHeight(if (isDesktopPlatform) DESKTOP_DIALOG_HEIGHT_FRACTION else MOBILE_DIALOG_HEIGHT_FRACTION)
-                        .then(if (isDesktopPlatform) Modifier.heightIn(max = DesktopDialogMaxHeight) else Modifier)
+                        .then(if (isDesktopPlatform) Modifier.desktopDialogSize() else Modifier.mobileDialogSize())
                         .safeDrawingPadding()
                         .clip(DialogShape)
                         .background(dialogBackgroundColor)

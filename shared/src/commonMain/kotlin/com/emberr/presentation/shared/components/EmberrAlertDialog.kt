@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.emberr.ui.theme.LocalAppIsDark
-import com.emberr.ui.theme.PaperTexturePanel
+import com.emberr.ui.theme.PaperTextureBox
 
 private val EmberrAlertDialogShape = RoundedCornerShape(22.dp)
 
@@ -34,7 +34,7 @@ fun EmberrAlertDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        PaperTexturePanel(
+        PaperTextureBox(
             modifier = Modifier
                 .widthIn(max = 400.dp)
                 .fillMaxWidth(0.88f)

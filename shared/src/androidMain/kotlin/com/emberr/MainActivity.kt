@@ -101,8 +101,7 @@ import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
-import com.emberr.ui.theme.colorThemePreferenceNamed
-import com.emberr.ui.theme.paperTextureAreasNamed
+import com.emberr.ui.theme.collectColorThemeSettings
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import com.emberr.domain.model.NoteBlock
@@ -323,22 +322,13 @@ class MainActivity : FragmentActivity() {
                 ThemePreference.SYSTEM -> isSystemInDarkTheme()
             }
 
-            val colorThemePreferenceName by settingsViewModel.colorThemePreference.collectAsState()
-            val themedTextAndIcons by settingsViewModel.themedTextAndIcons.collectAsState()
-            val colorThemeStrength by settingsViewModel.colorThemeStrength.collectAsState()
-            val paperTextureEnabled by settingsViewModel.paperTextureEnabled.collectAsState()
-            val paperTextureStrength by settingsViewModel.paperTextureStrength.collectAsState()
-            val savedPaperTextureAreas by settingsViewModel.paperTextureAreas.collectAsState()
+            val colorThemeSettings = settingsManager.collectColorThemeSettings()
 
             EmberrTheme(
                 darkTheme = darkTheme,
                 fontSizePreference = fontSizePreference,
                 fontStylePreference = fontStylePreference,
-                colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
-                themedTextAndIcons = themedTextAndIcons,
-                colorThemeStrength = colorThemeStrength,
-                paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
-                paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas),
+                colorThemeSettings = colorThemeSettings,
                 usesTwentyFourHourClock = usesTwentyFourHourClock,
                 firstDayOfWeek = firstDayOfWeek
             ) {

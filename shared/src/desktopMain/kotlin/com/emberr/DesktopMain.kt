@@ -81,8 +81,7 @@ import com.emberr.domain.theme.resolveLinuxSystemIsDark
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
-import com.emberr.ui.theme.colorThemePreferenceNamed
-import com.emberr.ui.theme.paperTextureAreasNamed
+import com.emberr.ui.theme.collectColorThemeSettings
 import com.emberr.ui.theme.EmberrTheme
 import com.emberr.domain.util.export.handleExportBackup
 import com.emberr.domain.util.export.handleExportMarkdown
@@ -398,35 +397,14 @@ private fun runEmberrDesktopApp() = application {
             ThemePreference.SYSTEM -> linuxSystemIsDark ?: systemIsDark
         }
 
-        val colorThemePreferenceName by settingsManager.colorThemePreferenceFlow.collectAsState(
-            initial = settingsManager.getColorThemePreference()
-        )
-        val themedTextAndIcons by settingsManager.themedTextAndIconsFlow.collectAsState(
-            initial = settingsManager.isThemedTextAndIconsEnabled()
-        )
-        val colorThemeStrength by settingsManager.colorThemeStrengthFlow.collectAsState(
-            initial = settingsManager.getColorThemeStrength()
-        )
-        val paperTextureEnabled by settingsManager.paperTextureEnabledFlow.collectAsState(
-            initial = settingsManager.isPaperTextureEnabled()
-        )
-        val paperTextureStrength by settingsManager.paperTextureStrengthFlow.collectAsState(
-            initial = settingsManager.getPaperTextureStrength()
-        )
-        val savedPaperTextureAreas by settingsManager.paperTextureAreasFlow.collectAsState(
-            initial = settingsManager.getPaperTextureAreas()
-        )
+        val colorThemeSettings = settingsManager.collectColorThemeSettings()
 
         FollowLiveDisplayScale(mainWindowState) {
         EmberrTheme(
             darkTheme = darkTheme,
             fontSizePreference = fontSizePreference,
             fontStylePreference = fontStylePreference,
-            colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
-            themedTextAndIcons = themedTextAndIcons,
-            colorThemeStrength = colorThemeStrength,
-            paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
-            paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas),
+            colorThemeSettings = colorThemeSettings,
             usesTwentyFourHourClock = usesTwentyFourHourClock,
             firstDayOfWeek = firstDayOfWeek
         ) {
@@ -566,24 +544,7 @@ private fun runEmberrDesktopApp() = application {
                     ThemePreference.SYSTEM -> linuxSystemIsDark ?: systemIsDark
                 }
 
-                val colorThemePreferenceName by settingsManager.colorThemePreferenceFlow.collectAsState(
-                    initial = settingsManager.getColorThemePreference()
-                )
-                val themedTextAndIcons by settingsManager.themedTextAndIconsFlow.collectAsState(
-                    initial = settingsManager.isThemedTextAndIconsEnabled()
-                )
-                val colorThemeStrength by settingsManager.colorThemeStrengthFlow.collectAsState(
-                    initial = settingsManager.getColorThemeStrength()
-                )
-                val paperTextureEnabled by settingsManager.paperTextureEnabledFlow.collectAsState(
-                    initial = settingsManager.isPaperTextureEnabled()
-                )
-                val paperTextureStrength by settingsManager.paperTextureStrengthFlow.collectAsState(
-                    initial = settingsManager.getPaperTextureStrength()
-                )
-                val savedPaperTextureAreas by settingsManager.paperTextureAreasFlow.collectAsState(
-                    initial = settingsManager.getPaperTextureAreas()
-                )
+                val colorThemeSettings = settingsManager.collectColorThemeSettings()
 
                 val stickyWindow = this.window as Frame
 
@@ -592,11 +553,7 @@ private fun runEmberrDesktopApp() = application {
                     darkTheme = darkTheme,
                     fontSizePreference = fontSizePreference,
                     fontStylePreference = fontStylePreference,
-                    colorThemePreference = colorThemePreferenceNamed(colorThemePreferenceName),
-                    themedTextAndIcons = themedTextAndIcons,
-                    colorThemeStrength = colorThemeStrength,
-                    paperTextureStrength = if (paperTextureEnabled) paperTextureStrength else 0,
-                    paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas),
+                    colorThemeSettings = colorThemeSettings,
                     usesTwentyFourHourClock = usesTwentyFourHourClock,
                     firstDayOfWeek = firstDayOfWeek
                 ) {

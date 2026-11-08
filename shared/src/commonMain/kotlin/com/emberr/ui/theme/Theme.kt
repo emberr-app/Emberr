@@ -56,20 +56,17 @@ fun EmberrTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     fontSizePreference: FontSizePreference = FontSizePreference.DEFAULT,
     fontStylePreference: FontStylePreference = FontStylePreference.POPPINS,
-    colorThemePreference: ColorThemePreference = ColorThemePreference.EMBERR,
-    themedTextAndIcons: Boolean = true,
-    colorThemeStrength: Int = FULL_STRENGTH_PERCENT,
-    paperTextureStrength: Int = 0,
-    paperTextureAreas: Set<PaperTextureArea> = setOf(PaperTextureArea.WHOLE_APP),
+    colorThemeSettings: ColorThemeSettings = ColorThemeSettings(),
     usesTwentyFourHourClock: Boolean = false,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = colorThemePreference.colorSchemeFor(
+    val colorTheme = colorThemeSettings.colorTheme
+    val colorScheme = colorTheme.colorSchemeFor(
         darkTheme = darkTheme,
-        themedTextAndIcons = themedTextAndIcons,
-        strengthPercent = colorThemeStrength,
-        sourceColorSchemes = colorThemePreference.sourceColorSchemes()
+        themedTextAndIcons = colorThemeSettings.themedTextAndIcons,
+        strengthPercent = colorThemeSettings.colorThemeStrength,
+        sourceColorSchemes = colorTheme.sourceColorSchemes()
     )
 
     val currentFontSizes = when {
@@ -96,13 +93,13 @@ fun EmberrTheme(
 
     CompositionLocalProvider(
         LocalAppIsDark provides darkTheme,
-        LocalColorThemePreference provides colorThemePreference,
+        LocalColorThemePreference provides colorTheme,
         LocalEmberrFontSizes provides currentFontSizes,
         LocalEmberrFontStyle provides fontStylePreference,
         LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock,
         LocalFirstDayOfWeek provides firstDayOfWeek,
-        LocalPaperTextureStrength provides paperTextureStrength,
-        LocalPaperTextureAreas provides paperTextureAreas
+        LocalPaperTextureStrength provides colorThemeSettings.paperTextureStrength,
+        LocalPaperTextureAreas provides colorThemeSettings.paperTextureAreas
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -114,7 +111,7 @@ fun EmberrTheme(
             )
             CompositionLocalProvider(LocalTextSelectionColors provides accentTextSelectionColors) {
                 EmberrTextContextMenu {
-                    if (isDesktopPlatform) content() else PaperTextureBox(propagateMinConstraints = true, content = content)
+                    if (isDesktopPlatform) content() else PaperTextureBox(propagateMinConstraints = true) { content() }
                 }
             }
         }

@@ -18,6 +18,8 @@ private val EmberrLightColorScheme = lightColorScheme(
     surface          = CloudVeil,
     onSurface        = CharcoalNoir,
     outline          = UrbanFog,
+    outlineVariant   = Color(0xFFC7C7C7),
+    onSurfaceVariant = Color(0xFF474747),
     surfaceVariant   = CloudVeil,
     surfaceContainerHigh = Color(0xFFD8D8D8)
 )
@@ -32,6 +34,8 @@ private val EmberrDarkColorScheme = darkColorScheme(
     surface          = IroncladGrey,
     onSurface        = CloudVeil,
     outline          = UrbanFog,
+    outlineVariant   = Color(0xFF474747),
+    onSurfaceVariant = Color(0xFFC7C7C7),
     surfaceVariant   = Color(0xFF363636),
     surfaceContainerHigh = Color(0xFF363636)
 )
@@ -426,11 +430,14 @@ enum class ColorThemePreference(
     GRUVBOX("Gruvbox", GruvboxLightColorScheme, GruvboxDarkColorScheme),
     EVERFOREST("Everforest", EverforestLightColorScheme, EverforestDarkColorScheme);
 
+    val builtInColorSchemes: ThemeColorSchemes
+        get() = ThemeColorSchemes(lightColorScheme, darkColorScheme)
+
     fun colorSchemeFor(
         darkTheme: Boolean,
         themedTextAndIcons: Boolean,
         strengthPercent: Int = FULL_STRENGTH_PERCENT,
-        sourceColorSchemes: ThemeColorSchemes = ThemeColorSchemes(lightColorScheme, darkColorScheme)
+        sourceColorSchemes: ThemeColorSchemes = builtInColorSchemes
     ): ColorScheme {
         val themedColorScheme = if (darkTheme) sourceColorSchemes.dark else sourceColorSchemes.light
         val neutralColorScheme = if (darkTheme) EmberrDarkColorScheme else EmberrLightColorScheme

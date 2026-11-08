@@ -144,6 +144,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.EmberrSlider
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.collectPaperTextureToggle
 import com.emberr.presentation.shared.components.LocalEmberrSheetHeaderSpace
 import com.emberr.presentation.shared.components.ReportSheetContentScrolled
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
@@ -343,10 +344,7 @@ fun NoteScreen(
 
     val handleToggleFavorite: () -> Unit = { viewModel.toggleFavorite() }
     val handleToggleWordCount: () -> Unit = { viewModel.toggleWordCount() }
-    val isPaperTextureOn by settingsManager.paperTextureEnabledFlow.collectAsState(
-        initial = settingsManager.isPaperTextureEnabled()
-    )
-    val handleTogglePaperTexture: () -> Unit = { settingsManager.savePaperTextureEnabled(!isPaperTextureOn) }
+    val paperTextureToggle = collectPaperTextureToggle()
     val handleSetAlignment: (TextAlignment) -> Unit = { viewModel.setAllBlocksAlignment(it) }
     val handleAddIcon: () -> Unit = {
         showOptionsMenu = false
@@ -842,8 +840,8 @@ fun NoteScreen(
                                         coverLinkFetch = coverLinkFetch,
                                         onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                                         onToggleWordCount = handleToggleWordCount,
-                                        isPaperTextureOn = isPaperTextureOn,
-                                        onTogglePaperTexture = handleTogglePaperTexture,
+                                        isPaperTextureOn = paperTextureToggle.isOn,
+                                        onTogglePaperTexture = paperTextureToggle.toggle,
                                         noteWidth = shownNoteWidth,
                                         onNoteWidthChange = { noteWidthBeingDragged = it },
                                         onNoteWidthChangeFinished = {
@@ -927,8 +925,8 @@ fun NoteScreen(
                         coverLinkFetch = coverLinkFetch,
                         onCoverLinkSubmitted = viewModel::handleCoverLinkSubmitted,
                         onToggleWordCount = handleToggleWordCount,
-                        isPaperTextureOn = isPaperTextureOn,
-                        onTogglePaperTexture = handleTogglePaperTexture,
+                        isPaperTextureOn = paperTextureToggle.isOn,
+                        onTogglePaperTexture = paperTextureToggle.toggle,
                         onSetAlignment = handleSetAlignment,
                         onMoveToTrash = handleMoveToTrash,
                         onCopyPlain = handleCopyPlain,

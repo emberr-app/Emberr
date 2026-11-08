@@ -43,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,7 +77,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.entity.CanvasNodeShape
 import com.emberr.data.local.room.entity.CanvasStrokeTool
 import com.emberr.domain.canvas.CanvasLineStyle
@@ -103,6 +101,7 @@ import com.emberr.presentation.shared.components.IconTooltipPosition
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.TopBarIconButtonGroup
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
+import com.emberr.presentation.shared.components.collectPaperTextureToggle
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
@@ -144,7 +143,6 @@ import emberr.shared.generated.resources.yuyushort_regular
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
-import org.koin.compose.koinInject
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -205,11 +203,7 @@ fun CanvasOptionsButton(
 ) {
     var showOptionsMenu by remember { mutableStateOf(false) }
     var showRenamePopup by remember { mutableStateOf(false) }
-    val settingsManager: SettingsManager = koinInject()
-    val isPaperTextureOn by settingsManager.paperTextureEnabledFlow.collectAsState(
-        initial = settingsManager.isPaperTextureEnabled()
-    )
-    val togglePaperTexture: () -> Unit = { settingsManager.savePaperTextureEnabled(!isPaperTextureOn) }
+    val paperTextureToggle = collectPaperTextureToggle()
 
     Box(modifier) {
         TopBarIconButton(
@@ -239,8 +233,8 @@ fun CanvasOptionsButton(
                 onDismissRename = { showRenamePopup = false },
                 onRename = onRename,
                 onToggleFavorite = onToggleFavorite,
-                isPaperTextureOn = isPaperTextureOn,
-                onTogglePaperTexture = togglePaperTexture,
+                isPaperTextureOn = paperTextureToggle.isOn,
+                onTogglePaperTexture = paperTextureToggle.toggle,
                 onMoveToTrash = onMoveToTrash
             )
         } else {
@@ -261,8 +255,8 @@ fun CanvasOptionsButton(
                 onRename = onRename,
                 onToggleFavorite = onToggleFavorite,
                 onOpenAsStickyNote = onOpenAsStickyNote,
-                isPaperTextureOn = isPaperTextureOn,
-                onTogglePaperTexture = togglePaperTexture,
+                isPaperTextureOn = paperTextureToggle.isOn,
+                onTogglePaperTexture = paperTextureToggle.toggle,
                 onMoveToTrash = onMoveToTrash
             )
         }

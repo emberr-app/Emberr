@@ -21,15 +21,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
@@ -73,7 +70,7 @@ import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.editor.components.FullScreenImageScreen
 import com.emberr.ui.theme.LocalAppIsDark
-import com.emberr.ui.theme.PaperTexturePanel
+import com.emberr.ui.theme.PaperTextureBox
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
@@ -90,13 +87,6 @@ private val UpdatePeekDelayAfterLaunch = 800.milliseconds
 private val UpdatePeekGoodbyeDuration = 1500.milliseconds
 private val UpdatePillGrowsFromBottom = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 1f)
 private val UpdateDialogShape = RoundedCornerShape(22.dp)
-private val UpdateDialogDesktopMaxWidth = 760.dp
-private val UpdateDialogDesktopMaxHeight = 720.dp
-private const val UpdateDialogDesktopWidthFraction = 0.6f
-private const val UpdateDialogDesktopHeightFraction = 0.8f
-private val UpdateDialogMobileMaxWidth = 720.dp
-private const val UpdateDialogMobileWidthFraction = 0.94f
-private const val UpdateDialogMobileHeightFraction = 0.92f
 private val UpdateDialogPadding = 24.dp
 private val UpdateDialogHeaderBlurHeight = 110.dp
 private val UpdateDialogHeaderGradientHeight = 130.dp
@@ -313,20 +303,14 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                 ),
             contentAlignment = Alignment.Center
         ) {
-            PaperTexturePanel(
+            PaperTextureBox(
                 modifier = Modifier
                     .then(
                         if (isDesktopPlatform) {
-                            Modifier
-                                .fillMaxWidth(UpdateDialogDesktopWidthFraction)
-                                .widthIn(max = UpdateDialogDesktopMaxWidth)
-                                .fillMaxHeight(UpdateDialogDesktopHeightFraction)
-                                .heightIn(max = UpdateDialogDesktopMaxHeight)
+                            Modifier.desktopDialogSize()
                         } else {
                             Modifier
-                                .fillMaxWidth(UpdateDialogMobileWidthFraction)
-                                .widthIn(max = UpdateDialogMobileMaxWidth)
-                                .fillMaxHeight(UpdateDialogMobileHeightFraction)
+                                .mobileDialogSize()
                                 .safeDrawingPadding()
                         }
                     )
