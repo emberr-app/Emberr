@@ -1019,6 +1019,10 @@ fun DesktopMainScreen(
 
     val splitState = rememberDesktopSplitState()
     var detail by splitState::focusedPane
+
+    LaunchedEffect(detail) {
+        SlowFrameReporter.currentScreenName = detail::class.simpleName ?: "Unknown"
+    }
     var hasRestored by remember { mutableStateOf(false) }
 
     LaunchedEffect(lastOpenedState, isLoading) {
