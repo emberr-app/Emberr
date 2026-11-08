@@ -16,6 +16,7 @@ import org.koin.mp.KoinPlatform
 import kotlin.system.exitProcess
 
 actual val isDesktopPlatform = false
+actual val isWindowsDesktop = false
 actual val isDebugBuild: Boolean by lazy {
     val context = KoinPlatform.getKoin().get<Context>()
     (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0

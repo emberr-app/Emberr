@@ -135,7 +135,7 @@ fun EmberrTopHeaderBar(
     overlayContent: @Composable BoxScope.() -> Unit = {}
 ) {
     val fadeStyle = rememberTopBarFadeStyle()
-    val isFadeProgressive = rememberTopBarFadeProgressive()
+    val isFadeProgressive = rememberTopBarFadeProgressive() && !fadeStyle.isAlwaysFlatOnThisPlatform
     val topEdgeGradient = rememberTopEdgeGradient(topEdgeColor)
 
     val showColorFade = fadeStyle == TopBarFadeStyle.COLOR &&

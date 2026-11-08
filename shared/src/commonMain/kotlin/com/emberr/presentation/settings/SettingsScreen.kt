@@ -392,7 +392,10 @@ fun SettingsScreen(
                             viewModel.setTopBarFadeStyle(option.name)
                         }
                     },
-                    topBarFadeProgressiveToggle = if (topBarFadeStyleFor(topBarFadeStyle) == TopBarFadeStyle.NONE) {
+                    topBarFadeProgressiveToggle = if (
+                        topBarFadeStyleFor(topBarFadeStyle) == TopBarFadeStyle.NONE ||
+                        topBarFadeStyleFor(topBarFadeStyle).isAlwaysFlatOnThisPlatform
+                    ) {
                         null
                     } else {
                         SettingsMenuToggle(label = "Progressive", isOn = topBarFadeProgressive) {
@@ -616,7 +619,7 @@ fun SettingsScreen(
                     )
                 }
 
-                if (selectedFadeStyle != TopBarFadeStyle.NONE) {
+                if (selectedFadeStyle != TopBarFadeStyle.NONE && !selectedFadeStyle.isAlwaysFlatOnThisPlatform) {
                     EmberrBottomSheetOption(
                         label = "Progressive",
                         onClick = { viewModel.setTopBarFadeProgressive(!topBarFadeProgressive) },
