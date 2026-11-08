@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,6 +43,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.LocalPinnableContainer
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.WatchlistBlock
@@ -81,6 +83,12 @@ fun WatchlistBlockView(
     runAfterKeyboardCloses: (() -> Unit) -> Unit = { it() }
 ) {
     if (editor == null) return
+
+    val pinnableContainer = LocalPinnableContainer.current
+    DisposableEffect(pinnableContainer) {
+        val keepComposedWhileOffScreen = pinnableContainer?.pin()
+        onDispose { keepComposedWhileOffScreen?.release() }
+    }
 
     val titles by remember(block.watchlistNoteId) { editor.titlesOf(block.watchlistNoteId) }.collectAsState(initial = null)
     val titleKeysInWatchlist = titles.orEmpty().mapNotNullTo(HashSet()) { it.titleKey() }
