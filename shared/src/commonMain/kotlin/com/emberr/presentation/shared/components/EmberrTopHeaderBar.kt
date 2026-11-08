@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.Layout
@@ -47,6 +48,7 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.TopBarFadeStyle
 import com.emberr.presentation.shared.stableStatusBarsPadding
 import com.emberr.ui.theme.LocalHoldsPaperGrainStill
+import com.emberr.ui.theme.stillPaperGrain
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
@@ -159,6 +161,7 @@ fun EmberrTopHeaderBar(
                         modifier = Modifier
                             .matchParentSize()
                             .flatFadeBox(flatFadeHeight, flatFadeExtraHeight)
+                            .stillPaperGrain(RectangleShape)
                             .drawBehind { drawRect(color = topEdgeColor, alpha = topEdgeFadeAlpha.coerceIn(0f, 1f)) }
                     )
                 }
@@ -168,6 +171,7 @@ fun EmberrTopHeaderBar(
                         modifier = Modifier
                             .matchParentSize()
                             .flatFadeBox(flatFadeHeight, flatFadeExtraHeight)
+                            .stillPaperGrain(RectangleShape)
                             .hazeEffect(blurBandSource, hazeStyle) { alpha = topEdgeFadeAlpha.coerceIn(0f, 1f) }
                     )
                 }
