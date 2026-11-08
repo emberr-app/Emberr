@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.shared.components.orHighContrastLine
 
 @Composable
 fun SolidDividerBlockView() {
@@ -26,7 +27,7 @@ fun SolidDividerBlockView() {
             .fillMaxWidth()
             .padding(vertical = 12.dp)
             .height(1.5.dp)
-            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(1.dp))
+            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine(), RoundedCornerShape(1.dp))
     )
 }
 
@@ -40,7 +41,7 @@ fun ThreeDotDividerBlockView() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         val dotSize = 6.dp
-        val dotColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+        val dotColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f).orHighContrastLine()
         Box(Modifier.size(dotSize).clip(CircleShape).background(dotColor))
         Spacer(Modifier.width(16.dp))
         Box(Modifier.size(dotSize).clip(CircleShape).background(dotColor))
