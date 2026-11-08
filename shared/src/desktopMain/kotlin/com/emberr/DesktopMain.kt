@@ -63,6 +63,7 @@ import com.emberr.presentation.desktop.DesktopSearchShortcutBus
 import com.emberr.presentation.desktop.DesktopRestartBus
 import com.emberr.presentation.desktop.DesktopToastHost
 import com.emberr.presentation.desktop.EmberrSystemTray
+import com.emberr.presentation.desktop.SlowFrameReporter
 import com.emberr.presentation.desktop.TrayMenuAction
 import com.emberr.presentation.desktop.update.AppUpdatePromptDialog
 import com.emberr.presentation.desktop.update.SelfHostUpdateRequiredPrompt
@@ -345,6 +346,8 @@ private fun runEmberrDesktopApp() = application {
             StartupLog.step("First frame of the main window drawn")
             isBackgroundStartupAllowed = true
         }
+
+        SlowFrameReporter.ReportSlowFramesDuringInput()
 
         LaunchedEffect(Unit) {
             ReminderClickBus.pendingBlockId.filterNotNull().collect {
