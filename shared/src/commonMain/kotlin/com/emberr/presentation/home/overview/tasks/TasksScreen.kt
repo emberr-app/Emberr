@@ -40,6 +40,7 @@ import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.editor.markdown.copyEmberrBlocks
 import com.emberr.presentation.shared.editor.selection.BlockSelectionMenuContent
 import com.emberr.presentation.shared.editor.selection.BlockSelectionPill
+import com.emberr.presentation.shared.editor.selection.TextCaret
 import com.emberr.presentation.shared.editor.EditorScreen
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.EditorActions
@@ -224,7 +225,10 @@ fun TasksScreen(
                         override fun onToggleCheckbox(id: String, checked: Boolean) = viewModel.toggleCheckbox(id, checked)
                         override fun onFocusBlock(id: String) = viewModel.setFocusedBlock(id)
                         override fun onEnterPressed(id: String, before: String, after: String) = viewModel.handleEnter(id, before, after)
-                        override fun onBackspaceOnEmpty(id: String) = viewModel.handleBackspaceOnEmpty(id)
+                        override fun onBackspaceOnEmpty(id: String): TextCaret? {
+                            viewModel.handleBackspaceOnEmpty(id)
+                            return null
+                        }
                         override fun onToggleSelection(id: String) = viewModel.toggleSelection(id)
                         override fun onUpdateReminder(id: String, timestamp: Long?, allDay: AllDaySpan?) = viewModel.updateReminder(id, timestamp, allDay)
                         override fun onOpenFile(filePath: String, mimeType: String) { onOpenFile(filePath, mimeType) }

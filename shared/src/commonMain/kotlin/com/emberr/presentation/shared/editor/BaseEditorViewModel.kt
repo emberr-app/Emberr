@@ -1926,10 +1926,10 @@ abstract class BaseEditorViewModel(
         return splitBlocks to newBlockId
     }
 
-    fun handleBackspaceOnEmpty(id: String) {
+    fun handleBackspaceOnEmpty(id: String): TextCaret? {
         val currentBlocks = _blocks.value
         val idx = currentBlocks.indexOfFirst { it.id == id }
-        if (idx == -1) return
+        if (idx == -1) return null
 
         val cur = currentBlocks[idx]
         val now = System.currentTimeMillis()
@@ -1941,13 +1941,13 @@ abstract class BaseEditorViewModel(
             val occurrenceDate = occurrenceDateFor(cur, id)
             if (occurrenceDate != null) {
                 requestRecurringDeletion(listOf(RecurringDeletionTarget(id, occurrenceDate)))
-                return
+                return null
             }
         }
 
         if (cur !is TextBlock) {
             val hiddenChildIds = hiddenChildrenOf(id).map { it.id }
-            if (touchesRecurringTask(hiddenChildIds)) return
+            if (touchesRecurringTask(hiddenChildIds)) return null
             val inheritedAlignment = cur.textAlignmentOrNull() ?: TextAlignment.LEFT
             modifyBlocks { list ->
                 val withTextBlock = spliceAtBlock(list, id) { mutable, i ->
@@ -1957,7 +1957,7 @@ abstract class BaseEditorViewModel(
             }
             announceDeletedBlocks(hiddenChildIds)
             scheduleAutosave()
-            return
+            return null
         }
 
         if (cur.indentationLevel > 0) {
@@ -1965,20 +1965,20 @@ abstract class BaseEditorViewModel(
                 mapBlockById(list, id) { b -> withIndentation(b, b.indentationLevel - 1, now) }
             }
             scheduleAutosave()
-            return
+            return null
         }
 
         val shownBlocks = visibleBlocks.value
         val shownIndex = shownBlocks.indexOfFirst { it.id == id }
-        if (shownIndex == -1 || shownBlocks.size <= 1) return
+        if (shownIndex == -1 || shownBlocks.size <= 1) return null
 
         val prevBlock = shownBlocks.getOrNull(shownIndex - 1)
         val nextBlock = shownBlocks.getOrNull(shownIndex + 1)
 
         if (prevBlock != null) {
-            val previousBlockHasNoText = prevBlock.editableTextOrNull() == null
+            val previousBlockText = prevBlock.editableTextOrNull()
 
-            if (previousBlockHasNoText) {
+            if (previousBlockText == null) {
                 modifyBlocks { list ->
                     deleteBlockEverywhereById(list, prevBlock.id)
                 }
@@ -1993,6 +1993,7 @@ abstract class BaseEditorViewModel(
                     }
                     scheduleAutosave()
                 }
+                return TextCaret(BlockTextPosition(prevBlock.id, previousBlockText.length), previousBlockText)
             }
         } else if (nextBlock != null) {
             _focusRequest.value = FocusRequest(id = nextBlock.id, placeCursorAtEnd = false)
@@ -2004,6 +2005,7 @@ abstract class BaseEditorViewModel(
                 scheduleAutosave()
             }
         }
+        return null
     }
 
     fun handleBackspaceAtStartOfText(id: String): TextCaret? {

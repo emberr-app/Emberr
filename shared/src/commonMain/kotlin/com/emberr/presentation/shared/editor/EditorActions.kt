@@ -39,7 +39,7 @@ interface EditorActions {
     fun onSetBlockAlignment(alignment: TextAlignment)
     fun onEnterPressed(id: String, before: String, after: String)
     fun onShiftEnterPressed(id: String, before: String, after: String) = onEnterPressed(id, before, after)
-    fun onBackspaceOnEmpty(id: String)
+    fun onBackspaceOnEmpty(id: String): TextCaret?
     fun onBackspaceAtStartOfText(id: String): TextCaret? = null
     fun onDeleteAtEndOfText(id: String): TextCaret? = null
     fun backspaceLeavesTopOfNote(id: String): Boolean = false

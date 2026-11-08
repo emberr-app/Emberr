@@ -387,8 +387,18 @@ fun EditorScreen(
                 if (before.isEmpty()) listState.requestScrollToItem(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset)
                 actions.onEnterPressed(id, before, after)
             }
+            override fun onBackspaceOnEmpty(id: String): TextCaret? =
+                actions.onBackspaceOnEmpty(id)?.also(::refreshSlashMenuWhereBackspaceLanded)
             override fun onBackspaceAtStartOfText(id: String): TextCaret? =
-                actions.onBackspaceAtStartOfText(id)?.also { pendingCaretAfterEdit = it }
+                actions.onBackspaceAtStartOfText(id)?.also { caret ->
+                    pendingCaretAfterEdit = caret
+                    refreshSlashMenuWhereBackspaceLanded(caret)
+                }
+            private fun refreshSlashMenuWhereBackspaceLanded(caret: TextCaret) {
+                val landedBlockId = caret.position.blockId
+                previousTextMap[landedBlockId] = caret.blockText
+                refreshSlashMenu(landedBlockId, caret.blockText, textWasDeleted = true)
+            }
             override fun onDeleteAtEndOfText(id: String): TextCaret? =
                 actions.onDeleteAtEndOfText(id)?.also { pendingCaretAfterEdit = it }
             override fun onToggleSelection(id: String) {
@@ -419,6 +429,25 @@ fun EditorScreen(
                     isSlashKilled = true
                 }
 
+                refreshSlashMenu(id, text, textWasDeleted = hasSeenThisBlockBefore && text.length < prevText.length)
+
+                val lastAtIndex = text.lastIndexOf('@')
+                val opensAMention = lastAtIndex != -1 && (
+                    lastAtIndex == 0 || text[lastAtIndex - 1] == ' ' || text[lastAtIndex - 1] == '\n'
+                    )
+                val textAfterAt = if (opensAMention) text.substring(lastAtIndex + 1) else ""
+                val mentionActive = opensAMention && !textAfterAt.contains(' ')
+
+                if (!isDesktopPlatform) {
+                    if (mentionActive) {
+                        latestOnMobileMenuStateChange(MobileMenuState.MENTION)
+                    } else if (latestMobileMenuState == MobileMenuState.MENTION) {
+                        latestOnMobileMenuStateChange(MobileMenuState.MAIN)
+                    }
+                }
+                latestOnMentionQueryChange(if (mentionActive) textAfterAt else null)
+            }
+            private fun refreshSlashMenu(id: String, text: String, textWasDeleted: Boolean) {
                 val lastSlashIndex = text.lastIndexOf('/')
                 val isCalloutTitle = findBlockRecursive(latestBlocks, id) is CalloutBlock
                 val opensASlashCommand = !isCalloutTitle && lastSlashIndex != -1
@@ -429,7 +458,6 @@ fun EditorScreen(
                         textAfterSlash.length <= 2 ||
                             slashMenuSearchTexts.any { it.contains(textAfterSlash, ignoreCase = true) }
                         )
-                    val textWasDeleted = hasSeenThisBlockBefore && text.length < prevText.length
 
                     if (!queryCanStillMatch) {
                         isSlashKilled = true
@@ -453,22 +481,6 @@ fun EditorScreen(
                     }
                     latestOnSlashQueryChange("")
                 }
-
-                val lastAtIndex = text.lastIndexOf('@')
-                val opensAMention = lastAtIndex != -1 && (
-                    lastAtIndex == 0 || text[lastAtIndex - 1] == ' ' || text[lastAtIndex - 1] == '\n'
-                    )
-                val textAfterAt = if (opensAMention) text.substring(lastAtIndex + 1) else ""
-                val mentionActive = opensAMention && !textAfterAt.contains(' ')
-
-                if (!isDesktopPlatform) {
-                    if (mentionActive) {
-                        latestOnMobileMenuStateChange(MobileMenuState.MENTION)
-                    } else if (latestMobileMenuState == MobileMenuState.MENTION) {
-                        latestOnMobileMenuStateChange(MobileMenuState.MAIN)
-                    }
-                }
-                latestOnMentionQueryChange(if (mentionActive) textAfterAt else null)
             }
             override fun onChangeBlockType(type: String) = clearSlashAndExecute { actions.onChangeBlockType(type) }
             override fun onToggleFormat(format: String) = clearSlashAndExecute { actions.onToggleFormat(format) }
