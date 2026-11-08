@@ -28,6 +28,8 @@ val TableGridLineDark  = Color(0xFF3A3A3A)
 
 val LocalAppIsDark = staticCompositionLocalOf { false }
 
+val LocalColorThemePreference = staticCompositionLocalOf { ColorThemePreference.EMBERR }
+
 val LocalUsesTwentyFourHourClock = staticCompositionLocalOf { false }
 
 val LocalFirstDayOfWeek = staticCompositionLocalOf { DayOfWeek.SUNDAY }
@@ -36,7 +38,11 @@ val highlightBackgroundColor: Color
     @Composable get() = if (LocalAppIsDark.current) HighlightLimeDark else HighlightLime
 
 val tableGridLineColor: Color
-    @Composable get() = if (LocalAppIsDark.current) TableGridLineDark else TableGridLineLight
+    @Composable get() = when {
+        LocalColorThemePreference.current == ColorThemePreference.HIGH_CONTRAST -> MaterialTheme.colorScheme.outlineVariant
+        LocalAppIsDark.current -> TableGridLineDark
+        else -> TableGridLineLight
+    }
 
 enum class FontSizePreference { EXTRA_SMALL, SMALL, DEFAULT, LARGE, EXTRA_LARGE }
 enum class ThemePreference(val displayName: String) {
@@ -59,7 +65,12 @@ fun EmberrTheme(
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = colorThemePreference.colorSchemeFor(darkTheme, themedTextAndIcons, colorThemeStrength)
+    val colorScheme = colorThemePreference.colorSchemeFor(
+        darkTheme = darkTheme,
+        themedTextAndIcons = themedTextAndIcons,
+        strengthPercent = colorThemeStrength,
+        sourceColorSchemes = colorThemePreference.sourceColorSchemes()
+    )
 
     val currentFontSizes = when {
         isDesktopPlatform -> when (fontSizePreference) {
@@ -85,6 +96,7 @@ fun EmberrTheme(
 
     CompositionLocalProvider(
         LocalAppIsDark provides darkTheme,
+        LocalColorThemePreference provides colorThemePreference,
         LocalEmberrFontSizes provides currentFontSizes,
         LocalEmberrFontStyle provides fontStylePreference,
         LocalUsesTwentyFourHourClock provides usesTwentyFourHourClock,

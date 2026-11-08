@@ -68,6 +68,38 @@ private val SoftDarkColorScheme = darkColorScheme(
     surfaceContainerHigh = Color(0xFF313131)
 )
 
+private val HighContrastLightColorScheme = lightColorScheme(
+    primary          = Color.Black,
+    onPrimary        = Color.White,
+    secondary        = Color(0xFF0040C0),
+    onSecondary      = Color.White,
+    background       = Color.White,
+    onBackground     = Color.Black,
+    surface          = Color(0xFFEBEBEB),
+    onSurface        = Color.Black,
+    outline          = Color(0xFF3D3D3D),
+    outlineVariant   = Color(0xFF8A8A8A),
+    onSurfaceVariant = Color(0xFF1A1A1A),
+    surfaceVariant = Color(0xFFEBEBEB),
+    surfaceContainerHigh = Color(0xFFD6D6D6)
+)
+
+private val HighContrastDarkColorScheme = darkColorScheme(
+    primary          = Color.White,
+    onPrimary        = Color.Black,
+    secondary        = Color(0xFFFFD600),
+    onSecondary      = Color.Black,
+    background       = Color.Black,
+    onBackground     = Color.White,
+    surface          = Color(0xFF141414),
+    onSurface        = Color.White,
+    outline          = Color(0xFFC2C2C2),
+    outlineVariant   = Color(0xFF7A7A7A),
+    onSurfaceVariant = Color(0xFFE6E6E6),
+    surfaceVariant = Color(0xFF2E2E2E),
+    surfaceContainerHigh = Color(0xFF2E2E2E)
+)
+
 private val TerracottaLightColorScheme = lightColorScheme(
     primary          = Color(0xFF2B1D14),
     onPrimary        = Color(0xFFFFFBF7),
@@ -372,6 +404,8 @@ private val EverforestDarkColorScheme = darkColorScheme(
     surfaceContainerHigh = Color(0xFF3D484D)
 )
 
+class ThemeColorSchemes(val light: ColorScheme, val dark: ColorScheme)
+
 enum class ColorThemePreference(
     val displayName: String,
     val lightColorScheme: ColorScheme,
@@ -379,6 +413,8 @@ enum class ColorThemePreference(
 ) {
     EMBERR("Emberr", EmberrLightColorScheme, EmberrDarkColorScheme),
     SOFT("Soft", SoftLightColorScheme, SoftDarkColorScheme),
+    WALLPAPER("Wallpaper", EmberrLightColorScheme, EmberrDarkColorScheme),
+    HIGH_CONTRAST("High Contrast", HighContrastLightColorScheme, HighContrastDarkColorScheme),
     TERRACOTTA("Terracotta", TerracottaLightColorScheme, TerracottaDarkColorScheme),
     PAPER("Paper", PaperLightColorScheme, PaperDarkColorScheme),
     NORD("Nord", NordLightColorScheme, NordDarkColorScheme),
@@ -393,9 +429,10 @@ enum class ColorThemePreference(
     fun colorSchemeFor(
         darkTheme: Boolean,
         themedTextAndIcons: Boolean,
-        strengthPercent: Int = FULL_THEME_STRENGTH
+        strengthPercent: Int = FULL_THEME_STRENGTH,
+        sourceColorSchemes: ThemeColorSchemes = ThemeColorSchemes(lightColorScheme, darkColorScheme)
     ): ColorScheme {
-        val themedColorScheme = if (darkTheme) darkColorScheme else lightColorScheme
+        val themedColorScheme = if (darkTheme) sourceColorSchemes.dark else sourceColorSchemes.light
         val neutralColorScheme = if (darkTheme) EmberrDarkColorScheme else EmberrLightColorScheme
         val textAndIconColorScheme = if (themedTextAndIcons) themedColorScheme else neutralColorScheme
         val strength = strengthPercent.coerceIn(0, FULL_THEME_STRENGTH) / FULL_THEME_STRENGTH.toFloat()

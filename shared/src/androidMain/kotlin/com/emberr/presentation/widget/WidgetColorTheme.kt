@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.glance.LocalContext
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.updateAll
 import com.emberr.data.local.prefs.SettingsManager
@@ -24,6 +25,8 @@ import com.emberr.presentation.widget.tasks.TasksWidget
 import com.emberr.presentation.widget.todaytasks.TodayTasksWidget
 import com.emberr.presentation.widget.upcomingevents.UpcomingEventsWidget
 import com.emberr.ui.theme.ColorThemePreference
+import com.emberr.ui.theme.ThemeColorSchemes
+import com.emberr.ui.theme.wallpaperColorSchemesFor
 import com.emberr.ui.theme.colorThemePreferenceNamed
 import kotlinx.coroutines.flow.flowOf
 import org.koin.core.context.GlobalContext
@@ -59,18 +62,25 @@ internal fun WidgetColorTheme(content: @Composable () -> Unit) {
         initial = settingsManager?.getColorThemeStrength() ?: SyncConstants.DEFAULT_COLOR_THEME_STRENGTH
     )
     val colorTheme = colorThemePreferenceNamed(colorThemePreferenceName)
+    val widgetContext = LocalContext.current
+    val sourceColorSchemes = remember(colorTheme, widgetContext) {
+        val wallpaperColorSchemes = if (colorTheme == ColorThemePreference.WALLPAPER) wallpaperColorSchemesFor(widgetContext) else null
+        wallpaperColorSchemes ?: ThemeColorSchemes(colorTheme.lightColorScheme, colorTheme.darkColorScheme)
+    }
 
     CompositionLocalProvider(
         LocalWidgetColorSchemes provides WidgetColorSchemes(
             light = colorTheme.colorSchemeFor(
                 darkTheme = false,
                 themedTextAndIcons = themedTextAndIcons,
-                strengthPercent = colorThemeStrength
+                strengthPercent = colorThemeStrength,
+                sourceColorSchemes = sourceColorSchemes
             ),
             dark = colorTheme.colorSchemeFor(
                 darkTheme = true,
                 themedTextAndIcons = themedTextAndIcons,
-                strengthPercent = colorThemeStrength
+                strengthPercent = colorThemeStrength,
+                sourceColorSchemes = sourceColorSchemes
             )
         ),
         content = content

@@ -57,6 +57,8 @@ import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.ui.theme.ColorThemePreference
+import com.emberr.ui.theme.availableColorThemes
+import com.emberr.ui.theme.sourceColorSchemes
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.PaperTextureArea
 import com.emberr.ui.theme.isPaperTextureAreaChecked
@@ -113,7 +115,8 @@ fun ColorThemeSettingsScreen(
     val savedPaperTextureAreas by viewModel.paperTextureAreas.collectAsState()
     val paperTextureAreas = paperTextureAreasNamed(savedPaperTextureAreas)
     val columnCount = if (isDesktopPlatform) DESKTOP_THEME_COLUMNS else MOBILE_THEME_COLUMNS
-    val colorThemeRows = remember(columnCount) { ColorThemePreference.entries.chunked(columnCount) }
+    val colorThemes = availableColorThemes()
+    val colorThemeRows = remember(columnCount, colorThemes) { colorThemes.chunked(columnCount) }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val sidePadding = desktopSettingsSidePadding(maxWidth)
@@ -354,6 +357,7 @@ private fun ColorThemePreviewCard(
     isSelected: Boolean,
     onSelect: () -> Unit
 ) {
+    val sourceColorSchemes = colorTheme.sourceColorSchemes()
     val previewBorderModifier = if (isSelected) {
         Modifier.border(SelectedPreviewBorderWidth, MaterialTheme.colorScheme.primary, PreviewCardShape)
     } else {
@@ -382,7 +386,8 @@ private fun ColorThemePreviewCard(
                 colors = colorTheme.colorSchemeFor(
                     darkTheme = false,
                     themedTextAndIcons = themedTextAndIcons,
-                    strengthPercent = strengthPercent
+                    strengthPercent = strengthPercent,
+                    sourceColorSchemes = sourceColorSchemes
                 ),
                 modifier = Modifier.weight(1f)
             )
@@ -390,7 +395,8 @@ private fun ColorThemePreviewCard(
                 colors = colorTheme.colorSchemeFor(
                     darkTheme = true,
                     themedTextAndIcons = themedTextAndIcons,
-                    strengthPercent = strengthPercent
+                    strengthPercent = strengthPercent,
+                    sourceColorSchemes = sourceColorSchemes
                 ),
                 modifier = Modifier.weight(1f)
             )
