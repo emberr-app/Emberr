@@ -138,6 +138,10 @@ interface SettingsManager {
     val fontSizePreferenceFlow: Flow<String>
     fun saveFontSizePreference(preference: String)
 
+    val interfaceScalePercentFlow: Flow<Int>
+    fun getInterfaceScalePercent(): Int
+    fun saveInterfaceScalePercent(percent: Int)
+
     val fontStylePreferenceFlow: Flow<String>
     fun saveFontStylePreference(preference: String)
 

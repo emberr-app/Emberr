@@ -52,6 +52,7 @@ class AppLockActivity : FragmentActivity() {
             val fontSizePreferenceName by settingsViewModel.fontSizePreference.collectAsState()
             val fontStylePreferenceName by settingsViewModel.fontStylePreference.collectAsState()
             val colorThemeSettings = settingsManager.collectColorThemeSettings()
+            val interfaceScalePercent by settingsViewModel.interfaceScalePercent.collectAsState()
 
             val darkTheme = when (runCatching { ThemePreference.valueOf(themePreferenceName) }.getOrDefault(ThemePreference.SYSTEM)) {
                 ThemePreference.LIGHT -> false
@@ -65,7 +66,8 @@ class AppLockActivity : FragmentActivity() {
                     .getOrDefault(FontSizePreference.DEFAULT),
                 fontStylePreference = runCatching { FontStylePreference.valueOf(fontStylePreferenceName) }
                     .getOrDefault(FontStylePreference.POPPINS),
-                colorThemeSettings = colorThemeSettings
+                colorThemeSettings = colorThemeSettings,
+                interfaceScalePercent = interfaceScalePercent
             ) {
                 AppLockScreen(
                     unlockFailureMessage = unlockFailureMessage,

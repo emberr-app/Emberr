@@ -15,6 +15,7 @@ import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.util.format.formatByteSize
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
+import com.emberr.ui.theme.showInterfaceScaleToast
 import com.emberr.presentation.home.overview.OverviewSection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -162,6 +163,17 @@ class SettingsViewModel(
 
     fun setFontSizePreference(preference: String) {
         settingsManager.saveFontSizePreference(preference)
+    }
+
+    val interfaceScalePercent: StateFlow<Int> = settingsManager.interfaceScalePercentFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = settingsManager.getInterfaceScalePercent()
+    )
+
+    fun setInterfaceScalePercent(percent: Int) {
+        settingsManager.saveInterfaceScalePercent(percent)
+        showInterfaceScaleToast(percent)
     }
 
     val fontStylePreference: StateFlow<String> = settingsManager.fontStylePreferenceFlow.stateIn(

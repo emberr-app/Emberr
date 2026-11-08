@@ -391,6 +391,17 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _fontSizePreference.value = preference
     }
 
+    private val _interfaceScalePercent = MutableStateFlow(
+        prefs.getInt(SyncConstants.KEY_INTERFACE_SCALE_PERCENT, SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT)
+    )
+    override val interfaceScalePercentFlow: Flow<Int> = _interfaceScalePercent
+    override fun getInterfaceScalePercent(): Int = _interfaceScalePercent.value
+
+    override fun saveInterfaceScalePercent(percent: Int) {
+        prefs.putInt(SyncConstants.KEY_INTERFACE_SCALE_PERCENT, percent)
+        _interfaceScalePercent.value = percent
+    }
+
     private val _fontStylePreference = MutableStateFlow(
         prefs.get(SyncConstants.KEY_FONT_STYLE_PREFERENCE, SyncConstants.DEFAULT_FONT_STYLE_PREFERENCE)
     )

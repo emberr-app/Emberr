@@ -71,6 +71,9 @@ import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrSwitch
+import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.SmallRoundedCornerShape
+import com.emberr.presentation.shared.components.emberrControlContainerColor
 import com.emberr.presentation.shared.components.SelectedOptionBackground
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.TopBarIconButton
@@ -84,6 +87,10 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
+import com.emberr.ui.theme.LARGEST_INTERFACE_SCALE_PERCENT
+import com.emberr.ui.theme.SMALLEST_INTERFACE_SCALE_PERCENT
+import com.emberr.ui.theme.interfaceScalePercentMovedBySteps
+import com.emberr.data.local.prefs.SyncConstants
 import com.emberr.ui.theme.colorThemePreferenceNamed
 import com.emberr.ui.theme.fontFamilyFor
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
@@ -120,6 +127,9 @@ import emberr.shared.generated.resources.scan_line
 import emberr.shared.generated.resources.share
 import emberr.shared.generated.resources.shield_alert
 import emberr.shared.generated.resources.sidebar
+import emberr.shared.generated.resources.scale
+import emberr.shared.generated.resources.minus
+import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.text_type
 import emberr.shared.generated.resources.clock_circle
@@ -199,6 +209,7 @@ fun SettingsScreen(
     val colorThemePreference by viewModel.colorThemePreference.collectAsState()
 
     val fontSizePreference by viewModel.fontSizePreference.collectAsState()
+    val interfaceScalePercent by viewModel.interfaceScalePercent.collectAsState()
     val fontStylePreference by viewModel.fontStylePreference.collectAsState()
 
     val timeFormatPreference by viewModel.timeFormatPreference.collectAsState()
@@ -345,6 +356,7 @@ fun SettingsScreen(
                 AppearanceSettingsSection(
                     colorThemeLabel = colorThemePreferenceNamed(colorThemePreference).displayName,
                     fontSizeLabel = fontSizeDisplayNameFor(fontSizePreference),
+                    interfaceScalePercent = interfaceScalePercent,
                     fontStyleLabel = selectedFontStyle.displayName,
                     timeFormatLabel = selectedTimeFormat.displayName,
                     firstDayOfWeekLabel = selectedFirstDayOfWeek.displayName,
@@ -403,6 +415,7 @@ fun SettingsScreen(
                         }
                     },
                     onColorThemeClick = onNavigateToColorThemeSettings,
+                    onInterfaceScaleChange = { viewModel.setInterfaceScalePercent(it) },
                     onTopBarFadeStyleClick = { showTopBarFadeStyleSheet = true },
                     onShowScrollbarChange = { viewModel.setShowScrollbar(it) },
                     onDailyNotesEnabledChange = { viewModel.setDailyNotesEnabled(it) },
@@ -1088,6 +1101,7 @@ private fun SyncSettingsSection(
 private fun AppearanceSettingsSection(
     colorThemeLabel: String,
     fontSizeLabel: String,
+    interfaceScalePercent: Int,
     fontStyleLabel: String,
     timeFormatLabel: String,
     firstDayOfWeekLabel: String,
@@ -1109,6 +1123,7 @@ private fun AppearanceSettingsSection(
     topBarFadeStyleChoices: List<SettingsChoice>,
     topBarFadeProgressiveToggle: SettingsMenuToggle?,
     onColorThemeClick: () -> Unit,
+    onInterfaceScaleChange: (Int) -> Unit,
     onTopBarFadeStyleClick: () -> Unit,
     onShowScrollbarChange: (Boolean) -> Unit,
     onDailyNotesEnabledChange: (Boolean) -> Unit,
@@ -1127,21 +1142,6 @@ private fun AppearanceSettingsSection(
             onClick = onColorThemeClick
         )
         SettingsDivider()
-        SettingsChoiceRow(
-            icon = painterResource(Res.drawable.sliders_horizontal),
-            title = "Font Size",
-            value = fontSizeLabel,
-            choices = fontSizeChoices
-        )
-        SettingsDivider()
-        SettingsChoiceRow(
-            icon = painterResource(Res.drawable.text_type),
-            title = "Font Style",
-            value = fontStyleLabel,
-            choices = fontStyleChoices
-        )
-
-        SettingsDivider()
         if (isDesktopPlatform) {
             SettingsChoiceRow(
                 icon = painterResource(Res.drawable.palette),
@@ -1158,6 +1158,25 @@ private fun AppearanceSettingsSection(
                 onClick = onTopBarFadeStyleClick
             )
         }
+        SettingsDivider()
+        InterfaceScaleStepperRow(
+            savedPercent = interfaceScalePercent,
+            onPercentChosen = onInterfaceScaleChange
+        )
+        SettingsDivider()
+        SettingsChoiceRow(
+            icon = painterResource(Res.drawable.sliders_horizontal),
+            title = "Font Size",
+            value = fontSizeLabel,
+            choices = fontSizeChoices
+        )
+        SettingsDivider()
+        SettingsChoiceRow(
+            icon = painterResource(Res.drawable.text_type),
+            title = "Font Style",
+            value = fontStyleLabel,
+            choices = fontStyleChoices
+        )
     }
 
     SettingsGroup(title = "Date & Time") {
@@ -1663,6 +1682,78 @@ fun SettingsActionRow(
                     modifier = Modifier.size(18.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun InterfaceScaleStepperRow(
+    savedPercent: Int,
+    onPercentChosen: (Int) -> Unit
+) {
+    SettingsRowLayout(modifier = Modifier) {
+        SettingsRowIcon(icon = painterResource(Res.drawable.scale))
+        Spacer(modifier = Modifier.width(16.dp))
+        SettingsRowTitle(
+            title = "Interface Scale",
+            subtitle = if (isDesktopPlatform) "Makes everything in the app bigger or smaller." else null,
+            modifier = Modifier.weight(1f)
+        )
+        Row(
+            modifier = Modifier.clip(SmallRoundedCornerShape).background(emberrControlContainerColor()),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            InterfaceScaleStepButton(
+                icon = painterResource(Res.drawable.minus),
+                description = "Smaller",
+                isEnabled = savedPercent > SMALLEST_INTERFACE_SCALE_PERCENT,
+                onClick = { onPercentChosen(interfaceScalePercentMovedBySteps(savedPercent, -1)) }
+            )
+            IconTooltip(text = "Reset to 100%") {
+                Text(
+                    text = "$savedPercent%",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .widthIn(min = if (isDesktopPlatform) 52.dp else 44.dp)
+                        .clickable(interactionSource = null, indication = null) {
+                            if (savedPercent != SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT) {
+                                onPercentChosen(SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT)
+                            }
+                        }
+                )
+            }
+            InterfaceScaleStepButton(
+                icon = painterResource(Res.drawable.plus),
+                description = "Bigger",
+                isEnabled = savedPercent < LARGEST_INTERFACE_SCALE_PERCENT,
+                onClick = { onPercentChosen(interfaceScalePercentMovedBySteps(savedPercent, 1)) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun InterfaceScaleStepButton(
+    icon: Painter,
+    description: String,
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    IconTooltip(text = description) {
+        Box(
+            modifier = Modifier
+                .size(if (isDesktopPlatform) 28.dp else 34.dp)
+                .clickable(enabled = isEnabled, onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = description,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isEnabled) 0.8f else 0.25f),
+                modifier = Modifier.size(16.dp)
+            )
         }
     }
 }

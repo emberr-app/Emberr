@@ -457,6 +457,17 @@ class AndroidSettingsManager(
         _fontSizePreference.value = preference
     }
 
+    private val _interfaceScalePercent = MutableStateFlow(
+        sharedPreferences.getInt(SyncConstants.KEY_INTERFACE_SCALE_PERCENT, SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT)
+    )
+    override val interfaceScalePercentFlow: Flow<Int> = _interfaceScalePercent
+    override fun getInterfaceScalePercent(): Int = _interfaceScalePercent.value
+
+    override fun saveInterfaceScalePercent(percent: Int) {
+        sharedPreferences.edit { putInt(SyncConstants.KEY_INTERFACE_SCALE_PERCENT, percent) }
+        _interfaceScalePercent.value = percent
+    }
+
     private val _fontStylePreference = MutableStateFlow(
         sharedPreferences.getString(SyncConstants.KEY_FONT_STYLE_PREFERENCE, SyncConstants.DEFAULT_FONT_STYLE_PREFERENCE)
             ?: SyncConstants.DEFAULT_FONT_STYLE_PREFERENCE

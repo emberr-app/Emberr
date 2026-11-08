@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import com.emberr.data.local.prefs.SyncConstants
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrTextContextMenu
 import kotlinx.datetime.DayOfWeek
@@ -59,6 +60,7 @@ fun EmberrTheme(
     colorThemeSettings: ColorThemeSettings = ColorThemeSettings(),
     usesTwentyFourHourClock: Boolean = false,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
+    interfaceScalePercent: Int = SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT,
     content: @Composable () -> Unit
 ) {
     val colorTheme = colorThemeSettings.colorTheme
@@ -91,6 +93,7 @@ fun EmberrTheme(
         darkIcons = !darkTheme
     )
 
+    ScaleInterface(interfaceScalePercent) {
     CompositionLocalProvider(
         LocalAppIsDark provides darkTheme,
         LocalColorThemePreference provides colorTheme,
@@ -115,5 +118,6 @@ fun EmberrTheme(
                 }
             }
         }
+    }
     }
 }
