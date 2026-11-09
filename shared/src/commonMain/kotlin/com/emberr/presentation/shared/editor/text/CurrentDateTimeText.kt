@@ -1,5 +1,7 @@
 package com.emberr.presentation.shared.editor.text
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.time.formatTimeOfDay
 import kotlinx.datetime.TimeZone
@@ -13,3 +15,13 @@ fun currentTimeText(usesTwentyFourHourClock: Boolean): String {
 }
 
 fun currentDateText(): String = shortDateText(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+
+fun TextFieldValue.withTextInsertedAtCursor(text: String): TextFieldValue {
+    val selectionStart = selection.min
+    val selectionEnd = selection.max
+    val spaceBefore = if (selectionStart > 0 && !this.text[selectionStart - 1].isWhitespace()) " " else ""
+    val spaceAfter = if (selectionEnd < this.text.length && this.text[selectionEnd].isWhitespace()) "" else " "
+    val insertedText = spaceBefore + text + spaceAfter
+    val newText = this.text.substring(0, selectionStart) + insertedText + this.text.substring(selectionEnd)
+    return copy(text = newText, selection = TextRange(selectionStart + insertedText.length), composition = null)
+}

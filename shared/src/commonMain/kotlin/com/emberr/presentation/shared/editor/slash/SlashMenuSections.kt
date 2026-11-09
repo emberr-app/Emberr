@@ -104,10 +104,7 @@ fun buildSlashMenuSections(
         SlashMenuItemData("Credentials", Res.drawable.lock_password) { onInsertMediaBlock("credentials") }
             .copy(searchWords = listOf("login", "password", "credentials", "account"))
     )),
-    SlashMenuSectionData("Date & Time", listOf(
-        SlashMenuItemData("Current Time", Res.drawable.clock_circle) { onInsertText(currentTimeText(usesTwentyFourHourClock)) },
-        SlashMenuItemData("Current Date", Res.drawable.calendar_date) { onInsertText(currentDateText()) }
-    )),
+    dateAndTimeSlashMenuSection(onInsertText, usesTwentyFourHourClock),
     SlashMenuSectionData(
         "Properties",
         PropertyType.entries.filterNot { it.isOnlyForDatabases }.map { propertyType ->
@@ -141,6 +138,15 @@ fun buildSlashMenuSections(
     )),
 )
 
+fun dateAndTimeSlashMenuSection(onInsertText: (String) -> Unit, usesTwentyFourHourClock: Boolean) =
+    SlashMenuSectionData("Date & Time", listOf(
+        SlashMenuItemData("Current Time", Res.drawable.clock_circle) { onInsertText(currentTimeText(usesTwentyFourHourClock)) },
+        SlashMenuItemData("Current Date", Res.drawable.calendar_date) { onInsertText(currentDateText()) }
+    ))
+
+fun SlashMenuItemData.matchesSlashQuery(query: String): Boolean =
+    query.isBlank() || label.contains(query, ignoreCase = true) || searchWords.any { it.contains(query, ignoreCase = true) }
+
 fun filteredSlashMenuSections(
     query: String,
     onChangeBlockType: (String) -> Unit,
@@ -161,7 +167,5 @@ fun filteredSlashMenuSections(
     usesTwentyFourHourClock,
     customProperties
 ).map { section ->
-    section.copy(items = section.items.filter { item ->
-        query.isBlank() || item.label.contains(query, ignoreCase = true) || item.searchWords.any { it.contains(query, ignoreCase = true) }
-    })
+    section.copy(items = section.items.filter { it.matchesSlashQuery(query) })
 }.filter { it.items.isNotEmpty() }
