@@ -1,11 +1,13 @@
 package com.emberr.domain.cloud.sync
 
 import com.emberr.data.local.room.dao.CloudItemDao
+import com.emberr.data.local.room.dao.CloudMediaLockDao
 import com.emberr.data.local.room.dao.CloudSpaceDao
 import com.emberr.data.local.room.dao.FolderDao
 import com.emberr.data.local.room.dao.SpaceDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CloudItemEntity
+import com.emberr.data.local.room.entity.CloudMediaLockEntity
 import com.emberr.data.local.room.entity.CloudSpaceEntity
 import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.PLACEHOLDER_SPACE_UPDATED_AT
@@ -18,6 +20,7 @@ import com.emberr.domain.cloud.api.CloudApiException
 import com.emberr.domain.cloud.api.CloudBlobTransferException
 import com.emberr.domain.cloud.api.CloudChanges
 import com.emberr.domain.cloud.api.CloudRemoteItem
+import com.emberr.domain.cloud.api.CloudRemoteMediaLock
 import com.emberr.domain.cloud.api.CloudServerUnreachableException
 import com.emberr.domain.cloud.api.CloudSpaceKind
 import com.emberr.domain.cloud.api.CloudWriteResult
@@ -46,7 +49,14 @@ import kotlinx.serialization.json.Json
 import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 
-private class PulledChanges(val items: List<CloudRemoteItem>, val latestRevision: Long, val isFullList: Boolean)
+private class PulledChanges(
+    val items: List<CloudRemoteItem>,
+    val mediaLocks: List<CloudRemoteMediaLock>,
+    val latestRevision: Long,
+    val isFullList: Boolean
+)
+
+private data class MediaLockPlace(val mediaId: String, val noteId: String)
 
 private class FolderKeyToSend(val openKey: ByteArray, val lockedKey: CloudEncryptedBytes)
 
@@ -57,6 +67,7 @@ class CloudSyncEngine(
     private val itemKeyManager: CloudItemKeyManager,
     private val cloudSpaceDao: CloudSpaceDao,
     private val cloudItemDao: CloudItemDao,
+    private val cloudMediaLockDao: CloudMediaLockDao,
     private val spaceDao: SpaceDao,
     private val folderDao: FolderDao,
     private val spaceRepository: SpaceRepository,
@@ -208,6 +219,7 @@ class CloudSyncEngine(
         val listPass = listSync.applyPulledLists(itemsNotYetAppliedByStream, counts)
         chatSync.applyPulledChats(itemsNotYetAppliedByStream, counts)
         pulledChangesByStream.forEach { (stream, pulledChanges) ->
+            savePulledMediaLocks(stream, pulledChanges.mediaLocks)
             cloudSpaceDao.updateLastRevisionSeen(stream.appSpaceId, pulledChanges.latestRevision)
         }
 
@@ -325,12 +337,14 @@ class CloudSyncEngine(
 
     private suspend fun fetchEveryChangedItem(sessionToken: String, stream: CloudStream): PulledChanges {
         val newestItemsById = LinkedHashMap<String, CloudRemoteItem>()
+        val newestMediaLocksByPlace = LinkedHashMap<MediaLockPlace, CloudRemoteMediaLock>()
         var since = stream.lastRevisionSeen
         var isFullList = false
         while (true) {
             when (val changes = apiClient.fetchChanges(sessionToken, stream.spaceRef, since)) {
                 is CloudChanges.ResyncRequired -> {
                     newestItemsById.clear()
+                    newestMediaLocksByPlace.clear()
                     since = 0L
                     isFullList = true
                 }
@@ -341,10 +355,43 @@ class CloudSyncEngine(
                             newestItemsById[item.itemId] = item
                         }
                     }
-                    if (!changes.hasMore) return PulledChanges(newestItemsById.values.toList(), changes.latest, isFullList)
+                    changes.mediaLocks.forEach { mediaLock ->
+                        val place = MediaLockPlace(mediaLock.mediaId, mediaLock.noteId)
+                        val alreadyPulled = newestMediaLocksByPlace[place]
+                        if (alreadyPulled == null || mediaLock.revision > alreadyPulled.revision) {
+                            newestMediaLocksByPlace[place] = mediaLock
+                        }
+                    }
+                    if (!changes.hasMore) {
+                        return PulledChanges(
+                            items = newestItemsById.values.toList(),
+                            mediaLocks = newestMediaLocksByPlace.values.toList(),
+                            latestRevision = changes.latest,
+                            isFullList = isFullList
+                        )
+                    }
                     since = changes.latest
                 }
             }
+        }
+    }
+
+    private suspend fun savePulledMediaLocks(stream: CloudStream, mediaLocks: List<CloudRemoteMediaLock>) {
+        if (mediaLocks.isEmpty()) return
+        withLocalDataLock {
+            cloudMediaLockDao.upsertLocks(
+                mediaLocks.map { mediaLock ->
+                    CloudMediaLockEntity(
+                        spaceRef = stream.spaceRef,
+                        mediaId = mediaLock.mediaId,
+                        noteId = mediaLock.noteId,
+                        encryptedKey = mediaLock.lockedKey?.cipherText?.toBase64(),
+                        encryptedKeyNonce = mediaLock.lockedKey?.nonce?.toBase64(),
+                        revision = mediaLock.revision,
+                        isDeleted = mediaLock.deleted
+                    )
+                }
+            )
         }
     }
 

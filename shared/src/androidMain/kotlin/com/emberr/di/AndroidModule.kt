@@ -297,6 +297,7 @@ val androidModule = module {
     single<com.emberr.data.local.room.dao.UnusedMediaFileDao> { get<AppDatabase>().unusedMediaFileDao() }
     single<com.emberr.data.local.room.dao.CloudSpaceDao> { get<AppDatabase>().cloudSpaceDao() }
     single<com.emberr.data.local.room.dao.CloudItemDao> { get<AppDatabase>().cloudItemDao() }
+    single<com.emberr.data.local.room.dao.CloudMediaLockDao> { get<AppDatabase>().cloudMediaLockDao() }
 
     // SQLDelight
     single<SqlDriver> { DatabaseDriverFactory(androidContext(), get<ByteArray>()).createDriver() }

@@ -80,6 +80,31 @@ class AppDatabaseMigrationTest {
         upgraded.close()
     }
 
+    @Test
+    fun upgradingToVersion8KeepsNotesAndCloudRecordsAndAddsAnEmptyMediaLockTable() {
+        val migrationTestHelper = migrationTestHelperFor("cloud-media-locks.db")
+        migrationTestHelper.createDatabase(7).apply {
+            insertNote(noteId = "note-1", spaceId = "default")
+            execSQL(
+                "INSERT INTO cloud_items (spaceRef, itemId, itemType, localId, parentId, encryptedKey, encryptedKeyNonce, " +
+                    "revision, syncedUpdatedAt, isDeleted) VALUES (7, 'note-1', 'NOTE', 'note-1', 'default', 'a2V5', 'bm9uY2U=', 12, 1, 0)"
+            )
+            close()
+        }
+
+        val upgraded = migrationTestHelper.runMigrationsAndValidate(8, emptyList())
+
+        assertEquals("Maya", upgraded.textInFirstRow("SELECT title FROM notes_metadata WHERE noteId = 'note-1'"))
+        assertEquals("12", upgraded.textInFirstRow("SELECT revision FROM cloud_items WHERE itemId = 'note-1'"))
+        assertEquals("0", upgraded.textInFirstRow("SELECT COUNT(*) FROM cloud_media_locks"))
+        upgraded.execSQL(
+            "INSERT INTO cloud_media_locks (spaceRef, mediaId, noteId, encryptedKey, encryptedKeyNonce, revision, isDeleted) " +
+                "VALUES (7, 'media_00', 'note-1', NULL, NULL, 13, 1)"
+        )
+        assertEquals("13", upgraded.textInFirstRow("SELECT revision FROM cloud_media_locks WHERE noteId = 'note-1'"))
+        upgraded.close()
+    }
+
     private fun migrationTestHelperFor(databaseFileName: String) = MigrationTestHelper(
         schemaDirectoryPath = schemaDirectory,
         databasePath = workingDirectory.resolve(databaseFileName),

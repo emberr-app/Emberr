@@ -73,9 +73,19 @@ class CloudRemoteItem(
     val updatedAtMicroseconds: Long
 )
 
+class CloudRemoteMediaLock(
+    val mediaId: String,
+    val noteId: String,
+    val lockedKey: CloudEncryptedBytes?,
+    val revision: Long,
+    val deleted: Boolean,
+    val updatedAtMicroseconds: Long
+)
+
 sealed class CloudChanges {
     class Page(
         val items: List<CloudRemoteItem>,
+        val mediaLocks: List<CloudRemoteMediaLock>,
         val latest: Long,
         val hasMore: Boolean
     ) : CloudChanges()
@@ -86,6 +96,28 @@ sealed class CloudChanges {
 class CloudUploadUrl(
     val objectKey: String,
     val uploadUrl: String,
+    val expiresAtMicroseconds: Long
+)
+
+class CloudMediaPieceUploadUrl(
+    val index: Int,
+    val uploadUrl: String
+)
+
+class CloudMediaUploadUrls(
+    val committed: Boolean,
+    val pieces: List<CloudMediaPieceUploadUrl>,
+    val expiresAtMicroseconds: Long?
+)
+
+class CloudMediaPieceDownloadUrl(
+    val index: Int,
+    val downloadUrl: String,
+    val sizeBytes: Long
+)
+
+class CloudMediaDownloadUrls(
+    val pieces: List<CloudMediaPieceDownloadUrl>,
     val expiresAtMicroseconds: Long
 )
 

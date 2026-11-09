@@ -158,9 +158,21 @@ internal class ItemJson(
 )
 
 @Serializable
+internal class MediaLockJson(
+    val mediaId: String,
+    val noteId: String,
+    val encryptedKey: String?,
+    val encryptedKeyNonce: String?,
+    val revision: Long,
+    val deleted: Boolean,
+    val updatedAt: Long
+)
+
+@Serializable
 internal class ChangesResponse(
     val resyncRequired: Boolean = false,
     val items: List<ItemJson> = emptyList(),
+    val mediaLocks: List<MediaLockJson> = emptyList(),
     val latest: Long,
     val hasMore: Boolean = false
 )
@@ -201,6 +213,31 @@ internal class DeleteItemRequest(val baseRevision: Long)
 
 @Serializable
 internal class RevisionResponse(val revision: Long)
+
+@Serializable
+internal class MediaUploadUrlsRequest(val pieceSizes: List<Long>)
+
+@Serializable
+internal class MediaPieceUploadUrlJson(val index: Int, val uploadUrl: String)
+
+@Serializable
+internal class MediaUploadUrlsResponse(
+    val committed: Boolean,
+    val pieces: List<MediaPieceUploadUrlJson>,
+    val expiresAt: Long? = null
+)
+
+@Serializable
+internal class CommitMediaResponse(val sizeBytes: Long)
+
+@Serializable
+internal class MediaPieceDownloadUrlJson(val index: Int, val downloadUrl: String, val sizeBytes: Long)
+
+@Serializable
+internal class MediaDownloadUrlsResponse(val pieces: List<MediaPieceDownloadUrlJson>, val expiresAt: Long)
+
+@Serializable
+internal class AddMediaLockRequest(val encryptedKey: String, val encryptedKeyNonce: String)
 
 @Serializable
 internal class ConflictResponse(val item: ItemJson? = null)
@@ -285,6 +322,15 @@ internal fun ItemJson.toCloudRemoteItem() = CloudRemoteItem(
     downloadUrl = downloadUrl,
     revision = revision,
     sizeBytes = sizeBytes,
+    deleted = deleted,
+    updatedAtMicroseconds = updatedAt
+)
+
+internal fun MediaLockJson.toCloudRemoteMediaLock() = CloudRemoteMediaLock(
+    mediaId = mediaId,
+    noteId = noteId,
+    lockedKey = encryptedBytesOrNull(encryptedKey, encryptedKeyNonce),
+    revision = revision,
     deleted = deleted,
     updatedAtMicroseconds = updatedAt
 )

@@ -234,6 +234,7 @@ class CloudApiClient(
         return response.decodeBase64Fields {
             CloudChanges.Page(
                 items = answer.items.map { it.toCloudRemoteItem() },
+                mediaLocks = answer.mediaLocks.map { it.toCloudRemoteMediaLock() },
                 latest = answer.latest,
                 hasMore = answer.hasMore
             )
@@ -314,6 +315,60 @@ class CloudApiClient(
         writeItem(HttpMethod.Delete, sessionToken, spaceRef, itemId) {
             jsonBody(DeleteItemRequest(baseRevision = baseRevision))
         }
+
+    suspend fun requestMediaUploadUrls(sessionToken: String, mediaId: String, pieceSizes: List<Long>): CloudMediaUploadUrls {
+        val answer = send(HttpMethod.Post, "media", mediaId, "upload-urls", sessionToken = sessionToken) {
+            jsonBody(MediaUploadUrlsRequest(pieceSizes = pieceSizes))
+        }.readAnswer<MediaUploadUrlsResponse>()
+        return CloudMediaUploadUrls(
+            committed = answer.committed,
+            pieces = answer.pieces.map { piece -> CloudMediaPieceUploadUrl(index = piece.index, uploadUrl = piece.uploadUrl) },
+            expiresAtMicroseconds = answer.expiresAt
+        )
+    }
+
+    suspend fun commitMedia(sessionToken: String, mediaId: String): Long =
+        send(HttpMethod.Put, "media", mediaId, sessionToken = sessionToken)
+            .readAnswer<CommitMediaResponse>()
+            .sizeBytes
+
+    suspend fun requestMediaDownloadUrls(sessionToken: String, mediaId: String): CloudMediaDownloadUrls {
+        val answer = send(HttpMethod.Post, "media", mediaId, "download-urls", sessionToken = sessionToken)
+            .readAnswer<MediaDownloadUrlsResponse>()
+        return CloudMediaDownloadUrls(
+            pieces = answer.pieces.map { piece ->
+                CloudMediaPieceDownloadUrl(index = piece.index, downloadUrl = piece.downloadUrl, sizeBytes = piece.sizeBytes)
+            },
+            expiresAtMicroseconds = answer.expiresAt
+        )
+    }
+
+    suspend fun addMediaLock(
+        sessionToken: String,
+        spaceRef: Long,
+        mediaId: String,
+        noteId: String,
+        lockedKey: CloudEncryptedBytes
+    ): Long =
+        send(
+            HttpMethod.Put,
+            "spaces", spaceRef.toString(), "media-locks", mediaId, noteId,
+            sessionToken = sessionToken
+        ) {
+            jsonBody(
+                AddMediaLockRequest(
+                    encryptedKey = lockedKey.cipherText.toBase64(),
+                    encryptedKeyNonce = lockedKey.nonce.toBase64()
+                )
+            )
+        }.readAnswer<RevisionResponse>().revision
+
+    suspend fun removeMediaLock(sessionToken: String, spaceRef: Long, mediaId: String, noteId: String): Long =
+        send(
+            HttpMethod.Delete,
+            "spaces", spaceRef.toString(), "media-locks", mediaId, noteId,
+            sessionToken = sessionToken
+        ).readAnswer<RevisionResponse>().revision
 
     private suspend fun writeItem(
         method: HttpMethod,
