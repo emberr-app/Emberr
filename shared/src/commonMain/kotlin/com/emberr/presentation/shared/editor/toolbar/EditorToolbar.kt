@@ -489,7 +489,7 @@ private fun mobileMenuStateAfterInserting(type: String): MobileMenuState = when 
 private val MenuHandleTouchWidth = 80.dp
 
 @Composable
-private fun MenuDragHandle(onClose: () -> Unit, modifier: Modifier = Modifier) {
+internal fun MenuDragHandle(onClose: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .width(MenuHandleTouchWidth)

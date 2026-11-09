@@ -35,6 +35,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -58,7 +60,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -68,6 +69,11 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.updatepreviews.InterfaceScaleUpdatePreview
+import com.emberr.presentation.shared.components.updatepreviews.PaperTextureUpdatePreview
+import com.emberr.presentation.shared.components.updatepreviews.SlashMenuUpdatePreview
+import com.emberr.presentation.shared.components.updatepreviews.ThemesUpdatePreview
+import com.emberr.presentation.shared.components.updatepreviews.WidgetsUpdatePreview
 import com.emberr.presentation.shared.editor.components.FullScreenImageScreen
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.PaperTextureBox
@@ -75,11 +81,13 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.x
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
+import org.jetbrains.compose.resources.painterResource
 
 private val UpdatePeekGhostSize = 56.dp
 private val UpdatePeekVisibleHeight = 32.dp
@@ -91,75 +99,87 @@ private val UpdateDialogPadding = 24.dp
 private val UpdateDialogHeaderBlurHeight = 110.dp
 private val UpdateDialogHeaderGradientHeight = 130.dp
 private val UpdateScreenshotShape = RoundedCornerShape(12.dp)
+private val UpdateSectionGap = 28.dp
 private val UpdateScreenshotWidthToHeightRatio = if (isDesktopPlatform) 1834f / 1019f else 407f / 858f
 private val UpdateScreenshotMaxHeight = if (isDesktopPlatform) 400.dp else 360.dp
 
 private class UpdateNotesSection(
     val heading: String,
-    val items: List<String>,
+    val location: String? = null,
+    val description: String? = null,
+    val items: List<String> = emptyList(),
     val isNew: Boolean = false,
-    val screenshotPaths: List<String> = emptyList()
+    val screenshotPaths: List<String> = emptyList(),
+    val preview: (@Composable () -> Unit)? = null
 )
 
 private val CurrentUpdateNotes = listOfNotNull(
     UpdateNotesSection(
-        heading = "Credential Block",
+        heading = "Themes",
+        location = "Settings → Appearance → Theme",
         isNew = true,
-        items = listOf(
-            "Save logins right in your notes. Type **/** and pick **Advanced Blocks → Credentials**.",
-            "Comes with a password generator, and you can copy fields with a tap.",
-            "Passwords and notes stay encrypted and never show up in search, AI chat or widgets."
-        )
+        preview = { ThemesUpdatePreview() },
+        description = if (isDesktopPlatform) {
+            "Pick from 13 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast. " +
+                "Each one has a strength setting, and you can choose whether text and icons follow it too."
+        } else {
+            "Pick from 14 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast, " +
+                "or let **Wallpaper** take its colors from your wallpaper. " +
+                "Each one has a strength setting, and you can choose whether text and icons follow it too. " +
+                "Your home screen widgets follow the theme as well."
+        }
+    ),
+    UpdateNotesSection(
+        heading = "Paper Texture",
+        location = "Settings → Appearance → Theme → Texture",
+        isNew = true,
+        preview = { PaperTextureUpdatePreview() },
+        description = "Give the app a soft grain, like real paper. " +
+            "Set how strong it is, and choose where it shows: the whole app, notes, canvas or Daily Notes."
+    ),
+    UpdateNotesSection(
+        heading = "Interface Scale",
+        location = "Settings → Appearance → Interface Scale",
+        isNew = true,
+        preview = { InterfaceScaleUpdatePreview() },
+        description = if (isDesktopPlatform) {
+            "Make everything in the app bigger or smaller, from 80% to 200%, or use **Ctrl +**, **Ctrl −** and **Ctrl 0**."
+        } else {
+            "Make everything in the app bigger or smaller, from 80% to 200%."
+        }
     ),
     if (isDesktopPlatform) {
         null
     } else {
         UpdateNotesSection(
-            heading = "App Lock",
-            isNew = true,
-            items = listOf(
-                "Lock Emberr with your fingerprint, face or screen lock. Turn it on in **Settings → Security**."
-            )
+            heading = "Widgets",
+            location = "Long-press your home screen → Widgets → Emberr",
+            preview = { WidgetsUpdatePreview() },
+            description = "Every widget has a cleaner new look, and there are three new ones: **Note card**, **Jot it down** " +
+                "and **Quote of the day**. Widgets now show the note you picked right away, and tell you when that note has been deleted."
         )
     },
     UpdateNotesSection(
-        heading = "People",
-        isNew = true,
-        items = listOf(
-            "Add someone once and use them everywhere. Assign them in databases, add them to meetings, and mention them in notes with **@**.",
-            "Each person has their own page with their details and events. Find it under **⋯ → People** on Home.",
-            "Import your phone contacts or a .vcf file with the **+** button."
-        )
-    ),
-    UpdateNotesSection(
-        heading = "Calendar",
-        items = listOf(
-            "Events that go past midnight now show on both days.",
-            "Repeating events and tasks now show up in widgets.",
-            "Unfinished daily items stay on their day and don't move to the next one."
-        )
-    ),
-    UpdateNotesSection(
         heading = "Editor",
-        items = (if (isDesktopPlatform) {
-            listOf("Change how wide notes are from a note's **⋯ → Note Width**.")
-        } else {
-            emptyList()
-        }) + listOf(
-            "Tap anywhere on an empty page to start typing.",
-            "Don't want the daily quote? Turn it off in **Settings → Appearance**."
-        )
+        location = "Type / anywhere in a note",
+        preview = { SlashMenuUpdatePreview() },
+        description = "The slash menu now opens right after any character, not only after a space. " +
+            "If you type past a match, delete back and the menu comes back."
     ),
     UpdateNotesSection(
         heading = "Others",
+        location = "Smaller changes and fixes",
         items = listOf(
-            "UI and UX improvements across the app.",
-            "New emoji picker.",
-            "Cleaner settings."
+            "Sliders across the app have a new design.",
+            if (isDesktopPlatform) {
+                "Type **/** in a note's title to add the current time or date."
+            } else {
+                "Add the current time or date to a note's title from the keyboard toolbar."
+            }
         ) + (if (isDesktopPlatform) {
-            listOf("Faster startup.")
+            listOf("Faster startup on Windows.")
         } else {
-            emptyList()
+            listOf("The network choice for sync is now in **Settings → Sync & Backup**.")
         }) + listOf(
             "Plenty of small fixes."
         )
@@ -288,6 +308,7 @@ private fun UpdatePeekPill(
 @Composable
 fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
     val dialogColor = if (LocalAppIsDark.current) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
+    val dialogWindowTitleBar = LocalDialogWindowTitleBar.current
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -303,6 +324,7 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                 ),
             contentAlignment = Alignment.Center
         ) {
+            dialogWindowTitleBar?.invoke()
             PaperTextureBox(
                 modifier = Modifier
                     .then(
@@ -326,13 +348,11 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                     Box(modifier = Modifier.weight(1f, fill = false)) {
                         val dialogHazeState = remember { HazeState() }
                         var headerHeightPx by remember { mutableFloatStateOf(0f) }
-                        var buttonAreaHeightPx by remember { mutableFloatStateOf(0f) }
                         val notesScrollState = rememberScrollState()
                         val headerFadeAlpha by remember {
                             derivedStateOf { if (notesScrollState.value > 0) 1f else 0f }
                         }
                         val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
-                        val buttonAreaHeight = with(LocalDensity.current) { buttonAreaHeightPx.toDp() }
                         val headerBlurStyle = EmberrBlur.Regular.copy(
                             backgroundColor = dialogColor,
                             tints = listOf(HazeTint(dialogColor.copy(alpha = 0.45f))),
@@ -345,10 +365,15 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                                 .hazeSource(state = dialogHazeState)
                                 .verticalScroll(notesScrollState)
                                 .padding(horizontal = UpdateDialogPadding)
-                                .padding(top = headerHeight + 16.dp, bottom = buttonAreaHeight),
-                            verticalArrangement = Arrangement.spacedBy(40.dp)
+                                .padding(top = headerHeight + 16.dp, bottom = UpdateDialogPadding),
+                            verticalArrangement = Arrangement.spacedBy(UpdateSectionGap)
                         ) {
-                            CurrentUpdateNotes.forEach { section ->
+                            CurrentUpdateNotes.forEachIndexed { index, section ->
+                                if (index > 0) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
+                                    )
+                                }
                                 UpdateNotesSectionView(section)
                             }
                         }
@@ -393,19 +418,21 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                                             )
                                         }
                                     }
+                                },
+                                actions = {
+                                    TopBarIconButton(
+                                        icon = painterResource(Res.drawable.x),
+                                        contentDescription = "Close",
+                                        bgColor = Color.Transparent,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        hazeState = dialogHazeState,
+                                        hazeStyle = headerBlurStyle,
+                                        tooltip = "Close",
+                                        onClick = onDismissRequest
+                                    )
                                 }
                             )
                         }
-
-                        EmberrButtonPrimary(
-                            text = "Got it",
-                            onClick = onDismissRequest,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .onGloballyPositioned { coordinates -> buttonAreaHeightPx = coordinates.size.height.toFloat() }
-                                .fillMaxWidth()
-                                .padding(UpdateDialogPadding)
-                        )
                     }
                 }
             }
@@ -416,20 +443,22 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
 @Composable
 private fun UpdateNotesSectionView(section: UpdateNotesSection) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-            text = buildAnnotatedString {
-                append(section.heading)
-                if (section.isNew) {
-                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(" (New)") }
-                }
-            },
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        UpdateNotesSectionHeading(section)
 
         if (section.screenshotPaths.isNotEmpty()) {
             UpdateScreenshotCarousel(section.screenshotPaths)
+        }
+
+        section.preview?.let { preview ->
+            Box(modifier = Modifier.padding(bottom = 6.dp)) { preview() }
+        }
+
+        section.description?.let { description ->
+            Text(
+                text = textWithBoldMarkedParts(description),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
 
         section.items.forEach { item ->
@@ -447,6 +476,52 @@ private fun UpdateNotesSectionView(section: UpdateNotesSection) {
             }
         }
     }
+}
+
+@Composable
+private fun UpdateNotesSectionHeading(section: UpdateNotesSection) {
+    Column(modifier = Modifier.padding(bottom = 4.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = section.heading,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (section.isNew) {
+                UpdateNewPill()
+            }
+        }
+        section.location?.let { location ->
+            Text(
+                text = location,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+    }
+}
+
+@Composable
+private fun updateBadgeColor(): Color =
+    if (LocalAppIsDark.current) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface
+
+@Composable
+private fun UpdateNewPill() {
+    Text(
+        text = "New",
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(updateBadgeColor())
+            .emberrBorder(CircleShape)
+            .padding(horizontal = 9.dp, vertical = 2.dp)
+    )
 }
 
 private fun textWithBoldMarkedParts(text: String): AnnotatedString = buildAnnotatedString {
