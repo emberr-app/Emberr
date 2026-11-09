@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -122,6 +123,7 @@ fun ImageBlockView(
         }
         val fileName = remember(block.localFilePath) { block.localFilePath.substringAfterLast("/") }
         val availability = rememberMediaAvailability(absolutePath, fileName)
+        val transferText = rememberMediaTransferText(fileName, availability)
 
         if (availability != MediaAvailability.Available) {
             Box(
@@ -166,7 +168,7 @@ fun ImageBlockView(
                         )
                         Spacer(Modifier.width(10.dp))
                         Text(
-                            "Downloading image...",
+                            transferText ?: "Downloading image...",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -250,6 +252,29 @@ fun ImageBlockView(
                         }
                     )
                     AnimatedGifLayer(absolutePath, ContentScale.Crop, Modifier.fillMaxSize())
+                    transferText?.let { text ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(8.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                modifier = Modifier.size(12.dp),
+                                strokeWidth = 1.5.dp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
                 }
             }
 

@@ -15,10 +15,13 @@ import com.emberr.domain.cloud.crypto.CloudCrypto
 import com.emberr.domain.cloud.keys.CloudAccountKeyManager
 import com.emberr.domain.cloud.keys.CloudDailyNoteIds
 import com.emberr.domain.cloud.keys.CloudItemKeyManager
+import com.emberr.domain.cloud.keys.CloudMediaCrypto
 import com.emberr.domain.cloud.keys.CloudRecoveryWords
 import com.emberr.domain.cloud.sync.CloudChatSync
 import com.emberr.domain.cloud.sync.CloudListSync
 import com.emberr.domain.cloud.sync.CloudLocalChanges
+import com.emberr.domain.cloud.sync.CloudMediaFileTransfer
+import com.emberr.domain.cloud.sync.CloudMediaSync
 import com.emberr.domain.cloud.sync.CloudNoteSync
 import com.emberr.domain.cloud.sync.CloudSyncEngine
 import com.emberr.domain.cloud.sync.CloudSyncPoller
@@ -557,6 +560,7 @@ val sharedModule = module {
     single { CloudAccountKeyManager(cloudCrypto = get()) }
     single { CloudItemKeyManager(cloudCrypto = get()) }
     single { CloudDailyNoteIds(cloudCrypto = get()) }
+    single { CloudMediaCrypto(cloudCrypto = get()) }
     single { CloudRecoveryWords(cloudCrypto = get()) }
     single {
         val settingsManager = get<SettingsManager>()
@@ -626,6 +630,20 @@ val sharedModule = module {
             spaceRepository = get()
         )
     }
+    single { CloudMediaFileTransfer(apiClient = get(), blobTransfer = get(), mediaCrypto = get()) }
+    single {
+        CloudMediaSync(
+            apiClient = get(),
+            fileTransfer = get(),
+            mediaCrypto = get(),
+            itemKeyManager = get(),
+            cloudItemDao = get(),
+            cloudMediaLockDao = get(),
+            noteDao = get(),
+            mediaReferenceIndex = get(),
+            mediaStorageHelper = get()
+        )
+    }
     single {
         CloudLocalChanges(
             cloudItemDao = get(),
@@ -655,6 +673,7 @@ val sharedModule = module {
             noteSync = get(),
             listSync = get(),
             chatSync = get(),
+            mediaSync = get(),
             localChanges = get(),
             selfHostConnectionState = get(),
             syncPairingState = get()

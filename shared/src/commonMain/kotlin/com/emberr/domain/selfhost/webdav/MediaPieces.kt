@@ -2,6 +2,8 @@ package com.emberr.domain.selfhost.webdav
 
 internal const val MEDIA_PIECE_SIZE_BYTES = 8L * 1024 * 1024
 
+internal const val PARTIAL_DOWNLOAD_SUFFIX = ".partial.tmp"
+
 internal fun mediaPieceCount(fileSizeBytes: Long): Int =
     maxOf(1L, (fileSizeBytes + MEDIA_PIECE_SIZE_BYTES - 1) / MEDIA_PIECE_SIZE_BYTES).toInt()
 

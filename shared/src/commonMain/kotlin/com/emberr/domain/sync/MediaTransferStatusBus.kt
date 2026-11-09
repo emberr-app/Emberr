@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 enum class MediaTransferPhase { DOWNLOADING, UPLOADING }
 
+data class MediaTransferBytes(val done: Long, val total: Long)
+
 // Tracks real-time media transfer states (downloading/uploading/failed) keyed by file name
 // so UI components can reflect in-flight status directly.
 object MediaTransferStatusBus {
@@ -22,12 +24,29 @@ object MediaTransferStatusBus {
     private val _failed = MutableStateFlow<Set<String>>(emptySet())
     val failed: StateFlow<Set<String>> = _failed.asStateFlow()
 
+    private val _bytes = MutableStateFlow<Map<String, MediaTransferBytes>>(emptyMap())
+    val bytes: StateFlow<Map<String, MediaTransferBytes>> = _bytes.asStateFlow()
+
+    private val _waitingForUpload = MutableStateFlow<Set<String>>(emptySet())
+    val waitingForUpload: StateFlow<Set<String>> = _waitingForUpload.asStateFlow()
+
     fun markStarted(fileName: String, phase: MediaTransferPhase) {
+        _waitingForUpload.update { it - fileName }
         _inProgress.update { it + (fileName to phase) }
+    }
+
+    fun reportBytes(fileName: String, done: Long, total: Long) {
+        _bytes.update { it + (fileName to MediaTransferBytes(done, total)) }
+    }
+
+    fun markWaitingForUpload(fileName: String) {
+        markDeferred(fileName)
+        _waitingForUpload.update { it + fileName }
     }
 
     fun markFinished(fileName: String, succeeded: Boolean) {
         _inProgress.update { it - fileName }
+        _bytes.update { it - fileName }
         if (succeeded) {
             consecutiveFailureCounts.remove(fileName)
             _failed.update { it - fileName }
@@ -43,6 +62,7 @@ object MediaTransferStatusBus {
     // resetting the failure streak so the UI maintains active transfer status.
     fun markDeferred(fileName: String) {
         _inProgress.update { it - fileName }
+        _bytes.update { it - fileName }
         consecutiveFailureCounts.remove(fileName)
     }
 }

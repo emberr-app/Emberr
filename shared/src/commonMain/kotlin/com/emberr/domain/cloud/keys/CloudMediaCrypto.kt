@@ -15,6 +15,9 @@ fun encryptedMediaPieceSizes(fileSizeBytes: Long): List<Long> =
         mediaPieceLength(pieceIndex, fileSizeBytes) + ENCRYPTED_PIECE_EXTRA_BYTES.toLong()
     }
 
+fun plainMediaSizeOf(encryptedPieceSizes: List<Long>): Long =
+    encryptedPieceSizes.sum() - encryptedPieceSizes.size * ENCRYPTED_PIECE_EXTRA_BYTES.toLong()
+
 class CloudMediaCrypto(private val cloudCrypto: CloudCrypto) {
 
     suspend fun mediaId(accountKey: ByteArray, mediaFileName: String): String {

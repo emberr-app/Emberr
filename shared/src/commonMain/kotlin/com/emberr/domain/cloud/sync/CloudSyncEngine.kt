@@ -35,15 +35,21 @@ import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.selfhost.merge.mergeFolders
 import com.emberr.domain.selfhost.merge.mergeSpaces
 import com.emberr.domain.selfhost.sync.SelfHostConnectionState
+import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.selfhost.translation.NotePayloadSyncException
 import com.emberr.domain.space.SpaceRepository
 import com.emberr.domain.sync.SyncPairingState
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlin.concurrent.Volatile
@@ -75,6 +81,7 @@ class CloudSyncEngine(
     private val noteSync: CloudNoteSync,
     private val listSync: CloudListSync,
     private val chatSync: CloudChatSync,
+    private val mediaSync: CloudMediaSync,
     private val localChanges: CloudLocalChanges,
     private val selfHostConnectionState: SelfHostConnectionState,
     private val syncPairingState: SyncPairingState
@@ -85,6 +92,13 @@ class CloudSyncEngine(
 
     private val mutableStatus = MutableStateFlow(CloudSyncStatus())
     val status: StateFlow<CloudSyncStatus> = mutableStatus.asStateFlow()
+
+    val mediaSyncProgress: StateFlow<SelfHostSyncProgress?> = mediaSync.progress
+
+    val mediaPassDetails: StateFlow<CloudMediaPassDetails?> = mediaSync.details
+
+    private val mediaPassScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val mediaPassStartLock = Mutex()
 
     @Volatile
     var isPausedUntilAppRestart = false
@@ -111,7 +125,48 @@ class CloudSyncEngine(
             CloudSyncPassLock.mutex.unlock()
             mutableStatus.update { it.copy(isSyncing = false) }
         }
-        rememberResult(passOutcome.getOrElse { error -> resultForFailedPass(error) })
+        val result = rememberResult(passOutcome.getOrElse { error -> resultForFailedPass(error) })
+        startMediaPassUnlessRunning()
+        result
+    }
+
+    suspend fun waitForRunningMediaPass() {
+        CloudMediaPassLock.runningPass?.join()
+    }
+
+    private suspend fun startMediaPassUnlessRunning() {
+        mediaPassStartLock.withLock {
+            if (CloudMediaPassLock.runningPass?.isActive == true) return@withLock
+            CloudMediaPassLock.runningPass = mediaPassScope.launch { runMediaPass() }
+        }
+    }
+
+    private suspend fun runMediaPass() {
+        if (isPausedUntilAppRestart || anotherSyncMethodIsOn()) return
+        if (!CloudMediaPassLock.mutex.tryLock()) return
+        try {
+            val sessionToken = accountStorage.getSessionToken() ?: return
+            val masterKey = accountStorage.getMasterKey() ?: return
+            val streams = cloudSpaceDao.getAllSpaces().map { savedSpace -> openStream(savedSpace, masterKey) }
+            val passResult = mediaSync.syncMedia(sessionToken, streams)
+            mutableStatus.update { it.copy(lastMediaPass = passResult) }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            val passResult = CloudMediaPassResult(
+                finishedAtMillis = Clock.System.now().toEpochMilliseconds(),
+                filesTooLargeCount = 0,
+                filesNotSentCount = 0,
+                filesNotReceivedCount = 0,
+                lastProblem = "Media sync stopped: ${describeMediaFailure(error)}"
+            )
+            mutableStatus.update { it.copy(lastMediaPass = passResult) }
+            if (error is CloudUpdateRequiredException || (error is CloudApiException && error.code == CloudApiErrorCode.UPGRADE_REQUIRED)) {
+                rememberResult(CloudSyncResult.UpdateRequired)
+            }
+        } finally {
+            CloudMediaPassLock.mutex.unlock()
+        }
     }
 
     suspend fun syncAutomatically(): CloudSyncResult? =

@@ -24,6 +24,7 @@ class CloudSyncWorker(
             waitForRunningPass = true,
             beforeSyncing = { showSyncNotification() }
         )
+        cloudSyncEngine.waitForRunningMediaPass()
         when {
             outcome !is CloudSyncResult.Failed -> Result.success()
             runAttemptCount < MAX_RETRY_ATTEMPTS -> Result.retry()

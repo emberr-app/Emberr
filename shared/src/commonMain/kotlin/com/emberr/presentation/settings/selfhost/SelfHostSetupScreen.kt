@@ -552,7 +552,7 @@ private fun ConnectedDashboard(
 }
 
 @Composable
-private fun SyncProgressDetails(
+internal fun SyncProgressDetails(
     title: String,
     progress: SelfHostSyncProgress,
     describeAmount: (done: Long, total: Long) -> String
@@ -638,7 +638,7 @@ private fun describeNotesWaitingToSync(count: Int): String =
 private fun describeNoteCount(done: Long, total: Long): String =
     "${minOf(done, total)} of $total ${if (total == 1L) "note" else "notes"}"
 
-private fun describeImageBytes(done: Long, total: Long): String =
+internal fun describeImageBytes(done: Long, total: Long): String =
     "${formatMegabytes(minOf(done, total))} of ${formatMegabytes(total)} MB"
 
 private fun formatMegabytes(bytes: Long): String {
