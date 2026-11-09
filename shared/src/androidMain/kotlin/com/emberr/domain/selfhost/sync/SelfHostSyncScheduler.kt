@@ -12,7 +12,6 @@ import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkInfo
@@ -21,6 +20,7 @@ import androidx.work.WorkRequest
 import androidx.work.workDataOf
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.sync.AutoSyncTrigger
+import com.emberr.domain.sync.syncNetworkConstraints
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -242,14 +242,8 @@ actual class SelfHostSyncScheduler(
         selfHostSyncEngine.stopRunningSync()
     }
 
-    private fun allowedNetworkConstraints(): Constraints {
-        val networkType = when (SelfHostSyncNetwork.fromStoredName(settingsManager.getSelfHostSyncNetwork())) {
-            SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA -> NetworkType.CONNECTED
-            SelfHostSyncNetwork.WIFI_ONLY -> NetworkType.UNMETERED
-            SelfHostSyncNetwork.MOBILE_DATA_ONLY -> NetworkType.METERED
-        }
-        return Constraints.Builder().setRequiredNetworkType(networkType).build()
-    }
+    private fun allowedNetworkConstraints(): Constraints =
+        syncNetworkConstraints(SelfHostSyncNetwork.fromStoredName(settingsManager.getSelfHostSyncNetwork()))
 
     private companion object {
         const val WORK_NAME_BACKGROUND = "EmberrSelfHostBackgroundSync"

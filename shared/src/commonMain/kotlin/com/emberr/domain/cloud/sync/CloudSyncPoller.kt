@@ -9,6 +9,14 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.minutes
 
+internal fun lastMediaPassLeftFilesBehind(lastMediaPass: CloudMediaPassResult?): Boolean {
+    if (lastMediaPass == null) return false
+    return lastMediaPass.stoppedBeforeTheEnd ||
+        lastMediaPass.filesNotSentCount > 0 ||
+        lastMediaPass.filesNotReceivedCount > 0 ||
+        lastMediaPass.filesWaitingForUploadCount > 0
+}
+
 class CloudSyncPoller(private val cloudSyncEngine: CloudSyncEngine) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -19,7 +27,10 @@ class CloudSyncPoller(private val cloudSyncEngine: CloudSyncEngine) {
         pollingJob = scope.launch {
             while (isActive) {
                 delay(POLL_INTERVAL)
-                cloudSyncEngine.syncAutomaticallyIfThereIsWork()
+                val result = cloudSyncEngine.syncAutomaticallyIfThereIsWork()
+                if (result == null && lastMediaPassLeftFilesBehind(cloudSyncEngine.status.value.lastMediaPass)) {
+                    cloudSyncEngine.startMediaPassUnlessRunning()
+                }
             }
         }
     }

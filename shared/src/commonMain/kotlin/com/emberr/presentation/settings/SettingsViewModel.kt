@@ -11,9 +11,15 @@ import com.emberr.domain.cloud.api.CloudApiErrorCode
 import com.emberr.domain.cloud.api.CloudApiException
 import com.emberr.domain.cloud.api.CloudServerUnreachableException
 import com.emberr.domain.cloud.sync.CloudEraseResult
+import com.emberr.domain.cloud.sync.CloudSyncScheduler
+import com.emberr.domain.selfhost.sync.SelfHostConnectionState
+import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
+import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.space.SpaceRepository
+import com.emberr.domain.sync.SyncNetworkRule
 import com.emberr.domain.util.format.formatByteSize
 import com.emberr.domain.util.system.eraseAllAppData
+import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.home.overview.OverviewSection
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +36,11 @@ class SettingsViewModel(
     private val disableAiFeaturesUseCase: DisableAiFeaturesUseCase,
     private val appScope: CoroutineScope,
     spaceRepository: SpaceRepository,
-    private val cloudEraser: suspend (password: String) -> CloudEraseResult
+    private val cloudEraser: suspend (password: String) -> CloudEraseResult,
+    private val syncNetworkRule: SyncNetworkRule,
+    private val selfHostConnectionState: SelfHostConnectionState,
+    private val selfHostSyncScheduler: SelfHostSyncScheduler,
+    private val cloudSyncScheduler: Lazy<CloudSyncScheduler>
 ) : ViewModel() {
 
     val spaces: StateFlow<List<SpaceEntity>> = spaceRepository.observeSpaces().stateIn(
@@ -56,6 +66,16 @@ class SettingsViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
+
+    private val _syncNetwork = MutableStateFlow(syncNetworkRule.chosenNetwork())
+    val syncNetwork: StateFlow<SelfHostSyncNetwork> = _syncNetwork.asStateFlow()
+
+    fun setSyncNetwork(syncNetwork: SelfHostSyncNetwork) {
+        settingsManager.saveSelfHostSyncNetwork(syncNetwork.name)
+        _syncNetwork.value = syncNetwork
+        if (selfHostConnectionState.isConnected.value) selfHostSyncScheduler.scheduleBackgroundSync()
+        if (isDebugBuild) cloudSyncScheduler.value.rescheduleBackgroundSync()
+    }
 
     fun setAutoBackupEnabled(enabled: Boolean) {
         settingsManager.saveAutoBackupEnabled(enabled)

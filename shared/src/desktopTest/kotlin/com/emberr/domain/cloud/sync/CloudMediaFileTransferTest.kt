@@ -71,7 +71,7 @@ class CloudMediaFileTransferTest {
             expiresAtMicroseconds = fifteenMinutesFromNow
         )
 
-        transfer.download("token", mediaId, mediaKey, answer, destinationFile) {}
+        transfer.download("token", mediaId, mediaKey, answer, destinationFile, beforeEachPiece = {}) {}
 
         assertEquals(listOf("http://storage/piece1"), requestedUrls)
         assertContentEquals(plainFile, destinationFile.readBytes())

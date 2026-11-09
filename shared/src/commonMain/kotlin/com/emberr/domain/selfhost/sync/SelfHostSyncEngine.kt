@@ -61,6 +61,7 @@ import com.emberr.domain.selfhost.webdav.WebDavSyncPaths
 import com.emberr.domain.selfhost.webdav.isWeakETag
 import com.emberr.domain.sync.MediaTransferPhase
 import com.emberr.domain.sync.MediaTransferStatusBus
+import com.emberr.domain.sync.SyncNetworkRule
 import com.emberr.domain.sync.withNewerDetailsFrom
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.sync.withSyncCoordinatorWaitingAtMost
@@ -145,7 +146,7 @@ class SelfHostSyncEngine(
     private val favoriteNoteOrderStore: FavoriteNoteOrderStore,
     private val mediaReferenceIndex: MediaReferenceIndex,
     private val canvasRepository: CanvasRepository,
-    private val meteredNetworkChecker: MeteredNetworkChecker,
+    private val syncNetworkRule: SyncNetworkRule,
     private val credentialVault: CredentialVault
 ) {
 
@@ -200,16 +201,12 @@ class SelfHostSyncEngine(
 
     val notesWaitingToSyncCount: Flow<Int> = noteDao.observeNotesNeedingSelfHostSyncCount()
 
-    fun isOnAllowedNetwork(): Boolean =
-        SelfHostSyncNetwork.fromStoredName(settingsManager.getSelfHostSyncNetwork())
-            .allowsSync(meteredNetworkChecker.isOnMeteredNetwork())
-
     // textSyncMutex prevents two text syncs from overlapping, but doesn't block local editor saves.
     // To prevent saves from reading incomplete data mid-sync, we use `SyncCoordinator.mutex`
     // to lock each note individually inside `runSyncLocked`.
     suspend fun runSync(): SelfHostSyncResult {
         SelfHostSyncLog.d("runSync() called")
-        if (!isOnAllowedNetwork()) {
+        if (!syncNetworkRule.isOnAllowedNetwork()) {
             SelfHostSyncLog.d("runSync() skipped, this network is not one the user picked for sync")
             return SelfHostSyncResult.WaitingForAllowedNetwork
         }
@@ -228,7 +225,7 @@ class SelfHostSyncEngine(
 
     suspend fun runSyncAfterAnyRunningOne(): SelfHostSyncResult {
         SelfHostSyncLog.d("runSyncAfterAnyRunningOne() called")
-        if (!isOnAllowedNetwork()) {
+        if (!syncNetworkRule.isOnAllowedNetwork()) {
             SelfHostSyncLog.d("runSyncAfterAnyRunningOne() skipped, this network is not one the user picked for sync")
             return SelfHostSyncResult.WaitingForAllowedNetwork
         }
@@ -246,7 +243,7 @@ class SelfHostSyncEngine(
 
     suspend fun syncMedia(): SelfHostSyncResult {
         SelfHostSyncLog.d("syncMedia() called")
-        if (!isOnAllowedNetwork()) {
+        if (!syncNetworkRule.isOnAllowedNetwork()) {
             SelfHostSyncLog.d("syncMedia() skipped, this network is not one the user picked for sync")
             return SelfHostSyncResult.WaitingForAllowedNetwork
         }
@@ -269,7 +266,7 @@ class SelfHostSyncEngine(
 
     suspend fun syncMediaAfterAnyRunningOne(): SelfHostSyncResult {
         SelfHostSyncLog.d("syncMediaAfterAnyRunningOne() called")
-        if (!isOnAllowedNetwork()) {
+        if (!syncNetworkRule.isOnAllowedNetwork()) {
             SelfHostSyncLog.d("syncMediaAfterAnyRunningOne() skipped, this network is not one the user picked for sync")
             return SelfHostSyncResult.WaitingForAllowedNetwork
         }

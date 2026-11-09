@@ -44,6 +44,8 @@ actual class CloudSyncScheduler(
         schedulerScope.launch { cloudSyncEngine.syncNow() }
     }
 
+    actual fun rescheduleBackgroundSync() = Unit
+
     private fun startSignedInWork() {
         signedInScope?.cancel()
         val newScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

@@ -12,7 +12,6 @@ import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -20,6 +19,8 @@ import androidx.work.WorkRequest
 import com.emberr.domain.cloud.account.CloudAccountRepository
 import com.emberr.domain.cloud.account.CloudSignInState
 import com.emberr.domain.sync.AutoSyncTrigger
+import com.emberr.domain.sync.SyncNetworkRule
+import com.emberr.domain.sync.syncNetworkConstraints
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,8 @@ actual class CloudSyncScheduler(
     private val context: Context,
     private val cloudSyncEngine: CloudSyncEngine,
     private val cloudAccountRepository: CloudAccountRepository,
-    private val cloudSyncPoller: CloudSyncPoller
+    private val cloudSyncPoller: CloudSyncPoller,
+    private val syncNetworkRule: SyncNetworkRule
 ) {
 
     private val schedulerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -75,6 +77,7 @@ actual class CloudSyncScheduler(
     }
 
     actual fun start() {
+        cloudSyncEngine.useMediaPassLauncher(CloudMediaPassLauncher { launchMediaWorkerWhileAppIsInForeground() })
         mainHandler.post { ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleObserver) }
         context.getSystemService(ConnectivityManager::class.java).registerDefaultNetworkCallback(networkCallback)
         schedulerScope.launch {
@@ -93,6 +96,19 @@ actual class CloudSyncScheduler(
 
     actual fun syncNow() {
         schedulerScope.launch { cloudSyncEngine.syncNow() }
+    }
+
+    actual fun rescheduleBackgroundSync() {
+        signedInScope?.launch { updateBackgroundSyncFromSessionCount() }
+    }
+
+    private fun launchMediaWorkerWhileAppIsInForeground(): Boolean {
+        if (!isAppInForeground) return false
+        val request = OneTimeWorkRequestBuilder<CloudMediaWorker>()
+            .setConstraints(allowedNetworkConstraints())
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME_MEDIA, ExistingWorkPolicy.KEEP, request)
+        return true
     }
 
     private fun startSignedInWork() {
@@ -119,6 +135,7 @@ actual class CloudSyncScheduler(
         WorkManager.getInstance(context).apply {
             cancelUniqueWork(WORK_NAME_PERIODIC)
             cancelUniqueWork(WORK_NAME_AFTER_LEAVING_APP)
+            cancelUniqueWork(WORK_NAME_MEDIA)
         }
     }
 
@@ -139,7 +156,7 @@ actual class CloudSyncScheduler(
 
     private fun schedulePeriodicSync() {
         val request = PeriodicWorkRequestBuilder<CloudSyncWorker>(PERIODIC_SYNC_MINUTES, TimeUnit.MINUTES)
-            .setConstraints(anyNetworkConstraints())
+            .setConstraints(allowedNetworkConstraints())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
             .build()
         WorkManager.getInstance(context)
@@ -148,19 +165,19 @@ actual class CloudSyncScheduler(
 
     private fun scheduleSyncAfterLeavingApp() {
         val request = OneTimeWorkRequestBuilder<CloudSyncWorker>()
-            .setConstraints(anyNetworkConstraints())
+            .setConstraints(allowedNetworkConstraints())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
             .build()
         WorkManager.getInstance(context)
             .enqueueUniqueWork(WORK_NAME_AFTER_LEAVING_APP, ExistingWorkPolicy.APPEND_OR_REPLACE, request)
     }
 
-    private fun anyNetworkConstraints(): Constraints =
-        Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+    private fun allowedNetworkConstraints(): Constraints = syncNetworkConstraints(syncNetworkRule.chosenNetwork())
 
     private companion object {
         const val WORK_NAME_PERIODIC = "EmberrCloudPeriodicSync"
         const val WORK_NAME_AFTER_LEAVING_APP = "EmberrCloudSyncAfterLeavingApp"
+        const val WORK_NAME_MEDIA = "EmberrCloudMediaSync"
         const val PERIODIC_SYNC_MINUTES = 30L
         val WAIT_AFTER_LAST_EDIT = 5.seconds
     }

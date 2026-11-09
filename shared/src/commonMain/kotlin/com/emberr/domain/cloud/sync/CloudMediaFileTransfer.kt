@@ -36,6 +36,7 @@ class CloudMediaFileTransfer(
         mediaId: String,
         mediaKey: ByteArray,
         sourceFile: File,
+        beforeEachPiece: () -> Unit,
         onBytesDone: (Long) -> Unit
     ) {
         val fileSizeBytes = withContext(Dispatchers.IO) { sourceFile.length() }
@@ -57,6 +58,7 @@ class CloudMediaFileTransfer(
                 bytesDone = bytesAlreadyOnServer(answer, fileSizeBytes)
                 continue
             }
+            beforeEachPiece()
             val piece = piecesToSend.first()
             val pieceLength = mediaPieceLength(piece.index, fileSizeBytes).toLong()
             val plainPiece = withContext(Dispatchers.IO) { readPiece(sourceFile, piece.index, fileSizeBytes) }
@@ -79,6 +81,7 @@ class CloudMediaFileTransfer(
         mediaKey: ByteArray,
         firstAnswer: CloudMediaDownloadUrls,
         destinationFile: File,
+        beforeEachPiece: () -> Unit,
         onBytesDone: (Long) -> Unit
     ) {
         if (withContext(Dispatchers.IO) { destinationFile.exists() }) return
@@ -98,6 +101,7 @@ class CloudMediaFileTransfer(
         onBytesDone(minOf(mediaPieceStart(piecesDone), fileSizeBytes))
 
         for (pieceIndex in piecesDone until pieceCount) {
+            beforeEachPiece()
             if (!answerIsFresh && expiresWithinAMinute(answer.expiresAtMicroseconds)) {
                 answer = apiClient.requestMediaDownloadUrls(sessionToken, mediaId)
                 answerIsFresh = true

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.data.local.prefs.SyncConstants
 import com.emberr.domain.backup.manual.BackupContentChoice
+import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
 import com.emberr.domain.sync.SyncPairingData
 import com.emberr.domain.sync.SyncServerStatus
 import com.emberr.domain.util.system.AppPermission
@@ -154,6 +155,11 @@ internal fun desktopSettingsSidePadding(availableWidth: Dp): Dp =
     if (isDesktopPlatform) ((availableWidth - SettingsPaneMaxWidth) / 2).coerceAtLeast(0.dp) else 0.dp
 
 private val BackupFrequencies = listOf("Daily", "Weekly")
+private val SyncNetworkLabels = listOf(
+    SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA to "Both",
+    SelfHostSyncNetwork.WIFI_ONLY to "Wi-Fi only",
+    SelfHostSyncNetwork.MOBILE_DATA_ONLY to "Data only"
+)
 private val FontSizeOptions = listOf(
     FontSizePreference.EXTRA_SMALL.name to "Extra Small",
     FontSizePreference.SMALL.name to "Small",
@@ -201,6 +207,7 @@ fun SettingsScreen(
 
     val autoBackupEnabled by viewModel.autoBackupEnabled.collectAsState()
     val backupFrequency by viewModel.backupFrequency.collectAsState()
+    val syncNetwork by viewModel.syncNetwork.collectAsState()
     val backupDirectoryUri by viewModel.backupDirectoryUri.collectAsState()
 
     val backupTime by viewModel.backupTime.collectAsState()
@@ -306,6 +313,8 @@ fun SettingsScreen(
                     isPaired = isPaired,
                     isSelfHostConnected = isSelfHostConnected,
                     isSignedInToCloud = isSignedInToCloud,
+                    syncNetwork = syncNetwork,
+                    onSyncNetworkSelected = viewModel::setSyncNetwork,
                     syncStatus = syncStatus,
                     serverUnavailableReason = serverUnavailableReason,
                     syncPortInput = syncPortInput,
@@ -975,6 +984,8 @@ private fun SyncSettingsSection(
     isPaired: Boolean,
     isSelfHostConnected: Boolean,
     isSignedInToCloud: Boolean,
+    syncNetwork: SelfHostSyncNetwork,
+    onSyncNetworkSelected: (SelfHostSyncNetwork) -> Unit,
     syncStatus: String,
     serverUnavailableReason: String?,
     syncPortInput: String,
@@ -1012,6 +1023,26 @@ private fun SyncSettingsSection(
                 isEnabled = isSignedInToCloud || (!isSelfHostConnected && !isPaired),
                 onClick = onOpenEmberrCloud
             )
+        }
+        if (!isDesktopPlatform) {
+            SettingsDivider()
+            Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                SettingsSegmentedOptions(
+                    options = SyncNetworkLabels.map { it.second },
+                    selectedOption = SyncNetworkLabels.first { it.first == syncNetwork }.second,
+                    onOptionSelected = { selectedLabel ->
+                        onSyncNetworkSelected(SyncNetworkLabels.first { it.second == selectedLabel }.first)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Self-Host and Emberr Cloud only sync over the network you pick.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                )
+            }
         }
     }
 
