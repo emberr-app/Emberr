@@ -46,6 +46,7 @@ import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.credentials.SecureCredentialKeyStorage
 import com.emberr.domain.selfhost.sync.ForegroundSyncPoller
 import com.emberr.domain.selfhost.sync.SelfHostSyncEngine
+import com.emberr.domain.sync.SyncNetworkRule
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import com.emberr.domain.util.task.HeuristicTaskExtractor
 import com.emberr.domain.util.task.TaskExtractor
@@ -297,7 +298,11 @@ val sharedModule = module {
             disableAiFeaturesUseCase = get(),
             appScope = get(named("AppScope")),
             spaceRepository = get(),
-            cloudEraser = { password -> eraseCloudDataAndThisDevice(get(), password) }
+            cloudEraser = { password -> eraseCloudDataAndThisDevice(get(), password) },
+            syncNetworkRule = get(),
+            selfHostConnectionState = get(),
+            selfHostSyncScheduler = get(),
+            cloudSyncScheduler = inject()
         )
     }
 
@@ -526,7 +531,7 @@ val sharedModule = module {
             favoriteNoteOrderStore = get(),
             mediaReferenceIndex = get(),
             canvasRepository = get(),
-            meteredNetworkChecker = get(),
+            syncNetworkRule = get(),
             credentialVault = get()
         )
     }
@@ -541,9 +546,11 @@ val sharedModule = module {
         ForegroundSyncPoller(
             webDavSyncClient = get(),
             selfHostSyncEngine = get(),
-            settingsManager = get()
+            settingsManager = get(),
+            syncNetworkRule = get()
         )
     }
+    single { SyncNetworkRule(settingsManager = get(), meteredNetworkChecker = get()) }
 
     single { VaultKeyLock(keyDerivationManager = get(), syncEncryptionManager = get()) }
     single {
@@ -641,7 +648,8 @@ val sharedModule = module {
             cloudMediaLockDao = get(),
             noteDao = get(),
             mediaReferenceIndex = get(),
-            mediaStorageHelper = get()
+            mediaStorageHelper = get(),
+            syncNetworkRule = get()
         )
     }
     single {
@@ -676,7 +684,8 @@ val sharedModule = module {
             mediaSync = get(),
             localChanges = get(),
             selfHostConnectionState = get(),
-            syncPairingState = get()
+            syncPairingState = get(),
+            syncNetworkRule = get()
         )
     }
     single { CloudSyncPoller(cloudSyncEngine = get()) }
@@ -687,7 +696,8 @@ val sharedModule = module {
             cloudSyncScheduler = get(),
             selfHostConnectionState = get(),
             syncPairingState = get(),
-            settingsManager = get()
+            settingsManager = get(),
+            syncNetworkRule = get()
         )
     }
 
@@ -701,7 +711,8 @@ val sharedModule = module {
             selfHostSyncScheduler = get(),
             settingsManager = get(),
             foregroundSyncPoller = get(),
-            selfHostConnectionState = get()
+            selfHostConnectionState = get(),
+            syncNetworkRule = get()
         )
     }
 }

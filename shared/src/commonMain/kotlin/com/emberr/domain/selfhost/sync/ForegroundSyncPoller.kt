@@ -3,6 +3,7 @@ package com.emberr.domain.selfhost.sync
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import com.emberr.domain.selfhost.webdav.WebDavSyncPaths
+import com.emberr.domain.sync.SyncNetworkRule
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +18,8 @@ import kotlin.time.Duration.Companion.seconds
 class ForegroundSyncPoller(
     private val webDavSyncClient: WebDavSyncClient,
     private val selfHostSyncEngine: SelfHostSyncEngine,
-    private val settingsManager: SettingsManager
+    private val settingsManager: SettingsManager,
+    private val syncNetworkRule: SyncNetworkRule
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -47,7 +49,7 @@ class ForegroundSyncPoller(
     }
 
     private suspend fun pollOnce() {
-        if (!selfHostSyncEngine.isOnAllowedNetwork()) return
+        if (!syncNetworkRule.isOnAllowedNetwork()) return
         if (!hasServerOrLocalChanges()) return
         scope.launch {
             selfHostSyncEngine.runSync()

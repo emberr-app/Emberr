@@ -22,8 +22,11 @@ import com.emberr.domain.cloud.sync.CloudSyncResult
 import com.emberr.domain.cloud.sync.CloudSyncScheduler
 import com.emberr.domain.cloud.sync.CloudSyncStatus
 import com.emberr.domain.selfhost.sync.SelfHostConnectionState
+import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
 import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
+import com.emberr.domain.sync.SyncNetworkRule
 import com.emberr.domain.sync.SyncPairingState
+import com.emberr.domain.sync.waitingForNetworkMessage
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
 import kotlinx.coroutines.Dispatchers
@@ -82,12 +85,13 @@ data class CloudAccountScreenState(
     val errorMessage: String? = null,
     val newCodeSentMessage: String? = null,
     val syncStatus: CloudSyncStatus = CloudSyncStatus(),
+    val syncNetwork: SelfHostSyncNetwork = SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA,
     val mediaSyncProgress: SelfHostSyncProgress? = null,
     val mediaPassDetails: CloudMediaPassDetails? = null,
     val otherSyncMethodMessage: String? = null
 ) {
     val syncProblemMessage: String?
-        get() = syncStatus.lastProblem?.let(::cloudSyncResultMessage)
+        get() = syncStatus.lastProblem?.let { problem -> cloudSyncResultMessage(problem, syncNetwork) }
 
     val canStartSignIn: Boolean
         get() = !isWorking && otherSyncMethodMessage == null
@@ -214,7 +218,7 @@ private fun cloudAccountErrorMessage(
     else -> SOMETHING_WENT_WRONG_MESSAGE
 }
 
-private fun cloudSyncResultMessage(result: CloudSyncResult): String = when (result) {
+private fun cloudSyncResultMessage(result: CloudSyncResult, syncNetwork: SelfHostSyncNetwork): String = when (result) {
     is CloudSyncResult.Done -> when (result.notSentCount) {
         0 -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent"
         else -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent, ${result.notSentCount} not sent"
@@ -224,6 +228,7 @@ private fun cloudSyncResultMessage(result: CloudSyncResult): String = when (resu
     CloudSyncResult.UpdateRequired -> "Update Emberr to keep syncing with Emberr Cloud."
     CloudSyncResult.AnotherSyncMethodIsOn ->
         "Another sync method is on. Disconnect Self-Host or unpair LAN Sync to keep using Emberr Cloud."
+    CloudSyncResult.WaitingForAllowedNetwork -> waitingForNetworkMessage(syncNetwork)
     is CloudSyncResult.Failed -> result.message
 }
 
@@ -233,7 +238,8 @@ class CloudAccountViewModel(
     private val cloudSyncScheduler: CloudSyncScheduler,
     private val selfHostConnectionState: SelfHostConnectionState,
     private val syncPairingState: SyncPairingState,
-    private val settingsManager: SettingsManager
+    private val settingsManager: SettingsManager,
+    private val syncNetworkRule: SyncNetworkRule
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(
@@ -251,7 +257,9 @@ class CloudAccountViewModel(
             cloudAccountRepository.signInState.collect { signInState -> onSignInStateChanged(signInState) }
         }
         viewModelScope.launch {
-            cloudSyncEngine.status.collect { syncStatus -> _screenState.update { it.copy(syncStatus = syncStatus) } }
+            cloudSyncEngine.status.collect { syncStatus ->
+                _screenState.update { it.copy(syncStatus = syncStatus, syncNetwork = syncNetworkRule.chosenNetwork()) }
+            }
         }
         viewModelScope.launch {
             cloudSyncEngine.mediaSyncProgress.collect { progress -> _screenState.update { it.copy(mediaSyncProgress = progress) } }

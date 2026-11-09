@@ -35,6 +35,8 @@ internal class CloudKeyNotFoundException : Exception("An item's key could not be
 
 internal class CloudLocalDataBusyException : Exception("This device's notes stayed busy, so the sync stopped to try again later")
 
+internal class CloudWaitingForAllowedNetworkException : Exception("This network is not one the user picked for sync")
+
 private class LockedAnswer<T>(val value: T)
 
 internal suspend fun <T> withLocalDataLock(block: suspend () -> T): T =

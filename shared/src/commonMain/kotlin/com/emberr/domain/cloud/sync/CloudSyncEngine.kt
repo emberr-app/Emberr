@@ -38,15 +38,18 @@ import com.emberr.domain.selfhost.sync.SelfHostConnectionState
 import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.selfhost.translation.NotePayloadSyncException
 import com.emberr.domain.space.SpaceRepository
+import com.emberr.domain.sync.SyncNetworkRule
 import com.emberr.domain.sync.SyncPairingState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -84,7 +87,8 @@ class CloudSyncEngine(
     private val mediaSync: CloudMediaSync,
     private val localChanges: CloudLocalChanges,
     private val selfHostConnectionState: SelfHostConnectionState,
-    private val syncPairingState: SyncPairingState
+    private val syncPairingState: SyncPairingState,
+    private val syncNetworkRule: SyncNetworkRule
 ) {
 
     private val payloadJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -101,13 +105,21 @@ class CloudSyncEngine(
     private val mediaPassStartLock = Mutex()
 
     @Volatile
+    private var mediaPassLauncher: CloudMediaPassLauncher? = null
+
+    @Volatile
     var isPausedUntilAppRestart = false
         private set
+
+    fun useMediaPassLauncher(launcher: CloudMediaPassLauncher) {
+        mediaPassLauncher = launcher
+    }
 
     suspend fun syncNow(): CloudSyncResult = runPass(waitForRunningPass = false)
 
     private suspend fun runPass(waitForRunningPass: Boolean): CloudSyncResult = withContext(Dispatchers.IO) {
         if (anotherSyncMethodIsOn()) return@withContext rememberResult(CloudSyncResult.AnotherSyncMethodIsOn)
+        if (!syncNetworkRule.isOnAllowedNetwork()) return@withContext rememberResult(CloudSyncResult.WaitingForAllowedNetwork)
         if (waitForRunningPass) {
             CloudSyncPassLock.mutex.lock()
         } else if (!CloudSyncPassLock.mutex.tryLock()) {
@@ -131,36 +143,50 @@ class CloudSyncEngine(
     }
 
     suspend fun waitForRunningMediaPass() {
-        CloudMediaPassLock.runningPass?.join()
+        mediaPassScope.coroutineContext.job.children.forEach { pass -> pass.join() }
     }
 
-    private suspend fun startMediaPassUnlessRunning() {
+    internal suspend fun startMediaPassUnlessRunning() {
         mediaPassStartLock.withLock {
             if (CloudMediaPassLock.runningPass?.isActive == true) return@withLock
-            CloudMediaPassLock.runningPass = mediaPassScope.launch { runMediaPass() }
+            if (mediaPassLauncher?.tryToLaunchInItsOwnJob() == true) return@withLock
+            CloudMediaPassLock.runningPass = mediaPassScope.launch { runMediaPass(beforeTransferringFiles = {}) }
         }
     }
 
-    private suspend fun runMediaPass() {
+    suspend fun runMediaPassInThisJob(beforeTransferringFiles: suspend () -> Unit) {
+        coroutineScope {
+            mediaPassStartLock.withLock {
+                if (CloudMediaPassLock.runningPass?.isActive == true) return@withLock
+                CloudMediaPassLock.runningPass = launch { runMediaPass(beforeTransferringFiles) }
+            }
+        }
+    }
+
+    private suspend fun runMediaPass(beforeTransferringFiles: suspend () -> Unit) {
         if (isPausedUntilAppRestart || anotherSyncMethodIsOn()) return
         if (!CloudMediaPassLock.mutex.tryLock()) return
         try {
             val sessionToken = accountStorage.getSessionToken() ?: return
             val masterKey = accountStorage.getMasterKey() ?: return
             val streams = cloudSpaceDao.getAllSpaces().map { savedSpace -> openStream(savedSpace, masterKey) }
-            val passResult = mediaSync.syncMedia(sessionToken, streams)
+            val passResult = mediaSync.syncMedia(sessionToken, streams, beforeTransferringFiles)
             mutableStatus.update { it.copy(lastMediaPass = passResult) }
         } catch (cancellation: CancellationException) {
             throw cancellation
-        } catch (error: Exception) {
+        } catch (caughtError: Exception) {
+            val error = if (syncNetworkRule.isOnAllowedNetwork()) caughtError else CloudWaitingForAllowedNetworkException()
             val passResult = CloudMediaPassResult(
                 finishedAtMillis = Clock.System.now().toEpochMilliseconds(),
                 filesTooLargeCount = 0,
                 filesNotSentCount = 0,
                 filesNotReceivedCount = 0,
+                filesWaitingForUploadCount = 0,
+                stoppedBeforeTheEnd = true,
                 lastProblem = "Media sync stopped: ${describeMediaFailure(error)}"
             )
             mutableStatus.update { it.copy(lastMediaPass = passResult) }
+            if (error is CloudWaitingForAllowedNetworkException) rememberResult(CloudSyncResult.WaitingForAllowedNetwork)
             if (error is CloudUpdateRequiredException || (error is CloudApiException && error.code == CloudApiErrorCode.UPGRADE_REQUIRED)) {
                 rememberResult(CloudSyncResult.UpdateRequired)
             }
@@ -179,6 +205,7 @@ class CloudSyncEngine(
         withContext(Dispatchers.IO) {
             if (isPausedUntilAppRestart) return@withContext null
             if (anotherSyncMethodIsOn()) return@withContext rememberResult(CloudSyncResult.AnotherSyncMethodIsOn)
+            if (!syncNetworkRule.isOnAllowedNetwork()) return@withContext rememberResult(CloudSyncResult.WaitingForAllowedNetwork)
             val hasWork = try {
                 thereIsWorkToSync()
             } catch (cancellation: CancellationException) {

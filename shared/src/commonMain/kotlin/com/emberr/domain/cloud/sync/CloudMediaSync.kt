@@ -24,6 +24,7 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.selfhost.sync.SelfHostSyncStage
 import com.emberr.domain.sync.MediaTransferPhase
 import com.emberr.domain.sync.MediaTransferStatusBus
+import com.emberr.domain.sync.SyncNetworkRule
 import com.emberr.domain.util.media.MediaStorageHelper
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +60,8 @@ data class CloudMediaPassResult(
     val filesTooLargeCount: Int,
     val filesNotSentCount: Int,
     val filesNotReceivedCount: Int,
+    val filesWaitingForUploadCount: Int,
+    val stoppedBeforeTheEnd: Boolean,
     val lastProblem: String?
 )
 
@@ -68,6 +71,7 @@ internal fun describeMediaFailure(error: Exception): String = when (error) {
     is CloudServerUnreachableException -> "the server could not be reached"
     is CloudDecryptionException -> "the file could not be decrypted"
     is CloudKeyNotFoundException -> "the note's key is missing on this device"
+    is CloudWaitingForAllowedNetworkException -> "this network is not one picked for sync"
     else -> error::class.simpleName ?: "unknown error"
 }
 
@@ -107,7 +111,8 @@ class CloudMediaSync(
     private val cloudMediaLockDao: CloudMediaLockDao,
     private val noteDao: NoteDao,
     private val mediaReferenceIndex: MediaReferenceIndex,
-    private val mediaStorageHelper: MediaStorageHelper
+    private val mediaStorageHelper: MediaStorageHelper,
+    private val syncNetworkRule: SyncNetworkRule
 ) {
 
     private val streamRecords = CloudStreamRecords(itemKeyManager, cloudItemDao)
@@ -118,9 +123,22 @@ class CloudMediaSync(
     private val mutableDetails = MutableStateFlow<CloudMediaPassDetails?>(null)
     val details: StateFlow<CloudMediaPassDetails?> = mutableDetails.asStateFlow()
 
-    internal suspend fun syncMedia(sessionToken: String, streams: List<CloudStream>): CloudMediaPassResult {
+    internal suspend fun syncMedia(
+        sessionToken: String,
+        streams: List<CloudStream>,
+        beforeTransferringFiles: suspend () -> Unit
+    ): CloudMediaPassResult {
+        stopUnlessOnAllowedNetwork()
         val accountStream = streams.firstOrNull { it.isAccountStream }
-            ?: return CloudMediaPassResult(nowMillis(), 0, 0, 0, "This device has no account stream yet. Sync notes first.")
+            ?: return CloudMediaPassResult(
+                finishedAtMillis = nowMillis(),
+                filesTooLargeCount = 0,
+                filesNotSentCount = 0,
+                filesNotReceivedCount = 0,
+                filesWaitingForUploadCount = 0,
+                stoppedBeforeTheEnd = false,
+                lastProblem = "This device has no account stream yet. Sync notes first."
+            )
         mutableProgress.value = SelfHostSyncProgress()
         try {
             val accountKey = streamRecords.openKeyOf(accountStream, ACCOUNT_SPACE_ID)
@@ -152,6 +170,7 @@ class CloudMediaSync(
                 filesToReceive = filesToDownload.size,
                 filesWaitingForUpload = pass.filesWaitingForUpload
             )
+            if (plan.fileNamesToUpload.isNotEmpty() || filesToDownload.isNotEmpty()) beforeTransferringFiles()
 
             for (fileName in plan.fileNamesToUpload) {
                 if (pass.uploadsAreStopped) break
@@ -168,6 +187,8 @@ class CloudMediaSync(
                 filesTooLargeCount = pass.tooLargeCount,
                 filesNotSentCount = pass.notSentCount,
                 filesNotReceivedCount = pass.notReceivedCount,
+                filesWaitingForUploadCount = pass.filesWaitingForUpload,
+                stoppedBeforeTheEnd = false,
                 lastProblem = pass.lastProblem
             )
         } finally {
@@ -230,6 +251,7 @@ class CloudMediaSync(
         }
 
     private suspend fun uploadTracked(pass: MediaPass, fileName: String): Boolean {
+        stopUnlessOnAllowedNetwork()
         val mediaId = pass.mediaIdsByFileName.getValue(fileName)
         val sourceFile = mediaFileOf(fileName)
         val fileSizeBytes = withContext(Dispatchers.IO) { sourceFile.length() }
@@ -237,7 +259,13 @@ class CloudMediaSync(
         showFileInTransfer(pass, fileName, isUpload = true, sizeBytes = fileSizeBytes)
         val reportFileBytes = fileBytesReporter(fileName, fileSizeBytes)
         val outcome = try {
-            fileTransfer.upload(pass.sessionToken, mediaId, mediaKeyOf(pass, mediaId), sourceFile) { bytesDone ->
+            fileTransfer.upload(
+                sessionToken = pass.sessionToken,
+                mediaId = mediaId,
+                mediaKey = mediaKeyOf(pass, mediaId),
+                sourceFile = sourceFile,
+                beforeEachPiece = ::stopUnlessOnAllowedNetwork
+            ) { bytesDone ->
                 reportBytesSent(pass.bytesOfFinishedUploads + bytesDone)
                 reportFileBytes(bytesDone)
             }
@@ -340,6 +368,7 @@ class CloudMediaSync(
     }
 
     private suspend fun downloadTracked(pass: MediaPass, fileToDownload: FileToDownload) {
+        stopUnlessOnAllowedNetwork()
         val fileName = fileToDownload.fileName
         MediaTransferStatusBus.markStarted(fileName, MediaTransferPhase.DOWNLOADING)
         showFileInTransfer(pass, fileName, isUpload = false, sizeBytes = fileToDownload.sizeBytes)
@@ -350,7 +379,8 @@ class CloudMediaSync(
                 mediaId = fileToDownload.mediaId,
                 mediaKey = mediaKeyOf(pass, fileToDownload.mediaId),
                 firstAnswer = fileToDownload.urls,
-                destinationFile = mediaFileOf(fileName)
+                destinationFile = mediaFileOf(fileName),
+                beforeEachPiece = ::stopUnlessOnAllowedNetwork
             ) { bytesDone ->
                 reportBytesReceived(pass.bytesOfFinishedDownloads + bytesDone)
                 reportFileBytes(bytesDone)
@@ -381,8 +411,13 @@ class CloudMediaSync(
 
     private fun mediaFileOf(fileName: String): File = File(mediaStorageHelper.getAbsoluteMediaPath(fileName))
 
+    private fun stopUnlessOnAllowedNetwork() {
+        if (!syncNetworkRule.isOnAllowedNetwork()) throw CloudWaitingForAllowedNetworkException()
+    }
+
     private fun endsTheWholePass(error: Exception): Boolean =
         error is CloudServerUnreachableException ||
+            error is CloudWaitingForAllowedNetworkException ||
             (error is CloudApiException && error.code in setOf(CloudApiErrorCode.INVALID_TOKEN, CloudApiErrorCode.UPGRADE_REQUIRED))
 
     private fun uploadOutcomeOf(error: Exception): UploadOutcome = when ((error as? CloudApiException)?.code) {

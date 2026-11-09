@@ -13,7 +13,6 @@ import com.emberr.domain.selfhost.sync.SELF_HOST_UPDATE_REQUIRED_MESSAGE
 import com.emberr.domain.selfhost.sync.SelfHostConnectionState
 import com.emberr.domain.selfhost.sync.SelfHostSyncEngine
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
-import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
 import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.selfhost.sync.SelfHostUpdateRequiredSignal
@@ -21,6 +20,8 @@ import com.emberr.domain.selfhost.webdav.WebDavConfigurationException
 import com.emberr.domain.selfhost.webdav.WebDavConflictException
 import com.emberr.domain.selfhost.webdav.WebDavConnectionTestResult
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
+import com.emberr.domain.sync.SyncNetworkRule
+import com.emberr.domain.sync.waitingForNetworkMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -82,7 +83,6 @@ data class SelfHostConnectedState(
     val lastSyncedAtMillis: Long? = null,
     val isDisconnecting: Boolean = false,
     val syncError: String? = null,
-    val syncNetwork: SelfHostSyncNetwork = SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA,
     val noteSyncProgress: SelfHostSyncProgress? = null,
     val imageSyncProgress: SelfHostSyncProgress? = null,
     val hasSavedRecoveryPassphrase: Boolean = false,
@@ -105,12 +105,6 @@ private const val WAIT_BEFORE_SHOWING_SYNC_FINISHED_MS = 1_000L
 
 private const val WRONG_PASSPHRASE_MESSAGE = "That passphrase doesn't unlock this vault."
 
-private fun waitingForNetworkMessage(syncNetwork: SelfHostSyncNetwork): String = when (syncNetwork) {
-    SelfHostSyncNetwork.WIFI_ONLY -> "Sync is set to Wi-Fi only. It will run when you connect to Wi-Fi."
-    SelfHostSyncNetwork.MOBILE_DATA_ONLY -> "Sync is set to mobile data only. It will run when you are off Wi-Fi."
-    SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA -> "Sync will run when you are back online."
-}
-
 fun formatLastSynced(epochMillis: Long?, usesTwentyFourHourClock: Boolean): String {
     if (epochMillis == null || epochMillis == 0L) return "Never synced"
     val local = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(TimeZone.currentSystemDefault())
@@ -127,7 +121,8 @@ class SelfHostSetupViewModel(
     private val selfHostSyncScheduler: SelfHostSyncScheduler,
     private val settingsManager: SettingsManager,
     private val foregroundSyncPoller: ForegroundSyncPoller,
-    private val selfHostConnectionState: SelfHostConnectionState
+    private val selfHostConnectionState: SelfHostConnectionState,
+    private val syncNetworkRule: SyncNetworkRule
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<SelfHostScreenState>(SelfHostScreenState.Checking)
@@ -198,7 +193,6 @@ class SelfHostSetupViewModel(
                 SelfHostConnectedState(
                     serverUrl = credentials.serverUrl,
                     lastSyncedAtMillis = settingsManager.getSelfHostLastSyncTimestamp().takeIf { it > 0L },
-                    syncNetwork = savedSyncNetwork(),
                     hasSavedRecoveryPassphrase = secureSyncKeyStorage.getRecoveryPassphrase() != null
                 )
             )
@@ -206,9 +200,6 @@ class SelfHostSetupViewModel(
             SelfHostScreenState.Unconfigured(freshFormState())
         }
     }
-
-    private fun savedSyncNetwork(): SelfHostSyncNetwork =
-        SelfHostSyncNetwork.fromStoredName(settingsManager.getSelfHostSyncNetwork())
 
     private fun freshFormState(): SelfHostSetupFormState =
         SelfHostSetupFormState(passphrase = keyDerivationManager.generatePassphrase())
@@ -432,7 +423,6 @@ class SelfHostSetupViewModel(
             _screenState.value = SelfHostScreenState.Connected(
                 SelfHostConnectedState(
                     serverUrl = credentials.serverUrl,
-                    syncNetwork = savedSyncNetwork(),
                     hasSavedRecoveryPassphrase = true
                 )
             )
@@ -449,8 +439,8 @@ class SelfHostSetupViewModel(
             SelfHostSyncLog.d("ViewModel: syncNow() ignored, a sync is already running")
             return
         }
-        if (!selfHostSyncEngine.isOnAllowedNetwork()) {
-            updateConnected { it.copy(syncError = waitingForNetworkMessage(it.syncNetwork)) }
+        if (!syncNetworkRule.isOnAllowedNetwork()) {
+            updateConnected { it.copy(syncError = waitingForNetworkMessage(syncNetworkRule.chosenNetwork())) }
             return
         }
         selfHostSyncScheduler.syncNow()
@@ -465,12 +455,6 @@ class SelfHostSetupViewModel(
 
     private fun currentSyncStatus(): ManualSyncStatus? =
         (_screenState.value as? SelfHostScreenState.Connected)?.connectedState?.syncStatus
-
-    fun onSyncNetworkSelected(syncNetwork: SelfHostSyncNetwork) {
-        settingsManager.saveSelfHostSyncNetwork(syncNetwork.name)
-        updateConnected { it.copy(syncNetwork = syncNetwork, syncError = null) }
-        selfHostSyncScheduler.scheduleBackgroundSync()
-    }
 
     fun showRecoveryPassphrase() {
         val passphrase = secureSyncKeyStorage.getRecoveryPassphrase() ?: return
