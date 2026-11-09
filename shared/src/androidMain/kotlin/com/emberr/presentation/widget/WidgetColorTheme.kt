@@ -27,7 +27,7 @@ import com.emberr.ui.theme.ColorThemePreference
 import com.emberr.ui.theme.ThemeColorSchemes
 import com.emberr.ui.theme.wallpaperColorSchemesFor
 import com.emberr.ui.theme.colorThemePreferenceNamed
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.emptyFlow
 import org.koin.core.context.GlobalContext
 
 internal val LocalWidgetColorSchemes = staticCompositionLocalOf {
@@ -35,22 +35,23 @@ internal val LocalWidgetColorSchemes = staticCompositionLocalOf {
 }
 
 @Composable
-internal fun WidgetColorTheme(content: @Composable () -> Unit) {
+internal fun WidgetColorTheme(followsSettingChanges: Boolean = true, content: @Composable () -> Unit) {
     val settingsManager = remember { GlobalContext.getOrNull()?.getOrNull<SettingsManager>() }
-    val colorThemePreferenceFlow = remember(settingsManager) {
-        settingsManager?.colorThemePreferenceFlow ?: flowOf(SyncConstants.DEFAULT_COLOR_THEME_PREFERENCE)
+    val liveSettingsManager = settingsManager?.takeIf { followsSettingChanges }
+    val colorThemePreferenceFlow = remember(liveSettingsManager) {
+        liveSettingsManager?.colorThemePreferenceFlow ?: emptyFlow()
     }
     val colorThemePreferenceName by colorThemePreferenceFlow.collectAsState(
         initial = settingsManager?.getColorThemePreference() ?: SyncConstants.DEFAULT_COLOR_THEME_PREFERENCE
     )
-    val themedTextAndIconsFlow = remember(settingsManager) {
-        settingsManager?.themedTextAndIconsFlow ?: flowOf(SyncConstants.DEFAULT_THEMED_TEXT_AND_ICONS)
+    val themedTextAndIconsFlow = remember(liveSettingsManager) {
+        liveSettingsManager?.themedTextAndIconsFlow ?: emptyFlow()
     }
     val themedTextAndIcons by themedTextAndIconsFlow.collectAsState(
         initial = settingsManager?.isThemedTextAndIconsEnabled() ?: SyncConstants.DEFAULT_THEMED_TEXT_AND_ICONS
     )
-    val colorThemeStrengthFlow = remember(settingsManager) {
-        settingsManager?.colorThemeStrengthFlow ?: flowOf(SyncConstants.DEFAULT_COLOR_THEME_STRENGTH)
+    val colorThemeStrengthFlow = remember(liveSettingsManager) {
+        liveSettingsManager?.colorThemeStrengthFlow ?: emptyFlow()
     }
     val colorThemeStrength by colorThemeStrengthFlow.collectAsState(
         initial = settingsManager?.getColorThemeStrength() ?: SyncConstants.DEFAULT_COLOR_THEME_STRENGTH
