@@ -100,6 +100,7 @@ import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.space.SpaceOptionsSheets
 import com.emberr.presentation.shared.components.orHighContrastLine
+import com.emberr.presentation.shared.components.highContrastBorder
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_up_down
 import emberr.shared.generated.resources.calendar
@@ -568,6 +569,7 @@ fun HomeScreen(
                                             Box(
                                                 modifier = Modifier
                                                     .mobileFavoriteDraggedCard(favoriteDragState, note.noteId)
+                                                    .highContrastBorder(DefaultCornerShape)
                                             ) {
                                                 NoteCard(
                                                     note = note,
@@ -1328,7 +1330,7 @@ private fun HomeEmptyState(
 
 @Composable
 fun OverviewCard(title: String, subtitle: String, onClick: () -> Unit) {
-    Surface(shape = DefaultCornerShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth().clip(DefaultCornerShape).noRippleClickable { onClick() }) {
+    Surface(shape = DefaultCornerShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth().clip(DefaultCornerShape).highContrastBorder(DefaultCornerShape).noRippleClickable { onClick() }) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(
                 title,

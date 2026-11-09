@@ -139,6 +139,7 @@ import emberr.shared.generated.resources.triangle_alert
 import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.presentation.shared.TopBarFadeStyle
 import com.emberr.presentation.shared.components.orHighContrastLine
+import com.emberr.presentation.shared.components.highContrastBorder
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -1515,7 +1516,8 @@ fun SettingsGroup(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(SettingsCardShape)
-                    .background(cardColor),
+                    .background(cardColor)
+                    .highContrastBorder(SettingsCardShape),
                 content = content
             )
         }

@@ -96,6 +96,7 @@ import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.topHeaderBarPadding
+import com.emberr.presentation.shared.components.highContrastSegmentBorder
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
@@ -525,6 +526,11 @@ private fun PeopleList(
                         modifier = itemModifier
                             .clip(personRowShape(item))
                             .background(MaterialTheme.colorScheme.surface)
+                            .highContrastSegmentBorder(
+                                cornerRadius = PersonCardCorner,
+                                isFirst = item.isFirstInLetter,
+                                isLast = item.isLastInLetter
+                            )
                     ) {
                         if (!item.isFirstInLetter) {
                             SettingsDivider()
