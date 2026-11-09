@@ -666,14 +666,18 @@ val sharedModule = module {
         )
     }
     single {
+        val cloudSpaceDao = get<CloudSpaceDao>()
+        val cloudItemDao = get<CloudItemDao>()
+        val cloudMediaLockDao = get<CloudMediaLockDao>()
+        val noteDao = get<NoteDao>()
         CloudSyncEngine(
             apiClient = get(),
             accountStorage = get(),
             accountRepository = get(),
             itemKeyManager = get(),
-            cloudSpaceDao = get(),
-            cloudItemDao = get(),
-            cloudMediaLockDao = get(),
+            cloudSpaceDao = cloudSpaceDao,
+            cloudItemDao = cloudItemDao,
+            cloudMediaLockDao = cloudMediaLockDao,
             spaceDao = get(),
             folderDao = get(),
             spaceRepository = get(),
@@ -685,7 +689,8 @@ val sharedModule = module {
             localChanges = get(),
             selfHostConnectionState = get(),
             syncPairingState = get(),
-            syncNetworkRule = get()
+            syncNetworkRule = get(),
+            forgetCloudSyncRecords = { forgetCloudSyncRecords(cloudSpaceDao, cloudItemDao, cloudMediaLockDao, noteDao) }
         )
     }
     single { CloudSyncPoller(cloudSyncEngine = get()) }

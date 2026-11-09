@@ -29,6 +29,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,9 +56,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.cloud.account.CloudPasswordStrength
+import com.emberr.domain.cloud.api.CloudAccountDetails
 import com.emberr.domain.cloud.api.CloudSession
 import com.emberr.domain.cloud.sync.CloudMediaPassDetails
 import com.emberr.domain.cloud.sync.CloudMediaPassResult
+import com.emberr.domain.cloud.sync.CloudSyncResult
 import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.format.formatByteSize
 import com.emberr.domain.util.media.mimeTypeForExtension
@@ -115,6 +118,7 @@ fun CloudAccountScreen(
     val topBarHeightDp = with(density) { topBarHeightPx.toDp() }
 
     LaunchedEffect(viewModel) { viewModel.onScreenShown() }
+    DisposableEffect(viewModel) { onDispose { viewModel.onScreenHidden() } }
 
     KmpBackHandler(enabled = screenState.canGoBack, onBack = viewModel::goBack)
 
@@ -462,7 +466,7 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
                 color = MaterialTheme.colorScheme.onSurface
             )
             when {
-                state.storageUsedBytes != null -> HintText(text = "Storage used: ${formatByteSize(state.storageUsedBytes)}")
+                state.accountDetails != null -> PlanAndStorage(accountDetails = state.accountDetails, planText = state.planText)
                 state.accountDetailsError != null -> ErrorText(message = state.accountDetailsError)
                 else -> HintText(text = "Loading storage used...")
             }
@@ -492,6 +496,10 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
             val lastMediaPass = state.syncStatus.lastMediaPass
             if (state.mediaSyncProgress == null && lastMediaPass != null) {
                 HintText(text = "Media last checked ${formatDateAndTime(lastMediaPass.finishedAtMillis, usesTwentyFourHourClock)}")
+                lastMediaPass.uploadsRefusedReason
+                    ?.takeIf { reason -> state.syncStatus.lastProblem != CloudSyncResult.UploadsRefused(reason) }
+                    ?.let { reason -> ErrorText(message = uploadsRefusedMessage(reason, state.accountDetails)) }
+                filesTooLargeMessage(lastMediaPass.filesTooLargeCount)?.let { message -> ErrorText(message = message) }
                 describeFilesNotMoved(lastMediaPass)?.let { message -> ErrorText(message = message) }
                 lastMediaPass.lastProblem?.let { problem -> ErrorText(message = problem) }
             }
@@ -1020,6 +1028,26 @@ private fun CodeSentText(email: String) {
 }
 
 @Composable
+private fun PlanAndStorage(accountDetails: CloudAccountDetails, planText: String?) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        planText?.let { text ->
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            )
+        }
+        HintText(text = cloudStorageUsedText(accountDetails))
+        LinearProgressIndicator(
+            progress = { cloudStorageUsedFraction(accountDetails) },
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
 private fun MediaFileDetails(details: CloudMediaPassDetails) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         describeFileCounts(details)?.let { counts -> HintText(text = counts) }
@@ -1060,7 +1088,6 @@ private fun MediaFileDetails(details: CloudMediaPassDetails) {
 
 private fun describeFilesNotMoved(passResult: CloudMediaPassResult): String? {
     val parts = listOfNotNull(
-        "${passResult.filesTooLargeCount} larger than 10 GB".takeIf { passResult.filesTooLargeCount > 0 },
         "${passResult.filesNotSentCount} not sent".takeIf { passResult.filesNotSentCount > 0 },
         "${passResult.filesNotReceivedCount} not received".takeIf { passResult.filesNotReceivedCount > 0 }
     )

@@ -123,6 +123,7 @@ class CloudChatSync(
     }
 
     private suspend fun pushChat(sessionToken: String, stream: CloudStream, sessionId: String, counts: SyncPassCounts) {
+        if (counts.uploadsRefusedReason != null) return
         repeat(MAX_COMMIT_TRIES_PER_ITEM) {
             val session = chatSessionDao.getSession(sessionId) ?: return
             if (session.spaceId != stream.appSpaceId) return
@@ -137,24 +138,23 @@ class CloudChatSync(
                 itemId = sessionId
             )
             val sizeBytes = encryptedChat.cipherText.size.toLong()
-            val uploadUrl = requestUploadUrlUnlessTooLarge(sessionToken, stream, sessionId, sizeBytes) ?: run {
-                counts.notSentCount++
-                return
-            }
+            val uploadUrl = requestUploadUrlUnlessTooLarge(sessionToken, stream, sessionId, sizeBytes, counts) ?: return
             blobTransfer.upload(uploadUrl.uploadUrl, encryptedChat.cipherText)
-            val result = apiClient.commitBlobItem(
-                sessionToken = sessionToken,
-                spaceRef = stream.spaceRef,
-                itemId = sessionId,
-                baseRevision = row?.revision ?: 0L,
-                itemType = CloudItemType.CHAT,
-                payloadVersion = CHAT_PAYLOAD_VERSION,
-                parentId = stream.appSpaceId,
-                lockedKey = chatKey.lockedKey,
-                objectKey = uploadUrl.objectKey,
-                blobNonce = encryptedChat.nonce,
-                sizeBytes = sizeBytes
-            )
+            val result = counts.writeUnlessUploadsRefused {
+                apiClient.commitBlobItem(
+                    sessionToken = sessionToken,
+                    spaceRef = stream.spaceRef,
+                    itemId = sessionId,
+                    baseRevision = row?.revision ?: 0L,
+                    itemType = CloudItemType.CHAT,
+                    payloadVersion = CHAT_PAYLOAD_VERSION,
+                    parentId = stream.appSpaceId,
+                    lockedKey = chatKey.lockedKey,
+                    objectKey = uploadUrl.objectKey,
+                    blobNonce = encryptedChat.nonce,
+                    sizeBytes = sizeBytes
+                )
+            } ?: return
             when (result) {
                 is CloudWriteResult.Saved -> {
                     stream.openKeys[sessionId] = chatKey.openKey
@@ -202,12 +202,14 @@ class CloudChatSync(
         sessionToken: String,
         stream: CloudStream,
         itemId: String,
-        sizeBytes: Long
+        sizeBytes: Long,
+        counts: SyncPassCounts
     ): CloudUploadUrl? =
         try {
-            apiClient.requestUploadUrl(sessionToken, stream.spaceRef, itemId, sizeBytes)
+            counts.writeUnlessUploadsRefused { apiClient.requestUploadUrl(sessionToken, stream.spaceRef, itemId, sizeBytes) }
         } catch (error: CloudApiException) {
             if (error.code != CloudApiErrorCode.REQUEST_TOO_LARGE) throw error
+            counts.notSentCount++
             null
         }
 

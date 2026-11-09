@@ -259,17 +259,19 @@ class CloudListSync(
                 itemId = itemId
             )
             val result = try {
-                apiClient.commitInlineItem(
-                    sessionToken = sessionToken,
-                    spaceRef = stream.spaceRef,
-                    itemId = itemId,
-                    baseRevision = row?.revision ?: 0L,
-                    itemType = itemType,
-                    payloadVersion = LISTS_PAYLOAD_VERSION,
-                    parentId = stream.appSpaceId,
-                    lockedKey = listKey.lockedKey,
-                    encryptedPayload = encryptedPayload
-                )
+                counts.writeUnlessUploadsRefused {
+                    apiClient.commitInlineItem(
+                        sessionToken = sessionToken,
+                        spaceRef = stream.spaceRef,
+                        itemId = itemId,
+                        baseRevision = row?.revision ?: 0L,
+                        itemType = itemType,
+                        payloadVersion = LISTS_PAYLOAD_VERSION,
+                        parentId = stream.appSpaceId,
+                        lockedKey = listKey.lockedKey,
+                        encryptedPayload = encryptedPayload
+                    )
+                } ?: return
             } catch (error: CloudApiException) {
                 if (error.code != CloudApiErrorCode.REQUEST_TOO_LARGE) throw error
                 counts.notSentCount++

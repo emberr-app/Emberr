@@ -8,6 +8,7 @@ import com.emberr.domain.cloud.account.CloudPasswordStrength
 import com.emberr.domain.cloud.account.CloudPendingRecovery
 import com.emberr.domain.cloud.account.CloudSignInState
 import com.emberr.domain.cloud.account.estimateCloudPasswordStrength
+import com.emberr.domain.cloud.api.CloudAccountDetails
 import com.emberr.domain.cloud.api.CloudApiErrorCode
 import com.emberr.domain.cloud.api.CloudApiException
 import com.emberr.domain.cloud.api.CloudServerUnreachableException
@@ -38,7 +39,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
 
 enum class CloudAccountStep {
     LOADING,
@@ -74,7 +77,7 @@ data class CloudAccountScreenState(
     val newRecoveryWords: String = "",
     val hasSavedRecoveryWords: Boolean = false,
     val signedInEmail: String = "",
-    val storageUsedBytes: Long? = null,
+    val accountDetails: CloudAccountDetails? = null,
     val accountDetailsError: String? = null,
     val sessions: List<CloudSession>? = null,
     val sessionsError: String? = null,
@@ -91,7 +94,12 @@ data class CloudAccountScreenState(
     val otherSyncMethodMessage: String? = null
 ) {
     val syncProblemMessage: String?
-        get() = syncStatus.lastProblem?.let { problem -> cloudSyncResultMessage(problem, syncNetwork) }
+        get() = syncStatus.lastProblem?.let { problem -> cloudSyncResultMessage(problem, syncNetwork, accountDetails) }
+
+    val planText: String?
+        get() = accountDetails?.subscription?.let { subscription ->
+            cloudPlanText(subscription, Clock.System.now(), TimeZone.currentSystemDefault())
+        }
 
     val canStartSignIn: Boolean
         get() = !isWorking && otherSyncMethodMessage == null
@@ -218,11 +226,17 @@ private fun cloudAccountErrorMessage(
     else -> SOMETHING_WENT_WRONG_MESSAGE
 }
 
-private fun cloudSyncResultMessage(result: CloudSyncResult, syncNetwork: SelfHostSyncNetwork): String = when (result) {
+private fun cloudSyncResultMessage(
+    result: CloudSyncResult,
+    syncNetwork: SelfHostSyncNetwork,
+    accountDetails: CloudAccountDetails?
+): String = when (result) {
     is CloudSyncResult.Done -> when (result.notSentCount) {
         0 -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent"
         else -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent, ${result.notSentCount} not sent"
     }
+    is CloudSyncResult.UploadsRefused -> uploadsRefusedMessage(result.reason, accountDetails)
+    is CloudSyncResult.CloudCopyRemoved -> cloudCopyRemovedMessage(result.removedAtMicroseconds, TimeZone.currentSystemDefault())
     CloudSyncResult.NotSignedIn -> SIGNED_OUT_MESSAGE
     CloudSyncResult.Busy -> "Another sync is running. Try again in a moment."
     CloudSyncResult.UpdateRequired -> "Update Emberr to keep syncing with Emberr Cloud."
@@ -230,6 +244,13 @@ private fun cloudSyncResultMessage(result: CloudSyncResult, syncNetwork: SelfHos
         "Another sync method is on. Disconnect Self-Host or unpair LAN Sync to keep using Emberr Cloud."
     CloudSyncResult.WaitingForAllowedNetwork -> waitingForNetworkMessage(syncNetwork)
     is CloudSyncResult.Failed -> result.message
+}
+
+private fun aSyncFinished(previous: CloudSyncStatus, current: CloudSyncStatus): Boolean {
+    val notePassFinished = previous.isSyncing && !current.isSyncing
+    val mediaPassFinished = current.lastMediaPass != null &&
+        current.lastMediaPass.finishedAtMillis != previous.lastMediaPass?.finishedAtMillis
+    return notePassFinished || mediaPassFinished
 }
 
 class CloudAccountViewModel(
@@ -251,15 +272,23 @@ class CloudAccountViewModel(
     private var passwordStrengthJob: Job? = null
     private var accountOverviewJob: Job? = null
     private var isSigningOutOnPurpose = false
+    private var isScreenShown = false
 
     init {
         viewModelScope.launch {
             cloudAccountRepository.signInState.collect { signInState -> onSignInStateChanged(signInState) }
         }
         viewModelScope.launch {
+            var previousSyncStatus: CloudSyncStatus? = null
             cloudSyncEngine.status.collect { syncStatus ->
                 _screenState.update { it.copy(syncStatus = syncStatus, syncNetwork = syncNetworkRule.chosenNetwork()) }
+                val finishedSince = previousSyncStatus?.let { previous -> aSyncFinished(previous, syncStatus) } == true
+                if (isScreenShown && finishedSince) launch { cloudAccountRepository.refreshAccountDetails() }
+                previousSyncStatus = syncStatus
             }
+        }
+        viewModelScope.launch {
+            cloudAccountRepository.accountDetails.collect { details -> _screenState.update { it.copy(accountDetails = details) } }
         }
         viewModelScope.launch {
             cloudSyncEngine.mediaSyncProgress.collect { progress -> _screenState.update { it.copy(mediaSyncProgress = progress) } }
@@ -451,10 +480,15 @@ class CloudAccountViewModel(
     }
 
     fun onScreenShown() {
+        isScreenShown = true
         val current = _screenState.value
         if (current.isWorking || current.step !in signedInSteps) return
         returnToSignedIn()
         loadAccountOverview()
+    }
+
+    fun onScreenHidden() {
+        isScreenShown = false
     }
 
     fun syncNow() {
@@ -625,8 +659,8 @@ class CloudAccountViewModel(
     private suspend fun loadAccountDetails() {
         if (cloudAccountRepository.signInState.value !is CloudSignInState.SignedIn) return
         try {
-            val accountDetails = cloudAccountRepository.fetchAccountDetails()
-            _screenState.update { it.copy(storageUsedBytes = accountDetails.storageUsedBytes, accountDetailsError = null) }
+            cloudAccountRepository.fetchAccountDetails()
+            _screenState.update { it.copy(accountDetailsError = null) }
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {
@@ -683,6 +717,7 @@ class CloudAccountViewModel(
                 signedInEmail = email,
                 isWorking = it.isWorking,
                 syncStatus = it.syncStatus,
+                accountDetails = it.accountDetails,
                 mediaSyncProgress = it.mediaSyncProgress,
                 mediaPassDetails = it.mediaPassDetails,
                 otherSyncMethodMessage = it.otherSyncMethodMessage
@@ -700,6 +735,7 @@ class CloudAccountViewModel(
                 isWorking = it.isWorking,
                 errorMessage = errorMessage,
                 syncStatus = it.syncStatus,
+                accountDetails = it.accountDetails,
                 mediaSyncProgress = it.mediaSyncProgress,
                 mediaPassDetails = it.mediaPassDetails,
                 otherSyncMethodMessage = it.otherSyncMethodMessage

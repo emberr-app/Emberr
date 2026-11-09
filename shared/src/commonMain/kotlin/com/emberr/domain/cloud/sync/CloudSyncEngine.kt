@@ -88,11 +88,16 @@ class CloudSyncEngine(
     private val localChanges: CloudLocalChanges,
     private val selfHostConnectionState: SelfHostConnectionState,
     private val syncPairingState: SyncPairingState,
-    private val syncNetworkRule: SyncNetworkRule
+    private val syncNetworkRule: SyncNetworkRule,
+    forgetCloudSyncRecords: suspend () -> Unit
 ) {
 
     private val payloadJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val streamRecords = CloudStreamRecords(itemKeyManager, cloudItemDao)
+    private val cloudCopyRemoval = CloudCopyRemovalCheck(
+        latestSubscription = { accountRepository.accountDetails.value?.subscription },
+        forgetCloudSyncRecords = forgetCloudSyncRecords
+    )
 
     private val mutableStatus = MutableStateFlow(CloudSyncStatus())
     val status: StateFlow<CloudSyncStatus> = mutableStatus.asStateFlow()
@@ -119,6 +124,7 @@ class CloudSyncEngine(
 
     private suspend fun runPass(waitForRunningPass: Boolean): CloudSyncResult = withContext(Dispatchers.IO) {
         if (anotherSyncMethodIsOn()) return@withContext rememberResult(CloudSyncResult.AnotherSyncMethodIsOn)
+        cloudCopyRemovedResultOrNull()?.let { removed -> return@withContext rememberResult(removed) }
         if (!syncNetworkRule.isOnAllowedNetwork()) return@withContext rememberResult(CloudSyncResult.WaitingForAllowedNetwork)
         if (waitForRunningPass) {
             CloudSyncPassLock.mutex.lock()
@@ -137,9 +143,22 @@ class CloudSyncEngine(
             CloudSyncPassLock.mutex.unlock()
             mutableStatus.update { it.copy(isSyncing = false) }
         }
-        val result = rememberResult(passOutcome.getOrElse { error -> resultForFailedPass(error) })
+        val passResult = passOutcome.getOrElse { error -> resultForFailedPass(error) }
+        val result = rememberResult(resultAfterCheckingTheSubscription(passResult, passOutcome.exceptionOrNull()))
         startMediaPassUnlessRunning()
         result
+    }
+
+    private suspend fun cloudCopyRemovedResultOrNull(): CloudSyncResult.CloudCopyRemoved? {
+        if (cloudCopyRemoval.isCloudCopyRemoved()) accountRepository.refreshAccountDetails()
+        return cloudCopyRemoval.forgetRecordsIfCloudCopyRemoved()
+    }
+
+    private suspend fun resultAfterCheckingTheSubscription(passResult: CloudSyncResult, passError: Throwable?): CloudSyncResult {
+        val spaceWasNotFound = passError is CloudApiException && passError.code == CloudApiErrorCode.NOT_FOUND
+        if (passResult !is CloudSyncResult.UploadsRefused && !spaceWasNotFound) return passResult
+        accountRepository.refreshAccountDetails()
+        return cloudCopyRemoval.forgetRecordsIfCloudCopyRemoved() ?: passResult
     }
 
     suspend fun waitForRunningMediaPass() {
@@ -164,7 +183,7 @@ class CloudSyncEngine(
     }
 
     private suspend fun runMediaPass(beforeTransferringFiles: suspend () -> Unit) {
-        if (isPausedUntilAppRestart || anotherSyncMethodIsOn()) return
+        if (isPausedUntilAppRestart || anotherSyncMethodIsOn() || cloudCopyRemoval.isCloudCopyRemoved()) return
         if (!CloudMediaPassLock.mutex.tryLock()) return
         try {
             val sessionToken = accountStorage.getSessionToken() ?: return
@@ -172,6 +191,7 @@ class CloudSyncEngine(
             val streams = cloudSpaceDao.getAllSpaces().map { savedSpace -> openStream(savedSpace, masterKey) }
             val passResult = mediaSync.syncMedia(sessionToken, streams, beforeTransferringFiles)
             mutableStatus.update { it.copy(lastMediaPass = passResult) }
+            if (passResult.uploadsRefusedReason != null) accountRepository.refreshAccountDetails()
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (caughtError: Exception) {
@@ -205,6 +225,7 @@ class CloudSyncEngine(
         withContext(Dispatchers.IO) {
             if (isPausedUntilAppRestart) return@withContext null
             if (anotherSyncMethodIsOn()) return@withContext rememberResult(CloudSyncResult.AnotherSyncMethodIsOn)
+            cloudCopyRemovedResultOrNull()?.let { removed -> return@withContext rememberResult(removed) }
             if (!syncNetworkRule.isOnAllowedNetwork()) return@withContext rememberResult(CloudSyncResult.WaitingForAllowedNetwork)
             val hasWork = try {
                 thereIsWorkToSync()
@@ -240,13 +261,16 @@ class CloudSyncEngine(
     private fun rememberResult(result: CloudSyncResult): CloudSyncResult {
         if (result == CloudSyncResult.UpdateRequired) isPausedUntilAppRestart = true
         mutableStatus.update { status ->
-            if (result is CloudSyncResult.Done) {
-                status.copy(
+            when (result) {
+                is CloudSyncResult.Done -> status.copy(
                     lastSyncedAtMillis = Clock.System.now().toEpochMilliseconds(),
                     lastProblem = result.takeIf { it.notSentCount > 0 }
                 )
-            } else {
-                status.copy(lastProblem = result)
+                is CloudSyncResult.UploadsRefused -> status.copy(
+                    lastSyncedAtMillis = Clock.System.now().toEpochMilliseconds(),
+                    lastProblem = result
+                )
+                else -> status.copy(lastProblem = result)
             }
         }
         return result
@@ -281,7 +305,8 @@ class CloudSyncEngine(
         val masterKey = accountStorage.getMasterKey() ?: return CloudSyncResult.NotSignedIn
         val counts = SyncPassCounts()
 
-        val streams = registerAndOpenStreams(sessionToken, masterKey)
+        val streams = registerAndOpenStreams(sessionToken, masterKey, counts)
+        if (streams.none { it.isAccountStream }) return counts.passResult()
         val pulledChangesByStream = streams.map { stream -> stream to fetchEveryChangedItem(sessionToken, stream) }
         val pulledItemsByStream = pulledChangesByStream.map { (stream, pulledChanges) ->
             val prunedTombstones = if (pulledChanges.isFullList) {
@@ -318,11 +343,7 @@ class CloudSyncEngine(
         chatSync.pushChats(sessionToken, streams, counts)
         moveActiveSpaceIfSpacesChanged(counts)
 
-        return CloudSyncResult.Done(
-            receivedCount = counts.receivedCount,
-            sentCount = counts.sentCount,
-            notSentCount = counts.notSentCount
-        )
+        return counts.passResult()
     }
 
     private suspend fun mergeDailyNotesIntoAccount(): AccountMergeResult? =
@@ -340,11 +361,11 @@ class CloudSyncEngine(
         counts.spacesChanged = false
     }
 
-    private suspend fun registerAndOpenStreams(sessionToken: String, masterKey: ByteArray): List<CloudStream> {
+    private suspend fun registerAndOpenStreams(sessionToken: String, masterKey: ByteArray, counts: SyncPassCounts): List<CloudStream> {
         val registeredSpaceIds = cloudSpaceDao.getAllSpaces().map { it.appSpaceId }.toMutableSet()
         val spaceIdsToRegister = spaceDao.getAllSpacesOnce().map { it.spaceId }.filter { it != ACCOUNT_SPACE_ID } + ACCOUNT_SPACE_ID
         spaceIdsToRegister.filterNot { it in registeredSpaceIds }.forEach { appSpaceId ->
-            registerSpace(sessionToken, masterKey, appSpaceId)
+            counts.writeUnlessUploadsRefused { registerSpace(sessionToken, masterKey, appSpaceId) } ?: return@forEach
             registeredSpaceIds += appSpaceId
         }
 
@@ -588,17 +609,19 @@ class CloudSyncEngine(
                 itemType = CloudItemType.SPACE,
                 itemId = stream.appSpaceId
             )
-            val result = apiClient.commitInlineItem(
-                sessionToken = sessionToken,
-                spaceRef = stream.spaceRef,
-                itemId = stream.appSpaceId,
-                baseRevision = row?.revision ?: 0L,
-                itemType = CloudItemType.SPACE,
-                payloadVersion = SPACE_AND_FOLDER_PAYLOAD_VERSION,
-                parentId = null,
-                lockedKey = null,
-                encryptedPayload = encryptedPayload
-            )
+            val result = counts.writeUnlessUploadsRefused {
+                apiClient.commitInlineItem(
+                    sessionToken = sessionToken,
+                    spaceRef = stream.spaceRef,
+                    itemId = stream.appSpaceId,
+                    baseRevision = row?.revision ?: 0L,
+                    itemType = CloudItemType.SPACE,
+                    payloadVersion = SPACE_AND_FOLDER_PAYLOAD_VERSION,
+                    parentId = null,
+                    lockedKey = null,
+                    encryptedPayload = encryptedPayload
+                )
+            } ?: return
             when (result) {
                 is CloudWriteResult.Saved -> {
                     streamRecords.saveRow(
@@ -639,17 +662,19 @@ class CloudSyncEngine(
                 itemType = CloudItemType.FOLDER,
                 itemId = folderId
             )
-            val result = apiClient.commitInlineItem(
-                sessionToken = sessionToken,
-                spaceRef = stream.spaceRef,
-                itemId = folderId,
-                baseRevision = row?.revision ?: 0L,
-                itemType = CloudItemType.FOLDER,
-                payloadVersion = SPACE_AND_FOLDER_PAYLOAD_VERSION,
-                parentId = keyParentId,
-                lockedKey = folderKey.lockedKey,
-                encryptedPayload = encryptedPayload
-            )
+            val result = counts.writeUnlessUploadsRefused {
+                apiClient.commitInlineItem(
+                    sessionToken = sessionToken,
+                    spaceRef = stream.spaceRef,
+                    itemId = folderId,
+                    baseRevision = row?.revision ?: 0L,
+                    itemType = CloudItemType.FOLDER,
+                    payloadVersion = SPACE_AND_FOLDER_PAYLOAD_VERSION,
+                    parentId = keyParentId,
+                    lockedKey = folderKey.lockedKey,
+                    encryptedPayload = encryptedPayload
+                )
+            } ?: return
             when (result) {
                 is CloudWriteResult.Saved -> {
                     stream.openKeys[folderId] = folderKey.openKey

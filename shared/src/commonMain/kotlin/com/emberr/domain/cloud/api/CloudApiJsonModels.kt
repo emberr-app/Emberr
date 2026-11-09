@@ -88,7 +88,16 @@ internal class SessionsResponse(val sessions: List<SessionJson>)
 internal class AccountDetailsResponse(
     val email: String,
     val storageUsedBytes: Long,
-    val keys: AccountKeysJson
+    val keys: AccountKeysJson,
+    val subscription: SubscriptionJson
+)
+
+@Serializable
+internal class SubscriptionJson(
+    val plan: String,
+    val storageLimitBytes: Long,
+    val expiresAt: Long,
+    val cloudCopyRemovedAt: Long? = null
 )
 
 @Serializable

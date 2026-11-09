@@ -34,10 +34,25 @@ class CloudSession(
     val isCurrent: Boolean
 )
 
+class CloudSubscription(
+    val plan: String,
+    val storageLimitBytes: Long,
+    val expiresAtMicroseconds: Long,
+    val cloudCopyRemovedAtMicroseconds: Long?
+) {
+    val isTrial: Boolean
+        get() = plan == TRIAL_PLAN
+
+    companion object {
+        const val TRIAL_PLAN = "trial"
+    }
+}
+
 class CloudAccountDetails(
     val email: String,
     val storageUsedBytes: Long,
-    val keys: CloudAccountKeys
+    val keys: CloudAccountKeys,
+    val subscription: CloudSubscription
 )
 
 enum class CloudSpaceKind(internal val wireValue: String) {
