@@ -43,6 +43,11 @@ class EmberrApplication : Application() {
         }
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStart(owner: LifecycleOwner) {
+                getKoin().get<CoroutineScope>(named("AppScope")).launch {
+                    com.emberr.presentation.widget.dailyquote.refreshDailyQuoteWidgets(this@EmberrApplication)
+                }
+            }
             override fun onStop(owner: LifecycleOwner) = getKoin().get<CredentialUnlockSession>().lockAgain()
         })
 

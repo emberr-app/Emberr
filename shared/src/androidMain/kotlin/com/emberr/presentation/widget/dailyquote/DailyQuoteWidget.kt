@@ -12,6 +12,7 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -69,9 +70,10 @@ class DailyQuoteWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        saveTodaysQuoteIfNeeded(context, id)
-
         provideContent {
+            LaunchedEffect(Unit) {
+                if (saveTodaysQuoteIfNeeded(context, id)) update(context, id)
+            }
             WidgetColorTheme {
                 val savedState = currentState<Preferences>()
                 DailyQuoteWidgetBody(
@@ -86,7 +88,7 @@ class DailyQuoteWidget : GlanceAppWidget() {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 DailyQuoteWidgetBody(
                     context = context,
                     gradient = WidgetGradient.defaultGradient,
