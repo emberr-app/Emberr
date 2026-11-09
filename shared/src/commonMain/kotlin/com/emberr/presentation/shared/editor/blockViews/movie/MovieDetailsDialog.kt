@@ -81,6 +81,7 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrTab
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.LocalDialogWindowTitleBar
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.desktopDialogSize
 import com.emberr.presentation.shared.components.emberrBlur
@@ -181,6 +182,8 @@ internal fun MovieDetailsDialog(
         )
     }
 
+    val dialogWindowTitleBar = LocalDialogWindowTitleBar.current
+
     if (isDesktopPlatform) {
         Dialog(
             onDismissRequest = onDismiss,
@@ -196,6 +199,7 @@ internal fun MovieDetailsDialog(
                     ),
                 contentAlignment = Alignment.Center
             ) {
+                dialogWindowTitleBar?.invoke()
                 PaperTextureBox(
                     modifier = Modifier
                         .desktopDialogSize()
