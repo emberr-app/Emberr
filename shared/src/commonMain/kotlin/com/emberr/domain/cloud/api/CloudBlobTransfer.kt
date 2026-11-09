@@ -3,6 +3,8 @@ package com.emberr.domain.cloud.api
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.onDownload
+import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -33,14 +35,17 @@ class CloudBlobTransferException(val httpStatus: Int) :
 
 class CloudBlobTransfer(private val httpClient: HttpClient) {
 
-    suspend fun upload(uploadUrl: String, bytes: ByteArray) {
+    suspend fun upload(uploadUrl: String, bytes: ByteArray, onBytesSent: ((Long) -> Unit)? = null) {
         send(HttpMethod.Put, uploadUrl) {
+            if (onBytesSent != null) onUpload { bytesSentTotal, _ -> onBytesSent(bytesSentTotal) }
             setBody(ByteArrayContent(bytes, ContentType.Application.OctetStream))
         }
     }
 
-    suspend fun download(downloadUrl: String): ByteArray =
-        send(HttpMethod.Get, downloadUrl).readRawBytes()
+    suspend fun download(downloadUrl: String, onBytesReceived: ((Long) -> Unit)? = null): ByteArray =
+        send(HttpMethod.Get, downloadUrl) {
+            if (onBytesReceived != null) onDownload { bytesReceivedTotal, _ -> onBytesReceived(bytesReceivedTotal) }
+        }.readRawBytes()
 
     private suspend fun send(
         method: HttpMethod,

@@ -16,11 +16,13 @@ import com.emberr.domain.cloud.api.normalizedCloudServerAddress
 import com.emberr.domain.cloud.keys.IncorrectCloudPasswordException
 import com.emberr.domain.cloud.keys.IncorrectRecoveryKeyException
 import com.emberr.domain.cloud.keys.InvalidRecoveryWordsException
+import com.emberr.domain.cloud.sync.CloudMediaPassDetails
 import com.emberr.domain.cloud.sync.CloudSyncEngine
 import com.emberr.domain.cloud.sync.CloudSyncResult
 import com.emberr.domain.cloud.sync.CloudSyncScheduler
 import com.emberr.domain.cloud.sync.CloudSyncStatus
 import com.emberr.domain.selfhost.sync.SelfHostConnectionState
+import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.sync.SyncPairingState
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
@@ -80,6 +82,8 @@ data class CloudAccountScreenState(
     val errorMessage: String? = null,
     val newCodeSentMessage: String? = null,
     val syncStatus: CloudSyncStatus = CloudSyncStatus(),
+    val mediaSyncProgress: SelfHostSyncProgress? = null,
+    val mediaPassDetails: CloudMediaPassDetails? = null,
     val otherSyncMethodMessage: String? = null
 ) {
     val syncProblemMessage: String?
@@ -248,6 +252,12 @@ class CloudAccountViewModel(
         }
         viewModelScope.launch {
             cloudSyncEngine.status.collect { syncStatus -> _screenState.update { it.copy(syncStatus = syncStatus) } }
+        }
+        viewModelScope.launch {
+            cloudSyncEngine.mediaSyncProgress.collect { progress -> _screenState.update { it.copy(mediaSyncProgress = progress) } }
+        }
+        viewModelScope.launch {
+            cloudSyncEngine.mediaPassDetails.collect { details -> _screenState.update { it.copy(mediaPassDetails = details) } }
         }
         viewModelScope.launch {
             combine(selfHostConnectionState.isConnected, syncPairingState.isPaired) { isSelfHostConnected, isPaired ->
@@ -665,6 +675,8 @@ class CloudAccountViewModel(
                 signedInEmail = email,
                 isWorking = it.isWorking,
                 syncStatus = it.syncStatus,
+                mediaSyncProgress = it.mediaSyncProgress,
+                mediaPassDetails = it.mediaPassDetails,
                 otherSyncMethodMessage = it.otherSyncMethodMessage
             )
         }
@@ -680,6 +692,8 @@ class CloudAccountViewModel(
                 isWorking = it.isWorking,
                 errorMessage = errorMessage,
                 syncStatus = it.syncStatus,
+                mediaSyncProgress = it.mediaSyncProgress,
+                mediaPassDetails = it.mediaPassDetails,
                 otherSyncMethodMessage = it.otherSyncMethodMessage
             )
         }

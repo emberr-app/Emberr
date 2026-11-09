@@ -15,12 +15,24 @@ sealed interface CloudEraseResult {
 suspend fun eraseCloudDataAndThisDevice(accountRepository: CloudAccountRepository, password: String): CloudEraseResult {
     CloudSyncPassLock.mutex.lock()
     try {
-        accountRepository.eraseAccountData(password)
+        CloudMediaPassLock.stopRunningPassAndLock()
     } catch (cancellation: CancellationException) {
         CloudSyncPassLock.mutex.unlock()
         throw cancellation
-    } catch (error: Exception) {
+    }
+
+    fun unlockBothPassLocks() {
+        CloudMediaPassLock.mutex.unlock()
         CloudSyncPassLock.mutex.unlock()
+    }
+
+    try {
+        accountRepository.eraseAccountData(password)
+    } catch (cancellation: CancellationException) {
+        unlockBothPassLocks()
+        throw cancellation
+    } catch (error: Exception) {
+        unlockBothPassLocks()
         if (error is CloudApiException && error.code == CloudApiErrorCode.INVALID_TOKEN) {
             accountRepository.clearLocalAccount()
         }
@@ -30,13 +42,13 @@ suspend fun eraseCloudDataAndThisDevice(accountRepository: CloudAccountRepositor
     val thisDeviceWasCleared = try {
         eraseAllAppData(keepCloudAccount = true)
     } catch (cancellation: CancellationException) {
-        CloudSyncPassLock.mutex.unlock()
+        unlockBothPassLocks()
         throw cancellation
     } catch (_: Exception) {
         false
     }
     if (!thisDeviceWasCleared) {
-        CloudSyncPassLock.mutex.unlock()
+        unlockBothPassLocks()
         return CloudEraseResult.ThisDeviceNotCleared
     }
     return CloudEraseResult.Erased

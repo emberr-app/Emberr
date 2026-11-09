@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,13 +50,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.cloud.account.CloudPasswordStrength
 import com.emberr.domain.cloud.api.CloudSession
+import com.emberr.domain.cloud.sync.CloudMediaPassDetails
+import com.emberr.domain.cloud.sync.CloudMediaPassResult
 import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.format.formatByteSize
+import com.emberr.domain.util.media.mimeTypeForExtension
 import com.emberr.domain.util.system.DeviceLockConfirmation
 import com.emberr.domain.util.system.rememberDeviceLockPrompt
 import com.emberr.domain.util.system.showNativeToast
@@ -65,6 +70,8 @@ import com.emberr.presentation.settings.SettingsDivider
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.SettingsValuePill
 import com.emberr.presentation.settings.desktopSettingsSidePadding
+import com.emberr.presentation.settings.selfhost.SyncProgressDetails
+import com.emberr.presentation.settings.selfhost.describeImageBytes
 import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
@@ -91,6 +98,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.roundToInt
 import kotlin.time.Instant
 
 @Composable
@@ -468,7 +476,7 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
                 state.syncStatus.isSyncing -> HintText(text = "Syncing...")
                 lastSyncedAtMillis != null ->
                     HintText(text = "Last synced ${formatDateAndTime(lastSyncedAtMillis, usesTwentyFourHourClock)}")
-                else -> HintText(text = "Sends and receives spaces, folders, notes, lists and chats.")
+                else -> HintText(text = "Sends and receives spaces, folders, notes, lists, chats and media.")
             }
             state.syncProblemMessage?.let { message -> ErrorText(message = message) }
             EmberrButtonSecondary(
@@ -477,6 +485,16 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
                 enabled = !state.syncStatus.isSyncing,
                 modifier = Modifier.fillMaxWidth()
             )
+            state.mediaSyncProgress?.let { progress ->
+                SyncProgressDetails(title = "Media", progress = progress, describeAmount = ::describeImageBytes)
+            }
+            state.mediaPassDetails?.let { details -> MediaFileDetails(details) }
+            val lastMediaPass = state.syncStatus.lastMediaPass
+            if (state.mediaSyncProgress == null && lastMediaPass != null) {
+                HintText(text = "Media last checked ${formatDateAndTime(lastMediaPass.finishedAtMillis, usesTwentyFourHourClock)}")
+                describeFilesNotMoved(lastMediaPass)?.let { message -> ErrorText(message = message) }
+                lastMediaPass.lastProblem?.let { problem -> ErrorText(message = problem) }
+            }
         }
 
         SettingsGroup(title = "Devices") {
@@ -999,6 +1017,72 @@ private fun SwitchRow(text: String, isOn: Boolean, onChange: (Boolean) -> Unit) 
 @Composable
 private fun CodeSentText(email: String) {
     HintText(text = "We sent a code to $email. Check your inbox (and spam).")
+}
+
+@Composable
+private fun MediaFileDetails(details: CloudMediaPassDetails) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        describeFileCounts(details)?.let { counts -> HintText(text = counts) }
+        details.fileInTransfer?.let { file ->
+            val fileNumber = if (file.isUpload) details.filesSent + 1 else details.filesReceived + 1
+            val fileCount = if (file.isUpload) details.filesToSend else details.filesToReceive
+            val doneFraction = if (file.sizeBytes > 0) (file.bytesDone.toFloat() / file.sizeBytes).coerceIn(0f, 1f) else 1f
+            Text(
+                text = "${if (file.isUpload) "Sending" else "Receiving"} file ${minOf(fileNumber, fileCount)} of $fileCount",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            )
+            Text(
+                text = "${mediaKindOf(file.fileName)} in ${file.noteTitle}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            HintText(
+                text = "${(doneFraction * 100).roundToInt()}% · ${formatByteSize(file.bytesDone)} of ${formatByteSize(file.sizeBytes)}"
+            )
+            LinearProgressIndicator(
+                progress = { doneFraction },
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        when (details.filesWaitingForUpload) {
+            0 -> Unit
+            1 -> HintText(text = "1 file is waiting for another device to upload it.")
+            else -> HintText(text = "${details.filesWaitingForUpload} files are waiting for another device to upload them.")
+        }
+    }
+}
+
+private fun describeFilesNotMoved(passResult: CloudMediaPassResult): String? {
+    val parts = listOfNotNull(
+        "${passResult.filesTooLargeCount} larger than 10 GB".takeIf { passResult.filesTooLargeCount > 0 },
+        "${passResult.filesNotSentCount} not sent".takeIf { passResult.filesNotSentCount > 0 },
+        "${passResult.filesNotReceivedCount} not received".takeIf { passResult.filesNotReceivedCount > 0 }
+    )
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(prefix = "Files: ", separator = ", ", postfix = ". They will be tried again on the next sync.")
+}
+
+private fun describeFileCounts(details: CloudMediaPassDetails): String? {
+    val parts = listOfNotNull(
+        "${details.filesSent} of ${details.filesToSend} files sent".takeIf { details.filesToSend > 0 },
+        "${details.filesReceived} of ${details.filesToReceive} files received".takeIf { details.filesToReceive > 0 }
+    )
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+}
+
+private fun mediaKindOf(fileName: String): String {
+    val mimeType = mimeTypeForExtension(fileName.substringAfterLast('.', "")) ?: return "File"
+    return when {
+        mimeType.startsWith("image/") -> "Photo"
+        mimeType.startsWith("video/") -> "Video"
+        mimeType.startsWith("audio/") -> "Audio"
+        else -> "Document"
+    }
 }
 
 @Composable

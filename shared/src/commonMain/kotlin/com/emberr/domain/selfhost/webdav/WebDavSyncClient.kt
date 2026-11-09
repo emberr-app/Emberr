@@ -73,7 +73,6 @@ class WebDavSyncClient(
         const val SOCKET_TIMEOUT_MS = 30_000L
         const val MEDIA_PIECE_REQUEST_TIMEOUT_MS = 10L * 60 * 1000
         const val MEDIA_PIECE_SOCKET_TIMEOUT_MS = 2L * 60 * 1000
-        const val PARTIAL_DOWNLOAD_SUFFIX = ".partial.tmp"
     }
 
     private val mediaDownloadLocksGuard = Mutex()

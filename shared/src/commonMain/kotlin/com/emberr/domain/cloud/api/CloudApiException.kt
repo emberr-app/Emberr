@@ -13,6 +13,8 @@ enum class CloudApiErrorCode {
     NOT_FOUND,
     EMAIL_ALREADY_USED,
     CONFLICT,
+    NO_ACTIVE_SUBSCRIPTION,
+    STORAGE_LIMIT_EXCEEDED,
     UNKNOWN
 }
 

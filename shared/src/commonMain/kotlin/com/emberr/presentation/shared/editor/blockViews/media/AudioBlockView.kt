@@ -77,6 +77,7 @@ fun AudioBlockView(
     val availability = if (localFilePath != null && fileName != null) {
         rememberMediaAvailability(mediaStorageHelper.getAbsoluteMediaPath(localFilePath), fileName)
     } else null
+    val transferText = if (fileName != null && availability != null) rememberMediaTransferText(fileName, availability) else null
 
     LaunchedEffect(isRecording) {
         if (isRecording) {
@@ -202,7 +203,7 @@ fun AudioBlockView(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Downloading audio...",
+                        text = transferText ?: "Downloading audio...",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -276,7 +277,7 @@ fun AudioBlockView(
                     val mins = block.durationSeconds / 60
                     val secs = block.durationSeconds % 60
                     Text(
-                        text = "${mins}:${secs.toString().padStart(2, '0')}",
+                        text = transferText ?: "${mins}:${secs.toString().padStart(2, '0')}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline
                     )

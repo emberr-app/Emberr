@@ -100,6 +100,7 @@ fun DocumentBlockView(
         }
         val fileName = remember(block.localFilePath) { block.localFilePath.substringAfterLast("/") }
         val availability = rememberMediaAvailability(absolutePath, fileName)
+        val transferText = rememberMediaTransferText(fileName, availability)
 
         Box(
             modifier = Modifier
@@ -144,12 +145,12 @@ fun DocumentBlockView(
                         color = MaterialTheme.colorScheme.error
                     )
                     MediaAvailability.Downloading -> Text(
-                        text = "Downloading...    ${documentFormatLabel(block.fileName, block.mimeType)}",
+                        text = "${transferText ?: "Downloading..."}    ${documentFormatLabel(block.fileName, block.mimeType)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline
                     )
                     MediaAvailability.Available -> Text(
-                        text = "${block.fileSizeString}    ${documentFormatLabel(block.fileName, block.mimeType)}",
+                        text = "${transferText ?: block.fileSizeString}    ${documentFormatLabel(block.fileName, block.mimeType)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline
                     )
