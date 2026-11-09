@@ -289,8 +289,8 @@ private fun EmberrTextFieldPlaceholder(placeholder: String, textStyle: TextStyle
 private fun emberrTextFieldColors(): TextFieldColors {
     val containerColor = emberrControlContainerColor()
     return OutlinedTextFieldDefaults.colors(
-        unfocusedBorderColor = Color.Transparent,
-        focusedBorderColor = Color.Transparent,
+        unfocusedBorderColor = Color.Transparent.orHighContrastLine(),
+        focusedBorderColor = Color.Transparent.orHighContrastLine(),
         unfocusedContainerColor = containerColor,
         focusedContainerColor = containerColor,
         cursorColor = MaterialTheme.colorScheme.secondary

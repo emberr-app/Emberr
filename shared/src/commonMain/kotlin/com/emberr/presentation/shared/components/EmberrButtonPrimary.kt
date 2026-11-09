@@ -25,6 +25,7 @@ fun EmberrButtonPrimary(
         modifier = modifier.height(46.dp),
         enabled = enabled,
         shape = RoundedCornerShape(12.dp),
+        border = highContrastBorderStroke,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary

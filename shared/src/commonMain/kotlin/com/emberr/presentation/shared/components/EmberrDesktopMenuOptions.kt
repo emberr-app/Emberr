@@ -62,6 +62,7 @@ fun EmberrDesktopMenuOption(
                 vertical = DESKTOP_OPTION_VERTICAL_SPACING
             )
             .clip(DESKTOP_OPTION_SHAPE)
+            .then(if (isSelected) Modifier.highContrastBorder(DESKTOP_OPTION_SHAPE) else Modifier)
             .background(if (isSelected) SelectedOptionBackground else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(
