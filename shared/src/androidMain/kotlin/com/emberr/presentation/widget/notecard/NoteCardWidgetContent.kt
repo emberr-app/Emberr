@@ -8,7 +8,6 @@ data class NoteCardWidgetContent(
     val noteId: String,
     val title: String,
     val icon: String?,
-    val snippet: String,
     val isFavorite: Boolean,
     val isCanvas: Boolean,
     val coverImageAbsolutePath: String?

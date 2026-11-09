@@ -60,7 +60,6 @@ internal val previewNoteCardContent = NoteCardWidgetContent(
     noteId = previewNoteId,
     title = "Reading list",
     icon = "📚",
-    snippet = "The Overstory, Piranesi, Project Hail Mary and A Psalm for the Wild-Built.",
     isFavorite = true,
     isCanvas = false,
     coverImageAbsolutePath = null
