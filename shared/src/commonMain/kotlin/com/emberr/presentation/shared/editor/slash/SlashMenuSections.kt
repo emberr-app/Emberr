@@ -144,6 +144,21 @@ fun dateAndTimeSlashMenuSection(onInsertText: (String) -> Unit, usesTwentyFourHo
         SlashMenuItemData("Current Date", Res.drawable.calendar_date) { onInsertText(currentDateText()) }
     ))
 
+fun buildSlashMenuSearchTexts(customProperties: List<CustomPropertyEntity> = emptyList()): List<String> =
+    buildSlashMenuSections(
+        onChangeBlockType = {},
+        onToggleFormat = {},
+        onAdjustIndentation = {},
+        onSetAlignment = {},
+        onInsertMediaBlock = {},
+        onInsertText = {},
+        usesTwentyFourHourClock = false,
+        customProperties = customProperties
+    ).flatMap { section -> section.items.flatMap { item -> listOf(item.label) + item.searchWords } }
+
+fun slashQueryCanStillMatch(query: String, slashMenuSearchTexts: List<String>): Boolean =
+    !query.contains(" ") && (query.length <= 2 || slashMenuSearchTexts.any { it.contains(query, ignoreCase = true) })
+
 fun SlashMenuItemData.matchesSlashQuery(query: String): Boolean =
     query.isBlank() || label.contains(query, ignoreCase = true) || searchWords.any { it.contains(query, ignoreCase = true) }
 

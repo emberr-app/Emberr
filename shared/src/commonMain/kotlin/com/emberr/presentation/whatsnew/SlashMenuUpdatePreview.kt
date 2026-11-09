@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.components.updatepreviews
+package com.emberr.presentation.whatsnew
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -54,8 +54,9 @@ import com.emberr.presentation.shared.components.emberrBorderWidth
 import com.emberr.presentation.shared.components.emberrSoftBorderColor
 import com.emberr.presentation.shared.editor.slash.SlashMenuList
 import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
-import com.emberr.presentation.shared.editor.slash.buildSlashMenuSections
+import com.emberr.presentation.shared.editor.slash.buildSlashMenuSearchTexts
 import com.emberr.presentation.shared.editor.slash.filteredSlashMenuSections
+import com.emberr.presentation.shared.editor.slash.slashQueryCanStillMatch
 import com.emberr.presentation.shared.editor.toolbar.DefaultKeyboardToolbarItems
 import com.emberr.presentation.shared.editor.toolbar.KeyboardToolbarItem
 import com.emberr.presentation.shared.editor.toolbar.KeyboardToolbarItemIcon
@@ -68,6 +69,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.keyboard
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
+import kotlin.time.Duration.Companion.milliseconds
 
 private val DesktopSlashPopupShape = RoundedCornerShape(18.dp)
 private val DesktopSlashPopupWidth = 290.dp
@@ -76,30 +78,36 @@ private val MobileToolbarShape = RoundedCornerShape(12.dp)
 private val MobileSlashListMaxHeight = 150.dp
 private val SlashPopupGrowsFromTopStart = TransformOrigin(pivotFractionX = 0f, pivotFractionY = 0f)
 private val KeyboardKeyShape = RoundedCornerShape(6.dp)
-private val LightKeyboardColors = Color(0xFFE4E4E7) to Color(0xFFFFFFFF)
-private val DarkKeyboardColors = Color(0xFF1B1B1D) to Color(0xFF3A3A3D)
+private val LightKeyboardColors = KeyboardColors(background = Color(0xFFE4E4E7), key = Color(0xFFFFFFFF))
+private val DarkKeyboardColors = KeyboardColors(background = Color(0xFF1B1B1D), key = Color(0xFF3A3A3D))
 private val KeyboardRowKeyCounts = listOf(10, 9, 7)
 private val KeyboardHeight = 124.dp
-private const val TYPING_DELAY_MILLIS = 180L
+private val TypingDelay = 180.milliseconds
+private val CaretBlinkDelay = 500.milliseconds
 private const val SHOWN_TOOLBAR_ITEM_COUNT = 12
 
-private fun slashQueryCanStillMatch(query: String, slashMenuSearchTexts: List<String>): Boolean =
-    !query.contains(" ") && (query.length <= 2 || slashMenuSearchTexts.any { it.contains(query, ignoreCase = true) })
+private class KeyboardColors(val background: Color, val key: Color)
+
+private fun isSlashMenuKilledAfter(
+    newText: String,
+    previousText: String,
+    wasKilled: Boolean,
+    slashMenuSearchTexts: List<String>
+): Boolean {
+    val slashIndex = newText.lastIndexOf('/')
+    if (slashIndex == -1) return false
+    val query = newText.substring(slashIndex + 1)
+    return when {
+        !slashQueryCanStillMatch(query, slashMenuSearchTexts) -> true
+        newText.length < previousText.length -> false
+        else -> wasKilled
+    }
+}
 
 @Composable
 internal fun SlashMenuUpdatePreview() {
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
-    val slashMenuSearchTexts = remember {
-        buildSlashMenuSections(
-            onChangeBlockType = {},
-            onToggleFormat = {},
-            onAdjustIndentation = {},
-            onSetAlignment = {},
-            onInsertMediaBlock = {},
-            onInsertText = {},
-            usesTwentyFourHourClock = false
-        ).flatMap { section -> section.items.flatMap { item -> listOf(item.label) + item.searchWords } }
-    }
+    val slashMenuSearchTexts = remember { buildSlashMenuSearchTexts() }
     var typedText by remember { mutableStateOf("") }
     var isSlashKilled by remember { mutableStateOf(false) }
     var shownMenuQuery by remember { mutableStateOf("") }
@@ -113,25 +121,16 @@ internal fun SlashMenuUpdatePreview() {
 
     LaunchedEffect(Unit) {
         fun showTypedText(newText: String) {
+            isSlashKilled = isSlashMenuKilledAfter(newText, typedText, isSlashKilled, slashMenuSearchTexts)
             val newSlashIndex = newText.lastIndexOf('/')
-            if (newSlashIndex == -1) {
-                isSlashKilled = false
-            } else {
-                val query = newText.substring(newSlashIndex + 1)
-                if (!slashQueryCanStillMatch(query, slashMenuSearchTexts)) {
-                    isSlashKilled = true
-                } else if (newText.length < typedText.length) {
-                    isSlashKilled = false
-                }
-                if (!isSlashKilled) shownMenuQuery = query
-            }
+            if (newSlashIndex != -1 && !isSlashKilled) shownMenuQuery = newText.substring(newSlashIndex + 1)
             typedText = newText
         }
 
         suspend fun typeSlowly(addedText: String) {
             addedText.forEach { character ->
                 showTypedText(typedText + character)
-                delay(TYPING_DELAY_MILLIS)
+                delay(TypingDelay)
             }
         }
 
@@ -139,40 +138,40 @@ internal fun SlashMenuUpdatePreview() {
             pressedKey = "Backspace"
             isKeyShown = true
             showTypedText(typedText.dropLast(1))
-            delay(200)
+            delay(200.milliseconds)
             isKeyShown = false
-            delay(450)
+            delay(450.milliseconds)
         }
 
         while (true) {
             isHeading = false
             isSlashKilled = false
             typedText = ""
-            delay(900)
+            delay(900.milliseconds)
             typeSlowly("Agenda")
-            delay(400)
+            delay(400.milliseconds)
             typeSlowly("/")
-            delay(1100)
+            delay(1100.milliseconds)
             typeSlowly("he")
-            delay(1300)
+            delay(1300.milliseconds)
             typeSlowly("zz")
-            delay(1300)
+            delay(1300.milliseconds)
             pressBackspace()
             pressBackspace()
-            delay(1200)
+            delay(1200.milliseconds)
             if (isDesktopPlatform) {
                 pressedKey = "Enter"
                 isKeyShown = true
-                delay(350)
+                delay(350.milliseconds)
                 isKeyShown = false
             } else {
                 isFirstItemPicked = true
-                delay(450)
+                delay(450.milliseconds)
                 isFirstItemPicked = false
             }
             typedText = "Agenda"
             isHeading = true
-            delay(2400)
+            delay(2400.milliseconds)
         }
     }
 
@@ -294,7 +293,7 @@ private fun BlinkingCaret(height: Dp) {
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(500)
+            delay(CaretBlinkDelay)
             isCaretShown = !isCaretShown
         }
     }
@@ -391,13 +390,13 @@ private fun MobileToolbarCopy(
 
 @Composable
 private fun PreviewKeyboard() {
-    val (keyboardColor, keyColor) = if (LocalAppIsDark.current) DarkKeyboardColors else LightKeyboardColors
+    val keyboardColors = if (LocalAppIsDark.current) DarkKeyboardColors else LightKeyboardColors
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .height(KeyboardHeight)
-            .background(keyboardColor)
+            .background(keyboardColors.background)
             .padding(horizontal = 6.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -412,7 +411,7 @@ private fun PreviewKeyboard() {
                             .width(30.dp)
                             .fillMaxHeight()
                             .clip(KeyboardKeyShape)
-                            .background(keyColor)
+                            .background(keyboardColors.key)
                     )
                 }
             }
@@ -426,7 +425,7 @@ private fun PreviewKeyboard() {
                     .width(200.dp)
                     .fillMaxHeight()
                     .clip(KeyboardKeyShape)
-                    .background(keyColor)
+                    .background(keyboardColors.key)
             )
         }
     }

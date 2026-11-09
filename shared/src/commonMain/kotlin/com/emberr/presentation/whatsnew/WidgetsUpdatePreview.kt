@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.components.updatepreviews
+package com.emberr.presentation.whatsnew
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.emberr.domain.model.shortMonthDayText
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.fontFamilyFor
@@ -55,6 +56,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 
 private val WidgetShape = RoundedCornerShape(24.dp)
 private val GradientCardPadding = 18.dp
@@ -69,11 +71,13 @@ private val NoteCardIconOverhang = 12.dp
 private val OnGradientTextColor = Color.White
 private val JotButtonGlassColor = Color(0x33FFFFFF)
 private val JotTapColor = Color(0x66FFFFFF)
-private val DuskGradientColors = Color(0xFF4F5B8A) to Color(0xFF4F7F8A)
-private val CopperGradientColors = Color(0xFF7A2E2A) to Color(0xFFB8642F)
+private val DuskGradientColors = GradientColors(top = Color(0xFF4F5B8A), bottom = Color(0xFF4F7F8A))
+private val CopperGradientColors = GradientColors(top = Color(0xFF7A2E2A), bottom = Color(0xFFB8642F))
 private val LightWallpaperColors = listOf(Color(0xFFCFCFD4), Color(0xFF9EA0A8))
 private val DarkWallpaperColors = listOf(Color(0xFF2A2B31), Color(0xFF0D0D10))
 private const val WIDGET_COUNT = 3
+
+private class GradientColors(val top: Color, val bottom: Color)
 
 @Composable
 internal fun WidgetsUpdatePreview() {
@@ -85,20 +89,20 @@ internal fun WidgetsUpdatePreview() {
         while (true) {
             areWidgetsLeaving = false
             shownWidgetCount = 0
-            delay(700)
+            delay(700.milliseconds)
             repeat(WIDGET_COUNT) {
                 shownWidgetCount++
-                delay(600)
+                delay(600.milliseconds)
             }
-            delay(1000)
+            delay(1000.milliseconds)
             jotTapCount++
-            delay(2600)
+            delay(2600.milliseconds)
             areWidgetsLeaving = true
-            delay(650)
+            delay(650.milliseconds)
         }
     }
 
-    val todayLabel = remember { shortTodayLabel() }
+    val todayLabel = remember { shortMonthDayText(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
     val wallpaperColors = if (LocalAppIsDark.current) DarkWallpaperColors else LightWallpaperColors
 
     UpdatePreviewFrame(fitsContentHeight = true) {
@@ -122,12 +126,6 @@ internal fun WidgetsUpdatePreview() {
             }
         }
     }
-}
-
-private fun shortTodayLabel(): String {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    val monthName = today.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-    return "$monthName ${today.day}"
 }
 
 @Composable
@@ -158,8 +156,8 @@ private fun PoppingWidget(isShown: Boolean, modifier: Modifier = Modifier, conte
     }
 }
 
-private fun gradientCardBrush(colors: Pair<Color, Color>): Brush =
-    Brush.verticalGradient(0f to colors.first, 0.3f to colors.first, 1f to colors.second)
+private fun gradientCardBrush(colors: GradientColors): Brush =
+    Brush.verticalGradient(0f to colors.top, 0.3f to colors.top, 1f to colors.bottom)
 
 @Composable
 private fun GradientCardHeader(todayLabel: String, dateFontFamily: FontFamily, sideInset: Dp = 0.dp) {

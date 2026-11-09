@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.components.updatepreviews
+package com.emberr.presentation.whatsnew
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -75,9 +75,14 @@ internal fun UpdatePreviewFrame(
                     content = content
                 )
             }
-            Box(modifier = Modifier.matchParentSize().pointerInput(Unit) {})
+            TouchBlocker()
         }
     }
+}
+
+@Composable
+private fun BoxScope.TouchBlocker() {
+    Box(modifier = Modifier.matchParentSize().pointerInput(Unit) {})
 }
 
 @Composable

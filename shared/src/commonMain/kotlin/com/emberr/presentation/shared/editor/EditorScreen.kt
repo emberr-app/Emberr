@@ -148,8 +148,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
-import com.emberr.presentation.shared.editor.slash.buildSlashMenuSections
+import com.emberr.presentation.shared.editor.slash.buildSlashMenuSearchTexts
 import com.emberr.presentation.shared.editor.slash.rememberCustomProperties
+import com.emberr.presentation.shared.editor.slash.slashQueryCanStillMatch
 import com.emberr.presentation.shared.editor.text.ClearanceAwareBringIntoViewSpec
 import com.emberr.presentation.shared.editor.toolbar.HeightWithoutKeyboard
 import com.emberr.presentation.shared.editor.toolbar.MobileMenuState
@@ -257,18 +258,7 @@ fun EditorScreen(
     var isSlashKilled by remember { mutableStateOf(false) }
     val previousTextMap = remember { mutableMapOf<String, String>() }
     val customProperties = rememberCustomProperties()
-    val slashMenuSearchTexts = remember(customProperties) {
-        buildSlashMenuSections(
-            onChangeBlockType = {},
-            onToggleFormat = {},
-            onAdjustIndentation = {},
-            onSetAlignment = {},
-            onInsertMediaBlock = {},
-            onInsertText = {},
-            usesTwentyFourHourClock = false,
-            customProperties = customProperties
-        ).flatMap { section -> section.items.flatMap { item -> listOf(item.label) + item.searchWords } }
-    }
+    val slashMenuSearchTexts = remember(customProperties) { buildSlashMenuSearchTexts(customProperties) }
 
     val isScrolled by remember {
         derivedStateOf {
@@ -454,12 +444,7 @@ fun EditorScreen(
                 val textAfterSlash = if (opensASlashCommand) text.substring(lastSlashIndex + 1) else ""
 
                 if (opensASlashCommand) {
-                    val queryCanStillMatch = !textAfterSlash.contains(" ") && (
-                        textAfterSlash.length <= 2 ||
-                            slashMenuSearchTexts.any { it.contains(textAfterSlash, ignoreCase = true) }
-                        )
-
-                    if (!queryCanStillMatch) {
+                    if (!slashQueryCanStillMatch(textAfterSlash, slashMenuSearchTexts)) {
                         isSlashKilled = true
                     } else if (textWasDeleted) {
                         isSlashKilled = false

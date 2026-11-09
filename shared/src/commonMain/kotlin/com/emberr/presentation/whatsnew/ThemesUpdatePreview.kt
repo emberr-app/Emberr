@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.components.updatepreviews
+package com.emberr.presentation.whatsnew
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
@@ -81,7 +81,7 @@ internal fun ThemesUpdatePreview() {
     )
 
     UpdatePreviewFrame {
-        MaterialTheme(colorScheme = fadingColors, typography = MaterialTheme.typography, shapes = MaterialTheme.shapes) {
+        MaterialTheme(colorScheme = fadingColors) {
             ThemePreviewNote()
         }
         ThemeNameChip(

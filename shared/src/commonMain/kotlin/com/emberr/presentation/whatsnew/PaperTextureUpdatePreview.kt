@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.components.updatepreviews
+package com.emberr.presentation.whatsnew
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +41,7 @@ import emberr.shared.generated.resources.texture_strength
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 private val WholeAppOnly = setOf(PaperTextureArea.WHOLE_APP)
 
@@ -52,15 +54,15 @@ internal fun PaperTextureUpdatePreview() {
         while (true) {
             isTextureOn = false
             textureStrength = 40
-            delay(1500)
+            delay(1500.milliseconds)
             isTextureOn = true
-            delay(1650)
+            delay(1650.milliseconds)
             textureStrength = 90
-            delay(1000)
+            delay(1000.milliseconds)
             textureStrength = 15
-            delay(1100)
+            delay(1100.milliseconds)
             textureStrength = 60
-            delay(2600)
+            delay(2600.milliseconds)
         }
     }
 
@@ -71,16 +73,21 @@ internal fun PaperTextureUpdatePreview() {
     )
 
     UpdatePreviewFrame {
-        CompositionLocalProvider(LocalPaperTextureStrength provides 0) {
-            SeparatePaperGrainBox(shape = UpdatePreviewShape, modifier = Modifier.fillMaxSize()) {
-                CompositionLocalProvider(
-                    LocalPaperTextureStrength provides shownTextureStrength.roundToInt(),
-                    LocalPaperTextureAreas provides WholeAppOnly
-                ) {
-                    PaperTextureBox(modifier = Modifier.fillMaxSize()) {
-                        TextureSettingsGroup(isTextureOn = isTextureOn, textureStrength = textureStrength)
-                    }
-                }
+        OwnPaperGrain(strengthPercent = shownTextureStrength.roundToInt()) {
+            TextureSettingsGroup(isTextureOn = isTextureOn, textureStrength = textureStrength)
+        }
+    }
+}
+
+@Composable
+private fun OwnPaperGrain(strengthPercent: Int, content: @Composable BoxScope.() -> Unit) {
+    CompositionLocalProvider(LocalPaperTextureStrength provides 0) {
+        SeparatePaperGrainBox(shape = UpdatePreviewShape, modifier = Modifier.fillMaxSize()) {
+            CompositionLocalProvider(
+                LocalPaperTextureStrength provides strengthPercent,
+                LocalPaperTextureAreas provides WholeAppOnly
+            ) {
+                PaperTextureBox(modifier = Modifier.fillMaxSize(), content = content)
             }
         }
     }

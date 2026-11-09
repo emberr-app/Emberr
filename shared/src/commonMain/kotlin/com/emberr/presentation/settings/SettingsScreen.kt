@@ -68,7 +68,7 @@ import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.LocalSitsOnCard
-import com.emberr.presentation.shared.components.EmberrUpdateDialog
+import com.emberr.presentation.whatsnew.EmberrUpdateDialog
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
