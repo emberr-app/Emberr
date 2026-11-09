@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,8 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -73,6 +77,11 @@ private val JotButtonGlassColor = Color(0x33FFFFFF)
 private val JotTapColor = Color(0x66FFFFFF)
 private val DuskGradientColors = GradientColors(top = Color(0xFF4F5B8A), bottom = Color(0xFF4F7F8A))
 private val CopperGradientColors = GradientColors(top = Color(0xFF7A2E2A), bottom = Color(0xFFB8642F))
+private val CoverSkyTopColor = Color(0xFFE9A27A)
+private val CoverSkyBottomColor = Color(0xFFF6D2B1)
+private val CoverSunColor = Color(0xFFFFF1DC)
+private val CoverFarHillColor = Color(0xFFB8746A)
+private val CoverNearHillColor = Color(0xFF7E4C52)
 private val LightWallpaperColors = listOf(Color(0xFFCFCFD4), Color(0xFF9EA0A8))
 private val DarkWallpaperColors = listOf(Color(0xFF2A2B31), Color(0xFF0D0D10))
 private const val WIDGET_COUNT = 3
@@ -220,7 +229,6 @@ private fun QuoteWidgetCopy(todayLabel: String) {
 
 @Composable
 private fun NoteCardWidgetCopy() {
-    val coverBandTint = if (LocalAppIsDark.current) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.05f)
     val coverBandHeight = SmallWidgetHeight - NoteCardTitleTopPadding - NoteCardTitleLineHeight - NoteCardBottomPadding
 
     Box(
@@ -230,11 +238,10 @@ private fun NoteCardWidgetCopy() {
             .clip(WidgetShape)
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Box(
+        SunsetCoverPicture(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(coverBandHeight)
-                .background(coverBandTint)
         )
         Text(
             text = "📚",
@@ -264,6 +271,35 @@ private fun NoteCardWidgetCopy() {
                 .size(14.dp)
         )
     }
+}
+
+@Composable
+private fun SunsetCoverPicture(modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        drawRect(Brush.verticalGradient(listOf(CoverSkyTopColor, CoverSkyBottomColor)))
+        drawCircle(
+            color = CoverSunColor,
+            radius = size.height * 0.16f,
+            center = Offset(size.width * 0.7f, size.height * 0.5f)
+        )
+        drawHill(color = CoverFarHillColor, leftHeight = 0.68f, peakHeight = 0.42f, dipHeight = 0.8f, rightHeight = 0.58f)
+        drawHill(color = CoverNearHillColor, leftHeight = 0.9f, peakHeight = 0.62f, dipHeight = 0.96f, rightHeight = 0.76f)
+    }
+}
+
+private fun DrawScope.drawHill(color: Color, leftHeight: Float, peakHeight: Float, dipHeight: Float, rightHeight: Float) {
+    val hill = Path().apply {
+        moveTo(0f, size.height * leftHeight)
+        cubicTo(
+            size.width * 0.3f, size.height * peakHeight,
+            size.width * 0.65f, size.height * dipHeight,
+            size.width, size.height * rightHeight
+        )
+        lineTo(size.width, size.height)
+        lineTo(0f, size.height)
+        close()
+    }
+    drawPath(hill, color)
 }
 
 @Composable

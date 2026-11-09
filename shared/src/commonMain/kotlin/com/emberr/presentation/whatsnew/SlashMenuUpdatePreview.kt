@@ -234,7 +234,7 @@ private fun SlashPreviewNote(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = if (isDesktopPlatform) 20.dp else 34.dp)
+            .padding(top = UpdatePreviewNoteTopPadding)
     ) {
         UpdatePreviewNoteTopButtons(modifier = Modifier.padding(horizontal = 16.dp))
         Spacer(modifier = Modifier.height(18.dp))
