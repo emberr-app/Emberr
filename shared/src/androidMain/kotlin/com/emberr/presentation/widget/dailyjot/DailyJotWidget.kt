@@ -67,7 +67,7 @@ class DailyJotWidget : GlanceAppWidget() {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 DailyJotWidgetBody(context = context, gradient = WidgetGradient.defaultGradient)
             }
         }
