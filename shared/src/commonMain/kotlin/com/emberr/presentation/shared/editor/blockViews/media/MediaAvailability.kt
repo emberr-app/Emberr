@@ -60,11 +60,11 @@ fun rememberMediaAvailability(absolutePath: String, fileName: String): MediaAvai
 @Composable
 fun rememberMediaTransferText(fileName: String, availability: MediaAvailability): String? {
     val phase by remember(fileName) { MediaTransferStatusBus.inProgress.map { it[fileName] } }
-        .collectAsState(initial = MediaTransferStatusBus.inProgress.value[fileName])
+        .collectAsState(initial = MediaTransferStatusBus.inProgress.collectAsState().value[fileName])
     val bytes by remember(fileName) { MediaTransferStatusBus.bytes.map { it[fileName] } }
-        .collectAsState(initial = MediaTransferStatusBus.bytes.value[fileName])
+        .collectAsState(initial = null)
     val isWaitingForUpload by remember(fileName) { MediaTransferStatusBus.waitingForUpload.map { fileName in it } }
-        .collectAsState(initial = fileName in MediaTransferStatusBus.waitingForUpload.value)
+        .collectAsState(initial = fileName in MediaTransferStatusBus.waitingForUpload.collectAsState().value)
 
     return when {
         availability == MediaAvailability.Downloading && phase == MediaTransferPhase.DOWNLOADING ->
