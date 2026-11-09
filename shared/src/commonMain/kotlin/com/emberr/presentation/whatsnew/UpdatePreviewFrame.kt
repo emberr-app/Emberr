@@ -37,6 +37,7 @@ import emberr.shared.generated.resources.ellipsis
 import org.jetbrains.compose.resources.painterResource
 
 internal val UpdatePreviewShape = RoundedCornerShape(22.dp)
+internal val UpdatePreviewNoteTopPadding = 20.dp
 private val DesktopPreviewDrawnWidth = 960.dp
 private val MobilePreviewDrawnWidth = 360.dp
 private const val DESKTOP_PREVIEW_WIDTH_TO_HEIGHT_RATIO = 2f

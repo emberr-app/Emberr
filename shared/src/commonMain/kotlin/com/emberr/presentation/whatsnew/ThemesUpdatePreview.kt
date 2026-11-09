@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.ui.theme.LocalAppIsDark
@@ -103,7 +102,7 @@ private fun ThemePreviewNote() {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(top = if (isDesktopPlatform) 20.dp else 34.dp)
+            .padding(top = UpdatePreviewNoteTopPadding)
     ) {
         UpdatePreviewNoteTopButtons(modifier = Modifier.padding(horizontal = 16.dp))
         Spacer(modifier = Modifier.height(18.dp))
