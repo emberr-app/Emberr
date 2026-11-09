@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.components.updatepreviews
+package com.emberr.presentation.whatsnew
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -30,9 +30,11 @@ import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.sliders_horizontal
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
+import kotlin.time.Duration.Companion.milliseconds
 
-private const val SCALE_STEP_DELAY_MILLIS = 300L
-private const val SCALE_PAUSE_MILLIS = 1300L
+private val ScaleStepDelay = 300.milliseconds
+private val ScalePause = 1300.milliseconds
+private val ResetKeyShowTime = 800.milliseconds
 
 @Composable
 internal fun InterfaceScaleUpdatePreview() {
@@ -47,21 +49,21 @@ internal fun InterfaceScaleUpdatePreview() {
             isShortcutShown = true
             while (scalePercent != targetPercent) {
                 scalePercent = interfaceScalePercentMovedBySteps(scalePercent, stepDirection)
-                delay(SCALE_STEP_DELAY_MILLIS)
+                delay(ScaleStepDelay)
             }
             isShortcutShown = false
         }
 
         while (true) {
-            delay(SCALE_PAUSE_MILLIS)
+            delay(ScalePause)
             stepScaleTo(130)
-            delay(SCALE_PAUSE_MILLIS)
+            delay(ScalePause)
             stepScaleTo(85)
-            delay(SCALE_PAUSE_MILLIS)
+            delay(ScalePause)
             shortcutKey = "0"
             isShortcutShown = true
             scalePercent = SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT
-            delay(800)
+            delay(ResetKeyShowTime)
             isShortcutShown = false
         }
     }

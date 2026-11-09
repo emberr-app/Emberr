@@ -75,7 +75,6 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrPillShadowAmbientColor
 import com.emberr.presentation.shared.components.EmberrPillShadowSpotColor
 import com.emberr.presentation.shared.components.EmberrTextField
-import com.emberr.presentation.shared.components.EmberrUpdatePeek
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.DesktopSidebarToggleButton
 import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
@@ -92,6 +91,7 @@ import com.emberr.presentation.calendar.CalendarScreen
 import com.emberr.presentation.calendar.matchingDetail
 import com.emberr.presentation.calendar.searchResultDateLabel
 import com.emberr.presentation.calendar.toCategoryColor
+import com.emberr.presentation.whatsnew.EmberrUpdatePeek
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.presentation.daily.CollapsedWeekStrip
 import com.emberr.presentation.daily.DailyEditorPane

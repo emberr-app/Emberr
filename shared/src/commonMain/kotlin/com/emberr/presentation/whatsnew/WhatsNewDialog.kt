@@ -1,4 +1,4 @@
-package com.emberr.presentation.shared.components
+package com.emberr.presentation.whatsnew
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -17,8 +17,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -69,11 +69,20 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.presentation.shared.components.updatepreviews.InterfaceScaleUpdatePreview
-import com.emberr.presentation.shared.components.updatepreviews.PaperTextureUpdatePreview
-import com.emberr.presentation.shared.components.updatepreviews.SlashMenuUpdatePreview
-import com.emberr.presentation.shared.components.updatepreviews.ThemesUpdatePreview
-import com.emberr.presentation.shared.components.updatepreviews.WidgetsUpdatePreview
+import com.emberr.presentation.shared.components.EmberrBlur
+import com.emberr.presentation.shared.components.EmberrFrontGhost
+import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.LocalDialogWindowTitleBar
+import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
+import com.emberr.presentation.shared.components.customEmberrShadow
+import com.emberr.presentation.shared.components.desktopDialogSize
+import com.emberr.presentation.shared.components.emberrBlur
+import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.fullScreenDialogProperties
+import com.emberr.presentation.shared.components.mobileDialogSize
+import com.emberr.presentation.shared.components.orHighContrastLine
+import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.editor.components.FullScreenImageScreen
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.PaperTextureBox
@@ -86,8 +95,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.painterResource
+import kotlin.time.Duration.Companion.milliseconds
 
 private val UpdatePeekGhostSize = 56.dp
 private val UpdatePeekVisibleHeight = 32.dp
@@ -102,89 +111,6 @@ private val UpdateScreenshotShape = RoundedCornerShape(12.dp)
 private val UpdateSectionGap = 28.dp
 private val UpdateScreenshotWidthToHeightRatio = if (isDesktopPlatform) 1834f / 1019f else 407f / 858f
 private val UpdateScreenshotMaxHeight = if (isDesktopPlatform) 400.dp else 360.dp
-
-private class UpdateNotesSection(
-    val heading: String,
-    val location: String? = null,
-    val description: String? = null,
-    val items: List<String> = emptyList(),
-    val isNew: Boolean = false,
-    val screenshotPaths: List<String> = emptyList(),
-    val preview: (@Composable () -> Unit)? = null
-)
-
-private val CurrentUpdateNotes = listOfNotNull(
-    UpdateNotesSection(
-        heading = "Themes",
-        location = "Settings → Appearance → Theme",
-        isNew = true,
-        preview = { ThemesUpdatePreview() },
-        description = if (isDesktopPlatform) {
-            "Pick from 13 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast. " +
-                "Each one has a strength setting, and you can choose whether text and icons follow it too."
-        } else {
-            "Pick from 14 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast, " +
-                "or let **Wallpaper** take its colors from your wallpaper. " +
-                "Each one has a strength setting, and you can choose whether text and icons follow it too. " +
-                "Your home screen widgets follow the theme as well."
-        }
-    ),
-    UpdateNotesSection(
-        heading = "Paper Texture",
-        location = "Settings → Appearance → Theme → Texture",
-        isNew = true,
-        preview = { PaperTextureUpdatePreview() },
-        description = "Give the app a soft grain, like real paper. " +
-            "Set how strong it is, and choose where it shows: the whole app, notes, canvas or Daily Notes."
-    ),
-    UpdateNotesSection(
-        heading = "Interface Scale",
-        location = "Settings → Appearance → Interface Scale",
-        isNew = true,
-        preview = { InterfaceScaleUpdatePreview() },
-        description = if (isDesktopPlatform) {
-            "Make everything in the app bigger or smaller, from 80% to 200%, or use **Ctrl +**, **Ctrl −** and **Ctrl 0**."
-        } else {
-            "Make everything in the app bigger or smaller, from 80% to 200%."
-        }
-    ),
-    if (isDesktopPlatform) {
-        null
-    } else {
-        UpdateNotesSection(
-            heading = "Widgets",
-            location = "Long-press your home screen → Widgets → Emberr",
-            preview = { WidgetsUpdatePreview() },
-            description = "Every widget has a cleaner new look, and there are three new ones: **Note card**, **Jot it down** " +
-                "and **Quote of the day**. Widgets now show the note you picked right away, and tell you when that note has been deleted."
-        )
-    },
-    UpdateNotesSection(
-        heading = "Editor",
-        location = "Type / anywhere in a note",
-        preview = { SlashMenuUpdatePreview() },
-        description = "The slash menu now opens right after any character, not only after a space. " +
-            "If you type past a match, delete back and the menu comes back."
-    ),
-    UpdateNotesSection(
-        heading = "Others",
-        location = "Smaller changes and fixes",
-        items = listOf(
-            "Sliders across the app have a new design.",
-            if (isDesktopPlatform) {
-                "Type **/** in a note's title to add the current time or date."
-            } else {
-                "Add the current time or date to a note's title from the keyboard toolbar."
-            }
-        ) + (if (isDesktopPlatform) {
-            listOf("Faster startup on Windows.")
-        } else {
-            listOf("The network choice for sync is now in **Settings → Sync & Backup**.")
-        }) + listOf(
-            "Plenty of small fixes."
-        )
-    )
-)
 
 @Composable
 fun EmberrUpdatePeek(
@@ -495,9 +421,9 @@ private fun UpdateNotesSectionHeading(section: UpdateNotesSection) {
                 UpdateNewPill()
             }
         }
-        section.location?.let { location ->
+        section.whereToFind?.let { whereToFind ->
             Text(
-                text = location,
+                text = whereToFind,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -506,7 +432,7 @@ private fun UpdateNotesSectionHeading(section: UpdateNotesSection) {
 }
 
 @Composable
-private fun updateBadgeColor(): Color =
+private fun newPillColor(): Color =
     if (LocalAppIsDark.current) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface
 
 @Composable
@@ -518,7 +444,7 @@ private fun UpdateNewPill() {
         color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier
             .clip(CircleShape)
-            .background(updateBadgeColor())
+            .background(newPillColor())
             .emberrBorder(CircleShape)
             .padding(horizontal = 9.dp, vertical = 2.dp)
     )

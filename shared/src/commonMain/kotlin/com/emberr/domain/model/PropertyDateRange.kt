@@ -48,9 +48,11 @@ data class PropertyDateRange(
     }
 }
 
-fun shortDateText(date: LocalDate): String {
+fun shortDateText(date: LocalDate): String = "${shortMonthDayText(date)}, ${date.year}"
+
+fun shortMonthDayText(date: LocalDate): String {
     val monthName = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-    return "$monthName ${date.day}, ${date.year}"
+    return "$monthName ${date.day}"
 }
 
 fun parsePropertyDateRange(text: String): PropertyDateRange? {
