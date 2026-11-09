@@ -64,6 +64,7 @@ fun EmberrBottomSheetOption(
             )
             .heightIn(min = OPTION_MIN_HEIGHT)
             .clip(OPTION_SHAPE)
+            .then(if (isSelected) Modifier.highContrastBorder(OPTION_SHAPE) else Modifier)
             .background(if (isSelected) SelectedOptionBackground else Color.Transparent)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
