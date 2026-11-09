@@ -62,7 +62,8 @@ data class CloudMediaPassResult(
     val filesNotReceivedCount: Int,
     val filesWaitingForUploadCount: Int,
     val stoppedBeforeTheEnd: Boolean,
-    val lastProblem: String?
+    val lastProblem: String?,
+    val uploadsRefusedReason: CloudUploadsRefusedReason? = null
 )
 
 internal fun describeMediaFailure(error: Exception): String = when (error) {
@@ -86,7 +87,7 @@ private class MediaPass(
     val fileNamesOnDisk: Set<String>,
     val committedMediaIds: MutableSet<String>
 ) {
-    var uploadsAreStopped = false
+    var uploadsRefusedReason: CloudUploadsRefusedReason? = null
     var tooLargeCount = 0
     var notSentCount = 0
     var notReceivedCount = 0
@@ -173,11 +174,11 @@ class CloudMediaSync(
             if (plan.fileNamesToUpload.isNotEmpty() || filesToDownload.isNotEmpty()) beforeTransferringFiles()
 
             for (fileName in plan.fileNamesToUpload) {
-                if (pass.uploadsAreStopped) break
+                if (pass.uploadsRefusedReason != null) break
                 uploadTracked(pass, fileName)
             }
             for (lockToAdd in plan.locksToAdd) {
-                if (pass.uploadsAreStopped) break
+                if (pass.uploadsRefusedReason != null) break
                 if (lockToAdd.place.mediaId in pass.committedMediaIds) addLockUnlessRefused(pass, lockToAdd)
             }
             plan.locksToRemove.forEach { place -> removeLockUnlessRefused(pass, place) }
@@ -189,7 +190,8 @@ class CloudMediaSync(
                 filesNotReceivedCount = pass.notReceivedCount,
                 filesWaitingForUploadCount = pass.filesWaitingForUpload,
                 stoppedBeforeTheEnd = false,
-                lastProblem = pass.lastProblem
+                lastProblem = pass.lastProblem,
+                uploadsRefusedReason = pass.uploadsRefusedReason
             )
         } finally {
             mutableProgress.value = null
@@ -278,9 +280,10 @@ class CloudMediaSync(
                 MediaTransferStatusBus.markDeferred(fileName)
                 throw error
             }
-            pass.lastProblem = when (uploadOutcomeOf(error)) {
-                UploadOutcome.REFUSED_BY_PLAN -> "Uploads stopped: ${describeMediaFailure(error)}"
-                else -> "Could not send a file: ${describeMediaFailure(error)}"
+            when (uploadOutcomeOf(error)) {
+                UploadOutcome.REFUSED_BY_PLAN -> pass.uploadsRefusedReason = uploadsRefusedReasonOf(error as CloudApiException)
+                UploadOutcome.FAILED -> pass.lastProblem = "Could not send a file: ${describeMediaFailure(error)}"
+                else -> Unit
             }
             uploadOutcomeOf(error)
         }
@@ -297,7 +300,6 @@ class CloudMediaSync(
                 MediaTransferStatusBus.markFinished(fileName, succeeded = false)
             }
             UploadOutcome.REFUSED_BY_PLAN -> {
-                pass.uploadsAreStopped = true
                 pass.notSentCount++
                 MediaTransferStatusBus.markDeferred(fileName)
             }
@@ -316,8 +318,12 @@ class CloudMediaSync(
             throw cancellation
         } catch (error: Exception) {
             if (endsTheWholePass(error)) throw error
-            if (uploadOutcomeOf(error) == UploadOutcome.REFUSED_BY_PLAN) pass.uploadsAreStopped = true
-            pass.lastProblem = "Could not link a file to its note: ${describeMediaFailure(error)}"
+            val refusedReason = (error as? CloudApiException)?.let(::uploadsRefusedReasonOf)
+            if (refusedReason != null) {
+                pass.uploadsRefusedReason = refusedReason
+            } else {
+                pass.lastProblem = "Could not link a file to its note: ${describeMediaFailure(error)}"
+            }
         }
     }
 

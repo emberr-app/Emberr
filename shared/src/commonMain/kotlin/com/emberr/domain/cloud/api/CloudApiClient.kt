@@ -134,7 +134,13 @@ class CloudApiClient(
             CloudAccountDetails(
                 email = answer.email,
                 storageUsedBytes = answer.storageUsedBytes,
-                keys = answer.keys.toCloudAccountKeys()
+                keys = answer.keys.toCloudAccountKeys(),
+                subscription = CloudSubscription(
+                    plan = answer.subscription.plan,
+                    storageLimitBytes = answer.subscription.storageLimitBytes,
+                    expiresAtMicroseconds = answer.subscription.expiresAt,
+                    cloudCopyRemovedAtMicroseconds = answer.subscription.cloudCopyRemovedAt
+                )
             )
         }
     }

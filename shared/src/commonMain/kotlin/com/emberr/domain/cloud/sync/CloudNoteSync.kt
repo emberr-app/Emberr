@@ -338,6 +338,7 @@ class CloudNoteSync(
     }
 
     private suspend fun pushNoteUnlessBroken(pass: NotePass, noteId: String) {
+        if (pass.counts.uploadsRefusedReason != null) return
         try {
             if (moveNoteOutOfOtherStreams(pass, noteId)) commitNote(pass, noteId)
         } catch (_: NotePayloadSyncException) {
@@ -408,24 +409,23 @@ class CloudNoteSync(
             val noteKey = noteKeyToSend(pass, stream, itemId, keyParentId)
             val encryptedNote = itemKeyManager.encryptContent(noteToSend.noteJson.encodeToByteArray(), noteKey.openKey, itemType, itemId)
             val sizeBytes = encryptedNote.cipherText.size.toLong()
-            val uploadUrl = requestUploadUrlUnlessTooLarge(pass, stream, itemId, sizeBytes) ?: run {
-                pass.counts.notSentCount++
-                return
-            }
+            val uploadUrl = requestUploadUrlUnlessTooLarge(pass, stream, itemId, sizeBytes) ?: return
             blobTransfer.upload(uploadUrl.uploadUrl, encryptedNote.cipherText)
-            val result = apiClient.commitBlobItem(
-                sessionToken = pass.sessionToken,
-                spaceRef = stream.spaceRef,
-                itemId = itemId,
-                baseRevision = row?.revision ?: 0L,
-                itemType = itemType,
-                payloadVersion = NOTE_PAYLOAD_SCHEMA_VERSION,
-                parentId = keyParentId,
-                lockedKey = noteKey.lockedKey,
-                objectKey = uploadUrl.objectKey,
-                blobNonce = encryptedNote.nonce,
-                sizeBytes = sizeBytes
-            )
+            val result = pass.counts.writeUnlessUploadsRefused {
+                apiClient.commitBlobItem(
+                    sessionToken = pass.sessionToken,
+                    spaceRef = stream.spaceRef,
+                    itemId = itemId,
+                    baseRevision = row?.revision ?: 0L,
+                    itemType = itemType,
+                    payloadVersion = NOTE_PAYLOAD_SCHEMA_VERSION,
+                    parentId = keyParentId,
+                    lockedKey = noteKey.lockedKey,
+                    objectKey = uploadUrl.objectKey,
+                    blobNonce = encryptedNote.nonce,
+                    sizeBytes = sizeBytes
+                )
+            } ?: return
             when (result) {
                 is CloudWriteResult.Saved -> {
                     stream.openKeys[itemId] = noteKey.openKey
@@ -493,9 +493,10 @@ class CloudNoteSync(
         sizeBytes: Long
     ): CloudUploadUrl? =
         try {
-            apiClient.requestUploadUrl(pass.sessionToken, stream.spaceRef, itemId, sizeBytes)
+            pass.counts.writeUnlessUploadsRefused { apiClient.requestUploadUrl(pass.sessionToken, stream.spaceRef, itemId, sizeBytes) }
         } catch (error: CloudApiException) {
             if (error.code != CloudApiErrorCode.REQUEST_TOO_LARGE) throw error
+            pass.counts.notSentCount++
             null
         }
 

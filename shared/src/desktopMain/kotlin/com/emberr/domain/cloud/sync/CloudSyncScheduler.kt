@@ -55,6 +55,7 @@ actual class CloudSyncScheduler(
             .debounce(WAIT_AFTER_LAST_EDIT)
             .onEach { cloudSyncEngine.syncAutomatically() }
             .launchIn(newScope)
+        newScope.launch { cloudAccountRepository.refreshAccountDetails() }
         newScope.launch { cloudSyncEngine.syncAutomatically() }
         cloudSyncPoller.start()
     }

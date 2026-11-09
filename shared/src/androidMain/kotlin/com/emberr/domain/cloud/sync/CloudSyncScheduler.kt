@@ -125,6 +125,7 @@ actual class CloudSyncScheduler(
             newScope.launch { cloudSyncEngine.syncAutomatically() }
         }
         newScope.launch { updateBackgroundSyncFromSessionCount() }
+        newScope.launch { cloudAccountRepository.refreshAccountDetails() }
     }
 
     private fun stopSignedInWork() {

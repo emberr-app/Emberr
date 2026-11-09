@@ -10,6 +10,7 @@ import com.emberr.domain.cloud.api.CloudSession
 import com.emberr.domain.cloud.crypto.CloudCrypto
 import com.emberr.domain.cloud.keys.CloudAccountKeyManager
 import com.emberr.domain.cloud.keys.CloudRecoveryWords
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,9 @@ class CloudAccountRepository(
 
     private val mutableSignInState = MutableStateFlow<CloudSignInState>(CloudSignInState.SignedOut)
     val signInState: StateFlow<CloudSignInState> = mutableSignInState.asStateFlow()
+
+    private val mutableAccountDetails = MutableStateFlow<CloudAccountDetails?>(null)
+    val accountDetails: StateFlow<CloudAccountDetails?> = mutableAccountDetails.asStateFlow()
 
     suspend fun loadSignedInState() {
         val sessionToken = accountStorage.getSessionToken()
@@ -169,7 +173,17 @@ class CloudAccountRepository(
     suspend fun fetchAccountDetails(): CloudAccountDetails {
         val accountDetails = withStoredSessionToken { sessionToken -> apiClient.fetchAccountDetails(sessionToken) }
         if (accountDetails.email != accountStorage.getEmail()) saveEmail(accountDetails.email)
+        mutableAccountDetails.value = accountDetails
         return accountDetails
+    }
+
+    suspend fun refreshAccountDetails() {
+        try {
+            fetchAccountDetails()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (_: Exception) {
+        }
     }
 
     suspend fun readRecoveryWords(): String {
@@ -265,6 +279,7 @@ class CloudAccountRepository(
 
     suspend fun clearLocalAccount() {
         accountStorage.clearAll()
+        mutableAccountDetails.value = null
         setSignInState(CloudSignInState.SignedOut)
         forgetCloudSyncRecords()
     }

@@ -3,6 +3,8 @@ package com.emberr.domain.cloud.sync
 import com.emberr.data.local.room.dao.CloudItemDao
 import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.CloudItemEntity
+import com.emberr.domain.cloud.api.CloudApiErrorCode
+import com.emberr.domain.cloud.api.CloudApiException
 import com.emberr.domain.cloud.api.CloudRemoteItem
 import com.emberr.domain.cloud.api.fromBase64
 import com.emberr.domain.cloud.crypto.CloudEncryptedBytes
@@ -58,6 +60,27 @@ internal class SyncPassCounts {
     var sentCount = 0
     var notSentCount = 0
     var spacesChanged = false
+    var uploadsRefusedReason: CloudUploadsRefusedReason? = null
+
+    suspend fun <Answer : Any> writeUnlessUploadsRefused(write: suspend () -> Answer): Answer? {
+        if (uploadsRefusedReason != null) return null
+        return try {
+            write()
+        } catch (error: CloudApiException) {
+            uploadsRefusedReason = uploadsRefusedReasonOf(error) ?: throw error
+            null
+        }
+    }
+
+    fun passResult(): CloudSyncResult =
+        uploadsRefusedReason?.let { reason -> CloudSyncResult.UploadsRefused(reason) }
+            ?: CloudSyncResult.Done(receivedCount = receivedCount, sentCount = sentCount, notSentCount = notSentCount)
+}
+
+internal fun uploadsRefusedReasonOf(error: CloudApiException): CloudUploadsRefusedReason? = when (error.code) {
+    CloudApiErrorCode.NO_ACTIVE_SUBSCRIPTION -> CloudUploadsRefusedReason.TRIAL_ENDED
+    CloudApiErrorCode.STORAGE_LIMIT_EXCEEDED -> CloudUploadsRefusedReason.STORAGE_FULL
+    else -> null
 }
 
 internal fun checkThisAppCanRead(item: CloudRemoteItem) {
