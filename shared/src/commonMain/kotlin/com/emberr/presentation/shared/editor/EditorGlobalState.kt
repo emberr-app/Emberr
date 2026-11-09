@@ -33,6 +33,8 @@ object GlobalEditorState {
 
     var focusedFieldsHidingToolbar by mutableIntStateOf(0)
 
+    var isNoteTitleFocused by mutableStateOf(false)
+
     var isPointerOverWatchlistTitle: Boolean = false
 
     var lastCopiedMarkdown: String? = null
@@ -100,3 +102,5 @@ object EditorEventBus {
 }
 
 data class InsertTextRequest(val blockId: String, val text: String, val nonce: Long)
+
+const val NOTE_TITLE_FIELD_ID = "note_title_field"

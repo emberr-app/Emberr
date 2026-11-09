@@ -101,6 +101,15 @@ import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import com.emberr.presentation.shared.editor.toolbar.MobileMenuState
 import com.emberr.presentation.shared.editor.EditorEventBus
+import com.emberr.presentation.shared.editor.NOTE_TITLE_FIELD_ID
+import com.emberr.presentation.shared.editor.text.withTextInsertedAtCursor
+import com.emberr.presentation.shared.editor.slash.SlashMenuList
+import com.emberr.presentation.shared.editor.slash.dateAndTimeSlashMenuSection
+import com.emberr.presentation.shared.editor.slash.matchesSlashQuery
+import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.PopupProperties
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -1159,6 +1168,42 @@ private fun NoteTitleField(
     var titleLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
     var titleCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val latestTitle by rememberUpdatedState(noteTitle)
+    var isTitleFocused by remember { mutableStateOf(false) }
+    val latestShownValue by rememberUpdatedState(shownValue)
+    val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
+    var slashIndex by remember { mutableStateOf<Int?>(null) }
+    val slashQuery = slashIndex?.let { titleSlashQueryOf(shownValue, it) }
+    var slashMenuSelectedIndex by remember(slashQuery) { mutableIntStateOf(0) }
+
+    fun replaceSlashQueryWith(text: String) {
+        val start = slashIndex ?: return
+        val value = latestShownValue
+        val end = value.selection.end
+        val insertedText = "$text "
+        val newText = value.text.substring(0, start) + insertedText + value.text.substring(end)
+        slashIndex = null
+        titleValue = TextFieldValue(newText, TextRange(start + insertedText.length))
+        onTitleChange(newText)
+    }
+
+    val slashMenuSection = remember(slashQuery, usesTwentyFourHourClock) {
+        slashQuery?.let { query ->
+            dateAndTimeSlashMenuSection(::replaceSlashQueryWith, usesTwentyFourHourClock)
+                .let { section -> section.copy(items = section.items.filter { it.matchesSlashQuery(query) }) }
+                .takeIf { it.items.isNotEmpty() }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { if (isTitleFocused) GlobalEditorState.isNoteTitleFocused = false }
+    }
+
+    LaunchedEffect(EditorEventBus.insertTextSignal) {
+        val request = EditorEventBus.insertTextSignal ?: return@LaunchedEffect
+        if (request.blockId != NOTE_TITLE_FIELD_ID || !isTitleFocused) return@LaunchedEffect
+        titleValue = shownValue.withTextInsertedAtCursor(request.text)
+        onTitleChange(titleValue.text)
+    }
 
     DisposableEffect(crossBlockSelection) {
         val focusTitleAtEnd: () -> Unit = {
@@ -1198,6 +1243,15 @@ private fun NoteTitleField(
         BasicTextField(
             value = shownValue,
             onValueChange = { newValue ->
+                val cursor = newValue.selection.end
+                val typedSlash = newValue.text.length == shownValue.text.length + 1 &&
+                    newValue.selection.collapsed &&
+                    cursor > 0 &&
+                    newValue.text[cursor - 1] == '/'
+                slashIndex = when {
+                    isDesktopPlatform && typedSlash -> cursor - 1
+                    else -> slashIndex?.takeIf { titleSlashQueryOf(newValue, it) != null }
+                }
                 titleValue = newValue
                 if (newValue.text != noteTitle) onTitleChange(newValue.text)
             },
@@ -1212,9 +1266,35 @@ private fun NoteTitleField(
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
+                .onFocusChanged { focusState ->
+                    isTitleFocused = focusState.isFocused
+                    GlobalEditorState.isNoteTitleFocused = focusState.isFocused
+                    if (!focusState.isFocused) slashIndex = null
+                }
                 .onGloballyPositioned { titleCoordinates = it }
                 .onPreviewKeyEvent { event ->
                     val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
+                    val slashMenuItems = slashMenuSection?.items
+                    if (slashMenuItems != null) {
+                        val isKeyDown = event.type == KeyEventType.KeyDown
+                        when {
+                            event.key == Key.DirectionDown || event.key == Key.DirectionUp -> {
+                                if (isKeyDown) {
+                                    val step = if (event.key == Key.DirectionDown) 1 else -1
+                                    slashMenuSelectedIndex = (slashMenuSelectedIndex + step).mod(slashMenuItems.size)
+                                }
+                                return@onPreviewKeyEvent true
+                            }
+                            isEnter -> {
+                                if (isKeyDown) slashMenuItems.getOrNull(slashMenuSelectedIndex)?.action?.invoke()
+                                return@onPreviewKeyEvent true
+                            }
+                            event.key == Key.Escape -> {
+                                if (isKeyDown) slashIndex = null
+                                return@onPreviewKeyEvent true
+                            }
+                        }
+                    }
                     val movesDownIntoNote = event.type == KeyEventType.KeyDown &&
                         event.key == Key.DirectionDown &&
                         !event.isShiftPressed &&
@@ -1232,7 +1312,37 @@ private fun NoteTitleField(
                 },
             singleLine = singleLine
         )
+
+        val shownSlashIndex = slashIndex
+        val layout = titleLayout
+        if (slashMenuSection != null && shownSlashIndex != null && layout != null && shownSlashIndex < layout.layoutInput.text.length) {
+            val slashRect = layout.getBoundingBox(shownSlashIndex)
+            val density = LocalDensity.current
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(slashRect.left.roundToInt(), slashRect.top.roundToInt()) }
+                    .size(width = 1.dp, height = with(density) { slashRect.height.toDp() })
+            ) {
+                EmberrDesktopMenu(
+                    expanded = true,
+                    onDismissRequest = { slashIndex = null },
+                    properties = PopupProperties(focusable = false),
+                    modifier = Modifier
+                        .width(290.dp)
+                        .heightIn(max = 400.dp)
+                ) {
+                    SlashMenuList(sections = listOf(slashMenuSection), selectedIndex = slashMenuSelectedIndex)
+                }
+            }
+        }
     }
+}
+
+private fun titleSlashQueryOf(value: TextFieldValue, slashIndex: Int): String? {
+    val cursor = value.selection.end
+    if (!value.selection.collapsed || slashIndex >= value.text.length || value.text[slashIndex] != '/' || cursor <= slashIndex) return null
+    val query = value.text.substring(slashIndex + 1, cursor)
+    return query.takeUnless { it.any(Char::isWhitespace) }
 }
 
 // CategorizedEmojiPicker

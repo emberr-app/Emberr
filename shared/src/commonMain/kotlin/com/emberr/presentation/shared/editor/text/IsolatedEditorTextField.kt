@@ -380,14 +380,8 @@ fun IsolatedEditorTextField(
         val request = EditorEventBus.insertTextSignal ?: return@LaunchedEffect
         if (request.blockId != blockId || !isFieldFocused) return@LaunchedEffect
 
-        val selectionStart = tfv.selection.min
-        val selectionEnd = tfv.selection.max
-        val spaceBefore = if (selectionStart > 0 && !tfv.text[selectionStart - 1].isWhitespace()) " " else ""
-        val spaceAfter = if (selectionEnd < tfv.text.length && tfv.text[selectionEnd].isWhitespace()) "" else " "
-        val insertedText = spaceBefore + request.text + spaceAfter
-        val newText = tfv.text.substring(0, selectionStart) + insertedText + tfv.text.substring(selectionEnd)
-
-        tfv = tfv.copy(text = newText, selection = TextRange(selectionStart + insertedText.length), composition = null)
+        tfv = tfv.withTextInsertedAtCursor(request.text)
+        val newText = tfv.text
         GlobalEditorState.currentSelection = tfv.selection
         lastSentText = newText
         textsSentButNotYetEchoed += newText

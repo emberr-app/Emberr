@@ -60,6 +60,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import com.emberr.presentation.shared.editor.EditorEventBus
 import com.emberr.presentation.shared.editor.GlobalEditorState
+import com.emberr.presentation.shared.editor.NOTE_TITLE_FIELD_ID
 import com.emberr.presentation.shared.editor.links.CanvasLinkMenuContent
 import com.emberr.presentation.shared.editor.links.DatabaseLinkMenuContent
 import com.emberr.presentation.shared.editor.links.NoteLinkMenuContent
@@ -123,8 +124,13 @@ fun EditorToolbar(
     val savedToolbarItems by settingsManager.keyboardToolbarItemsFlow.collectAsState(
         initial = settingsManager.getKeyboardToolbarItems()
     )
-    val toolbarItems = remember(savedToolbarItems, showHistory) {
-        keyboardToolbarItemsToShow(keyboardToolbarItemsFrom(savedToolbarItems), showHistory)
+    val isNoteTitleFocused = GlobalEditorState.isNoteTitleFocused
+    val toolbarItems = remember(savedToolbarItems, showHistory, isNoteTitleFocused) {
+        if (isNoteTitleFocused) {
+            listOf(KeyboardToolbarItem.CURRENT_TIME, KeyboardToolbarItem.CURRENT_DATE)
+        } else {
+            keyboardToolbarItemsToShow(keyboardToolbarItemsFrom(savedToolbarItems), showHistory)
+        }
     }
     var isLinkPanelFromSlash by remember { mutableStateOf(false) }
     val finishSlashLink: () -> Unit = {
@@ -149,7 +155,8 @@ fun EditorToolbar(
     }
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
     val insertTextAtCursor: (String) -> Unit = { text ->
-        GlobalEditorState.currentlyFocusedBlockId?.let { EditorEventBus.requestInsertText(it, text) }
+        val targetId = if (GlobalEditorState.isNoteTitleFocused) NOTE_TITLE_FIELD_ID else GlobalEditorState.currentlyFocusedBlockId
+        targetId?.let { EditorEventBus.requestInsertText(it, text) }
     }
     val onToolbarItemClick: (KeyboardToolbarItem) -> Unit = { item ->
         when (item) {
@@ -236,7 +243,7 @@ fun EditorToolbar(
                 CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 36.dp) {
                     Column(modifier = Modifier.fillMaxWidth().animateContentSize()) {
                         when (mobileMenuState) {
-                            MobileMenuState.MAIN -> if (GlobalEditorState.hasTextSelection && !isTextSelectedAcrossBlocks) {
+                            MobileMenuState.MAIN -> if (GlobalEditorState.hasTextSelection && !isTextSelectedAcrossBlocks && !isNoteTitleFocused) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
