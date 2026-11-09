@@ -176,6 +176,9 @@ interface BackupDao {
     @Query("DELETE FROM cloud_items")
     suspend fun deleteAllCloudItems()
 
+    @Query("DELETE FROM cloud_media_locks")
+    suspend fun deleteAllCloudMediaLocks()
+
     @Query("SELECT blockDataJson FROM note_blocks")
     suspend fun getAllBlockDataJson(): List<String>
 

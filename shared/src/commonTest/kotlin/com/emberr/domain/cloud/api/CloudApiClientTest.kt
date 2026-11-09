@@ -18,6 +18,7 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
@@ -340,5 +341,79 @@ class CloudApiClientTest {
         assertNull(tombstone.inlinePayload)
         assertNull(tombstone.blobNonce)
         assertNull(tombstone.downloadUrl)
+    }
+
+    @Test
+    fun mediaUploadUrlsSendThePieceSizesAndReadACommittedAndAnUnfinishedAnswer() = runTest {
+        var methodSent: HttpMethod? = null
+        var pathSent: String? = null
+        var bodySent: JsonObject? = null
+        val unfinishedClient = clientAnswering { request ->
+            methodSent = request.method
+            pathSent = request.url.encodedPath
+            bodySent = Json.parseToJsonElement(request.body.toByteArray().decodeToString()).jsonObject
+            respond(
+                """{"committed":false,"pieces":[{"index":1,"uploadUrl":"http://localhost:3900/emberr/media/m/u/piece_00001?X-Amz-Signature=abc"}],""" +
+                    """"expiresAt":1761300000000000}""",
+                HttpStatusCode.OK,
+                jsonHeaders
+            )
+        }
+
+        val unfinished = unfinishedClient.requestMediaUploadUrls("session-token", "media_ab12", listOf(8388648L, 41L))
+
+        assertEquals(HttpMethod.Post, methodSent)
+        assertEquals("/v1/media/media_ab12/upload-urls", pathSent)
+        assertEquals(setOf("pieceSizes"), bodySent!!.keys)
+        assertEquals(listOf(8388648L, 41L), bodySent!!.getValue("pieceSizes").jsonArray.map { it.jsonPrimitive.long })
+        assertFalse(unfinished.committed)
+        assertEquals(1, unfinished.pieces.single().index)
+        assertEquals("http://localhost:3900/emberr/media/m/u/piece_00001?X-Amz-Signature=abc", unfinished.pieces.single().uploadUrl)
+        assertEquals(1761300000000000L, unfinished.expiresAtMicroseconds)
+
+        val committedClient = clientAnswering {
+            respond("""{"committed":true,"pieces":[]}""", HttpStatusCode.OK, jsonHeaders)
+        }
+
+        val committed = committedClient.requestMediaUploadUrls("session-token", "media_ab12", listOf(40L))
+
+        assertTrue(committed.committed)
+        assertTrue(committed.pieces.isEmpty())
+        assertNull(committed.expiresAtMicroseconds)
+    }
+
+    @Test
+    fun changesReadALiveMediaLockAndATombstone() = runTest {
+        val lockedKey = Base64.Default.encode(ByteArray(48) { 2 })
+        val lockedKeyNonce = Base64.Default.encode(ByteArray(24) { 3 })
+        val client = clientAnswering {
+            respond(
+                """{"items":[],"mediaLocks":[""" +
+                    """{"mediaId":"media_ab12","noteId":"note-1","encryptedKey":"$lockedKey","encryptedKeyNonce":"$lockedKeyNonce",""" +
+                    """"revision":20,"deleted":false,"updatedAt":1761300000000000},""" +
+                    """{"mediaId":"media_cd34","noteId":"note-1","encryptedKey":null,"encryptedKeyNonce":null,""" +
+                    """"revision":21,"deleted":true,"updatedAt":1761300000000001}""" +
+                    """],"latest":21,"hasMore":false}""",
+                HttpStatusCode.OK,
+                jsonHeaders
+            )
+        }
+
+        val page = assertIs<CloudChanges.Page>(client.fetchChanges("session-token", spaceRef = 7, since = 19))
+
+        assertTrue(page.items.isEmpty())
+        assertEquals(2, page.mediaLocks.size)
+        val (liveLock, tombstone) = page.mediaLocks
+        assertEquals("media_ab12", liveLock.mediaId)
+        assertEquals("note-1", liveLock.noteId)
+        assertContentEquals(ByteArray(48) { 2 }, liveLock.lockedKey!!.cipherText)
+        assertContentEquals(ByteArray(24) { 3 }, liveLock.lockedKey!!.nonce)
+        assertEquals(20L, liveLock.revision)
+        assertFalse(liveLock.deleted)
+        assertEquals(1761300000000000L, liveLock.updatedAtMicroseconds)
+        assertEquals("media_cd34", tombstone.mediaId)
+        assertNull(tombstone.lockedKey)
+        assertTrue(tombstone.deleted)
+        assertEquals(21L, tombstone.revision)
     }
 }

@@ -2,6 +2,7 @@ package com.emberr.di
 
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.CloudItemDao
+import com.emberr.data.local.room.dao.CloudMediaLockDao
 import com.emberr.data.local.room.dao.CloudSpaceDao
 import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.domain.cloud.account.CloudAccountRepository
@@ -569,6 +570,7 @@ val sharedModule = module {
     single {
         val cloudSpaceDao = get<CloudSpaceDao>()
         val cloudItemDao = get<CloudItemDao>()
+        val cloudMediaLockDao = get<CloudMediaLockDao>()
         val noteDao = get<NoteDao>()
         CloudAccountRepository(
             apiClient = get(),
@@ -577,7 +579,7 @@ val sharedModule = module {
             cloudCrypto = get(),
             accountStorage = get(),
             deviceName = cloudDeviceName(),
-            forgetCloudSyncRecords = { forgetCloudSyncRecords(cloudSpaceDao, cloudItemDao, noteDao) }
+            forgetCloudSyncRecords = { forgetCloudSyncRecords(cloudSpaceDao, cloudItemDao, cloudMediaLockDao, noteDao) }
         )
     }
     single {
@@ -645,6 +647,7 @@ val sharedModule = module {
             itemKeyManager = get(),
             cloudSpaceDao = get(),
             cloudItemDao = get(),
+            cloudMediaLockDao = get(),
             spaceDao = get(),
             folderDao = get(),
             spaceRepository = get(),

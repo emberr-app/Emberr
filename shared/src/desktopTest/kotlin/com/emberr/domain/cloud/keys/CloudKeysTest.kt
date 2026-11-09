@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -17,6 +18,7 @@ class CloudKeysTest {
     private val itemKeyManager = CloudItemKeyManager(cloudCrypto)
     private val recoveryWords = CloudRecoveryWords(cloudCrypto)
     private val dailyNoteIds = CloudDailyNoteIds(cloudCrypto)
+    private val mediaCrypto = CloudMediaCrypto(cloudCrypto)
 
     @Test
     fun loggingInWithTheSignupPasswordUnlocksTheSameKeys() = runTest {
@@ -185,5 +187,49 @@ class CloudKeysTest {
         assertEquals(dailyNoteId, dailyNoteIds.dailyNoteId(accountKey, "2026-10-18"))
         assertNotEquals(dailyNoteId, dailyNoteIds.dailyNoteId(otherAccountKey, "2026-10-18"))
         assertTrue(Regex("daily_[0-9a-f]{32}").matches(dailyNoteId))
+    }
+
+    @Test
+    fun aMediaIdAndKeyDependOnlyOnTheAccountKeyAndFileName() = runTest {
+        val accountKey = itemKeyManager.newItemKey()
+        val otherDeviceSameAccountKey = accountKey.copyOf()
+
+        val mediaId = mediaCrypto.mediaId(accountKey, "media_4f1c.jpg")
+        val otherFileMediaId = mediaCrypto.mediaId(accountKey, "media_9a2e.jpg")
+
+        assertTrue(Regex("media_[0-9a-f]{32}").matches(mediaId))
+        assertEquals(mediaId, mediaCrypto.mediaId(otherDeviceSameAccountKey, "media_4f1c.jpg"))
+        assertNotEquals(mediaId, otherFileMediaId)
+        val mediaKey = mediaCrypto.mediaKey(accountKey, mediaId)
+        assertEquals(32, mediaKey.size)
+        assertContentEquals(mediaKey, mediaCrypto.mediaKey(otherDeviceSameAccountKey, mediaId))
+        assertFalse(mediaKey.contentEquals(mediaCrypto.mediaKey(accountKey, otherFileMediaId)))
+    }
+
+    @Test
+    fun aMediaPieceOpensOnlyAtItsOwnIndexAndCount() = runTest {
+        val mediaId = "media_00112233445566778899aabbccddeeff"
+        val mediaKey = mediaCrypto.mediaKey(itemKeyManager.newItemKey(), mediaId)
+        val piece = ByteArray(1000) { it.toByte() }
+
+        val encryptedPiece = mediaCrypto.encryptPiece(piece, mediaKey, mediaId, pieceIndex = 1, pieceCount = 3)
+
+        assertEquals(piece.size + 40, encryptedPiece.size)
+        assertContentEquals(piece, mediaCrypto.decryptPiece(encryptedPiece, mediaKey, mediaId, pieceIndex = 1, pieceCount = 3))
+        assertFailsWith<CloudDecryptionException> {
+            mediaCrypto.decryptPiece(encryptedPiece, mediaKey, mediaId, pieceIndex = 2, pieceCount = 3)
+        }
+        assertFailsWith<CloudDecryptionException> {
+            mediaCrypto.decryptPiece(encryptedPiece, mediaKey, mediaId, pieceIndex = 1, pieceCount = 2)
+        }
+    }
+
+    @Test
+    fun encryptedPieceSizesAddFortyBytesToEveryEightMebibytePiece() {
+        val eightMebibytes = 8L * 1024 * 1024
+
+        assertEquals(listOf(40L), encryptedMediaPieceSizes(0L))
+        assertEquals(listOf(eightMebibytes + 40), encryptedMediaPieceSizes(eightMebibytes))
+        assertEquals(listOf(eightMebibytes + 40, 41L), encryptedMediaPieceSizes(eightMebibytes + 1))
     }
 }
