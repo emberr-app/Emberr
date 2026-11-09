@@ -1,4 +1,4 @@
-// Loads one note's title, icon, snippet and cover for the card widget to draw.
+// Loads one note's title, icon and cover for the card widget to draw.
 package com.emberr.presentation.widget.notecard
 
 import com.emberr.data.local.room.dao.NoteDao
@@ -8,8 +8,6 @@ import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-private const val maximumCharactersPerSnippet = 300
 
 class NoteCardWidgetContentReader(
     private val noteDao: NoteDao,
@@ -33,8 +31,6 @@ class NoteCardWidgetContentReader(
             noteId = note.noteId,
             title = note.title.trim().ifBlank { "Untitled" },
             icon = note.icon?.trim()?.takeIf { it.isNotEmpty() },
-            snippet = note.snippet.trim().take(maximumCharactersPerSnippet)
-                .ifBlank { if (isCanvas) "Canvas" else "Empty note..." },
             isFavorite = note.isFavorite,
             isCanvas = isCanvas,
             coverImageAbsolutePath = note.coverImagePath?.let { path -> mediaStorageHelper.getAbsoluteMediaPath(path) }

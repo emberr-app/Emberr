@@ -35,7 +35,6 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
-import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -62,17 +61,22 @@ import org.koin.core.component.get
 import com.emberr.presentation.widget.writeDeletedFlag
 import com.emberr.presentation.widget.WidgetDeletedState
 import com.emberr.presentation.widget.previewNoteCardContent
+import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
+import com.emberr.presentation.widget.readWidgetState
 
-private const val coverBandHeightFraction = 0.5f
-private val minimumCoverBandHeight = 76.dp
-private val maximumCoverBandHeight = 240.dp
+private val minimumCoverBandHeight = 40.dp
 private val iconOverhang = 12.dp
 private val cardSidePadding = 14.dp
 private val favoriteStarReservedWidth = 16.dp
 private val cardTextVerticalPadding = 12.dp
+private val noteContentSidePadding = 18.dp
+private val titleGapBelowIcon = 15.dp
+private val cardTextBottomPadding = 18.dp
+private val titleLineHeight = 25.dp
 private val emojiIconStartNudge = 2.dp
 private val emojiIconTopNudge = 6.dp
 private val favoriteStarSize = 14.dp
+private val favoriteStarPadding = 14.dp
 private val canvasIconSize = 22.dp
 private const val coverBitmapTargetWidthPixels = 600
 private val coverBandTint = ColorProvider(day = Color(0x0D000000), night = Color(0x0DFFFFFF))
@@ -84,6 +88,7 @@ class NoteCardWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val stateAtStart = readWidgetState(context, id)
         val noteIdAtStart = readCardNoteId(context, id)?.takeIf { it.isNotBlank() }
         if (noteIdAtStart != null && loadAndCacheCard(context, id, noteIdAtStart) == null) {
             val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
@@ -91,8 +96,10 @@ class NoteCardWidget : GlanceAppWidget(), KoinComponent {
         }
 
         val appWidgetId = resolveAppWidgetId(context, id)
+        val stateChangedAtStart = readWidgetState(context, id) != stateAtStart
 
         provideContent {
+            RedrawIfStateChangedAtStart(context, id, stateChangedAtStart)
             WidgetColorTheme {
                 val savedState = currentState<Preferences>()
                 val rawCachedCard = savedState[cachedCardKey]
@@ -111,7 +118,7 @@ class NoteCardWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 NoteCardWidgetBody(
                     context = context,
                     appWidgetId = INVALID_APPWIDGET_ID,
@@ -171,8 +178,9 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
     val hasIcon = content.icon != null
     val hasCanvasIcon = content.isCanvas && !hasIcon
     val hasCoverBand = content.coverImageAbsolutePath != null || content.isCanvas || hasIcon
-    val coverBandHeight = (LocalSize.current.height * coverBandHeightFraction)
-        .coerceIn(minimumCoverBandHeight, maximumCoverBandHeight)
+    val titleTopPadding = if (hasIcon || hasCanvasIcon) iconOverhang + titleGapBelowIcon else cardTextVerticalPadding
+    val coverBandHeight = (LocalSize.current.height - titleTopPadding - titleLineHeight - cardTextBottomPadding)
+        .coerceAtLeast(minimumCoverBandHeight)
     val coverBitmap = remember(content.coverImageAbsolutePath) {
         content.coverImageAbsolutePath?.let(::loadCoverBitmap)
     }
@@ -208,28 +216,21 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
                     .fillMaxWidth()
                     .defaultWeight()
                     .padding(
-                        start = cardSidePadding,
-                        end = if (content.isFavorite && !hasCoverBand) cardSidePadding + favoriteStarReservedWidth else cardSidePadding,
-                        top = if (hasIcon || hasCanvasIcon) iconOverhang + cardTextVerticalPadding else cardTextVerticalPadding,
-                        bottom = cardTextVerticalPadding
-                    )
+                        start = noteContentSidePadding,
+                        end = if (content.isFavorite && !hasCoverBand) noteContentSidePadding + favoriteStarReservedWidth else noteContentSidePadding,
+                        top = titleTopPadding,
+                        bottom = if (hasCoverBand) cardTextBottomPadding else cardTextVerticalPadding
+                    ),
+                verticalAlignment = if (hasCoverBand) Alignment.Vertical.Bottom else Alignment.Vertical.CenterVertically
             ) {
                 Text(
                     text = content.title,
-                    maxLines = 1,
+                    maxLines = if (hasCoverBand) 1 else 3,
                     style = TextStyle(
                         color = primaryTextColor,
-                        fontSize = 16.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Medium
                     )
-                )
-
-                Spacer(modifier = GlanceModifier.height(4.dp))
-
-                Text(
-                    text = content.snippet,
-                    maxLines = if (hasCoverBand) 3 else 7,
-                    style = TextStyle(color = secondaryTextColor, fontSize = 12.sp)
                 )
             }
         }
@@ -238,12 +239,12 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
             Text(
                 text = content.icon.orEmpty(),
                 style = TextStyle(color = primaryTextColor, fontSize = 24.sp),
-                modifier = GlanceModifier.padding(start = cardSidePadding - emojiIconStartNudge, top = coverBandHeight - iconOverhang - emojiIconTopNudge)
+                modifier = GlanceModifier.padding(start = noteContentSidePadding - emojiIconStartNudge, top = coverBandHeight - iconOverhang - emojiIconTopNudge)
             )
         }
 
         if (hasCanvasIcon) {
-            Box(modifier = GlanceModifier.padding(start = cardSidePadding, top = coverBandHeight - iconOverhang)) {
+            Box(modifier = GlanceModifier.padding(start = noteContentSidePadding, top = coverBandHeight - iconOverhang)) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_widget_canvas),
                     contentDescription = "Canvas",
@@ -255,7 +256,7 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
 
         if (content.isFavorite) {
             Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
-                Box(modifier = GlanceModifier.padding(10.dp)) {
+                Box(modifier = GlanceModifier.padding(favoriteStarPadding)) {
                     Image(
                         provider = ImageProvider(R.drawable.ic_widget_star),
                         contentDescription = "Favorite",
