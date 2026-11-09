@@ -94,6 +94,7 @@ import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.EmberrSearchTextFieldAction
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.LocalDialogWindowTitleBar
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.desktopDialogSize
@@ -174,6 +175,8 @@ fun DailyTimelineDialog(
     onDismiss: () -> Unit,
     onBlockClick: (LocalDate, String) -> Unit
 ) {
+    val dialogWindowTitleBar = LocalDialogWindowTitleBar.current
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = fullScreenDialogProperties()
@@ -217,6 +220,7 @@ fun DailyTimelineDialog(
                     ),
                 contentAlignment = Alignment.Center
             ) {
+                dialogWindowTitleBar?.invoke()
                 PaperTextureBox(
                     modifier = Modifier
                         .then(if (isDesktopPlatform) Modifier.desktopDialogSize() else Modifier.mobileDialogSize())

@@ -72,6 +72,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.LocalDialogWindowTitleBar
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.presentation.shared.components.TopBarIconButton
 import com.emberr.presentation.shared.components.EmberrBlur
@@ -260,6 +261,8 @@ fun PersonView(
         }
     )
 
+    val dialogWindowTitleBar = LocalDialogWindowTitleBar.current
+
     if (isDesktopPlatform) {
         Dialog(onDismissRequest = dismiss, properties = fullScreenDialogProperties()) {
             Box(
@@ -268,6 +271,7 @@ fun PersonView(
                     .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = dismiss),
                 contentAlignment = Alignment.Center
             ) {
+                dialogWindowTitleBar?.invoke()
                 PaperTextureBox(
                     modifier = Modifier
                         .desktopDialogSize()
