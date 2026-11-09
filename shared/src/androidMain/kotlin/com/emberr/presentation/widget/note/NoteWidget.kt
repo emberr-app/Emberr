@@ -72,6 +72,8 @@ import com.emberr.presentation.widget.writeDeletedFlag
 import com.emberr.presentation.widget.WidgetDeletedState
 import com.emberr.presentation.widget.previewNoteId
 import com.emberr.presentation.widget.previewNoteContent
+import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
+import com.emberr.presentation.widget.readWidgetState
 
 private const val maximumIndentationLevels = 4
 private const val indentationStepInDp = 12
@@ -91,6 +93,7 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val stateAtStart = readWidgetState(context, id)
         val noteIdAtStart = readSelectedNoteId(context, id)?.takeIf { it.isNotBlank() }
         if (noteIdAtStart != null && loadAndCacheContent(context, id, noteIdAtStart) == null) {
             val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
@@ -99,8 +102,10 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
 
         val appWidgetId = resolveAppWidgetId(context, id)
         val reportedWidgetWidth = readWidgetWidth(context, appWidgetId)
+        val stateChangedAtStart = readWidgetState(context, id) != stateAtStart
 
         provideContent {
+            RedrawIfStateChangedAtStart(context, id, stateChangedAtStart)
             WidgetColorTheme {
                 val savedState = currentState<Preferences>()
                 val storedNoteId = savedState[selectedNoteIdKey]?.takeIf { it.isNotBlank() }
@@ -121,7 +126,7 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 WidgetBody(
                     context = context,
                     chosenNoteId = previewNoteId,

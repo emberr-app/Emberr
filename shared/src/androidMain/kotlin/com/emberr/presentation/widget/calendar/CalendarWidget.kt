@@ -63,6 +63,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import androidx.core.graphics.toColorInt
 import com.emberr.presentation.widget.previewCalendarContent
+import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
+import com.emberr.presentation.widget.readWidgetState
 
 private val chevronSize = 16.dp
 private val monthStepButtonSize = 32.dp
@@ -76,12 +78,15 @@ class CalendarWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val stateAtStart = readWidgetState(context, id)
         val shownMonth = readShownMonth(context, id)
         val content = loadAndCacheCalendar(context, id, shownMonth)
             ?: readCachedCalendar(context, id)
         val appWidgetId = resolveAppWidgetId(context, id)
+        val stateChangedAtStart = readWidgetState(context, id) != stateAtStart
 
         provideContent {
+            RedrawIfStateChangedAtStart(context, id, stateChangedAtStart)
             WidgetColorTheme {
                 val rawCachedContent = currentState<Preferences>()[cachedCalendarKey]
                 val savedContent = remember(rawCachedContent) { decodeCachedCalendar(rawCachedContent) }
@@ -97,7 +102,7 @@ class CalendarWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 CalendarWidgetBody(
                     context = context,
                     appWidgetId = INVALID_APPWIDGET_ID,

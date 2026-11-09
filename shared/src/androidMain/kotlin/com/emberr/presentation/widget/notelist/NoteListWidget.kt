@@ -69,6 +69,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import com.emberr.presentation.widget.WidgetDeletedState
 import com.emberr.presentation.widget.previewNoteListContent
+import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
+import com.emberr.presentation.widget.readWidgetState
 
 private val headerIconSize = 18.dp
 private val noteCardCornerRadius = 14.dp
@@ -82,11 +84,14 @@ class NoteListWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val stateAtStart = readWidgetState(context, id)
         val loadedContent = loadAndCacheNoteList(context, id) ?: readCachedNoteList(context, id)
         val spaceId = readWidgetSpaceId(context, id)
         val appWidgetId = resolveAppWidgetId(context, id)
+        val stateChangedAtStart = readWidgetState(context, id) != stateAtStart
 
         provideContent {
+            RedrawIfStateChangedAtStart(context, id, stateChangedAtStart)
             WidgetColorTheme {
                 val savedState = currentState<Preferences>()
                 val rawCachedNoteList = savedState[cachedNoteListKey]
@@ -104,7 +109,7 @@ class NoteListWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 NoteListWidgetBody(
                     context = context,
                     spaceId = "",
