@@ -265,7 +265,7 @@ fun ColorThemeSettingsScreen(
 }
 
 @Composable
-private fun PaperTextureAreasRow(
+internal fun PaperTextureAreasRow(
     areas: Set<PaperTextureArea>,
     onToggleArea: (PaperTextureArea) -> Unit
 ) {
@@ -324,7 +324,7 @@ private fun PaperTextureAreasRow(
 }
 
 @Composable
-private fun PercentSliderRow(
+internal fun PercentSliderRow(
     icon: Painter,
     title: String,
     percent: Int,

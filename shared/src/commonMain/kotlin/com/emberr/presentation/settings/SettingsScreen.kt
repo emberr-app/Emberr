@@ -1721,7 +1721,7 @@ fun SettingsActionRow(
 }
 
 @Composable
-private fun InterfaceScaleStepperRow(
+internal fun InterfaceScaleStepperRow(
     savedPercent: Int,
     onPercentChosen: (Int) -> Unit
 ) {
