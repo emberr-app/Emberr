@@ -62,6 +62,8 @@ import com.emberr.presentation.widget.widgetNewEventExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import com.emberr.presentation.widget.previewUpcomingEventsContent
+import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
+import com.emberr.presentation.widget.readWidgetState
 
 private val dateColumnWidth = 30.dp
 private val eventCardCornerRadius = 10.dp
@@ -76,9 +78,12 @@ class UpcomingEventsWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val stateAtStart = readWidgetState(context, id)
         val content = loadAndCacheUpcomingEvents(context, id) ?: readCachedUpcomingEvents(context, id)
+        val stateChangedAtStart = readWidgetState(context, id) != stateAtStart
 
         provideContent {
+            RedrawIfStateChangedAtStart(context, id, stateChangedAtStart)
             WidgetColorTheme {
                 val rawCachedContent = currentState<Preferences>()[cachedUpcomingEventsKey]
                 val savedContent = remember(rawCachedContent) { decodeCachedUpcomingEvents(rawCachedContent) }
@@ -90,7 +95,7 @@ class UpcomingEventsWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 UpcomingEventsWidgetBody(context = context, content = previewUpcomingEventsContent())
             }
         }

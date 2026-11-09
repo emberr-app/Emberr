@@ -72,6 +72,8 @@ import kotlinx.datetime.todayIn
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import com.emberr.presentation.widget.previewTodayTasksContent
+import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
+import com.emberr.presentation.widget.readWidgetState
 
 private val checkboxTapWidth = 36.dp
 private val cardInset = 8.dp
@@ -91,10 +93,13 @@ class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val stateAtStart = readWidgetState(context, id)
         val content = loadAndCacheTodayTasks(context, id) ?: readCachedTodayTasks(context, id)
         val appWidgetId = resolveAppWidgetId(context, id)
+        val stateChangedAtStart = readWidgetState(context, id) != stateAtStart
 
         provideContent {
+            RedrawIfStateChangedAtStart(context, id, stateChangedAtStart)
             WidgetColorTheme {
                 val rawCachedContent = currentState<Preferences>()[cachedTodayTasksKey]
                 val savedContent = remember(rawCachedContent) { decodeCachedTodayTasks(rawCachedContent) }
@@ -110,7 +115,7 @@ class TodayTasksWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 TodayTasksWidgetBody(
                     context = context,
                     appWidgetId = INVALID_APPWIDGET_ID,

@@ -72,6 +72,8 @@ import com.emberr.presentation.widget.widgetTasksScreenExtra
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import com.emberr.presentation.widget.previewTasksContent
+import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
+import com.emberr.presentation.widget.readWidgetState
 
 private val topBarIconSize = 20.dp
 private val checkboxTapWidth = 36.dp
@@ -84,14 +86,17 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val stateAtStart = readWidgetState(context, id)
         val isShowingCompleted = readShowingCompleted(context, id)
 
         val content = loadAndCacheTasks(context, id, isShowingCompleted)
             ?: readCachedTasks(context, id)
 
         val appWidgetId = resolveAppWidgetId(context, id)
+        val stateChangedAtStart = readWidgetState(context, id) != stateAtStart
 
         provideContent {
+            RedrawIfStateChangedAtStart(context, id, stateChangedAtStart)
             WidgetColorTheme {
                 val rawCachedContent = currentState<Preferences>()[cachedTasksKey]
                 val savedContent = remember(rawCachedContent) { decodeCachedTasks(rawCachedContent) }
@@ -107,7 +112,7 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 TasksWidgetBody(
                     context = context,
                     appWidgetId = INVALID_APPWIDGET_ID,

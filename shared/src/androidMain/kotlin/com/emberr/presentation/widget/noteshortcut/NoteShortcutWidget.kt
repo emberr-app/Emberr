@@ -61,6 +61,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import com.emberr.presentation.widget.writeDeletedFlag
 import com.emberr.presentation.widget.previewNoteShortcutContent
+import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
+import com.emberr.presentation.widget.readWidgetState
 
 private val pillHeight = 66.dp
 private val pillCornerRadius = 33.dp
@@ -78,6 +80,7 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val stateAtStart = readWidgetState(context, id)
         val noteIdAtStart = readShortcutNoteId(context, id)?.takeIf { it.isNotBlank() }
         if (noteIdAtStart != null && loadAndCacheShortcut(context, id, noteIdAtStart) == null) {
             val noteSource = runCatching { get<WidgetNoteSource>() }.getOrNull()
@@ -85,8 +88,10 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
         }
 
         val appWidgetId = resolveAppWidgetId(context, id)
+        val stateChangedAtStart = readWidgetState(context, id) != stateAtStart
 
         provideContent {
+            RedrawIfStateChangedAtStart(context, id, stateChangedAtStart)
             WidgetColorTheme {
                 val savedState = currentState<Preferences>()
                 val storedNoteId = savedState[shortcutNoteIdKey]?.takeIf { it.isNotBlank() }
@@ -107,7 +112,7 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
-            WidgetColorTheme {
+            WidgetColorTheme(followsSettingChanges = false) {
                 NoteShortcutWidgetBody(
                     context = context,
                     content = previewNoteShortcutContent,
