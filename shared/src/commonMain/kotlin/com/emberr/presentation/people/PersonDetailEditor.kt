@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PersonDetailKind
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.domain.people.personDisplayName
 import com.emberr.presentation.shared.components.emberrBorderWidth
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetAction
@@ -58,8 +57,26 @@ import com.emberr.presentation.shared.components.emberrBorderColor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.trash
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.people_add_detail
+import emberr.shared.generated.resources.people_already_added
+import emberr.shared.generated.resources.people_birthday_date_not_in_year
+import emberr.shared.generated.resources.people_birthday_day
+import emberr.shared.generated.resources.people_birthday_month
+import emberr.shared.generated.resources.people_birthday_optional
+import emberr.shared.generated.resources.people_birthday_year
+import emberr.shared.generated.resources.people_birthday_year_example
+import emberr.shared.generated.resources.people_birthday_year_range
+import emberr.shared.generated.resources.people_cannot_be_empty
+import emberr.shared.generated.resources.people_custom_label
+import emberr.shared.generated.resources.people_custom_label_placeholder
+import emberr.shared.generated.resources.people_label_optional
+import emberr.shared.generated.resources.people_remove
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 internal const val ADD_DETAIL_ANCHOR = "add-detail"
 private const val DAYS_SHOWN_BEFORE_CHOSEN_DAY = 3
@@ -109,8 +126,9 @@ internal class PersonDetailActions(
     val copy: (String) -> Unit
 )
 
+@Composable
 private fun editorTitle(popup: PersonDetailPopup.Editing): String =
-    "${if (popup.detail == null) "Add" else "Edit"} ${popup.kind.label.lowercase()}"
+    if (popup.detail == null) popup.kind.addDetailTitle() else popup.kind.editDetailTitle()
 
 @Composable
 internal fun PersonDetailPopupAt(anchor: String, editing: PersonDetailEditing) {
@@ -130,8 +148,8 @@ internal fun PersonDetailPopupAt(anchor: String, editing: PersonDetailEditing) {
             PersonDetailKind.entries.forEach { kind ->
                 if (kind == PersonDetailKind.BIRTHDAY && editing.hasBirthday) {
                     EmberrDesktopMenuOption(
-                        label = kind.label,
-                        subtitle = "Already added",
+                        label = kind.displayName(),
+                        subtitle = stringResource(Res.string.people_already_added),
                         labelColor = MaterialTheme.colorScheme.outline,
                         icon = { KindMenuIcon(kind) },
                         onClick = {}
@@ -140,7 +158,7 @@ internal fun PersonDetailPopupAt(anchor: String, editing: PersonDetailEditing) {
                     EmberrDesktopSubmenu(
                         menuWidthEstimate = DesktopEditorWidth,
                         anchor = { openEditor, _ ->
-                            EmberrDesktopMenuOption(label = kind.label, icon = { KindMenuIcon(kind) }, onClick = openEditor)
+                            EmberrDesktopMenuOption(label = kind.displayName(), icon = { KindMenuIcon(kind) }, onClick = openEditor)
                         }
                     ) { isEditorOpen, closeEditor ->
                         EmberrDesktopMenu(expanded = isEditorOpen, onDismissRequest = closeEditor) {
@@ -179,15 +197,15 @@ internal fun PersonDetailSheet(editing: PersonDetailEditing) {
     EmberrBottomSheet(
         expanded = pickerAnchor != null,
         onDismiss = { editing.onPopupChange(null) },
-        title = "Add detail",
+        title = stringResource(Res.string.people_add_detail),
         contentHorizontalPadding = 0.dp
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
             PersonDetailKind.entries.forEach { kind ->
                 val isTaken = kind == PersonDetailKind.BIRTHDAY && editing.hasBirthday
                 EmberrBottomSheetOption(
-                    label = kind.label,
-                    subtitle = if (isTaken) "Already added" else null,
+                    label = kind.displayName(),
+                    subtitle = if (isTaken) stringResource(Res.string.people_already_added) else null,
                     labelColor = if (isTaken) MaterialTheme.colorScheme.outline else null,
                     icon = { KindMenuIcon(kind) },
                     outerHorizontalPadding = SheetRowInset,
@@ -199,7 +217,7 @@ internal fun PersonDetailSheet(editing: PersonDetailEditing) {
                 )
             }
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { closeAnd {} },
                 modifier = Modifier.fillMaxWidth().padding(start = SheetSidePadding, end = SheetSidePadding, top = 12.dp)
             )
@@ -210,11 +228,11 @@ internal fun PersonDetailSheet(editing: PersonDetailEditing) {
             expanded = true,
             onDismiss = editing.onBack,
             title = editorTitle(popup),
-            subtitle = personDisplayName(editing.personName),
+            subtitle = shownPersonName(editing.personName),
             headerAction = popup.detail?.let { detail ->
                 EmberrBottomSheetAction(
                     icon = painterResource(Res.drawable.trash),
-                    contentDescription = "Remove",
+                    contentDescription = stringResource(Res.string.people_remove),
                     tint = MaterialTheme.colorScheme.error,
                     closesSheet = true,
                     onClick = {
@@ -310,7 +328,7 @@ private fun DetailEditorContent(
                         .focusRequester(valueFocusRequester)
                         .markedWrongIf(showsMistakes && value.isBlank())
                 )
-                if (showsMistakes && value.isBlank()) MistakeLine("This can’t be empty")
+                if (showsMistakes && value.isBlank()) MistakeLine(stringResource(Res.string.people_cannot_be_empty))
             }
             Column {
                 if (choices.isNotEmpty()) {
@@ -334,7 +352,7 @@ private fun DetailEditorContent(
                             text = "",
                             isChosen = showsTypedLabel,
                             icon = painterResource(Res.drawable.plus),
-                            iconDescription = "Custom label",
+                            iconDescription = stringResource(Res.string.people_custom_label),
                             onClick = {
                                 showsTypedLabel = !showsTypedLabel
                                 typedLabel = ""
@@ -350,7 +368,7 @@ private fun DetailEditorContent(
                     EmberrTextField(
                         value = typedLabel,
                         onValueChange = { text -> typedLabel = text },
-                        placeholder = if (choices.isNotEmpty()) "Custom Label" else "Label (optional)",
+                        placeholder = stringResource(if (choices.isNotEmpty()) Res.string.people_custom_label_placeholder else Res.string.people_label_optional),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         onSubmit = ::save,
                         modifier = Modifier.fillMaxWidth().focusRequester(typedLabelFocusRequester)
@@ -371,9 +389,9 @@ private fun DetailEditorContent(
 
     if (isDesktopPlatform) EditorDivider()
     Row(modifier = Modifier.fillMaxWidth().padding(if (isDesktopPlatform) PaddingValues(12.dp) else PaddingValues(top = 20.dp))) {
-        EmberrButtonSecondary(text = "Cancel", onClick = cancel, modifier = Modifier.weight(1f))
+        EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = cancel, modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.width(8.dp))
-        EmberrButtonPrimary(text = "Save", onClick = ::save, modifier = Modifier.weight(1f))
+        EmberrButtonPrimary(text = stringResource(Res.string.common_save), onClick = ::save, modifier = Modifier.weight(1f))
     }
 }
 
@@ -397,21 +415,22 @@ private fun DesktopEditorHeader(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = personDisplayName(personName),
+                text = shownPersonName(personName),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline
             )
         }
         popup.detail?.let { detail ->
+            val removeLabel = stringResource(Res.string.people_remove)
             TopBarIconButton(
                 icon = painterResource(Res.drawable.trash),
-                contentDescription = "Remove",
+                contentDescription = removeLabel,
                 bgColor = Color.Transparent,
                 tint = MaterialTheme.colorScheme.error,
                 shadowElevation = EmberrShadowElevation.None,
                 size = 36.dp,
                 iconSize = 18.dp,
-                tooltip = "Remove",
+                tooltip = removeLabel,
                 onClick = { onRemove(detail) }
             )
         }
@@ -443,7 +462,7 @@ private fun BirthdayFields(
     onSubmit: () -> Unit
 ) {
     Column {
-        BirthdayHeading(title = "Month")
+        BirthdayHeading(title = stringResource(Res.string.people_birthday_month))
         Column(
             modifier = Modifier.markedWrongIf(showsMistakes && birthday.month == null),
             verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -463,7 +482,7 @@ private fun BirthdayFields(
         }
     }
     Column {
-        BirthdayHeading(title = "Day")
+        BirthdayHeading(title = stringResource(Res.string.people_birthday_day))
         val dayScrollState = rememberScrollState()
         val density = LocalDensity.current
         LaunchedEffect(Unit) {
@@ -489,11 +508,11 @@ private fun BirthdayFields(
     }
     val isYearWrong = showsMistakes && !birthday.isYearValid(thisYear)
     Column {
-        BirthdayHeading(title = "Year", note = "optional")
+        BirthdayHeading(title = stringResource(Res.string.people_birthday_year), note = stringResource(Res.string.people_birthday_optional))
         EmberrTextField(
             value = birthday.yearText,
             onValueChange = { text -> onBirthdayChange(birthday.copy(yearText = text.filter(Char::isDigit).take(4))) },
-            placeholder = "e.g. 1996",
+            placeholder = stringResource(Res.string.people_birthday_year_example),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
             onSubmit = onSubmit,
             modifier = Modifier.fillMaxWidth().markedWrongIf(isYearWrong)
@@ -538,15 +557,16 @@ private fun MistakeLine(text: String) {
 private fun Modifier.markedWrongIf(isWrong: Boolean): Modifier =
     if (isWrong) emberrBorder(FieldShape, color = MaterialTheme.colorScheme.error) else this
 
+@Composable
 private fun yearMistake(birthday: BirthdayChoice, thisYear: Int): String {
     val year = birthday.yearText.toIntOrNull()
     val month = birthday.month
     val day = birthday.day
     val isYearInRange = birthday.yearText.length == 4 && year != null && year in EARLIEST_BIRTH_YEAR..thisYear
     return if (isYearInRange && month != null && day != null) {
-        "${fullMonthName(month)} $day isn’t in $year"
+        stringResource(Res.string.people_birthday_date_not_in_year, "${fullMonthName(month)} $day", birthday.yearText)
     } else {
-        "Use a year from $EARLIEST_BIRTH_YEAR to $thisYear"
+        stringResource(Res.string.people_birthday_year_range, EARLIEST_BIRTH_YEAR, thisYear)
     }
 }
 

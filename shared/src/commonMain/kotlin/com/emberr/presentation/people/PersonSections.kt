@@ -61,9 +61,25 @@ import emberr.shared.generated.resources.square_arrow_out_up_right
 import emberr.shared.generated.resources.star_outline
 import emberr.shared.generated.resources.tag_user2
 import emberr.shared.generated.resources.tags
+import emberr.shared.generated.resources.people_call
+import emberr.shared.generated.resources.people_copy
+import emberr.shared.generated.resources.people_details
+import emberr.shared.generated.resources.people_message
+import emberr.shared.generated.resources.people_more_details
+import emberr.shared.generated.resources.people_no_past_events
+import emberr.shared.generated.resources.people_nothing_planned_with
+import emberr.shared.generated.resources.people_nothing_planned_with_them
+import emberr.shared.generated.resources.people_open
+import emberr.shared.generated.resources.people_past
+import emberr.shared.generated.resources.people_show_all_count
+import emberr.shared.generated.resources.people_show_fewer
+import emberr.shared.generated.resources.people_untitled_event
+import emberr.shared.generated.resources.people_upcoming
+import emberr.shared.generated.resources.people_write_email
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 internal const val PAST_EVENTS_SHOWN_BEFORE_SHOW_ALL = 3
 private const val PAST_EVENT_ALPHA = 0.6f
@@ -162,7 +178,7 @@ internal fun PersonDetailsSection(
 ) {
     val missingSuggestedKinds = suggestedDetailKinds.filter { kind -> details.none { it.kind == kind } }
     Column {
-        PersonSectionHeader(title = "Details", count = details.size.takeIf { it > 0 })
+        PersonSectionHeader(title = stringResource(Res.string.people_details), count = details.size.takeIf { it > 0 })
         Column(verticalArrangement = Arrangement.spacedBy(DetailCardGap)) {
             details.forEach { detail ->
                 val anchor = detailAnchor(detail.id)
@@ -189,7 +205,7 @@ internal fun PersonDetailsSection(
                     val anchor = suggestionAnchor(kind)
                     Box {
                         DetailPill(
-                            text = kind.label,
+                            text = kind.displayName(),
                             onClick = { editing.onPopupChange(PersonDetailPopup.Editing(kind, null, anchor)) }
                         )
                         PersonDetailPopupAt(anchor = anchor, editing = editing)
@@ -197,7 +213,7 @@ internal fun PersonDetailsSection(
                 }
                 Box {
                     DetailPill(
-                        text = "More details",
+                        text = stringResource(Res.string.people_more_details),
                         onClick = { editing.onPopupChange(PersonDetailPopup.ChoosingKind(ADD_DETAIL_ANCHOR)) }
                     )
                     PersonDetailPopupAt(anchor = ADD_DETAIL_ANCHOR, editing = editing)
@@ -233,7 +249,7 @@ private fun DetailHeading(kind: PersonDetailKind) {
             modifier = Modifier.size(DetailHeadingIconSize)
         )
         Text(
-            text = kind.label,
+            text = kind.displayName(),
             style = MaterialTheme.typography.labelSmall,
             color = headingColor
         )
@@ -247,6 +263,7 @@ private fun PersonDetailRow(
     actions: PersonDetailActions,
     onClick: () -> Unit
 ) {
+    val shownValue = shownDetailValue(detail, today)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -265,7 +282,7 @@ private fun PersonDetailRow(
                 )
             }
             Text(
-                text = shownDetailValue(detail, today),
+                text = shownValue,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -275,16 +292,16 @@ private fun PersonDetailRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (detail.kind == PersonDetailKind.PHONE && !isDesktopPlatform) {
-                DetailActionButton(Res.drawable.phone, "Call") { actions.openLink(phoneCallLink(detail.value)) }
-                DetailActionButton(Res.drawable.message, "Message") { actions.openLink(phoneMessageLink(detail.value)) }
+                DetailActionButton(Res.drawable.phone, stringResource(Res.string.people_call)) { actions.openLink(phoneCallLink(detail.value)) }
+                DetailActionButton(Res.drawable.message, stringResource(Res.string.people_message)) { actions.openLink(phoneMessageLink(detail.value)) }
             }
             if (detail.kind == PersonDetailKind.EMAIL) {
-                DetailActionButton(Res.drawable.mail, "Write email") { actions.openLink(emailLink(detail.value)) }
+                DetailActionButton(Res.drawable.mail, stringResource(Res.string.people_write_email)) { actions.openLink(emailLink(detail.value)) }
             }
             openLinkFor(detail)?.let { link ->
-                DetailActionButton(Res.drawable.square_arrow_out_up_right, "Open") { actions.openLink(link) }
+                DetailActionButton(Res.drawable.square_arrow_out_up_right, stringResource(Res.string.people_open)) { actions.openLink(link) }
             }
-            DetailActionButton(Res.drawable.copy, "Copy") { actions.copy(shownDetailValue(detail, today)) }
+            DetailActionButton(Res.drawable.copy, stringResource(Res.string.people_copy)) { actions.copy(shownValue) }
         }
     }
 }
@@ -355,7 +372,7 @@ internal fun KindTile(kind: PersonDetailKind) {
     Box(modifier = Modifier.size(KindTileSize), contentAlignment = Alignment.Center) {
         Icon(
             painter = kindIcon(kind),
-            contentDescription = kind.label,
+            contentDescription = kind.displayName(),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(KindIconSize)
         )
@@ -387,14 +404,22 @@ internal class PersonEventRowLook(
 @Composable
 internal fun PersonUpcomingSection(
     upcoming: List<CalendarTaskEntity>,
-    firstName: String,
+    firstName: String?,
     look: PersonEventRowLook,
     onOpenEvent: (CalendarTaskEntity) -> Unit
 ) {
     Column {
-        PersonSectionHeader(title = "Upcoming", count = upcoming.size)
+        PersonSectionHeader(title = stringResource(Res.string.people_upcoming), count = upcoming.size)
         PersonCard {
-            if (upcoming.isEmpty()) CardEmptyLine("Nothing planned with $firstName")
+            if (upcoming.isEmpty()) {
+                CardEmptyLine(
+                    if (firstName != null) {
+                        stringResource(Res.string.people_nothing_planned_with, firstName)
+                    } else {
+                        stringResource(Res.string.people_nothing_planned_with_them)
+                    }
+                )
+            }
             upcoming.forEachIndexed { index, event ->
                 if (index > 0) CardRowDivider(start = EventDividerStart)
                 PersonEventRow(
@@ -419,9 +444,9 @@ internal fun PersonPastSection(
 ) {
     val shownEvents = if (showsAll) past else past.take(PAST_EVENTS_SHOWN_BEFORE_SHOW_ALL)
     Column {
-        PersonSectionHeader(title = "Past", count = past.size)
+        PersonSectionHeader(title = stringResource(Res.string.people_past), count = past.size)
         PersonCard {
-            if (past.isEmpty()) CardEmptyLine("No past events")
+            if (past.isEmpty()) CardEmptyLine(stringResource(Res.string.people_no_past_events))
             shownEvents.forEachIndexed { index, event ->
                 if (index > 0) CardRowDivider(start = EventDividerStart)
                 PersonEventRow(
@@ -435,7 +460,7 @@ internal fun PersonPastSection(
             if (past.size > PAST_EVENTS_SHOWN_BEFORE_SHOW_ALL) {
                 CardRowDivider(start = 0.dp)
                 Text(
-                    text = if (showsAll) "Show fewer" else "Show all ${past.size}",
+                    text = if (showsAll) stringResource(Res.string.people_show_fewer) else stringResource(Res.string.people_show_all_count, past.size),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium,
                     color = secondaryTextColor(),
@@ -484,7 +509,7 @@ private fun PersonEventRow(
                 )
                 Spacer(modifier = Modifier.width(7.dp))
                 Text(
-                    text = event.text.ifBlank { "Untitled event" },
+                    text = event.text.ifBlank { stringResource(Res.string.people_untitled_event) },
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,

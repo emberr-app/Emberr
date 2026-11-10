@@ -13,6 +13,11 @@ import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
 import com.emberr.domain.util.system.movedToTrashMessage
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.home.note.NoteEditorViewModel
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.people_already_importing_contacts
+import emberr.shared.generated.resources.people_could_not_create_person
+import emberr.shared.generated.resources.people_moved_people_to_trash
+import emberr.shared.generated.resources.people_moved_some_people_to_trash
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,9 +31,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getPluralString
+import org.jetbrains.compose.resources.getString
 
 private const val STOP_LISTENING_AFTER_MILLIS = 5_000L
-private const val ALREADY_IMPORTING_MESSAGE = "Already importing contacts"
 
 data class PersonListRow(
     val person: NoteMetadataEntity,
@@ -75,18 +81,22 @@ class PeopleViewModel(
                 onCreated(personNoteId)
             } catch (e: Exception) {
                 e.printStackTrace()
-                showNativeToast("Couldn't create the person")
+                showNativeToast(getString(Res.string.people_could_not_create_person))
             }
         }
     }
 
     fun importContactFiles(fileContents: List<ByteArray>) {
-        if (!contactImporter.startImportFromFiles(fileContents)) showNativeToast(ALREADY_IMPORTING_MESSAGE)
+        if (!contactImporter.startImportFromFiles(fileContents)) showAlreadyImportingToast()
     }
 
     fun importContacts(contacts: List<ContactToImport>) {
         if (contacts.isEmpty()) return
-        if (!contactImporter.startImport(contacts)) showNativeToast(ALREADY_IMPORTING_MESSAGE)
+        if (!contactImporter.startImport(contacts)) showAlreadyImportingToast()
+    }
+
+    private fun showAlreadyImportingToast() {
+        viewModelScope.launch { showNativeToast(getString(Res.string.people_already_importing_contacts)) }
     }
 
     fun takeFinishedImportResult(): ContactImportResult? = contactImporter.takeFinishedResult()
@@ -126,8 +136,8 @@ class PeopleViewModel(
                 when {
                     trashedCount == 0 -> COULD_NOT_MOVE_TO_TRASH_MESSAGE
                     selectedPeople.size == 1 -> movedToTrashMessage(selectedPeople.first().title)
-                    trashedCount == selectedPeople.size -> "Moved $trashedCount people to Trash"
-                    else -> "Moved $trashedCount of ${selectedPeople.size} people to Trash"
+                    trashedCount == selectedPeople.size -> getPluralString(Res.plurals.people_moved_people_to_trash, trashedCount, trashedCount)
+                    else -> getPluralString(Res.plurals.people_moved_some_people_to_trash, selectedPeople.size, trashedCount, selectedPeople.size)
                 }
             )
         }
