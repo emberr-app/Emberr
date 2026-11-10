@@ -53,6 +53,12 @@ import com.emberr.domain.util.system.appVersionName
 import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.restartApplication
+import com.emberr.domain.util.language.AppLanguage
+import com.emberr.domain.util.language.appLanguageChangeNeedsRestart
+import com.emberr.domain.util.language.chooseAppLanguage
+import com.emberr.domain.util.language.chosenAppLanguage
+import com.emberr.presentation.shared.editor.ActiveEditorRegistry
+import kotlinx.coroutines.launch
 import com.emberr.domain.util.system.rememberAppPermissionCoordinator
 import com.emberr.presentation.settings.about.AboutScreen
 import com.emberr.presentation.settings.about.OpenSourceLicensesScreen
@@ -156,6 +162,8 @@ import emberr.shared.generated.resources.settings_font_size_extra_small
 import emberr.shared.generated.resources.settings_font_size_large
 import emberr.shared.generated.resources.settings_font_size_small
 import emberr.shared.generated.resources.settings_font_style
+import emberr.shared.generated.resources.settings_language
+import emberr.shared.generated.resources.settings_language_restart_message
 import emberr.shared.generated.resources.settings_group_ai
 import emberr.shared.generated.resources.settings_group_appearance
 import emberr.shared.generated.resources.settings_group_danger_zone
@@ -241,6 +249,7 @@ import emberr.shared.generated.resources.lock
 import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.quote_down2
 import emberr.shared.generated.resources.palette
+import emberr.shared.generated.resources.globe
 import emberr.shared.generated.resources.qr_code
 import emberr.shared.generated.resources.refresh_cw
 import emberr.shared.generated.resources.scan_line
@@ -346,6 +355,9 @@ fun SettingsScreen(
     val fontStylePreference by viewModel.fontStylePreference.collectAsState()
 
     val timeFormatPreference by viewModel.timeFormatPreference.collectAsState()
+
+    var chosenLanguage by remember { mutableStateOf(chosenAppLanguage()) }
+    var showLanguageRestartNotice by remember { mutableStateOf(false) }
 
     val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
 
@@ -489,6 +501,7 @@ fun SettingsScreen(
                     .getOrDefault(SubNoteOpenMode.SIDE_PANEL)
 
                 AppearanceSettingsSection(
+                    languageLabel = chosenLanguage.label(),
                     colorThemeLabel = colorThemePreferenceNamed(colorThemePreference).label(),
                     fontSizeLabel = fontSizeLabelFor(fontSizePreference),
                     interfaceScalePercent = interfaceScalePercent,
@@ -505,6 +518,15 @@ fun SettingsScreen(
                     hiddenOverviewSections = hiddenOverviewSections,
                     customWindowFrameEnabled = customWindowFrameEnabled,
                     autoHideTitleBar = autoHideTitleBar,
+                    languageChoices = AppLanguage.entries.map { language ->
+                        SettingsChoice(label = language.label(), isSelected = language == chosenLanguage) {
+                            if (language != chosenLanguage) {
+                                chooseAppLanguage(language)
+                                chosenLanguage = language
+                                if (appLanguageChangeNeedsRestart) showLanguageRestartNotice = true
+                            }
+                        }
+                    },
                     fontSizeChoices = FontSizeOptions.map { (preferenceName, labelResource) ->
                         SettingsChoice(label = stringResource(labelResource), isSelected = preferenceName == fontSizePreference) {
                             viewModel.setFontSizePreference(preferenceName)
@@ -742,6 +764,13 @@ fun SettingsScreen(
             spaces = spaces,
             onExportClick = onExportReady,
             onDismiss = { showExportSpacesSheet = false }
+        )
+    }
+
+    if (showLanguageRestartNotice) {
+        RestartToApplyDialog(
+            message = stringResource(Res.string.settings_language_restart_message),
+            onDismiss = { showLanguageRestartNotice = false }
         )
     }
 
@@ -1258,6 +1287,7 @@ private fun SyncSettingsSection(
 
 @Composable
 private fun AppearanceSettingsSection(
+    languageLabel: String,
     colorThemeLabel: String,
     fontSizeLabel: String,
     interfaceScalePercent: Int,
@@ -1274,6 +1304,7 @@ private fun AppearanceSettingsSection(
     hiddenOverviewSections: Set<String>,
     customWindowFrameEnabled: Boolean,
     autoHideTitleBar: Boolean,
+    languageChoices: List<SettingsChoice>,
     fontSizeChoices: List<SettingsChoice>,
     fontStyleChoices: List<SettingsChoice>,
     timeFormatChoices: List<SettingsChoice>,
@@ -1294,6 +1325,13 @@ private fun AppearanceSettingsSection(
     onAutoHideTitleBarChange: (Boolean) -> Unit
 ) {
     SettingsGroup(title = stringResource(Res.string.settings_group_appearance)) {
+        SettingsChoiceRow(
+            icon = painterResource(Res.drawable.globe),
+            title = stringResource(Res.string.settings_language),
+            value = languageLabel,
+            choices = languageChoices
+        )
+        SettingsDivider()
         SettingsActionRow(
             icon = painterResource(Res.drawable.palette),
             title = stringResource(Res.string.settings_theme),
@@ -1457,33 +1495,45 @@ private fun AppearanceSettingsSection(
             }
 
             if (showCustomWindowFrameNotice) {
-                EmberrAlertDialog(
-                    onDismissRequest = { showCustomWindowFrameNotice = false },
-                    title = stringResource(Res.string.settings_restart_to_apply_title)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.settings_restart_to_apply_message),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-                    )
-                    Spacer(Modifier.height(20.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        EmberrButtonSecondary(
-                            text = stringResource(Res.string.settings_restart_later),
-                            onClick = { showCustomWindowFrameNotice = false },
-                            modifier = Modifier.weight(1f)
-                        )
-                        EmberrButtonPrimary(
-                            text = stringResource(Res.string.settings_restart_now),
-                            onClick = {
-                                showCustomWindowFrameNotice = false
-                                restartApplication()
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
+                RestartToApplyDialog(
+                    message = stringResource(Res.string.settings_restart_to_apply_message),
+                    onDismiss = { showCustomWindowFrameNotice = false }
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun RestartToApplyDialog(message: String, onDismiss: () -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+
+    EmberrAlertDialog(
+        onDismissRequest = onDismiss,
+        title = stringResource(Res.string.settings_restart_to_apply_title)
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+        )
+        Spacer(Modifier.height(20.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            EmberrButtonSecondary(
+                text = stringResource(Res.string.settings_restart_later),
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            )
+            EmberrButtonPrimary(
+                text = stringResource(Res.string.settings_restart_now),
+                onClick = {
+                    coroutineScope.launch {
+                        ActiveEditorRegistry.flushAllPending()
+                        restartApplication()
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }

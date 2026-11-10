@@ -1,6 +1,7 @@
 package com.emberr.presentation.settings
 
 import androidx.compose.runtime.Composable
+import com.emberr.domain.util.language.AppLanguage
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.domain.util.time.TimeFormatPreference
 import com.emberr.presentation.shared.SubNoteOpenMode
@@ -29,6 +30,7 @@ import emberr.shared.generated.resources.settings_first_day_of_week_saturday
 import emberr.shared.generated.resources.settings_first_day_of_week_sunday
 import emberr.shared.generated.resources.settings_first_day_of_week_system
 import emberr.shared.generated.resources.settings_font_style_system
+import emberr.shared.generated.resources.settings_language_system
 import emberr.shared.generated.resources.settings_paper_texture_area_canvas
 import emberr.shared.generated.resources.settings_paper_texture_area_daily_notes
 import emberr.shared.generated.resources.settings_paper_texture_area_notes
@@ -98,6 +100,9 @@ fun TopBarFadeStyle.label(isProgressive: Boolean): String {
 @Composable
 fun FontStylePreference.label(): String =
     if (this == FontStylePreference.SYSTEM) stringResource(Res.string.settings_font_style_system) else displayName
+
+@Composable
+fun AppLanguage.label(): String = nativeName ?: stringResource(Res.string.settings_language_system)
 
 @Composable
 fun ThemePreference.label(): String = stringResource(

@@ -424,6 +424,12 @@ class DesktopSettingsManager(private val secretStore: DesktopSecretStore) : Sett
         _timeFormatPreference.value = preference
     }
 
+    override fun getAppLanguageTag(): String = prefs.get(SyncConstants.KEY_APP_LANGUAGE_TAG, "")
+
+    override fun saveAppLanguageTag(languageTag: String) {
+        prefs.put(SyncConstants.KEY_APP_LANGUAGE_TAG, languageTag)
+    }
+
     private val _firstDayOfWeekPreference = MutableStateFlow(
         prefs.get(SyncConstants.KEY_FIRST_DAY_OF_WEEK_PREFERENCE, SyncConstants.DEFAULT_FIRST_DAY_OF_WEEK_PREFERENCE)
     )

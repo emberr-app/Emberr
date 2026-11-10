@@ -99,6 +99,7 @@ import kotlinx.coroutines.FlowPreview
 import com.emberr.domain.reminders.DesktopReminderShownBus
 import com.emberr.domain.reminders.ReminderClickBus
 import com.emberr.domain.reminders.ReminderRescheduler
+import com.emberr.domain.util.language.applySavedAppLanguage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.debounce
@@ -162,6 +163,7 @@ private fun runEmberrDesktopApp() = application {
                 modules(sharedModule, desktopModule)
             }
         }
+        applySavedAppLanguage()
         Unit
     }
 

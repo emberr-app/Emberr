@@ -149,6 +149,9 @@ interface SettingsManager {
     fun getTimeFormatPreference(): String
     fun saveTimeFormatPreference(preference: String)
 
+    fun getAppLanguageTag(): String
+    fun saveAppLanguageTag(languageTag: String)
+
     val firstDayOfWeekPreferenceFlow: Flow<String>
     fun getFirstDayOfWeekPreference(): String
     fun saveFirstDayOfWeekPreference(preference: String)
