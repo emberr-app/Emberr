@@ -83,6 +83,10 @@ import kotlin.math.ceil
 import org.jetbrains.compose.resources.painterResource
 import java.awt.Cursor
 import kotlinx.datetime.LocalDate
+import emberr.shared.generated.resources.desktop_close_pane
+import emberr.shared.generated.resources.desktop_close_this_screen
+import emberr.shared.generated.resources.desktop_drag_to_swap_screens
+import org.jetbrains.compose.resources.stringResource
 
 private const val MAX_SPLIT_PANES = 4
 private val MIN_SPLIT_PANE_WIDTH = 320.dp
@@ -647,8 +651,8 @@ private fun SplitPaneHandle(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SplitPillDragHandle(tint = iconTint, isEnabled = isExpanded, paneIndex = paneIndex, splitState = splitState)
-            IconTooltip(text = "Close pane") {
-                SplitPillButton(painterResource(Res.drawable.x), "Close this screen", iconTint, isExpanded) { splitState.closePane(paneIndex) }
+            IconTooltip(text = stringResource(Res.string.desktop_close_pane)) {
+                SplitPillButton(painterResource(Res.drawable.x), stringResource(Res.string.desktop_close_this_screen), iconTint, isExpanded) { splitState.closePane(paneIndex) }
             }
         }
     }
@@ -692,7 +696,7 @@ private fun SplitPillDragHandle(
     ) {
         Icon(
             imageVector = Icons.Default.DragIndicator,
-            contentDescription = "Drag to swap screens",
+            contentDescription = stringResource(Res.string.desktop_drag_to_swap_screens),
             tint = tint,
             modifier = Modifier.size(SPLIT_PILL_ICON_SIZE)
         )

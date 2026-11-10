@@ -19,6 +19,17 @@ import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import org.koin.compose.koinInject
+import emberr.shared.generated.resources.desktop_ok
+import emberr.shared.generated.resources.desktop_update_available
+import emberr.shared.generated.resources.desktop_update_available_message
+import emberr.shared.generated.resources.desktop_update_download
+import emberr.shared.generated.resources.desktop_update_failed
+import emberr.shared.generated.resources.desktop_update_later
+import emberr.shared.generated.resources.desktop_update_ready_message
+import emberr.shared.generated.resources.desktop_update_ready_to_install
+import emberr.shared.generated.resources.desktop_update_restart
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.Res
 
 @Composable
 fun AppUpdatePromptDialog() {
@@ -29,19 +40,21 @@ fun AppUpdatePromptDialog() {
         null -> Unit
 
         is AppUpdatePrompt.OfferDownload -> UpdateChoiceDialog(
-            title = "Update available",
-            message = "Emberr ${currentPrompt.version} is available. You are using " +
-                "${updateController.installedVersion}. It downloads in the background while you keep working.",
-            confirmText = "Download",
+            title = stringResource(Res.string.desktop_update_available),
+            message = stringResource(
+                Res.string.desktop_update_available_message,
+                currentPrompt.version,
+                updateController.installedVersion.toString()
+            ),
+            confirmText = stringResource(Res.string.desktop_update_download),
             onConfirm = updateController::startDownload,
             onLater = updateController::dismissPrompt
         )
 
         is AppUpdatePrompt.OfferRestart -> UpdateChoiceDialog(
-            title = "Update ready to install",
-            message = "Restart Emberr to start using version ${currentPrompt.version}. " +
-                "If you choose Later, the update is used the next time you open Emberr.",
-            confirmText = "Restart",
+            title = stringResource(Res.string.desktop_update_ready_to_install),
+            message = stringResource(Res.string.desktop_update_ready_message, currentPrompt.version),
+            confirmText = stringResource(Res.string.desktop_update_restart),
             onConfirm = {
                 updateController.dismissPrompt()
                 restartApplication()
@@ -51,12 +64,12 @@ fun AppUpdatePromptDialog() {
 
         is AppUpdatePrompt.ReportFailure -> EmberrAlertDialog(
             onDismissRequest = updateController::dismissPrompt,
-            title = "Couldn't update Emberr"
+            title = stringResource(Res.string.desktop_update_failed)
         ) {
             UpdateDialogMessage(currentPrompt.message)
             Spacer(Modifier.height(20.dp))
             EmberrButtonPrimary(
-                text = "OK",
+                text = stringResource(Res.string.desktop_ok),
                 onClick = updateController::dismissPrompt,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -80,7 +93,7 @@ private fun UpdateChoiceDialog(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             EmberrButtonSecondary(
-                text = "Later",
+                text = stringResource(Res.string.desktop_update_later),
                 onClick = onLater,
                 modifier = Modifier.weight(1f)
             )

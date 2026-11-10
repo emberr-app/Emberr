@@ -135,7 +135,7 @@ import com.emberr.presentation.trash.TrashScreen
 import com.emberr.presentation.people.PeopleScreen
 import com.emberr.presentation.people.PersonView
 import com.emberr.presentation.people.personDetailSearchLine
-import com.emberr.domain.people.personDisplayName
+import com.emberr.presentation.people.shownPersonName
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.domain.people.PersonSearchResult
 import com.emberr.domain.people.personNoteIdOfBirthdayReminder
@@ -203,6 +203,53 @@ import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
 import java.awt.Cursor
 import com.emberr.presentation.home.overview.label
+import emberr.shared.generated.resources.app_shell_ask_ai
+import emberr.shared.generated.resources.app_shell_clear_search
+import emberr.shared.generated.resources.app_shell_search_anything
+import emberr.shared.generated.resources.desktop_sync
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_create
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.daily_open_timeline
+import emberr.shared.generated.resources.daily_timeline
+import emberr.shared.generated.resources.desktop_collapse_sidebar
+import emberr.shared.generated.resources.desktop_folder
+import emberr.shared.generated.resources.desktop_hide_sidebar
+import emberr.shared.generated.resources.desktop_open_in_split_view
+import emberr.shared.generated.resources.desktop_rename_note
+import emberr.shared.generated.resources.desktop_search_no_match
+import emberr.shared.generated.resources.desktop_select_a_note
+import emberr.shared.generated.resources.home_calendar
+import emberr.shared.generated.resources.home_favorites
+import emberr.shared.generated.resources.home_folder_name_placeholder
+import emberr.shared.generated.resources.home_more_settings
+import emberr.shared.generated.resources.home_new_folder
+import emberr.shared.generated.resources.home_new_folder_tooltip
+import emberr.shared.generated.resources.home_new_note_tooltip
+import emberr.shared.generated.resources.home_note
+import emberr.shared.generated.resources.home_notes
+import emberr.shared.generated.resources.home_overview_attached
+import emberr.shared.generated.resources.home_overview_saved
+import emberr.shared.generated.resources.home_overview_tasks_left
+import emberr.shared.generated.resources.home_recents
+import emberr.shared.generated.resources.home_settings
+import emberr.shared.generated.resources.home_sort
+import emberr.shared.generated.resources.home_sort_notes
+import emberr.shared.generated.resources.search_daily
+import emberr.shared.generated.resources.search_events
+import emberr.shared.generated.resources.search_in_parent
+import emberr.shared.generated.resources.search_notes
+import emberr.shared.generated.resources.search_people
+import emberr.shared.generated.resources.search_pinned
+import emberr.shared.generated.resources.search_rename
+import emberr.shared.generated.resources.search_repeats
+import emberr.shared.generated.resources.search_show_all_events
+import emberr.shared.generated.resources.search_show_all_people
+import emberr.shared.generated.resources.search_untitled_event
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
 
 private val PANEL_PADDING = 16.dp
 private val PANEL_TOP_MARGIN = 12.dp
@@ -375,7 +422,7 @@ private fun SidebarSearchBar(
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (query.isEmpty()) {
                         Text(
-                            text = "Search anything",
+                            text = stringResource(Res.string.app_shell_search_anything),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                         )
@@ -386,7 +433,7 @@ private fun SidebarSearchBar(
         )
         if (query.isNotEmpty()) {
             val clearInteractionSource = remember { MutableInteractionSource() }
-            IconTooltip(text = "Clear search") {
+            IconTooltip(text = stringResource(Res.string.app_shell_clear_search)) {
                 Box(
                     modifier = Modifier
                         .size(30.dp)
@@ -396,7 +443,7 @@ private fun SidebarSearchBar(
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.x),
-                        contentDescription = "Clear search",
+                        contentDescription = stringResource(Res.string.app_shell_clear_search),
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                         modifier = Modifier.size(14.dp)
                     )
@@ -454,7 +501,7 @@ private fun SidebarSearchResults(
         if (hasNoResults) {
             if (hasSettledOnNoResults) {
                 Text(
-                    text = "No notes, events or people match \"$query\"",
+                    text = stringResource(Res.string.desktop_search_no_match, query),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     textAlign = TextAlign.Center,
@@ -483,7 +530,7 @@ private fun SidebarSearchResults(
                 contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 16.dp)
             ) {
                 if (personResults.isNotEmpty()) {
-                    item(key = "people_header") { SidebarSearchSectionTitle("People") }
+                    item(key = "people_header") { SidebarSearchSectionTitle(stringResource(Res.string.search_people)) }
                     itemsIndexed(shownPersonResults, key = { _, personResult -> "person_${personResult.person.noteId}" }) { index, personResult ->
                         Column {
                             SidebarPersonSearchResultRow(
@@ -503,7 +550,7 @@ private fun SidebarSearchResults(
                     if (isShowAllPeopleVisible) {
                         item(key = "people_show_all") {
                             Text(
-                                text = "Show all ${personResults.size} people",
+                                text = pluralStringResource(Res.plurals.search_show_all_people, personResults.size, personResults.size),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
@@ -517,7 +564,7 @@ private fun SidebarSearchResults(
                 if (eventResults.isNotEmpty()) {
                     item(key = "events_header") {
                         SidebarSearchSectionTitle(
-                            "Events",
+                            stringResource(Res.string.search_events),
                             modifier = if (personResults.isNotEmpty()) Modifier.padding(top = 12.dp) else Modifier
                         )
                     }
@@ -543,7 +590,7 @@ private fun SidebarSearchResults(
                     if (isShowAllEventsVisible) {
                         item(key = "events_show_all") {
                             Text(
-                                text = "Show all ${eventResults.size} events",
+                                text = pluralStringResource(Res.plurals.search_show_all_events, eventResults.size, eventResults.size),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
@@ -556,7 +603,7 @@ private fun SidebarSearchResults(
                 }
                 if (isNotesHeaderVisible) {
                     item(key = "notes_header") {
-                        SidebarSearchSectionTitle("Notes", modifier = Modifier.padding(top = 12.dp))
+                        SidebarSearchSectionTitle(stringResource(Res.string.search_notes), modifier = Modifier.padding(top = 12.dp))
                     }
                 }
                 itemsIndexed(results, key = { _, result -> result.note.noteId }) { index, result ->
@@ -606,7 +653,7 @@ private fun SidebarPersonSearchResultRow(
 ) {
     val person = result.person
     val trimmedQuery = query.trim()
-    val name = personDisplayName(person.title)
+    val name = shownPersonName(person.title)
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val rowBackground by animateColorAsState(
@@ -686,7 +733,7 @@ private fun SidebarEventSearchResultRow(
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = highlightMatches(event.text.ifBlank { "Untitled event" }, trimmedQuery, highlightStyle),
+                text = highlightMatches(event.text.ifBlank { stringResource(Res.string.search_untitled_event) }, trimmedQuery, highlightStyle),
                 style = sidebarRowTextStyle,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
                 maxLines = 1,
@@ -716,7 +763,7 @@ private fun SidebarEventSearchResultRow(
                 Spacer(Modifier.width(6.dp))
                 Icon(
                     painter = painterResource(Res.drawable.refresh_cw),
-                    contentDescription = "Repeats",
+                    contentDescription = stringResource(Res.string.search_repeats),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
                     modifier = Modifier.size(11.dp)
                 )
@@ -750,7 +797,7 @@ private fun SidebarSearchResultRow(
     )
     val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
     val dailyDateString = result.note.dateString?.takeIf { result.note.isDaily }
-    val titleText = if (result.isPinnedBlocks) "Pinned" else dailyDateString ?: result.note.title.ifBlank { "Untitled" }
+    val titleText = if (result.isPinnedBlocks) stringResource(Res.string.search_pinned) else dailyDateString ?: result.note.title.ifBlank { stringResource(Res.string.common_untitled) }
     val snippetText = result.matchedText.takeIf { it.isNotBlank() && it != result.note.title }
 
     Box {
@@ -780,7 +827,7 @@ private fun SidebarSearchResultRow(
                 if (dailyDateString != null) {
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "Daily",
+                        text = stringResource(Res.string.search_daily),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                     )
@@ -798,7 +845,7 @@ private fun SidebarSearchResultRow(
             }
             result.parentTitle?.let { parentTitle ->
                 Text(
-                    text = "in $parentTitle",
+                    text = stringResource(Res.string.search_in_parent, parentTitle),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
                     maxLines = 1,
@@ -816,13 +863,13 @@ private fun SidebarSearchResultRow(
                 ) {
                     SidebarMenuItems {
                         if (onOpenInSplitView != null) {
-                            SidebarMenuItem("Open in split view", Icons.Default.VerticalSplit) {
+                            SidebarMenuItem(stringResource(Res.string.desktop_open_in_split_view), Icons.Default.VerticalSplit) {
                                 showContextMenu = false
                                 onOpenInSplitView()
                             }
                         }
                         if (result.canBeRenamed) {
-                            SidebarMenuItem("Rename", Icons.Default.Edit) {
+                            SidebarMenuItem(stringResource(Res.string.search_rename), Icons.Default.Edit) {
                                 showContextMenu = false
                                 showRenamePopup = true
                             }
@@ -832,7 +879,7 @@ private fun SidebarSearchResultRow(
                                 showContextMenu = false
                                 onSetFavorite(!result.note.isFavorite)
                             }
-                            SidebarMenuItem("Delete", Icons.Default.Delete, isDestructive = true) {
+                            SidebarMenuItem(stringResource(Res.string.common_delete), Icons.Default.Delete, isDestructive = true) {
                                 showContextMenu = false
                                 onDelete()
                             }
@@ -845,9 +892,9 @@ private fun SidebarSearchResultRow(
                     modifier = Modifier.width(280.dp)
                 ) {
                     DesktopNamePopup(
-                        title = "Rename Note",
+                        title = stringResource(Res.string.desktop_rename_note),
                         initialValue = result.note.title,
-                        confirmLabel = "Save",
+                        confirmLabel = stringResource(Res.string.common_save),
                         onConfirm = { newTitle ->
                             onRename(newTitle)
                             showRenamePopup = false
@@ -1388,12 +1435,12 @@ fun DesktopMainScreen(
                     modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, top = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconTooltip(text = "Hide sidebar") {
+                    IconTooltip(text = stringResource(Res.string.desktop_hide_sidebar)) {
                         IconButton(onClick = onToggleSidebar) {
                             val sidebarIcon = painterResource(Res.drawable.sidebar)
                             Icon(
                                 remember(sidebarIcon) { sidebarIcon.flippedHorizontally() },
-                                "Collapse sidebar",
+                                stringResource(Res.string.desktop_collapse_sidebar),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -1403,10 +1450,10 @@ fun DesktopMainScreen(
                         Box(modifier = Modifier.padding(end = 8.dp)) {
                             TopBarIconButton(
                                 icon = painterResource(Res.drawable.history2),
-                                contentDescription = "Open timeline",
+                                contentDescription = stringResource(Res.string.daily_open_timeline),
                                 bgColor = MaterialTheme.colorScheme.background,
                                 tint = MaterialTheme.colorScheme.primary,
-                                tooltip = "Timeline",
+                                tooltip = stringResource(Res.string.daily_timeline),
                                 onClick = {
                                     dailyViewModel.loadTimeline()
                                     showTimelineDialog = true
@@ -1421,15 +1468,15 @@ fun DesktopMainScreen(
                             items = listOf(
                                 TopBarIconButtonItem(
                                     icon = painterResource(Res.drawable.calendar),
-                                    contentDescription = "Calendar",
+                                    contentDescription = stringResource(Res.string.home_calendar),
                                     onClick = { detail = DetailPane.Calendar; isPeeking = false },
-                                    tooltip = "Calendar"
+                                    tooltip = stringResource(Res.string.home_calendar)
                                 ),
                                 TopBarIconButtonItem(
                                     icon = painterResource(Res.drawable.ellipsis),
-                                    contentDescription = "Settings",
+                                    contentDescription = stringResource(Res.string.home_settings),
                                     onClick = { showSettingsMenu = true },
-                                    tooltip = "More settings"
+                                    tooltip = stringResource(Res.string.home_more_settings)
                                 )
                             )
                         )
@@ -1582,10 +1629,10 @@ fun DesktopMainScreen(
                                             visibleOverviewSections.forEach { section ->
                                                 val sectionPane = section.detailPane()
                                                 val subtitle = when (section) {
-                                                    OverviewSection.TASKS -> "$remindersCount left"
-                                                    OverviewSection.BOOKMARKS -> "$bookmarksCount saved"
-                                                    OverviewSection.IMAGES -> "$imagesCount saved"
-                                                    OverviewSection.DOCUMENTS -> "$documentsCount attached"
+                                                    OverviewSection.TASKS -> pluralStringResource(Res.plurals.home_overview_tasks_left, remindersCount, remindersCount)
+                                                    OverviewSection.BOOKMARKS -> pluralStringResource(Res.plurals.home_overview_saved, bookmarksCount, bookmarksCount)
+                                                    OverviewSection.IMAGES -> pluralStringResource(Res.plurals.home_overview_saved, imagesCount, imagesCount)
+                                                    OverviewSection.DOCUMENTS -> pluralStringResource(Res.plurals.home_overview_attached, documentsCount, documentsCount)
                                                 }
                                                 OverviewRow(
                                                     painterResource(section.icon),
@@ -1612,7 +1659,7 @@ fun DesktopMainScreen(
                                 if (favoriteNotes.isNotEmpty()) {
                                     item(key = "sb_favorites_header") {
                                         SidebarSectionHeader(
-                                            "Favorites",
+                                            stringResource(Res.string.home_favorites),
                                             isFavoritesExpanded,
                                             { isFavoritesExpanded = !isFavoritesExpanded },
                                             modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null, placementSpec = TreeRowPlacementSpec)
@@ -1653,7 +1700,7 @@ fun DesktopMainScreen(
 
                                 item(key = "sb_notes_header") {
                                     SidebarSectionHeader(
-                                        title = "Notes", isExpanded = isNotesExpanded,
+                                        title = stringResource(Res.string.home_notes), isExpanded = isNotesExpanded,
                                         onToggle = { isNotesExpanded = !isNotesExpanded },
                                         modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null, placementSpec = TreeRowPlacementSpec),
                                         trailing = {
@@ -1669,21 +1716,21 @@ fun DesktopMainScreen(
                                                     items = listOf(
                                                         TopBarIconButtonItem(
                                                             icon = painterResource(Res.drawable.arrow_up_down),
-                                                            contentDescription = "Sort",
+                                                            contentDescription = stringResource(Res.string.home_sort),
                                                             onClick = { showSortMenu = true },
-                                                            tooltip = "Sort notes"
+                                                            tooltip = stringResource(Res.string.home_sort_notes)
                                                         ),
                                                         TopBarIconButtonItem(
                                                             icon = painterResource(Res.drawable.folder_plus),
-                                                            contentDescription = "New folder",
+                                                            contentDescription = stringResource(Res.string.home_new_folder_tooltip),
                                                             onClick = { addFolderInput = ""; showAddFolderPopup = true },
-                                                            tooltip = "New folder"
+                                                            tooltip = stringResource(Res.string.home_new_folder_tooltip)
                                                         ),
                                                         TopBarIconButtonItem(
                                                             icon = painterResource(Res.drawable.pen_square),
-                                                            contentDescription = "New note",
+                                                            contentDescription = stringResource(Res.string.home_new_note_tooltip),
                                                             onClick = { showAddNotePopup = true },
-                                                            tooltip = "New note"
+                                                            tooltip = stringResource(Res.string.home_new_note_tooltip)
                                                         )
                                                     )
                                                 )
@@ -1732,7 +1779,7 @@ fun DesktopMainScreen(
                                                         )
                                                     ) {
                                                         Text(
-                                                            "New Folder",
+                                                            stringResource(Res.string.home_new_folder),
                                                             style = MaterialTheme.typography.bodyLarge.copy(
                                                                 fontWeight = FontWeight.Bold
                                                             ),
@@ -1742,7 +1789,7 @@ fun DesktopMainScreen(
                                                         EmberrTextField(
                                                             value = addFolderInput,
                                                             onValueChange = { addFolderInput = it },
-                                                            placeholder = "e.g. Personal, Work...",
+                                                            placeholder = stringResource(Res.string.home_folder_name_placeholder),
                                                             modifier = Modifier.fillMaxWidth(),
                                                             onSubmit = {
                                                                 if (addFolderInput.isNotBlank()) {
@@ -1758,14 +1805,14 @@ fun DesktopMainScreen(
                                                             )
                                                         ) {
                                                             EmberrButtonSecondary(
-                                                                text = "Cancel",
+                                                                text = stringResource(Res.string.common_cancel),
                                                                 onClick = {
                                                                     showAddFolderPopup = false
                                                                 },
                                                                 modifier = Modifier.weight(1f)
                                                             )
                                                             EmberrButtonPrimary(
-                                                                text = "Create",
+                                                                text = stringResource(Res.string.common_create),
                                                                 onClick = {
                                                                     if (addFolderInput.isNotBlank()) {
                                                                         handleCreateFolder(
@@ -1872,7 +1919,7 @@ fun DesktopMainScreen(
                                 if (recentNotes.isNotEmpty()) {
                                     item(key = "sb_recents_header") {
                                         SidebarSectionHeader(
-                                            "Recents",
+                                            stringResource(Res.string.home_recents),
                                             isRecentsExpanded,
                                             { isRecentsExpanded = !isRecentsExpanded },
                                             modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null, placementSpec = TreeRowPlacementSpec)
@@ -1941,10 +1988,10 @@ fun DesktopMainScreen(
                 if (!isAiDisabled) {
                     TopBarIconButton(
                         icon = painterResource(Res.drawable.astroid),
-                        contentDescription = "Ask AI",
+                        contentDescription = stringResource(Res.string.app_shell_ask_ai),
                         bgColor = MaterialTheme.colorScheme.background,
                         tint = MaterialTheme.colorScheme.primary,
-                        tooltip = "Ask AI",
+                        tooltip = stringResource(Res.string.app_shell_ask_ai),
                         tooltipPosition = IconTooltipPosition.Above,
                         onClick = onAiIconTap
                     )
@@ -1961,7 +2008,7 @@ fun DesktopMainScreen(
             }
             DetailPane.Empty -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Select a note from the sidebar",
+                    text = stringResource(Res.string.desktop_select_a_note),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                 )
@@ -2284,6 +2331,9 @@ fun DesktopMainScreen(
                     }
                 }
 
+                val untitledDragLabel = stringResource(Res.string.common_untitled)
+                val noteDragLabel = stringResource(Res.string.home_note)
+                val folderDragLabel = stringResource(Res.string.desktop_folder)
                 DesktopListDragChip(
                     dragState = dragState,
                     containerOriginInWindow = screenOriginInWindow,
@@ -2292,11 +2342,11 @@ fun DesktopMainScreen(
                             payload.startsWith(DRAG_PREFIX_NOTE) -> {
                                 val id = payload.removePrefix(DRAG_PREFIX_NOTE)
                                 (notesByFolder.values.flatten() + favoriteNotes + recentNotes + searchResults.map { it.note })
-                                    .find { it.noteId == id }?.title?.ifEmpty { "Untitled" } ?: "Note"
+                                    .find { it.noteId == id }?.title?.ifEmpty { untitledDragLabel } ?: noteDragLabel
                             }
                             payload.startsWith(DRAG_PREFIX_FOLDER) -> {
                                 val id = payload.removePrefix(DRAG_PREFIX_FOLDER)
-                                foldersByParent.values.flatten().find { it.folderId == id }?.name ?: "Folder"
+                                foldersByParent.values.flatten().find { it.folderId == id }?.name ?: folderDragLabel
                             }
                             else -> ""
                         }
@@ -2433,7 +2483,7 @@ fun DesktopMainScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Sync,
-                                contentDescription = "Sync",
+                                contentDescription = stringResource(Res.string.desktop_sync),
                                 modifier = Modifier.size(30.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))

@@ -9,6 +9,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.input.key.Key
@@ -99,6 +100,7 @@ import com.emberr.domain.reminders.DesktopReminderShownBus
 import com.emberr.domain.reminders.ReminderClickBus
 import com.emberr.domain.reminders.ReminderRescheduler
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
@@ -109,6 +111,21 @@ import java.awt.Frame
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.desktop_backup_only_on_android_message
+import emberr.shared.generated.resources.desktop_backup_only_on_android_title
+import emberr.shared.generated.resources.desktop_error
+import emberr.shared.generated.resources.desktop_file_not_found_message
+import emberr.shared.generated.resources.desktop_file_not_found_title
+import emberr.shared.generated.resources.desktop_open_file_failed
+import emberr.shared.generated.resources.desktop_select_document
+import emberr.shared.generated.resources.desktop_select_image
+import emberr.shared.generated.resources.desktop_sticky_note
+import emberr.shared.generated.resources.desktop_tray_close_window
+import emberr.shared.generated.resources.desktop_tray_open_emberr
+import emberr.shared.generated.resources.desktop_tray_quit
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
+import emberr.shared.generated.resources.Res
 
 private const val DESKTOP_IMAGE_CACHE_BYTES = 48L * 1024 * 1024
 private const val MILLIS_TO_WAIT_FOR_FIRST_FRAME_BEFORE_STARTING_ANYWAY = 4000L
@@ -296,9 +313,9 @@ private fun runEmberrDesktopApp() = application {
             if (isMainWindowOnScreen) isMainWindowOpen = false else showMainWindow()
         },
         actions = listOf(
-            TrayMenuAction("Open Emberr") { showMainWindow() },
-            TrayMenuAction("Close Window") { isMainWindowOpen = false },
-            TrayMenuAction("Quit") { exitApplication() }
+            TrayMenuAction(stringResource(Res.string.desktop_tray_open_emberr)) { showMainWindow() },
+            TrayMenuAction(stringResource(Res.string.desktop_tray_close_window)) { isMainWindowOpen = false },
+            TrayMenuAction(stringResource(Res.string.desktop_tray_quit)) { exitApplication() }
         )
     )
     }
@@ -341,6 +358,13 @@ private fun runEmberrDesktopApp() = application {
         }
     ) {
         val currentWindow = this.window as Frame
+        val selectImageTitle = stringResource(Res.string.desktop_select_image)
+        val selectDocumentTitle = stringResource(Res.string.desktop_select_document)
+        val fileNotFoundMessage = stringResource(Res.string.desktop_file_not_found_message)
+        val fileNotFoundTitle = stringResource(Res.string.desktop_file_not_found_title)
+        val openFileErrorScope = rememberCoroutineScope()
+        val backupOnlyOnAndroidMessage = stringResource(Res.string.desktop_backup_only_on_android_message)
+        val backupOnlyOnAndroidTitle = stringResource(Res.string.desktop_backup_only_on_android_title)
 
         LaunchedEffect(Unit) {
             withFrameNanos { }
@@ -428,13 +452,13 @@ private fun runEmberrDesktopApp() = application {
                 EmberrApp(
                     startRoute = Screen.Splash.route,
                     onPickImage = { onPathSelected ->
-                        val dialog = java.awt.FileDialog(currentWindow, "Select Image", java.awt.FileDialog.LOAD)
+                        val dialog = java.awt.FileDialog(currentWindow, selectImageTitle, java.awt.FileDialog.LOAD)
                         dialog.file = "*.png;*.jpg;*.jpeg;*.webp;*.gif"
                         dialog.isVisible = true
                         dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
                     },
                     onPickDocument = { onPathSelected ->
-                        val dialog = java.awt.FileDialog(currentWindow, "Select Document", java.awt.FileDialog.LOAD)
+                        val dialog = java.awt.FileDialog(currentWindow, selectDocumentTitle, java.awt.FileDialog.LOAD)
                         dialog.isVisible = true
                         dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
                     },
@@ -451,8 +475,8 @@ private fun runEmberrDesktopApp() = application {
                                 SwingUtilities.invokeLater {
                                     JOptionPane.showMessageDialog(
                                         currentWindow,
-                                        "This file is no longer available on this device.",
-                                        "File Not Found",
+                                        fileNotFoundMessage,
+                                        fileNotFoundTitle,
                                         JOptionPane.WARNING_MESSAGE
                                     )
                                 }
@@ -461,13 +485,17 @@ private fun runEmberrDesktopApp() = application {
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            SwingUtilities.invokeLater {
-                                JOptionPane.showMessageDialog(
-                                    currentWindow,
-                                    "Failed to open file: ${e.message}",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                                )
+                            openFileErrorScope.launch {
+                                val failedMessage = getString(Res.string.desktop_open_file_failed, e.message.toString())
+                                val errorTitle = getString(Res.string.desktop_error)
+                                SwingUtilities.invokeLater {
+                                    JOptionPane.showMessageDialog(
+                                        currentWindow,
+                                        failedMessage,
+                                        errorTitle,
+                                        JOptionPane.ERROR_MESSAGE
+                                    )
+                                }
                             }
                         }
                     },
@@ -484,8 +512,8 @@ private fun runEmberrDesktopApp() = application {
                         SwingUtilities.invokeLater {
                             JOptionPane.showMessageDialog(
                                 currentWindow,
-                                "Automated background backups are currently only supported on the Android app. You can still use the manual 'Export Backup' button!",
-                                "Desktop Feature",
+                                backupOnlyOnAndroidMessage,
+                                backupOnlyOnAndroidTitle,
                                 JOptionPane.INFORMATION_MESSAGE
                             )
                         }
@@ -508,7 +536,7 @@ private fun runEmberrDesktopApp() = application {
 
             Window(
                 onCloseRequest = { StickyNoteWindowBus.close(stickyNoteId) },
-                title = "Sticky Note",
+                title = stringResource(Res.string.desktop_sticky_note),
                 state = stickyNoteWindowState,
                 undecorated = useCustomWindowFrame,
                 transparent = useCustomWindowFrame,
@@ -559,6 +587,11 @@ private fun runEmberrDesktopApp() = application {
                 )
 
                 val stickyWindow = this.window as Frame
+                val selectImageTitle = stringResource(Res.string.desktop_select_image)
+                val selectDocumentTitle = stringResource(Res.string.desktop_select_document)
+                val fileNotFoundMessage = stringResource(Res.string.desktop_file_not_found_message)
+                val fileNotFoundTitle = stringResource(Res.string.desktop_file_not_found_title)
+                val openFileErrorScope = rememberCoroutineScope()
 
                 FollowLiveDisplayScale(stickyNoteWindowState) {
                 EmberrTheme(
@@ -575,7 +608,7 @@ private fun runEmberrDesktopApp() = application {
                     EmberrWindowFrame(
                         windowState = stickyNoteWindowState,
                         isEnabled = useCustomWindowFrame,
-                        windowTitle = "Sticky Note",
+                        windowTitle = stringResource(Res.string.desktop_sticky_note),
                         frameSize = WindowFrameSize.Compact,
                         autoHideTitleBar = autoHideTitleBar,
                         onCloseRequest = { StickyNoteWindowBus.close(stickyNoteId) }
@@ -584,7 +617,7 @@ private fun runEmberrDesktopApp() = application {
                         value = GlobalContext.get().get<NoteRepository>().getNoteById(stickyNoteId)?.kind ?: NoteKind.NOTE
                     }
                     val pickStickyImage: (onPathSelected: (String) -> Unit) -> Unit = { onPathSelected ->
-                        val dialog = java.awt.FileDialog(stickyWindow, "Select Image", java.awt.FileDialog.LOAD)
+                        val dialog = java.awt.FileDialog(stickyWindow, selectImageTitle, java.awt.FileDialog.LOAD)
                         dialog.file = "*.png;*.jpg;*.jpeg;*.webp;*.gif"
                         dialog.isVisible = true
                         dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
@@ -599,7 +632,7 @@ private fun runEmberrDesktopApp() = application {
                             onNavigateBack = {},
                             onPickImage = pickStickyImage,
                             onPickDocument = { onPathSelected ->
-                                val dialog = java.awt.FileDialog(stickyWindow, "Select Document", java.awt.FileDialog.LOAD)
+                                val dialog = java.awt.FileDialog(stickyWindow, selectDocumentTitle, java.awt.FileDialog.LOAD)
                                 dialog.isVisible = true
                                 dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
                             },
@@ -616,8 +649,8 @@ private fun runEmberrDesktopApp() = application {
                                         SwingUtilities.invokeLater {
                                             JOptionPane.showMessageDialog(
                                                 stickyWindow,
-                                                "This file is no longer available on this device.",
-                                                "File Not Found",
+                                                fileNotFoundMessage,
+                                                fileNotFoundTitle,
                                                 JOptionPane.WARNING_MESSAGE
                                             )
                                         }
@@ -626,13 +659,17 @@ private fun runEmberrDesktopApp() = application {
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
-                                    SwingUtilities.invokeLater {
-                                        JOptionPane.showMessageDialog(
-                                            stickyWindow,
-                                            "Failed to open file: ${e.message}",
-                                            "Error",
-                                            JOptionPane.ERROR_MESSAGE
-                                        )
+                                    openFileErrorScope.launch {
+                                        val failedMessage = getString(Res.string.desktop_open_file_failed, e.message.toString())
+                                        val errorTitle = getString(Res.string.desktop_error)
+                                        SwingUtilities.invokeLater {
+                                            JOptionPane.showMessageDialog(
+                                                stickyWindow,
+                                                failedMessage,
+                                                errorTitle,
+                                                JOptionPane.ERROR_MESSAGE
+                                            )
+                                        }
                                     }
                                 }
                             },
