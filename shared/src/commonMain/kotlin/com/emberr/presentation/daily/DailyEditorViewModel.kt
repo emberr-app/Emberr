@@ -47,6 +47,11 @@ import kotlinx.datetime.number
 import kotlinx.coroutines.flow.flatMapLatest
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.notifications_daily_title
+import emberr.shared.generated.resources.notifications_unfinished_task
+import emberr.shared.generated.resources.notifications_note
+import org.jetbrains.compose.resources.getString
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DailyEditorViewModel(
@@ -204,8 +209,8 @@ class DailyEditorViewModel(
 
                 reminderScheduler.scheduleEventReminder(
                     blockId = blockId,
-                    noteTitle = "Daily: $targetDateString",
-                    text = block.text.ifBlank { "Unfinished task" },
+                    noteTitle = getString(Res.string.notifications_daily_title, targetDateString),
+                    text = block.text.ifBlank { getString(Res.string.notifications_unfinished_task) },
                     timestamp = timestamp,
                     allDay = allDay,
                     recurrenceRule = block.recurrenceRule
@@ -498,8 +503,8 @@ class DailyEditorViewModel(
         }
     }
 
-    override fun getNoteTitleForReminder(): String =
-        "Daily: ${currentDateString ?: "Note"}"
+    override suspend fun getNoteTitleForReminder(): String =
+        getString(Res.string.notifications_daily_title, currentDateString ?: getString(Res.string.notifications_note))
 
     override suspend fun spaceIdOfThisNote(): String = ACCOUNT_SPACE_ID
 

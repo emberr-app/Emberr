@@ -42,11 +42,11 @@ class BirthdayReminderTest {
         val maya = person("maya-id", "Maya", "1995-11-02")
 
         assertEquals(
-            BirthdayReminder("birthday_maya-id", "Maya turns 31 today", millisAt(2026, 11, 2, 9, 0)),
+            BirthdayReminder("birthday_maya-id", "Maya", 31, millisAt(2026, 11, 2, 9, 0)),
             nextReminder(maya, nineInTheMorning, now = millisAt(2026, 11, 2, 8, 59))
         )
         assertEquals(
-            BirthdayReminder("birthday_maya-id", "Maya turns 32 today", millisAt(2027, 11, 2, 9, 0)),
+            BirthdayReminder("birthday_maya-id", "Maya", 32, millisAt(2027, 11, 2, 9, 0)),
             nextReminder(maya, nineInTheMorning, now = millisAt(2026, 11, 2, 9, 0))
         )
         assertEquals(
@@ -57,12 +57,12 @@ class BirthdayReminderTest {
     }
 
     @Test
-    fun aLeapDayBirthdayIsRemindedOnFebruary28AndAMissingYearOrNameStillGivesText() {
+    fun aLeapDayBirthdayIsRemindedOnFebruary28AndAMissingYearOrNameStillGivesAReminder() {
         val leap = person("leap-id", "Leap", "2000-02-29")
         val noYearNoName = person("blank-id", " ", "--03-14")
 
         assertEquals(
-            BirthdayReminder("birthday_leap-id", "Leap turns 27 today", millisAt(2027, 2, 28, 9, 0)),
+            BirthdayReminder("birthday_leap-id", "Leap", 27, millisAt(2027, 2, 28, 9, 0)),
             nextReminder(leap, nineInTheMorning, now = millisAt(2027, 1, 10, 12, 0))
         )
         assertEquals(
@@ -70,12 +70,12 @@ class BirthdayReminderTest {
             nextReminder(leap, nineInTheMorning, now = millisAt(2027, 2, 28, 10, 0))?.timestamp
         )
         assertEquals(
-            BirthdayReminder("birthday_blank-id", "It's Untitled's birthday today", millisAt(2027, 3, 14, 9, 0)),
+            BirthdayReminder("birthday_blank-id", "", null, millisAt(2027, 3, 14, 9, 0)),
             nextReminder(noYearNoName, nineInTheMorning, now = millisAt(2026, 11, 2, 12, 0))
         )
         assertEquals(
-            "It's Maya's birthday today",
-            nextReminder(person("spaced-id", "  Maya  ", "--03-14"), nineInTheMorning, now = millisAt(2026, 11, 2, 12, 0))?.text
+            "Maya",
+            nextReminder(person("spaced-id", "  Maya  ", "--03-14"), nineInTheMorning, now = millisAt(2026, 11, 2, 12, 0))?.personName
         )
     }
 }

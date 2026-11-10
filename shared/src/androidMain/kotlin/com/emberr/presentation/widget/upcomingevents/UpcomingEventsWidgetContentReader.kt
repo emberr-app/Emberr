@@ -24,12 +24,17 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.number
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.widgets_untitled_event
+import emberr.shared.generated.resources.widgets_repeating
+import emberr.shared.generated.resources.widgets_today
+import emberr.shared.generated.resources.widgets_tomorrow
+import org.jetbrains.compose.resources.getString
 
 private const val maximumEventsShown = 60
 private const val maximumCharactersPerTitle = 100
 private const val daysSearchedForNextRepeat = 366
 private const val repeatingGroupKey = "repeating"
-private const val repeatingSectionTitle = "Repeating"
 
 class UpcomingEventsWidgetContentReader(
     private val calendarTaskDao: CalendarTaskDao,
@@ -85,12 +90,15 @@ class UpcomingEventsWidgetContentReader(
             .distinctBy { occurrence -> occurrence.blockId }
     }
 
-    private fun buildEvents(
+    private suspend fun buildEvents(
         tasks: List<CalendarTaskEntity>,
         birthdayEvents: List<CalendarEvent>,
         today: LocalDate,
         colorsByCategoryId: Map<String, String>
     ): List<UpcomingEvent> {
+        val untitledEventTitle = getString(Res.string.widgets_untitled_event)
+        val repeatingSectionTitle = getString(Res.string.widgets_repeating)
+        val dayLabels = RelativeDayLabels(today = getString(Res.string.widgets_today), tomorrow = getString(Res.string.widgets_tomorrow))
         val taskEvents = tasks.mapNotNull { task ->
             val targetDate = task.targetDate?.let(LocalDate::parse) ?: return@mapNotNull null
             val isRepeating = task.recurrenceFrequency != null
@@ -101,10 +109,10 @@ class UpcomingEventsWidgetContentReader(
                 timestamp = task.reminderTimestamp ?: Long.MAX_VALUE,
                 event = UpcomingEvent(
                     blockId = task.blockId,
-                    title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
+                    title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { untitledEventTitle },
                     dateGroupKey = if (isRepeating) repeatingGroupKey else task.targetDate,
-                    dateLabel = if (isRepeating) repeatingSectionTitle else formatDateLabel(targetDate, today),
-                    dayLabel = if (isRepeating) formatDateLabel(targetDate, today) else null,
+                    dateLabel = if (isRepeating) repeatingSectionTitle else formatDateLabel(targetDate, today, dayLabels),
+                    dayLabel = if (isRepeating) formatDateLabel(targetDate, today, dayLabels) else null,
                     timeLabel = task.reminderTimestamp?.let { timestamp -> clockFormat.clockTimeOf(timestamp) },
                     isOverdue = targetDate == today &&
                         task.reminderTimestamp != null &&
@@ -125,7 +133,7 @@ class UpcomingEventsWidgetContentReader(
                     blockId = birthday.blockId,
                     title = birthday.text.take(maximumCharactersPerTitle),
                     dateGroupKey = birthday.dateString,
-                    dateLabel = formatDateLabel(birthdayDate, today),
+                    dateLabel = formatDateLabel(birthdayDate, today, dayLabels),
                     timeLabel = null,
                     isOverdue = false,
                     accentColorHex = colorsByCategoryId[BIRTHDAYS_CATEGORY_ID],
@@ -156,10 +164,12 @@ private val shortMonthNames = listOf(
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 )
 
-private fun formatDateLabel(targetDate: LocalDate, today: LocalDate): String =
+private class RelativeDayLabels(val today: String, val tomorrow: String)
+
+private fun formatDateLabel(targetDate: LocalDate, today: LocalDate, dayLabels: RelativeDayLabels): String =
     when (targetDate) {
-        today -> "Today"
-        today.plus(DatePeriod(days = 1)) -> "Tomorrow"
+        today -> dayLabels.today
+        today.plus(DatePeriod(days = 1)) -> dayLabels.tomorrow
         else -> {
             val month = shortMonthNames.getOrNull(targetDate.month.number - 1) ?: targetDate.month.name.take(3)
             "$month ${targetDate.day}"

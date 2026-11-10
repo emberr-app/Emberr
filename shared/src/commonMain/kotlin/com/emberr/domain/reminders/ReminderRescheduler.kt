@@ -18,6 +18,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.notifications_unfinished_task
+import emberr.shared.generated.resources.notifications_daily_title
+import emberr.shared.generated.resources.notifications_task_reminder
+import org.jetbrains.compose.resources.getString
 
 internal const val RESCHEDULE_HORIZON_DAYS = 60
 
@@ -59,7 +64,7 @@ class ReminderRescheduler(
                     reminderScheduler.schedule(
                         blockId = reminder.blockId,
                         noteTitle = buildNotificationTitle(note),
-                        text = reminder.text.ifBlank { "Unfinished task" },
+                        text = reminder.text.ifBlank { getString(Res.string.notifications_unfinished_task) },
                         timestamp = reminder.timestamp
                     )
                 }
@@ -134,9 +139,9 @@ class ReminderRescheduler(
         )
     }
 
-    private fun buildNotificationTitle(note: NoteMetadataEntity): String = when {
-        note.isDaily -> "Daily: ${note.dateString.orEmpty()}"
+    private suspend fun buildNotificationTitle(note: NoteMetadataEntity): String = when {
+        note.isDaily -> getString(Res.string.notifications_daily_title, note.dateString.orEmpty())
         note.title.isNotBlank() -> note.title
-        else -> "Task Reminder"
+        else -> getString(Res.string.notifications_task_reminder)
     }
 }

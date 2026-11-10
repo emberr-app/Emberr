@@ -71,6 +71,7 @@ import com.emberr.presentation.widget.WidgetDeletedState
 import com.emberr.presentation.widget.previewNoteListContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.presentation.widget.widgetText
 
 private val headerIconSize = 18.dp
 private val noteCardCornerRadius = 14.dp
@@ -113,7 +114,7 @@ class NoteListWidget : GlanceAppWidget(), KoinComponent {
                 NoteListWidgetBody(
                     context = context,
                     spaceId = "",
-                    content = previewNoteListContent,
+                    content = previewNoteListContent(),
                     appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
                 )
             }
@@ -174,9 +175,9 @@ internal fun NoteListWidgetBody(
             ) {
                 Text(
                     text = if (content == null) {
-                        "Open Emberr to load your notes"
+                        widgetText(R.string.widget_open_emberr_to_load_your_notes)
                     } else {
-                        "No notes yet. Tap to write one."
+                        widgetText(R.string.widget_no_notes_yet_tap_to_write_one)
                     },
                     style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
                 )
@@ -216,7 +217,7 @@ internal fun NoteListWidgetBody(
                 Spacer(modifier = GlanceModifier.width(10.dp))
 
                 Text(
-                    text = "Notes",
+                    text = widgetText(R.string.widget_notes),
                     maxLines = 1,
                     style = TextStyle(
                         color = primaryTextColor,
@@ -227,7 +228,7 @@ internal fun NoteListWidgetBody(
             }
 
             WidgetAddButton(
-                contentDescription = "New note",
+                contentDescription = widgetText(R.string.widget_new_note),
                 onClick = actionStartActivity(newNoteIntent(context, spaceId))
             )
         }
@@ -237,13 +238,13 @@ internal fun NoteListWidgetBody(
 @Composable
 private fun DeletedSpaceNoteList(context: Context, appWidgetId: Int) {
     WidgetDeletedState(
-        headerText = "Notes",
+        headerText = widgetText(R.string.widget_notes),
         headerStyle = TextStyle(
             color = secondaryTextColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         ),
-        message = "This space was deleted. Tap to choose another",
+        message = widgetText(R.string.widget_space_deleted_choose_another),
         messageFontSize = 15.sp,
         modifier = GlanceModifier
             .fillMaxSize()

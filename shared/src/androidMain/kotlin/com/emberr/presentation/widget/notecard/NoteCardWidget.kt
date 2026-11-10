@@ -63,6 +63,7 @@ import com.emberr.presentation.widget.WidgetDeletedState
 import com.emberr.presentation.widget.previewNoteCardContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.presentation.widget.widgetText
 
 private val minimumCoverBandHeight = 40.dp
 private val iconOverhang = 12.dp
@@ -122,8 +123,8 @@ class NoteCardWidget : GlanceAppWidget(), KoinComponent {
                 NoteCardWidgetBody(
                     context = context,
                     appWidgetId = INVALID_APPWIDGET_ID,
-                    chosenNoteId = previewNoteCardContent.noteId,
-                    content = previewNoteCardContent,
+                    chosenNoteId = previewNoteCardContent().noteId,
+                    content = previewNoteCardContent(),
                     isNoteDeleted = false
                 )
             }
@@ -160,11 +161,11 @@ internal fun NoteCardWidgetBody(
     val chooseNoteAction = actionStartActivity(openPickerIntent(context, appWidgetId))
 
     when {
-        chosenNoteId == null -> CardMessage(message = "Tap to choose a note", tapAction = chooseNoteAction)
+        chosenNoteId == null -> CardMessage(message = widgetText(R.string.widget_tap_to_choose_a_note), tapAction = chooseNoteAction)
 
         isNoteDeleted -> DeletedCard(title = content?.title, chooseAnotherNoteAction = chooseNoteAction)
 
-        content == null -> CardMessage(message = "Open Emberr to load this note", tapAction = null)
+        content == null -> CardMessage(message = widgetText(R.string.widget_open_emberr_to_load_this_note), tapAction = null)
 
         else -> NoteCard(
             content = content,
@@ -247,7 +248,7 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
             Box(modifier = GlanceModifier.padding(start = noteContentSidePadding, top = coverBandHeight - iconOverhang)) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_widget_canvas),
-                    contentDescription = "Canvas",
+                    contentDescription = widgetText(R.string.widget_canvas),
                     colorFilter = ColorFilter.tint(primaryTextColor),
                     modifier = GlanceModifier.size(canvasIconSize)
                 )
@@ -259,7 +260,7 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
                 Box(modifier = GlanceModifier.padding(favoriteStarPadding)) {
                     Image(
                         provider = ImageProvider(R.drawable.ic_widget_star),
-                        contentDescription = "Favorite",
+                        contentDescription = widgetText(R.string.widget_favorite),
                         colorFilter = ColorFilter.tint(highlightColor),
                         modifier = GlanceModifier.size(favoriteStarSize)
                     )
@@ -272,14 +273,14 @@ private fun NoteCard(content: NoteCardWidgetContent, openNoteAction: Action) {
 @Composable
 private fun DeletedCard(title: String?, chooseAnotherNoteAction: Action) {
     WidgetDeletedState(
-        headerText = title ?: "Untitled",
+        headerText = title ?: widgetText(R.string.widget_untitled),
         headerStyle = TextStyle(
             color = secondaryTextColor,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             textDecoration = TextDecoration.LineThrough
         ),
-        message = "This note was deleted. Tap to choose another",
+        message = widgetText(R.string.widget_note_deleted_choose_another),
         messageFontSize = 13.sp,
         modifier = GlanceModifier
             .fillMaxSize()

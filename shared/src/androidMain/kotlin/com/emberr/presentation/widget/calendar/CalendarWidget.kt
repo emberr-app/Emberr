@@ -65,6 +65,7 @@ import androidx.core.graphics.toColorInt
 import com.emberr.presentation.widget.previewCalendarContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.presentation.widget.widgetText
 
 private val chevronSize = 16.dp
 private val monthStepButtonSize = 32.dp
@@ -155,7 +156,7 @@ internal fun CalendarWidgetBody(
         ) {
             MonthStepButton(
                 iconResource = R.drawable.ic_widget_chevron_left,
-                contentDescription = "Previous month",
+                contentDescription = widgetText(R.string.widget_previous_month),
                 onClick = actionSendBroadcast(monthStepIntent(context, appWidgetId, isForward = false))
             )
 
@@ -188,7 +189,7 @@ internal fun CalendarWidgetBody(
 
             MonthStepButton(
                 iconResource = R.drawable.ic_widget_chevron_right,
-                contentDescription = "Next month",
+                contentDescription = widgetText(R.string.widget_next_month),
                 onClick = actionSendBroadcast(monthStepIntent(context, appWidgetId, isForward = true))
             )
         }

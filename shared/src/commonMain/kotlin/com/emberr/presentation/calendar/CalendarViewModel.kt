@@ -55,6 +55,9 @@ import java.util.UUID
 import kotlin.time.Clock
 import kotlin.time.Instant
 import org.jetbrains.compose.resources.getString
+import emberr.shared.generated.resources.notifications_task_reminder
+import emberr.shared.generated.resources.notifications_unfinished_task
+import emberr.shared.generated.resources.notifications_daily_title
 
 class CalendarViewModel(
     private val repository: NoteRepository,
@@ -314,7 +317,7 @@ class CalendarViewModel(
                 val now = System.currentTimeMillis()
 
                 if (original != null && original.sourceType == TaskSource.NOTE) {
-                    var notificationTitle = "Task Reminder"
+                    var notificationTitle = getString(Res.string.notifications_task_reminder)
                     SyncCoordinator.mutex.withLock {
                         val meta = repository.getNoteById(original.noteId) ?: return@withLock
                         val content = repository.getNoteContent(original.noteId) ?: return@withLock
@@ -334,11 +337,11 @@ class CalendarViewModel(
                         )
                         val updatedBlocks = content.blocks.map { if (it.id == blockId) updatedBlock else it }
                         repository.saveNote(meta.copy(updatedAt = now), NoteContent(blocks = updatedBlocks))
-                        notificationTitle = meta.title.ifBlank { "Task Reminder" }
+                        notificationTitle = meta.title.ifBlank { getString(Res.string.notifications_task_reminder) }
                     }
                     SyncEventBus.emitSyncCompleted(original.noteId)
                     reminderScheduler.scheduleEventReminder(
-                        blockId, notificationTitle, name.ifBlank { "Unfinished task" }, timestamp, allDay, recurrenceRule
+                        blockId, notificationTitle, name.ifBlank { getString(Res.string.notifications_unfinished_task) }, timestamp, allDay, recurrenceRule
                     )
                     return@launch
                 }
@@ -388,8 +391,8 @@ class CalendarViewModel(
 
                 reminderScheduler.scheduleEventReminder(
                     blockId = blockId,
-                    noteTitle = "Daily: $dateString",
-                    text = name.ifBlank { "Unfinished task" },
+                    noteTitle = getString(Res.string.notifications_daily_title, dateString),
+                    text = name.ifBlank { getString(Res.string.notifications_unfinished_task) },
                     timestamp = timestamp,
                     allDay = allDay,
                     recurrenceRule = recurrenceRule

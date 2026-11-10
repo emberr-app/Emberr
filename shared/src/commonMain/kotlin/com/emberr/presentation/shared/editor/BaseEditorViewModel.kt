@@ -154,6 +154,7 @@ import emberr.shared.generated.resources.Res
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.StringResource
+import emberr.shared.generated.resources.notifications_unfinished_task
 
 @Stable
 data class FocusRequest(
@@ -393,7 +394,7 @@ abstract class BaseEditorViewModel(
     // a failed save must check this rather than relying on an exception
     protected abstract suspend fun performSave(): Boolean
     protected abstract suspend fun performIndexing()
-    protected abstract fun getNoteTitleForReminder(): String
+    protected abstract suspend fun getNoteTitleForReminder(): String
     protected abstract suspend fun spaceIdOfThisNote(): String?
 
     val allLinkableNotes: StateFlow<List<NoteMetadataEntity>> = combine(
@@ -2571,14 +2572,16 @@ abstract class BaseEditorViewModel(
         scheduleAutosave()
 
         if (timestamp != null) {
-            reminderScheduler.scheduleEventReminder(
-                blockId = blockId,
-                noteTitle = getNoteTitleForReminder(),
-                text = blockText.ifBlank { "Unfinished task" },
-                timestamp = timestamp,
-                allDay = allDay,
-                recurrenceRule = block?.recurrenceRule
-            )
+            viewModelScope.launch {
+                reminderScheduler.scheduleEventReminder(
+                    blockId = blockId,
+                    noteTitle = getNoteTitleForReminder(),
+                    text = blockText.ifBlank { getString(Res.string.notifications_unfinished_task) },
+                    timestamp = timestamp,
+                    allDay = allDay,
+                    recurrenceRule = block?.recurrenceRule
+                )
+            }
         } else {
             reminderScheduler.cancel(blockId)
         }

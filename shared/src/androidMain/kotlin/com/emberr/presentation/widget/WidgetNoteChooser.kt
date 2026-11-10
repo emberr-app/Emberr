@@ -65,13 +65,19 @@ import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.notes2
 import emberr.shared.generated.resources.search
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.widgets_favorites
+import emberr.shared.generated.resources.widgets_other
+import emberr.shared.generated.resources.widgets_no_notes_yet
+import emberr.shared.generated.resources.widgets_no_notes_match
+import emberr.shared.generated.resources.widgets_choose_a_note
+import emberr.shared.generated.resources.widgets_search_notes
+import org.jetbrains.compose.resources.stringResource
 
 private val noteGroupCornerRadius = 18.dp
 private val noteIconSize = 20.dp
 private val floatingSearchHeight = 50.dp
 private val floatingSearchVerticalPadding = 14.dp
-private const val otherNotesGroupTitle = "Other"
-private const val favoritesGroupTitle = "Favorites"
 
 private data class WidgetNoteGroup(
     val title: String,
@@ -90,7 +96,11 @@ fun WidgetNoteChooser(
     val headerHeight = with(density) { headerHeightPx.toDp() }
     var searchText by remember { mutableStateOf("") }
 
-    val noteGroups = remember(notes, searchText) { groupNotesForChooser(notes, searchText) }
+    val favoritesGroupTitle = stringResource(Res.string.widgets_favorites)
+    val otherNotesGroupTitle = stringResource(Res.string.widgets_other)
+    val noteGroups = remember(notes, searchText, favoritesGroupTitle, otherNotesGroupTitle) {
+        groupNotesForChooser(notes, searchText, favoritesGroupTitle, otherNotesGroupTitle)
+    }
     val keyboardOrNavigationBarHeight = WindowInsets.ime
         .union(WindowInsets.navigationBars)
         .asPaddingValues()
@@ -111,13 +121,13 @@ fun WidgetNoteChooser(
                 notes.isEmpty() -> item(key = "empty_notes") {
                     ChooserEmptyState(
                         icon = painterResource(Res.drawable.notes2),
-                        message = "You have no notes yet"
+                        message = stringResource(Res.string.widgets_no_notes_yet)
                     )
                 }
                 noteGroups.isEmpty() -> item(key = "empty_search") {
                     ChooserEmptyState(
                         icon = painterResource(Res.drawable.search),
-                        message = "No notes match \"${searchText.trim()}\""
+                        message = stringResource(Res.string.widgets_no_notes_match, searchText.trim())
                     )
                 }
                 else -> noteGroups.forEachIndexed { groupIndex, group ->
@@ -134,7 +144,7 @@ fun WidgetNoteChooser(
                 .onGloballyPositioned { coordinates -> headerHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = "Choose a note",
+                title = stringResource(Res.string.widgets_choose_a_note),
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 onBackClick = onClose
@@ -144,7 +154,7 @@ fun WidgetNoteChooser(
         EmberrSearchTextField(
             value = searchText,
             onValueChange = { newText -> searchText = newText },
-            placeholder = "Search notes",
+            placeholder = stringResource(Res.string.widgets_search_notes),
             hazeState = hazeState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -174,7 +184,9 @@ fun WidgetSetupNotice(message: String) {
 
 private fun groupNotesForChooser(
     notes: List<SelectableWidgetNote>,
-    searchText: String
+    searchText: String,
+    favoritesGroupTitle: String,
+    otherNotesGroupTitle: String
 ): List<WidgetNoteGroup> {
     val query = searchText.trim()
     val matchingNotes = if (query.isEmpty()) {
@@ -254,8 +266,9 @@ private fun NoteChooserRow(note: NoteMetadataEntity, onClick: () -> Unit) {
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(1f)) {
+            val untitledNoteTitle = stringResource(Res.string.common_untitled)
             Text(
-                text = note.title.trim().ifBlank { "Untitled" },
+                text = note.title.trim().ifBlank { untitledNoteTitle },
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,

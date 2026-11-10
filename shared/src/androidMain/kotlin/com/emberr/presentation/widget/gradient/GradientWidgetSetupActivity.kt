@@ -71,6 +71,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.get
+import emberr.shared.generated.resources.widgets_choose_a_gradient
+import emberr.shared.generated.resources.widgets_whats_on_your_mind
+import emberr.shared.generated.resources.widgets_selected
+import org.jetbrains.compose.resources.stringResource
 
 private val swatchHeight = 112.dp
 private val swatchCornerRadius = 20.dp
@@ -204,7 +208,7 @@ private fun GradientChooser(
                 .onGloballyPositioned { coordinates -> headerHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = "Choose a gradient",
+                title = stringResource(Res.string.widgets_choose_a_gradient),
                 hazeState = hazeState,
                 topEdgeFadeAlpha = headerFadeAlpha,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
@@ -234,7 +238,7 @@ private fun GradientSwatch(gradient: WidgetGradient, isSelected: Boolean, onClic
                 .padding(12.dp)
         ) {
             Text(
-                text = "What's on your mind?",
+                text = stringResource(Res.string.widgets_whats_on_your_mind),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -251,7 +255,7 @@ private fun GradientSwatch(gradient: WidgetGradient, isSelected: Boolean, onClic
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.check),
-                        contentDescription = "Selected",
+                        contentDescription = stringResource(Res.string.widgets_selected),
                         tint = Color.Black,
                         modifier = Modifier.size(16.dp)
                     )
@@ -262,7 +266,7 @@ private fun GradientSwatch(gradient: WidgetGradient, isSelected: Boolean, onClic
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = gradient.displayName,
+            text = stringResource(gradient.nameResource),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,

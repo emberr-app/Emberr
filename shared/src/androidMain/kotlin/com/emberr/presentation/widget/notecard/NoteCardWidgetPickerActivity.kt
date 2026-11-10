@@ -28,6 +28,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.get
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.widgets_open_the_app_first
+import org.jetbrains.compose.resources.stringResource
 
 class NoteCardWidgetPickerActivity : ComponentActivity() {
 
@@ -64,7 +67,7 @@ class NoteCardWidgetPickerActivity : ComponentActivity() {
                 ) {
                     val source = noteSource
                     if (source == null) {
-                        WidgetSetupNotice("Open the app once before adding a widget")
+                        WidgetSetupNotice(stringResource(Res.string.widgets_open_the_app_first))
                     } else {
                         val notesFlow = remember { source.observeSelectableNotes() }
                         val notes by notesFlow.collectAsState(initial = emptyList())

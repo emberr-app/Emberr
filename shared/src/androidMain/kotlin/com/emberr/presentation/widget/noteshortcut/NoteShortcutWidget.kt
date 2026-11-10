@@ -63,6 +63,7 @@ import com.emberr.presentation.widget.writeDeletedFlag
 import com.emberr.presentation.widget.previewNoteShortcutContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.presentation.widget.widgetText
 
 private val pillHeight = 66.dp
 private val pillCornerRadius = 33.dp
@@ -115,7 +116,7 @@ class NoteShortcutWidget : GlanceAppWidget(), KoinComponent {
             WidgetColorTheme(followsSettingChanges = false) {
                 NoteShortcutWidgetBody(
                     context = context,
-                    content = previewNoteShortcutContent,
+                    content = previewNoteShortcutContent(),
                     isNoteDeleted = false,
                     appWidgetId = INVALID_APPWIDGET_ID
                 )
@@ -180,7 +181,7 @@ internal fun NoteShortcutWidgetBody(
     if (content == null) {
         ShortcutSurface(tapModifier = GlanceModifier) {
             Text(
-                text = "Open Emberr to load this note",
+                text = widgetText(R.string.widget_open_emberr_to_load_this_note),
                 maxLines = 1,
                 style = TextStyle(color = secondaryTextColor, fontSize = 14.sp)
             )
@@ -224,7 +225,7 @@ private fun DeletedShortcut(context: Context, content: NoteShortcutWidgetContent
         Spacer(modifier = GlanceModifier.width(12.dp))
 
         Text(
-            text = content?.title ?: "Untitled",
+            text = content?.title ?: widgetText(R.string.widget_untitled),
             maxLines = 1,
             style = TextStyle(
                 color = secondaryTextColor,
@@ -259,7 +260,7 @@ private fun NoteShortcutSetupPrompt(context: Context, appWidgetId: Int) {
         )
     ) {
         Text(
-            text = "Tap to choose a note",
+            text = widgetText(R.string.widget_tap_to_choose_a_note),
             maxLines = 1,
             style = TextStyle(color = secondaryTextColor, fontSize = 14.sp)
         )

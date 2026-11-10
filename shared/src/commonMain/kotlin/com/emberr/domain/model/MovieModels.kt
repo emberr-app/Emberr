@@ -298,11 +298,11 @@ data class MovieSearchResult(
 fun starsTextOf(halfStars: Int): String =
     if (halfStars % 2 == 0) "${halfStars / 2}" else "${halfStars / 2}.5"
 
-fun MovieBlock.summaryLine(): String? {
+fun MovieBlock.summaryLine(watchStatusLabel: String = watchStatus.label): String? {
     val details = details ?: return null
     val titleWithYear = if (details.yearText.isBlank()) details.title else "${details.title} (${details.yearText})"
     val rating = ratingHalfStars?.let { "★ ${starsTextOf(it)}" }
-    return listOfNotNull(titleWithYear, watchStatus.label, rating).joinToString(" · ")
+    return listOfNotNull(titleWithYear, watchStatusLabel, rating).joinToString(" · ")
 }
 
 data class WatchState(

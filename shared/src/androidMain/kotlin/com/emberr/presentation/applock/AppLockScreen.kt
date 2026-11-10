@@ -25,6 +25,10 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.lock_keyhole2
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.app_lock_emberr_is_locked
+import emberr.shared.generated.resources.app_lock_screen_detail
+import emberr.shared.generated.resources.app_lock_unlock
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AppLockScreen(
@@ -59,13 +63,13 @@ fun AppLockScreen(
             }
             Spacer(modifier = Modifier.height(22.dp))
             Text(
-                text = "Emberr is locked",
+                text = stringResource(Res.string.app_lock_emberr_is_locked),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Use your fingerprint, face, or screen lock to open it.",
+                text = stringResource(Res.string.app_lock_screen_detail),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                 textAlign = TextAlign.Center,
@@ -84,7 +88,7 @@ fun AppLockScreen(
         }
 
         EmberrButtonPrimary(
-            text = "Unlock",
+            text = stringResource(Res.string.app_lock_unlock),
             onClick = onUnlockClick,
             modifier = Modifier
                 .align(Alignment.BottomCenter)

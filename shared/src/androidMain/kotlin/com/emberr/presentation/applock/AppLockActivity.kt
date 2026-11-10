@@ -25,6 +25,13 @@ import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.collectColorThemeSettings
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import kotlinx.coroutines.MainScope
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.app_lock_off_no_screen_lock
+import emberr.shared.generated.resources.app_lock_unlock_emberr
+import org.jetbrains.compose.resources.getString
+
+private val appLockToastScope = MainScope()
 
 fun Activity.openAppLockScreen() {
     startActivity(Intent(this, AppLockActivity::class.java))
@@ -85,7 +92,7 @@ class AppLockActivity : FragmentActivity() {
         }
         if (!phoneHasScreenLock()) {
             appLockManager.turnOff()
-            showNativeToast("App Lock is off because this phone has no screen lock.")
+            appLockToastScope.launch { showNativeToast(getString(Res.string.app_lock_off_no_screen_lock)) }
             unlockAndClose()
             return
         }
@@ -103,7 +110,7 @@ class AppLockActivity : FragmentActivity() {
     private fun askToUnlock() {
         unlockFailureMessage = null
         lifecycleScope.launch {
-            when (val result = systemUnlockPrompt.ask(title = "Unlock Emberr")) {
+            when (val result = systemUnlockPrompt.ask(title = getString(Res.string.app_lock_unlock_emberr))) {
                 SystemUnlockResult.Unlocked -> unlockAndClose()
                 SystemUnlockResult.Cancelled -> Unit
                 is SystemUnlockResult.Failed -> unlockFailureMessage = result.message

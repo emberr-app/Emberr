@@ -25,6 +25,9 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.notifications_daily_title
+import org.jetbrains.compose.resources.getString
 
 class VoiceTaskViewModel(
     private val repository: NoteRepository,
@@ -118,7 +121,7 @@ class VoiceTaskViewModel(
                             task.timestamp?.let { timeInMillis ->
                                 reminderScheduler.schedule(
                                     blockId = newVoiceTaskBlock.id,
-                                    noteTitle = "Daily: $targetDateString",
+                                    noteTitle = getString(Res.string.notifications_daily_title, targetDateString),
                                     text = task.taskText,
                                     timestamp = timeInMillis
                                 )

@@ -26,8 +26,8 @@ class AndroidReminderReceiver : BroadcastReceiver(), KoinComponent {
     private val birthdayReminderScheduler: BirthdayReminderScheduler by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
-        val noteTitle = intent.getStringExtra("note_title") ?: "Reminder"
-        val blockText = intent.getStringExtra("block_text") ?: "You have a task to check."
+        val noteTitle = intent.getStringExtra("note_title") ?: context.getString(R.string.notification_reminder)
+        val blockText = intent.getStringExtra("block_text") ?: context.getString(R.string.notification_you_have_a_task_to_check)
         val notificationId = intent.getStringExtra("block_id")?.hashCode() ?: 1
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -36,7 +36,7 @@ class AndroidReminderReceiver : BroadcastReceiver(), KoinComponent {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                "Task Reminders",
+                context.getString(R.string.notification_channel_task_reminders),
                 NotificationManager.IMPORTANCE_HIGH
             )
             notificationManager.createNotificationChannel(channel)

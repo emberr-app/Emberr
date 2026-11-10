@@ -111,8 +111,8 @@ class AndroidUpdateChecker(
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "App updates", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "Tells you when a new version of Emberr is available"
+            NotificationChannel(CHANNEL_ID, context.getString(R.string.notification_channel_app_updates), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = context.getString(R.string.notification_channel_app_updates_description)
             }
         )
 
@@ -125,8 +125,8 @@ class AndroidUpdateChecker(
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Emberr $version is available")
-            .setContentText("Tap to download it from GitHub.")
+            .setContentTitle(context.getString(R.string.notification_update_available, version))
+            .setContentText(context.getString(R.string.notification_update_tap_to_download))
             .setContentIntent(openReleasePage)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

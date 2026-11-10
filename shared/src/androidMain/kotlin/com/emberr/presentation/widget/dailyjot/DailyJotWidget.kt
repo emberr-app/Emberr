@@ -45,6 +45,7 @@ import com.emberr.presentation.widget.gradient.gradientCardBackground
 import com.emberr.presentation.widget.gradient.gradientCardPadding
 import com.emberr.presentation.widget.gradient.onGradientTextColor
 import com.emberr.presentation.widget.gradient.widgetGradientKey
+import com.emberr.presentation.widget.widgetText
 
 private val buttonGlassColor = ColorProvider(Color(0x33FFFFFF))
 private val jotButtonHeight = 42.dp
@@ -90,7 +91,7 @@ private fun DailyJotWidgetBody(context: Context, gradient: WidgetGradient) {
         Spacer(modifier = GlanceModifier.height(16.dp))
 
         Text(
-            text = "What's on your mind?",
+            text = widgetText(R.string.widget_whats_on_your_mind),
             maxLines = 2,
             style = TextStyle(
                 color = onGradientTextColor,
@@ -128,7 +129,7 @@ private fun JotButton(onClick: Action) {
         Spacer(modifier = GlanceModifier.width(8.dp))
 
         Text(
-            text = "Jot it down",
+            text = widgetText(R.string.widget_jot_it_down),
             maxLines = 1,
             style = TextStyle(
                 color = onGradientTextColor,

@@ -31,6 +31,7 @@ import emberr.shared.generated.resources.editor_callout_type_success
 import emberr.shared.generated.resources.editor_callout_type_tip
 import emberr.shared.generated.resources.editor_callout_type_todo
 import emberr.shared.generated.resources.editor_callout_type_warning
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private val CalloutBlue = Color(0xFF086DDD)
@@ -57,22 +58,25 @@ fun CalloutType.backgroundColor(surfaceColor: Color): Color = when (this) {
     else -> accentColor().copy(alpha = CalloutTintedBackgroundAlpha)
 }
 
+val CalloutType.nameResource: StringResource
+    get() = when (this) {
+        CalloutType.NOTE -> Res.string.editor_callout_type_note
+        CalloutType.ABSTRACT -> Res.string.editor_callout_type_abstract
+        CalloutType.INFO -> Res.string.editor_callout_type_info
+        CalloutType.TODO -> Res.string.editor_callout_type_todo
+        CalloutType.TIP -> Res.string.editor_callout_type_tip
+        CalloutType.SUCCESS -> Res.string.editor_callout_type_success
+        CalloutType.QUESTION -> Res.string.editor_callout_type_question
+        CalloutType.WARNING -> Res.string.editor_callout_type_warning
+        CalloutType.FAILURE -> Res.string.editor_callout_type_failure
+        CalloutType.DANGER -> Res.string.editor_callout_type_danger
+        CalloutType.BUG -> Res.string.editor_callout_type_bug
+        CalloutType.EXAMPLE -> Res.string.editor_callout_type_example
+        CalloutType.QUOTE -> Res.string.editor_callout_type_quote
+    }
+
 @Composable
-fun CalloutType.displayName(): String = when (this) {
-    CalloutType.NOTE -> stringResource(Res.string.editor_callout_type_note)
-    CalloutType.ABSTRACT -> stringResource(Res.string.editor_callout_type_abstract)
-    CalloutType.INFO -> stringResource(Res.string.editor_callout_type_info)
-    CalloutType.TODO -> stringResource(Res.string.editor_callout_type_todo)
-    CalloutType.TIP -> stringResource(Res.string.editor_callout_type_tip)
-    CalloutType.SUCCESS -> stringResource(Res.string.editor_callout_type_success)
-    CalloutType.QUESTION -> stringResource(Res.string.editor_callout_type_question)
-    CalloutType.WARNING -> stringResource(Res.string.editor_callout_type_warning)
-    CalloutType.FAILURE -> stringResource(Res.string.editor_callout_type_failure)
-    CalloutType.DANGER -> stringResource(Res.string.editor_callout_type_danger)
-    CalloutType.BUG -> stringResource(Res.string.editor_callout_type_bug)
-    CalloutType.EXAMPLE -> stringResource(Res.string.editor_callout_type_example)
-    CalloutType.QUOTE -> stringResource(Res.string.editor_callout_type_quote)
-}
+fun CalloutType.displayName(): String = stringResource(nameResource)
 
 fun CalloutType.icon(): DrawableResource = when (this) {
     CalloutType.NOTE -> Res.drawable.doc_add

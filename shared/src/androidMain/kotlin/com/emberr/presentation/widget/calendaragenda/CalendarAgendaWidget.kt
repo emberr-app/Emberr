@@ -70,6 +70,7 @@ import androidx.core.graphics.toColorInt
 import com.emberr.presentation.widget.previewCalendarAgendaContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.presentation.widget.widgetText
 
 private val chevronSize = 18.dp
 private val dayHighlightSize = 18.dp
@@ -202,7 +203,7 @@ internal fun CalendarAgendaWidgetBody(
 
                 Image(
                     provider = ImageProvider(R.drawable.ic_widget_chevron_left),
-                    contentDescription = "Previous month",
+                    contentDescription = widgetText(R.string.widget_previous_month),
                     colorFilter = ColorFilter.tint(secondaryTextColor),
                     modifier = GlanceModifier
                         .size(chevronSize)
@@ -215,7 +216,7 @@ internal fun CalendarAgendaWidgetBody(
 
                 Image(
                     provider = ImageProvider(R.drawable.ic_widget_chevron_right),
-                    contentDescription = "Next month",
+                    contentDescription = widgetText(R.string.widget_next_month),
                     colorFilter = ColorFilter.tint(secondaryTextColor),
                     modifier = GlanceModifier
                         .size(chevronSize)
@@ -311,7 +312,7 @@ private fun EventList(context: Context, content: CalendarAgendaWidgetContent?) {
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
             Text(
-                text = if (content == null) "Open Emberr to load events" else "No events this month",
+                text = if (content == null) widgetText(R.string.widget_open_emberr_to_load_events) else widgetText(R.string.widget_no_events_this_month),
                 maxLines = 2,
                 style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
             )
@@ -324,12 +325,12 @@ private fun EventList(context: Context, content: CalendarAgendaWidgetContent?) {
     LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
         headerSpaceItem(height = agendaListTopSpace)
         if (repeatingEvents.isNotEmpty()) {
-            item(itemId = repeatingHeaderItemId) { SectionHeader(label = "Repeating") }
+            item(itemId = repeatingHeaderItemId) { SectionHeader(label = widgetText(R.string.widget_repeating)) }
             items(items = repeatingEvents, itemId = { event -> "repeating/${event.blockId}".hashCode().toLong() }) { event ->
                 EventRow(context = context, event = event)
             }
             if (otherEvents.isNotEmpty()) {
-                item(itemId = otherEventsHeaderItemId) { SectionHeader(label = "Events") }
+                item(itemId = otherEventsHeaderItemId) { SectionHeader(label = widgetText(R.string.widget_events)) }
             }
         }
         items(items = otherEvents, itemId = { event -> "${event.blockId}/${event.occurrenceDate}".hashCode().toLong() }) { event ->

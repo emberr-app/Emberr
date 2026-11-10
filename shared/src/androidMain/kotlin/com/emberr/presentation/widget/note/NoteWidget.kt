@@ -74,6 +74,7 @@ import com.emberr.presentation.widget.previewNoteId
 import com.emberr.presentation.widget.previewNoteContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.presentation.widget.widgetText
 
 private const val maximumIndentationLevels = 4
 private const val indentationStepInDp = 12
@@ -130,7 +131,7 @@ class NoteWidget : GlanceAppWidget(), KoinComponent {
                 WidgetBody(
                     context = context,
                     chosenNoteId = previewNoteId,
-                    content = previewNoteContent,
+                    content = previewNoteContent(),
                     isNoteDeleted = false,
                     appWidgetId = INVALID_APPWIDGET_ID
                 )
@@ -210,7 +211,7 @@ internal fun WidgetBody(
     NoteSurface {
         when {
             chosenNoteId == null -> CenteredMessage(
-                message = "Tap to choose a note",
+                message = widgetText(R.string.widget_tap_to_choose_a_note),
                 tapAction = actionStartActivity(openPickerIntent(context, appWidgetId))
             )
 
@@ -220,7 +221,7 @@ internal fun WidgetBody(
             )
 
             content == null -> CenteredMessage(
-                message = "This note is no longer available. Tap to choose another",
+                message = widgetText(R.string.widget_note_no_longer_available),
                 tapAction = actionStartActivity(openPickerIntent(context, appWidgetId))
             )
 
@@ -236,13 +237,13 @@ internal fun WidgetBody(
 @Composable
 private fun DeletedNoteContent(title: String?, chooseAnotherNoteAction: Action) {
     WidgetDeletedState(
-        headerText = title ?: "Untitled",
+        headerText = title ?: widgetText(R.string.widget_untitled),
         headerStyle = TextStyle(
             color = secondaryTextColor,
             fontSize = 14.sp,
             textDecoration = TextDecoration.LineThrough
         ),
-        message = "This note was deleted. Tap to choose another",
+        message = widgetText(R.string.widget_note_deleted_choose_another),
         messageFontSize = 15.sp,
         modifier = GlanceModifier
             .fillMaxSize()
@@ -293,7 +294,7 @@ private fun NoteContent(
                     .thenClickable(openNoteAction)
             ) {
                 Text(
-                    text = "This note is empty",
+                    text = widgetText(R.string.widget_note_is_empty),
                     style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
                 )
             }
@@ -462,14 +463,14 @@ private fun LineMarker(marker: WidgetLineMarker) {
 
         WidgetLineMarker.UNCHECKED_BOX -> Image(
             provider = ImageProvider(R.drawable.ic_widget_checkbox_empty),
-            contentDescription = "Not done",
+            contentDescription = widgetText(R.string.widget_not_done),
             colorFilter = ColorFilter.tint(primaryTextColor),
             modifier = GlanceModifier.size(checklistBoxSize)
         )
 
         WidgetLineMarker.CHECKED_BOX -> Image(
             provider = ImageProvider(R.drawable.ic_widget_checkbox_filled),
-            contentDescription = "Done",
+            contentDescription = widgetText(R.string.widget_done),
             colorFilter = ColorFilter.tint(primaryTextColor),
             modifier = GlanceModifier.size(checklistBoxSize)
         )

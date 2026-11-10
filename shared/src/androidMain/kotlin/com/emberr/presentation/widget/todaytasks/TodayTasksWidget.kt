@@ -74,6 +74,7 @@ import org.koin.core.component.get
 import com.emberr.presentation.widget.previewTodayTasksContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.presentation.widget.widgetText
 
 private val checkboxTapWidth = 36.dp
 private val cardInset = 8.dp
@@ -184,9 +185,9 @@ internal fun TodayTasksWidgetBody(
                 ) {
                     Text(
                         text = if (content == null) {
-                            "Open Emberr to load today's tasks"
+                            widgetText(R.string.widget_open_emberr_to_load_todays_tasks)
                         } else {
-                            "Nothing planned for today"
+                            widgetText(R.string.widget_nothing_planned_for_today)
                         },
                         style = TextStyle(color = secondaryTextColor, fontSize = 14.sp)
                     )
@@ -217,7 +218,7 @@ internal fun TodayTasksWidgetBody(
                 verticalAlignment = Alignment.Vertical.CenterVertically
             ) {
                 Text(
-                    text = "Today's tasks",
+                    text = widgetText(R.string.widget_todays_tasks),
                     maxLines = 1,
                     style = TextStyle(
                         color = primaryTextColor,
@@ -286,7 +287,7 @@ private fun DoneCountPill(doneCount: Int, totalCount: Int) {
             .padding(1.dp)
     ) {
         Text(
-            text = "$doneCount of $totalCount done",
+            text = widgetText(R.string.widget_done_count_of_total, doneCount, totalCount),
             maxLines = 1,
             style = TextStyle(color = primaryTextColor, fontSize = 12.sp),
             modifier = GlanceModifier
