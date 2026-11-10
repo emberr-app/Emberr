@@ -53,6 +53,7 @@ import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.orHighContrastLine
+import com.emberr.presentation.shared.components.shownSpaceName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.pen_square
 import emberr.shared.generated.resources.plus
@@ -102,7 +103,7 @@ fun SpaceOptionsSheets(
     var showRenameSheet by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
-    val activeSpaceName = spaces.firstOrNull { it.spaceId == activeSpaceId }?.displayName.orEmpty()
+    val activeSpaceName = shownSpaceName(spaces.firstOrNull { it.spaceId == activeSpaceId }?.displayName.orEmpty())
 
     EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = stringResource(Res.string.space_spaces)) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 30.dp)) {
@@ -264,7 +265,7 @@ private fun SpaceReorderList(
     ) {
         displayedSpaces.forEachIndexed { index, space ->
             SpaceRow(
-                displayName = space.displayName,
+                displayName = shownSpaceName(space.displayName),
                 isActive = space.spaceId == activeSpaceId,
                 isBeingMoved = draggedFromIndex >= 0 && index == draggedToIndex
             )

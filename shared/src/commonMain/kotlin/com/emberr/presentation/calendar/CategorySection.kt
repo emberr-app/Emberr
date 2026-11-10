@@ -50,6 +50,8 @@ import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.shownCategoryName
+import com.emberr.presentation.shared.components.shownSpaceName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar_add
 import emberr.shared.generated.resources.calendar_add_category
@@ -102,6 +104,7 @@ fun CategorySection(
 ) {
     val noCategoryVisibilityKey = NO_CATEGORY_VISIBILITY_KEY
     var editorState by remember { mutableStateOf<CategoryEditorState?>(null) }
+    val shownNamesById = categories.associate { category -> category.id to shownCategoryName(category.name) }
 
     fun isNameTakenByAnotherCategory(state: CategoryEditorState?): Boolean =
         state != null && categories.any { category ->
@@ -116,7 +119,9 @@ fun CategorySection(
             if (id == null) {
                 onAddCategory(trimmedName, state.colorHex)
             } else {
-                onUpdateCategory(id, trimmedName, state.colorHex)
+                val savedName = categories.firstOrNull { it.id == id }?.name
+                val nameToSave = if (savedName != null && trimmedName == shownNamesById[id]) savedName else trimmedName
+                onUpdateCategory(id, nameToSave, state.colorHex)
             }
         }
     }
@@ -134,7 +139,7 @@ fun CategorySection(
                 onClick = {
                     editorState = CategoryEditorState(
                         categoryId = category.id,
-                        name = category.name,
+                        name = shownNamesById[category.id] ?: category.name,
                         colorHex = category.colorHex
                     )
                 },
@@ -186,7 +191,7 @@ fun CategorySection(
                 if (index > 0) SettingsDivider()
                 val spaceVisibilityKey = spaceVisibilityKeyFor(space.spaceId)
                 VisibilityToggleRow(
-                    label = space.displayName.trim().ifBlank { stringResource(Res.string.calendar_untitled_space) },
+                    label = shownSpaceName(space.displayName.trim().ifBlank { stringResource(Res.string.calendar_untitled_space) }),
                     isShown = spaceVisibilityKey !in hiddenCategoryVisibilityKeys,
                     onToggleShown = { onToggleCategoryVisibility(spaceVisibilityKey) }
                 )
@@ -274,7 +279,7 @@ private fun CategoryRow(
             Spacer(modifier = Modifier.width(6.dp))
 
             Text(
-                text = category.name,
+                text = shownCategoryName(category.name),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)

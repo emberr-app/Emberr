@@ -60,6 +60,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.presentation.shared.components.IconTooltipPosition
+import com.emberr.presentation.shared.components.shownSpaceName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.plus
 import kotlin.math.abs
@@ -224,7 +225,7 @@ private fun SpaceDotsRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         displayedSpaces.forEachIndexed { index, space ->
-            IconTooltip(text = space.displayName, position = IconTooltipPosition.Above) {
+            IconTooltip(text = shownSpaceName(space.displayName), position = IconTooltipPosition.Above) {
                 Box(
                     modifier = Modifier.width(DOT_SLOT_WIDTH).height(BAR_HEIGHT),
                     contentAlignment = Alignment.Center

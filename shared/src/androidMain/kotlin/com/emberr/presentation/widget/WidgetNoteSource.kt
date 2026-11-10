@@ -4,6 +4,7 @@ package com.emberr.presentation.widget
 import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.data.local.room.dao.SpaceDao
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.presentation.shared.components.loadShownSpaceName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -27,7 +28,7 @@ class WidgetNoteSource(
             noteDao.getAllNotesAcrossSpacesFlow(),
             spaceDao.getAllSpaces()
         ) { notes, spaces ->
-            val spaceNamesById = spaces.associate { space -> space.spaceId to space.displayName }
+            val spaceNamesById = spaces.associate { space -> space.spaceId to loadShownSpaceName(space.displayName) }
             val spacePositionsById = spaces.withIndex().associate { (position, space) -> space.spaceId to position }
             notes.map { note ->
                 SelectableWidgetNote(

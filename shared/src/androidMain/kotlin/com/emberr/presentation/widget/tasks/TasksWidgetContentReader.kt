@@ -8,6 +8,8 @@ import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.presentation.shared.components.loadNoteTitleNames
+import com.emberr.presentation.shared.components.loadShownSpaceName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -85,7 +87,7 @@ class TasksWidgetContentReader(
             tomorrow = getString(Res.string.widgets_tomorrow),
             yesterday = getString(Res.string.widgets_yesterday)
         )
-        val noteHeadingsById = taskHeadingsByNoteId(notesHoldingTasks, resolveSpaceNames(), labels.untitledNote)
+        val noteHeadingsById = taskHeadingsByNoteId(notesHoldingTasks, resolveSpaceNames(), labels.untitledNote, loadNoteTitleNames())
         val inboxNoteIds = findInboxNoteIds(noteTitlesById)
 
         val (unlabelled, labelled) = tasks.partition { task ->
@@ -158,7 +160,7 @@ class TasksWidgetContentReader(
 
     private suspend fun resolveSpaceNames(): Map<String, String> =
         try {
-            spaceDao.getAllSpacesOnce().associate { space -> space.spaceId to space.displayName }
+            spaceDao.getAllSpacesOnce().associate { space -> space.spaceId to loadShownSpaceName(space.displayName) }
         } catch (cause: Exception) {
             WidgetLog.e("Could not resolve space names for the task list", cause)
             emptyMap()

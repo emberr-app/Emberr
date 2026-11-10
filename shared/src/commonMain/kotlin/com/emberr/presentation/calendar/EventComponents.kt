@@ -94,6 +94,7 @@ import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.people.PersonView
+import com.emberr.presentation.shared.components.shownCategoryName
 import com.emberr.presentation.shared.editor.components.DesktopCursor
 import com.emberr.presentation.shared.editor.components.desktopPointerCursor
 import com.emberr.presentation.shared.components.IconTooltip
@@ -1075,7 +1076,7 @@ private fun CategoryChoiceChip(
 
     Box {
         EventEditorChip(
-            label = category?.name ?: stringResource(Res.string.calendar_no_category),
+            label = category?.let { shownCategoryName(it.name) } ?: stringResource(Res.string.calendar_no_category),
             dotColor = category?.colorHex?.toCategoryColor() ?: noCategoryColor,
             onClick = { showMenu = true }
         )
@@ -1460,7 +1461,7 @@ private fun EventViewFields(
             ) {
                 if (category != null) {
                     EventEditorChip(
-                        label = category.name,
+                        label = shownCategoryName(category.name),
                         dotColor = category.colorHex.toCategoryColor(),
                         opensMenu = false,
                         onClick = null

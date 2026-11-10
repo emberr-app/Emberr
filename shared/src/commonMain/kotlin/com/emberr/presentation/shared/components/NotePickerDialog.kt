@@ -24,7 +24,6 @@ import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.common_close
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.components_create_new_note
 import emberr.shared.generated.resources.components_link_to_note
 import emberr.shared.generated.resources.components_link_to_note_heading
@@ -95,7 +94,7 @@ fun NotePickerDialog(
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = note.title.ifEmpty { stringResource(Res.string.common_untitled) },
+                    text = shownNoteTitle(note.title),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,

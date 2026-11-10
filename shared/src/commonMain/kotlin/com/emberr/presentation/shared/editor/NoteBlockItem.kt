@@ -105,6 +105,7 @@ import com.emberr.domain.model.WatchlistBlock
 import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import com.emberr.presentation.shared.components.rememberNoteTitleNames
 import com.emberr.presentation.shared.editor.blockViews.callout.accentColor
 import com.emberr.presentation.shared.editor.blockViews.callout.displayName
 import com.emberr.presentation.shared.editor.formatting.HighlightColorCircles
@@ -405,7 +406,8 @@ fun NoteBlockItem(
             val linkColor = MaterialTheme.colorScheme.primary
             val fadedLinkColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             val inlineSpans = block.inlineSpansOrEmpty()
-            val noteTitlesById = remember(allLinkableNotes) { allLinkableNotes.associate { it.noteId to it.title } }
+            val noteTitleNames = rememberNoteTitleNames()
+            val noteTitlesById = remember(allLinkableNotes, noteTitleNames) { allLinkableNotes.associate { it.noteId to noteTitleNames.shown(it.title) } }
             val untitledNoteTitle = stringResource(Res.string.common_untitled)
             val richTextTransformation: VisualTransformation = remember(
                 block is CodeBlock, linkColor, fadedLinkColor, isDarkTheme, validNoteIds, inlineSpans, linkHoverState.hoveredLink, noteTitlesById, untitledNoteTitle

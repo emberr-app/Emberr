@@ -37,7 +37,7 @@
     <string name="home_sort_by">Sort by</string>
     <string name="home_empty_space_start_with">This space is empty. Start with</string>
     <string name="home_empty_space_a_new_note">a new note</string>
-    <string name="home_empty_space_or">or</string>
+    <string name="home_empty_space_note_or_folder">%1$s or %2$s</string>
     <string name="home_empty_space_a_folder">a folder</string>
     <string name="home_breadcrumb_home">Home</string>
     <string name="home_cover">Cover</string>

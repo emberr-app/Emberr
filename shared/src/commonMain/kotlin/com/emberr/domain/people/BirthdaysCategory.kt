@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
 const val BIRTHDAYS_CATEGORY_ID = "birthdays"
-private const val BIRTHDAYS_CATEGORY_DEFAULT_NAME = "Birthdays"
+const val BIRTHDAYS_CATEGORY_DEFAULT_NAME = "Birthdays"
 private const val BIRTHDAYS_CATEGORY_DEFAULT_COLOR_HEX = "#FFC6FF"
 
 fun birthdaysCategoryRowToSave(existingRow: CategoryEntity?, nowMillis: Long): CategoryEntity? = when {

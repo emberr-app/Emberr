@@ -3,15 +3,13 @@ package com.emberr.presentation.widget.notelist
 
 import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.presentation.shared.components.loadNoteTitleNames
 import com.emberr.presentation.widget.WidgetLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.common_untitled
-import org.jetbrains.compose.resources.getString
 
 private const val maximumNotesShown = 30
 private const val maximumCharactersPerTitle = 120
@@ -38,12 +36,12 @@ class NoteListWidgetContentReader(
         }
 
     suspend fun buildContent(spaceId: String, notes: List<NoteMetadataEntity>): NoteListWidgetContent {
-        val untitledNoteTitle = getString(Res.string.common_untitled)
+        val noteTitleNames = loadNoteTitleNames()
         return NoteListWidgetContent(
             notes = notes.filter { note -> note.spaceId == spaceId }.take(maximumNotesShown).map { note ->
                 NoteListWidgetRow(
                     noteId = note.noteId,
-                    title = note.title.trim().take(maximumCharactersPerTitle).ifBlank { untitledNoteTitle },
+                    title = noteTitleNames.shown(note.title.trim()).take(maximumCharactersPerTitle),
                     snippet = note.snippet.trim().take(maximumCharactersPerSnippet),
                     icon = note.icon?.trim()?.takeIf { it.isNotEmpty() }
                 )

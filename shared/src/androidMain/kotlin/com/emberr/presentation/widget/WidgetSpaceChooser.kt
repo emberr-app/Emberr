@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.presentation.shared.components.orHighContrastLine
+import com.emberr.presentation.shared.components.shownSpaceName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.widgets_choose_a_space
 import emberr.shared.generated.resources.widgets_follow_the_app
@@ -56,7 +57,7 @@ fun WidgetSpaceChooser(
 
             items(items = spaces, key = { space -> space.spaceId }) { space ->
                 SpaceChooserRow(
-                    title = space.displayName,
+                    title = shownSpaceName(space.displayName),
                     subtitle = if (space.spaceId == activeSpaceId) stringResource(Res.string.widgets_current_space) else null,
                     onClick = { onSpaceChosen(space.spaceId) }
                 )

@@ -343,20 +343,20 @@ private fun WatchlistViewTab(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = view.name,
+                text = view.shownName(),
                 style = if (isDesktopPlatform) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelSmall,
                 color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 maxLines = 1
             )
         }
-        MovieMenu(expanded = isMenuOpen, title = view.name, onDismiss = { isMenuOpen = false }) { closeAnd ->
+        MovieMenu(expanded = isMenuOpen, title = view.shownName(), onDismiss = { isMenuOpen = false }) { closeAnd ->
             MovieMenuLayer(
                 title = stringResource(Res.string.movie_watchlist_rename_view),
                 showsCloseButton = false,
                 anchor = { openLayer -> MovieMenuOption(label = stringResource(Res.string.movie_watchlist_rename), icon = Res.drawable.pen, onClick = openLayer) }
             ) { closeLayerAnd ->
                 WatchlistRenameViewPage(
-                    currentName = view.name,
+                    currentName = view.shownName(),
                     onCancel = { closeLayerAnd { } },
                     onRename = { name -> closeLayerAnd { closeAnd { onRename(name) } } }
                 )

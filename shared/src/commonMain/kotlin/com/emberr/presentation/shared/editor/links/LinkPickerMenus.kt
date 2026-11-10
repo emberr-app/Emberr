@@ -46,6 +46,7 @@ import com.emberr.presentation.shared.components.emberrControlContainerColor
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.rememberNoteTitleNames
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
@@ -60,7 +61,6 @@ import com.emberr.presentation.shared.editor.slash.SlashMenuItemData
 import com.emberr.presentation.shared.editor.slash.SlashMenuList
 import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
 import emberr.shared.generated.resources.common_back
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.editor_back_to_commands
 import emberr.shared.generated.resources.editor_block_link_to_canvas
 import emberr.shared.generated.resources.editor_block_link_to_database
@@ -133,9 +133,9 @@ fun NoteLinkMenuContent(
     }
 
     val createNewNoteLabel = stringResource(Res.string.editor_create_new_note)
-    val untitledLabel = stringResource(Res.string.common_untitled)
+    val noteTitleNames = rememberNoteTitleNames()
     val newNoteForQueryLabel = stringResource(Res.string.editor_new_note_named, query)
-    val entries = remember(query, filteredNotes, createNewNoteLabel, untitledLabel, newNoteForQueryLabel) {
+    val entries = remember(query, filteredNotes, createNewNoteLabel, noteTitleNames, newNoteForQueryLabel) {
         buildList {
             add(
                 SlashMenuItemData(createNewNoteLabel, Res.drawable.doc_text_plus) {
@@ -144,7 +144,7 @@ fun NoteLinkMenuContent(
             )
             filteredNotes.forEach { note ->
                 val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Drawable(Res.drawable.doc_text)
-                add(SlashMenuItemData(note.title.ifEmpty { untitledLabel }, icon) { onNoteSelected(note.noteId) })
+                add(SlashMenuItemData(noteTitleNames.shown(note.title), icon) { onNoteSelected(note.noteId) })
             }
             if (query.isNotBlank()) {
                 add(
@@ -265,10 +265,10 @@ fun DatabaseLinkMenuContent(
     val databases by produceState(initialValue = emptyList<LinkableDatabase>()) { value = loadDatabases() }
 
     val untitledDatabaseLabel = stringResource(Res.string.editor_untitled_database)
-    val untitledLabel = stringResource(Res.string.common_untitled)
+    val noteTitleNames = rememberNoteTitleNames()
     val databaseLabels = databases.map { database ->
         val databaseTitle = database.title.ifBlank { untitledDatabaseLabel }
-        database.databaseId to stringResource(Res.string.editor_database_in_note, databaseTitle, database.noteTitle.ifBlank { untitledLabel })
+        database.databaseId to stringResource(Res.string.editor_database_in_note, databaseTitle, noteTitleNames.shown(database.noteTitle))
     }
     val entries = remember(query, databaseLabels) {
         databaseLabels

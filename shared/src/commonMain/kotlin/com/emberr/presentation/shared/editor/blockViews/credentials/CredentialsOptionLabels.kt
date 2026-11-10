@@ -47,3 +47,7 @@ internal fun CredentialFieldKind.copyDescription(): String = when (this) {
     CredentialFieldKind.PASSWORD -> stringResource(Res.string.credentials_copy_password)
     CredentialFieldKind.NOTE -> stringResource(Res.string.credentials_copy_note)
 }
+
+@Composable
+internal fun shownCredentialLabel(storedLabel: String): String =
+    CredentialFieldKind.entries.firstOrNull { it.defaultLabel() == storedLabel }?.displayLabel() ?: storedLabel

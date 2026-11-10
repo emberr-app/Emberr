@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.domain.model.CredentialsEdit
+import com.emberr.presentation.shared.components.shownNoteTitle
 import com.emberr.presentation.shared.editor.centeredWithMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -827,7 +828,7 @@ fun NoteScreen(
                 }
 
                 if (customHeader == null) EmberrTopHeaderBar(
-                    title = noteTitle.ifBlank { stringResource(Res.string.common_untitled) },
+                    title = shownNoteTitle(noteTitle),
                     titleVisibility = if (isEditingTemplate) 0f else titleCollapseProgress,
                     titleColor = topBarContentColor ?: MaterialTheme.colorScheme.onSurface,
                     onTitleClick = onCollapsedTitleClick,
@@ -1189,7 +1190,7 @@ private fun NoteHeader(
                     it.copy(fontSize = it.fontSize * 1.5f, lineHeight = it.lineHeight * 1.2f)
                 }
                 NoteTitleField(
-                    noteTitle = noteTitle,
+                    noteTitle = if (noteTitle.isBlank()) noteTitle else shownNoteTitle(noteTitle),
                     onTitleChange = onTitleChange,
                     style = titleStyle,
                     modifier = Modifier.fillMaxWidth()

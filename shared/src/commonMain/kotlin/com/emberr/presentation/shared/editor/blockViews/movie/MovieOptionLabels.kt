@@ -7,6 +7,8 @@ import com.emberr.domain.model.WatchlistFilterCondition
 import com.emberr.domain.model.WatchlistFilterField
 import com.emberr.domain.model.WatchlistSortKey
 import com.emberr.domain.model.WatchlistView
+import com.emberr.domain.model.WatchlistViewSettings
+import com.emberr.presentation.shared.components.shownViewName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.movie_date_added
 import emberr.shared.generated.resources.movie_filter_condition_after
@@ -120,3 +122,7 @@ internal fun WatchlistFilterCondition.displayName(): String = when (this) {
     WatchlistFilterCondition.STILL_AIRING -> stringResource(Res.string.movie_filter_condition_still_airing)
     WatchlistFilterCondition.ENDED -> stringResource(Res.string.movie_filter_condition_ended)
 }
+
+@Composable
+internal fun WatchlistViewSettings.shownName(): String =
+    shownViewName(name, WatchlistView.entries.associate { it.label to it.displayName() })

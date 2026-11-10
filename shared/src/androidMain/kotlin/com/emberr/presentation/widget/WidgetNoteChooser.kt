@@ -54,6 +54,7 @@ import com.emberr.presentation.settings.SettingsRowIcon
 import com.emberr.presentation.settings.settingsRowSize
 import com.emberr.presentation.shared.components.EmberrSearchTextField
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
+import com.emberr.presentation.shared.components.shownNoteTitle
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -65,7 +66,6 @@ import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.notes2
 import emberr.shared.generated.resources.search
 import org.jetbrains.compose.resources.painterResource
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.widgets_favorites
 import emberr.shared.generated.resources.widgets_other
 import emberr.shared.generated.resources.widgets_no_notes_yet
@@ -266,9 +266,8 @@ private fun NoteChooserRow(note: NoteMetadataEntity, onClick: () -> Unit) {
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            val untitledNoteTitle = stringResource(Res.string.common_untitled)
             Text(
-                text = note.title.trim().ifBlank { untitledNoteTitle },
+                text = shownNoteTitle(note.title.trim()),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,

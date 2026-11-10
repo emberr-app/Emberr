@@ -20,6 +20,8 @@ import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.domain.reminders.scheduleEventReminder
+import com.emberr.presentation.shared.components.loadNoteTitleNames
+import com.emberr.presentation.shared.components.loadShownSpaceName
 import com.emberr.presentation.shared.editor.FocusRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -112,8 +114,9 @@ class TasksViewModel(
         combine(notesHoldingTasks, spaceRepository.observeSpaces()) { notes, spaces ->
             taskHeadingsByNoteId(
                 notes = notes,
-                spaceNamesById = spaces.associate { it.spaceId to it.displayName },
-                untitledNoteHeading = getString(Res.string.overview_tasks_note)
+                spaceNamesById = spaces.associate { it.spaceId to loadShownSpaceName(it.displayName) },
+                untitledNoteHeading = getString(Res.string.overview_tasks_note),
+                noteTitleNames = loadNoteTitleNames()
             )
         }
             .catch { cause -> cause.printStackTrace() }

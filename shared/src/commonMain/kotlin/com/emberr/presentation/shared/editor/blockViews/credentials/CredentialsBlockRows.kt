@@ -343,7 +343,7 @@ private fun CredentialFieldRow(
 private fun CredentialFieldLabel(field: CredentialField, style: TextStyle) {
     val kindLabel = field.kind.displayLabel()
     Text(
-        text = field.label.ifBlank { kindLabel },
+        text = shownCredentialLabel(field.label).ifBlank { kindLabel },
         style = style,
         color = MaterialTheme.colorScheme.outline,
         maxLines = 1,

@@ -41,6 +41,7 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.shownChatTitle
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.ai_chat_name
 import emberr.shared.generated.resources.ai_chat_options
@@ -106,7 +107,7 @@ internal fun ChatSessionRow(
 
     if (isDesktopPlatform) {
         EmberrDesktopMenuOption(
-            label = session.title,
+            label = shownChatTitle(session.title),
             subtitle = session.messages.lastOrNull()?.text.orEmpty(),
             isSelected = isActive,
             trailing = chatOptionsButton,
@@ -114,7 +115,7 @@ internal fun ChatSessionRow(
         )
     } else {
         EmberrBottomSheetOption(
-            label = session.title,
+            label = shownChatTitle(session.title),
             subtitle = session.messages.lastOrNull()?.text.orEmpty(),
             isSelected = isActive,
             labelMaxLines = 1,
@@ -134,7 +135,8 @@ internal fun ChatSessionRow(
     }
 
     if (showRenameDialog) {
-        var titleInput by remember { mutableStateOf(session.title) }
+        val shownTitle = shownChatTitle(session.title)
+        var titleInput by remember { mutableStateOf(shownTitle) }
         EmberrAlertDialog(
             onDismissRequest = { showRenameDialog = false },
             title = stringResource(Res.string.ai_rename_chat)

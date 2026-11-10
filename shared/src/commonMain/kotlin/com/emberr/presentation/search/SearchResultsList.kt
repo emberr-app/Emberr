@@ -55,6 +55,7 @@ import com.emberr.presentation.people.shownPersonName
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
+import com.emberr.presentation.shared.components.shownNoteTitle
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar_day
 import emberr.shared.generated.resources.pen
@@ -63,7 +64,6 @@ import emberr.shared.generated.resources.trash
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.search_daily
 import emberr.shared.generated.resources.search_events
 import emberr.shared.generated.resources.search_in_parent
@@ -264,7 +264,7 @@ private fun SearchResultOptionsSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = result.note.title.ifBlank { stringResource(Res.string.common_untitled) }
+        title = shownNoteTitle(result.note.title)
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             if (result.canBeRenamed) {
@@ -469,7 +469,7 @@ private fun SearchResultRow(
     // A daily note is stored with the title "Daily: <date>", which the calendar chip below already
     // says - so the title line shows the bare date and the chip carries the "Daily" part.
     val dailyDateString = note.dateString?.takeIf { note.isDaily }
-    val titleText = if (result.isPinnedBlocks) stringResource(Res.string.search_pinned) else dailyDateString ?: note.title.ifBlank { stringResource(Res.string.common_untitled) }
+    val titleText = if (result.isPinnedBlocks) stringResource(Res.string.search_pinned) else dailyDateString ?: shownNoteTitle(note.title)
 
     Column(
         modifier = Modifier

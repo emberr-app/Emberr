@@ -56,6 +56,7 @@ import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.shownBookmarkTitle
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.presentation.shared.editor.links.rememberWebLinkActions
 import dev.chrisbanes.haze.HazeState
@@ -166,7 +167,7 @@ fun BookmarkBlockView(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = block.title ?: block.url,
+                            text = block.title?.let { shownBookmarkTitle(it) } ?: block.url,
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface,
