@@ -19,6 +19,9 @@ import com.emberr.presentation.shared.components.MorePeopleAvatar
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.presentation.shared.components.PersonOption
 import com.emberr.presentation.shared.components.PersonPill
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_with
+import org.jetbrains.compose.resources.stringResource
 
 internal val EventChipAvatarSize = 16.dp
 private val EventChipAvatarOverlap = 5.dp
@@ -41,7 +44,7 @@ internal fun EventPeopleRow(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text = "With",
+            text = stringResource(Res.string.calendar_with),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.align(Alignment.CenterVertically).padding(end = 2.dp)

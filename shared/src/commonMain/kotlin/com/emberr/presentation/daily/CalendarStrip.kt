@@ -43,6 +43,12 @@ import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.chevron_right
+import emberr.shared.generated.resources.daily_go_to_today
+import emberr.shared.generated.resources.daily_next
+import emberr.shared.generated.resources.daily_next_month
+import emberr.shared.generated.resources.daily_previous
+import emberr.shared.generated.resources.daily_previous_month
+import emberr.shared.generated.resources.daily_today
 import kotlinx.coroutines.delay
 import kotlinx.datetime.*
 import kotlinx.datetime.number
@@ -52,6 +58,7 @@ import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CollapsedWeekStrip(
@@ -259,7 +266,7 @@ private fun WeekStripChip(
     ) {
         if (isToday) {
             Text(
-                text = "Today",
+                text = stringResource(Res.string.daily_today),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = activeFontWeight,
                 color = primaryTextColor
@@ -299,9 +306,9 @@ fun BottomSheetMonthCalendar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconTooltip(text = "Previous month") {
+            IconTooltip(text = stringResource(Res.string.daily_previous_month)) {
                 IconButton(onClick = { currentMonth = currentMonth.minus(1, DateTimeUnit.MONTH) }) {
-                    Icon(painterResource(Res.drawable.chevron_left), contentDescription = "Previous", tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(painterResource(Res.drawable.chevron_left), contentDescription = stringResource(Res.string.daily_previous), tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
 
@@ -311,15 +318,15 @@ fun BottomSheetMonthCalendar(
                     style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Go to Today",
+                    text = stringResource(Res.string.daily_go_to_today),
                     style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable { onGoToToday() }.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
 
-            IconTooltip(text = "Next month") {
+            IconTooltip(text = stringResource(Res.string.daily_next_month)) {
                 IconButton(onClick = { currentMonth = currentMonth.plus(1, DateTimeUnit.MONTH) }) {
-                    Icon(painterResource(Res.drawable.chevron_right), contentDescription = "Next", tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(painterResource(Res.drawable.chevron_right), contentDescription = stringResource(Res.string.daily_next), tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }

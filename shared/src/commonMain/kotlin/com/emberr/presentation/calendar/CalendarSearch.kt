@@ -1,5 +1,6 @@
 package com.emberr.presentation.calendar
 
+import androidx.compose.runtime.Composable
 import kotlinx.datetime.LocalDate
 
 private const val BIRTHDAYS_SEARCH_WORD = "Birthdays"
@@ -40,6 +41,7 @@ data class CalendarEventSearchResult(
     val category: CalendarCategory?
 )
 
+@Composable
 fun CalendarEvent.searchResultDateLabel(usesTwentyFourHourClock: Boolean): String =
     "${formatFullDate(LocalDate.parse(dateString))} · ${timeOfDayLabel(usesTwentyFourHourClock)}"
 

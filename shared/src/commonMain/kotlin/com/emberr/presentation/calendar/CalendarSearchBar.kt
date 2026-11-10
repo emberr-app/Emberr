@@ -45,9 +45,14 @@ import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_no_matching_events
+import emberr.shared.generated.resources.calendar_past
+import emberr.shared.generated.resources.calendar_repeats
+import emberr.shared.generated.resources.calendar_untitled_event
 import emberr.shared.generated.resources.refresh_cw
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private val CalendarSearchBarReservedHeight = EXPANDED_BOTTOM_BAR_PILL_HEIGHT + BOTTOM_BAR_BOTTOM_PADDING
 
@@ -83,7 +88,7 @@ internal fun CalendarSearchResultsList(
         when {
             results == null -> Unit
             results.isEmpty -> Text(
-                text = "No matching events found.",
+                text = stringResource(Res.string.calendar_no_matching_events),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
@@ -104,7 +109,7 @@ internal fun CalendarSearchResultsList(
                 if (results.pastEvents.isNotEmpty()) {
                     item(key = "past_header") {
                         Text(
-                            text = "Past",
+                            text = stringResource(Res.string.calendar_past),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(start = 4.dp, top = 16.dp)
@@ -179,7 +184,7 @@ private fun CalendarSearchResultRow(
         )
         Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(
-                text = highlightMatches(event.text.ifBlank { "Untitled event" }, query, highlightStyle),
+                text = highlightMatches(event.text.ifBlank { stringResource(Res.string.calendar_untitled_event) }, query, highlightStyle),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -199,7 +204,7 @@ private fun CalendarSearchResultRow(
         if (event.recurrenceRule != null) {
             Icon(
                 painter = painterResource(Res.drawable.refresh_cw),
-                contentDescription = "Repeats",
+                contentDescription = stringResource(Res.string.calendar_repeats),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.size(12.dp)
             )

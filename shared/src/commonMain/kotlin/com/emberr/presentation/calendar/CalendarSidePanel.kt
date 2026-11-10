@@ -51,6 +51,12 @@ import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.ui.theme.LocalFirstDayOfWeek
 import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_categories
+import emberr.shared.generated.resources.calendar_next_month
+import emberr.shared.generated.resources.calendar_no_category_title
+import emberr.shared.generated.resources.calendar_previous_month
+import emberr.shared.generated.resources.calendar_spaces
+import emberr.shared.generated.resources.calendar_untitled_space
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.chevron_right
 import kotlinx.datetime.DateTimeUnit
@@ -61,6 +67,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.stringResource
 
 internal val CalendarSidePanelWidth = 304.dp
 internal val CalendarSidePanelContentGap = 12.dp
@@ -109,7 +116,7 @@ internal fun CalendarSidePanel(
                 onDateClick = onDateClick
             )
 
-            SidePanelSectionTitle(title = "Categories")
+            SidePanelSectionTitle(title = stringResource(Res.string.calendar_categories))
             categories.forEach { category ->
                 SidePanelVisibilityRow(
                     label = category.name,
@@ -119,18 +126,18 @@ internal fun CalendarSidePanel(
                 )
             }
             SidePanelVisibilityRow(
-                label = "No Category",
+                label = stringResource(Res.string.calendar_no_category_title),
                 color = MaterialTheme.colorScheme.outline,
                 isShown = NO_CATEGORY_VISIBILITY_KEY !in hiddenCategoryVisibilityKeys,
                 onClick = { onToggleVisibility(NO_CATEGORY_VISIBILITY_KEY) }
             )
 
             if (keepsSpacesSectionShown && spaces.isNotEmpty()) {
-                SidePanelSectionTitle(title = "Spaces")
+                SidePanelSectionTitle(title = stringResource(Res.string.calendar_spaces))
                 spaces.forEach { space ->
                     val spaceVisibilityKey = spaceVisibilityKeyFor(space.spaceId)
                     SidePanelVisibilityRow(
-                        label = space.displayName.trim().ifBlank { "Untitled space" },
+                        label = space.displayName.trim().ifBlank { stringResource(Res.string.calendar_untitled_space) },
                         color = MaterialTheme.colorScheme.outline,
                         isShown = spaceVisibilityKey !in hiddenCategoryVisibilityKeys,
                         onClick = { onToggleVisibility(spaceVisibilityKey) }
@@ -171,13 +178,13 @@ private fun MiniMonthCalendar(
             )
             MiniMonthArrowButton(
                 icon = painterResource(Res.drawable.chevron_left),
-                tooltip = "Previous month",
+                tooltip = stringResource(Res.string.calendar_previous_month),
                 onClick = { shownMonth = shownMonth.plus(-1, DateTimeUnit.MONTH) }
             )
             Spacer(modifier = Modifier.width(4.dp))
             MiniMonthArrowButton(
                 icon = painterResource(Res.drawable.chevron_right),
-                tooltip = "Next month",
+                tooltip = stringResource(Res.string.calendar_next_month),
                 onClick = { shownMonth = shownMonth.plus(1, DateTimeUnit.MONTH) }
             )
         }
