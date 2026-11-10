@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">Введіть / для команд...</string>
+    <string name="note_copied_to_clipboard">Скопійовано в буфер обміну</string>
+    <string name="note_copied_as_markdown">Скопійовано як Markdown</string>
+    <string name="note_options">Параметри</string>
+    <string name="note_more_options">Інші параметри</string>
+    <string name="note_choose_icon">Вибрати значок</string>
+    <string name="note_search_emojis">Шукати емодзі</string>
+    <string name="note_no_emojis_found">Емодзі не знайдено</string>
+    <string name="note_editing_template">Редагування шаблону</string>
+    <string name="note_icon_options">Параметри значка</string>
+    <string name="note_change_icon">Змінити значок</string>
+    <string name="note_add_icon">Додати значок</string>
+    <string name="note_remove_icon">Прибрати значок</string>
+    <string name="note_cover_options">Параметри обкладинки</string>
+    <string name="note_upload_cover">Завантажити обкладинку</string>
+    <string name="note_remove_cover">Прибрати обкладинку</string>
+    <string name="note_hide_word_count">Сховати кількість слів</string>
+    <string name="note_show_word_count">Показати кількість слів</string>
+    <string name="note_alignment">Вирівнювання</string>
+    <string name="note_note_width">Ширина нотатки</string>
+    <string name="note_unfavorite">Прибрати з вибраного</string>
+    <string name="note_favorite">Додати у вибране</string>
+    <string name="note_open_as_sticky_note">Відкрити як стікер</string>
+    <string name="note_export_note">Експортувати нотатку</string>
+    <string name="note_copy_text">Копіювати текст</string>
+    <string name="note_copy_as_markdown">Копіювати як Markdown</string>
+    <string name="note_download_markdown">Завантажити .md</string>
+    <string name="note_download_pdf">Завантажити PDF</string>
+    <string name="note_move_to_trash">Перемістити в кошик</string>
+    <string name="note_width_narrow">Вузька</string>
+    <string name="note_width_full">Повна</string>
+    <string name="note_align_left">Ліворуч</string>
+    <string name="note_align_center">По центру</string>
+    <string name="note_align_right">Праворуч</string>
+    <string name="note_align_justify">За шириною</string>
+    <string name="note_note_options">Параметри нотатки</string>
+    <string name="note_export_options">Параметри експорту</string>
+    <string name="note_paste_image_link">Вставте посилання на зображення</string>
+    <string name="note_cover_image">Зображення обкладинки</string>
+    <string name="note_drag_image_to_reposition">Перетягніть зображення, щоб змінити положення</string>
+    <string name="note_save_position">Зберегти положення</string>
+    <string name="note_reposition">Змінити положення</string>
+    <string name="note_collapse_panel">Згорнути панель</string>
+    <string name="note_expand_panel">Розгорнути панель</string>
+    <plurals name="note_word_count">
+        <item quantity="one">%1$d слово</item>
+        <item quantity="few">%1$d слова</item>
+        <item quantity="many">%1$d слів</item>
+        <item quantity="other">%1$d слова</item>
+    </plurals>
+</resources>

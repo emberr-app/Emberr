@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Emberr öffnen</string>
+    <string name="desktop_tray_close_window">Fenster schließen</string>
+    <string name="desktop_tray_quit">Beenden</string>
+    <string name="desktop_sticky_note">Haftnotiz</string>
+    <string name="desktop_select_image">Bild auswählen</string>
+    <string name="desktop_select_document">Dokument auswählen</string>
+    <string name="desktop_file_not_found_message">Diese Datei ist auf diesem Gerät nicht mehr verfügbar.</string>
+    <string name="desktop_file_not_found_title">Datei nicht gefunden</string>
+    <string name="desktop_open_file_failed">Datei konnte nicht geöffnet werden: %1$s</string>
+    <string name="desktop_error">Fehler</string>
+    <string name="desktop_backup_only_on_android_message">Automatische Backups im Hintergrund gibt es derzeit nur in der Android-App. Du kannst aber jederzeit die Schaltfläche „Backup exportieren“ nutzen!</string>
+    <string name="desktop_backup_only_on_android_title">Desktop-Funktion</string>
+    <string name="desktop_update_available">Update verfügbar</string>
+    <string name="desktop_update_available_message">Emberr %1$s ist verfügbar. Du nutzt %2$s. Das Update wird im Hintergrund geladen, während du weiterarbeitest.</string>
+    <string name="desktop_update_download">Herunterladen</string>
+    <string name="desktop_update_ready_to_install">Update bereit zur Installation</string>
+    <string name="desktop_update_ready_message">Starte Emberr neu, um Version %1$s zu nutzen. Wenn du „Später“ wählst, wird das Update beim nächsten Öffnen von Emberr verwendet.</string>
+    <string name="desktop_update_restart">Neu starten</string>
+    <string name="desktop_update_failed">Emberr konnte nicht aktualisiert werden</string>
+    <string name="desktop_update_later">Später</string>
+    <string name="desktop_ok">OK</string>
+    <string name="desktop_new_note_in_folder">Neue Notiz im Ordner</string>
+    <string name="desktop_new_note_here">Neue Notiz hier</string>
+    <string name="desktop_rename_folder">Ordner umbenennen</string>
+    <string name="desktop_add_subfolder">Unterordner hinzufügen</string>
+    <string name="desktop_rename_note">Notiz umbenennen</string>
+    <string name="desktop_open_in_split_view">In geteilter Ansicht öffnen</string>
+    <string name="desktop_toggle_section">%1$s ein-/ausklappen</string>
+    <string name="desktop_empty_space">Dieser Bereich ist leer.</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">Beginne mit %1$s oder %2$s</string>
+    <string name="desktop_empty_space_a_note">einer Notiz</string>
+    <string name="desktop_create_space">Bereich erstellen</string>
+    <string name="desktop_add_space">Bereich hinzufügen</string>
+    <string name="desktop_space_options">Bereichsoptionen</string>
+    <string name="desktop_close_pane">Spalte schließen</string>
+    <string name="desktop_close_this_screen">Diese Ansicht schließen</string>
+    <string name="desktop_drag_to_swap_screens">Ziehen, um Ansichten zu tauschen</string>
+    <string name="desktop_search_no_match">Keine Notizen, Termine oder Personen passen zu „%1$s“</string>
+    <string name="desktop_hide_sidebar">Seitenleiste ausblenden</string>
+    <string name="desktop_collapse_sidebar">Seitenleiste einklappen</string>
+    <string name="desktop_select_a_note">Wähle eine Notiz in der Seitenleiste aus</string>
+    <string name="desktop_folder">Ordner</string>
+    <string name="desktop_sync">Synchronisieren</string>
+</resources>

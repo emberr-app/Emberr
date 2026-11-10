@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Назад</string>
+    <string name="common_cancel">Отмена</string>
+    <string name="common_save">Сохранить</string>
+    <string name="common_close">Закрыть</string>
+    <string name="common_delete">Удалить</string>
+    <string name="common_on">Вкл.</string>
+    <string name="common_off">Выкл.</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">Без названия</string>
+    <string name="common_color_yellow">Жёлтый</string>
+    <string name="common_color_lime">Лаймовый</string>
+    <string name="common_color_grey">Серый</string>
+    <string name="common_color_red">Красный</string>
+    <string name="common_color_blue">Синий</string>
+    <string name="common_color_green">Зелёный</string>
+    <string name="common_color_orange">Оранжевый</string>
+    <string name="common_color_pink">Розовый</string>
+    <string name="common_color_purple">Фиолетовый</string>
+    <string name="common_create">Создать</string>
+    <string name="common_more">Ещё</string>
+</resources>

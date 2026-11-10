@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Importuj z</string>
+    <string name="import_text_and_markdown">Tekst i Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Działa też z notatkami z Obsidian i Bear.\nNiektóre funkcje Obsidian mogą nie zaimportować się w pełni.</string>
+
+    <string name="import_button">Importuj</string>
+    <string name="import_done">Gotowe</string>
+    <string name="import_stop">Zatrzymaj import</string>
+    <string name="import_or_drop_here">lub upuść tutaj</string>
+    <string name="import_choose_again_hint_desktop">Kliknij, aby wybrać ponownie, lub upuść tutaj.</string>
+    <string name="import_choose_again_hint_touch">Dotknij, aby wybrać ponownie.</string>
+    <string name="import_stopping">Zatrzymywanie i usuwanie zaimportowanych elementów…</string>
+    <string name="import_stopped">Import zatrzymany</string>
+    <string name="import_nothing_added">Nic nie zostało dodane.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="one">%1$d przestrzeń</item>
+        <item quantity="few">%1$d przestrzenie</item>
+        <item quantity="many">%1$d przestrzeni</item>
+        <item quantity="other">%1$d przestrzeni</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="one">%1$d notatka</item>
+        <item quantity="few">%1$d notatki</item>
+        <item quantity="many">%1$d notatek</item>
+        <item quantity="other">%1$d notatki</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="one">%1$d folder</item>
+        <item quantity="few">%1$d foldery</item>
+        <item quantity="many">%1$d folderów</item>
+        <item quantity="other">%1$d folderu</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="one">%1$d załącznik</item>
+        <item quantity="few">%1$d załączniki</item>
+        <item quantity="many">%1$d załączników</item>
+        <item quantity="other">%1$d załącznika</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Importuj kopię zapasową bez zastępowania obecnych notatek.</string>
+    <string name="import_emberr_copying_media">Kopiowanie multimediów %1$d z %2$d…</string>
+    <string name="import_emberr_getting_ready">Przygotowywanie…</string>
+    <string name="import_emberr_saving">Zapisywanie importu…</string>
+    <string name="import_emberr_failed">Import nie powiódł się</string>
+    <string name="import_emberr_choose_backup_file">Wybierz plik kopii zapasowej</string>
+    <string name="import_emberr_choose_backup_hint">Plik .emberr z Eksportuj kopię zapasową</string>
+    <string name="import_emberr_reading_backup">Odczytywanie kopii zapasowej…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Wybierz inny plik</string>
+    <string name="import_emberr_spaces_to_import">Przestrzenie do zaimportowania</string>
+    <string name="import_emberr_choose_backup_first">Najpierw wybierz kopię zapasową</string>
+    <string name="import_emberr_daily_notes">Notatki dzienne</string>
+    <string name="import_emberr_calendar">Kalendarz</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Dodano notatki dzienne i wydarzenia z kalendarza</string>
+    <string name="import_emberr_added_daily_notes">Dodano notatki dzienne</string>
+    <string name="import_emberr_added_calendar">Dodano wydarzenia z kalendarza</string>
+    <string name="import_emberr_finished">Import zakończony</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="one">Zaimportowano %1$d przestrzeń</item>
+        <item quantity="few">Zaimportowano %1$d przestrzenie</item>
+        <item quantity="many">Zaimportowano %1$d przestrzeni</item>
+        <item quantity="other">Zaimportowano %1$d przestrzeni</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">Nie znaleziono %1$d pliku multimediów w kopii zapasowej, więc będzie oznaczony jako brakujący.</item>
+        <item quantity="few">Nie znaleziono %1$d plików multimediów w kopii zapasowej, więc będą oznaczone jako brakujące.</item>
+        <item quantity="many">Nie znaleziono %1$d plików multimediów w kopii zapasowej, więc będą oznaczone jako brakujące.</item>
+        <item quantity="other">Nie znaleziono %1$d pliku multimediów w kopii zapasowej, więc będą oznaczone jako brakujące.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Nieznany błąd</string>
+    <string name="import_emberr_picker_title">Wybierz kopię zapasową Emberr</string>
+
+    <string name="import_markdown_subtitle">Zamień pliki .md, .txt i .canvas albo plik .zip z folderami na notatki Emberr.</string>
+    <string name="import_markdown_copying_file">Kopiowanie %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">Importowanie notatek: %1$d z %2$d…</item>
+        <item quantity="few">Importowanie notatek: %1$d z %2$d…</item>
+        <item quantity="many">Importowanie notatek: %1$d z %2$d…</item>
+        <item quantity="other">Importowanie notatek: %1$d z %2$d…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Wybierz pliki lub .zip</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas lub .zip</string>
+    <string name="import_markdown_reading_files">Odczytywanie plików…</string>
+    <string name="import_markdown_could_not_read">Nie udało się odczytać tych plików. %1$s</string>
+    <string name="import_markdown_save_to_space">Zapisz w przestrzeni</string>
+    <string name="import_markdown_import_as">Importuj jako</string>
+    <string name="import_markdown_emberr_notes">Notatki Emberr</string>
+    <string name="import_markdown_emberr_notes_subtitle">Każdy plik staje się notatką złożoną z bloków.</string>
+    <string name="import_markdown_markdown_files">Pliki Markdown</string>
+    <string name="import_markdown_coming_soon">Wkrótce</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="one">Zaimportowano %1$d notatkę</item>
+        <item quantity="few">Zaimportowano %1$d notatki</item>
+        <item quantity="many">Zaimportowano %1$d notatek</item>
+        <item quantity="other">Zaimportowano %1$d notatki</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="one">Zaimportowano %1$d notatkę do przestrzeni %2$s</item>
+        <item quantity="few">Zaimportowano %1$d notatki do przestrzeni %2$s</item>
+        <item quantity="many">Zaimportowano %1$d notatek do przestrzeni %2$s</item>
+        <item quantity="other">Zaimportowano %1$d notatki do przestrzeni %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">Nie udało się zaimportować %1$d: %2$s</string>
+    <string name="import_markdown_choose_folder">Wybierz folder</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d plik</item>
+        <item quantity="few">%1$d pliki</item>
+        <item quantity="many">%1$d plików</item>
+        <item quantity="other">%1$d pliku</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">Pominięto %1$d: %2$s</string>
+    <string name="import_markdown_choose_different_files">Wybierz inne pliki</string>
+    <string name="import_markdown_picker_title">Wybierz pliki do zaimportowania</string>
+</resources>

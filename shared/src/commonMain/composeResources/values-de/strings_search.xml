@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Tippe, um Titel, Ausschnitte und Notizinhalte zu durchsuchen.</string>
+    <string name="search_nothing_found">Keine passenden Notizen, Termine oder Personen gefunden.</string>
+    <string name="search_people">Personen</string>
+    <string name="search_events">Termine</string>
+    <string name="search_notes">Notizen</string>
+    <string name="search_rename_note">Notiz umbenennen</string>
+    <string name="search_note_title_placeholder">Titel der Notiz...</string>
+    <string name="search_rename">Umbenennen</string>
+    <string name="search_move_to_trash">In den Papierkorb</string>
+    <string name="search_untitled_event">Termin ohne Titel</string>
+    <string name="search_repeats">Wiederholt sich</string>
+    <string name="search_pinned">Angeheftet</string>
+    <string name="search_in_parent">in %1$s</string>
+    <string name="search_daily">Tagesnotiz</string>
+    <string name="search_add_to_favorites">Zu Favoriten hinzufügen</string>
+    <string name="search_remove_from_favorites">Aus Favoriten entfernen</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">%1$d Person anzeigen</item>
+        <item quantity="other">Alle %1$d Personen anzeigen</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">%1$d Termin anzeigen</item>
+        <item quantity="other">Alle %1$d Termine anzeigen</item>
+    </plurals>
+</resources>

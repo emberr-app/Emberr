@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Завдання</string>
+    <string name="overview_section_bookmarks">Закладки</string>
+    <string name="overview_section_images">Зображення</string>
+    <string name="overview_section_documents">Документи</string>
+    <string name="overview_tasks_repeating">Повторювані</string>
+    <string name="overview_tasks_note">Нотатка</string>
+    <string name="overview_tasks_today">Сьогодні</string>
+    <string name="overview_tasks_tomorrow">Завтра</string>
+    <string name="overview_tasks_yesterday">Учора</string>
+    <string name="overview_tasks_none_completed">Поки немає виконаних завдань.</string>
+    <string name="overview_tasks_all_caught_up">Усе зроблено!</string>
+    <string name="overview_tasks_completed">Виконано</string>
+    <string name="overview_tasks_completed_tasks">Виконані завдання</string>
+    <string name="overview_tasks_hide_completed">Сховати виконані</string>
+    <string name="overview_tasks_show_completed">Показати виконані</string>
+    <string name="overview_tasks_add_task_description">Додати завдання</string>
+    <string name="overview_tasks_add_task">Додати завдання</string>
+    <string name="overview_images_empty">Поки немає збережених зображень.</string>
+    <string name="overview_images_add_image_description">Додати зображення</string>
+    <string name="overview_images_add_image">Додати зображення</string>
+    <string name="overview_documents_empty">Поки немає прикріплених документів.</string>
+    <string name="overview_documents_add_document_description">Додати документ</string>
+    <string name="overview_documents_add_document">Додати документ</string>
+    <string name="overview_bookmarks_empty">Поки немає збережених посилань.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Додати закладку</string>
+    <string name="overview_bookmarks_add_bookmark">Додати закладку</string>
+    <string name="overview_bookmarks_add_link">Додати посилання</string>
+    <string name="overview_bookmarks_paste_link">Вставте посилання...</string>
+    <string name="overview_bookmarks_clear_link">Очистити посилання</string>
+    <string name="overview_bookmarks_all">Усі</string>
+    <string name="overview_bookmarks_others">Інші</string>
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">До зустрічі!</string>
+    <string name="whatsnew_whats_new_question">Що нового?</string>
+    <string name="whatsnew_title">Що нового</string>
+    <string name="whatsnew_version">Версія %1$s</string>
+    <string name="whatsnew_new">Нове</string>
+    <string name="whatsnew_themes_heading">Теми</string>
+    <string name="whatsnew_themes_where">Налаштування → Вигляд → Тема</string>
+    <string name="whatsnew_themes_description_desktop">Виберіть одну з 13 колірних тем, як-от Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine і Висока контрастність. Для кожної можна налаштувати інтенсивність і вибрати, чи будуть текст і значки теж у її кольорах.</string>
+    <string name="whatsnew_themes_description_mobile">Виберіть одну з 14 колірних тем, як-от Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine і Висока контрастність, або дозвольте темі **Шпалери** брати кольори з ваших шпалер. Для кожної можна налаштувати інтенсивність і вибрати, чи будуть текст і значки теж у її кольорах. Віджети на головному екрані також підлаштовуються під тему.</string>
+    <string name="whatsnew_texture_heading">Текстура паперу</string>
+    <string name="whatsnew_texture_where">Налаштування → Вигляд → Тема → Текстура</string>
+    <string name="whatsnew_texture_description">Додайте застосунку м'яке зерно, як у справжнього паперу. Налаштуйте його інтенсивність і виберіть, де воно показується: увесь застосунок, нотатки, полотно або щоденні нотатки.</string>
+    <string name="whatsnew_scale_heading">Масштаб інтерфейсу</string>
+    <string name="whatsnew_scale_where">Налаштування → Вигляд → Масштаб інтерфейсу</string>
+    <string name="whatsnew_scale_description_desktop">Робіть усе в застосунку більшим або меншим, від 80% до 200%, або використовуйте **Ctrl +**, **Ctrl −** і **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Робіть усе в застосунку більшим або меншим, від 80% до 200%.</string>
+    <string name="whatsnew_widgets_heading">Віджети</string>
+    <string name="whatsnew_widgets_where">Утримуйте палець на головному екрані → Віджети → Emberr</string>
+    <string name="whatsnew_widgets_description">Усі віджети отримали чистіший новий вигляд, а ще з'явилося три нові: **Картка нотатки**, **Швидкий запис** і **Цитата дня**. Тепер віджети одразу показують вибрану нотатку й повідомляють, якщо її видалено.</string>
+    <string name="whatsnew_editor_heading">Редактор</string>
+    <string name="whatsnew_editor_where">Введіть / будь-де в нотатці</string>
+    <string name="whatsnew_editor_description">Меню команд тепер відкривається одразу після будь-якого символу, а не лише після пробілу. Якщо ви ввели текст, що вже нічому не відповідає, зітріть його, і меню з'явиться знову.</string>
+    <string name="whatsnew_others_heading">Інше</string>
+    <string name="whatsnew_others_where">Дрібніші зміни й виправлення</string>
+    <string name="whatsnew_others_sliders">Повзунки в усьому застосунку мають новий дизайн.</string>
+    <string name="whatsnew_others_title_time_desktop">Введіть **/** у назві нотатки, щоб додати поточний час або дату.</string>
+    <string name="whatsnew_others_title_time_mobile">Додавайте поточний час або дату в назву нотатки з панелі інструментів клавіатури.</string>
+    <string name="whatsnew_others_sync_network">Вибір мережі для синхронізації тепер у **Налаштування → Синхронізація та резервні копії**.</string>
+    <string name="whatsnew_others_windows_startup">Швидший запуск на Windows.</string>
+    <string name="whatsnew_others_small_fixes">Багато дрібних виправлень.</string>
+    <string name="whatsnew_preview_options">Параметри</string>
+    <string name="whatsnew_preview_trip_title">Поїздка на вихідні</string>
+    <string name="whatsnew_preview_trip_text">Виїхати до 8-ї ранку, щоб уникнути заторів.</string>
+    <string name="whatsnew_preview_train_tickets">Квитки на потяг</string>
+    <string name="whatsnew_preview_passport">Паспорт</string>
+    <string name="whatsnew_preview_camera_charger">Зарядка для камери</string>
+    <string name="whatsnew_preview_reading_list">Список для читання</string>
+    <string name="whatsnew_preview_reading_list_books">The Overstory, Piranesi, Project Hail Mary</string>
+    <string name="whatsnew_preview_meeting_title">Зустріч команди</string>
+    <string name="whatsnew_preview_meeting_text">Четвер о 10, кімната 2.</string>
+    <string name="whatsnew_preview_typed_heading">Порядок денний</string>
+    <string name="whatsnew_preview_quote">Секрет успіху в тому, щоб почати.</string>
+    <string name="whatsnew_preview_jot_prompt">Що у вас на думці?</string>
+    <string name="whatsnew_preview_jot_button">Швидкий запис</string>
+</resources>

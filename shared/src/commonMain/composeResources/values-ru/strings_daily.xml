@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">Хронология</string>
+    <string name="daily_close_timeline">Закрыть хронологию</string>
+    <string name="daily_open_timeline">Открыть хронологию</string>
+    <string name="daily_search_the_timeline">Поиск по хронологии</string>
+    <string name="daily_previous_match">Предыдущее совпадение</string>
+    <string name="daily_next_match">Следующее совпадение</string>
+    <string name="daily_nothing_on_this_day_yet">В этот день пока ничего нет.</string>
+    <string name="daily_nothing_written_yet">Пока ничего не написано.</string>
+    <string name="daily_code">Код</string>
+    <string name="daily_today">Сегодня</string>
+    <string name="daily_tomorrow">Завтра</string>
+    <string name="daily_yesterday">Вчера</string>
+    <string name="daily_go_to_today">Перейти к сегодня</string>
+    <string name="daily_previous_month">Предыдущий месяц</string>
+    <string name="daily_next_month">Следующий месяц</string>
+    <string name="daily_previous">Назад</string>
+    <string name="daily_next">Вперёд</string>
+    <string name="daily_open_calendar">Открыть календарь</string>
+    <string name="daily_calendar">Календарь</string>
+    <string name="daily_settings">Настройки</string>
+    <string name="daily_more_settings">Другие настройки</string>
+    <string name="daily_click_to_write_your_thoughts">Нажмите, чтобы записать мысли</string>
+    <string name="daily_tap_to_write_your_thoughts">Нажмите, чтобы записать мысли</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Ruimtes</string>
+    <string name="space_create_space">Ruimte maken</string>
+    <string name="space_rename_space">Naam ruimte wijzigen</string>
+    <string name="space_delete_space">Ruimte verwijderen</string>
+    <string name="space_new_space">Nieuwe ruimte</string>
+    <string name="space_new_space_subtitle">Werk, Persoonlijk, wat je maar wilt.</string>
+    <string name="space_name_placeholder">Naam van ruimte...</string>
+    <string name="space_rename_subtitle">Kies een nieuwe naam.</string>
+    <string name="space_delete_space_question">“%1$s” verwijderen?</string>
+    <string name="space_delete_space_message">Alle notities, mappen, tags en chats in deze ruimte worden mee verwijderd. Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="space_reorder_space">Ruimte verplaatsen</string>
+</resources>

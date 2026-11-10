@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Зберегти отриманий вміст</string>
+    <string name="share_save_to_overview">Зберегти в огляд</string>
+    <string name="share_save_to_a_note">Зберегти в нотатку</string>
+    <string name="share_shared_image">Отримане зображення</string>
+    <string name="share_failed_to_save">Не вдалося зберегти отриманий вміст.</string>
+    <string name="share_saved_to_inbox">Збережено у «Вхідні»</string>
+    <string name="share_note_no_longer_available">Ця нотатка більше не доступна.</string>
+    <plurals name="share_images_selected">
+        <item quantity="one">Вибрано %1$d зображення</item>
+        <item quantity="few">Вибрано %1$d зображення</item>
+        <item quantity="many">Вибрано %1$d зображень</item>
+        <item quantity="other">Вибрано %1$d зображення</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="one">Вибрано %1$d файл</item>
+        <item quantity="few">Вибрано %1$d файли</item>
+        <item quantity="many">Вибрано %1$d файлів</item>
+        <item quantity="other">Вибрано %1$d файлу</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="one">Збережено %1$d елемент у «Вхідні»</item>
+        <item quantity="few">Збережено %1$d елементи у «Вхідні»</item>
+        <item quantity="many">Збережено %1$d елементів у «Вхідні»</item>
+        <item quantity="other">Збережено %1$d елемента у «Вхідні»</item>
+    </plurals>
+</resources>

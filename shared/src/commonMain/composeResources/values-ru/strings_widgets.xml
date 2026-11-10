@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">Выберите пространство</string>
+    <string name="widgets_follow_the_app">Как в приложении</string>
+    <string name="widgets_follow_the_app_detail">Всегда показывает пространство, в котором вы находитесь</string>
+    <string name="widgets_current_space">Текущее пространство</string>
+    <string name="widgets_untitled_space">Пространство без названия</string>
+    <string name="widgets_favorites">Избранное</string>
+    <string name="widgets_other">Другое</string>
+    <string name="widgets_no_notes_yet">У вас пока нет заметок</string>
+    <string name="widgets_no_notes_match">Нет заметок по запросу «%1$s»</string>
+    <string name="widgets_choose_a_note">Выберите заметку</string>
+    <string name="widgets_search_notes">Поиск заметок</string>
+    <string name="widgets_open_the_app_first">Откройте приложение хотя бы раз, прежде чем добавлять виджет</string>
+    <string name="widgets_choose_a_gradient">Выберите градиент</string>
+    <string name="widgets_whats_on_your_mind">О чём вы думаете?</string>
+    <string name="widgets_selected">Выбрано</string>
+    <string name="widgets_gradient_dusk">Сумерки</string>
+    <string name="widgets_gradient_copper">Медь</string>
+    <string name="widgets_gradient_forest">Лес</string>
+    <string name="widgets_gradient_lagoon">Лагуна</string>
+    <string name="widgets_gradient_midnight">Полночь</string>
+    <string name="widgets_gradient_blossom">Цветение</string>
+    <string name="widgets_gradient_graphite">Графит</string>
+    <string name="widgets_gradient_aurora">Сияние</string>
+    <string name="widgets_gradient_sunset">Закат</string>
+    <string name="widgets_gradient_slate">Сланец</string>
+    <string name="widgets_gradient_cocoa">Какао</string>
+    <string name="widgets_gradient_lavender">Лаванда</string>
+    <string name="widgets_untitled_event">Событие без названия</string>
+    <string name="widgets_untitled_task">Задача без названия</string>
+    <string name="widgets_note">Заметка</string>
+    <string name="widgets_repeating">Повторяется</string>
+    <string name="widgets_today">Сегодня</string>
+    <string name="widgets_tomorrow">Завтра</string>
+    <string name="widgets_yesterday">Вчера</string>
+    <string name="widgets_all_day">Весь день</string>
+    <string name="widgets_date_all_day">%1$s · Весь день</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · Весь день</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="one">%1$d мин назад</item>
+        <item quantity="few">%1$d мин назад</item>
+        <item quantity="many">%1$d мин назад</item>
+        <item quantity="other">%1$d мин назад</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="one">%1$d час назад</item>
+        <item quantity="few">%1$d часа назад</item>
+        <item quantity="many">%1$d часов назад</item>
+        <item quantity="other">%1$d часа назад</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">Связанная заметка</string>
+    <string name="widgets_image">Изображение</string>
+    <string name="widgets_canvas">Холст</string>
+    <string name="widgets_database">База данных</string>
+    <string name="widgets_watchlist">Буду смотреть</string>
+    <string name="widgets_credentials">Учётные данные</string>
+    <string name="widgets_voice_note_length">Голосовая заметка  %1$s</string>
+    <string name="widgets_needs_newer_version">Нужна более новая версия Emberr</string>
+    <string name="widgets_table">Таблица</string>
+</resources>

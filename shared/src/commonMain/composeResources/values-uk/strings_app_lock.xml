@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr заблоковано</string>
+    <string name="app_lock_screen_detail">Скористайтеся відбитком пальця, обличчям або блокуванням екрана, щоб відкрити його.</string>
+    <string name="app_lock_unlock">Розблокувати</string>
+    <string name="app_lock_prompt_subtitle">Скористайтеся відбитком пальця, обличчям або блокуванням екрана</string>
+    <string name="app_lock_unlock_emberr">Розблокувати Emberr</string>
+    <string name="app_lock_off_no_screen_lock">Блокування застосунку вимкнено, бо на цьому телефоні немає блокування екрана.</string>
+</resources>

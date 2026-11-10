@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Открыть Emberr</string>
+    <string name="desktop_tray_close_window">Закрыть окно</string>
+    <string name="desktop_tray_quit">Выйти</string>
+    <string name="desktop_sticky_note">Стикер</string>
+    <string name="desktop_select_image">Выбрать изображение</string>
+    <string name="desktop_select_document">Выбрать документ</string>
+    <string name="desktop_file_not_found_message">Этот файл больше недоступен на этом устройстве.</string>
+    <string name="desktop_file_not_found_title">Файл не найден</string>
+    <string name="desktop_open_file_failed">Не удалось открыть файл: %1$s</string>
+    <string name="desktop_error">Ошибка</string>
+    <string name="desktop_backup_only_on_android_message">Автоматические фоновые резервные копии пока поддерживаются только в приложении для Android. Вы всё равно можете использовать кнопку «Экспорт резервной копии»!</string>
+    <string name="desktop_backup_only_on_android_title">Функция для компьютера</string>
+    <string name="desktop_update_available">Доступно обновление</string>
+    <string name="desktop_update_available_message">Доступен Emberr %1$s. У вас версия %2$s. Обновление загрузится в фоне, пока вы работаете.</string>
+    <string name="desktop_update_download">Загрузить</string>
+    <string name="desktop_update_ready_to_install">Обновление готово к установке</string>
+    <string name="desktop_update_ready_message">Перезапустите Emberr, чтобы перейти на версию %1$s. Если выбрать «Позже», обновление применится при следующем запуске Emberr.</string>
+    <string name="desktop_update_restart">Перезапустить</string>
+    <string name="desktop_update_failed">Не удалось обновить Emberr</string>
+    <string name="desktop_update_later">Позже</string>
+    <string name="desktop_ok">ОК</string>
+    <string name="desktop_new_note_in_folder">Новая заметка в папке</string>
+    <string name="desktop_new_note_here">Новая заметка здесь</string>
+    <string name="desktop_rename_folder">Переименовать папку</string>
+    <string name="desktop_add_subfolder">Добавить подпапку</string>
+    <string name="desktop_rename_note">Переименовать заметку</string>
+    <string name="desktop_open_in_split_view">Открыть в разделённом экране</string>
+    <string name="desktop_toggle_section">Свернуть или развернуть: %1$s</string>
+    <string name="desktop_empty_space">Это пространство пустое.</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">Начните с %1$s или %2$s</string>
+    <string name="desktop_empty_space_a_note">заметки</string>
+    <string name="desktop_create_space">Создать пространство</string>
+    <string name="desktop_add_space">Добавить пространство</string>
+    <string name="desktop_space_options">Параметры пространства</string>
+    <string name="desktop_close_pane">Закрыть панель</string>
+    <string name="desktop_close_this_screen">Закрыть этот экран</string>
+    <string name="desktop_drag_to_swap_screens">Перетащите, чтобы поменять экраны местами</string>
+    <string name="desktop_search_no_match">Нет заметок, событий или людей по запросу «%1$s»</string>
+    <string name="desktop_hide_sidebar">Скрыть боковую панель</string>
+    <string name="desktop_collapse_sidebar">Свернуть боковую панель</string>
+    <string name="desktop_select_a_note">Выберите заметку на боковой панели</string>
+    <string name="desktop_folder">Папка</string>
+    <string name="desktop_sync">Синхронизация</string>
+</resources>

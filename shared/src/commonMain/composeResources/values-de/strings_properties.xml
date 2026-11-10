@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Eigenschaften</string>
+    <string name="properties_built_in">Integriert</string>
+    <string name="properties_built_in_hint">Integrierte Eigenschaften können nicht umbenannt oder gelöscht werden.</string>
+    <string name="properties_custom">Eigene</string>
+    <string name="properties_add_property">Eigenschaft hinzufügen</string>
+    <string name="properties_new_property">Neue Eigenschaft</string>
+    <string name="properties_edit_property">Eigenschaft bearbeiten</string>
+    <string name="properties_delete_question">„%1$s“ löschen? Die Eigenschaft wird aus allen Notizen entfernt, die sie verwenden.</string>
+    <string name="properties_property_name">Name der Eigenschaft</string>
+    <string name="properties_name_taken">Eine Eigenschaft mit diesem Namen existiert bereits</string>
+    <string name="properties_value_type">Werttyp</string>
+    <string name="properties_value_type_locked">Der Werttyp kann nach dem Erstellen der Eigenschaft nicht mehr geändert werden.</string>
+    <string name="properties_delete_property">Eigenschaft löschen</string>
+    <string name="properties_add">Hinzufügen</string>
+</resources>

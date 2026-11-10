@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Właściwości</string>
+    <string name="properties_built_in">Wbudowane</string>
+    <string name="properties_built_in_hint">Wbudowanych właściwości nie można zmienić ani usunąć.</string>
+    <string name="properties_custom">Własne</string>
+    <string name="properties_add_property">Dodaj właściwość</string>
+    <string name="properties_new_property">Nowa właściwość</string>
+    <string name="properties_edit_property">Edytuj właściwość</string>
+    <string name="properties_delete_question">Usunąć „%1$s”? Zostanie usunięta z każdej notatki, która jej używa.</string>
+    <string name="properties_property_name">Nazwa właściwości</string>
+    <string name="properties_name_taken">Właściwość o tej nazwie już istnieje</string>
+    <string name="properties_value_type">Typ wartości</string>
+    <string name="properties_value_type_locked">Typu wartości nie można zmienić po utworzeniu właściwości.</string>
+    <string name="properties_delete_property">Usuń właściwość</string>
+    <string name="properties_add">Dodaj</string>
+</resources>

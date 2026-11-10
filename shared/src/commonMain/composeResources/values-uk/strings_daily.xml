@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">Хронологія</string>
+    <string name="daily_close_timeline">Закрити хронологію</string>
+    <string name="daily_open_timeline">Відкрити хронологію</string>
+    <string name="daily_search_the_timeline">Шукати в хронології</string>
+    <string name="daily_previous_match">Попередній збіг</string>
+    <string name="daily_next_match">Наступний збіг</string>
+    <string name="daily_nothing_on_this_day_yet">Цього дня поки нічого немає.</string>
+    <string name="daily_nothing_written_yet">Поки нічого не написано.</string>
+    <string name="daily_code">Код</string>
+    <string name="daily_today">Сьогодні</string>
+    <string name="daily_tomorrow">Завтра</string>
+    <string name="daily_yesterday">Учора</string>
+    <string name="daily_go_to_today">Перейти до сьогодні</string>
+    <string name="daily_previous_month">Попередній місяць</string>
+    <string name="daily_next_month">Наступний місяць</string>
+    <string name="daily_previous">Попередній</string>
+    <string name="daily_next">Наступний</string>
+    <string name="daily_open_calendar">Відкрити календар</string>
+    <string name="daily_calendar">Календар</string>
+    <string name="daily_settings">Налаштування</string>
+    <string name="daily_more_settings">Більше налаштувань</string>
+    <string name="daily_click_to_write_your_thoughts">Натисніть, щоб записати свої думки</string>
+    <string name="daily_tap_to_write_your_thoughts">Торкніться, щоб записати свої думки</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr is vergrendeld</string>
+    <string name="app_lock_screen_detail">Gebruik je vingerafdruk, gezicht of schermvergrendeling om het te openen.</string>
+    <string name="app_lock_unlock">Ontgrendelen</string>
+    <string name="app_lock_prompt_subtitle">Gebruik je vingerafdruk, gezicht of schermvergrendeling</string>
+    <string name="app_lock_unlock_emberr">Emberr ontgrendelen</string>
+    <string name="app_lock_off_no_screen_lock">App-vergrendeling staat uit omdat deze telefoon geen schermvergrendeling heeft.</string>
+</resources>

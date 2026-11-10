@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Prullenbak is leeg</string>
+    <string name="trash_title">Prullenbak</string>
+    <string name="trash_empty_trash">Prullenbak legen</string>
+    <string name="trash_empty_trash_tooltip">Prullenbak legen</string>
+    <string name="trash_restore_note">Notitie herstellen</string>
+    <string name="trash_delete_permanently">Definitief verwijderen</string>
+    <string name="trash_manage_note">Notitie beheren</string>
+    <string name="trash_manage_note_subtitle">Notities in de prullenbak worden na 30 dagen automatisch verwijderd.</string>
+    <string name="trash_empty_trash_question">Prullenbak legen?</string>
+    <string name="trash_empty_trash_subtitle">Hiermee worden alle notities in de prullenbak definitief verwijderd. Dit kan niet ongedaan worden gemaakt.</string>
+</resources>

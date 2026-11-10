@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">Słucham...</string>
+    <string name="voice_tap_the_orb">Dotknij kuli, aby mówić</string>
+    <string name="voice_add_tasks_with_voice">(dodawaj zadania głosem)</string>
+    <string name="voice_install_speech_app">Zainstaluj aplikację do rozpoznawania mowy, aby używać zadań głosowych</string>
+    <string name="voice_tap_a_task_to_fix_it">Dotknij zadania, aby je poprawić</string>
+    <string name="voice_discard">Odrzuć</string>
+    <string name="voice_add">Dodaj</string>
+    <string name="voice_empty_tasks_are_skipped">Puste zadania są pomijane</string>
+    <string name="voice_today">Dzisiaj</string>
+    <string name="voice_tomorrow">Jutro</string>
+    <string name="voice_add_time">Dodaj godzinę</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Свойства</string>
+    <string name="properties_built_in">Встроенные</string>
+    <string name="properties_built_in_hint">Встроенные свойства нельзя переименовать или удалить.</string>
+    <string name="properties_custom">Свои</string>
+    <string name="properties_add_property">Добавить свойство</string>
+    <string name="properties_new_property">Новое свойство</string>
+    <string name="properties_edit_property">Изменить свойство</string>
+    <string name="properties_delete_question">Удалить «%1$s»? Свойство будет убрано из всех заметок, где оно используется.</string>
+    <string name="properties_property_name">Название свойства</string>
+    <string name="properties_name_taken">Свойство с таким названием уже есть</string>
+    <string name="properties_value_type">Тип значения</string>
+    <string name="properties_value_type_locked">Тип значения нельзя изменить после создания свойства.</string>
+    <string name="properties_delete_property">Удалить свойство</string>
+    <string name="properties_add">Добавить</string>
+</resources>

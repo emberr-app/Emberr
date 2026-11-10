@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Zacznij pisać, aby przeszukać tytuły, fragmenty i treść notatek.</string>
+    <string name="search_nothing_found">Nie znaleziono pasujących notatek, wydarzeń ani osób.</string>
+    <string name="search_people">Osoby</string>
+    <string name="search_events">Wydarzenia</string>
+    <string name="search_notes">Notatki</string>
+    <string name="search_rename_note">Zmień nazwę notatki</string>
+    <string name="search_note_title_placeholder">Tytuł notatki...</string>
+    <string name="search_rename">Zmień nazwę</string>
+    <string name="search_move_to_trash">Przenieś do kosza</string>
+    <string name="search_untitled_event">Wydarzenie bez tytułu</string>
+    <string name="search_repeats">Powtarza się</string>
+    <string name="search_pinned">Przypięte</string>
+    <string name="search_in_parent">w: %1$s</string>
+    <string name="search_daily">Dziennik</string>
+    <string name="search_add_to_favorites">Dodaj do ulubionych</string>
+    <string name="search_remove_from_favorites">Usuń z ulubionych</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">Pokaż wszystkie osoby (%1$d)</item>
+        <item quantity="few">Pokaż wszystkie %1$d osoby</item>
+        <item quantity="many">Pokaż wszystkie %1$d osób</item>
+        <item quantity="other">Pokaż wszystkie osoby (%1$d)</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">Pokaż wszystkie wydarzenia (%1$d)</item>
+        <item quantity="few">Pokaż wszystkie %1$d wydarzenia</item>
+        <item quantity="many">Pokaż wszystkie %1$d wydarzeń</item>
+        <item quantity="other">Pokaż wszystkie wydarzenia (%1$d)</item>
+    </plurals>
+</resources>

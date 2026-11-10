@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_title">Emberr Cloud</string>
+
+    <string name="cloud_server_address">Serveradres</string>
+    <string name="cloud_server_address_invalid">Voer een adres in dat begint met http:// of https://, zoals http://localhost:8080.</string>
+    <string name="cloud_server_address_saved">Serveradres opgeslagen</string>
+
+    <string name="cloud_welcome_hint">Synchroniseer je notities tussen apparaten met end-to-end-versleuteling. Alleen jouw apparaten kunnen ze lezen.</string>
+    <string name="cloud_create_account">Account aanmaken</string>
+    <string name="cloud_log_in">Inloggen</string>
+    <string name="cloud_send_code">Code versturen</string>
+    <string name="cloud_send_new_code">Nieuwe code versturen</string>
+    <string name="cloud_continue">Doorgaan</string>
+    <string name="cloud_done">Gereed</string>
+    <string name="cloud_password_not_stored_hint">We bewaren dit wachtwoord niet. Als je het vergeet, kunnen we je notities niet ontsleutelen.</string>
+    <string name="cloud_recovery_words">Herstelwoorden</string>
+    <string name="cloud_recovery_words_explanation">Als je je wachtwoord vergeet, zijn deze 24 woorden de enige weg terug naar je account. We bewaren ze niet, dus bewaar ze op een veilige plek.</string>
+    <string name="cloud_recovery_words_warning">Zonder je wachtwoord en deze woorden kunnen je cloudnotities niet worden hersteld.</string>
+    <string name="cloud_recovery_words_saved_checkbox">Ik heb deze woorden op een veilige plek bewaard</string>
+    <string name="cloud_copy_words">Woorden kopiëren</string>
+    <string name="cloud_recovery_words_copied">Herstelwoorden gekopieerd</string>
+    <string name="cloud_forgot_password">Wachtwoord vergeten</string>
+    <string name="cloud_recovery_email_hint">Voer het e-mailadres van je account in. We sturen je een code.</string>
+    <string name="cloud_recovery_other_device_hint">Aangemeld op een ander apparaat? Wijzig je wachtwoord daar.</string>
+    <string name="cloud_recovery_words_entry_hint">Voer de 24 herstelwoorden in die je hebt bewaard toen je je account aanmaakte.</string>
+    <string name="cloud_recovery_words_placeholder">Je 24 herstelwoorden</string>
+    <string name="cloud_set_new_password">Stel een nieuw wachtwoord in</string>
+    <string name="cloud_new_password_hint">Voer een nieuw wachtwoord in waarmee we je notities kunnen versleutelen.</string>
+    <string name="cloud_reset_password">Wachtwoord herstellen</string>
+    <string name="cloud_sign_out_other_devices_title">Afmelden op andere apparaten</string>
+    <string name="cloud_sign_out_other_devices_message">Als je denkt dat iemand je wachtwoord kent, kun je alle andere apparaten die je account gebruiken dwingen zich af te melden.</string>
+    <string name="cloud_sign_out_other_devices_button">Andere apparaten afmelden</string>
+    <string name="cloud_do_not_sign_out">Niet afmelden</string>
+
+    <string name="cloud_account">Account</string>
+    <string name="cloud_signed_in_as">Aangemeld als %1$s</string>
+    <string name="cloud_loading_storage_used">Gebruikte opslag laden...</string>
+    <string name="cloud_sync">Synchronisatie</string>
+    <string name="cloud_syncing">Synchroniseren...</string>
+    <string name="cloud_last_synced">Laatst gesynchroniseerd %1$s</string>
+    <string name="cloud_sync_explanation">Verstuurt en ontvangt ruimtes, mappen, notities, lijsten, chats en media.</string>
+    <string name="cloud_sync_now">Nu synchroniseren</string>
+    <string name="cloud_media">Media</string>
+    <string name="cloud_media_last_checked">Media laatst gecontroleerd %1$s</string>
+    <string name="cloud_devices">Apparaten</string>
+    <string name="cloud_loading_devices">Apparaten laden...</string>
+    <string name="cloud_tap_device_to_sign_out">Tik op een apparaat om het af te melden.</string>
+    <string name="cloud_sign_out_of_this_device">Afmelden op dit apparaat</string>
+    <string name="cloud_manage_account">Account beheren</string>
+    <string name="cloud_change_password">Wachtwoord wijzigen</string>
+    <string name="cloud_change_email">E-mailadres wijzigen</string>
+    <string name="cloud_recovery_words_lock_description">Verifieer jezelf om je herstelwoorden te bekijken</string>
+    <string name="cloud_delete_account">Account verwijderen</string>
+    <string name="cloud_sign_out_device_title">Apparaat afmelden?</string>
+    <string name="cloud_sign_out_device_message">Dit meldt het volgende apparaat af:\n\n%1$s</string>
+    <string name="cloud_sign_out">Afmelden</string>
+    <string name="cloud_delete_account_title">Account verwijderen?</string>
+    <string name="cloud_delete_account_message">Je Emberr Cloud-account en alles wat erin staat wordt definitief verwijderd. Dit kan niet ongedaan worden gemaakt. De notities op dit apparaat blijven, tenzij je ervoor kiest ze ook te wissen. We sturen een code naar %1$s ter bevestiging.</string>
+    <string name="cloud_last_used">Laatst gebruikt %1$s</string>
+    <string name="cloud_this_device">Dit apparaat</string>
+    <string name="cloud_sign_out_of_this_device_title">Afmelden op dit apparaat?</string>
+    <string name="cloud_sign_out_of_this_device_message">Dit apparaat stopt met het gebruik van Emberr Cloud. Je notities op dit apparaat blijven onaangeroerd.</string>
+
+    <string name="cloud_change_password_code_hint">We sturen een code naar %1$s ter bevestiging.</string>
+    <string name="cloud_sign_out_of_other_devices">Afmelden op andere apparaten</string>
+    <string name="cloud_change_email_hint">Voer je nieuwe e-mailadres in. We sturen er een code naartoe.</string>
+    <string name="cloud_recovery_words_password_hint">Voer je wachtwoord in om je herstelwoorden te bekijken.</string>
+    <string name="cloud_clear_notes_on_this_device">Ook de notities op dit apparaat wissen</string>
+    <string name="cloud_delete_account_warning">Je Emberr Cloud-account wordt definitief verwijderd. Dit kan niet ongedaan worden gemaakt.</string>
+
+    <string name="cloud_email">E-mailadres</string>
+    <string name="cloud_code_placeholder">Code van 6 cijfers</string>
+    <string name="cloud_password">Wachtwoord</string>
+    <string name="cloud_confirm_password">Wachtwoord bevestigen</string>
+    <string name="cloud_passwords_do_not_match">Wachtwoorden komen niet overeen.</string>
+    <string name="cloud_hide_password">Wachtwoord verbergen</string>
+    <string name="cloud_show_password">Wachtwoord tonen</string>
+    <string name="cloud_password_strength_weak">Wachtwoordsterkte: zwak</string>
+    <string name="cloud_password_strength_moderate">Wachtwoordsterkte: redelijk</string>
+    <string name="cloud_password_strength_strong">Wachtwoordsterkte: sterk</string>
+    <string name="cloud_code_sent">We hebben een code naar %1$s gestuurd. Kijk in je inbox (en spam).</string>
+    <string name="cloud_new_code_sent">We hebben een nieuwe code naar %1$s gestuurd.</string>
+    <string name="cloud_please_wait">Even geduld...</string>
+
+    <string name="cloud_sending_file">Bestand %1$d van %2$d versturen</string>
+    <string name="cloud_receiving_file">Bestand %1$d van %2$d ontvangen</string>
+    <string name="cloud_photo_in_note">Foto in %1$s</string>
+    <string name="cloud_video_in_note">Video in %1$s</string>
+    <string name="cloud_audio_in_note">Audio in %1$s</string>
+    <string name="cloud_document_in_note">Document in %1$s</string>
+    <string name="cloud_file_in_note">Bestand in %1$s</string>
+    <string name="cloud_file_progress">%1$d% · %2$s van %3$s</string>
+    <plurals name="cloud_files_waiting_for_upload">
+        <item quantity="one">%1$d bestand wacht tot een ander apparaat het uploadt.</item>
+        <item quantity="other">%1$d bestanden wachten tot een ander apparaat ze uploadt.</item>
+    </plurals>
+    <string name="cloud_files_not_sent_and_not_received">Bestanden: %1$d niet verstuurd, %2$d niet ontvangen. Ze worden bij de volgende synchronisatie opnieuw geprobeerd.</string>
+    <string name="cloud_files_not_sent">Bestanden: %1$d niet verstuurd. Ze worden bij de volgende synchronisatie opnieuw geprobeerd.</string>
+    <string name="cloud_files_not_received">Bestanden: %1$d niet ontvangen. Ze worden bij de volgende synchronisatie opnieuw geprobeerd.</string>
+    <string name="cloud_files_sent_and_received_counts">%1$d van %2$d bestanden verstuurd · %3$d van %4$d bestanden ontvangen</string>
+    <string name="cloud_files_sent_count">%1$d van %2$d bestanden verstuurd</string>
+    <string name="cloud_files_received_count">%1$d van %2$d bestanden ontvangen</string>
+
+    <string name="cloud_trial_ended">Gratis proefperiode afgelopen op %1$s · alleen-lezen tot %2$s</string>
+    <string name="cloud_trial_ends_today">Gratis proefperiode · eindigt vandaag</string>
+    <plurals name="cloud_trial_days_left">
+        <item quantity="one">Gratis proefperiode · nog %1$d dag</item>
+        <item quantity="other">Gratis proefperiode · nog %1$d dagen</item>
+    </plurals>
+    <string name="cloud_storage_used">%1$s van %2$s gebruikt</string>
+    <string name="cloud_full_with_usage">Emberr Cloud is vol: %1$s van %2$s gebruikt. Nieuwe notities en bestanden blijven op dit apparaat en worden geüpload zodra er ruimte is.</string>
+    <string name="cloud_full">Emberr Cloud is vol. Nieuwe notities en bestanden blijven op dit apparaat en worden geüpload zodra er ruimte is.</string>
+    <string name="cloud_trial_ended_read_only">Je gratis proefperiode is afgelopen, dus Emberr Cloud is alleen-lezen. Dit apparaat ontvangt nog wijzigingen van je andere apparaten, maar er wordt niets nieuws geüpload. Je notities blijven op je apparaten.</string>
+    <plurals name="cloud_files_too_large">
+        <item quantity="one">%1$d bestand is groter dan 10 GB en blijft daarom alleen op dit apparaat.</item>
+        <item quantity="other">%1$d bestanden zijn groter dan 10 GB en blijven daarom alleen op dit apparaat.</item>
+    </plurals>
+    <string name="cloud_copy_removed">Je gratis proefperiode is afgelopen en de cloudkopie is verwijderd op %1$s. Elke notitie staat nog op dit apparaat. Synchronisatie start weer zodra je een abonnement kiest.</string>
+
+    <string name="cloud_error_something_went_wrong">Er ging iets mis. Probeer het opnieuw.</string>
+    <string name="cloud_error_signed_out">Je bent afgemeld. Log opnieuw in.</string>
+    <string name="cloud_error_incorrect_password">Onjuist wachtwoord. Probeer het opnieuw.</string>
+    <string name="cloud_error_invalid_email">Voer een geldig e-mailadres in.</string>
+    <string name="cloud_error_wrong_email_or_password">Onjuist e-mailadres of wachtwoord.</string>
+    <string name="cloud_error_incorrect_code">Die code klopt niet.</string>
+    <string name="cloud_error_expired_code">Die code is verlopen. Vraag een nieuwe aan.</string>
+    <string name="cloud_error_too_many_tries">Te veel pogingen. Wacht even en probeer het opnieuw.</string>
+    <string name="cloud_error_update_required">Werk Emberr bij om Emberr Cloud te gebruiken.</string>
+    <string name="cloud_error_device_already_signed_out">Dat apparaat was al afgemeld.</string>
+    <string name="cloud_error_email_already_used">Een ander account gebruikt dit e-mailadres al.</string>
+    <string name="cloud_error_server_unreachable">Kan de server op %1$s niet bereiken.</string>
+    <string name="cloud_error_invalid_recovery_words">Die woorden zijn geen geldige herstelsleutel. Controleer of het 24 woorden zijn en hoe elk woord gespeld is.</string>
+    <string name="cloud_error_recovery_words_other_account">Deze woorden horen bij een ander account.</string>
+    <string name="cloud_account_deleted_notes_not_cleared">Je account is verwijderd, maar de notities op dit apparaat konden niet worden gewist.</string>
+    <string name="cloud_password_changed">Wachtwoord gewijzigd</string>
+    <string name="cloud_email_changed">E-mailadres gewijzigd in %1$s</string>
+
+    <string name="cloud_synced">Gesynchroniseerd: %1$d ontvangen, %2$d verstuurd</string>
+    <string name="cloud_synced_with_not_sent">Gesynchroniseerd: %1$d ontvangen, %2$d verstuurd, %3$d niet verstuurd</string>
+    <string name="cloud_sync_busy">Er loopt al een andere synchronisatie. Probeer het zo opnieuw.</string>
+    <string name="cloud_sync_update_required">Werk Emberr bij om te blijven synchroniseren met Emberr Cloud.</string>
+    <string name="cloud_sync_other_method_on">Er staat een andere synchronisatiemethode aan. Verbreek de verbinding met je eigen server of ontkoppel LAN-synchronisatie om Emberr Cloud te blijven gebruiken.</string>
+    <string name="cloud_disconnect_self_host_first">Verbreek de verbinding met je eigen server om Emberr Cloud te gebruiken.</string>
+    <string name="cloud_unpair_lan_sync_first">Ontkoppel LAN-synchronisatie om Emberr Cloud te gebruiken.</string>
+</resources>

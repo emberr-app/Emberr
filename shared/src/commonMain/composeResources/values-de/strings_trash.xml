@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Der Papierkorb ist leer</string>
+    <string name="trash_title">Papierkorb</string>
+    <string name="trash_empty_trash">Papierkorb leeren</string>
+    <string name="trash_empty_trash_tooltip">Papierkorb leeren</string>
+    <string name="trash_restore_note">Notiz wiederherstellen</string>
+    <string name="trash_delete_permanently">Endgültig löschen</string>
+    <string name="trash_manage_note">Notiz verwalten</string>
+    <string name="trash_manage_note_subtitle">Notizen im Papierkorb werden nach 30 Tagen automatisch gelöscht.</string>
+    <string name="trash_empty_trash_question">Papierkorb leeren?</string>
+    <string name="trash_empty_trash_subtitle">Alle Notizen im Papierkorb werden endgültig gelöscht. Das kann nicht rückgängig gemacht werden.</string>
+</resources>

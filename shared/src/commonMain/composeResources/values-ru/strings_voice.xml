@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">Слушаю...</string>
+    <string name="voice_tap_the_orb">Нажмите на шар, чтобы говорить</string>
+    <string name="voice_add_tasks_with_voice">(добавляйте задачи голосом)</string>
+    <string name="voice_install_speech_app">Установите приложение для распознавания речи, чтобы использовать голосовые задачи</string>
+    <string name="voice_tap_a_task_to_fix_it">Нажмите на задачу, чтобы исправить её</string>
+    <string name="voice_discard">Отменить</string>
+    <string name="voice_add">Добавить</string>
+    <string name="voice_empty_tasks_are_skipped">Пустые задачи пропускаются</string>
+    <string name="voice_today">Сегодня</string>
+    <string name="voice_tomorrow">Завтра</string>
+    <string name="voice_add_time">Добавить время</string>
+</resources>

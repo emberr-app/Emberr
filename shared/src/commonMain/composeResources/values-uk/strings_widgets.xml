@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">Виберіть простір</string>
+    <string name="widgets_follow_the_app">Як у застосунку</string>
+    <string name="widgets_follow_the_app_detail">Завжди показує простір, у якому ви зараз перебуваєте</string>
+    <string name="widgets_current_space">Поточний простір</string>
+    <string name="widgets_untitled_space">Простір без назви</string>
+    <string name="widgets_favorites">Вибране</string>
+    <string name="widgets_other">Інше</string>
+    <string name="widgets_no_notes_yet">У вас поки немає нотаток</string>
+    <string name="widgets_no_notes_match">Немає нотаток, що відповідають «%1$s»</string>
+    <string name="widgets_choose_a_note">Виберіть нотатку</string>
+    <string name="widgets_search_notes">Шукати нотатки</string>
+    <string name="widgets_open_the_app_first">Перш ніж додати віджет, відкрийте застосунок хоча б раз</string>
+    <string name="widgets_choose_a_gradient">Виберіть градієнт</string>
+    <string name="widgets_whats_on_your_mind">Що у вас на думці?</string>
+    <string name="widgets_selected">Вибрано</string>
+    <string name="widgets_gradient_dusk">Сутінки</string>
+    <string name="widgets_gradient_copper">Мідь</string>
+    <string name="widgets_gradient_forest">Ліс</string>
+    <string name="widgets_gradient_lagoon">Лагуна</string>
+    <string name="widgets_gradient_midnight">Північ</string>
+    <string name="widgets_gradient_blossom">Цвітіння</string>
+    <string name="widgets_gradient_graphite">Графіт</string>
+    <string name="widgets_gradient_aurora">Полярне сяйво</string>
+    <string name="widgets_gradient_sunset">Захід сонця</string>
+    <string name="widgets_gradient_slate">Сланець</string>
+    <string name="widgets_gradient_cocoa">Какао</string>
+    <string name="widgets_gradient_lavender">Лаванда</string>
+    <string name="widgets_untitled_event">Подія без назви</string>
+    <string name="widgets_untitled_task">Завдання без назви</string>
+    <string name="widgets_note">Нотатка</string>
+    <string name="widgets_repeating">Повторюване</string>
+    <string name="widgets_today">Сьогодні</string>
+    <string name="widgets_tomorrow">Завтра</string>
+    <string name="widgets_yesterday">Учора</string>
+    <string name="widgets_all_day">Увесь день</string>
+    <string name="widgets_date_all_day">%1$s · Увесь день</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · Увесь день</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="one">%1$d хв тому</item>
+        <item quantity="few">%1$d хв тому</item>
+        <item quantity="many">%1$d хв тому</item>
+        <item quantity="other">%1$d хв тому</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="one">%1$d годину тому</item>
+        <item quantity="few">%1$d години тому</item>
+        <item quantity="many">%1$d годин тому</item>
+        <item quantity="other">%1$d години тому</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">Пов'язана нотатка</string>
+    <string name="widgets_image">Зображення</string>
+    <string name="widgets_canvas">Полотно</string>
+    <string name="widgets_database">База даних</string>
+    <string name="widgets_watchlist">Хочу переглянути</string>
+    <string name="widgets_credentials">Облікові дані</string>
+    <string name="widgets_voice_note_length">Голосова нотатка  %1$s</string>
+    <string name="widgets_needs_newer_version">Потрібна новіша версія Emberr</string>
+    <string name="widgets_table">Таблиця</string>
+</resources>

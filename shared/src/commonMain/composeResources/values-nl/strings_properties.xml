@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Eigenschappen</string>
+    <string name="properties_built_in">Ingebouwd</string>
+    <string name="properties_built_in_hint">Ingebouwde eigenschappen kunnen niet worden hernoemd of verwijderd.</string>
+    <string name="properties_custom">Aangepast</string>
+    <string name="properties_add_property">Eigenschap toevoegen</string>
+    <string name="properties_new_property">Nieuwe eigenschap</string>
+    <string name="properties_edit_property">Eigenschap bewerken</string>
+    <string name="properties_delete_question">“%1$s” verwijderen? De eigenschap wordt verwijderd uit elke notitie die hem gebruikt.</string>
+    <string name="properties_property_name">Naam van eigenschap</string>
+    <string name="properties_name_taken">Er bestaat al een eigenschap met deze naam</string>
+    <string name="properties_value_type">Waardetype</string>
+    <string name="properties_value_type_locked">Het waardetype kan niet meer worden gewijzigd nadat de eigenschap is gemaakt.</string>
+    <string name="properties_delete_property">Eigenschap verwijderen</string>
+    <string name="properties_add">Toevoegen</string>
+</resources>

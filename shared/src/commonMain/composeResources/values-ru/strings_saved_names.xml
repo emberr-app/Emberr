@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_name_inbox">Входящие</string>
+    <string name="saved_name_others_folder">Другое</string>
+    <string name="saved_name_personal_space">Личное</string>
+    <string name="saved_name_new_chat">Новый чат</string>
+    <string name="saved_name_canvas_group">Группа</string>
+    <string name="saved_name_unknown_link">Неизвестная ссылка</string>
+    <string name="saved_name_loading_preview">Загрузка превью...</string>
+    <string name="saved_name_numbered_view">%1$s %2$d</string>
+    <string name="saved_name_view_copy">%1$s (копия)</string>
+    <string name="saved_name_label_mobile">Мобильный</string>
+    <string name="saved_name_label_home">Домашний</string>
+    <string name="saved_name_label_work">Рабочий</string>
+    <string name="saved_name_label_main">Основной</string>
+    <string name="saved_name_label_personal">Личный</string>
+    <string name="saved_name_label_portfolio">Портфолио</string>
+    <string name="saved_name_label_blog">Блог</string>
+    <string name="saved_name_label_anniversary">Годовщина</string>
+    <string name="saved_name_label_date">Дата</string>
+    <string name="saved_name_label_nickname">Прозвище</string>
+    <string name="saved_name_label_birthday">День рождения</string>
+</resources>

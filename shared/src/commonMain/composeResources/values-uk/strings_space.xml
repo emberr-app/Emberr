@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Простори</string>
+    <string name="space_create_space">Створити простір</string>
+    <string name="space_rename_space">Перейменувати простір</string>
+    <string name="space_delete_space">Видалити простір</string>
+    <string name="space_new_space">Новий простір</string>
+    <string name="space_new_space_subtitle">Робота, особисте — що завгодно.</string>
+    <string name="space_name_placeholder">Назва простору...</string>
+    <string name="space_rename_subtitle">Виберіть нову назву.</string>
+    <string name="space_delete_space_question">Видалити «%1$s»?</string>
+    <string name="space_delete_space_message">Усі нотатки, папки, теги й чати в цьому просторі буде видалено разом із ним. Цю дію не можна скасувати.</string>
+    <string name="space_reorder_space">Змінити порядок простору</string>
+</resources>

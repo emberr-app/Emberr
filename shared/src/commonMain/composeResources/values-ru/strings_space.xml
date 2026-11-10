@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Пространства</string>
+    <string name="space_create_space">Создать пространство</string>
+    <string name="space_rename_space">Переименовать пространство</string>
+    <string name="space_delete_space">Удалить пространство</string>
+    <string name="space_new_space">Новое пространство</string>
+    <string name="space_new_space_subtitle">Работа, личное — что угодно.</string>
+    <string name="space_name_placeholder">Название пространства...</string>
+    <string name="space_rename_subtitle">Выберите новое название.</string>
+    <string name="space_delete_space_question">Удалить «%1$s»?</string>
+    <string name="space_delete_space_message">Все заметки, папки, теги и чаты в этом пространстве будут удалены вместе с ним. Это действие нельзя отменить.</string>
+    <string name="space_reorder_space">Изменить порядок пространства</string>
+</resources>

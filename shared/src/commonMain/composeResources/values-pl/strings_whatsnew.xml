@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">Do zobaczenia!</string>
+    <string name="whatsnew_whats_new_question">Co nowego?</string>
+    <string name="whatsnew_title">Co nowego</string>
+    <string name="whatsnew_version">Wersja %1$s</string>
+    <string name="whatsnew_new">Nowość</string>
+    <string name="whatsnew_themes_heading">Motywy</string>
+    <string name="whatsnew_themes_where">Ustawienia → Wygląd → Motyw</string>
+    <string name="whatsnew_themes_description_desktop">Wybierz jeden z 13 motywów kolorystycznych, takich jak Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine i Wysoki kontrast. Każdy ma ustawienie intensywności, a Ty decydujesz, czy tekst i ikony też mają za nim podążać.</string>
+    <string name="whatsnew_themes_description_mobile">Wybierz jeden z 14 motywów kolorystycznych, takich jak Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine i Wysoki kontrast, albo pozwól, by **Tapeta** wzięła kolory z Twojej tapety. Każdy ma ustawienie intensywności, a Ty decydujesz, czy tekst i ikony też mają za nim podążać. Widżety na ekranie głównym również dopasowują się do motywu.</string>
+    <string name="whatsnew_texture_heading">Tekstura papieru</string>
+    <string name="whatsnew_texture_where">Ustawienia → Wygląd → Motyw → Tekstura</string>
+    <string name="whatsnew_texture_description">Nadaj aplikacji delikatne ziarno, jak prawdziwy papier. Ustaw jego intensywność i wybierz, gdzie ma być widoczne: w całej aplikacji, w notatkach, na płótnie lub w notatkach dziennych.</string>
+    <string name="whatsnew_scale_heading">Skala interfejsu</string>
+    <string name="whatsnew_scale_where">Ustawienia → Wygląd → Skala interfejsu</string>
+    <string name="whatsnew_scale_description_desktop">Powiększ lub pomniejsz wszystko w aplikacji, od 80% do 200%, albo użyj **Ctrl +**, **Ctrl −** i **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Powiększ lub pomniejsz wszystko w aplikacji, od 80% do 200%.</string>
+    <string name="whatsnew_widgets_heading">Widżety</string>
+    <string name="whatsnew_widgets_where">Przytrzymaj ekran główny → Widżety → Emberr</string>
+    <string name="whatsnew_widgets_description">Każdy widżet ma nowy, czystszy wygląd, a do tego są trzy nowe: **Karta notatki**, **Zanotuj to** i **Cytat dnia**. Widżety od razu pokazują wybraną notatkę i informują, gdy zostanie ona usunięta.</string>
+    <string name="whatsnew_editor_heading">Edytor</string>
+    <string name="whatsnew_editor_where">Wpisz / w dowolnym miejscu notatki</string>
+    <string name="whatsnew_editor_description">Menu poleceń otwiera się teraz zaraz po dowolnym znaku, nie tylko po spacji. Jeśli wpiszesz za dużo i nic nie pasuje, usuń znaki, a menu wróci.</string>
+    <string name="whatsnew_others_heading">Inne</string>
+    <string name="whatsnew_others_where">Mniejsze zmiany i poprawki</string>
+    <string name="whatsnew_others_sliders">Suwaki w całej aplikacji mają nowy wygląd.</string>
+    <string name="whatsnew_others_title_time_desktop">Wpisz **/** w tytule notatki, aby dodać bieżącą godzinę lub datę.</string>
+    <string name="whatsnew_others_title_time_mobile">Dodaj bieżącą godzinę lub datę do tytułu notatki z paska narzędzi klawiatury.</string>
+    <string name="whatsnew_others_sync_network">Wybór sieci do synchronizacji jest teraz w **Ustawienia → Synchronizacja i kopia zapasowa**.</string>
+    <string name="whatsnew_others_windows_startup">Szybsze uruchamianie w systemie Windows.</string>
+    <string name="whatsnew_others_small_fixes">Mnóstwo drobnych poprawek.</string>
+    <string name="whatsnew_preview_options">Opcje</string>
+    <string name="whatsnew_preview_trip_title">Wyjazd na weekend</string>
+    <string name="whatsnew_preview_trip_text">Wyjedź przed 8:00, żeby ominąć korki.</string>
+    <string name="whatsnew_preview_train_tickets">Bilety na pociąg</string>
+    <string name="whatsnew_preview_passport">Paszport</string>
+    <string name="whatsnew_preview_camera_charger">Ładowarka do aparatu</string>
+    <string name="whatsnew_preview_reading_list">Do przeczytania</string>
+    <string name="whatsnew_preview_reading_list_books">Listowie, Piranesi, Projekt Hail Mary</string>
+    <string name="whatsnew_preview_meeting_title">Spotkanie zespołu</string>
+    <string name="whatsnew_preview_meeting_text">Czwartek o 10, sala 2.</string>
+    <string name="whatsnew_preview_typed_heading">Plan</string>
+    <string name="whatsnew_preview_quote">Sekretem sukcesu jest zacząć.</string>
+    <string name="whatsnew_preview_jot_prompt">O czym myślisz?</string>
+    <string name="whatsnew_preview_jot_button">Zanotuj to</string>
+</resources>

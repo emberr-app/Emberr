@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Begin met typen om te zoeken in titels, fragmenten en notitie-inhoud.</string>
+    <string name="search_nothing_found">Geen overeenkomende notities, afspraken of personen gevonden.</string>
+    <string name="search_people">Personen</string>
+    <string name="search_events">Afspraken</string>
+    <string name="search_notes">Notities</string>
+    <string name="search_rename_note">Naam notitie wijzigen</string>
+    <string name="search_note_title_placeholder">Titel van notitie...</string>
+    <string name="search_rename">Naam wijzigen</string>
+    <string name="search_move_to_trash">Naar prullenbak</string>
+    <string name="search_untitled_event">Naamloze afspraak</string>
+    <string name="search_repeats">Herhaalt</string>
+    <string name="search_pinned">Vastgezet</string>
+    <string name="search_in_parent">in %1$s</string>
+    <string name="search_daily">Dagelijks</string>
+    <string name="search_add_to_favorites">Toevoegen aan favorieten</string>
+    <string name="search_remove_from_favorites">Verwijderen uit favorieten</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">%1$d persoon tonen</item>
+        <item quantity="other">Alle %1$d personen tonen</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">%1$d afspraak tonen</item>
+        <item quantity="other">Alle %1$d afspraken tonen</item>
+    </plurals>
+</resources>

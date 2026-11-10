@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Importieren aus</string>
+    <string name="import_text_and_markdown">Text &amp; Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Funktioniert auch für Notizen aus Obsidian und Bear.\nManche Obsidian-Funktionen werden eventuell nicht vollständig importiert.</string>
+
+    <string name="import_button">Importieren</string>
+    <string name="import_done">Fertig</string>
+    <string name="import_stop">Import stoppen</string>
+    <string name="import_or_drop_here">oder hier ablegen</string>
+    <string name="import_choose_again_hint_desktop">Klicke, um neu zu wählen, oder lege hier ab.</string>
+    <string name="import_choose_again_hint_touch">Tippe, um neu zu wählen.</string>
+    <string name="import_stopping">Import wird gestoppt und Importiertes entfernt…</string>
+    <string name="import_stopped">Import gestoppt</string>
+    <string name="import_nothing_added">Es wurde nichts hinzugefügt.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="one">%1$d Bereich</item>
+        <item quantity="other">%1$d Bereiche</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="one">%1$d Notiz</item>
+        <item quantity="other">%1$d Notizen</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="one">%1$d Ordner</item>
+        <item quantity="other">%1$d Ordner</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="one">%1$d Anhang</item>
+        <item quantity="other">%1$d Anhänge</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Importiere ein Backup, ohne deine aktuellen Notizen zu ersetzen.</string>
+    <string name="import_emberr_copying_media">Medien werden kopiert: %1$d von %2$d…</string>
+    <string name="import_emberr_getting_ready">Wird vorbereitet…</string>
+    <string name="import_emberr_saving">Import wird gespeichert…</string>
+    <string name="import_emberr_failed">Import fehlgeschlagen</string>
+    <string name="import_emberr_choose_backup_file">Backup-Datei wählen</string>
+    <string name="import_emberr_choose_backup_hint">.emberr-Datei aus „Backup exportieren“</string>
+    <string name="import_emberr_reading_backup">Backup wird gelesen…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Andere Datei wählen</string>
+    <string name="import_emberr_spaces_to_import">Zu importierende Bereiche</string>
+    <string name="import_emberr_choose_backup_first">Wähle zuerst ein Backup</string>
+    <string name="import_emberr_daily_notes">Tagesnotizen</string>
+    <string name="import_emberr_calendar">Kalender</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Tagesnotizen und Kalendertermine hinzugefügt</string>
+    <string name="import_emberr_added_daily_notes">Tagesnotizen hinzugefügt</string>
+    <string name="import_emberr_added_calendar">Kalendertermine hinzugefügt</string>
+    <string name="import_emberr_finished">Import abgeschlossen</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="one">%1$d Bereich importiert</item>
+        <item quantity="other">%1$d Bereiche importiert</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">%1$d Mediendatei wurde im Backup nicht gefunden und wird als fehlend angezeigt.</item>
+        <item quantity="other">%1$d Mediendateien wurden im Backup nicht gefunden und werden als fehlend angezeigt.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Unbekannter Fehler</string>
+    <string name="import_emberr_picker_title">Emberr-Backup wählen</string>
+
+    <string name="import_markdown_subtitle">Mach aus .md-, .txt- und .canvas-Dateien oder einer .zip mit Ordnern Emberr-Notizen.</string>
+    <string name="import_markdown_copying_file">%1$s wird kopiert…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">Notiz %1$d von %2$d wird importiert…</item>
+        <item quantity="other">Notiz %1$d von %2$d wird importiert…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Dateien oder eine .zip wählen</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas oder .zip</string>
+    <string name="import_markdown_reading_files">Dateien werden gelesen…</string>
+    <string name="import_markdown_could_not_read">Diese Dateien konnten nicht gelesen werden. %1$s</string>
+    <string name="import_markdown_save_to_space">In Bereich speichern</string>
+    <string name="import_markdown_import_as">Importieren als</string>
+    <string name="import_markdown_emberr_notes">Emberr-Notizen</string>
+    <string name="import_markdown_emberr_notes_subtitle">Jede Datei wird zu einer Notiz aus Blöcken.</string>
+    <string name="import_markdown_markdown_files">Markdown-Dateien</string>
+    <string name="import_markdown_coming_soon">Demnächst</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="one">%1$d Notiz importiert</item>
+        <item quantity="other">%1$d Notizen importiert</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="one">%1$d Notiz in %2$s importiert</item>
+        <item quantity="other">%1$d Notizen in %2$s importiert</item>
+    </plurals>
+    <string name="import_markdown_failed_files">%1$d nicht importiert: %2$s</string>
+    <string name="import_markdown_choose_folder">Ordner wählen</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d Datei</item>
+        <item quantity="other">%1$d Dateien</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d übersprungen: %2$s</string>
+    <string name="import_markdown_choose_different_files">Andere Dateien wählen</string>
+    <string name="import_markdown_picker_title">Dateien zum Importieren wählen</string>
+</resources>

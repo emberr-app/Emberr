@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Сохранить полученное</string>
+    <string name="share_save_to_overview">Сохранить в обзор</string>
+    <string name="share_save_to_a_note">Сохранить в заметку</string>
+    <string name="share_shared_image">Полученное изображение</string>
+    <string name="share_failed_to_save">Не удалось сохранить полученное.</string>
+    <string name="share_saved_to_inbox">Сохранено во «Входящие»</string>
+    <string name="share_note_no_longer_available">Эта заметка больше недоступна.</string>
+    <plurals name="share_images_selected">
+        <item quantity="one">Выбрано %1$d изображение</item>
+        <item quantity="few">Выбрано %1$d изображения</item>
+        <item quantity="many">Выбрано %1$d изображений</item>
+        <item quantity="other">Выбрано %1$d изображения</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="one">Выбран %1$d файл</item>
+        <item quantity="few">Выбрано %1$d файла</item>
+        <item quantity="many">Выбрано %1$d файлов</item>
+        <item quantity="other">Выбрано %1$d файла</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="one">%1$d элемент сохранён во «Входящие»</item>
+        <item quantity="few">%1$d элемента сохранено во «Входящие»</item>
+        <item quantity="many">%1$d элементов сохранено во «Входящие»</item>
+        <item quantity="other">%1$d элемента сохранено во «Входящие»</item>
+    </plurals>
+</resources>

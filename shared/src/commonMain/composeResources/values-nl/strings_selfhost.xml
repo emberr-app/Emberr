@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Eigen server</string>
+
+    <string name="selfhost_group_server_details">Servergegevens</string>
+    <string name="selfhost_group_recovery_passphrase">Herstelwachtwoordzin</string>
+    <string name="selfhost_group_unlock_vault">Kluis ontgrendelen</string>
+    <string name="selfhost_group_status">Status</string>
+
+    <string name="selfhost_setting_up">Instellen</string>
+    <string name="selfhost_unlock_and_sync">Ontgrendelen en synchroniseren</string>
+    <string name="selfhost_create_vault_and_sync">Kluis maken en synchroniseren</string>
+    <string name="selfhost_server_address_rejected">Serveradres geweigerd</string>
+    <string name="selfhost_got_it">Begrepen</string>
+
+    <string name="selfhost_status_connected">Status: verbonden</string>
+    <string name="selfhost_cancelling">Annuleren...</string>
+    <string name="selfhost_cancel_sync">Synchronisatie annuleren</string>
+    <string name="selfhost_cancel_sync_hint">Annuleren pauzeert de synchronisatie tot je de app herstart of op Nu synchroniseren tikt.</string>
+    <string name="selfhost_sync_now">Nu synchroniseren</string>
+    <string name="selfhost_syncing">Synchroniseren...</string>
+    <string name="selfhost_never_synced">Nooit gesynchroniseerd</string>
+    <string name="selfhost_last_synced">Laatst gesynchroniseerd: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d notitie wacht op synchronisatie</item>
+        <item quantity="other">%1$d notities wachten op synchronisatie</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Notities</string>
+    <string name="selfhost_progress_images">Afbeeldingen</string>
+
+    <string name="selfhost_passphrase_needed_hint">Je hebt deze wachtwoordzin nodig om een andere telefoon of computer met deze server te verbinden.</string>
+    <string name="selfhost_show_passphrase_button">Wachtwoordzin tonen</string>
+    <string name="selfhost_unlock_prompt_title">Herstelwachtwoordzin</string>
+    <string name="selfhost_unlock_prompt_description">Ontgrendel om je herstelwachtwoordzin te zien</string>
+    <string name="selfhost_save_passphrase_hint">Dit apparaat was verbonden voordat Emberr de wachtwoordzin opsloeg. Voer hem één keer in om hem hier op te slaan, zodat je hem later kunt zien.</string>
+    <string name="selfhost_checking">Controleren</string>
+    <string name="selfhost_save_passphrase">Wachtwoordzin opslaan</string>
+    <string name="selfhost_disconnect_vault">Kluis loskoppelen</string>
+    <string name="selfhost_recovery_dialog_message">Voer dit in op het andere apparaat wanneer het vraagt om de kluis te ontgrendelen. Deel het met niemand.</string>
+    <string name="selfhost_done">Gereed</string>
+    <string name="selfhost_disconnect_vault_question">Kluis loskoppelen?</string>
+    <string name="selfhost_disconnect_message">Je notities blijven op dit apparaat en op de server. Je hebt je herstelwachtwoordzin nodig om opnieuw te verbinden.</string>
+    <string name="selfhost_disconnect">Loskoppelen</string>
+
+    <string name="selfhost_checking_for_changes">Controleren op wijzigingen...</string>
+    <string name="selfhost_finishing_up">Afronden...</string>
+    <string name="selfhost_sending_percent">Versturen %1$d%</string>
+    <string name="selfhost_nothing_to_send">Niets te versturen</string>
+    <string name="selfhost_receiving_percent">Ontvangen %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Niets te ontvangen</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%1$d van %2$d notitie</item>
+        <item quantity="other">%1$d van %2$d notities</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s van %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Voer het WebDAV-adres en de inloggegevens van je server in, bijvoorbeeld Nextcloud of een NAS. Emberr versleutelt je notities voordat ze dit apparaat verlaten.</string>
+    <string name="selfhost_username">Gebruikersnaam</string>
+    <string name="selfhost_password">Wachtwoord</string>
+    <string name="selfhost_hide_password">Wachtwoord verbergen</string>
+    <string name="selfhost_show_password">Wachtwoord tonen</string>
+    <string name="selfhost_testing">Testen</string>
+    <string name="selfhost_test_connection">Verbinding testen</string>
+    <string name="selfhost_contacting_server">Contact maken met server...</string>
+
+    <string name="selfhost_restore_hint">Deze server heeft al een Emberr-kluis. Voer de herstelwachtwoordzin van 16 tekens in die werd getoond toen de kluis werd gemaakt.</string>
+    <string name="selfhost_restore_find_hint">Kun je hem niet vinden? Open Instellingen → Eigen server → Wachtwoordzin tonen op een apparaat dat al verbonden is.</string>
+    <string name="selfhost_passphrase_placeholder">Wachtwoordzin van 16 tekens</string>
+    <string name="selfhost_hide_passphrase">Wachtwoordzin verbergen</string>
+    <string name="selfhost_show_passphrase">Wachtwoordzin tonen</string>
+
+    <string name="selfhost_save_passphrase_now">Bewaar deze wachtwoordzin nu</string>
+    <string name="selfhost_fact_type_on_other_devices">Je typt hem op elke andere telefoon of computer die je met deze server verbindt.</string>
+    <string name="selfhost_fact_locks_notes">Hij vergrendelt je notities op de server. Niemand kan ze lezen zonder hem, zelfs Emberr niet.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr kan hem niet herstellen. Bewaar hem in een wachtwoordbeheerder of schrijf hem op.</string>
+    <string name="selfhost_fact_see_again_later">Je kunt hem later weer zien in Instellingen → Eigen server op elk verbonden apparaat.</string>
+    <string name="selfhost_new_passphrase">Nieuwe wachtwoordzin</string>
+    <string name="selfhost_generate_new_passphrase">Nieuwe wachtwoordzin maken</string>
+    <string name="selfhost_saved_passphrase_confirmation">Ik heb deze wachtwoordzin op een veilige plek bewaard</string>
+    <string name="selfhost_copy_passphrase">Wachtwoordzin kopiëren</string>
+    <string name="selfhost_copy_address">Adres kopiëren</string>
+    <string name="selfhost_copied_address">adres gekopieerd</string>
+
+    <string name="selfhost_invalid_credentials">Ongeldige gebruikersnaam of wachtwoord</string>
+    <string name="selfhost_server_returned_error">Server gaf een fout (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Kon de server niet bereiken</string>
+    <string name="selfhost_could_not_check_vault">Kon niet controleren op een bestaande kluis: %1$s</string>
+    <string name="selfhost_unknown_error">onbekende fout</string>
+    <string name="selfhost_existing_vault_found">Bestaande kluis gevonden op deze server</string>
+    <string name="selfhost_no_existing_vault">Geen bestaande kluis, er wordt een nieuwe gemaakt</string>
+    <string name="selfhost_no_vault_file_to_restore">Er is geen kluisbestand op de server gevonden om uit te herstellen</string>
+    <string name="selfhost_old_or_damaged_vault_data">Deze servermap bevat synchronisatiegegevens van een oudere of beschadigde kluis. Verwijder de map emberr_sync op je server en stel daarna opnieuw in.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Er bestaat al een kluis op deze server. Voer hieronder de herstelwachtwoordzin in om hem te herstellen.</string>
+    <string name="selfhost_could_not_set_up">Kon beveiligde synchronisatie niet instellen</string>
+    <string name="selfhost_no_vault_on_server">Er is geen kluis op de server gevonden.</string>
+    <string name="selfhost_wrong_passphrase">Die wachtwoordzin ontgrendelt deze kluis niet.</string>
+    <string name="selfhost_could_not_check_passphrase">Kon de wachtwoordzin niet controleren: %1$s</string>
+
+    <string name="selfhost_update_required_title">Synchronisatie met eigen server gepauzeerd</string>
+    <string name="selfhost_update_required_message">%1$s Je notities zijn veilig en worden op dit apparaat verder opgeslagen.</string>
+    <string name="selfhost_later">Later</string>
+    <string name="selfhost_update">Bijwerken</string>
+</resources>

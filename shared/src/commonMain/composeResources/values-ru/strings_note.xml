@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">Введите / для команд...</string>
+    <string name="note_copied_to_clipboard">Скопировано в буфер обмена</string>
+    <string name="note_copied_as_markdown">Скопировано как Markdown</string>
+    <string name="note_options">Параметры</string>
+    <string name="note_more_options">Другие параметры</string>
+    <string name="note_choose_icon">Выбрать значок</string>
+    <string name="note_search_emojis">Поиск эмодзи</string>
+    <string name="note_no_emojis_found">Эмодзи не найдены</string>
+    <string name="note_editing_template">Редактирование шаблона</string>
+    <string name="note_icon_options">Параметры значка</string>
+    <string name="note_change_icon">Сменить значок</string>
+    <string name="note_add_icon">Добавить значок</string>
+    <string name="note_remove_icon">Убрать значок</string>
+    <string name="note_cover_options">Параметры обложки</string>
+    <string name="note_upload_cover">Загрузить обложку</string>
+    <string name="note_remove_cover">Убрать обложку</string>
+    <string name="note_hide_word_count">Скрыть число слов</string>
+    <string name="note_show_word_count">Показать число слов</string>
+    <string name="note_alignment">Выравнивание</string>
+    <string name="note_note_width">Ширина заметки</string>
+    <string name="note_unfavorite">Убрать из избранного</string>
+    <string name="note_favorite">В избранное</string>
+    <string name="note_open_as_sticky_note">Открыть как стикер</string>
+    <string name="note_export_note">Экспорт заметки</string>
+    <string name="note_copy_text">Копировать текст</string>
+    <string name="note_copy_as_markdown">Копировать как Markdown</string>
+    <string name="note_download_markdown">Скачать .md</string>
+    <string name="note_download_pdf">Скачать PDF</string>
+    <string name="note_move_to_trash">Переместить в корзину</string>
+    <string name="note_width_narrow">Узкая</string>
+    <string name="note_width_full">Во всю ширину</string>
+    <string name="note_align_left">По левому краю</string>
+    <string name="note_align_center">По центру</string>
+    <string name="note_align_right">По правому краю</string>
+    <string name="note_align_justify">По ширине</string>
+    <string name="note_note_options">Параметры заметки</string>
+    <string name="note_export_options">Параметры экспорта</string>
+    <string name="note_paste_image_link">Вставьте ссылку на изображение</string>
+    <string name="note_cover_image">Обложка</string>
+    <string name="note_drag_image_to_reposition">Перетащите изображение, чтобы сдвинуть его</string>
+    <string name="note_save_position">Сохранить положение</string>
+    <string name="note_reposition">Сдвинуть</string>
+    <string name="note_collapse_panel">Свернуть панель</string>
+    <string name="note_expand_panel">Развернуть панель</string>
+    <plurals name="note_word_count">
+        <item quantity="one">%1$d слово</item>
+        <item quantity="few">%1$d слова</item>
+        <item quantity="many">%1$d слов</item>
+        <item quantity="other">%1$d слова</item>
+    </plurals>
+</resources>

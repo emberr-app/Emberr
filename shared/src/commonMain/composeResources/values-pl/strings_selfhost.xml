@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Własny serwer</string>
+
+    <string name="selfhost_group_server_details">Dane serwera</string>
+    <string name="selfhost_group_recovery_passphrase">Fraza odzyskiwania</string>
+    <string name="selfhost_group_unlock_vault">Odblokuj sejf</string>
+    <string name="selfhost_group_status">Stan</string>
+
+    <string name="selfhost_setting_up">Konfigurowanie</string>
+    <string name="selfhost_unlock_and_sync">Odblokuj i synchronizuj</string>
+    <string name="selfhost_create_vault_and_sync">Utwórz sejf i synchronizuj</string>
+    <string name="selfhost_server_address_rejected">Adres serwera odrzucony</string>
+    <string name="selfhost_got_it">Rozumiem</string>
+
+    <string name="selfhost_status_connected">Stan: połączono</string>
+    <string name="selfhost_cancelling">Anulowanie...</string>
+    <string name="selfhost_cancel_sync">Anuluj synchronizację</string>
+    <string name="selfhost_cancel_sync_hint">Anulowanie wstrzymuje synchronizację do ponownego uruchomienia aplikacji lub dotknięcia Synchronizuj teraz.</string>
+    <string name="selfhost_sync_now">Synchronizuj teraz</string>
+    <string name="selfhost_syncing">Synchronizowanie...</string>
+    <string name="selfhost_never_synced">Nigdy nie synchronizowano</string>
+    <string name="selfhost_last_synced">Ostatnia synchronizacja: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d notatka czeka na synchronizację</item>
+        <item quantity="few">%1$d notatki czekają na synchronizację</item>
+        <item quantity="many">%1$d notatek czeka na synchronizację</item>
+        <item quantity="other">%1$d notatki czeka na synchronizację</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Notatki</string>
+    <string name="selfhost_progress_images">Obrazy</string>
+
+    <string name="selfhost_passphrase_needed_hint">Ta fraza jest potrzebna, aby połączyć inny telefon lub komputer z tym serwerem.</string>
+    <string name="selfhost_show_passphrase_button">Pokaż frazę</string>
+    <string name="selfhost_unlock_prompt_title">Fraza odzyskiwania</string>
+    <string name="selfhost_unlock_prompt_description">Odblokuj, aby zobaczyć frazę odzyskiwania</string>
+    <string name="selfhost_save_passphrase_hint">To urządzenie zostało połączone, zanim Emberr zaczął zapisywać frazę. Wpisz ją raz, aby zapisać ją tutaj i móc ją później zobaczyć.</string>
+    <string name="selfhost_checking">Sprawdzanie</string>
+    <string name="selfhost_save_passphrase">Zapisz frazę</string>
+    <string name="selfhost_disconnect_vault">Odłącz sejf</string>
+    <string name="selfhost_recovery_dialog_message">Wpisz ją na drugim urządzeniu, gdy poprosi o odblokowanie sejfu. Nie udostępniaj jej nikomu.</string>
+    <string name="selfhost_done">Gotowe</string>
+    <string name="selfhost_disconnect_vault_question">Odłączyć sejf?</string>
+    <string name="selfhost_disconnect_message">Twoje notatki zostają na tym urządzeniu i na serwerze. Do ponownego połączenia potrzebna będzie fraza odzyskiwania.</string>
+    <string name="selfhost_disconnect">Odłącz</string>
+
+    <string name="selfhost_checking_for_changes">Sprawdzanie zmian...</string>
+    <string name="selfhost_finishing_up">Kończenie...</string>
+    <string name="selfhost_sending_percent">Wysyłanie %1$d%</string>
+    <string name="selfhost_nothing_to_send">Nic do wysłania</string>
+    <string name="selfhost_receiving_percent">Odbieranie %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Nic do odebrania</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">Notatki: %1$d z %2$d</item>
+        <item quantity="few">Notatki: %1$d z %2$d</item>
+        <item quantity="many">Notatki: %1$d z %2$d</item>
+        <item quantity="other">Notatki: %1$d z %2$d</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s z %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Wpisz adres WebDAV i dane logowania swojego serwera, na przykład Nextcloud lub NAS. Emberr szyfruje notatki, zanim opuszczą to urządzenie.</string>
+    <string name="selfhost_username">Nazwa użytkownika</string>
+    <string name="selfhost_password">Hasło</string>
+    <string name="selfhost_hide_password">Ukryj hasło</string>
+    <string name="selfhost_show_password">Pokaż hasło</string>
+    <string name="selfhost_testing">Testowanie</string>
+    <string name="selfhost_test_connection">Testuj połączenie</string>
+    <string name="selfhost_contacting_server">Łączenie z serwerem...</string>
+
+    <string name="selfhost_restore_hint">Na tym serwerze jest już sejf Emberr. Wpisz 16-znakową frazę odzyskiwania pokazaną przy tworzeniu sejfu.</string>
+    <string name="selfhost_restore_find_hint">Nie możesz jej znaleźć? Otwórz Ustawienia → Własny serwer → Pokaż frazę na urządzeniu, które jest już połączone.</string>
+    <string name="selfhost_passphrase_placeholder">16-znakowa fraza</string>
+    <string name="selfhost_hide_passphrase">Ukryj frazę</string>
+    <string name="selfhost_show_passphrase">Pokaż frazę</string>
+
+    <string name="selfhost_save_passphrase_now">Zapisz tę frazę teraz</string>
+    <string name="selfhost_fact_type_on_other_devices">Wpiszesz ją na każdym innym telefonie lub komputerze, który połączysz z tym serwerem.</string>
+    <string name="selfhost_fact_locks_notes">Zabezpiecza Twoje notatki na serwerze. Bez niej nikt ich nie odczyta, nawet Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr nie może jej zresetować. Przechowuj ją w menedżerze haseł lub zapisz.</string>
+    <string name="selfhost_fact_see_again_later">Możesz ją później zobaczyć w Ustawienia → Własny serwer na każdym połączonym urządzeniu.</string>
+    <string name="selfhost_new_passphrase">Nowa fraza</string>
+    <string name="selfhost_generate_new_passphrase">Wygeneruj nową frazę</string>
+    <string name="selfhost_saved_passphrase_confirmation">Fraza jest zapisana w bezpiecznym miejscu</string>
+    <string name="selfhost_copy_passphrase">Kopiuj frazę</string>
+    <string name="selfhost_copy_address">Kopiuj adres</string>
+    <string name="selfhost_copied_address">skopiowano adres</string>
+
+    <string name="selfhost_invalid_credentials">Nieprawidłowa nazwa użytkownika lub hasło</string>
+    <string name="selfhost_server_returned_error">Serwer zwrócił błąd (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Nie udało się połączyć z serwerem</string>
+    <string name="selfhost_could_not_check_vault">Nie udało się sprawdzić istniejącego sejfu: %1$s</string>
+    <string name="selfhost_unknown_error">nieznany błąd</string>
+    <string name="selfhost_existing_vault_found">Na tym serwerze znaleziono istniejący sejf</string>
+    <string name="selfhost_no_existing_vault">Brak istniejącego sejfu, zostanie utworzony nowy</string>
+    <string name="selfhost_no_vault_file_to_restore">Na serwerze nie znaleziono pliku sejfu do przywrócenia</string>
+    <string name="selfhost_old_or_damaged_vault_data">Ten folder na serwerze zawiera dane synchronizacji ze starszego lub uszkodzonego sejfu. Usuń folder emberr_sync na serwerze i skonfiguruj wszystko ponownie.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Na tym serwerze istnieje już sejf. Wpisz poniżej jego frazę odzyskiwania, aby go przywrócić.</string>
+    <string name="selfhost_could_not_set_up">Nie udało się skonfigurować bezpiecznej synchronizacji</string>
+    <string name="selfhost_no_vault_on_server">Na serwerze nie znaleziono sejfu.</string>
+    <string name="selfhost_wrong_passphrase">Ta fraza nie odblokowuje tego sejfu.</string>
+    <string name="selfhost_could_not_check_passphrase">Nie udało się sprawdzić frazy: %1$s</string>
+
+    <string name="selfhost_update_required_title">Synchronizacja z własnym serwerem wstrzymana</string>
+    <string name="selfhost_update_required_message">%1$s Twoje notatki są bezpieczne i nadal zapisują się na tym urządzeniu.</string>
+    <string name="selfhost_later">Później</string>
+    <string name="selfhost_update">Aktualizuj</string>
+</resources>

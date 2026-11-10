@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">Taakherinnering</string>
+    <string name="notifications_unfinished_task">Onafgeronde taak</string>
+    <string name="notifications_daily_note">Dagnotitie</string>
+    <string name="notifications_daily_title">Dagelijks: %1$s</string>
+    <string name="notifications_note">Notitie</string>
+    <string name="notifications_birthday">Verjaardag</string>
+    <string name="notifications_birthday_turns_age">%1$s wordt vandaag %2$d</string>
+    <string name="notifications_birthday_today">%1$s is vandaag jarig</string>
+    <string name="notifications_open">Openen</string>
+</resources>

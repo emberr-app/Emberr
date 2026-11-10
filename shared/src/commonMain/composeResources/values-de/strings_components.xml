@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">Leeren</string>
+    <string name="components_select_all">Alle auswählen</string>
+    <string name="components_spaces_none_yet">Noch keine</string>
+    <string name="components_spaces_none">Keine</string>
+    <plurals name="components_spaces_all">
+        <item quantity="one">Alle Bereiche (%1$d)</item>
+        <item quantity="other">Alle %1$d Bereiche</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="one">%1$d von %2$d Bereich</item>
+        <item quantity="other">%1$d von %2$d Bereichen</item>
+    </plurals>
+
+    <string name="components_search_notes">Notizen suchen...</string>
+    <string name="components_create_new_note">Neue Notiz erstellen</string>
+    <string name="components_new_named_note">Neue Notiz „%1$s“</string>
+    <string name="components_note_picker_hint">Tippe, um zu suchen, oder erstelle eine neue Notiz</string>
+    <string name="components_link_to_note_heading">MIT NOTIZ VERKNÜPFEN</string>
+    <string name="components_link_to_note">Mit Notiz verknüpfen</string>
+
+    <string name="components_load_more">Mehr laden</string>
+    <string name="components_show_sidebar">Seitenleiste einblenden</string>
+    <string name="components_clear_search">Suche löschen</string>
+
+    <string name="components_people_search_placeholder">Person suchen oder hinzufügen</string>
+    <string name="components_people_create_failed">Person konnte nicht erstellt werden</string>
+    <string name="components_people_type_name_hint">Gib einen Namen ein, um eine Person hinzuzufügen</string>
+    <string name="components_people_add_people">Personen hinzufügen</string>
+    <string name="components_people_selected">Ausgewählt</string>
+    <string name="components_people_create_named">„%1$s“ erstellen</string>
+    <string name="components_people_remove">Entfernen</string>
+    <string name="components_people_remove_named">%1$s entfernen</string>
+
+    <string name="components_reminder_later_today">Später heute</string>
+    <string name="components_reminder_tomorrow">Morgen</string>
+    <string name="components_reminder_this_weekend">Dieses Wochenende</string>
+    <string name="components_reminder_next_week">Nächste Woche</string>
+    <string name="components_reminder_custom_date">Eigenes Datum...</string>
+    <string name="components_reminder_remove">Erinnerung entfernen</string>
+    <string name="components_reminder_date">Datum</string>
+    <string name="components_reminder_all_day">Ganztägig</string>
+    <string name="components_reminder_in_15_mins">In 15 Min.</string>
+    <string name="components_reminder_in_1_hour">In 1 Stunde</string>
+    <string name="components_reminder_in_3_hours">In 3 Stunden</string>
+    <string name="components_reminder_this_evening">Heute Abend</string>
+    <string name="components_reminder_custom_time">Eigene Uhrzeit...</string>
+    <string name="components_reminder_time">Uhrzeit</string>
+    <string name="components_choose_month_or_year">Monat oder Jahr wählen</string>
+    <string name="components_previous_month">Vorheriger Monat</string>
+    <string name="components_next_month">Nächster Monat</string>
+    <string name="components_select_date">Datum wählen</string>
+    <string name="components_month_and_year">Monat &amp; Jahr</string>
+    <string name="components_select_time">Uhrzeit wählen</string>
+</resources>

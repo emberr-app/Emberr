@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Gedeelde inhoud opslaan</string>
+    <string name="share_save_to_overview">Opslaan in Overzicht</string>
+    <string name="share_save_to_a_note">Opslaan in een notitie</string>
+    <string name="share_shared_image">Gedeelde afbeelding</string>
+    <string name="share_failed_to_save">Kan gedeelde inhoud niet opslaan.</string>
+    <string name="share_saved_to_inbox">Opgeslagen in Inbox</string>
+    <string name="share_note_no_longer_available">Die notitie is niet meer beschikbaar.</string>
+    <plurals name="share_images_selected">
+        <item quantity="one">%1$d afbeelding geselecteerd</item>
+        <item quantity="other">%1$d afbeeldingen geselecteerd</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="one">%1$d bestand geselecteerd</item>
+        <item quantity="other">%1$d bestanden geselecteerd</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="one">%1$d item opgeslagen in Inbox</item>
+        <item quantity="other">%1$d items opgeslagen in Inbox</item>
+    </plurals>
+</resources>

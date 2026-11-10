@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr jest zablokowany</string>
+    <string name="app_lock_screen_detail">Użyj odcisku palca, twarzy lub blokady ekranu, aby go otworzyć.</string>
+    <string name="app_lock_unlock">Odblokuj</string>
+    <string name="app_lock_prompt_subtitle">Użyj odcisku palca, twarzy lub blokady ekranu</string>
+    <string name="app_lock_unlock_emberr">Odblokuj Emberr</string>
+    <string name="app_lock_off_no_screen_lock">Blokada aplikacji jest wyłączona, bo ten telefon nie ma blokady ekranu.</string>
+</resources>

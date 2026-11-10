@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">Favorieten</string>
+    <string name="home_toggle_favorites">Favorieten in-/uitklappen</string>
+    <string name="home_notes">Notities</string>
+    <string name="home_toggle_notes">Notities in-/uitklappen</string>
+    <string name="home_recents">Recent</string>
+    <string name="home_toggle_recents">Recent in-/uitklappen</string>
+    <string name="home_sort">Sorteren</string>
+    <string name="home_sort_notes">Notities sorteren</string>
+    <string name="home_new_folder">Nieuwe map</string>
+    <string name="home_new_folder_tooltip">Nieuwe map</string>
+    <string name="home_new_subfolder">Nieuwe submap</string>
+    <string name="home_folder_name_placeholder">bijv. Persoonlijk, Werk...</string>
+    <string name="home_new_note">Nieuwe notitie</string>
+    <string name="home_new_note_tooltip">Nieuwe notitie</string>
+    <string name="home_new_note_in_folder">Nieuwe notitie in %1$s</string>
+    <string name="home_note_title_placeholder">Titel van notitie...</string>
+    <string name="home_templates">Sjablonen</string>
+    <string name="home_switch_space">Wissel van ruimte</string>
+    <string name="home_toggle_sidebar">Zijbalk tonen/verbergen</string>
+    <string name="home_open_calendar">Agenda openen</string>
+    <string name="home_calendar">Agenda</string>
+    <string name="home_settings">Instellingen</string>
+    <string name="home_more_settings">Meer instellingen</string>
+    <string name="home_rename">Naam wijzigen</string>
+    <string name="home_move_to_trash">Naar prullenbak</string>
+    <string name="home_add_to_favorites">Toevoegen aan favorieten</string>
+    <string name="home_remove_from_favorites">Verwijderen uit favorieten</string>
+    <string name="home_sort_last_edited">Laatst bewerkt</string>
+    <string name="home_sort_date_created">Aanmaakdatum</string>
+    <string name="home_sort_name">Naam (A-Z)</string>
+    <string name="home_sort_type">Type</string>
+    <string name="home_sort_manual">Handmatig</string>
+    <string name="home_sort_ascending">Oplopend</string>
+    <string name="home_sort_descending">Aflopend</string>
+    <string name="home_sort_by">Sorteren op</string>
+    <string name="home_empty_space_start_with">Deze ruimte is leeg. Begin met</string>
+    <string name="home_empty_space_a_new_note">een nieuwe notitie</string>
+    <string name="home_empty_space_note_or_folder">%1$s of %2$s</string>
+    <string name="home_empty_space_a_folder">een map</string>
+    <string name="home_breadcrumb_home">Start</string>
+    <string name="home_cover">Omslag</string>
+    <string name="home_in_parent">in %1$s</string>
+    <string name="home_canvas">Canvas</string>
+    <string name="home_note">Notitie</string>
+    <string name="home_empty_note">Lege notitie...</string>
+    <string name="home_favorite">Favoriet</string>
+    <string name="home_selected">Geselecteerd</string>
+    <string name="home_rename_subtitle">Kies een nieuwe naam.</string>
+    <string name="home_name_placeholder">Naam...</string>
+    <string name="home_nesting_inside_folder">Komt in %1$s.</string>
+    <string name="home_organize_your_notes">Orden je notities.</string>
+    <string name="home_search_templates_placeholder">Sjablonen zoeken...</string>
+    <string name="home_search_templates">Sjablonen zoeken</string>
+    <string name="home_no_templates_yet">Nog geen sjablonen.</string>
+    <string name="home_no_templates_match">Geen sjablonen gevonden voor “%1$s”.</string>
+    <string name="home_new_template">Nieuw sjabloon</string>
+    <string name="home_edit_template">Sjabloon bewerken</string>
+    <string name="home_delete_template">Sjabloon verwijderen</string>
+    <string name="home_templates_subtitle">Begin een nieuwe notitie vanuit een sjabloon.</string>
+    <string name="home_new_subfolder_in_folder">Nieuwe submap in %1$s</string>
+    <string name="home_new_note_in_folder_description">Nieuwe notitie in %1$s</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="one">%1$d te gaan</item>
+        <item quantity="other">%1$d te gaan</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="one">%1$d opgeslagen</item>
+        <item quantity="other">%1$d opgeslagen</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="one">%1$d bijgevoegd</item>
+        <item quantity="other">%1$d bijgevoegd</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="one">%1$d item verwijderen</item>
+        <item quantity="other">%1$d items verwijderen</item>
+    </plurals>
+</resources>

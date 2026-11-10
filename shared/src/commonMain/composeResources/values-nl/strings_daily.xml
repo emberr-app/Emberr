@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">Tijdlijn</string>
+    <string name="daily_close_timeline">Tijdlijn sluiten</string>
+    <string name="daily_open_timeline">Tijdlijn openen</string>
+    <string name="daily_search_the_timeline">Zoeken in de tijdlijn</string>
+    <string name="daily_previous_match">Vorige overeenkomst</string>
+    <string name="daily_next_match">Volgende overeenkomst</string>
+    <string name="daily_nothing_on_this_day_yet">Nog niets op deze dag.</string>
+    <string name="daily_nothing_written_yet">Nog niets geschreven.</string>
+    <string name="daily_code">Code</string>
+    <string name="daily_today">Vandaag</string>
+    <string name="daily_tomorrow">Morgen</string>
+    <string name="daily_yesterday">Gisteren</string>
+    <string name="daily_go_to_today">Naar vandaag</string>
+    <string name="daily_previous_month">Vorige maand</string>
+    <string name="daily_next_month">Volgende maand</string>
+    <string name="daily_previous">Vorige</string>
+    <string name="daily_next">Volgende</string>
+    <string name="daily_open_calendar">Agenda openen</string>
+    <string name="daily_calendar">Agenda</string>
+    <string name="daily_settings">Instellingen</string>
+    <string name="daily_more_settings">Meer instellingen</string>
+    <string name="daily_click_to_write_your_thoughts">Klik om je gedachten op te schrijven</string>
+    <string name="daily_tap_to_write_your_thoughts">Tik om je gedachten op te schrijven</string>
+</resources>

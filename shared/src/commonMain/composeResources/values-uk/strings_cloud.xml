@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_title">Emberr Cloud</string>
+
+    <string name="cloud_server_address">Адреса сервера</string>
+    <string name="cloud_server_address_invalid">Введіть адресу, що починається з http:// або https://, наприклад http://localhost:8080.</string>
+    <string name="cloud_server_address_saved">Адресу сервера збережено</string>
+
+    <string name="cloud_welcome_hint">Синхронізуйте нотатки між пристроями з наскрізним шифруванням. Прочитати їх можуть лише ваші пристрої.</string>
+    <string name="cloud_create_account">Створити обліковий запис</string>
+    <string name="cloud_log_in">Увійти</string>
+    <string name="cloud_send_code">Надіслати код</string>
+    <string name="cloud_send_new_code">Надіслати новий код</string>
+    <string name="cloud_continue">Продовжити</string>
+    <string name="cloud_done">Готово</string>
+    <string name="cloud_password_not_stored_hint">Ми не зберігаємо цей пароль, тож якщо ви його забудете, ми не зможемо розшифрувати ваші нотатки.</string>
+    <string name="cloud_recovery_words">Слова відновлення</string>
+    <string name="cloud_recovery_words_explanation">Якщо ви забудете пароль, ці 24 слова — єдиний спосіб повернутися до облікового запису. Ми їх не зберігаємо, тож збережіть їх у надійному місці.</string>
+    <string name="cloud_recovery_words_warning">Без пароля та цих слів ваші хмарні нотатки не вдасться відновити.</string>
+    <string name="cloud_recovery_words_saved_checkbox">Я зберіг(-ла) ці слова в надійному місці</string>
+    <string name="cloud_copy_words">Копіювати слова</string>
+    <string name="cloud_recovery_words_copied">Слова відновлення скопійовано</string>
+    <string name="cloud_forgot_password">Забули пароль</string>
+    <string name="cloud_recovery_email_hint">Введіть електронну пошту облікового запису. Ми надішлемо вам код.</string>
+    <string name="cloud_recovery_other_device_hint">Ви ввійшли на іншому пристрої? Змініть пароль там.</string>
+    <string name="cloud_recovery_words_entry_hint">Введіть 24 слова відновлення, які ви зберегли під час створення облікового запису.</string>
+    <string name="cloud_recovery_words_placeholder">Ваші 24 слова відновлення</string>
+    <string name="cloud_set_new_password">Установіть новий пароль</string>
+    <string name="cloud_new_password_hint">Введіть новий пароль, яким ми шифруватимемо ваші нотатки.</string>
+    <string name="cloud_reset_password">Скинути пароль</string>
+    <string name="cloud_sign_out_other_devices_title">Вийти на інших пристроях</string>
+    <string name="cloud_sign_out_other_devices_message">Якщо ви думаєте, що хтось може знати ваш пароль, можна примусово вийти з облікового запису на всіх інших пристроях.</string>
+    <string name="cloud_sign_out_other_devices_button">Вийти на інших пристроях</string>
+    <string name="cloud_do_not_sign_out">Не виходити</string>
+
+    <string name="cloud_account">Обліковий запис</string>
+    <string name="cloud_signed_in_as">Ви ввійшли як %1$s</string>
+    <string name="cloud_loading_storage_used">Завантаження використаного місця...</string>
+    <string name="cloud_sync">Синхронізація</string>
+    <string name="cloud_syncing">Синхронізація...</string>
+    <string name="cloud_last_synced">Остання синхронізація: %1$s</string>
+    <string name="cloud_sync_explanation">Надсилає й отримує простори, папки, нотатки, списки, чати та медіафайли.</string>
+    <string name="cloud_sync_now">Синхронізувати зараз</string>
+    <string name="cloud_media">Медіафайли</string>
+    <string name="cloud_media_last_checked">Медіафайли востаннє перевірено: %1$s</string>
+    <string name="cloud_devices">Пристрої</string>
+    <string name="cloud_loading_devices">Завантаження пристроїв...</string>
+    <string name="cloud_tap_device_to_sign_out">Торкніться пристрою, щоб вийти на ньому.</string>
+    <string name="cloud_sign_out_of_this_device">Вийти на цьому пристрої</string>
+    <string name="cloud_manage_account">Керування обліковим записом</string>
+    <string name="cloud_change_password">Змінити пароль</string>
+    <string name="cloud_change_email">Змінити електронну пошту</string>
+    <string name="cloud_recovery_words_lock_description">Підтвердьте свою особу, щоб переглянути слова відновлення</string>
+    <string name="cloud_delete_account">Видалити обліковий запис</string>
+    <string name="cloud_sign_out_device_title">Вийти на пристрої?</string>
+    <string name="cloud_sign_out_device_message">Буде виконано вихід на цьому пристрої:\n\n%1$s</string>
+    <string name="cloud_sign_out">Вийти</string>
+    <string name="cloud_delete_account_title">Видалити обліковий запис?</string>
+    <string name="cloud_delete_account_message">Ваш обліковий запис Emberr Cloud і все, що в ньому зберігається, буде видалено назавжди. Це не можна скасувати. Нотатки на цьому пристрої залишаться, якщо ви не вирішите стерти й їх. Ми надішлемо код на %1$s для підтвердження.</string>
+    <string name="cloud_last_used">Востаннє використано: %1$s</string>
+    <string name="cloud_this_device">Цей пристрій</string>
+    <string name="cloud_sign_out_of_this_device_title">Вийти на цьому пристрої?</string>
+    <string name="cloud_sign_out_of_this_device_message">Цей пристрій перестане використовувати Emberr Cloud. Ваші нотатки на цьому пристрої не зачіпаються.</string>
+
+    <string name="cloud_change_password_code_hint">Ми надішлемо код на %1$s для підтвердження.</string>
+    <string name="cloud_sign_out_of_other_devices">Вийти на інших пристроях</string>
+    <string name="cloud_change_email_hint">Введіть нову адресу електронної пошти. Ми надішлемо туди код.</string>
+    <string name="cloud_recovery_words_password_hint">Введіть пароль, щоб переглянути слова відновлення.</string>
+    <string name="cloud_clear_notes_on_this_device">Також стерти нотатки на цьому пристрої</string>
+    <string name="cloud_delete_account_warning">Ваш обліковий запис Emberr Cloud буде видалено назавжди. Це не можна скасувати.</string>
+
+    <string name="cloud_email">Електронна пошта</string>
+    <string name="cloud_code_placeholder">6-значний код</string>
+    <string name="cloud_password">Пароль</string>
+    <string name="cloud_confirm_password">Підтвердьте пароль</string>
+    <string name="cloud_passwords_do_not_match">Паролі не збігаються.</string>
+    <string name="cloud_hide_password">Приховати пароль</string>
+    <string name="cloud_show_password">Показати пароль</string>
+    <string name="cloud_password_strength_weak">Надійність пароля: слабкий</string>
+    <string name="cloud_password_strength_moderate">Надійність пароля: середній</string>
+    <string name="cloud_password_strength_strong">Надійність пароля: надійний</string>
+    <string name="cloud_code_sent">Ми надіслали код на %1$s. Перевірте вхідні (і спам).</string>
+    <string name="cloud_new_code_sent">Ми надіслали новий код на %1$s.</string>
+    <string name="cloud_please_wait">Зачекайте...</string>
+
+    <string name="cloud_sending_file">Надсилання файлу %1$d з %2$d</string>
+    <string name="cloud_receiving_file">Отримання файлу %1$d з %2$d</string>
+    <string name="cloud_photo_in_note">Фото в «%1$s»</string>
+    <string name="cloud_video_in_note">Відео в «%1$s»</string>
+    <string name="cloud_audio_in_note">Аудіо в «%1$s»</string>
+    <string name="cloud_document_in_note">Документ у «%1$s»</string>
+    <string name="cloud_file_in_note">Файл у «%1$s»</string>
+    <string name="cloud_file_progress">%1$d% · %2$s з %3$s</string>
+    <plurals name="cloud_files_waiting_for_upload">
+        <item quantity="one">%1$d файл чекає, поки інший пристрій його вивантажить.</item>
+        <item quantity="few">%1$d файли чекають, поки інший пристрій їх вивантажить.</item>
+        <item quantity="many">%1$d файлів чекають, поки інший пристрій їх вивантажить.</item>
+        <item quantity="other">%1$d файлу чекають, поки інший пристрій їх вивантажить.</item>
+    </plurals>
+    <string name="cloud_files_not_sent_and_not_received">Файли: не надіслано %1$d, не отримано %2$d. Спробуємо ще раз під час наступної синхронізації.</string>
+    <string name="cloud_files_not_sent">Файли: не надіслано %1$d. Спробуємо ще раз під час наступної синхронізації.</string>
+    <string name="cloud_files_not_received">Файли: не отримано %1$d. Спробуємо ще раз під час наступної синхронізації.</string>
+    <string name="cloud_files_sent_and_received_counts">Надіслано файлів: %1$d з %2$d · отримано файлів: %3$d з %4$d</string>
+    <string name="cloud_files_sent_count">Надіслано файлів: %1$d з %2$d</string>
+    <string name="cloud_files_received_count">Отримано файлів: %1$d з %2$d</string>
+
+    <string name="cloud_trial_ended">Пробний період завершився %1$s · лише читання до %2$s</string>
+    <string name="cloud_trial_ends_today">Пробний період · завершується сьогодні</string>
+    <plurals name="cloud_trial_days_left">
+        <item quantity="one">Пробний період · залишився %1$d день</item>
+        <item quantity="few">Пробний період · залишилося %1$d дні</item>
+        <item quantity="many">Пробний період · залишилося %1$d днів</item>
+        <item quantity="other">Пробний період · залишилося %1$d дня</item>
+    </plurals>
+    <string name="cloud_storage_used">Використано %1$s з %2$s</string>
+    <string name="cloud_full_with_usage">Emberr Cloud заповнено: використано %1$s з %2$s. Нові нотатки й файли залишаються на цьому пристрої та вивантажаться, коли з'явиться місце.</string>
+    <string name="cloud_full">Emberr Cloud заповнено. Нові нотатки й файли залишаються на цьому пристрої та вивантажаться, коли з'явиться місце.</string>
+    <string name="cloud_trial_ended_read_only">Ваш безкоштовний пробний період завершився, тому Emberr Cloud доступний лише для читання. Цей пристрій і далі отримує зміни з інших ваших пристроїв, але нічого нового не вивантажується. Ваші нотатки залишаються на ваших пристроях.</string>
+    <plurals name="cloud_files_too_large">
+        <item quantity="one">%1$d файл має розмір понад 10 ГБ, тому залишається лише на цьому пристрої.</item>
+        <item quantity="few">%1$d файли мають розмір понад 10 ГБ, тому залишаються лише на цьому пристрої.</item>
+        <item quantity="many">%1$d файлів мають розмір понад 10 ГБ, тому залишаються лише на цьому пристрої.</item>
+        <item quantity="other">%1$d файлу мають розмір понад 10 ГБ, тому залишаються лише на цьому пристрої.</item>
+    </plurals>
+    <string name="cloud_copy_removed">Ваш безкоштовний пробний період завершився, і хмарну копію було видалено %1$s. Усі нотатки досі є на цьому пристрої. Синхронізація відновиться, коли ви виберете план.</string>
+
+    <string name="cloud_error_something_went_wrong">Щось пішло не так. Спробуйте ще раз.</string>
+    <string name="cloud_error_signed_out">Ви вийшли з облікового запису. Увійдіть знову.</string>
+    <string name="cloud_error_incorrect_password">Неправильний пароль. Спробуйте ще раз.</string>
+    <string name="cloud_error_invalid_email">Введіть дійсну адресу електронної пошти.</string>
+    <string name="cloud_error_wrong_email_or_password">Неправильна електронна пошта або пароль.</string>
+    <string name="cloud_error_incorrect_code">Цей код неправильний.</string>
+    <string name="cloud_error_expired_code">Термін дії коду минув. Попросіть новий.</string>
+    <string name="cloud_error_too_many_tries">Забагато спроб. Зачекайте трохи й спробуйте ще раз.</string>
+    <string name="cloud_error_update_required">Оновіть Emberr, щоб користуватися Emberr Cloud.</string>
+    <string name="cloud_error_device_already_signed_out">На цьому пристрої вихід уже виконано.</string>
+    <string name="cloud_error_email_already_used">Ця електронна пошта вже використовується іншим обліковим записом.</string>
+    <string name="cloud_error_server_unreachable">Не вдається зв'язатися із сервером %1$s.</string>
+    <string name="cloud_error_invalid_recovery_words">Ці слова не є дійсним ключем відновлення. Переконайтеся, що слів 24, і перевірте написання кожного.</string>
+    <string name="cloud_error_recovery_words_other_account">Ці слова належать іншому обліковому запису.</string>
+    <string name="cloud_account_deleted_notes_not_cleared">Ваш обліковий запис видалено, але нотатки на цьому пристрої не вдалося стерти.</string>
+    <string name="cloud_password_changed">Пароль успішно змінено</string>
+    <string name="cloud_email_changed">Електронну пошту змінено на %1$s</string>
+
+    <string name="cloud_synced">Синхронізовано: отримано %1$d, надіслано %2$d</string>
+    <string name="cloud_synced_with_not_sent">Синхронізовано: отримано %1$d, надіслано %2$d, не надіслано %3$d</string>
+    <string name="cloud_sync_busy">Триває інша синхронізація. Спробуйте за мить.</string>
+    <string name="cloud_sync_update_required">Оновіть Emberr, щоб і далі синхронізуватися з Emberr Cloud.</string>
+    <string name="cloud_sync_other_method_on">Увімкнено інший спосіб синхронізації. Від'єднайте власний сервер або скасуйте пару синхронізації через LAN, щоб і далі користуватися Emberr Cloud.</string>
+    <string name="cloud_disconnect_self_host_first">Від'єднайте власний сервер, щоб користуватися Emberr Cloud.</string>
+    <string name="cloud_unpair_lan_sync_first">Скасуйте пару синхронізації через LAN, щоб користуватися Emberr Cloud.</string>
+</resources>

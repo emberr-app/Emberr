@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">Tot later!</string>
+    <string name="whatsnew_whats_new_question">Wat is er nieuw?</string>
+    <string name="whatsnew_title">Wat is er nieuw</string>
+    <string name="whatsnew_version">Versie %1$s</string>
+    <string name="whatsnew_new">Nieuw</string>
+    <string name="whatsnew_themes_heading">Thema's</string>
+    <string name="whatsnew_themes_where">Instellingen → Uiterlijk → Thema</string>
+    <string name="whatsnew_themes_description_desktop">Kies uit 13 kleurthema's, zoals Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine en Hoog contrast. Elk thema heeft een sterkte-instelling, en je kiest of tekst en pictogrammen het ook volgen.</string>
+    <string name="whatsnew_themes_description_mobile">Kies uit 14 kleurthema's, zoals Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine en Hoog contrast, of laat **Achtergrond** de kleuren van je achtergrond overnemen. Elk thema heeft een sterkte-instelling, en je kiest of tekst en pictogrammen het ook volgen. Je widgets op het startscherm volgen het thema ook.</string>
+    <string name="whatsnew_texture_heading">Papiertextuur</string>
+    <string name="whatsnew_texture_where">Instellingen → Uiterlijk → Thema → Textuur</string>
+    <string name="whatsnew_texture_description">Geef de app een zachte korrel, zoals echt papier. Stel in hoe sterk die is en kies waar die verschijnt: de hele app, notities, canvas of dagnotities.</string>
+    <string name="whatsnew_scale_heading">Interfaceschaal</string>
+    <string name="whatsnew_scale_where">Instellingen → Uiterlijk → Interfaceschaal</string>
+    <string name="whatsnew_scale_description_desktop">Maak alles in de app groter of kleiner, van 80% tot 200%, of gebruik **Ctrl +**, **Ctrl −** en **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Maak alles in de app groter of kleiner, van 80% tot 200%.</string>
+    <string name="whatsnew_widgets_heading">Widgets</string>
+    <string name="whatsnew_widgets_where">Houd je startscherm ingedrukt → Widgets → Emberr</string>
+    <string name="whatsnew_widgets_description">Elke widget heeft een nieuwe, strakkere look, en er zijn drie nieuwe: **Notitiekaart**, **Snel noteren** en **Citaat van de dag**. Widgets tonen de gekozen notitie nu meteen, en laten weten wanneer die notitie is verwijderd.</string>
+    <string name="whatsnew_editor_heading">Editor</string>
+    <string name="whatsnew_editor_where">Typ / ergens in een notitie</string>
+    <string name="whatsnew_editor_description">Het slash-menu opent nu direct na elk teken, niet alleen na een spatie. Typ je voorbij een overeenkomst, wis dan terug en het menu komt terug.</string>
+    <string name="whatsnew_others_heading">Overig</string>
+    <string name="whatsnew_others_where">Kleinere wijzigingen en verbeteringen</string>
+    <string name="whatsnew_others_sliders">Schuifregelaars in de hele app hebben een nieuw ontwerp.</string>
+    <string name="whatsnew_others_title_time_desktop">Typ **/** in de titel van een notitie om de huidige tijd of datum toe te voegen.</string>
+    <string name="whatsnew_others_title_time_mobile">Voeg de huidige tijd of datum toe aan de titel van een notitie via de toetsenbordwerkbalk.</string>
+    <string name="whatsnew_others_sync_network">De netwerkkeuze voor synchronisatie staat nu in **Instellingen → Synchronisatie en back-up**.</string>
+    <string name="whatsnew_others_windows_startup">Sneller opstarten op Windows.</string>
+    <string name="whatsnew_others_small_fixes">Veel kleine verbeteringen.</string>
+    <string name="whatsnew_preview_options">Opties</string>
+    <string name="whatsnew_preview_trip_title">Weekendje weg</string>
+    <string name="whatsnew_preview_trip_text">Om 8 uur vertrekken om de files voor te zijn.</string>
+    <string name="whatsnew_preview_train_tickets">Treinkaartjes</string>
+    <string name="whatsnew_preview_passport">Paspoort</string>
+    <string name="whatsnew_preview_camera_charger">Camera-oplader</string>
+    <string name="whatsnew_preview_reading_list">Leeslijst</string>
+    <string name="whatsnew_preview_reading_list_books">The Overstory, Piranesi, Project Hail Mary</string>
+    <string name="whatsnew_preview_meeting_title">Teamoverleg</string>
+    <string name="whatsnew_preview_meeting_text">Donderdag om 10 uur, zaal 2.</string>
+    <string name="whatsnew_preview_typed_heading">Agenda</string>
+    <string name="whatsnew_preview_quote">Het geheim van vooruitkomen is beginnen.</string>
+    <string name="whatsnew_preview_jot_prompt">Waar denk je aan?</string>
+    <string name="whatsnew_preview_jot_button">Snel noteren</string>
+</resources>
