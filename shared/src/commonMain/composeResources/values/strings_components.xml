@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">Clear</string>
+    <string name="components_select_all">Select All</string>
+    <string name="components_spaces_none_yet">None yet</string>
+    <string name="components_spaces_none">None</string>
+    <plurals name="components_spaces_all">
+        <item quantity="one">All %1$d spaces</item>
+        <item quantity="other">All %1$d spaces</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="one">%1$d of %2$d spaces</item>
+        <item quantity="other">%1$d of %2$d spaces</item>
+    </plurals>
+
+    <string name="components_search_notes">Search notes...</string>
+    <string name="components_create_new_note">Create new note</string>
+    <string name="components_new_named_note">New "%1$s" note</string>
+    <string name="components_note_picker_hint">Start typing to search, or create a new note</string>
+    <string name="components_link_to_note_heading">LINK TO NOTE</string>
+    <string name="components_link_to_note">Link to Note</string>
+
+    <string name="components_load_more">Load more</string>
+    <string name="components_show_sidebar">Show sidebar</string>
+    <string name="components_clear_search">Clear search</string>
+
+    <string name="components_people_search_placeholder">Search or add a person</string>
+    <string name="components_people_create_failed">Couldn't create the person</string>
+    <string name="components_people_type_name_hint">Type a name to add a person</string>
+    <string name="components_people_add_people">Add people</string>
+    <string name="components_people_selected">Selected</string>
+    <string name="components_people_create_named">Create “%1$s”</string>
+    <string name="components_people_remove">Remove</string>
+    <string name="components_people_remove_named">Remove %1$s</string>
+
+    <string name="components_reminder_later_today">Later today</string>
+    <string name="components_reminder_tomorrow">Tomorrow</string>
+    <string name="components_reminder_this_weekend">This weekend</string>
+    <string name="components_reminder_next_week">Next week</string>
+    <string name="components_reminder_custom_date">Custom date...</string>
+    <string name="components_reminder_remove">Remove reminder</string>
+    <string name="components_reminder_date">Date</string>
+    <string name="components_reminder_all_day">All day</string>
+    <string name="components_reminder_in_15_mins">In 15 mins</string>
+    <string name="components_reminder_in_1_hour">In 1 hour</string>
+    <string name="components_reminder_in_3_hours">In 3 hours</string>
+    <string name="components_reminder_this_evening">This evening</string>
+    <string name="components_reminder_custom_time">Custom time...</string>
+    <string name="components_reminder_time">Time</string>
+    <string name="components_choose_month_or_year">Choose month or year</string>
+    <string name="components_previous_month">Previous month</string>
+    <string name="components_next_month">Next month</string>
+    <string name="components_select_date">Select Date</string>
+    <string name="components_month_and_year">Month &amp; Year</string>
+    <string name="components_select_time">Select Time</string>
+</resources>

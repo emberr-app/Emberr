@@ -45,6 +45,30 @@ import emberr.shared.generated.resources.calendar_day
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.clock_circle
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.components_choose_month_or_year
+import emberr.shared.generated.resources.components_month_and_year
+import emberr.shared.generated.resources.components_next_month
+import emberr.shared.generated.resources.components_previous_month
+import emberr.shared.generated.resources.components_reminder_all_day
+import emberr.shared.generated.resources.components_reminder_custom_date
+import emberr.shared.generated.resources.components_reminder_custom_time
+import emberr.shared.generated.resources.components_reminder_date
+import emberr.shared.generated.resources.components_reminder_in_15_mins
+import emberr.shared.generated.resources.components_reminder_in_1_hour
+import emberr.shared.generated.resources.components_reminder_in_3_hours
+import emberr.shared.generated.resources.components_reminder_later_today
+import emberr.shared.generated.resources.components_reminder_next_week
+import emberr.shared.generated.resources.components_reminder_remove
+import emberr.shared.generated.resources.components_reminder_this_evening
+import emberr.shared.generated.resources.components_reminder_this_weekend
+import emberr.shared.generated.resources.components_reminder_time
+import emberr.shared.generated.resources.components_reminder_tomorrow
+import emberr.shared.generated.resources.components_select_date
+import emberr.shared.generated.resources.components_select_time
 import emberr.shared.generated.resources.history2
 import emberr.shared.generated.resources.history3
 import emberr.shared.generated.resources.moon_cloud
@@ -55,6 +79,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import java.util.Calendar
 import kotlin.math.abs
 
@@ -79,22 +104,22 @@ fun ReminderPresetMenu(
         ) {
             Column(modifier = Modifier.padding(vertical = 4.dp)) {
                 EmberrDesktopMenuOption(
-                    label = "Later today",
+                    label = stringResource(Res.string.components_reminder_later_today),
                     icon = { ReminderMenuIcon(Res.drawable.calendar_day) },
                     onClick = { onPresetSelected(getDatePresetTime(DatePresetType.LATER_TODAY)); onDismiss() }
                 )
                 EmberrDesktopMenuOption(
-                    label = "Tomorrow",
+                    label = stringResource(Res.string.components_reminder_tomorrow),
                     icon = { ReminderMenuIcon(Res.drawable.calendar_day) },
                     onClick = { onPresetSelected(getDatePresetTime(DatePresetType.TOMORROW)); onDismiss() }
                 )
                 EmberrDesktopMenuOption(
-                    label = "This weekend",
+                    label = stringResource(Res.string.components_reminder_this_weekend),
                     icon = { ReminderMenuIcon(Res.drawable.sofa) },
                     onClick = { onPresetSelected(getDatePresetTime(DatePresetType.THIS_WEEKEND)); onDismiss() }
                 )
                 EmberrDesktopMenuOption(
-                    label = "Next week",
+                    label = stringResource(Res.string.components_reminder_next_week),
                     icon = { ReminderMenuIcon(Res.drawable.square_arrows_right) },
                     onClick = { onPresetSelected(getDatePresetTime(DatePresetType.NEXT_WEEK)); onDismiss() }
                 )
@@ -103,7 +128,7 @@ fun ReminderPresetMenu(
                     menuWidthEstimate = DesktopDatePickerMenuWidth,
                     anchor = { openPicker, _ ->
                         EmberrDesktopMenuOption(
-                            label = "Custom date...",
+                            label = stringResource(Res.string.components_reminder_custom_date),
                             icon = { ReminderMenuIcon(Res.drawable.calendar_add3) },
                             onClick = openPicker
                         )
@@ -119,7 +144,7 @@ fun ReminderPresetMenu(
                 if (onRemove != null) {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
                     EmberrDesktopMenuOption(
-                        label = "Remove reminder",
+                        label = stringResource(Res.string.components_reminder_remove),
                         icon = { ReminderMenuIcon(Res.drawable.bell_off2, tint = MaterialTheme.colorScheme.error) },
                         labelColor = MaterialTheme.colorScheme.error,
                         onClick = { onRemove(); onDismiss() }
@@ -128,28 +153,28 @@ fun ReminderPresetMenu(
             }
         }
     } else {
-        EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "Date") {
+        EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = stringResource(Res.string.components_reminder_date)) {
           CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
           ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
-                PresetSheetItem(painterResource(Res.drawable.calendar_day), "Later today") {
+                PresetSheetItem(painterResource(Res.drawable.calendar_day), stringResource(Res.string.components_reminder_later_today)) {
                     onPresetSelected(
                         getDatePresetTime(DatePresetType.LATER_TODAY)
                     ); onDismiss()
                 }
-                PresetSheetItem(painterResource(Res.drawable.calendar_day), "Tomorrow") {
+                PresetSheetItem(painterResource(Res.drawable.calendar_day), stringResource(Res.string.components_reminder_tomorrow)) {
                     onPresetSelected(
                         getDatePresetTime(DatePresetType.TOMORROW)
                     ); onDismiss()
                 }
-                PresetSheetItem(painterResource(Res.drawable.sofa), "This weekend") {
+                PresetSheetItem(painterResource(Res.drawable.sofa), stringResource(Res.string.components_reminder_this_weekend)) {
                     onPresetSelected(
                         getDatePresetTime(DatePresetType.THIS_WEEKEND)
                     ); onDismiss()
                 }
-                PresetSheetItem(painterResource(Res.drawable.square_arrows_right), "Next week") {
+                PresetSheetItem(painterResource(Res.drawable.square_arrows_right), stringResource(Res.string.components_reminder_next_week)) {
                     onPresetSelected(
                         getDatePresetTime(DatePresetType.NEXT_WEEK)
                     ); onDismiss()
@@ -160,7 +185,7 @@ fun ReminderPresetMenu(
                 )
                 PresetSheetItem(
                     painterResource(Res.drawable.calendar_add3),
-                    "Custom date..."
+                    stringResource(Res.string.components_reminder_custom_date)
                 ) { onCustomSelected(); onDismiss() }
                 if (onRemove != null) {
                     HorizontalDivider(
@@ -169,12 +194,12 @@ fun ReminderPresetMenu(
                     )
                     PresetSheetItem(
                         painterResource(Res.drawable.bell_off2),
-                        "Remove reminder",
+                        stringResource(Res.string.components_reminder_remove),
                         isDestructive = true
                     ) { onRemove(); onDismiss() }
                 }
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
                 )
@@ -204,7 +229,7 @@ fun TimePresetMenu(
             Column(modifier = Modifier.padding(vertical = 4.dp)) {
                 if (onAllDaySelected != null) {
                     EmberrDesktopMenuOption(
-                        label = "All day",
+                        label = stringResource(Res.string.components_reminder_all_day),
                         isSelected = isAllDay,
                         icon = { ReminderMenuIcon(Res.drawable.calendar_day) },
                         onClick = { onAllDaySelected(); onDismiss() }
@@ -212,22 +237,22 @@ fun TimePresetMenu(
                     HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp))
                 }
                 EmberrDesktopMenuOption(
-                    label = "In 15 mins",
+                    label = stringResource(Res.string.components_reminder_in_15_mins),
                     icon = { ReminderMenuIcon(Res.drawable.history2) },
                     onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_15_MINS)); onDismiss() }
                 )
                 EmberrDesktopMenuOption(
-                    label = "In 1 hour",
+                    label = stringResource(Res.string.components_reminder_in_1_hour),
                     icon = { ReminderMenuIcon(Res.drawable.history2) },
                     onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_1_HOUR)); onDismiss() }
                 )
                 EmberrDesktopMenuOption(
-                    label = "In 3 hours",
+                    label = stringResource(Res.string.components_reminder_in_3_hours),
                     icon = { ReminderMenuIcon(Res.drawable.history3) },
                     onClick = { onPresetSelected(getTimePreset(TimePresetType.IN_3_HOURS)); onDismiss() }
                 )
                 EmberrDesktopMenuOption(
-                    label = "This evening",
+                    label = stringResource(Res.string.components_reminder_this_evening),
                     icon = { ReminderMenuIcon(Res.drawable.moon_cloud) },
                     onClick = { onPresetSelected(getTimePreset(TimePresetType.THIS_EVENING)); onDismiss() }
                 )
@@ -236,7 +261,7 @@ fun TimePresetMenu(
                     menuWidthEstimate = DesktopTimePickerMenuWidth,
                     anchor = { openPicker, _ ->
                         EmberrDesktopMenuOption(
-                            label = "Custom time...",
+                            label = stringResource(Res.string.components_reminder_custom_time),
                             icon = { ReminderMenuIcon(Res.drawable.clock_circle) },
                             onClick = openPicker
                         )
@@ -252,14 +277,14 @@ fun TimePresetMenu(
             }
         }
     } else {
-        EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "Time") {
+        EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = stringResource(Res.string.components_reminder_time)) {
           CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
           ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
                 if (onAllDaySelected != null) {
-                    PresetSheetItem(painterResource(Res.drawable.calendar_day), "All day", isSelected = isAllDay) {
+                    PresetSheetItem(painterResource(Res.drawable.calendar_day), stringResource(Res.string.components_reminder_all_day), isSelected = isAllDay) {
                         onAllDaySelected(); onDismiss()
                     }
                     HorizontalDivider(
@@ -267,24 +292,24 @@ fun TimePresetMenu(
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                     )
                 }
-                PresetSheetItem(painterResource(Res.drawable.history2), "In 15 mins") {
+                PresetSheetItem(painterResource(Res.drawable.history2), stringResource(Res.string.components_reminder_in_15_mins)) {
                     onPresetSelected(
                         getTimePreset(
                             TimePresetType.IN_15_MINS
                         )
                     ); onDismiss()
                 }
-                PresetSheetItem(painterResource(Res.drawable.history2), "In 1 hour") {
+                PresetSheetItem(painterResource(Res.drawable.history2), stringResource(Res.string.components_reminder_in_1_hour)) {
                     onPresetSelected(
                         getTimePreset(TimePresetType.IN_1_HOUR)
                     ); onDismiss()
                 }
-                PresetSheetItem(painterResource(Res.drawable.history3), "In 3 hours") {
+                PresetSheetItem(painterResource(Res.drawable.history3), stringResource(Res.string.components_reminder_in_3_hours)) {
                     onPresetSelected(
                         getTimePreset(TimePresetType.IN_3_HOURS)
                     ); onDismiss()
                 }
-                PresetSheetItem(painterResource(Res.drawable.moon_cloud), "This evening") {
+                PresetSheetItem(painterResource(Res.drawable.moon_cloud), stringResource(Res.string.components_reminder_this_evening)) {
                     onPresetSelected(
                         getTimePreset(TimePresetType.THIS_EVENING)
                     ); onDismiss()
@@ -295,10 +320,10 @@ fun TimePresetMenu(
                 )
                 PresetSheetItem(
                     painterResource(Res.drawable.clock_circle),
-                    "Custom time..."
+                    stringResource(Res.string.components_reminder_custom_time)
                 ) { onCustomSelected(); onDismiss() }
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
                 )
@@ -448,19 +473,19 @@ private fun CustomCalendarHeader(
             Spacer(modifier = Modifier.width(2.dp))
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = "Choose month or year",
+                contentDescription = stringResource(Res.string.components_choose_month_or_year),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
         Spacer(modifier = Modifier.weight(1f).padding(end = 2.dp))
-        IconTooltip(text = "Previous month") {
+        IconTooltip(text = stringResource(Res.string.components_previous_month)) {
             IconButton(onClick = onPreviousMonth, modifier = Modifier.size(32.dp)) {
-                Icon(painterResource(Res.drawable.chevron_left), contentDescription = "Previous month")
+                Icon(painterResource(Res.drawable.chevron_left), contentDescription = stringResource(Res.string.components_previous_month))
             }
         }
-        IconTooltip(text = "Next month") {
+        IconTooltip(text = stringResource(Res.string.components_next_month)) {
             IconButton(onClick = onNextMonth, modifier = Modifier.size(32.dp).padding(end = 2.dp)) {
-                Icon(painterResource(Res.drawable.chevron_right), contentDescription = "Next month")
+                Icon(painterResource(Res.drawable.chevron_right), contentDescription = stringResource(Res.string.components_next_month))
             }
         }
     }
@@ -591,9 +616,9 @@ private fun MonthYearPickerContent(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            EmberrButtonSecondary(text = "Back", onClick = onBack, modifier = Modifier.weight(1f))
+            EmberrButtonSecondary(text = stringResource(Res.string.common_back), onClick = onBack, modifier = Modifier.weight(1f))
             EmberrButtonPrimary(
-                text = "Save",
+                text = stringResource(Res.string.common_save),
                 onClick = { onConfirm(selectedMonth, selectedYear) },
                 modifier = Modifier.weight(1f)
             )
@@ -665,9 +690,9 @@ fun MinimalDatePickerDialog(
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
+                        EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.weight(1f))
                         EmberrButtonPrimary(
-                            text = "Save",
+                            text = stringResource(Res.string.common_save),
                             onClick = { onConfirm(pickerState.selectedMillis); onDismiss() },
                             modifier = Modifier.weight(1f)
                         )
@@ -681,7 +706,7 @@ fun MinimalDatePickerDialog(
         EmberrBottomSheet(
             expanded = expanded,
             onDismiss = onDismiss,
-            title = "Select Date"
+            title = stringResource(Res.string.components_select_date)
         ) {
           CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
@@ -693,9 +718,9 @@ fun MinimalDatePickerDialog(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
+                EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.weight(1f))
                 EmberrButtonPrimary(
-                    text = "Save",
+                    text = stringResource(Res.string.common_save),
                     onClick = { onConfirm(pickerState.selectedMillis); onDismiss() },
                     modifier = Modifier.weight(1f)
                 )
@@ -706,7 +731,7 @@ fun MinimalDatePickerDialog(
         EmberrBottomSheet(
             expanded = showMonthYearPicker,
             onDismiss = { showMonthYearPicker = false },
-            title = "Month & Year"
+            title = stringResource(Res.string.components_month_and_year)
         ) {
           CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
@@ -810,13 +835,13 @@ fun MinimalTimePickerDialog(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
-                    EmberrButtonPrimary(text = "Save", onClick = { onConfirm(hourOfDay, minute); onDismiss() }, modifier = Modifier.weight(1f))
+                    EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.weight(1f))
+                    EmberrButtonPrimary(text = stringResource(Res.string.common_save), onClick = { onConfirm(hourOfDay, minute); onDismiss() }, modifier = Modifier.weight(1f))
                 }
             }
         }
     } else {
-        EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "Select Time") {
+        EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = stringResource(Res.string.components_select_time)) {
           CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
@@ -828,9 +853,9 @@ fun MinimalTimePickerDialog(
                     .padding(vertical = 12.dp).padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
+                EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.weight(1f))
                 EmberrButtonPrimary(
-                    text = "Save",
+                    text = stringResource(Res.string.common_save),
                     onClick = {
                         onConfirm(hourOfDay, minute)
                         onDismiss()

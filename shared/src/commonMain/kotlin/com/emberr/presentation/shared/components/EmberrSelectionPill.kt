@@ -30,9 +30,11 @@ import androidx.compose.ui.unit.dp
 import com.emberr.presentation.BOTTOM_BAR_BOTTOM_PADDING
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.components_clear
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private val DefaultCornerShape = RoundedCornerShape(12.dp)
 
@@ -79,7 +81,7 @@ fun EmberrSelectionPill(
             ) {
                 Icon(
                     painterResource(Res.drawable.x),
-                    "Clear",
+                    stringResource(Res.string.components_clear),
                     modifier = Modifier.size(18.dp).noRippleClickable { onClearSelection() },
                     tint = tint
                 )

@@ -19,7 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
+import emberr.shared.generated.resources.components_load_more
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 internal val SmallRoundedCornerShape = RoundedCornerShape(8.dp)
 internal val NewItemButtonColor = Color(0xFF4F5B8A)
@@ -43,7 +45,7 @@ internal fun LoadMoreButton(onClick: () -> Unit, modifier: Modifier = Modifier) 
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(7.dp))
-        Text(text = "Load more", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
+        Text(text = stringResource(Res.string.components_load_more), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
     }
 }
 

@@ -58,15 +58,24 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
+import emberr.shared.generated.resources.components_people_add_people
+import emberr.shared.generated.resources.components_people_create_failed
+import emberr.shared.generated.resources.components_people_create_named
+import emberr.shared.generated.resources.components_people_remove
+import emberr.shared.generated.resources.components_people_remove_named
+import emberr.shared.generated.resources.components_people_search_placeholder
+import emberr.shared.generated.resources.components_people_selected
+import emberr.shared.generated.resources.components_people_type_name_hint
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.x
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
-private const val SEARCH_PLACEHOLDER = "Search or add a person"
 private val PeoplePickerDesktopWidth = 280.dp
 private val PeoplePickerListMaxHeight = 460.dp
 private val PeoplePickerListMinHeight = 280.dp
@@ -122,7 +131,7 @@ fun rememberPersonCreator(): (name: String, onCreated: (personNoteId: String) ->
                     throw cancelled
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    showNativeToast("Couldn't create the person")
+                    showNativeToast(getString(Res.string.components_people_create_failed))
                 }
             }
         }
@@ -175,7 +184,7 @@ fun PeoplePicker(
 
         if (matchingPeople.isEmpty() && !canCreatePerson) {
             Text(
-                text = "Type a name to add a person",
+                text = stringResource(Res.string.components_people_type_name_hint),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(horizontal = PeoplePickerRowSidePadding, vertical = 10.dp)
@@ -194,7 +203,7 @@ fun PeoplePicker(
                 EmberrTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    placeholder = SEARCH_PLACEHOLDER,
+                    placeholder = stringResource(Res.string.components_people_search_placeholder),
                     modifier = Modifier.focusRequester(searchFocusRequester).fillMaxWidth(),
                     onSubmit = { submitSearch() }
                 )
@@ -211,7 +220,7 @@ fun PeoplePicker(
     EmberrBottomSheet(
         expanded = true,
         onDismiss = onDismiss,
-        title = "Add people",
+        title = stringResource(Res.string.components_people_add_people),
         contentHorizontalPadding = 0.dp,
         scrollsContent = false
     ) { _ ->
@@ -244,7 +253,7 @@ fun PeoplePicker(
                 EmberrSearchTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    placeholder = SEARCH_PLACEHOLDER,
+                    placeholder = stringResource(Res.string.components_people_search_placeholder),
                     hazeState = listHazeState,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     onSubmit = { submitSearch() },
@@ -284,7 +293,7 @@ private fun PeoplePickerRow(person: PersonOption, isSelected: Boolean, onClick: 
         if (isSelected) {
             Icon(
                 painter = painterResource(Res.drawable.check),
-                contentDescription = "Selected",
+                contentDescription = stringResource(Res.string.components_people_selected),
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 8.dp).size(16.dp)
             )
@@ -313,7 +322,7 @@ private fun CreatePersonRow(name: String, onClick: () -> Unit) {
         }
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = "Create “$name”",
+            text = stringResource(Res.string.components_people_create_named, name),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
@@ -343,10 +352,10 @@ fun PersonPill(person: PersonOption, onOpen: () -> Unit, onRemove: (() -> Unit)?
             overflow = TextOverflow.Ellipsis
         )
         if (onRemove != null) {
-            IconTooltip(text = "Remove") {
+            IconTooltip(text = stringResource(Res.string.components_people_remove)) {
                 Icon(
                     painter = painterResource(Res.drawable.x),
-                    contentDescription = "Remove ${person.displayName()}",
+                    contentDescription = stringResource(Res.string.components_people_remove_named, person.displayName()),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier
                         .clip(CircleShape)

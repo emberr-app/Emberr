@@ -22,6 +22,16 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.util.system.isDesktopPlatform
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.components_create_new_note
+import emberr.shared.generated.resources.components_link_to_note
+import emberr.shared.generated.resources.components_link_to_note_heading
+import emberr.shared.generated.resources.components_new_named_note
+import emberr.shared.generated.resources.components_note_picker_hint
+import emberr.shared.generated.resources.components_search_notes
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun NotePickerDialog(
@@ -49,7 +59,7 @@ fun NotePickerDialog(
         EmberrTextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = "Search notes...",
+            placeholder = stringResource(Res.string.components_search_notes),
 //            trailingIcon = { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
         )
@@ -63,7 +73,7 @@ fun NotePickerDialog(
         ) {
             Icon(Icons.AutoMirrored.Filled.NoteAdd, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(12.dp))
-            Text("Create new note", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(Res.string.components_create_new_note), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
 
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine())
@@ -85,7 +95,7 @@ fun NotePickerDialog(
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = note.title.ifEmpty { "Untitled" },
+                    text = note.title.ifEmpty { stringResource(Res.string.common_untitled) },
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -107,11 +117,11 @@ fun NotePickerDialog(
             ) {
                 Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(12.dp))
-                Text("New \"$query\" note", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(Res.string.components_new_named_note, query), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         } else if (filteredNotes.isEmpty()) {
             Text(
-                text = "Start typing to search, or create a new note",
+                text = stringResource(Res.string.components_note_picker_hint),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).padding(bottom = 8.dp)
@@ -154,7 +164,7 @@ fun NotePickerDialog(
             ) {
                 Column(modifier = Modifier.padding(vertical = 4.dp)) {
                     Text(
-                        text = "LINK TO NOTE",
+                        text = stringResource(Res.string.components_link_to_note_heading),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -174,7 +184,7 @@ fun NotePickerDialog(
         EmberrBottomSheet(
             expanded = true,
             onDismiss = onDismiss,
-            title = "Link to Note"
+            title = stringResource(Res.string.components_link_to_note)
         ) { closeAnd ->
             headerContent(closeAnd)
             Column(
@@ -188,7 +198,7 @@ fun NotePickerDialog(
                 }
             }
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)

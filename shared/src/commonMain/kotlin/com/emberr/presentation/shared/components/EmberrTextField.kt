@@ -42,9 +42,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.components_clear_search
 import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun EmberrTextField(
@@ -227,7 +229,7 @@ fun EmberrSearchTextField(
             if (value.isNotEmpty()) {
                 EmberrSearchTextFieldAction(
                     icon = painterResource(Res.drawable.x),
-                    contentDescription = "Clear search",
+                    contentDescription = stringResource(Res.string.components_clear_search),
                     onClick = { onValueChange("") }
                 )
             }

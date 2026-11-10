@@ -144,6 +144,12 @@ import com.emberr.ui.theme.LocalPaperGrainMover
 import com.emberr.ui.theme.NotePaperTextureBox
 import com.emberr.ui.theme.PaperTextureArea
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.canvas_add_label
+import emberr.shared.generated.resources.canvas_create_group
+import emberr.shared.generated.resources.canvas_edit_label
+import emberr.shared.generated.resources.canvas_paste_image
+import emberr.shared.generated.resources.canvas_ungroup
+import emberr.shared.generated.resources.common_delete
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.image
 import emberr.shared.generated.resources.square
@@ -586,10 +592,10 @@ fun CanvasScreen(
     }
 
     fun contextMenuOptionsFor(target: CanvasSelection): List<CanvasMenuOption> {
-        val deleteOption = CanvasMenuOption("Delete", Res.drawable.trash, isDestructive = true) { deleteItems(target) }
+        val deleteOption = CanvasMenuOption(Res.string.common_delete, Res.drawable.trash, isDestructive = true) { deleteItems(target) }
         if (target is CanvasSelection.Edge) {
             val hasLabel = canvas.edges.any { it.edgeId == target.edgeId && !it.label.isNullOrBlank() }
-            val labelOption = CanvasMenuOption(if (hasLabel) "Edit label" else "Add label", Res.drawable.text_type) {
+            val labelOption = CanvasMenuOption(if (hasLabel) Res.string.canvas_edit_label else Res.string.canvas_add_label, Res.drawable.text_type) {
                 selection = target
                 editingEdgeId = target.edgeId
             }
@@ -600,12 +606,12 @@ fun CanvasScreen(
             canvas.nodes.firstOrNull { it.nodeId == nodeId && it.isGroup }
         }
         val groupingOption = if (clickedGroup != null) {
-            CanvasMenuOption("Ungroup", Res.drawable.square) {
+            CanvasMenuOption(Res.string.canvas_ungroup, Res.drawable.square) {
                 viewModel.ungroup(clickedGroup.nodeId)
                 selection = CanvasSelection.None
             }
         } else {
-            CanvasMenuOption("Create group", Res.drawable.group) {
+            CanvasMenuOption(Res.string.canvas_create_group, Res.drawable.group) {
                 val newGroupId = viewModel.createGroup(target.nodeIds)
                 selection = newGroupId?.let { CanvasSelection.Nodes(setOf(it)) } ?: CanvasSelection.None
             }
@@ -1488,7 +1494,7 @@ fun CanvasScreen(
                 anchorOnScreen = request.anchorOnScreen,
                 options = if (request.target == CanvasSelection.None) {
                     val pasteWorldCenter = viewport.screenToWorld(request.anchorOnScreen, pixelDensity)
-                    listOf(CanvasMenuOption("Paste image", Res.drawable.image) { viewModel.pasteImageFromClipboard(pasteWorldCenter) })
+                    listOf(CanvasMenuOption(Res.string.canvas_paste_image, Res.drawable.image) { viewModel.pasteImageFromClipboard(pasteWorldCenter) })
                 } else {
                     contextMenuOptionsFor(request.target)
                 },
