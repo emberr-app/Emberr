@@ -13,15 +13,15 @@
     <string name="cloud_send_new_code">Send a new code</string>
     <string name="cloud_continue">Continue</string>
     <string name="cloud_done">Done</string>
-    <string name="cloud_password_not_stored_hint">We don\'t store this password, so if you forget it, we can\'t decrypt your notes.</string>
+    <string name="cloud_password_not_stored_hint">We don't store this password, so if you forget it, we can't decrypt your notes.</string>
     <string name="cloud_recovery_words">Recovery words</string>
-    <string name="cloud_recovery_words_explanation">If you forget your password, these 24 words are the only way back into your account. We don\'t store them, so save them somewhere safe.</string>
-    <string name="cloud_recovery_words_warning">Without your password and these words, your cloud notes can\'t be recovered.</string>
+    <string name="cloud_recovery_words_explanation">If you forget your password, these 24 words are the only way back into your account. We don't store them, so save them somewhere safe.</string>
+    <string name="cloud_recovery_words_warning">Without your password and these words, your cloud notes can't be recovered.</string>
     <string name="cloud_recovery_words_saved_checkbox">I have saved these words somewhere safe</string>
     <string name="cloud_copy_words">Copy words</string>
     <string name="cloud_recovery_words_copied">Recovery words copied</string>
     <string name="cloud_forgot_password">Forgot password</string>
-    <string name="cloud_recovery_email_hint">Enter your account\'s email. We\'ll send you a code.</string>
+    <string name="cloud_recovery_email_hint">Enter your account's email. We'll send you a code.</string>
     <string name="cloud_recovery_other_device_hint">Signed in on another device? Change your password there.</string>
     <string name="cloud_recovery_words_entry_hint">Enter the 24 recovery words you saved when you created your account.</string>
     <string name="cloud_recovery_words_placeholder">Your 24 recovery words</string>
@@ -56,24 +56,24 @@
     <string name="cloud_sign_out_device_message">This will sign out the following device:\n\n%1$s</string>
     <string name="cloud_sign_out">Sign out</string>
     <string name="cloud_delete_account_title">Delete Account?</string>
-    <string name="cloud_delete_account_message">Your Emberr Cloud account and everything stored in it will be deleted for good. This can\'t be undone. The notes on this device stay, unless you also choose to clear them. We\'ll send a code to %1$s to confirm.</string>
+    <string name="cloud_delete_account_message">Your Emberr Cloud account and everything stored in it will be deleted for good. This can't be undone. The notes on this device stay, unless you also choose to clear them. We'll send a code to %1$s to confirm.</string>
     <string name="cloud_last_used">Last used %1$s</string>
     <string name="cloud_this_device">This device</string>
     <string name="cloud_sign_out_of_this_device_title">Sign Out of This Device?</string>
     <string name="cloud_sign_out_of_this_device_message">This device stops using Emberr Cloud. Your notes on this device are not touched.</string>
 
-    <string name="cloud_change_password_code_hint">We\'ll send a code to %1$s to confirm.</string>
+    <string name="cloud_change_password_code_hint">We'll send a code to %1$s to confirm.</string>
     <string name="cloud_sign_out_of_other_devices">Sign out of other devices</string>
-    <string name="cloud_change_email_hint">Enter your new email address. We\'ll send a code there.</string>
+    <string name="cloud_change_email_hint">Enter your new email address. We'll send a code there.</string>
     <string name="cloud_recovery_words_password_hint">Enter your password to view your recovery words.</string>
     <string name="cloud_clear_notes_on_this_device">Also clear the notes on this device</string>
-    <string name="cloud_delete_account_warning">Your Emberr Cloud account will be deleted for good. This can\'t be undone.</string>
+    <string name="cloud_delete_account_warning">Your Emberr Cloud account will be deleted for good. This can't be undone.</string>
 
     <string name="cloud_email">Email</string>
     <string name="cloud_code_placeholder">6-digit code</string>
     <string name="cloud_password">Password</string>
     <string name="cloud_confirm_password">Confirm password</string>
-    <string name="cloud_passwords_do_not_match">Passwords don\'t match.</string>
+    <string name="cloud_passwords_do_not_match">Passwords don't match.</string>
     <string name="cloud_hide_password">Hide password</string>
     <string name="cloud_show_password">Show password</string>
     <string name="cloud_password_strength_weak">Password strength: Weak</string>
@@ -109,8 +109,8 @@
         <item quantity="other">Free trial · %1$d days left</item>
     </plurals>
     <string name="cloud_storage_used">%1$s of %2$s used</string>
-    <string name="cloud_full_with_usage">Emberr Cloud is full: %1$s of %2$s used. New notes and files stay on this device and upload when there\'s room.</string>
-    <string name="cloud_full">Emberr Cloud is full. New notes and files stay on this device and upload when there\'s room.</string>
+    <string name="cloud_full_with_usage">Emberr Cloud is full: %1$s of %2$s used. New notes and files stay on this device and upload when there's room.</string>
+    <string name="cloud_full">Emberr Cloud is full. New notes and files stay on this device and upload when there's room.</string>
     <string name="cloud_trial_ended_read_only">Your free trial has ended, so Emberr Cloud is read-only. This device still gets changes from your other devices, but nothing new uploads. Your notes stay on your devices.</string>
     <plurals name="cloud_files_too_large">
         <item quantity="one">%1$d file is larger than 10 GB, so it stays on this device only.</item>
@@ -129,10 +129,10 @@
     <string name="cloud_error_update_required">Update Emberr to use Emberr Cloud.</string>
     <string name="cloud_error_device_already_signed_out">That device was already signed out.</string>
     <string name="cloud_error_email_already_used">Another account already uses this email.</string>
-    <string name="cloud_error_server_unreachable">Can\'t reach the server at %1$s.</string>
+    <string name="cloud_error_server_unreachable">Can't reach the server at %1$s.</string>
     <string name="cloud_error_invalid_recovery_words">Those words are not a valid recovery key. Make sure there are 24 words, and check the spelling of each.</string>
     <string name="cloud_error_recovery_words_other_account">These words belong to a different account.</string>
-    <string name="cloud_account_deleted_notes_not_cleared">Your account was deleted, but the notes on this device couldn\'t be cleared.</string>
+    <string name="cloud_account_deleted_notes_not_cleared">Your account was deleted, but the notes on this device couldn't be cleared.</string>
     <string name="cloud_password_changed">Password changed successfully</string>
     <string name="cloud_email_changed">Email changed to %1$s</string>
 

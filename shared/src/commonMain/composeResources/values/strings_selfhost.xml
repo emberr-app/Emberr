@@ -36,10 +36,10 @@
     <string name="selfhost_checking">Checking</string>
     <string name="selfhost_save_passphrase">Save Passphrase</string>
     <string name="selfhost_disconnect_vault">Disconnect Vault</string>
-    <string name="selfhost_recovery_dialog_message">Enter this on the other device when it asks to unlock the vault. Don\'t share it with anyone.</string>
+    <string name="selfhost_recovery_dialog_message">Enter this on the other device when it asks to unlock the vault. Don't share it with anyone.</string>
     <string name="selfhost_done">Done</string>
     <string name="selfhost_disconnect_vault_question">Disconnect Vault?</string>
-    <string name="selfhost_disconnect_message">Your notes stay on this device and the server. You\'ll need your recovery passphrase to reconnect.</string>
+    <string name="selfhost_disconnect_message">Your notes stay on this device and the server. You'll need your recovery passphrase to reconnect.</string>
     <string name="selfhost_disconnect">Disconnect</string>
 
     <string name="selfhost_checking_for_changes">Checking for changes...</string>
@@ -64,7 +64,7 @@
     <string name="selfhost_contacting_server">Contacting server...</string>
 
     <string name="selfhost_restore_hint">This server already has an Emberr vault. Enter the 16-character recovery passphrase that was shown when the vault was created.</string>
-    <string name="selfhost_restore_find_hint">Can\'t find it? Open Settings → Self-Host → Show Passphrase on a device that is already connected.</string>
+    <string name="selfhost_restore_find_hint">Can't find it? Open Settings → Self-Host → Show Passphrase on a device that is already connected.</string>
     <string name="selfhost_passphrase_placeholder">16-character passphrase</string>
     <string name="selfhost_hide_passphrase">Hide passphrase</string>
     <string name="selfhost_show_passphrase">Show passphrase</string>
@@ -72,7 +72,7 @@
     <string name="selfhost_save_passphrase_now">Save this passphrase now</string>
     <string name="selfhost_fact_type_on_other_devices">You will type it on every other phone or computer you connect to this server.</string>
     <string name="selfhost_fact_locks_notes">It locks your notes on the server. No one can read them without it, not even Emberr.</string>
-    <string name="selfhost_fact_cannot_reset">Emberr can\'t reset it. Keep it in a password manager or write it down.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr can't reset it. Keep it in a password manager or write it down.</string>
     <string name="selfhost_fact_see_again_later">You can see it again later in Settings → Self-Host on any device that is connected.</string>
     <string name="selfhost_new_passphrase">New passphrase</string>
     <string name="selfhost_generate_new_passphrase">Generate a new passphrase</string>
@@ -93,7 +93,7 @@
     <string name="selfhost_vault_exists_enter_passphrase">A vault already exists on this server. Enter its recovery passphrase below to restore it.</string>
     <string name="selfhost_could_not_set_up">Could not set up secure sync</string>
     <string name="selfhost_no_vault_on_server">No vault was found on the server.</string>
-    <string name="selfhost_wrong_passphrase">That passphrase doesn\'t unlock this vault.</string>
+    <string name="selfhost_wrong_passphrase">That passphrase doesn't unlock this vault.</string>
     <string name="selfhost_could_not_check_passphrase">Could not check the passphrase: %1$s</string>
 
     <string name="selfhost_update_required_title">Self-host sync paused</string>
