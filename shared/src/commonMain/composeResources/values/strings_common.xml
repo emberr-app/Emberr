@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_close">Close</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_on">On</string>
+    <string name="common_off">Off</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+</resources>

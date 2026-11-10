@@ -36,11 +36,21 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_version_label
+import emberr.shared.generated.resources.settings_about_copyright
+import emberr.shared.generated.resources.settings_about_license_notice
+import emberr.shared.generated.resources.settings_about_open_source_licenses
+import emberr.shared.generated.resources.settings_about_source_code
+import emberr.shared.generated.resources.settings_about_tagline
+import emberr.shared.generated.resources.settings_about_third_party_services
+import emberr.shared.generated.resources.settings_about_title
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.files
 import emberr.shared.generated.resources.info
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private const val SOURCE_CODE_URL = "https://github.com/emberr-app/Emberr"
 private const val AGPL_LICENSE_URL = "https://www.gnu.org/licenses/agpl-3.0.html"
@@ -88,7 +98,7 @@ fun AboutScreen(
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.code),
-                        title = "Source Code",
+                        title = stringResource(Res.string.settings_about_source_code),
                         onClick = { uriHandler.openUri(SOURCE_CODE_URL) }
                     )
                     SettingsDivider()
@@ -100,13 +110,13 @@ fun AboutScreen(
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.files),
-                        title = "Open-Source Licenses",
+                        title = stringResource(Res.string.settings_about_open_source_licenses),
                         onClick = onOpenSourceLicensesClick
                     )
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.info),
-                        title = "Third-Party Services",
+                        title = stringResource(Res.string.settings_about_third_party_services),
                         onClick = onThirdPartyServicesClick
                     )
                 }
@@ -122,10 +132,10 @@ fun AboutScreen(
                     .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
             ) {
                 EmberrTopHeaderBar(
-                    title = "About",
+                    title = stringResource(Res.string.settings_about_title),
                     hazeState = hazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onBackClick = onNavigateBack
                 )
             }
@@ -137,25 +147,25 @@ fun AboutScreen(
 private fun AppLicenseNotice() {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            text = listOfNotNull("Emberr", appVersionName?.let { "v$it" }).joinToString(" "),
+            text = listOfNotNull("Emberr", appVersionName?.let { stringResource(Res.string.common_version_label, it) }).joinToString(" "),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Open-source, offline-first notes and productivity app",
+            text = stringResource(Res.string.settings_about_tagline),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(top = 2.dp)
         )
         Text(
-            text = "Copyright © 2026 Benny",
+            text = stringResource(Res.string.settings_about_copyright),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.padding(top = 2.dp, bottom = 12.dp)
         )
         Text(
-            text = "Licensed under the GNU AGPL v3.0. Provided without any warranty.",
+            text = stringResource(Res.string.settings_about_license_notice),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )

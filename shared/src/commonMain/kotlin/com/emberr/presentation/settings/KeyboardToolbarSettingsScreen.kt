@@ -70,11 +70,23 @@ import com.emberr.presentation.shared.editor.toolbar.keyboardToolbarSavedValueOf
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.settings_keyboard_toolbar
+import emberr.shared.generated.resources.settings_toolbar_add_button
+import emberr.shared.generated.resources.settings_toolbar_empty
+import emberr.shared.generated.resources.settings_toolbar_group_available
+import emberr.shared.generated.resources.settings_toolbar_group_in_toolbar
+import emberr.shared.generated.resources.settings_toolbar_remove
+import emberr.shared.generated.resources.settings_toolbar_remove_button
+import emberr.shared.generated.resources.settings_toolbar_reorder_button
+import emberr.shared.generated.resources.settings_toolbar_reorder_footnote
+import emberr.shared.generated.resources.settings_toolbar_reset_to_default
 import emberr.shared.generated.resources.circle_minus
 import emberr.shared.generated.resources.circle_plus
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 private data class ToolbarEntry(val id: Int, val item: KeyboardToolbarItem)
@@ -126,10 +138,10 @@ fun KeyboardToolbarSettingsScreen(
             contentPadding = PaddingValues(top = topBarHeightDp + 8.dp, bottom = 48.dp)
         ) {
             item(key = "in_toolbar") {
-                SettingsGroup(title = "In Toolbar") {
+                SettingsGroup(title = stringResource(Res.string.settings_toolbar_group_in_toolbar)) {
                     if (toolbarEntries.isEmpty()) {
                         Text(
-                            text = "No buttons yet. Add some from the list below.",
+                            text = stringResource(Res.string.settings_toolbar_empty),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                             modifier = Modifier.padding(16.dp)
@@ -147,12 +159,12 @@ fun KeyboardToolbarSettingsScreen(
                             onOrderChanged = saveToolbarEntries
                         )
                     }
-                    SettingsFootnote(text = "Drag the handle to reorder. The close keyboard button always stays on the right.")
+                    SettingsFootnote(text = stringResource(Res.string.settings_toolbar_reorder_footnote))
                 }
             }
 
             item(key = "available") {
-                SettingsGroup(title = "Available") {
+                SettingsGroup(title = stringResource(Res.string.settings_toolbar_group_available)) {
                     availableItems.forEachIndexed { index, item ->
                         if (index > 0) SettingsDivider()
                         AvailableToolbarItemRow(
@@ -169,7 +181,7 @@ fun KeyboardToolbarSettingsScreen(
 
             item(key = "reset") {
                 EmberrButtonSecondary(
-                    text = "Reset to Default",
+                    text = stringResource(Res.string.settings_toolbar_reset_to_default),
                     onClick = {
                         toolbarEntries.clear()
                         DefaultKeyboardToolbarItems.forEach { item ->
@@ -194,10 +206,10 @@ fun KeyboardToolbarSettingsScreen(
                 .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = "Keyboard Toolbar",
+                title = stringResource(Res.string.settings_keyboard_toolbar),
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                backTooltip = "Back",
+                backTooltip = stringResource(Res.string.common_back),
                 onBackClick = onNavigateBack
             )
         }
@@ -384,7 +396,7 @@ private fun ToolbarEntryRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.DragIndicator,
-                    contentDescription = "Reorder ${item.title}",
+                    contentDescription = stringResource(Res.string.settings_toolbar_reorder_button, item.title),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     modifier = Modifier.size(20.dp)
                 )
@@ -401,7 +413,7 @@ private fun ToolbarEntryRow(
                 modifier = Modifier.weight(1f)
             )
 
-            IconTooltip(text = "Remove") {
+            IconTooltip(text = stringResource(Res.string.settings_toolbar_remove)) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -411,7 +423,7 @@ private fun ToolbarEntryRow(
                 ) {
                     Icon(
                         painterResource(Res.drawable.circle_minus),
-                        contentDescription = "Remove ${item.title}",
+                        contentDescription = stringResource(Res.string.settings_toolbar_remove_button, item.title),
                         tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
                         modifier = Modifier.size(20.dp)
                     )
@@ -444,7 +456,7 @@ private fun AvailableToolbarItemRow(item: KeyboardToolbarItem, onAdd: () -> Unit
 
         Icon(
             painterResource(Res.drawable.circle_plus),
-            contentDescription = "Add ${item.title}",
+            contentDescription = stringResource(Res.string.settings_toolbar_add_button, item.title),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(20.dp)
         )

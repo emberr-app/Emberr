@@ -46,10 +46,10 @@ val tableGridLineColor: Color
     }
 
 enum class FontSizePreference { EXTRA_SMALL, SMALL, DEFAULT, LARGE, EXTRA_LARGE }
-enum class ThemePreference(val displayName: String) {
-    SYSTEM("System"),
-    LIGHT("Light"),
-    DARK("Dark")
+enum class ThemePreference {
+    SYSTEM,
+    LIGHT,
+    DARK
 }
 
 @Composable

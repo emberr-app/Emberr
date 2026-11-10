@@ -103,6 +103,121 @@ import com.emberr.domain.util.time.timeFormatPreferenceNamed
 import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.presentation.home.overview.OverviewSection
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_off
+import emberr.shared.generated.resources.common_on
+import emberr.shared.generated.resources.common_percent_value
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.common_version_label
+import emberr.shared.generated.resources.settings_about_emberr
+import emberr.shared.generated.resources.settings_ai_off_hint
+import emberr.shared.generated.resources.settings_ai_on_hint
+import emberr.shared.generated.resources.settings_ai_removing_data
+import emberr.shared.generated.resources.settings_auto_hide_title_bar
+import emberr.shared.generated.resources.settings_auto_hide_title_bar_hint
+import emberr.shared.generated.resources.settings_automatic_backups
+import emberr.shared.generated.resources.settings_backup_day
+import emberr.shared.generated.resources.settings_backup_frequency_daily
+import emberr.shared.generated.resources.settings_backup_frequency_weekly
+import emberr.shared.generated.resources.settings_backup_location
+import emberr.shared.generated.resources.settings_backup_location_change
+import emberr.shared.generated.resources.settings_backup_time
+import emberr.shared.generated.resources.settings_clear_all_data
+import emberr.shared.generated.resources.settings_clear_all_data_desktop_hint
+import emberr.shared.generated.resources.settings_clear_all_data_dialog_message
+import emberr.shared.generated.resources.settings_clear_all_data_dialog_title
+import emberr.shared.generated.resources.settings_cloud_blocked_by_lan_sync
+import emberr.shared.generated.resources.settings_cloud_blocked_by_self_host
+import emberr.shared.generated.resources.settings_custom_title_bar
+import emberr.shared.generated.resources.settings_custom_title_bar_hint
+import emberr.shared.generated.resources.settings_daily_notes
+import emberr.shared.generated.resources.settings_daily_notes_hint
+import emberr.shared.generated.resources.settings_daily_quote
+import emberr.shared.generated.resources.settings_daily_quote_hint
+import emberr.shared.generated.resources.settings_emberr_cloud
+import emberr.shared.generated.resources.settings_erase
+import emberr.shared.generated.resources.settings_erase_cloud_dialog_message
+import emberr.shared.generated.resources.settings_erase_cloud_password
+import emberr.shared.generated.resources.settings_erasing
+import emberr.shared.generated.resources.settings_export_backup
+import emberr.shared.generated.resources.settings_faq
+import emberr.shared.generated.resources.settings_first_day_of_week
+import emberr.shared.generated.resources.settings_first_day_of_week_desktop_hint
+import emberr.shared.generated.resources.settings_font_size
+import emberr.shared.generated.resources.settings_font_size_default
+import emberr.shared.generated.resources.settings_font_size_extra_large
+import emberr.shared.generated.resources.settings_font_size_extra_small
+import emberr.shared.generated.resources.settings_font_size_large
+import emberr.shared.generated.resources.settings_font_size_small
+import emberr.shared.generated.resources.settings_font_style
+import emberr.shared.generated.resources.settings_group_ai
+import emberr.shared.generated.resources.settings_group_appearance
+import emberr.shared.generated.resources.settings_group_danger_zone
+import emberr.shared.generated.resources.settings_group_data_storage
+import emberr.shared.generated.resources.settings_group_date_time
+import emberr.shared.generated.resources.settings_group_desktop_window
+import emberr.shared.generated.resources.settings_group_editor
+import emberr.shared.generated.resources.settings_group_lan_sync
+import emberr.shared.generated.resources.settings_group_layout
+import emberr.shared.generated.resources.settings_group_need_help
+import emberr.shared.generated.resources.settings_group_overview
+import emberr.shared.generated.resources.settings_group_reminders
+import emberr.shared.generated.resources.settings_group_sync_backup
+import emberr.shared.generated.resources.settings_import
+import emberr.shared.generated.resources.settings_interface_scale
+import emberr.shared.generated.resources.settings_interface_scale_bigger
+import emberr.shared.generated.resources.settings_interface_scale_hint
+import emberr.shared.generated.resources.settings_interface_scale_reset
+import emberr.shared.generated.resources.settings_interface_scale_smaller
+import emberr.shared.generated.resources.settings_keyboard_toolbar
+import emberr.shared.generated.resources.settings_lan_sync_blocked_by_cloud
+import emberr.shared.generated.resources.settings_lan_sync_blocked_by_self_host
+import emberr.shared.generated.resources.settings_lan_sync_paired_desktop
+import emberr.shared.generated.resources.settings_mic_button
+import emberr.shared.generated.resources.settings_open_home_first
+import emberr.shared.generated.resources.settings_overview_sidebar_footnote
+import emberr.shared.generated.resources.settings_pair_mobile_device
+import emberr.shared.generated.resources.settings_pair_with_desktop
+import emberr.shared.generated.resources.settings_privacy_policy
+import emberr.shared.generated.resources.settings_restart_later
+import emberr.shared.generated.resources.settings_restart_now
+import emberr.shared.generated.resources.settings_restart_to_apply_message
+import emberr.shared.generated.resources.settings_restart_to_apply_title
+import emberr.shared.generated.resources.settings_select_backup_day
+import emberr.shared.generated.resources.settings_self_host
+import emberr.shared.generated.resources.settings_self_host_blocked_by_cloud
+import emberr.shared.generated.resources.settings_self_host_blocked_by_lan_sync
+import emberr.shared.generated.resources.settings_show_scrollbar
+import emberr.shared.generated.resources.settings_show_scrollbar_hint
+import emberr.shared.generated.resources.settings_subnote_opening
+import emberr.shared.generated.resources.settings_sync_network_both
+import emberr.shared.generated.resources.settings_sync_network_data_only
+import emberr.shared.generated.resources.settings_sync_network_hint
+import emberr.shared.generated.resources.settings_sync_network_wifi_only
+import emberr.shared.generated.resources.settings_sync_now
+import emberr.shared.generated.resources.settings_sync_port
+import emberr.shared.generated.resources.settings_sync_port_hint
+import emberr.shared.generated.resources.settings_theme
+import emberr.shared.generated.resources.settings_time_format
+import emberr.shared.generated.resources.settings_title
+import emberr.shared.generated.resources.settings_top_bar_fade
+import emberr.shared.generated.resources.settings_top_bar_fade_progressive
+import emberr.shared.generated.resources.settings_top_bar_fade_subtitle
+import emberr.shared.generated.resources.settings_turn_off
+import emberr.shared.generated.resources.settings_turn_off_ai_dialog_message
+import emberr.shared.generated.resources.settings_turn_off_ai_dialog_title
+import emberr.shared.generated.resources.settings_turn_off_ai_features
+import emberr.shared.generated.resources.settings_unpair
+import emberr.shared.generated.resources.settings_unpair_dialog_message_desktop
+import emberr.shared.generated.resources.settings_unpair_dialog_message_phone
+import emberr.shared.generated.resources.settings_unpair_dialog_title
+import emberr.shared.generated.resources.settings_unpair_from_desktop
+import emberr.shared.generated.resources.settings_unpair_from_mobile_device
+import emberr.shared.generated.resources.settings_unrestricted_background
+import emberr.shared.generated.resources.settings_whats_new
 import emberr.shared.generated.resources.astroid
 import emberr.shared.generated.resources.badge_plus
 import emberr.shared.generated.resources.badge_question_mark
@@ -142,6 +257,7 @@ import com.emberr.presentation.shared.TopBarFadeStyle
 import com.emberr.presentation.shared.components.orHighContrastLine
 import com.emberr.presentation.shared.components.highContrastBorder
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 private const val PRIVACY_POLICY_URL = "https://github.com/emberr-app/Emberr/blob/main/PRIVACY.md"
@@ -154,18 +270,21 @@ private const val SUB_PAGE_FADE_MILLIS = 150
 internal fun desktopSettingsSidePadding(availableWidth: Dp): Dp =
     if (isDesktopPlatform) ((availableWidth - SettingsPaneMaxWidth) / 2).coerceAtLeast(0.dp) else 0.dp
 
-private val BackupFrequencies = listOf("Daily", "Weekly")
+private val BackupFrequencyLabels = mapOf(
+    "Daily" to Res.string.settings_backup_frequency_daily,
+    "Weekly" to Res.string.settings_backup_frequency_weekly
+)
 private val SyncNetworkLabels = listOf(
-    SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA to "Both",
-    SelfHostSyncNetwork.WIFI_ONLY to "Wi-Fi only",
-    SelfHostSyncNetwork.MOBILE_DATA_ONLY to "Data only"
+    SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA to Res.string.settings_sync_network_both,
+    SelfHostSyncNetwork.WIFI_ONLY to Res.string.settings_sync_network_wifi_only,
+    SelfHostSyncNetwork.MOBILE_DATA_ONLY to Res.string.settings_sync_network_data_only
 )
 private val FontSizeOptions = listOf(
-    FontSizePreference.EXTRA_SMALL.name to "Extra Small",
-    FontSizePreference.SMALL.name to "Small",
-    FontSizePreference.DEFAULT.name to "Default",
-    FontSizePreference.LARGE.name to "Large",
-    FontSizePreference.EXTRA_LARGE.name to "Extra Large"
+    FontSizePreference.EXTRA_SMALL.name to Res.string.settings_font_size_extra_small,
+    FontSizePreference.SMALL.name to Res.string.settings_font_size_small,
+    FontSizePreference.DEFAULT.name to Res.string.settings_font_size_default,
+    FontSizePreference.LARGE.name to Res.string.settings_font_size_large,
+    FontSizePreference.EXTRA_LARGE.name to Res.string.settings_font_size_extra_large
 )
 
 private class SettingsCategory(
@@ -365,14 +484,14 @@ fun SettingsScreen(
                     .getOrDefault(SubNoteOpenMode.SIDE_PANEL)
 
                 AppearanceSettingsSection(
-                    colorThemeLabel = colorThemePreferenceNamed(colorThemePreference).displayName,
-                    fontSizeLabel = fontSizeDisplayNameFor(fontSizePreference),
+                    colorThemeLabel = colorThemePreferenceNamed(colorThemePreference).label(),
+                    fontSizeLabel = fontSizeLabelFor(fontSizePreference),
                     interfaceScalePercent = interfaceScalePercent,
-                    fontStyleLabel = selectedFontStyle.displayName,
-                    timeFormatLabel = selectedTimeFormat.displayName,
-                    firstDayOfWeekLabel = selectedFirstDayOfWeek.displayName,
-                    subNoteOpenModeLabel = selectedSubNoteOpenMode.displayName,
-                    topBarFadeStyleLabel = topBarFadeStyleFor(topBarFadeStyle).displayName(topBarFadeProgressive),
+                    fontStyleLabel = selectedFontStyle.label(),
+                    timeFormatLabel = selectedTimeFormat.label(),
+                    firstDayOfWeekLabel = selectedFirstDayOfWeek.label(),
+                    subNoteOpenModeLabel = selectedSubNoteOpenMode.label(),
+                    topBarFadeStyleLabel = topBarFadeStyleFor(topBarFadeStyle).label(topBarFadeProgressive),
                     showScrollbar = showScrollbar,
                     dailyNotesEnabled = dailyNotesEnabled,
                     startOnHome = startOnHome,
@@ -381,14 +500,14 @@ fun SettingsScreen(
                     hiddenOverviewSections = hiddenOverviewSections,
                     customWindowFrameEnabled = customWindowFrameEnabled,
                     autoHideTitleBar = autoHideTitleBar,
-                    fontSizeChoices = FontSizeOptions.map { (preferenceName, displayName) ->
-                        SettingsChoice(label = displayName, isSelected = preferenceName == fontSizePreference) {
+                    fontSizeChoices = FontSizeOptions.map { (preferenceName, labelResource) ->
+                        SettingsChoice(label = stringResource(labelResource), isSelected = preferenceName == fontSizePreference) {
                             viewModel.setFontSizePreference(preferenceName)
                         }
                     },
                     fontStyleChoices = FontStylePreference.entries.map { option ->
                         SettingsChoice(
-                            label = option.displayName,
+                            label = option.label(),
                             isSelected = option == selectedFontStyle,
                             labelFontFamily = fontFamilyFor(option)
                         ) {
@@ -396,22 +515,22 @@ fun SettingsScreen(
                         }
                     },
                     timeFormatChoices = TimeFormatPreference.entries.map { option ->
-                        SettingsChoice(label = option.displayName, isSelected = option == selectedTimeFormat) {
+                        SettingsChoice(label = option.label(), isSelected = option == selectedTimeFormat) {
                             viewModel.setTimeFormatPreference(option.name)
                         }
                     },
                     firstDayOfWeekChoices = FirstDayOfWeekPreference.entries.map { option ->
-                        SettingsChoice(label = option.displayName, isSelected = option == selectedFirstDayOfWeek) {
+                        SettingsChoice(label = option.label(), isSelected = option == selectedFirstDayOfWeek) {
                             viewModel.setFirstDayOfWeekPreference(option.name)
                         }
                     },
                     subNoteOpenModeChoices = SubNoteOpenMode.entries.map { option ->
-                        SettingsChoice(label = option.displayName, isSelected = option == selectedSubNoteOpenMode) {
+                        SettingsChoice(label = option.label(), isSelected = option == selectedSubNoteOpenMode) {
                             viewModel.setSubNoteOpenMode(option.name)
                         }
                     },
                     topBarFadeStyleChoices = TopBarFadeStyle.entries.filter { isDebugBuild || it != TopBarFadeStyle.FALLBACK }.map { option ->
-                        SettingsChoice(label = option.displayName(topBarFadeProgressive), isSelected = option == topBarFadeStyleFor(topBarFadeStyle)) {
+                        SettingsChoice(label = option.label(topBarFadeProgressive), isSelected = option == topBarFadeStyleFor(topBarFadeStyle)) {
                             viewModel.setTopBarFadeStyle(option.name)
                         }
                     },
@@ -421,7 +540,7 @@ fun SettingsScreen(
                     ) {
                         null
                     } else {
-                        SettingsMenuToggle(label = "Progressive", isOn = topBarFadeProgressive) {
+                        SettingsMenuToggle(label = stringResource(Res.string.settings_top_bar_fade_progressive), isOn = topBarFadeProgressive) {
                             viewModel.setTopBarFadeProgressive(!topBarFadeProgressive)
                         }
                     },
@@ -523,12 +642,12 @@ fun SettingsScreen(
                 .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = "Settings",
+                title = stringResource(Res.string.settings_title),
                 hazeState = hazeState,
                 topEdgeFadeAlpha = if (isDesktopPlatform) desktopTopEdgeFadeAlpha else 1f,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 showBackButton = showBackButton,
-                backTooltip = "Back",
+                backTooltip = stringResource(Res.string.common_back),
                 onBackClick = {
                     val openSubPage = desktopSubPage
                     if (openSubPage != null) onDesktopSubPageChange(openSubPage.parentPage) else onNavigateBack()
@@ -590,8 +709,8 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        EmberrButtonSecondary(text = "Cancel", onClick = { showDayPicker = false }, modifier = Modifier.weight(1f))
-                        EmberrButtonPrimary(text = "Save", onClick = { viewModel.saveBackupSchedule(backupFrequency, backupTime, days[selectedIndex]); showDayPicker = false }, modifier = Modifier.weight(1f))
+                        EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = { showDayPicker = false }, modifier = Modifier.weight(1f))
+                        EmberrButtonPrimary(text = stringResource(Res.string.common_save), onClick = { viewModel.saveBackupSchedule(backupFrequency, backupTime, days[selectedIndex]); showDayPicker = false }, modifier = Modifier.weight(1f))
                     }
                 }
             }
@@ -599,15 +718,15 @@ fun SettingsScreen(
             EmberrBottomSheet(
                 expanded = showDayPicker,
                 onDismiss = { showDayPicker = false },
-                title = "Select Backup Day"
+                title = stringResource(Res.string.settings_select_backup_day)
             ) {
                 wheelContent()
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    EmberrButtonSecondary(text = "Cancel", onClick = { showDayPicker = false }, modifier = Modifier.weight(1f))
-                    EmberrButtonPrimary(text = "Save", onClick = { viewModel.saveBackupSchedule(backupFrequency, backupTime, days[selectedIndex]); showDayPicker = false }, modifier = Modifier.weight(1f))
+                    EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = { showDayPicker = false }, modifier = Modifier.weight(1f))
+                    EmberrButtonPrimary(text = stringResource(Res.string.common_save), onClick = { viewModel.saveBackupSchedule(backupFrequency, backupTime, days[selectedIndex]); showDayPicker = false }, modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -625,8 +744,8 @@ fun SettingsScreen(
         EmberrBottomSheet(
             expanded = true,
             onDismiss = { showTopBarFadeStyleSheet = false },
-            title = "Top Bar Fade",
-            subtitle = "Choose how content fades out behind the top bar while you scroll.",
+            title = stringResource(Res.string.settings_top_bar_fade),
+            subtitle = stringResource(Res.string.settings_top_bar_fade_subtitle),
             contentHorizontalPadding = 0.dp
         ) {
             val selectedFadeStyle = topBarFadeStyleFor(topBarFadeStyle)
@@ -634,7 +753,7 @@ fun SettingsScreen(
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                 TopBarFadeStyle.entries.filter { isDebugBuild || it != TopBarFadeStyle.FALLBACK }.forEach { option ->
                     EmberrBottomSheetOption(
-                        label = option.displayName(topBarFadeProgressive),
+                        label = option.label(topBarFadeProgressive),
                         isSelected = option == selectedFadeStyle,
                         onClick = {
                             viewModel.setTopBarFadeStyle(option.name)
@@ -645,14 +764,14 @@ fun SettingsScreen(
 
                 if (selectedFadeStyle != TopBarFadeStyle.NONE && !selectedFadeStyle.isAlwaysFlatOnThisPlatform) {
                     EmberrBottomSheetOption(
-                        label = "Progressive",
+                        label = stringResource(Res.string.settings_top_bar_fade_progressive),
                         onClick = { viewModel.setTopBarFadeProgressive(!topBarFadeProgressive) },
                         trailing = { EmberrSwitch(isOn = topBarFadeProgressive) }
                     )
                 }
 
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = { showTopBarFadeStyleSheet = false },
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 12.dp, start = 20.dp, end = 20.dp)
@@ -664,22 +783,22 @@ fun SettingsScreen(
     if (showDisableAiConfirmation) {
         EmberrAlertDialog(
             onDismissRequest = { showDisableAiConfirmation = false },
-            title = "Turn Off AI Features?"
+            title = stringResource(Res.string.settings_turn_off_ai_dialog_title)
         ) {
             Text(
-                text = "Deletes downloaded models, the search index and saved API keys. Your notes and chats are kept.",
+                text = stringResource(Res.string.settings_turn_off_ai_dialog_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
             )
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { showDisableAiConfirmation = false },
                     modifier = Modifier.weight(1f)
                 )
                 EmberrButtonPrimary(
-                    text = "Turn Off",
+                    text = stringResource(Res.string.settings_turn_off),
                     onClick = {
                         showDisableAiConfirmation = false
                         viewModel.setAiFeaturesDisabled(true)
@@ -705,17 +824,17 @@ fun SettingsScreen(
     if (showClearAllDataConfirmation && !clearAllDataErasesCloudData) {
         EmberrAlertDialog(
             onDismissRequest = { showClearAllDataConfirmation = false },
-            title = "Clear All Data?"
+            title = stringResource(Res.string.settings_clear_all_data_dialog_title)
         ) {
             Text(
-                text = "Deletes everything on this device. Your other devices, sync server and backups are not touched. ",
+                text = stringResource(Res.string.settings_clear_all_data_dialog_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
             )
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { showClearAllDataConfirmation = false },
                     modifier = Modifier.weight(1f)
                 )
@@ -732,7 +851,7 @@ fun SettingsScreen(
                     ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None)
                 ) {
-                    Text("Delete", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(Res.string.common_delete), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -761,13 +880,13 @@ fun SettingsScreen(
     if (showUnpairConfirmation) {
         EmberrAlertDialog(
             onDismissRequest = { showUnpairConfirmation = false },
-            title = "Unpair Device?"
+            title = stringResource(Res.string.settings_unpair_dialog_title)
         ) {
             Text(
                 text = if (isDesktopPlatform) {
-                    "Removes sync pairing from this desktop. Unpair on your phone too."
+                    stringResource(Res.string.settings_unpair_dialog_message_desktop)
                 } else {
-                    "Removes sync pairing from this device. Keep the desktop app open, or unpair there too."
+                    stringResource(Res.string.settings_unpair_dialog_message_phone)
                 },
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
@@ -775,12 +894,12 @@ fun SettingsScreen(
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { showUnpairConfirmation = false },
                     modifier = Modifier.weight(1f)
                 )
                 EmberrButtonPrimary(
-                    text = "Unpair",
+                    text = stringResource(Res.string.settings_unpair),
                     onClick = {
                         showUnpairConfirmation = false
                         syncViewModel.unpair()
@@ -874,11 +993,11 @@ private fun SettingsSubPageBackButton(onClick: () -> Unit) {
     Box(modifier = Modifier.padding(start = 16.dp, top = 20.dp)) {
         TopBarIconButton(
             icon = painterResource(Res.drawable.chevron_left),
-            contentDescription = "Back",
+            contentDescription = stringResource(Res.string.common_back),
             bgColor = Color.Transparent,
             tint = MaterialTheme.colorScheme.primary,
             size = TopHeaderBarButtonSize,
-            tooltip = "Back",
+            tooltip = stringResource(Res.string.common_back),
             onClick = onClick
         )
     }
@@ -886,14 +1005,14 @@ private fun SettingsSubPageBackButton(onClick: () -> Unit) {
 
 @Composable
 private fun RemindersSettingsSection() {
-    SettingsGroup(title = "Reminders") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_reminders)) {
         val permissionCoordinator = rememberAppPermissionCoordinator()
         val isUnrestricted = permissionCoordinator.isGranted(AppPermission.UnrestrictedBackground)
 
         SettingsActionRow(
             icon = painterResource(Res.drawable.timer_reset),
-            title = "Unrestricted Background",
-            trailingLabel = if (isUnrestricted) "On" else "Off",
+            title = stringResource(Res.string.settings_unrestricted_background),
+            trailingLabel = if (isUnrestricted) stringResource(Res.string.common_on) else stringResource(Res.string.common_off),
             onClick = { permissionCoordinator.request(AppPermission.UnrestrictedBackground) }
         )
     }
@@ -913,16 +1032,16 @@ private fun DataSettingsSection(
     onPickBackupTime: () -> Unit,
     onChooseBackupFolder: () -> Unit
 ) {
-    SettingsGroup(title = "Data & Storage") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_data_storage)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.download),
-            title = "Import",
+            title = stringResource(Res.string.settings_import),
             onClick = onImportNotesClick
         )
         SettingsDivider()
         SettingsActionRow(
             icon = painterResource(Res.drawable.share),
-            title = "Export Backup",
+            title = stringResource(Res.string.settings_export_backup),
             onClick = onExportClick
         )
 
@@ -930,7 +1049,7 @@ private fun DataSettingsSection(
             SettingsDivider()
             SettingsToggleRow(
                 icon = painterResource(Res.drawable.folder_sync),
-                title = "Automatic Backups",
+                title = stringResource(Res.string.settings_automatic_backups),
                 isChecked = autoBackupEnabled,
                 onCheckedChange = onAutoBackupChange
             )
@@ -942,8 +1061,9 @@ private fun DataSettingsSection(
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     SettingsSegmentedOptions(
-                        options = BackupFrequencies,
+                        options = BackupFrequencyLabels.keys.toList(),
                         selectedOption = backupFrequency,
+                        optionLabel = { frequency -> stringResource(BackupFrequencyLabels.getValue(frequency)) },
                         onOptionSelected = onBackupFrequencySelected,
                         modifier = Modifier.padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
                     )
@@ -952,7 +1072,7 @@ private fun DataSettingsSection(
                         SettingsDivider()
                         SettingsActionRow(
                             icon = painterResource(Res.drawable.calendar_clock),
-                            title = "Backup Day",
+                            title = stringResource(Res.string.settings_backup_day),
                             trailingLabel = backupDay,
                             onClick = onPickBackupDay
                         )
@@ -961,7 +1081,7 @@ private fun DataSettingsSection(
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.timer_reset),
-                        title = "Backup Time",
+                        title = stringResource(Res.string.settings_backup_time),
                         trailingLabel = backupTimeLabel(backupTime, LocalUsesTwentyFourHourClock.current),
                         onClick = onPickBackupTime
                     )
@@ -969,8 +1089,8 @@ private fun DataSettingsSection(
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.folder_input),
-                        title = "Backup Location",
-                        trailingLabel = "Change",
+                        title = stringResource(Res.string.settings_backup_location),
+                        trailingLabel = stringResource(Res.string.settings_backup_location_change),
                         onClick = onChooseBackupFolder
                     )
                 }
@@ -997,13 +1117,13 @@ private fun SyncSettingsSection(
     onPairWithDesktop: () -> Unit,
     onUnpair: () -> Unit
 ) {
-    SettingsGroup(title = "Sync & Backup") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_sync_backup)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.refresh_cw),
-            title = "Self-Host",
+            title = stringResource(Res.string.settings_self_host),
             subtitle = when {
-                isPaired -> "Unpair LAN Sync to use Self-Host."
-                isSignedInToCloud -> "Sign out of Emberr Cloud to use Self-Host."
+                isPaired -> stringResource(Res.string.settings_self_host_blocked_by_lan_sync)
+                isSignedInToCloud -> stringResource(Res.string.settings_self_host_blocked_by_cloud)
                 else -> null
             },
             isEnabled = !isPaired && !isSignedInToCloud,
@@ -1013,11 +1133,11 @@ private fun SyncSettingsSection(
             SettingsDivider()
             SettingsActionRow(
                 icon = painterResource(Res.drawable.lock),
-                title = "Emberr Cloud",
+                title = stringResource(Res.string.settings_emberr_cloud),
                 subtitle = when {
                     isSignedInToCloud -> null
-                    isSelfHostConnected -> "Disconnect Self-Host to use Emberr Cloud."
-                    isPaired -> "Unpair LAN Sync to use Emberr Cloud."
+                    isSelfHostConnected -> stringResource(Res.string.settings_cloud_blocked_by_self_host)
+                    isPaired -> stringResource(Res.string.settings_cloud_blocked_by_lan_sync)
                     else -> null
                 },
                 isEnabled = isSignedInToCloud || (!isSelfHostConnected && !isPaired),
@@ -1028,17 +1148,16 @@ private fun SyncSettingsSection(
             SettingsDivider()
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 SettingsSegmentedOptions(
-                    options = SyncNetworkLabels.map { it.second },
-                    selectedOption = SyncNetworkLabels.first { it.first == syncNetwork }.second,
-                    onOptionSelected = { selectedLabel ->
-                        onSyncNetworkSelected(SyncNetworkLabels.first { it.second == selectedLabel }.first)
-                    }
+                    options = SyncNetworkLabels.map { it.first },
+                    selectedOption = syncNetwork,
+                    optionLabel = { network -> stringResource(SyncNetworkLabels.first { it.first == network }.second) },
+                    onOptionSelected = onSyncNetworkSelected
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = "Self-Host and Emberr Cloud only sync over the network you pick.",
+                    text = stringResource(Res.string.settings_sync_network_hint),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                 )
@@ -1046,10 +1165,10 @@ private fun SyncSettingsSection(
         }
     }
 
-    SettingsGroup(title = "LAN Sync") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_lan_sync)) {
         val lanSyncBlockedReason = when {
-            isSelfHostConnected -> "Disconnect Self-Host to use LAN Sync."
-            isSignedInToCloud -> "Sign out of Emberr Cloud to use LAN Sync."
+            isSelfHostConnected -> stringResource(Res.string.settings_lan_sync_blocked_by_self_host)
+            isSignedInToCloud -> stringResource(Res.string.settings_lan_sync_blocked_by_cloud)
             else -> null
         }
 
@@ -1061,7 +1180,7 @@ private fun SyncSettingsSection(
             isPaired -> {
                 if (isDesktopPlatform) {
                     Text(
-                        text = "Paired. This desktop syncs automatically whenever your phone connects over LAN.",
+                        text = stringResource(Res.string.settings_lan_sync_paired_desktop),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp)
@@ -1069,7 +1188,7 @@ private fun SyncSettingsSection(
                 } else {
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.refresh_cw),
-                        title = "Sync Now",
+                        title = stringResource(Res.string.settings_sync_now),
                         trailingLabel = syncStatus,
                         onClick = onSyncNow
                     )
@@ -1078,7 +1197,7 @@ private fun SyncSettingsSection(
                 SettingsDivider()
                 SettingsActionRow(
                     icon = rememberVectorPainter(Icons.Default.LinkOff),
-                    title = if (isDesktopPlatform) "Unpair from Mobile Device" else "Unpair from Desktop",
+                    title = if (isDesktopPlatform) stringResource(Res.string.settings_unpair_from_mobile_device) else stringResource(Res.string.settings_unpair_from_desktop),
                     isDestructive = true,
                     onClick = onUnpair
                 )
@@ -1087,7 +1206,7 @@ private fun SyncSettingsSection(
             isDesktopPlatform -> {
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
                     Text(
-                        text = "Sync Port",
+                        text = stringResource(Res.string.settings_sync_port),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -1101,8 +1220,7 @@ private fun SyncSettingsSection(
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Only takes effect after restarting Emberr. Change this if another " +
-                            "program on this computer is already using the current port.",
+                        text = stringResource(Res.string.settings_sync_port_hint),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                     )
@@ -1110,7 +1228,7 @@ private fun SyncSettingsSection(
                 SettingsDivider()
                 SettingsActionRow(
                     icon = painterResource(Res.drawable.qr_code),
-                    title = "Pair Mobile Device",
+                    title = stringResource(Res.string.settings_pair_mobile_device),
                     subtitle = lanSyncBlockedReason,
                     isEnabled = !isSelfHostConnected && !isSignedInToCloud,
                     onClick = onPairMobileDevice
@@ -1120,7 +1238,7 @@ private fun SyncSettingsSection(
             else -> {
                 SettingsActionRow(
                     icon = painterResource(Res.drawable.scan_line),
-                    title = "Pair with Desktop",
+                    title = stringResource(Res.string.settings_pair_with_desktop),
                     subtitle = lanSyncBlockedReason,
                     isEnabled = !isSelfHostConnected && !isSignedInToCloud,
                     onClick = onPairWithDesktop
@@ -1167,10 +1285,10 @@ private fun AppearanceSettingsSection(
     onCustomWindowFrameChange: (Boolean) -> Unit,
     onAutoHideTitleBarChange: (Boolean) -> Unit
 ) {
-    SettingsGroup(title = "Appearance") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_appearance)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.palette),
-            title = "Theme",
+            title = stringResource(Res.string.settings_theme),
             trailingLabel = colorThemeLabel,
             onClick = onColorThemeClick
         )
@@ -1178,7 +1296,7 @@ private fun AppearanceSettingsSection(
         if (isDesktopPlatform) {
             SettingsChoiceRow(
                 icon = painterResource(Res.drawable.palette),
-                title = "Top Bar Fade",
+                title = stringResource(Res.string.settings_top_bar_fade),
                 value = topBarFadeStyleLabel,
                 choices = topBarFadeStyleChoices,
                 menuToggle = topBarFadeProgressiveToggle
@@ -1186,7 +1304,7 @@ private fun AppearanceSettingsSection(
         } else {
             SettingsActionRow(
                 icon = painterResource(Res.drawable.palette),
-                title = "Top Bar Fade",
+                title = stringResource(Res.string.settings_top_bar_fade),
                 trailingLabel = topBarFadeStyleLabel,
                 onClick = onTopBarFadeStyleClick
             )
@@ -1199,42 +1317,42 @@ private fun AppearanceSettingsSection(
         SettingsDivider()
         SettingsChoiceRow(
             icon = painterResource(Res.drawable.sliders_horizontal),
-            title = "Font Size",
+            title = stringResource(Res.string.settings_font_size),
             value = fontSizeLabel,
             choices = fontSizeChoices
         )
         SettingsDivider()
         SettingsChoiceRow(
             icon = painterResource(Res.drawable.text_type),
-            title = "Font Style",
+            title = stringResource(Res.string.settings_font_style),
             value = fontStyleLabel,
             choices = fontStyleChoices
         )
     }
 
-    SettingsGroup(title = "Date & Time") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_date_time)) {
         SettingsChoiceRow(
             icon = painterResource(Res.drawable.clock_circle),
-            title = "Time Format",
+            title = stringResource(Res.string.settings_time_format),
             value = timeFormatLabel,
             choices = timeFormatChoices
         )
         SettingsDivider()
         SettingsChoiceRow(
             icon = painterResource(Res.drawable.calendar),
-            title = "First Day of Week",
+            title = stringResource(Res.string.settings_first_day_of_week),
             value = firstDayOfWeekLabel,
             choices = firstDayOfWeekChoices,
-            subtitle = if (isDesktopPlatform) "Same setting as First Day of Week in Calendar settings." else null
+            subtitle = if (isDesktopPlatform) stringResource(Res.string.settings_first_day_of_week_desktop_hint) else null
         )
     }
 
-    SettingsGroup(title = "Layout") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_layout)) {
         SettingsToggleRow(
             icon = painterResource(Res.drawable.daily),
-            title = "Daily Notes",
+            title = stringResource(Res.string.settings_daily_notes),
             isChecked = dailyNotesEnabled,
-            subtitle = if (isDesktopPlatform) "Hides daily notes. Existing ones are kept." else null,
+            subtitle = if (isDesktopPlatform) stringResource(Res.string.settings_daily_notes_hint) else null,
             onCheckedChange = onDailyNotesEnabledChange
         )
 
@@ -1242,9 +1360,9 @@ private fun AppearanceSettingsSection(
             SettingsDivider()
             SettingsToggleRow(
                 icon = painterResource(Res.drawable.quote_down2),
-                title = "Daily Quote",
+                title = stringResource(Res.string.settings_daily_quote),
                 isChecked = dailyQuoteVisible,
-                subtitle = "Shows a quote on empty days.",
+                subtitle = stringResource(Res.string.settings_daily_quote_hint),
                 onCheckedChange = onDailyQuoteVisibleChange
             )
         }
@@ -1253,7 +1371,7 @@ private fun AppearanceSettingsSection(
             SettingsDivider()
             SettingsToggleRow(
                 icon = painterResource(Res.drawable.house),
-                title = "Open Home First",
+                title = stringResource(Res.string.settings_open_home_first),
                 isChecked = startOnHome,
                 onCheckedChange = onStartOnHomeChange
             )
@@ -1263,14 +1381,14 @@ private fun AppearanceSettingsSection(
             SettingsDivider()
             SettingsToggleRow(
                 icon = painterResource(Res.drawable.microphone),
-                title = "Mic Button",
+                title = stringResource(Res.string.settings_mic_button),
                 isChecked = micButtonVisible,
                 onCheckedChange = onMicButtonVisibleChange
             )
         }
     }
 
-    SettingsGroup(title = "Overview") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_overview)) {
         OverviewSection.entries.forEachIndexed { index, section ->
             if (index > 0) SettingsDivider()
             SettingsToggleRow(
@@ -1282,15 +1400,15 @@ private fun AppearanceSettingsSection(
         }
 
         if (isDesktopPlatform) {
-            SettingsFootnote(text = "Shortcuts shown in the sidebar.")
+            SettingsFootnote(text = stringResource(Res.string.settings_overview_sidebar_footnote))
         }
     }
 
     if (isDesktopPlatform) {
-        SettingsGroup(title = "Desktop Window") {
+        SettingsGroup(title = stringResource(Res.string.settings_group_desktop_window)) {
             SettingsChoiceRow(
                 icon = painterResource(Res.drawable.sidebar),
-                title = "Subnote Opening",
+                title = stringResource(Res.string.settings_subnote_opening),
                 value = subNoteOpenModeLabel,
                 choices = subNoteOpenModeChoices
             )
@@ -1298,9 +1416,9 @@ private fun AppearanceSettingsSection(
             SettingsDivider()
             SettingsToggleRow(
                 icon = painterResource(Res.drawable.sidebar),
-                title = "Show Scrollbar",
+                title = stringResource(Res.string.settings_show_scrollbar),
                 isChecked = showScrollbar,
-                subtitle = "Shows scrollbars in lists, notes and tables.",
+                subtitle = stringResource(Res.string.settings_show_scrollbar_hint),
                 onCheckedChange = onShowScrollbarChange
             )
 
@@ -1310,9 +1428,9 @@ private fun AppearanceSettingsSection(
 
             SettingsToggleRow(
                 icon = painterResource(Res.drawable.sidebar),
-                title = "Custom Title Bar",
+                title = stringResource(Res.string.settings_custom_title_bar),
                 isChecked = customWindowFrameEnabled,
-                subtitle = "Uses Emberr's own title bar. Applies after restart.",
+                subtitle = stringResource(Res.string.settings_custom_title_bar_hint),
                 onCheckedChange = { enabled ->
                     onCustomWindowFrameChange(enabled)
                     showCustomWindowFrameNotice = true
@@ -1323,9 +1441,9 @@ private fun AppearanceSettingsSection(
                 SettingsDivider()
                 SettingsToggleRow(
                     icon = painterResource(Res.drawable.sidebar),
-                    title = "Auto-hide Title Bar",
+                    title = stringResource(Res.string.settings_auto_hide_title_bar),
                     isChecked = autoHideTitleBar,
-                    subtitle = "Shows the title bar when you point at the top edge.",
+                    subtitle = stringResource(Res.string.settings_auto_hide_title_bar_hint),
                     onCheckedChange = onAutoHideTitleBarChange
                 )
             }
@@ -1333,25 +1451,22 @@ private fun AppearanceSettingsSection(
             if (showCustomWindowFrameNotice) {
                 EmberrAlertDialog(
                     onDismissRequest = { showCustomWindowFrameNotice = false },
-                    title = "Restart to apply"
+                    title = stringResource(Res.string.settings_restart_to_apply_title)
                 ) {
                     Text(
-                        text = "The window cannot switch between its own title bar and the " +
-                            "desktop's one while it is open, so Emberr needs to restart to " +
-                            "apply this. Unsaved work is saved as you type, so restarting now " +
-                            "is safe.",
+                        text = stringResource(Res.string.settings_restart_to_apply_message),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
                     )
                     Spacer(Modifier.height(20.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         EmberrButtonSecondary(
-                            text = "Later",
+                            text = stringResource(Res.string.settings_restart_later),
                             onClick = { showCustomWindowFrameNotice = false },
                             modifier = Modifier.weight(1f)
                         )
                         EmberrButtonPrimary(
-                            text = "Restart Now",
+                            text = stringResource(Res.string.settings_restart_now),
                             onClick = {
                                 showCustomWindowFrameNotice = false
                                 restartApplication()
@@ -1372,16 +1487,16 @@ private fun AiSettingsSection(
     onDisableRequested: () -> Unit,
     onEnableRequested: () -> Unit
 ) {
-    SettingsGroup(title = "AI") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_ai)) {
         SettingsToggleRow(
             icon = painterResource(Res.drawable.astroid),
-            title = "Turn Off AI Features",
+            title = stringResource(Res.string.settings_turn_off_ai_features),
             isChecked = aiFeaturesDisabled,
             subtitle = when {
-                isPurgingAiData -> "Removing models, embeddings and saved keys…"
+                isPurgingAiData -> stringResource(Res.string.settings_ai_removing_data)
                 !isDesktopPlatform -> null
-                aiFeaturesDisabled -> "AI is off. Models and keys are removed. Chats are kept."
-                else -> "Hides the assistant and deletes models and keys. Chats are kept."
+                aiFeaturesDisabled -> stringResource(Res.string.settings_ai_off_hint)
+                else -> stringResource(Res.string.settings_ai_on_hint)
             },
             onCheckedChange = { isChecked ->
                 if (!isPurgingAiData) {
@@ -1394,10 +1509,10 @@ private fun AiSettingsSection(
 
 @Composable
 private fun EditorSettingsSection(onKeyboardToolbarClick: () -> Unit) {
-    SettingsGroup(title = "Editor") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_editor)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.keyboard),
-            title = "Keyboard Toolbar",
+            title = stringResource(Res.string.settings_keyboard_toolbar),
             onClick = onKeyboardToolbarClick
         )
     }
@@ -1407,30 +1522,30 @@ private fun EditorSettingsSection(onKeyboardToolbarClick: () -> Unit) {
 private fun HelpSettingsSection(onAboutClick: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     var isWhatsNewOpen by remember { mutableStateOf(false) }
-    SettingsGroup(title = "Need Help?") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_need_help)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.badge_question_mark),
-            title = "FAQ",
+            title = stringResource(Res.string.settings_faq),
             isEnabled = false,
             onClick = {}
         )
         SettingsDivider()
         SettingsActionRow(
             icon = painterResource(Res.drawable.badge_plus),
-            title = "What's New",
+            title = stringResource(Res.string.settings_whats_new),
             onClick = { isWhatsNewOpen = true }
         )
         SettingsDivider()
         SettingsActionRow(
             icon = painterResource(Res.drawable.shield_alert),
-            title = "Privacy Policy",
+            title = stringResource(Res.string.settings_privacy_policy),
             onClick = { uriHandler.openUri(PRIVACY_POLICY_URL) }
         )
         SettingsDivider()
         SettingsActionRow(
             icon = painterResource(Res.drawable.info),
-            title = "About Emberr",
-            trailingLabel = appVersionName?.let { "v$it" },
+            title = stringResource(Res.string.settings_about_emberr),
+            trailingLabel = appVersionName?.let { stringResource(Res.string.common_version_label, it) },
             onClick = onAboutClick
         )
     }
@@ -1442,12 +1557,12 @@ private fun HelpSettingsSection(onAboutClick: () -> Unit) {
 
 @Composable
 private fun DangerZoneSettingsSection(onClearAllData: () -> Unit) {
-    SettingsGroup(title = "Danger Zone") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_danger_zone)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.triangle_alert),
-            title = "Clear All Data",
+            title = stringResource(Res.string.settings_clear_all_data),
             subtitle = if (isDesktopPlatform) {
-                "Deletes every note, reminder and attachment stored on this device. This cannot be undone."
+                stringResource(Res.string.settings_clear_all_data_desktop_hint)
             } else {
                 null
             },
@@ -1468,10 +1583,10 @@ private fun EraseCloudDataDialog(
 
     EmberrAlertDialog(
         onDismissRequest = { if (!isErasing) onDismiss() },
-        title = "Clear All Data?"
+        title = stringResource(Res.string.settings_clear_all_data_dialog_title)
     ) {
         Text(
-            text = "Erases all your data from Emberr Cloud and every signed-in device. You stay signed in.",
+            text = stringResource(Res.string.settings_erase_cloud_dialog_message),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
         )
@@ -1479,7 +1594,7 @@ private fun EraseCloudDataDialog(
         PasswordField(
             password = password,
             onPasswordChanged = { password = it },
-            placeholder = "Password",
+            placeholder = stringResource(Res.string.settings_erase_cloud_password),
             onSubmit = { onErase(password) }
         )
         if (errorMessage != null) {
@@ -1493,7 +1608,7 @@ private fun EraseCloudDataDialog(
         Spacer(Modifier.height(20.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             EmberrButtonSecondary(
-                text = "Cancel",
+                text = stringResource(Res.string.common_cancel),
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 enabled = !isErasing
@@ -1510,7 +1625,7 @@ private fun EraseCloudDataDialog(
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None)
             ) {
                 Text(
-                    text = if (isErasing) "Erasing..." else "Erase",
+                    text = if (isErasing) stringResource(Res.string.settings_erasing) else stringResource(Res.string.settings_erase),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     maxLines = 1
@@ -1628,10 +1743,11 @@ private fun SettingsWarningNotice(message: String) {
 }
 
 @Composable
-internal fun SettingsSegmentedOptions(
-    options: List<String>,
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit,
+internal fun <T> SettingsSegmentedOptions(
+    options: List<T>,
+    selectedOption: T,
+    optionLabel: @Composable (T) -> String,
+    onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -1655,7 +1771,7 @@ internal fun SettingsSegmentedOptions(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = option,
+                    text = optionLabel(option),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
                     color = if (isSelected) {
@@ -1729,8 +1845,8 @@ internal fun InterfaceScaleStepperRow(
         SettingsRowIcon(icon = painterResource(Res.drawable.scale))
         Spacer(modifier = Modifier.width(16.dp))
         SettingsRowTitle(
-            title = "Interface Scale",
-            subtitle = if (isDesktopPlatform) "Makes everything in the app bigger or smaller." else null,
+            title = stringResource(Res.string.settings_interface_scale),
+            subtitle = if (isDesktopPlatform) stringResource(Res.string.settings_interface_scale_hint) else null,
             modifier = Modifier.weight(1f)
         )
         Row(
@@ -1739,13 +1855,13 @@ internal fun InterfaceScaleStepperRow(
         ) {
             InterfaceScaleStepButton(
                 icon = painterResource(Res.drawable.minus),
-                description = "Smaller",
+                description = stringResource(Res.string.settings_interface_scale_smaller),
                 isEnabled = savedPercent > SMALLEST_INTERFACE_SCALE_PERCENT,
                 onClick = { onPercentChosen(interfaceScalePercentMovedBySteps(savedPercent, -1)) }
             )
-            IconTooltip(text = "Reset to 100%") {
+            IconTooltip(text = stringResource(Res.string.settings_interface_scale_reset)) {
                 Text(
-                    text = "$savedPercent%",
+                    text = stringResource(Res.string.common_percent_value, savedPercent),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
@@ -1754,7 +1870,7 @@ internal fun InterfaceScaleStepperRow(
                         .clickable(
                             interactionSource = null,
                             indication = null,
-                            onClickLabel = "Reset to 100%",
+                            onClickLabel = stringResource(Res.string.settings_interface_scale_reset),
                             role = Role.Button
                         ) {
                             if (savedPercent != SyncConstants.DEFAULT_INTERFACE_SCALE_PERCENT) {
@@ -1765,7 +1881,7 @@ internal fun InterfaceScaleStepperRow(
             }
             InterfaceScaleStepButton(
                 icon = painterResource(Res.drawable.plus),
-                description = "Bigger",
+                description = stringResource(Res.string.settings_interface_scale_bigger),
                 isEnabled = savedPercent < LARGEST_INTERFACE_SCALE_PERCENT,
                 onClick = { onPercentChosen(interfaceScalePercentMovedBySteps(savedPercent, 1)) }
             )
@@ -1934,7 +2050,7 @@ internal fun SettingsChoiceRow(
                 }
 
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = { isMenuOpen = false },
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 12.dp, start = 20.dp, end = 20.dp)
@@ -1981,9 +2097,11 @@ fun SettingsToggleRow(
 internal fun Modifier.settingsRowSize(): Modifier =
     heightIn(min = SettingsRowMinHeight).padding(horizontal = SettingsRowSidePadding, vertical = 12.dp)
 
-private fun fontSizeDisplayNameFor(preferenceName: String): String =
+@Composable
+private fun fontSizeLabelFor(preferenceName: String): String = stringResource(
     FontSizeOptions.firstOrNull { it.first == preferenceName }?.second
         ?: FontSizeOptions[2].second
+)
 
 private fun topBarFadeStyleFor(styleName: String): TopBarFadeStyle =
     runCatching { TopBarFadeStyle.valueOf(styleName) }.getOrDefault(TopBarFadeStyle.BLUR)

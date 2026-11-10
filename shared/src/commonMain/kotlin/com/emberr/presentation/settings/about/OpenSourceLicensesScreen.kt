@@ -55,10 +55,20 @@ import com.mikepenz.aboutlibraries.entity.License
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.settings_about_open_source_licenses
+import emberr.shared.generated.resources.settings_licenses_by_authors
+import emberr.shared.generated.resources.settings_licenses_full_text_at
+import emberr.shared.generated.resources.settings_licenses_group_fonts
+import emberr.shared.generated.resources.settings_licenses_group_libraries
+import emberr.shared.generated.resources.settings_licenses_unnamed_license
+import emberr.shared.generated.resources.settings_licenses_version
+import emberr.shared.generated.resources.settings_licenses_visit_website
 import emberr.shared.generated.resources.chevron_right
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private const val LIBRARY_DEFINITIONS_PATH = "files/aboutlibraries.json"
 private const val FONT_ID_PREFIX = "font:"
@@ -82,6 +92,8 @@ fun OpenSourceLicensesScreen(onNavigateBack: () -> Unit, showTopBar: Boolean = t
     val (fonts, codeLibraries) = remember(libraries) {
         libraries.partition { it.uniqueId.startsWith(FONT_ID_PREFIX) }
     }
+    val librariesGroupTitle = stringResource(Res.string.settings_licenses_group_libraries)
+    val fontsGroupTitle = stringResource(Res.string.settings_licenses_group_fonts)
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val sidePadding = desktopSettingsSidePadding(maxWidth)
@@ -98,8 +110,8 @@ fun OpenSourceLicensesScreen(onNavigateBack: () -> Unit, showTopBar: Boolean = t
                 bottom = 48.dp
             )
         ) {
-            libraryGroup(title = "Libraries", libraries = codeLibraries, onLibraryClick = { selectedLibrary = it })
-            libraryGroup(title = "Fonts", libraries = fonts, onLibraryClick = { selectedLibrary = it })
+            libraryGroup(title = librariesGroupTitle, libraries = codeLibraries, onLibraryClick = { selectedLibrary = it })
+            libraryGroup(title = fontsGroupTitle, libraries = fonts, onLibraryClick = { selectedLibrary = it })
         }
 
         EmberrVerticalScrollbar(
@@ -119,10 +131,10 @@ fun OpenSourceLicensesScreen(onNavigateBack: () -> Unit, showTopBar: Boolean = t
                     .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
             ) {
                 EmberrTopHeaderBar(
-                    title = "Open-Source Licenses",
+                    title = stringResource(Res.string.settings_about_open_source_licenses),
                     hazeState = hazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onBackClick = onNavigateBack
                 )
             }
@@ -241,8 +253,8 @@ private fun LibraryLicenseSheet(library: Library, onDismiss: () -> Unit) {
     val authorNames = library.organization?.name?.takeIf { it.isNotBlank() }
         ?: library.developers.mapNotNull { it.name?.takeIf { name -> name.isNotBlank() } }.joinToString(", ")
     val sheetSubtitle = listOfNotNull(
-        library.artifactVersion?.let { "Version $it" },
-        authorNames.takeIf { it.isNotBlank() }?.let { "By $it" }
+        library.artifactVersion?.let { stringResource(Res.string.settings_licenses_version, it) },
+        authorNames.takeIf { it.isNotBlank() }?.let { stringResource(Res.string.settings_licenses_by_authors, it) }
     ).joinToString(" · ").takeIf { it.isNotBlank() }
 
     EmberrBottomSheet(
@@ -253,7 +265,7 @@ private fun LibraryLicenseSheet(library: Library, onDismiss: () -> Unit) {
     ) { _ ->
         library.licensesToShow().forEach { license ->
             Text(
-                text = license.name.ifBlank { "License" },
+                text = license.name.ifBlank { stringResource(Res.string.settings_licenses_unnamed_license) },
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -261,7 +273,7 @@ private fun LibraryLicenseSheet(library: Library, onDismiss: () -> Unit) {
             )
             Text(
                 text = license.licenseContent?.takeIf { it.isNotBlank() }
-                    ?: "The full text is available at ${license.url.orEmpty()}",
+                    ?: stringResource(Res.string.settings_licenses_full_text_at, license.url.orEmpty()),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
                 modifier = Modifier.padding(bottom = 24.dp)
@@ -270,7 +282,7 @@ private fun LibraryLicenseSheet(library: Library, onDismiss: () -> Unit) {
 
         library.website?.takeIf { it.isNotBlank() }?.let { website ->
             EmberrButtonSecondary(
-                text = "Visit Website",
+                text = stringResource(Res.string.settings_licenses_visit_website),
                 onClick = { uriHandler.openUri(website) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
             )
