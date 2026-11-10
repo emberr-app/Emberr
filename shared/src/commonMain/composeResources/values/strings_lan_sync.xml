@@ -9,8 +9,8 @@
     <string name="lan_sync_status_success">Success!</string>
     <string name="lan_sync_status_synced_successfully">Synced Successfully</string>
     <plurals name="lan_sync_status_synced_with_unsaved_items">
-        <item quantity="one">Synced, %1$d item couldn\'t be saved</item>
-        <item quantity="other">Synced, %1$d items couldn\'t be saved</item>
+        <item quantity="one">Synced, %1$d item couldn't be saved</item>
+        <item quantity="other">Synced, %1$d items couldn't be saved</item>
     </plurals>
     <string name="lan_sync_status_partial">Partial sync, will retry</string>
     <string name="lan_sync_status_update_both_devices">Update Emberr on both devices</string>

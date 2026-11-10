@@ -54,8 +54,8 @@
         <item quantity="other">Imported %1$d spaces</item>
     </plurals>
     <plurals name="import_emberr_missing_media">
-        <item quantity="one">Couldn\'t find %1$d media file in the backup, so it will show as missing.</item>
-        <item quantity="other">Couldn\'t find %1$d media files in the backup, so they will show as missing.</item>
+        <item quantity="one">Couldn't find %1$d media file in the backup, so it will show as missing.</item>
+        <item quantity="other">Couldn't find %1$d media files in the backup, so they will show as missing.</item>
     </plurals>
     <string name="import_emberr_unknown_error">Unknown error</string>
     <string name="import_emberr_picker_title">Choose an Emberr Backup</string>
@@ -69,7 +69,7 @@
     <string name="import_markdown_choose_files">Choose Files or a .zip</string>
     <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas or .zip</string>
     <string name="import_markdown_reading_files">Reading files…</string>
-    <string name="import_markdown_could_not_read">Couldn\'t read those files. %1$s</string>
+    <string name="import_markdown_could_not_read">Couldn't read those files. %1$s</string>
     <string name="import_markdown_save_to_space">Save to Space</string>
     <string name="import_markdown_import_as">Import As</string>
     <string name="import_markdown_emberr_notes">Emberr Notes</string>
@@ -84,7 +84,7 @@
         <item quantity="one">Imported %1$d note into %2$s</item>
         <item quantity="other">Imported %1$d notes into %2$s</item>
     </plurals>
-    <string name="import_markdown_failed_files">Couldn\'t import %1$d: %2$s</string>
+    <string name="import_markdown_failed_files">Couldn't import %1$d: %2$s</string>
     <string name="import_markdown_choose_folder">Choose a Folder</string>
     <plurals name="import_markdown_picked_files">
         <item quantity="one">%1$d file</item>
