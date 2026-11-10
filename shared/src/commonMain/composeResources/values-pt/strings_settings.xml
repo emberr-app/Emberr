@@ -82,6 +82,7 @@
     <string name="settings_font_style">Estilo da fonte</string>
     <string name="settings_font_style_system">Sistema</string>
     <string name="settings_language">Idioma</string>
+    <string name="settings_search_languages">Pesquisar idiomas</string>
     <string name="settings_language_system">Padrão do sistema</string>
     <string name="settings_language_restart_message">O Emberr precisa reiniciar para mostrar o novo idioma. O trabalho é salvo enquanto você digita, então reiniciar agora é seguro.</string>
 

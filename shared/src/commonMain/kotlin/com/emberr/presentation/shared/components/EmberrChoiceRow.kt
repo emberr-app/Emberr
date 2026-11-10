@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.SpaceEntity
@@ -111,12 +113,14 @@ fun EmberrChoiceValueMenu(
     value: String,
     isMenuOpen: Boolean,
     onMenuOpenChange: (Boolean) -> Unit,
+    menuMaxHeight: Dp = Dp.Unspecified,
     menuContent: @Composable (closeMenuAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     EmberrChoiceMenu(
         isMenuOpen = isMenuOpen,
         onMenuOpenChange = onMenuOpenChange,
         anchor = { ChoiceValueButton(value = value, isMenuOpen = isMenuOpen, onClick = { onMenuOpenChange(true) }) },
+        menuMaxHeight = menuMaxHeight,
         menuContent = menuContent
     )
 }
@@ -126,6 +130,7 @@ fun EmberrChoiceMenu(
     isMenuOpen: Boolean,
     onMenuOpenChange: (Boolean) -> Unit,
     anchor: @Composable () -> Unit,
+    menuMaxHeight: Dp = Dp.Unspecified,
     menuContent: @Composable (closeMenuAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     Box {
@@ -135,7 +140,7 @@ fun EmberrChoiceMenu(
                 expanded = isMenuOpen,
                 onDismissRequest = { onMenuOpenChange(false) },
                 offset = DpOffset(x = 0.dp, y = ChoiceMenuGap),
-                modifier = Modifier.widthIn(min = ChoiceMenuMinWidth, max = ChoiceMenuMaxWidth)
+                modifier = Modifier.widthIn(min = ChoiceMenuMinWidth, max = ChoiceMenuMaxWidth).heightIn(max = menuMaxHeight)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = ChoiceMenuVerticalPadding)) {
                     menuContent { action ->

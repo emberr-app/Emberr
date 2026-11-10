@@ -82,6 +82,7 @@
     <string name="settings_font_style">Tipo de letra</string>
     <string name="settings_font_style_system">Sistema</string>
     <string name="settings_language">Idioma</string>
+    <string name="settings_search_languages">Buscar idiomas</string>
     <string name="settings_language_system">Predeterminado del sistema</string>
     <string name="settings_language_restart_message">Emberr debe reiniciarse para mostrar el nuevo idioma. Tu trabajo se guarda mientras escribes, así que puedes reiniciar ahora sin problema.</string>
 

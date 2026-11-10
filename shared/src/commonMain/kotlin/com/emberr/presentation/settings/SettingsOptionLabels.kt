@@ -2,6 +2,7 @@ package com.emberr.presentation.settings
 
 import androidx.compose.runtime.Composable
 import com.emberr.domain.util.language.AppLanguage
+import com.emberr.domain.util.language.languageNameInCurrentLanguage
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.domain.util.time.TimeFormatPreference
 import com.emberr.presentation.shared.SubNoteOpenMode
@@ -103,6 +104,13 @@ fun FontStylePreference.label(): String =
 
 @Composable
 fun AppLanguage.label(): String = nativeName ?: stringResource(Res.string.settings_language_system)
+
+fun AppLanguage.nameInCurrentLanguage(): String? {
+    if (this == AppLanguage.SYSTEM) return null
+    val displayTag = if (this == AppLanguage.CHINESE_SIMPLIFIED) "zh-Hans" else languageTag
+    val translatedName = languageNameInCurrentLanguage(displayTag)
+    return translatedName.takeIf { it != nativeName }
+}
 
 @Composable
 fun ThemePreference.label(): String = stringResource(

@@ -82,6 +82,7 @@
     <string name="settings_font_style">Font Style</string>
     <string name="settings_font_style_system">System</string>
     <string name="settings_language">Language</string>
+    <string name="settings_search_languages">Search languages</string>
     <string name="settings_language_system">System default</string>
     <string name="settings_language_restart_message">Emberr needs to restart to show the new language. Unsaved work is saved as you type, so restarting now is safe.</string>
 
