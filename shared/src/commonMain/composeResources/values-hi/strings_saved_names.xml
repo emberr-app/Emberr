@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_name_inbox">इनबॉक्स</string>
+    <string name="saved_name_others_folder">अन्य</string>
+    <string name="saved_name_personal_space">निजी</string>
+    <string name="saved_name_new_chat">नई चैट</string>
+    <string name="saved_name_canvas_group">ग्रुप</string>
+    <string name="saved_name_unknown_link">अनजान लिंक</string>
+    <string name="saved_name_loading_preview">प्रीव्यू लोड हो रहा है...</string>
+    <string name="saved_name_numbered_view">%1$s %2$d</string>
+    <string name="saved_name_view_copy">%1$s की कॉपी</string>
+    <string name="saved_name_label_mobile">मोबाइल</string>
+    <string name="saved_name_label_home">घर</string>
+    <string name="saved_name_label_work">काम</string>
+    <string name="saved_name_label_main">मुख्य</string>
+    <string name="saved_name_label_personal">निजी</string>
+    <string name="saved_name_label_portfolio">पोर्टफ़ोलियो</string>
+    <string name="saved_name_label_blog">ब्लॉग</string>
+    <string name="saved_name_label_anniversary">सालगिरह</string>
+    <string name="saved_name_label_date">तारीख</string>
+    <string name="saved_name_label_nickname">उपनाम</string>
+    <string name="saved_name_label_birthday">जन्मदिन</string>
+</resources>

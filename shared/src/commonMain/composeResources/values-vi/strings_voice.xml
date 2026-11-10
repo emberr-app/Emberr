@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">Đang nghe...</string>
+    <string name="voice_tap_the_orb">Nhấn vào quả cầu để nói</string>
+    <string name="voice_add_tasks_with_voice">(thêm việc cần làm bằng giọng nói)</string>
+    <string name="voice_install_speech_app">Cài ứng dụng nhận dạng giọng nói để thêm việc bằng giọng nói</string>
+    <string name="voice_tap_a_task_to_fix_it">Nhấn vào một việc để sửa</string>
+    <string name="voice_discard">Hủy bỏ</string>
+    <string name="voice_add">Thêm</string>
+    <string name="voice_empty_tasks_are_skipped">Việc trống sẽ bị bỏ qua</string>
+    <string name="voice_today">Hôm nay</string>
+    <string name="voice_tomorrow">Ngày mai</string>
+    <string name="voice_add_time">Thêm giờ</string>
+</resources>

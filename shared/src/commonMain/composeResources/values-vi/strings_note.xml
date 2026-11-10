@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">Gõ / để xem lệnh...</string>
+    <string name="note_copied_to_clipboard">Đã sao chép vào bộ nhớ tạm</string>
+    <string name="note_copied_as_markdown">Đã sao chép dạng Markdown</string>
+    <string name="note_options">Tùy chọn</string>
+    <string name="note_more_options">Tùy chọn khác</string>
+    <string name="note_choose_icon">Chọn biểu tượng</string>
+    <string name="note_search_emojis">Tìm emoji</string>
+    <string name="note_no_emojis_found">Không tìm thấy emoji</string>
+    <string name="note_editing_template">Đang sửa mẫu</string>
+    <string name="note_icon_options">Tùy chọn biểu tượng</string>
+    <string name="note_change_icon">Đổi biểu tượng</string>
+    <string name="note_add_icon">Thêm biểu tượng</string>
+    <string name="note_remove_icon">Xóa biểu tượng</string>
+    <string name="note_cover_options">Tùy chọn ảnh bìa</string>
+    <string name="note_upload_cover">Tải ảnh bìa lên</string>
+    <string name="note_remove_cover">Xóa ảnh bìa</string>
+    <string name="note_hide_word_count">Ẩn số từ</string>
+    <string name="note_show_word_count">Hiện số từ</string>
+    <string name="note_alignment">Căn lề</string>
+    <string name="note_note_width">Độ rộng ghi chú</string>
+    <string name="note_unfavorite">Bỏ yêu thích</string>
+    <string name="note_favorite">Yêu thích</string>
+    <string name="note_open_as_sticky_note">Mở dạng ghi chú dán</string>
+    <string name="note_export_note">Xuất ghi chú</string>
+    <string name="note_copy_text">Sao chép văn bản</string>
+    <string name="note_copy_as_markdown">Sao chép dạng Markdown</string>
+    <string name="note_download_markdown">Tải xuống .md</string>
+    <string name="note_download_pdf">Tải xuống PDF</string>
+    <string name="note_move_to_trash">Chuyển vào thùng rác</string>
+    <string name="note_width_narrow">Hẹp</string>
+    <string name="note_width_full">Toàn bộ</string>
+    <string name="note_align_left">Trái</string>
+    <string name="note_align_center">Giữa</string>
+    <string name="note_align_right">Phải</string>
+    <string name="note_align_justify">Đều hai bên</string>
+    <string name="note_note_options">Tùy chọn ghi chú</string>
+    <string name="note_export_options">Tùy chọn xuất</string>
+    <string name="note_paste_image_link">Dán liên kết hình ảnh</string>
+    <string name="note_cover_image">Ảnh bìa</string>
+    <string name="note_drag_image_to_reposition">Kéo ảnh để đổi vị trí</string>
+    <string name="note_save_position">Lưu vị trí</string>
+    <string name="note_reposition">Đổi vị trí</string>
+    <string name="note_collapse_panel">Thu gọn bảng</string>
+    <string name="note_expand_panel">Mở rộng bảng</string>
+    <plurals name="note_word_count">
+        <item quantity="other">%1$d từ</item>
+    </plurals>
+</resources>

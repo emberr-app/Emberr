@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Paylaşılan içeriği kaydet</string>
+    <string name="share_save_to_overview">Genel bakışa kaydet</string>
+    <string name="share_save_to_a_note">Bir nota kaydet</string>
+    <string name="share_shared_image">Paylaşılan görsel</string>
+    <string name="share_failed_to_save">Paylaşılan içerik kaydedilemedi.</string>
+    <string name="share_saved_to_inbox">Gelen Kutusuna kaydedildi</string>
+    <string name="share_note_no_longer_available">Bu not artık mevcut değil.</string>
+    <plurals name="share_images_selected">
+        <item quantity="one">%1$d görsel seçildi</item>
+        <item quantity="other">%1$d görsel seçildi</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="one">%1$d dosya seçildi</item>
+        <item quantity="other">%1$d dosya seçildi</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="one">%1$d öğe Gelen Kutusuna kaydedildi</item>
+        <item quantity="other">%1$d öğe Gelen Kutusuna kaydedildi</item>
+    </plurals>
+</resources>

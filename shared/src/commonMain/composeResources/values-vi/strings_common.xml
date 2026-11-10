@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Quay lại</string>
+    <string name="common_cancel">Hủy</string>
+    <string name="common_save">Lưu</string>
+    <string name="common_close">Đóng</string>
+    <string name="common_delete">Xóa</string>
+    <string name="common_on">Bật</string>
+    <string name="common_off">Tắt</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">Không có tiêu đề</string>
+    <string name="common_color_yellow">Vàng</string>
+    <string name="common_color_lime">Xanh chanh</string>
+    <string name="common_color_grey">Xám</string>
+    <string name="common_color_red">Đỏ</string>
+    <string name="common_color_blue">Xanh dương</string>
+    <string name="common_color_green">Xanh lá</string>
+    <string name="common_color_orange">Cam</string>
+    <string name="common_color_pink">Hồng</string>
+    <string name="common_color_purple">Tím</string>
+    <string name="common_create">Tạo</string>
+    <string name="common_more">Thêm</string>
+</resources>

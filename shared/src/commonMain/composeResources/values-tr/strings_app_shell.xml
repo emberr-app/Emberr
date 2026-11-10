@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">Günlük notlar</string>
+    <string name="app_shell_home">Ana sayfa</string>
+    <string name="app_shell_ask_ai">Yapay zekaya sor</string>
+    <string name="app_shell_search">Ara</string>
+    <string name="app_shell_voice_task">Sesli görev</string>
+    <string name="app_shell_mic">Mikrofon</string>
+    <string name="app_shell_search_anything">Her şeyi arayın</string>
+    <string name="app_shell_close_search">Aramayı kapat</string>
+    <string name="app_shell_clear_search">Aramayı temizle</string>
+</resources>

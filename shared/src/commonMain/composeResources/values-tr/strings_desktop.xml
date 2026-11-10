@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Emberr'i aç</string>
+    <string name="desktop_tray_close_window">Pencereyi kapat</string>
+    <string name="desktop_tray_quit">Çık</string>
+    <string name="desktop_sticky_note">Yapışkan not</string>
+    <string name="desktop_select_image">Görsel seçin</string>
+    <string name="desktop_select_document">Belge seçin</string>
+    <string name="desktop_file_not_found_message">Bu dosya artık bu cihazda yok.</string>
+    <string name="desktop_file_not_found_title">Dosya bulunamadı</string>
+    <string name="desktop_open_file_failed">Dosya açılamadı: %1$s</string>
+    <string name="desktop_error">Hata</string>
+    <string name="desktop_backup_only_on_android_message">Otomatik arka plan yedekleri şimdilik yalnızca Android uygulamasında destekleniyor. Yine de elle 'Yedeği dışa aktar' düğmesini kullanabilirsiniz!</string>
+    <string name="desktop_backup_only_on_android_title">Masaüstü özelliği</string>
+    <string name="desktop_update_available">Güncelleme var</string>
+    <string name="desktop_update_available_message">Emberr %1$s çıktı. Şu anda %2$s sürümünü kullanıyorsunuz. Siz çalışmaya devam ederken arka planda indirilir.</string>
+    <string name="desktop_update_download">İndir</string>
+    <string name="desktop_update_ready_to_install">Güncelleme yüklenmeye hazır</string>
+    <string name="desktop_update_ready_message">%1$s sürümünü kullanmaya başlamak için Emberr'i yeniden başlatın. Daha sonra'yı seçerseniz güncelleme, Emberr'i bir sonraki açışınızda kullanılır.</string>
+    <string name="desktop_update_restart">Yeniden başlat</string>
+    <string name="desktop_update_failed">Emberr güncellenemedi</string>
+    <string name="desktop_update_later">Daha sonra</string>
+    <string name="desktop_ok">Tamam</string>
+    <string name="desktop_new_note_in_folder">Klasörde yeni not</string>
+    <string name="desktop_new_note_here">Buraya yeni not</string>
+    <string name="desktop_rename_folder">Klasörü yeniden adlandır</string>
+    <string name="desktop_add_subfolder">Alt klasör ekle</string>
+    <string name="desktop_rename_note">Notu yeniden adlandır</string>
+    <string name="desktop_open_in_split_view">Bölünmüş görünümde aç</string>
+    <string name="desktop_toggle_section">Aç/kapat: %1$s</string>
+    <string name="desktop_empty_space">Bu alan boş.</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">Başlamak için %1$s veya %2$s ekleyin</string>
+    <string name="desktop_empty_space_a_note">bir not</string>
+    <string name="desktop_create_space">Alan oluştur</string>
+    <string name="desktop_add_space">Alan ekle</string>
+    <string name="desktop_space_options">Alan seçenekleri</string>
+    <string name="desktop_close_pane">Bölmeyi kapat</string>
+    <string name="desktop_close_this_screen">Bu ekranı kapat</string>
+    <string name="desktop_drag_to_swap_screens">Ekranların yerini değiştirmek için sürükleyin</string>
+    <string name="desktop_search_no_match">"%1$s" ile eşleşen not, etkinlik veya kişi yok</string>
+    <string name="desktop_hide_sidebar">Kenar çubuğunu gizle</string>
+    <string name="desktop_collapse_sidebar">Kenar çubuğunu daralt</string>
+    <string name="desktop_select_a_note">Kenar çubuğundan bir not seçin</string>
+    <string name="desktop_folder">Klasör</string>
+    <string name="desktop_sync">Eşitle</string>
+</resources>

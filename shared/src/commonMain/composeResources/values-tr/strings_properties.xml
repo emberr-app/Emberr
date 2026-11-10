@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Özellikler</string>
+    <string name="properties_built_in">Yerleşik</string>
+    <string name="properties_built_in_hint">Yerleşik özellikler yeniden adlandırılamaz veya silinemez.</string>
+    <string name="properties_custom">Özel</string>
+    <string name="properties_add_property">Özellik ekle</string>
+    <string name="properties_new_property">Yeni özellik</string>
+    <string name="properties_edit_property">Özelliği düzenle</string>
+    <string name="properties_delete_question">"%1$s" silinsin mi? Bunu kullanan tüm notlardan kaldırılacak.</string>
+    <string name="properties_property_name">Özellik adı</string>
+    <string name="properties_name_taken">Bu adda bir özellik zaten var</string>
+    <string name="properties_value_type">Değer türü</string>
+    <string name="properties_value_type_locked">Özellik oluşturulduktan sonra değer türü değiştirilemez.</string>
+    <string name="properties_delete_property">Özelliği sil</string>
+    <string name="properties_add">Ekle</string>
+</resources>

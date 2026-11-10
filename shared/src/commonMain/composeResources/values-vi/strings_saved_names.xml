@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_name_inbox">Hộp thư đến</string>
+    <string name="saved_name_others_folder">Khác</string>
+    <string name="saved_name_personal_space">Cá nhân</string>
+    <string name="saved_name_new_chat">Cuộc trò chuyện mới</string>
+    <string name="saved_name_canvas_group">Nhóm</string>
+    <string name="saved_name_unknown_link">Liên kết không xác định</string>
+    <string name="saved_name_loading_preview">Đang tải bản xem trước...</string>
+    <string name="saved_name_numbered_view">%1$s %2$d</string>
+    <string name="saved_name_view_copy">Bản sao %1$s</string>
+    <string name="saved_name_label_mobile">Di động</string>
+    <string name="saved_name_label_home">Nhà riêng</string>
+    <string name="saved_name_label_work">Cơ quan</string>
+    <string name="saved_name_label_main">Chính</string>
+    <string name="saved_name_label_personal">Cá nhân</string>
+    <string name="saved_name_label_portfolio">Hồ sơ năng lực</string>
+    <string name="saved_name_label_blog">Blog</string>
+    <string name="saved_name_label_anniversary">Ngày kỷ niệm</string>
+    <string name="saved_name_label_date">Ngày</string>
+    <string name="saved_name_label_nickname">Biệt danh</string>
+    <string name="saved_name_label_birthday">Sinh nhật</string>
+</resources>

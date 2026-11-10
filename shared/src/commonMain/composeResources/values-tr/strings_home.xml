@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">Favoriler</string>
+    <string name="home_toggle_favorites">Favorileri aç/kapat</string>
+    <string name="home_notes">Notlar</string>
+    <string name="home_toggle_notes">Notları aç/kapat</string>
+    <string name="home_recents">Son kullanılanlar</string>
+    <string name="home_toggle_recents">Son kullanılanları aç/kapat</string>
+    <string name="home_sort">Sırala</string>
+    <string name="home_sort_notes">Notları sırala</string>
+    <string name="home_new_folder">Yeni klasör</string>
+    <string name="home_new_folder_tooltip">Yeni klasör</string>
+    <string name="home_new_subfolder">Yeni alt klasör</string>
+    <string name="home_folder_name_placeholder">ör. Kişisel, İş...</string>
+    <string name="home_new_note">Yeni not</string>
+    <string name="home_new_note_tooltip">Yeni not</string>
+    <string name="home_new_note_in_folder">%1$s içinde yeni not</string>
+    <string name="home_note_title_placeholder">Not başlığı...</string>
+    <string name="home_templates">Şablonlar</string>
+    <string name="home_switch_space">Alan değiştir</string>
+    <string name="home_toggle_sidebar">Kenar çubuğunu aç/kapat</string>
+    <string name="home_open_calendar">Takvimi aç</string>
+    <string name="home_calendar">Takvim</string>
+    <string name="home_settings">Ayarlar</string>
+    <string name="home_more_settings">Diğer ayarlar</string>
+    <string name="home_rename">Yeniden adlandır</string>
+    <string name="home_move_to_trash">Çöp Kutusuna taşı</string>
+    <string name="home_add_to_favorites">Favorilere ekle</string>
+    <string name="home_remove_from_favorites">Favorilerden kaldır</string>
+    <string name="home_sort_last_edited">Son düzenleme</string>
+    <string name="home_sort_date_created">Oluşturma tarihi</string>
+    <string name="home_sort_name">Ad (A-Z)</string>
+    <string name="home_sort_type">Tür</string>
+    <string name="home_sort_manual">Elle</string>
+    <string name="home_sort_ascending">Artan</string>
+    <string name="home_sort_descending">Azalan</string>
+    <string name="home_sort_by">Sıralama ölçütü</string>
+    <string name="home_empty_space_start_with">Bu alan boş. Başlamak için</string>
+    <string name="home_empty_space_a_new_note">yeni bir not</string>
+    <string name="home_empty_space_note_or_folder">%1$s veya %2$s ekleyin</string>
+    <string name="home_empty_space_a_folder">bir klasör</string>
+    <string name="home_breadcrumb_home">Ana sayfa</string>
+    <string name="home_cover">Kapak</string>
+    <string name="home_in_parent">%1$s içinde</string>
+    <string name="home_canvas">Tuval</string>
+    <string name="home_note">Not</string>
+    <string name="home_empty_note">Boş not...</string>
+    <string name="home_favorite">Favori</string>
+    <string name="home_selected">Seçili</string>
+    <string name="home_rename_subtitle">Yeni bir ad seçin.</string>
+    <string name="home_name_placeholder">Ad...</string>
+    <string name="home_nesting_inside_folder">%1$s içine yerleştiriliyor.</string>
+    <string name="home_organize_your_notes">Notlarınızı düzenleyin.</string>
+    <string name="home_search_templates_placeholder">Şablonlarda ara...</string>
+    <string name="home_search_templates">Şablonlarda ara</string>
+    <string name="home_no_templates_yet">Henüz şablon yok.</string>
+    <string name="home_no_templates_match">"%1$s" ile eşleşen şablon yok.</string>
+    <string name="home_new_template">Yeni şablon</string>
+    <string name="home_edit_template">Şablonu düzenle</string>
+    <string name="home_delete_template">Şablonu sil</string>
+    <string name="home_templates_subtitle">Şablondan yeni bir not başlatın.</string>
+    <string name="home_new_subfolder_in_folder">%1$s içinde yeni alt klasör</string>
+    <string name="home_new_note_in_folder_description">%1$s içinde yeni not</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="one">%1$d kaldı</item>
+        <item quantity="other">%1$d kaldı</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="one">%1$d kayıtlı</item>
+        <item quantity="other">%1$d kayıtlı</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="one">%1$d ekli</item>
+        <item quantity="other">%1$d ekli</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="one">%1$d öğeyi sil</item>
+        <item quantity="other">%1$d öğeyi sil</item>
+    </plurals>
+</resources>

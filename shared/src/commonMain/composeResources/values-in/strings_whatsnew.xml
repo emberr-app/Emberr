@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">Sampai jumpa!</string>
+    <string name="whatsnew_whats_new_question">Apa yang baru?</string>
+    <string name="whatsnew_title">Yang Baru</string>
+    <string name="whatsnew_version">Versi %1$s</string>
+    <string name="whatsnew_new">Baru</string>
+    <string name="whatsnew_themes_heading">Tema</string>
+    <string name="whatsnew_themes_where">Setelan → Tampilan → Tema</string>
+    <string name="whatsnew_themes_description_desktop">Pilih dari 13 tema warna, seperti Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, dan Kontras tinggi. Setiap tema punya setelan intensitas, dan Anda dapat memilih apakah teks dan ikon juga mengikutinya.</string>
+    <string name="whatsnew_themes_description_mobile">Pilih dari 14 tema warna, seperti Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, dan Kontras tinggi, atau biarkan **Wallpaper** mengambil warna dari wallpaper Anda. Setiap tema punya setelan intensitas, dan Anda dapat memilih apakah teks dan ikon juga mengikutinya. Widget layar utama Anda juga mengikuti tema.</string>
+    <string name="whatsnew_texture_heading">Tekstur kertas</string>
+    <string name="whatsnew_texture_where">Setelan → Tampilan → Tema → Tekstur</string>
+    <string name="whatsnew_texture_description">Beri aplikasi butiran halus, seperti kertas sungguhan. Atur seberapa kuat, dan pilih tempat tampilnya: seluruh aplikasi, catatan, kanvas, atau Catatan harian.</string>
+    <string name="whatsnew_scale_heading">Skala antarmuka</string>
+    <string name="whatsnew_scale_where">Setelan → Tampilan → Skala antarmuka</string>
+    <string name="whatsnew_scale_description_desktop">Buat semua yang ada di aplikasi lebih besar atau lebih kecil, dari 80% hingga 200%, atau pakai **Ctrl +**, **Ctrl −**, dan **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Buat semua yang ada di aplikasi lebih besar atau lebih kecil, dari 80% hingga 200%.</string>
+    <string name="whatsnew_widgets_heading">Widget</string>
+    <string name="whatsnew_widgets_where">Tekan lama layar utama → Widget → Emberr</string>
+    <string name="whatsnew_widgets_description">Setiap widget punya tampilan baru yang lebih rapi, dan ada tiga widget baru: **Kartu catatan**, **Catat sekarang**, dan **Kutipan hari ini**. Widget kini langsung menampilkan catatan yang Anda pilih, dan memberi tahu Anda saat catatan itu telah dihapus.</string>
+    <string name="whatsnew_editor_heading">Editor</string>
+    <string name="whatsnew_editor_where">Ketik / di mana saja dalam catatan</string>
+    <string name="whatsnew_editor_description">Menu garis miring kini terbuka tepat setelah karakter apa pun, tidak hanya setelah spasi. Jika Anda mengetik melewati hasil yang cocok, hapus kembali dan menu akan muncul lagi.</string>
+    <string name="whatsnew_others_heading">Lainnya</string>
+    <string name="whatsnew_others_where">Perubahan kecil dan perbaikan</string>
+    <string name="whatsnew_others_sliders">Penggeser di seluruh aplikasi punya desain baru.</string>
+    <string name="whatsnew_others_title_time_desktop">Ketik **/** di judul catatan untuk menambahkan waktu atau tanggal saat ini.</string>
+    <string name="whatsnew_others_title_time_mobile">Tambahkan waktu atau tanggal saat ini ke judul catatan dari bilah alat keyboard.</string>
+    <string name="whatsnew_others_sync_network">Pilihan jaringan untuk sinkronisasi kini ada di **Setelan → Sinkronisasi &amp; cadangan**.</string>
+    <string name="whatsnew_others_windows_startup">Pembukaan lebih cepat di Windows.</string>
+    <string name="whatsnew_others_small_fixes">Banyak perbaikan kecil.</string>
+    <string name="whatsnew_preview_options">Opsi</string>
+    <string name="whatsnew_preview_trip_title">Liburan akhir pekan</string>
+    <string name="whatsnew_preview_trip_text">Berangkat sebelum jam 8 pagi agar tidak macet.</string>
+    <string name="whatsnew_preview_train_tickets">Tiket kereta</string>
+    <string name="whatsnew_preview_passport">Paspor</string>
+    <string name="whatsnew_preview_camera_charger">Pengisi daya kamera</string>
+    <string name="whatsnew_preview_reading_list">Daftar bacaan</string>
+    <string name="whatsnew_preview_reading_list_books">The Overstory, Piranesi, Project Hail Mary</string>
+    <string name="whatsnew_preview_meeting_title">Rapat tim</string>
+    <string name="whatsnew_preview_meeting_text">Kamis jam 10, ruang 2.</string>
+    <string name="whatsnew_preview_typed_heading">Agenda</string>
+    <string name="whatsnew_preview_quote">Rahasia untuk maju adalah memulai.</string>
+    <string name="whatsnew_preview_jot_prompt">Apa yang sedang Anda pikirkan?</string>
+    <string name="whatsnew_preview_jot_button">Catat sekarang</string>
+</resources>

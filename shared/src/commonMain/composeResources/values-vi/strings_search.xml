@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Nhập để tìm trong tiêu đề, đoạn trích và nội dung ghi chú.</string>
+    <string name="search_nothing_found">Không tìm thấy ghi chú, sự kiện hay người nào phù hợp.</string>
+    <string name="search_people">Mọi người</string>
+    <string name="search_events">Sự kiện</string>
+    <string name="search_notes">Ghi chú</string>
+    <string name="search_rename_note">Đổi tên ghi chú</string>
+    <string name="search_note_title_placeholder">Tiêu đề ghi chú...</string>
+    <string name="search_rename">Đổi tên</string>
+    <string name="search_move_to_trash">Chuyển vào thùng rác</string>
+    <string name="search_untitled_event">Sự kiện không có tiêu đề</string>
+    <string name="search_repeats">Lặp lại</string>
+    <string name="search_pinned">Đã ghim</string>
+    <string name="search_in_parent">trong %1$s</string>
+    <string name="search_daily">Hằng ngày</string>
+    <string name="search_add_to_favorites">Thêm vào Yêu thích</string>
+    <string name="search_remove_from_favorites">Xóa khỏi Yêu thích</string>
+    <plurals name="search_show_all_people">
+        <item quantity="other">Hiện tất cả %1$d người</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="other">Hiện tất cả %1$d sự kiện</item>
+    </plurals>
+</resources>

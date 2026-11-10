@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Tugas</string>
+    <string name="overview_section_bookmarks">Penanda</string>
+    <string name="overview_section_images">Gambar</string>
+    <string name="overview_section_documents">Dokumen</string>
+    <string name="overview_tasks_repeating">Berulang</string>
+    <string name="overview_tasks_note">Catatan</string>
+    <string name="overview_tasks_today">Hari ini</string>
+    <string name="overview_tasks_tomorrow">Besok</string>
+    <string name="overview_tasks_yesterday">Kemarin</string>
+    <string name="overview_tasks_none_completed">Belum ada tugas yang selesai.</string>
+    <string name="overview_tasks_all_caught_up">Semua beres!</string>
+    <string name="overview_tasks_completed">Selesai</string>
+    <string name="overview_tasks_completed_tasks">Tugas selesai</string>
+    <string name="overview_tasks_hide_completed">Sembunyikan yang selesai</string>
+    <string name="overview_tasks_show_completed">Tampilkan yang selesai</string>
+    <string name="overview_tasks_add_task_description">Tambah tugas</string>
+    <string name="overview_tasks_add_task">Tambah tugas</string>
+    <string name="overview_images_empty">Belum ada gambar yang disimpan.</string>
+    <string name="overview_images_add_image_description">Tambah gambar</string>
+    <string name="overview_images_add_image">Tambah gambar</string>
+    <string name="overview_documents_empty">Belum ada dokumen yang dilampirkan.</string>
+    <string name="overview_documents_add_document_description">Tambah dokumen</string>
+    <string name="overview_documents_add_document">Tambah dokumen</string>
+    <string name="overview_bookmarks_empty">Belum ada tautan yang disimpan.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Tambah penanda</string>
+    <string name="overview_bookmarks_add_bookmark">Tambah penanda</string>
+    <string name="overview_bookmarks_add_link">Tambah tautan</string>
+    <string name="overview_bookmarks_paste_link">Tempel tautan...</string>
+    <string name="overview_bookmarks_clear_link">Hapus tautan</string>
+    <string name="overview_bookmarks_all">Semua</string>
+    <string name="overview_bookmarks_others">Lainnya</string>
+</resources>

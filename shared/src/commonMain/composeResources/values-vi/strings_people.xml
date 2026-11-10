@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">Mọi người</string>
+    <string name="people_clear_selection">Bỏ chọn</string>
+    <string name="people_select_all">Chọn tất cả</string>
+    <string name="people_deselect_all">Bỏ chọn tất cả</string>
+    <string name="people_add_people">Thêm người</string>
+    <string name="people_create_new_contact">Tạo liên hệ mới</string>
+    <string name="people_import_from_vcf_file">Nhập từ tệp .vcf</string>
+    <string name="people_import_from_phone">Nhập từ điện thoại</string>
+    <string name="people_search_people">Tìm người</string>
+    <string name="people_move_to_trash">Chuyển vào thùng rác</string>
+    <string name="people_next">Tiếp theo</string>
+    <string name="people_untitled_event">Sự kiện không có tiêu đề</string>
+    <string name="people_no_upcoming_events">Không có sự kiện sắp tới</string>
+    <string name="people_selected">Đã chọn</string>
+    <string name="people_empty_title">Chưa có ai</string>
+    <string name="people_empty_message">Thêm người mà bạn muốn ghi nhớ điều gì đó về họ. Những người bạn thêm vào sự kiện cũng sẽ hiện ở đây.</string>
+    <string name="people_new_person">Người mới</string>
+    <string name="people_import_contacts">Nhập danh bạ</string>
+    <string name="people_no_one_matches">Không ai khớp với “%1$s”</string>
+    <string name="people_create_named">Tạo “%1$s”</string>
+    <plurals name="people_selected_count">
+        <item quantity="other">Đã chọn %1$d</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="other">%1$d người</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="other">%1$d sự kiện</item>
+    </plurals>
+
+    <string name="people_importing_contacts">Đang nhập danh bạ…</string>
+    <string name="people_importing_contacts_progress">Đang nhập danh bạ… %1$d trên %2$d</string>
+    <string name="people_already_importing_contacts">Đang nhập danh bạ rồi</string>
+    <string name="people_could_not_read_file">Không thể đọc tệp</string>
+    <string name="people_could_not_read_contact">Không thể đọc liên hệ</string>
+    <string name="people_no_contacts_app_found">Không tìm thấy ứng dụng danh bạ</string>
+    <string name="people_choose_contact_files">Chọn tệp danh bạ</string>
+    <string name="people_no_contacts_found">Không tìm thấy liên hệ nào</string>
+    <string name="people_could_not_add_contacts">Không thể thêm liên hệ</string>
+    <string name="people_already_in_people">Đã có trong Mọi người</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="other">Cả %1$d đều đã có trong Mọi người</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="other">Đã thêm %1$d người</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="other">bỏ qua %1$d người đã có trong Mọi người</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="other">không thể thêm %1$d người</item>
+    </plurals>
+    <string name="people_could_not_create_person">Không thể tạo người này</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="other">Đã chuyển %1$d người vào thùng rác</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="other">Đã chuyển %1$d trên %2$d người vào thùng rác</item>
+    </plurals>
+    <string name="people_could_not_save_detail">Không thể lưu thông tin</string>
+    <string name="people_could_not_remove_detail">Không thể xóa thông tin</string>
+
+    <string name="people_meta_next_and_last_seen">Lần tới vào %1$s · gặp lần cuối %2$s</string>
+    <string name="people_meta_next">Lần tới vào %1$s</string>
+    <string name="people_meta_last_seen">Gặp lần cuối %1$s</string>
+    <string name="people_meta_no_events">Chưa có sự kiện nào</string>
+    <string name="people_birthday_with_age">%1$s, %2$d · tròn %3$d tuổi</string>
+    <string name="people_all_day">Cả ngày</string>
+    <string name="people_event_with_names">với %1$s</string>
+
+    <string name="people_copied">Đã sao chép</string>
+    <string name="people_could_not_copy">Không thể sao chép</string>
+    <string name="people_could_not_open_link">Không thể mở liên kết</string>
+    <string name="people_write_anything_about">Viết bất cứ điều gì về %1$s…</string>
+    <string name="people_write_anything_about_them">Viết bất cứ điều gì về người này…</string>
+    <string name="people_notes">Ghi chú</string>
+    <string name="people_remove_icon">Xóa biểu tượng</string>
+    <string name="people_change_icon">Đổi biểu tượng</string>
+    <string name="people_change_photo">Đổi ảnh</string>
+    <string name="people_remove_photo">Xóa ảnh</string>
+    <string name="people_open">Mở</string>
+    <string name="people_more">Thêm</string>
+    <string name="people_call">Gọi</string>
+    <string name="people_message">Nhắn tin</string>
+    <string name="people_email">Email</string>
+    <string name="people_write_email">Viết email</string>
+    <string name="people_copy">Sao chép</string>
+    <string name="people_new_event">Sự kiện mới</string>
+    <string name="people_name">Tên</string>
+
+    <string name="people_details">Thông tin</string>
+    <string name="people_more_details">Thêm thông tin</string>
+    <string name="people_upcoming">Sắp tới</string>
+    <string name="people_nothing_planned_with">Chưa có kế hoạch nào với %1$s</string>
+    <string name="people_nothing_planned_with_them">Chưa có kế hoạch nào với người này</string>
+    <string name="people_past">Đã qua</string>
+    <string name="people_no_past_events">Không có sự kiện đã qua</string>
+    <string name="people_show_fewer">Ẩn bớt</string>
+    <string name="people_show_all_count">Hiện tất cả %1$d</string>
+
+    <string name="people_detail_phone">Điện thoại</string>
+    <string name="people_detail_email">Email</string>
+    <string name="people_detail_birthday">Sinh nhật</string>
+    <string name="people_detail_address">Địa chỉ</string>
+    <string name="people_detail_company">Công ty</string>
+    <string name="people_detail_role">Chức vụ</string>
+    <string name="people_detail_website">Trang web</string>
+    <string name="people_detail_social">Mạng xã hội</string>
+    <string name="people_detail_relationship">Mối quan hệ</string>
+    <string name="people_detail_custom">Tùy chỉnh</string>
+    <string name="people_add_phone">Thêm điện thoại</string>
+    <string name="people_add_email">Thêm email</string>
+    <string name="people_add_birthday">Thêm sinh nhật</string>
+    <string name="people_add_address">Thêm địa chỉ</string>
+    <string name="people_add_company">Thêm công ty</string>
+    <string name="people_add_role">Thêm chức vụ</string>
+    <string name="people_add_website">Thêm trang web</string>
+    <string name="people_add_social">Thêm mạng xã hội</string>
+    <string name="people_add_relationship">Thêm mối quan hệ</string>
+    <string name="people_add_custom">Thêm mục tùy chỉnh</string>
+    <string name="people_edit_phone">Sửa điện thoại</string>
+    <string name="people_edit_email">Sửa email</string>
+    <string name="people_edit_birthday">Sửa sinh nhật</string>
+    <string name="people_edit_address">Sửa địa chỉ</string>
+    <string name="people_edit_company">Sửa công ty</string>
+    <string name="people_edit_role">Sửa chức vụ</string>
+    <string name="people_edit_website">Sửa trang web</string>
+    <string name="people_edit_social">Sửa mạng xã hội</string>
+    <string name="people_edit_relationship">Sửa mối quan hệ</string>
+    <string name="people_edit_custom">Sửa mục tùy chỉnh</string>
+
+    <string name="people_placeholder_phone_number">Số điện thoại</string>
+    <string name="people_placeholder_address">Đường, phường, thành phố</string>
+    <string name="people_placeholder_company">Nơi họ làm việc</string>
+    <string name="people_placeholder_role">Công việc của họ</string>
+    <string name="people_placeholder_relationship">Bạn đại học</string>
+    <string name="people_placeholder_custom">Bất cứ điều gì</string>
+
+    <string name="people_add_detail">Thêm thông tin</string>
+    <string name="people_already_added">Đã thêm rồi</string>
+    <string name="people_remove">Xóa</string>
+    <string name="people_cannot_be_empty">Không được để trống</string>
+    <string name="people_custom_label">Nhãn tùy chỉnh</string>
+    <string name="people_custom_label_placeholder">Nhãn tùy chỉnh</string>
+    <string name="people_label_optional">Nhãn (không bắt buộc)</string>
+    <string name="people_birthday_month">Tháng</string>
+    <string name="people_birthday_day">Ngày</string>
+    <string name="people_birthday_year">Năm</string>
+    <string name="people_birthday_optional">không bắt buộc</string>
+    <string name="people_birthday_year_example">VD: 1996</string>
+    <string name="people_birthday_date_not_in_year">Năm %2$s không có ngày %1$s</string>
+    <string name="people_birthday_year_range">Dùng năm từ %1$d đến %2$d</string>
+</resources>

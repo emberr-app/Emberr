@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Server sendiri</string>
+
+    <string name="selfhost_group_server_details">Detail server</string>
+    <string name="selfhost_group_recovery_passphrase">Frasa sandi pemulihan</string>
+    <string name="selfhost_group_unlock_vault">Buka brankas</string>
+    <string name="selfhost_group_status">Status</string>
+
+    <string name="selfhost_setting_up">Menyiapkan</string>
+    <string name="selfhost_unlock_and_sync">Buka dan sinkronkan</string>
+    <string name="selfhost_create_vault_and_sync">Buat brankas dan sinkronkan</string>
+    <string name="selfhost_server_address_rejected">Alamat server ditolak</string>
+    <string name="selfhost_got_it">Mengerti</string>
+
+    <string name="selfhost_status_connected">Status: Terhubung</string>
+    <string name="selfhost_cancelling">Membatalkan...</string>
+    <string name="selfhost_cancel_sync">Batalkan sinkronisasi</string>
+    <string name="selfhost_cancel_sync_hint">Membatalkan akan menjeda sinkronisasi sampai Anda memulai ulang aplikasi atau mengetuk Sinkronkan sekarang.</string>
+    <string name="selfhost_sync_now">Sinkronkan sekarang</string>
+    <string name="selfhost_syncing">Menyinkronkan...</string>
+    <string name="selfhost_never_synced">Belum pernah disinkronkan</string>
+    <string name="selfhost_last_synced">Terakhir disinkronkan: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="other">%1$d catatan menunggu disinkronkan</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Catatan</string>
+    <string name="selfhost_progress_images">Gambar</string>
+
+    <string name="selfhost_passphrase_needed_hint">Anda memerlukan frasa sandi ini untuk menghubungkan ponsel atau komputer lain ke server ini.</string>
+    <string name="selfhost_show_passphrase_button">Tampilkan frasa sandi</string>
+    <string name="selfhost_unlock_prompt_title">Frasa sandi pemulihan</string>
+    <string name="selfhost_unlock_prompt_description">Buka kunci untuk melihat frasa sandi pemulihan Anda</string>
+    <string name="selfhost_save_passphrase_hint">Perangkat ini terhubung sebelum Emberr menyimpan frasa sandi. Masukkan sekali untuk menyimpannya di sini, agar Anda dapat melihatnya nanti.</string>
+    <string name="selfhost_checking">Memeriksa</string>
+    <string name="selfhost_save_passphrase">Simpan frasa sandi</string>
+    <string name="selfhost_disconnect_vault">Putuskan brankas</string>
+    <string name="selfhost_recovery_dialog_message">Masukkan ini di perangkat lain saat diminta membuka brankas. Jangan bagikan kepada siapa pun.</string>
+    <string name="selfhost_done">Selesai</string>
+    <string name="selfhost_disconnect_vault_question">Putuskan brankas?</string>
+    <string name="selfhost_disconnect_message">Catatan Anda tetap ada di perangkat ini dan di server. Anda memerlukan frasa sandi pemulihan untuk menghubungkan kembali.</string>
+    <string name="selfhost_disconnect">Putuskan</string>
+
+    <string name="selfhost_checking_for_changes">Memeriksa perubahan...</string>
+    <string name="selfhost_finishing_up">Menyelesaikan...</string>
+    <string name="selfhost_sending_percent">Mengirim %1$d%</string>
+    <string name="selfhost_nothing_to_send">Tidak ada yang dikirim</string>
+    <string name="selfhost_receiving_percent">Menerima %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Tidak ada yang diterima</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="other">%1$d dari %2$d catatan</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s dari %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Masukkan alamat WebDAV dan info masuk server Anda, misalnya Nextcloud atau NAS. Emberr mengenkripsi catatan Anda sebelum keluar dari perangkat ini.</string>
+    <string name="selfhost_username">Nama pengguna</string>
+    <string name="selfhost_password">Kata sandi</string>
+    <string name="selfhost_hide_password">Sembunyikan kata sandi</string>
+    <string name="selfhost_show_password">Tampilkan kata sandi</string>
+    <string name="selfhost_testing">Menguji</string>
+    <string name="selfhost_test_connection">Uji koneksi</string>
+    <string name="selfhost_contacting_server">Menghubungi server...</string>
+
+    <string name="selfhost_restore_hint">Server ini sudah memiliki brankas Emberr. Masukkan frasa sandi pemulihan 16 karakter yang ditampilkan saat brankas dibuat.</string>
+    <string name="selfhost_restore_find_hint">Tidak menemukannya? Buka Setelan → Server sendiri → Tampilkan frasa sandi di perangkat yang sudah terhubung.</string>
+    <string name="selfhost_passphrase_placeholder">Frasa sandi 16 karakter</string>
+    <string name="selfhost_hide_passphrase">Sembunyikan frasa sandi</string>
+    <string name="selfhost_show_passphrase">Tampilkan frasa sandi</string>
+
+    <string name="selfhost_save_passphrase_now">Simpan frasa sandi ini sekarang</string>
+    <string name="selfhost_fact_type_on_other_devices">Anda akan mengetiknya di setiap ponsel atau komputer lain yang Anda hubungkan ke server ini.</string>
+    <string name="selfhost_fact_locks_notes">Frasa ini mengunci catatan Anda di server. Tidak ada yang dapat membacanya tanpa frasa ini, bahkan Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr tidak dapat menyetel ulangnya. Simpan di pengelola kata sandi atau tuliskan.</string>
+    <string name="selfhost_fact_see_again_later">Anda dapat melihatnya lagi nanti di Setelan → Server sendiri di perangkat mana pun yang terhubung.</string>
+    <string name="selfhost_new_passphrase">Frasa sandi baru</string>
+    <string name="selfhost_generate_new_passphrase">Buat frasa sandi baru</string>
+    <string name="selfhost_saved_passphrase_confirmation">Saya sudah menyimpan frasa sandi ini di tempat yang aman</string>
+    <string name="selfhost_copy_passphrase">Salin frasa sandi</string>
+    <string name="selfhost_copy_address">Salin alamat</string>
+    <string name="selfhost_copied_address">alamat disalin</string>
+
+    <string name="selfhost_invalid_credentials">Nama pengguna atau kata sandi tidak valid</string>
+    <string name="selfhost_server_returned_error">Server mengembalikan kesalahan (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Tidak dapat menjangkau server</string>
+    <string name="selfhost_could_not_check_vault">Tidak dapat memeriksa brankas yang ada: %1$s</string>
+    <string name="selfhost_unknown_error">kesalahan tidak diketahui</string>
+    <string name="selfhost_existing_vault_found">Brankas yang ada ditemukan di server ini</string>
+    <string name="selfhost_no_existing_vault">Tidak ada brankas, brankas baru akan dibuat</string>
+    <string name="selfhost_no_vault_file_to_restore">Tidak ada file brankas di server untuk dipulihkan</string>
+    <string name="selfhost_old_or_damaged_vault_data">Folder server ini berisi data sinkronisasi dari brankas lama atau rusak. Hapus folder emberr_sync di server Anda, lalu siapkan lagi.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Brankas sudah ada di server ini. Masukkan frasa sandi pemulihannya di bawah untuk memulihkannya.</string>
+    <string name="selfhost_could_not_set_up">Tidak dapat menyiapkan sinkronisasi aman</string>
+    <string name="selfhost_no_vault_on_server">Tidak ada brankas yang ditemukan di server.</string>
+    <string name="selfhost_wrong_passphrase">Frasa sandi itu tidak dapat membuka brankas ini.</string>
+    <string name="selfhost_could_not_check_passphrase">Tidak dapat memeriksa frasa sandi: %1$s</string>
+
+    <string name="selfhost_update_required_title">Sinkronisasi server sendiri dijeda</string>
+    <string name="selfhost_update_required_message">%1$s Catatan Anda aman dan tetap tersimpan di perangkat ini.</string>
+    <string name="selfhost_later">Nanti</string>
+    <string name="selfhost_update">Perbarui</string>
+</resources>

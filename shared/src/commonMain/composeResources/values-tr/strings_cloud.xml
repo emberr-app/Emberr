@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_title">Emberr Cloud</string>
+
+    <string name="cloud_server_address">Sunucu adresi</string>
+    <string name="cloud_server_address_invalid">http:// veya https:// ile başlayan bir adres girin, örneğin http://localhost:8080.</string>
+    <string name="cloud_server_address_saved">Sunucu adresi kaydedildi</string>
+
+    <string name="cloud_welcome_hint">Notlarınızı uçtan uca şifrelemeyle cihazlarınız arasında eşitleyin. Onları yalnızca sizin cihazlarınız okuyabilir.</string>
+    <string name="cloud_create_account">Hesap oluştur</string>
+    <string name="cloud_log_in">Giriş yap</string>
+    <string name="cloud_send_code">Kod gönder</string>
+    <string name="cloud_send_new_code">Yeni kod gönder</string>
+    <string name="cloud_continue">Devam</string>
+    <string name="cloud_done">Bitti</string>
+    <string name="cloud_password_not_stored_hint">Bu şifreyi saklamıyoruz; unutursanız notlarınızın şifresini çözemeyiz.</string>
+    <string name="cloud_recovery_words">Kurtarma kelimeleri</string>
+    <string name="cloud_recovery_words_explanation">Şifrenizi unutursanız hesabınıza geri dönmenin tek yolu bu 24 kelimedir. Bunları saklamıyoruz, bu yüzden güvenli bir yere kaydedin.</string>
+    <string name="cloud_recovery_words_warning">Şifreniz ve bu kelimeler olmadan bulut notlarınız kurtarılamaz.</string>
+    <string name="cloud_recovery_words_saved_checkbox">Bu kelimeleri güvenli bir yere kaydettim</string>
+    <string name="cloud_copy_words">Kelimeleri kopyala</string>
+    <string name="cloud_recovery_words_copied">Kurtarma kelimeleri kopyalandı</string>
+    <string name="cloud_forgot_password">Şifremi unuttum</string>
+    <string name="cloud_recovery_email_hint">Hesabınızın e-posta adresini girin. Size bir kod göndereceğiz.</string>
+    <string name="cloud_recovery_other_device_hint">Başka bir cihazda oturum açık mı? Şifrenizi orada değiştirin.</string>
+    <string name="cloud_recovery_words_entry_hint">Hesabınızı oluştururken kaydettiğiniz 24 kurtarma kelimesini girin.</string>
+    <string name="cloud_recovery_words_placeholder">24 kurtarma kelimeniz</string>
+    <string name="cloud_set_new_password">Yeni şifre belirleyin</string>
+    <string name="cloud_new_password_hint">Notlarınızı şifrelemek için kullanabileceğimiz yeni bir şifre girin.</string>
+    <string name="cloud_reset_password">Şifreyi sıfırla</string>
+    <string name="cloud_sign_out_other_devices_title">Diğer cihazlarda oturumu kapat</string>
+    <string name="cloud_sign_out_other_devices_message">Birinin şifrenizi bildiğinden şüpheleniyorsanız, hesabınızı kullanan diğer tüm cihazların oturumunu kapatabilirsiniz.</string>
+    <string name="cloud_sign_out_other_devices_button">Diğer cihazlarda oturumu kapat</string>
+    <string name="cloud_do_not_sign_out">Oturumu kapatma</string>
+
+    <string name="cloud_account">Hesap</string>
+    <string name="cloud_signed_in_as">Oturum açan: %1$s</string>
+    <string name="cloud_loading_storage_used">Kullanılan alan yükleniyor...</string>
+    <string name="cloud_sync">Eşitleme</string>
+    <string name="cloud_syncing">Eşitleniyor...</string>
+    <string name="cloud_last_synced">Son eşitleme: %1$s</string>
+    <string name="cloud_sync_explanation">Alanları, klasörleri, notları, listeleri, sohbetleri ve medyayı gönderir ve alır.</string>
+    <string name="cloud_sync_now">Şimdi eşitle</string>
+    <string name="cloud_media">Medya</string>
+    <string name="cloud_media_last_checked">Medya son kontrol: %1$s</string>
+    <string name="cloud_devices">Cihazlar</string>
+    <string name="cloud_loading_devices">Cihazlar yükleniyor...</string>
+    <string name="cloud_tap_device_to_sign_out">Oturumunu kapatmak için bir cihaza dokunun.</string>
+    <string name="cloud_sign_out_of_this_device">Bu cihazda oturumu kapat</string>
+    <string name="cloud_manage_account">Hesabı yönet</string>
+    <string name="cloud_change_password">Şifreyi değiştir</string>
+    <string name="cloud_change_email">E-postayı değiştir</string>
+    <string name="cloud_recovery_words_lock_description">Kurtarma kelimelerinizi görmek için kimliğinizi doğrulayın</string>
+    <string name="cloud_delete_account">Hesabı sil</string>
+    <string name="cloud_sign_out_device_title">Cihazın oturumu kapatılsın mı?</string>
+    <string name="cloud_sign_out_device_message">Şu cihazın oturumu kapatılacak:\n\n%1$s</string>
+    <string name="cloud_sign_out">Oturumu kapat</string>
+    <string name="cloud_delete_account_title">Hesap silinsin mi?</string>
+    <string name="cloud_delete_account_message">Emberr Cloud hesabınız ve içinde saklanan her şey kalıcı olarak silinecek. Bu işlem geri alınamaz. Bu cihazdaki notlar, onları da temizlemeyi seçmediğiniz sürece kalır. Onaylamak için %1$s adresine bir kod göndereceğiz.</string>
+    <string name="cloud_last_used">Son kullanım: %1$s</string>
+    <string name="cloud_this_device">Bu cihaz</string>
+    <string name="cloud_sign_out_of_this_device_title">Bu cihazda oturum kapatılsın mı?</string>
+    <string name="cloud_sign_out_of_this_device_message">Bu cihaz Emberr Cloud'u kullanmayı bırakır. Bu cihazdaki notlarınıza dokunulmaz.</string>
+
+    <string name="cloud_change_password_code_hint">Onaylamak için %1$s adresine bir kod göndereceğiz.</string>
+    <string name="cloud_sign_out_of_other_devices">Diğer cihazlarda oturumu kapat</string>
+    <string name="cloud_change_email_hint">Yeni e-posta adresinizi girin. Oraya bir kod göndereceğiz.</string>
+    <string name="cloud_recovery_words_password_hint">Kurtarma kelimelerinizi görmek için şifrenizi girin.</string>
+    <string name="cloud_clear_notes_on_this_device">Bu cihazdaki notları da temizle</string>
+    <string name="cloud_delete_account_warning">Emberr Cloud hesabınız kalıcı olarak silinecek. Bu işlem geri alınamaz.</string>
+
+    <string name="cloud_email">E-posta</string>
+    <string name="cloud_code_placeholder">6 haneli kod</string>
+    <string name="cloud_password">Şifre</string>
+    <string name="cloud_confirm_password">Şifreyi onayla</string>
+    <string name="cloud_passwords_do_not_match">Şifreler eşleşmiyor.</string>
+    <string name="cloud_hide_password">Şifreyi gizle</string>
+    <string name="cloud_show_password">Şifreyi göster</string>
+    <string name="cloud_password_strength_weak">Şifre gücü: Zayıf</string>
+    <string name="cloud_password_strength_moderate">Şifre gücü: Orta</string>
+    <string name="cloud_password_strength_strong">Şifre gücü: Güçlü</string>
+    <string name="cloud_code_sent">%1$s adresine bir kod gönderdik. Gelen kutunuzu (ve istenmeyen klasörünü) kontrol edin.</string>
+    <string name="cloud_new_code_sent">%1$s adresine yeni bir kod gönderdik.</string>
+    <string name="cloud_please_wait">Lütfen bekleyin...</string>
+
+    <string name="cloud_sending_file">Dosya gönderiliyor: %1$d / %2$d</string>
+    <string name="cloud_receiving_file">Dosya alınıyor: %1$d / %2$d</string>
+    <string name="cloud_photo_in_note">Fotoğraf, şu notta: %1$s</string>
+    <string name="cloud_video_in_note">Video, şu notta: %1$s</string>
+    <string name="cloud_audio_in_note">Ses, şu notta: %1$s</string>
+    <string name="cloud_document_in_note">Belge, şu notta: %1$s</string>
+    <string name="cloud_file_in_note">Dosya, şu notta: %1$s</string>
+    <string name="cloud_file_progress">%1$d% · %2$s / %3$s</string>
+    <plurals name="cloud_files_waiting_for_upload">
+        <item quantity="one">%1$d dosya, başka bir cihazın yüklemesini bekliyor.</item>
+        <item quantity="other">%1$d dosya, başka bir cihazın yüklemesini bekliyor.</item>
+    </plurals>
+    <string name="cloud_files_not_sent_and_not_received">Dosyalar: %1$d gönderilmedi, %2$d alınmadı. Bir sonraki eşitlemede yeniden denenecek.</string>
+    <string name="cloud_files_not_sent">Dosyalar: %1$d gönderilmedi. Bir sonraki eşitlemede yeniden denenecek.</string>
+    <string name="cloud_files_not_received">Dosyalar: %1$d alınmadı. Bir sonraki eşitlemede yeniden denenecek.</string>
+    <string name="cloud_files_sent_and_received_counts">%1$d / %2$d dosya gönderildi · %3$d / %4$d dosya alındı</string>
+    <string name="cloud_files_sent_count">%1$d / %2$d dosya gönderildi</string>
+    <string name="cloud_files_received_count">%1$d / %2$d dosya alındı</string>
+
+    <string name="cloud_trial_ended">Ücretsiz deneme %1$s tarihinde sona erdi · %2$s tarihine kadar salt okunur</string>
+    <string name="cloud_trial_ends_today">Ücretsiz deneme · bugün sona eriyor</string>
+    <plurals name="cloud_trial_days_left">
+        <item quantity="one">Ücretsiz deneme · %1$d gün kaldı</item>
+        <item quantity="other">Ücretsiz deneme · %1$d gün kaldı</item>
+    </plurals>
+    <string name="cloud_storage_used">%1$s / %2$s kullanıldı</string>
+    <string name="cloud_full_with_usage">Emberr Cloud dolu: %1$s / %2$s kullanıldı. Yeni notlar ve dosyalar bu cihazda kalır ve yer açıldığında yüklenir.</string>
+    <string name="cloud_full">Emberr Cloud dolu. Yeni notlar ve dosyalar bu cihazda kalır ve yer açıldığında yüklenir.</string>
+    <string name="cloud_trial_ended_read_only">Ücretsiz denemeniz sona erdi, bu yüzden Emberr Cloud salt okunur. Bu cihaz diğer cihazlarınızdaki değişiklikleri almaya devam eder ama yeni bir şey yüklenmez. Notlarınız cihazlarınızda kalır.</string>
+    <plurals name="cloud_files_too_large">
+        <item quantity="one">%1$d dosya 10 GB'tan büyük olduğu için yalnızca bu cihazda kalır.</item>
+        <item quantity="other">%1$d dosya 10 GB'tan büyük olduğu için yalnızca bu cihazda kalır.</item>
+    </plurals>
+    <string name="cloud_copy_removed">Ücretsiz denemeniz sona erdi ve buluttaki kopya %1$s tarihinde kaldırıldı. Tüm notlar hâlâ bu cihazda. Bir plan seçtiğinizde eşitleme yeniden başlar.</string>
+
+    <string name="cloud_error_something_went_wrong">Bir sorun oluştu. Yeniden deneyin.</string>
+    <string name="cloud_error_signed_out">Oturumunuz kapatıldı. Yeniden giriş yapın.</string>
+    <string name="cloud_error_incorrect_password">Şifre yanlış. Yeniden deneyin.</string>
+    <string name="cloud_error_invalid_email">Geçerli bir e-posta adresi girin.</string>
+    <string name="cloud_error_wrong_email_or_password">E-posta veya şifre yanlış.</string>
+    <string name="cloud_error_incorrect_code">Bu kod doğru değil.</string>
+    <string name="cloud_error_expired_code">Bu kodun süresi doldu. Yeni bir kod isteyin.</string>
+    <string name="cloud_error_too_many_tries">Çok fazla deneme. Biraz bekleyip yeniden deneyin.</string>
+    <string name="cloud_error_update_required">Emberr Cloud'u kullanmak için Emberr'ı güncelleyin.</string>
+    <string name="cloud_error_device_already_signed_out">Bu cihazın oturumu zaten kapatılmış.</string>
+    <string name="cloud_error_email_already_used">Bu e-posta adresini başka bir hesap kullanıyor.</string>
+    <string name="cloud_error_server_unreachable">Sunucuya ulaşılamıyor: %1$s</string>
+    <string name="cloud_error_invalid_recovery_words">Bu kelimeler geçerli bir kurtarma anahtarı değil. 24 kelime olduğundan emin olun ve her birinin yazımını kontrol edin.</string>
+    <string name="cloud_error_recovery_words_other_account">Bu kelimeler başka bir hesaba ait.</string>
+    <string name="cloud_account_deleted_notes_not_cleared">Hesabınız silindi ancak bu cihazdaki notlar temizlenemedi.</string>
+    <string name="cloud_password_changed">Şifre başarıyla değiştirildi</string>
+    <string name="cloud_email_changed">E-posta şu adresle değiştirildi: %1$s</string>
+
+    <string name="cloud_synced">Eşitlendi: %1$d alındı, %2$d gönderildi</string>
+    <string name="cloud_synced_with_not_sent">Eşitlendi: %1$d alındı, %2$d gönderildi, %3$d gönderilmedi</string>
+    <string name="cloud_sync_busy">Başka bir eşitleme çalışıyor. Birazdan yeniden deneyin.</string>
+    <string name="cloud_sync_update_required">Emberr Cloud ile eşitlemeye devam etmek için Emberr'ı güncelleyin.</string>
+    <string name="cloud_sync_other_method_on">Başka bir eşitleme yöntemi açık. Emberr Cloud'u kullanmaya devam etmek için Kendi sunucunuz bağlantısını kesin veya LAN eşitleme eşlemesini kaldırın.</string>
+    <string name="cloud_disconnect_self_host_first">Emberr Cloud'u kullanmak için Kendi sunucunuz bağlantısını kesin.</string>
+    <string name="cloud_unpair_lan_sync_first">Emberr Cloud'u kullanmak için LAN eşitleme eşlemesini kaldırın.</string>
+</resources>

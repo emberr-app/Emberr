@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">ट्रैश खाली है</string>
+    <string name="trash_title">ट्रैश</string>
+    <string name="trash_empty_trash">ट्रैश खाली करें</string>
+    <string name="trash_empty_trash_tooltip">ट्रैश खाली करें</string>
+    <string name="trash_restore_note">नोट वापस लाएँ</string>
+    <string name="trash_delete_permanently">हमेशा के लिए मिटाएँ</string>
+    <string name="trash_manage_note">नोट प्रबंधित करें</string>
+    <string name="trash_manage_note_subtitle">ट्रैश के नोट 30 दिन बाद अपने-आप मिट जाते हैं।</string>
+    <string name="trash_empty_trash_question">ट्रैश खाली करें?</string>
+    <string name="trash_empty_trash_subtitle">इससे ट्रैश में मौजूद सभी नोट हमेशा के लिए मिट जाएँगे। इसे वापस नहीं लाया जा सकता।</string>
+</resources>

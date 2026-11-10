@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Không gian</string>
+    <string name="space_create_space">Tạo không gian</string>
+    <string name="space_rename_space">Đổi tên không gian</string>
+    <string name="space_delete_space">Xóa không gian</string>
+    <string name="space_new_space">Không gian mới</string>
+    <string name="space_new_space_subtitle">Công việc, Cá nhân, bất cứ thứ gì bạn muốn.</string>
+    <string name="space_name_placeholder">Tên không gian...</string>
+    <string name="space_rename_subtitle">Chọn tên mới.</string>
+    <string name="space_delete_space_question">Xóa "%1$s"?</string>
+    <string name="space_delete_space_message">Mọi ghi chú, thư mục, thẻ và cuộc trò chuyện trong không gian này sẽ bị xóa theo. Không thể hoàn tác.</string>
+    <string name="space_reorder_space">Sắp xếp lại không gian</string>
+</resources>

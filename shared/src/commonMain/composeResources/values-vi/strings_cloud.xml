@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_title">Emberr Cloud</string>
+
+    <string name="cloud_server_address">Địa chỉ máy chủ</string>
+    <string name="cloud_server_address_invalid">Nhập địa chỉ bắt đầu bằng http:// hoặc https://, ví dụ http://localhost:8080.</string>
+    <string name="cloud_server_address_saved">Đã lưu địa chỉ máy chủ</string>
+
+    <string name="cloud_welcome_hint">Đồng bộ ghi chú giữa các thiết bị với mã hóa đầu cuối. Chỉ thiết bị của bạn mới đọc được.</string>
+    <string name="cloud_create_account">Tạo tài khoản</string>
+    <string name="cloud_log_in">Đăng nhập</string>
+    <string name="cloud_send_code">Gửi mã</string>
+    <string name="cloud_send_new_code">Gửi mã mới</string>
+    <string name="cloud_continue">Tiếp tục</string>
+    <string name="cloud_done">Xong</string>
+    <string name="cloud_password_not_stored_hint">Chúng tôi không lưu mật khẩu này, nên nếu bạn quên, chúng tôi không thể giải mã ghi chú của bạn.</string>
+    <string name="cloud_recovery_words">Từ khôi phục</string>
+    <string name="cloud_recovery_words_explanation">Nếu bạn quên mật khẩu, 24 từ này là cách duy nhất để vào lại tài khoản. Chúng tôi không lưu chúng, nên hãy cất ở nơi an toàn.</string>
+    <string name="cloud_recovery_words_warning">Nếu không có mật khẩu và các từ này, ghi chú trên đám mây sẽ không thể khôi phục.</string>
+    <string name="cloud_recovery_words_saved_checkbox">Tôi đã cất các từ này ở nơi an toàn</string>
+    <string name="cloud_copy_words">Sao chép các từ</string>
+    <string name="cloud_recovery_words_copied">Đã sao chép từ khôi phục</string>
+    <string name="cloud_forgot_password">Quên mật khẩu</string>
+    <string name="cloud_recovery_email_hint">Nhập email của tài khoản. Chúng tôi sẽ gửi mã cho bạn.</string>
+    <string name="cloud_recovery_other_device_hint">Đang đăng nhập trên thiết bị khác? Hãy đổi mật khẩu ở đó.</string>
+    <string name="cloud_recovery_words_entry_hint">Nhập 24 từ khôi phục bạn đã lưu khi tạo tài khoản.</string>
+    <string name="cloud_recovery_words_placeholder">24 từ khôi phục của bạn</string>
+    <string name="cloud_set_new_password">Đặt mật khẩu mới</string>
+    <string name="cloud_new_password_hint">Nhập mật khẩu mới để mã hóa ghi chú của bạn.</string>
+    <string name="cloud_reset_password">Đặt lại mật khẩu</string>
+    <string name="cloud_sign_out_other_devices_title">Đăng xuất khỏi các thiết bị khác</string>
+    <string name="cloud_sign_out_other_devices_message">Nếu bạn nghĩ có người biết mật khẩu của mình, bạn có thể buộc mọi thiết bị khác đang dùng tài khoản này đăng xuất.</string>
+    <string name="cloud_sign_out_other_devices_button">Đăng xuất các thiết bị khác</string>
+    <string name="cloud_do_not_sign_out">Không đăng xuất</string>
+
+    <string name="cloud_account">Tài khoản</string>
+    <string name="cloud_signed_in_as">Đã đăng nhập: %1$s</string>
+    <string name="cloud_loading_storage_used">Đang tải dung lượng đã dùng...</string>
+    <string name="cloud_sync">Đồng bộ</string>
+    <string name="cloud_syncing">Đang đồng bộ...</string>
+    <string name="cloud_last_synced">Đồng bộ lần cuối %1$s</string>
+    <string name="cloud_sync_explanation">Gửi và nhận không gian, thư mục, ghi chú, danh sách, cuộc trò chuyện và nội dung đa phương tiện.</string>
+    <string name="cloud_sync_now">Đồng bộ ngay</string>
+    <string name="cloud_media">Đa phương tiện</string>
+    <string name="cloud_media_last_checked">Kiểm tra đa phương tiện lần cuối %1$s</string>
+    <string name="cloud_devices">Thiết bị</string>
+    <string name="cloud_loading_devices">Đang tải thiết bị...</string>
+    <string name="cloud_tap_device_to_sign_out">Nhấn vào một thiết bị để đăng xuất thiết bị đó.</string>
+    <string name="cloud_sign_out_of_this_device">Đăng xuất khỏi thiết bị này</string>
+    <string name="cloud_manage_account">Quản lý tài khoản</string>
+    <string name="cloud_change_password">Đổi mật khẩu</string>
+    <string name="cloud_change_email">Đổi email</string>
+    <string name="cloud_recovery_words_lock_description">Hãy xác thực để xem từ khôi phục</string>
+    <string name="cloud_delete_account">Xóa tài khoản</string>
+    <string name="cloud_sign_out_device_title">Đăng xuất thiết bị?</string>
+    <string name="cloud_sign_out_device_message">Thiết bị sau sẽ bị đăng xuất:\n\n%1$s</string>
+    <string name="cloud_sign_out">Đăng xuất</string>
+    <string name="cloud_delete_account_title">Xóa tài khoản?</string>
+    <string name="cloud_delete_account_message">Tài khoản Emberr Cloud và mọi thứ lưu trong đó sẽ bị xóa vĩnh viễn. Không thể hoàn tác. Ghi chú trên thiết bị này vẫn giữ nguyên, trừ khi bạn chọn xóa luôn. Chúng tôi sẽ gửi mã đến %1$s để xác nhận.</string>
+    <string name="cloud_last_used">Dùng lần cuối %1$s</string>
+    <string name="cloud_this_device">Thiết bị này</string>
+    <string name="cloud_sign_out_of_this_device_title">Đăng xuất khỏi thiết bị này?</string>
+    <string name="cloud_sign_out_of_this_device_message">Thiết bị này sẽ ngừng dùng Emberr Cloud. Ghi chú trên thiết bị này không bị ảnh hưởng.</string>
+
+    <string name="cloud_change_password_code_hint">Chúng tôi sẽ gửi mã đến %1$s để xác nhận.</string>
+    <string name="cloud_sign_out_of_other_devices">Đăng xuất khỏi các thiết bị khác</string>
+    <string name="cloud_change_email_hint">Nhập địa chỉ email mới. Chúng tôi sẽ gửi mã đến đó.</string>
+    <string name="cloud_recovery_words_password_hint">Nhập mật khẩu để xem từ khôi phục.</string>
+    <string name="cloud_clear_notes_on_this_device">Xóa luôn ghi chú trên thiết bị này</string>
+    <string name="cloud_delete_account_warning">Tài khoản Emberr Cloud sẽ bị xóa vĩnh viễn. Không thể hoàn tác.</string>
+
+    <string name="cloud_email">Email</string>
+    <string name="cloud_code_placeholder">Mã 6 chữ số</string>
+    <string name="cloud_password">Mật khẩu</string>
+    <string name="cloud_confirm_password">Xác nhận mật khẩu</string>
+    <string name="cloud_passwords_do_not_match">Mật khẩu không khớp.</string>
+    <string name="cloud_hide_password">Ẩn mật khẩu</string>
+    <string name="cloud_show_password">Hiện mật khẩu</string>
+    <string name="cloud_password_strength_weak">Độ mạnh mật khẩu: Yếu</string>
+    <string name="cloud_password_strength_moderate">Độ mạnh mật khẩu: Trung bình</string>
+    <string name="cloud_password_strength_strong">Độ mạnh mật khẩu: Mạnh</string>
+    <string name="cloud_code_sent">Chúng tôi đã gửi mã đến %1$s. Hãy kiểm tra hộp thư đến (và thư rác).</string>
+    <string name="cloud_new_code_sent">Chúng tôi đã gửi mã mới đến %1$s.</string>
+    <string name="cloud_please_wait">Vui lòng chờ...</string>
+
+    <string name="cloud_sending_file">Đang gửi tệp %1$d/%2$d</string>
+    <string name="cloud_receiving_file">Đang nhận tệp %1$d/%2$d</string>
+    <string name="cloud_photo_in_note">Ảnh trong %1$s</string>
+    <string name="cloud_video_in_note">Video trong %1$s</string>
+    <string name="cloud_audio_in_note">Âm thanh trong %1$s</string>
+    <string name="cloud_document_in_note">Tài liệu trong %1$s</string>
+    <string name="cloud_file_in_note">Tệp trong %1$s</string>
+    <string name="cloud_file_progress">%1$d% · %2$s/%3$s</string>
+    <plurals name="cloud_files_waiting_for_upload">
+        <item quantity="other">%1$d tệp đang chờ thiết bị khác tải lên.</item>
+    </plurals>
+    <string name="cloud_files_not_sent_and_not_received">Tệp: %1$d chưa gửi, %2$d chưa nhận. Sẽ thử lại ở lần đồng bộ tiếp theo.</string>
+    <string name="cloud_files_not_sent">Tệp: %1$d chưa gửi. Sẽ thử lại ở lần đồng bộ tiếp theo.</string>
+    <string name="cloud_files_not_received">Tệp: %1$d chưa nhận. Sẽ thử lại ở lần đồng bộ tiếp theo.</string>
+    <string name="cloud_files_sent_and_received_counts">Đã gửi %1$d/%2$d tệp · Đã nhận %3$d/%4$d tệp</string>
+    <string name="cloud_files_sent_count">Đã gửi %1$d/%2$d tệp</string>
+    <string name="cloud_files_received_count">Đã nhận %1$d/%2$d tệp</string>
+
+    <string name="cloud_trial_ended">Dùng thử miễn phí đã kết thúc vào %1$s · chỉ đọc đến %2$s</string>
+    <string name="cloud_trial_ends_today">Dùng thử miễn phí · kết thúc hôm nay</string>
+    <plurals name="cloud_trial_days_left">
+        <item quantity="other">Dùng thử miễn phí · còn %1$d ngày</item>
+    </plurals>
+    <string name="cloud_storage_used">Đã dùng %1$s/%2$s</string>
+    <string name="cloud_full_with_usage">Emberr Cloud đã đầy: đã dùng %1$s/%2$s. Ghi chú và tệp mới được giữ trên thiết bị này và sẽ tải lên khi có chỗ.</string>
+    <string name="cloud_full">Emberr Cloud đã đầy. Ghi chú và tệp mới được giữ trên thiết bị này và sẽ tải lên khi có chỗ.</string>
+    <string name="cloud_trial_ended_read_only">Thời gian dùng thử miễn phí đã kết thúc, nên Emberr Cloud chỉ đọc. Thiết bị này vẫn nhận thay đổi từ các thiết bị khác, nhưng không tải lên gì mới. Ghi chú vẫn ở trên các thiết bị của bạn.</string>
+    <plurals name="cloud_files_too_large">
+        <item quantity="other">%1$d tệp lớn hơn 10 GB, nên chỉ được giữ trên thiết bị này.</item>
+    </plurals>
+    <string name="cloud_copy_removed">Thời gian dùng thử miễn phí đã kết thúc và bản sao trên đám mây đã bị xóa vào %1$s. Mọi ghi chú vẫn còn trên thiết bị này. Đồng bộ sẽ bắt đầu lại khi bạn chọn một gói.</string>
+
+    <string name="cloud_error_something_went_wrong">Đã xảy ra lỗi. Hãy thử lại.</string>
+    <string name="cloud_error_signed_out">Bạn đã bị đăng xuất. Hãy đăng nhập lại.</string>
+    <string name="cloud_error_incorrect_password">Sai mật khẩu. Hãy thử lại.</string>
+    <string name="cloud_error_invalid_email">Nhập địa chỉ email hợp lệ.</string>
+    <string name="cloud_error_wrong_email_or_password">Sai email hoặc mật khẩu.</string>
+    <string name="cloud_error_incorrect_code">Mã không đúng.</string>
+    <string name="cloud_error_expired_code">Mã đã hết hạn. Hãy yêu cầu mã mới.</string>
+    <string name="cloud_error_too_many_tries">Thử quá nhiều lần. Hãy chờ một lát rồi thử lại.</string>
+    <string name="cloud_error_update_required">Hãy cập nhật Emberr để dùng Emberr Cloud.</string>
+    <string name="cloud_error_device_already_signed_out">Thiết bị đó đã được đăng xuất rồi.</string>
+    <string name="cloud_error_email_already_used">Email này đã được một tài khoản khác sử dụng.</string>
+    <string name="cloud_error_server_unreachable">Không kết nối được máy chủ tại %1$s.</string>
+    <string name="cloud_error_invalid_recovery_words">Các từ này không phải khóa khôi phục hợp lệ. Hãy đảm bảo có đủ 24 từ và kiểm tra chính tả từng từ.</string>
+    <string name="cloud_error_recovery_words_other_account">Các từ này thuộc về một tài khoản khác.</string>
+    <string name="cloud_account_deleted_notes_not_cleared">Tài khoản đã bị xóa, nhưng không xóa được ghi chú trên thiết bị này.</string>
+    <string name="cloud_password_changed">Đã đổi mật khẩu thành công</string>
+    <string name="cloud_email_changed">Đã đổi email thành %1$s</string>
+
+    <string name="cloud_synced">Đã đồng bộ: nhận %1$d, gửi %2$d</string>
+    <string name="cloud_synced_with_not_sent">Đã đồng bộ: nhận %1$d, gửi %2$d, %3$d chưa gửi</string>
+    <string name="cloud_sync_busy">Đang có lần đồng bộ khác. Hãy thử lại sau giây lát.</string>
+    <string name="cloud_sync_update_required">Hãy cập nhật Emberr để tiếp tục đồng bộ với Emberr Cloud.</string>
+    <string name="cloud_sync_other_method_on">Một phương thức đồng bộ khác đang bật. Hãy ngắt kết nối máy chủ riêng hoặc hủy ghép nối đồng bộ LAN để tiếp tục dùng Emberr Cloud.</string>
+    <string name="cloud_disconnect_self_host_first">Ngắt kết nối máy chủ riêng để dùng Emberr Cloud.</string>
+    <string name="cloud_unpair_lan_sync_first">Hủy ghép nối đồng bộ LAN để dùng Emberr Cloud.</string>
+</resources>

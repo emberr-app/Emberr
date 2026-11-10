@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">Favorit</string>
+    <string name="home_toggle_favorites">Ciutkan/bentangkan Favorit</string>
+    <string name="home_notes">Catatan</string>
+    <string name="home_toggle_notes">Ciutkan/bentangkan Catatan</string>
+    <string name="home_recents">Terbaru</string>
+    <string name="home_toggle_recents">Ciutkan/bentangkan Terbaru</string>
+    <string name="home_sort">Urutkan</string>
+    <string name="home_sort_notes">Urutkan catatan</string>
+    <string name="home_new_folder">Folder baru</string>
+    <string name="home_new_folder_tooltip">Folder baru</string>
+    <string name="home_new_subfolder">Subfolder baru</string>
+    <string name="home_folder_name_placeholder">mis. Pribadi, Kerja...</string>
+    <string name="home_new_note">Catatan baru</string>
+    <string name="home_new_note_tooltip">Catatan baru</string>
+    <string name="home_new_note_in_folder">Catatan baru di %1$s</string>
+    <string name="home_note_title_placeholder">Judul catatan...</string>
+    <string name="home_templates">Templat</string>
+    <string name="home_switch_space">Ganti ruang</string>
+    <string name="home_toggle_sidebar">Tampilkan/sembunyikan bilah sisi</string>
+    <string name="home_open_calendar">Buka kalender</string>
+    <string name="home_calendar">Kalender</string>
+    <string name="home_settings">Setelan</string>
+    <string name="home_more_settings">Setelan lainnya</string>
+    <string name="home_rename">Ganti nama</string>
+    <string name="home_move_to_trash">Pindahkan ke Sampah</string>
+    <string name="home_add_to_favorites">Tambahkan ke Favorit</string>
+    <string name="home_remove_from_favorites">Hapus dari Favorit</string>
+    <string name="home_sort_last_edited">Terakhir diedit</string>
+    <string name="home_sort_date_created">Tanggal dibuat</string>
+    <string name="home_sort_name">Nama (A-Z)</string>
+    <string name="home_sort_type">Jenis</string>
+    <string name="home_sort_manual">Manual</string>
+    <string name="home_sort_ascending">Naik</string>
+    <string name="home_sort_descending">Turun</string>
+    <string name="home_sort_by">Urutkan menurut</string>
+    <string name="home_empty_space_start_with">Ruang ini kosong. Mulai dengan</string>
+    <string name="home_empty_space_a_new_note">catatan baru</string>
+    <string name="home_empty_space_note_or_folder">%1$s atau %2$s</string>
+    <string name="home_empty_space_a_folder">folder</string>
+    <string name="home_breadcrumb_home">Beranda</string>
+    <string name="home_cover">Sampul</string>
+    <string name="home_in_parent">di %1$s</string>
+    <string name="home_canvas">Kanvas</string>
+    <string name="home_note">Catatan</string>
+    <string name="home_empty_note">Catatan kosong...</string>
+    <string name="home_favorite">Favorit</string>
+    <string name="home_selected">Dipilih</string>
+    <string name="home_rename_subtitle">Pilih nama baru.</string>
+    <string name="home_name_placeholder">Nama...</string>
+    <string name="home_nesting_inside_folder">Di dalam %1$s.</string>
+    <string name="home_organize_your_notes">Atur catatan Anda.</string>
+    <string name="home_search_templates_placeholder">Cari templat...</string>
+    <string name="home_search_templates">Cari templat</string>
+    <string name="home_no_templates_yet">Belum ada templat.</string>
+    <string name="home_no_templates_match">Tidak ada templat yang cocok dengan "%1$s".</string>
+    <string name="home_new_template">Templat baru</string>
+    <string name="home_edit_template">Edit templat</string>
+    <string name="home_delete_template">Hapus templat</string>
+    <string name="home_templates_subtitle">Mulai catatan baru dari templat.</string>
+    <string name="home_new_subfolder_in_folder">Subfolder baru di %1$s</string>
+    <string name="home_new_note_in_folder_description">Catatan baru di %1$s</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="other">%1$d tersisa</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="other">%1$d disimpan</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="other">%1$d dilampirkan</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="other">Hapus %1$d item</item>
+    </plurals>
+</resources>

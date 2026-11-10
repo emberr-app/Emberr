@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Siaga</string>
+    <string name="lan_sync_status_not_paired">Belum dipasangkan!</string>
+    <string name="lan_sync_status_already_in_progress">Sinkronisasi sedang berlangsung</string>
+    <string name="lan_sync_status_syncing">Menyinkronkan...</string>
+    <string name="lan_sync_status_auto_syncing">Menyinkronkan otomatis...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Mengambil dari desktop...</string>
+    <string name="lan_sync_status_success">Berhasil!</string>
+    <string name="lan_sync_status_synced_successfully">Berhasil disinkronkan</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="other">Tersinkron, %1$d item tidak dapat disimpan</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Sinkronisasi sebagian, akan dicoba lagi</string>
+    <string name="lan_sync_status_update_both_devices">Perbarui Emberr di kedua perangkat</string>
+    <string name="lan_sync_status_desktop_offline">Desktop offline</string>
+    <string name="lan_sync_status_failed">Gagal: %1$s</string>
+    <string name="lan_sync_status_sync_error">Kesalahan sinkronisasi: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Pasangkan perangkat seluler</string>
+    <string name="lan_sync_pair_dialog_message">Pindai kode QR ini dengan aplikasi seluler Emberr untuk terhubung dengan aman ke desktop Anda.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Token rahasia: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Pindai kode QR yang ditampilkan di desktop Anda.</string>
+    <string name="lan_sync_scanner_desktop_hint">Di desktop Anda, buka Setelan → Sinkronisasi LAN → Pasangkan perangkat seluler.</string>
+    <string name="lan_sync_camera_access_needed">Akses kamera diperlukan</string>
+    <string name="lan_sync_camera_allow_message">Izinkan kamera untuk memindai kode pemasangan di desktop Anda.</string>
+    <string name="lan_sync_camera_turn_on_message">Aktifkan Kamera di Izin, lalu kembali ke sini.</string>
+    <string name="lan_sync_allow_camera">Izinkan kamera</string>
+    <string name="lan_sync_open_app_settings">Buka setelan aplikasi</string>
+    <string name="lan_sync_camera_mobile_only">Pemindaian kamera hanya didukung di perangkat seluler.</string>
+</resources>

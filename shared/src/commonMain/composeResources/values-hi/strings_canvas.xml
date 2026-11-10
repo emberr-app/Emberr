@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="canvas_options">विकल्प</string>
+    <string name="canvas_more_options">और विकल्प</string>
+    <string name="canvas_rename">नाम बदलें</string>
+    <string name="canvas_open_as_sticky_note">स्टिकी नोट की तरह खोलें</string>
+    <string name="canvas_move_to_trash">ट्रैश में ले जाएँ</string>
+    <string name="canvas_add_to_favorites">पसंदीदा में जोड़ें</string>
+    <string name="canvas_remove_from_favorites">पसंदीदा से हटाएँ</string>
+    <string name="canvas_sheet_title">कैनवास</string>
+    <string name="canvas_rename_canvas">कैनवास का नाम बदलें</string>
+    <string name="canvas_title_placeholder">कैनवास का शीर्षक...</string>
+    <string name="canvas_untitled_canvas">बिना शीर्षक कैनवास</string>
+
+    <string name="canvas_shapes">आकृतियाँ</string>
+    <string name="canvas_shape_rectangle">आयत</string>
+    <string name="canvas_shape_square">वर्ग</string>
+    <string name="canvas_shape_circle">वृत्त</string>
+    <string name="canvas_shape_oval">अंडाकार</string>
+    <string name="canvas_shape_triangle">त्रिभुज</string>
+    <string name="canvas_shape_diamond">डायमंड</string>
+    <string name="canvas_shape_pentagon">पंचभुज</string>
+    <string name="canvas_shape_hexagon">षट्भुज</string>
+    <string name="canvas_shape_parallelogram">समांतर चतुर्भुज</string>
+    <string name="canvas_shape_trapezoid">समलंब</string>
+    <string name="canvas_shape_pill">कैप्सूल</string>
+    <string name="canvas_shape_database">डेटाबेस</string>
+    <string name="canvas_shape_double_rectangle">दोहरा आयत</string>
+    <string name="canvas_shape_double_square">दोहरा वर्ग</string>
+    <string name="canvas_shape_double_circle">दोहरा वृत्त</string>
+    <string name="canvas_shape_double_triangle">दोहरा त्रिभुज</string>
+
+    <string name="canvas_clear">सब हटाएँ</string>
+    <string name="canvas_zoom_in">ज़ूम इन करें</string>
+    <string name="canvas_zoom_out">ज़ूम आउट करें</string>
+    <string name="canvas_go_to_boxes">बॉक्स पर जाएँ</string>
+    <string name="canvas_undo">पहले जैसा करें</string>
+    <string name="canvas_redo">फिर से करें</string>
+
+    <string name="canvas_tool_pen">पेन</string>
+    <string name="canvas_tool_highlighter">हाइलाइटर</string>
+    <string name="canvas_tool_eraser">इरेज़र</string>
+    <string name="canvas_tool_text">टेक्स्ट</string>
+    <string name="canvas_tool_shapes">आकृतियाँ</string>
+    <string name="canvas_tool_line">रेखा</string>
+    <string name="canvas_tool_image">इमेज</string>
+
+    <string name="canvas_default_ink">डिफ़ॉल्ट स्याही</string>
+    <string name="canvas_no_background">कोई बैकग्राउंड नहीं</string>
+    <string name="canvas_stroke">स्ट्रोक</string>
+    <string name="canvas_stroke_width">स्ट्रोक की मोटाई</string>
+    <string name="canvas_pressure">दबाव</string>
+    <string name="canvas_same_thickness">एक जैसी मोटाई</string>
+    <string name="canvas_follow_pressure">दबाव के हिसाब से</string>
+    <string name="canvas_opacity">अपारदर्शिता</string>
+    <string name="canvas_size">आकार</string>
+    <string name="canvas_font">फ़ॉन्ट</string>
+    <string name="canvas_weight">मोटाई</string>
+    <string name="canvas_color">रंग</string>
+    <string name="canvas_background">बैकग्राउंड</string>
+    <string name="canvas_align">संरेखण</string>
+    <string name="canvas_line">रेखा</string>
+    <string name="canvas_line_style">रेखा की स्टाइल</string>
+
+    <string name="canvas_width_thin">पतली</string>
+    <string name="canvas_width_medium">मध्यम</string>
+    <string name="canvas_width_thick">मोटी</string>
+    <string name="canvas_size_small">छोटा</string>
+    <string name="canvas_size_medium">मध्यम</string>
+    <string name="canvas_size_large">बड़ा</string>
+    <string name="canvas_weight_regular">सामान्य</string>
+    <string name="canvas_weight_medium">मध्यम</string>
+    <string name="canvas_weight_bold">बोल्ड</string>
+    <string name="canvas_font_default">डिफ़ॉल्ट</string>
+    <string name="canvas_align_left">बाएँ संरेखित करें</string>
+    <string name="canvas_align_center">बीच में संरेखित करें</string>
+    <string name="canvas_align_right">दाएँ संरेखित करें</string>
+
+    <string name="canvas_line_arrow">तीर</string>
+    <string name="canvas_line_dotted_arrow">बिंदुदार तीर</string>
+    <string name="canvas_line_dashed_arrow">डैश वाला तीर</string>
+    <string name="canvas_line_solid_line">सीधी रेखा</string>
+    <string name="canvas_line_dotted_line">बिंदुदार रेखा</string>
+    <string name="canvas_line_dashed_line">डैश वाली रेखा</string>
+
+    <string name="canvas_show_dots">बिंदु दिखाएँ</string>
+    <string name="canvas_hide_dots">बिंदु छिपाएँ</string>
+    <string name="canvas_full_screen">फ़ुल स्क्रीन</string>
+    <string name="canvas_exit_full_screen">फ़ुल स्क्रीन से बाहर निकलें</string>
+
+    <string name="canvas_delete_box">बॉक्स मिटाएँ</string>
+    <string name="canvas_box_color">बॉक्स का रंग</string>
+    <string name="canvas_paste_image">इमेज पेस्ट करें</string>
+    <string name="canvas_adding_image">इमेज जोड़ी जा रही है...</string>
+    <string name="canvas_add_label">लेबल जोड़ें</string>
+    <string name="canvas_edit_label">लेबल बदलें</string>
+    <string name="canvas_ungroup">ग्रुप तोड़ें</string>
+    <string name="canvas_create_group">ग्रुप बनाएँ</string>
+
+    <string name="canvas_image">कैनवास इमेज</string>
+    <string name="canvas_image_failed_to_download">इमेज डाउनलोड नहीं हो सकी</string>
+    <string name="canvas_downloading_image">इमेज डाउनलोड हो रही है...</string>
+</resources>

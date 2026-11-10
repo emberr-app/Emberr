@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Sampah kosong</string>
+    <string name="trash_title">Sampah</string>
+    <string name="trash_empty_trash">Kosongkan Sampah</string>
+    <string name="trash_empty_trash_tooltip">Kosongkan Sampah</string>
+    <string name="trash_restore_note">Pulihkan catatan</string>
+    <string name="trash_delete_permanently">Hapus permanen</string>
+    <string name="trash_manage_note">Kelola catatan</string>
+    <string name="trash_manage_note_subtitle">Catatan di Sampah otomatis dihapus setelah 30 hari.</string>
+    <string name="trash_empty_trash_question">Kosongkan Sampah?</string>
+    <string name="trash_empty_trash_subtitle">Ini akan menghapus permanen semua catatan yang ada di Sampah. Tindakan ini tidak dapat dibatalkan.</string>
+</resources>

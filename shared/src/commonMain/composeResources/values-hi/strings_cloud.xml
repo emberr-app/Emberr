@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_title">Emberr Cloud</string>
+
+    <string name="cloud_server_address">सर्वर पता</string>
+    <string name="cloud_server_address_invalid">ऐसा पता डालें जो http:// या https:// से शुरू हो, जैसे http://localhost:8080।</string>
+    <string name="cloud_server_address_saved">सर्वर पता सेव हो गया</string>
+
+    <string name="cloud_welcome_hint">एंड-टू-एंड एन्क्रिप्शन के साथ अपने नोट डिवाइस के बीच सिंक करें। उन्हें सिर्फ़ आपके डिवाइस पढ़ सकते हैं।</string>
+    <string name="cloud_create_account">अकाउंट बनाएँ</string>
+    <string name="cloud_log_in">लॉग इन करें</string>
+    <string name="cloud_send_code">कोड भेजें</string>
+    <string name="cloud_send_new_code">नया कोड भेजें</string>
+    <string name="cloud_continue">जारी रखें</string>
+    <string name="cloud_done">हो गया</string>
+    <string name="cloud_password_not_stored_hint">हम यह पासवर्ड सेव नहीं करते, इसलिए अगर आप इसे भूल गए तो हम आपके नोट डिक्रिप्ट नहीं कर पाएँगे।</string>
+    <string name="cloud_recovery_words">रिकवरी शब्द</string>
+    <string name="cloud_recovery_words_explanation">अगर आप अपना पासवर्ड भूल जाएँ, तो ये 24 शब्द ही आपके अकाउंट में वापस आने का एकमात्र तरीका हैं। हम इन्हें सेव नहीं करते, इसलिए इन्हें किसी सुरक्षित जगह रखें।</string>
+    <string name="cloud_recovery_words_warning">आपके पासवर्ड और इन शब्दों के बिना आपके क्लाउड नोट वापस नहीं मिल सकते।</string>
+    <string name="cloud_recovery_words_saved_checkbox">मैंने ये शब्द किसी सुरक्षित जगह सेव कर लिए हैं</string>
+    <string name="cloud_copy_words">शब्द कॉपी करें</string>
+    <string name="cloud_recovery_words_copied">रिकवरी शब्द कॉपी हो गए</string>
+    <string name="cloud_forgot_password">पासवर्ड भूल गए</string>
+    <string name="cloud_recovery_email_hint">अपने अकाउंट का ईमेल डालें। हम आपको एक कोड भेजेंगे।</string>
+    <string name="cloud_recovery_other_device_hint">किसी दूसरे डिवाइस पर साइन इन हैं? वहाँ अपना पासवर्ड बदलें।</string>
+    <string name="cloud_recovery_words_entry_hint">वे 24 रिकवरी शब्द डालें जो आपने अकाउंट बनाते समय सेव किए थे।</string>
+    <string name="cloud_recovery_words_placeholder">आपके 24 रिकवरी शब्द</string>
+    <string name="cloud_set_new_password">नया पासवर्ड सेट करें</string>
+    <string name="cloud_new_password_hint">एक नया पासवर्ड डालें जिससे हम आपके नोट एन्क्रिप्ट कर सकें।</string>
+    <string name="cloud_reset_password">पासवर्ड रीसेट करें</string>
+    <string name="cloud_sign_out_other_devices_title">दूसरे डिवाइस से साइन आउट करें</string>
+    <string name="cloud_sign_out_other_devices_message">अगर आपको लगता है कि किसी को आपका पासवर्ड पता हो सकता है, तो आप आपके अकाउंट का इस्तेमाल कर रहे बाकी सभी डिवाइस को साइन आउट करा सकते हैं।</string>
+    <string name="cloud_sign_out_other_devices_button">दूसरे डिवाइस साइन आउट करें</string>
+    <string name="cloud_do_not_sign_out">साइन आउट न करें</string>
+
+    <string name="cloud_account">अकाउंट</string>
+    <string name="cloud_signed_in_as">%1$s के रूप में साइन इन है</string>
+    <string name="cloud_loading_storage_used">इस्तेमाल हुई स्टोरेज लोड हो रही है...</string>
+    <string name="cloud_sync">सिंक</string>
+    <string name="cloud_syncing">सिंक हो रहा है...</string>
+    <string name="cloud_last_synced">पिछला सिंक %1$s</string>
+    <string name="cloud_sync_explanation">स्पेस, फ़ोल्डर, नोट, सूचियाँ, चैट और मीडिया भेजता और लेता है।</string>
+    <string name="cloud_sync_now">अभी सिंक करें</string>
+    <string name="cloud_media">मीडिया</string>
+    <string name="cloud_media_last_checked">मीडिया की पिछली जाँच %1$s</string>
+    <string name="cloud_devices">डिवाइस</string>
+    <string name="cloud_loading_devices">डिवाइस लोड हो रहे हैं...</string>
+    <string name="cloud_tap_device_to_sign_out">किसी डिवाइस को साइन आउट करने के लिए उस पर टैप करें।</string>
+    <string name="cloud_sign_out_of_this_device">इस डिवाइस से साइन आउट करें</string>
+    <string name="cloud_manage_account">अकाउंट मैनेज करें</string>
+    <string name="cloud_change_password">पासवर्ड बदलें</string>
+    <string name="cloud_change_email">ईमेल बदलें</string>
+    <string name="cloud_recovery_words_lock_description">अपने रिकवरी शब्द देखने के लिए कृपया पुष्टि करें</string>
+    <string name="cloud_delete_account">अकाउंट मिटाएँ</string>
+    <string name="cloud_sign_out_device_title">डिवाइस साइन आउट करें?</string>
+    <string name="cloud_sign_out_device_message">इससे यह डिवाइस साइन आउट हो जाएगा:\n\n%1$s</string>
+    <string name="cloud_sign_out">साइन आउट करें</string>
+    <string name="cloud_delete_account_title">अकाउंट मिटाएँ?</string>
+    <string name="cloud_delete_account_message">आपका Emberr Cloud अकाउंट और उसमें रखी हर चीज़ हमेशा के लिए मिटा दी जाएगी। इसे वापस नहीं किया जा सकता। इस डिवाइस के नोट बने रहेंगे, जब तक आप उन्हें भी साफ़ करना न चुनें। पुष्टि के लिए हम %1$s पर एक कोड भेजेंगे।</string>
+    <string name="cloud_last_used">पिछला इस्तेमाल %1$s</string>
+    <string name="cloud_this_device">यह डिवाइस</string>
+    <string name="cloud_sign_out_of_this_device_title">इस डिवाइस से साइन आउट करें?</string>
+    <string name="cloud_sign_out_of_this_device_message">यह डिवाइस Emberr Cloud का इस्तेमाल बंद कर देगा। इस डिवाइस पर आपके नोट नहीं छुए जाएँगे।</string>
+
+    <string name="cloud_change_password_code_hint">पुष्टि के लिए हम %1$s पर एक कोड भेजेंगे।</string>
+    <string name="cloud_sign_out_of_other_devices">दूसरे डिवाइस से साइन आउट करें</string>
+    <string name="cloud_change_email_hint">अपना नया ईमेल पता डालें। हम वहाँ एक कोड भेजेंगे।</string>
+    <string name="cloud_recovery_words_password_hint">अपने रिकवरी शब्द देखने के लिए अपना पासवर्ड डालें।</string>
+    <string name="cloud_clear_notes_on_this_device">इस डिवाइस के नोट भी साफ़ करें</string>
+    <string name="cloud_delete_account_warning">आपका Emberr Cloud अकाउंट हमेशा के लिए मिटा दिया जाएगा। इसे वापस नहीं किया जा सकता।</string>
+
+    <string name="cloud_email">ईमेल</string>
+    <string name="cloud_code_placeholder">6 अंकों का कोड</string>
+    <string name="cloud_password">पासवर्ड</string>
+    <string name="cloud_confirm_password">पासवर्ड की पुष्टि करें</string>
+    <string name="cloud_passwords_do_not_match">पासवर्ड मेल नहीं खाते।</string>
+    <string name="cloud_hide_password">पासवर्ड छिपाएँ</string>
+    <string name="cloud_show_password">पासवर्ड दिखाएँ</string>
+    <string name="cloud_password_strength_weak">पासवर्ड की मज़बूती: कमज़ोर</string>
+    <string name="cloud_password_strength_moderate">पासवर्ड की मज़बूती: ठीक-ठाक</string>
+    <string name="cloud_password_strength_strong">पासवर्ड की मज़बूती: मज़बूत</string>
+    <string name="cloud_code_sent">हमने %1$s पर एक कोड भेजा है। अपना इनबॉक्स (और स्पैम) देखें।</string>
+    <string name="cloud_new_code_sent">हमने %1$s पर एक नया कोड भेजा है।</string>
+    <string name="cloud_please_wait">कृपया इंतज़ार करें...</string>
+
+    <string name="cloud_sending_file">फ़ाइल भेजी जा रही है, %2$d में से %1$d</string>
+    <string name="cloud_receiving_file">फ़ाइल ली जा रही है, %2$d में से %1$d</string>
+    <string name="cloud_photo_in_note">%1$s में फ़ोटो</string>
+    <string name="cloud_video_in_note">%1$s में वीडियो</string>
+    <string name="cloud_audio_in_note">%1$s में ऑडियो</string>
+    <string name="cloud_document_in_note">%1$s में दस्तावेज़</string>
+    <string name="cloud_file_in_note">%1$s में फ़ाइल</string>
+    <string name="cloud_file_progress">%1$d% · %3$s में से %2$s</string>
+    <plurals name="cloud_files_waiting_for_upload">
+        <item quantity="one">%1$d फ़ाइल किसी दूसरे डिवाइस से अपलोड होने का इंतज़ार कर रही है।</item>
+        <item quantity="other">%1$d फ़ाइलें किसी दूसरे डिवाइस से अपलोड होने का इंतज़ार कर रही हैं।</item>
+    </plurals>
+    <string name="cloud_files_not_sent_and_not_received">फ़ाइलें: %1$d नहीं भेजी गईं, %2$d नहीं मिलीं। अगले सिंक पर फिर से कोशिश होगी।</string>
+    <string name="cloud_files_not_sent">फ़ाइलें: %1$d नहीं भेजी गईं। अगले सिंक पर फिर से कोशिश होगी।</string>
+    <string name="cloud_files_not_received">फ़ाइलें: %1$d नहीं मिलीं। अगले सिंक पर फिर से कोशिश होगी।</string>
+    <string name="cloud_files_sent_and_received_counts">%2$d में से %1$d फ़ाइलें भेजी गईं · %4$d में से %3$d फ़ाइलें मिलीं</string>
+    <string name="cloud_files_sent_count">%2$d में से %1$d फ़ाइलें भेजी गईं</string>
+    <string name="cloud_files_received_count">%2$d में से %1$d फ़ाइलें मिलीं</string>
+
+    <string name="cloud_trial_ended">फ़्री ट्रायल %1$s को खत्म हुआ · %2$s तक सिर्फ़ पढ़ने के लिए</string>
+    <string name="cloud_trial_ends_today">फ़्री ट्रायल · आज खत्म होगा</string>
+    <plurals name="cloud_trial_days_left">
+        <item quantity="one">फ़्री ट्रायल · %1$d दिन बाकी</item>
+        <item quantity="other">फ़्री ट्रायल · %1$d दिन बाकी</item>
+    </plurals>
+    <string name="cloud_storage_used">%2$s में से %1$s इस्तेमाल हुआ</string>
+    <string name="cloud_full_with_usage">Emberr Cloud भर गया है: %2$s में से %1$s इस्तेमाल हुआ। नए नोट और फ़ाइलें इस डिवाइस पर रहेंगी और जगह होने पर अपलोड होंगी।</string>
+    <string name="cloud_full">Emberr Cloud भर गया है। नए नोट और फ़ाइलें इस डिवाइस पर रहेंगी और जगह होने पर अपलोड होंगी।</string>
+    <string name="cloud_trial_ended_read_only">आपका फ़्री ट्रायल खत्म हो गया है, इसलिए Emberr Cloud अब सिर्फ़ पढ़ने के लिए है। इस डिवाइस को आपके दूसरे डिवाइस से बदलाव मिलते रहेंगे, पर कुछ भी नया अपलोड नहीं होगा। आपके नोट आपके डिवाइस पर बने रहेंगे।</string>
+    <plurals name="cloud_files_too_large">
+        <item quantity="one">%1$d फ़ाइल 10 GB से बड़ी है, इसलिए वह सिर्फ़ इसी डिवाइस पर रहेगी।</item>
+        <item quantity="other">%1$d फ़ाइलें 10 GB से बड़ी हैं, इसलिए वे सिर्फ़ इसी डिवाइस पर रहेंगी।</item>
+    </plurals>
+    <string name="cloud_copy_removed">आपका फ़्री ट्रायल खत्म हो गया और क्लाउड कॉपी %1$s को हटा दी गई। हर नोट अब भी इस डिवाइस पर है। प्लान चुनने पर सिंक फिर से शुरू हो जाएगा।</string>
+
+    <string name="cloud_error_something_went_wrong">कुछ गड़बड़ हो गई। फिर से कोशिश करें।</string>
+    <string name="cloud_error_signed_out">आप साइन आउट हो गए। फिर से लॉग इन करें।</string>
+    <string name="cloud_error_incorrect_password">गलत पासवर्ड। फिर से कोशिश करें।</string>
+    <string name="cloud_error_invalid_email">सही ईमेल पता डालें।</string>
+    <string name="cloud_error_wrong_email_or_password">गलत ईमेल या पासवर्ड।</string>
+    <string name="cloud_error_incorrect_code">यह कोड सही नहीं है।</string>
+    <string name="cloud_error_expired_code">इस कोड की समय-सीमा खत्म हो गई है। नया कोड मँगाएँ।</string>
+    <string name="cloud_error_too_many_tries">बहुत ज़्यादा कोशिशें। थोड़ा रुककर फिर से कोशिश करें।</string>
+    <string name="cloud_error_update_required">Emberr Cloud इस्तेमाल करने के लिए Emberr अपडेट करें।</string>
+    <string name="cloud_error_device_already_signed_out">वह डिवाइस पहले ही साइन आउट हो चुका था।</string>
+    <string name="cloud_error_email_already_used">यह ईमेल पहले से किसी दूसरे अकाउंट में इस्तेमाल हो रहा है।</string>
+    <string name="cloud_error_server_unreachable">%1$s पर सर्वर तक नहीं पहुँच सके।</string>
+    <string name="cloud_error_invalid_recovery_words">ये शब्द सही रिकवरी की नहीं हैं। पक्का करें कि 24 शब्द हों, और हर शब्द की वर्तनी जाँचें।</string>
+    <string name="cloud_error_recovery_words_other_account">ये शब्द किसी दूसरे अकाउंट के हैं।</string>
+    <string name="cloud_account_deleted_notes_not_cleared">आपका अकाउंट मिटा दिया गया, पर इस डिवाइस के नोट साफ़ नहीं हो सके।</string>
+    <string name="cloud_password_changed">पासवर्ड सफलतापूर्वक बदल गया</string>
+    <string name="cloud_email_changed">ईमेल बदलकर %1$s हो गया</string>
+
+    <string name="cloud_synced">सिंक हुआ: %1$d मिले, %2$d भेजे</string>
+    <string name="cloud_synced_with_not_sent">सिंक हुआ: %1$d मिले, %2$d भेजे, %3$d नहीं भेजे</string>
+    <string name="cloud_sync_busy">एक और सिंक चल रहा है। थोड़ी देर में फिर से कोशिश करें।</string>
+    <string name="cloud_sync_update_required">Emberr Cloud के साथ सिंक जारी रखने के लिए Emberr अपडेट करें।</string>
+    <string name="cloud_sync_other_method_on">सिंक का कोई दूसरा तरीका चालू है। Emberr Cloud इस्तेमाल करते रहने के लिए अपना सर्वर डिस्कनेक्ट करें या LAN सिंक अनपेयर करें।</string>
+    <string name="cloud_disconnect_self_host_first">Emberr Cloud इस्तेमाल करने के लिए अपना सर्वर डिस्कनेक्ट करें।</string>
+    <string name="cloud_unpair_lan_sync_first">Emberr Cloud इस्तेमाल करने के लिए LAN सिंक अनपेयर करें।</string>
+</resources>

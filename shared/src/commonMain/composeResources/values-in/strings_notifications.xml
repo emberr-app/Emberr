@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">Pengingat tugas</string>
+    <string name="notifications_unfinished_task">Tugas belum selesai</string>
+    <string name="notifications_daily_note">Catatan harian</string>
+    <string name="notifications_daily_title">Harian: %1$s</string>
+    <string name="notifications_note">Catatan</string>
+    <string name="notifications_birthday">Ulang tahun</string>
+    <string name="notifications_birthday_turns_age">%1$s berulang tahun ke-%2$d hari ini</string>
+    <string name="notifications_birthday_today">Hari ini ulang tahun %1$s</string>
+    <string name="notifications_open">Buka</string>
+</resources>

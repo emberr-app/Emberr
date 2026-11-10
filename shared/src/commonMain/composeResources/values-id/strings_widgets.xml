@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">Pilih ruang</string>
+    <string name="widgets_follow_the_app">Ikuti aplikasi</string>
+    <string name="widgets_follow_the_app_detail">Selalu menampilkan ruang yang sedang Anda buka</string>
+    <string name="widgets_current_space">Ruang saat ini</string>
+    <string name="widgets_untitled_space">Ruang tanpa judul</string>
+    <string name="widgets_favorites">Favorit</string>
+    <string name="widgets_other">Lainnya</string>
+    <string name="widgets_no_notes_yet">Anda belum punya catatan</string>
+    <string name="widgets_no_notes_match">Tidak ada catatan yang cocok dengan "%1$s"</string>
+    <string name="widgets_choose_a_note">Pilih catatan</string>
+    <string name="widgets_search_notes">Cari catatan</string>
+    <string name="widgets_open_the_app_first">Buka aplikasi sekali sebelum menambahkan widget</string>
+    <string name="widgets_choose_a_gradient">Pilih gradien</string>
+    <string name="widgets_whats_on_your_mind">Apa yang Anda pikirkan?</string>
+    <string name="widgets_selected">Dipilih</string>
+    <string name="widgets_gradient_dusk">Senja</string>
+    <string name="widgets_gradient_copper">Tembaga</string>
+    <string name="widgets_gradient_forest">Hutan</string>
+    <string name="widgets_gradient_lagoon">Laguna</string>
+    <string name="widgets_gradient_midnight">Tengah malam</string>
+    <string name="widgets_gradient_blossom">Kembang</string>
+    <string name="widgets_gradient_graphite">Grafit</string>
+    <string name="widgets_gradient_aurora">Aurora</string>
+    <string name="widgets_gradient_sunset">Matahari terbenam</string>
+    <string name="widgets_gradient_slate">Batu tulis</string>
+    <string name="widgets_gradient_cocoa">Kakao</string>
+    <string name="widgets_gradient_lavender">Lavender</string>
+    <string name="widgets_untitled_event">Acara tanpa judul</string>
+    <string name="widgets_untitled_task">Tugas tanpa judul</string>
+    <string name="widgets_note">Catatan</string>
+    <string name="widgets_repeating">Berulang</string>
+    <string name="widgets_today">Hari ini</string>
+    <string name="widgets_tomorrow">Besok</string>
+    <string name="widgets_yesterday">Kemarin</string>
+    <string name="widgets_all_day">Sepanjang hari</string>
+    <string name="widgets_date_all_day">%1$s · Sepanjang hari</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · Sepanjang hari</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="other">%1$d mnt lalu</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="other">%1$d jam lalu</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">Catatan tertaut</string>
+    <string name="widgets_image">Gambar</string>
+    <string name="widgets_canvas">Kanvas</string>
+    <string name="widgets_database">Basis data</string>
+    <string name="widgets_watchlist">Daftar tonton</string>
+    <string name="widgets_credentials">Kredensial</string>
+    <string name="widgets_voice_note_length">Catatan suara  %1$s</string>
+    <string name="widgets_needs_newer_version">Memerlukan versi Emberr yang lebih baru</string>
+    <string name="widgets_table">Tabel</string>
+</resources>

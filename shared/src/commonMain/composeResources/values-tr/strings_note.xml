@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">Komutlar için / yazın...</string>
+    <string name="note_copied_to_clipboard">Panoya kopyalandı</string>
+    <string name="note_copied_as_markdown">Markdown olarak kopyalandı</string>
+    <string name="note_options">Seçenekler</string>
+    <string name="note_more_options">Diğer seçenekler</string>
+    <string name="note_choose_icon">Simge seçin</string>
+    <string name="note_search_emojis">Emoji ara</string>
+    <string name="note_no_emojis_found">Emoji bulunamadı</string>
+    <string name="note_editing_template">Şablon düzenleniyor</string>
+    <string name="note_icon_options">Simge seçenekleri</string>
+    <string name="note_change_icon">Simgeyi değiştir</string>
+    <string name="note_add_icon">Simge ekle</string>
+    <string name="note_remove_icon">Simgeyi kaldır</string>
+    <string name="note_cover_options">Kapak seçenekleri</string>
+    <string name="note_upload_cover">Kapak yükle</string>
+    <string name="note_remove_cover">Kapağı kaldır</string>
+    <string name="note_hide_word_count">Kelime sayısını gizle</string>
+    <string name="note_show_word_count">Kelime sayısını göster</string>
+    <string name="note_alignment">Hizalama</string>
+    <string name="note_note_width">Not genişliği</string>
+    <string name="note_unfavorite">Favorilerden çıkar</string>
+    <string name="note_favorite">Favorilere ekle</string>
+    <string name="note_open_as_sticky_note">Yapışkan not olarak aç</string>
+    <string name="note_export_note">Notu dışa aktar</string>
+    <string name="note_copy_text">Metni kopyala</string>
+    <string name="note_copy_as_markdown">Markdown olarak kopyala</string>
+    <string name="note_download_markdown">.md indir</string>
+    <string name="note_download_pdf">PDF indir</string>
+    <string name="note_move_to_trash">Çöp Kutusuna taşı</string>
+    <string name="note_width_narrow">Dar</string>
+    <string name="note_width_full">Tam</string>
+    <string name="note_align_left">Sol</string>
+    <string name="note_align_center">Orta</string>
+    <string name="note_align_right">Sağ</string>
+    <string name="note_align_justify">İki yana yasla</string>
+    <string name="note_note_options">Not seçenekleri</string>
+    <string name="note_export_options">Dışa aktarma seçenekleri</string>
+    <string name="note_paste_image_link">Görsel bağlantısı yapıştırın</string>
+    <string name="note_cover_image">Kapak görseli</string>
+    <string name="note_drag_image_to_reposition">Konumlandırmak için görseli sürükleyin</string>
+    <string name="note_save_position">Konumu kaydet</string>
+    <string name="note_reposition">Yeniden konumlandır</string>
+    <string name="note_collapse_panel">Paneli daralt</string>
+    <string name="note_expand_panel">Paneli genişlet</string>
+    <plurals name="note_word_count">
+        <item quantity="one">%1$d kelime</item>
+        <item quantity="other">%1$d kelime</item>
+    </plurals>
+</resources>

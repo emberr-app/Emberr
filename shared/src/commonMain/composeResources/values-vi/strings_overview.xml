@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Việc cần làm</string>
+    <string name="overview_section_bookmarks">Dấu trang</string>
+    <string name="overview_section_images">Hình ảnh</string>
+    <string name="overview_section_documents">Tài liệu</string>
+    <string name="overview_tasks_repeating">Lặp lại</string>
+    <string name="overview_tasks_note">Ghi chú</string>
+    <string name="overview_tasks_today">Hôm nay</string>
+    <string name="overview_tasks_tomorrow">Ngày mai</string>
+    <string name="overview_tasks_yesterday">Hôm qua</string>
+    <string name="overview_tasks_none_completed">Chưa có việc nào hoàn thành.</string>
+    <string name="overview_tasks_all_caught_up">Đã xong hết!</string>
+    <string name="overview_tasks_completed">Đã hoàn thành</string>
+    <string name="overview_tasks_completed_tasks">Việc đã hoàn thành</string>
+    <string name="overview_tasks_hide_completed">Ẩn việc đã xong</string>
+    <string name="overview_tasks_show_completed">Hiện việc đã xong</string>
+    <string name="overview_tasks_add_task_description">Thêm việc cần làm</string>
+    <string name="overview_tasks_add_task">Thêm việc cần làm</string>
+    <string name="overview_images_empty">Chưa lưu hình ảnh nào.</string>
+    <string name="overview_images_add_image_description">Thêm hình ảnh</string>
+    <string name="overview_images_add_image">Thêm hình ảnh</string>
+    <string name="overview_documents_empty">Chưa đính kèm tài liệu nào.</string>
+    <string name="overview_documents_add_document_description">Thêm tài liệu</string>
+    <string name="overview_documents_add_document">Thêm tài liệu</string>
+    <string name="overview_bookmarks_empty">Chưa lưu liên kết nào.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Thêm dấu trang</string>
+    <string name="overview_bookmarks_add_bookmark">Thêm dấu trang</string>
+    <string name="overview_bookmarks_add_link">Thêm liên kết</string>
+    <string name="overview_bookmarks_paste_link">Dán liên kết...</string>
+    <string name="overview_bookmarks_clear_link">Xóa liên kết</string>
+    <string name="overview_bookmarks_all">Tất cả</string>
+    <string name="overview_bookmarks_others">Khác</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">प्रॉपर्टी</string>
+    <string name="properties_built_in">बिल्ट-इन</string>
+    <string name="properties_built_in_hint">बिल्ट-इन प्रॉपर्टी का नाम बदला या मिटाया नहीं जा सकता।</string>
+    <string name="properties_custom">कस्टम</string>
+    <string name="properties_add_property">प्रॉपर्टी जोड़ें</string>
+    <string name="properties_new_property">नई प्रॉपर्टी</string>
+    <string name="properties_edit_property">प्रॉपर्टी बदलें</string>
+    <string name="properties_delete_question">"%1$s" मिटाएँ? इसे इस्तेमाल करने वाले हर नोट से यह हटा दी जाएगी।</string>
+    <string name="properties_property_name">प्रॉपर्टी का नाम</string>
+    <string name="properties_name_taken">इस नाम की प्रॉपर्टी पहले से मौजूद है</string>
+    <string name="properties_value_type">वैल्यू का प्रकार</string>
+    <string name="properties_value_type_locked">प्रॉपर्टी बनने के बाद वैल्यू का प्रकार नहीं बदला जा सकता।</string>
+    <string name="properties_delete_property">प्रॉपर्टी मिटाएँ</string>
+    <string name="properties_add">जोड़ें</string>
+</resources>

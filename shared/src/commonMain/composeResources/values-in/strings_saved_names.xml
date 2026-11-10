@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_name_inbox">Kotak Masuk</string>
+    <string name="saved_name_others_folder">Lainnya</string>
+    <string name="saved_name_personal_space">Pribadi</string>
+    <string name="saved_name_new_chat">Obrolan baru</string>
+    <string name="saved_name_canvas_group">Grup</string>
+    <string name="saved_name_unknown_link">Tautan tidak dikenal</string>
+    <string name="saved_name_loading_preview">Memuat pratinjau...</string>
+    <string name="saved_name_numbered_view">%1$s %2$d</string>
+    <string name="saved_name_view_copy">Salinan %1$s</string>
+    <string name="saved_name_label_mobile">Seluler</string>
+    <string name="saved_name_label_home">Rumah</string>
+    <string name="saved_name_label_work">Kantor</string>
+    <string name="saved_name_label_main">Utama</string>
+    <string name="saved_name_label_personal">Pribadi</string>
+    <string name="saved_name_label_portfolio">Portofolio</string>
+    <string name="saved_name_label_blog">Blog</string>
+    <string name="saved_name_label_anniversary">Hari jadi</string>
+    <string name="saved_name_label_date">Tanggal</string>
+    <string name="saved_name_label_nickname">Nama panggilan</string>
+    <string name="saved_name_label_birthday">Ulang tahun</string>
+</resources>

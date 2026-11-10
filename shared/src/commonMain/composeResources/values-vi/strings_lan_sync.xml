@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Chờ</string>
+    <string name="lan_sync_status_not_paired">Chưa ghép nối!</string>
+    <string name="lan_sync_status_already_in_progress">Đang đồng bộ rồi</string>
+    <string name="lan_sync_status_syncing">Đang đồng bộ...</string>
+    <string name="lan_sync_status_auto_syncing">Đang tự động đồng bộ...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Đang lấy dữ liệu từ máy tính...</string>
+    <string name="lan_sync_status_success">Thành công!</string>
+    <string name="lan_sync_status_synced_successfully">Đồng bộ thành công</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="other">Đã đồng bộ, không lưu được %1$d mục</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Đồng bộ một phần, sẽ thử lại</string>
+    <string name="lan_sync_status_update_both_devices">Hãy cập nhật Emberr trên cả hai thiết bị</string>
+    <string name="lan_sync_status_desktop_offline">Máy tính đang ngoại tuyến</string>
+    <string name="lan_sync_status_failed">Thất bại: %1$s</string>
+    <string name="lan_sync_status_sync_error">Lỗi đồng bộ: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Ghép nối thiết bị di động</string>
+    <string name="lan_sync_pair_dialog_message">Quét mã QR này bằng ứng dụng Emberr trên điện thoại để kết nối an toàn với máy tính.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Mã bí mật: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Quét mã QR hiển thị trên máy tính.</string>
+    <string name="lan_sync_scanner_desktop_hint">Trên máy tính, mở Cài đặt → Đồng bộ LAN → Ghép nối thiết bị di động.</string>
+    <string name="lan_sync_camera_access_needed">Cần quyền truy cập camera</string>
+    <string name="lan_sync_camera_allow_message">Cho phép dùng camera để quét mã ghép nối trên máy tính.</string>
+    <string name="lan_sync_camera_turn_on_message">Bật Camera trong mục Quyền, rồi quay lại đây.</string>
+    <string name="lan_sync_allow_camera">Cho phép camera</string>
+    <string name="lan_sync_open_app_settings">Mở cài đặt ứng dụng</string>
+    <string name="lan_sync_camera_mobile_only">Chỉ có thể quét bằng camera trên thiết bị di động.</string>
+</resources>

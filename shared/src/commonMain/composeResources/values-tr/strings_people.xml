@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">Kişiler</string>
+    <string name="people_clear_selection">Seçimi temizle</string>
+    <string name="people_select_all">Tümünü seç</string>
+    <string name="people_deselect_all">Tüm seçimi kaldır</string>
+    <string name="people_add_people">Kişi ekle</string>
+    <string name="people_create_new_contact">Yeni kişi oluştur</string>
+    <string name="people_import_from_vcf_file">.vcf dosyasından içe aktar</string>
+    <string name="people_import_from_phone">Telefondan içe aktar</string>
+    <string name="people_search_people">Kişilerde ara</string>
+    <string name="people_move_to_trash">Çöp Kutusuna taşı</string>
+    <string name="people_next">Sonraki</string>
+    <string name="people_untitled_event">Adsız etkinlik</string>
+    <string name="people_no_upcoming_events">Yaklaşan etkinlik yok</string>
+    <string name="people_selected">Seçilenler</string>
+    <string name="people_empty_title">Henüz kişi yok</string>
+    <string name="people_empty_message">Hakkında bir şeyler hatırlamak istediğiniz birini ekleyin. Bir etkinliğe eklediğiniz kişiler de burada görünür.</string>
+    <string name="people_new_person">Yeni kişi</string>
+    <string name="people_import_contacts">Kişileri içe aktar</string>
+    <string name="people_no_one_matches">“%1$s” ile eşleşen kimse yok</string>
+    <string name="people_create_named">“%1$s” oluştur</string>
+    <plurals name="people_selected_count">
+        <item quantity="one">%1$d seçili</item>
+        <item quantity="other">%1$d seçili</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="one">%1$d kişi</item>
+        <item quantity="other">%1$d kişi</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="one">%1$d etkinlik</item>
+        <item quantity="other">%1$d etkinlik</item>
+    </plurals>
+
+    <string name="people_importing_contacts">Kişiler içe aktarılıyor…</string>
+    <string name="people_importing_contacts_progress">Kişiler içe aktarılıyor… %1$d / %2$d</string>
+    <string name="people_already_importing_contacts">Kişiler zaten içe aktarılıyor</string>
+    <string name="people_could_not_read_file">Dosya okunamadı</string>
+    <string name="people_could_not_read_contact">Kişi okunamadı</string>
+    <string name="people_no_contacts_app_found">Kişiler uygulaması bulunamadı</string>
+    <string name="people_choose_contact_files">Kişi dosyalarını seçin</string>
+    <string name="people_no_contacts_found">Kişi bulunamadı</string>
+    <string name="people_could_not_add_contacts">Kişiler eklenemedi</string>
+    <string name="people_already_in_people">Zaten Kişiler'de</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="one">%1$d kişinin tümü zaten Kişiler'de</item>
+        <item quantity="other">%1$d kişinin tümü zaten Kişiler'de</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="one">%1$d kişi eklendi</item>
+        <item quantity="other">%1$d kişi eklendi</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="one">zaten Kişiler'de olan %1$d kişi atlandı</item>
+        <item quantity="other">zaten Kişiler'de olan %1$d kişi atlandı</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="one">%1$d kişi eklenemedi</item>
+        <item quantity="other">%1$d kişi eklenemedi</item>
+    </plurals>
+    <string name="people_could_not_create_person">Kişi oluşturulamadı</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="one">%1$d kişi Çöp Kutusuna taşındı</item>
+        <item quantity="other">%1$d kişi Çöp Kutusuna taşındı</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="one">%1$d / %2$d kişi Çöp Kutusuna taşındı</item>
+        <item quantity="other">%1$d / %2$d kişi Çöp Kutusuna taşındı</item>
+    </plurals>
+    <string name="people_could_not_save_detail">Bilgi kaydedilemedi</string>
+    <string name="people_could_not_remove_detail">Bilgi kaldırılamadı</string>
+
+    <string name="people_meta_next_and_last_seen">Sonraki: %1$s · son görüşme: %2$s</string>
+    <string name="people_meta_next">Sonraki: %1$s</string>
+    <string name="people_meta_last_seen">Son görüşme: %1$s</string>
+    <string name="people_meta_no_events">Henüz etkinlik yok</string>
+    <string name="people_birthday_with_age">%1$s, %2$d · %3$d yaşına giriyor</string>
+    <string name="people_all_day">Tüm gün</string>
+    <string name="people_event_with_names">katılanlar: %1$s</string>
+
+    <string name="people_copied">Kopyalandı</string>
+    <string name="people_could_not_copy">Kopyalanamadı</string>
+    <string name="people_could_not_open_link">Bağlantı açılamadı</string>
+    <string name="people_write_anything_about">%1$s hakkında istediğinizi yazın…</string>
+    <string name="people_write_anything_about_them">Bu kişi hakkında istediğinizi yazın…</string>
+    <string name="people_notes">Notlar</string>
+    <string name="people_remove_icon">Simgeyi kaldır</string>
+    <string name="people_change_icon">Simgeyi değiştir</string>
+    <string name="people_change_photo">Fotoğrafı değiştir</string>
+    <string name="people_remove_photo">Fotoğrafı kaldır</string>
+    <string name="people_open">Aç</string>
+    <string name="people_more">Diğer</string>
+    <string name="people_call">Ara</string>
+    <string name="people_message">Mesaj</string>
+    <string name="people_email">E-posta</string>
+    <string name="people_write_email">E-posta yaz</string>
+    <string name="people_copy">Kopyala</string>
+    <string name="people_new_event">Yeni etkinlik</string>
+    <string name="people_name">Ad</string>
+
+    <string name="people_details">Bilgiler</string>
+    <string name="people_more_details">Diğer bilgiler</string>
+    <string name="people_upcoming">Yaklaşan</string>
+    <string name="people_nothing_planned_with">%1$s ile planlanmış bir şey yok</string>
+    <string name="people_nothing_planned_with_them">Bu kişiyle planlanmış bir şey yok</string>
+    <string name="people_past">Geçmiş</string>
+    <string name="people_no_past_events">Geçmiş etkinlik yok</string>
+    <string name="people_show_fewer">Daha az göster</string>
+    <string name="people_show_all_count">Tümünü göster (%1$d)</string>
+
+    <string name="people_detail_phone">Telefon</string>
+    <string name="people_detail_email">E-posta</string>
+    <string name="people_detail_birthday">Doğum günü</string>
+    <string name="people_detail_address">Adres</string>
+    <string name="people_detail_company">Şirket</string>
+    <string name="people_detail_role">Görev</string>
+    <string name="people_detail_website">Web sitesi</string>
+    <string name="people_detail_social">Sosyal medya</string>
+    <string name="people_detail_relationship">İlişki</string>
+    <string name="people_detail_custom">Özel</string>
+    <string name="people_add_phone">Telefon ekle</string>
+    <string name="people_add_email">E-posta ekle</string>
+    <string name="people_add_birthday">Doğum günü ekle</string>
+    <string name="people_add_address">Adres ekle</string>
+    <string name="people_add_company">Şirket ekle</string>
+    <string name="people_add_role">Görev ekle</string>
+    <string name="people_add_website">Web sitesi ekle</string>
+    <string name="people_add_social">Sosyal medya ekle</string>
+    <string name="people_add_relationship">İlişki ekle</string>
+    <string name="people_add_custom">Özel bilgi ekle</string>
+    <string name="people_edit_phone">Telefonu düzenle</string>
+    <string name="people_edit_email">E-postayı düzenle</string>
+    <string name="people_edit_birthday">Doğum gününü düzenle</string>
+    <string name="people_edit_address">Adresi düzenle</string>
+    <string name="people_edit_company">Şirketi düzenle</string>
+    <string name="people_edit_role">Görevi düzenle</string>
+    <string name="people_edit_website">Web sitesini düzenle</string>
+    <string name="people_edit_social">Sosyal medyayı düzenle</string>
+    <string name="people_edit_relationship">İlişkiyi düzenle</string>
+    <string name="people_edit_custom">Özel bilgiyi düzenle</string>
+
+    <string name="people_placeholder_phone_number">Telefon numarası</string>
+    <string name="people_placeholder_address">Sokak, semt, şehir</string>
+    <string name="people_placeholder_company">Çalıştığı yer</string>
+    <string name="people_placeholder_role">Ne iş yaptığı</string>
+    <string name="people_placeholder_relationship">Üniversiteden arkadaş</string>
+    <string name="people_placeholder_custom">Herhangi bir şey</string>
+
+    <string name="people_add_detail">Bilgi ekle</string>
+    <string name="people_already_added">Zaten eklendi</string>
+    <string name="people_remove">Kaldır</string>
+    <string name="people_cannot_be_empty">Bu alan boş bırakılamaz</string>
+    <string name="people_custom_label">Özel etiket</string>
+    <string name="people_custom_label_placeholder">Özel etiket</string>
+    <string name="people_label_optional">Etiket (isteğe bağlı)</string>
+    <string name="people_birthday_month">Ay</string>
+    <string name="people_birthday_day">Gün</string>
+    <string name="people_birthday_year">Yıl</string>
+    <string name="people_birthday_optional">isteğe bağlı</string>
+    <string name="people_birthday_year_example">ör. 1996</string>
+    <string name="people_birthday_date_not_in_year">%1$s, %2$s yılında yok</string>
+    <string name="people_birthday_year_range">%1$d ile %2$d arasında bir yıl kullanın</string>
+</resources>

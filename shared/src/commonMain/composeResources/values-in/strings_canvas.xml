@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="canvas_options">Opsi</string>
+    <string name="canvas_more_options">Opsi lainnya</string>
+    <string name="canvas_rename">Ganti nama</string>
+    <string name="canvas_open_as_sticky_note">Buka sebagai catatan tempel</string>
+    <string name="canvas_move_to_trash">Pindahkan ke Sampah</string>
+    <string name="canvas_add_to_favorites">Tambahkan ke Favorit</string>
+    <string name="canvas_remove_from_favorites">Hapus dari Favorit</string>
+    <string name="canvas_sheet_title">Kanvas</string>
+    <string name="canvas_rename_canvas">Ganti nama kanvas</string>
+    <string name="canvas_title_placeholder">Judul kanvas...</string>
+    <string name="canvas_untitled_canvas">Kanvas tanpa judul</string>
+
+    <string name="canvas_shapes">Bentuk</string>
+    <string name="canvas_shape_rectangle">Persegi panjang</string>
+    <string name="canvas_shape_square">Persegi</string>
+    <string name="canvas_shape_circle">Lingkaran</string>
+    <string name="canvas_shape_oval">Oval</string>
+    <string name="canvas_shape_triangle">Segitiga</string>
+    <string name="canvas_shape_diamond">Belah ketupat</string>
+    <string name="canvas_shape_pentagon">Segi lima</string>
+    <string name="canvas_shape_hexagon">Segi enam</string>
+    <string name="canvas_shape_parallelogram">Jajar genjang</string>
+    <string name="canvas_shape_trapezoid">Trapesium</string>
+    <string name="canvas_shape_pill">Kapsul</string>
+    <string name="canvas_shape_database">Basis data</string>
+    <string name="canvas_shape_double_rectangle">Persegi panjang ganda</string>
+    <string name="canvas_shape_double_square">Persegi ganda</string>
+    <string name="canvas_shape_double_circle">Lingkaran ganda</string>
+    <string name="canvas_shape_double_triangle">Segitiga ganda</string>
+
+    <string name="canvas_clear">Bersihkan</string>
+    <string name="canvas_zoom_in">Perbesar</string>
+    <string name="canvas_zoom_out">Perkecil</string>
+    <string name="canvas_go_to_boxes">Ke kotak</string>
+    <string name="canvas_undo">Urungkan</string>
+    <string name="canvas_redo">Ulangi</string>
+
+    <string name="canvas_tool_pen">Pena</string>
+    <string name="canvas_tool_highlighter">Stabilo</string>
+    <string name="canvas_tool_eraser">Penghapus</string>
+    <string name="canvas_tool_text">Teks</string>
+    <string name="canvas_tool_shapes">Bentuk</string>
+    <string name="canvas_tool_line">Garis</string>
+    <string name="canvas_tool_image">Gambar</string>
+
+    <string name="canvas_default_ink">Tinta default</string>
+    <string name="canvas_no_background">Tanpa latar</string>
+    <string name="canvas_stroke">Goresan</string>
+    <string name="canvas_stroke_width">Tebal goresan</string>
+    <string name="canvas_pressure">Tekanan</string>
+    <string name="canvas_same_thickness">Ketebalan sama</string>
+    <string name="canvas_follow_pressure">Ikuti tekanan</string>
+    <string name="canvas_opacity">Opasitas</string>
+    <string name="canvas_size">Ukuran</string>
+    <string name="canvas_font">Font</string>
+    <string name="canvas_weight">Ketebalan</string>
+    <string name="canvas_color">Warna</string>
+    <string name="canvas_background">Latar</string>
+    <string name="canvas_align">Perataan</string>
+    <string name="canvas_line">Garis</string>
+    <string name="canvas_line_style">Gaya garis</string>
+
+    <string name="canvas_width_thin">Tipis</string>
+    <string name="canvas_width_medium">Sedang</string>
+    <string name="canvas_width_thick">Tebal</string>
+    <string name="canvas_size_small">Kecil</string>
+    <string name="canvas_size_medium">Sedang</string>
+    <string name="canvas_size_large">Besar</string>
+    <string name="canvas_weight_regular">Reguler</string>
+    <string name="canvas_weight_medium">Sedang</string>
+    <string name="canvas_weight_bold">Tebal</string>
+    <string name="canvas_font_default">Default</string>
+    <string name="canvas_align_left">Rata kiri</string>
+    <string name="canvas_align_center">Rata tengah</string>
+    <string name="canvas_align_right">Rata kanan</string>
+
+    <string name="canvas_line_arrow">Panah</string>
+    <string name="canvas_line_dotted_arrow">Panah titik-titik</string>
+    <string name="canvas_line_dashed_arrow">Panah putus-putus</string>
+    <string name="canvas_line_solid_line">Garis utuh</string>
+    <string name="canvas_line_dotted_line">Garis titik-titik</string>
+    <string name="canvas_line_dashed_line">Garis putus-putus</string>
+
+    <string name="canvas_show_dots">Tampilkan titik</string>
+    <string name="canvas_hide_dots">Sembunyikan titik</string>
+    <string name="canvas_full_screen">Layar penuh</string>
+    <string name="canvas_exit_full_screen">Keluar dari layar penuh</string>
+
+    <string name="canvas_delete_box">Hapus kotak</string>
+    <string name="canvas_box_color">Warna kotak</string>
+    <string name="canvas_paste_image">Tempel gambar</string>
+    <string name="canvas_adding_image">Menambahkan gambar...</string>
+    <string name="canvas_add_label">Tambah label</string>
+    <string name="canvas_edit_label">Edit label</string>
+    <string name="canvas_ungroup">Pisahkan grup</string>
+    <string name="canvas_create_group">Buat grup</string>
+
+    <string name="canvas_image">Gambar kanvas</string>
+    <string name="canvas_image_failed_to_download">Gambar gagal diunduh</string>
+    <string name="canvas_downloading_image">Mengunduh gambar...</string>
+</resources>

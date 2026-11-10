@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">Lời nhắc việc cần làm</string>
+    <string name="notifications_unfinished_task">Việc chưa xong</string>
+    <string name="notifications_daily_note">Ghi chú hằng ngày</string>
+    <string name="notifications_daily_title">Hằng ngày: %1$s</string>
+    <string name="notifications_note">Ghi chú</string>
+    <string name="notifications_birthday">Sinh nhật</string>
+    <string name="notifications_birthday_turns_age">Hôm nay %1$s tròn %2$d tuổi</string>
+    <string name="notifications_birthday_today">Hôm nay là sinh nhật của %1$s</string>
+    <string name="notifications_open">Mở</string>
+</resources>

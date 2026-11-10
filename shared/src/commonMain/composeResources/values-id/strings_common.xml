@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Kembali</string>
+    <string name="common_cancel">Batal</string>
+    <string name="common_save">Simpan</string>
+    <string name="common_close">Tutup</string>
+    <string name="common_delete">Hapus</string>
+    <string name="common_on">Aktif</string>
+    <string name="common_off">Mati</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">Tanpa judul</string>
+    <string name="common_color_yellow">Kuning</string>
+    <string name="common_color_lime">Hijau limau</string>
+    <string name="common_color_grey">Abu-abu</string>
+    <string name="common_color_red">Merah</string>
+    <string name="common_color_blue">Biru</string>
+    <string name="common_color_green">Hijau</string>
+    <string name="common_color_orange">Oranye</string>
+    <string name="common_color_pink">Merah muda</string>
+    <string name="common_color_purple">Ungu</string>
+    <string name="common_create">Buat</string>
+    <string name="common_more">Lainnya</string>
+</resources>

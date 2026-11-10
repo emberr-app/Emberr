@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">पसंदीदा</string>
+    <string name="home_toggle_favorites">पसंदीदा खोलें/बंद करें</string>
+    <string name="home_notes">नोट</string>
+    <string name="home_toggle_notes">नोट खोलें/बंद करें</string>
+    <string name="home_recents">हाल के</string>
+    <string name="home_toggle_recents">हाल के खोलें/बंद करें</string>
+    <string name="home_sort">क्रम</string>
+    <string name="home_sort_notes">नोट का क्रम बदलें</string>
+    <string name="home_new_folder">नया फ़ोल्डर</string>
+    <string name="home_new_folder_tooltip">नया फ़ोल्डर</string>
+    <string name="home_new_subfolder">नया सबफ़ोल्डर</string>
+    <string name="home_folder_name_placeholder">जैसे निजी, काम...</string>
+    <string name="home_new_note">नया नोट</string>
+    <string name="home_new_note_tooltip">नया नोट</string>
+    <string name="home_new_note_in_folder">%1$s में नया नोट</string>
+    <string name="home_note_title_placeholder">नोट का शीर्षक...</string>
+    <string name="home_templates">टेम्पलेट</string>
+    <string name="home_switch_space">स्पेस बदलें</string>
+    <string name="home_toggle_sidebar">साइडबार खोलें/बंद करें</string>
+    <string name="home_open_calendar">कैलेंडर खोलें</string>
+    <string name="home_calendar">कैलेंडर</string>
+    <string name="home_settings">सेटिंग</string>
+    <string name="home_more_settings">और सेटिंग</string>
+    <string name="home_rename">नाम बदलें</string>
+    <string name="home_move_to_trash">ट्रैश में ले जाएँ</string>
+    <string name="home_add_to_favorites">पसंदीदा में जोड़ें</string>
+    <string name="home_remove_from_favorites">पसंदीदा से हटाएँ</string>
+    <string name="home_sort_last_edited">आखिरी बदलाव</string>
+    <string name="home_sort_date_created">बनाने की तारीख</string>
+    <string name="home_sort_name">नाम (A-Z)</string>
+    <string name="home_sort_type">प्रकार</string>
+    <string name="home_sort_manual">मैन्युअल</string>
+    <string name="home_sort_ascending">बढ़ते क्रम में</string>
+    <string name="home_sort_descending">घटते क्रम में</string>
+    <string name="home_sort_by">इसके अनुसार क्रम</string>
+    <string name="home_empty_space_start_with">यह स्पेस खाली है। शुरू करें</string>
+    <string name="home_empty_space_a_new_note">नए नोट</string>
+    <string name="home_empty_space_note_or_folder">%1$s या %2$s से</string>
+    <string name="home_empty_space_a_folder">फ़ोल्डर</string>
+    <string name="home_breadcrumb_home">होम</string>
+    <string name="home_cover">कवर</string>
+    <string name="home_in_parent">%1$s में</string>
+    <string name="home_canvas">कैनवास</string>
+    <string name="home_note">नोट</string>
+    <string name="home_empty_note">खाली नोट...</string>
+    <string name="home_favorite">पसंदीदा</string>
+    <string name="home_selected">चुने गए</string>
+    <string name="home_rename_subtitle">नया नाम चुनें।</string>
+    <string name="home_name_placeholder">नाम...</string>
+    <string name="home_nesting_inside_folder">%1$s के अंदर बनेगा।</string>
+    <string name="home_organize_your_notes">अपने नोट व्यवस्थित करें।</string>
+    <string name="home_search_templates_placeholder">टेम्पलेट खोजें...</string>
+    <string name="home_search_templates">टेम्पलेट खोजें</string>
+    <string name="home_no_templates_yet">अभी कोई टेम्पलेट नहीं है।</string>
+    <string name="home_no_templates_match">"%1$s" से कोई टेम्पलेट मेल नहीं खाता।</string>
+    <string name="home_new_template">नया टेम्पलेट</string>
+    <string name="home_edit_template">टेम्पलेट बदलें</string>
+    <string name="home_delete_template">टेम्पलेट मिटाएँ</string>
+    <string name="home_templates_subtitle">किसी टेम्पलेट से नया नोट शुरू करें।</string>
+    <string name="home_new_subfolder_in_folder">%1$s में नया सबफ़ोल्डर</string>
+    <string name="home_new_note_in_folder_description">%1$s में नया नोट</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="one">%1$d बाकी</item>
+        <item quantity="other">%1$d बाकी</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="one">%1$d सेव किया गया</item>
+        <item quantity="other">%1$d सेव किए गए</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="one">%1$d जोड़ा गया</item>
+        <item quantity="other">%1$d जोड़े गए</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="one">%1$d आइटम मिटाएँ</item>
+        <item quantity="other">%1$d आइटम मिटाएँ</item>
+    </plurals>
+</resources>

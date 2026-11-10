@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">शीर्षक, अंश और नोट का कंटेंट खोजने के लिए टाइप करना शुरू करें।</string>
+    <string name="search_nothing_found">कोई मेल खाता नोट, इवेंट या व्यक्ति नहीं मिला।</string>
+    <string name="search_people">लोग</string>
+    <string name="search_events">इवेंट</string>
+    <string name="search_notes">नोट</string>
+    <string name="search_rename_note">नोट का नाम बदलें</string>
+    <string name="search_note_title_placeholder">नोट का शीर्षक...</string>
+    <string name="search_rename">नाम बदलें</string>
+    <string name="search_move_to_trash">ट्रैश में ले जाएँ</string>
+    <string name="search_untitled_event">बिना शीर्षक इवेंट</string>
+    <string name="search_repeats">दोहराता है</string>
+    <string name="search_pinned">पिन किए गए</string>
+    <string name="search_in_parent">%1$s में</string>
+    <string name="search_daily">दैनिक</string>
+    <string name="search_add_to_favorites">पसंदीदा में जोड़ें</string>
+    <string name="search_remove_from_favorites">पसंदीदा से हटाएँ</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">सभी %1$d व्यक्ति दिखाएँ</item>
+        <item quantity="other">सभी %1$d लोग दिखाएँ</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">सभी %1$d इवेंट दिखाएँ</item>
+        <item quantity="other">सभी %1$d इवेंट दिखाएँ</item>
+    </plurals>
+</resources>

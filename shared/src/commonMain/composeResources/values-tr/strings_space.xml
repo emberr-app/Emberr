@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Alanlar</string>
+    <string name="space_create_space">Alan oluştur</string>
+    <string name="space_rename_space">Alanı yeniden adlandır</string>
+    <string name="space_delete_space">Alanı sil</string>
+    <string name="space_new_space">Yeni alan</string>
+    <string name="space_new_space_subtitle">İş, Kişisel, ne isterseniz.</string>
+    <string name="space_name_placeholder">Alan adı...</string>
+    <string name="space_rename_subtitle">Yeni bir ad seçin.</string>
+    <string name="space_delete_space_question">"%1$s" silinsin mi?</string>
+    <string name="space_delete_space_message">Bu alandaki tüm notlar, klasörler, etiketler ve sohbetler de silinir. Bu işlem geri alınamaz.</string>
+    <string name="space_reorder_space">Alanı yeniden sırala</string>
+</resources>

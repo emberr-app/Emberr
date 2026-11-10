@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">वापस</string>
+    <string name="common_cancel">रद्द करें</string>
+    <string name="common_save">सेव करें</string>
+    <string name="common_close">बंद करें</string>
+    <string name="common_delete">मिटाएँ</string>
+    <string name="common_on">चालू</string>
+    <string name="common_off">बंद</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">बिना शीर्षक</string>
+    <string name="common_color_yellow">पीला</string>
+    <string name="common_color_lime">नींबू हरा</string>
+    <string name="common_color_grey">स्लेटी</string>
+    <string name="common_color_red">लाल</string>
+    <string name="common_color_blue">नीला</string>
+    <string name="common_color_green">हरा</string>
+    <string name="common_color_orange">नारंगी</string>
+    <string name="common_color_pink">गुलाबी</string>
+    <string name="common_color_purple">बैंगनी</string>
+    <string name="common_create">बनाएँ</string>
+    <string name="common_more">और</string>
+</resources>

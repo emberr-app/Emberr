@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Geri</string>
+    <string name="common_cancel">İptal</string>
+    <string name="common_save">Kaydet</string>
+    <string name="common_close">Kapat</string>
+    <string name="common_delete">Sil</string>
+    <string name="common_on">Açık</string>
+    <string name="common_off">Kapalı</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">Adsız</string>
+    <string name="common_color_yellow">Sarı</string>
+    <string name="common_color_lime">Limon yeşili</string>
+    <string name="common_color_grey">Gri</string>
+    <string name="common_color_red">Kırmızı</string>
+    <string name="common_color_blue">Mavi</string>
+    <string name="common_color_green">Yeşil</string>
+    <string name="common_color_orange">Turuncu</string>
+    <string name="common_color_pink">Pembe</string>
+    <string name="common_color_purple">Mor</string>
+    <string name="common_create">Oluştur</string>
+    <string name="common_more">Daha fazla</string>
+</resources>

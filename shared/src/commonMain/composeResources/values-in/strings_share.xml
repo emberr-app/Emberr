@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Simpan konten yang dibagikan</string>
+    <string name="share_save_to_overview">Simpan ke Ringkasan</string>
+    <string name="share_save_to_a_note">Simpan ke catatan</string>
+    <string name="share_shared_image">Gambar yang dibagikan</string>
+    <string name="share_failed_to_save">Gagal menyimpan konten yang dibagikan.</string>
+    <string name="share_saved_to_inbox">Disimpan ke Kotak Masuk</string>
+    <string name="share_note_no_longer_available">Catatan itu tidak lagi tersedia.</string>
+    <plurals name="share_images_selected">
+        <item quantity="other">%1$d gambar dipilih</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="other">%1$d file dipilih</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="other">%1$d item disimpan ke Kotak Masuk</item>
+    </plurals>
+</resources>

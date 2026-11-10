@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Görevler</string>
+    <string name="overview_section_bookmarks">Yer işaretleri</string>
+    <string name="overview_section_images">Görseller</string>
+    <string name="overview_section_documents">Belgeler</string>
+    <string name="overview_tasks_repeating">Yinelenen</string>
+    <string name="overview_tasks_note">Not</string>
+    <string name="overview_tasks_today">Bugün</string>
+    <string name="overview_tasks_tomorrow">Yarın</string>
+    <string name="overview_tasks_yesterday">Dün</string>
+    <string name="overview_tasks_none_completed">Henüz tamamlanan görev yok.</string>
+    <string name="overview_tasks_all_caught_up">Hepsi tamam!</string>
+    <string name="overview_tasks_completed">Tamamlananlar</string>
+    <string name="overview_tasks_completed_tasks">Tamamlanan görevler</string>
+    <string name="overview_tasks_hide_completed">Tamamlananları gizle</string>
+    <string name="overview_tasks_show_completed">Tamamlananları göster</string>
+    <string name="overview_tasks_add_task_description">Görev ekle</string>
+    <string name="overview_tasks_add_task">Görev ekle</string>
+    <string name="overview_images_empty">Henüz kayıtlı görsel yok.</string>
+    <string name="overview_images_add_image_description">Görsel ekle</string>
+    <string name="overview_images_add_image">Görsel ekle</string>
+    <string name="overview_documents_empty">Henüz ekli belge yok.</string>
+    <string name="overview_documents_add_document_description">Belge ekle</string>
+    <string name="overview_documents_add_document">Belge ekle</string>
+    <string name="overview_bookmarks_empty">Henüz kayıtlı bağlantı yok.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Yer işareti ekle</string>
+    <string name="overview_bookmarks_add_bookmark">Yer işareti ekle</string>
+    <string name="overview_bookmarks_add_link">Bağlantı ekle</string>
+    <string name="overview_bookmarks_paste_link">Bağlantı yapıştırın...</string>
+    <string name="overview_bookmarks_clear_link">Bağlantıyı temizle</string>
+    <string name="overview_bookmarks_all">Tümü</string>
+    <string name="overview_bookmarks_others">Diğerleri</string>
+</resources>

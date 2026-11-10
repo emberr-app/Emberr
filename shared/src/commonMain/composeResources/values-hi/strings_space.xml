@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">स्पेस</string>
+    <string name="space_create_space">स्पेस बनाएँ</string>
+    <string name="space_rename_space">स्पेस का नाम बदलें</string>
+    <string name="space_delete_space">स्पेस मिटाएँ</string>
+    <string name="space_new_space">नया स्पेस</string>
+    <string name="space_new_space_subtitle">काम, निजी, जो भी आप चाहें।</string>
+    <string name="space_name_placeholder">स्पेस का नाम...</string>
+    <string name="space_rename_subtitle">नया नाम चुनें।</string>
+    <string name="space_delete_space_question">"%1$s" मिटाएँ?</string>
+    <string name="space_delete_space_message">इस स्पेस के सभी नोट, फ़ोल्डर, टैग और चैट भी इसके साथ मिट जाएँगे। इसे वापस नहीं लाया जा सकता।</string>
+    <string name="space_reorder_space">स्पेस का क्रम बदलें</string>
+</resources>

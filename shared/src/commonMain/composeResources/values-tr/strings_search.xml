@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Başlıklarda, özetlerde ve not içeriğinde aramak için yazmaya başlayın.</string>
+    <string name="search_nothing_found">Eşleşen not, etkinlik veya kişi bulunamadı.</string>
+    <string name="search_people">Kişiler</string>
+    <string name="search_events">Etkinlikler</string>
+    <string name="search_notes">Notlar</string>
+    <string name="search_rename_note">Notu yeniden adlandır</string>
+    <string name="search_note_title_placeholder">Not başlığı...</string>
+    <string name="search_rename">Yeniden adlandır</string>
+    <string name="search_move_to_trash">Çöp Kutusuna taşı</string>
+    <string name="search_untitled_event">Adsız etkinlik</string>
+    <string name="search_repeats">Tekrarlanır</string>
+    <string name="search_pinned">Sabitlenmiş</string>
+    <string name="search_in_parent">%1$s içinde</string>
+    <string name="search_daily">Günlük</string>
+    <string name="search_add_to_favorites">Favorilere ekle</string>
+    <string name="search_remove_from_favorites">Favorilerden kaldır</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">%1$d kişinin tümünü göster</item>
+        <item quantity="other">%1$d kişinin tümünü göster</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">%1$d etkinliğin tümünü göster</item>
+        <item quantity="other">%1$d etkinliğin tümünü göster</item>
+    </plurals>
+</resources>

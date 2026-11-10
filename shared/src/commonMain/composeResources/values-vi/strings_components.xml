@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">Xóa</string>
+    <string name="components_select_all">Chọn tất cả</string>
+    <string name="components_spaces_none_yet">Chưa có</string>
+    <string name="components_spaces_none">Không có</string>
+    <plurals name="components_spaces_all">
+        <item quantity="other">Tất cả %1$d không gian</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="other">%1$d trên %2$d không gian</item>
+    </plurals>
+
+    <string name="components_search_notes">Tìm ghi chú...</string>
+    <string name="components_create_new_note">Tạo ghi chú mới</string>
+    <string name="components_new_named_note">Ghi chú mới "%1$s"</string>
+    <string name="components_note_picker_hint">Nhập để tìm, hoặc tạo ghi chú mới</string>
+    <string name="components_link_to_note_heading">LIÊN KẾT ĐẾN GHI CHÚ</string>
+    <string name="components_link_to_note">Liên kết đến ghi chú</string>
+
+    <string name="components_load_more">Tải thêm</string>
+    <string name="components_show_sidebar">Hiện thanh bên</string>
+    <string name="components_clear_search">Xóa tìm kiếm</string>
+
+    <string name="components_people_search_placeholder">Tìm hoặc thêm người</string>
+    <string name="components_people_create_failed">Không thể tạo người này</string>
+    <string name="components_people_type_name_hint">Nhập tên để thêm người</string>
+    <string name="components_people_add_people">Thêm người</string>
+    <string name="components_people_selected">Đã chọn</string>
+    <string name="components_people_create_named">Tạo “%1$s”</string>
+    <string name="components_people_remove">Gỡ</string>
+    <string name="components_people_remove_named">Gỡ %1$s</string>
+
+    <string name="components_reminder_later_today">Cuối ngày hôm nay</string>
+    <string name="components_reminder_tomorrow">Ngày mai</string>
+    <string name="components_reminder_this_weekend">Cuối tuần này</string>
+    <string name="components_reminder_next_week">Tuần sau</string>
+    <string name="components_reminder_custom_date">Ngày tùy chỉnh...</string>
+    <string name="components_reminder_remove">Xóa lời nhắc</string>
+    <string name="components_reminder_date">Ngày</string>
+    <string name="components_reminder_all_day">Cả ngày</string>
+    <string name="components_reminder_in_15_mins">Sau 15 phút</string>
+    <string name="components_reminder_in_1_hour">Sau 1 giờ</string>
+    <string name="components_reminder_in_3_hours">Sau 3 giờ</string>
+    <string name="components_reminder_this_evening">Tối nay</string>
+    <string name="components_reminder_custom_time">Giờ tùy chỉnh...</string>
+    <string name="components_reminder_time">Giờ</string>
+    <string name="components_choose_month_or_year">Chọn tháng hoặc năm</string>
+    <string name="components_previous_month">Tháng trước</string>
+    <string name="components_next_month">Tháng sau</string>
+    <string name="components_select_date">Chọn ngày</string>
+    <string name="components_month_and_year">Tháng &amp; năm</string>
+    <string name="components_select_time">Chọn giờ</string>
+</resources>

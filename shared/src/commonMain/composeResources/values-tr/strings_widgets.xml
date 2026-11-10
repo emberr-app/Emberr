@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">Bir alan seçin</string>
+    <string name="widgets_follow_the_app">Uygulamayı izle</string>
+    <string name="widgets_follow_the_app_detail">Her zaman o an bulunduğunuz alanı gösterir</string>
+    <string name="widgets_current_space">Geçerli alan</string>
+    <string name="widgets_untitled_space">Adsız alan</string>
+    <string name="widgets_favorites">Favoriler</string>
+    <string name="widgets_other">Diğer</string>
+    <string name="widgets_no_notes_yet">Henüz notunuz yok</string>
+    <string name="widgets_no_notes_match">"%1$s" ile eşleşen not yok</string>
+    <string name="widgets_choose_a_note">Bir not seçin</string>
+    <string name="widgets_search_notes">Notlarda ara</string>
+    <string name="widgets_open_the_app_first">Widget eklemeden önce uygulamayı bir kez açın</string>
+    <string name="widgets_choose_a_gradient">Bir renk geçişi seçin</string>
+    <string name="widgets_whats_on_your_mind">Aklınızda ne var?</string>
+    <string name="widgets_selected">Seçili</string>
+    <string name="widgets_gradient_dusk">Alacakaranlık</string>
+    <string name="widgets_gradient_copper">Bakır</string>
+    <string name="widgets_gradient_forest">Orman</string>
+    <string name="widgets_gradient_lagoon">Lagün</string>
+    <string name="widgets_gradient_midnight">Gece yarısı</string>
+    <string name="widgets_gradient_blossom">Çiçek</string>
+    <string name="widgets_gradient_graphite">Grafit</string>
+    <string name="widgets_gradient_aurora">Kutup ışıkları</string>
+    <string name="widgets_gradient_sunset">Gün batımı</string>
+    <string name="widgets_gradient_slate">Arduvaz</string>
+    <string name="widgets_gradient_cocoa">Kakao</string>
+    <string name="widgets_gradient_lavender">Lavanta</string>
+    <string name="widgets_untitled_event">Adsız etkinlik</string>
+    <string name="widgets_untitled_task">Adsız görev</string>
+    <string name="widgets_note">Not</string>
+    <string name="widgets_repeating">Yinelenen</string>
+    <string name="widgets_today">Bugün</string>
+    <string name="widgets_tomorrow">Yarın</string>
+    <string name="widgets_yesterday">Dün</string>
+    <string name="widgets_all_day">Tüm gün</string>
+    <string name="widgets_date_all_day">%1$s · Tüm gün</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · Tüm gün</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="one">%1$d dk önce</item>
+        <item quantity="other">%1$d dk önce</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="one">%1$d saat önce</item>
+        <item quantity="other">%1$d saat önce</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">Bağlantılı not</string>
+    <string name="widgets_image">Görsel</string>
+    <string name="widgets_canvas">Tuval</string>
+    <string name="widgets_database">Veritabanı</string>
+    <string name="widgets_watchlist">İzleme listesi</string>
+    <string name="widgets_credentials">Giriş bilgileri</string>
+    <string name="widgets_voice_note_length">Sesli not  %1$s</string>
+    <string name="widgets_needs_newer_version">Emberr'in daha yeni bir sürümü gerekiyor</string>
+    <string name="widgets_table">Tablo</string>
+</resources>

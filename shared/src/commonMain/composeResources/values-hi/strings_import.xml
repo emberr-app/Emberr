@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">यहाँ से इंपोर्ट करें</string>
+    <string name="import_text_and_markdown">टेक्स्ट और Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Obsidian और Bear नोट के लिए भी काम करता है।\nObsidian की कुछ सुविधाएँ शायद पूरी तरह इंपोर्ट न हों।</string>
+
+    <string name="import_button">इंपोर्ट करें</string>
+    <string name="import_done">हो गया</string>
+    <string name="import_stop">इंपोर्ट रोकें</string>
+    <string name="import_or_drop_here">या यहाँ छोड़ें</string>
+    <string name="import_choose_again_hint_desktop">फिर से चुनने के लिए क्लिक करें, या यहाँ छोड़ें।</string>
+    <string name="import_choose_again_hint_touch">फिर से चुनने के लिए टैप करें।</string>
+    <string name="import_stopping">रोका जा रहा है और इंपोर्ट की गई चीज़ें हटाई जा रही हैं…</string>
+    <string name="import_stopped">इंपोर्ट रोक दिया गया</string>
+    <string name="import_nothing_added">कुछ भी नहीं जोड़ा गया।</string>
+
+    <plurals name="import_space_count">
+        <item quantity="one">%1$d स्पेस</item>
+        <item quantity="other">%1$d स्पेस</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="one">%1$d नोट</item>
+        <item quantity="other">%1$d नोट</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="one">%1$d फ़ोल्डर</item>
+        <item quantity="other">%1$d फ़ोल्डर</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="one">%1$d अटैचमेंट</item>
+        <item quantity="other">%1$d अटैचमेंट</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">अपने मौजूदा नोट बदले बिना बैकअप इंपोर्ट करें।</string>
+    <string name="import_emberr_copying_media">मीडिया कॉपी हो रहा है, %2$d में से %1$d…</string>
+    <string name="import_emberr_getting_ready">तैयारी हो रही है…</string>
+    <string name="import_emberr_saving">इंपोर्ट सेव हो रहा है…</string>
+    <string name="import_emberr_failed">इंपोर्ट विफल रहा</string>
+    <string name="import_emberr_choose_backup_file">बैकअप फ़ाइल चुनें</string>
+    <string name="import_emberr_choose_backup_hint">बैकअप एक्सपोर्ट से बनी .emberr फ़ाइल</string>
+    <string name="import_emberr_reading_backup">बैकअप पढ़ा जा रहा है…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">दूसरी फ़ाइल चुनें</string>
+    <string name="import_emberr_spaces_to_import">इंपोर्ट करने के लिए स्पेस</string>
+    <string name="import_emberr_choose_backup_first">पहले बैकअप चुनें</string>
+    <string name="import_emberr_daily_notes">दैनिक नोट</string>
+    <string name="import_emberr_calendar">कैलेंडर</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">दैनिक नोट और कैलेंडर इवेंट जोड़े गए</string>
+    <string name="import_emberr_added_daily_notes">दैनिक नोट जोड़े गए</string>
+    <string name="import_emberr_added_calendar">कैलेंडर इवेंट जोड़े गए</string>
+    <string name="import_emberr_finished">इंपोर्ट पूरा हुआ</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="one">%1$d स्पेस इंपोर्ट हुआ</item>
+        <item quantity="other">%1$d स्पेस इंपोर्ट हुए</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">बैकअप में %1$d मीडिया फ़ाइल नहीं मिली, इसलिए वह गायब दिखेगी।</item>
+        <item quantity="other">बैकअप में %1$d मीडिया फ़ाइलें नहीं मिलीं, इसलिए वे गायब दिखेंगी।</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">अज्ञात गड़बड़ी</string>
+    <string name="import_emberr_picker_title">Emberr बैकअप चुनें</string>
+
+    <string name="import_markdown_subtitle">.md, .txt और .canvas फ़ाइलों, या फ़ोल्डर वाली .zip को Emberr नोट में बदलें।</string>
+    <string name="import_markdown_copying_file">%1$s कॉपी हो रही है…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">%2$d में से %1$d नोट इंपोर्ट हो रहा है…</item>
+        <item quantity="other">%2$d में से %1$d नोट इंपोर्ट हो रहे हैं…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">फ़ाइलें या .zip चुनें</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas या .zip</string>
+    <string name="import_markdown_reading_files">फ़ाइलें पढ़ी जा रही हैं…</string>
+    <string name="import_markdown_could_not_read">वे फ़ाइलें पढ़ी नहीं जा सकीं। %1$s</string>
+    <string name="import_markdown_save_to_space">स्पेस में सेव करें</string>
+    <string name="import_markdown_import_as">इस रूप में इंपोर्ट करें</string>
+    <string name="import_markdown_emberr_notes">Emberr नोट</string>
+    <string name="import_markdown_emberr_notes_subtitle">हर फ़ाइल ब्लॉक से बना एक नोट बन जाती है।</string>
+    <string name="import_markdown_markdown_files">Markdown फ़ाइलें</string>
+    <string name="import_markdown_coming_soon">जल्द आ रहा है</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="one">%1$d नोट इंपोर्ट हुआ</item>
+        <item quantity="other">%1$d नोट इंपोर्ट हुए</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="one">%1$d नोट %2$s में इंपोर्ट हुआ</item>
+        <item quantity="other">%1$d नोट %2$s में इंपोर्ट हुए</item>
+    </plurals>
+    <string name="import_markdown_failed_files">%1$d इंपोर्ट नहीं हो सकीं: %2$s</string>
+    <string name="import_markdown_choose_folder">फ़ोल्डर चुनें</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d फ़ाइल</item>
+        <item quantity="other">%1$d फ़ाइलें</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d छोड़ी गईं: %2$s</string>
+    <string name="import_markdown_choose_different_files">दूसरी फ़ाइलें चुनें</string>
+    <string name="import_markdown_picker_title">इंपोर्ट के लिए फ़ाइलें चुनें</string>
+</resources>

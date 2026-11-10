@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr terkunci</string>
+    <string name="app_lock_screen_detail">Gunakan sidik jari, wajah, atau kunci layar untuk membukanya.</string>
+    <string name="app_lock_unlock">Buka kunci</string>
+    <string name="app_lock_prompt_subtitle">Gunakan sidik jari, wajah, atau kunci layar</string>
+    <string name="app_lock_unlock_emberr">Buka kunci Emberr</string>
+    <string name="app_lock_off_no_screen_lock">Kunci Aplikasi nonaktif karena ponsel ini tidak memiliki kunci layar.</string>
+</resources>

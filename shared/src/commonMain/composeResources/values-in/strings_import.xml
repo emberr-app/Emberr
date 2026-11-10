@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Impor dari</string>
+    <string name="import_text_and_markdown">Teks &amp; Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Juga dapat dipakai untuk catatan Obsidian dan Bear.\nBeberapa fitur Obsidian mungkin tidak terimpor sepenuhnya.</string>
+
+    <string name="import_button">Impor</string>
+    <string name="import_done">Selesai</string>
+    <string name="import_stop">Hentikan impor</string>
+    <string name="import_or_drop_here">atau letakkan di sini</string>
+    <string name="import_choose_again_hint_desktop">Klik untuk memilih lagi, atau letakkan di sini.</string>
+    <string name="import_choose_again_hint_touch">Ketuk untuk memilih lagi.</string>
+    <string name="import_stopping">Menghentikan dan menghapus yang sudah diimpor…</string>
+    <string name="import_stopped">Impor dihentikan</string>
+    <string name="import_nothing_added">Tidak ada yang ditambahkan.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="other">%1$d ruang</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="other">%1$d catatan</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="other">%1$d folder</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="other">%1$d lampiran</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Impor cadangan tanpa mengganti catatan Anda saat ini.</string>
+    <string name="import_emberr_copying_media">Menyalin media %1$d dari %2$d…</string>
+    <string name="import_emberr_getting_ready">Menyiapkan…</string>
+    <string name="import_emberr_saving">Menyimpan hasil impor…</string>
+    <string name="import_emberr_failed">Impor gagal</string>
+    <string name="import_emberr_choose_backup_file">Pilih file cadangan</string>
+    <string name="import_emberr_choose_backup_hint">File .emberr dari Ekspor cadangan</string>
+    <string name="import_emberr_reading_backup">Membaca cadangan…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Pilih file lain</string>
+    <string name="import_emberr_spaces_to_import">Ruang yang akan diimpor</string>
+    <string name="import_emberr_choose_backup_first">Pilih cadangan terlebih dahulu</string>
+    <string name="import_emberr_daily_notes">Catatan harian</string>
+    <string name="import_emberr_calendar">Kalender</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Catatan harian dan acara kalender ditambahkan</string>
+    <string name="import_emberr_added_daily_notes">Catatan harian ditambahkan</string>
+    <string name="import_emberr_added_calendar">Acara kalender ditambahkan</string>
+    <string name="import_emberr_finished">Impor selesai</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="other">%1$d ruang diimpor</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="other">Tidak dapat menemukan %1$d file media di cadangan, jadi akan ditampilkan sebagai hilang.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Kesalahan tidak diketahui</string>
+    <string name="import_emberr_picker_title">Pilih cadangan Emberr</string>
+
+    <string name="import_markdown_subtitle">Ubah file .md, .txt, dan .canvas, atau .zip berisi folder, menjadi catatan Emberr.</string>
+    <string name="import_markdown_copying_file">Menyalin %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="other">Mengimpor %1$d dari %2$d catatan…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Pilih file atau .zip</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas, atau .zip</string>
+    <string name="import_markdown_reading_files">Membaca file…</string>
+    <string name="import_markdown_could_not_read">Tidak dapat membaca file tersebut. %1$s</string>
+    <string name="import_markdown_save_to_space">Simpan ke ruang</string>
+    <string name="import_markdown_import_as">Impor sebagai</string>
+    <string name="import_markdown_emberr_notes">Catatan Emberr</string>
+    <string name="import_markdown_emberr_notes_subtitle">Setiap file menjadi catatan yang terdiri dari blok.</string>
+    <string name="import_markdown_markdown_files">File Markdown</string>
+    <string name="import_markdown_coming_soon">Segera hadir</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="other">%1$d catatan diimpor</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="other">%1$d catatan diimpor ke %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">Tidak dapat mengimpor %1$d: %2$s</string>
+    <string name="import_markdown_choose_folder">Pilih folder</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="other">%1$d file</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d dilewati: %2$s</string>
+    <string name="import_markdown_choose_different_files">Pilih file lain</string>
+    <string name="import_markdown_picker_title">Pilih file untuk diimpor</string>
+</resources>

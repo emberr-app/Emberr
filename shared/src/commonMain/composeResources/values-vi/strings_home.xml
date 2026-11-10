@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">Yêu thích</string>
+    <string name="home_toggle_favorites">Thu gọn/mở rộng Yêu thích</string>
+    <string name="home_notes">Ghi chú</string>
+    <string name="home_toggle_notes">Thu gọn/mở rộng Ghi chú</string>
+    <string name="home_recents">Gần đây</string>
+    <string name="home_toggle_recents">Thu gọn/mở rộng Gần đây</string>
+    <string name="home_sort">Sắp xếp</string>
+    <string name="home_sort_notes">Sắp xếp ghi chú</string>
+    <string name="home_new_folder">Thư mục mới</string>
+    <string name="home_new_folder_tooltip">Thư mục mới</string>
+    <string name="home_new_subfolder">Thư mục con mới</string>
+    <string name="home_folder_name_placeholder">VD: Cá nhân, Công việc...</string>
+    <string name="home_new_note">Ghi chú mới</string>
+    <string name="home_new_note_tooltip">Ghi chú mới</string>
+    <string name="home_new_note_in_folder">Ghi chú mới trong %1$s</string>
+    <string name="home_note_title_placeholder">Tiêu đề ghi chú...</string>
+    <string name="home_templates">Mẫu</string>
+    <string name="home_switch_space">Chuyển không gian</string>
+    <string name="home_toggle_sidebar">Bật/tắt thanh bên</string>
+    <string name="home_open_calendar">Mở lịch</string>
+    <string name="home_calendar">Lịch</string>
+    <string name="home_settings">Cài đặt</string>
+    <string name="home_more_settings">Cài đặt khác</string>
+    <string name="home_rename">Đổi tên</string>
+    <string name="home_move_to_trash">Chuyển vào thùng rác</string>
+    <string name="home_add_to_favorites">Thêm vào Yêu thích</string>
+    <string name="home_remove_from_favorites">Xóa khỏi Yêu thích</string>
+    <string name="home_sort_last_edited">Sửa lần cuối</string>
+    <string name="home_sort_date_created">Ngày tạo</string>
+    <string name="home_sort_name">Tên (A-Z)</string>
+    <string name="home_sort_type">Loại</string>
+    <string name="home_sort_manual">Thủ công</string>
+    <string name="home_sort_ascending">Tăng dần</string>
+    <string name="home_sort_descending">Giảm dần</string>
+    <string name="home_sort_by">Sắp xếp theo</string>
+    <string name="home_empty_space_start_with">Không gian này trống. Bắt đầu với</string>
+    <string name="home_empty_space_a_new_note">một ghi chú mới</string>
+    <string name="home_empty_space_note_or_folder">%1$s hoặc %2$s</string>
+    <string name="home_empty_space_a_folder">một thư mục</string>
+    <string name="home_breadcrumb_home">Trang chủ</string>
+    <string name="home_cover">Ảnh bìa</string>
+    <string name="home_in_parent">trong %1$s</string>
+    <string name="home_canvas">Bảng vẽ</string>
+    <string name="home_note">Ghi chú</string>
+    <string name="home_empty_note">Ghi chú trống...</string>
+    <string name="home_favorite">Yêu thích</string>
+    <string name="home_selected">Đã chọn</string>
+    <string name="home_rename_subtitle">Chọn tên mới.</string>
+    <string name="home_name_placeholder">Tên...</string>
+    <string name="home_nesting_inside_folder">Đặt bên trong %1$s.</string>
+    <string name="home_organize_your_notes">Sắp xếp ghi chú của bạn.</string>
+    <string name="home_search_templates_placeholder">Tìm mẫu...</string>
+    <string name="home_search_templates">Tìm mẫu</string>
+    <string name="home_no_templates_yet">Chưa có mẫu nào.</string>
+    <string name="home_no_templates_match">Không có mẫu nào khớp với "%1$s".</string>
+    <string name="home_new_template">Mẫu mới</string>
+    <string name="home_edit_template">Sửa mẫu</string>
+    <string name="home_delete_template">Xóa mẫu</string>
+    <string name="home_templates_subtitle">Tạo ghi chú mới từ một mẫu.</string>
+    <string name="home_new_subfolder_in_folder">Thư mục con mới trong %1$s</string>
+    <string name="home_new_note_in_folder_description">Ghi chú mới trong %1$s</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="other">Còn %1$d</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="other">%1$d đã lưu</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="other">%1$d đính kèm</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="other">Xóa %1$d mục</item>
+    </plurals>
+</resources>

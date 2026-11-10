@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Lưu nội dung được chia sẻ</string>
+    <string name="share_save_to_overview">Lưu vào Tổng quan</string>
+    <string name="share_save_to_a_note">Lưu vào một ghi chú</string>
+    <string name="share_shared_image">Hình ảnh được chia sẻ</string>
+    <string name="share_failed_to_save">Không lưu được nội dung được chia sẻ.</string>
+    <string name="share_saved_to_inbox">Đã lưu vào Hộp thư đến</string>
+    <string name="share_note_no_longer_available">Ghi chú đó không còn nữa.</string>
+    <plurals name="share_images_selected">
+        <item quantity="other">Đã chọn %1$d hình ảnh</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="other">Đã chọn %1$d tệp</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="other">Đã lưu %1$d mục vào Hộp thư đến</item>
+    </plurals>
+</resources>

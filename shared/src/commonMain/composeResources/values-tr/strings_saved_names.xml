@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_name_inbox">Gelen Kutusu</string>
+    <string name="saved_name_others_folder">Diğerleri</string>
+    <string name="saved_name_personal_space">Kişisel</string>
+    <string name="saved_name_new_chat">Yeni sohbet</string>
+    <string name="saved_name_canvas_group">Grup</string>
+    <string name="saved_name_unknown_link">Bilinmeyen bağlantı</string>
+    <string name="saved_name_loading_preview">Önizleme yükleniyor...</string>
+    <string name="saved_name_numbered_view">%1$s %2$d</string>
+    <string name="saved_name_view_copy">%1$s kopyası</string>
+    <string name="saved_name_label_mobile">Cep</string>
+    <string name="saved_name_label_home">Ev</string>
+    <string name="saved_name_label_work">İş</string>
+    <string name="saved_name_label_main">Ana</string>
+    <string name="saved_name_label_personal">Kişisel</string>
+    <string name="saved_name_label_portfolio">Portfolyo</string>
+    <string name="saved_name_label_blog">Blog</string>
+    <string name="saved_name_label_anniversary">Yıl dönümü</string>
+    <string name="saved_name_label_date">Tarih</string>
+    <string name="saved_name_label_nickname">Takma ad</string>
+    <string name="saved_name_label_birthday">Doğum günü</string>
+</resources>

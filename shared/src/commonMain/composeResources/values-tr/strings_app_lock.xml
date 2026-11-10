@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr kilitli</string>
+    <string name="app_lock_screen_detail">Açmak için parmak izinizi, yüzünüzü veya ekran kilidinizi kullanın.</string>
+    <string name="app_lock_unlock">Kilidi aç</string>
+    <string name="app_lock_prompt_subtitle">Parmak izinizi, yüzünüzü veya ekran kilidinizi kullanın</string>
+    <string name="app_lock_unlock_emberr">Emberr kilidini aç</string>
+    <string name="app_lock_off_no_screen_lock">Bu telefonda ekran kilidi olmadığı için Uygulama Kilidi kapalı.</string>
+</resources>

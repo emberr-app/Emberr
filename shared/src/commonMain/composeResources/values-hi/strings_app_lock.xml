@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr लॉक है</string>
+    <string name="app_lock_screen_detail">इसे खोलने के लिए अपना फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक इस्तेमाल करें।</string>
+    <string name="app_lock_unlock">अनलॉक करें</string>
+    <string name="app_lock_prompt_subtitle">अपना फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक इस्तेमाल करें</string>
+    <string name="app_lock_unlock_emberr">Emberr अनलॉक करें</string>
+    <string name="app_lock_off_no_screen_lock">ऐप लॉक बंद है, क्योंकि इस फ़ोन में स्क्रीन लॉक नहीं है।</string>
+</resources>

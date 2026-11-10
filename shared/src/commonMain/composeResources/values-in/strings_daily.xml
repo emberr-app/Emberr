@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">Linimasa</string>
+    <string name="daily_close_timeline">Tutup linimasa</string>
+    <string name="daily_open_timeline">Buka linimasa</string>
+    <string name="daily_search_the_timeline">Cari di linimasa</string>
+    <string name="daily_previous_match">Hasil sebelumnya</string>
+    <string name="daily_next_match">Hasil berikutnya</string>
+    <string name="daily_nothing_on_this_day_yet">Belum ada apa pun di hari ini.</string>
+    <string name="daily_nothing_written_yet">Belum ada yang ditulis.</string>
+    <string name="daily_code">Kode</string>
+    <string name="daily_today">Hari ini</string>
+    <string name="daily_tomorrow">Besok</string>
+    <string name="daily_yesterday">Kemarin</string>
+    <string name="daily_go_to_today">Ke hari ini</string>
+    <string name="daily_previous_month">Bulan sebelumnya</string>
+    <string name="daily_next_month">Bulan berikutnya</string>
+    <string name="daily_previous">Sebelumnya</string>
+    <string name="daily_next">Berikutnya</string>
+    <string name="daily_open_calendar">Buka kalender</string>
+    <string name="daily_calendar">Kalender</string>
+    <string name="daily_settings">Setelan</string>
+    <string name="daily_more_settings">Setelan lainnya</string>
+    <string name="daily_click_to_write_your_thoughts">Klik untuk menulis pikiran Anda</string>
+    <string name="daily_tap_to_write_your_thoughts">Ketuk untuk menulis pikiran Anda</string>
+</resources>

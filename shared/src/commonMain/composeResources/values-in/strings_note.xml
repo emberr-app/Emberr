@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">Ketik / untuk perintah...</string>
+    <string name="note_copied_to_clipboard">Disalin ke papan klip</string>
+    <string name="note_copied_as_markdown">Disalin sebagai Markdown</string>
+    <string name="note_options">Opsi</string>
+    <string name="note_more_options">Opsi lainnya</string>
+    <string name="note_choose_icon">Pilih ikon</string>
+    <string name="note_search_emojis">Cari emoji</string>
+    <string name="note_no_emojis_found">Emoji tidak ditemukan</string>
+    <string name="note_editing_template">Mengedit templat</string>
+    <string name="note_icon_options">Opsi ikon</string>
+    <string name="note_change_icon">Ganti ikon</string>
+    <string name="note_add_icon">Tambah ikon</string>
+    <string name="note_remove_icon">Hapus ikon</string>
+    <string name="note_cover_options">Opsi sampul</string>
+    <string name="note_upload_cover">Unggah sampul</string>
+    <string name="note_remove_cover">Hapus sampul</string>
+    <string name="note_hide_word_count">Sembunyikan jumlah kata</string>
+    <string name="note_show_word_count">Tampilkan jumlah kata</string>
+    <string name="note_alignment">Perataan</string>
+    <string name="note_note_width">Lebar catatan</string>
+    <string name="note_unfavorite">Hapus dari Favorit</string>
+    <string name="note_favorite">Favoritkan</string>
+    <string name="note_open_as_sticky_note">Buka sebagai catatan tempel</string>
+    <string name="note_export_note">Ekspor catatan</string>
+    <string name="note_copy_text">Salin teks</string>
+    <string name="note_copy_as_markdown">Salin sebagai Markdown</string>
+    <string name="note_download_markdown">Unduh .md</string>
+    <string name="note_download_pdf">Unduh PDF</string>
+    <string name="note_move_to_trash">Pindahkan ke Sampah</string>
+    <string name="note_width_narrow">Sempit</string>
+    <string name="note_width_full">Penuh</string>
+    <string name="note_align_left">Kiri</string>
+    <string name="note_align_center">Tengah</string>
+    <string name="note_align_right">Kanan</string>
+    <string name="note_align_justify">Rata kiri-kanan</string>
+    <string name="note_note_options">Opsi catatan</string>
+    <string name="note_export_options">Opsi ekspor</string>
+    <string name="note_paste_image_link">Tempel tautan gambar</string>
+    <string name="note_cover_image">Gambar sampul</string>
+    <string name="note_drag_image_to_reposition">Seret gambar untuk mengatur posisi</string>
+    <string name="note_save_position">Simpan posisi</string>
+    <string name="note_reposition">Atur posisi</string>
+    <string name="note_collapse_panel">Ciutkan panel</string>
+    <string name="note_expand_panel">Bentangkan panel</string>
+    <plurals name="note_word_count">
+        <item quantity="other">%1$d kata</item>
+    </plurals>
+</resources>

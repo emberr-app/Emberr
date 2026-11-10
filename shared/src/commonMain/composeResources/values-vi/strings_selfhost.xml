@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Máy chủ riêng</string>
+
+    <string name="selfhost_group_server_details">Thông tin máy chủ</string>
+    <string name="selfhost_group_recovery_passphrase">Cụm mật khẩu khôi phục</string>
+    <string name="selfhost_group_unlock_vault">Mở khóa kho</string>
+    <string name="selfhost_group_status">Trạng thái</string>
+
+    <string name="selfhost_setting_up">Đang thiết lập</string>
+    <string name="selfhost_unlock_and_sync">Mở khóa và đồng bộ</string>
+    <string name="selfhost_create_vault_and_sync">Tạo kho và đồng bộ</string>
+    <string name="selfhost_server_address_rejected">Địa chỉ máy chủ bị từ chối</string>
+    <string name="selfhost_got_it">Đã hiểu</string>
+
+    <string name="selfhost_status_connected">Trạng thái: Đã kết nối</string>
+    <string name="selfhost_cancelling">Đang hủy...</string>
+    <string name="selfhost_cancel_sync">Hủy đồng bộ</string>
+    <string name="selfhost_cancel_sync_hint">Hủy sẽ tạm dừng đồng bộ cho đến khi bạn khởi động lại ứng dụng hoặc nhấn Đồng bộ ngay.</string>
+    <string name="selfhost_sync_now">Đồng bộ ngay</string>
+    <string name="selfhost_syncing">Đang đồng bộ...</string>
+    <string name="selfhost_never_synced">Chưa đồng bộ lần nào</string>
+    <string name="selfhost_last_synced">Đồng bộ lần cuối: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="other">%1$d ghi chú đang chờ đồng bộ</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Ghi chú</string>
+    <string name="selfhost_progress_images">Hình ảnh</string>
+
+    <string name="selfhost_passphrase_needed_hint">Bạn cần cụm mật khẩu này để kết nối điện thoại hoặc máy tính khác với máy chủ này.</string>
+    <string name="selfhost_show_passphrase_button">Hiện cụm mật khẩu</string>
+    <string name="selfhost_unlock_prompt_title">Cụm mật khẩu khôi phục</string>
+    <string name="selfhost_unlock_prompt_description">Mở khóa để xem cụm mật khẩu khôi phục</string>
+    <string name="selfhost_save_passphrase_hint">Thiết bị này đã được kết nối trước khi Emberr lưu cụm mật khẩu. Hãy nhập một lần để lưu ở đây, để sau này có thể xem lại.</string>
+    <string name="selfhost_checking">Đang kiểm tra</string>
+    <string name="selfhost_save_passphrase">Lưu cụm mật khẩu</string>
+    <string name="selfhost_disconnect_vault">Ngắt kết nối kho</string>
+    <string name="selfhost_recovery_dialog_message">Nhập cụm này trên thiết bị kia khi được yêu cầu mở khóa kho. Không chia sẻ với bất kỳ ai.</string>
+    <string name="selfhost_done">Xong</string>
+    <string name="selfhost_disconnect_vault_question">Ngắt kết nối kho?</string>
+    <string name="selfhost_disconnect_message">Ghi chú vẫn ở trên thiết bị này và trên máy chủ. Bạn sẽ cần cụm mật khẩu khôi phục để kết nối lại.</string>
+    <string name="selfhost_disconnect">Ngắt kết nối</string>
+
+    <string name="selfhost_checking_for_changes">Đang kiểm tra thay đổi...</string>
+    <string name="selfhost_finishing_up">Đang hoàn tất...</string>
+    <string name="selfhost_sending_percent">Đang gửi %1$d%</string>
+    <string name="selfhost_nothing_to_send">Không có gì để gửi</string>
+    <string name="selfhost_receiving_percent">Đang nhận %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Không có gì để nhận</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="other">%1$d/%2$d ghi chú</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s/%2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Nhập địa chỉ WebDAV và thông tin đăng nhập máy chủ của bạn, ví dụ Nextcloud hoặc NAS. Emberr mã hóa ghi chú trước khi chúng rời khỏi thiết bị này.</string>
+    <string name="selfhost_username">Tên người dùng</string>
+    <string name="selfhost_password">Mật khẩu</string>
+    <string name="selfhost_hide_password">Ẩn mật khẩu</string>
+    <string name="selfhost_show_password">Hiện mật khẩu</string>
+    <string name="selfhost_testing">Đang thử</string>
+    <string name="selfhost_test_connection">Thử kết nối</string>
+    <string name="selfhost_contacting_server">Đang liên hệ máy chủ...</string>
+
+    <string name="selfhost_restore_hint">Máy chủ này đã có kho Emberr. Hãy nhập cụm mật khẩu khôi phục 16 ký tự được hiển thị khi tạo kho.</string>
+    <string name="selfhost_restore_find_hint">Không tìm thấy? Mở Cài đặt → Máy chủ riêng → Hiện cụm mật khẩu trên một thiết bị đã kết nối.</string>
+    <string name="selfhost_passphrase_placeholder">Cụm mật khẩu 16 ký tự</string>
+    <string name="selfhost_hide_passphrase">Ẩn cụm mật khẩu</string>
+    <string name="selfhost_show_passphrase">Hiện cụm mật khẩu</string>
+
+    <string name="selfhost_save_passphrase_now">Hãy lưu cụm mật khẩu này ngay</string>
+    <string name="selfhost_fact_type_on_other_devices">Bạn sẽ nhập nó trên mọi điện thoại hoặc máy tính khác kết nối với máy chủ này.</string>
+    <string name="selfhost_fact_locks_notes">Nó khóa ghi chú của bạn trên máy chủ. Không ai đọc được nếu không có nó, kể cả Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr không thể đặt lại nó. Hãy lưu trong trình quản lý mật khẩu hoặc ghi ra giấy.</string>
+    <string name="selfhost_fact_see_again_later">Sau này bạn có thể xem lại trong Cài đặt → Máy chủ riêng trên bất kỳ thiết bị nào đã kết nối.</string>
+    <string name="selfhost_new_passphrase">Cụm mật khẩu mới</string>
+    <string name="selfhost_generate_new_passphrase">Tạo cụm mật khẩu mới</string>
+    <string name="selfhost_saved_passphrase_confirmation">Tôi đã lưu cụm mật khẩu này ở nơi an toàn</string>
+    <string name="selfhost_copy_passphrase">Sao chép cụm mật khẩu</string>
+    <string name="selfhost_copy_address">Sao chép địa chỉ</string>
+    <string name="selfhost_copied_address">đã sao chép địa chỉ</string>
+
+    <string name="selfhost_invalid_credentials">Sai tên người dùng hoặc mật khẩu</string>
+    <string name="selfhost_server_returned_error">Máy chủ trả về lỗi (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Không kết nối được máy chủ</string>
+    <string name="selfhost_could_not_check_vault">Không kiểm tra được kho hiện có: %1$s</string>
+    <string name="selfhost_unknown_error">lỗi không xác định</string>
+    <string name="selfhost_existing_vault_found">Đã tìm thấy kho hiện có trên máy chủ này</string>
+    <string name="selfhost_no_existing_vault">Chưa có kho nào, một kho mới sẽ được tạo</string>
+    <string name="selfhost_no_vault_file_to_restore">Không tìm thấy tệp kho nào trên máy chủ để khôi phục</string>
+    <string name="selfhost_old_or_damaged_vault_data">Thư mục máy chủ này có dữ liệu đồng bộ từ một kho cũ hoặc bị hỏng. Hãy xóa thư mục emberr_sync trên máy chủ, rồi thiết lập lại.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Máy chủ này đã có một kho. Nhập cụm mật khẩu khôi phục của kho bên dưới để khôi phục.</string>
+    <string name="selfhost_could_not_set_up">Không thiết lập được đồng bộ bảo mật</string>
+    <string name="selfhost_no_vault_on_server">Không tìm thấy kho nào trên máy chủ.</string>
+    <string name="selfhost_wrong_passphrase">Cụm mật khẩu đó không mở khóa được kho này.</string>
+    <string name="selfhost_could_not_check_passphrase">Không kiểm tra được cụm mật khẩu: %1$s</string>
+
+    <string name="selfhost_update_required_title">Đồng bộ máy chủ riêng đã tạm dừng</string>
+    <string name="selfhost_update_required_message">%1$s Ghi chú của bạn vẫn an toàn và tiếp tục được lưu trên thiết bị này.</string>
+    <string name="selfhost_later">Để sau</string>
+    <string name="selfhost_update">Cập nhật</string>
+</resources>

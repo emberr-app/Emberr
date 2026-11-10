@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Mulai mengetik untuk mencari judul, cuplikan, dan isi catatan.</string>
+    <string name="search_nothing_found">Tidak ada catatan, acara, atau orang yang cocok.</string>
+    <string name="search_people">Orang</string>
+    <string name="search_events">Acara</string>
+    <string name="search_notes">Catatan</string>
+    <string name="search_rename_note">Ganti nama catatan</string>
+    <string name="search_note_title_placeholder">Judul catatan...</string>
+    <string name="search_rename">Ganti nama</string>
+    <string name="search_move_to_trash">Pindahkan ke Sampah</string>
+    <string name="search_untitled_event">Acara tanpa judul</string>
+    <string name="search_repeats">Berulang</string>
+    <string name="search_pinned">Disematkan</string>
+    <string name="search_in_parent">di %1$s</string>
+    <string name="search_daily">Harian</string>
+    <string name="search_add_to_favorites">Tambahkan ke Favorit</string>
+    <string name="search_remove_from_favorites">Hapus dari Favorit</string>
+    <plurals name="search_show_all_people">
+        <item quantity="other">Tampilkan semua %1$d orang</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="other">Tampilkan semua %1$d acara</item>
+    </plurals>
+</resources>

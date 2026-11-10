@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">अपना सर्वर</string>
+
+    <string name="selfhost_group_server_details">सर्वर की जानकारी</string>
+    <string name="selfhost_group_recovery_passphrase">रिकवरी पासफ़्रेज़</string>
+    <string name="selfhost_group_unlock_vault">वॉल्ट अनलॉक करें</string>
+    <string name="selfhost_group_status">स्थिति</string>
+
+    <string name="selfhost_setting_up">सेट अप हो रहा है</string>
+    <string name="selfhost_unlock_and_sync">अनलॉक करें और सिंक करें</string>
+    <string name="selfhost_create_vault_and_sync">वॉल्ट बनाएँ और सिंक करें</string>
+    <string name="selfhost_server_address_rejected">सर्वर पता अस्वीकार हुआ</string>
+    <string name="selfhost_got_it">समझ गया</string>
+
+    <string name="selfhost_status_connected">स्थिति: कनेक्टेड</string>
+    <string name="selfhost_cancelling">रद्द हो रहा है...</string>
+    <string name="selfhost_cancel_sync">सिंक रद्द करें</string>
+    <string name="selfhost_cancel_sync_hint">रद्द करने पर सिंक तब तक रुका रहेगा जब तक आप ऐप दोबारा शुरू नहीं करते या अभी सिंक करें पर टैप नहीं करते।</string>
+    <string name="selfhost_sync_now">अभी सिंक करें</string>
+    <string name="selfhost_syncing">सिंक हो रहा है...</string>
+    <string name="selfhost_never_synced">कभी सिंक नहीं हुआ</string>
+    <string name="selfhost_last_synced">पिछला सिंक: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d नोट सिंक का इंतज़ार कर रहा है</item>
+        <item quantity="other">%1$d नोट सिंक का इंतज़ार कर रहे हैं</item>
+    </plurals>
+    <string name="selfhost_progress_notes">नोट</string>
+    <string name="selfhost_progress_images">इमेज</string>
+
+    <string name="selfhost_passphrase_needed_hint">इस सर्वर से कोई दूसरा फ़ोन या कंप्यूटर जोड़ने के लिए आपको यह पासफ़्रेज़ चाहिए।</string>
+    <string name="selfhost_show_passphrase_button">पासफ़्रेज़ दिखाएँ</string>
+    <string name="selfhost_unlock_prompt_title">रिकवरी पासफ़्रेज़</string>
+    <string name="selfhost_unlock_prompt_description">अपना रिकवरी पासफ़्रेज़ देखने के लिए अनलॉक करें</string>
+    <string name="selfhost_save_passphrase_hint">यह डिवाइस तब जुड़ा था जब Emberr पासफ़्रेज़ सेव नहीं करता था। इसे यहाँ सेव करने के लिए एक बार डालें, ताकि आप इसे बाद में देख सकें।</string>
+    <string name="selfhost_checking">जाँच हो रही है</string>
+    <string name="selfhost_save_passphrase">पासफ़्रेज़ सेव करें</string>
+    <string name="selfhost_disconnect_vault">वॉल्ट डिस्कनेक्ट करें</string>
+    <string name="selfhost_recovery_dialog_message">जब दूसरा डिवाइस वॉल्ट अनलॉक करने को कहे, तब यह वहाँ डालें। इसे किसी से शेयर न करें।</string>
+    <string name="selfhost_done">हो गया</string>
+    <string name="selfhost_disconnect_vault_question">वॉल्ट डिस्कनेक्ट करें?</string>
+    <string name="selfhost_disconnect_message">आपके नोट इस डिवाइस और सर्वर पर बने रहेंगे। दोबारा जोड़ने के लिए आपको रिकवरी पासफ़्रेज़ चाहिए होगा।</string>
+    <string name="selfhost_disconnect">डिस्कनेक्ट करें</string>
+
+    <string name="selfhost_checking_for_changes">बदलाव देखे जा रहे हैं...</string>
+    <string name="selfhost_finishing_up">पूरा किया जा रहा है...</string>
+    <string name="selfhost_sending_percent">भेजा जा रहा है %1$d%</string>
+    <string name="selfhost_nothing_to_send">भेजने को कुछ नहीं</string>
+    <string name="selfhost_receiving_percent">लिया जा रहा है %1$d%</string>
+    <string name="selfhost_nothing_to_receive">लेने को कुछ नहीं</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%2$d में से %1$d नोट</item>
+        <item quantity="other">%2$d में से %1$d नोट</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%2$s में से %1$s MB</string>
+
+    <string name="selfhost_server_details_hint">अपने सर्वर का WebDAV पता और लॉगिन डालें, जैसे Nextcloud या NAS। Emberr आपके नोट इस डिवाइस से निकलने से पहले एन्क्रिप्ट करता है।</string>
+    <string name="selfhost_username">यूज़रनेम</string>
+    <string name="selfhost_password">पासवर्ड</string>
+    <string name="selfhost_hide_password">पासवर्ड छिपाएँ</string>
+    <string name="selfhost_show_password">पासवर्ड दिखाएँ</string>
+    <string name="selfhost_testing">जाँच हो रही है</string>
+    <string name="selfhost_test_connection">कनेक्शन जाँचें</string>
+    <string name="selfhost_contacting_server">सर्वर से संपर्क हो रहा है...</string>
+
+    <string name="selfhost_restore_hint">इस सर्वर पर पहले से एक Emberr वॉल्ट है। वह 16 अक्षरों वाला रिकवरी पासफ़्रेज़ डालें जो वॉल्ट बनाते समय दिखाया गया था।</string>
+    <string name="selfhost_restore_find_hint">नहीं मिल रहा? पहले से जुड़े किसी डिवाइस पर सेटिंग → अपना सर्वर → पासफ़्रेज़ दिखाएँ खोलें।</string>
+    <string name="selfhost_passphrase_placeholder">16 अक्षरों वाला पासफ़्रेज़</string>
+    <string name="selfhost_hide_passphrase">पासफ़्रेज़ छिपाएँ</string>
+    <string name="selfhost_show_passphrase">पासफ़्रेज़ दिखाएँ</string>
+
+    <string name="selfhost_save_passphrase_now">यह पासफ़्रेज़ अभी सेव करें</string>
+    <string name="selfhost_fact_type_on_other_devices">इस सर्वर से जोड़े जाने वाले हर दूसरे फ़ोन या कंप्यूटर पर आपको इसे टाइप करना होगा।</string>
+    <string name="selfhost_fact_locks_notes">यह सर्वर पर आपके नोट लॉक करता है। इसके बिना कोई उन्हें नहीं पढ़ सकता, Emberr भी नहीं।</string>
+    <string name="selfhost_fact_cannot_reset">Emberr इसे रीसेट नहीं कर सकता। इसे पासवर्ड मैनेजर में रखें या कहीं लिख लें।</string>
+    <string name="selfhost_fact_see_again_later">आप इसे बाद में किसी भी जुड़े डिवाइस पर सेटिंग → अपना सर्वर में फिर से देख सकते हैं।</string>
+    <string name="selfhost_new_passphrase">नया पासफ़्रेज़</string>
+    <string name="selfhost_generate_new_passphrase">नया पासफ़्रेज़ बनाएँ</string>
+    <string name="selfhost_saved_passphrase_confirmation">मैंने यह पासफ़्रेज़ किसी सुरक्षित जगह सेव कर लिया है</string>
+    <string name="selfhost_copy_passphrase">पासफ़्रेज़ कॉपी करें</string>
+    <string name="selfhost_copy_address">पता कॉपी करें</string>
+    <string name="selfhost_copied_address">पता कॉपी हो गया</string>
+
+    <string name="selfhost_invalid_credentials">गलत यूज़रनेम या पासवर्ड</string>
+    <string name="selfhost_server_returned_error">सर्वर ने गड़बड़ी लौटाई (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">सर्वर तक नहीं पहुँच सके</string>
+    <string name="selfhost_could_not_check_vault">मौजूदा वॉल्ट की जाँच नहीं हो सकी: %1$s</string>
+    <string name="selfhost_unknown_error">अज्ञात गड़बड़ी</string>
+    <string name="selfhost_existing_vault_found">इस सर्वर पर मौजूदा वॉल्ट मिला</string>
+    <string name="selfhost_no_existing_vault">कोई मौजूदा वॉल्ट नहीं, एक नया बनाया जाएगा</string>
+    <string name="selfhost_no_vault_file_to_restore">सर्वर पर रीस्टोर करने के लिए कोई वॉल्ट फ़ाइल नहीं मिली</string>
+    <string name="selfhost_old_or_damaged_vault_data">इस सर्वर फ़ोल्डर में किसी पुराने या खराब वॉल्ट का सिंक डेटा है। अपने सर्वर पर emberr_sync फ़ोल्डर मिटाएँ, फिर दोबारा सेट अप करें।</string>
+    <string name="selfhost_vault_exists_enter_passphrase">इस सर्वर पर पहले से एक वॉल्ट है। उसे रीस्टोर करने के लिए नीचे उसका रिकवरी पासफ़्रेज़ डालें।</string>
+    <string name="selfhost_could_not_set_up">सुरक्षित सिंक सेट अप नहीं हो सका</string>
+    <string name="selfhost_no_vault_on_server">सर्वर पर कोई वॉल्ट नहीं मिला।</string>
+    <string name="selfhost_wrong_passphrase">यह पासफ़्रेज़ इस वॉल्ट को अनलॉक नहीं करता।</string>
+    <string name="selfhost_could_not_check_passphrase">पासफ़्रेज़ की जाँच नहीं हो सकी: %1$s</string>
+
+    <string name="selfhost_update_required_title">अपने सर्वर से सिंक रुका हुआ है</string>
+    <string name="selfhost_update_required_message">%1$s आपके नोट सुरक्षित हैं और इस डिवाइस पर सेव होते रहेंगे।</string>
+    <string name="selfhost_later">बाद में</string>
+    <string name="selfhost_update">अपडेट करें</string>
+</resources>
