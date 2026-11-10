@@ -82,6 +82,7 @@
     <string name="settings_font_style">Style de police</string>
     <string name="settings_font_style_system">Système</string>
     <string name="settings_language">Langue</string>
+    <string name="settings_search_languages">Rechercher une langue</string>
     <string name="settings_language_system">Langue du système</string>
     <string name="settings_language_restart_message">Emberr doit redémarrer pour afficher la nouvelle langue. Votre travail est enregistré pendant la saisie, vous pouvez donc redémarrer sans risque.</string>
 

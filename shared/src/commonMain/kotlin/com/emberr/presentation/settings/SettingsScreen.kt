@@ -77,6 +77,7 @@ import com.emberr.presentation.shared.components.LocalSitsOnCard
 import com.emberr.presentation.whatsnew.EmberrUpdateDialog
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
+import com.emberr.presentation.shared.components.EmberrSearchSheetBody
 import com.emberr.presentation.shared.components.EmberrChoiceValueMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrSwitch
@@ -163,6 +164,7 @@ import emberr.shared.generated.resources.settings_font_size_large
 import emberr.shared.generated.resources.settings_font_size_small
 import emberr.shared.generated.resources.settings_font_style
 import emberr.shared.generated.resources.settings_language
+import emberr.shared.generated.resources.settings_search_languages
 import emberr.shared.generated.resources.settings_language_restart_message
 import emberr.shared.generated.resources.settings_group_ai
 import emberr.shared.generated.resources.settings_group_appearance
@@ -278,6 +280,7 @@ private val SettingsCardShape = RoundedCornerShape(18.dp)
 private val SettingsRowMinHeight = 62.dp
 private val SettingsRowSidePadding = 16.dp
 private val SettingsPaneMaxWidth = 760.dp
+private val LanguageMenuMaxHeight = 520.dp
 private const val SUB_PAGE_FADE_MILLIS = 150
 
 internal fun desktopSettingsSidePadding(availableWidth: Dp): Dp =
@@ -519,7 +522,11 @@ fun SettingsScreen(
                     customWindowFrameEnabled = customWindowFrameEnabled,
                     autoHideTitleBar = autoHideTitleBar,
                     languageChoices = AppLanguage.entries.map { language ->
-                        SettingsChoice(label = language.label(), isSelected = language == chosenLanguage) {
+                        SettingsChoice(
+                            label = language.label(),
+                            isSelected = language == chosenLanguage,
+                            subtitle = language.nameInCurrentLanguage()
+                        ) {
                             if (language != chosenLanguage) {
                                 chooseAppLanguage(language)
                                 chosenLanguage = language
@@ -1329,7 +1336,9 @@ private fun AppearanceSettingsSection(
             icon = painterResource(Res.drawable.globe),
             title = stringResource(Res.string.settings_language),
             value = languageLabel,
-            choices = languageChoices
+            choices = languageChoices,
+            searchPlaceholder = stringResource(Res.string.settings_search_languages),
+            desktopMenuMaxHeight = LanguageMenuMaxHeight
         )
         SettingsDivider()
         SettingsActionRow(
@@ -2018,6 +2027,7 @@ internal class SettingsChoice(
     val label: String,
     val isSelected: Boolean,
     val labelFontFamily: FontFamily? = null,
+    val subtitle: String? = null,
     val onSelect: () -> Unit
 )
 
@@ -2034,7 +2044,9 @@ internal fun SettingsChoiceRow(
     value: String,
     choices: List<SettingsChoice>,
     menuToggle: SettingsMenuToggle? = null,
-    subtitle: String? = null
+    subtitle: String? = null,
+    searchPlaceholder: String? = null,
+    desktopMenuMaxHeight: Dp = Dp.Unspecified
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
 
@@ -2051,13 +2063,15 @@ internal fun SettingsChoiceRow(
             EmberrChoiceValueMenu(
                 value = value,
                 isMenuOpen = isMenuOpen,
-                onMenuOpenChange = { isOpen -> isMenuOpen = isOpen }
+                onMenuOpenChange = { isOpen -> isMenuOpen = isOpen },
+                menuMaxHeight = desktopMenuMaxHeight
             ) { closeMenuAnd ->
                 choices.forEach { choice ->
                     EmberrDesktopMenuOption(
                         label = choice.label,
                         isSelected = choice.isSelected,
                         labelFontFamily = choice.labelFontFamily,
+                        subtitle = choice.subtitle,
                         onClick = { closeMenuAnd(choice.onSelect) }
                     )
                 }
@@ -2080,39 +2094,65 @@ internal fun SettingsChoiceRow(
             onClick = { isMenuOpen = true }
         )
 
-        EmberrBottomSheet(
-            expanded = isMenuOpen,
-            onDismiss = { isMenuOpen = false },
-            title = title,
-            contentHorizontalPadding = 0.dp
-        ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                choices.forEach { choice ->
-                    EmberrBottomSheetOption(
-                        label = choice.label,
-                        isSelected = choice.isSelected,
-                        labelFontFamily = choice.labelFontFamily,
-                        onClick = {
-                            choice.onSelect()
-                            isMenuOpen = false
-                        }
+        val sheetOption: @Composable (SettingsChoice) -> Unit = { choice ->
+            EmberrBottomSheetOption(
+                label = choice.label,
+                isSelected = choice.isSelected,
+                labelFontFamily = choice.labelFontFamily,
+                subtitle = choice.subtitle,
+                onClick = {
+                    choice.onSelect()
+                    isMenuOpen = false
+                }
+            )
+        }
+
+        if (searchPlaceholder != null) {
+            EmberrBottomSheet(
+                expanded = isMenuOpen,
+                onDismiss = { isMenuOpen = false },
+                title = title,
+                contentHorizontalPadding = 0.dp,
+                scrollsContent = false
+            ) {
+                var searchText by remember { mutableStateOf("") }
+                val matchingChoices = choices.filter { choice ->
+                    choice.label.contains(searchText.trim(), ignoreCase = true) ||
+                        choice.subtitle?.contains(searchText.trim(), ignoreCase = true) == true
+                }
+                EmberrSearchSheetBody(
+                    searchText = searchText,
+                    onSearchTextChange = { searchText = it },
+                    placeholder = searchPlaceholder
+                ) {
+                    matchingChoices.forEach { choice -> sheetOption(choice) }
+                }
+            }
+        } else {
+            EmberrBottomSheet(
+                expanded = isMenuOpen,
+                onDismiss = { isMenuOpen = false },
+                title = title,
+                contentHorizontalPadding = 0.dp
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+                    choices.forEach { choice -> sheetOption(choice) }
+
+                    if (menuToggle != null) {
+                        EmberrBottomSheetOption(
+                            label = menuToggle.label,
+                            onClick = menuToggle.onToggle,
+                            trailing = { EmberrSwitch(isOn = menuToggle.isOn) }
+                        )
+                    }
+
+                    EmberrButtonPrimary(
+                        text = stringResource(Res.string.common_close),
+                        onClick = { isMenuOpen = false },
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(top = 12.dp, start = 20.dp, end = 20.dp)
                     )
                 }
-
-                if (menuToggle != null) {
-                    EmberrBottomSheetOption(
-                        label = menuToggle.label,
-                        onClick = menuToggle.onToggle,
-                        trailing = { EmberrSwitch(isOn = menuToggle.isOn) }
-                    )
-                }
-
-                EmberrButtonPrimary(
-                    text = stringResource(Res.string.common_close),
-                    onClick = { isMenuOpen = false },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-                )
             }
         }
     }

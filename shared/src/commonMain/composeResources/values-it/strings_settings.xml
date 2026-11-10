@@ -82,6 +82,7 @@
     <string name="settings_font_style">Carattere</string>
     <string name="settings_font_style_system">Sistema</string>
     <string name="settings_language">Lingua</string>
+    <string name="settings_search_languages">Cerca lingue</string>
     <string name="settings_language_system">Predefinita di sistema</string>
     <string name="settings_language_restart_message">Emberr deve riavviarsi per mostrare la nuova lingua. Il lavoro viene salvato mentre scrivi, quindi puoi riavviare ora senza rischi.</string>
 
