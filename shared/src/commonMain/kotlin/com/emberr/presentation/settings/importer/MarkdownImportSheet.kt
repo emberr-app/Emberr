@@ -23,9 +23,37 @@ import com.emberr.presentation.shared.components.EmberrChoiceRow
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.folder
+import emberr.shared.generated.resources.import_attachment_count
+import emberr.shared.generated.resources.import_folder_count
+import emberr.shared.generated.resources.import_markdown_choose_different_files
+import emberr.shared.generated.resources.import_markdown_choose_files
+import emberr.shared.generated.resources.import_markdown_choose_files_hint
+import emberr.shared.generated.resources.import_markdown_choose_folder
+import emberr.shared.generated.resources.import_markdown_coming_soon
+import emberr.shared.generated.resources.import_markdown_copying_file
+import emberr.shared.generated.resources.import_markdown_could_not_read
+import emberr.shared.generated.resources.import_markdown_emberr_notes
+import emberr.shared.generated.resources.import_markdown_emberr_notes_subtitle
+import emberr.shared.generated.resources.import_markdown_failed_files
+import emberr.shared.generated.resources.import_markdown_import_as
+import emberr.shared.generated.resources.import_markdown_imported_notes
+import emberr.shared.generated.resources.import_markdown_imported_notes_into_space
+import emberr.shared.generated.resources.import_markdown_importing_notes
+import emberr.shared.generated.resources.import_markdown_markdown_files
+import emberr.shared.generated.resources.import_markdown_picked_files
+import emberr.shared.generated.resources.import_markdown_reading_files
+import emberr.shared.generated.resources.import_markdown_save_to_space
+import emberr.shared.generated.resources.import_markdown_skipped_files
+import emberr.shared.generated.resources.import_markdown_subtitle
+import emberr.shared.generated.resources.import_note_count
+import emberr.shared.generated.resources.import_nothing_added
+import emberr.shared.generated.resources.import_stopped
+import emberr.shared.generated.resources.import_stopping
+import emberr.shared.generated.resources.import_text_and_markdown
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 private val ChooseFolderButtonHeight = 46.dp
-private const val EMBERR_NOTES_LABEL = "Emberr Notes"
 
 @Composable
 fun MarkdownImportSheet(
@@ -46,8 +74,8 @@ fun MarkdownImportSheet(
     EmberrBottomSheet(
         expanded = true,
         onDismiss = onDismiss,
-        title = "Text & Markdown",
-        subtitle = "Turn .md, .txt and .canvas files, or a .zip with folders, into Emberr notes.",
+        title = stringResource(Res.string.import_text_and_markdown),
+        subtitle = stringResource(Res.string.import_markdown_subtitle),
         contentHorizontalPadding = 0.dp,
         isDismissible = importProgress !is ImportProgress.Importing && importProgress != ImportProgress.Stopping
     ) {
@@ -66,14 +94,20 @@ fun MarkdownImportSheet(
                 )
                 is ImportProgress.Importing -> ImportProgressMessage(
                     doneFraction = importProgress.doneFraction,
-                    progressText = importProgress.copyingFileName?.let { fileName -> "Copying $fileName…" }
-                        ?: "Importing ${importProgress.handledNoteCount} of ${countLabel(importProgress.totalNoteCount, "note")}…",
+                    progressText = importProgress.copyingFileName?.let { fileName ->
+                        stringResource(Res.string.import_markdown_copying_file, fileName)
+                    } ?: pluralStringResource(
+                        Res.plurals.import_markdown_importing_notes,
+                        importProgress.totalNoteCount,
+                        importProgress.handledNoteCount,
+                        importProgress.totalNoteCount
+                    ),
                     onStopClick = onStopClick
                 )
-                ImportProgress.Stopping -> ImportWorkingMessage("Stopping and removing what was imported…")
+                ImportProgress.Stopping -> ImportWorkingMessage(stringResource(Res.string.import_stopping))
                 ImportProgress.Stopped -> ImportOutcomeMessage(
-                    title = "Import stopped",
-                    detailLines = listOf("Nothing was added."),
+                    title = stringResource(Res.string.import_stopped),
+                    detailLines = listOf(stringResource(Res.string.import_nothing_added)),
                     errorLine = null,
                     onDoneClick = onDismiss
                 )
@@ -107,11 +141,11 @@ private fun ImportChoices(
     ) {
         when (pickedFilesState) {
             PickedFilesState.NothingPicked -> ImportChoosePrompt(
-                title = "Choose Files or a .zip",
-                hint = ".md, .markdown, .txt, .canvas or .zip"
+                title = stringResource(Res.string.import_markdown_choose_files),
+                hint = stringResource(Res.string.import_markdown_choose_files_hint)
             )
-            PickedFilesState.Reading -> ImportReadingMessage("Reading files…")
-            PickedFilesState.CouldNotRead -> ImportFadedLine(text = "Couldn't read those files. $importChooseAgainHint")
+            PickedFilesState.Reading -> ImportReadingMessage(stringResource(Res.string.import_markdown_reading_files))
+            PickedFilesState.CouldNotRead -> ImportFadedLine(text = stringResource(Res.string.import_markdown_could_not_read, importChooseAgainHint()))
             is PickedFilesState.Ready -> PickedFilesSummary(pickedFilesState.summary)
         }
     }
@@ -124,7 +158,7 @@ private fun ImportChoices(
 
     Column(modifier = Modifier.padding(top = 16.dp)) {
         EmberrChoiceRow(
-            label = "Save to Space",
+            label = stringResource(Res.string.import_markdown_save_to_space),
             value = spaces.firstOrNull { it.spaceId == selectedSpaceId }?.displayName.orEmpty(),
             icon = Res.drawable.folder
         ) { closeMenuAnd ->
@@ -136,16 +170,21 @@ private fun ImportChoices(
                 )
             }
         }
-        EmberrChoiceRow(label = "Import As", value = EMBERR_NOTES_LABEL, icon = Res.drawable.file_text) { closeMenuAnd ->
+        val emberrNotesLabel = stringResource(Res.string.import_markdown_emberr_notes)
+        EmberrChoiceRow(
+            label = stringResource(Res.string.import_markdown_import_as),
+            value = emberrNotesLabel,
+            icon = Res.drawable.file_text
+        ) { closeMenuAnd ->
             ImportMenuOption(
-                label = EMBERR_NOTES_LABEL,
-                subtitle = "Each file becomes a note made of blocks.",
+                label = emberrNotesLabel,
+                subtitle = stringResource(Res.string.import_markdown_emberr_notes_subtitle),
                 isSelected = true,
                 onClick = { closeMenuAnd {} }
             )
             ImportMenuOption(
-                label = "Markdown Files",
-                subtitle = "Coming soon",
+                label = stringResource(Res.string.import_markdown_markdown_files),
+                subtitle = stringResource(Res.string.import_markdown_coming_soon),
                 isSelected = false,
                 isAvailable = false,
                 onClick = {}
@@ -162,17 +201,27 @@ private fun ImportChoices(
 
 @Composable
 private fun ImportFinishedMessage(result: ImportResult, spaceName: String?, onDoneClick: () -> Unit) {
-    val destination = spaceName?.let { " into $it" }.orEmpty()
     val extrasLine = listOfNotNull(
-        countLabel(result.createdFolderCount, "folder").takeIf { result.createdFolderCount > 0 },
-        countLabel(result.copiedAttachmentCount, "attachment").takeIf { result.copiedAttachmentCount > 0 }
+        pluralStringResource(Res.plurals.import_folder_count, result.createdFolderCount, result.createdFolderCount)
+            .takeIf { result.createdFolderCount > 0 },
+        pluralStringResource(Res.plurals.import_attachment_count, result.copiedAttachmentCount, result.copiedAttachmentCount)
+            .takeIf { result.copiedAttachmentCount > 0 }
     ).joinToString(" · ")
 
     ImportOutcomeMessage(
-        title = "Imported ${countLabel(result.importedNoteCount, "note")}$destination",
+        title = if (spaceName == null) {
+            pluralStringResource(Res.plurals.import_markdown_imported_notes, result.importedNoteCount, result.importedNoteCount)
+        } else {
+            pluralStringResource(
+                Res.plurals.import_markdown_imported_notes_into_space,
+                result.importedNoteCount,
+                result.importedNoteCount,
+                spaceName
+            )
+        },
         detailLines = listOf(extrasLine).filter { it.isNotEmpty() },
         errorLine = result.failedNames.takeIf { it.isNotEmpty() }?.let { failedNames ->
-            "Couldn't import ${failedNames.size}: ${failedNames.joinToString(", ")}"
+            stringResource(Res.string.import_markdown_failed_files, failedNames.size, failedNames.joinToString(", "))
         },
         onDoneClick = onDoneClick
     )
@@ -190,7 +239,7 @@ private fun ChooseFolderButton(onClick: () -> Unit, modifier: Modifier = Modifie
             .clickable(onClick = onClick)
     ) {
         Text(
-            text = "Choose a Folder",
+            text = stringResource(Res.string.import_markdown_choose_folder),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface
@@ -201,17 +250,20 @@ private fun ChooseFolderButton(onClick: () -> Unit, modifier: Modifier = Modifie
 @Composable
 private fun PickedFilesSummary(summary: ImportSummary) {
     ImportPickedSummary(
-        pickedLabel = summary.pickedNames.singleOrNull() ?: "${summary.pickedNames.size} files",
+        pickedLabel = summary.pickedNames.singleOrNull()
+            ?: pluralStringResource(Res.plurals.import_markdown_picked_files, summary.pickedNames.size, summary.pickedNames.size),
         countsLine = listOfNotNull(
-            countLabel(summary.noteCount, "note"),
-            countLabel(summary.folderCount, "folder").takeIf { summary.folderCount > 0 },
-            countLabel(summary.attachmentCount, "attachment").takeIf { summary.attachmentCount > 0 }
+            pluralStringResource(Res.plurals.import_note_count, summary.noteCount, summary.noteCount),
+            pluralStringResource(Res.plurals.import_folder_count, summary.folderCount, summary.folderCount)
+                .takeIf { summary.folderCount > 0 },
+            pluralStringResource(Res.plurals.import_attachment_count, summary.attachmentCount, summary.attachmentCount)
+                .takeIf { summary.attachmentCount > 0 }
         ).joinToString(" · "),
         extraLines = listOfNotNull(
             summary.skippedNames.takeIf { it.isNotEmpty() }?.let { skippedNames ->
-                "${skippedNames.size} skipped: ${skippedNames.joinToString(", ")}"
+                stringResource(Res.string.import_markdown_skipped_files, skippedNames.size, skippedNames.joinToString(", "))
             }
         ),
-        changeHint = "Choose different files"
+        changeHint = stringResource(Res.string.import_markdown_choose_different_files)
     )
 }

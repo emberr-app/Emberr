@@ -78,9 +78,78 @@ import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.refresh_cw
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.selfhost_cancel_sync
+import emberr.shared.generated.resources.selfhost_cancel_sync_hint
+import emberr.shared.generated.resources.selfhost_cancelling
+import emberr.shared.generated.resources.selfhost_checking
+import emberr.shared.generated.resources.selfhost_checking_for_changes
+import emberr.shared.generated.resources.selfhost_contacting_server
+import emberr.shared.generated.resources.selfhost_copied_address
+import emberr.shared.generated.resources.selfhost_copy_address
+import emberr.shared.generated.resources.selfhost_copy_passphrase
+import emberr.shared.generated.resources.selfhost_create_vault_and_sync
+import emberr.shared.generated.resources.selfhost_disconnect
+import emberr.shared.generated.resources.selfhost_disconnect_message
+import emberr.shared.generated.resources.selfhost_disconnect_vault
+import emberr.shared.generated.resources.selfhost_disconnect_vault_question
+import emberr.shared.generated.resources.selfhost_done
+import emberr.shared.generated.resources.selfhost_fact_cannot_reset
+import emberr.shared.generated.resources.selfhost_fact_locks_notes
+import emberr.shared.generated.resources.selfhost_fact_see_again_later
+import emberr.shared.generated.resources.selfhost_fact_type_on_other_devices
+import emberr.shared.generated.resources.selfhost_finishing_up
+import emberr.shared.generated.resources.selfhost_generate_new_passphrase
+import emberr.shared.generated.resources.selfhost_got_it
+import emberr.shared.generated.resources.selfhost_group_recovery_passphrase
+import emberr.shared.generated.resources.selfhost_group_server_details
+import emberr.shared.generated.resources.selfhost_group_status
+import emberr.shared.generated.resources.selfhost_group_unlock_vault
+import emberr.shared.generated.resources.selfhost_hide_passphrase
+import emberr.shared.generated.resources.selfhost_hide_password
+import emberr.shared.generated.resources.selfhost_megabytes_progress
+import emberr.shared.generated.resources.selfhost_new_passphrase
+import emberr.shared.generated.resources.selfhost_note_count_progress
+import emberr.shared.generated.resources.selfhost_notes_waiting_to_sync
+import emberr.shared.generated.resources.selfhost_nothing_to_receive
+import emberr.shared.generated.resources.selfhost_nothing_to_send
+import emberr.shared.generated.resources.selfhost_passphrase_needed_hint
+import emberr.shared.generated.resources.selfhost_passphrase_placeholder
+import emberr.shared.generated.resources.selfhost_password
+import emberr.shared.generated.resources.selfhost_progress_images
+import emberr.shared.generated.resources.selfhost_progress_notes
+import emberr.shared.generated.resources.selfhost_receiving_percent
+import emberr.shared.generated.resources.selfhost_recovery_dialog_message
+import emberr.shared.generated.resources.selfhost_restore_find_hint
+import emberr.shared.generated.resources.selfhost_restore_hint
+import emberr.shared.generated.resources.selfhost_save_passphrase
+import emberr.shared.generated.resources.selfhost_save_passphrase_hint
+import emberr.shared.generated.resources.selfhost_save_passphrase_now
+import emberr.shared.generated.resources.selfhost_saved_passphrase_confirmation
+import emberr.shared.generated.resources.selfhost_sending_percent
+import emberr.shared.generated.resources.selfhost_server_address_rejected
+import emberr.shared.generated.resources.selfhost_server_details_hint
+import emberr.shared.generated.resources.selfhost_setting_up
+import emberr.shared.generated.resources.selfhost_show_passphrase
+import emberr.shared.generated.resources.selfhost_show_passphrase_button
+import emberr.shared.generated.resources.selfhost_show_password
+import emberr.shared.generated.resources.selfhost_status_connected
+import emberr.shared.generated.resources.selfhost_sync_now
+import emberr.shared.generated.resources.selfhost_syncing
+import emberr.shared.generated.resources.selfhost_test_connection
+import emberr.shared.generated.resources.selfhost_testing
+import emberr.shared.generated.resources.selfhost_title
+import emberr.shared.generated.resources.selfhost_unlock_and_sync
+import emberr.shared.generated.resources.selfhost_unlock_prompt_description
+import emberr.shared.generated.resources.selfhost_unlock_prompt_title
+import emberr.shared.generated.resources.selfhost_username
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
@@ -128,10 +197,10 @@ fun SelfHostSetupScreen(
                     .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
             ) {
                 EmberrTopHeaderBar(
-                    title = "Self-Host",
+                    title = stringResource(Res.string.selfhost_title),
                     hazeState = internalHazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onBackClick = onNavigateBack
                 )
             }
@@ -176,14 +245,14 @@ private fun SetupForm(
         )
     ) {
         item {
-            SettingsGroup(title = "Server Details") {
+            SettingsGroup(title = stringResource(Res.string.selfhost_group_server_details)) {
                 ServerDetailsCard(form = form, viewModel = viewModel)
             }
         }
 
         if (form.vaultMode == VaultMode.CREATE_VAULT) {
             item {
-                SettingsGroup(title = "Recovery Passphrase") {
+                SettingsGroup(title = stringResource(Res.string.selfhost_group_recovery_passphrase)) {
                     NewPassphraseCard(
                         passphrase = form.passphrase,
                         hasSavedPassphrase = form.hasAcknowledgedRisk,
@@ -196,7 +265,7 @@ private fun SetupForm(
 
         if (form.vaultMode == VaultMode.RESTORE_VAULT) {
             item {
-                SettingsGroup(title = "Unlock Vault") {
+                SettingsGroup(title = stringResource(Res.string.selfhost_group_unlock_vault)) {
                     RestorePassphraseCard(
                         passphraseInput = form.existingPassphraseInput,
                         onPassphraseChanged = viewModel::onExistingPassphraseChanged,
@@ -211,9 +280,9 @@ private fun SetupForm(
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
                     EmberrButtonPrimary(
                         text = when {
-                            form.setupPhase == SetupPhase.FINALIZING -> "Setting up"
-                            form.vaultMode == VaultMode.RESTORE_VAULT -> "Unlock and Sync"
-                            else -> "Create Vault and Sync"
+                            form.setupPhase == SetupPhase.FINALIZING -> stringResource(Res.string.selfhost_setting_up)
+                            form.vaultMode == VaultMode.RESTORE_VAULT -> stringResource(Res.string.selfhost_unlock_and_sync)
+                            else -> stringResource(Res.string.selfhost_create_vault_and_sync)
                         },
                         onClick = viewModel::completeSetup,
                         enabled = form.canFinishSetup,
@@ -234,7 +303,7 @@ private fun SetupForm(
     if (form.configurationWarningMessage != null) {
         EmberrAlertDialog(
             onDismissRequest = viewModel::dismissConfigurationWarning,
-            title = "Server Address Rejected"
+            title = stringResource(Res.string.selfhost_server_address_rejected)
         ) {
             Text(
                 text = form.configurationWarningMessage,
@@ -243,7 +312,7 @@ private fun SetupForm(
             )
             Spacer(Modifier.height(20.dp))
             EmberrButtonPrimary(
-                text = "Got it",
+                text = stringResource(Res.string.selfhost_got_it),
                 onClick = viewModel::dismissConfigurationWarning,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -263,6 +332,8 @@ private fun ConnectedDashboard(
     val notesWaitingToSync by viewModel.notesWaitingToSyncCount.collectAsState()
     val deviceLockPrompt = rememberDeviceLockPrompt()
     val coroutineScope = rememberCoroutineScope()
+    val unlockPromptTitle = stringResource(Res.string.selfhost_unlock_prompt_title)
+    val unlockPromptDescription = stringResource(Res.string.selfhost_unlock_prompt_description)
 
     val listState = rememberLazyListState()
 
@@ -280,7 +351,7 @@ private fun ConnectedDashboard(
         )
     ) {
         item {
-            SettingsGroup(title = "Status") {
+            SettingsGroup(title = stringResource(Res.string.selfhost_group_status)) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
@@ -291,7 +362,7 @@ private fun ConnectedDashboard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Status: Connected",
+                            text = stringResource(Res.string.selfhost_status_connected),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -308,7 +379,11 @@ private fun ConnectedDashboard(
 
                     if (isSyncRunning) {
                         EmberrButtonSecondary(
-                            text = if (state.syncStatus == ManualSyncStatus.CANCELLING) "Cancelling..." else "Cancel Sync",
+                            text = if (state.syncStatus == ManualSyncStatus.CANCELLING) {
+                                stringResource(Res.string.selfhost_cancelling)
+                            } else {
+                                stringResource(Res.string.selfhost_cancel_sync)
+                            },
                             onClick = {
                                 SelfHostSyncLog.d("UI: Cancel Sync button tapped")
                                 viewModel.cancelSync()
@@ -319,13 +394,13 @@ private fun ConnectedDashboard(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "Cancelling pauses sync until you restart the app or tap Sync Now.",
+                            text = stringResource(Res.string.selfhost_cancel_sync_hint),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                         )
                     } else {
                         EmberrButtonPrimary(
-                            text = "Sync Now",
+                            text = stringResource(Res.string.selfhost_sync_now),
                             onClick = {
                                 SelfHostSyncLog.d("UI: Sync Now button tapped")
                                 viewModel.syncNow()
@@ -347,7 +422,7 @@ private fun ConnectedDashboard(
                         }
                         Text(
                             text = if (isSyncRunning) {
-                                "Syncing..."
+                                stringResource(Res.string.selfhost_syncing)
                             } else {
                                 formatLastSynced(state.lastSyncedAtMillis, LocalUsesTwentyFourHourClock.current)
                             },
@@ -358,17 +433,31 @@ private fun ConnectedDashboard(
 
                     if (!isSyncRunning && notesWaitingToSync > 0) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        SyncProgressHint(text = describeNotesWaitingToSync(notesWaitingToSync))
+                        SyncProgressHint(
+                            text = pluralStringResource(
+                                Res.plurals.selfhost_notes_waiting_to_sync,
+                                notesWaitingToSync,
+                                notesWaitingToSync
+                            )
+                        )
                     }
 
                     state.noteSyncProgress?.let { progress ->
                         Spacer(modifier = Modifier.height(14.dp))
-                        SyncProgressDetails(title = "Notes", progress = progress, describeAmount = ::describeNoteCount)
+                        SyncProgressDetails(
+                            title = stringResource(Res.string.selfhost_progress_notes),
+                            progress = progress,
+                            describeAmount = { done, total -> describeNoteCount(done, total) }
+                        )
                     }
 
                     state.imageSyncProgress?.let { progress ->
                         Spacer(modifier = Modifier.height(14.dp))
-                        SyncProgressDetails(title = "Images", progress = progress, describeAmount = ::describeImageBytes)
+                        SyncProgressDetails(
+                            title = stringResource(Res.string.selfhost_progress_images),
+                            progress = progress,
+                            describeAmount = { done, total -> describeImageBytes(done, total) }
+                        )
                     }
 
                     state.syncError?.let { error ->
@@ -384,20 +473,20 @@ private fun ConnectedDashboard(
         }
 
         item {
-            SettingsGroup(title = "Recovery Passphrase") {
+            SettingsGroup(title = stringResource(Res.string.selfhost_group_recovery_passphrase)) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     if (state.hasSavedRecoveryPassphrase) {
-                        SettingsHint(text = "You need this passphrase to connect another phone or computer to this server.")
+                        SettingsHint(text = stringResource(Res.string.selfhost_passphrase_needed_hint))
                         EmberrButtonSecondary(
-                            text = "Show Passphrase",
+                            text = stringResource(Res.string.selfhost_show_passphrase_button),
                             onClick = {
                                 coroutineScope.launch {
                                     val confirmation = deviceLockPrompt.confirm(
-                                        title = "Recovery passphrase",
-                                        description = "Unlock to see your recovery passphrase"
+                                        title = unlockPromptTitle,
+                                        description = unlockPromptDescription
                                     )
                                     if (confirmation != DeviceLockConfirmation.NOT_CONFIRMED) {
                                         viewModel.showRecoveryPassphrase()
@@ -408,8 +497,7 @@ private fun ConnectedDashboard(
                         )
                     } else {
                         SettingsHint(
-                            text = "This device was connected before Emberr saved the passphrase. " +
-                                "Enter it once to save it here, so you can see it later."
+                            text = stringResource(Res.string.selfhost_save_passphrase_hint)
                         )
                         PassphraseField(
                             value = state.passphraseToSaveInput,
@@ -424,7 +512,11 @@ private fun ConnectedDashboard(
                             )
                         }
                         EmberrButtonSecondary(
-                            text = if (state.isSavingPassphrase) "Checking" else "Save Passphrase",
+                            text = if (state.isSavingPassphrase) {
+                                stringResource(Res.string.selfhost_checking)
+                            } else {
+                                stringResource(Res.string.selfhost_save_passphrase)
+                            },
                             onClick = viewModel::savePassphraseOnThisDevice,
                             enabled = state.canSavePassphrase,
                             showsWavingDots = state.isSavingPassphrase,
@@ -463,7 +555,7 @@ private fun ConnectedDashboard(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = "Disconnect Vault",
+                    text = stringResource(Res.string.selfhost_disconnect_vault),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.error,
@@ -476,10 +568,10 @@ private fun ConnectedDashboard(
     state.shownRecoveryPassphrase?.let { passphrase ->
         EmberrAlertDialog(
             onDismissRequest = viewModel::hideRecoveryPassphrase,
-            title = "Recovery Passphrase"
+            title = stringResource(Res.string.selfhost_group_recovery_passphrase)
         ) {
             Text(
-                text = "Enter this on the other device when it asks to unlock the vault. Don't share it with anyone.",
+                text = stringResource(Res.string.selfhost_recovery_dialog_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
             )
@@ -487,7 +579,7 @@ private fun ConnectedDashboard(
             PassphraseBox(passphrase = passphrase)
             Spacer(Modifier.height(16.dp))
             EmberrButtonPrimary(
-                text = "Done",
+                text = stringResource(Res.string.selfhost_done),
                 onClick = viewModel::hideRecoveryPassphrase,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -497,22 +589,22 @@ private fun ConnectedDashboard(
     if (showDisconnectConfirmation) {
         EmberrAlertDialog(
             onDismissRequest = { showDisconnectConfirmation = false },
-            title = "Disconnect Vault?"
+            title = stringResource(Res.string.selfhost_disconnect_vault_question)
         ) {
             Text(
-                text = "Your notes stay on this device and the server. You'll need your recovery passphrase to reconnect.",
+                text = stringResource(Res.string.selfhost_disconnect_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
             )
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { showDisconnectConfirmation = false },
                     modifier = Modifier.weight(1f)
                 )
                 EmberrButtonPrimary(
-                    text = "Disconnect",
+                    text = stringResource(Res.string.selfhost_disconnect),
                     onClick = {
                         showDisconnectConfirmation = false
                         viewModel.disconnectVault()
@@ -528,7 +620,7 @@ private fun ConnectedDashboard(
 internal fun SyncProgressDetails(
     title: String,
     progress: SelfHostSyncProgress,
-    describeAmount: (done: Long, total: Long) -> String
+    describeAmount: @Composable (done: Long, total: Long) -> String
 ) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -538,19 +630,19 @@ internal fun SyncProgressDetails(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
         )
         when (progress.stage) {
-            SelfHostSyncStage.PREPARING -> SyncProgressHint("Checking for changes...")
-            SelfHostSyncStage.FINISHING -> SyncProgressHint("Finishing up...")
+            SelfHostSyncStage.PREPARING -> SyncProgressHint(stringResource(Res.string.selfhost_checking_for_changes))
+            SelfHostSyncStage.FINISHING -> SyncProgressHint(stringResource(Res.string.selfhost_finishing_up))
             SelfHostSyncStage.TRANSFERRING -> {
                 SyncDirectionProgress(
-                    label = "Sending",
-                    emptyMessage = "Nothing to send",
+                    labelWithPercent = Res.string.selfhost_sending_percent,
+                    emptyMessage = stringResource(Res.string.selfhost_nothing_to_send),
                     done = progress.sent,
                     total = progress.toSend,
                     describeAmount = describeAmount
                 )
                 SyncDirectionProgress(
-                    label = "Receiving",
-                    emptyMessage = "Nothing to receive",
+                    labelWithPercent = Res.string.selfhost_receiving_percent,
+                    emptyMessage = stringResource(Res.string.selfhost_nothing_to_receive),
                     done = progress.received,
                     total = progress.toReceive,
                     describeAmount = describeAmount
@@ -562,11 +654,11 @@ internal fun SyncProgressDetails(
 
 @Composable
 private fun SyncDirectionProgress(
-    label: String,
+    labelWithPercent: StringResource,
     emptyMessage: String,
     done: Long,
     total: Long,
-    describeAmount: (done: Long, total: Long) -> String
+    describeAmount: @Composable (done: Long, total: Long) -> String
 ) {
     if (total == 0L) {
         SyncProgressHint(emptyMessage)
@@ -576,7 +668,7 @@ private fun SyncDirectionProgress(
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "$label ${(doneFraction * 100).roundToInt()}%",
+                text = stringResource(labelWithPercent, (doneFraction * 100).roundToInt()),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
@@ -605,14 +697,13 @@ private fun SyncProgressHint(text: String) {
     )
 }
 
-private fun describeNotesWaitingToSync(count: Int): String =
-    if (count == 1) "1 note waiting to sync" else "$count notes waiting to sync"
-
+@Composable
 private fun describeNoteCount(done: Long, total: Long): String =
-    "${minOf(done, total)} of $total ${if (total == 1L) "note" else "notes"}"
+    pluralStringResource(Res.plurals.selfhost_note_count_progress, total.toInt(), minOf(done, total), total)
 
+@Composable
 internal fun describeImageBytes(done: Long, total: Long): String =
-    "${formatMegabytes(minOf(done, total))} of ${formatMegabytes(total)} MB"
+    stringResource(Res.string.selfhost_megabytes_progress, formatMegabytes(minOf(done, total)), formatMegabytes(total))
 
 private fun formatMegabytes(bytes: Long): String {
     val tenthsOfMegabyte = bytes * 10 / (1024 * 1024)
@@ -622,6 +713,11 @@ private fun formatMegabytes(bytes: Long): String {
 @Composable
 private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostSetupViewModel) {
     var isPasswordVisible by remember { mutableStateOf(false) }
+    val passwordVisibilityLabel = if (isPasswordVisible) {
+        stringResource(Res.string.selfhost_hide_password)
+    } else {
+        stringResource(Res.string.selfhost_show_password)
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -630,8 +726,7 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
         val onSubmitServerDetails: () -> Unit = { if (form.canTestConnection) viewModel.testConnection() }
 
         SettingsHint(
-            text = "Enter the WebDAV address and login of your server, for example Nextcloud or a NAS. " +
-                "Emberr encrypts your notes before they leave this device."
+            text = stringResource(Res.string.selfhost_server_details_hint)
         )
 
         EmberrTextField(
@@ -646,7 +741,7 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
         EmberrTextField(
             value = form.username,
             onValueChange = viewModel::onUsernameChanged,
-            placeholder = "Username",
+            placeholder = stringResource(Res.string.selfhost_username),
             modifier = Modifier.fillMaxWidth(),
             onSubmit = onSubmitServerDetails
         )
@@ -654,15 +749,15 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
         EmberrTextField(
             value = form.password,
             onValueChange = viewModel::onPasswordChanged,
-            placeholder = "Password",
+            placeholder = stringResource(Res.string.selfhost_password),
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             trailingIcon = {
-                IconTooltip(text = if (isPasswordVisible) "Hide password" else "Show password") {
+                IconTooltip(text = passwordVisibilityLabel) {
                     EmberrTextFieldIconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
                             painter = painterResource(if (isPasswordVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
-                            contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                            contentDescription = passwordVisibilityLabel,
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                     }
@@ -675,7 +770,11 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
         Spacer(modifier = Modifier.height(4.dp))
 
         EmberrButtonPrimary(
-            text = if (form.connectionTestStatus == ConnectionTestStatus.TESTING) "Testing" else "Test Connection",
+            text = if (form.connectionTestStatus == ConnectionTestStatus.TESTING) {
+                stringResource(Res.string.selfhost_testing)
+            } else {
+                stringResource(Res.string.selfhost_test_connection)
+            },
             onClick = viewModel::testConnection,
             enabled = form.canTestConnection,
             showsWavingDots = form.connectionTestStatus == ConnectionTestStatus.TESTING,
@@ -691,7 +790,7 @@ private fun ServerDetailsCard(form: SelfHostSetupFormState, viewModel: SelfHostS
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Contacting server...",
+                    text = stringResource(Res.string.selfhost_contacting_server),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -731,11 +830,10 @@ private fun RestorePassphraseCard(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         SettingsHint(
-            text = "This server already has an Emberr vault. Enter the 16-character recovery passphrase " +
-                "that was shown when the vault was created."
+            text = stringResource(Res.string.selfhost_restore_hint)
         )
         SettingsHint(
-            text = "Can't find it? Open Settings → Self-Host → Show Passphrase on a device that is already connected."
+            text = stringResource(Res.string.selfhost_restore_find_hint)
         )
 
         PassphraseField(value = passphraseInput, onValueChange = onPassphraseChanged, onSubmit = onSubmit)
@@ -745,19 +843,24 @@ private fun RestorePassphraseCard(
 @Composable
 private fun PassphraseField(value: String, onValueChange: (String) -> Unit, onSubmit: (() -> Unit)?) {
     var isPassphraseVisible by remember { mutableStateOf(false) }
+    val passphraseVisibilityLabel = if (isPassphraseVisible) {
+        stringResource(Res.string.selfhost_hide_passphrase)
+    } else {
+        stringResource(Res.string.selfhost_show_passphrase)
+    }
 
     EmberrTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = "16-character passphrase",
+        placeholder = stringResource(Res.string.selfhost_passphrase_placeholder),
         visualTransformation = if (isPassphraseVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
-            IconTooltip(text = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase") {
+            IconTooltip(text = passphraseVisibilityLabel) {
                 EmberrTextFieldIconButton(onClick = { isPassphraseVisible = !isPassphraseVisible }) {
                     Icon(
                         painter = painterResource(if (isPassphraseVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
-                        contentDescription = if (isPassphraseVisible) "Hide passphrase" else "Show passphrase",
+                        contentDescription = passphraseVisibilityLabel,
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
@@ -788,26 +891,26 @@ private fun NewPassphraseCard(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = "Save this passphrase now",
+                text = stringResource(Res.string.selfhost_save_passphrase_now),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
 
-        PassphraseFact("You will type it on every other phone or computer you connect to this server.")
-        PassphraseFact("It locks your notes on the server. No one can read them without it, not even Emberr.")
-        PassphraseFact("Emberr can't reset it. Keep it in a password manager or write it down.")
-        PassphraseFact("You can see it again later in Settings → Self-Host on any device that is connected.")
+        PassphraseFact(stringResource(Res.string.selfhost_fact_type_on_other_devices))
+        PassphraseFact(stringResource(Res.string.selfhost_fact_locks_notes))
+        PassphraseFact(stringResource(Res.string.selfhost_fact_cannot_reset))
+        PassphraseFact(stringResource(Res.string.selfhost_fact_see_again_later))
 
         PassphraseBox(
             passphrase = passphrase,
             extraAction = {
-                IconTooltip(text = "New passphrase") {
+                IconTooltip(text = stringResource(Res.string.selfhost_new_passphrase)) {
                     IconButton(onClick = onRegenerate) {
                         Icon(
                             painter = painterResource(Res.drawable.refresh_cw),
-                            contentDescription = "Generate a new passphrase",
+                            contentDescription = stringResource(Res.string.selfhost_generate_new_passphrase),
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             modifier = Modifier.size(20.dp)
                         )
@@ -826,7 +929,7 @@ private fun NewPassphraseCard(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "I saved this passphrase somewhere safe",
+                text = stringResource(Res.string.selfhost_saved_passphrase_confirmation),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -879,11 +982,11 @@ private fun PassphraseBox(passphrase: String, extraAction: @Composable () -> Uni
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            IconTooltip(text = "Copy passphrase") {
+            IconTooltip(text = stringResource(Res.string.selfhost_copy_passphrase)) {
                 IconButton(onClick = { clipboardManager.setText(AnnotatedString(passphrase)) }) {
                     Icon(
                         painter = painterResource(Res.drawable.copy),
-                        contentDescription = "Copy passphrase",
+                        contentDescription = stringResource(Res.string.selfhost_copy_passphrase),
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.size(20.dp)
                     )
@@ -897,6 +1000,7 @@ private fun PassphraseBox(passphrase: String, extraAction: @Composable () -> Uni
 @Composable
 private fun ServerAddressBox(serverUrl: String) {
     val clipboardManager = LocalClipboardManager.current
+    val copiedAddressMessage = stringResource(Res.string.selfhost_copied_address)
 
     Row(
         modifier = Modifier
@@ -913,14 +1017,14 @@ private fun ServerAddressBox(serverUrl: String) {
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-        IconTooltip(text = "Copy address") {
+        IconTooltip(text = stringResource(Res.string.selfhost_copy_address)) {
             IconButton(onClick = {
                 clipboardManager.setText(AnnotatedString(serverUrl))
-                showNativeToast("copied address")
+                showNativeToast(copiedAddressMessage)
             }) {
                 Icon(
                     painter = painterResource(Res.drawable.copy),
-                    contentDescription = "Copy address",
+                    contentDescription = stringResource(Res.string.selfhost_copy_address),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.size(20.dp)
                 )

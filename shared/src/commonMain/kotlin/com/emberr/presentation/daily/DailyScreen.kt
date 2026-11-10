@@ -84,6 +84,7 @@ import com.emberr.presentation.shared.components.TopBarIconButtonGroup
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
 import com.emberr.presentation.shared.editor.selection.BlockStyleBar
 import com.emberr.presentation.sync.SyncViewModel
+import com.emberr.presentation.sync.text
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.ui.theme.NotePaperTextureBox
 import com.emberr.ui.theme.PaperTextureArea
@@ -155,6 +156,7 @@ fun DailyScreen(
     // User Settings & Sync State
     var showSettingsMenu by remember { mutableStateOf(false) }
     val syncState by syncViewModel.syncStatus.collectAsState()
+    val syncStateText = syncState.text()
 
     val density = LocalDensity.current
     val imeBottom = WindowInsets.ime.getBottom(density)
@@ -193,8 +195,8 @@ fun DailyScreen(
     }
 
     LaunchedEffect(syncState) {
-        if (syncState != "Idle" && syncState != "Syncing...") {
-            showNativeToast(syncState)
+        if (syncState.shouldShowAsMessage) {
+            showNativeToast(syncStateText)
             syncViewModel.resetSyncStatus()
         }
     }

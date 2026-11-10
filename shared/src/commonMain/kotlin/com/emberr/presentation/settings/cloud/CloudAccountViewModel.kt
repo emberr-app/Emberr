@@ -30,6 +30,34 @@ import com.emberr.domain.sync.SyncPairingState
 import com.emberr.domain.sync.waitingForNetworkMessage
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.cloud_account_deleted_notes_not_cleared
+import emberr.shared.generated.resources.cloud_disconnect_self_host_first
+import emberr.shared.generated.resources.cloud_email_changed
+import emberr.shared.generated.resources.cloud_error_device_already_signed_out
+import emberr.shared.generated.resources.cloud_error_email_already_used
+import emberr.shared.generated.resources.cloud_error_expired_code
+import emberr.shared.generated.resources.cloud_error_incorrect_code
+import emberr.shared.generated.resources.cloud_error_incorrect_password
+import emberr.shared.generated.resources.cloud_error_invalid_email
+import emberr.shared.generated.resources.cloud_error_invalid_recovery_words
+import emberr.shared.generated.resources.cloud_error_recovery_words_other_account
+import emberr.shared.generated.resources.cloud_error_server_unreachable
+import emberr.shared.generated.resources.cloud_error_signed_out
+import emberr.shared.generated.resources.cloud_error_something_went_wrong
+import emberr.shared.generated.resources.cloud_error_too_many_tries
+import emberr.shared.generated.resources.cloud_error_update_required
+import emberr.shared.generated.resources.cloud_error_wrong_email_or_password
+import emberr.shared.generated.resources.cloud_new_code_sent
+import emberr.shared.generated.resources.cloud_password_changed
+import emberr.shared.generated.resources.cloud_server_address_invalid
+import emberr.shared.generated.resources.cloud_server_address_saved
+import emberr.shared.generated.resources.cloud_sync_busy
+import emberr.shared.generated.resources.cloud_sync_other_method_on
+import emberr.shared.generated.resources.cloud_sync_update_required
+import emberr.shared.generated.resources.cloud_synced
+import emberr.shared.generated.resources.cloud_synced_with_not_sent
+import emberr.shared.generated.resources.cloud_unpair_lan_sync_first
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +70,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 
 enum class CloudAccountStep {
     LOADING,
@@ -66,7 +96,7 @@ enum class CloudAccountStep {
 data class CloudAccountScreenState(
     val step: CloudAccountStep = CloudAccountStep.LOADING,
     val serverAddressInput: String = "",
-    val serverAddressError: String? = null,
+    val serverAddressError: StringResource? = null,
     val email: String = "",
     val code: String = "",
     val password: String = "",
@@ -93,10 +123,10 @@ data class CloudAccountScreenState(
     val mediaPassDetails: CloudMediaPassDetails? = null,
     val otherSyncMethodMessage: String? = null
 ) {
-    val syncProblemMessage: String?
+    val syncProblemMessage: CloudText?
         get() = syncStatus.lastProblem?.let { problem -> cloudSyncResultMessage(problem, syncNetwork, accountDetails) }
 
-    val planText: String?
+    val planText: CloudText?
         get() = accountDetails?.subscription?.let { subscription ->
             cloudPlanText(subscription, Clock.System.now(), TimeZone.currentSystemDefault())
         }
@@ -194,56 +224,53 @@ private fun previousStepOf(step: CloudAccountStep): CloudAccountStep? = when (st
     CloudAccountStep.SIGNED_IN -> null
 }
 
-private const val SOMETHING_WENT_WRONG_MESSAGE = "Something went wrong. Try again."
-
-private const val SIGNED_OUT_MESSAGE = "You were signed out. Log in again."
-
-private const val INCORRECT_PASSWORD_MESSAGE = "Incorrect password. Try again."
-
-private fun cloudAccountErrorMessage(
+private suspend fun cloudAccountErrorMessage(
     error: Exception,
     serverAddress: String,
     isSignedIn: Boolean,
     isPasswordChange: Boolean = false
 ): String = when (error) {
     is CloudApiException -> when (error.code) {
-        CloudApiErrorCode.BAD_REQUEST -> if (isPasswordChange) SOMETHING_WENT_WRONG_MESSAGE else "Enter a valid email address."
-        CloudApiErrorCode.INVALID_PASSWORD -> if (isSignedIn) INCORRECT_PASSWORD_MESSAGE else "Wrong email or password."
-        CloudApiErrorCode.INCORRECT_CODE -> "That code is not right."
-        CloudApiErrorCode.EXPIRED_CODE -> "That code has expired. Ask for a new one."
-        CloudApiErrorCode.TOO_MANY_REQUESTS -> "Too many tries. Wait a bit and try again."
-        CloudApiErrorCode.UPGRADE_REQUIRED -> "Update Emberr to use Emberr Cloud."
-        CloudApiErrorCode.INVALID_TOKEN -> SIGNED_OUT_MESSAGE
-        CloudApiErrorCode.NOT_FOUND -> "That device was already signed out."
-        CloudApiErrorCode.EMAIL_ALREADY_USED -> "Another account already uses this email."
-        else -> SOMETHING_WENT_WRONG_MESSAGE
+        CloudApiErrorCode.BAD_REQUEST ->
+            getString(if (isPasswordChange) Res.string.cloud_error_something_went_wrong else Res.string.cloud_error_invalid_email)
+        CloudApiErrorCode.INVALID_PASSWORD ->
+            getString(if (isSignedIn) Res.string.cloud_error_incorrect_password else Res.string.cloud_error_wrong_email_or_password)
+        CloudApiErrorCode.INCORRECT_CODE -> getString(Res.string.cloud_error_incorrect_code)
+        CloudApiErrorCode.EXPIRED_CODE -> getString(Res.string.cloud_error_expired_code)
+        CloudApiErrorCode.TOO_MANY_REQUESTS -> getString(Res.string.cloud_error_too_many_tries)
+        CloudApiErrorCode.UPGRADE_REQUIRED -> getString(Res.string.cloud_error_update_required)
+        CloudApiErrorCode.INVALID_TOKEN -> getString(Res.string.cloud_error_signed_out)
+        CloudApiErrorCode.NOT_FOUND -> getString(Res.string.cloud_error_device_already_signed_out)
+        CloudApiErrorCode.EMAIL_ALREADY_USED -> getString(Res.string.cloud_error_email_already_used)
+        else -> getString(Res.string.cloud_error_something_went_wrong)
     }
-    is CloudServerUnreachableException -> "Can't reach the server at $serverAddress."
-    is InvalidRecoveryWordsException ->
-        "Those words are not a valid recovery key. Make sure there are 24 words, and check the spelling of each."
-    is IncorrectRecoveryKeyException -> "These words belong to a different account."
-    is IncorrectCloudPasswordException -> INCORRECT_PASSWORD_MESSAGE
-    else -> SOMETHING_WENT_WRONG_MESSAGE
+    is CloudServerUnreachableException -> getString(Res.string.cloud_error_server_unreachable, serverAddress)
+    is InvalidRecoveryWordsException -> getString(Res.string.cloud_error_invalid_recovery_words)
+    is IncorrectRecoveryKeyException -> getString(Res.string.cloud_error_recovery_words_other_account)
+    is IncorrectCloudPasswordException -> getString(Res.string.cloud_error_incorrect_password)
+    else -> getString(Res.string.cloud_error_something_went_wrong)
 }
 
 private fun cloudSyncResultMessage(
     result: CloudSyncResult,
     syncNetwork: SelfHostSyncNetwork,
     accountDetails: CloudAccountDetails?
-): String = when (result) {
+): CloudText = when (result) {
     is CloudSyncResult.Done -> when (result.notSentCount) {
-        0 -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent"
-        else -> "Synced: ${result.receivedCount} received, ${result.sentCount} sent, ${result.notSentCount} not sent"
+        0 -> CloudText.Phrase(Res.string.cloud_synced, listOf(result.receivedCount, result.sentCount))
+        else -> CloudText.Phrase(
+            Res.string.cloud_synced_with_not_sent,
+            listOf(result.receivedCount, result.sentCount, result.notSentCount)
+        )
     }
     is CloudSyncResult.UploadsRefused -> uploadsRefusedMessage(result.reason, accountDetails)
     is CloudSyncResult.CloudCopyRemoved -> cloudCopyRemovedMessage(result.removedAtMicroseconds, TimeZone.currentSystemDefault())
-    CloudSyncResult.NotSignedIn -> SIGNED_OUT_MESSAGE
-    CloudSyncResult.Busy -> "Another sync is running. Try again in a moment."
-    CloudSyncResult.UpdateRequired -> "Update Emberr to keep syncing with Emberr Cloud."
-    CloudSyncResult.AnotherSyncMethodIsOn ->
-        "Another sync method is on. Disconnect Self-Host or unpair LAN Sync to keep using Emberr Cloud."
-    CloudSyncResult.WaitingForAllowedNetwork -> waitingForNetworkMessage(syncNetwork)
-    is CloudSyncResult.Failed -> result.message
+    CloudSyncResult.NotSignedIn -> CloudText.Phrase(Res.string.cloud_error_signed_out)
+    CloudSyncResult.Busy -> CloudText.Phrase(Res.string.cloud_sync_busy)
+    CloudSyncResult.UpdateRequired -> CloudText.Phrase(Res.string.cloud_sync_update_required)
+    CloudSyncResult.AnotherSyncMethodIsOn -> CloudText.Phrase(Res.string.cloud_sync_other_method_on)
+    CloudSyncResult.WaitingForAllowedNetwork -> CloudText.Plain(waitingForNetworkMessage(syncNetwork))
+    is CloudSyncResult.Failed -> CloudText.Plain(result.message)
 }
 
 private fun aSyncFinished(previous: CloudSyncStatus, current: CloudSyncStatus): Boolean {
@@ -299,8 +326,8 @@ class CloudAccountViewModel(
         viewModelScope.launch {
             combine(selfHostConnectionState.isConnected, syncPairingState.isPaired) { isSelfHostConnected, isPaired ->
                 when {
-                    isSelfHostConnected -> "Disconnect Self-Host to use Emberr Cloud."
-                    isPaired -> "Unpair LAN Sync to use Emberr Cloud."
+                    isSelfHostConnected -> getString(Res.string.cloud_disconnect_self_host_first)
+                    isPaired -> getString(Res.string.cloud_unpair_lan_sync_first)
                     else -> null
                 }
             }.collect { message -> _screenState.update { it.copy(otherSyncMethodMessage = message) } }
@@ -323,13 +350,13 @@ class CloudAccountViewModel(
         val address = normalizedCloudServerAddress(_screenState.value.serverAddressInput)
         if (address == null) {
             _screenState.update {
-                it.copy(serverAddressError = "Enter an address that starts with http:// or https://, like http://localhost:8080.")
+                it.copy(serverAddressError = Res.string.cloud_server_address_invalid)
             }
             return
         }
         settingsManager.saveCloudServerAddress(address)
         _screenState.update { it.copy(serverAddressInput = address, serverAddressError = null) }
-        showNativeToast("Server address saved")
+        viewModelScope.launch { showNativeToast(getString(Res.string.cloud_server_address_saved)) }
     }
 
     fun onEmailChanged(email: String) {
@@ -528,7 +555,7 @@ class CloudAccountViewModel(
         runAccountTask {
             val current = _screenState.value
             cloudAccountRepository.changePassword(current.password, current.code, current.logOutOtherDevices)
-            showNativeToast("Password changed successfully")
+            showNativeToast(getString(Res.string.cloud_password_changed))
             returnToSignedIn()
             if (current.logOutOtherDevices) loadSessions()
         }
@@ -548,7 +575,7 @@ class CloudAccountViewModel(
         runAccountTask {
             val current = _screenState.value
             cloudAccountRepository.changeEmail(current.email, current.code)
-            showNativeToast("Email changed to ${current.email}")
+            showNativeToast(getString(Res.string.cloud_email_changed, current.email))
             returnToSignedIn()
         }
     }
@@ -579,9 +606,8 @@ class CloudAccountViewModel(
             val current = _screenState.value
             signOutOnPurpose { cloudAccountRepository.deleteAccount(current.password, current.code) }
             if (current.clearNotesOnThisDevice && !eraseAllAppData()) {
-                _screenState.update {
-                    it.copy(errorMessage = "Your account was deleted, but the notes on this device couldn't be cleared.")
-                }
+                val message = getString(Res.string.cloud_account_deleted_notes_not_cleared)
+                _screenState.update { it.copy(errorMessage = message) }
             }
         }
     }
@@ -636,12 +662,12 @@ class CloudAccountViewModel(
         }
     }
 
-    private fun onSignInStateChanged(signInState: CloudSignInState) {
+    private suspend fun onSignInStateChanged(signInState: CloudSignInState) {
         if (_screenState.value.step !in signedInSteps) return
         when (signInState) {
             is CloudSignInState.SignedIn -> _screenState.update { it.copy(signedInEmail = signInState.email) }
             CloudSignInState.SignedOut -> {
-                val message = if (isSigningOutOnPurpose) _screenState.value.errorMessage else SIGNED_OUT_MESSAGE
+                val message = if (isSigningOutOnPurpose) _screenState.value.errorMessage else getString(Res.string.cloud_error_signed_out)
                 isSigningOutOnPurpose = false
                 showSignedOut(errorMessage = message)
             }
@@ -664,7 +690,8 @@ class CloudAccountViewModel(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {
-            _screenState.update { it.copy(accountDetailsError = signedInErrorMessage(error)) }
+            val message = signedInErrorMessage(error)
+            _screenState.update { it.copy(accountDetailsError = message) }
         }
     }
 
@@ -676,11 +703,12 @@ class CloudAccountViewModel(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (error: Exception) {
-            _screenState.update { it.copy(sessionsError = signedInErrorMessage(error)) }
+            val message = signedInErrorMessage(error)
+            _screenState.update { it.copy(sessionsError = message) }
         }
     }
 
-    private fun signedInErrorMessage(error: Exception): String =
+    private suspend fun signedInErrorMessage(error: Exception): String =
         cloudAccountErrorMessage(error, settingsManager.getCloudServerAddress(), isSignedIn = true)
 
     private fun openStep(step: CloudAccountStep) {
@@ -698,10 +726,11 @@ class CloudAccountViewModel(
         }
     }
 
-    private fun showCodeSent(email: String, codeStep: CloudAccountStep) {
+    private suspend fun showCodeSent(email: String, codeStep: CloudAccountStep) {
+        val newCodeSentMessage = getString(Res.string.cloud_new_code_sent, email)
         _screenState.update {
             if (it.step == codeStep) {
-                it.copy(code = "", newCodeSentMessage = "We sent a new code to $email.")
+                it.copy(code = "", newCodeSentMessage = newCodeSentMessage)
             } else {
                 it.copy(step = codeStep, email = email, code = "", newCodeSentMessage = null)
             }

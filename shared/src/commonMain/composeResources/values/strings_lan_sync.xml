@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Idle</string>
+    <string name="lan_sync_status_not_paired">Not Paired!</string>
+    <string name="lan_sync_status_already_in_progress">Sync already in progress</string>
+    <string name="lan_sync_status_syncing">Syncing...</string>
+    <string name="lan_sync_status_auto_syncing">Auto-Syncing...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Fetching from Desktop...</string>
+    <string name="lan_sync_status_success">Success!</string>
+    <string name="lan_sync_status_synced_successfully">Synced Successfully</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Synced, %1$d item couldn\'t be saved</item>
+        <item quantity="other">Synced, %1$d items couldn\'t be saved</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Partial sync, will retry</string>
+    <string name="lan_sync_status_update_both_devices">Update Emberr on both devices</string>
+    <string name="lan_sync_status_desktop_offline">Desktop Offline</string>
+    <string name="lan_sync_status_failed">Failed: %1$s</string>
+    <string name="lan_sync_status_sync_error">Sync Error: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Pair Mobile Device</string>
+    <string name="lan_sync_pair_dialog_message">Scan this QR code using the Emberr mobile app to connect securely to your desktop.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Secret Token: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Scan the QR code shown on your desktop.</string>
+    <string name="lan_sync_scanner_desktop_hint">On your desktop, open Settings → LAN Sync → Pair Mobile Device.</string>
+    <string name="lan_sync_camera_access_needed">Camera access needed</string>
+    <string name="lan_sync_camera_allow_message">Allow the camera to scan the pairing code on your desktop.</string>
+    <string name="lan_sync_camera_turn_on_message">Turn on Camera in Permissions, then come back here.</string>
+    <string name="lan_sync_allow_camera">Allow Camera</string>
+    <string name="lan_sync_open_app_settings">Open App Settings</string>
+    <string name="lan_sync_camera_mobile_only">Camera scanning is only supported on mobile devices.</string>
+</resources>

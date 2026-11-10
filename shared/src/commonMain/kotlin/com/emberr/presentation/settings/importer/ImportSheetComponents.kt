@@ -41,8 +41,17 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_percent_value
+import emberr.shared.generated.resources.import_button
+import emberr.shared.generated.resources.import_choose_again_hint_desktop
+import emberr.shared.generated.resources.import_choose_again_hint_touch
+import emberr.shared.generated.resources.import_done
+import emberr.shared.generated.resources.import_or_drop_here
+import emberr.shared.generated.resources.import_stop
 import emberr.shared.generated.resources.upload2
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 internal val ImportSheetContentPadding = 20.dp
@@ -57,7 +66,9 @@ private const val UNAVAILABLE_OPTION_ALPHA = 0.38f
 private const val FADED_TEXT_ALPHA = 0.6f
 private const val PROGRESS_TRACK_ALPHA = 0.12f
 
-internal val importChooseAgainHint = if (isDesktopPlatform) "Click to choose again, or drop here." else "Tap to choose again."
+@Composable
+internal fun importChooseAgainHint(): String =
+    stringResource(if (isDesktopPlatform) Res.string.import_choose_again_hint_desktop else Res.string.import_choose_again_hint_touch)
 
 @Composable
 internal fun importChooseBorderColor(): Color = MaterialTheme.colorScheme.onSurface.copy(alpha = CHOOSE_BOX_BORDER_ALPHA)
@@ -126,7 +137,7 @@ internal fun ImportChoosePrompt(title: String, hint: String) {
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface
         )
-        if (isDesktopPlatform) ImportFadedLine(text = "or drop here")
+        if (isDesktopPlatform) ImportFadedLine(text = stringResource(Res.string.import_or_drop_here))
         ImportFadedLine(text = hint)
     }
 }
@@ -211,7 +222,7 @@ internal fun ImportMenuOption(
 @Composable
 internal fun ImportStartButtons(isImportEnabled: Boolean, onImportClick: () -> Unit, onCloseClick: () -> Unit) {
     EmberrButtonPrimary(
-        text = "Import",
+        text = stringResource(Res.string.import_button),
         onClick = onImportClick,
         enabled = isImportEnabled,
         modifier = Modifier
@@ -219,7 +230,7 @@ internal fun ImportStartButtons(isImportEnabled: Boolean, onImportClick: () -> U
             .padding(top = 16.dp, start = ImportSheetContentPadding, end = ImportSheetContentPadding)
     )
     EmberrButtonSecondary(
-        text = "Close",
+        text = stringResource(Res.string.common_close),
         onClick = onCloseClick,
         modifier = Modifier
             .fillMaxWidth()
@@ -249,14 +260,14 @@ internal fun ImportProgressMessage(doneFraction: Float, progressText: String, on
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = "${(doneFraction * 100).roundToInt()}%",
+                text = stringResource(Res.string.common_percent_value, (doneFraction * 100).roundToInt()),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
         EmberrButtonSecondary(
-            text = "Stop import",
+            text = stringResource(Res.string.import_stop),
             onClick = onStopClick,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
@@ -309,12 +320,9 @@ internal fun ImportOutcomeMessage(
             )
         }
         EmberrButtonPrimary(
-            text = "Done",
+            text = stringResource(Res.string.import_done),
             onClick = onDoneClick,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         )
     }
 }
-
-internal fun countLabel(count: Int, singularWord: String): String =
-    if (count == 1) "1 $singularWord" else "$count ${singularWord}s"

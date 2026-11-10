@@ -31,9 +31,15 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_back
 import emberr.shared.generated.resources.emberr_ghost
 import emberr.shared.generated.resources.file_text
+import emberr.shared.generated.resources.import_from
+import emberr.shared.generated.resources.import_text_and_markdown
+import emberr.shared.generated.resources.import_text_and_markdown_subtitle
+import emberr.shared.generated.resources.settings_import
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -72,11 +78,11 @@ fun ImportScreen(
             )
         ) {
             item(key = "import_sources") {
-                SettingsGroup(title = "Import From") {
+                SettingsGroup(title = stringResource(Res.string.import_from)) {
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.file_text),
-                        title = "Text & Markdown",
-                        subtitle = "Also works for Obsidian and Bear notes.\nSome Obsidian features may not import fully.",
+                        title = stringResource(Res.string.import_text_and_markdown),
+                        subtitle = stringResource(Res.string.import_text_and_markdown_subtitle),
                         onClick = {
                             viewModel.prepareMarkdownImport()
                             showMarkdownImportSheet = true
@@ -101,10 +107,10 @@ fun ImportScreen(
                     .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
             ) {
                 EmberrTopHeaderBar(
-                    title = "Import",
+                    title = stringResource(Res.string.settings_import),
                     hazeState = hazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onBackClick = onNavigateBack
                 )
             }

@@ -39,6 +39,26 @@ import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import com.emberr.domain.util.time.formatTimeOfDay
+import androidx.compose.runtime.Composable
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.selfhost_could_not_check_passphrase
+import emberr.shared.generated.resources.selfhost_could_not_check_vault
+import emberr.shared.generated.resources.selfhost_could_not_reach_server
+import emberr.shared.generated.resources.selfhost_could_not_set_up
+import emberr.shared.generated.resources.selfhost_existing_vault_found
+import emberr.shared.generated.resources.selfhost_invalid_credentials
+import emberr.shared.generated.resources.selfhost_last_synced
+import emberr.shared.generated.resources.selfhost_never_synced
+import emberr.shared.generated.resources.selfhost_no_existing_vault
+import emberr.shared.generated.resources.selfhost_no_vault_file_to_restore
+import emberr.shared.generated.resources.selfhost_no_vault_on_server
+import emberr.shared.generated.resources.selfhost_old_or_damaged_vault_data
+import emberr.shared.generated.resources.selfhost_server_returned_error
+import emberr.shared.generated.resources.selfhost_unknown_error
+import emberr.shared.generated.resources.selfhost_vault_exists_enter_passphrase
+import emberr.shared.generated.resources.selfhost_wrong_passphrase
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 
 enum class ConnectionTestStatus { NOT_TESTED, TESTING, VERIFIED, FAILED }
 
@@ -103,13 +123,15 @@ sealed class SelfHostScreenState {
 
 private const val WAIT_BEFORE_SHOWING_SYNC_FINISHED_MS = 1_000L
 
-private const val WRONG_PASSPHRASE_MESSAGE = "That passphrase doesn't unlock this vault."
-
+@Composable
 fun formatLastSynced(epochMillis: Long?, usesTwentyFourHourClock: Boolean): String {
-    if (epochMillis == null || epochMillis == 0L) return "Never synced"
+    if (epochMillis == null || epochMillis == 0L) return stringResource(Res.string.selfhost_never_synced)
     val local = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(TimeZone.currentSystemDefault())
     val month = local.month.name.lowercase().replaceFirstChar { it.uppercase() }.take(3)
-    return "Last synced: $month ${local.day}, ${formatTimeOfDay(local.hour, local.minute, usesTwentyFourHourClock)}"
+    return stringResource(
+        Res.string.selfhost_last_synced,
+        "$month ${local.day}, ${formatTimeOfDay(local.hour, local.minute, usesTwentyFourHourClock)}"
+    )
 }
 
 class SelfHostSetupViewModel(
@@ -294,21 +316,29 @@ class SelfHostSetupViewModel(
             val result = webDavSyncClient.testConnection(credentials)
 
             if (result !is WebDavConnectionTestResult.Success) {
+                val failureMessage = when (result) {
+                    is WebDavConnectionTestResult.InvalidCredentials -> getString(Res.string.selfhost_invalid_credentials)
+                    is WebDavConnectionTestResult.ServerError ->
+                        getString(Res.string.selfhost_server_returned_error, result.statusCode)
+                    is WebDavConnectionTestResult.NetworkFailure ->
+                        result.cause.message ?: getString(Res.string.selfhost_could_not_reach_server)
+                    else -> null
+                }
                 updateForm { current ->
                     when (result) {
                         is WebDavConnectionTestResult.InvalidCredentials -> current.copy(
                             connectionTestStatus = ConnectionTestStatus.FAILED,
-                            connectionTestMessage = "Invalid username or password"
+                            connectionTestMessage = failureMessage
                         )
 
                         is WebDavConnectionTestResult.ServerError -> current.copy(
                             connectionTestStatus = ConnectionTestStatus.FAILED,
-                            connectionTestMessage = "Server returned an error (${result.statusCode})"
+                            connectionTestMessage = failureMessage
                         )
 
                         is WebDavConnectionTestResult.NetworkFailure -> current.copy(
                             connectionTestStatus = ConnectionTestStatus.FAILED,
-                            connectionTestMessage = result.cause.message ?: "Could not reach the server"
+                            connectionTestMessage = failureMessage
                         )
 
                         is WebDavConnectionTestResult.InvalidConfiguration -> current.copy(
@@ -325,23 +355,28 @@ class SelfHostSetupViewModel(
             val vaultExists = try {
                 webDavSyncClient.checkVaultExists(credentials)
             } catch (cause: Exception) {
+                val failureMessage = getString(
+                    Res.string.selfhost_could_not_check_vault,
+                    cause.message ?: getString(Res.string.selfhost_unknown_error)
+                )
                 updateForm {
                     it.copy(
                         connectionTestStatus = ConnectionTestStatus.FAILED,
-                        connectionTestMessage = "Could not check for an existing vault: ${cause.message ?: "unknown error"}"
+                        connectionTestMessage = failureMessage
                     )
                 }
                 return@launch
             }
 
+            val vaultCheckMessage = if (vaultExists) {
+                getString(Res.string.selfhost_existing_vault_found)
+            } else {
+                getString(Res.string.selfhost_no_existing_vault)
+            }
             updateForm {
                 it.copy(
                     connectionTestStatus = ConnectionTestStatus.VERIFIED,
-                    connectionTestMessage = if (vaultExists) {
-                        "Existing vault found on this server"
-                    } else {
-                        "No existing vault, this will create a new one"
-                    },
+                    connectionTestMessage = vaultCheckMessage,
                     vaultMode = if (vaultExists) VaultMode.RESTORE_VAULT else VaultMode.CREATE_VAULT
                 )
             }
@@ -371,7 +406,7 @@ class SelfHostSetupViewModel(
                 val vaultKey = try {
                     if (isRestoring) {
                         val vaultFileBytes = webDavSyncClient.downloadVaultFile()
-                            ?: throw WebDavConfigurationException("No vault file was found on the server to restore from")
+                            ?: throw WebDavConfigurationException(getString(Res.string.selfhost_no_vault_file_to_restore))
                         withContext(Dispatchers.Default) { vaultKeyLock.unlockVault(vaultFileBytes, passphraseChars) }
                     } else {
                         if (webDavSyncClient.checkVaultExists(credentials)) {
@@ -381,8 +416,7 @@ class SelfHostSetupViewModel(
                         }
                         if (webDavSyncClient.checkManifestExists(credentials)) {
                             throw WebDavConfigurationException(
-                                "This server folder has sync data from an older or damaged vault. " +
-                                    "Delete the emberr_sync folder on your server, then set up again."
+                                getString(Res.string.selfhost_old_or_damaged_vault_data)
                             )
                         }
                         val newVault = withContext(Dispatchers.Default) { vaultKeyLock.createVault(passphraseChars) }
@@ -397,21 +431,24 @@ class SelfHostSetupViewModel(
                 selfHostSyncEngine.forgetServerSyncProgress()
             } catch (cause: WebDavConflictException) {
                 secureSyncKeyStorage.clearAll()
+                val vaultFoundMessage = getString(Res.string.selfhost_existing_vault_found)
+                val restoreInsteadMessage = getString(Res.string.selfhost_vault_exists_enter_passphrase)
                 updateForm {
                     it.copy(
                         setupPhase = SetupPhase.FORM,
                         vaultMode = VaultMode.RESTORE_VAULT,
-                        connectionTestMessage = "Existing vault found on this server",
-                        errorMessage = "A vault already exists on this server. Enter its recovery passphrase below to restore it."
+                        connectionTestMessage = vaultFoundMessage,
+                        errorMessage = restoreInsteadMessage
                     )
                 }
                 return@launch
             } catch (cause: Exception) {
                 secureSyncKeyStorage.clearAll()
+                val setupFailedMessage = cause.message ?: getString(Res.string.selfhost_could_not_set_up)
                 updateForm {
                     it.copy(
                         setupPhase = SetupPhase.ERROR,
-                        errorMessage = cause.message ?: "Could not set up secure sync"
+                        errorMessage = setupFailedMessage
                     )
                 }
                 return@launch
@@ -480,19 +517,22 @@ class SelfHostSetupViewModel(
             val errorMessage = try {
                 val vaultFileBytes = webDavSyncClient.downloadVaultFile()
                 if (vaultFileBytes == null) {
-                    "No vault was found on the server."
+                    getString(Res.string.selfhost_no_vault_on_server)
                 } else if (unlocksThisDevicesVault(vaultFileBytes, passphrase)) {
                     secureSyncKeyStorage.saveRecoveryPassphrase(passphrase)
                     null
                 } else {
-                    WRONG_PASSPHRASE_MESSAGE
+                    getString(Res.string.selfhost_wrong_passphrase)
                 }
             } catch (cause: IncorrectPassphraseException) {
-                WRONG_PASSPHRASE_MESSAGE
+                getString(Res.string.selfhost_wrong_passphrase)
             } catch (cause: CancellationException) {
                 throw cause
             } catch (cause: Exception) {
-                "Could not check the passphrase: ${cause.message ?: "unknown error"}"
+                getString(
+                    Res.string.selfhost_could_not_check_passphrase,
+                    cause.message ?: getString(Res.string.selfhost_unknown_error)
+                )
             }
 
             updateConnected {

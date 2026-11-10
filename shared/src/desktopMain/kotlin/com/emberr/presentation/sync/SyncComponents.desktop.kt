@@ -14,6 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.lan_sync_camera_mobile_only
+import org.jetbrains.compose.resources.stringResource
 
 actual @Composable fun QrCodeDisplay(
     data: String,
@@ -60,6 +63,6 @@ actual @Composable fun QrScannerView(
     modifier: Modifier
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Text("Camera scanning is only supported on mobile devices.")
+        Text(stringResource(Res.string.lan_sync_camera_mobile_only))
     }
 }

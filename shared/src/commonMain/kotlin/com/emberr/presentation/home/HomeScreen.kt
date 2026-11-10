@@ -88,6 +88,7 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.sync.SyncViewModel
+import com.emberr.presentation.sync.text
 import com.emberr.domain.util.system.showNativeToast
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -388,10 +389,11 @@ fun HomeScreen(
     }
 
     val syncState by syncViewModel.syncStatus.collectAsState()
+    val syncStateText = syncState.text()
 
     LaunchedEffect(syncState) {
-        if (syncState != "Idle" && syncState != "Syncing...") {
-            showNativeToast(syncState)
+        if (syncState.shouldShowAsMessage) {
+            showNativeToast(syncStateText)
             syncViewModel.resetSyncStatus()
         }
     }
