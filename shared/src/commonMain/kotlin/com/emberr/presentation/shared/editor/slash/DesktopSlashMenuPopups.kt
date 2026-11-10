@@ -33,9 +33,11 @@ internal fun rememberSlashMenuSections(
     onChooseHighlightColor: () -> Unit
 ): List<SlashMenuSectionData> {
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
-    return remember(slashQuery, isSlashMenuActiveHere, customProperties, usesTwentyFourHourClock) {
+    val slashMenuLabels = rememberSlashMenuLabels()
+    return remember(slashQuery, isSlashMenuActiveHere, customProperties, usesTwentyFourHourClock, slashMenuLabels) {
         if (isSlashMenuActiveHere) {
             filteredSlashMenuSections(
+                labels = slashMenuLabels,
                 query = slashQuery,
                 onChangeBlockType = { actions.onChangeBlockType(it) },
                 onToggleFormat = { format ->

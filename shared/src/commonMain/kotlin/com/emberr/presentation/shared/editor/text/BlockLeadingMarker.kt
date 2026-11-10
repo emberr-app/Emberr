@@ -41,6 +41,9 @@ import com.emberr.presentation.shared.editor.blockViews.callout.accentColor
 import com.emberr.presentation.shared.editor.blockViews.callout.icon
 import org.jetbrains.compose.resources.painterResource
 import com.emberr.presentation.shared.editor.EditorActions
+import emberr.shared.generated.resources.editor_callout_options
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun BlockLeadingMarker(
@@ -84,7 +87,7 @@ internal fun BlockLeadingMarker(
                 }
                 is CalloutBlock -> {
                     Icon(
-                        painterResource(block.calloutType.icon()), "Callout options",
+                        painterResource(block.calloutType.icon()), stringResource(Res.string.editor_callout_options),
                         tint = block.calloutType.accentColor(),
                         modifier = Modifier
                             .size(24.dp)

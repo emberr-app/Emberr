@@ -43,6 +43,49 @@ import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.underline
 import emberr.shared.generated.resources.unordered_list
 import emberr.shared.generated.resources.x
+import emberr.shared.generated.resources.editor_blocks_selected
+import emberr.shared.generated.resources.editor_hide_cover_image
+import emberr.shared.generated.resources.editor_hide_note_icon
+import emberr.shared.generated.resources.editor_pin
+import emberr.shared.generated.resources.editor_show_cover_image
+import emberr.shared.generated.resources.editor_show_note_icon
+import emberr.shared.generated.resources.editor_unpin
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.editor_add_block_above
+import emberr.shared.generated.resources.editor_add_block_below
+import emberr.shared.generated.resources.editor_align_center
+import emberr.shared.generated.resources.editor_align_justify
+import emberr.shared.generated.resources.editor_align_left
+import emberr.shared.generated.resources.editor_align_right
+import emberr.shared.generated.resources.editor_block_bulleted_list
+import emberr.shared.generated.resources.editor_block_callout
+import emberr.shared.generated.resources.editor_block_code_block
+import emberr.shared.generated.resources.editor_block_heading_1
+import emberr.shared.generated.resources.editor_block_heading_2
+import emberr.shared.generated.resources.editor_block_numbered_list
+import emberr.shared.generated.resources.editor_block_quote
+import emberr.shared.generated.resources.editor_block_text
+import emberr.shared.generated.resources.editor_block_todo_list
+import emberr.shared.generated.resources.editor_block_toggle_list
+import emberr.shared.generated.resources.editor_clear_selection
+import emberr.shared.generated.resources.editor_copy
+import emberr.shared.generated.resources.editor_cut
+import emberr.shared.generated.resources.editor_format_bold
+import emberr.shared.generated.resources.editor_format_highlight
+import emberr.shared.generated.resources.editor_format_italic
+import emberr.shared.generated.resources.editor_format_strikethrough
+import emberr.shared.generated.resources.editor_format_underline
+import emberr.shared.generated.resources.editor_formatting
+import emberr.shared.generated.resources.editor_indent_decrease
+import emberr.shared.generated.resources.editor_indent_increase
+import emberr.shared.generated.resources.editor_preview
+import emberr.shared.generated.resources.editor_select_all_blocks
+import emberr.shared.generated.resources.editor_select_more_blocks
+import emberr.shared.generated.resources.editor_slash_section_alignment
+import emberr.shared.generated.resources.editor_slash_section_indentation
+import emberr.shared.generated.resources.editor_turn_into
 
 @Composable
 fun BlockSelectionMenuContent(
@@ -74,35 +117,35 @@ fun BlockSelectionMenuContent(
 
     val addBlockItems = buildList {
         if (onAddBlockAbove != null) {
-            add(SlashMenuItemData("Add Block Above", Res.drawable.arrow_up, action = closeThen(onAddBlockAbove)))
+            add(SlashMenuItemData(stringResource(Res.string.editor_add_block_above), Res.drawable.arrow_up, action = closeThen(onAddBlockAbove)))
         }
         if (onAddBlockBelow != null) {
-            add(SlashMenuItemData("Add Block Below", Res.drawable.arrow_down, action = closeThen(onAddBlockBelow)))
+            add(SlashMenuItemData(stringResource(Res.string.editor_add_block_below), Res.drawable.arrow_down, action = closeThen(onAddBlockBelow)))
         }
     }
     val selectionItems = listOf(
-        SlashMenuItemData("Select More Blocks", Res.drawable.mouse_square2, action = onCloseMenu),
-        SlashMenuItemData("Select All Blocks", Res.drawable.select_all, action = closeThen(onSelectAll)),
-        SlashMenuItemData("Clear Selection", Res.drawable.x, 14.dp, action = closeThen(onClearSelection))
+        SlashMenuItemData(stringResource(Res.string.editor_select_more_blocks), Res.drawable.mouse_square2, action = onCloseMenu),
+        SlashMenuItemData(stringResource(Res.string.editor_select_all_blocks), Res.drawable.select_all, action = closeThen(onSelectAll)),
+        SlashMenuItemData(stringResource(Res.string.editor_clear_selection), Res.drawable.x, 14.dp, action = closeThen(onClearSelection))
     )
 
     val sections = buildList {
         add(
             SlashMenuSectionData(
-                title = if (selectedCount == 1) "1 Block Selected" else "$selectedCount Blocks Selected",
+                title = pluralStringResource(Res.plurals.editor_blocks_selected, selectedCount, selectedCount),
                 items = buildList {
-                    add(SlashMenuItemData("Copy", Res.drawable.copy, action = closeThen(onCopy)))
-                    add(SlashMenuItemData("Cut", Res.drawable.scissor2, action = closeThen(onCut)))
+                    add(SlashMenuItemData(stringResource(Res.string.editor_copy), Res.drawable.copy, action = closeThen(onCopy)))
+                    add(SlashMenuItemData(stringResource(Res.string.editor_cut), Res.drawable.scissor2, action = closeThen(onCut)))
                     if (onTogglePin != null) {
                         add(
                             SlashMenuItemData(
-                                label = if (isSelectionPinned) "Unpin" else "Pin",
+                                label = if (isSelectionPinned) stringResource(Res.string.editor_unpin) else stringResource(Res.string.editor_pin),
                                 icon = Res.drawable.thumbtack,
                                 action = closeThen(onTogglePin)
                             )
                         )
                     }
-                    add(SlashMenuItemData("Delete", Res.drawable.trash, action = closeThen(onDelete)))
+                    add(SlashMenuItemData(stringResource(Res.string.common_delete), Res.drawable.trash, action = closeThen(onDelete)))
                     if (addBlockItems.isEmpty()) {
                         addAll(selectionItems)
                     }
@@ -118,10 +161,10 @@ fun BlockSelectionMenuContent(
         if (selectedLinkedNote != null && onUpdateLinkedNoteOptions != null) {
             add(
                 SlashMenuSectionData(
-                    title = "Preview",
+                    title = stringResource(Res.string.editor_preview),
                     items = listOf(
                         SlashMenuItemData(
-                            label = if (selectedLinkedNote.showIcon) "Hide Note Icon" else "Show Note Icon",
+                            label = if (selectedLinkedNote.showIcon) stringResource(Res.string.editor_hide_note_icon) else stringResource(Res.string.editor_show_note_icon),
                             icon = if (selectedLinkedNote.showIcon) Res.drawable.eye_closed else Res.drawable.eye_open,
                             action = closeThen {
                                 onUpdateLinkedNoteOptions(
@@ -132,7 +175,7 @@ fun BlockSelectionMenuContent(
                             }
                         ),
                         SlashMenuItemData(
-                            label = if (selectedLinkedNote.showCoverImage) "Hide Cover Image" else "Show Cover Image",
+                            label = if (selectedLinkedNote.showCoverImage) stringResource(Res.string.editor_hide_cover_image) else stringResource(Res.string.editor_show_cover_image),
                             icon = if (selectedLinkedNote.showCoverImage) Res.drawable.eye_closed else Res.drawable.eye_open,
                             action = closeThen {
                                 onUpdateLinkedNoteOptions(
@@ -151,19 +194,19 @@ fun BlockSelectionMenuContent(
             if (onChangeBlockType != null && hasTextBlockSelected) {
                 add(
                     optionThatOpensMenu(
-                        label = "Turn Into",
+                        label = stringResource(Res.string.editor_turn_into),
                         icon = SlashMenuIcon.Drawable(Res.drawable.refresh_cw),
                         items = listOf(
-                            SlashMenuItemData("Text", Icons.AutoMirrored.Filled.Subject, action = closeThen { onChangeBlockType("text") }),
-                            SlashMenuItemData("Heading 1", SlashMenuIcon.Label("H1"), closeThen { onChangeBlockType("h1") }),
-                            SlashMenuItemData("Heading 2", SlashMenuIcon.Label("H2"), closeThen { onChangeBlockType("h2") }),
-                            SlashMenuItemData("To-do List", Res.drawable.check_square, action = closeThen { onChangeBlockType("checkbox") }),
-                            SlashMenuItemData("Bulleted List", Res.drawable.unordered_list, 15.dp, closeThen { onChangeBlockType("bullet") }),
-                            SlashMenuItemData("Numbered List", Res.drawable.ordered_list, 14.dp, closeThen { onChangeBlockType("number") }),
-                            SlashMenuItemData("Toggle List", Res.drawable.arrow_right2, action = closeThen { onChangeBlockType("toggle") }),
-                            SlashMenuItemData("Quote", Res.drawable.quote_down2, 14.dp, closeThen { onChangeBlockType("quote") }),
-                            SlashMenuItemData("Callout", Res.drawable.card_edit2, action = closeThen { onChangeBlockType("callout") }),
-                            SlashMenuItemData("Code Block", Res.drawable.code, action = closeThen { onChangeBlockType("code") })
+                            SlashMenuItemData(stringResource(Res.string.editor_block_text), Icons.AutoMirrored.Filled.Subject, action = closeThen { onChangeBlockType("text") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_heading_1), SlashMenuIcon.Label("H1"), closeThen { onChangeBlockType("h1") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_heading_2), SlashMenuIcon.Label("H2"), closeThen { onChangeBlockType("h2") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_todo_list), Res.drawable.check_square, action = closeThen { onChangeBlockType("checkbox") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_bulleted_list), Res.drawable.unordered_list, 15.dp, closeThen { onChangeBlockType("bullet") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_numbered_list), Res.drawable.ordered_list, 14.dp, closeThen { onChangeBlockType("number") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_toggle_list), Res.drawable.arrow_right2, action = closeThen { onChangeBlockType("toggle") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_quote), Res.drawable.quote_down2, 14.dp, closeThen { onChangeBlockType("quote") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_callout), Res.drawable.card_edit2, action = closeThen { onChangeBlockType("callout") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_block_code_block), Res.drawable.code, action = closeThen { onChangeBlockType("code") })
                         )
                     )
                 )
@@ -172,14 +215,14 @@ fun BlockSelectionMenuContent(
             if (onToggleFormat != null && hasTextBlockSelected) {
                 add(
                     optionThatOpensMenu(
-                        label = "Formatting",
+                        label = stringResource(Res.string.editor_formatting),
                         icon = SlashMenuIcon.Drawable(Res.drawable.format_bold, 13.dp),
                         items = listOf(
-                            SlashMenuItemData("Bold", Res.drawable.format_bold, 13.dp, closeThen { onToggleFormat("bold") }),
-                            SlashMenuItemData("Italic", Res.drawable.italic, 13.dp, closeThen { onToggleFormat("italic") }),
-                            SlashMenuItemData("Underline", Res.drawable.underline, 15.dp, closeThen { onToggleFormat("underline") }),
-                            SlashMenuItemData("Strikethrough", Res.drawable.text_x, 15.dp, closeThen { onToggleFormat("strike") }),
-                            SlashMenuItemData("Highlight", Res.drawable.text_highlight, 19.dp, closeThen { onToggleFormat("highlight") })
+                            SlashMenuItemData(stringResource(Res.string.editor_format_bold), Res.drawable.format_bold, 13.dp, closeThen { onToggleFormat("bold") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_format_italic), Res.drawable.italic, 13.dp, closeThen { onToggleFormat("italic") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_format_underline), Res.drawable.underline, 15.dp, closeThen { onToggleFormat("underline") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_format_strikethrough), Res.drawable.text_x, 15.dp, closeThen { onToggleFormat("strike") }),
+                            SlashMenuItemData(stringResource(Res.string.editor_format_highlight), Res.drawable.text_highlight, 19.dp, closeThen { onToggleFormat("highlight") })
                         )
                     )
                 )
@@ -188,13 +231,13 @@ fun BlockSelectionMenuContent(
             if (onSetAlignment != null && hasTextBlockSelected) {
                 add(
                     optionThatOpensMenu(
-                        label = "Alignment",
+                        label = stringResource(Res.string.editor_slash_section_alignment),
                         icon = SlashMenuIcon.Drawable(Res.drawable.textalign_left2),
                         items = listOf(
-                            SlashMenuItemData("Align Left", Res.drawable.textalign_left2, action = closeThen { onSetAlignment(TextAlignment.LEFT) }),
-                            SlashMenuItemData("Align Right", Res.drawable.textalign_right2, action = closeThen { onSetAlignment(TextAlignment.RIGHT) }),
-                            SlashMenuItemData("Align Center", Res.drawable.textalign_center2, action = closeThen { onSetAlignment(TextAlignment.CENTER) }),
-                            SlashMenuItemData("Justify", Res.drawable.textalign_justifycenter2, action = closeThen { onSetAlignment(TextAlignment.JUSTIFY) })
+                            SlashMenuItemData(stringResource(Res.string.editor_align_left), Res.drawable.textalign_left2, action = closeThen { onSetAlignment(TextAlignment.LEFT) }),
+                            SlashMenuItemData(stringResource(Res.string.editor_align_right), Res.drawable.textalign_right2, action = closeThen { onSetAlignment(TextAlignment.RIGHT) }),
+                            SlashMenuItemData(stringResource(Res.string.editor_align_center), Res.drawable.textalign_center2, action = closeThen { onSetAlignment(TextAlignment.CENTER) }),
+                            SlashMenuItemData(stringResource(Res.string.editor_align_justify), Res.drawable.textalign_justifycenter2, action = closeThen { onSetAlignment(TextAlignment.JUSTIFY) })
                         )
                     )
                 )
@@ -203,11 +246,11 @@ fun BlockSelectionMenuContent(
             if (onAdjustIndentation != null) {
                 add(
                     optionThatOpensMenu(
-                        label = "Indentation",
+                        label = stringResource(Res.string.editor_slash_section_indentation),
                         icon = SlashMenuIcon.Drawable(Res.drawable.indent_left),
                         items = listOf(
-                            SlashMenuItemData("Decrease Indent", Res.drawable.indent_right, action = closeThen { onAdjustIndentation(false) }),
-                            SlashMenuItemData("Increase Indent", Res.drawable.indent_left, action = closeThen { onAdjustIndentation(true) })
+                            SlashMenuItemData(stringResource(Res.string.editor_indent_decrease), Res.drawable.indent_right, action = closeThen { onAdjustIndentation(false) }),
+                            SlashMenuItemData(stringResource(Res.string.editor_indent_increase), Res.drawable.indent_left, action = closeThen { onAdjustIndentation(true) })
                         )
                     )
                 )

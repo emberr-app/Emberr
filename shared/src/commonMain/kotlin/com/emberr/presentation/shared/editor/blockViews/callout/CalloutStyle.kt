@@ -1,5 +1,6 @@
 package com.emberr.presentation.shared.editor.blockViews.callout
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.emberr.domain.model.CalloutType
 import emberr.shared.generated.resources.Res
@@ -17,6 +18,20 @@ import emberr.shared.generated.resources.list_square
 import emberr.shared.generated.resources.quote_down2
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.DrawableResource
+import emberr.shared.generated.resources.editor_callout_type_abstract
+import emberr.shared.generated.resources.editor_callout_type_bug
+import emberr.shared.generated.resources.editor_callout_type_danger
+import emberr.shared.generated.resources.editor_callout_type_example
+import emberr.shared.generated.resources.editor_callout_type_failure
+import emberr.shared.generated.resources.editor_callout_type_info
+import emberr.shared.generated.resources.editor_callout_type_note
+import emberr.shared.generated.resources.editor_callout_type_question
+import emberr.shared.generated.resources.editor_callout_type_quote
+import emberr.shared.generated.resources.editor_callout_type_success
+import emberr.shared.generated.resources.editor_callout_type_tip
+import emberr.shared.generated.resources.editor_callout_type_todo
+import emberr.shared.generated.resources.editor_callout_type_warning
+import org.jetbrains.compose.resources.stringResource
 
 private val CalloutBlue = Color(0xFF086DDD)
 private val CalloutCyan = Color(0xFF00BFBC)
@@ -40,6 +55,23 @@ fun CalloutType.accentColor(): Color = when (this) {
 fun CalloutType.backgroundColor(surfaceColor: Color): Color = when (this) {
     CalloutType.NOTE, CalloutType.QUOTE -> surfaceColor
     else -> accentColor().copy(alpha = CalloutTintedBackgroundAlpha)
+}
+
+@Composable
+fun CalloutType.displayName(): String = when (this) {
+    CalloutType.NOTE -> stringResource(Res.string.editor_callout_type_note)
+    CalloutType.ABSTRACT -> stringResource(Res.string.editor_callout_type_abstract)
+    CalloutType.INFO -> stringResource(Res.string.editor_callout_type_info)
+    CalloutType.TODO -> stringResource(Res.string.editor_callout_type_todo)
+    CalloutType.TIP -> stringResource(Res.string.editor_callout_type_tip)
+    CalloutType.SUCCESS -> stringResource(Res.string.editor_callout_type_success)
+    CalloutType.QUESTION -> stringResource(Res.string.editor_callout_type_question)
+    CalloutType.WARNING -> stringResource(Res.string.editor_callout_type_warning)
+    CalloutType.FAILURE -> stringResource(Res.string.editor_callout_type_failure)
+    CalloutType.DANGER -> stringResource(Res.string.editor_callout_type_danger)
+    CalloutType.BUG -> stringResource(Res.string.editor_callout_type_bug)
+    CalloutType.EXAMPLE -> stringResource(Res.string.editor_callout_type_example)
+    CalloutType.QUOTE -> stringResource(Res.string.editor_callout_type_quote)
 }
 
 fun CalloutType.icon(): DrawableResource = when (this) {

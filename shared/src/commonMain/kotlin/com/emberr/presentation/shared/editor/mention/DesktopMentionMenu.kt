@@ -32,8 +32,10 @@ internal fun rememberMentionMenuSections(
 ): List<SlashMenuSectionData> {
     var shownMentionNoteCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
     var shownMentionPeopleCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
-    return remember(mentionQuery, allLinkableNotes, shownMentionNoteCount, shownMentionPeopleCount) {
+    val labels = mentionMenuLabels(mentionQuery.orEmpty())
+    return remember(mentionQuery, allLinkableNotes, shownMentionNoteCount, shownMentionPeopleCount, labels) {
         mentionMenuSections(
+            labels = labels,
             query = mentionQuery.orEmpty(),
             mentionableNotes = allLinkableNotes,
             shownNoteCount = shownMentionNoteCount,

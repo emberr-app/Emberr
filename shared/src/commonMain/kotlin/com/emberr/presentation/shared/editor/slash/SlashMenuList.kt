@@ -47,6 +47,8 @@ import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.image
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import emberr.shared.generated.resources.editor_no_results_found
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DesktopSlashMenuContent(
@@ -61,7 +63,9 @@ fun DesktopSlashMenuContent(
     customProperties: List<CustomPropertyEntity> = emptyList()
 ) {
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
+    val slashMenuLabels = rememberSlashMenuLabels()
     val filteredSections = remember(
+        slashMenuLabels,
         query,
         onChangeBlockType,
         onToggleFormat,
@@ -73,6 +77,7 @@ fun DesktopSlashMenuContent(
         customProperties
     ) {
         filteredSlashMenuSections(
+            slashMenuLabels,
             query,
             onChangeBlockType,
             onToggleFormat,
@@ -135,7 +140,7 @@ fun SlashMenuList(sections: List<SlashMenuSectionData>, selectedIndex: Int = -1,
     ) {
         if (sections.isEmpty()) {
             Text(
-                text = "No results found",
+                text = stringResource(Res.string.editor_no_results_found),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(16.dp)

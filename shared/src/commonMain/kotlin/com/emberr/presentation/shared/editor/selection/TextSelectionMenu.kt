@@ -33,6 +33,19 @@ import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.underline
 import kotlin.math.roundToInt
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.editor_block_text
+import emberr.shared.generated.resources.editor_copy
+import emberr.shared.generated.resources.editor_cut
+import emberr.shared.generated.resources.editor_format_bold
+import emberr.shared.generated.resources.editor_format_highlight
+import emberr.shared.generated.resources.editor_format_italic
+import emberr.shared.generated.resources.editor_format_strikethrough
+import emberr.shared.generated.resources.editor_format_underline
+import emberr.shared.generated.resources.editor_formatting
+import emberr.shared.generated.resources.editor_paste
+import emberr.shared.generated.resources.editor_select_all_title_case
+import org.jetbrains.compose.resources.stringResource
 
 private val TextSelectionMenuWidth = 260.dp
 
@@ -81,27 +94,27 @@ fun TextSelectionMenu(
                 )
             } else {
                 val textItems = listOfNotNull(
-                    actions.copy?.let { SlashMenuItemData("Copy", Res.drawable.copy, action = closeThen(it)) },
-                    actions.cut?.let { SlashMenuItemData("Cut", Res.drawable.scissor2, action = closeThen(it)) },
-                    actions.paste?.let { SlashMenuItemData("Paste", Icons.Default.ContentPaste, action = closeThen(it)) },
-                    actions.delete?.let { SlashMenuItemData("Delete", Res.drawable.trash, action = closeThen(it)) },
-                    actions.selectAll?.let { SlashMenuItemData("Select All", Res.drawable.select_all, action = closeThen(it)) }
+                    actions.copy?.let { SlashMenuItemData(stringResource(Res.string.editor_copy), Res.drawable.copy, action = closeThen(it)) },
+                    actions.cut?.let { SlashMenuItemData(stringResource(Res.string.editor_cut), Res.drawable.scissor2, action = closeThen(it)) },
+                    actions.paste?.let { SlashMenuItemData(stringResource(Res.string.editor_paste), Icons.Default.ContentPaste, action = closeThen(it)) },
+                    actions.delete?.let { SlashMenuItemData(stringResource(Res.string.common_delete), Res.drawable.trash, action = closeThen(it)) },
+                    actions.selectAll?.let { SlashMenuItemData(stringResource(Res.string.editor_select_all_title_case), Res.drawable.select_all, action = closeThen(it)) }
                 )
                 val formattingItems = if (toggleFormat == null) {
                     emptyList()
                 } else {
                     listOf(
-                        SlashMenuItemData("Bold", Res.drawable.format_bold, 13.dp, closeThen { toggleFormat("bold") }),
-                        SlashMenuItemData("Italic", Res.drawable.italic, 13.dp, closeThen { toggleFormat("italic") }),
-                        SlashMenuItemData("Underline", Res.drawable.underline, 15.dp, closeThen { toggleFormat("underline") }),
-                        SlashMenuItemData("Strikethrough", Res.drawable.text_x, 15.dp, closeThen { toggleFormat("strike") }),
-                        SlashMenuItemData("Highlight", Res.drawable.text_highlight, 19.dp) { isChoosingHighlightColor = true }
+                        SlashMenuItemData(stringResource(Res.string.editor_format_bold), Res.drawable.format_bold, 13.dp, closeThen { toggleFormat("bold") }),
+                        SlashMenuItemData(stringResource(Res.string.editor_format_italic), Res.drawable.italic, 13.dp, closeThen { toggleFormat("italic") }),
+                        SlashMenuItemData(stringResource(Res.string.editor_format_underline), Res.drawable.underline, 15.dp, closeThen { toggleFormat("underline") }),
+                        SlashMenuItemData(stringResource(Res.string.editor_format_strikethrough), Res.drawable.text_x, 15.dp, closeThen { toggleFormat("strike") }),
+                        SlashMenuItemData(stringResource(Res.string.editor_format_highlight), Res.drawable.text_highlight, 19.dp) { isChoosingHighlightColor = true }
                     )
                 }
                 SlashMenuList(
                     sections = listOfNotNull(
-                        SlashMenuSectionData(title = "Text", items = textItems).takeIf { textItems.isNotEmpty() },
-                        SlashMenuSectionData(title = "Formatting", items = formattingItems).takeIf { formattingItems.isNotEmpty() }
+                        SlashMenuSectionData(title = stringResource(Res.string.editor_block_text), items = textItems).takeIf { textItems.isNotEmpty() },
+                        SlashMenuSectionData(title = stringResource(Res.string.editor_formatting), items = formattingItems).takeIf { formattingItems.isNotEmpty() }
                     )
                 )
             }

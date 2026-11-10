@@ -9,4 +9,5 @@
     <string name="common_off">Off</string>
     <string name="common_version_label">v%1$s</string>
     <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">Untitled</string>
 </resources>

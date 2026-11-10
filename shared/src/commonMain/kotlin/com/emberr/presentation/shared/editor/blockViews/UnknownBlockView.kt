@@ -10,11 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.editor.DefaultBlockShape
+import emberr.shared.generated.resources.editor_block_needs_newer_version
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun UnknownBlockView() {
     Text(
-        text = "This block needs a newer version of Emberr",
+        text = stringResource(Res.string.editor_block_needs_newer_version),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier

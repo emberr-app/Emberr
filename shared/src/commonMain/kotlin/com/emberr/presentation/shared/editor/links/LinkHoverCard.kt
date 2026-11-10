@@ -62,6 +62,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.editor_edited_on_date
+import emberr.shared.generated.resources.editor_note_not_found
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_FAILURE_DESCRIPTION = "Could not load preview"
 private const val MOST_PREVIEWS_KEPT_IN_MEMORY = 200
@@ -116,11 +121,12 @@ private fun webPreviewFor(url: String): WebLinkPreview? {
     return WebLinkPreviewCache.previewFor(url)
 }
 
+@Composable
 private fun lastEditedLabel(updatedAt: Long): String {
     val editedOn = Instant.fromEpochMilliseconds(updatedAt)
         .toLocalDateTime(TimeZone.currentSystemDefault())
     val month = editedOn.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-    return "Edited $month ${editedOn.day}"
+    return stringResource(Res.string.editor_edited_on_date, month, editedOn.day)
 }
 
 @Composable
@@ -267,7 +273,7 @@ private fun WebLinkCardContent(url: String) {
 private fun NoteLinkCardContent(note: NoteMetadataEntity?) {
     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
         val icon = note?.icon
-        val title = note?.title?.ifBlank { "Untitled" } ?: "Note not found"
+        val title = note?.title?.ifBlank { stringResource(Res.string.common_untitled) } ?: stringResource(Res.string.editor_note_not_found)
 
         Text(
             text = if (icon.isNullOrBlank()) title else "$icon  $title",

@@ -67,6 +67,7 @@ import com.emberr.presentation.shared.editor.toolbar.KeyboardToolbarItem
 import com.emberr.presentation.shared.editor.toolbar.KeyboardToolbarItemIcon
 import com.emberr.presentation.shared.editor.toolbar.keyboardToolbarItemsFrom
 import com.emberr.presentation.shared.editor.toolbar.keyboardToolbarSavedValueOf
+import com.emberr.presentation.shared.editor.toolbar.label
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
@@ -396,7 +397,7 @@ private fun ToolbarEntryRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.DragIndicator,
-                    contentDescription = stringResource(Res.string.settings_toolbar_reorder_button, item.title),
+                    contentDescription = stringResource(Res.string.settings_toolbar_reorder_button, item.label()),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     modifier = Modifier.size(20.dp)
                 )
@@ -407,7 +408,7 @@ private fun ToolbarEntryRow(
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = item.title,
+                text = item.label(),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
@@ -423,7 +424,7 @@ private fun ToolbarEntryRow(
                 ) {
                     Icon(
                         painterResource(Res.drawable.circle_minus),
-                        contentDescription = stringResource(Res.string.settings_toolbar_remove_button, item.title),
+                        contentDescription = stringResource(Res.string.settings_toolbar_remove_button, item.label()),
                         tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
                         modifier = Modifier.size(20.dp)
                     )
@@ -448,7 +449,7 @@ private fun AvailableToolbarItemRow(item: KeyboardToolbarItem, onAdd: () -> Unit
         Spacer(modifier = Modifier.width(16.dp))
 
         Text(
-            text = item.title,
+            text = item.label(),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
@@ -456,7 +457,7 @@ private fun AvailableToolbarItemRow(item: KeyboardToolbarItem, onAdd: () -> Unit
 
         Icon(
             painterResource(Res.drawable.circle_plus),
-            contentDescription = stringResource(Res.string.settings_toolbar_add_button, item.title),
+            contentDescription = stringResource(Res.string.settings_toolbar_add_button, item.label()),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(20.dp)
         )

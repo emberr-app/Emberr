@@ -51,6 +51,20 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.editor_pause
+import emberr.shared.generated.resources.editor_play
+import emberr.shared.generated.resources.editor_record_audio
+import emberr.shared.generated.resources.editor_recording_time
+import emberr.shared.generated.resources.editor_start_recording_title_case
+import emberr.shared.generated.resources.editor_stop_recording
+import emberr.shared.generated.resources.editor_stop_recording_title_case
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.editor_downloading_audio
+import emberr.shared.generated.resources.editor_failed_to_download_audio
+import emberr.shared.generated.resources.editor_microphone_permission_denied
+import emberr.shared.generated.resources.editor_remove
+import emberr.shared.generated.resources.editor_remove_audio
+import emberr.shared.generated.resources.editor_tap_mic_to_record
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -128,10 +142,10 @@ fun AudioBlockView(
         ) {
             if (block.localFilePath == null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconTooltip(text = if (isRecording) "Stop recording" else "Record audio") {
+                    IconTooltip(text = if (isRecording) stringResource(Res.string.editor_stop_recording) else stringResource(Res.string.editor_record_audio)) {
                         Icon(
                             if (isRecording) painterResource(Res.drawable.square) else painterResource(Res.drawable.microphone),
-                            contentDescription = if (isRecording) "Stop Recording" else "Start Recording",
+                            contentDescription = if (isRecording) stringResource(Res.string.editor_stop_recording_title_case) else stringResource(Res.string.editor_start_recording_title_case),
                             tint = if (isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
                             modifier = Modifier
                                 .size(if (isRecording) 18.dp else 20.dp)
@@ -155,20 +169,20 @@ fun AudioBlockView(
                         val mins = recordingDuration / 60
                         val secs = recordingDuration % 60
                         Text(
-                            text = "Recording... ${mins}:${secs.toString().padStart(2, '0')}",
+                            text = stringResource(Res.string.editor_recording_time, "${mins}:${secs.toString().padStart(2, '0')}"),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.error
                         )
                     } else if (!hasMicPermission) {
                         Text(
-                            text = "Microphone permission denied",
+                            text = stringResource(Res.string.editor_microphone_permission_denied),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
                     } else {
                         Text(
-                            text = "Tap mic to record audio",
+                            text = stringResource(Res.string.editor_tap_mic_to_record),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -189,7 +203,7 @@ fun AudioBlockView(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Failed to download audio - tap to retry",
+                        text = stringResource(Res.string.editor_failed_to_download_audio),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -203,7 +217,7 @@ fun AudioBlockView(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = transferText ?: "Downloading audio...",
+                        text = transferText ?: stringResource(Res.string.editor_downloading_audio),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -213,10 +227,10 @@ fun AudioBlockView(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
                 ) {
-                    IconTooltip(text = if (isPlaying) "Pause" else "Play") {
+                    IconTooltip(text = if (isPlaying) stringResource(Res.string.editor_pause) else stringResource(Res.string.editor_play)) {
                         Icon(
                             if (isPlaying) painterResource(Res.drawable.pause) else painterResource(Res.drawable.play),
-                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            contentDescription = if (isPlaying) stringResource(Res.string.editor_pause) else stringResource(Res.string.editor_play),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .size(18.dp)
@@ -283,10 +297,10 @@ fun AudioBlockView(
                     )
                 }
 
-                IconTooltip(text = "Remove audio") {
+                IconTooltip(text = stringResource(Res.string.editor_remove_audio)) {
                     Icon(
                         painterResource(Res.drawable.circle_x),
-                        contentDescription = "Remove",
+                        contentDescription = stringResource(Res.string.editor_remove),
                         tint = MaterialTheme.colorScheme.outline,
                         modifier = Modifier
                             .padding(start = 12.dp)

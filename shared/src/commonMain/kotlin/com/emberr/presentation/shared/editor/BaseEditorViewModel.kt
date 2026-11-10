@@ -140,6 +140,20 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 import com.emberr.presentation.shared.editor.slash.customPropertyInsertKey
 import com.emberr.presentation.shared.editor.slash.propertyInsertKey
+import emberr.shared.generated.resources.editor_deleted_blocks
+import emberr.shared.generated.resources.editor_deleted_bookmark
+import emberr.shared.generated.resources.editor_deleted_credentials
+import emberr.shared.generated.resources.editor_deleted_database
+import emberr.shared.generated.resources.editor_deleted_document
+import emberr.shared.generated.resources.editor_deleted_image
+import emberr.shared.generated.resources.editor_deleted_movie
+import emberr.shared.generated.resources.editor_deleted_table
+import emberr.shared.generated.resources.editor_deleted_voice_note
+import emberr.shared.generated.resources.editor_deleted_watchlist
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.getPluralString
+import org.jetbrains.compose.resources.StringResource
 
 @Stable
 data class FocusRequest(
@@ -2113,22 +2127,29 @@ abstract class BaseEditorViewModel(
     private fun announceDeletedBlocks(blockIds: Collection<String>) {
         val idsToCheck = blockIds.toSet()
         val deletedBlocks = _blocks.value.filter { it.id in idsToCheck && it.isDeleted }
-        val namesOfDeletedBlocks = deletedBlocks.mapNotNull { nameShownWhenDeleted(it) }
-        if (namesOfDeletedBlocks.isEmpty()) return
-        val message = if (deletedBlocks.size == 1) "deleted ${namesOfDeletedBlocks.single()}" else "deleted ${deletedBlocks.size} blocks"
-        showNativeToast(message)
+        val messagesOfDeletedBlocks = deletedBlocks.mapNotNull { messageShownWhenDeleted(it) }
+        if (messagesOfDeletedBlocks.isEmpty()) return
+        val deletedCount = deletedBlocks.size
+        viewModelScope.launch {
+            val message = if (deletedCount == 1) {
+                getString(messagesOfDeletedBlocks.single())
+            } else {
+                getPluralString(Res.plurals.editor_deleted_blocks, deletedCount, deletedCount)
+            }
+            showNativeToast(message)
+        }
     }
 
-    private fun nameShownWhenDeleted(block: NoteBlock): String? = when (block) {
-        is ImageBlock -> "image"
-        is DocumentBlock -> "document"
-        is VoiceBlock -> "voice note"
-        is BookmarkBlock -> "bookmark"
-        is TableBlock -> "table"
-        is DatabaseBlock -> "database"
-        is MovieBlock -> "movie"
-        is WatchlistBlock -> "watchlist"
-        is CredentialsBlock -> "credentials"
+    private fun messageShownWhenDeleted(block: NoteBlock): StringResource? = when (block) {
+        is ImageBlock -> Res.string.editor_deleted_image
+        is DocumentBlock -> Res.string.editor_deleted_document
+        is VoiceBlock -> Res.string.editor_deleted_voice_note
+        is BookmarkBlock -> Res.string.editor_deleted_bookmark
+        is TableBlock -> Res.string.editor_deleted_table
+        is DatabaseBlock -> Res.string.editor_deleted_database
+        is MovieBlock -> Res.string.editor_deleted_movie
+        is WatchlistBlock -> Res.string.editor_deleted_watchlist
+        is CredentialsBlock -> Res.string.editor_deleted_credentials
         else -> null
     }
 
