@@ -119,8 +119,23 @@ import com.emberr.presentation.shared.components.smoothWheelScroll
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_add_event
+import emberr.shared.generated.resources.calendar_calendar_settings
+import emberr.shared.generated.resources.calendar_calendar_sidebar
+import emberr.shared.generated.resources.calendar_hide_panel
+import emberr.shared.generated.resources.calendar_no_events
+import emberr.shared.generated.resources.calendar_search_events
+import emberr.shared.generated.resources.calendar_settings
+import emberr.shared.generated.resources.calendar_settings_title
+import emberr.shared.generated.resources.calendar_show_panel
+import emberr.shared.generated.resources.calendar_untitled_event
+import emberr.shared.generated.resources.calendar_view_day
+import emberr.shared.generated.resources.calendar_view_month
+import emberr.shared.generated.resources.calendar_view_three_day
+import emberr.shared.generated.resources.calendar_view_week
 import emberr.shared.generated.resources.chevron_down
 import emberr.shared.generated.resources.cog
+import emberr.shared.generated.resources.common_back
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.sidebar
 import kotlinx.coroutines.delay
@@ -138,6 +153,7 @@ import kotlinx.datetime.todayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.number
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
 import com.emberr.domain.util.time.formatHourLabel
@@ -151,10 +167,10 @@ import com.emberr.presentation.shared.components.orHighContrastLine
 enum class CalendarViewMode { DAY, THREE_DAY, WEEK, MONTH }
 
 internal val calendarViewModeLabels = listOf(
-    CalendarViewMode.DAY to "Day",
-    CalendarViewMode.THREE_DAY to "3 Day",
-    CalendarViewMode.WEEK to "Week",
-    CalendarViewMode.MONTH to "Month"
+    CalendarViewMode.DAY to Res.string.calendar_view_day,
+    CalendarViewMode.THREE_DAY to Res.string.calendar_view_three_day,
+    CalendarViewMode.WEEK to Res.string.calendar_view_week,
+    CalendarViewMode.MONTH to Res.string.calendar_view_month
 )
 
 private val CalendarTitleHeight = 52.dp
@@ -505,7 +521,7 @@ fun CalendarScreen(
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
                     verticalAlignment = Alignment.Top,
                     showBackButton = showBackButton,
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onBackClick = onNavigateBack,
                     centerContent = {
                         if (isDesktopPlatform) {
@@ -530,12 +546,12 @@ fun CalendarScreen(
                             if (viewMode == CalendarViewMode.MONTH) {
                                 TopBarIconButton(
                                     icon = painterResource(Res.drawable.plus),
-                                    contentDescription = "Add event",
+                                    contentDescription = stringResource(Res.string.calendar_add_event),
                                     bgColor = Color.Transparent,
                                     tint = MaterialTheme.colorScheme.primary,
                                     hazeState = internalHazeState,
                                     hazeStyle = EmberrBlur.Regular,
-                                    tooltip = "Add event",
+                                    tooltip = stringResource(Res.string.calendar_add_event),
                                     onClick = {
                                         eventEditorState = EventEditorState(
                                             original = null,
@@ -557,23 +573,23 @@ fun CalendarScreen(
                                 )
                                 TopBarIconButton(
                                     icon = sidePanelIcon,
-                                    contentDescription = if (isSidePanelVisible) "Hide calendar panel" else "Show calendar panel",
+                                    contentDescription = if (isSidePanelVisible) stringResource(Res.string.calendar_hide_panel) else stringResource(Res.string.calendar_show_panel),
                                     bgColor = Color.Transparent,
                                     tint = MaterialTheme.colorScheme.primary,
                                     hazeState = internalHazeState,
                                     hazeStyle = EmberrBlur.Regular,
-                                    tooltip = if (isSidePanelVisible) "Hide calendar panel" else "Show calendar panel",
+                                    tooltip = if (isSidePanelVisible) stringResource(Res.string.calendar_hide_panel) else stringResource(Res.string.calendar_show_panel),
                                     onClick = viewModel::toggleSidePanel
                                 )
                             }
                             TopBarIconButton(
                                 icon = painterResource(if (isDesktopPlatform) Res.drawable.cog else Res.drawable.sidebar),
-                                contentDescription = if (isDesktopPlatform) "Calendar settings" else "Calendar sidebar",
+                                contentDescription = if (isDesktopPlatform) stringResource(Res.string.calendar_calendar_settings) else stringResource(Res.string.calendar_calendar_sidebar),
                                 bgColor = Color.Transparent,
                                 tint = MaterialTheme.colorScheme.primary,
                                 hazeState = internalHazeState,
                                 hazeStyle = EmberrBlur.Regular,
-                                tooltip = "Calendar settings",
+                                tooltip = stringResource(Res.string.calendar_calendar_settings),
                                 onClick = {
                                     if (isDesktopPlatform) showSettingsSheet = true else showSidebar = true
                                 }
@@ -659,7 +675,7 @@ fun CalendarScreen(
             if (!isDesktopPlatform) {
                 EmberrExpandingSearchBar(
                     isOpen = isSearchOpen,
-                    placeholder = "Search events",
+                    placeholder = stringResource(Res.string.calendar_search_events),
                     query = searchQuery,
                     onQueryChange = viewModel::onSearchQueryChange,
                     onOpenClick = { isSearchOpen = true },
@@ -672,7 +688,7 @@ fun CalendarScreen(
                 KmpBackHandler(enabled = isSearchOpen, onBack = closeSearch)
 
                 CalendarSidebar(
-                    title = "Settings",
+                    title = stringResource(Res.string.calendar_settings),
                     isOpen = showSidebar,
                     onClose = { showSidebar = false },
                     modifier = Modifier.zIndex(30f)
@@ -705,7 +721,7 @@ fun CalendarScreen(
     EmberrBottomSheet(
         expanded = showSettingsSheet,
         onDismiss = { showSettingsSheet = false },
-        title = "Calendar Settings",
+        title = stringResource(Res.string.calendar_settings_title),
         contentHorizontalPadding = 0.dp
     ) {
         CalendarSettingsContent(
@@ -1797,7 +1813,7 @@ private fun MonthEventList(
     Box(modifier = modifier) {
         if (sortedEvents.isEmpty()) {
             Text(
-                text = "No events",
+                text = stringResource(Res.string.calendar_no_events),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.align(Alignment.Center).padding(bottom = bottomPadding)
@@ -1853,7 +1869,7 @@ internal fun MonthEventRow(
                 )
         )
         Text(
-            text = event.text.ifBlank { "Untitled event" },
+            text = event.text.ifBlank { stringResource(Res.string.calendar_untitled_event) },
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (event.isChecked) 0.45f else 1f),
             textDecoration = if (event.isChecked) TextDecoration.LineThrough else null,
@@ -1946,7 +1962,7 @@ private fun CalendarViewModeSwitcher(
     hazeState: HazeState
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
-    val currentLabel = calendarViewModeLabels.first { (mode, _) -> mode == viewMode }.second
+    val currentLabel = stringResource(calendarViewModeLabels.first { (mode, _) -> mode == viewMode }.second)
     val headerTint = LocalTopHeaderButtonTint.current
     val pillBlurStyle = if (headerTint.fadeProgress > 0f) {
         EmberrBlur.headerFadeTint(headerTint.fadeProgress, headerTint.fullTintAlpha)
@@ -1994,7 +2010,7 @@ private fun CalendarViewModeSwitcher(
     ) { closeMenuAnd ->
         calendarViewModeLabels.forEach { (mode, label) ->
             EmberrDesktopMenuOption(
-                label = label,
+                label = stringResource(label),
                 isSelected = mode == viewMode,
                 onClick = { closeMenuAnd { onViewModeChange(mode) } }
             )

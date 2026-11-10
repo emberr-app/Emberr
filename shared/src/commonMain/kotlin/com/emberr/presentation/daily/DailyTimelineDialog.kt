@@ -102,6 +102,7 @@ import com.emberr.presentation.shared.components.mobileDialogSize
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.fullScreenDialogProperties
 import com.emberr.presentation.shared.editor.EditorActions
+import com.emberr.presentation.shared.editor.blockViews.callout.displayName
 import com.emberr.presentation.shared.editor.blockViews.media.AudioBlockView
 import com.emberr.presentation.shared.editor.blockViews.media.BookmarkBlockView
 import com.emberr.presentation.shared.editor.blockViews.media.DocumentBlockView
@@ -122,6 +123,17 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_up
 import emberr.shared.generated.resources.code
+import emberr.shared.generated.resources.daily_close_timeline
+import emberr.shared.generated.resources.daily_code
+import emberr.shared.generated.resources.daily_next_match
+import emberr.shared.generated.resources.daily_nothing_on_this_day_yet
+import emberr.shared.generated.resources.daily_nothing_written_yet
+import emberr.shared.generated.resources.daily_previous_match
+import emberr.shared.generated.resources.daily_search_the_timeline
+import emberr.shared.generated.resources.daily_timeline
+import emberr.shared.generated.resources.daily_today
+import emberr.shared.generated.resources.daily_tomorrow
+import emberr.shared.generated.resources.daily_yesterday
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -129,6 +141,7 @@ import kotlinx.datetime.daysUntil
 import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
+import org.jetbrains.compose.resources.stringResource
 
 private const val NoteLinkPrefix = "](emberr://note/"
 private val NoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)""".toRegex()
@@ -196,8 +209,13 @@ fun DailyTimelineDialog(
 
             val rows = remember(days) { buildTimelineRows(days) }
             val trimmedQuery = searchQuery.trim()
-            val matchRowIndices = remember(rows, trimmedQuery, today) {
-                findMatchingRowIndices(rows, trimmedQuery, today)
+            val relativeDayLabels = TimelineRelativeDayLabels(
+                today = stringResource(Res.string.daily_today),
+                tomorrow = stringResource(Res.string.daily_tomorrow),
+                yesterday = stringResource(Res.string.daily_yesterday)
+            )
+            val matchRowIndices = remember(rows, trimmedQuery, today, relativeDayLabels) {
+                findMatchingRowIndices(rows, trimmedQuery, today, relativeDayLabels)
             }
 
             val nearestMatchPosition = remember(rows, matchRowIndices, anchorDate) {
@@ -243,6 +261,7 @@ fun DailyTimelineDialog(
                             isLoading = isLoading,
                             anchorDate = anchorDate,
                             today = today,
+                            relativeDayLabels = relativeDayLabels,
                             matchRowIndices = matchRowIndices,
                             targetRowIndex = matchRowIndices.getOrNull(currentMatchPosition),
                             editorActions = editorActions,
@@ -292,7 +311,7 @@ private fun TimelineHeader(
     EmberrTopHeaderBar(
         modifier = modifier.onSizeChanged { headerHeightPx = it.height },
         showsSidebarToggle = false,
-        title = "Timeline",
+        title = stringResource(Res.string.daily_timeline),
         titlePlacement = TopHeaderTitlePlacement.Start,
         showBackButton = false,
         reserveBackButtonSpace = false,
@@ -312,13 +331,13 @@ private fun TimelineHeader(
             ) {
                 TopBarIconButton(
                     icon = Icons.Default.Close,
-                    contentDescription = "Close timeline",
+                    contentDescription = stringResource(Res.string.daily_close_timeline),
                     bgColor = Color.Transparent,
                     tint = MaterialTheme.colorScheme.onSurface,
                     hazeState = hazeState,
                     hazeStyle = EmberrBlur.Regular,
                     shadowElevation = EmberrShadowElevation.None,
-                    tooltip = "Close timeline",
+                    tooltip = stringResource(Res.string.daily_close_timeline),
                     onClick = onDismiss
                 )
             }
@@ -343,7 +362,7 @@ private fun TimelineSearchBar(
     EmberrSearchTextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = "Search the timeline",
+        placeholder = stringResource(Res.string.daily_search_the_timeline),
         hazeState = hazeState,
         modifier = modifier
             .fillMaxWidth()
@@ -359,12 +378,12 @@ private fun TimelineSearchBar(
             )
             EmberrSearchTextFieldAction(
                 icon = painterResource(Res.drawable.arrow_up),
-                contentDescription = "Previous match",
+                contentDescription = stringResource(Res.string.daily_previous_match),
                 onClick = onPreviousMatch
             )
             EmberrSearchTextFieldAction(
                 icon = painterResource(Res.drawable.arrow_down),
-                contentDescription = "Next match",
+                contentDescription = stringResource(Res.string.daily_next_match),
                 onClick = onNextMatch
             )
         }
@@ -377,6 +396,7 @@ private fun TimelineList(
     isLoading: Boolean,
     anchorDate: LocalDate,
     today: LocalDate,
+    relativeDayLabels: TimelineRelativeDayLabels,
     matchRowIndices: List<Int>,
     targetRowIndex: Int?,
     editorActions: EditorActions,
@@ -432,7 +452,7 @@ private fun TimelineList(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = timelineDayLabel(row.date, today),
+                            text = timelineDayLabel(row.date, today, relativeDayLabels),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = if (isSearchMatch) FontWeight.Bold else null,
                             color = MaterialTheme.colorScheme.onSurface
@@ -441,7 +461,7 @@ private fun TimelineList(
                 }
 
                 is TimelineRow.EmptyDay -> Text(
-                    text = "Nothing on this day yet.",
+                    text = stringResource(Res.string.daily_nothing_on_this_day_yet),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
@@ -489,7 +509,7 @@ private fun TimelineList(
     } else if (rows.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
-                text = "Nothing written yet.",
+                text = stringResource(Res.string.daily_nothing_written_yet),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
@@ -572,7 +592,7 @@ private fun TimelineBlockContent(
 
         is CalloutBlock -> TimelinePrefixedText(
             block = block,
-            prefix = block.calloutType.label,
+            prefix = block.calloutType.displayName(),
             text = block.text,
             isSearchMatch = isSearchMatch
         )
@@ -580,7 +600,7 @@ private fun TimelineBlockContent(
         is CodeBlock -> Row(verticalAlignment = Alignment.Top) {
             Icon(
                 painter = painterResource(Res.drawable.code),
-                contentDescription = "Code",
+                contentDescription = stringResource(Res.string.daily_code),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.size(16.dp).padding(top = 2.dp)
             )
@@ -844,7 +864,8 @@ private fun buildTimelineRows(days: List<DailyTimelineDay>): List<TimelineRow> =
 private fun findMatchingRowIndices(
     rows: List<TimelineRow>,
     query: String,
-    today: LocalDate
+    today: LocalDate,
+    relativeDayLabels: TimelineRelativeDayLabels
 ): List<Int> {
     if (query.isEmpty()) return emptyList()
     return rows.indices.filter { index ->
@@ -852,7 +873,7 @@ private fun findMatchingRowIndices(
             is TimelineRow.BlockRow -> timelineBlockSearchText(row.block).contains(query, ignoreCase = true)
             is TimelineRow.DayHeader ->
                 row.date.toString().contains(query, ignoreCase = true) ||
-                    timelineDayLabel(row.date, today).contains(query, ignoreCase = true)
+                    timelineDayLabel(row.date, today, relativeDayLabels).contains(query, ignoreCase = true)
             is TimelineRow.EmptyDay -> false
         }
     }
@@ -882,10 +903,12 @@ private fun timelineBlockSearchText(block: NoteBlock): String = when (block) {
     else -> ""
 }
 
-private fun timelineDayLabel(date: LocalDate, today: LocalDate): String = when (date) {
-    today -> "Today"
-    today.plus(1, DateTimeUnit.DAY) -> "Tomorrow"
-    today.plus(-1, DateTimeUnit.DAY) -> "Yesterday"
+private data class TimelineRelativeDayLabels(val today: String, val tomorrow: String, val yesterday: String)
+
+private fun timelineDayLabel(date: LocalDate, today: LocalDate, relativeDayLabels: TimelineRelativeDayLabels): String = when (date) {
+    today -> relativeDayLabels.today
+    today.plus(1, DateTimeUnit.DAY) -> relativeDayLabels.tomorrow
+    today.plus(-1, DateTimeUnit.DAY) -> relativeDayLabels.yesterday
     else -> {
         val weekday = shortName(date.dayOfWeek.name)
         val month = shortName(date.month.name)

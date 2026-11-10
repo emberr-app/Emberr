@@ -1,5 +1,6 @@
 package com.emberr.presentation.calendar
 
+import androidx.compose.runtime.Composable
 import com.emberr.data.local.room.entity.CalendarTaskEntity
 import com.emberr.data.local.room.entity.TaskSource
 import com.emberr.data.local.room.entity.personNoteIdList
@@ -10,12 +11,15 @@ import com.emberr.domain.model.AllDaySpan
 import com.emberr.domain.model.RecurrenceRule
 import com.emberr.domain.model.lastDate
 import com.emberr.domain.util.time.formatTimeOfDay
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_all_day
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
+import org.jetbrains.compose.resources.stringResource
 
 data class CalendarEvent(
     val blockId: String,
@@ -49,8 +53,9 @@ fun CalendarEvent.datesShownOn(): List<LocalDate> {
     return generateSequence(LocalDate.parse(dateString)) { it.plus(1, DateTimeUnit.DAY) }.takeWhile { it <= lastDate }.toList()
 }
 
+@Composable
 fun CalendarEvent.timeOfDayLabel(usesTwentyFourHourClock: Boolean): String {
-    if (allDay != null) return "All day"
+    if (allDay != null) return stringResource(Res.string.calendar_all_day)
     val startTime = Instant.fromEpochMilliseconds(reminderTimestamp).toLocalDateTime(TimeZone.currentSystemDefault())
     return formatTimeOfDay(startTime.hour, startTime.minute, usesTwentyFourHourClock)
 }

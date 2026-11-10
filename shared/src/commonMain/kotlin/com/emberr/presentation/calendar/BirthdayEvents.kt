@@ -7,20 +7,28 @@ import com.emberr.domain.people.BirthdayOnDate
 import com.emberr.domain.people.PersonWithDetails
 import com.emberr.domain.people.birthdaysInRange
 import com.emberr.domain.people.personDisplayName
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_birthday_title
+import emberr.shared.generated.resources.calendar_birthday_title_turning
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
+import org.jetbrains.compose.resources.getString
 
-fun nextBirthdayEvents(people: List<PersonWithDetails>, today: LocalDate): List<CalendarEvent> =
+suspend fun nextBirthdayEvents(people: List<PersonWithDetails>, today: LocalDate): List<CalendarEvent> =
     birthdaysInRange(people, today, today.plus(1, DateTimeUnit.YEAR))
         .distinctBy { birthday -> birthday.personNoteId }
         .map { birthday -> birthday.toCalendarEvent() }
 
-fun BirthdayOnDate.toCalendarEvent(): CalendarEvent {
+suspend fun BirthdayOnDate.toCalendarEvent(): CalendarEvent {
     val name = personDisplayName(personName)
-    val title = if (turningAge == null) "$name's birthday" else "$name's birthday (turns $turningAge)"
+    val title = if (turningAge == null) {
+        getString(Res.string.calendar_birthday_title, name)
+    } else {
+        getString(Res.string.calendar_birthday_title_turning, name, turningAge)
+    }
     return CalendarEvent(
         blockId = "birthday_${personNoteId}_${date.year}",
         noteId = personNoteId,

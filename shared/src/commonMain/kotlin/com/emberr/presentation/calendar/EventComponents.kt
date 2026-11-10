@@ -101,6 +101,74 @@ import com.emberr.presentation.shared.components.PeoplePicker
 import com.emberr.presentation.shared.components.PersonOption
 import com.emberr.presentation.shared.components.displayName
 import com.emberr.presentation.shared.components.EmberrBlur
+import emberr.shared.generated.resources.calendar_add
+import emberr.shared.generated.resources.calendar_add_a_description
+import emberr.shared.generated.resources.calendar_add_a_link
+import emberr.shared.generated.resources.calendar_add_details
+import emberr.shared.generated.resources.calendar_all_day
+import emberr.shared.generated.resources.calendar_category
+import emberr.shared.generated.resources.calendar_choose_end_date
+import emberr.shared.generated.resources.calendar_custom_end_time
+import emberr.shared.generated.resources.calendar_custom_repeat
+import emberr.shared.generated.resources.calendar_day_count
+import emberr.shared.generated.resources.calendar_decrease
+import emberr.shared.generated.resources.calendar_delete_event
+import emberr.shared.generated.resources.calendar_does_not_repeat
+import emberr.shared.generated.resources.calendar_done
+import emberr.shared.generated.resources.calendar_duration
+import emberr.shared.generated.resources.calendar_duration_hours
+import emberr.shared.generated.resources.calendar_duration_hours_minutes
+import emberr.shared.generated.resources.calendar_duration_minutes
+import emberr.shared.generated.resources.calendar_edit
+import emberr.shared.generated.resources.calendar_ends
+import emberr.shared.generated.resources.calendar_fewer_details
+import emberr.shared.generated.resources.calendar_increase
+import emberr.shared.generated.resources.calendar_no_category
+import emberr.shared.generated.resources.calendar_no_reminder
+import emberr.shared.generated.resources.calendar_on_date
+import emberr.shared.generated.resources.calendar_on_these_days
+import emberr.shared.generated.resources.calendar_people
+import emberr.shared.generated.resources.calendar_people_count
+import emberr.shared.generated.resources.calendar_pick_a_time
+import emberr.shared.generated.resources.calendar_reminder
+import emberr.shared.generated.resources.calendar_reminder_at_time
+import emberr.shared.generated.resources.calendar_reminder_on_each_day
+import emberr.shared.generated.resources.calendar_reminder_on_this_day
+import emberr.shared.generated.resources.calendar_repeat
+import emberr.shared.generated.resources.calendar_repeat_custom
+import emberr.shared.generated.resources.calendar_repeat_daily
+import emberr.shared.generated.resources.calendar_repeat_every
+import emberr.shared.generated.resources.calendar_repeat_every_day
+import emberr.shared.generated.resources.calendar_repeat_every_days
+import emberr.shared.generated.resources.calendar_repeat_every_month
+import emberr.shared.generated.resources.calendar_repeat_every_months
+import emberr.shared.generated.resources.calendar_repeat_every_week
+import emberr.shared.generated.resources.calendar_repeat_every_weeks
+import emberr.shared.generated.resources.calendar_repeat_every_year
+import emberr.shared.generated.resources.calendar_repeat_every_years
+import emberr.shared.generated.resources.calendar_repeat_monthly
+import emberr.shared.generated.resources.calendar_repeat_never
+import emberr.shared.generated.resources.calendar_repeat_on_day_of_month
+import emberr.shared.generated.resources.calendar_repeat_on_days
+import emberr.shared.generated.resources.calendar_repeat_summary_until
+import emberr.shared.generated.resources.calendar_repeat_until
+import emberr.shared.generated.resources.calendar_repeat_weekly
+import emberr.shared.generated.resources.calendar_repeat_yearly
+import emberr.shared.generated.resources.calendar_scope_all_events
+import emberr.shared.generated.resources.calendar_scope_all_future_events
+import emberr.shared.generated.resources.calendar_scope_all_past_events
+import emberr.shared.generated.resources.calendar_scope_this_event
+import emberr.shared.generated.resources.calendar_unit_days
+import emberr.shared.generated.resources.calendar_unit_months
+import emberr.shared.generated.resources.calendar_unit_weeks
+import emberr.shared.generated.resources.calendar_unit_years
+import emberr.shared.generated.resources.calendar_untitled_event
+import emberr.shared.generated.resources.calendar_whats_happening
+import emberr.shared.generated.resources.calendar_which_events
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_save
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.isoDayNumber
 import com.emberr.presentation.shared.components.EmberrBottomSheet
@@ -153,6 +221,8 @@ import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.LocalFirstDayOfWeek
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.presentation.shared.components.orHighContrastLine
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 internal val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
@@ -355,7 +425,7 @@ private fun EventChipLabels(
         verticalArrangement = Arrangement.spacedBy(EventChipLabelsSpacing)
     ) {
         Text(
-            text = text.ifBlank { "Untitled event" },
+            text = text.ifBlank { stringResource(Res.string.calendar_untitled_event) },
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Normal,
             color = if (isChecked) textColor.copy(alpha = CheckedEventTitleAlpha) else textColor,
@@ -508,41 +578,44 @@ fun EventEditorState.viewAfterSaving(): EventEditorState? {
 private fun LocalDate.atTimeInEpochMillis(hour: Int, minute: Int): Long =
     LocalDateTime(year, month.number, day, hour, minute).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 
+@Composable
 fun formatRecurrenceSummary(rule: RecurrenceRule): String {
+    val interval = rule.interval
     val base = when (rule.frequency) {
-        RecurrenceFrequency.DAILY -> if (rule.interval == 1) "Daily" else "Every ${rule.interval} days"
+        RecurrenceFrequency.DAILY -> if (interval == 1) stringResource(Res.string.calendar_repeat_daily) else pluralStringResource(Res.plurals.calendar_repeat_every_days, interval, interval)
         RecurrenceFrequency.WEEKLY -> {
-            val dayLabel = rule.daysOfWeek.takeIf { it.isNotEmpty() }
+            val weekly = if (interval == 1) stringResource(Res.string.calendar_repeat_weekly) else pluralStringResource(Res.plurals.calendar_repeat_every_weeks, interval, interval)
+            val dayNames = rule.daysOfWeek.takeIf { it.isNotEmpty() }
                 ?.sortedBy { it.isoDayNumber }
                 ?.joinToString(", ") { it.name.take(3).lowercase().replaceFirstChar(Char::uppercase) }
-                ?.let { " on $it" }
-                ?: ""
-            (if (rule.interval == 1) "Weekly" else "Every ${rule.interval} weeks") + dayLabel
+            if (dayNames == null) weekly else stringResource(Res.string.calendar_repeat_on_days, weekly, dayNames)
         }
-        RecurrenceFrequency.MONTHLY -> if (rule.interval == 1) "Monthly" else "Every ${rule.interval} months"
-        RecurrenceFrequency.YEARLY -> if (rule.interval == 1) "Yearly" else "Every ${rule.interval} years"
+        RecurrenceFrequency.MONTHLY -> if (interval == 1) stringResource(Res.string.calendar_repeat_monthly) else pluralStringResource(Res.plurals.calendar_repeat_every_months, interval, interval)
+        RecurrenceFrequency.YEARLY -> if (interval == 1) stringResource(Res.string.calendar_repeat_yearly) else pluralStringResource(Res.plurals.calendar_repeat_every_years, interval, interval)
     }
-    val until = rule.untilDateString?.let { " until ${formatFullDate(LocalDate.parse(it))}" } ?: ""
-    return base + until
+    val untilDateString = rule.untilDateString ?: return base
+    return stringResource(Res.string.calendar_repeat_until, base, formatFullDate(LocalDate.parse(untilDateString)))
 }
 
+@Composable
 fun formatDuration(minutes: Int): String {
     val hours = minutes / 60
     val mins = minutes % 60
     return when {
-        hours == 0 -> "$mins min"
-        mins == 0 -> "$hours hr"
-        else -> "$hours hr $mins min"
+        hours == 0 -> stringResource(Res.string.calendar_duration_minutes, mins)
+        mins == 0 -> stringResource(Res.string.calendar_duration_hours, hours)
+        else -> stringResource(Res.string.calendar_duration_hours_minutes, hours, mins)
     }
 }
 
+@Composable
 private fun formatEventTimeSuffix(state: EventEditorState, usesTwentyFourHourClock: Boolean): String {
     val allDay = state.allDay
     return when {
         allDay == null -> ", ${formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock)} – " +
             formatTimeOfDay(state.endHour(), state.endMinute(), usesTwentyFourHourClock)
         allDay.lengthInDays > 1 -> " – ${formatEditorDate(state.allDayLastDate())}"
-        else -> ", All day"
+        else -> ", ${stringResource(Res.string.calendar_all_day)}"
     }
 }
 
@@ -693,7 +766,7 @@ private fun EventEditorFields(
             EmberrTextField(
                 value = state.name,
                 onValueChange = onNameChange,
-                placeholder = "What's happening?",
+                placeholder = stringResource(Res.string.calendar_whats_happening),
                 textStyle = EventTitleStyle,
                 hasBackground = false,
                 modifier = Modifier.weight(1f).focusRequester(titleFocusRequester),
@@ -756,7 +829,7 @@ private fun EventEditorFields(
                 verticalArrangement = Arrangement.spacedBy(ChipSpacing)
             ) {
                 EventEditorChip(
-                    label = "All day",
+                    label = stringResource(Res.string.calendar_all_day),
                     icon = painterResource(Res.drawable.calendar_day),
                     isSelected = allDay != null,
                     opensMenu = false,
@@ -776,7 +849,7 @@ private fun EventEditorFields(
                 icon = painterResource(Res.drawable.link),
                 value = state.url,
                 onValueChange = onUrlChange,
-                placeholder = "Add a link",
+                placeholder = stringResource(Res.string.calendar_add_a_link),
                 onSubmit = onSave
             )
 
@@ -784,18 +857,18 @@ private fun EventEditorFields(
                 icon = painterResource(Res.drawable.doc_text),
                 value = state.description,
                 onValueChange = onDescriptionChange,
-                placeholder = "Add a description",
+                placeholder = stringResource(Res.string.calendar_add_a_description),
                 singleLine = false
             )
         }
 
-        val saveLabel = if (state.original == null) "Add" else "Save"
+        val saveLabel = if (state.original == null) stringResource(Res.string.calendar_add) else stringResource(Res.string.common_save)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            EmberrButtonSecondary(text = "Cancel", onClick = onCancel, modifier = Modifier.weight(1f))
+            EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onCancel, modifier = Modifier.weight(1f))
             EmberrButtonPrimary(text = saveLabel, onClick = onSave, modifier = Modifier.weight(1f))
         }
     }
@@ -872,13 +945,13 @@ private fun DeleteEventButton(alignedTo: TextStyle, onDelete: () -> Unit) {
     Box(modifier = Modifier.height(lineHeight).wrapContentHeight(unbounded = true)) {
         TopBarIconButton(
             icon = painterResource(Res.drawable.trash),
-            contentDescription = "Delete",
+            contentDescription = stringResource(Res.string.common_delete),
             bgColor = Color.Transparent,
             tint = MaterialTheme.colorScheme.error,
             hazeState = remember { HazeState() },
             hazeStyle = EmberrBlur.Regular,
             shadowElevation = EmberrShadowElevation.None,
-            tooltip = "Delete event",
+            tooltip = stringResource(Res.string.calendar_delete_event),
             onClick = onDelete
         )
     }
@@ -895,7 +968,7 @@ private fun DurationChip(state: EventEditorState, onDurationChange: (minutes: In
         )
         if (showMenu) BelowPill {
             EventChoiceMenu(
-                title = "Duration",
+                title = stringResource(Res.string.calendar_duration),
                 onDismiss = { showMenu = false },
                 choices = DurationPresetsInMinutes.map { minutes ->
                     EventChoice(
@@ -905,7 +978,7 @@ private fun DurationChip(state: EventEditorState, onDurationChange: (minutes: In
                     )
                 },
                 customTime = EventCustomTimeChoice(
-                    label = "Custom end time…",
+                    label = stringResource(Res.string.calendar_custom_end_time),
                     initialTimestamp = state.toEndEpochMillis(),
                     onTimeChosen = { hour, minute ->
                         val startTotal = state.hour * 60 + state.minute
@@ -924,7 +997,7 @@ private fun AllDayLengthChip(state: EventEditorState, allDay: AllDaySpan, onAllD
     var showEndDatePicker by remember { mutableStateOf(false) }
     Box {
         EventEditorChip(
-            label = if (allDay.lengthInDays == 1) "1 day" else "${allDay.lengthInDays} days",
+            label = pluralStringResource(Res.plurals.calendar_day_count, allDay.lengthInDays, allDay.lengthInDays),
             icon = painterResource(Res.drawable.calendar),
             onClick = { showEndDatePicker = true }
         )
@@ -953,29 +1026,29 @@ private fun AllDayReminderChip(
 
     Box {
         EventEditorChip(
-            label = if (allDay.isReminderOn) reminderTime else "No reminder",
+            label = if (allDay.isReminderOn) reminderTime else stringResource(Res.string.calendar_no_reminder),
             icon = painterResource(if (allDay.isReminderOn) Res.drawable.bell else Res.drawable.bell_off2),
             onClick = { showMenu = true }
         )
         if (showMenu) BelowPill {
             EventChoiceMenu(
-                title = "Reminder",
+                title = stringResource(Res.string.calendar_reminder),
                 onDismiss = { showMenu = false },
                 choices = listOf(
                     EventChoice(
-                        label = "No reminder",
+                        label = stringResource(Res.string.calendar_no_reminder),
                         isSelected = !allDay.isReminderOn,
                         onClick = { onAllDayChange(allDay.copy(isReminderOn = false)) }
                     ),
                     EventChoice(
-                        label = "At $reminderTime",
-                        subtitle = if (allDay.lengthInDays > 1) "On each day" else "On this day",
+                        label = stringResource(Res.string.calendar_reminder_at_time, reminderTime),
+                        subtitle = if (allDay.lengthInDays > 1) stringResource(Res.string.calendar_reminder_on_each_day) else stringResource(Res.string.calendar_reminder_on_this_day),
                         isSelected = allDay.isReminderOn,
                         onClick = { onAllDayChange(allDay.copy(isReminderOn = true)) }
                     )
                 ),
                 customTime = EventCustomTimeChoice(
-                    label = "Pick a time…",
+                    label = stringResource(Res.string.calendar_pick_a_time),
                     initialTimestamp = state.toEpochMillis(),
                     onTimeChosen = { hour, minute ->
                         onTimeChange(hour, minute)
@@ -999,17 +1072,17 @@ private fun CategoryChoiceChip(
 
     Box {
         EventEditorChip(
-            label = category?.name ?: "No category",
+            label = category?.name ?: stringResource(Res.string.calendar_no_category),
             dotColor = category?.colorHex?.toCategoryColor() ?: noCategoryColor,
             onClick = { showMenu = true }
         )
         if (showMenu) BelowPill {
             EventChoiceMenu(
-                title = "Category",
+                title = stringResource(Res.string.calendar_category),
                 onDismiss = { showMenu = false },
                 choices = listOf(
                     EventChoice(
-                        label = "No category",
+                        label = stringResource(Res.string.calendar_no_category),
                         isSelected = category == null,
                         dotColor = noCategoryColor,
                         onClick = { onCategoryChange(null) }
@@ -1039,9 +1112,9 @@ private fun PeopleChoiceChip(
     Box {
         EventEditorChip(
             label = when (shownPeople.size) {
-                0 -> "People"
+                0 -> stringResource(Res.string.calendar_people)
                 1 -> shownPeople.single().displayName()
-                else -> "${shownPeople.size} people"
+                else -> pluralStringResource(Res.plurals.calendar_people_count, shownPeople.size, shownPeople.size)
             },
             icon = painterResource(Res.drawable.user2),
             onClick = { showPicker = true }
@@ -1063,7 +1136,7 @@ private fun RepeatChip(state: EventEditorState, isEnabled: Boolean, onRecurrence
     var showRepeatDialog by remember { mutableStateOf(false) }
     Box {
         EventEditorChip(
-            label = state.recurrenceRule?.let(::formatRecurrenceSummary) ?: "Does not repeat",
+            label = state.recurrenceRule?.let { rule -> formatRecurrenceSummary(rule) } ?: stringResource(Res.string.calendar_does_not_repeat),
             icon = painterResource(Res.drawable.refresh_cw),
             isEnabled = isEnabled,
             onClick = { showRepeatDialog = true }
@@ -1156,7 +1229,7 @@ private fun DetailsTogglePill(showsDetails: Boolean, onClick: () -> Unit) {
     ) {
         Icon(
             imageVector = if (showsDetails) Icons.Default.Remove else Icons.Default.Add,
-            contentDescription = if (showsDetails) "Fewer details" else "Add details",
+            contentDescription = if (showsDetails) stringResource(Res.string.calendar_fewer_details) else stringResource(Res.string.calendar_add_details),
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.size(14.dp)
         )
@@ -1358,7 +1431,7 @@ private fun EventViewFields(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = state.name.ifBlank { "Untitled event" },
+                text = state.name.ifBlank { stringResource(Res.string.calendar_untitled_event) },
                 style = EventTitleStyle,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
@@ -1366,10 +1439,11 @@ private fun EventViewFields(
             if (onDelete != null) DeleteEventButton(alignedTo = EventTitleStyle, onDelete = onDelete)
         }
 
+        val timeSuffix = formatEventTimeSuffix(state, usesTwentyFourHourClock)
         Text(
             text = buildAnnotatedString {
                 withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(formatEditorDate(state.date)) }
-                append(formatEventTimeSuffix(state, usesTwentyFourHourClock))
+                append(timeSuffix)
             },
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface
@@ -1398,13 +1472,13 @@ private fun EventViewFields(
                     )
                 } else {
                     EventEditorChip(
-                        label = if (allDay.lengthInDays == 1) "1 day" else "${allDay.lengthInDays} days",
+                        label = pluralStringResource(Res.plurals.calendar_day_count, allDay.lengthInDays, allDay.lengthInDays),
                         icon = painterResource(Res.drawable.calendar),
                         opensMenu = false,
                         onClick = null
                     )
                     EventEditorChip(
-                        label = if (allDay.isReminderOn) formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock) else "No reminder",
+                        label = if (allDay.isReminderOn) formatTimeOfDay(state.hour, state.minute, usesTwentyFourHourClock) else stringResource(Res.string.calendar_no_reminder),
                         icon = painterResource(if (allDay.isReminderOn) Res.drawable.bell else Res.drawable.bell_off2),
                         opensMenu = false,
                         onClick = null
@@ -1466,8 +1540,8 @@ private fun EventViewFields(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            EmberrButtonSecondary(text = "Close", onClick = onClose, modifier = Modifier.weight(1f))
-            EmberrButtonPrimary(text = "Edit", onClick = onEditClick, modifier = Modifier.weight(1f))
+            EmberrButtonSecondary(text = stringResource(Res.string.common_close), onClick = onClose, modifier = Modifier.weight(1f))
+            EmberrButtonPrimary(text = stringResource(Res.string.calendar_edit), onClick = onEditClick, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -1574,17 +1648,17 @@ private fun RepeatDesktopMenu(
         modifier = Modifier.widthIn(min = PillMenuMinWidth, max = PillMenuMaxWidth)
     ) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
-            EmberrDesktopMenuOption(label = "Never", onClick = { onConfirm(null) })
-            EmberrDesktopMenuOption(label = "Daily", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.DAILY)) })
+            EmberrDesktopMenuOption(label = stringResource(Res.string.calendar_repeat_never), onClick = { onConfirm(null) })
+            EmberrDesktopMenuOption(label = stringResource(Res.string.calendar_repeat_daily), onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.DAILY)) })
             EmberrDesktopMenuOption(
-                label = "Weekly",
+                label = stringResource(Res.string.calendar_repeat_weekly),
                 onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.WEEKLY, daysOfWeek = setOf(anchorDate.dayOfWeek))) }
             )
-            EmberrDesktopMenuOption(label = "Monthly", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.MONTHLY)) })
-            EmberrDesktopMenuOption(label = "Yearly", onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.YEARLY)) })
+            EmberrDesktopMenuOption(label = stringResource(Res.string.calendar_repeat_monthly), onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.MONTHLY)) })
+            EmberrDesktopMenuOption(label = stringResource(Res.string.calendar_repeat_yearly), onClick = { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.YEARLY)) })
             EmberrDesktopSubmenu(
                 menuWidthEstimate = CustomRepeatMenuWidth,
-                anchor = { openCustom, _ -> EmberrDesktopMenuOption(label = "Custom…", onClick = openCustom) }
+                anchor = { openCustom, _ -> EmberrDesktopMenuOption(label = stringResource(Res.string.calendar_repeat_custom), onClick = openCustom) }
             ) { isCustomOpen, closeCustom ->
                 EmberrDesktopMenu(
                     expanded = isCustomOpen,
@@ -1633,23 +1707,23 @@ fun RepeatOptionsDialog(
         return
     }
 
-    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = "Repeat") { closeAnd ->
+    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = stringResource(Res.string.calendar_repeat)) { closeAnd ->
         CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
-                SheetOptionRow("Never") { closeAnd { onConfirm(null) } }
-                SheetOptionRow("Daily") { closeAnd { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.DAILY)) } }
-                SheetOptionRow("Weekly") {
+                SheetOptionRow(stringResource(Res.string.calendar_repeat_never)) { closeAnd { onConfirm(null) } }
+                SheetOptionRow(stringResource(Res.string.calendar_repeat_daily)) { closeAnd { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.DAILY)) } }
+                SheetOptionRow(stringResource(Res.string.calendar_repeat_weekly)) {
                     closeAnd { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.WEEKLY, daysOfWeek = setOf(anchorDate.dayOfWeek))) }
                 }
-                SheetOptionRow("Monthly") { closeAnd { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.MONTHLY)) } }
-                SheetOptionRow("Yearly") { closeAnd { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.YEARLY)) } }
-                SheetOptionRow("Custom…") { showCustom = true }
+                SheetOptionRow(stringResource(Res.string.calendar_repeat_monthly)) { closeAnd { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.MONTHLY)) } }
+                SheetOptionRow(stringResource(Res.string.calendar_repeat_yearly)) { closeAnd { onConfirm(RecurrenceRule(frequency = RecurrenceFrequency.YEARLY)) } }
+                SheetOptionRow(stringResource(Res.string.calendar_repeat_custom)) { showCustom = true }
 
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                         .padding(vertical = 12.dp)
@@ -1699,6 +1773,7 @@ private fun StepperButton(
 private fun DayOfWeek.shortLabel(): String =
     name.lowercase().replaceFirstChar { it.uppercase() }.take(3)
 
+@Composable
 private fun buildRepeatSummary(
     frequency: RecurrenceFrequency,
     interval: Int,
@@ -1707,25 +1782,24 @@ private fun buildRepeatSummary(
     anchorDate: LocalDate,
     untilDateString: String?
 ): String {
-    val unit = when (frequency) {
-        RecurrenceFrequency.DAILY -> "day"
-        RecurrenceFrequency.WEEKLY -> "week"
-        RecurrenceFrequency.MONTHLY -> "month"
-        RecurrenceFrequency.YEARLY -> "year"
+    val base = when (frequency) {
+        RecurrenceFrequency.DAILY -> if (interval == 1) stringResource(Res.string.calendar_repeat_every_day) else pluralStringResource(Res.plurals.calendar_repeat_every_days, interval, interval)
+        RecurrenceFrequency.WEEKLY -> if (interval == 1) stringResource(Res.string.calendar_repeat_every_week) else pluralStringResource(Res.plurals.calendar_repeat_every_weeks, interval, interval)
+        RecurrenceFrequency.MONTHLY -> if (interval == 1) stringResource(Res.string.calendar_repeat_every_month) else pluralStringResource(Res.plurals.calendar_repeat_every_months, interval, interval)
+        RecurrenceFrequency.YEARLY -> if (interval == 1) stringResource(Res.string.calendar_repeat_every_year) else pluralStringResource(Res.plurals.calendar_repeat_every_years, interval, interval)
     }
-    val base = if (interval == 1) "Every $unit" else "Every $interval ${unit}s"
-    val detail = when (frequency) {
-        RecurrenceFrequency.WEEKLY -> daysOfWeek
-            .sortedBy { weekdayOrder.indexOf(it) }
-            .joinToString(", ") { it.shortLabel() }
-            .let { if (it.isBlank()) "" else " on $it" }
-        RecurrenceFrequency.MONTHLY -> " on day ${anchorDate.day}"
-        else -> ""
+    val withDetail = when (frequency) {
+        RecurrenceFrequency.WEEKLY -> {
+            val dayNames = daysOfWeek
+                .sortedBy { weekdayOrder.indexOf(it) }
+                .joinToString(", ") { it.shortLabel() }
+            if (dayNames.isBlank()) base else stringResource(Res.string.calendar_repeat_on_days, base, dayNames)
+        }
+        RecurrenceFrequency.MONTHLY -> stringResource(Res.string.calendar_repeat_on_day_of_month, base, anchorDate.day)
+        else -> base
     }
-    val ending = untilDateString
-        ?.let { " · until ${formatFullDate(LocalDate.parse(it))}" }
-        .orEmpty()
-    return base + detail + ending
+    if (untilDateString == null) return withDetail
+    return stringResource(Res.string.calendar_repeat_summary_until, withDetail, formatFullDate(LocalDate.parse(untilDateString)))
 }
 
 @Composable
@@ -1735,7 +1809,7 @@ private fun CustomRepeatDialog(
     onDismiss: () -> Unit,
     onConfirm: (RecurrenceRule?) -> Unit
 ) {
-    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = "Custom Repeat") { closeAnd ->
+    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = stringResource(Res.string.calendar_custom_repeat)) { closeAnd ->
         CustomRepeatForm(
             initialRule = initialRule,
             anchorDate = anchorDate,
@@ -1764,16 +1838,14 @@ private fun CustomRepeatForm(
     var showEndDatePicker by remember { mutableStateOf(false) }
     val weekdayOrder = daysOfWeekStartingFrom(LocalFirstDayOfWeek.current)
 
-    val summary = remember(frequency, interval, daysOfWeek, weekdayOrder, hasEndDate, untilDateString) {
-        buildRepeatSummary(
-            frequency = frequency,
-            interval = interval,
-            daysOfWeek = daysOfWeek,
-            weekdayOrder = weekdayOrder,
-            anchorDate = anchorDate,
-            untilDateString = if (hasEndDate) untilDateString else null
-        )
-    }
+    val summary = buildRepeatSummary(
+        frequency = frequency,
+        interval = interval,
+        daysOfWeek = daysOfWeek,
+        weekdayOrder = weekdayOrder,
+        anchorDate = anchorDate,
+        untilDateString = if (hasEndDate) untilDateString else null
+    )
 
     val divider = @Composable {
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine())
@@ -1802,7 +1874,7 @@ private fun CustomRepeatForm(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Repeat every",
+                    text = stringResource(Res.string.calendar_repeat_every),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -1812,7 +1884,7 @@ private fun CustomRepeatForm(
                 ) {
                     StepperButton(
                         icon = Icons.Default.Remove,
-                        contentDescription = "Decrease",
+                        contentDescription = stringResource(Res.string.calendar_decrease),
                         enabled = interval > 1
                     ) { interval = (interval - 1).coerceAtLeast(1) }
                     Text(
@@ -1824,7 +1896,7 @@ private fun CustomRepeatForm(
                     )
                     StepperButton(
                         icon = Icons.Default.Add,
-                        contentDescription = "Increase",
+                        contentDescription = stringResource(Res.string.calendar_increase),
                         enabled = interval < 99
                     ) { interval = (interval + 1).coerceAtMost(99) }
                 }
@@ -1838,10 +1910,10 @@ private fun CustomRepeatForm(
                 RecurrenceFrequency.entries.forEach { option ->
                     CategoryChip(
                         label = when (option) {
-                            RecurrenceFrequency.DAILY -> "Days"
-                            RecurrenceFrequency.WEEKLY -> "Weeks"
-                            RecurrenceFrequency.MONTHLY -> "Months"
-                            RecurrenceFrequency.YEARLY -> "Years"
+                            RecurrenceFrequency.DAILY -> stringResource(Res.string.calendar_unit_days)
+                            RecurrenceFrequency.WEEKLY -> stringResource(Res.string.calendar_unit_weeks)
+                            RecurrenceFrequency.MONTHLY -> stringResource(Res.string.calendar_unit_months)
+                            RecurrenceFrequency.YEARLY -> stringResource(Res.string.calendar_unit_years)
                         },
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         hasCategory = false,
@@ -1856,7 +1928,7 @@ private fun CustomRepeatForm(
                 divider()
 
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SectionLabel("On these days")
+                    SectionLabel(stringResource(Res.string.calendar_on_these_days))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -1902,20 +1974,20 @@ private fun CustomRepeatForm(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Ends",
+                    text = stringResource(Res.string.calendar_ends),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CategoryChip(
-                        label = "Never",
+                        label = stringResource(Res.string.calendar_repeat_never),
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         hasCategory = false,
                         isSelected = !hasEndDate,
                         onClick = { hasEndDate = false }
                     )
                     CategoryChip(
-                        label = "On date",
+                        label = stringResource(Res.string.calendar_on_date),
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         hasCategory = false,
                         isSelected = hasEndDate,
@@ -1931,7 +2003,7 @@ private fun CustomRepeatForm(
                 EventFieldRow(
                     icon = painterResource(Res.drawable.calendar),
                     label = untilDateString?.let { formatFullDate(LocalDate.parse(it)) }
-                        ?: "Choose end date",
+                        ?: stringResource(Res.string.calendar_choose_end_date),
                     onClick = { showEndDatePicker = true },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1953,9 +2025,9 @@ private fun CustomRepeatForm(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                EmberrButtonSecondary(text = "Cancel", onClick = onCancel, modifier = Modifier.weight(1f))
+                EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onCancel, modifier = Modifier.weight(1f))
                 EmberrButtonPrimary(
-                    text = "Done",
+                    text = stringResource(Res.string.calendar_done),
                     onClick = {
                         onDone(
                             RecurrenceRule(
@@ -1978,19 +2050,19 @@ fun RecurrenceScopeChooser(
     onDismiss: () -> Unit,
     onScopeSelected: (RecurrenceEditScope) -> Unit
 ) {
-    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = "Which events?") { closeAnd ->
+    EmberrBottomSheet(expanded = true, onDismiss = onDismiss, title = stringResource(Res.string.calendar_which_events)) { closeAnd ->
         CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
-                SheetOptionRow("This event") { closeAnd { onScopeSelected(RecurrenceEditScope.THIS_EVENT) } }
-                SheetOptionRow("All future events") { closeAnd { onScopeSelected(RecurrenceEditScope.ALL_FUTURE_EVENTS) } }
-                SheetOptionRow("All past events") { closeAnd { onScopeSelected(RecurrenceEditScope.ALL_PAST_EVENTS) } }
-                SheetOptionRow("All events") { closeAnd { onScopeSelected(RecurrenceEditScope.ALL_EVENTS) } }
+                SheetOptionRow(stringResource(Res.string.calendar_scope_this_event)) { closeAnd { onScopeSelected(RecurrenceEditScope.THIS_EVENT) } }
+                SheetOptionRow(stringResource(Res.string.calendar_scope_all_future_events)) { closeAnd { onScopeSelected(RecurrenceEditScope.ALL_FUTURE_EVENTS) } }
+                SheetOptionRow(stringResource(Res.string.calendar_scope_all_past_events)) { closeAnd { onScopeSelected(RecurrenceEditScope.ALL_PAST_EVENTS) } }
+                SheetOptionRow(stringResource(Res.string.calendar_scope_all_events)) { closeAnd { onScopeSelected(RecurrenceEditScope.ALL_EVENTS) } }
 
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                         .padding(vertical = 12.dp)

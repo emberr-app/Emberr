@@ -61,11 +61,17 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.editor.components.DesktopCursor
 import com.emberr.presentation.shared.editor.components.desktopPointerCursor
 import com.emberr.presentation.shared.components.orHighContrastLine
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_all_day_on_date
+import emberr.shared.generated.resources.calendar_hidden_more
+import emberr.shared.generated.resources.calendar_untitled_event
 import kotlin.math.roundToInt
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.plus
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 const val MAX_ALL_DAY_ROWS_SHOWN = 2
 
@@ -350,7 +356,7 @@ fun AllDayStrip(
             layout.hiddenCountByColumn.forEachIndexed { column, hiddenCount ->
                 if (hiddenCount > 0) {
                     Text(
-                        text = if (isNarrow) "+$hiddenCount" else "+$hiddenCount more",
+                        text = if (isNarrow) "+$hiddenCount" else pluralStringResource(Res.plurals.calendar_hidden_more, hiddenCount, hiddenCount),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center,
@@ -510,7 +516,7 @@ private fun AllDayBarLook(
         contentAlignment = Alignment.CenterStart
     ) {
         Text(
-            text = event.text.ifBlank { "Untitled event" },
+            text = event.text.ifBlank { stringResource(Res.string.calendar_untitled_event) },
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Medium,
             color = if (event.isChecked) textColor.copy(alpha = CheckedEventTitleAlpha) else textColor,
@@ -534,7 +540,7 @@ fun AllDayEventsSheet(
     EmberrBottomSheet(
         expanded = date != null,
         onDismiss = onDismiss,
-        title = date?.let { "All day · ${formatFullDate(it)}" }
+        title = date?.let { stringResource(Res.string.calendar_all_day_on_date, formatFullDate(it)) }
     ) { closeAnd ->
         Column(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 20.dp),

@@ -6,11 +6,11 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 
-enum class FirstDayOfWeekPreference(val displayName: String) {
-    SYSTEM("System default"),
-    SATURDAY("Saturday"),
-    SUNDAY("Sunday"),
-    MONDAY("Monday");
+enum class FirstDayOfWeekPreference {
+    SYSTEM,
+    SATURDAY,
+    SUNDAY,
+    MONDAY;
 
     fun firstDayOfWeek(systemFirstDayOfWeek: DayOfWeek): DayOfWeek = when (this) {
         SYSTEM -> systemFirstDayOfWeek

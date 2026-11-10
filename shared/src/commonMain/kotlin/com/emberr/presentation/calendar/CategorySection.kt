@@ -51,10 +51,25 @@ import com.emberr.presentation.shared.components.menuTapAnchor
 import com.emberr.presentation.shared.components.rememberMenuTapAnchor
 import com.emberr.presentation.shared.components.EmberrTextField
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_add
+import emberr.shared.generated.resources.calendar_add_category
+import emberr.shared.generated.resources.calendar_categories
+import emberr.shared.generated.resources.calendar_category_already_exists
+import emberr.shared.generated.resources.calendar_category_name
+import emberr.shared.generated.resources.calendar_color
+import emberr.shared.generated.resources.calendar_delete_category
+import emberr.shared.generated.resources.calendar_edit_category
+import emberr.shared.generated.resources.calendar_no_category_title
+import emberr.shared.generated.resources.calendar_spaces
+import emberr.shared.generated.resources.calendar_untitled_space
 import emberr.shared.generated.resources.chevron_right
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_save
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private val CategoryMenuWidth = 320.dp
 private val CategoryMenuHorizontalPadding = 14.dp
@@ -106,7 +121,7 @@ fun CategorySection(
         }
     }
 
-    SettingsGroup(title = "Categories", cardColor = cardColor) {
+    SettingsGroup(title = stringResource(Res.string.calendar_categories), cardColor = cardColor) {
         categories.forEach { category ->
             val state = editorState
             CategoryRow(
@@ -135,7 +150,7 @@ fun CategorySection(
 
         if (!isDesktopPlatform) {
             VisibilityToggleRow(
-                label = "No Category",
+                label = stringResource(Res.string.calendar_no_category_title),
                 isShown = noCategoryVisibilityKey !in hiddenCategoryVisibilityKeys,
                 onToggleShown = { onToggleCategoryVisibility(noCategoryVisibilityKey) }
             )
@@ -166,12 +181,12 @@ fun CategorySection(
     var keepsSpacesGroupShown by remember { mutableStateOf(false) }
     if (spaces.size >= 2 || isAnySpaceHidden) keepsSpacesGroupShown = true
     if (!isDesktopPlatform && keepsSpacesGroupShown && spaces.isNotEmpty()) {
-        SettingsGroup(title = "Spaces", cardColor = cardColor) {
+        SettingsGroup(title = stringResource(Res.string.calendar_spaces), cardColor = cardColor) {
             spaces.forEachIndexed { index, space ->
                 if (index > 0) SettingsDivider()
                 val spaceVisibilityKey = spaceVisibilityKeyFor(space.spaceId)
                 VisibilityToggleRow(
-                    label = space.displayName.trim().ifBlank { "Untitled space" },
+                    label = space.displayName.trim().ifBlank { stringResource(Res.string.calendar_untitled_space) },
                     isShown = spaceVisibilityKey !in hiddenCategoryVisibilityKeys,
                     onToggleShown = { onToggleCategoryVisibility(spaceVisibilityKey) }
                 )
@@ -184,13 +199,13 @@ fun CategorySection(
         EmberrBottomSheet(
             expanded = state != null,
             onDismiss = { editorState = null },
-            title = if (state?.categoryId == null) "Add Category" else "Edit Category",
+            title = if (state?.categoryId == null) stringResource(Res.string.calendar_add_category) else stringResource(Res.string.calendar_edit_category),
             headerAction = state?.categoryId?.takeIf { id -> id != BIRTHDAYS_CATEGORY_ID }?.let { id ->
                 EmberrBottomSheetAction(
                     icon = painterResource(Res.drawable.trash),
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(Res.string.common_delete),
                     tint = MaterialTheme.colorScheme.error,
-                    tooltip = "Delete category",
+                    tooltip = stringResource(Res.string.calendar_delete_category),
                     closesSheet = true,
                     onClick = {
                         onDeleteCategory(id)
@@ -286,7 +301,7 @@ private fun CategoryRow(
                             vertical = CategoryMenuVerticalPadding
                         )
                     ) {
-                        CategoryMenuHeader(title = "Edit Category", onDelete = onDelete)
+                        CategoryMenuHeader(title = stringResource(Res.string.calendar_edit_category), onDelete = onDelete)
                         CategoryEditor(
                             state = shownEditorState,
                             isNew = false,
@@ -389,7 +404,7 @@ private fun AddCategoryRow(
     Box(modifier = Modifier.fillMaxWidth().menuTapAnchor(tapAnchor)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.plus),
-            title = "Add Category",
+            title = stringResource(Res.string.calendar_add_category),
             onClick = onClick
         )
 
@@ -406,7 +421,7 @@ private fun AddCategoryRow(
                             vertical = CategoryMenuVerticalPadding
                         )
                     ) {
-                        CategoryMenuHeader(title = "Add Category", onDelete = null)
+                        CategoryMenuHeader(title = stringResource(Res.string.calendar_add_category), onDelete = null)
                         CategoryEditor(
                             state = shownEditorState,
                             isNew = true,
@@ -443,7 +458,7 @@ private fun CategoryMenuHeader(
             modifier = Modifier.weight(1f)
         )
         if (onDelete != null) {
-            IconTooltip(text = "Delete category") {
+            IconTooltip(text = stringResource(Res.string.calendar_delete_category)) {
                 Box(
                     modifier = Modifier
                         .size(CategoryMenuHeaderHeight)
@@ -456,7 +471,7 @@ private fun CategoryMenuHeader(
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.trash),
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(Res.string.common_delete),
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)
                     )
@@ -481,14 +496,14 @@ private fun CategoryEditor(
         EmberrTextField(
             value = state.name,
             onValueChange = onNameChange,
-            placeholder = "Category name",
+            placeholder = stringResource(Res.string.calendar_category_name),
             modifier = Modifier.fillMaxWidth(),
             onSubmit = { if (!isNameTaken) onSave() }
         )
 
         if (isNameTaken) {
             Text(
-                text = "Category already exists",
+                text = stringResource(Res.string.calendar_category_already_exists),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(start = CategoryMenuContentInset, top = CategoryEditorLabelSpacing)
@@ -496,7 +511,7 @@ private fun CategoryEditor(
         }
 
         Text(
-            text = "Color",
+            text = stringResource(Res.string.calendar_color),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.padding(
@@ -528,12 +543,12 @@ private fun CategoryEditor(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             EmberrButtonSecondary(
-                text = "Cancel",
+                text = stringResource(Res.string.common_cancel),
                 onClick = onCancel,
                 modifier = Modifier.weight(1f)
             )
             EmberrButtonPrimary(
-                text = if (isNew) "Add" else "Save",
+                text = if (isNew) stringResource(Res.string.calendar_add) else stringResource(Res.string.common_save),
                 onClick = onSave,
                 modifier = Modifier.weight(1f),
                 enabled = !isNameTaken

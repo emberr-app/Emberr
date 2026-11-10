@@ -26,6 +26,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.model.CredentialsEdit
 import com.emberr.data.local.prefs.SettingsManager
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.daily_calendar
+import emberr.shared.generated.resources.daily_click_to_write_your_thoughts
+import emberr.shared.generated.resources.daily_more_settings
+import emberr.shared.generated.resources.daily_open_calendar
+import emberr.shared.generated.resources.daily_open_timeline
+import emberr.shared.generated.resources.daily_settings
+import emberr.shared.generated.resources.daily_tap_to_write_your_thoughts
+import emberr.shared.generated.resources.daily_timeline
+import emberr.shared.generated.resources.daily_today
+import emberr.shared.generated.resources.note_empty_note_placeholder
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.domain.model.AllDaySpan
@@ -556,7 +568,7 @@ fun DailyScreen(
                             topContentPadding = editorTopContentPadding,
                             onUndo = { viewModel.undo() },
                             onRedo = { viewModel.redo() },
-                            emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type / for commands...",
+                            emptyNotePlaceholder = if (isDailyQuoteVisible) "" else stringResource(Res.string.note_empty_note_placeholder),
                             singleTapStartsTyping = true,
                             startTypingAtEndRequested = isCurrentActivePage && pageDateString == startTypingAtEndOnDate,
                             onStartedTypingAtEnd = { startTypingAtEndOnDate = null },
@@ -673,12 +685,12 @@ fun DailyScreen(
                             ) {
                                 TopBarIconButton(
                                     icon = painterResource(Res.drawable.history2),
-                                    contentDescription = "Open timeline",
+                                    contentDescription = stringResource(Res.string.daily_open_timeline),
                                     bgColor = Color.Transparent,
                                     tint = MaterialTheme.colorScheme.primary,
                                     hazeState = hazeState,
                                     hazeStyle = EmberrBlur.Regular,
-                                    tooltip = "Timeline",
+                                    tooltip = stringResource(Res.string.daily_timeline),
                                     onClick = {
                                         viewModel.loadTimeline()
                                         showTimelineDialog = true
@@ -694,15 +706,15 @@ fun DailyScreen(
                                         items = listOf(
                                             TopBarIconButtonItem(
                                                 icon = painterResource(Res.drawable.calendar),
-                                                contentDescription = "Open Calendar",
+                                                contentDescription = stringResource(Res.string.daily_open_calendar),
                                                 onClick = onNavigateToCalendar,
-                                                tooltip = "Calendar"
+                                                tooltip = stringResource(Res.string.daily_calendar)
                                             ),
                                             TopBarIconButtonItem(
                                                 icon = painterResource(Res.drawable.ellipsis),
-                                                contentDescription = "Settings",
+                                                contentDescription = stringResource(Res.string.daily_settings),
                                                 onClick = { showSettingsMenu = true },
-                                                tooltip = "More settings"
+                                                tooltip = stringResource(Res.string.daily_more_settings)
                                             )
                                         )
                                     )
@@ -780,9 +792,10 @@ fun DailyScreen(
     }
 }
 
+@Composable
 private fun dailyHeaderTitle(selectedDate: LocalDate): String {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    if (selectedDate == today) return "Today"
+    if (selectedDate == today) return stringResource(Res.string.daily_today)
 
     val shortDayName = selectedDate.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
     return "$shortDayName ${selectedDate.day}"
@@ -819,7 +832,7 @@ private fun DailyCalendarSheet(
             )
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp, horizontal = 20.dp)
@@ -880,7 +893,7 @@ fun DailyEmptyDayMessage(
         }
 
         Text(
-            text = if (isDesktopPlatform) "Click to write your thoughts" else "Tap to write your thoughts",
+            text = if (isDesktopPlatform) stringResource(Res.string.daily_click_to_write_your_thoughts) else stringResource(Res.string.daily_tap_to_write_your_thoughts),
             style = MaterialTheme.typography.labelSmall,
             color = textColor.copy(alpha = 0.3f),
             textAlign = TextAlign.Center,

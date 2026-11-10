@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.domain.model.CredentialsEdit
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.note_empty_note_placeholder
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -55,6 +57,7 @@ import com.emberr.ui.theme.NotePaperTextureBox
 import com.emberr.ui.theme.PaperTextureArea
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 /**
@@ -370,7 +373,7 @@ fun DailyEditorPane(
             modifier = Modifier.fillMaxSize().hazeSource(state = hazeState),
             onUndo = { viewModel.undo() },
             onRedo = { viewModel.redo() },
-            emptyNotePlaceholder = if (isDailyQuoteVisible) "" else "Type / for commands...",
+            emptyNotePlaceholder = if (isDailyQuoteVisible) "" else stringResource(Res.string.note_empty_note_placeholder),
             singleTapStartsTyping = true,
             emptyContent = if (isDailyQuoteVisible) {
                 {

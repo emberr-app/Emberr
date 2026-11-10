@@ -53,6 +53,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.settings.label
 import com.emberr.presentation.shared.components.IconTooltip
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.util.system.isDesktopPlatform
@@ -85,8 +86,16 @@ import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.bell
 import emberr.shared.generated.resources.calendar
+import emberr.shared.generated.resources.calendar_birthday_reminders
+import emberr.shared.generated.resources.calendar_birthdays
+import emberr.shared.generated.resources.calendar_close_sidebar
+import emberr.shared.generated.resources.calendar_general
+import emberr.shared.generated.resources.calendar_reminder_time
+import emberr.shared.generated.resources.calendar_views
 import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.clock_circle
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.settings_first_day_of_week
 import emberr.shared.generated.resources.sidebar
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -96,6 +105,7 @@ import kotlinx.datetime.todayIn
 import kotlin.time.Clock
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.stringResource
 
 private val SidebarShape = RoundedCornerShape(22.dp)
 private val SidebarEdgePadding = 12.dp
@@ -234,7 +244,7 @@ fun CalendarSidebar(
                             bottom = 8.dp
                         ),
                         actions = {
-                            IconTooltip(text = "Close sidebar") {
+                            IconTooltip(text = stringResource(Res.string.calendar_close_sidebar)) {
                                 Box(
                                     modifier = Modifier
                                         .size(TopHeaderBarButtonSize)
@@ -247,7 +257,7 @@ fun CalendarSidebar(
                                 ) {
                                     Icon(
                                         painter = painterResource(Res.drawable.sidebar),
-                                        contentDescription = "Close sidebar",
+                                        contentDescription = stringResource(Res.string.calendar_close_sidebar),
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(22.dp)
                                     )
@@ -290,7 +300,7 @@ fun CalendarSettingsContent(
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (viewMode != null) {
-            SettingsGroup(title = "Views", cardColor = cardColor) {
+            SettingsGroup(title = stringResource(Res.string.calendar_views), cardColor = cardColor) {
                 calendarViewModeLabels.forEachIndexed { index, (mode, label) ->
                     if (index > 0) {
                         HorizontalDivider(
@@ -300,7 +310,7 @@ fun CalendarSettingsContent(
                         )
                     }
                     CalendarViewModeRow(
-                        label = label,
+                        label = stringResource(label),
                         isSelected = mode == viewMode,
                         onClick = { onViewModeChange(mode) }
                     )
@@ -319,30 +329,30 @@ fun CalendarSettingsContent(
             cardColor = cardColor
         )
 
-        SettingsGroup(title = "General", cardColor = cardColor) {
+        SettingsGroup(title = stringResource(Res.string.calendar_general), cardColor = cardColor) {
             if (isDesktopPlatform) {
                 SettingsChoiceRow(
                     icon = painterResource(Res.drawable.calendar),
-                    title = "First Day of Week",
-                    value = firstDayOfWeekPreference.displayName,
+                    title = stringResource(Res.string.settings_first_day_of_week),
+                    value = firstDayOfWeekPreference.label(),
                     choices = FirstDayOfWeekPreference.entries.map { option ->
-                        SettingsChoice(label = option.displayName, isSelected = option == firstDayOfWeekPreference) {
+                        SettingsChoice(label = option.label(), isSelected = option == firstDayOfWeekPreference) {
                             onFirstDayOfWeekPreferenceChange(option)
                         }
                     }
                 )
             } else {
                 FirstDayOfWeekStackedRow(
-                    selectedLabel = firstDayOfWeekPreference.displayName,
+                    selectedLabel = firstDayOfWeekPreference.label(),
                     onClick = { showFirstDayOfWeekOptions = true }
                 )
             }
         }
 
-        SettingsGroup(title = "Birthdays", cardColor = cardColor) {
+        SettingsGroup(title = stringResource(Res.string.calendar_birthdays), cardColor = cardColor) {
             SettingsToggleRow(
                 icon = painterResource(Res.drawable.bell),
-                title = "Birthday Reminders",
+                title = stringResource(Res.string.calendar_birthday_reminders),
                 isChecked = areBirthdayRemindersOn,
                 onCheckedChange = onBirthdayRemindersOnChange
             )
@@ -352,7 +362,7 @@ fun CalendarSettingsContent(
                 Box {
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.clock_circle),
-                        title = "Reminder Time",
+                        title = stringResource(Res.string.calendar_reminder_time),
                         trailingLabel = formatTimeOfDay(
                             hour = birthdayReminderMinuteOfDay / 60,
                             minute = birthdayReminderMinuteOfDay % 60,
@@ -377,13 +387,13 @@ fun CalendarSettingsContent(
         EmberrBottomSheet(
             expanded = showFirstDayOfWeekOptions,
             onDismiss = { showFirstDayOfWeekOptions = false },
-            title = "First Day of Week",
+            title = stringResource(Res.string.settings_first_day_of_week),
             contentHorizontalPadding = 0.dp
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                 FirstDayOfWeekPreference.entries.forEach { option ->
                     EmberrBottomSheetOption(
-                        label = option.displayName,
+                        label = option.label(),
                         isSelected = option == firstDayOfWeekPreference,
                         onClick = {
                             onFirstDayOfWeekPreferenceChange(option)
@@ -393,7 +403,7 @@ fun CalendarSettingsContent(
                 }
 
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = { showFirstDayOfWeekOptions = false },
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 12.dp, start = 20.dp, end = 20.dp)
@@ -452,7 +462,7 @@ private fun FirstDayOfWeekStackedRow(selectedLabel: String, onClick: () -> Unit)
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "First Day of Week",
+                text = stringResource(Res.string.settings_first_day_of_week),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
