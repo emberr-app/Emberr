@@ -94,6 +94,23 @@ import com.emberr.presentation.shared.components.emberrBorderColor
 import com.emberr.presentation.shared.components.subtleFillColor
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.credentials_add_field
+import emberr.shared.generated.resources.credentials_change_field_type
+import emberr.shared.generated.resources.credentials_field_type
+import emberr.shared.generated.resources.credentials_generate_a_password
+import emberr.shared.generated.resources.credentials_hide
+import emberr.shared.generated.resources.credentials_lock_failed
+import emberr.shared.generated.resources.credentials_login_url
+import emberr.shared.generated.resources.credentials_no_fields_hint
+import emberr.shared.generated.resources.credentials_remove_field
+import emberr.shared.generated.resources.credentials_service_name
+import emberr.shared.generated.resources.credentials_show
+import emberr.shared.generated.resources.credentials_strength_moderate
+import emberr.shared.generated.resources.credentials_strength_strong
+import emberr.shared.generated.resources.credentials_strength_weak
 import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.lock_password
@@ -106,6 +123,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -154,15 +172,6 @@ internal fun CredentialFieldKind.defaultLabel(): String = when (this) {
     CredentialFieldKind.USERNAME -> "Username"
     CredentialFieldKind.PASSWORD -> "Password"
     CredentialFieldKind.NOTE -> "Note"
-}
-
-private fun CredentialFieldKind.menuLabel(): String =
-    if (this == CredentialFieldKind.USERNAME) "Username or email" else defaultLabel()
-
-private fun CredentialFieldKind.valuePlaceholder(): String = when (this) {
-    CredentialFieldKind.USERNAME -> "Username or email"
-    CredentialFieldKind.PASSWORD -> "Password"
-    CredentialFieldKind.NOTE -> "Add a note"
 }
 
 private fun CredentialFieldKind.valueKeyboardOptions(): KeyboardOptions = when (this) {
@@ -217,6 +226,7 @@ internal fun CredentialsBlockEditor(
     }
     var fieldIdToFocus by remember { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
+    val lockFailedMessage = stringResource(Res.string.credentials_lock_failed)
 
     DisposableEffect(Unit) {
         GlobalEditorState.openCredentialsFormCount += 1
@@ -237,7 +247,7 @@ internal fun CredentialsBlockEditor(
             val edit = credentialsEdit(serviceName, loginUrl, fieldDrafts.toList(), blockAtStart, credentialVault)
             when {
                 edit == null -> {
-                    showNativeToast("Couldn't lock these credentials on this device. Try again.")
+                    showNativeToast(lockFailedMessage)
                     isSaving = false
                 }
                 edit.changesNothing() -> onCancel()
@@ -274,7 +284,7 @@ internal fun CredentialsBlockEditor(
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = if (isDesktopPlatform) 12.dp else 16.dp, vertical = 6.dp)) {
             if (fieldDrafts.isEmpty()) {
                 Text(
-                    text = "Add a field for a username, password or note.",
+                    text = stringResource(Res.string.credentials_no_fields_hint),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.padding(vertical = 12.dp)
@@ -381,14 +391,14 @@ private fun CredentialsEditorHeader(
             EmberrTextField(
                 value = serviceName,
                 onValueChange = onServiceNameChange,
-                placeholder = "Service name",
+                placeholder = stringResource(Res.string.credentials_service_name),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
             EmberrTextField(
                 value = loginUrl,
                 onValueChange = onLoginUrlChange,
-                placeholder = "Login URL",
+                placeholder = stringResource(Res.string.credentials_login_url),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, autoCorrectEnabled = false),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -484,12 +494,12 @@ private fun CredentialFieldEditorRow(
         Box {
             CredentialIconButton(
                 painter = draft.kind.icon(),
-                description = "Change field type",
+                description = stringResource(Res.string.credentials_change_field_type),
                 onClick = { runAfterKeyboardCloses { isKindMenuOpen = true } }
             )
             CredentialFieldKindMenu(
                 expanded = isKindMenuOpen,
-                title = "Field type",
+                title = stringResource(Res.string.credentials_field_type),
                 selectedKind = draft.kind,
                 onDismiss = { isKindMenuOpen = false },
                 onPick = { kind -> draft.changeKind(kind) }
@@ -500,7 +510,7 @@ private fun CredentialFieldEditorRow(
         CredentialGhostInput(
             value = draft.label,
             onValueChange = { draft.label = it },
-            placeholder = draft.kind.defaultLabel(),
+            placeholder = draft.kind.displayLabel(),
             modifier = modifier
         )
     }
@@ -508,7 +518,7 @@ private fun CredentialFieldEditorRow(
         Box {
             CredentialIconButton(
                 painter = painterResource(Res.drawable.refresh_cw),
-                description = "Generate a password",
+                description = stringResource(Res.string.credentials_generate_a_password),
                 onClick = { runAfterKeyboardCloses { isGeneratorOpen = true } },
                 showsRipple = showsRipple
             )
@@ -553,7 +563,7 @@ private fun CredentialFieldEditorRow(
             ) {
                 CredentialIconButton(
                     painter = painterResource(Res.drawable.trash),
-                    description = "Remove field",
+                    description = stringResource(Res.string.credentials_remove_field),
                     onClick = onRemove
                 )
             }
@@ -566,7 +576,7 @@ private fun CredentialFieldEditorRow(
                 if (draft.kind == CredentialFieldKind.PASSWORD) generatorButton(true)
                 CredentialIconButton(
                     painter = painterResource(Res.drawable.trash),
-                    description = "Remove field",
+                    description = stringResource(Res.string.credentials_remove_field),
                     onClick = onRemove
                 )
             }
@@ -605,7 +615,7 @@ private fun CredentialValueInput(
                     generatorButton?.invoke()
                     CredentialIconButton(
                         painter = painterResource(if (draft.isValueVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
-                        description = if (draft.isValueVisible) "Hide" else "Show",
+                        description = if (draft.isValueVisible) stringResource(Res.string.credentials_hide) else stringResource(Res.string.credentials_show),
                         onClick = { draft.isValueVisible = !draft.isValueVisible },
                         showsRipple = false
                     )
@@ -628,9 +638,9 @@ private fun PasswordStrengthMeter(password: String) {
     if (password.isEmpty() || shownStrength == null) return
 
     val (label, color, filledBarCount) = when (shownStrength) {
-        CloudPasswordStrength.WEAK -> Triple("Weak", MaterialTheme.colorScheme.error, 1)
-        CloudPasswordStrength.MODERATE -> Triple("Moderate", ModerateColor, 2)
-        CloudPasswordStrength.STRONG -> Triple("Strong", StrongColor, 3)
+        CloudPasswordStrength.WEAK -> Triple(stringResource(Res.string.credentials_strength_weak), MaterialTheme.colorScheme.error, 1)
+        CloudPasswordStrength.MODERATE -> Triple(stringResource(Res.string.credentials_strength_moderate), ModerateColor, 2)
+        CloudPasswordStrength.STRONG -> Triple(stringResource(Res.string.credentials_strength_strong), StrongColor, 3)
     }
     Row(modifier = Modifier.padding(start = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         repeat(CloudPasswordStrength.entries.size) { barIndex ->
@@ -661,7 +671,7 @@ private fun CredentialsEditorFooter(
             AddFieldButton(onClick = { runAfterKeyboardCloses { isAddFieldMenuOpen = true } })
             CredentialFieldKindMenu(
                 expanded = isAddFieldMenuOpen,
-                title = "Add field",
+                title = stringResource(Res.string.credentials_add_field),
                 selectedKind = null,
                 onDismiss = { isAddFieldMenuOpen = false },
                 onPick = onAddField
@@ -676,18 +686,18 @@ private fun CredentialsEditorFooter(
         ) {
             addFieldButton()
             Spacer(modifier = Modifier.weight(1f))
-            EmberrButtonSecondary(text = "Cancel", onClick = onCancel, enabled = !isSaving, modifier = Modifier.widthIn(min = DesktopFooterButtonMinWidth))
+            EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onCancel, enabled = !isSaving, modifier = Modifier.widthIn(min = DesktopFooterButtonMinWidth))
             Spacer(modifier = Modifier.width(8.dp))
-            EmberrButtonPrimary(text = "Save", onClick = onSave, enabled = !isSaving, modifier = Modifier.widthIn(min = DesktopFooterButtonMinWidth))
+            EmberrButtonPrimary(text = stringResource(Res.string.common_save), onClick = onSave, enabled = !isSaving, modifier = Modifier.widthIn(min = DesktopFooterButtonMinWidth))
         }
     } else {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             addFieldButton()
             Spacer(modifier = Modifier.height(12.dp))
             Row {
-                EmberrButtonSecondary(text = "Cancel", onClick = onCancel, enabled = !isSaving, modifier = Modifier.weight(1f))
+                EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onCancel, enabled = !isSaving, modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.width(8.dp))
-                EmberrButtonPrimary(text = "Save", onClick = onSave, enabled = !isSaving, modifier = Modifier.weight(1f))
+                EmberrButtonPrimary(text = stringResource(Res.string.common_save), onClick = onSave, enabled = !isSaving, modifier = Modifier.weight(1f))
             }
         }
     }
@@ -710,7 +720,7 @@ private fun AddFieldButton(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = "Add field",
+            text = stringResource(Res.string.credentials_add_field),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary
         )
@@ -778,7 +788,7 @@ private fun CredentialFieldKindMenu(
 @Composable
 internal fun SheetCloseButton(onClick: () -> Unit) {
     EmberrButtonPrimary(
-        text = "Close",
+        text = stringResource(Res.string.common_close),
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()

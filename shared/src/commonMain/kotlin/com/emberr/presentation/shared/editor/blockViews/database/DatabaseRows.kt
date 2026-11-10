@@ -83,6 +83,16 @@ import emberr.shared.generated.resources.square_arrow_out_up_right
 import emberr.shared.generated.resources.square_check
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.database_delete_row
+import emberr.shared.generated.resources.database_duplicate_row
+import emberr.shared.generated.resources.database_open
+import emberr.shared.generated.resources.database_open_row
+import emberr.shared.generated.resources.database_row
+import emberr.shared.generated.resources.database_row_options
+import emberr.shared.generated.resources.database_select_row
+import emberr.shared.generated.resources.editor_open_note
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseRowItem(
@@ -318,7 +328,7 @@ private fun DatabaseTitleCell(
                             propagateMinConstraints = true
                         ) {
                             if (fieldValue.text.isEmpty()) {
-                                Text(text = "Untitled", style = textStyle.copy(color = MaterialTheme.colorScheme.outline))
+                                Text(text = stringResource(Res.string.common_untitled), style = textStyle.copy(color = MaterialTheme.colorScheme.outline))
                             }
                             innerTextField()
                         }
@@ -344,10 +354,10 @@ private fun DatabaseTitleCell(
             }
 
             if (canOpen) {
-                IconTooltip(text = "Open note") {
+                IconTooltip(text = stringResource(Res.string.editor_open_note)) {
                     Icon(
                         painter = painterResource(Res.drawable.square_arrow_out_up_right),
-                        contentDescription = "Open row",
+                        contentDescription = stringResource(Res.string.database_open_row),
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier
                             .padding(start = 4.dp)
@@ -489,10 +499,10 @@ private fun DatabaseRowMenuButton(
         contentAlignment = Alignment.Center
     ) {
         if (!inSelectionMode) {
-            IconTooltip(text = "Row options") {
+            IconTooltip(text = stringResource(Res.string.database_row_options)) {
                 Icon(
                     painter = painterResource(Res.drawable.ellipsis),
-                    contentDescription = "Row options",
+                    contentDescription = stringResource(Res.string.database_row_options),
                     tint = MaterialTheme.colorScheme.outline,
                     modifier = Modifier
                         .clip(CircleShape)
@@ -503,25 +513,25 @@ private fun DatabaseRowMenuButton(
             }
         }
 
-        DatabaseMenu(expanded = showMenu, title = "Row", onDismiss = { showMenu = false }) { closeAnd ->
+        DatabaseMenu(expanded = showMenu, title = stringResource(Res.string.database_row), onDismiss = { showMenu = false }) { closeAnd ->
             DatabaseMenuOption(
-                label = "Open",
+                label = stringResource(Res.string.database_open),
                 icon = { DatabaseOptionIcon(Res.drawable.square_arrow_out_up_right) },
                 onClick = { closeAnd(onOpen) }
             )
             if (!isLocked) {
                 DatabaseMenuOption(
-                    label = "Duplicate row",
+                    label = stringResource(Res.string.database_duplicate_row),
                     icon = { DatabaseOptionIcon(Res.drawable.copy) },
                     onClick = { closeAnd(onDuplicate) }
                 )
                 DatabaseMenuOption(
-                    label = "Select row",
+                    label = stringResource(Res.string.database_select_row),
                     icon = { DatabaseOptionIcon(Res.drawable.square_check) },
                     onClick = { closeAnd(onSelect) }
                 )
                 DatabaseMenuOption(
-                    label = "Delete row",
+                    label = stringResource(Res.string.database_delete_row),
                     icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
                     onClick = { closeAnd(onDelete) }
                 )

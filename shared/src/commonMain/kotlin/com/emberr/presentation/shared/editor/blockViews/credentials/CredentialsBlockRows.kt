@@ -65,13 +65,20 @@ import com.emberr.presentation.shared.components.emberrBorderColor
 import com.emberr.presentation.shared.components.subtleFillColor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
+import emberr.shared.generated.resources.cloud_hide_password
+import emberr.shared.generated.resources.cloud_show_password
 import emberr.shared.generated.resources.copy
+import emberr.shared.generated.resources.credentials_empty
+import emberr.shared.generated.resources.credentials_locked_until_key_arrives
+import emberr.shared.generated.resources.credentials_waiting_for_key
 import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.lock
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 private const val PASSWORD_REVEAL_MILLIS = 20_000
@@ -105,7 +112,7 @@ internal class CredentialSecretReader(
 
     private suspend fun decryptOrShowLocked(field: CredentialField): String? {
         val value = credentialVault.decrypt(field)
-        if (value == null) showNativeToast("These credentials are locked until their key arrives from your other device.")
+        if (value == null) showNativeToast(getString(Res.string.credentials_locked_until_key_arrives))
         return value
     }
 }
@@ -118,12 +125,6 @@ internal fun rememberCredentialSecretReader(): CredentialSecretReader {
     return remember(credentialVault, unlockSession, deviceLockPrompt) {
         CredentialSecretReader(credentialVault, unlockSession, deviceLockPrompt)
     }
-}
-
-private fun CredentialFieldKind.noun(): String = when (this) {
-    CredentialFieldKind.USERNAME -> "username"
-    CredentialFieldKind.PASSWORD -> "password"
-    CredentialFieldKind.NOTE -> "note"
 }
 
 @Composable
@@ -169,6 +170,7 @@ private fun CredentialFieldRow(
     var noteText by remember(field.encryptedValue) { mutableStateOf<String?>(null) }
     var isReadingSecret by remember { mutableStateOf(false) }
     var showsCopied by remember { mutableStateOf(false) }
+    val copiedMessage = field.kind.copiedMessage()
 
     val isSecret = field.kind != CredentialFieldKind.USERNAME
     val hasValue = if (isSecret) field.encryptedValue != null else field.plainValue.isNotEmpty()
@@ -200,7 +202,7 @@ private fun CredentialFieldRow(
     fun copyToClipboard(value: String) {
         clipboardManager.setText(AnnotatedString(value))
         showsCopied = true
-        showNativeToast("Copied ${field.kind.noun()}")
+        showNativeToast(copiedMessage)
     }
 
     fun copyValue() {
@@ -339,8 +341,9 @@ private fun CredentialFieldRow(
 
 @Composable
 private fun CredentialFieldLabel(field: CredentialField, style: TextStyle) {
+    val kindLabel = field.kind.displayLabel()
     Text(
-        text = field.label.ifBlank { field.kind.defaultLabel() },
+        text = field.label.ifBlank { kindLabel },
         style = style,
         color = MaterialTheme.colorScheme.outline,
         maxLines = 1,
@@ -367,7 +370,7 @@ private fun CredentialFieldValue(field: CredentialField, revealedPassword: Strin
                 modifier = Modifier.size(14.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
-            Text(text = "Waiting for the key from your other device", style = bodyLarge, color = outline)
+            Text(text = stringResource(Res.string.credentials_waiting_for_key), style = bodyLarge, color = outline)
         }
         field.kind == CredentialFieldKind.USERNAME && field.plainValue.isNotEmpty() -> Text(
             text = field.plainValue,
@@ -377,7 +380,7 @@ private fun CredentialFieldValue(field: CredentialField, revealedPassword: Strin
             overflow = TextOverflow.Ellipsis
         )
         field.kind == CredentialFieldKind.USERNAME || field.encryptedValue == null ->
-            Text(text = "Empty", style = bodyLarge, color = outline)
+            Text(text = stringResource(Res.string.credentials_empty), style = bodyLarge, color = outline)
         field.kind == CredentialFieldKind.NOTE -> Text(text = noteText.orEmpty(), style = bodyLarge, color = onSurface)
         revealedPassword != null -> Text(
             text = revealedPassword,
@@ -397,7 +400,6 @@ private fun CredentialRowActions(
     onCopy: () -> Unit,
     modifier: Modifier
 ) {
-    val noun = field.kind.noun()
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(if (isDesktopPlatform) RowActionGap else 0.dp),
@@ -406,14 +408,14 @@ private fun CredentialRowActions(
         if (field.kind == CredentialFieldKind.PASSWORD) {
             CredentialIconButton(
                 painter = painterResource(if (isRevealed) Res.drawable.eye_closed else Res.drawable.eye_open),
-                description = if (isRevealed) "Hide $noun" else "Show $noun",
+                description = if (isRevealed) stringResource(Res.string.cloud_hide_password) else stringResource(Res.string.cloud_show_password),
                 onClick = onToggleReveal,
                 showsRipple = false
             )
         }
         CredentialIconButton(
             painter = painterResource(if (showsCopied) Res.drawable.check else Res.drawable.copy),
-            description = "Copy $noun",
+            description = field.kind.copyDescription(),
             tint = if (showsCopied) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
             onClick = onCopy,
             showsRipple = false

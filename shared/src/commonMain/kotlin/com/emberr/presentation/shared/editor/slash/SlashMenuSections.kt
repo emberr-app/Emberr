@@ -13,6 +13,7 @@ import com.emberr.domain.model.PropertyType
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.presentation.shared.editor.blockViews.property.iconResource
+import com.emberr.presentation.shared.editor.blockViews.property.labelResource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_right2
 import emberr.shared.generated.resources.bookmark
@@ -157,7 +158,7 @@ private val slashMenuLabelResources = listOf(
     Res.string.editor_slash_section_indentation,
     Res.string.editor_slash_section_dividers,
     Res.string.editor_slash_section_date_time
-)
+) + PropertyType.entries.map { it.labelResource }
 
 @Composable
 fun rememberSlashMenuLabels(): SlashMenuLabels {
@@ -218,7 +219,7 @@ fun buildSlashMenuSections(
     SlashMenuSectionData(
         labels[Res.string.editor_slash_section_properties],
         PropertyType.entries.filterNot { it.isOnlyForDatabases }.map { propertyType ->
-            SlashMenuItemData(propertyType.label, propertyType.iconResource()) { onInsertMediaBlock(propertyInsertKey(propertyType)) }
+            SlashMenuItemData(labels[propertyType.labelResource], propertyType.iconResource()) { onInsertMediaBlock(propertyInsertKey(propertyType)) }
         } + customProperties.map { property ->
             SlashMenuItemData(property.name, property.valueType.iconResource()) {
                 onInsertMediaBlock(customPropertyInsertKey(property.propertyId))

@@ -67,10 +67,26 @@ import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.pen
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.trash
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.property_color
+import emberr.shared.generated.resources.property_create
+import emberr.shared.generated.resources.property_delete_tag
+import emberr.shared.generated.resources.property_delete_tag_message
+import emberr.shared.generated.resources.property_edit_tag
+import emberr.shared.generated.resources.property_edit_tag_named
+import emberr.shared.generated.resources.property_selected
+import emberr.shared.generated.resources.property_tag_create_hint
+import emberr.shared.generated.resources.property_tag_name
+import emberr.shared.generated.resources.property_tag_name_taken
+import emberr.shared.generated.resources.property_tag_search_or_create
+import emberr.shared.generated.resources.property_tag_search_or_create_ellipsis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
@@ -240,7 +256,7 @@ fun PropertyTagPicker(
             ) {
                 if (tagName == tagBeingEdited) {
                     PropertyTagLayer(
-                        title = "Edit tag",
+                        title = stringResource(Res.string.property_edit_tag),
                         onDismiss = { closeTagEditor() }
                     ) { closeEditorAnd ->
                         EditTagContent(
@@ -266,7 +282,7 @@ fun PropertyTagPicker(
 
         if (matchingTagNames.isEmpty() && !canCreateTag) {
             Text(
-                text = "Type a name to create one",
+                text = stringResource(Res.string.property_tag_create_hint),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
@@ -281,7 +297,7 @@ fun PropertyTagPicker(
                 EmberrTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    placeholder = "Search or create...",
+                    placeholder = stringResource(Res.string.property_tag_search_or_create_ellipsis),
                     modifier = Modifier.focusRequester(searchFocusRequester).fillMaxWidth(),
                     onSubmit = { submitSearch() }
                 )
@@ -299,7 +315,7 @@ fun PropertyTagPicker(
                 EmberrSearchSheetBody(
                     searchText = searchText,
                     onSearchTextChange = { searchText = it },
-                    placeholder = "Search or create",
+                    placeholder = stringResource(Res.string.property_tag_search_or_create),
                     contentHorizontalPadding = TagSheetSidePadding,
                     onSubmit = { submitSearch() }
                 ) {
@@ -368,15 +384,15 @@ private fun PropertyTagOptionRow(tagName: String, tagPoolKey: String, isSelected
         if (isSelected) {
             Icon(
                 painter = painterResource(Res.drawable.check),
-                contentDescription = "Selected",
+                contentDescription = stringResource(Res.string.property_selected),
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(16.dp)
             )
         }
-        IconTooltip(text = "Edit tag") {
+        IconTooltip(text = stringResource(Res.string.property_edit_tag)) {
             Icon(
                 painter = painterResource(Res.drawable.pen),
-                contentDescription = "Edit $tagName",
+                contentDescription = stringResource(Res.string.property_edit_tag_named, tagName),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 modifier = Modifier
                     .padding(start = 8.dp)
@@ -408,20 +424,20 @@ private fun EditTagContent(
         EmberrTextField(
             value = tagName,
             onValueChange = onTagNameChange,
-            placeholder = "Tag name",
+            placeholder = stringResource(Res.string.property_tag_name),
             modifier = Modifier.fillMaxWidth().focusRequester(nameFocusRequester),
             onSubmit = onSave
         )
         if (isNameTaken) {
             Text(
-                text = "A tag with this name already exists",
+                text = stringResource(Res.string.property_tag_name_taken),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(start = 4.dp, top = 6.dp)
             )
         }
         Text(
-            text = "Color",
+            text = stringResource(Res.string.property_color),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline,
             modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 8.dp)
@@ -439,7 +455,7 @@ private fun EditTagContent(
         ) { isConfirmingDelete, closeConfirmation ->
             if (isConfirmingDelete) {
                 PropertyTagLayer(
-                    title = "Delete tag",
+                    title = stringResource(Res.string.property_delete_tag),
                     onDismiss = closeConfirmation
                 ) { closeConfirmationAnd ->
                     DeleteTagConfirmation(
@@ -454,8 +470,8 @@ private fun EditTagContent(
             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            EmberrButtonSecondary(text = "Cancel", onClick = onCancel, modifier = Modifier.weight(1f))
-            EmberrButtonPrimary(text = "Save", onClick = onSave, modifier = Modifier.weight(1f), enabled = canSave)
+            EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onCancel, modifier = Modifier.weight(1f))
+            EmberrButtonPrimary(text = stringResource(Res.string.common_save), onClick = onSave, modifier = Modifier.weight(1f), enabled = canSave)
         }
     }
 
@@ -476,7 +492,7 @@ private fun DeleteTagOption(onClick: () -> Unit) {
     }
     if (isDesktopPlatform) {
         EmberrDesktopMenuOption(
-            label = "Delete tag",
+            label = stringResource(Res.string.property_delete_tag),
             onClick = onClick,
             icon = deleteIcon,
             outerHorizontalPadding = 0.dp,
@@ -484,7 +500,7 @@ private fun DeleteTagOption(onClick: () -> Unit) {
         )
     } else {
         EmberrBottomSheetOption(
-            label = "Delete tag",
+            label = stringResource(Res.string.property_delete_tag),
             onClick = onClick,
             icon = deleteIcon,
             outerHorizontalPadding = 0.dp,
@@ -497,7 +513,7 @@ private fun DeleteTagOption(onClick: () -> Unit) {
 private fun DeleteTagConfirmation(tagName: String, onCancel: () -> Unit, onDelete: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Delete \"$tagName\"? It will be removed from every note that uses it.",
+            text = stringResource(Res.string.property_delete_tag_message, tagName),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
@@ -506,8 +522,8 @@ private fun DeleteTagConfirmation(tagName: String, onCancel: () -> Unit, onDelet
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            EmberrButtonSecondary(text = "Cancel", onClick = onCancel, modifier = Modifier.weight(1f))
-            EmberrButtonPrimary(text = "Delete", onClick = onDelete, modifier = Modifier.weight(1f))
+            EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onCancel, modifier = Modifier.weight(1f))
+            EmberrButtonPrimary(text = stringResource(Res.string.common_delete), onClick = onDelete, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -531,7 +547,7 @@ private fun CreatePropertyTagRow(tagName: String, onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Create",
+            text = stringResource(Res.string.property_create),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface
         )

@@ -81,6 +81,9 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.roundToInt
+import com.emberr.presentation.shared.editor.blockViews.property.displayLabel
+import emberr.shared.generated.resources.common_untitled
+import org.jetbrains.compose.resources.stringResource
 
 private val CardGap = 12.dp
 private val CardShape = RoundedCornerShape(10.dp)
@@ -314,7 +317,7 @@ internal fun DatabaseRowCard(
                     Spacer(modifier = Modifier.width(6.dp))
                 }
                 Text(
-                    text = row.title.ifBlank { "Untitled" },
+                    text = row.title.ifBlank { stringResource(Res.string.common_untitled) },
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = if (row.title.isBlank()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
@@ -428,7 +431,7 @@ private fun DatabaseCardValue(cell: PropertyBlock, numberFormat: DatabaseNumberF
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = cell.label, style = MaterialTheme.typography.bodyMedium, color = valueColor, maxLines = 1)
+                Text(text = cell.displayLabel(), style = MaterialTheme.typography.bodyMedium, color = valueColor, maxLines = 1)
             }
         }
         cell.valueType.holdsDate -> if (cell.date != null) {

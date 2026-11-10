@@ -27,12 +27,15 @@ import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
+import emberr.shared.generated.resources.property_tag_color_automatic
+import emberr.shared.generated.resources.property_tag_color_automatic_letter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 class PropertyTagColorStore(repository: NoteRepository, appScope: CoroutineScope) {
@@ -73,7 +76,7 @@ fun PropertyTagColorChoices(
     ) {
         PropertyTagColorSwatch(
             color = propertyTagColor(tagName, isDarkTheme),
-            label = "Automatic",
+            label = stringResource(Res.string.property_tag_color_automatic),
             isSelected = selectedColorName == null,
             isAutomatic = true,
             onClick = { onColorChosen(null) }
@@ -113,7 +116,7 @@ private fun PropertyTagColorSwatch(color: Color, label: String, isSelected: Bool
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(14.dp)
             )
-            isAutomatic -> Text(text = "A", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            isAutomatic -> Text(text = stringResource(Res.string.property_tag_color_automatic_letter), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

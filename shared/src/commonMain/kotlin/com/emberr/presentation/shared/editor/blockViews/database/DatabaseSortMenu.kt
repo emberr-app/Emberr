@@ -21,13 +21,21 @@ import com.emberr.domain.database.activeView
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.DatabaseSort
-import com.emberr.domain.model.labelOf
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_down
 import emberr.shared.generated.resources.arrow_up
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.database_add_sort
+import emberr.shared.generated.resources.database_remove_all_sorts
+import emberr.shared.generated.resources.database_remove_sort
+import emberr.shared.generated.resources.database_sort
+import emberr.shared.generated.resources.database_sort_ascending
+import emberr.shared.generated.resources.database_sort_by
+import emberr.shared.generated.resources.database_sort_descending
+import emberr.shared.generated.resources.database_sort_order
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseSortMenu(
@@ -43,9 +51,9 @@ internal fun DatabaseSortMenu(
 
     fun setSorts(newSorts: List<DatabaseSort>) = editor.setSorts(block.id, view.id, newSorts)
 
-    DatabaseMenu(expanded = expanded, title = "Sort", onDismiss = onDismiss) { _ ->
+    DatabaseMenu(expanded = expanded, title = stringResource(Res.string.database_sort), onDismiss = onDismiss) { _ ->
         if (sorts.isEmpty()) {
-            DatabaseMenuSectionLabel(text = "Sort by")
+            DatabaseMenuSectionLabel(text = stringResource(Res.string.database_sort_by))
             DatabaseColumnChoices(
                 block = block,
                 columns = columnTargets,
@@ -85,10 +93,10 @@ private fun DatabaseActiveSorts(
     DatabaseMenuSectionDivider()
     if (unsortedColumns.isNotEmpty()) {
         DatabaseMenuLayer(
-            title = "Add sort",
+            title = stringResource(Res.string.database_add_sort),
             anchor = { openLayer ->
                 DatabaseMenuOption(
-                    label = "Add sort",
+                    label = stringResource(Res.string.database_add_sort),
                     icon = { DatabaseOptionIcon(Res.drawable.plus) },
                     onClick = openLayer
                 )
@@ -103,7 +111,7 @@ private fun DatabaseActiveSorts(
         }
     }
     DatabaseMenuOption(
-        label = "Remove all sorts",
+        label = stringResource(Res.string.database_remove_all_sorts),
         icon = { DatabaseOptionIcon(Res.drawable.x, tint = MaterialTheme.colorScheme.error) },
         labelColor = MaterialTheme.colorScheme.error,
         onClick = { setSorts(emptyList()) }
@@ -123,8 +131,8 @@ private fun DatabaseSortEditor(
         verticalAlignment = Alignment.CenterVertically
     ) {
         DatabaseMenuLayer(
-            title = "Sort by",
-            anchor = { openLayer -> MenuChoiceButton(text = block.labelOf(sort.target), onClick = openLayer) },
+            title = stringResource(Res.string.database_sort_by),
+            anchor = { openLayer -> MenuChoiceButton(text = block.displayLabelOf(sort.target), onClick = openLayer) },
             anchorIsMenuRow = false
         ) { closeLayerAnd ->
             DatabaseColumnChoices(
@@ -136,30 +144,33 @@ private fun DatabaseSortEditor(
         }
         Spacer(modifier = Modifier.width(8.dp))
         DatabaseMenuLayer(
-            title = "Order",
+            title = stringResource(Res.string.database_sort_order),
             anchor = { openLayer ->
-                MenuChoiceButton(text = if (sort.isDescending) "Descending" else "Ascending", onClick = openLayer)
+                MenuChoiceButton(
+                    text = stringResource(if (sort.isDescending) Res.string.database_sort_descending else Res.string.database_sort_ascending),
+                    onClick = openLayer
+                )
             },
             anchorIsMenuRow = false
         ) { closeLayerAnd ->
             DatabaseMenuOption(
-                label = "Ascending",
+                label = stringResource(Res.string.database_sort_ascending),
                 isSelected = !sort.isDescending,
                 icon = { DatabaseOptionIcon(Res.drawable.arrow_up) },
                 onClick = { closeLayerAnd { onChange(sort.copy(isDescending = false)) } }
             )
             DatabaseMenuOption(
-                label = "Descending",
+                label = stringResource(Res.string.database_sort_descending),
                 isSelected = sort.isDescending,
                 icon = { DatabaseOptionIcon(Res.drawable.arrow_down) },
                 onClick = { closeLayerAnd { onChange(sort.copy(isDescending = true)) } }
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        IconTooltip(text = "Remove sort") {
+        IconTooltip(text = stringResource(Res.string.database_remove_sort)) {
             Icon(
                 painter = painterResource(Res.drawable.x),
-                contentDescription = "Remove sort",
+                contentDescription = stringResource(Res.string.database_remove_sort),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier
                     .clip(CircleShape)
@@ -180,7 +191,7 @@ internal fun DatabaseColumnChoices(
 ) {
     columns.forEach { target ->
         DatabaseMenuOption(
-            label = block.labelOf(target),
+            label = block.displayLabelOf(target),
             isSelected = selectedColumn?.let { target == it },
             icon = { DatabaseOptionIcon(block.iconOf(target)) },
             onClick = { onPick(target) }

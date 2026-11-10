@@ -67,6 +67,14 @@ import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.widget
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.database_add_view
+import emberr.shared.generated.resources.database_delete_view
+import emberr.shared.generated.resources.database_rename
+import emberr.shared.generated.resources.database_rename_view
+import emberr.shared.generated.resources.database_view_name
+import org.jetbrains.compose.resources.stringResource
 
 internal fun DatabaseViewType.iconResource(): DrawableResource = when (this) {
     DatabaseViewType.TABLE -> Res.drawable.table
@@ -225,19 +233,19 @@ private fun DatabaseViewTab(
             Icon(painter = painterResource(view.type.iconResource()), contentDescription = null, tint = databaseInlineIconTint(mobileTint = color), modifier = Modifier.size(DatabaseInlineIconSize))
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = view.name.ifBlank { view.type.label },
+                text = view.name.ifBlank { view.type.displayName() },
                 style = if (isDesktopPlatform) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelSmall,
                 color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 maxLines = 1
             )
         }
 
-        DatabaseMenu(expanded = showMenu, title = view.name.ifBlank { view.type.label }, onDismiss = { showMenu = false }) { closeAnd ->
+        DatabaseMenu(expanded = showMenu, title = view.name.ifBlank { view.type.displayName() }, onDismiss = { showMenu = false }) { closeAnd ->
             DatabaseMenuLayer(
-                title = "Rename view",
+                title = stringResource(Res.string.database_rename_view),
                 showsCloseButton = false,
                 anchor = { openLayer ->
-                    DatabaseMenuOption(label = "Rename", icon = { DatabaseOptionIcon(Res.drawable.pen) }, onClick = openLayer)
+                    DatabaseMenuOption(label = stringResource(Res.string.database_rename), icon = { DatabaseOptionIcon(Res.drawable.pen) }, onClick = openLayer)
                 }
             ) { closeLayerAnd ->
                 DatabaseRenameViewPage(
@@ -248,7 +256,7 @@ private fun DatabaseViewTab(
             }
             if (canDelete) {
                 DatabaseMenuOption(
-                    label = "Delete view",
+                    label = stringResource(Res.string.database_delete_view),
                     icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
                     labelColor = MaterialTheme.colorScheme.error,
                     onClick = { closeAnd { editor.deleteView(block.id, view.id) } }
@@ -267,12 +275,17 @@ private fun DatabaseRenameViewPage(currentName: String, onCancel: () -> Unit, on
         EmberrTextField(
             value = name,
             onValueChange = { name = it },
-            placeholder = "View name",
+            placeholder = stringResource(Res.string.database_view_name),
             modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
             onSubmit = saveName
         )
     }
-    DatabaseMenuButtons(cancelText = "Cancel", onCancel = onCancel, confirmText = "Save", onConfirm = saveName)
+    DatabaseMenuButtons(
+        cancelText = stringResource(Res.string.common_cancel),
+        onCancel = onCancel,
+        confirmText = stringResource(Res.string.common_save),
+        onConfirm = saveName
+    )
 }
 
 @Composable
@@ -285,10 +298,10 @@ private fun DatabaseAddViewButton(
     var showMenu by remember { mutableStateOf(false) }
 
     Box {
-        IconTooltip(text = "Add view") {
+        IconTooltip(text = stringResource(Res.string.database_add_view)) {
             Icon(
                 painter = painterResource(Res.drawable.plus),
-                contentDescription = "Add view",
+                contentDescription = stringResource(Res.string.database_add_view),
                 tint = MaterialTheme.colorScheme.outline,
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
@@ -298,10 +311,10 @@ private fun DatabaseAddViewButton(
             )
         }
 
-        DatabaseMenu(expanded = showMenu, title = "Add view", onDismiss = { showMenu = false }) { closeAnd ->
+        DatabaseMenu(expanded = showMenu, title = stringResource(Res.string.database_add_view), onDismiss = { showMenu = false }) { closeAnd ->
             DatabaseViewType.entries.forEach { type ->
                 DatabaseMenuOption(
-                    label = type.label,
+                    label = type.displayName(),
                     icon = { DatabaseOptionIcon(type.iconResource()) },
                     onClick = { closeAnd { editor.addView(block.id, type) } }
                 )

@@ -57,6 +57,8 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_close
+import org.jetbrains.compose.resources.stringResource
 
 internal val DesktopDatabaseMenuMinWidth = 240.dp
 internal val DesktopDatabaseMenuMaxWidth = 300.dp
@@ -123,7 +125,7 @@ internal fun DatabaseMenu(
                     if (showsCloseButton) {
                         DatabaseMenuContent {
                             EmberrButtonPrimary(
-                                text = "Close",
+                                text = stringResource(Res.string.common_close),
                                 onClick = { closeAnd { } },
                                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                             )

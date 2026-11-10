@@ -34,7 +34,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.movie.TmdbTooManyRequestsException
 import com.emberr.presentation.shared.components.WavingDots
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.movie_couldnt_find_on_tmdb
+import emberr.shared.generated.resources.movie_loading
+import emberr.shared.generated.resources.movie_needs_internet_to_load
+import emberr.shared.generated.resources.movie_too_many_requests
+import emberr.shared.generated.resources.movie_try_again
 import kotlinx.coroutines.CancellationException
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private const val SHIMMER_WAVE_MILLIS = 1300
 private const val SHIMMER_DELAY_PER_ITEM = 0.08f
@@ -87,7 +95,7 @@ internal fun MovieSkeletonLine(
 internal sealed interface LiveTmdbLoad<out T> {
     data object Loading : LiveTmdbLoad<Nothing>
     data class Loaded<T>(val value: T) : LiveTmdbLoad<T>
-    data class Failed(val message: String) : LiveTmdbLoad<Nothing>
+    data class Failed(val message: StringResource) : LiveTmdbLoad<Nothing>
 }
 
 internal class LiveTmdbLoadState<T>(val load: LiveTmdbLoad<T>, val retry: () -> Unit)
@@ -101,13 +109,13 @@ internal fun <T> rememberLiveTmdbLoad(key: Any, load: suspend () -> T?): LiveTmd
     val result by produceState<LiveTmdbLoad<T>>(LiveTmdbLoad.Loading, key, attempt) {
         value = LiveTmdbLoad.Loading
         value = try {
-            latestLoad()?.let { LiveTmdbLoad.Loaded(it) } ?: LiveTmdbLoad.Failed("Couldn't find this on TMDB")
+            latestLoad()?.let { LiveTmdbLoad.Loaded(it) } ?: LiveTmdbLoad.Failed(Res.string.movie_couldnt_find_on_tmdb)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (_: TmdbTooManyRequestsException) {
-            LiveTmdbLoad.Failed("Too many requests right now. Try again in a minute.")
+            LiveTmdbLoad.Failed(Res.string.movie_too_many_requests)
         } catch (_: Exception) {
-            LiveTmdbLoad.Failed("Needs internet to load this")
+            LiveTmdbLoad.Failed(Res.string.movie_needs_internet_to_load)
         }
     }
     return LiveTmdbLoadState(result, retry = { attempt++ })
@@ -122,13 +130,13 @@ internal fun LiveTmdbLoadMessage(
 ) {
     when (val load = state.load) {
         LiveTmdbLoad.Loading -> Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "Loading", style = MaterialTheme.typography.bodyLarge, color = textColor)
+            Text(text = stringResource(Res.string.movie_loading), style = MaterialTheme.typography.bodyLarge, color = textColor)
             WavingDots(style = MaterialTheme.typography.bodyLarge.copy(color = textColor))
         }
         is LiveTmdbLoad.Failed -> Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(text = load.message, style = MaterialTheme.typography.bodyLarge, color = textColor)
+            Text(text = stringResource(load.message), style = MaterialTheme.typography.bodyLarge, color = textColor)
             MovieChip(
-                label = "Try again",
+                label = stringResource(Res.string.movie_try_again),
                 onClick = state.retry,
                 modifier = Modifier.height(movieChipHeight()),
                 background = chipBackground,

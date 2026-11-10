@@ -61,6 +61,43 @@ import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import emberr.shared.generated.resources.movie_out_of_ten
+import emberr.shared.generated.resources.movie_watchlist_add_filter
+import emberr.shared.generated.resources.movie_watchlist_chip_added_after
+import emberr.shared.generated.resources.movie_watchlist_chip_added_before
+import emberr.shared.generated.resources.movie_watchlist_chip_added_in_past_days
+import emberr.shared.generated.resources.movie_watchlist_chip_before
+import emberr.shared.generated.resources.movie_watchlist_chip_between
+import emberr.shared.generated.resources.movie_watchlist_chip_ended
+import emberr.shared.generated.resources.movie_watchlist_chip_not
+import emberr.shared.generated.resources.movie_watchlist_chip_not_rated_yet
+import emberr.shared.generated.resources.movie_watchlist_chip_only
+import emberr.shared.generated.resources.movie_watchlist_chip_or_later
+import emberr.shared.generated.resources.movie_watchlist_chip_over
+import emberr.shared.generated.resources.movie_watchlist_chip_past_years
+import emberr.shared.generated.resources.movie_watchlist_chip_stars_and_up
+import emberr.shared.generated.resources.movie_watchlist_chip_still_airing
+import emberr.shared.generated.resources.movie_watchlist_chip_tmdb_at_least
+import emberr.shared.generated.resources.movie_watchlist_chip_tmdb_up_to
+import emberr.shared.generated.resources.movie_watchlist_chip_under
+import emberr.shared.generated.resources.movie_watchlist_chip_up_to_stars
+import emberr.shared.generated.resources.movie_watchlist_date_from
+import emberr.shared.generated.resources.movie_watchlist_date_to
+import emberr.shared.generated.resources.movie_watchlist_filter
+import emberr.shared.generated.resources.movie_watchlist_filter_by
+import emberr.shared.generated.resources.movie_watchlist_no_genres_yet
+import emberr.shared.generated.resources.movie_watchlist_number_of_days
+import emberr.shared.generated.resources.movie_watchlist_number_of_minutes
+import emberr.shared.generated.resources.movie_watchlist_number_of_years
+import emberr.shared.generated.resources.movie_watchlist_pick_a_date
+import emberr.shared.generated.resources.movie_watchlist_pick_options
+import emberr.shared.generated.resources.movie_watchlist_remove_filter
+import emberr.shared.generated.resources.movie_watchlist_unit_days
+import emberr.shared.generated.resources.movie_watchlist_unit_minutes
+import emberr.shared.generated.resources.movie_watchlist_unit_years
+import emberr.shared.generated.resources.movie_watchlist_zero_to_ten
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
 
 private val FilterValueShape = RoundedCornerShape(12.dp)
 private const val TMDB_HIGHEST_RATING = 10.0
@@ -82,15 +119,15 @@ internal fun WatchlistFilterMenu(
         changeFilters { filters -> filters + newWatchlistFilter(Uuid.random().toString(), field) }
     }
 
-    MovieMenu(expanded = expanded, title = "Filter", onDismiss = onDismiss) { _ ->
+    MovieMenu(expanded = expanded, title = stringResource(Res.string.movie_watchlist_filter), onDismiss = onDismiss) { _ ->
         if (openView.filters.isEmpty()) {
-            MovieMenuSectionLabel("Filter by")
+            MovieMenuSectionLabel(stringResource(Res.string.movie_watchlist_filter_by))
             WatchlistFilterFieldChoices(onPick = ::addFilter)
         } else {
             openView.filters.forEachIndexed { index, filter ->
                 key(filter.id) {
                     if (index > 0) MovieMenuDivider()
-                    MovieMenuSectionLabel(filter.field.label)
+                    MovieMenuSectionLabel(filter.field.displayName())
                     WatchlistFilterEditor(
                         filter = filter,
                         titles = titles,
@@ -103,8 +140,8 @@ internal fun WatchlistFilterMenu(
             }
             MovieMenuDivider()
             MovieMenuLayer(
-                title = "Add filter",
-                anchor = { openLayer -> MovieMenuOption(label = "Add filter", icon = Res.drawable.plus, onClick = openLayer) }
+                title = stringResource(Res.string.movie_watchlist_add_filter),
+                anchor = { openLayer -> MovieMenuOption(label = stringResource(Res.string.movie_watchlist_add_filter), icon = Res.drawable.plus, onClick = openLayer) }
             ) { closeLayerAnd ->
                 WatchlistFilterFieldChoices(onPick = { field -> closeLayerAnd { addFilter(field) } })
             }
@@ -115,7 +152,7 @@ internal fun WatchlistFilterMenu(
 @Composable
 private fun WatchlistFilterFieldChoices(onPick: (WatchlistFilterField) -> Unit) {
     WatchlistFilterField.entries.forEach { field ->
-        MovieMenuOption(label = field.label, onClick = { onPick(field) })
+        MovieMenuOption(label = field.displayName(), onClick = { onPick(field) })
     }
 }
 
@@ -130,13 +167,13 @@ private fun WatchlistFilterEditor(
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (filter.field.conditions.size > 1) {
                 MovieMenuLayer(
-                    title = filter.field.label,
+                    title = filter.field.displayName(),
                     anchorIsMenuRow = false,
-                    anchor = { openLayer -> MenuChoiceButton(text = filter.condition.label, onClick = openLayer) }
+                    anchor = { openLayer -> MenuChoiceButton(text = filter.condition.displayName(), onClick = openLayer) }
                 ) { closeLayerAnd ->
                     filter.field.conditions.forEach { condition ->
                         MovieMenuOption(
-                            label = condition.label,
+                            label = condition.displayName(),
                             isSelected = condition == filter.condition,
                             onClick = { closeLayerAnd { onChange { it.withCondition(condition) } } }
                         )
@@ -144,14 +181,14 @@ private fun WatchlistFilterEditor(
                 }
             } else {
                 Text(
-                    text = filter.condition.label,
+                    text = filter.condition.displayName(),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(vertical = 5.dp)
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            WatchlistCloseButton(label = "Remove filter", touchPadding = 4.dp, onClick = onRemove)
+            WatchlistCloseButton(label = stringResource(Res.string.movie_watchlist_remove_filter), touchPadding = 4.dp, onClick = onRemove)
         }
         WatchlistFilterValue(filter = filter, titles = titles, onChange = onChange)
     }
@@ -179,25 +216,37 @@ private fun WatchlistFilterValue(
         WatchlistFilterCondition.BEFORE,
         WatchlistFilterCondition.AFTER,
         WatchlistFilterCondition.ON_OR_AFTER -> Box(modifier = valueModifier) {
-            WatchlistFilterDateValue(date = filter.date, placeholder = "Pick a date") { date -> onChange { it.copy(date = date) } }
+            WatchlistFilterDateValue(date = filter.date, placeholder = stringResource(Res.string.movie_watchlist_pick_a_date)) { date -> onChange { it.copy(date = date) } }
         }
         WatchlistFilterCondition.BETWEEN -> Column(modifier = valueModifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            WatchlistFilterDateValue(date = filter.date, placeholder = "From") { date -> onChange { it.copy(date = date) } }
-            WatchlistFilterDateValue(date = filter.endDate, placeholder = "To") { date -> onChange { it.copy(endDate = date) } }
+            WatchlistFilterDateValue(date = filter.date, placeholder = stringResource(Res.string.movie_watchlist_date_from)) { date -> onChange { it.copy(date = date) } }
+            WatchlistFilterDateValue(date = filter.endDate, placeholder = stringResource(Res.string.movie_watchlist_date_to)) { date -> onChange { it.copy(endDate = date) } }
         }
         WatchlistFilterCondition.WITHIN_PAST_DAYS -> Box(modifier = valueModifier) {
-            WatchlistFilterNumberValue(number = filter.number, placeholder = "Number of days", unit = "days") { number ->
+            WatchlistFilterNumberValue(
+                number = filter.number,
+                placeholder = stringResource(Res.string.movie_watchlist_number_of_days),
+                unit = stringResource(Res.string.movie_watchlist_unit_days)
+            ) { number ->
                 onChange { it.copy(number = number) }
             }
         }
         WatchlistFilterCondition.WITHIN_PAST_YEARS -> Box(modifier = valueModifier) {
-            WatchlistFilterNumberValue(number = filter.number, placeholder = "Number of years", unit = "years") { number ->
+            WatchlistFilterNumberValue(
+                number = filter.number,
+                placeholder = stringResource(Res.string.movie_watchlist_number_of_years),
+                unit = stringResource(Res.string.movie_watchlist_unit_years)
+            ) { number ->
                 onChange { it.copy(number = number) }
             }
         }
         WatchlistFilterCondition.SHORTER_THAN,
         WatchlistFilterCondition.LONGER_THAN -> Box(modifier = valueModifier) {
-            WatchlistFilterNumberValue(number = filter.number, placeholder = "Number of minutes", unit = "min") { number ->
+            WatchlistFilterNumberValue(
+                number = filter.number,
+                placeholder = stringResource(Res.string.movie_watchlist_number_of_minutes),
+                unit = stringResource(Res.string.movie_watchlist_unit_minutes)
+            ) { number ->
                 onChange { it.copy(number = number) }
             }
         }
@@ -212,8 +261,8 @@ private fun WatchlistFilterValue(
             } else {
                 WatchlistFilterNumberValue(
                     number = filter.number,
-                    placeholder = "0 to 10",
-                    unit = "/ 10",
+                    placeholder = stringResource(Res.string.movie_watchlist_zero_to_ten),
+                    unit = stringResource(Res.string.movie_out_of_ten),
                     highestNumber = TMDB_HIGHEST_RATING
                 ) { number -> onChange { it.copy(number = number) } }
             }
@@ -234,9 +283,10 @@ private fun pickChoicesOf(filter: WatchlistFilter, titles: List<MovieBlock>): Li
     return choices + filter.picks.filter { it !in choices }
 }
 
+@Composable
 private fun pickLabelOf(field: WatchlistFilterField, pick: String): String = when (field) {
-    WatchlistFilterField.TYPE -> MovieKind.entries.firstOrNull { it.name == pick }?.let { "${it.label}s" } ?: pick
-    WatchlistFilterField.STATUS -> WatchStatus.entries.firstOrNull { it.name == pick }?.label ?: pick
+    WatchlistFilterField.TYPE -> MovieKind.entries.firstOrNull { it.name == pick }?.pluralDisplayName() ?: pick
+    WatchlistFilterField.STATUS -> WatchStatus.entries.firstOrNull { it.name == pick }?.displayName() ?: pick
     else -> pick
 }
 
@@ -247,20 +297,20 @@ private fun WatchlistFilterPicksValue(
     picksOnlyOne: Boolean,
     onChange: ((WatchlistFilter) -> WatchlistFilter) -> Unit
 ) {
-    val shownValue = filter.picks.joinToString(", ") { pickLabelOf(filter.field, it) }
+    val shownValue = filter.picks.map { pickLabelOf(filter.field, it) }.joinToString(", ")
     MovieMenuLayer(
-        title = filter.field.label,
+        title = filter.field.displayName(),
         anchorIsMenuRow = false,
         anchor = { openLayer ->
             WatchlistFilterValueBox(onClick = openLayer) {
-                WatchlistFilterValueText(text = shownValue.ifEmpty { "Pick options" }, isPlaceholder = shownValue.isEmpty())
+                WatchlistFilterValueText(text = shownValue.ifEmpty { stringResource(Res.string.movie_watchlist_pick_options) }, isPlaceholder = shownValue.isEmpty())
             }
         }
     ) { closeLayerAnd ->
         if (choices.isEmpty()) {
             MovieMenuContent {
                 Text(
-                    text = "No genres in this watchlist yet",
+                    text = stringResource(Res.string.movie_watchlist_no_genres_yet),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -392,37 +442,55 @@ private fun WatchlistFilterChip(label: String, isEnabled: Boolean, onRemove: () 
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
         Icon(
             painter = painterResource(Res.drawable.x),
-            contentDescription = "Remove filter",
+            contentDescription = stringResource(Res.string.movie_watchlist_remove_filter),
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.size(12.dp)
         )
     }
 }
 
+@Composable
 private fun WatchlistFilter.chipLabel(): String {
-    if (!isUsable()) return field.label
-    val pickedText = picks.joinToString(", ") { pickLabelOf(field, it) }
+    if (!isUsable()) return field.displayName()
+    val pickedText = picks.map { pickLabelOf(field, it) }.joinToString(", ")
     val chosenNumber = number ?: 0.0
+    val chosenCount = chosenNumber.toInt()
     return when (condition) {
-        WatchlistFilterCondition.IS -> "$pickedText only"
+        WatchlistFilterCondition.IS -> stringResource(Res.string.movie_watchlist_chip_only, pickedText)
         WatchlistFilterCondition.IS_ANY_OF, WatchlistFilterCondition.HAS_ANY_OF -> pickedText
-        WatchlistFilterCondition.HAS_NONE_OF -> "Not $pickedText"
+        WatchlistFilterCondition.HAS_NONE_OF -> stringResource(Res.string.movie_watchlist_chip_not, pickedText)
         WatchlistFilterCondition.BEFORE ->
-            if (field == WatchlistFilterField.DATE_ADDED) "Added before ${dateChipText(date)}" else "Before ${yearOrDateText(date, isRangeEnd = false)}"
-        WatchlistFilterCondition.AFTER -> "Added after ${dateChipText(date)}"
-        WatchlistFilterCondition.ON_OR_AFTER -> "${yearOrDateText(date, isRangeEnd = false)} or later"
-        WatchlistFilterCondition.BETWEEN -> "${yearOrDateText(date, isRangeEnd = false)} – ${yearOrDateText(endDate, isRangeEnd = true)}"
-        WatchlistFilterCondition.WITHIN_PAST_DAYS -> "Added in the past ${countText(chosenNumber.toInt(), "day")}"
-        WatchlistFilterCondition.WITHIN_PAST_YEARS -> "Past ${countText(chosenNumber.toInt(), "year")}"
+            if (field == WatchlistFilterField.DATE_ADDED) {
+                stringResource(Res.string.movie_watchlist_chip_added_before, dateChipText(date))
+            } else {
+                stringResource(Res.string.movie_watchlist_chip_before, yearOrDateText(date, isRangeEnd = false))
+            }
+        WatchlistFilterCondition.AFTER -> stringResource(Res.string.movie_watchlist_chip_added_after, dateChipText(date))
+        WatchlistFilterCondition.ON_OR_AFTER -> stringResource(Res.string.movie_watchlist_chip_or_later, yearOrDateText(date, isRangeEnd = false))
+        WatchlistFilterCondition.BETWEEN -> stringResource(
+            Res.string.movie_watchlist_chip_between,
+            yearOrDateText(date, isRangeEnd = false),
+            yearOrDateText(endDate, isRangeEnd = true)
+        )
+        WatchlistFilterCondition.WITHIN_PAST_DAYS -> pluralStringResource(Res.plurals.movie_watchlist_chip_added_in_past_days, chosenCount, chosenCount)
+        WatchlistFilterCondition.WITHIN_PAST_YEARS -> pluralStringResource(Res.plurals.movie_watchlist_chip_past_years, chosenCount, chosenCount)
         WatchlistFilterCondition.AT_LEAST ->
-            if (field == WatchlistFilterField.YOUR_RATING) "${starsTextOf((chosenNumber * 2).toInt())}★ and up" else "TMDB ${numberText(chosenNumber)}+"
+            if (field == WatchlistFilterField.YOUR_RATING) {
+                stringResource(Res.string.movie_watchlist_chip_stars_and_up, starsTextOf((chosenNumber * 2).toInt()))
+            } else {
+                stringResource(Res.string.movie_watchlist_chip_tmdb_at_least, numberText(chosenNumber))
+            }
         WatchlistFilterCondition.AT_MOST ->
-            if (field == WatchlistFilterField.YOUR_RATING) "Up to ${starsTextOf((chosenNumber * 2).toInt())}★" else "TMDB up to ${numberText(chosenNumber)}"
-        WatchlistFilterCondition.NOT_RATED_YET -> "Not rated yet"
-        WatchlistFilterCondition.SHORTER_THAN -> "Under ${minutesText(chosenNumber.toInt())}"
-        WatchlistFilterCondition.LONGER_THAN -> "Over ${minutesText(chosenNumber.toInt())}"
-        WatchlistFilterCondition.STILL_AIRING -> "Still airing"
-        WatchlistFilterCondition.ENDED -> "Ended"
+            if (field == WatchlistFilterField.YOUR_RATING) {
+                stringResource(Res.string.movie_watchlist_chip_up_to_stars, starsTextOf((chosenNumber * 2).toInt()))
+            } else {
+                stringResource(Res.string.movie_watchlist_chip_tmdb_up_to, numberText(chosenNumber))
+            }
+        WatchlistFilterCondition.NOT_RATED_YET -> stringResource(Res.string.movie_watchlist_chip_not_rated_yet)
+        WatchlistFilterCondition.SHORTER_THAN -> stringResource(Res.string.movie_watchlist_chip_under, minutesText(chosenCount))
+        WatchlistFilterCondition.LONGER_THAN -> stringResource(Res.string.movie_watchlist_chip_over, minutesText(chosenCount))
+        WatchlistFilterCondition.STILL_AIRING -> stringResource(Res.string.movie_watchlist_chip_still_airing)
+        WatchlistFilterCondition.ENDED -> stringResource(Res.string.movie_watchlist_chip_ended)
     }
 }
 
@@ -433,7 +501,5 @@ private fun yearOrDateText(date: LocalDate?, isRangeEnd: Boolean): String {
     val isWholeYearEdge = if (isRangeEnd) date.month == Month.DECEMBER && date.day == 31 else date.month == Month.JANUARY && date.day == 1
     return if (isWholeYearEdge) date.year.toString() else releaseDateText(date)
 }
-
-private fun countText(count: Int, unit: String): String = if (count == 1) unit else "$count ${unit}s"
 
 private fun numberText(number: Double): String = if (number % 1.0 == 0.0) number.toInt().toString() else number.toString()

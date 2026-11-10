@@ -64,6 +64,9 @@ import com.emberr.presentation.shared.components.boardDragGesture
 import com.emberr.presentation.shared.components.scrollWhenPointerNearEdges
 import com.emberr.presentation.shared.components.emberrBorder
 import kotlin.math.roundToInt
+import emberr.shared.generated.resources.movie_watchlist_drop_titles_here
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 private val BoardColumnMinWidth = 250.dp
 private val BoardColumnGap = 12.dp
@@ -242,7 +245,7 @@ private fun WatchlistBoardColumn(
         ) {
             Box(modifier = Modifier.size(8.dp).background(status.dotColor(), CircleShape))
             Text(
-                text = status.label,
+                text = status.displayName(),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -264,7 +267,7 @@ private fun WatchlistBoardColumn(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Drop titles here",
+                    text = stringResource(Res.string.movie_watchlist_drop_titles_here),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )

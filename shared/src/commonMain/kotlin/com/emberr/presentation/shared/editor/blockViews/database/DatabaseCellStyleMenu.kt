@@ -40,6 +40,17 @@ import emberr.shared.generated.resources.textalign_left2
 import emberr.shared.generated.resources.textalign_right2
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.database_align_center
+import emberr.shared.generated.resources.database_align_left
+import emberr.shared.generated.resources.database_align_right
+import emberr.shared.generated.resources.database_alignment
+import emberr.shared.generated.resources.database_default_color
+import emberr.shared.generated.resources.database_style_cell
+import emberr.shared.generated.resources.database_style_column
+import emberr.shared.generated.resources.database_style_row
+import emberr.shared.generated.resources.editor_table_background_color
+import emberr.shared.generated.resources.editor_table_text_color
+import org.jetbrains.compose.resources.stringResource
 
 private val StyleSwatchSize = 28.dp
 
@@ -62,9 +73,9 @@ internal fun DatabaseStyleOptions(
     column: DatabaseColumnTarget,
     editor: DatabaseBlockEditor
 ) {
-    DatabaseStyleOption(label = "Style cell", target = DatabaseStyleTarget.CELL, block = block, rowNoteId = rowNoteId, column = column, editor = editor)
-    DatabaseStyleOption(label = "Style row", target = DatabaseStyleTarget.ROW, block = block, rowNoteId = rowNoteId, column = column, editor = editor)
-    DatabaseStyleOption(label = "Style column", target = DatabaseStyleTarget.COLUMN, block = block, rowNoteId = rowNoteId, column = column, editor = editor)
+    DatabaseStyleOption(label = stringResource(Res.string.database_style_cell), target = DatabaseStyleTarget.CELL, block = block, rowNoteId = rowNoteId, column = column, editor = editor)
+    DatabaseStyleOption(label = stringResource(Res.string.database_style_row), target = DatabaseStyleTarget.ROW, block = block, rowNoteId = rowNoteId, column = column, editor = editor)
+    DatabaseStyleOption(label = stringResource(Res.string.database_style_column), target = DatabaseStyleTarget.COLUMN, block = block, rowNoteId = rowNoteId, column = column, editor = editor)
 }
 
 @Composable
@@ -85,7 +96,7 @@ private fun DatabaseStyleOption(
         val style = block.styleOf(target, rowNoteId, column)
         fun choose(newStyle: DatabaseCellStyle) = editor.setStyle(block.id, target, rowNoteId, column, newStyle)
 
-        DatabaseMenuSectionLabel(text = "Text color")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_text_color))
         DatabaseStyleColorChoices(
             selectedColorName = style.textColorName,
             colorOf = { databaseTextColorNamed(it.storageName) },
@@ -93,7 +104,7 @@ private fun DatabaseStyleOption(
         )
 
         DatabaseMenuSectionDivider()
-        DatabaseMenuSectionLabel(text = "Background color")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_background_color))
         DatabaseStyleColorChoices(
             selectedColorName = style.backgroundColorName,
             colorOf = { databaseBackgroundColorNamed(it.storageName) },
@@ -101,16 +112,16 @@ private fun DatabaseStyleOption(
         )
 
         DatabaseMenuSectionDivider()
-        DatabaseMenuSectionLabel(text = "Alignment")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.database_alignment))
         DatabaseAlignmentOptions(selectedAlignment = style.alignment) { choose(style.copy(alignment = it)) }
     }
 }
 
 @Composable
 internal fun DatabaseAlignmentOptions(selectedAlignment: TextAlignment?, onAlignmentChosen: (TextAlignment?) -> Unit) {
-    DatabaseAlignmentOption("Left", Res.drawable.textalign_left2, TextAlignment.LEFT, selectedAlignment, onAlignmentChosen)
-    DatabaseAlignmentOption("Center", Res.drawable.textalign_center2, TextAlignment.CENTER, selectedAlignment, onAlignmentChosen)
-    DatabaseAlignmentOption("Right", Res.drawable.textalign_right2, TextAlignment.RIGHT, selectedAlignment, onAlignmentChosen)
+    DatabaseAlignmentOption(stringResource(Res.string.database_align_left), Res.drawable.textalign_left2, TextAlignment.LEFT, selectedAlignment, onAlignmentChosen)
+    DatabaseAlignmentOption(stringResource(Res.string.database_align_center), Res.drawable.textalign_center2, TextAlignment.CENTER, selectedAlignment, onAlignmentChosen)
+    DatabaseAlignmentOption(stringResource(Res.string.database_align_right), Res.drawable.textalign_right2, TextAlignment.RIGHT, selectedAlignment, onAlignmentChosen)
 }
 
 @Composable
@@ -143,7 +154,7 @@ internal fun DatabaseStyleColorChoices(
     ) {
         DatabaseStyleSwatch(
             color = Color.Transparent,
-            label = "Default",
+            label = stringResource(Res.string.database_default_color),
             isSelected = selectedColorName == null,
             showsNoColorMark = true,
             onClick = { onColorChosen(null) }

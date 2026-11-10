@@ -39,6 +39,10 @@ import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.movie_change_title
+import emberr.shared.generated.resources.movie_refresh_details
+import org.jetbrains.compose.resources.stringResource
 
 private val DesktopMenuMinWidth = 240.dp
 private val DesktopMenuMaxWidth = 300.dp
@@ -82,7 +86,7 @@ internal fun MovieMenu(
                 content(closeAnd)
                 if (showsCloseButton) {
                     EmberrButtonPrimary(
-                        text = "Close",
+                        text = stringResource(Res.string.common_close),
                         onClick = { closeAnd { } },
                         modifier = Modifier.fillMaxWidth().padding(start = MenuTextInset, end = MenuTextInset, top = 12.dp)
                     )
@@ -104,9 +108,9 @@ internal fun MovieOptionsMenu(
 ) {
     MovieMenu(expanded = expanded, title = title, onDismiss = onDismiss) { closeAnd ->
         if (onChangeTitle != null) {
-            MovieMenuOption(label = "Change title", icon = Res.drawable.search, onClick = { closeAnd(onChangeTitle) })
+            MovieMenuOption(label = stringResource(Res.string.movie_change_title), icon = Res.drawable.search, onClick = { closeAnd(onChangeTitle) })
         }
-        MovieMenuOption(label = "Refresh details", icon = Res.drawable.refresh_cw, onClick = { closeAnd(onRefreshDetails) })
+        MovieMenuOption(label = stringResource(Res.string.movie_refresh_details), icon = Res.drawable.refresh_cw, onClick = { closeAnd(onRefreshDetails) })
         MovieMenuOption(
             label = deleteLabel,
             icon = Res.drawable.trash,

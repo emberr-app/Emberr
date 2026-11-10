@@ -17,6 +17,13 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar_day
 import emberr.shared.generated.resources.clock_circle
 import emberr.shared.generated.resources.x
+import emberr.shared.generated.resources.property_clear
+import emberr.shared.generated.resources.property_date_date
+import emberr.shared.generated.resources.property_date_end
+import emberr.shared.generated.resources.property_date_start
+import emberr.shared.generated.resources.property_end_date
+import emberr.shared.generated.resources.property_include_time
+import org.jetbrains.compose.resources.stringResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -40,7 +47,7 @@ internal fun PropertyDateEditor(
     DatabaseMenu(expanded = expanded, title = title, onDismiss = onDismiss) { closeAnd ->
         val start = range.start
         if (start != null) {
-            DatabaseMenuSectionLabel(text = if (range.hasEnd) "Start" else "Date")
+            DatabaseMenuSectionLabel(text = if (range.hasEnd) stringResource(Res.string.property_date_start) else stringResource(Res.string.property_date_date))
             PropertyDatePartOptions(
                 date = start,
                 time = range.startTime,
@@ -50,7 +57,7 @@ internal fun PropertyDateEditor(
         }
         val end = range.end
         if (start != null && end != null) {
-            DatabaseMenuSectionLabel(text = "End")
+            DatabaseMenuSectionLabel(text = stringResource(Res.string.property_date_end))
             PropertyDatePartOptions(
                 date = end,
                 time = range.endTime,
@@ -61,19 +68,19 @@ internal fun PropertyDateEditor(
 
         DatabaseMenuSectionDivider()
         DatabaseMenuOption(
-            label = "End date",
+            label = stringResource(Res.string.property_end_date),
             trailing = { EmberrSwitch(isOn = range.hasEnd) },
             onClick = { onRangeChange(range.withEndDateShown(!range.hasEnd)) }
         )
         DatabaseMenuOption(
-            label = "Include time",
+            label = stringResource(Res.string.property_include_time),
             trailing = { EmberrSwitch(isOn = range.includesTime) },
             onClick = { onRangeChange(range.withTimeIncluded(!range.includesTime)) }
         )
 
         DatabaseMenuSectionDivider()
         DatabaseMenuOption(
-            label = "Clear",
+            label = stringResource(Res.string.property_clear),
             icon = { DatabaseOptionIcon(Res.drawable.x, tint = MaterialTheme.colorScheme.error) },
             labelColor = MaterialTheme.colorScheme.error,
             onClick = { closeAnd { onRangeChange(PropertyDateRange()) } }

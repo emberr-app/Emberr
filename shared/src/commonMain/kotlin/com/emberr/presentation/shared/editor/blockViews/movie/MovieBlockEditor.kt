@@ -10,6 +10,9 @@ import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.movie.withImagesSavedBy
 import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.system.showNativeToast
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.movie_couldnt_find_title_toast
+import emberr.shared.generated.resources.movie_couldnt_load_title_toast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 interface MovieBlockHost {
     fun changeMovieBlock(blockId: String, change: (MovieBlock) -> MovieBlock)
@@ -101,14 +105,14 @@ internal suspend fun MovieTitleSource.loadDetailsWithImages(
     try {
         val details = loadDetails(tmdbId, kind)?.withImagesSavedBy(webImageFetcher)
         if (details == null) {
-            showNativeToast("couldn't find this title")
+            showNativeToast(getString(Res.string.movie_couldnt_find_title_toast))
         } else {
             useDetails(details)
         }
     } catch (cancellation: CancellationException) {
         throw cancellation
     } catch (_: Exception) {
-        showNativeToast("couldn't load this title, check your internet")
+        showNativeToast(getString(Res.string.movie_couldnt_load_title_toast))
     }
 }
 

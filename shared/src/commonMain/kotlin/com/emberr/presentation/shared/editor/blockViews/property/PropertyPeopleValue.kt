@@ -35,7 +35,10 @@ import com.emberr.presentation.shared.components.rememberPeopleToPick
 import com.emberr.presentation.shared.components.rememberPersonCreator
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.plus
+import emberr.shared.generated.resources.property_add_people
+import emberr.shared.generated.resources.property_empty
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private val PropertyPeopleHorizontalPadding = 12.dp
 private val PropertyPeopleVerticalPadding = 6.dp
@@ -92,7 +95,7 @@ internal fun PropertyPeopleValue(
             when {
                 linkedPeople == null -> Unit
                 linkedPeople.isEmpty() -> Text(
-                    text = "Empty",
+                    text = stringResource(Res.string.property_empty),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.padding(vertical = 3.dp)
@@ -112,10 +115,10 @@ internal fun PropertyPeopleValue(
                     pills()
                     if (pillsOpenPersonPage && !inSelectionMode) {
                         Box(modifier = Modifier.align(Alignment.CenterVertically)) {
-                            IconTooltip(text = "Add people") {
+                            IconTooltip(text = stringResource(Res.string.property_add_people)) {
                                 Icon(
                                     painter = painterResource(Res.drawable.plus),
-                                    contentDescription = "Add people",
+                                    contentDescription = stringResource(Res.string.property_add_people),
                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                     modifier = Modifier
                                         .clip(CircleShape)

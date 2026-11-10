@@ -33,6 +33,15 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import org.koin.compose.koinInject
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.movie_person_best_known_for
+import emberr.shared.generated.resources.movie_person_biography
+import emberr.shared.generated.resources.movie_person_birthplace
+import emberr.shared.generated.resources.movie_person_born
+import emberr.shared.generated.resources.movie_person_died
+import emberr.shared.generated.resources.movie_person_known_for
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 private val PersonSheetDesktopWidth = 560.dp
 private val PersonSheetSidePadding = 20.dp
@@ -75,7 +84,7 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
             }
             if (person != null) {
                 if (person.biography.isNotBlank()) {
-                    MoviePersonSection(title = "Biography") {
+                    MoviePersonSection(title = stringResource(Res.string.movie_person_biography)) {
                         MovieReadMoreText(
                             text = person.biography,
                             color = colors.text,
@@ -84,7 +93,7 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
                     }
                 }
                 if (person.roles.isNotEmpty()) {
-                    MoviePersonSection(title = "Best known for", padsContent = false) {
+                    MoviePersonSection(title = stringResource(Res.string.movie_person_best_known_for), padsContent = false) {
                         MoviePersonRoles(roles = person.roles, onOpenRole = { role -> titleToPreview = role.toTitleToPreview() })
                     }
                 }
@@ -100,7 +109,7 @@ internal fun MoviePersonSheet(member: MovieCastMember, personId: Long, onDismiss
             }
             if (!isDesktopPlatform) {
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = { closeAnd { } },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = PersonSheetSidePadding)
                 )
@@ -209,14 +218,14 @@ private fun MoviePersonBodySkeleton() {
     val progress = rememberShimmerProgress()
     val colors = detailsColors()
     val shimmerColors = shimmerColorsOf(colors.chipBackground, colors.text)
-    MoviePersonSection(title = "Biography") {
+    MoviePersonSection(title = stringResource(Res.string.movie_person_biography)) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             listOf(1f, 1f, 1f, 0.9f, 0.55f).forEachIndexed { index, widthFraction ->
                 MovieSkeletonLine(widthFraction = widthFraction, height = 12.dp, progress = progress, colors = shimmerColors, itemIndex = index)
             }
         }
     }
-    MoviePersonSection(title = "Best known for", padsContent = false) {
+    MoviePersonSection(title = stringResource(Res.string.movie_person_best_known_for), padsContent = false) {
         MoviePersonRolesLayout(itemCount = SKELETON_PERSON_ROLES) { index, posterWidth ->
             MoviePosterSkeleton(width = posterWidth, progress = progress, shimmerColors = shimmerColors, itemIndex = index)
         }
@@ -255,11 +264,12 @@ private fun MovieRolePoster(role: MoviePersonRole, width: Dp, onClick: () -> Uni
     }
 }
 
+@Composable
 private fun personFactsOf(person: MoviePerson): List<Pair<String, String>> = listOfNotNull(
-    person.knownFor.ifBlank { null }?.let { "Known for" to it },
-    person.birthday?.let { "Born" to releaseDateText(it) },
-    person.placeOfBirth.ifBlank { null }?.let { "Birthplace" to it },
-    person.deathday?.let { "Died" to releaseDateText(it) }
+    person.knownFor.ifBlank { null }?.let { stringResource(Res.string.movie_person_known_for) to it },
+    person.birthday?.let { stringResource(Res.string.movie_person_born) to releaseDateText(it) },
+    person.placeOfBirth.ifBlank { null }?.let { stringResource(Res.string.movie_person_birthplace) to it },
+    person.deathday?.let { stringResource(Res.string.movie_person_died) to releaseDateText(it) }
 )
 
 private fun personLinksOf(person: MoviePerson): List<MovieLink> =

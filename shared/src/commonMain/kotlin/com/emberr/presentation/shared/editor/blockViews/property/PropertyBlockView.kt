@@ -96,12 +96,16 @@ import emberr.shared.generated.resources.tags
 import emberr.shared.generated.resources.text_type
 import emberr.shared.generated.resources.user2
 import emberr.shared.generated.resources.x
+import emberr.shared.generated.resources.property_clear_date
+import emberr.shared.generated.resources.property_empty
+import emberr.shared.generated.resources.property_open_value
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 
 private val PropertyValueHorizontalPadding = 12.dp
@@ -175,7 +179,7 @@ fun PropertyBlockView(
 
         Row(verticalAlignment = Alignment.Top) {
             Text(
-                text = block.label,
+                text = block.displayLabel(),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -331,7 +335,7 @@ internal fun PropertyTextValue(
                     ) {
                         if (fieldValue.text.isEmpty()) {
                             Text(
-                                text = "Empty",
+                                text = stringResource(Res.string.property_empty),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.outline,
                                 textAlign = alignment.toTextAlign()
@@ -341,10 +345,10 @@ internal fun PropertyTextValue(
                     }
 
                     if (openValue != null && showsOpenIcon) {
-                        IconTooltip(text = "Open ${block.label.lowercase()}") {
+                        IconTooltip(text = stringResource(Res.string.property_open_value, block.displayLabel().lowercase())) {
                             Icon(
                                 painter = painterResource(openIcon),
-                                contentDescription = "Open ${block.label.lowercase()}",
+                                contentDescription = stringResource(Res.string.property_open_value, block.displayLabel().lowercase()),
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier
                                     .padding(end = 8.dp)
@@ -412,7 +416,7 @@ internal fun PropertyDateValue(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = formatPropertyDateRange(range, LocalUsesTwentyFourHourClock.current).ifEmpty { "Empty" },
+                text = formatPropertyDateRange(range, LocalUsesTwentyFourHourClock.current).ifEmpty { stringResource(Res.string.property_empty) },
                 style = MaterialTheme.typography.bodyLarge,
                 color = when {
                     range.start == null -> MaterialTheme.colorScheme.outline
@@ -425,10 +429,10 @@ internal fun PropertyDateValue(
                 modifier = Modifier.weight(1f, fill = alignment != null)
             )
             if (range.start != null && !inSelectionMode) {
-                IconTooltip(text = "Clear date") {
+                IconTooltip(text = stringResource(Res.string.property_clear_date)) {
                     Icon(
                         painter = painterResource(Res.drawable.x),
-                        contentDescription = "Clear date",
+                        contentDescription = stringResource(Res.string.property_clear_date),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .padding(start = 8.dp)
@@ -444,7 +448,7 @@ internal fun PropertyDateValue(
         MenuAtTap(tapAnchor, menuWidth = DesktopDatabaseMenuMaxWidth) {
             PropertyDateEditor(
                 expanded = showsDateEditor,
-                title = block.label,
+                title = block.displayLabel(),
                 range = range,
                 onRangeChange = onUpdateDate,
                 onPickPart = { partBeingPicked = it },
@@ -489,7 +493,7 @@ internal fun PropertyTagsValue(
         ) {
             if (block.tags.isEmpty()) {
                 Text(
-                    text = "Empty",
+                    text = stringResource(Res.string.property_empty),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -515,7 +519,7 @@ internal fun PropertyTagsValue(
         if (showTagPicker) {
             PropertyTagPicker(
                 tagPoolKey = block.tagPoolKey,
-                title = block.label,
+                title = block.displayLabel(),
                 allowsManyTags = block.valueType.allowsManyTags,
                 selectedTags = block.tags,
                 onDismiss = { showTagPicker = false },
