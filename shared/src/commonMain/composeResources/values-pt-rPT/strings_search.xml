@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Começa a escrever para pesquisar títulos, trechos e conteúdo das notas.</string>
+    <string name="search_move_to_trash">Mover para a reciclagem</string>
+</resources>

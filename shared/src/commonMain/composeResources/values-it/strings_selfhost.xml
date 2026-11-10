@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Server personale</string>
+
+    <string name="selfhost_group_server_details">Dettagli del server</string>
+    <string name="selfhost_group_recovery_passphrase">Passphrase di recupero</string>
+    <string name="selfhost_group_unlock_vault">Sblocca cassaforte</string>
+    <string name="selfhost_group_status">Stato</string>
+
+    <string name="selfhost_setting_up">Configurazione</string>
+    <string name="selfhost_unlock_and_sync">Sblocca e sincronizza</string>
+    <string name="selfhost_create_vault_and_sync">Crea cassaforte e sincronizza</string>
+    <string name="selfhost_server_address_rejected">Indirizzo del server rifiutato</string>
+    <string name="selfhost_got_it">Ho capito</string>
+
+    <string name="selfhost_status_connected">Stato: connesso</string>
+    <string name="selfhost_cancelling">Annullamento...</string>
+    <string name="selfhost_cancel_sync">Annulla sincronizzazione</string>
+    <string name="selfhost_cancel_sync_hint">Annullando, la sincronizzazione resta in pausa finché non riavvii l'app o tocchi Sincronizza ora.</string>
+    <string name="selfhost_sync_now">Sincronizza ora</string>
+    <string name="selfhost_syncing">Sincronizzazione...</string>
+    <string name="selfhost_never_synced">Mai sincronizzato</string>
+    <string name="selfhost_last_synced">Ultima sincronizzazione: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d nota in attesa di sincronizzazione</item>
+        <item quantity="other">%1$d note in attesa di sincronizzazione</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Note</string>
+    <string name="selfhost_progress_images">Immagini</string>
+
+    <string name="selfhost_passphrase_needed_hint">Ti serve questa passphrase per collegare un altro telefono o computer a questo server.</string>
+    <string name="selfhost_show_passphrase_button">Mostra passphrase</string>
+    <string name="selfhost_unlock_prompt_title">Passphrase di recupero</string>
+    <string name="selfhost_unlock_prompt_description">Sblocca per vedere la passphrase di recupero</string>
+    <string name="selfhost_save_passphrase_hint">Questo dispositivo è stato collegato prima che Emberr salvasse la passphrase. Inseriscila una volta per salvarla qui e poterla vedere in seguito.</string>
+    <string name="selfhost_checking">Verifica</string>
+    <string name="selfhost_save_passphrase">Salva passphrase</string>
+    <string name="selfhost_disconnect_vault">Disconnetti cassaforte</string>
+    <string name="selfhost_recovery_dialog_message">Inseriscila sull'altro dispositivo quando chiede di sbloccare la cassaforte. Non condividerla con nessuno.</string>
+    <string name="selfhost_done">Fine</string>
+    <string name="selfhost_disconnect_vault_question">Disconnettere la cassaforte?</string>
+    <string name="selfhost_disconnect_message">Le note restano su questo dispositivo e sul server. Ti servirà la passphrase di recupero per ricollegarti.</string>
+    <string name="selfhost_disconnect">Disconnetti</string>
+
+    <string name="selfhost_checking_for_changes">Controllo delle modifiche...</string>
+    <string name="selfhost_finishing_up">Completamento...</string>
+    <string name="selfhost_sending_percent">Invio %1$d%</string>
+    <string name="selfhost_nothing_to_send">Niente da inviare</string>
+    <string name="selfhost_receiving_percent">Ricezione %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Niente da ricevere</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%1$d di %2$d nota</item>
+        <item quantity="other">%1$d di %2$d note</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s di %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Inserisci l'indirizzo WebDAV e le credenziali del tuo server, per esempio Nextcloud o un NAS. Emberr cifra le note prima che lascino questo dispositivo.</string>
+    <string name="selfhost_username">Nome utente</string>
+    <string name="selfhost_password">Password</string>
+    <string name="selfhost_hide_password">Nascondi password</string>
+    <string name="selfhost_show_password">Mostra password</string>
+    <string name="selfhost_testing">Test in corso</string>
+    <string name="selfhost_test_connection">Prova connessione</string>
+    <string name="selfhost_contacting_server">Contatto con il server...</string>
+
+    <string name="selfhost_restore_hint">Su questo server c'è già una cassaforte Emberr. Inserisci la passphrase di recupero di 16 caratteri mostrata quando è stata creata.</string>
+    <string name="selfhost_restore_find_hint">Non la trovi? Apri Impostazioni → Server personale → Mostra passphrase su un dispositivo già collegato.</string>
+    <string name="selfhost_passphrase_placeholder">Passphrase di 16 caratteri</string>
+    <string name="selfhost_hide_passphrase">Nascondi passphrase</string>
+    <string name="selfhost_show_passphrase">Mostra passphrase</string>
+
+    <string name="selfhost_save_passphrase_now">Salva ora questa passphrase</string>
+    <string name="selfhost_fact_type_on_other_devices">Dovrai digitarla su ogni altro telefono o computer che colleghi a questo server.</string>
+    <string name="selfhost_fact_locks_notes">Protegge le tue note sul server. Nessuno può leggerle senza, nemmeno Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr non può reimpostarla. Tienila in un gestore di password o scrivila da qualche parte.</string>
+    <string name="selfhost_fact_see_again_later">Puoi rivederla in Impostazioni → Server personale su qualsiasi dispositivo collegato.</string>
+    <string name="selfhost_new_passphrase">Nuova passphrase</string>
+    <string name="selfhost_generate_new_passphrase">Genera una nuova passphrase</string>
+    <string name="selfhost_saved_passphrase_confirmation">Ho salvato questa passphrase in un posto sicuro</string>
+    <string name="selfhost_copy_passphrase">Copia passphrase</string>
+    <string name="selfhost_copy_address">Copia indirizzo</string>
+    <string name="selfhost_copied_address">indirizzo copiato</string>
+
+    <string name="selfhost_invalid_credentials">Nome utente o password non validi</string>
+    <string name="selfhost_server_returned_error">Il server ha restituito un errore (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Impossibile raggiungere il server</string>
+    <string name="selfhost_could_not_check_vault">Impossibile verificare se esiste una cassaforte: %1$s</string>
+    <string name="selfhost_unknown_error">errore sconosciuto</string>
+    <string name="selfhost_existing_vault_found">Trovata una cassaforte esistente su questo server</string>
+    <string name="selfhost_no_existing_vault">Nessuna cassaforte esistente, ne verrà creata una nuova</string>
+    <string name="selfhost_no_vault_file_to_restore">Sul server non è stato trovato alcun file della cassaforte da ripristinare</string>
+    <string name="selfhost_old_or_damaged_vault_data">Questa cartella del server contiene dati di sincronizzazione di una cassaforte vecchia o danneggiata. Elimina la cartella emberr_sync sul server, poi ripeti la configurazione.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Su questo server esiste già una cassaforte. Inserisci qui sotto la sua passphrase di recupero per ripristinarla.</string>
+    <string name="selfhost_could_not_set_up">Impossibile configurare la sincronizzazione sicura</string>
+    <string name="selfhost_no_vault_on_server">Nessuna cassaforte trovata sul server.</string>
+    <string name="selfhost_wrong_passphrase">Questa passphrase non sblocca la cassaforte.</string>
+    <string name="selfhost_could_not_check_passphrase">Impossibile verificare la passphrase: %1$s</string>
+
+    <string name="selfhost_update_required_title">Sincronizzazione con il server personale in pausa</string>
+    <string name="selfhost_update_required_message">%1$s Le note sono al sicuro e continuano a essere salvate su questo dispositivo.</string>
+    <string name="selfhost_later">Più tardi</string>
+    <string name="selfhost_update">Aggiorna</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_screen_detail">Usa a tua impressão digital, rosto ou bloqueio de ecrã para abrir.</string>
+    <string name="app_lock_prompt_subtitle">Usa a tua impressão digital, rosto ou bloqueio de ecrã</string>
+    <string name="app_lock_off_no_screen_lock">O Bloqueio da app está desativado porque este telemóvel não tem bloqueio de ecrã.</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Propiedades</string>
+    <string name="properties_built_in">Integradas</string>
+    <string name="properties_built_in_hint">Las propiedades integradas no se pueden renombrar ni eliminar.</string>
+    <string name="properties_custom">Personalizadas</string>
+    <string name="properties_add_property">Añadir propiedad</string>
+    <string name="properties_new_property">Nueva propiedad</string>
+    <string name="properties_edit_property">Editar propiedad</string>
+    <string name="properties_delete_question">¿Eliminar "%1$s"? Se quitará de todas las notas que la usan.</string>
+    <string name="properties_property_name">Nombre de la propiedad</string>
+    <string name="properties_name_taken">Ya existe una propiedad con este nombre</string>
+    <string name="properties_value_type">Tipo de valor</string>
+    <string name="properties_value_type_locked">El tipo de valor no se puede cambiar después de crear la propiedad.</string>
+    <string name="properties_delete_property">Eliminar propiedad</string>
+    <string name="properties_add">Añadir</string>
+</resources>

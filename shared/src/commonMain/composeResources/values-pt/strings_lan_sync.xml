@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Ocioso</string>
+    <string name="lan_sync_status_not_paired">Não vinculado!</string>
+    <string name="lan_sync_status_already_in_progress">Sincronização já em andamento</string>
+    <string name="lan_sync_status_syncing">Sincronizando...</string>
+    <string name="lan_sync_status_auto_syncing">Sincronizando automaticamente...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Buscando do desktop...</string>
+    <string name="lan_sync_status_success">Sucesso!</string>
+    <string name="lan_sync_status_synced_successfully">Sincronizado com sucesso</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Sincronizado, %1$d item não pôde ser salvo</item>
+        <item quantity="other">Sincronizado, %1$d itens não puderam ser salvos</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Sincronização parcial, vai tentar de novo</string>
+    <string name="lan_sync_status_update_both_devices">Atualize o Emberr nos dois dispositivos</string>
+    <string name="lan_sync_status_desktop_offline">Desktop offline</string>
+    <string name="lan_sync_status_failed">Falhou: %1$s</string>
+    <string name="lan_sync_status_sync_error">Erro de sincronização: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Vincular celular</string>
+    <string name="lan_sync_pair_dialog_message">Escaneie este QR code com o app Emberr no celular para se conectar com segurança ao seu desktop.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Token secreto: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Escaneie o QR code mostrado no seu desktop.</string>
+    <string name="lan_sync_scanner_desktop_hint">No desktop, abra Configurações → Sincronização LAN → Vincular celular.</string>
+    <string name="lan_sync_camera_access_needed">Acesso à câmera necessário</string>
+    <string name="lan_sync_camera_allow_message">Permita a câmera para escanear o código de vínculo no seu desktop.</string>
+    <string name="lan_sync_camera_turn_on_message">Ative a Câmera em Permissões e volte aqui.</string>
+    <string name="lan_sync_allow_camera">Permitir câmera</string>
+    <string name="lan_sync_open_app_settings">Abrir configurações do app</string>
+    <string name="lan_sync_camera_mobile_only">A leitura pela câmera só funciona em celulares.</string>
+</resources>

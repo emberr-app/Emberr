@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_delete_space">Eliminar espaço</string>
+    <string name="space_new_space_subtitle">Trabalho, Pessoal, o que quiseres.</string>
+    <string name="space_rename_subtitle">Escolhe um novo nome.</string>
+    <string name="space_delete_space_question">Eliminar "%1$s"?</string>
+    <string name="space_delete_space_message">Todas as notas, pastas, etiquetas e chats deste espaço serão eliminados também. Isto não pode ser desfeito.</string>
+</resources>

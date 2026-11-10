@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">Até breve!</string>
+    <string name="whatsnew_themes_where">Definições → Aparência → Tema</string>
+    <string name="whatsnew_themes_description_desktop">Escolhe entre 13 temas de cores, como Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine e Alto contraste. Cada um tem um ajuste de intensidade, e podes escolher se o texto e os ícones também o seguem.</string>
+    <string name="whatsnew_themes_description_mobile">Escolhe entre 14 temas de cores, como Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine e Alto contraste, ou deixa o **Papel de parede** usar as cores do teu papel de parede. Cada um tem um ajuste de intensidade, e podes escolher se o texto e os ícones também o seguem. Os widgets do ecrã principal também seguem o tema.</string>
+    <string name="whatsnew_texture_where">Definições → Aparência → Tema → Textura</string>
+    <string name="whatsnew_texture_description">Dá à app um granulado suave, como papel a sério. Define a intensidade e escolhe onde aparece: na app inteira, nas notas, no canvas ou nas Notas diárias.</string>
+    <string name="whatsnew_scale_where">Definições → Aparência → Escala da interface</string>
+    <string name="whatsnew_scale_description_desktop">Torna tudo na app maior ou menor, de 80% a 200%, ou usa **Ctrl +**, **Ctrl −** e **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Torna tudo na app maior ou menor, de 80% a 200%.</string>
+    <string name="whatsnew_widgets_where">Toca sem soltar no ecrã principal → Widgets → Emberr</string>
+    <string name="whatsnew_widgets_description">Todos os widgets ganharam um visual novo e mais limpo, e há três novos: **Cartão de nota**, **Anota rápido** e **Frase do dia**. Os widgets agora mostram de imediato a nota que escolheste e avisam quando essa nota foi eliminada.</string>
+    <string name="whatsnew_editor_where">Escreve / em qualquer lugar de uma nota</string>
+    <string name="whatsnew_editor_description">O menu de barra agora abre logo depois de qualquer carácter, não só depois de um espaço. Se escreveres além de uma correspondência, apaga para trás e o menu reaparece.</string>
+    <string name="whatsnew_others_sliders">Os controlos deslizantes da app têm um novo design.</string>
+    <string name="whatsnew_others_title_time_desktop">Escreve **/** no título de uma nota para adicionar a hora ou a data atual.</string>
+    <string name="whatsnew_others_title_time_mobile">Adiciona a hora ou a data atual ao título de uma nota pela barra de ferramentas do teclado.</string>
+    <string name="whatsnew_others_sync_network">A escolha de rede para sincronização agora fica em **Definições → Sincronização e backup**.</string>
+    <string name="whatsnew_preview_train_tickets">Bilhetes de comboio</string>
+    <string name="whatsnew_preview_camera_charger">Carregador da câmara</string>
+    <string name="whatsnew_preview_meeting_title">Reunião da equipa</string>
+    <string name="whatsnew_preview_typed_heading">Agenda</string>
+    <string name="whatsnew_preview_jot_prompt">Em que estás a pensar?</string>
+    <string name="whatsnew_preview_jot_button">Anota rápido</string>
+</resources>

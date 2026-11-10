@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">Elige un espacio</string>
+    <string name="widgets_follow_the_app">Seguir la app</string>
+    <string name="widgets_follow_the_app_detail">Siempre muestra el espacio en el que estés</string>
+    <string name="widgets_current_space">Espacio actual</string>
+    <string name="widgets_untitled_space">Espacio sin título</string>
+    <string name="widgets_favorites">Favoritos</string>
+    <string name="widgets_other">Otras</string>
+    <string name="widgets_no_notes_yet">Aún no tienes notas</string>
+    <string name="widgets_no_notes_match">Ninguna nota coincide con "%1$s"</string>
+    <string name="widgets_choose_a_note">Elige una nota</string>
+    <string name="widgets_search_notes">Buscar notas</string>
+    <string name="widgets_open_the_app_first">Abre la app una vez antes de agregar un widget</string>
+    <string name="widgets_choose_a_gradient">Elige un degradado</string>
+    <string name="widgets_whats_on_your_mind">¿Qué tienes en mente?</string>
+    <string name="widgets_selected">Seleccionado</string>
+    <string name="widgets_gradient_dusk">Anochecer</string>
+    <string name="widgets_gradient_copper">Cobre</string>
+    <string name="widgets_gradient_forest">Bosque</string>
+    <string name="widgets_gradient_lagoon">Laguna</string>
+    <string name="widgets_gradient_midnight">Medianoche</string>
+    <string name="widgets_gradient_blossom">Flor</string>
+    <string name="widgets_gradient_graphite">Grafito</string>
+    <string name="widgets_gradient_aurora">Aurora</string>
+    <string name="widgets_gradient_sunset">Atardecer</string>
+    <string name="widgets_gradient_slate">Pizarra</string>
+    <string name="widgets_gradient_cocoa">Cacao</string>
+    <string name="widgets_gradient_lavender">Lavanda</string>
+    <string name="widgets_untitled_event">Evento sin título</string>
+    <string name="widgets_untitled_task">Tarea sin título</string>
+    <string name="widgets_note">Nota</string>
+    <string name="widgets_repeating">Periódicas</string>
+    <string name="widgets_today">Hoy</string>
+    <string name="widgets_tomorrow">Mañana</string>
+    <string name="widgets_yesterday">Ayer</string>
+    <string name="widgets_all_day">Todo el día</string>
+    <string name="widgets_date_all_day">%1$s · Todo el día</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · Todo el día</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="one">hace %1$d min</item>
+        <item quantity="other">hace %1$d min</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="one">hace %1$d hora</item>
+        <item quantity="other">hace %1$d horas</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">Nota enlazada</string>
+    <string name="widgets_image">Imagen</string>
+    <string name="widgets_canvas">Lienzo</string>
+    <string name="widgets_database">Base de datos</string>
+    <string name="widgets_watchlist">Para ver</string>
+    <string name="widgets_credentials">Credenciales</string>
+    <string name="widgets_voice_note_length">Nota de voz  %1$s</string>
+    <string name="widgets_needs_newer_version">Requiere una versión más reciente de Emberr</string>
+    <string name="widgets_table">Tabla</string>
+</resources>

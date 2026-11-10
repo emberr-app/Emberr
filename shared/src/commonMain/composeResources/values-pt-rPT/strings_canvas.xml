@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="canvas_move_to_trash">Mover para a reciclagem</string>
+    <string name="canvas_shape_database">Base de dados</string>
+    <string name="canvas_align_center">Centrar</string>
+    <string name="canvas_full_screen">Ecrã inteiro</string>
+    <string name="canvas_exit_full_screen">Sair do ecrã inteiro</string>
+    <string name="canvas_delete_box">Eliminar caixa</string>
+    <string name="canvas_adding_image">A adicionar imagem...</string>
+    <string name="canvas_image_failed_to_download">Falha ao transferir a imagem</string>
+    <string name="canvas_downloading_image">A transferir imagem...</string>
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">À bientôt !</string>
+    <string name="whatsnew_whats_new_question">Quoi de neuf ?</string>
+    <string name="whatsnew_title">Nouveautés</string>
+    <string name="whatsnew_version">Version %1$s</string>
+    <string name="whatsnew_new">Nouveau</string>
+    <string name="whatsnew_themes_heading">Thèmes</string>
+    <string name="whatsnew_themes_where">Réglages → Apparence → Thème</string>
+    <string name="whatsnew_themes_description_desktop">Choisissez parmi 13 thèmes de couleurs, comme Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine et Contraste élevé. Chacun a un réglage d'intensité, et vous pouvez choisir si le texte et les icônes le suivent aussi.</string>
+    <string name="whatsnew_themes_description_mobile">Choisissez parmi 14 thèmes de couleurs, comme Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine et Contraste élevé, ou laissez **Fond d'écran** reprendre les couleurs de votre fond d'écran. Chacun a un réglage d'intensité, et vous pouvez choisir si le texte et les icônes le suivent aussi. Les widgets de l'écran d'accueil suivent aussi le thème.</string>
+    <string name="whatsnew_texture_heading">Texture papier</string>
+    <string name="whatsnew_texture_where">Réglages → Apparence → Thème → Texture</string>
+    <string name="whatsnew_texture_description">Donnez à l'app un léger grain, comme du vrai papier. Réglez son intensité et choisissez où il apparaît : toute l'app, les notes, le canevas ou les notes du jour.</string>
+    <string name="whatsnew_scale_heading">Échelle de l'interface</string>
+    <string name="whatsnew_scale_where">Réglages → Apparence → Échelle de l'interface</string>
+    <string name="whatsnew_scale_description_desktop">Agrandissez ou réduisez tout dans l'app, de 80 % à 200 %, ou utilisez **Ctrl +**, **Ctrl −** et **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Agrandissez ou réduisez tout dans l'app, de 80 % à 200 %.</string>
+    <string name="whatsnew_widgets_heading">Widgets</string>
+    <string name="whatsnew_widgets_where">Appui long sur l'écran d'accueil → Widgets → Emberr</string>
+    <string name="whatsnew_widgets_description">Tous les widgets ont un nouveau look plus épuré, et trois nouveaux arrivent : **Carte de note**, **Notez-le** et **Citation du jour**. Les widgets affichent désormais tout de suite la note choisie, et vous préviennent quand elle a été supprimée.</string>
+    <string name="whatsnew_editor_heading">Éditeur</string>
+    <string name="whatsnew_editor_where">Tapez / n'importe où dans une note</string>
+    <string name="whatsnew_editor_description">Le menu barre oblique s'ouvre maintenant après n'importe quel caractère, pas seulement après une espace. Si vous dépassez une correspondance, effacez en arrière et le menu revient.</string>
+    <string name="whatsnew_others_heading">Autres</string>
+    <string name="whatsnew_others_where">Petits changements et corrections</string>
+    <string name="whatsnew_others_sliders">Les curseurs de l'app ont un nouveau design.</string>
+    <string name="whatsnew_others_title_time_desktop">Tapez **/** dans le titre d'une note pour ajouter l'heure ou la date actuelle.</string>
+    <string name="whatsnew_others_title_time_mobile">Ajoutez l'heure ou la date actuelle au titre d'une note depuis la barre d'outils du clavier.</string>
+    <string name="whatsnew_others_sync_network">Le choix du réseau pour la synchro se trouve maintenant dans **Réglages → Synchro et sauvegarde**.</string>
+    <string name="whatsnew_others_windows_startup">Démarrage plus rapide sous Windows.</string>
+    <string name="whatsnew_others_small_fixes">De nombreuses petites corrections.</string>
+    <string name="whatsnew_preview_options">Options</string>
+    <string name="whatsnew_preview_trip_title">Week-end en voyage</string>
+    <string name="whatsnew_preview_trip_text">Partir avant 8 h pour éviter les bouchons.</string>
+    <string name="whatsnew_preview_train_tickets">Billets de train</string>
+    <string name="whatsnew_preview_passport">Passeport</string>
+    <string name="whatsnew_preview_camera_charger">Chargeur de l'appareil photo</string>
+    <string name="whatsnew_preview_reading_list">Liste de lecture</string>
+    <string name="whatsnew_preview_reading_list_books">L'Arbre-monde, Piranesi, Projet Dernière Chance</string>
+    <string name="whatsnew_preview_meeting_title">Réunion d'équipe</string>
+    <string name="whatsnew_preview_meeting_text">Jeudi à 10 h, salle 2.</string>
+    <string name="whatsnew_preview_typed_heading">Ordre du jour</string>
+    <string name="whatsnew_preview_quote">Le secret pour avancer, c'est de commencer.</string>
+    <string name="whatsnew_preview_jot_prompt">À quoi pensez-vous ?</string>
+    <string name="whatsnew_preview_jot_button">Notez-le</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">Notes du jour</string>
+    <string name="app_shell_home">Accueil</string>
+    <string name="app_shell_ask_ai">Demander à l'IA</string>
+    <string name="app_shell_search">Rechercher</string>
+    <string name="app_shell_voice_task">Tâche vocale</string>
+    <string name="app_shell_mic">Micro</string>
+    <string name="app_shell_search_anything">Rechercher n'importe quoi</string>
+    <string name="app_shell_close_search">Fermer la recherche</string>
+    <string name="app_shell_clear_search">Effacer la recherche</string>
+</resources>

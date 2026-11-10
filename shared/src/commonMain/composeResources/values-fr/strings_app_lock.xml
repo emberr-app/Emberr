@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr est verrouillé</string>
+    <string name="app_lock_screen_detail">Utilisez votre empreinte, votre visage ou le verrouillage de l'écran pour l'ouvrir.</string>
+    <string name="app_lock_unlock">Déverrouiller</string>
+    <string name="app_lock_prompt_subtitle">Utilisez votre empreinte, votre visage ou le verrouillage de l'écran</string>
+    <string name="app_lock_unlock_emberr">Déverrouiller Emberr</string>
+    <string name="app_lock_off_no_screen_lock">Le verrouillage de l'app est désactivé, car ce téléphone n'a pas de verrouillage d'écran.</string>
+</resources>

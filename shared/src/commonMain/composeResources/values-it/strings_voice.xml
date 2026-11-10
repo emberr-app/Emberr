@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">In ascolto...</string>
+    <string name="voice_tap_the_orb">Tocca la sfera per parlare</string>
+    <string name="voice_add_tasks_with_voice">(aggiungi attività con la voce)</string>
+    <string name="voice_install_speech_app">Installa un'app di riconoscimento vocale per usare le attività vocali</string>
+    <string name="voice_tap_a_task_to_fix_it">Tocca un'attività per correggerla</string>
+    <string name="voice_discard">Scarta</string>
+    <string name="voice_add">Aggiungi</string>
+    <string name="voice_empty_tasks_are_skipped">Le attività vuote vengono saltate</string>
+    <string name="voice_today">Oggi</string>
+    <string name="voice_tomorrow">Domani</string>
+    <string name="voice_add_time">Aggiungi ora</string>
+</resources>

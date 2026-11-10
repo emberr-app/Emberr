@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_name_loading_preview">A carregar pré-visualização...</string>
+    <string name="saved_name_label_mobile">Telemóvel</string>
+    <string name="saved_name_label_nickname">Alcunha</string>
+</resources>

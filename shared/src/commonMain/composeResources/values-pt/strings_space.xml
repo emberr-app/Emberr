@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Espaços</string>
+    <string name="space_create_space">Criar espaço</string>
+    <string name="space_rename_space">Renomear espaço</string>
+    <string name="space_delete_space">Excluir espaço</string>
+    <string name="space_new_space">Novo espaço</string>
+    <string name="space_new_space_subtitle">Trabalho, Pessoal, o que você quiser.</string>
+    <string name="space_name_placeholder">Nome do espaço...</string>
+    <string name="space_rename_subtitle">Escolha um novo nome.</string>
+    <string name="space_delete_space_question">Excluir "%1$s"?</string>
+    <string name="space_delete_space_message">Todas as notas, pastas, tags e chats deste espaço serão excluídos junto. Isso não pode ser desfeito.</string>
+    <string name="space_reorder_space">Reordenar espaço</string>
+</resources>

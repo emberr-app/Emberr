@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Propriétés</string>
+    <string name="properties_built_in">Intégrées</string>
+    <string name="properties_built_in_hint">Les propriétés intégrées ne peuvent pas être renommées ni supprimées.</string>
+    <string name="properties_custom">Personnalisées</string>
+    <string name="properties_add_property">Ajouter une propriété</string>
+    <string name="properties_new_property">Nouvelle propriété</string>
+    <string name="properties_edit_property">Modifier la propriété</string>
+    <string name="properties_delete_question">Supprimer « %1$s » ? Elle sera retirée de chaque note qui l'utilise.</string>
+    <string name="properties_property_name">Nom de la propriété</string>
+    <string name="properties_name_taken">Une propriété porte déjà ce nom</string>
+    <string name="properties_value_type">Type de valeur</string>
+    <string name="properties_value_type_locked">Le type de valeur ne peut plus être modifié une fois la propriété créée.</string>
+    <string name="properties_delete_property">Supprimer la propriété</string>
+    <string name="properties_add">Ajouter</string>
+</resources>

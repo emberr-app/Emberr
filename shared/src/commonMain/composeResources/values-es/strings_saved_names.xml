@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_name_inbox">Bandeja de entrada</string>
+    <string name="saved_name_others_folder">Otros</string>
+    <string name="saved_name_personal_space">Personal</string>
+    <string name="saved_name_new_chat">Nuevo chat</string>
+    <string name="saved_name_canvas_group">Grupo</string>
+    <string name="saved_name_unknown_link">Enlace desconocido</string>
+    <string name="saved_name_loading_preview">Cargando vista previa...</string>
+    <string name="saved_name_numbered_view">%1$s %2$d</string>
+    <string name="saved_name_view_copy">%1$s (copia)</string>
+    <string name="saved_name_label_mobile">Móvil</string>
+    <string name="saved_name_label_home">Casa</string>
+    <string name="saved_name_label_work">Trabajo</string>
+    <string name="saved_name_label_main">Principal</string>
+    <string name="saved_name_label_personal">Personal</string>
+    <string name="saved_name_label_portfolio">Portafolio</string>
+    <string name="saved_name_label_blog">Blog</string>
+    <string name="saved_name_label_anniversary">Aniversario</string>
+    <string name="saved_name_label_date">Fecha</string>
+    <string name="saved_name_label_nickname">Apodo</string>
+    <string name="saved_name_label_birthday">Cumpleaños</string>
+</resources>

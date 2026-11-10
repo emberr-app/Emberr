@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Servidor propio</string>
+
+    <string name="selfhost_group_server_details">Datos del servidor</string>
+    <string name="selfhost_group_recovery_passphrase">Frase de recuperación</string>
+    <string name="selfhost_group_unlock_vault">Desbloquear bóveda</string>
+    <string name="selfhost_group_status">Estado</string>
+
+    <string name="selfhost_setting_up">Configurando</string>
+    <string name="selfhost_unlock_and_sync">Desbloquear y sincronizar</string>
+    <string name="selfhost_create_vault_and_sync">Crear bóveda y sincronizar</string>
+    <string name="selfhost_server_address_rejected">Dirección del servidor rechazada</string>
+    <string name="selfhost_got_it">Entendido</string>
+
+    <string name="selfhost_status_connected">Estado: conectado</string>
+    <string name="selfhost_cancelling">Cancelando...</string>
+    <string name="selfhost_cancel_sync">Cancelar sincronización</string>
+    <string name="selfhost_cancel_sync_hint">Al cancelar, la sincronización se pausa hasta que reinicies la app o toques Sincronizar ahora.</string>
+    <string name="selfhost_sync_now">Sincronizar ahora</string>
+    <string name="selfhost_syncing">Sincronizando...</string>
+    <string name="selfhost_never_synced">Nunca sincronizado</string>
+    <string name="selfhost_last_synced">Última sincronización: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d nota pendiente de sincronizar</item>
+        <item quantity="other">%1$d notas pendientes de sincronizar</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Notas</string>
+    <string name="selfhost_progress_images">Imágenes</string>
+
+    <string name="selfhost_passphrase_needed_hint">Necesitas esta frase para conectar otro teléfono o computadora a este servidor.</string>
+    <string name="selfhost_show_passphrase_button">Mostrar frase</string>
+    <string name="selfhost_unlock_prompt_title">Frase de recuperación</string>
+    <string name="selfhost_unlock_prompt_description">Desbloquea para ver tu frase de recuperación</string>
+    <string name="selfhost_save_passphrase_hint">Este dispositivo se conectó antes de que Emberr guardara la frase. Escríbela una vez para guardarla aquí y poder verla después.</string>
+    <string name="selfhost_checking">Comprobando</string>
+    <string name="selfhost_save_passphrase">Guardar frase</string>
+    <string name="selfhost_disconnect_vault">Desconectar bóveda</string>
+    <string name="selfhost_recovery_dialog_message">Escríbela en el otro dispositivo cuando pida desbloquear la bóveda. No la compartas con nadie.</string>
+    <string name="selfhost_done">Listo</string>
+    <string name="selfhost_disconnect_vault_question">¿Desconectar bóveda?</string>
+    <string name="selfhost_disconnect_message">Tus notas se quedan en este dispositivo y en el servidor. Necesitarás tu frase de recuperación para volver a conectar.</string>
+    <string name="selfhost_disconnect">Desconectar</string>
+
+    <string name="selfhost_checking_for_changes">Buscando cambios...</string>
+    <string name="selfhost_finishing_up">Terminando...</string>
+    <string name="selfhost_sending_percent">Enviando %1$d%</string>
+    <string name="selfhost_nothing_to_send">Nada que enviar</string>
+    <string name="selfhost_receiving_percent">Recibiendo %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Nada que recibir</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%1$d de %2$d nota</item>
+        <item quantity="other">%1$d de %2$d notas</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s de %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Escribe la dirección WebDAV y los datos de acceso de tu servidor, por ejemplo Nextcloud o un NAS. Emberr cifra tus notas antes de que salgan de este dispositivo.</string>
+    <string name="selfhost_username">Usuario</string>
+    <string name="selfhost_password">Contraseña</string>
+    <string name="selfhost_hide_password">Ocultar contraseña</string>
+    <string name="selfhost_show_password">Mostrar contraseña</string>
+    <string name="selfhost_testing">Probando</string>
+    <string name="selfhost_test_connection">Probar conexión</string>
+    <string name="selfhost_contacting_server">Contactando con el servidor...</string>
+
+    <string name="selfhost_restore_hint">Este servidor ya tiene una bóveda de Emberr. Escribe la frase de recuperación de 16 caracteres que se mostró al crear la bóveda.</string>
+    <string name="selfhost_restore_find_hint">¿No la encuentras? Abre Ajustes → Servidor propio → Mostrar frase en un dispositivo que ya esté conectado.</string>
+    <string name="selfhost_passphrase_placeholder">Frase de 16 caracteres</string>
+    <string name="selfhost_hide_passphrase">Ocultar frase</string>
+    <string name="selfhost_show_passphrase">Mostrar frase</string>
+
+    <string name="selfhost_save_passphrase_now">Guarda esta frase ahora</string>
+    <string name="selfhost_fact_type_on_other_devices">La escribirás en cada teléfono o computadora que conectes a este servidor.</string>
+    <string name="selfhost_fact_locks_notes">Protege tus notas en el servidor. Nadie puede leerlas sin ella, ni siquiera Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr no puede restablecerla. Guárdala en un gestor de contraseñas o anótala.</string>
+    <string name="selfhost_fact_see_again_later">Puedes volver a verla en Ajustes → Servidor propio en cualquier dispositivo conectado.</string>
+    <string name="selfhost_new_passphrase">Nueva frase</string>
+    <string name="selfhost_generate_new_passphrase">Generar una frase nueva</string>
+    <string name="selfhost_saved_passphrase_confirmation">He guardado esta frase en un lugar seguro</string>
+    <string name="selfhost_copy_passphrase">Copiar frase</string>
+    <string name="selfhost_copy_address">Copiar dirección</string>
+    <string name="selfhost_copied_address">dirección copiada</string>
+
+    <string name="selfhost_invalid_credentials">Usuario o contraseña no válidos</string>
+    <string name="selfhost_server_returned_error">El servidor devolvió un error (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">No se pudo conectar con el servidor</string>
+    <string name="selfhost_could_not_check_vault">No se pudo comprobar si hay una bóveda: %1$s</string>
+    <string name="selfhost_unknown_error">error desconocido</string>
+    <string name="selfhost_existing_vault_found">Se encontró una bóveda en este servidor</string>
+    <string name="selfhost_no_existing_vault">No hay ninguna bóveda; se creará una nueva</string>
+    <string name="selfhost_no_vault_file_to_restore">No se encontró en el servidor ningún archivo de bóveda para restaurar</string>
+    <string name="selfhost_old_or_damaged_vault_data">Esta carpeta del servidor tiene datos de sincronización de una bóveda antigua o dañada. Elimina la carpeta emberr_sync de tu servidor y vuelve a configurarlo.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Ya existe una bóveda en este servidor. Escribe su frase de recuperación abajo para restaurarla.</string>
+    <string name="selfhost_could_not_set_up">No se pudo configurar la sincronización segura</string>
+    <string name="selfhost_no_vault_on_server">No se encontró ninguna bóveda en el servidor.</string>
+    <string name="selfhost_wrong_passphrase">Esa frase no desbloquea esta bóveda.</string>
+    <string name="selfhost_could_not_check_passphrase">No se pudo comprobar la frase: %1$s</string>
+
+    <string name="selfhost_update_required_title">Sincronización con servidor propio en pausa</string>
+    <string name="selfhost_update_required_message">%1$s Tus notas están a salvo y se siguen guardando en este dispositivo.</string>
+    <string name="selfhost_later">Más tarde</string>
+    <string name="selfhost_update">Actualizar</string>
+</resources>

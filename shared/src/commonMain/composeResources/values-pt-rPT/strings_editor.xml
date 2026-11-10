@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="editor_block_document_file">Documento / Ficheiro</string>
+    <string name="editor_block_watchlist">Para ver</string>
+    <string name="editor_block_link_to_database">Link para base de dados</string>
+    <string name="editor_block_database">Base de dados</string>
+    <string name="editor_align_center">Centrar</string>
+    <string name="editor_slash_section_media_links">Multimédia e links</string>
+    <string name="editor_style_bar_align_center">Centrar</string>
+    <string name="editor_untitled_database">Base de dados sem título</string>
+    <string name="editor_search_databases">Pesquisar bases de dados...</string>
+    <string name="editor_type_something">Escreve algo...</string>
+    <string name="editor_table_delete_row">Eliminar linha</string>
+    <string name="editor_table_delete_column">Eliminar coluna</string>
+    <string name="editor_table_delete_table">Eliminar tabela</string>
+    <string name="editor_table_reset_style">Repor estilo</string>
+    <string name="editor_loading">A carregar...</string>
+    <string name="editor_downloading_progress">A transferir %1$d% · %2$s de %3$s</string>
+    <string name="editor_uploading_progress">A enviar %1$d% · %2$s de %3$s</string>
+    <string name="editor_uploading">A enviar...</string>
+    <string name="editor_waiting_for_other_device_upload">À espera que o outro dispositivo envie...</string>
+    <string name="editor_image_saved_to_downloads">Imagem guardada em Transferências</string>
+    <string name="editor_image_saved_to_photos">Imagem guardada em Fotos</string>
+    <string name="editor_failed_to_save_image">Falha ao guardar a imagem</string>
+    <string name="editor_failed_to_download_image">Falha ao transferir a imagem - toca para tentar novamente</string>
+    <string name="editor_downloading_image">A transferir imagem...</string>
+    <string name="editor_paste_image_link_or_upload">Cola o link de uma imagem ou envia uma</string>
+    <string name="editor_attach_a_file">Anexar um ficheiro</string>
+    <string name="editor_failed_to_download">Falha ao transferir - toca para tentar novamente</string>
+    <string name="editor_downloading">A transferir...</string>
+    <string name="editor_recording_time">A gravar... %1$s</string>
+    <string name="editor_tap_mic_to_record">Toca no microfone para gravar áudio</string>
+    <string name="editor_failed_to_download_audio">Falha ao transferir o áudio - toca para tentar novamente</string>
+    <string name="editor_downloading_audio">A transferir áudio...</string>
+    <string name="editor_paste_link_press_enter">Cola um link e prime Enter...</string>
+    <string name="editor_full_screen_image">Imagem em ecrã inteiro</string>
+    <string name="editor_download">Transferir</string>
+    <string name="editor_deleted_image">imagem eliminada</string>
+    <string name="editor_deleted_document">documento eliminado</string>
+    <string name="editor_deleted_voice_note">nota de voz eliminada</string>
+    <string name="editor_deleted_bookmark">marcador eliminado</string>
+    <string name="editor_deleted_table">tabela eliminada</string>
+    <string name="editor_deleted_database">base de dados eliminada</string>
+    <string name="editor_deleted_movie">filme eliminado</string>
+    <string name="editor_deleted_watchlist">lista Para ver eliminada</string>
+    <string name="editor_deleted_credentials">credenciais eliminadas</string>
+    <plurals name="editor_deleted_blocks">
+        <item quantity="one">%1$d bloco eliminado</item>
+        <item quantity="other">%1$d blocos eliminados</item>
+    </plurals>
+    <string name="editor_document_format_file">FICHEIRO</string>
+</resources>

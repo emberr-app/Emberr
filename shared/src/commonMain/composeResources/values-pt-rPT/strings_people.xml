@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_create_new_contact">Criar novo contacto</string>
+    <string name="people_import_from_vcf_file">Importar de ficheiro .vcf</string>
+    <string name="people_import_from_phone">Importar do telemóvel</string>
+    <string name="people_move_to_trash">Mover para a reciclagem</string>
+    <string name="people_empty_message">Adiciona alguém sobre quem queres lembrar coisas. As pessoas que adicionas a um evento também aparecem aqui.</string>
+    <string name="people_import_contacts">Importar contactos</string>
+    <string name="people_importing_contacts">A importar contactos…</string>
+    <string name="people_importing_contacts_progress">A importar contactos… %1$d de %2$d</string>
+    <string name="people_already_importing_contacts">Já a importar contactos</string>
+    <string name="people_could_not_read_file">Não foi possível ler o ficheiro</string>
+    <string name="people_could_not_read_contact">Não foi possível ler o contacto</string>
+    <string name="people_no_contacts_app_found">Nenhuma aplicação de contactos encontrada</string>
+    <string name="people_choose_contact_files">Escolher ficheiros de contactos</string>
+    <string name="people_no_contacts_found">Nenhum contacto encontrado</string>
+    <string name="people_could_not_add_contacts">Não foi possível adicionar os contactos</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="one">%1$d pessoa movida para a reciclagem</item>
+        <item quantity="other">%1$d pessoas movidas para a reciclagem</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="one">%1$d de %2$d pessoas movida para a reciclagem</item>
+        <item quantity="other">%1$d de %2$d pessoas movidas para a reciclagem</item>
+    </plurals>
+    <string name="people_could_not_save_detail">Não foi possível guardar o detalhe</string>
+    <string name="people_write_anything_about">Escreve qualquer coisa sobre %1$s…</string>
+    <string name="people_write_anything_about_them">Escreve qualquer coisa sobre esta pessoa…</string>
+    <string name="people_nothing_planned_with">Nada planeado com %1$s</string>
+    <string name="people_nothing_planned_with_them">Nada planeado com esta pessoa</string>
+    <string name="people_birthday_year_range">Usa um ano de %1$d a %2$d</string>
+</resources>

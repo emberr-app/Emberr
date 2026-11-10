@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Proprietà</string>
+    <string name="properties_built_in">Predefinite</string>
+    <string name="properties_built_in_hint">Le proprietà predefinite non possono essere rinominate o eliminate.</string>
+    <string name="properties_custom">Personalizzate</string>
+    <string name="properties_add_property">Aggiungi proprietà</string>
+    <string name="properties_new_property">Nuova proprietà</string>
+    <string name="properties_edit_property">Modifica proprietà</string>
+    <string name="properties_delete_question">Eliminare "%1$s"? Verrà rimossa da ogni nota che la usa.</string>
+    <string name="properties_property_name">Nome proprietà</string>
+    <string name="properties_name_taken">Esiste già una proprietà con questo nome</string>
+    <string name="properties_value_type">Tipo di valore</string>
+    <string name="properties_value_type_locked">Il tipo di valore non può essere cambiato dopo aver creato la proprietà.</string>
+    <string name="properties_delete_property">Elimina proprietà</string>
+    <string name="properties_add">Aggiungi</string>
+</resources>

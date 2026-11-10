@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_welcome_button">Mostra-me como funciona.</string>
+    <string name="onboarding_privacy_headline">As tuas notas continuam tuas.</string>
+    <string name="onboarding_blocks_lead">Escreve da forma como pensas.</string>
+    <string name="onboarding_blocks_detail">Texto, listas de tarefas, tabelas, bases de dados, imagens, notas de voz e documentos, tudo numa nota.</string>
+    <string name="onboarding_daily_headline">Planeia os teus dias.</string>
+    <string name="onboarding_daily_detail">Tarefas não concluídas passam para hoje, tudo aparece num calendário e qualquer caixa de seleção te pode lembrar ao minuto exato.</string>
+    <string name="onboarding_sync_lead">Os teus dispositivos, a tua rede.</string>
+    <string name="onboarding_sync_headline">Sincroniza sem intermediários.</string>
+    <string name="onboarding_sync_detail">Vincula pela tua rede local ou usa um servidor teu. O conteúdo é encriptado antes de sair.</string>
+    <string name="onboarding_typeface_lead">Deixa-o à tua maneira.</string>
+    <string name="onboarding_typeface_headline">Escolhe um tipo de letra.</string>
+    <string name="onboarding_text_size_headline">Define o tamanho do texto.</string>
+    <string name="onboarding_ai_lead">Pergunta às tuas próprias notas.</string>
+    <string name="onboarding_ai_headline">Traz um assistente.</string>
+    <string name="onboarding_scrollbars_headline">Mostra as barras de deslocamento.</string>
+    <string name="onboarding_permissions_headline">Ativa o que precisas.</string>
+    <string name="onboarding_done_detail">Todas as escolhas que fizeste aqui ficam em Definições.</string>
+    <string name="onboarding_chat_answer">Escolheste a última semana de março e reservaste a rota pelo litoral.</string>
+    <string name="onboarding_chat_placeholder">Pergunta sobre as tuas notas</string>
+    <string name="onboarding_enable_ai_description">Nada é enviado para lado nenhum, a menos que adiciones a tua própria chave.</string>
+    <string name="onboarding_show_scrollbars">Mostrar barras de deslocamento</string>
+    <string name="onboarding_permission_notifications_description">Entregar os teus lembretes.</string>
+    <string name="onboarding_permission_camera">Câmara</string>
+    <string name="onboarding_permission_camera_description">Tirar fotos e ler códigos QR.</string>
+    <string name="onboarding_skip">Saltar</string>
+    <string name="splash_tagline">Regista os teus pensamentos</string>
+</resources>

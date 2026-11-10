@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">Escreve / para comandos...</string>
+    <string name="note_editing_template">A editar modelo</string>
+    <string name="note_upload_cover">Carregar capa</string>
+    <string name="note_download_markdown">Transferir .md</string>
+    <string name="note_download_pdf">Transferir PDF</string>
+    <string name="note_move_to_trash">Mover para a reciclagem</string>
+    <string name="note_paste_image_link">Cola um link de imagem</string>
+    <string name="note_drag_image_to_reposition">Arrasta a imagem para reposicionar</string>
+    <string name="note_save_position">Guardar posição</string>
+</resources>

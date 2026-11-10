@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_group_status">Estado</string>
+    <string name="selfhost_setting_up">A configurar</string>
+    <string name="selfhost_status_connected">Estado: ligado</string>
+    <string name="selfhost_cancelling">A cancelar...</string>
+    <string name="selfhost_cancel_sync_hint">Cancelar pausa a sincronização até reiniciares a app ou tocares em Sincronizar agora.</string>
+    <string name="selfhost_syncing">A sincronizar...</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d nota à espera de sincronização</item>
+        <item quantity="other">%1$d notas à espera de sincronização</item>
+    </plurals>
+    <string name="selfhost_passphrase_needed_hint">Precisas desta frase-senha para ligar outro telemóvel ou computador a este servidor.</string>
+    <string name="selfhost_unlock_prompt_description">Desbloqueia para ver a tua frase-senha de recuperação</string>
+    <string name="selfhost_save_passphrase_hint">Este dispositivo foi ligado antes de o Emberr guardar a frase-senha. Escreve-a uma vez para a guardar aqui e poderes vê-la mais tarde.</string>
+    <string name="selfhost_checking">A verificar</string>
+    <string name="selfhost_save_passphrase">Guardar frase-senha</string>
+    <string name="selfhost_disconnect_vault">Desligar cofre</string>
+    <string name="selfhost_recovery_dialog_message">Escreve isto no outro dispositivo quando ele pedir para desbloquear o cofre. Não partilhes com ninguém.</string>
+    <string name="selfhost_disconnect_vault_question">Desligar cofre?</string>
+    <string name="selfhost_disconnect_message">As tuas notas ficam neste dispositivo e no servidor. Vais precisar da frase-senha de recuperação para voltar a ligar.</string>
+    <string name="selfhost_disconnect">Desligar</string>
+    <string name="selfhost_checking_for_changes">A procurar alterações...</string>
+    <string name="selfhost_finishing_up">A finalizar...</string>
+    <string name="selfhost_sending_percent">A enviar %1$d%</string>
+    <string name="selfhost_receiving_percent">A receber %1$d%</string>
+    <string name="selfhost_server_details_hint">Escreve o endereço WebDAV e o login do teu servidor, por exemplo Nextcloud ou um NAS. O Emberr encripta as tuas notas antes de saírem deste dispositivo.</string>
+    <string name="selfhost_username">Nome de utilizador</string>
+    <string name="selfhost_password">Palavra-passe</string>
+    <string name="selfhost_hide_password">Ocultar palavra-passe</string>
+    <string name="selfhost_show_password">Mostrar palavra-passe</string>
+    <string name="selfhost_testing">A testar</string>
+    <string name="selfhost_test_connection">Testar ligação</string>
+    <string name="selfhost_contacting_server">A contactar o servidor...</string>
+    <string name="selfhost_restore_hint">Este servidor já tem um cofre do Emberr. Escreve a frase-senha de recuperação de 16 caracteres mostrada quando o cofre foi criado.</string>
+    <string name="selfhost_restore_find_hint">Não a encontras? Abre Definições → Servidor próprio → Mostrar frase-senha num dispositivo que já esteja ligado.</string>
+    <string name="selfhost_save_passphrase_now">Guarda esta frase-senha agora</string>
+    <string name="selfhost_fact_type_on_other_devices">Vais escrevê-la em todos os outros telemóveis ou computadores que ligares a este servidor.</string>
+    <string name="selfhost_fact_locks_notes">Ela tranca as tuas notas no servidor. Ninguém as pode ler sem ela, nem mesmo o Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">O Emberr não a pode repor. Guarda-a num gestor de palavras-passe ou aponta-a.</string>
+    <string name="selfhost_fact_see_again_later">Podes vê-la novamente mais tarde em Definições → Servidor próprio em qualquer dispositivo ligado.</string>
+    <string name="selfhost_saved_passphrase_confirmation">Guardei esta frase-senha num lugar seguro</string>
+    <string name="selfhost_invalid_credentials">Nome de utilizador ou palavra-passe inválidos</string>
+    <string name="selfhost_could_not_reach_server">Não foi possível aceder ao servidor</string>
+    <string name="selfhost_no_vault_file_to_restore">Nenhum ficheiro de cofre foi encontrado no servidor para restaurar</string>
+    <string name="selfhost_old_or_damaged_vault_data">Esta pasta do servidor tem dados de sincronização de um cofre antigo ou danificado. Elimina a pasta emberr_sync no teu servidor e configura novamente.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Já existe um cofre neste servidor. Escreve a frase-senha de recuperação abaixo para o restaurar.</string>
+    <string name="selfhost_update_required_message">%1$s As tuas notas estão seguras e continuam a ser guardadas neste dispositivo.</string>
+</resources>

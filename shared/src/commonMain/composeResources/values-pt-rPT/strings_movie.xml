@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="movie_too_many_requests">Demasiados pedidos neste momento. Tenta novamente daqui a um minuto.</string>
+    <string name="movie_loading">A carregar</string>
+    <string name="movie_try_again">Tentar novamente</string>
+    <string name="movie_couldnt_load_title_toast">não foi possível carregar este título, verifica a tua internet</string>
+    <string name="movie_your_rating">A tua avaliação</string>
+    <string name="movie_in_watchlist">Em Para ver</string>
+    <string name="movie_adding">A adicionar</string>
+    <string name="movie_add_to_watchlist">Adicionar a Para ver</string>
+    <string name="movie_section_where_to_watch">Onde ver</string>
+    <string name="movie_status">Estado</string>
+    <string name="movie_fact_genres">Géneros</string>
+    <string name="movie_fact_box_office">Bilheteira</string>
+    <string name="movie_too_many_searches">Demasiadas pesquisas neste momento. Tenta novamente daqui a um minuto.</string>
+    <string name="movie_no_internet_connection">Sem ligação à internet</string>
+    <string name="movie_couldnt_search">Não foi possível pesquisar agora. Tenta novamente daqui a pouco.</string>
+    <string name="movie_search_placeholder">Pesquisa um filme ou série</string>
+    <string name="movie_no_titles_match">Nenhum título corresponde a "%1$s". Verifica a ortografia ou experimenta o título original.</string>
+    <string name="movie_remove_from_watchlist">Remover de Para ver</string>
+    <string name="movie_delete_block">Eliminar bloco</string>
+    <string name="movie_genre">Género</string>
+    <string name="movie_watchlist_drop_titles_here">Larga títulos aqui</string>
+    <string name="movie_watchlist_empty_hint">Adiciona um filme ou série para começares a tua lista Para ver</string>
+    <string name="movie_watchlist_settings">Definições</string>
+    <string name="movie_watchlist_delete_watchlist">Eliminar lista Para ver</string>
+    <string name="movie_watchlist_rename_view">Mudar o nome da vista</string>
+    <string name="movie_watchlist_delete_view">Eliminar vista</string>
+    <string name="movie_watchlist_view_name">Nome da vista</string>
+    <string name="movie_watchlist_add_view">Adicionar vista</string>
+    <string name="movie_watchlist_pick_a_date">Escolhe uma data</string>
+    <string name="movie_watchlist_pick_options">Escolhe opções</string>
+    <string name="movie_watchlist_no_genres_yet">Ainda nenhum género nesta lista</string>
+    <string name="movie_watch_status_not_watched">Não visto</string>
+    <string name="movie_watch_status_watching">A ver</string>
+    <string name="movie_watch_status_watched">Visto</string>
+    <string name="movie_filter_show_status">Estado da série</string>
+</resources>

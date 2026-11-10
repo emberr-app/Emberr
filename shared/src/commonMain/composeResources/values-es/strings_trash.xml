@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">La papelera está vacía</string>
+    <string name="trash_title">Papelera</string>
+    <string name="trash_empty_trash">Vaciar papelera</string>
+    <string name="trash_empty_trash_tooltip">Vaciar papelera</string>
+    <string name="trash_restore_note">Restaurar nota</string>
+    <string name="trash_delete_permanently">Eliminar definitivamente</string>
+    <string name="trash_manage_note">Gestionar nota</string>
+    <string name="trash_manage_note_subtitle">Las notas de la papelera se eliminan automáticamente después de 30 días.</string>
+    <string name="trash_empty_trash_question">¿Vaciar la papelera?</string>
+    <string name="trash_empty_trash_subtitle">Se eliminarán definitivamente todas las notas de la papelera. Esta acción no se puede deshacer.</string>
+</resources>

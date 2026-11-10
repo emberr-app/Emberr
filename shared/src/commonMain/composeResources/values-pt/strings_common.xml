@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Voltar</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_save">Salvar</string>
+    <string name="common_close">Fechar</string>
+    <string name="common_delete">Excluir</string>
+    <string name="common_on">Ativado</string>
+    <string name="common_off">Desativado</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">Sem título</string>
+    <string name="common_color_yellow">Amarelo</string>
+    <string name="common_color_lime">Lima</string>
+    <string name="common_color_grey">Cinza</string>
+    <string name="common_color_red">Vermelho</string>
+    <string name="common_color_blue">Azul</string>
+    <string name="common_color_green">Verde</string>
+    <string name="common_color_orange">Laranja</string>
+    <string name="common_color_pink">Rosa</string>
+    <string name="common_color_purple">Roxo</string>
+    <string name="common_create">Criar</string>
+    <string name="common_more">Mais</string>
+</resources>

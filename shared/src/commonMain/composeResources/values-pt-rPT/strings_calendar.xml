@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="calendar_calendar_settings">Definições do calendário</string>
+    <string name="calendar_settings">Definições</string>
+    <string name="calendar_settings_title">Definições do calendário</string>
+    <string name="calendar_delete_category">Eliminar categoria</string>
+    <string name="calendar_whats_happening">O que está a acontecer?</string>
+    <string name="calendar_delete_event">Eliminar evento</string>
+</resources>

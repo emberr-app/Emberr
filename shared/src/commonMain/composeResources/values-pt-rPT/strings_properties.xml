@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_built_in_hint">As propriedades integradas não podem ter o nome alterado nem ser eliminadas.</string>
+    <string name="properties_delete_question">Eliminar "%1$s"? Será removida de todas as notas que a usam.</string>
+    <string name="properties_delete_property">Eliminar propriedade</string>
+</resources>
