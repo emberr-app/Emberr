@@ -64,6 +64,8 @@ import org.koin.core.component.get
 import com.emberr.presentation.widget.previewUpcomingEventsContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.R
+import com.emberr.presentation.widget.widgetText
 
 private val dateColumnWidth = 30.dp
 private val eventCardCornerRadius = 10.dp
@@ -139,7 +141,7 @@ internal fun UpcomingEventsWidgetBody(
             verticalAlignment = Alignment.Vertical.CenterVertically
         ) {
             Text(
-                text = "Upcoming",
+                text = widgetText(R.string.widget_upcoming),
                 maxLines = 1,
                 style = TextStyle(
                     color = primaryTextColor,
@@ -152,7 +154,7 @@ internal fun UpcomingEventsWidgetBody(
             )
 
             WidgetAddButton(
-                contentDescription = "New event",
+                contentDescription = widgetText(R.string.widget_new_event),
                 onClick = actionStartActivity(newEventIntent(context))
             )
         }
@@ -170,7 +172,7 @@ private fun EventList(context: Context, content: UpcomingEventsWidgetContent?) {
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
             Text(
-                text = if (content == null) "Open Emberr to load events" else "No upcoming events",
+                text = if (content == null) widgetText(R.string.widget_open_emberr_to_load_events) else widgetText(R.string.widget_no_upcoming_events),
                 maxLines = 2,
                 style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
             )

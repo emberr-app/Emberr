@@ -92,17 +92,19 @@ class ModelDownloadWorker(
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (manager.getNotificationChannel(CHANNEL_ID) == null) {
             manager.createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, "Model downloads", NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL_ID, applicationContext.getString(R.string.notification_channel_model_downloads), NotificationManager.IMPORTANCE_LOW)
             )
         }
     }
 
     private fun createForegroundInfo(fileName: String, fraction: Float): ForegroundInfo {
-        val displayName = if (fileName == ModelFileNames.EMBEDDER) "embedding model" else "AI model"
+        val title = applicationContext.getString(
+            if (fileName == ModelFileNames.EMBEDDER) R.string.notification_downloading_embedding_model else R.string.notification_downloading_ai_model
+        )
         val percent = (fraction * 100).toInt()
         val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-            .setContentTitle("Downloading $displayName")
-            .setContentText("$percent%")
+            .setContentTitle(title)
+            .setContentText(applicationContext.getString(R.string.notification_percent, percent))
             .setSmallIcon(R.drawable.ic_notification)
             .setProgress(100, percent, false)
             .setOngoing(true)

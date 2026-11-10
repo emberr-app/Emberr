@@ -1,6 +1,10 @@
 package com.emberr.domain.reminders
 
 import com.emberr.core.desktop.DesktopAppStorage
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.notifications_open
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.getString
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -124,13 +128,14 @@ class DesktopReminderScheduler : ReminderScheduler {
             return
         }
 
+        val openActionLabel = runBlocking { getString(Res.string.notifications_open) }
         val notification = ProcessBuilder(
             listOf(
                 "notify-send",
                 "-a", "Emberr",
                 "-u", "normal",
-                "-A", "default=Open",
-                "-A", "open=Open"
+                "-A", "default=$openActionLabel",
+                "-A", "open=$openActionLabel"
             ) + iconOption + listOf(title, message)
         ).start()
 

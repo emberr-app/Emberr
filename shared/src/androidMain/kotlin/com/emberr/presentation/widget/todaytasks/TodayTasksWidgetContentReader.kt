@@ -13,6 +13,12 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.number
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.widgets_untitled_task
+import emberr.shared.generated.resources.widgets_minutes_ago
+import emberr.shared.generated.resources.widgets_hours_ago
+import org.jetbrains.compose.resources.getPluralString
+import org.jetbrains.compose.resources.getString
 
 private const val maximumTasksShown = 12
 private const val maximumCharactersPerTitle = 120
@@ -41,8 +47,9 @@ class TodayTasksWidgetContentReader(
         )
     }
 
-    private fun buildRows(tasks: List<CalendarTaskEntity>, now: Long): List<TodayTaskRow> =
-        tasks
+    private suspend fun buildRows(tasks: List<CalendarTaskEntity>, now: Long): List<TodayTaskRow> {
+        val untitledTaskTitle = getString(Res.string.widgets_untitled_task)
+        return tasks
             .sortedWith(
                 compareBy(
                     { task -> if (task.isChecked) 1 else 0 },
@@ -58,7 +65,7 @@ class TodayTasksWidgetContentReader(
                 TodayTaskRow(
                     blockId = task.blockId,
                     occurrenceDate = task.targetDate,
-                    title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled task" },
+                    title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { untitledTaskTitle },
                     isChecked = task.isChecked,
                     scheduleLabel = when {
                         scheduledAt == null -> null
@@ -68,6 +75,7 @@ class TodayTasksWidgetContentReader(
                     isOverdue = isOverdue
                 )
             }
+    }
 }
 
 private val monthNames = listOf(
@@ -84,12 +92,13 @@ private fun formatMonthAndDay(date: LocalDate): String {
     return "$month ${date.day}"
 }
 
-private fun formatOverdueLabel(elapsedMillis: Long): String {
+private suspend fun formatOverdueLabel(elapsedMillis: Long): String {
     val elapsedMinutes = (elapsedMillis / 60_000L).coerceAtLeast(1L)
 
-    if (elapsedMinutes < 60) return "$elapsedMinutes min ago"
+    if (elapsedMinutes < 60) {
+        return getPluralString(Res.plurals.widgets_minutes_ago, elapsedMinutes.toInt(), elapsedMinutes)
+    }
 
     val hours = elapsedMinutes / 60
-    val hourLabel = if (hours == 1L) "1 hour" else "$hours hours"
-    return "$hourLabel ago"
+    return getPluralString(Res.plurals.widgets_hours_ago, hours.toInt(), hours)
 }

@@ -1,5 +1,7 @@
 package com.emberr.presentation.widget
 
+import androidx.compose.runtime.Composable
+import com.emberr.R
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.presentation.widget.calendar.CalendarDayCell
 import com.emberr.presentation.widget.calendar.CalendarWidgetContent
@@ -31,7 +33,8 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 
 internal const val previewNoteId = "widget-preview"
-internal const val previewQuoteText = "The secret of getting ahead is getting started."
+@Composable
+internal fun previewQuoteText(): String = widgetText(R.string.widget_preview_quote)
 internal const val previewQuoteAuthor = "Mark Twain"
 
 private const val blueHex = "#64B5F6"
@@ -42,66 +45,72 @@ private const val daysPerWeek = 7
 private const val weeksShown = 6
 private val previewWeekdays = daysOfWeekStartingFrom(DayOfWeek.SUNDAY)
 
-internal val previewNoteContent = WidgetNoteContent(
-    title = "Weekend trip",
+@Composable
+internal fun previewNoteContent() = WidgetNoteContent(
+    title = widgetText(R.string.widget_preview_weekend_trip),
     elements = listOf(
-        previewTextLine("packing", "Packing", WidgetTextStyleName.SUBHEADING),
-        previewTextLine("passport", "Passport", marker = WidgetLineMarker.UNCHECKED_BOX),
-        previewTextLine("tickets", "Train tickets", marker = WidgetLineMarker.CHECKED_BOX, isStruckThrough = true),
-        previewTextLine("charger", "Camera charger", marker = WidgetLineMarker.UNCHECKED_BOX),
+        previewTextLine("packing", widgetText(R.string.widget_preview_packing), WidgetTextStyleName.SUBHEADING),
+        previewTextLine("passport", widgetText(R.string.widget_preview_passport), marker = WidgetLineMarker.UNCHECKED_BOX),
+        previewTextLine("tickets", widgetText(R.string.widget_preview_train_tickets), marker = WidgetLineMarker.CHECKED_BOX, isStruckThrough = true),
+        previewTextLine("charger", widgetText(R.string.widget_preview_camera_charger), marker = WidgetLineMarker.UNCHECKED_BOX),
         WidgetElement.DividerLine(key = "divider"),
-        previewTextLine("plan", "Leave by 8am to beat the traffic."),
-        previewTextLine("lunch", "Lunch at the harbour", marker = WidgetLineMarker.BULLET),
-        previewTextLine("museum", "Museum before it closes at 5", marker = WidgetLineMarker.BULLET)
+        previewTextLine("plan", widgetText(R.string.widget_preview_leave_early)),
+        previewTextLine("lunch", widgetText(R.string.widget_preview_lunch_at_the_harbour), marker = WidgetLineMarker.BULLET),
+        previewTextLine("museum", widgetText(R.string.widget_preview_museum), marker = WidgetLineMarker.BULLET)
     )
 )
 
-internal val previewNoteCardContent = NoteCardWidgetContent(
+@Composable
+internal fun previewNoteCardContent() = NoteCardWidgetContent(
     noteId = previewNoteId,
-    title = "Reading list",
+    title = widgetText(R.string.widget_preview_reading_list),
     icon = "📚",
     isFavorite = true,
     isCanvas = false,
     coverImageAbsolutePath = null
 )
 
-internal val previewNoteShortcutContent = NoteShortcutWidgetContent(
+@Composable
+internal fun previewNoteShortcutContent() = NoteShortcutWidgetContent(
     noteId = previewNoteId,
-    title = "Ideas",
+    title = widgetText(R.string.widget_preview_ideas),
     icon = "💡"
 )
 
-internal val previewNoteListContent = NoteListWidgetContent(
+@Composable
+internal fun previewNoteListContent() = NoteListWidgetContent(
     notes = listOf(
-        NoteListWidgetRow("trip", "Weekend trip", "Passport, train tickets, camera charger", "🧳"),
-        NoteListWidgetRow("reading", "Reading list", "The Overstory, Piranesi, Project Hail Mary", "📚"),
-        NoteListWidgetRow("meeting", "Meeting notes", "Agree on the launch date", "🗒️"),
-        NoteListWidgetRow("recipes", "Recipes", "Lemon pasta, miso soup", "🍋")
+        NoteListWidgetRow("trip", widgetText(R.string.widget_preview_weekend_trip), widgetText(R.string.widget_preview_weekend_trip_snippet), "🧳"),
+        NoteListWidgetRow("reading", widgetText(R.string.widget_preview_reading_list), "The Overstory, Piranesi, Project Hail Mary", "📚"),
+        NoteListWidgetRow("meeting", widgetText(R.string.widget_preview_meeting_notes), widgetText(R.string.widget_preview_meeting_notes_snippet), "🗒️"),
+        NoteListWidgetRow("recipes", widgetText(R.string.widget_preview_recipes), widgetText(R.string.widget_preview_recipes_snippet), "🍋")
     )
 )
 
-internal val previewTasksContent = TasksWidgetContent(
+@Composable
+internal fun previewTasksContent() = TasksWidgetContent(
     isShowingCompleted = false,
     rows = listOf(
-        previewTask("dentist", "Call the dentist", timeLabel = "10:30 AM"),
-        previewTask("slides", "Finish the slides"),
-        TasksWidgetRow.SectionHeading(key = "groceries", label = "Groceries"),
-        previewTask("milk", "Oat milk"),
-        previewTask("bread", "Bread"),
-        TasksWidgetRow.SectionHeading(key = "repeating", label = "Repeating"),
-        previewTask("plants", "Water the plants", timeLabel = "9:00 AM", dayLabel = "Today")
+        previewTask("dentist", widgetText(R.string.widget_preview_call_the_dentist), timeLabel = "10:30 AM"),
+        previewTask("slides", widgetText(R.string.widget_preview_finish_the_slides)),
+        TasksWidgetRow.SectionHeading(key = "groceries", label = widgetText(R.string.widget_preview_groceries)),
+        previewTask("milk", widgetText(R.string.widget_preview_oat_milk)),
+        previewTask("bread", widgetText(R.string.widget_preview_bread)),
+        TasksWidgetRow.SectionHeading(key = "repeating", label = widgetText(R.string.widget_repeating)),
+        previewTask("plants", widgetText(R.string.widget_preview_water_the_plants), timeLabel = "9:00 AM", dayLabel = widgetText(R.string.widget_preview_today))
     )
 )
 
+@Composable
 internal fun previewTodayTasksContent(): TodayTasksWidgetContent {
     val today = previewToday()
     return TodayTasksWidgetContent(
         dateLabel = "${monthNameOf(today)} ${today.day}",
         weekdayLabel = capitalized(today.dayOfWeek.name),
         rows = listOf(
-            TodayTaskRow("plants", "Water the plants", isChecked = true, scheduleLabel = "9:00 AM", isOverdue = false),
-            TodayTaskRow("dentist", "Call the dentist", isChecked = false, scheduleLabel = "10:30 AM", isOverdue = false),
-            TodayTaskRow("slides", "Finish the slides", isChecked = false, scheduleLabel = null, isOverdue = false)
+            TodayTaskRow("plants", widgetText(R.string.widget_preview_water_the_plants), isChecked = true, scheduleLabel = "9:00 AM", isOverdue = false),
+            TodayTaskRow("dentist", widgetText(R.string.widget_preview_call_the_dentist), isChecked = false, scheduleLabel = "10:30 AM", isOverdue = false),
+            TodayTaskRow("slides", widgetText(R.string.widget_preview_finish_the_slides), isChecked = false, scheduleLabel = null, isOverdue = false)
         ),
         doneCount = 1,
         totalCount = 3
@@ -129,6 +138,7 @@ internal fun previewCalendarContent(): CalendarWidgetContent {
     )
 }
 
+@Composable
 internal fun previewCalendarAgendaContent(): CalendarAgendaWidgetContent {
     val today = previewToday()
     val dotsByDay = previewDotsByDay(today)
@@ -147,22 +157,25 @@ internal fun previewCalendarAgendaContent(): CalendarAgendaWidgetContent {
             }
         },
         events = listOf(
-            AgendaEvent("standup", "Team sync", "$todayLabel · 10:00 AM", isDone = false, accentColorHex = blueHex),
-            AgendaEvent("gym", "Gym", "$todayLabel · 6:00 PM", isDone = false, accentColorHex = greenHex),
-            AgendaEvent("dinner", "Dinner with Sam", "$todayLabel · 8:00 PM", isDone = false, accentColorHex = orangeHex)
+            AgendaEvent("standup", widgetText(R.string.widget_preview_team_sync), "$todayLabel · 10:00 AM", isDone = false, accentColorHex = blueHex),
+            AgendaEvent("gym", widgetText(R.string.widget_preview_gym), "$todayLabel · 6:00 PM", isDone = false, accentColorHex = greenHex),
+            AgendaEvent("dinner", widgetText(R.string.widget_preview_dinner_with_sam), "$todayLabel · 8:00 PM", isDone = false, accentColorHex = orangeHex)
         )
     )
 }
 
+@Composable
 internal fun previewUpcomingEventsContent(): UpcomingEventsWidgetContent {
     val today = previewToday()
     val tomorrow = today.plus(DatePeriod(days = 1))
+    val todayLabel = widgetText(R.string.widget_preview_today)
+    val tomorrowLabel = widgetText(R.string.widget_preview_tomorrow)
     return UpcomingEventsWidgetContent(
         events = listOf(
-            previewUpcomingEvent("standup", "Team sync", today, "Today", "10:00 AM", blueHex),
-            previewUpcomingEvent("gym", "Gym", today, "Today", "6:00 PM", greenHex),
-            previewUpcomingEvent("dentist", "Dentist", tomorrow, "Tomorrow", "2:30 PM", orangeHex),
-            previewUpcomingEvent("birthday", "Alex's birthday", tomorrow, "Tomorrow", null, pinkHex)
+            previewUpcomingEvent("standup", widgetText(R.string.widget_preview_team_sync), today, todayLabel, "10:00 AM", blueHex),
+            previewUpcomingEvent("gym", widgetText(R.string.widget_preview_gym), today, todayLabel, "6:00 PM", greenHex),
+            previewUpcomingEvent("dentist", widgetText(R.string.widget_preview_dentist), tomorrow, tomorrowLabel, "2:30 PM", orangeHex),
+            previewUpcomingEvent("birthday", widgetText(R.string.widget_preview_alexs_birthday), tomorrow, tomorrowLabel, null, pinkHex)
         )
     )
 }

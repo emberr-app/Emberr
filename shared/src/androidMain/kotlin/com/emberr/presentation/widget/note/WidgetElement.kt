@@ -33,6 +33,21 @@ import com.emberr.domain.model.summaryLine
 import com.emberr.domain.model.valueAsText
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import com.emberr.presentation.shared.editor.blockViews.callout.nameResource
+import com.emberr.presentation.shared.editor.blockViews.movie.nameResource as watchStatusNameResource
+import com.emberr.presentation.shared.editor.blockViews.property.labelResource
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.widgets_label_prefix
+import emberr.shared.generated.resources.widgets_linked_note
+import emberr.shared.generated.resources.widgets_image
+import emberr.shared.generated.resources.widgets_canvas
+import emberr.shared.generated.resources.widgets_database
+import emberr.shared.generated.resources.widgets_watchlist
+import emberr.shared.generated.resources.widgets_credentials
+import emberr.shared.generated.resources.widgets_voice_note_length
+import emberr.shared.generated.resources.widgets_needs_newer_version
+import emberr.shared.generated.resources.widgets_table
+import org.jetbrains.compose.resources.getString
 
 @Serializable
 enum class WidgetTextStyleName { HEADING, SUBHEADING, BODY, QUOTE, CODE, SUBTLE }
@@ -94,7 +109,7 @@ private const val maximumFieldsPerRecord = 6
 private const val maximumCharactersPerLabel = 40
 private const val maximumCharactersPerValue = 120
 
-fun buildElementsFromBlocks(
+suspend fun buildElementsFromBlocks(
     blocks: List<NoteBlock>,
     linkedNoteTitles: Map<String, String>
 ): List<WidgetElement> {
@@ -121,7 +136,7 @@ private fun estimateRenderCost(element: WidgetElement): Int = when (element) {
     is WidgetElement.Record -> element.fields.size * 2
 }
 
-private fun convertBlockToElements(
+private suspend fun convertBlockToElements(
     block: NoteBlock,
     linkedNoteTitles: Map<String, String>
 ): List<WidgetElement> = when (block) {
@@ -145,7 +160,7 @@ private fun convertBlockToElements(
 
     is ToggleBlock -> textLine(block, block.text, WidgetTextStyleName.BODY, prefix = "▸  ")
 
-    is CalloutBlock -> textLine(block, block.text, WidgetTextStyleName.BODY, prefix = "${block.calloutType.label}:  ")
+    is CalloutBlock -> textLine(block, block.text, WidgetTextStyleName.BODY, prefix = getString(Res.string.widgets_label_prefix, getString(block.calloutType.nameResource)))
 
     is CheckboxBlock -> textLine(
         block = block,
@@ -173,33 +188,33 @@ private fun convertBlockToElements(
 
     is LinkedNoteBlock -> textLine(
         block = block,
-        text = linkedNoteTitles[block.linkedNoteId] ?: "Linked note",
+        text = linkedNoteTitles[block.linkedNoteId] ?: getString(Res.string.widgets_linked_note),
         style = WidgetTextStyleName.SUBTLE
     )
 
-    is ImageBlock -> textLine(block, "Image", WidgetTextStyleName.SUBTLE)
+    is ImageBlock -> textLine(block, getString(Res.string.widgets_image), WidgetTextStyleName.SUBTLE)
 
-    is CanvasBlock -> textLine(block, "Canvas", WidgetTextStyleName.SUBTLE)
+    is CanvasBlock -> textLine(block, getString(Res.string.widgets_canvas), WidgetTextStyleName.SUBTLE)
 
-    is DatabaseBlock -> textLine(block, block.title.ifBlank { "Database" }, WidgetTextStyleName.SUBTLE)
+    is DatabaseBlock -> textLine(block, block.title.ifBlank { getString(Res.string.widgets_database) }, WidgetTextStyleName.SUBTLE)
 
-    is MovieBlock -> block.summaryLine()?.let { textLine(block, it, WidgetTextStyleName.SUBTLE) } ?: emptyList()
+    is MovieBlock -> block.summaryLine(watchStatusLabel = getString(block.watchStatus.watchStatusNameResource))?.let { textLine(block, it, WidgetTextStyleName.SUBTLE) } ?: emptyList()
 
-    is WatchlistBlock -> textLine(block, block.title.ifBlank { "Watchlist" }, WidgetTextStyleName.SUBTLE)
+    is WatchlistBlock -> textLine(block, block.title.ifBlank { getString(Res.string.widgets_watchlist) }, WidgetTextStyleName.SUBTLE)
 
-    is CredentialsBlock -> textLine(block, block.serviceName.ifBlank { "Credentials" }, WidgetTextStyleName.SUBTLE)
+    is CredentialsBlock -> textLine(block, block.serviceName.ifBlank { getString(Res.string.widgets_credentials) }, WidgetTextStyleName.SUBTLE)
 
     is PropertyBlock -> {
         val value = block.valueAsText()
         if (value.isBlank()) emptyList()
-        else textLine(block, value, WidgetTextStyleName.BODY, prefix = "${block.label}:  ")
+        else textLine(block, value, WidgetTextStyleName.BODY, prefix = getString(Res.string.widgets_label_prefix, block.propertyType?.let { getString(it.labelResource) } ?: block.customLabel))
     }
 
     is DocumentBlock -> textLine(block, block.fileName, WidgetTextStyleName.SUBTLE)
 
     is VoiceBlock -> textLine(
         block = block,
-        text = "Voice note  ${formatSecondsAsClock(block.durationSeconds)}",
+        text = getString(Res.string.widgets_voice_note_length, formatSecondsAsClock(block.durationSeconds)),
         style = WidgetTextStyleName.SUBTLE
     )
 
@@ -211,7 +226,7 @@ private fun convertBlockToElements(
 
     is PersonDetailBlock -> emptyList()
 
-    is UnknownBlock -> textLine(block, "Needs a newer version of Emberr", WidgetTextStyleName.SUBTLE)
+    is UnknownBlock -> textLine(block, getString(Res.string.widgets_needs_newer_version), WidgetTextStyleName.SUBTLE)
 }
 
 private fun textLine(
@@ -283,7 +298,7 @@ private fun mergeTouchingRanges(sortedRanges: List<HighlightedRange>): List<High
     return merged
 }
 
-private fun convertTableToElements(block: TableBlock): List<WidgetElement> {
+private suspend fun convertTableToElements(block: TableBlock): List<WidgetElement> {
     val records = buildRecords(
         key = block.id,
         allRows = block.rows,
@@ -293,7 +308,7 @@ private fun convertTableToElements(block: TableBlock): List<WidgetElement> {
 
     val title = WidgetElement.TextLine(
         key = "${block.id}#title",
-        text = "Table",
+        text = getString(Res.string.widgets_table),
         style = WidgetTextStyleName.SUBHEADING,
         indentationLevel = block.indentationLevel,
         isStruckThrough = false

@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.emberr.R
 
 class BackupWorker(
     appContext: Context,
@@ -39,8 +40,8 @@ class BackupWorker(
             val uriString = settingsManager.backupDirectoryUriFlow.first()
             if (uriString.isNullOrBlank()) {
                 backupNotifier.showBackupFailedNotification(
-                    "Backup Failed",
-                    "Auto-backup is enabled, but no folder is selected. Please check your settings."
+                    applicationContext.getString(R.string.notification_backup_failed),
+                    applicationContext.getString(R.string.notification_backup_no_folder_selected)
                 )
                 return Result.failure()
             }
@@ -51,8 +52,8 @@ class BackupWorker(
             if (pickedDir == null || !pickedDir.canWrite()) {
                 settingsManager.saveAutoBackupEnabled(false)
                 backupNotifier.showBackupFailedNotification(
-                    "Backup Folder Missing",
-                    "Emberr lost access to your backup folder. Auto-backups have been paused."
+                    applicationContext.getString(R.string.notification_backup_folder_missing),
+                    applicationContext.getString(R.string.notification_backup_folder_access_lost)
                 )
                 return Result.failure()
             }
@@ -82,16 +83,16 @@ class BackupWorker(
         } catch (e: SecurityException) {
             e.printStackTrace()
             backupNotifier.showBackupFailedNotification(
-                "Permission Denied",
-                "Emberr doesn't have permission to write to your backup folder."
+                applicationContext.getString(R.string.notification_backup_permission_denied),
+                applicationContext.getString(R.string.notification_backup_no_write_permission)
             )
             return Result.failure()
 
         } catch (e: Exception) {
             e.printStackTrace()
             backupNotifier.showBackupFailedNotification(
-                "Backup Failed",
-                "Something went wrong while creating your backup: ${e.message}"
+                applicationContext.getString(R.string.notification_backup_failed),
+                applicationContext.getString(R.string.notification_backup_something_went_wrong, e.message)
             )
             return Result.failure()
         }

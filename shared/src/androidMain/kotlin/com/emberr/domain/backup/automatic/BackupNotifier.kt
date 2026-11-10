@@ -20,10 +20,10 @@ class BackupNotifier(private val context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                "Backup Alerts",
+                context.getString(R.string.notification_channel_backup_alerts),
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Alerts for automated database backups"
+                description = context.getString(R.string.notification_channel_backup_alerts_description)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -45,8 +45,8 @@ class BackupNotifier(private val context: Context) {
     fun showBackupSuccessNotification(fileName: String) {
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Backup Complete")
-            .setContentText("$fileName saved successfully.")
+            .setContentTitle(context.getString(R.string.notification_backup_complete))
+            .setContentText(context.getString(R.string.notification_backup_saved, fileName))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setAutoCancel(true)
             .build()

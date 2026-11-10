@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr is locked</string>
+    <string name="app_lock_screen_detail">Use your fingerprint, face, or screen lock to open it.</string>
+    <string name="app_lock_unlock">Unlock</string>
+    <string name="app_lock_prompt_subtitle">Use your fingerprint, face, or screen lock</string>
+    <string name="app_lock_unlock_emberr">Unlock Emberr</string>
+    <string name="app_lock_off_no_screen_lock">App Lock is off because this phone has no screen lock.</string>
+</resources>

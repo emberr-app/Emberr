@@ -45,6 +45,7 @@ import emberr.shared.generated.resources.movie_watchlist_view_board
 import emberr.shared.generated.resources.movie_watchlist_view_gallery
 import emberr.shared.generated.resources.movie_watchlist_view_list
 import emberr.shared.generated.resources.movie_your_rating
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -59,12 +60,15 @@ internal fun MovieKind.pluralDisplayName(): String = when (this) {
     MovieKind.SHOW -> stringResource(Res.string.movie_kind_shows)
 }
 
+internal val WatchStatus.nameResource: StringResource
+    get() = when (this) {
+        WatchStatus.NOT_WATCHED -> Res.string.movie_watch_status_not_watched
+        WatchStatus.WATCHING -> Res.string.movie_watch_status_watching
+        WatchStatus.WATCHED -> Res.string.movie_watch_status_watched
+    }
+
 @Composable
-internal fun WatchStatus.displayName(): String = when (this) {
-    WatchStatus.NOT_WATCHED -> stringResource(Res.string.movie_watch_status_not_watched)
-    WatchStatus.WATCHING -> stringResource(Res.string.movie_watch_status_watching)
-    WatchStatus.WATCHED -> stringResource(Res.string.movie_watch_status_watched)
-}
+internal fun WatchStatus.displayName(): String = stringResource(nameResource)
 
 @Composable
 internal fun WatchlistView.displayName(): String = when (this) {

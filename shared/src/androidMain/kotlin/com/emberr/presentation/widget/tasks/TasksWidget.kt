@@ -74,6 +74,7 @@ import org.koin.core.component.get
 import com.emberr.presentation.widget.previewTasksContent
 import com.emberr.presentation.widget.RedrawIfStateChangedAtStart
 import com.emberr.presentation.widget.readWidgetState
+import com.emberr.presentation.widget.widgetText
 
 private val topBarIconSize = 20.dp
 private val checkboxTapWidth = 36.dp
@@ -116,7 +117,7 @@ class TasksWidget : GlanceAppWidget(), KoinComponent {
                 TasksWidgetBody(
                     context = context,
                     appWidgetId = INVALID_APPWIDGET_ID,
-                    content = previewTasksContent
+                    content = previewTasksContent()
                 )
             }
         }
@@ -173,9 +174,9 @@ internal fun TasksWidgetBody(
             ) {
                 Text(
                     text = when {
-                        content == null -> "Open Emberr to load your tasks"
-                        isShowingCompleted -> "No completed tasks yet."
-                        else -> "All caught up!"
+                        content == null -> widgetText(R.string.widget_open_emberr_to_load_your_tasks)
+                        isShowingCompleted -> widgetText(R.string.widget_no_completed_tasks_yet)
+                        else -> widgetText(R.string.widget_all_caught_up)
                     },
                     style = TextStyle(color = secondaryTextColor, fontSize = 15.sp)
                 )
@@ -207,7 +208,7 @@ internal fun TasksWidgetBody(
             verticalAlignment = Alignment.Vertical.CenterVertically
         ) {
             Text(
-                text = if (isShowingCompleted) "Completed" else "Tasks",
+                text = if (isShowingCompleted) widgetText(R.string.widget_completed) else widgetText(R.string.widget_tasks),
                 maxLines = 1,
                 style = TextStyle(
                     color = primaryTextColor,
@@ -219,7 +220,7 @@ internal fun TasksWidgetBody(
 
             Image(
                 provider = ImageProvider(R.drawable.ic_widget_check_square),
-                contentDescription = "Completed tasks",
+                contentDescription = widgetText(R.string.widget_completed_tasks),
                 colorFilter = ColorFilter.tint(
                     if (isShowingCompleted) primaryTextColor else secondaryTextColor
                 ),
@@ -231,7 +232,7 @@ internal fun TasksWidgetBody(
             Spacer(modifier = GlanceModifier.width(12.dp))
 
             WidgetAddButton(
-                contentDescription = "Add task",
+                contentDescription = widgetText(R.string.widget_add_task),
                 onClick = actionStartActivity(addTaskIntent(context))
             )
         }

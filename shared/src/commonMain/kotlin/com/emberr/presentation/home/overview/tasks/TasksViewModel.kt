@@ -39,6 +39,12 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.overview_tasks_note
+import org.jetbrains.compose.resources.getString
+import emberr.shared.generated.resources.notifications_task_reminder
+import emberr.shared.generated.resources.notifications_daily_note
+import emberr.shared.generated.resources.notifications_unfinished_task
 
 data class BlockLocation(val noteId: String, val isDaily: Boolean)
 
@@ -104,7 +110,11 @@ class TasksViewModel(
 
     val noteHeadingsById: StateFlow<Map<String, String>> =
         combine(notesHoldingTasks, spaceRepository.observeSpaces()) { notes, spaces ->
-            taskHeadingsByNoteId(notes, spaces.associate { it.spaceId to it.displayName })
+            taskHeadingsByNoteId(
+                notes = notes,
+                spaceNamesById = spaces.associate { it.spaceId to it.displayName },
+                untitledNoteHeading = getString(Res.string.overview_tasks_note)
+            )
         }
             .catch { cause -> cause.printStackTrace() }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
@@ -454,7 +464,7 @@ class TasksViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                var notificationTitle = "Task Reminder"
+                var notificationTitle = getString(Res.string.notifications_task_reminder)
 
                 if (loc.isDaily && targetDateString != null && targetDateString != loc.noteId) {
                     val homeContent = repository.getDailyNote(loc.noteId)
@@ -487,7 +497,7 @@ class TasksViewModel(
                     blockSourceMap[blockId] = loc.copy(noteId = targetDateString)
                     _blockLocations.value = blockSourceMap.toMap()
                     SyncEventBus.emitBlockMoved(blockId, fromDateString = loc.noteId, toDateString = targetDateString)
-                    notificationTitle = repository.getDailyNoteMetadata(targetDateString)?.title?.ifBlank { "Daily Note" } ?: "Daily Note"
+                    notificationTitle = repository.getDailyNoteMetadata(targetDateString)?.title?.ifBlank { getString(Res.string.notifications_daily_note) } ?: getString(Res.string.notifications_daily_note)
                 } else if (loc.isDaily) {
                     var saved = false
                     SyncCoordinator.mutex.withLock {
@@ -503,7 +513,7 @@ class TasksViewModel(
                         }
                     }
                     if (!saved) return@launch
-                    notificationTitle = repository.getDailyNoteMetadata(loc.noteId)?.title?.ifBlank { "Daily Note" } ?: "Daily Note"
+                    notificationTitle = repository.getDailyNoteMetadata(loc.noteId)?.title?.ifBlank { getString(Res.string.notifications_daily_note) } ?: getString(Res.string.notifications_daily_note)
                 } else {
                     var savedMeta: NoteMetadataEntity? = null
                     SyncCoordinator.mutex.withLock {
@@ -519,12 +529,12 @@ class TasksViewModel(
                         savedMeta = meta
                     }
                     val meta = savedMeta ?: return@launch
-                    notificationTitle = meta.title.ifBlank { "Task Reminder" }
+                    notificationTitle = meta.title.ifBlank { getString(Res.string.notifications_task_reminder) }
                 }
 
                 if (timestamp != null) {
                     reminderScheduler.scheduleEventReminder(
-                        blockId, notificationTitle, blockText.ifBlank { "Unfinished task" }, timestamp, allDay, recurrenceRule
+                        blockId, notificationTitle, blockText.ifBlank { getString(Res.string.notifications_unfinished_task) }, timestamp, allDay, recurrenceRule
                     )
                 } else {
                     reminderScheduler.cancel(blockId)

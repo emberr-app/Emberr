@@ -35,6 +35,14 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.number
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.widgets_untitled_event
+import emberr.shared.generated.resources.widgets_all_day
+import emberr.shared.generated.resources.widgets_date_all_day
+import emberr.shared.generated.resources.widgets_date_range_all_day
+import emberr.shared.generated.resources.widgets_today
+import emberr.shared.generated.resources.widgets_tomorrow
+import org.jetbrains.compose.resources.getString
 
 private const val weeksShown = 6
 private const val daysPerWeek = 7
@@ -125,12 +133,18 @@ class CalendarAgendaWidgetContentReader(
         return allWeeks.dropLastWhile { week -> week.all { cell -> cell.dayNumber == null } }
     }
 
-    private fun buildEvents(
+    private suspend fun buildEvents(
         tasks: List<CalendarTaskEntity>,
         birthdayEvents: List<CalendarEvent>,
         colorsByCategoryId: Map<String, String>,
         today: LocalDate
     ): List<AgendaEvent> {
+        val untitledEventTitle = getString(Res.string.widgets_untitled_event)
+        val labels = AgendaDayLabels(
+            allDay = getString(Res.string.widgets_all_day),
+            today = getString(Res.string.widgets_today),
+            tomorrow = getString(Res.string.widgets_tomorrow)
+        )
         val (repeatingTasks, oneTimeTasks) = tasks
             .filter { task -> task.reminderTimestamp != null }
             .partition { task -> task.recurrenceFrequency != null }
@@ -148,12 +162,12 @@ class CalendarAgendaWidgetContentReader(
                     event = AgendaEvent(
                         blockId = task.blockId,
                         occurrenceDate = task.targetDate,
-                        title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
-                        whenLabel = if (task.isAllDay) "All day" else clockFormat.clockTimeOf(timestamp),
+                        title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { untitledEventTitle },
+                        whenLabel = if (task.isAllDay) labels.allDay else clockFormat.clockTimeOf(timestamp),
                         isDone = task.isChecked,
                         accentColorHex = task.categoryId?.let { colorsByCategoryId[it] },
                         isRepeating = true,
-                        dayLabel = task.targetDate?.let { date -> formatDayLabel(LocalDate.parse(date), today) }
+                        dayLabel = task.targetDate?.let { date -> formatDayLabel(LocalDate.parse(date), today, labels) }
                     )
                 )
             }
@@ -167,7 +181,7 @@ class CalendarAgendaWidgetContentReader(
                     event = AgendaEvent(
                         blockId = task.blockId,
                         occurrenceDate = task.targetDate,
-                        title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled event" },
+                        title = task.text.trim().take(maximumCharactersPerTitle).ifBlank { untitledEventTitle },
                         whenLabel = formatWhenLabel(task.reminderTimestamp ?: 0L, task.toAllDaySpan(), clockFormat),
                         isDone = task.isChecked,
                         accentColorHex = task.categoryId?.let { colorsByCategoryId[it] }
@@ -245,22 +259,28 @@ private fun monthKeyOf(date: LocalDate): String =
 private fun formatMonthLabel(firstOfMonth: LocalDate): String =
     monthNames.getOrNull(firstOfMonth.month.number - 1) ?: firstOfMonth.month.name
 
-private fun formatWhenLabel(timestamp: Long, allDay: AllDaySpan?, clockFormat: WidgetClockFormat): String {
+private class AgendaDayLabels(
+    val allDay: String,
+    val today: String,
+    val tomorrow: String
+)
+
+private suspend fun formatWhenLabel(timestamp: Long, allDay: AllDaySpan?, clockFormat: WidgetClockFormat): String {
     val moment = Instant.fromEpochMilliseconds(timestamp)
         .toLocalDateTime(TimeZone.currentSystemDefault())
     if (allDay == null) return "${shortDateLabel(moment.date)} · ${clockFormat.clockTimeOf(moment)}"
     val lastDate = allDay.lastDate(moment.date)
     return if (lastDate == moment.date) {
-        "${shortDateLabel(moment.date)} · All day"
+        getString(Res.string.widgets_date_all_day, shortDateLabel(moment.date))
     } else {
-        "${shortDateLabel(moment.date)} – ${shortDateLabel(lastDate)} · All day"
+        getString(Res.string.widgets_date_range_all_day, shortDateLabel(moment.date), shortDateLabel(lastDate))
     }
 }
 
-private fun formatDayLabel(date: LocalDate, today: LocalDate): String =
+private fun formatDayLabel(date: LocalDate, today: LocalDate, labels: AgendaDayLabels): String =
     when (date) {
-        today -> "Today"
-        today.plus(DatePeriod(days = 1)) -> "Tomorrow"
+        today -> labels.today
+        today.plus(DatePeriod(days = 1)) -> labels.tomorrow
         else -> shortDateLabel(date)
     }
 

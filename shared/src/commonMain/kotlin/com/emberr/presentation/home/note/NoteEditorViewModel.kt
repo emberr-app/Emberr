@@ -31,6 +31,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.notifications_note
+import org.jetbrains.compose.resources.getString
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NoteEditorViewModel(
@@ -244,8 +247,8 @@ class NoteEditorViewModel(
         }
     }
 
-    override fun getNoteTitleForReminder(): String {
-        return _noteTitle.value.ifBlank { "Note" }
+    override suspend fun getNoteTitleForReminder(): String {
+        return _noteTitle.value.ifBlank { getString(Res.string.notifications_note) }
     }
 
     override suspend fun spaceIdOfThisNote(): String? {

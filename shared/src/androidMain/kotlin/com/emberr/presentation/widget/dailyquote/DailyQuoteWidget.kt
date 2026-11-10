@@ -49,6 +49,7 @@ import com.emberr.presentation.widget.gradient.gradientCardBackground
 import com.emberr.presentation.widget.gradient.gradientCardPadding
 import com.emberr.presentation.widget.previewQuoteAuthor
 import com.emberr.presentation.widget.previewQuoteText
+import com.emberr.presentation.widget.widgetText
 
 private const val maximumQuoteLines = 4
 private val quoteFontSizeStepsInSp = listOf(18f, 17f, 16f, 15f, 14f, 13f)
@@ -92,7 +93,7 @@ class DailyQuoteWidget : GlanceAppWidget() {
                 DailyQuoteWidgetBody(
                     context = context,
                     gradient = WidgetGradient.defaultGradient,
-                    quoteText = previewQuoteText,
+                    quoteText = previewQuoteText(),
                     quoteAuthor = previewQuoteAuthor
                 )
             }
@@ -108,7 +109,7 @@ private fun DailyQuoteWidgetBody(
     quoteAuthor: String?
 ) {
     val widgetSize = LocalSize.current
-    val shownQuote = quoteText ?: "Open Emberr to load today's quote"
+    val shownQuote = quoteText ?: widgetText(R.string.widget_open_emberr_to_load_todays_quote)
     val renderedQuote = remember(shownQuote, quoteAuthor, widgetSize) {
         renderQuoteImage(context, shownQuote, quoteAuthor, widgetSize)
     }

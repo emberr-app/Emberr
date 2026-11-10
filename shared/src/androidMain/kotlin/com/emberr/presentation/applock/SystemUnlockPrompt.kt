@@ -9,6 +9,9 @@ import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.app_lock_prompt_subtitle
+import org.jetbrains.compose.resources.getString
 
 sealed interface SystemUnlockResult {
     data object Unlocked : SystemUnlockResult
@@ -56,7 +59,7 @@ class SystemUnlockPrompt(activity: FragmentActivity) {
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(title)
-            .setSubtitle("Use your fingerprint, face, or screen lock")
+            .setSubtitle(getString(Res.string.app_lock_prompt_subtitle))
             .setAllowedAuthenticators(fingerprintFaceOrScreenLock)
             .build()
 

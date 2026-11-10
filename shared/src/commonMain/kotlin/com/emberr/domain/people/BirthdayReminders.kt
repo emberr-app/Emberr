@@ -22,13 +22,19 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Instant
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.notifications_birthday
+import emberr.shared.generated.resources.notifications_birthday_today
+import emberr.shared.generated.resources.notifications_birthday_turns_age
+import org.jetbrains.compose.resources.getString
 
 private const val BIRTHDAY_REMINDER_ID_PREFIX = "birthday_"
-private const val BIRTHDAY_NOTIFICATION_TITLE = "Birthday"
 
 data class BirthdayReminder(
     val reminderId: String,
-    val text: String,
+    val personName: String,
+    val turningAge: Int?,
     val timestamp: Long
 )
 
@@ -52,7 +58,8 @@ fun nextBirthdayReminder(
         ?.let { (birthday, timestamp) ->
             BirthdayReminder(
                 reminderId = birthdayReminderId(birthday.personNoteId),
-                text = birthdayReminderText(birthday),
+                personName = birthday.personName.trim(),
+                turningAge = birthday.turningAge,
                 timestamp = timestamp
             )
         }
@@ -73,9 +80,10 @@ fun birthdaySummaryOf(people: List<PersonWithDetails>): List<BirthdaySummary> =
         )
     }
 
-private fun birthdayReminderText(birthday: BirthdayOnDate): String {
-    val name = personDisplayName(birthday.personName)
-    return birthday.turningAge?.let { age -> "$name turns $age today" } ?: "It's $name's birthday today"
+private suspend fun birthdayReminderText(reminder: BirthdayReminder): String {
+    val name = reminder.personName.ifEmpty { getString(Res.string.common_untitled) }
+    return reminder.turningAge?.let { age -> getString(Res.string.notifications_birthday_turns_age, name, age) }
+        ?: getString(Res.string.notifications_birthday_today, name)
 }
 
 class BirthdayReminderScheduler(
@@ -128,9 +136,11 @@ class BirthdayReminderScheduler(
                 val idsThatFailedToCancel = (previouslyScheduledIds - wantedReminderIds).filterNot { reminderId ->
                     changeOneReminder { reminderScheduler.cancel(reminderId) }
                 }
+                val notificationTitle = getString(Res.string.notifications_birthday)
                 reminders.forEach { reminder ->
+                    val notificationText = birthdayReminderText(reminder)
                     changeOneReminder {
-                        reminderScheduler.schedule(reminder.reminderId, BIRTHDAY_NOTIFICATION_TITLE, reminder.text, reminder.timestamp)
+                        reminderScheduler.schedule(reminder.reminderId, notificationTitle, notificationText, reminder.timestamp)
                     }
                 }
                 settingsManager.saveScheduledBirthdayReminderIds(wantedReminderIds + idsThatFailedToCancel)

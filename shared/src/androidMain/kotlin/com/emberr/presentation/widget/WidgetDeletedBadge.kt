@@ -11,11 +11,12 @@ import androidx.glance.layout.padding
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.emberr.R
 
 @Composable
 internal fun WidgetDeletedBadge() {
     Text(
-        text = "Deleted",
+        text = widgetText(R.string.widget_deleted),
         maxLines = 1,
         style = TextStyle(
             color = secondaryTextColor,

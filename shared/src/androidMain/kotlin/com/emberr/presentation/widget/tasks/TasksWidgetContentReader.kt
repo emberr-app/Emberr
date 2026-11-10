@@ -24,11 +24,18 @@ import kotlinx.datetime.todayIn
 import com.emberr.presentation.widget.WidgetClockFormat
 import com.emberr.presentation.widget.WidgetLog
 import com.emberr.presentation.home.overview.tasks.taskHeadingsByNoteId
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.widgets_repeating
+import emberr.shared.generated.resources.widgets_note
+import emberr.shared.generated.resources.widgets_untitled_task
+import emberr.shared.generated.resources.widgets_today
+import emberr.shared.generated.resources.widgets_tomorrow
+import emberr.shared.generated.resources.widgets_yesterday
+import org.jetbrains.compose.resources.getString
 
 private const val maximumTasksShown = 40
 private const val maximumCharactersPerTask = 160
 private const val inboxNoteTitle = "Inbox"
-private const val repeatingSectionTitle = "Repeating"
 
 class TasksWidgetContentReader(
     private val noteRepository: NoteRepository,
@@ -68,11 +75,19 @@ class TasksWidgetContentReader(
 
         val notesHoldingTasks = resolveNotesHoldingTasks(tasks)
         val noteTitlesById = notesHoldingTasks.associate { note -> note.noteId to note.title.trim() }
-        val noteHeadingsById = taskHeadingsByNoteId(notesHoldingTasks, resolveSpaceNames())
+        val labels = TaskRowLabels(
+            repeating = getString(Res.string.widgets_repeating),
+            untitledNote = getString(Res.string.widgets_note),
+            untitledTask = getString(Res.string.widgets_untitled_task),
+            today = getString(Res.string.widgets_today),
+            tomorrow = getString(Res.string.widgets_tomorrow),
+            yesterday = getString(Res.string.widgets_yesterday)
+        )
+        val noteHeadingsById = taskHeadingsByNoteId(notesHoldingTasks, resolveSpaceNames(), labels.untitledNote)
         val inboxNoteIds = findInboxNoteIds(noteTitlesById)
 
         val (unlabelled, labelled) = tasks.partition { task ->
-            headingFor(task, noteHeadingsById, inboxNoteIds) == null
+            headingFor(task, noteHeadingsById, inboxNoteIds, labels) == null
         }
 
         val (repeatingTasks, nonRepeatingTasks) = labelled.partition { task -> task.recurrenceFrequency != null }
@@ -96,7 +111,7 @@ class TasksWidgetContentReader(
         var lastHeading: String? = null
 
         orderedTasks.forEach { task ->
-            val heading = headingFor(task, noteHeadingsById, inboxNoteIds)
+            val heading = headingFor(task, noteHeadingsById, inboxNoteIds, labels)
             if (heading != null && heading != lastHeading) {
                 rows += TasksWidgetRow.SectionHeading(key = "heading:${task.blockId}", label = heading)
             }
@@ -105,11 +120,11 @@ class TasksWidgetContentReader(
             rows += TasksWidgetRow.Task(
                 key = "task:${task.blockId}",
                 blockId = task.blockId,
-                text = task.text.trim().take(maximumCharactersPerTask).ifBlank { "Untitled task" },
+                text = task.text.trim().take(maximumCharactersPerTask).ifBlank { labels.untitledTask },
                 isChecked = task.isChecked,
                 timeLabel = task.reminderTimestamp?.let { timestamp -> clockFormat.clockTimeOf(timestamp) },
                 occurrenceDate = task.targetDate,
-                dayLabel = if (task.recurrenceFrequency != null) task.targetDate?.let(::dailyDateLabel) else null
+                dayLabel = if (task.recurrenceFrequency != null) task.targetDate?.let { date -> dailyDateLabel(date, labels) } else null
             )
         }
 
@@ -153,16 +168,26 @@ class TasksWidgetContentReader(
     private fun headingFor(
         task: CalendarTaskEntity,
         noteHeadingsById: Map<String, String>,
-        inboxNoteIds: Set<String>
+        inboxNoteIds: Set<String>,
+        labels: TaskRowLabels
     ): String? = when {
-        task.recurrenceFrequency != null -> repeatingSectionTitle
-        task.sourceType == TaskSource.DAILY -> dailyDateLabel(task.noteId)
+        task.recurrenceFrequency != null -> labels.repeating
+        task.sourceType == TaskSource.DAILY -> dailyDateLabel(task.noteId, labels)
         task.noteId in inboxNoteIds -> null
-        else -> noteHeadingsById[task.noteId] ?: "Note"
+        else -> noteHeadingsById[task.noteId] ?: labels.untitledNote
     }
 }
 
-private fun dailyDateLabel(dateString: String): String {
+private class TaskRowLabels(
+    val repeating: String,
+    val untitledNote: String,
+    val untitledTask: String,
+    val today: String,
+    val tomorrow: String,
+    val yesterday: String
+)
+
+private fun dailyDateLabel(dateString: String, labels: TaskRowLabels): String {
     val date = try {
         LocalDate.parse(dateString)
     } catch (cause: IllegalArgumentException) {
@@ -171,9 +196,9 @@ private fun dailyDateLabel(dateString: String): String {
 
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     return when (date) {
-        today -> "Today"
-        today.plus(DatePeriod(days = 1)) -> "Tomorrow"
-        today.minus(DatePeriod(days = 1)) -> "Yesterday"
+        today -> labels.today
+        today.plus(DatePeriod(days = 1)) -> labels.tomorrow
+        today.minus(DatePeriod(days = 1)) -> labels.yesterday
         else -> {
             val shortDay = date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
             val shortMonth = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }

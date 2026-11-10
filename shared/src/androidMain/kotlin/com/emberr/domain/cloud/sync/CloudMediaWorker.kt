@@ -38,14 +38,14 @@ class CloudMediaWorker(
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (manager.getNotificationChannel(CHANNEL_ID) == null) {
             manager.createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, "Server sync", NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL_ID, applicationContext.getString(R.string.notification_channel_server_sync), NotificationManager.IMPORTANCE_LOW)
             )
         }
     }
 
     private fun createForegroundInfo(): ForegroundInfo {
         val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-            .setContentTitle("Syncing files…")
+            .setContentTitle(applicationContext.getString(R.string.notification_syncing_files))
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

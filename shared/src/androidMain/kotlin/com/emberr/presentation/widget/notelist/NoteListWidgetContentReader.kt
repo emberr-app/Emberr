@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_untitled
+import org.jetbrains.compose.resources.getString
 
 private const val maximumNotesShown = 30
 private const val maximumCharactersPerTitle = 120
@@ -34,15 +37,17 @@ class NoteListWidgetContentReader(
             buildContent(spaceId, notes)
         }
 
-    fun buildContent(spaceId: String, notes: List<NoteMetadataEntity>): NoteListWidgetContent =
-        NoteListWidgetContent(
+    suspend fun buildContent(spaceId: String, notes: List<NoteMetadataEntity>): NoteListWidgetContent {
+        val untitledNoteTitle = getString(Res.string.common_untitled)
+        return NoteListWidgetContent(
             notes = notes.filter { note -> note.spaceId == spaceId }.take(maximumNotesShown).map { note ->
                 NoteListWidgetRow(
                     noteId = note.noteId,
-                    title = note.title.trim().take(maximumCharactersPerTitle).ifBlank { "Untitled" },
+                    title = note.title.trim().take(maximumCharactersPerTitle).ifBlank { untitledNoteTitle },
                     snippet = note.snippet.trim().take(maximumCharactersPerSnippet),
                     icon = note.icon?.trim()?.takeIf { it.isNotEmpty() }
                 )
             }
         )
+    }
 }

@@ -21,6 +21,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.presentation.shared.components.orHighContrastLine
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.widgets_choose_a_space
+import emberr.shared.generated.resources.widgets_follow_the_app
+import emberr.shared.generated.resources.widgets_follow_the_app_detail
+import emberr.shared.generated.resources.widgets_current_space
+import emberr.shared.generated.resources.widgets_untitled_space
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun WidgetSpaceChooser(
@@ -30,7 +37,7 @@ fun WidgetSpaceChooser(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            text = "Choose a space",
+            text = stringResource(Res.string.widgets_choose_a_space),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
@@ -40,8 +47,8 @@ fun WidgetSpaceChooser(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
                 SpaceChooserRow(
-                    title = "Follow the app",
-                    subtitle = "Always shows whichever space you are in",
+                    title = stringResource(Res.string.widgets_follow_the_app),
+                    subtitle = stringResource(Res.string.widgets_follow_the_app_detail),
                     onClick = { onSpaceChosen(null) }
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine())
@@ -50,7 +57,7 @@ fun WidgetSpaceChooser(
             items(items = spaces, key = { space -> space.spaceId }) { space ->
                 SpaceChooserRow(
                     title = space.displayName,
-                    subtitle = if (space.spaceId == activeSpaceId) "Current space" else null,
+                    subtitle = if (space.spaceId == activeSpaceId) stringResource(Res.string.widgets_current_space) else null,
                     onClick = { onSpaceChosen(space.spaceId) }
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f).orHighContrastLine())
@@ -69,8 +76,9 @@ private fun SpaceChooserRow(title: String, subtitle: String?, onClick: () -> Uni
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            val untitledSpaceTitle = stringResource(Res.string.widgets_untitled_space)
             Text(
-                text = title.trim().ifBlank { "Untitled space" },
+                text = title.trim().ifBlank { untitledSpaceTitle },
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,

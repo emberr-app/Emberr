@@ -13,6 +13,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import com.emberr.presentation.widget.WidgetLog
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_untitled
+import org.jetbrains.compose.resources.getString
 
 @Serializable
 data class WidgetNoteContent(
@@ -44,7 +47,7 @@ class WidgetContentReader(
 
             val blocksWithTables = blocks.withDatabasesAsTables(noteRepository)
             WidgetNoteContent(
-                title = metadata.title.trim().ifBlank { "Untitled" },
+                title = metadata.title.trim().ifBlank { getString(Res.string.common_untitled) },
                 elements = buildElementsFromBlocks(blocksWithTables, resolveLinkedNoteTitles(blocksWithTables))
             )
         }
@@ -52,8 +55,9 @@ class WidgetContentReader(
     private suspend fun resolveLinkedNoteTitles(blocks: List<NoteBlock>): Map<String, String> {
         val linkedNoteIds = blocks.filterIsInstance<LinkedNoteBlock>().map { it.linkedNoteId }.distinct()
         if (linkedNoteIds.isEmpty()) return emptyMap()
+        val untitledNoteTitle = getString(Res.string.common_untitled)
         return noteDao.getNotesByIdsIncludingTemplates(linkedNoteIds)
-            .associate { note -> note.noteId to note.title.trim().ifBlank { "Untitled" } }
+            .associate { note -> note.noteId to note.title.trim().ifBlank { untitledNoteTitle } }
     }
 
     private fun decodeBlock(blockDataJson: String): NoteBlock? =

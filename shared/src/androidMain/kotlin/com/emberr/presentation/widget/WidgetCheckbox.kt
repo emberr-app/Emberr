@@ -32,7 +32,7 @@ fun WidgetCheckbox(
                 )
                 Image(
                     provider = ImageProvider(R.drawable.ic_widget_checkbox_tick),
-                    contentDescription = "Done",
+                    contentDescription = widgetText(R.string.widget_done),
                     colorFilter = ColorFilter.tint(highlightColor),
                     modifier = GlanceModifier.size(checkboxIconSize)
                 )
@@ -40,7 +40,7 @@ fun WidgetCheckbox(
         } else {
             Image(
                 provider = ImageProvider(R.drawable.ic_widget_checkbox_empty),
-                contentDescription = "Not done",
+                contentDescription = widgetText(R.string.widget_not_done),
                 colorFilter = ColorFilter.tint(secondaryTextColor),
                 modifier = GlanceModifier.size(checkboxIconSize)
             )
