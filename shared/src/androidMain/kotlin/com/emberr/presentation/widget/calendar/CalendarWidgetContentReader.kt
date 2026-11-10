@@ -26,6 +26,8 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.datetime.number
+import com.emberr.domain.util.time.monthName
+import com.emberr.domain.util.time.weekdayLetter
 
 private const val maximumDotsPerDay = 4
 private const val weeksShown = 6
@@ -92,7 +94,7 @@ class CalendarWidgetContentReader(
             CalendarWidgetContent(
                 shownMonth = monthKey,
                 monthLabel = formatMonthLabel(firstOfMonth),
-                weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> day.name.take(1) },
+                weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> weekdayLetter(day) },
                 weeks = buildWeeks(firstOfMonth, today, weekStartsOn, dotsByDate),
                 yearLabel = firstOfMonth.year.toString()
             )
@@ -134,11 +136,6 @@ class CalendarWidgetContentReader(
     }
 }
 
-private val monthNames = listOf(
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-)
-
 fun shiftMonth(shownMonth: String?, monthsToAdd: Int): String {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     val firstOfMonth = parseFirstOfMonth(shownMonth) ?: firstOfMonthFor(today)
@@ -160,5 +157,4 @@ private fun firstOfMonthFor(date: LocalDate): LocalDate =
 private fun monthKeyOf(date: LocalDate): String =
     "${date.year}-${date.month.number.toString().padStart(2, '0')}"
 
-private fun formatMonthLabel(firstOfMonth: LocalDate): String =
-    monthNames.getOrNull(firstOfMonth.month.number - 1) ?: firstOfMonth.month.name
+private fun formatMonthLabel(firstOfMonth: LocalDate): String = monthName(firstOfMonth.month)

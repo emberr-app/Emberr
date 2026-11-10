@@ -41,13 +41,14 @@ import emberr.shared.generated.resources.database_repeat_on_day_of_month
 import emberr.shared.generated.resources.database_repeat_on_days
 import emberr.shared.generated.resources.database_repeat_on_these_days
 import emberr.shared.generated.resources.editor_time
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toInstant
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.shortWeekdayName
+import com.emberr.domain.util.time.weekdayLetter
 
 private val RepeatDayButtonSize = 34.dp
 
@@ -56,7 +57,7 @@ internal fun DatabaseTemplateRepeat.summary(usesTwentyFourHourClock: Boolean): S
     val frequencyName = frequency.displayName()
     val daysText = when (frequency) {
         DatabaseRepeatFrequency.WEEKLY -> {
-            val dayNames = isoDaysOfWeek.sorted().mapNotNull { isoDayNumberToDayOfWeek(it)?.shortName() }
+            val dayNames = isoDaysOfWeek.sorted().mapNotNull { isoDayNumberToDayOfWeek(it)?.let(::shortWeekdayName) }
             if (dayNames.isEmpty()) frequencyName else stringResource(Res.string.database_repeat_on_days, frequencyName, dayNames.joinToString(", "))
         }
         DatabaseRepeatFrequency.MONTHLY -> stringResource(Res.string.database_repeat_on_day_of_month, frequencyName, startsOn.day)
@@ -65,8 +66,6 @@ internal fun DatabaseTemplateRepeat.summary(usesTwentyFourHourClock: Boolean): S
     val repeatTime = time ?: return daysText
     return stringResource(Res.string.database_repeat_at_time, daysText, formatPropertyTime(repeatTime, usesTwentyFourHourClock))
 }
-
-private fun DayOfWeek.shortName(): String = name.take(3).lowercase().replaceFirstChar { it.uppercase() }
 
 @Composable
 internal fun DatabaseTemplateRepeatChoices(
@@ -138,7 +137,7 @@ private fun DatabaseRepeatDayButtons(selectedIsoDays: List<Int>, onSelectedIsoDa
     ) {
         (1..7).forEach { isoDay ->
             val isSelected = isoDay in selectedIsoDays
-            val dayLetter = isoDayNumberToDayOfWeek(isoDay)?.name?.take(1).orEmpty()
+            val dayLetter = isoDayNumberToDayOfWeek(isoDay)?.let(::weekdayLetter).orEmpty()
             Box(
                 modifier = Modifier
                     .size(RepeatDayButtonSize)

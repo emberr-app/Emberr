@@ -25,8 +25,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.number
+import kotlinx.datetime.LocalDate
 import java.util.UUID
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 data class DocumentGroup(
     val monthYear: String,
@@ -64,9 +66,6 @@ class DocumentsViewModel(
                 .collectLatest { allDocuments ->
                     blockSourceMap.clear()
 
-                    val months = arrayOf("", "January", "February", "March", "April", "May",
-                        "June", "July", "August", "September", "October", "November", "December")
-
                     val monthGroups    = mutableMapOf<String, MutableList<DocumentBlock>>()
                     val monthTimestamp = mutableMapOf<String, Long>()
 
@@ -75,7 +74,7 @@ class DocumentsViewModel(
 
                         val instant   = Instant.fromEpochMilliseconds(entity.noteCreatedAt)
                         val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                        val key       = "${months[localDate.month.number]} ${localDate.year}"
+                        val key       = formatDate(LocalDate(localDate.year, localDate.month, 1), DateTextStyle.MONTH_YEAR)
 
                         monthGroups.getOrPut(key) { mutableListOf() }.add(
                             DocumentBlock(

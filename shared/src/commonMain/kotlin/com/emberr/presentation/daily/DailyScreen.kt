@@ -106,6 +106,7 @@ import emberr.shared.generated.resources.calendar
 import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.history2
 import org.jetbrains.compose.resources.painterResource
+import com.emberr.domain.util.time.shortWeekdayName
 
 private val DailyHeaderBaseBlurHeight = 140.dp
 private val DailyHeaderBaseGradientHeight = 240.dp
@@ -797,8 +798,7 @@ private fun dailyHeaderTitle(selectedDate: LocalDate): String {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     if (selectedDate == today) return stringResource(Res.string.daily_today)
 
-    val shortDayName = selectedDate.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-    return "$shortDayName ${selectedDate.day}"
+    return "${shortWeekdayName(selectedDate.dayOfWeek)} ${selectedDate.day}"
 }
 
 @Composable

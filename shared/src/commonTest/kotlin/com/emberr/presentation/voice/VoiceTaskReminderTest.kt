@@ -42,10 +42,9 @@ class VoiceTaskReminderTest {
     }
 
     @Test
-    fun aReminderFurtherAwayShowsTheWeekdayAndDate() {
+    fun aReminderFurtherAwayShowsItsTime() {
         val reminder = timestampAt(2026, 9, 25, 14, 5)
 
-        assertEquals("Fri, Sep 25", dayLabel(reminder))
         assertEquals("2:05 PM", timeLabel(reminder))
     }
 

@@ -68,9 +68,10 @@ import emberr.shared.generated.resources.editor_date
 import emberr.shared.generated.resources.editor_event_options
 import emberr.shared.generated.resources.editor_more_details
 import emberr.shared.generated.resources.editor_time
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
-private fun shortDateLabel(date: LocalDate): String =
-    "${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.day}"
+private fun shortDateLabel(date: LocalDate): String = formatDate(date, DateTextStyle.SHORT_MONTH_DAY)
 
 private fun CheckboxBlock.reminderTimestampOnNewDate(newTimestamp: Long): Long {
     val currentTimestamp = reminderTimestamp

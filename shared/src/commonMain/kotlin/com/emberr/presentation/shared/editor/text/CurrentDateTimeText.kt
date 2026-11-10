@@ -2,7 +2,8 @@ package com.emberr.presentation.shared.editor.text
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import com.emberr.domain.model.shortDateText
+import com.emberr.domain.util.time.DateTextStyle
+import com.emberr.domain.util.time.formatDate
 import com.emberr.domain.util.time.formatTimeOfDay
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -14,7 +15,8 @@ fun currentTimeText(usesTwentyFourHourClock: Boolean): String {
     return formatTimeOfDay(now.hour, now.minute, usesTwentyFourHourClock)
 }
 
-fun currentDateText(): String = shortDateText(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+fun currentDateText(): String =
+    formatDate(Clock.System.todayIn(TimeZone.currentSystemDefault()), DateTextStyle.SHORT_MONTH_DAY_YEAR)
 
 fun TextFieldValue.withTextInsertedAtCursor(text: String): TextFieldValue {
     val selectionStart = selection.min

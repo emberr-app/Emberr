@@ -223,6 +223,10 @@ import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.presentation.shared.components.orHighContrastLine
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.DateTextStyle
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.shortWeekdayName
+import com.emberr.domain.util.time.weekdayLetter
 
 internal val EventChipTextColor = Color(0xFF1A1A1A)
 private val InteractiveShape = RoundedCornerShape(12.dp)
@@ -587,7 +591,7 @@ fun formatRecurrenceSummary(rule: RecurrenceRule): String {
             val weekly = if (interval == 1) stringResource(Res.string.calendar_repeat_weekly) else pluralStringResource(Res.plurals.calendar_repeat_every_weeks, interval, interval)
             val dayNames = rule.daysOfWeek.takeIf { it.isNotEmpty() }
                 ?.sortedBy { it.isoDayNumber }
-                ?.joinToString(", ") { it.name.take(3).lowercase().replaceFirstChar(Char::uppercase) }
+                ?.joinToString(", ") { shortWeekdayName(it) }
             if (dayNames == null) weekly else stringResource(Res.string.calendar_repeat_on_days, weekly, dayNames)
         }
         RecurrenceFrequency.MONTHLY -> if (interval == 1) stringResource(Res.string.calendar_repeat_monthly) else pluralStringResource(Res.plurals.calendar_repeat_every_months, interval, interval)
@@ -620,10 +624,9 @@ private fun formatEventTimeSuffix(state: EventEditorState, usesTwentyFourHourClo
 }
 
 private fun formatEditorDate(date: LocalDate): String {
-    val weekday = date.dayOfWeek.name.lowercase().replaceFirstChar(Char::uppercase)
-    val month = date.month.name.take(3).lowercase().replaceFirstChar(Char::uppercase)
     val isThisYear = date.year == Clock.System.todayIn(TimeZone.currentSystemDefault()).year
-    return if (isThisYear) "$weekday, $month ${date.day}" else "$weekday, $month ${date.day}, ${date.year}"
+    val style = if (isThisYear) DateTextStyle.FULL_WEEKDAY_SHORT_MONTH_DAY else DateTextStyle.FULL_WEEKDAY_SHORT_MONTH_DAY_YEAR
+    return formatDate(date, style)
 }
 
 @Composable
@@ -1770,9 +1773,6 @@ private fun StepperButton(
     }
 }
 
-private fun DayOfWeek.shortLabel(): String =
-    name.lowercase().replaceFirstChar { it.uppercase() }.take(3)
-
 @Composable
 private fun buildRepeatSummary(
     frequency: RecurrenceFrequency,
@@ -1792,7 +1792,7 @@ private fun buildRepeatSummary(
         RecurrenceFrequency.WEEKLY -> {
             val dayNames = daysOfWeek
                 .sortedBy { weekdayOrder.indexOf(it) }
-                .joinToString(", ") { it.shortLabel() }
+                .joinToString(", ") { shortWeekdayName(it) }
             if (dayNames.isBlank()) base else stringResource(Res.string.calendar_repeat_on_days, base, dayNames)
         }
         RecurrenceFrequency.MONTHLY -> stringResource(Res.string.calendar_repeat_on_day_of_month, base, anchorDate.day)
@@ -1954,7 +1954,7 @@ private fun CustomRepeatForm(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = day.name.take(1),
+                                    text = weekdayLetter(day),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = if (isSelected) MaterialTheme.colorScheme.onPrimary
                                     else MaterialTheme.colorScheme.onSurface

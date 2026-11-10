@@ -32,6 +32,8 @@ import emberr.shared.generated.resources.widgets_today
 import emberr.shared.generated.resources.widgets_tomorrow
 import emberr.shared.generated.resources.widgets_yesterday
 import org.jetbrains.compose.resources.getString
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private const val maximumTasksShown = 40
 private const val maximumCharactersPerTask = 160
@@ -199,10 +201,6 @@ private fun dailyDateLabel(dateString: String, labels: TaskRowLabels): String {
         today -> labels.today
         today.plus(DatePeriod(days = 1)) -> labels.tomorrow
         today.minus(DatePeriod(days = 1)) -> labels.yesterday
-        else -> {
-            val shortDay = date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-            val shortMonth = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-            "$shortDay, $shortMonth ${date.day}"
-        }
+        else -> formatDate(date, DateTextStyle.SHORT_WEEKDAY_SHORT_MONTH_DAY)
     }
 }

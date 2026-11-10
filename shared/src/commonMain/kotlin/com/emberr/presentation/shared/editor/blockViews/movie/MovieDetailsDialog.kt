@@ -147,6 +147,8 @@ import emberr.shared.generated.resources.movie_your_rating
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.StringResource
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private val DialogShape = RoundedCornerShape(24.dp)
 private val FactShape = RoundedCornerShape(8.dp)
@@ -1139,10 +1141,7 @@ private fun oneDecimalText(value: Double): String = ((value * 10).roundToInt() /
 @Composable
 internal fun episodeCountText(episodes: Int): String = pluralStringResource(Res.plurals.movie_episode_count, episodes, episodes)
 
-internal fun releaseDateText(date: LocalDate): String {
-    val month = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-    return "${date.day} $month ${date.year}"
-}
+internal fun releaseDateText(date: LocalDate): String = formatDate(date, DateTextStyle.SHORT_MONTH_DAY_YEAR)
 
 internal fun initialsOf(name: String): String =
     name.split(' ').filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }

@@ -10,6 +10,8 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private val DEFAULT_REMINDER_TIME = LocalTime(9, 0)
 
@@ -24,11 +26,7 @@ internal fun voiceTaskDayLabel(
     return when (date) {
         today -> todayLabel
         today.plus(DatePeriod(days = 1)) -> tomorrowLabel
-        else -> {
-            val shortDay = date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-            val shortMonth = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-            "$shortDay, $shortMonth ${date.day}"
-        }
+        else -> formatDate(date, DateTextStyle.SHORT_WEEKDAY_SHORT_MONTH_DAY)
     }
 }
 

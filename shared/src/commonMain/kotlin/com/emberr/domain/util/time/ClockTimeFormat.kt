@@ -18,12 +18,12 @@ fun timeFormatPreferenceNamed(name: String): TimeFormatPreference =
 fun formatTimeOfDay(hour: Int, minute: Int, usesTwentyFourHourClock: Boolean): String {
     val paddedMinute = minute.toString().padStart(2, '0')
     if (usesTwentyFourHourClock) return "${hour.toString().padStart(2, '0')}:$paddedMinute"
-    return "${twelveHourClockHour(hour)}:$paddedMinute ${dayPeriod(hour)}"
+    return joinTimeWithDayPeriod("${twelveHourClockHour(hour)}:$paddedMinute", isAfternoon = hour >= 12)
 }
 
 fun formatHourLabel(hour: Int, usesTwentyFourHourClock: Boolean): String {
     if (usesTwentyFourHourClock) return "${hour.toString().padStart(2, '0')}:00"
-    return "${twelveHourClockHour(hour)} ${dayPeriod(hour)}"
+    return joinTimeWithDayPeriod("${twelveHourClockHour(hour)}", isAfternoon = hour >= 12)
 }
 
 private fun twelveHourClockHour(hour: Int): Int = when {
@@ -31,5 +31,3 @@ private fun twelveHourClockHour(hour: Int): Int = when {
     hour > 12 -> hour - 12
     else -> hour
 }
-
-private fun dayPeriod(hour: Int): String = if (hour < 12) "AM" else "PM"

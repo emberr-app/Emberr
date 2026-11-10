@@ -23,13 +23,15 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
-import kotlinx.datetime.number
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.widgets_untitled_event
 import emberr.shared.generated.resources.widgets_repeating
 import emberr.shared.generated.resources.widgets_today
 import emberr.shared.generated.resources.widgets_tomorrow
 import org.jetbrains.compose.resources.getString
+import com.emberr.domain.util.time.shortWeekdayName
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private const val maximumEventsShown = 60
 private const val maximumCharactersPerTitle = 100
@@ -158,11 +160,7 @@ class UpcomingEventsWidgetContentReader(
 }
 
 private fun weekdayShortLabelOf(date: LocalDate): String =
-    date.dayOfWeek.name.take(3)
-
-private val shortMonthNames = listOf(
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-)
+    shortWeekdayName(date.dayOfWeek).uppercase()
 
 private class RelativeDayLabels(val today: String, val tomorrow: String)
 
@@ -170,8 +168,5 @@ private fun formatDateLabel(targetDate: LocalDate, today: LocalDate, dayLabels: 
     when (targetDate) {
         today -> dayLabels.today
         today.plus(DatePeriod(days = 1)) -> dayLabels.tomorrow
-        else -> {
-            val month = shortMonthNames.getOrNull(targetDate.month.number - 1) ?: targetDate.month.name.take(3)
-            "$month ${targetDate.day}"
-        }
+        else -> formatDate(targetDate, DateTextStyle.SHORT_MONTH_DAY)
     }

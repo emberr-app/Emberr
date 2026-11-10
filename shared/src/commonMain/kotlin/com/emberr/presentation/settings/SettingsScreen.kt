@@ -100,6 +100,8 @@ import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.domain.util.time.TimeFormatPreference
 import com.emberr.domain.util.time.FirstDayOfWeekPreference
 import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.domain.util.time.weekdayName
+import kotlinx.datetime.DayOfWeek
 import com.emberr.domain.util.time.timeFormatPreferenceNamed
 import com.emberr.domain.util.time.firstDayOfWeekPreferenceNamed
 import com.emberr.presentation.home.overview.OverviewSection
@@ -689,7 +691,7 @@ fun SettingsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 com.emberr.presentation.shared.components.WheelPicker(
-                    items = days,
+                    items = days.map(::backupDayLabel),
                     selectedIndex = selectedIndex,
                     onItemSelected = { selectedIndex = it },
                     itemHeight = if (isDesktopPlatform) 40.dp else 44.dp
@@ -1006,6 +1008,9 @@ private fun SettingsSubPageBackButton(onClick: () -> Unit) {
     }
 }
 
+private fun backupDayLabel(savedDay: String): String =
+    DayOfWeek.entries.firstOrNull { it.name.equals(savedDay, ignoreCase = true) }?.let(::weekdayName) ?: savedDay
+
 @Composable
 private fun RemindersSettingsSection() {
     SettingsGroup(title = stringResource(Res.string.settings_group_reminders)) {
@@ -1076,7 +1081,7 @@ private fun DataSettingsSection(
                         SettingsActionRow(
                             icon = painterResource(Res.drawable.calendar_clock),
                             title = stringResource(Res.string.settings_backup_day),
-                            trailingLabel = backupDay,
+                            trailingLabel = backupDayLabel(backupDay),
                             onClick = onPickBackupDay
                         )
                     }

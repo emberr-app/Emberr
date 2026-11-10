@@ -61,7 +61,6 @@ import com.emberr.domain.cloud.api.CloudSession
 import com.emberr.domain.cloud.sync.CloudMediaPassDetails
 import com.emberr.domain.cloud.sync.CloudMediaPassResult
 import com.emberr.domain.cloud.sync.CloudSyncResult
-import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.format.formatByteSize
 import com.emberr.domain.util.media.mimeTypeForExtension
 import com.emberr.domain.util.system.DeviceLockConfirmation
@@ -198,6 +197,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 import kotlin.time.Instant
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 @Composable
 fun CloudAccountScreen(
@@ -758,7 +759,7 @@ private fun formatLastUsed(lastUsedAtMicroseconds: Long, usesTwentyFourHourClock
 private fun formatDateAndTime(epochMillis: Long, usesTwentyFourHourClock: Boolean): String {
     val local = Instant.fromEpochMilliseconds(epochMillis)
         .toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${shortDateText(local.date)}, ${formatTimeOfDay(local.hour, local.minute, usesTwentyFourHourClock)}"
+    return "${formatDate(local.date, DateTextStyle.SHORT_MONTH_DAY_YEAR)}, ${formatTimeOfDay(local.hour, local.minute, usesTwentyFourHourClock)}"
 }
 
 @Composable

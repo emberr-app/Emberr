@@ -68,6 +68,7 @@ import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Clock
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.weekdayLetter
 
 internal val CalendarSidePanelWidth = 304.dp
 internal val CalendarSidePanelContentGap = 12.dp
@@ -193,7 +194,7 @@ private fun MiniMonthCalendar(
             daysOfWeekStartingFrom(firstDayOfWeek).forEach { day ->
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     Text(
-                        text = day.name.take(1),
+                        text = weekdayLetter(day),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = if (day == DayOfWeek.SUNDAY) {

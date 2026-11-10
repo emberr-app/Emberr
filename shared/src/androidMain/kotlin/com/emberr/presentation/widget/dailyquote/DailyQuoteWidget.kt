@@ -7,7 +7,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.text.Layout
-import android.text.format.DateFormat
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
@@ -50,12 +49,16 @@ import com.emberr.presentation.widget.gradient.gradientCardPadding
 import com.emberr.presentation.widget.previewQuoteAuthor
 import com.emberr.presentation.widget.previewQuoteText
 import com.emberr.presentation.widget.widgetText
+import com.emberr.domain.util.time.formatDate
+import kotlin.time.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import com.emberr.domain.util.time.DateTextStyle
 
 private const val maximumQuoteLines = 4
 private val quoteFontSizeStepsInSp = listOf(18f, 17f, 16f, 15f, 14f, 13f)
 private const val authorFontSizeInSp = 13f
 private const val dateFontSizeInSp = 13f
-private const val datePattern = "MMM d"
 private const val gapBetweenQuoteAndAuthorInDp = 8f
 private const val quoteLineSpacingMultiplier = 1.1f
 private const val headerRowHeightInDp = 30f
@@ -113,7 +116,7 @@ private fun DailyQuoteWidgetBody(
     val renderedQuote = remember(shownQuote, quoteAuthor, widgetSize) {
         renderQuoteImage(context, shownQuote, quoteAuthor, widgetSize)
     }
-    val todayLabel = DateFormat.format(datePattern, System.currentTimeMillis()).toString()
+    val todayLabel = formatDate(Clock.System.todayIn(TimeZone.currentSystemDefault()), DateTextStyle.SHORT_MONTH_DAY)
     val renderedDate = remember(todayLabel) { renderDateImage(context, todayLabel) }
 
     Column(

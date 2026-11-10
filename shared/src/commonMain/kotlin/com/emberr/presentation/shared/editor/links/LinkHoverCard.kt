@@ -67,6 +67,8 @@ import emberr.shared.generated.resources.editor_edited_on_date
 import emberr.shared.generated.resources.editor_note_not_found
 import emberr.shared.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private const val PREVIEW_FAILURE_DESCRIPTION = "Could not load preview"
 private const val MOST_PREVIEWS_KEPT_IN_MEMORY = 200
@@ -125,8 +127,7 @@ private fun webPreviewFor(url: String): WebLinkPreview? {
 private fun lastEditedLabel(updatedAt: Long): String {
     val editedOn = Instant.fromEpochMilliseconds(updatedAt)
         .toLocalDateTime(TimeZone.currentSystemDefault())
-    val month = editedOn.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-    return stringResource(Res.string.editor_edited_on_date, month, editedOn.day)
+    return stringResource(Res.string.editor_edited_on_date, formatDate(editedOn.date, DateTextStyle.SHORT_MONTH_DAY))
 }
 
 @Composable
