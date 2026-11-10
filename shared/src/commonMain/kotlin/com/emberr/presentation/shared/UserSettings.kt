@@ -19,10 +19,17 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.cog
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_more
 import emberr.shared.generated.resources.people2
+import emberr.shared.generated.resources.people_title
+import emberr.shared.generated.resources.properties_title
+import emberr.shared.generated.resources.settings_title
 import emberr.shared.generated.resources.sliders_horizontal
 import emberr.shared.generated.resources.trash
+import emberr.shared.generated.resources.trash_title
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private val MenuWidth = 220.dp
 
@@ -72,7 +79,7 @@ private fun UserSettingsDesktopMenu(
     Column(modifier = Modifier.width(MenuWidth).padding(vertical = 4.dp)) {
 
         UserSettingsMenuRow(
-            text = "People",
+            text = stringResource(Res.string.people_title),
             icon = painterResource(Res.drawable.people2),
             onClick = {
                 onDismiss()
@@ -81,7 +88,7 @@ private fun UserSettingsDesktopMenu(
         )
 
         UserSettingsMenuRow(
-            text = "Properties",
+            text = stringResource(Res.string.properties_title),
             icon = painterResource(Res.drawable.sliders_horizontal),
             onClick = {
                 onDismiss()
@@ -90,7 +97,7 @@ private fun UserSettingsDesktopMenu(
         )
 
         UserSettingsMenuRow(
-            text = "Settings",
+            text = stringResource(Res.string.settings_title),
             icon = painterResource(Res.drawable.cog),
             onClick = {
                 onDismiss()
@@ -99,7 +106,7 @@ private fun UserSettingsDesktopMenu(
         )
 
         UserSettingsMenuRow(
-            text = "Trash",
+            text = stringResource(Res.string.trash_title),
             icon = painterResource(Res.drawable.trash),
             onClick = {
                 onDismiss()
@@ -150,31 +157,31 @@ private fun UserSettingsBottomSheet(
     onNavigateToProperties: () -> Unit,
     onNavigateToTrash: () -> Unit
 ) {
-    EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "More") { closeAnd ->
+    EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = stringResource(Res.string.common_more)) { closeAnd ->
 
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             UserSettingsSheetRow(
-                text = "People",
+                text = stringResource(Res.string.people_title),
                 icon = painterResource(Res.drawable.people2)
             ) { closeAnd { onNavigateToPeople() } }
 
             UserSettingsSheetRow(
-                text = "Properties",
+                text = stringResource(Res.string.properties_title),
                 icon = painterResource(Res.drawable.sliders_horizontal)
             ) { closeAnd { onNavigateToProperties() } }
 
             UserSettingsSheetRow(
-                text = "Settings",
+                text = stringResource(Res.string.settings_title),
                 icon = painterResource(Res.drawable.cog)
             ) { closeAnd { onNavigateToSettings() } }
 
             UserSettingsSheetRow(
-                text = "Trash",
+                text = stringResource(Res.string.trash_title),
                 icon = painterResource(Res.drawable.trash)
             ) { closeAnd { onNavigateToTrash() } }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { closeAnd(onDismiss) },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
             )
