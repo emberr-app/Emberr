@@ -492,6 +492,13 @@ class AndroidSettingsManager(
         _timeFormatPreference.value = preference
     }
 
+    override fun getAppLanguageTag(): String =
+        sharedPreferences.getString(SyncConstants.KEY_APP_LANGUAGE_TAG, "").orEmpty()
+
+    override fun saveAppLanguageTag(languageTag: String) {
+        sharedPreferences.edit(commit = true) { putString(SyncConstants.KEY_APP_LANGUAGE_TAG, languageTag) }
+    }
+
     private val _firstDayOfWeekPreference = MutableStateFlow(
         sharedPreferences.getString(SyncConstants.KEY_FIRST_DAY_OF_WEEK_PREFERENCE, SyncConstants.DEFAULT_FIRST_DAY_OF_WEEK_PREFERENCE)
             ?: SyncConstants.DEFAULT_FIRST_DAY_OF_WEEK_PREFERENCE

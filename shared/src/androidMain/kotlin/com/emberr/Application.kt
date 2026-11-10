@@ -2,6 +2,7 @@ package com.emberr
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -16,11 +17,14 @@ import com.emberr.domain.credentials.CredentialUnlockSession
 import com.emberr.domain.importer.deleteImportCopiesLeftFromEarlierRuns
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.reminders.ReminderRescheduler
+import com.emberr.domain.util.language.applySavedAppLanguage
 import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.presentation.shared.FirstContentRenderSignal
+import com.emberr.presentation.widget.refreshWidgetsForNewLanguage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Locale
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
@@ -33,8 +37,12 @@ class EmberrApplication : Application() {
         var isReady = false
     }
 
+    private var languageTagWidgetsWereBuiltIn = ""
+
     override fun onCreate() {
         super.onCreate()
+        applySavedAppLanguage(this)
+        languageTagWidgetsWereBuiltIn = Locale.getDefault().toLanguageTag()
         eraseAppDataKeepingCloudAccountIfRequested(this)
         startKoin {
             androidContext(this@EmberrApplication)
@@ -80,5 +88,17 @@ class EmberrApplication : Application() {
             if (isDebugBuild) getKoin().get<CloudSyncScheduler>().start()
         }
 
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        applySavedAppLanguage(this)
+
+        val currentLanguageTag = Locale.getDefault().toLanguageTag()
+        if (currentLanguageTag == languageTagWidgetsWereBuiltIn) return
+        languageTagWidgetsWereBuiltIn = currentLanguageTag
+        getKoin().get<CoroutineScope>(named("AppScope")).launch {
+            refreshWidgetsForNewLanguage(this@EmberrApplication)
+        }
     }
 }

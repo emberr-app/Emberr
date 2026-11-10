@@ -38,6 +38,7 @@ object SyncConstants {
     const val DEFAULT_FONT_STYLE_PREFERENCE = "POPPINS"
     const val KEY_TIME_FORMAT_PREFERENCE = "time_format_preference"
     const val DEFAULT_TIME_FORMAT_PREFERENCE = "SYSTEM"
+    const val KEY_APP_LANGUAGE_TAG = "app_language_tag"
     const val KEY_FIRST_DAY_OF_WEEK_PREFERENCE = "first_day_of_week_preference"
     const val DEFAULT_FIRST_DAY_OF_WEEK_PREFERENCE = "SYSTEM"
     const val KEY_TOP_BAR_FADE_STYLE = "top_bar_fade_style"

@@ -16,10 +16,12 @@ import com.emberr.presentation.widget.noteshortcut.NoteShortcutWidgetReceiver
 import com.emberr.presentation.widget.tasks.TasksWidgetReceiver
 import com.emberr.presentation.widget.todaytasks.TodayTasksWidgetReceiver
 import com.emberr.presentation.widget.upcomingevents.UpcomingEventsWidgetReceiver
+import java.util.Locale
 import kotlin.reflect.KClass
 
 private const val widgetPreviewPreferencesName = "widget_previews"
 private const val publishedForInstallTimeKey = "published_for_install_time"
+private const val publishedForLanguageKey = "published_for_language"
 
 private val receiversWithPreviews: List<KClass<out GlanceAppWidgetReceiver>> = listOf(
     NoteWidgetReceiver::class,
@@ -45,7 +47,10 @@ suspend fun publishWidgetPreviewsAfterInstallOrUpdate(context: Context) {
         WidgetLog.e("Could not read the app install time for widget previews", cause)
         return
     }
-    if (preferences.getLong(publishedForInstallTimeKey, 0L) == installTime) return
+    val languageTag = Locale.getDefault().toLanguageTag()
+    val isAlreadyPublished = preferences.getLong(publishedForInstallTimeKey, 0L) == installTime &&
+        preferences.getString(publishedForLanguageKey, null) == languageTag
+    if (isAlreadyPublished) return
 
     val widgetManager = GlanceAppWidgetManager(context)
     val publishResults = receiversWithPreviews.map { receiver ->
@@ -58,6 +63,9 @@ suspend fun publishWidgetPreviewsAfterInstallOrUpdate(context: Context) {
     }
 
     if (publishResults.all { isPublished -> isPublished }) {
-        preferences.edit { putLong(publishedForInstallTimeKey, installTime) }
+        preferences.edit {
+            putLong(publishedForInstallTimeKey, installTime)
+            putString(publishedForLanguageKey, languageTag)
+        }
     }
 }
