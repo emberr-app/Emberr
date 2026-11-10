@@ -38,6 +38,12 @@ import emberr.shared.generated.resources.film
 import emberr.shared.generated.resources.star
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import emberr.shared.generated.resources.movie_runtime_hours
+import emberr.shared.generated.resources.movie_runtime_hours_minutes
+import emberr.shared.generated.resources.movie_runtime_minutes
+import emberr.shared.generated.resources.movie_season_count
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
 
 internal const val PosterAspectRatio = 2f / 3f
 internal val PosterCornerRadius = 12.dp
@@ -150,15 +156,17 @@ internal fun WatchStatus.dotColor(): Color {
     }
 }
 
+@Composable
 internal fun MovieDetails.lengthText(): String? = when (kind) {
-    MovieKind.MOVIE -> runtimeMinutes?.let(::minutesText)
-    MovieKind.SHOW -> seasonCount?.let { seasons -> if (seasons == 1) "1 season" else "$seasons seasons" }
+    MovieKind.MOVIE -> runtimeMinutes?.let { minutesText(it) }
+    MovieKind.SHOW -> seasonCount?.let { seasons -> pluralStringResource(Res.plurals.movie_season_count, seasons, seasons) }
 }
 
+@Composable
 internal fun minutesText(minutes: Int): String = when {
-    minutes < 60 -> "${minutes}m"
-    minutes % 60 == 0 -> "${minutes / 60}h"
-    else -> "${minutes / 60}h ${minutes % 60}m"
+    minutes < 60 -> stringResource(Res.string.movie_runtime_minutes, minutes)
+    minutes % 60 == 0 -> stringResource(Res.string.movie_runtime_hours, minutes / 60)
+    else -> stringResource(Res.string.movie_runtime_hours_minutes, minutes / 60, minutes % 60)
 }
 
 internal fun tmdbRatingText(rating: Double): String = ((rating * 10).roundToInt() / 10.0).toString()

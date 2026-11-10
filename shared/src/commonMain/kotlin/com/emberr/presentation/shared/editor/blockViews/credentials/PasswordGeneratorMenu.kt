@@ -44,10 +44,23 @@ import com.emberr.presentation.shared.components.SmallRoundedCornerShape
 import com.emberr.presentation.shared.components.emberrControlContainerColor
 import com.emberr.presentation.shared.components.EmberrSlider
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.credentials_avoid_look_alike_characters
+import emberr.shared.generated.resources.credentials_characters
+import emberr.shared.generated.resources.credentials_fewer
+import emberr.shared.generated.resources.credentials_generate_another
+import emberr.shared.generated.resources.credentials_generate_password
+import emberr.shared.generated.resources.credentials_length
+import emberr.shared.generated.resources.credentials_minimum_numbers
+import emberr.shared.generated.resources.credentials_minimum_symbols
+import emberr.shared.generated.resources.credentials_more
+import emberr.shared.generated.resources.credentials_options
+import emberr.shared.generated.resources.credentials_use_password
 import emberr.shared.generated.resources.minus
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.refresh_cw
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
@@ -108,7 +121,7 @@ internal fun PasswordGeneratorMenu(
         EmberrBottomSheet(
             expanded = expanded,
             onDismiss = onDismiss,
-            title = "Generate password",
+            title = stringResource(Res.string.credentials_generate_password),
             contentHorizontalPadding = 0.dp
         ) { closeAnd ->
             Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = SheetBottomPadding)) {
@@ -166,13 +179,13 @@ private fun PasswordGeneratorContent(
                 )
                 CredentialIconButton(
                     painter = painterResource(Res.drawable.refresh_cw),
-                    description = "Generate another",
+                    description = stringResource(Res.string.credentials_generate_another),
                     onClick = onRegenerate
                 )
             }
 
             Spacer(modifier = Modifier.height(SectionGap))
-            GeneratorSectionLabel(text = "Length")
+            GeneratorSectionLabel(text = stringResource(Res.string.credentials_length))
             Spacer(modifier = Modifier.height(4.dp))
             EmberrSlider(
                 value = options.shownLength.toFloat(),
@@ -187,7 +200,7 @@ private fun PasswordGeneratorContent(
             )
 
             Spacer(modifier = Modifier.height(SectionGap))
-            GeneratorSectionLabel(text = "Characters")
+            GeneratorSectionLabel(text = stringResource(Res.string.credentials_characters))
             Spacer(modifier = Modifier.height(LabelGap))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 CharacterSetChip(label = "A-Z", isOn = options.usesUppercase, modifier = Modifier.weight(1f)) {
@@ -205,18 +218,18 @@ private fun PasswordGeneratorContent(
             }
 
             Spacer(modifier = Modifier.height(SectionGap))
-            GeneratorSectionLabel(text = "Options")
+            GeneratorSectionLabel(text = stringResource(Res.string.credentials_options))
             Spacer(modifier = Modifier.height(LabelGap - RowVerticalPadding))
             if (options.usesNumbers) {
                 GeneratorCountRow(
-                    label = "Minimum numbers",
+                    label = stringResource(Res.string.credentials_minimum_numbers),
                     count = options.minimumNumbers,
                     onCountChange = { count -> onOptionsChange(options.copy(minimumNumbers = count), true) }
                 )
             }
             if (options.usesSymbols) {
                 GeneratorCountRow(
-                    label = "Minimum symbols",
+                    label = stringResource(Res.string.credentials_minimum_symbols),
                     count = options.minimumSymbols,
                     onCountChange = { count -> onOptionsChange(options.copy(minimumSymbols = count), true) }
                 )
@@ -232,7 +245,7 @@ private fun PasswordGeneratorContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Avoid look-alike characters",
+                    text = stringResource(Res.string.credentials_avoid_look_alike_characters),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
@@ -242,11 +255,11 @@ private fun PasswordGeneratorContent(
 
             Spacer(modifier = Modifier.height(ButtonTopGap))
             if (onCancel == null) {
-                EmberrButtonPrimary(text = "Use password", onClick = onUse, modifier = Modifier.fillMaxWidth())
+                EmberrButtonPrimary(text = stringResource(Res.string.credentials_use_password), onClick = onUse, modifier = Modifier.fillMaxWidth())
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    EmberrButtonSecondary(text = "Cancel", onClick = onCancel, modifier = Modifier.weight(1f))
-                    EmberrButtonPrimary(text = "Use password", onClick = onUse, modifier = Modifier.weight(1f))
+                    EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onCancel, modifier = Modifier.weight(1f))
+                    EmberrButtonPrimary(text = stringResource(Res.string.credentials_use_password), onClick = onUse, modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -299,7 +312,7 @@ private fun GeneratorCountRow(label: String, count: Int, onCountChange: (Int) ->
         ) {
             CredentialIconButton(
                 painter = painterResource(Res.drawable.minus),
-                description = "Fewer",
+                description = stringResource(Res.string.credentials_fewer),
                 onClick = { if (count > 0) onCountChange(count - 1) }
             )
             Text(
@@ -311,7 +324,7 @@ private fun GeneratorCountRow(label: String, count: Int, onCountChange: (Int) ->
             )
             CredentialIconButton(
                 painter = painterResource(Res.drawable.plus),
-                description = "More",
+                description = stringResource(Res.string.credentials_more),
                 onClick = { if (count < MOST_REQUIRED_CHARACTERS_OF_ONE_KIND) onCountChange(count + 1) }
             )
         }

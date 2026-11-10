@@ -29,6 +29,22 @@ import com.emberr.presentation.shared.components.EmberrSearchSheetBody
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_off
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.database_edit
+import emberr.shared.generated.resources.database_named_template_options
+import emberr.shared.generated.resources.database_new_template
+import emberr.shared.generated.resources.database_no_templates_match
+import emberr.shared.generated.resources.database_search_templates
+import emberr.shared.generated.resources.database_search_templates_with_dots
+import emberr.shared.generated.resources.database_template_default
+import emberr.shared.generated.resources.database_template_default_for_new_rows
+import emberr.shared.generated.resources.database_template_empty
+import emberr.shared.generated.resources.database_template_options
+import emberr.shared.generated.resources.database_template_repeat
+import emberr.shared.generated.resources.database_template_set_as_default
+import emberr.shared.generated.resources.database_templates
 import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.file_text
@@ -40,6 +56,7 @@ import emberr.shared.generated.resources.star_outline
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseTemplateMenu(
@@ -52,13 +69,14 @@ internal fun DatabaseTemplateMenu(
     val templates by remember(editor) { editor.databaseTemplates }.collectAsState(initial = emptyList())
     val defaultTemplateId = block.defaultTemplateId?.takeIf { templateId -> templates.any { it.noteId == templateId } }
     var searchQuery by remember(expanded) { mutableStateOf("") }
-    val matchingTemplates = templates.filter { templateLabel(it).contains(searchQuery.trim(), ignoreCase = true) }
+    val untitledText = stringResource(Res.string.common_untitled)
+    val matchingTemplates = templates.filter { templateLabel(it, untitledText).contains(searchQuery.trim(), ignoreCase = true) }
 
-    DatabaseMenu(expanded = expanded, title = "Templates", onDismiss = onDismiss, hasSearchBar = true) { closeAnd ->
+    DatabaseMenu(expanded = expanded, title = stringResource(Res.string.database_templates), onDismiss = onDismiss, hasSearchBar = true) { closeAnd ->
         val templateChoices = @Composable {
             if (searchQuery.isBlank()) {
                 DatabaseTemplateOption(
-                    label = "Empty",
+                    label = stringResource(Res.string.database_template_empty),
                     icon = Res.drawable.doc_text,
                     isDefault = defaultTemplateId == null,
                     onUse = { closeAnd { editor.addRowFromTemplate(block.id, null) } },
@@ -69,13 +87,13 @@ internal fun DatabaseTemplateMenu(
                     onDelete = null
                 )
             } else if (matchingTemplates.isEmpty()) {
-                DatabaseMenuMessage(text = "No templates match \"${searchQuery.trim()}\"", color = MaterialTheme.colorScheme.outline)
+                DatabaseMenuMessage(text = stringResource(Res.string.database_no_templates_match, searchQuery.trim()), color = MaterialTheme.colorScheme.outline)
             }
 
             matchingTemplates.forEach { template ->
                 key(template.noteId) {
                     DatabaseTemplateOption(
-                        label = templateLabel(template),
+                        label = templateLabel(template, untitledText),
                         icon = Res.drawable.file_text,
                         isDefault = template.noteId == defaultTemplateId,
                         onUse = { closeAnd { editor.addRowFromTemplate(block.id, template.noteId) } },
@@ -89,7 +107,7 @@ internal fun DatabaseTemplateMenu(
             }
 
             DatabaseMenuOption(
-                label = "New template",
+                label = stringResource(Res.string.database_new_template),
                 icon = { DatabaseOptionIcon(Res.drawable.plus) },
                 onClick = { closeAnd { editor.createTemplate(block.id, onOpenTemplate) } }
             )
@@ -100,7 +118,7 @@ internal fun DatabaseTemplateMenu(
                 EmberrTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = "Search templates...",
+                    placeholder = stringResource(Res.string.database_search_templates_with_dots),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
                 )
             }
@@ -109,7 +127,7 @@ internal fun DatabaseTemplateMenu(
             EmberrSearchSheetBody(
                 searchText = searchQuery,
                 onSearchTextChange = { searchQuery = it },
-                placeholder = "Search templates"
+                placeholder = stringResource(Res.string.database_search_templates)
             ) {
                 templateChoices()
             }
@@ -117,7 +135,7 @@ internal fun DatabaseTemplateMenu(
     }
 }
 
-private fun templateLabel(template: NoteMetadataEntity): String = template.title.ifBlank { "Untitled" }
+private fun templateLabel(template: NoteMetadataEntity, untitledText: String): String = template.title.ifBlank { untitledText }
 
 @Composable
 private fun DatabaseTemplateOption(
@@ -149,16 +167,16 @@ private fun DatabaseTemplateOption(
                         }
                         if (isDefault) {
                             Text(
-                                text = "Default",
+                                text = stringResource(Res.string.database_template_default),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(end = 10.dp)
                             )
                         }
-                        IconTooltip(text = "Template options") {
+                        IconTooltip(text = stringResource(Res.string.database_template_options)) {
                             Icon(
                                 painter = painterResource(Res.drawable.ellipsis),
-                                contentDescription = "$label options",
+                                contentDescription = stringResource(Res.string.database_named_template_options, label),
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                 modifier = Modifier
                                     .clip(CircleShape)
@@ -175,20 +193,20 @@ private fun DatabaseTemplateOption(
         anchorIsMenuRow = false
     ) { closeLayerAnd ->
         DatabaseMenuOption(
-            label = if (isDefault) "Default for new rows" else "Set as default",
+            label = stringResource(if (isDefault) Res.string.database_template_default_for_new_rows else Res.string.database_template_set_as_default),
             icon = { DatabaseOptionIcon(if (isDefault) Res.drawable.star else Res.drawable.star_outline) },
             onClick = onSetDefault
         )
         if (onRepeatChange != null) {
             DatabaseMenuLayer(
-                title = "Repeat",
+                title = stringResource(Res.string.database_template_repeat),
                 anchor = { openRepeatLayer ->
                     DatabaseMenuOption(
-                        label = "Repeat",
+                        label = stringResource(Res.string.database_template_repeat),
                         icon = { DatabaseOptionIcon(Res.drawable.refresh_cw) },
                         trailing = {
                             Text(
-                                text = repeat?.summary(LocalUsesTwentyFourHourClock.current) ?: "Off",
+                                text = repeat?.summary(LocalUsesTwentyFourHourClock.current) ?: stringResource(Res.string.common_off),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.outline,
                                 maxLines = 1
@@ -203,14 +221,14 @@ private fun DatabaseTemplateOption(
         }
         if (onEdit != null) {
             DatabaseMenuOption(
-                label = "Edit",
+                label = stringResource(Res.string.database_edit),
                 icon = { DatabaseOptionIcon(Res.drawable.pen) },
                 onClick = { closeLayerAnd(onEdit) }
             )
         }
         if (onDelete != null) {
             DatabaseMenuOption(
-                label = "Delete",
+                label = stringResource(Res.string.common_delete),
                 icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
                 labelColor = MaterialTheme.colorScheme.error,
                 onClick = { closeLayerAnd(onDelete) }

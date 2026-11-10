@@ -64,6 +64,29 @@ import emberr.shared.generated.resources.unordered_list
 import emberr.shared.generated.resources.widget
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.editor_block_watchlist
+import emberr.shared.generated.resources.movie_watchlist_add_title
+import emberr.shared.generated.resources.movie_watchlist_add_view
+import emberr.shared.generated.resources.movie_watchlist_ascending
+import emberr.shared.generated.resources.movie_watchlist_delete_view
+import emberr.shared.generated.resources.movie_watchlist_delete_watchlist
+import emberr.shared.generated.resources.movie_watchlist_descending
+import emberr.shared.generated.resources.movie_watchlist_duplicate
+import emberr.shared.generated.resources.movie_watchlist_filter
+import emberr.shared.generated.resources.movie_watchlist_load_limit
+import emberr.shared.generated.resources.movie_watchlist_order
+import emberr.shared.generated.resources.movie_watchlist_rename
+import emberr.shared.generated.resources.movie_watchlist_rename_view
+import emberr.shared.generated.resources.movie_watchlist_search
+import emberr.shared.generated.resources.movie_watchlist_settings
+import emberr.shared.generated.resources.movie_watchlist_sort
+import emberr.shared.generated.resources.movie_watchlist_sort_by
+import emberr.shared.generated.resources.movie_watchlist_titles_count
+import emberr.shared.generated.resources.movie_watchlist_view_name
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
 
 private val HeaderButtonGap = 6.dp
 private val HeaderButtonInnerPadding = 8.dp
@@ -130,7 +153,7 @@ internal fun WatchlistToolbar(
     }
     val searchButton: @Composable () -> Unit = {
         WatchlistHeaderButton(
-            label = "Search",
+            label = stringResource(Res.string.movie_watchlist_search),
             icon = Res.drawable.search,
             isActive = isSearchActive,
             isEnabled = isEnabled,
@@ -140,7 +163,7 @@ internal fun WatchlistToolbar(
     val actionButtons: @Composable () -> Unit = {
         Box {
             WatchlistHeaderButton(
-                label = "Sort",
+                label = stringResource(Res.string.movie_watchlist_sort),
                 icon = Res.drawable.list_sort_descending,
                 isActive = sortIsChanged,
                 isEnabled = isEnabled,
@@ -150,7 +173,7 @@ internal fun WatchlistToolbar(
         }
         Box {
             WatchlistHeaderButton(
-                label = "Filter",
+                label = stringResource(Res.string.movie_watchlist_filter),
                 icon = Res.drawable.funnel,
                 isActive = openView.filters.isNotEmpty(),
                 isEnabled = isEnabled,
@@ -160,7 +183,7 @@ internal fun WatchlistToolbar(
         }
         Box {
             WatchlistHeaderButton(
-                label = "Settings",
+                label = stringResource(Res.string.movie_watchlist_settings),
                 icon = Res.drawable.sliders_horizontal,
                 isActive = false,
                 isEnabled = isEnabled,
@@ -168,30 +191,30 @@ internal fun WatchlistToolbar(
             )
             MovieMenu(
                 expanded = isSettingsMenuOpen,
-                title = block.title.ifBlank { "Watchlist" },
+                title = block.title.ifBlank { stringResource(Res.string.editor_block_watchlist) },
                 onDismiss = { isSettingsMenuOpen = false }
             ) { closeAnd ->
                 MovieMenuLayer(
-                    title = "Load limit",
+                    title = stringResource(Res.string.movie_watchlist_load_limit),
                     anchor = { openLayer ->
                         MovieMenuOption(
-                            label = "Load limit",
+                            label = stringResource(Res.string.movie_watchlist_load_limit),
                             icon = Res.drawable.arrow_down,
-                            trailingText = "${openView.loadLimit} titles",
+                            trailingText = pluralStringResource(Res.plurals.movie_watchlist_titles_count, openView.loadLimit, openView.loadLimit),
                             onClick = openLayer
                         )
                     }
                 ) { closeLayerAnd ->
                     WatchlistLoadLimitChoices.forEach { loadLimit ->
                         MovieMenuOption(
-                            label = "$loadLimit titles",
+                            label = pluralStringResource(Res.plurals.movie_watchlist_titles_count, loadLimit, loadLimit),
                             isSelected = openView.loadLimit == loadLimit,
                             onClick = { closeLayerAnd { editor.changeView(block.id, openView.id) { it.copy(loadLimit = loadLimit) } } }
                         )
                     }
                 }
                 MovieMenuOption(
-                    label = "Delete watchlist",
+                    label = stringResource(Res.string.movie_watchlist_delete_watchlist),
                     icon = Res.drawable.trash,
                     labelColor = MaterialTheme.colorScheme.error,
                     onClick = { closeAnd(onDelete) }
@@ -243,11 +266,11 @@ private fun WatchlistSortMenu(
     editor: WatchlistBlockEditor,
     onDismiss: () -> Unit
 ) {
-    MovieMenu(expanded = expanded, title = "Sort", onDismiss = onDismiss) { closeAnd ->
-        MovieMenuSectionLabel("Sort by")
+    MovieMenu(expanded = expanded, title = stringResource(Res.string.movie_watchlist_sort), onDismiss = onDismiss) { closeAnd ->
+        MovieMenuSectionLabel(stringResource(Res.string.movie_watchlist_sort_by))
         WatchlistSortKey.entries.forEach { sortKey ->
             MovieMenuOption(
-                label = sortKey.label,
+                label = sortKey.displayName(),
                 isSelected = openView.sortKey == sortKey,
                 onClick = {
                     closeAnd {
@@ -257,10 +280,10 @@ private fun WatchlistSortMenu(
             )
         }
         MovieMenuDivider()
-        MovieMenuSectionLabel("Order")
+        MovieMenuSectionLabel(stringResource(Res.string.movie_watchlist_order))
         listOf(false, true).forEach { descending ->
             MovieMenuOption(
-                label = if (descending) "Descending" else "Ascending",
+                label = if (descending) stringResource(Res.string.movie_watchlist_descending) else stringResource(Res.string.movie_watchlist_ascending),
                 isSelected = openView.sortsDescending == descending,
                 onClick = { closeAnd { editor.changeView(block.id, openView.id) { it.copy(sortsDescending = descending) } } }
             )
@@ -328,9 +351,9 @@ private fun WatchlistViewTab(
         }
         MovieMenu(expanded = isMenuOpen, title = view.name, onDismiss = { isMenuOpen = false }) { closeAnd ->
             MovieMenuLayer(
-                title = "Rename view",
+                title = stringResource(Res.string.movie_watchlist_rename_view),
                 showsCloseButton = false,
-                anchor = { openLayer -> MovieMenuOption(label = "Rename", icon = Res.drawable.pen, onClick = openLayer) }
+                anchor = { openLayer -> MovieMenuOption(label = stringResource(Res.string.movie_watchlist_rename), icon = Res.drawable.pen, onClick = openLayer) }
             ) { closeLayerAnd ->
                 WatchlistRenameViewPage(
                     currentName = view.name,
@@ -338,10 +361,10 @@ private fun WatchlistViewTab(
                     onRename = { name -> closeLayerAnd { closeAnd { onRename(name) } } }
                 )
             }
-            MovieMenuOption(label = "Duplicate", icon = Res.drawable.copy, onClick = { closeAnd(onDuplicate) })
+            MovieMenuOption(label = stringResource(Res.string.movie_watchlist_duplicate), icon = Res.drawable.copy, onClick = { closeAnd(onDuplicate) })
             if (canDelete) {
                 MovieMenuOption(
-                    label = "Delete view",
+                    label = stringResource(Res.string.movie_watchlist_delete_view),
                     icon = Res.drawable.trash,
                     labelColor = MaterialTheme.colorScheme.error,
                     onClick = { closeAnd(onDelete) }
@@ -360,12 +383,17 @@ private fun WatchlistRenameViewPage(currentName: String, onCancel: () -> Unit, o
         EmberrTextField(
             value = name,
             onValueChange = { name = it },
-            placeholder = "View name",
+            placeholder = stringResource(Res.string.movie_watchlist_view_name),
             modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
             onSubmit = saveName
         )
     }
-    MovieMenuButtons(cancelText = "Cancel", onCancel = onCancel, confirmText = "Save", onConfirm = saveName)
+    MovieMenuButtons(
+        cancelText = stringResource(Res.string.common_cancel),
+        onCancel = onCancel,
+        confirmText = stringResource(Res.string.common_save),
+        onConfirm = saveName
+    )
 }
 
 @Composable
@@ -375,11 +403,12 @@ private fun AddViewButton(
     runAfterKeyboardCloses: (() -> Unit) -> Unit
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
+    val addViewLabel = stringResource(Res.string.movie_watchlist_add_view)
     Box {
-        IconTooltip(text = "Add view") {
+        IconTooltip(text = addViewLabel) {
             Icon(
                 painter = painterResource(Res.drawable.plus),
-                contentDescription = "Add view",
+                contentDescription = addViewLabel,
                 tint = MaterialTheme.colorScheme.outline,
                 modifier = Modifier
                     .clip(SmallRoundedCornerShape)
@@ -388,10 +417,10 @@ private fun AddViewButton(
                     .size(16.dp)
             )
         }
-        MovieMenu(expanded = isMenuOpen, title = "Add view", onDismiss = { isMenuOpen = false }) { closeAnd ->
+        MovieMenu(expanded = isMenuOpen, title = addViewLabel, onDismiss = { isMenuOpen = false }) { closeAnd ->
             WatchlistView.entries.forEach { layout ->
                 MovieMenuOption(
-                    label = layout.label,
+                    label = layout.displayName(),
                     icon = layout.iconResource(),
                     onClick = { closeAnd { onAdd(layout) } }
                 )
@@ -435,10 +464,11 @@ private fun WatchlistHeaderButton(
 
 @Composable
 private fun AddTitleButton(isEnabled: Boolean, onClick: () -> Unit) {
-    IconTooltip(text = "Add title") {
+    val addTitleLabel = stringResource(Res.string.movie_watchlist_add_title)
+    IconTooltip(text = addTitleLabel) {
         Icon(
             painter = painterResource(Res.drawable.plus),
-            contentDescription = "Add title",
+            contentDescription = addTitleLabel,
             tint = Color.White,
             modifier = Modifier
                 .padding(start = HeaderButtonInnerPadding)

@@ -106,6 +106,47 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import emberr.shared.generated.resources.movie_add_to_watchlist
+import emberr.shared.generated.resources.movie_adding
+import emberr.shared.generated.resources.movie_data_from_justwatch
+import emberr.shared.generated.resources.movie_dollars
+import emberr.shared.generated.resources.movie_dollars_billions
+import emberr.shared.generated.resources.movie_dollars_millions
+import emberr.shared.generated.resources.movie_dollars_thousands
+import emberr.shared.generated.resources.movie_episode_count
+import emberr.shared.generated.resources.movie_fact_box_office
+import emberr.shared.generated.resources.movie_fact_budget
+import emberr.shared.generated.resources.movie_fact_collection
+import emberr.shared.generated.resources.movie_fact_companies
+import emberr.shared.generated.resources.movie_fact_country
+import emberr.shared.generated.resources.movie_fact_first_aired
+import emberr.shared.generated.resources.movie_fact_genres
+import emberr.shared.generated.resources.movie_fact_language
+import emberr.shared.generated.resources.movie_fact_networks
+import emberr.shared.generated.resources.movie_fact_released
+import emberr.shared.generated.resources.movie_in_watchlist
+import emberr.shared.generated.resources.movie_rate_stars
+import emberr.shared.generated.resources.movie_read_more
+import emberr.shared.generated.resources.movie_runtime
+import emberr.shared.generated.resources.movie_seasons
+import emberr.shared.generated.resources.movie_section_details
+import emberr.shared.generated.resources.movie_section_keywords
+import emberr.shared.generated.resources.movie_section_where_to_watch
+import emberr.shared.generated.resources.movie_show_less
+import emberr.shared.generated.resources.movie_status
+import emberr.shared.generated.resources.movie_tab_cast
+import emberr.shared.generated.resources.movie_tab_more_like_this
+import emberr.shared.generated.resources.movie_tab_overview
+import emberr.shared.generated.resources.movie_tab_reviews
+import emberr.shared.generated.resources.movie_trailer
+import emberr.shared.generated.resources.movie_watch_buy
+import emberr.shared.generated.resources.movie_watch_rent
+import emberr.shared.generated.resources.movie_watch_stream
+import emberr.shared.generated.resources.movie_website
+import emberr.shared.generated.resources.movie_your_rating
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.StringResource
 
 private val DialogShape = RoundedCornerShape(24.dp)
 private val FactShape = RoundedCornerShape(8.dp)
@@ -133,12 +174,12 @@ private val CompanyChipHeight = 32.dp
 private const val MAXIMUM_STAR_HALVES = 10
 private const val SKELETON_FACT_ROWS = 4
 
-private enum class MovieDetailsTab(val label: String, val needsLiveExtras: Boolean = false) {
-    OVERVIEW("Overview"),
-    CAST("Cast"),
-    SEASONS("Seasons"),
-    MORE_LIKE_THIS("More like this", needsLiveExtras = true),
-    REVIEWS("Reviews", needsLiveExtras = true)
+private enum class MovieDetailsTab(val labelResource: StringResource, val needsLiveExtras: Boolean = false) {
+    OVERVIEW(Res.string.movie_tab_overview),
+    CAST(Res.string.movie_tab_cast),
+    SEASONS(Res.string.movie_seasons),
+    MORE_LIKE_THIS(Res.string.movie_tab_more_like_this, needsLiveExtras = true),
+    REVIEWS(Res.string.movie_tab_reviews, needsLiveExtras = true)
 }
 
 internal data class DetailsColors(
@@ -288,7 +329,7 @@ private fun MovieDetailsContent(
             if (!isPreview) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Your rating",
+                        text = stringResource(Res.string.movie_your_rating),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
                         color = colors.text,
@@ -457,7 +498,7 @@ private fun WatchStatusBar(
                 Box(modifier = Modifier.size(8.dp).background(status.dotColor(), CircleShape))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = status.label,
+                    text = status.displayName(),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
                     color = if (isSelected) colors.text else colors.secondaryText,
@@ -473,7 +514,7 @@ private fun WatchStatusBar(
 private fun MovieTrailerChip(trailer: MovieTrailer, colors: DetailsColors) {
     val uriHandler = LocalUriHandler.current
     MovieChip(
-        label = "Trailer",
+        label = stringResource(Res.string.movie_trailer),
         onClick = { uriHandler.openUri(trailer.youtubeLink) },
         modifier = Modifier.height(movieChipHeight()),
         background = colors.chipBackground,
@@ -506,7 +547,7 @@ private fun MovieDetailsTabRow(
     ) {
         tabs.forEach { tab ->
             EmberrTab(
-                label = tab.label,
+                label = stringResource(tab.labelResource),
                 isSelected = tab == selectedTab,
                 contentColor = contentColor,
                 selectedBackground = selectedBackground,
@@ -557,9 +598,9 @@ private fun MovieAddToWatchlistButton(
 ) {
     val isInWatchlist = details.titleKey() in adder.titleKeysInWatchlist
     val label = when {
-        isInWatchlist -> "In watchlist"
-        adder.isAdding -> "Adding"
-        else -> "Add to watchlist"
+        isInWatchlist -> stringResource(Res.string.movie_in_watchlist)
+        adder.isAdding -> stringResource(Res.string.movie_adding)
+        else -> stringResource(Res.string.movie_add_to_watchlist)
     }
     MovieChip(
         label = label,
@@ -608,11 +649,12 @@ internal fun StarRatingPicker(ratingHalfStars: Int?, emptyColor: Color, onRate: 
                     Row(modifier = Modifier.fillMaxSize()) {
                         listOf(1, 2).forEach { half ->
                             val tappedHalfStars = starIndex * 2 + half
+                            val rateDescription = stringResource(Res.string.movie_rate_stars, starsTextOf(tappedHalfStars))
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
                                     .fillMaxHeight()
-                                    .semantics { contentDescription = "Rate ${starsTextOf(tappedHalfStars)} stars" }
+                                    .semantics { contentDescription = rateDescription }
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
@@ -662,7 +704,7 @@ private fun MovieOverviewTab(details: MovieDetails, colors: DetailsColors) {
         val facts = factRowsOf(details)
         val logoRows = logoRowsOf(details)
         if (facts.isNotEmpty() || logoRows.isNotEmpty()) {
-            MovieDetailsSection(title = "Details", colors = colors) {
+            MovieDetailsSection(title = stringResource(Res.string.movie_section_details), colors = colors) {
                 facts.forEach { (label, value) -> MovieFactRow(label = label, value = value, colors = colors) }
                 logoRows.forEach { (label, companies) ->
                     MovieLabeledRow(
@@ -682,7 +724,7 @@ private fun MovieOverviewTab(details: MovieDetails, colors: DetailsColors) {
             }
         }
         if (details.keywords.isNotEmpty()) {
-            MovieDetailsSection(title = "Keywords", colors = colors) {
+            MovieDetailsSection(title = stringResource(Res.string.movie_section_keywords), colors = colors) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -744,7 +786,7 @@ internal fun MovieReadMoreText(text: String, color: Color, shortLines: Int) {
         )
         if (isCutShort) {
             Text(
-                text = if (isExpanded) "Show less" else "Read more",
+                text = if (isExpanded) stringResource(Res.string.movie_show_less) else stringResource(Res.string.movie_read_more),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
                 color = color,
@@ -817,9 +859,13 @@ internal fun socialLinksOf(instagramHandle: String, facebookHandle: String, xHan
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MovieWhereToWatch(providers: MovieWatchProviders, colors: DetailsColors, onOpenWatchPage: (() -> Unit)?) {
-    val groups = listOf("Stream" to providers.stream, "Rent" to providers.rent, "Buy" to providers.buy)
+    val groups = listOf(
+        stringResource(Res.string.movie_watch_stream) to providers.stream,
+        stringResource(Res.string.movie_watch_rent) to providers.rent,
+        stringResource(Res.string.movie_watch_buy) to providers.buy
+    )
         .filter { (_, logos) -> logos.isNotEmpty() }
-    MovieDetailsSection(title = "Where to watch", colors = colors) {
+    MovieDetailsSection(title = stringResource(Res.string.movie_section_where_to_watch), colors = colors) {
         groups.forEach { (label, logos) ->
             MovieLabeledRow(
                 label = label,
@@ -835,7 +881,7 @@ private fun MovieWhereToWatch(providers: MovieWatchProviders, colors: DetailsCol
                 }
             }
         }
-        Text(text = "Data from JustWatch", style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)
+        Text(text = stringResource(Res.string.movie_data_from_justwatch), style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)
     }
 }
 
@@ -1015,6 +1061,7 @@ internal fun MoviePersonPhoto(member: MovieCastMember, colors: DetailsColors, mo
     }
 }
 
+@Composable
 private fun ticketFactsOf(details: MovieDetails): List<String> = listOfNotNull(
     details.ageRating,
     details.lengthText(),
@@ -1022,38 +1069,46 @@ private fun ticketFactsOf(details: MovieDetails): List<String> = listOfNotNull(
     details.language
 ).filter { it.isNotBlank() }
 
+@Composable
 private fun factRowsOf(details: MovieDetails): List<Pair<String, String>> {
     val isShow = details.kind == MovieKind.SHOW
     val lengthValue = if (isShow) {
-        listOfNotNull(details.lengthText(), details.episodeCount?.let(::episodeCountText)).joinToString(", ")
+        listOfNotNull(details.lengthText(), details.episodeCount?.let { episodeCountText(it) }).joinToString(", ")
     } else {
         details.lengthText().orEmpty()
     }
     return listOf(
         details.creditLabel to details.creditNames.joinToString(", "),
-        (if (isShow) "First aired" else "Released") to details.releaseDate?.let(::releaseDateText).orEmpty(),
-        (if (isShow) "Seasons" else "Runtime") to lengthValue,
-        "Status" to details.productionStatus,
-        "Genres" to details.genres.joinToString(", "),
-        "Language" to details.language,
-        "Country" to details.countries.joinToString(", "),
-        "Budget" to details.budgetDollars?.let(::dollarsText).orEmpty(),
-        "Box office" to details.revenueDollars?.let(::dollarsText).orEmpty(),
-        "Collection" to details.collectionName
+        (if (isShow) stringResource(Res.string.movie_fact_first_aired) else stringResource(Res.string.movie_fact_released)) to
+            details.releaseDate?.let(::releaseDateText).orEmpty(),
+        (if (isShow) stringResource(Res.string.movie_seasons) else stringResource(Res.string.movie_runtime)) to lengthValue,
+        stringResource(Res.string.movie_status) to details.productionStatus,
+        stringResource(Res.string.movie_fact_genres) to details.genres.joinToString(", "),
+        stringResource(Res.string.movie_fact_language) to details.language,
+        stringResource(Res.string.movie_fact_country) to details.countries.joinToString(", "),
+        stringResource(Res.string.movie_fact_budget) to details.budgetDollars?.let { dollarsText(it) }.orEmpty(),
+        stringResource(Res.string.movie_fact_box_office) to details.revenueDollars?.let { dollarsText(it) }.orEmpty(),
+        stringResource(Res.string.movie_fact_collection) to details.collectionName
     ).filter { (label, value) -> label.isNotBlank() && value.isNotBlank() }
 }
 
+@Composable
 private fun logoRowsOf(details: MovieDetails): List<Pair<String, List<MovieNamedLogo>>> =
-    listOf("Networks" to details.networks, "Companies" to details.productionCompanies)
+    listOf(
+        stringResource(Res.string.movie_fact_networks) to details.networks,
+        stringResource(Res.string.movie_fact_companies) to details.productionCompanies
+    )
         .filter { (_, companies) -> companies.isNotEmpty() }
 
+@Composable
 private fun linksOf(details: MovieDetails): List<MovieLink> = listOfNotNull(
     details.imdbId.takeIf { it.isNotBlank() }?.let { imdbLinkOf("title/$it") },
     details.homepage.takeIf { it.startsWith("https://") || it.startsWith("http://") }?.let {
-        MovieLink(label = "Website", address = it, icon = Res.drawable.link, keepsIconColors = false)
+        MovieLink(label = stringResource(Res.string.movie_website), address = it, icon = Res.drawable.link, keepsIconColors = false)
     }
 ) + socialLinksOf(details.instagramHandle, details.facebookHandle, details.xHandle)
 
+@Composable
 private fun shownTabsOf(details: MovieDetails): List<MovieDetailsTab> {
     val hasOverview = details.overview.isNotBlank() ||
         details.watchProviders?.allProviders.orEmpty().isNotEmpty() ||
@@ -1070,17 +1125,19 @@ private fun shownTabsOf(details: MovieDetails): List<MovieDetailsTab> {
     )
 }
 
+@Composable
 private fun dollarsText(dollars: Long): String = when {
-    dollars >= 1_000_000_000L -> "$${oneDecimalText(dollars / 1_000_000_000.0)}B"
-    dollars >= 10_000_000L -> "$${(dollars / 1_000_000.0).roundToInt()}M"
-    dollars >= 1_000_000L -> "$${oneDecimalText(dollars / 1_000_000.0)}M"
-    dollars >= 1_000L -> "$${(dollars / 1_000.0).roundToInt()}K"
-    else -> "$$dollars"
+    dollars >= 1_000_000_000L -> stringResource(Res.string.movie_dollars_billions, oneDecimalText(dollars / 1_000_000_000.0))
+    dollars >= 10_000_000L -> stringResource(Res.string.movie_dollars_millions, (dollars / 1_000_000.0).roundToInt().toString())
+    dollars >= 1_000_000L -> stringResource(Res.string.movie_dollars_millions, oneDecimalText(dollars / 1_000_000.0))
+    dollars >= 1_000L -> stringResource(Res.string.movie_dollars_thousands, (dollars / 1_000.0).roundToInt().toString())
+    else -> stringResource(Res.string.movie_dollars, dollars.toString())
 }
 
 private fun oneDecimalText(value: Double): String = ((value * 10).roundToInt() / 10.0).toString()
 
-internal fun episodeCountText(episodes: Int): String = if (episodes == 1) "1 episode" else "$episodes episodes"
+@Composable
+internal fun episodeCountText(episodes: Int): String = pluralStringResource(Res.plurals.movie_episode_count, episodes, episodes)
 
 internal fun releaseDateText(date: LocalDate): String {
     val month = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }

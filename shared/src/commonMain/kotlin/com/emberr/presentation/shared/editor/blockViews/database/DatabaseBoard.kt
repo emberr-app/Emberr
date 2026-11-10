@@ -73,7 +73,6 @@ import com.emberr.domain.model.DatabaseDateGrouping
 import com.emberr.domain.model.DatabaseView
 import com.emberr.domain.model.cleanPropertyTagName
 import com.emberr.domain.model.columnKey
-import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.tagPoolKey
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.presentation.shared.components.EmberrCheckbox
@@ -103,6 +102,24 @@ import emberr.shared.generated.resources.plus
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.database_add
+import emberr.shared.generated.resources.database_add_a_group
+import emberr.shared.generated.resources.database_board_needs_group_column
+import emberr.shared.generated.resources.database_calculation_with_value
+import emberr.shared.generated.resources.database_checked
+import emberr.shared.generated.resources.database_collapse_group
+import emberr.shared.generated.resources.database_color
+import emberr.shared.generated.resources.database_expand_group
+import emberr.shared.generated.resources.database_group_name
+import emberr.shared.generated.resources.database_group_name_taken
+import emberr.shared.generated.resources.database_hidden_groups
+import emberr.shared.generated.resources.database_hide_group
+import emberr.shared.generated.resources.database_new_group
+import emberr.shared.generated.resources.database_no_column_value
+import emberr.shared.generated.resources.database_unchecked
+import emberr.shared.generated.resources.database_week_of_date
+import org.jetbrains.compose.resources.stringResource
 
 private val BoardColumnGap = 12.dp
 private val BoardColumnPadding = 6.dp
@@ -189,7 +206,7 @@ internal fun DatabaseBoard(
     val valueType = groupColumn?.let { block.valueTypeOf(it) }
     if (groupColumn == null || valueType == null) {
         Text(
-            text = "Add a Status, Tags, People, Checkbox or Date column to group this board by.",
+            text = stringResource(Res.string.database_board_needs_group_column),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.outline,
             modifier = modifier.padding(vertical = 12.dp)
@@ -213,7 +230,7 @@ internal fun DatabaseBoard(
     val hiddenGroups = groups.hiddenIn(view)
     val shownOptionGroups = shownGroups.filter { it.value is DatabaseBoardGroupValue.Option }
     val canReorderColumns = tagPoolKey != null && valueType.holdsTags && !blocksEdits
-    val columnLabel = block.labelOf(groupColumn)
+    val columnLabel = block.displayLabelOf(groupColumn)
     val columnWidth = view.cardSize.boardColumnWidth()
     val cardDimensions = view.cardSize.dimensions().copy(width = columnWidth - BoardColumnPadding * 2)
     val calculationLabel = rememberGroupCalculationLabel(block, view)
@@ -484,18 +501,26 @@ internal fun DatabaseDropIndicator(offset: Offset, width: Dp, height: Dp) {
 }
 
 @Composable
-private fun rememberGroupCalculationLabel(block: DatabaseBlock, view: DatabaseView): (List<DatabaseRow>) -> String? {
+private fun rememberGroupCalculationLabel(block: DatabaseBlock, view: DatabaseView): @Composable (List<DatabaseRow>) -> String? {
     val calculationColumn = block.columnWithKey(view.groupCalculationColumnKey)
     val calculationValueType = calculationColumn?.let { block.valueTypeOf(it) }
     val calculation = view.groupCalculation?.takeIf { calculationValueType != null && it in calculationsFor(calculationValueType) }
     val numberFormat = calculationColumn?.let { block.numberFormats[it.columnKey] }
-    return remember(calculationColumn, calculationValueType, calculation, numberFormat) {
-        { groupRows ->
+    val calculateForRows = remember(calculationColumn, calculationValueType, calculation) {
+        { groupRows: List<DatabaseRow> ->
             if (calculationColumn == null || calculationValueType == null || calculation == null) {
                 null
             } else {
-                "${calculation.shortLabel} ${calculate(groupRows, calculationColumn, calculationValueType, calculation).displayTextIn(numberFormat)}"
+                calculate(groupRows, calculationColumn, calculationValueType, calculation)
             }
+        }
+    }
+    return { groupRows ->
+        val result = calculateForRows(groupRows)
+        if (calculation == null || result == null) {
+            null
+        } else {
+            stringResource(Res.string.database_calculation_with_value, calculation.shortDisplayName(), result.displayTextIn(numberFormat))
         }
     }
 }
@@ -701,10 +726,10 @@ private fun DatabaseBoardColumnHeader(
             ) { closeAnd ->
                 if (optionName != null && tagPoolKey != null) {
                     DatabaseMenuLayer(
-                        title = "Color",
+                        title = stringResource(Res.string.database_color),
                         anchor = { openLayer ->
                             DatabaseMenuOption(
-                                label = "Color",
+                                label = stringResource(Res.string.database_color),
                                 icon = { DatabaseOptionIcon(Res.drawable.palette) },
                                 onClick = openLayer
                             )
@@ -721,12 +746,12 @@ private fun DatabaseBoardColumnHeader(
                     }
                 }
                 DatabaseMenuOption(
-                    label = "Collapse group",
+                    label = stringResource(Res.string.database_collapse_group),
                     icon = { DatabaseOptionIcon(Res.drawable.minimize_2) },
                     onClick = { closeAnd(onCollapse) }
                 )
                 DatabaseMenuOption(
-                    label = "Hide group",
+                    label = stringResource(Res.string.database_hide_group),
                     icon = { DatabaseOptionIcon(Res.drawable.eye_closed) },
                     onClick = { closeAnd(onHide) }
                 )
@@ -798,7 +823,7 @@ private fun DatabaseCollapsedBoardColumn(
     ) {
         Icon(
             painter = painterResource(Res.drawable.chevron_right),
-            contentDescription = "Expand group",
+            contentDescription = stringResource(Res.string.database_expand_group),
             tint = MaterialTheme.colorScheme.outline,
             modifier = Modifier.size(14.dp)
         )
@@ -844,7 +869,7 @@ private fun DatabaseHiddenGroupsColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = "Hidden groups",
+            text = stringResource(Res.string.database_hidden_groups),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
@@ -898,10 +923,10 @@ private fun DatabaseAddGroupButton(
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
-            Text(text = "Add a group", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline, maxLines = 1)
+            Text(text = stringResource(Res.string.database_add_a_group), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline, maxLines = 1)
         }
 
-        DatabaseMenu(expanded = showMenu, title = "New group", onDismiss = { showMenu = false }, showsCloseButton = false) { closeAnd ->
+        DatabaseMenu(expanded = showMenu, title = stringResource(Res.string.database_new_group), onDismiss = { showMenu = false }, showsCloseButton = false) { closeAnd ->
             DatabaseNewGroupPage(
                 existingNames = existingNames,
                 onCancel = { closeAnd { } },
@@ -922,31 +947,37 @@ private fun DatabaseNewGroupPage(existingNames: List<String>, onCancel: () -> Un
         EmberrTextField(
             value = name,
             onValueChange = { name = it },
-            placeholder = "Group name",
+            placeholder = stringResource(Res.string.database_group_name),
             modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
             onSubmit = addGroup
         )
         if (isNameTaken) {
             Text(
-                text = "A group with this name already exists",
+                text = stringResource(Res.string.database_group_name_taken),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
             )
         }
     }
-    DatabaseMenuButtons(cancelText = "Cancel", onCancel = onCancel, confirmText = "Add", onConfirm = addGroup)
+    DatabaseMenuButtons(
+        cancelText = stringResource(Res.string.common_cancel),
+        onCancel = onCancel,
+        confirmText = stringResource(Res.string.database_add),
+        onConfirm = addGroup
+    )
 }
 
+@Composable
 internal fun DatabaseBoardGroupValue.labelText(columnLabel: String): String = when (this) {
     is DatabaseBoardGroupValue.Option -> name
     is DatabaseBoardGroupValue.Person -> name
-    is DatabaseBoardGroupValue.Checkbox -> if (isChecked) "Checked" else "Unchecked"
+    is DatabaseBoardGroupValue.Checkbox -> stringResource(if (isChecked) Res.string.database_checked else Res.string.database_unchecked)
     is DatabaseBoardGroupValue.DatePeriod -> when (grouping) {
         DatabaseDateGrouping.DAY -> formatPropertyDate(start)
-        DatabaseDateGrouping.WEEK -> "Week of ${formatPropertyDate(start)}"
+        DatabaseDateGrouping.WEEK -> stringResource(Res.string.database_week_of_date, formatPropertyDate(start))
         DatabaseDateGrouping.MONTH -> "${start.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${start.year}"
         DatabaseDateGrouping.YEAR -> start.year.toString()
     }
-    DatabaseBoardGroupValue.NoValue -> "No $columnLabel"
+    DatabaseBoardGroupValue.NoValue -> stringResource(Res.string.database_no_column_value, columnLabel)
 }

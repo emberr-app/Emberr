@@ -115,6 +115,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.IOException
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.movie_add_movie_or_show
+import emberr.shared.generated.resources.movie_close_search
+import emberr.shared.generated.resources.movie_couldnt_search
+import emberr.shared.generated.resources.movie_everything_already_added
+import emberr.shared.generated.resources.movie_no_internet_connection
+import emberr.shared.generated.resources.movie_no_titles_match
+import emberr.shared.generated.resources.movie_results
+import emberr.shared.generated.resources.movie_search_placeholder
+import emberr.shared.generated.resources.movie_suggestions
+import emberr.shared.generated.resources.movie_too_many_searches
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
 
 private const val SEARCH_DELAY_MILLIS = 250L
 private const val RESULTS_HIDE_DELAY_MILLIS = 150L
@@ -242,11 +254,11 @@ private fun rememberMovieSearch(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (_: TmdbTooManyRequestsException) {
-            state.failureMessage = "Too many searches right now. Try again in a minute."
+            state.failureMessage = getString(Res.string.movie_too_many_searches)
         } catch (_: IOException) {
-            state.failureMessage = "No internet connection"
+            state.failureMessage = getString(Res.string.movie_no_internet_connection)
         } catch (_: Exception) {
-            state.failureMessage = "Couldn't search right now. Try again in a bit."
+            state.failureMessage = getString(Res.string.movie_couldnt_search)
         }
         state.isLoading = false
     }
@@ -382,7 +394,7 @@ private fun PhoneMovieSearchBox(
 
     MovieSearchRow(onClose = onClose, onClick = { isSheetOpen = true }) {
         Text(
-            text = "Search a movie or show",
+            text = stringResource(Res.string.movie_search_placeholder),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.outline,
             maxLines = 1,
@@ -410,7 +422,7 @@ internal fun MovieSearchSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Add a movie or show",
+        title = stringResource(Res.string.movie_add_movie_or_show),
         contentHorizontalPadding = 0.dp,
         scrollsContent = false
     ) { closeAnd ->
@@ -476,7 +488,7 @@ internal fun MovieSearchSheet(
             EmberrSearchTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = "Search a movie or show",
+                placeholder = stringResource(Res.string.movie_search_placeholder),
                 hazeState = resultsHazeState,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 onSubmit = { focusManager.clearFocus() },
@@ -499,7 +511,7 @@ internal fun MovieSearchField(
     onSearchAction: () -> Unit,
     modifier: Modifier = Modifier,
     fieldModifier: Modifier = Modifier,
-    placeholder: String = "Search a movie or show"
+    placeholder: String = stringResource(Res.string.movie_search_placeholder)
 ) {
     val textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
     MovieSearchRow(onClose = onClose, modifier = modifier) {
@@ -554,10 +566,11 @@ private fun MovieSearchRow(
 
 @Composable
 private fun MovieSearchCloseIcon(onClick: () -> Unit) {
-    IconTooltip(text = "Close search") {
+    val closeSearchLabel = stringResource(Res.string.movie_close_search)
+    IconTooltip(text = closeSearchLabel) {
         Icon(
             painter = painterResource(Res.drawable.x),
-            contentDescription = "Close search",
+            contentDescription = closeSearchLabel,
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier
                 .clip(CircleShape)
@@ -598,9 +611,9 @@ private fun MovieSearchResultsList(
         failureMessage != null -> MovieSearchResultsMessage(failureMessage)
         results.isEmpty() -> MovieSearchResultsMessage(
             if (trimmedQuery.isEmpty()) {
-                "Everything here is already added"
+                stringResource(Res.string.movie_everything_already_added)
             } else {
-                "No titles match \"$trimmedQuery\". Check the spelling or try the original title."
+                stringResource(Res.string.movie_no_titles_match, trimmedQuery)
             }
         )
         else -> {
@@ -623,7 +636,7 @@ private fun MovieSearchResultsList(
 @Composable
 private fun MovieSearchResultsHeader(trimmedQuery: String) {
     Text(
-        text = if (trimmedQuery.isEmpty()) "Suggestions" else "Results",
+        text = if (trimmedQuery.isEmpty()) stringResource(Res.string.movie_suggestions) else stringResource(Res.string.movie_results),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.outline,
         modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
@@ -692,7 +705,7 @@ private fun MovieSearchResultRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = listOf(result.kind.label, result.yearText).filter { it.isNotBlank() }.joinToString(" · "),
+                text = listOf(result.kind.displayName(), result.yearText).filter { it.isNotBlank() }.joinToString(" · "),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
                 maxLines = 1

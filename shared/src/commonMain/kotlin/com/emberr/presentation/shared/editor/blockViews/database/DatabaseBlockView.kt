@@ -120,6 +120,22 @@ import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.database_close_search
+import emberr.shared.generated.resources.database_filter
+import emberr.shared.generated.resources.database_locked
+import emberr.shared.generated.resources.database_missing
+import emberr.shared.generated.resources.database_new
+import emberr.shared.generated.resources.database_new_note
+import emberr.shared.generated.resources.database_new_row
+import emberr.shared.generated.resources.database_search
+import emberr.shared.generated.resources.database_search_this_database
+import emberr.shared.generated.resources.database_settings
+import emberr.shared.generated.resources.database_shown_of_total_rows
+import emberr.shared.generated.resources.database_sort
+import emberr.shared.generated.resources.database_templates
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 internal const val MinimumColumnWidth = 40
 internal const val MaximumColumnWidth = 600
@@ -183,7 +199,7 @@ fun DatabaseBlockView(
     when (val shownSettings = settingsState) {
         DatabaseSettingsState.Loading -> Unit
         DatabaseSettingsState.Missing -> Text(
-            text = "This database was deleted or has not synced to this device yet.",
+            text = stringResource(Res.string.database_missing),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = DatabaseSidePadding, vertical = DatabaseVerticalPadding)
@@ -358,7 +374,7 @@ private fun DatabaseBlockContent(
                     )
                 }
                 DatabaseHeaderButton(
-                    label = "Search",
+                    label = stringResource(Res.string.database_search),
                     icon = Res.drawable.search,
                     isActive = searchText.isNotBlank(),
                     enabled = !inSelectionMode,
@@ -372,7 +388,7 @@ private fun DatabaseBlockContent(
                 }
                 if (block.isLocked) {
                     DatabaseHeaderButton(
-                        label = "Locked",
+                        label = stringResource(Res.string.database_locked),
                         icon = Res.drawable.lock,
                         isActive = true,
                         enabled = !inSelectionMode,
@@ -380,7 +396,7 @@ private fun DatabaseBlockContent(
                     ) {}
                 } else {
                     DatabaseHeaderButton(
-                        label = "Sort",
+                        label = stringResource(Res.string.database_sort),
                         icon = Res.drawable.list_sort_descending,
                         isActive = activeView.sorts.isNotEmpty(),
                         enabled = !inSelectionMode,
@@ -394,7 +410,7 @@ private fun DatabaseBlockContent(
                         )
                     }
                     DatabaseHeaderButton(
-                        label = "Filter",
+                        label = stringResource(Res.string.database_filter),
                         icon = Res.drawable.funnel,
                         isActive = activeView.filters.isNotEmpty(),
                         enabled = !inSelectionMode,
@@ -408,7 +424,7 @@ private fun DatabaseBlockContent(
                         )
                     }
                     DatabaseHeaderButton(
-                        label = "Settings",
+                        label = stringResource(Res.string.database_settings),
                         icon = Res.drawable.sliders_horizontal,
                         isActive = false,
                         enabled = !inSelectionMode,
@@ -697,7 +713,7 @@ private fun DatabaseTitleField(
         decorationBox = { innerTextField ->
             Box {
                 if (fieldValue.text.isEmpty()) {
-                    Text(text = "Untitled", style = titleStyle.copy(color = MaterialTheme.colorScheme.outline))
+                    Text(text = stringResource(Res.string.common_untitled), style = titleStyle.copy(color = MaterialTheme.colorScheme.outline))
                 }
                 innerTextField()
             }
@@ -754,16 +770,16 @@ private fun DatabaseSearchField(
             decorationBox = { innerTextField ->
                 Box {
                     if (searchText.isEmpty()) {
-                        Text(text = "Search this database", style = textStyle.copy(color = MaterialTheme.colorScheme.outline))
+                        Text(text = stringResource(Res.string.database_search_this_database), style = textStyle.copy(color = MaterialTheme.colorScheme.outline))
                     }
                     innerTextField()
                 }
             }
         )
-        IconTooltip(text = "Close search") {
+        IconTooltip(text = stringResource(Res.string.database_close_search)) {
             Icon(
                 painter = painterResource(Res.drawable.x),
-                contentDescription = "Close search",
+                contentDescription = stringResource(Res.string.database_close_search),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier
                     .clip(CircleShape)
@@ -826,10 +842,10 @@ private fun DatabaseNewRowButton(
                 .background(NewItemButtonColor),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconTooltip(text = "New note") {
+            IconTooltip(text = stringResource(Res.string.database_new_note)) {
                 Icon(
                     painter = painterResource(Res.drawable.plus),
-                    contentDescription = "New row",
+                    contentDescription = stringResource(Res.string.database_new_row),
                     tint = Color.White,
                     modifier = Modifier
                         .clickable(enabled = enabled, onClick = onNewRow)
@@ -837,10 +853,10 @@ private fun DatabaseNewRowButton(
                         .size(18.dp)
                 )
             }
-            IconTooltip(text = "Templates") {
+            IconTooltip(text = stringResource(Res.string.database_templates)) {
                 Icon(
                     painter = painterResource(Res.drawable.chevron_down),
-                    contentDescription = "Templates",
+                    contentDescription = stringResource(Res.string.database_templates),
                     tint = Color.White,
                     modifier = Modifier
                         .clickable(enabled = enabled, onClick = onOpenTemplates)
@@ -876,8 +892,13 @@ private fun DatabaseNewRowLine(
     }
 }
 
+@Composable
 private fun rowCountLabel(shownRowCount: Int, totalRowCount: Int): String =
-    if (shownRowCount == totalRowCount) rowCountText(totalRowCount) else "$shownRowCount of ${rowCountText(totalRowCount)}"
+    if (shownRowCount == totalRowCount) {
+        rowCountText(totalRowCount)
+    } else {
+        pluralStringResource(Res.plurals.database_shown_of_total_rows, totalRowCount, shownRowCount, totalRowCount)
+    }
 
 @Composable
 internal fun DatabaseAddRowButton(onClick: () -> Unit) {
@@ -896,6 +917,6 @@ internal fun DatabaseAddRowButton(onClick: () -> Unit) {
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(7.dp))
-        Text(text = "New", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = stringResource(Res.string.database_new), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
     }
 }

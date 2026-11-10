@@ -39,6 +39,12 @@ import emberr.shared.generated.resources.chevron_right
 import emberr.shared.generated.resources.sigma
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.database_calculate
+import emberr.shared.generated.resources.database_remove_calculation
+import emberr.shared.generated.resources.database_calculation_none
+import emberr.shared.generated.resources.database_day_count
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 private val CalculationCellMinHeight = 36.dp
 
@@ -107,7 +113,7 @@ private fun DatabaseCalculationCell(
         if (calculation != null && result != null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = calculation.shortLabel,
+                    text = calculation.shortDisplayName(),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                     maxLines = 1
@@ -137,15 +143,15 @@ internal fun DatabaseCalculateOption(
     val calculationsByGroup = calculationsFor(valueType).groupBy { it.group }
 
     DatabaseMenuLayer(
-        title = "Calculate",
+        title = stringResource(Res.string.database_calculate),
         anchor = { openLayer ->
             DatabaseMenuOption(
-                label = "Calculate",
+                label = stringResource(Res.string.database_calculate),
                 icon = { DatabaseOptionIcon(Res.drawable.sigma) },
                 trailing = if (calculation == null) null else {
                     {
                         Text(
-                            text = calculation.label,
+                            text = calculation.displayName(),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                             maxLines = 1
@@ -159,10 +165,10 @@ internal fun DatabaseCalculateOption(
         calculationsByGroup.forEach { (group, options) ->
             key(group) {
                 DatabaseMenuLayer(
-                    title = group.label,
+                    title = group.displayName(),
                     anchor = { openGroup ->
                         DatabaseMenuOption(
-                            label = group.label,
+                            label = group.displayName(),
                             isSelected = calculation?.group == group,
                             trailing = if (isDesktopPlatform) null else {
                                 {
@@ -180,7 +186,7 @@ internal fun DatabaseCalculateOption(
                 ) { closeGroupAnd ->
                     options.forEach { option ->
                         DatabaseMenuOption(
-                            label = option.label,
+                            label = option.displayName(),
                             isSelected = option == calculation,
                             onClick = {
                                 closeGroupAnd { closeCalculateAnd { closeMenuAnd { editor.setCalculation(block.id, column, option) } } }
@@ -193,7 +199,7 @@ internal fun DatabaseCalculateOption(
 
         if (calculation != null) {
             DatabaseMenuOption(
-                label = "Remove calculation",
+                label = stringResource(Res.string.database_remove_calculation),
                 icon = { DatabaseOptionIcon(Res.drawable.x, tint = MaterialTheme.colorScheme.error) },
                 labelColor = MaterialTheme.colorScheme.error,
                 onClick = { closeCalculateAnd { closeMenuAnd { editor.setCalculation(block.id, column, null) } } }
@@ -202,11 +208,13 @@ internal fun DatabaseCalculateOption(
     }
 }
 
+@Composable
 internal fun DatabaseCalculationResult.displayTextIn(numberFormat: DatabaseNumberFormat?): String {
     val number = (this as? DatabaseCalculationResult.NumberValue)?.number
     return if (number != null && numberFormat != null) numberFormat.textFor(number) else displayText()
 }
 
+@Composable
 internal fun DatabaseCalculationResult.displayText(): String = when (this) {
     is DatabaseCalculationResult.Count -> value.toString()
     is DatabaseCalculationResult.Percent -> {
@@ -214,11 +222,8 @@ internal fun DatabaseCalculationResult.displayText(): String = when (this) {
         val tenths = tenthsOfAPercent % 10
         if (tenths == 0) "$wholePercent%" else "$wholePercent.$tenths%"
     }
-    is DatabaseCalculationResult.NumberValue -> number?.let { formatCalculatedNumber(it) } ?: "None"
-    is DatabaseCalculationResult.DateValue -> date?.let { formatPropertyDate(it) } ?: "None"
-    is DatabaseCalculationResult.DayCount -> when (days) {
-        null -> "None"
-        1 -> "1 day"
-        else -> "$days days"
-    }
+    is DatabaseCalculationResult.NumberValue -> number?.let { formatCalculatedNumber(it) } ?: stringResource(Res.string.database_calculation_none)
+    is DatabaseCalculationResult.DateValue -> date?.let { formatPropertyDate(it) } ?: stringResource(Res.string.database_calculation_none)
+    is DatabaseCalculationResult.DayCount -> days?.let { pluralStringResource(Res.plurals.database_day_count, it, it) }
+        ?: stringResource(Res.string.database_calculation_none)
 }

@@ -35,6 +35,11 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.link
 import emberr.shared.generated.resources.star
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.movie_no_reviews_yet
+import emberr.shared.generated.resources.movie_no_similar_titles_yet
+import emberr.shared.generated.resources.movie_out_of_ten
+import emberr.shared.generated.resources.movie_read_on_tmdb
+import org.jetbrains.compose.resources.stringResource
 
 private val SimilarPosterMinWidthDesktop = 140.dp
 private val SimilarPosterMinWidthPhone = 88.dp
@@ -54,7 +59,7 @@ internal fun MovieMoreLikeThisTab(
     when {
         liveExtras.load == LiveTmdbLoad.Loading -> MovieSimilarTitlesSkeleton(colors = colors)
         extras == null -> LiveTmdbLoadMessage(state = liveExtras, textColor = colors.text, chipBackground = colors.chipBackground)
-        extras.similarTitles.isEmpty() -> MovieTabEmptyMessage(text = "No similar titles yet", colors = colors)
+        extras.similarTitles.isEmpty() -> MovieTabEmptyMessage(text = stringResource(Res.string.movie_no_similar_titles_yet), colors = colors)
         else -> MovieSimilarGrid(items = extras.similarTitles) { title, posterWidth ->
             MovieSimilarTitle(title = title, width = posterWidth, colors = colors, onClick = { onOpenTitle(title) })
         }
@@ -128,7 +133,7 @@ internal fun MovieReviewsTab(liveExtras: LiveTmdbLoadState<MovieTitleExtras>, co
     when {
         liveExtras.load == LiveTmdbLoad.Loading -> MovieReviewsSkeleton(colors = colors)
         extras == null -> LiveTmdbLoadMessage(state = liveExtras, textColor = colors.text, chipBackground = colors.chipBackground)
-        extras.reviews.isEmpty() -> MovieTabEmptyMessage(text = "No reviews yet", colors = colors)
+        extras.reviews.isEmpty() -> MovieTabEmptyMessage(text = stringResource(Res.string.movie_no_reviews_yet), colors = colors)
         else -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             extras.reviews.forEach { review -> MovieReviewCard(review = review, colors = colors) }
         }
@@ -193,14 +198,14 @@ private fun MovieReviewCard(review: MovieReview, colors: DetailsColors) {
                         modifier = Modifier.size(14.dp)
                     )
                     Text(text = tmdbRatingText(rating), style = MaterialTheme.typography.labelSmall, color = colors.text)
-                    Text(text = "/ 10", style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)
+                    Text(text = stringResource(Res.string.movie_out_of_ten), style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)
                 }
             }
         }
         MovieReadMoreText(text = review.text, color = colors.text, shortLines = SHORT_REVIEW_LINES)
         if (review.link.isNotBlank()) {
             MovieChip(
-                label = "Read on TMDB",
+                label = stringResource(Res.string.movie_read_on_tmdb),
                 onClick = { uriHandler.openUri(review.link) },
                 modifier = Modifier.height(movieChipHeight()),
                 background = colors.chipBackground,

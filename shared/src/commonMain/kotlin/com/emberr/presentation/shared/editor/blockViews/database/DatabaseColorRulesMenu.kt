@@ -18,7 +18,6 @@ import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.DatabaseFilter
 import com.emberr.domain.model.DatabaseFilterCondition
 import com.emberr.domain.model.PropertyValueType
-import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.presentation.shared.components.displayName
 import com.emberr.presentation.shared.components.rememberPeopleToPick
@@ -26,14 +25,28 @@ import com.emberr.presentation.shared.editor.blockViews.property.formatPropertyD
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.palette
 import emberr.shared.generated.resources.plus
+import emberr.shared.generated.resources.database_add_rule
+import emberr.shared.generated.resources.database_color
+import emberr.shared.generated.resources.database_color_rule
+import emberr.shared.generated.resources.database_color_rule_summary
+import emberr.shared.generated.resources.database_color_rule_summary_without_value
+import emberr.shared.generated.resources.database_color_rules
+import emberr.shared.generated.resources.database_color_rules_explanation
+import emberr.shared.generated.resources.database_delete_rule
+import emberr.shared.generated.resources.database_quoted_value
+import emberr.shared.generated.resources.database_when
+import emberr.shared.generated.resources.database_when_this_property_matches
+import emberr.shared.generated.resources.editor_table_background_color
+import emberr.shared.generated.resources.editor_table_text_color
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseColorRulesOption(block: DatabaseBlock, editor: DatabaseBlockEditor) {
     DatabaseMenuLayer(
-        title = "Color rules",
+        title = stringResource(Res.string.database_color_rules),
         anchor = { openLayer ->
             DatabaseMenuOption(
-                label = "Color rules",
+                label = stringResource(Res.string.database_color_rules),
                 icon = { DatabaseOptionIcon(Res.drawable.palette) },
                 trailing = if (block.colorRules.isEmpty()) null else {
                     {
@@ -51,7 +64,7 @@ internal fun DatabaseColorRulesOption(block: DatabaseBlock, editor: DatabaseBloc
     ) { _ ->
         if (block.colorRules.isEmpty()) {
             DatabaseMenuMessage(
-                text = "Color the rows or cells that match a condition, like tasks that are overdue.",
+                text = stringResource(Res.string.database_color_rules_explanation),
                 color = MaterialTheme.colorScheme.outline
             )
         }
@@ -61,15 +74,15 @@ internal fun DatabaseColorRulesOption(block: DatabaseBlock, editor: DatabaseBloc
             }
         }
         DatabaseMenuLayer(
-            title = "Add rule",
+            title = stringResource(Res.string.database_add_rule),
             anchor = { openLayer ->
-                DatabaseMenuOption(label = "Add rule", icon = { DatabaseOptionIcon(Res.drawable.plus) }, onClick = openLayer)
+                DatabaseMenuOption(label = stringResource(Res.string.database_add_rule), icon = { DatabaseOptionIcon(Res.drawable.plus) }, onClick = openLayer)
             }
         ) { closeLayerAnd ->
-            DatabaseMenuSectionLabel(text = "When this property matches")
+            DatabaseMenuSectionLabel(text = stringResource(Res.string.database_when_this_property_matches))
             (listOf<DatabaseColumnTarget>(DatabaseColumnTarget.NotesTitle) + block.columns).forEach { column ->
                 DatabaseMenuOption(
-                    label = block.labelOf(column),
+                    label = block.displayLabelOf(column),
                     icon = { DatabaseOptionIcon(block.iconOf(column)) },
                     onClick = { closeLayerAnd { editor.addColorRule(block.id, column) } }
                 )
@@ -84,7 +97,7 @@ private fun DatabaseColorRuleOption(block: DatabaseBlock, rule: DatabaseColorRul
     val people = rememberPeopleToPick().orEmpty()
 
     DatabaseMenuLayer(
-        title = "Color rule",
+        title = stringResource(Res.string.database_color_rule),
         anchor = { openLayer ->
             DatabaseMenuOption(
                 label = block.summaryOf(rule.condition) { personNoteId -> people.firstOrNull { it.id == personNoteId }?.displayName() },
@@ -93,28 +106,28 @@ private fun DatabaseColorRuleOption(block: DatabaseBlock, rule: DatabaseColorRul
             )
         }
     ) { closeLayerAnd ->
-        DatabaseMenuSectionLabel(text = "When")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.database_when))
         DatabaseFilterEditor(
             block = block,
             filter = rule.condition,
             editor = editor,
             onChange = { change -> changeRule { it.copy(condition = change(it.condition)) } },
             onRemove = { closeLayerAnd { editor.removeColorRule(block.id, rule.id) } },
-            removeLabel = "Delete rule"
+            removeLabel = stringResource(Res.string.database_delete_rule)
         )
 
         DatabaseMenuSectionDivider()
-        DatabaseMenuSectionLabel(text = "Color")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.database_color))
         DatabaseColorRuleTarget.entries.forEach { target ->
             DatabaseMenuOption(
-                label = target.label,
+                label = target.displayName(),
                 isSelected = target == rule.target,
                 onClick = { changeRule { it.copy(target = target) } }
             )
         }
 
         DatabaseMenuSectionDivider()
-        DatabaseMenuSectionLabel(text = "Text color")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_text_color))
         DatabaseStyleColorChoices(
             selectedColorName = rule.textColorName,
             colorOf = { databaseTextColorNamed(it.storageName) },
@@ -122,7 +135,7 @@ private fun DatabaseColorRuleOption(block: DatabaseBlock, rule: DatabaseColorRul
         )
 
         DatabaseMenuSectionDivider()
-        DatabaseMenuSectionLabel(text = "Background color")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_background_color))
         DatabaseStyleColorChoices(
             selectedColorName = rule.backgroundColorName,
             colorOf = { databaseBackgroundColorNamed(it.storageName) },
@@ -144,16 +157,24 @@ private fun DatabaseColorRuleSwatch(rule: DatabaseColorRule) {
     )
 }
 
+@Composable
 private fun DatabaseBlock.summaryOf(condition: DatabaseFilter, personNameOf: (personNoteId: String) -> String?): String {
     val valueText = filterValueText(condition, valueTypeOf(condition.target) ?: PropertyValueType.TEXT, personNameOf)
-    return listOfNotNull(labelOf(condition.target), condition.condition.label, valueText).joinToString(" ")
+    val columnLabel = displayLabelOf(condition.target)
+    val conditionLabel = condition.condition.displayName()
+    return if (valueText == null) {
+        stringResource(Res.string.database_color_rule_summary_without_value, columnLabel, conditionLabel)
+    } else {
+        stringResource(Res.string.database_color_rule_summary, columnLabel, conditionLabel, valueText)
+    }
 }
 
+@Composable
 private fun filterValueText(filter: DatabaseFilter, valueType: PropertyValueType, personNameOf: (personNoteId: String) -> String?): String? = when {
     !filter.condition.needsValue -> null
-    valueType.holdsDate && filter.condition == DatabaseFilterCondition.IS_WITHIN -> filter.dateRange?.label?.lowercase()
-    valueType.holdsDate -> filter.relativeDate?.label?.lowercase() ?: filter.date?.let { formatPropertyDate(it) }
+    valueType.holdsDate && filter.condition == DatabaseFilterCondition.IS_WITHIN -> filter.dateRange?.displayName()?.lowercase()
+    valueType.holdsDate -> filter.relativeDate?.displayName()?.lowercase() ?: filter.date?.let { formatPropertyDate(it) }
     valueType.holdsTags -> filter.tagName
     valueType.holdsPeople -> filter.personNoteId?.let(personNameOf)
-    else -> filter.text.trim().takeIf { it.isNotEmpty() }?.let { "\"$it\"" }
+    else -> filter.text.trim().takeIf { it.isNotEmpty() }?.let { stringResource(Res.string.database_quoted_value, it) }
 }

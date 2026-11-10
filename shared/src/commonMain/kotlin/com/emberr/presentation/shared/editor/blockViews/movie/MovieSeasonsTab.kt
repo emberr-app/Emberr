@@ -43,6 +43,15 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_down
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import emberr.shared.generated.resources.movie_episode_short
+import emberr.shared.generated.resources.movie_hide_episodes
+import emberr.shared.generated.resources.movie_latest_episode
+import emberr.shared.generated.resources.movie_next_episode
+import emberr.shared.generated.resources.movie_no_episodes_yet
+import emberr.shared.generated.resources.movie_season_number
+import emberr.shared.generated.resources.movie_season_short
+import emberr.shared.generated.resources.movie_show_episodes
+import org.jetbrains.compose.resources.stringResource
 
 private val SeasonPosterWidth = 56.dp
 private val SeasonPosterCornerRadius = 8.dp
@@ -63,8 +72,8 @@ internal fun hasSeasonsToShow(details: MovieDetails): Boolean =
 internal fun MovieSeasonsTab(details: MovieDetails, colors: DetailsColors) {
     var openSeasonNumber by remember(details.tmdbId) { mutableStateOf<Int?>(null) }
     val airingEpisodes = listOfNotNull(
-        details.nextEpisode?.let { "Next episode" to it },
-        details.lastEpisode?.let { "Latest episode" to it }
+        details.nextEpisode?.let { stringResource(Res.string.movie_next_episode) to it },
+        details.lastEpisode?.let { stringResource(Res.string.movie_latest_episode) to it }
     )
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         if (airingEpisodes.isNotEmpty()) {
@@ -101,7 +110,11 @@ internal fun MovieSeasonsTab(details: MovieDetails, colors: DetailsColors) {
 private fun MovieAiringEpisode(label: String, episode: MovieEpisodeSummary, colors: DetailsColors) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)
-        val episodeLine = listOf("S${episode.seasonNumber}", "E${episode.episodeNumber}", episode.name)
+        val episodeLine = listOf(
+            stringResource(Res.string.movie_season_short, episode.seasonNumber),
+            stringResource(Res.string.movie_episode_short, episode.episodeNumber),
+            episode.name
+        )
             .filter { it.isNotBlank() }
             .joinToString(" · ")
         Text(text = episodeLine, style = MaterialTheme.typography.bodyLarge, color = colors.text)
@@ -141,13 +154,13 @@ private fun MovieSeasonCard(
             )
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = season.name.ifBlank { "Season ${season.number}" },
+                    text = season.name.ifBlank { stringResource(Res.string.movie_season_number, season.number) },
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = colors.text
                 )
                 val seasonFacts = listOfNotNull(
-                    season.episodeCount?.let(::episodeCountText),
+                    season.episodeCount?.let { episodeCountText(it) },
                     season.airDate?.year?.toString()
                 ).joinToString(" · ")
                 if (seasonFacts.isNotEmpty()) {
@@ -156,7 +169,7 @@ private fun MovieSeasonCard(
             }
             Icon(
                 painter = painterResource(Res.drawable.chevron_down),
-                contentDescription = if (isOpen) "Hide episodes" else "Show episodes",
+                contentDescription = if (isOpen) stringResource(Res.string.movie_hide_episodes) else stringResource(Res.string.movie_show_episodes),
                 tint = colors.secondaryText,
                 modifier = Modifier.size(18.dp).rotate(if (isOpen) 180f else 0f)
             )
@@ -184,7 +197,7 @@ private fun MovieSeasonEpisodes(showId: Long, seasonNumber: Int, colors: Details
                 chipBackground = colors.chipBackground
             )
             episodes.isEmpty() -> Text(
-                text = "No episodes listed yet",
+                text = stringResource(Res.string.movie_no_episodes_yet),
                 style = MaterialTheme.typography.bodyLarge,
                 color = colors.secondaryText
             )
@@ -226,14 +239,14 @@ private fun MovieEpisodeRow(episode: MovieEpisode, colors: DetailsColors) {
                     .background(colors.chipBackground),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "E${episode.number}", style = MaterialTheme.typography.labelSmall, color = colors.text)
+                Text(text = stringResource(Res.string.movie_episode_short, episode.number), style = MaterialTheme.typography.labelSmall, color = colors.text)
                 if (episode.stillUrl != null) {
                     MovieImage(filePath = null, url = episode.stillUrl, modifier = Modifier.fillMaxSize())
                 }
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = listOf("E${episode.number}", episode.name).filter { it.isNotBlank() }.joinToString(" · "),
+                    text = listOf(stringResource(Res.string.movie_episode_short, episode.number), episode.name).filter { it.isNotBlank() }.joinToString(" · "),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = colors.text,
@@ -242,7 +255,7 @@ private fun MovieEpisodeRow(episode: MovieEpisode, colors: DetailsColors) {
                 )
                 val episodeFacts = listOfNotNull(
                     episode.airDate?.let(::releaseDateText),
-                    episode.runtimeMinutes?.let(::minutesText)
+                    episode.runtimeMinutes?.let { minutesText(it) }
                 ).joinToString(" · ")
                 if (episodeFacts.isNotEmpty()) {
                     Text(text = episodeFacts, style = MaterialTheme.typography.labelSmall, color = colors.secondaryText)

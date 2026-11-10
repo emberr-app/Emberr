@@ -50,6 +50,15 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.sigma
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.database_edit_formula
+import emberr.shared.generated.resources.database_formula_functions
+import emberr.shared.generated.resources.database_formula_hint
+import emberr.shared.generated.resources.database_formula_operations
+import emberr.shared.generated.resources.database_formula_placeholder
+import emberr.shared.generated.resources.database_formula_properties
+import org.jetbrains.compose.resources.stringResource
 
 private val DesktopFormulaMenuWidth = 360.dp
 private val FormulaPieceMinWidth = 36.dp
@@ -111,12 +120,12 @@ internal fun DatabaseEditFormulaOption(
     closeMenuAnd: (() -> Unit) -> Unit
 ) {
     DatabaseMenuLayer(
-        title = "Edit formula",
+        title = stringResource(Res.string.database_edit_formula),
         desktopWidth = DesktopFormulaMenuWidth,
         showsCloseButton = false,
         anchor = { openLayer ->
             DatabaseMenuOption(
-                label = "Edit formula",
+                label = stringResource(Res.string.database_edit_formula),
                 icon = { DatabaseOptionIcon(Res.drawable.sigma) },
                 onClick = openLayer
             )
@@ -155,19 +164,19 @@ private fun DatabaseFormulaPage(
         EmberrTextField(
             value = formula,
             onValueChange = { formula = it },
-            placeholder = "Tap the pieces below or type",
+            placeholder = stringResource(Res.string.database_formula_placeholder),
             singleLine = false,
             keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
         Text(
-            text = problem ?: "Tap a property, an operation or a function to add it.",
+            text = problem ?: stringResource(Res.string.database_formula_hint),
             style = MaterialTheme.typography.labelSmall,
             color = if (problem == null) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.error,
             modifier = Modifier.padding(start = 4.dp, top = 2.dp)
         )
 
-        FormulaPiecesSectionLabel(text = "Properties")
+        FormulaPiecesSectionLabel(text = stringResource(Res.string.database_formula_properties))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(FormulaPieceGap), verticalArrangement = Arrangement.spacedBy(FormulaPieceGap)) {
             propertyColumns.forEach { propertyColumn ->
                 val propertyName = block.labelOf(propertyColumn)
@@ -179,14 +188,14 @@ private fun DatabaseFormulaPage(
             }
         }
 
-        FormulaPiecesSectionLabel(text = "Operations")
+        FormulaPiecesSectionLabel(text = stringResource(Res.string.database_formula_operations))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(FormulaPieceGap), verticalArrangement = Arrangement.spacedBy(FormulaPieceGap)) {
             formulaOperationPieces.forEach { piece ->
                 FormulaPieceButton(label = piece.label, onClick = { insert(piece) })
             }
         }
 
-        FormulaPiecesSectionLabel(text = "Functions")
+        FormulaPiecesSectionLabel(text = stringResource(Res.string.database_formula_functions))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(FormulaPieceGap), verticalArrangement = Arrangement.spacedBy(FormulaPieceGap)) {
             FormulaFunction.entries.forEach { function ->
                 val piece = function.piece()
@@ -194,7 +203,12 @@ private fun DatabaseFormulaPage(
             }
         }
     }
-    DatabaseMenuButtons(cancelText = "Cancel", onCancel = onCancel, confirmText = "Save", onConfirm = { onSave(formula.text) })
+    DatabaseMenuButtons(
+        cancelText = stringResource(Res.string.common_cancel),
+        onCancel = onCancel,
+        confirmText = stringResource(Res.string.common_save),
+        onConfirm = { onSave(formula.text) }
+    )
 }
 
 @Composable

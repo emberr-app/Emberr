@@ -52,6 +52,18 @@ import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import com.emberr.presentation.shared.editor.links.rememberWebLinkActions
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.credentials_edit_fields
+import emberr.shared.generated.resources.credentials_edited_days_ago
+import emberr.shared.generated.resources.credentials_edited_hours_ago
+import emberr.shared.generated.resources.credentials_edited_just_now
+import emberr.shared.generated.resources.credentials_edited_minutes_ago
+import emberr.shared.generated.resources.credentials_edited_on_date
+import emberr.shared.generated.resources.credentials_edited_yesterday
+import emberr.shared.generated.resources.credentials_open
+import emberr.shared.generated.resources.credentials_open_sign_in_page
+import emberr.shared.generated.resources.credentials_options
+import emberr.shared.generated.resources.credentials_untitled
+import emberr.shared.generated.resources.editor_block_credentials
 import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.pen
 import emberr.shared.generated.resources.square_arrow_out_up_right
@@ -60,6 +72,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -198,6 +212,8 @@ private fun CredentialsViewHeader(
     val webLinkActions = rememberWebLinkActions()
     val openableUrl = openableLoginUrl(block.loginUrl)
     var isMenuOpen by remember { mutableStateOf(false) }
+    val untitledCredentials = stringResource(Res.string.credentials_untitled)
+    val credentialsBlockName = stringResource(Res.string.editor_block_credentials)
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
@@ -207,7 +223,7 @@ private fun CredentialsViewHeader(
         Spacer(modifier = Modifier.width(if (isDesktopPlatform) 16.dp else 12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = block.serviceName.ifBlank { "Untitled credentials" },
+                text = block.serviceName.ifBlank { untitledCredentials },
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = if (block.serviceName.isBlank()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
@@ -233,13 +249,13 @@ private fun CredentialsViewHeader(
             Box {
                 CredentialIconButton(
                     painter = painterResource(Res.drawable.ellipsis),
-                    description = "Options",
+                    description = stringResource(Res.string.credentials_options),
                     onClick = { runAfterKeyboardCloses { isMenuOpen = true } },
                     modifier = Modifier.alpha(if (!isDesktopPlatform || isCardHovered || isMenuOpen) 1f else 0f)
                 )
                 CredentialsOptionsMenu(
                     expanded = isMenuOpen,
-                    title = block.serviceName.ifBlank { "Credentials" },
+                    title = block.serviceName.ifBlank { credentialsBlockName },
                     updatedAt = block.updatedAt,
                     onDismiss = { isMenuOpen = false },
                     onEditFields = onEditFields
@@ -256,7 +272,7 @@ private fun shownLoginUrl(loginUrl: String): String =
 private fun OpenSignInPageButton(onClick: () -> Unit) {
     val painter = painterResource(Res.drawable.square_arrow_out_up_right)
     if (!isDesktopPlatform) {
-        CredentialIconButton(painter = painter, description = "Open sign-in page", onClick = onClick)
+        CredentialIconButton(painter = painter, description = stringResource(Res.string.credentials_open_sign_in_page), onClick = onClick)
         return
     }
     Row(
@@ -273,10 +289,11 @@ private fun OpenSignInPageButton(onClick: () -> Unit) {
             modifier = Modifier.size(14.dp)
         )
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = "Open", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
+        Text(text = stringResource(Res.string.credentials_open), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
     }
 }
 
+@Composable
 internal fun editedAgoText(updatedAtMillis: Long, nowMillis: Long): String {
     val minutesAgo = (nowMillis - updatedAtMillis) / MILLIS_PER_MINUTE
     val hoursAgo = minutesAgo / 60
@@ -285,14 +302,12 @@ internal fun editedAgoText(updatedAtMillis: Long, nowMillis: Long): String {
     val today = Instant.fromEpochMilliseconds(nowMillis).toLocalDateTime(timeZone).date
     val daysAgo = updatedDate.daysUntil(today)
     return when {
-        minutesAgo < 1 -> "Edited just now"
-        minutesAgo == 1L -> "Edited 1 minute ago"
-        minutesAgo < 60 -> "Edited $minutesAgo minutes ago"
-        hoursAgo == 1L -> "Edited 1 hour ago"
-        hoursAgo < 24 -> "Edited $hoursAgo hours ago"
-        daysAgo <= 1 -> "Edited yesterday"
-        daysAgo <= 7 -> "Edited $daysAgo days ago"
-        else -> "Edited ${shortDateText(updatedDate)}"
+        minutesAgo < 1 -> stringResource(Res.string.credentials_edited_just_now)
+        minutesAgo < 60 -> pluralStringResource(Res.plurals.credentials_edited_minutes_ago, minutesAgo.toInt(), minutesAgo.toInt())
+        hoursAgo < 24 -> pluralStringResource(Res.plurals.credentials_edited_hours_ago, hoursAgo.toInt(), hoursAgo.toInt())
+        daysAgo <= 1 -> stringResource(Res.string.credentials_edited_yesterday)
+        daysAgo <= 7 -> pluralStringResource(Res.plurals.credentials_edited_days_ago, daysAgo, daysAgo)
+        else -> stringResource(Res.string.credentials_edited_on_date, shortDateText(updatedDate))
     }
 }
 
@@ -326,7 +341,7 @@ private fun CredentialsOptionsMenu(
             modifier = Modifier.width(220.dp)
         ) {
             EmberrDesktopMenuOption(
-                label = "Edit fields",
+                label = stringResource(Res.string.credentials_edit_fields),
                 icon = { optionIcon(editIcon) },
                 onClick = {
                     onDismiss()
@@ -353,7 +368,7 @@ private fun CredentialsOptionsMenu(
         ) { closeAnd ->
             Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = SheetBottomPadding)) {
                 EmberrBottomSheetOption(
-                    label = "Edit fields",
+                    label = stringResource(Res.string.credentials_edit_fields),
                     icon = { optionIcon(editIcon) },
                     outerHorizontalPadding = SheetRowInset,
                     onClick = { closeAnd(onEditFields) }

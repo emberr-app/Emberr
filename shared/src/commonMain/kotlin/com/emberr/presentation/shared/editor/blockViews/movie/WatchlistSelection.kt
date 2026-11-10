@@ -44,6 +44,12 @@ import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.editor_remove
+import emberr.shared.generated.resources.movie_watchlist_clear_selection
+import emberr.shared.generated.resources.movie_watchlist_refresh
+import emberr.shared.generated.resources.movie_watchlist_selected_count
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
 
 @Stable
 internal class WatchlistSelection {
@@ -173,21 +179,21 @@ internal fun WatchlistSelectionBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "$selectedCount selected",
+            text = pluralStringResource(Res.plurals.movie_watchlist_selected_count, selectedCount, selectedCount),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1
         )
         Spacer(modifier = Modifier.weight(1f))
-        SelectionBarButton(label = "Refresh", icon = Res.drawable.refresh_cw, isEnabled = hasSelectedTitles, onClick = onRefresh)
+        SelectionBarButton(label = stringResource(Res.string.movie_watchlist_refresh), icon = Res.drawable.refresh_cw, isEnabled = hasSelectedTitles, onClick = onRefresh)
         SelectionBarButton(
-            label = "Remove",
+            label = stringResource(Res.string.editor_remove),
             icon = Res.drawable.trash,
             isEnabled = hasSelectedTitles,
             isDestructive = true,
             onClick = onRemove
         )
-        WatchlistCloseButton(label = "Clear selection", touchPadding = 6.dp, onClick = onClear)
+        WatchlistCloseButton(label = stringResource(Res.string.movie_watchlist_clear_selection), touchPadding = 6.dp, onClick = onClear)
     }
 }
 

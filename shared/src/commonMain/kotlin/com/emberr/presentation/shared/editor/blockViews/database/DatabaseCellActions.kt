@@ -33,7 +33,6 @@ import com.emberr.domain.database.visibleColumnsInTableOrder
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseCellStyle
 import com.emberr.domain.model.DatabaseColumnTarget
-import com.emberr.domain.model.labelOf
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.MenuAtTap
 import com.emberr.presentation.shared.components.menuTapAnchor
@@ -49,6 +48,21 @@ import emberr.shared.generated.resources.move_right
 import emberr.shared.generated.resources.square_check
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
+import emberr.shared.generated.resources.database_add_property
+import emberr.shared.generated.resources.database_cell_actions
+import emberr.shared.generated.resources.database_delete_row
+import emberr.shared.generated.resources.database_duplicate_row
+import emberr.shared.generated.resources.database_insert_column_left
+import emberr.shared.generated.resources.database_insert_column_right
+import emberr.shared.generated.resources.database_insert_row_above
+import emberr.shared.generated.resources.database_insert_row_below
+import emberr.shared.generated.resources.database_move_column_left
+import emberr.shared.generated.resources.database_move_column_right
+import emberr.shared.generated.resources.database_move_row_down
+import emberr.shared.generated.resources.database_move_row_up
+import emberr.shared.generated.resources.database_remove_column
+import emberr.shared.generated.resources.database_select_row
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseCellWithActions(
@@ -157,21 +171,21 @@ private fun DatabaseCellActionsMenu(
     val columnAfterThisOne = allColumns.getOrNull(allColumns.indexOf(column) + 1)
     val canMoveSomething = rowAbove != null || rowBelow != null || columnToTheLeft != null || columnToTheRight != null
 
-    DatabaseMenu(expanded = expanded, title = "Cell actions", onDismiss = onDismiss) { closeAnd ->
+    DatabaseMenu(expanded = expanded, title = stringResource(Res.string.database_cell_actions), onDismiss = onDismiss) { closeAnd ->
         if (canPlaceRows) {
             DatabaseMenuOption(
-                label = "Insert row above",
+                label = stringResource(Res.string.database_insert_row_above),
                 icon = { DatabaseOptionIcon(Res.drawable.arrow_up) },
                 onClick = { closeAnd { editor.insertRow(block.id, view.id, shownRowIds, rowNoteId, isAfter = false) } }
             )
             DatabaseMenuOption(
-                label = "Insert row below",
+                label = stringResource(Res.string.database_insert_row_below),
                 icon = { DatabaseOptionIcon(Res.drawable.arrow_down) },
                 onClick = { closeAnd { editor.insertRow(block.id, view.id, shownRowIds, rowNoteId, isAfter = true) } }
             )
         }
         DatabaseInsertColumnOption(
-            label = "Insert column left",
+            label = stringResource(Res.string.database_insert_column_left),
             icon = Res.drawable.arrow_left,
             block = block,
             rowCount = rowCount,
@@ -180,7 +194,7 @@ private fun DatabaseCellActionsMenu(
             closeMenuAnd = closeAnd
         )
         DatabaseInsertColumnOption(
-            label = "Insert column right",
+            label = stringResource(Res.string.database_insert_column_right),
             icon = Res.drawable.arrow_right,
             block = block,
             rowCount = rowCount,
@@ -194,28 +208,28 @@ private fun DatabaseCellActionsMenu(
         }
         if (rowAbove != null) {
             DatabaseMenuOption(
-                label = "Move row up",
+                label = stringResource(Res.string.database_move_row_up),
                 icon = { DatabaseOptionVectorIcon(Icons.Default.ArrowUpward) },
                 onClick = { closeAnd { editor.moveRow(block.id, view.id, shownRowIds, rowNoteId, rowAbove, isAfter = false) } }
             )
         }
         if (rowBelow != null) {
             DatabaseMenuOption(
-                label = "Move row down",
+                label = stringResource(Res.string.database_move_row_down),
                 icon = { DatabaseOptionVectorIcon(Icons.Default.ArrowDownward) },
                 onClick = { closeAnd { editor.moveRow(block.id, view.id, shownRowIds, rowNoteId, rowBelow, isAfter = true) } }
             )
         }
         if (columnToTheLeft != null) {
             DatabaseMenuOption(
-                label = "Move column left",
+                label = stringResource(Res.string.database_move_column_left),
                 icon = { DatabaseOptionIcon(Res.drawable.move_left) },
                 onClick = { closeAnd { editor.moveColumnBefore(block.id, column, columnToTheLeft) } }
             )
         }
         if (columnToTheRight != null) {
             DatabaseMenuOption(
-                label = "Move column right",
+                label = stringResource(Res.string.database_move_column_right),
                 icon = { DatabaseOptionIcon(Res.drawable.move_right) },
                 onClick = { closeAnd { editor.moveColumnBefore(block.id, columnToTheRight, column) } }
             )
@@ -231,28 +245,28 @@ private fun DatabaseCellActionsMenu(
 
         DatabaseMenuSectionDivider()
         DatabaseMenuOption(
-            label = "Duplicate row",
+            label = stringResource(Res.string.database_duplicate_row),
             icon = { DatabaseOptionIcon(Res.drawable.copy) },
             onClick = { closeAnd { editor.duplicateRow(block.id, view.id, shownRowIds, rowNoteId) } }
         )
         DatabaseMenuOption(
-            label = "Select row",
+            label = stringResource(Res.string.database_select_row),
             icon = { DatabaseOptionIcon(Res.drawable.square_check) },
             onClick = { closeAnd(onSelectRow) }
         )
         DatabaseMenuOption(
-            label = "Delete row",
+            label = stringResource(Res.string.database_delete_row),
             icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
             labelColor = MaterialTheme.colorScheme.error,
             onClick = { closeAnd { editor.deleteRow(rowNoteId) } }
         )
         if (isPropertyColumn) {
             DatabaseMenuLayer(
-                title = "Remove column",
+                title = stringResource(Res.string.database_remove_column),
                 showsCloseButton = false,
                 anchor = { openLayer ->
                     DatabaseMenuOption(
-                        label = "Remove column",
+                        label = stringResource(Res.string.database_remove_column),
                         icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
                         labelColor = MaterialTheme.colorScheme.error,
                         onClick = openLayer
@@ -260,7 +274,7 @@ private fun DatabaseCellActionsMenu(
                 }
             ) { closeLayerAnd ->
                 DatabaseRemoveColumnConfirmation(
-                    label = block.labelOf(column),
+                    label = block.displayLabelOf(column),
                     rowCount = rowCount,
                     onCancel = { closeLayerAnd { } },
                     onRemove = { closeLayerAnd { closeAnd { editor.removeColumn(block.id, column) } } }
@@ -281,7 +295,7 @@ private fun DatabaseInsertColumnOption(
     closeMenuAnd: (() -> Unit) -> Unit
 ) {
     DatabaseMenuLayer(
-        title = "Add property",
+        title = stringResource(Res.string.database_add_property),
         anchor = { openLayer ->
             DatabaseMenuOption(label = label, icon = { DatabaseOptionIcon(icon) }, onClick = openLayer)
         },

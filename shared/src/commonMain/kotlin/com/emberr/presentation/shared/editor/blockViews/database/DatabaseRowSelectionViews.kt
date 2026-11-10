@@ -40,7 +40,6 @@ import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.isNumberBeingTyped
-import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.tagPoolKey
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.domain.model.withDateRange
@@ -63,6 +62,25 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Instant
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.database_checked
+import emberr.shared.generated.resources.database_clear
+import emberr.shared.generated.resources.database_duplicate
+import emberr.shared.generated.resources.database_edit
+import emberr.shared.generated.resources.database_edit_rows
+import emberr.shared.generated.resources.database_no_options_saved_yet
+import emberr.shared.generated.resources.database_no_people_added_yet
+import emberr.shared.generated.resources.database_no_properties_to_edit
+import emberr.shared.generated.resources.database_pick_a_date
+import emberr.shared.generated.resources.database_rows_selected
+import emberr.shared.generated.resources.database_set_for_every_row
+import emberr.shared.generated.resources.database_set_property_for_selected_rows
+import emberr.shared.generated.resources.database_type_a_number
+import emberr.shared.generated.resources.database_type_a_value
+import emberr.shared.generated.resources.database_unchecked
+import emberr.shared.generated.resources.editor_clear_selection_sentence_case
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseRowCheckboxCell(
@@ -107,7 +125,7 @@ internal fun DatabaseSelectionBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "${selectedRowIds.size} selected",
+            text = pluralStringResource(Res.plurals.database_rows_selected, selectedRowIds.size, selectedRowIds.size),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1
@@ -116,17 +134,17 @@ internal fun DatabaseSelectionBar(
         val hasSelectedRows = selectedRowIds.isNotEmpty()
         Box {
             DatabaseSelectionBarButton(
-                label = "Edit",
+                label = stringResource(Res.string.database_edit),
                 icon = Res.drawable.pen,
                 enabled = hasSelectedRows,
                 onClick = { runAfterKeyboardCloses { showsEditMenu = true } }
             )
-            DatabaseMenu(expanded = showsEditMenu, title = "Edit ${selectedRowIds.size} rows", onDismiss = { showsEditMenu = false }) { closeMenuAnd ->
+            DatabaseMenu(expanded = showsEditMenu, title = pluralStringResource(Res.plurals.database_edit_rows, selectedRowIds.size, selectedRowIds.size), onDismiss = { showsEditMenu = false }) { closeMenuAnd ->
                 DatabaseBulkEditChoices(block = block, selectedRowIds = selectedRowIds, editor = editor, closeMenuAnd = closeMenuAnd)
             }
         }
         DatabaseSelectionBarButton(
-            label = "Duplicate",
+            label = stringResource(Res.string.database_duplicate),
             icon = Res.drawable.copy,
             enabled = hasSelectedRows,
             onClick = {
@@ -135,7 +153,7 @@ internal fun DatabaseSelectionBar(
             }
         )
         DatabaseSelectionBarButton(
-            label = "Delete",
+            label = stringResource(Res.string.common_delete),
             icon = Res.drawable.trash,
             isDestructive = true,
             enabled = hasSelectedRows,
@@ -144,10 +162,10 @@ internal fun DatabaseSelectionBar(
                 onClearSelection()
             }
         )
-        IconTooltip(text = "Clear selection") {
+        IconTooltip(text = stringResource(Res.string.editor_clear_selection_sentence_case)) {
             Icon(
                 painter = painterResource(Res.drawable.x),
-                contentDescription = "Clear selection",
+                contentDescription = stringResource(Res.string.editor_clear_selection_sentence_case),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier
                     .clip(CircleShape)
@@ -193,13 +211,13 @@ private fun DatabaseBulkEditChoices(
 ) {
     val editableColumns = block.columns.filterNot { block.isFormulaColumn(it) }
     if (editableColumns.isEmpty()) {
-        DatabaseMenuMessage(text = "No properties to edit yet", color = MaterialTheme.colorScheme.outline)
+        DatabaseMenuMessage(text = stringResource(Res.string.database_no_properties_to_edit), color = MaterialTheme.colorScheme.outline)
     }
 
-    DatabaseMenuSectionLabel(text = "Set a property for every selected row")
+    DatabaseMenuSectionLabel(text = stringResource(Res.string.database_set_property_for_selected_rows))
     editableColumns.forEach { column ->
         key(column) {
-            val label = block.labelOf(column)
+            val label = block.displayLabelOf(column)
             fun setEveryCell(change: (PropertyBlock) -> PropertyBlock) = editor.updateCells(block.id, selectedRowIds, column, change)
 
             DatabaseMenuLayer(
@@ -234,8 +252,8 @@ private fun DatabaseBulkValueChoices(
     when {
         valueType.holdsTags -> DatabaseBulkOptionChoices(column = column, editor = editor, onSet = onSet)
         valueType.holdsCheck -> {
-            DatabaseMenuOption(label = "Checked", isSelected = false, onClick = { onSet { it.copy(isChecked = true) } })
-            DatabaseMenuOption(label = "Unchecked", isSelected = false, onClick = { onSet { it.copy(isChecked = false) } })
+            DatabaseMenuOption(label = stringResource(Res.string.database_checked), isSelected = false, onClick = { onSet { it.copy(isChecked = true) } })
+            DatabaseMenuOption(label = stringResource(Res.string.database_unchecked), isSelected = false, onClick = { onSet { it.copy(isChecked = false) } })
         }
         valueType.holdsDate -> DatabaseBulkDateChoices(onSet = onSet)
         valueType.holdsPeople -> DatabaseBulkPeopleChoices(onSet = onSet)
@@ -255,7 +273,7 @@ private fun DatabaseBulkOptionChoices(
     }.collectAsState(initial = emptyList())
 
     if (savedTags.isEmpty()) {
-        DatabaseMenuMessage(text = "No options saved yet", color = MaterialTheme.colorScheme.outline)
+        DatabaseMenuMessage(text = stringResource(Res.string.database_no_options_saved_yet), color = MaterialTheme.colorScheme.outline)
     }
     savedTags.forEach { tag ->
         DatabaseMenuOption(
@@ -281,7 +299,7 @@ private fun DatabaseBulkPeopleChoices(onSet: ((PropertyBlock) -> PropertyBlock) 
     val people = rememberPeopleToPick().orEmpty()
 
     if (people.isEmpty()) {
-        DatabaseMenuMessage(text = "No people added yet", color = MaterialTheme.colorScheme.outline)
+        DatabaseMenuMessage(text = stringResource(Res.string.database_no_people_added_yet), color = MaterialTheme.colorScheme.outline)
     }
     people.forEach { person ->
         DatabaseMenuOption(
@@ -300,7 +318,7 @@ private fun DatabaseBulkDateChoices(onSet: ((PropertyBlock) -> PropertyBlock) ->
     var showsDatePicker by remember { mutableStateOf(false) }
     val timeZone = TimeZone.currentSystemDefault()
 
-    DatabaseMenuOption(label = "Pick a date", onClick = { showsDatePicker = true })
+    DatabaseMenuOption(label = stringResource(Res.string.database_pick_a_date), onClick = { showsDatePicker = true })
     DatabaseMenuSectionDivider()
     DatabaseBulkClearOption(onClear = { onSet { it.withDateRange(PropertyDateRange()) } })
 
@@ -325,13 +343,13 @@ private fun DatabaseBulkTextChoices(holdsNumber: Boolean, onSet: ((PropertyBlock
         EmberrTextField(
             value = typedText,
             onValueChange = { text -> if (!holdsNumber || isNumberBeingTyped(text)) typedText = text.replace('\n', ' ') },
-            placeholder = if (holdsNumber) "Type a number" else "Type a value",
+            placeholder = stringResource(if (holdsNumber) Res.string.database_type_a_number else Res.string.database_type_a_value),
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
             keyboardOptions = if (holdsNumber) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
             onSubmit = { onSet { it.copy(text = typedText) } }
         )
     }
-    DatabaseMenuOption(label = "Set for every row", onClick = { onSet { it.copy(text = typedText) } })
+    DatabaseMenuOption(label = stringResource(Res.string.database_set_for_every_row), onClick = { onSet { it.copy(text = typedText) } })
     DatabaseMenuSectionDivider()
     DatabaseBulkClearOption(onClear = { onSet { it.copy(text = "") } })
 }
@@ -339,7 +357,7 @@ private fun DatabaseBulkTextChoices(holdsNumber: Boolean, onSet: ((PropertyBlock
 @Composable
 private fun DatabaseBulkClearOption(onClear: () -> Unit) {
     DatabaseMenuOption(
-        label = "Clear",
+        label = stringResource(Res.string.database_clear),
         icon = { DatabaseOptionIcon(Res.drawable.x, tint = MaterialTheme.colorScheme.error) },
         labelColor = MaterialTheme.colorScheme.error,
         onClick = onClear

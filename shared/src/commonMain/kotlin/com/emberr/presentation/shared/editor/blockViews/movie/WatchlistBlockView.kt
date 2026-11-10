@@ -65,6 +65,16 @@ import com.emberr.presentation.shared.editor.hidesEditorToolbarWhileFocused
 import kotlinx.coroutines.delay
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import emberr.shared.generated.resources.editor_block_watchlist
+import emberr.shared.generated.resources.movie_watchlist_clear_filters
+import emberr.shared.generated.resources.movie_watchlist_clear_search
+import emberr.shared.generated.resources.movie_watchlist_empty_hint
+import emberr.shared.generated.resources.movie_watchlist_no_titles_match_filters
+import emberr.shared.generated.resources.movie_watchlist_no_titles_match_search
+import emberr.shared.generated.resources.movie_watchlist_no_titles_yet
+import emberr.shared.generated.resources.movie_watchlist_search_placeholder
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 private const val NEW_TITLE_HIGHLIGHT_MILLIS = 1_200L
 private const val TITLE_RESIZE_MILLIS = 260
@@ -193,7 +203,7 @@ fun WatchlistBlockView(
                 onQueryChange = { searchText = it },
                 onClose = ::closeSearch,
                 onSearchAction = {},
-                placeholder = "Search this watchlist",
+                placeholder = stringResource(Res.string.movie_watchlist_search_placeholder),
                 fieldModifier = Modifier
                     .focusRequester(searchFocusRequester)
                     .hidesEditorToolbarWhileFocused()
@@ -309,13 +319,13 @@ private fun WatchlistTitles(
         titles == null -> Unit
         titles.isEmpty() && !isAddingTitle -> WatchlistEmptyState(onAddTitle = onAddTitle)
         shownTitles.isEmpty() && titles.isNotEmpty() && searchText.isNotBlank() -> WatchlistNoMatches(
-            message = "No titles match \"${searchText.trim()}\"",
-            clearLabel = "Clear search",
+            message = stringResource(Res.string.movie_watchlist_no_titles_match_search, searchText.trim()),
+            clearLabel = stringResource(Res.string.movie_watchlist_clear_search),
             onClear = onClearSearch
         )
         shownTitles.isEmpty() && titles.isNotEmpty() -> WatchlistNoMatches(
-            message = "No titles match these filters",
-            clearLabel = "Clear filters",
+            message = stringResource(Res.string.movie_watchlist_no_titles_match_filters),
+            clearLabel = stringResource(Res.string.movie_watchlist_clear_filters),
             onClear = { editor.changeView(block.id, openView.id) { it.copy(filters = emptyList()) } }
         )
         openView.layout == WatchlistView.BOARD -> WatchlistBoard(
@@ -396,7 +406,7 @@ private fun WatchlistHeader(
         decorationBox = { innerTextField ->
             if (titleText.isEmpty()) {
                 Text(
-                    text = "Watchlist",
+                    text = stringResource(Res.string.editor_block_watchlist),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -450,13 +460,13 @@ private fun WatchlistEmptyState(onAddTitle: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = "No titles yet",
+            text = stringResource(Res.string.movie_watchlist_no_titles_yet),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.outline,
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Add a movie or show to start your watchlist",
+            text = stringResource(Res.string.movie_watchlist_empty_hint),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline,
             textAlign = TextAlign.Center

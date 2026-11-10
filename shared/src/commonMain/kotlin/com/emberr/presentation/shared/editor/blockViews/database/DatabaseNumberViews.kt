@@ -53,6 +53,15 @@ import com.emberr.presentation.shared.editor.blockViews.property.PropertyTextVal
 import com.emberr.presentation.shared.editor.blockViews.property.toTextAlign
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.hash
+import emberr.shared.generated.resources.database_decimal_places
+import emberr.shared.generated.resources.database_decimal_places_default
+import emberr.shared.generated.resources.database_empty_value
+import emberr.shared.generated.resources.database_full_at
+import emberr.shared.generated.resources.database_number_format
+import emberr.shared.generated.resources.database_show_as
+import emberr.shared.generated.resources.database_show_number
+import emberr.shared.generated.resources.editor_table_format
+import org.jetbrains.compose.resources.stringResource
 
 private val ProgressBarHeight = 6.dp
 private val ProgressRingSize = 18.dp
@@ -172,7 +181,7 @@ internal fun DatabaseFormattedNumberCell(
         ) {
             if (number == null) {
                 Text(
-                    text = "Empty",
+                    text = stringResource(Res.string.database_empty_value),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.outline,
                     textAlign = alignment.toTextAlign(),
@@ -195,20 +204,20 @@ internal fun DatabaseNumberFormatOption(
     fun save(changedFormat: DatabaseNumberFormat) = editor.setNumberFormat(block.id, column, changedFormat)
 
     DatabaseMenuLayer(
-        title = "Number format",
+        title = stringResource(Res.string.database_number_format),
         anchor = { openLayer ->
             DatabaseMenuOption(
-                label = "Number format",
+                label = stringResource(Res.string.database_number_format),
                 icon = { DatabaseOptionIcon(Res.drawable.hash) },
-                trailing = { DatabaseMenuTrailingText(text = format.style.label) },
+                trailing = { DatabaseMenuTrailingText(text = format.style.displayName()) },
                 onClick = openLayer
             )
         }
     ) { _ ->
-        DatabaseMenuSectionLabel(text = "Format")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_format))
         DatabaseNumberStyle.entries.forEach { style ->
             DatabaseMenuOption(
-                label = style.label,
+                label = style.displayName(),
                 isSelected = style == format.style,
                 trailing = { DatabaseMenuTrailingText(text = format.copy(style = style, display = DatabaseNumberDisplay.NUMBER).textFor(1234.5)) },
                 onClick = { save(format.copy(style = style)) }
@@ -217,17 +226,17 @@ internal fun DatabaseNumberFormatOption(
 
         DatabaseMenuSectionDivider()
         DatabaseMenuLayer(
-            title = "Decimal places",
+            title = stringResource(Res.string.database_decimal_places),
             anchor = { openLayer ->
                 DatabaseMenuOption(
-                    label = "Decimal places",
-                    trailing = { DatabaseMenuTrailingText(text = format.decimalPlaces?.toString() ?: "Default") },
+                    label = stringResource(Res.string.database_decimal_places),
+                    trailing = { DatabaseMenuTrailingText(text = format.decimalPlaces?.toString() ?: stringResource(Res.string.database_decimal_places_default)) },
                     onClick = openLayer
                 )
             }
         ) { closeLayerAnd ->
             DatabaseMenuOption(
-                label = "Default",
+                label = stringResource(Res.string.database_decimal_places_default),
                 isSelected = format.decimalPlaces == null,
                 onClick = { closeLayerAnd { save(format.copy(decimalPlaces = null)) } }
             )
@@ -241,21 +250,21 @@ internal fun DatabaseNumberFormatOption(
         }
 
         DatabaseMenuSectionDivider()
-        DatabaseMenuSectionLabel(text = "Show as")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.database_show_as))
         DatabaseNumberDisplay.entries.forEach { display ->
             DatabaseMenuOption(
-                label = display.label,
+                label = display.displayName(),
                 isSelected = display == format.display,
                 onClick = { save(format.copy(display = display)) }
             )
         }
         if (format.display != DatabaseNumberDisplay.NUMBER) {
-            DatabaseMenuSectionLabel(text = "Full at")
+            DatabaseMenuSectionLabel(text = stringResource(Res.string.database_full_at))
             DatabaseMenuContent {
                 DatabaseProgressGoalField(goal = format.progressGoal, onGoalChange = { save(format.copy(progressGoal = it)) })
             }
             DatabaseMenuOption(
-                label = "Show number",
+                label = stringResource(Res.string.database_show_number),
                 trailing = { EmberrSwitch(isOn = format.showsNumberWithProgress) },
                 onClick = { save(format.copy(showsNumberWithProgress = !format.showsNumberWithProgress)) }
             )

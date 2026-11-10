@@ -62,7 +62,6 @@ import com.emberr.domain.model.DatabaseCustomProperty
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.columnKey
 import com.emberr.domain.model.customPropertyWithId
-import com.emberr.domain.model.labelOf
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.properties.PropertyEditor
 import com.emberr.presentation.properties.PropertyEditorState
@@ -87,6 +86,34 @@ import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import com.emberr.presentation.shared.editor.blockViews.property.displayName
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.database_add_property
+import emberr.shared.generated.resources.database_add_to_properties
+import emberr.shared.generated.resources.database_column_width
+import emberr.shared.generated.resources.database_delete_property
+import emberr.shared.generated.resources.database_delete_property_question
+import emberr.shared.generated.resources.database_delete_property_with_values
+import emberr.shared.generated.resources.database_delete_shared_property_question
+import emberr.shared.generated.resources.database_edit_named
+import emberr.shared.generated.resources.database_edit_property
+import emberr.shared.generated.resources.database_filtered
+import emberr.shared.generated.resources.database_from_properties
+import emberr.shared.generated.resources.database_in_this_database
+import emberr.shared.generated.resources.database_new_property
+import emberr.shared.generated.resources.database_remove_column
+import emberr.shared.generated.resources.database_remove_column_question
+import emberr.shared.generated.resources.database_remove_column_with_values
+import emberr.shared.generated.resources.database_row_count
+import emberr.shared.generated.resources.database_search_properties
+import emberr.shared.generated.resources.editor_remove
+import emberr.shared.generated.resources.editor_table_add_column
+import emberr.shared.generated.resources.editor_table_column_width_px
+import emberr.shared.generated.resources.editor_table_decrease_column_width
+import emberr.shared.generated.resources.editor_table_increase_column_width
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseHeaderRow(
@@ -220,7 +247,7 @@ private fun DatabaseColumnHeader(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = block.labelOf(column),
+                    text = block.displayLabelOf(column),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.outline,
                     maxLines = 1,
@@ -231,7 +258,7 @@ private fun DatabaseColumnHeader(
                     Spacer(modifier = Modifier.width(6.dp))
                     Icon(
                         painter = painterResource(Res.drawable.funnel),
-                        contentDescription = "Filtered",
+                        contentDescription = stringResource(Res.string.database_filtered),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(12.dp)
                     )
@@ -308,7 +335,7 @@ private fun DatabaseColumnMenu(
     editor: DatabaseBlockEditor,
     onDismiss: () -> Unit
 ) {
-    val label = block.labelOf(column)
+    val label = block.displayLabelOf(column)
     val customProperty = (column as? DatabaseColumnTarget.CustomProperty)?.let { block.customPropertyWithId(it.propertyId) }
 
     DatabaseMenu(expanded = expanded, title = label, onDismiss = onDismiss) { closeMenuAnd ->
@@ -318,11 +345,11 @@ private fun DatabaseColumnMenu(
         }
         if (customProperty != null) {
             DatabaseMenuLayer(
-                title = "Edit property",
+                title = stringResource(Res.string.database_edit_property),
                 showsCloseButton = false,
                 anchor = { openLayer ->
                     DatabaseMenuOption(
-                        label = "Edit property",
+                        label = stringResource(Res.string.database_edit_property),
                         icon = { DatabaseOptionIcon(Res.drawable.pen) },
                         onClick = openLayer
                     )
@@ -347,11 +374,11 @@ private fun DatabaseColumnMenu(
         DatabaseCalculateOption(block = block, column = column, editor = editor, closeMenuAnd = closeMenuAnd)
         if (column != DatabaseColumnTarget.NotesTitle) {
             DatabaseMenuLayer(
-                title = "Remove column",
+                title = stringResource(Res.string.database_remove_column),
                 showsCloseButton = false,
                 anchor = { openLayer ->
                     DatabaseMenuOption(
-                        label = "Remove column",
+                        label = stringResource(Res.string.database_remove_column),
                         icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
                         labelColor = MaterialTheme.colorScheme.error,
                         onClick = openLayer
@@ -377,13 +404,18 @@ internal fun DatabaseRemoveColumnConfirmation(
     onRemove: () -> Unit
 ) {
     val message = if (rowCount == 0) {
-        "Remove $label?"
+        stringResource(Res.string.database_remove_column_question, label)
     } else {
-        "Remove $label? Its values in ${rowCountText(rowCount)} will be deleted."
+        pluralStringResource(Res.plurals.database_remove_column_with_values, rowCount, label, rowCount)
     }
 
     DatabaseMenuMessage(text = message)
-    DatabaseMenuButtons(cancelText = "Cancel", onCancel = onCancel, confirmText = "Remove", onConfirm = onRemove)
+    DatabaseMenuButtons(
+        cancelText = stringResource(Res.string.common_cancel),
+        onCancel = onCancel,
+        confirmText = stringResource(Res.string.editor_remove),
+        onConfirm = onRemove
+    )
 }
 
 @Composable
@@ -395,20 +427,26 @@ private fun DatabaseDeletePropertyConfirmation(
     onDelete: () -> Unit
 ) {
     val message = when {
-        isShared -> "Delete $name? It will be removed from every note and database that uses it."
-        rowCount == 0 -> "Delete $name?"
-        else -> "Delete $name? Its values in ${rowCountText(rowCount)} will be deleted."
+        isShared -> stringResource(Res.string.database_delete_shared_property_question, name)
+        rowCount == 0 -> stringResource(Res.string.database_delete_property_question, name)
+        else -> pluralStringResource(Res.plurals.database_delete_property_with_values, rowCount, name, rowCount)
     }
 
     DatabaseMenuMessage(text = message)
-    DatabaseMenuButtons(cancelText = "Cancel", onCancel = onCancel, confirmText = "Delete", onConfirm = onDelete)
+    DatabaseMenuButtons(
+        cancelText = stringResource(Res.string.common_cancel),
+        onCancel = onCancel,
+        confirmText = stringResource(Res.string.common_delete),
+        onConfirm = onDelete
+    )
 }
 
-internal fun rowCountText(rowCount: Int): String = if (rowCount == 1) "1 row" else "$rowCount rows"
+@Composable
+internal fun rowCountText(rowCount: Int): String = pluralStringResource(Res.plurals.database_row_count, rowCount, rowCount)
 
 @Composable
 internal fun DatabaseColumnWidthStepper(width: Int, onWidthChosen: (Int) -> Unit) {
-    DatabaseMenuSectionLabel(text = "Column width")
+    DatabaseMenuSectionLabel(text = stringResource(Res.string.database_column_width))
     Row(
         modifier = Modifier.padding(horizontal = DatabaseMenuTextInset, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -416,11 +454,11 @@ internal fun DatabaseColumnWidthStepper(width: Int, onWidthChosen: (Int) -> Unit
     ) {
         DatabaseWidthStepButton(
             icon = Res.drawable.minus,
-            contentDescription = "Decrease column width",
+            contentDescription = stringResource(Res.string.editor_table_decrease_column_width),
             onClick = { onWidthChosen(widthOneStepNarrower(width)) }
         )
         Text(
-            text = "$width px",
+            text = stringResource(Res.string.editor_table_column_width_px, width),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
@@ -428,7 +466,7 @@ internal fun DatabaseColumnWidthStepper(width: Int, onWidthChosen: (Int) -> Unit
         )
         DatabaseWidthStepButton(
             icon = Res.drawable.plus,
-            contentDescription = "Increase column width",
+            contentDescription = stringResource(Res.string.editor_table_increase_column_width),
             onClick = { onWidthChosen(widthOneStepWider(width)) }
         )
     }
@@ -483,17 +521,17 @@ private fun DatabaseAddColumnButton(
         contentAlignment = Alignment.Center
     ) {
         if (!inSelectionMode) {
-            IconTooltip(text = "Add column") {
+            IconTooltip(text = stringResource(Res.string.editor_table_add_column)) {
                 Icon(
                     painter = painterResource(Res.drawable.plus),
-                    contentDescription = "Add column",
+                    contentDescription = stringResource(Res.string.editor_table_add_column),
                     tint = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.size(17.dp)
                 )
             }
         }
 
-        DatabaseMenu(expanded = showPicker, title = "Add property", onDismiss = { showPicker = false }, hasSearchBar = true) { closePickerAnd ->
+        DatabaseMenu(expanded = showPicker, title = stringResource(Res.string.database_add_property), onDismiss = { showPicker = false }, hasSearchBar = true) { closePickerAnd ->
             DatabaseAddColumnChoices(
                 block = block,
                 rowCount = rowCount,
@@ -528,11 +566,12 @@ internal fun DatabaseAddColumnChoices(
                 )
         ) {
             val builtInPropertiesToAdd = block.builtInPropertiesNotYetAdded()
-                .filter { matchesSearch(it.label) }
-                .sortedBy { it.label.lowercase() }
-            builtInPropertiesToAdd.forEach { propertyType ->
+                .map { propertyType -> propertyType to propertyType.displayName() }
+                .filter { (_, propertyName) -> matchesSearch(propertyName) }
+                .sortedBy { (_, propertyName) -> propertyName.lowercase() }
+            builtInPropertiesToAdd.forEach { (propertyType, propertyName) ->
                 DatabaseMenuOption(
-                    label = propertyType.label,
+                    label = propertyName,
                     icon = { DatabaseOptionIcon(propertyType.iconResource()) },
                     onClick = { closePickerAnd { editor.addColumn(block.id, DatabaseColumnTarget.Property(propertyType), beforeColumn = beforeColumn) } }
                 )
@@ -543,21 +582,21 @@ internal fun DatabaseAddColumnChoices(
                 if (builtInPropertiesToAdd.isNotEmpty()) {
                     DatabaseMenuSectionDivider()
                 }
-                DatabaseMenuSectionLabel(text = "In this database")
+                DatabaseMenuSectionLabel(text = stringResource(Res.string.database_in_this_database))
                 hiddenProperties.forEach { property ->
                     key(property.id) {
                         DatabaseMenuLayer(
-                            title = "Edit property",
+                            title = stringResource(Res.string.database_edit_property),
                             showsCloseButton = false,
                             anchor = { openLayer ->
                                 DatabaseMenuOption(
                                     label = property.name,
                                     icon = { DatabaseOptionIcon(property.valueType.iconResource()) },
                                     trailing = {
-                                        IconTooltip(text = "Edit property") {
+                                        IconTooltip(text = stringResource(Res.string.database_edit_property)) {
                                             Icon(
                                                 painter = painterResource(Res.drawable.pen),
-                                                contentDescription = "Edit ${property.name}",
+                                                contentDescription = stringResource(Res.string.database_edit_named, property.name),
                                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                                 modifier = Modifier
                                                     .clip(CircleShape)
@@ -592,7 +631,7 @@ internal fun DatabaseAddColumnChoices(
                 if (builtInPropertiesToAdd.isNotEmpty() || hiddenProperties.isNotEmpty()) {
                     DatabaseMenuSectionDivider()
                 }
-                DatabaseMenuSectionLabel(text = "From Properties")
+                DatabaseMenuSectionLabel(text = stringResource(Res.string.database_from_properties))
                 sharedPropertiesToAdd.forEach { property ->
                     key(property.id) {
                         DatabaseMenuOption(
@@ -605,11 +644,11 @@ internal fun DatabaseAddColumnChoices(
             }
 
             DatabaseMenuLayer(
-                title = "New property",
+                title = stringResource(Res.string.database_new_property),
                 showsCloseButton = false,
                 anchor = { openLayer ->
                     DatabaseMenuOption(
-                        label = "New property",
+                        label = stringResource(Res.string.database_new_property),
                         icon = { DatabaseOptionIcon(Res.drawable.plus) },
                         onClick = openLayer
                     )
@@ -631,7 +670,7 @@ internal fun DatabaseAddColumnChoices(
             EmberrTextField(
                 value = searchText,
                 onValueChange = { searchText = it },
-                placeholder = "Search properties",
+                placeholder = stringResource(Res.string.database_search_properties),
                 modifier = Modifier.doesNotWidenMenu().fillMaxWidth().padding(vertical = 6.dp)
             )
         }
@@ -640,7 +679,7 @@ internal fun DatabaseAddColumnChoices(
         EmberrSearchSheetBody(
             searchText = searchText,
             onSearchTextChange = { searchText = it },
-            placeholder = "Search properties"
+            placeholder = stringResource(Res.string.database_search_properties)
         ) {
             propertyChoices()
         }
@@ -697,7 +736,7 @@ internal fun DatabaseNewPropertyPage(
 
 @Composable
 private fun DatabaseAddToPropertiesOption(isOn: Boolean, onToggle: () -> Unit) {
-    val label = "Add to Properties"
+    val label = stringResource(Res.string.database_add_to_properties)
     if (isDesktopPlatform) {
         EmberrDesktopMenuOption(
             label = label,
@@ -742,7 +781,7 @@ private fun DatabaseEditPropertyPage(
         (isShared && sharedProperties.any { it.id != property.id && it.name.equals(state.name.trim(), ignoreCase = true) })
 
     DatabaseMenuLayer(
-        title = "Delete property",
+        title = stringResource(Res.string.database_delete_property),
         showsCloseButton = false,
         anchor = { openLayer ->
             DatabaseMenuContent {

@@ -24,7 +24,6 @@ import com.emberr.domain.model.DatabaseView
 import com.emberr.domain.model.DatabaseViewType
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.columnKey
-import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.presentation.shared.components.EmberrSwitch
@@ -47,6 +46,31 @@ import emberr.shared.generated.resources.sigma
 import emberr.shared.generated.resources.textalign_justifycenter2
 import emberr.shared.generated.resources.trash
 import org.koin.compose.koinInject
+import com.emberr.presentation.shared.editor.blockViews.property.displayName
+import emberr.shared.generated.resources.database_add_a_property
+import emberr.shared.generated.resources.database_all_views
+import emberr.shared.generated.resources.database_card_size
+import emberr.shared.generated.resources.database_count_only
+import emberr.shared.generated.resources.database_delete_database
+import emberr.shared.generated.resources.database_freeze_title_column
+import emberr.shared.generated.resources.database_group_by
+import emberr.shared.generated.resources.database_group_calculation
+import emberr.shared.generated.resources.database_group_dates_by
+import emberr.shared.generated.resources.database_hidden_column_count
+import emberr.shared.generated.resources.database_hide_empty_groups
+import emberr.shared.generated.resources.database_load_limit
+import emberr.shared.generated.resources.database_lock_database
+import emberr.shared.generated.resources.database_named_view
+import emberr.shared.generated.resources.database_new_property
+import emberr.shared.generated.resources.database_no_columns_to_show_or_hide
+import emberr.shared.generated.resources.database_row_count_setting
+import emberr.shared.generated.resources.database_settings_title
+import emberr.shared.generated.resources.database_show_hide_columns
+import emberr.shared.generated.resources.database_wrap_cell_text
+import emberr.shared.generated.resources.editor_show_cover_image_sentence_case
+import emberr.shared.generated.resources.editor_show_icon
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseSettingsMenu(
@@ -61,23 +85,23 @@ internal fun DatabaseSettingsMenu(
     val tableLayoutStore = koinInject<DeviceTableLayoutStore>()
     val freezesTitleColumn = rememberDeviceTableLayout(block.id).freezesTitleColumn(activeView)
 
-    DatabaseMenu(expanded = expanded, title = "Database settings", onDismiss = onDismiss) { closeAnd ->
-        DatabaseMenuSectionLabel(text = "${activeView.name.ifBlank { activeView.type.label }} view")
+    DatabaseMenu(expanded = expanded, title = stringResource(Res.string.database_settings_title), onDismiss = onDismiss) { closeAnd ->
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.database_named_view, activeView.name.ifBlank { activeView.type.displayName() }))
         DatabaseMenuOption(
-            label = "Show icon",
+            label = stringResource(Res.string.editor_show_icon),
             icon = { DatabaseOptionIcon(Res.drawable.ghost_smile) },
             trailing = { EmberrSwitch(isOn = activeView.showsIcon) },
             onClick = { editor.setViewShowsIcon(block.id, activeView.id, !activeView.showsIcon) }
         )
         if (activeView.type == DatabaseViewType.TABLE) {
             DatabaseMenuOption(
-                label = "Freeze title column",
+                label = stringResource(Res.string.database_freeze_title_column),
                 icon = { DatabaseOptionIcon(Res.drawable.pin_tack) },
                 trailing = { EmberrSwitch(isOn = freezesTitleColumn) },
                 onClick = { tableLayoutStore.setFreezesTitleColumn(block.id, activeView.id, !freezesTitleColumn) }
             )
             DatabaseMenuOption(
-                label = "Wrap cell text",
+                label = stringResource(Res.string.database_wrap_cell_text),
                 icon = { DatabaseOptionIcon(Res.drawable.textalign_justifycenter2) },
                 trailing = { EmberrSwitch(isOn = activeView.wrapsCellText) },
                 onClick = { editor.changeView(block.id, activeView.id) { it.copy(wrapsCellText = !it.wrapsCellText) } }
@@ -85,7 +109,7 @@ internal fun DatabaseSettingsMenu(
         }
         if (activeView.type != DatabaseViewType.TABLE) {
             DatabaseMenuOption(
-                label = "Show cover image",
+                label = stringResource(Res.string.editor_show_cover_image_sentence_case),
                 icon = { DatabaseOptionIcon(Res.drawable.image) },
                 trailing = { EmberrSwitch(isOn = activeView.showsCoverImage) },
                 onClick = { editor.setViewShowsCoverImage(block.id, activeView.id, !activeView.showsCoverImage) }
@@ -96,14 +120,14 @@ internal fun DatabaseSettingsMenu(
         }
         if (activeView.type != DatabaseViewType.TABLE) {
             DatabaseMenuLayer(
-                title = "Card size",
+                title = stringResource(Res.string.database_card_size),
                 anchor = { openLayer ->
                     DatabaseMenuOption(
-                        label = "Card size",
+                        label = stringResource(Res.string.database_card_size),
                         icon = { DatabaseOptionIcon(Res.drawable.maximize_2) },
                         trailing = {
                             Text(
-                                text = activeView.cardSize.label,
+                                text = activeView.cardSize.displayName(),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.outline,
                                 maxLines = 1
@@ -115,7 +139,7 @@ internal fun DatabaseSettingsMenu(
             ) { closeLayerAnd ->
                 DatabaseCardSize.entries.forEach { cardSize ->
                     DatabaseMenuOption(
-                        label = cardSize.label,
+                        label = cardSize.displayName(),
                         isSelected = cardSize == activeView.cardSize,
                         onClick = { closeLayerAnd { editor.setViewCardSize(block.id, activeView.id, cardSize) } }
                     )
@@ -124,19 +148,19 @@ internal fun DatabaseSettingsMenu(
         }
 
         DatabaseMenuLayer(
-            title = "Load limit",
+            title = stringResource(Res.string.database_load_limit),
             anchor = { openLayer ->
                 DatabaseMenuOption(
-                    label = "Load limit",
+                    label = stringResource(Res.string.database_load_limit),
                     icon = { DatabaseOptionIcon(Res.drawable.arrow_down) },
-                    trailing = { DatabaseSettingValueText(text = "${activeView.loadLimit} rows") },
+                    trailing = { DatabaseSettingValueText(text = rowCountText(activeView.loadLimit)) },
                     onClick = openLayer
                 )
             }
         ) { closeLayerAnd ->
             DatabaseLoadLimitChoices.forEach { loadLimit ->
                 DatabaseMenuOption(
-                    label = "$loadLimit rows",
+                    label = rowCountText(loadLimit),
                     isSelected = loadLimit == activeView.loadLimit,
                     onClick = { closeLayerAnd { editor.changeView(block.id, activeView.id) { it.copy(loadLimit = loadLimit) } } }
                 )
@@ -144,15 +168,15 @@ internal fun DatabaseSettingsMenu(
         }
 
         DatabaseMenuLayer(
-            title = "Show / hide columns",
+            title = stringResource(Res.string.database_show_hide_columns),
             anchor = { openLayer ->
                 DatabaseMenuOption(
-                    label = "Show / hide columns",
+                    label = stringResource(Res.string.database_show_hide_columns),
                     icon = { DatabaseOptionIcon(Res.drawable.eye_open) },
                     trailing = if (hiddenColumnCount == 0) null else {
                         {
                             Text(
-                                text = "$hiddenColumnCount hidden",
+                                text = pluralStringResource(Res.plurals.database_hidden_column_count, hiddenColumnCount, hiddenColumnCount),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.outline,
                                 maxLines = 1
@@ -164,13 +188,13 @@ internal fun DatabaseSettingsMenu(
             }
         ) { _ ->
             if (block.columns.isEmpty()) {
-                DatabaseMenuMessage(text = "No columns to show or hide yet", color = MaterialTheme.colorScheme.outline)
+                DatabaseMenuMessage(text = stringResource(Res.string.database_no_columns_to_show_or_hide), color = MaterialTheme.colorScheme.outline)
             }
             block.columns.forEach { column ->
                 key(column.columnKey) {
                     val isShown = column.columnKey !in activeView.hiddenColumnKeys
                     DatabaseMenuOption(
-                        label = block.labelOf(column),
+                        label = block.displayLabelOf(column),
                         icon = { DatabaseOptionIcon(block.iconOf(column)) },
                         trailing = { EmberrSwitch(isOn = isShown) },
                         onClick = { editor.setColumnShown(block.id, activeView.id, column, !isShown) }
@@ -180,22 +204,22 @@ internal fun DatabaseSettingsMenu(
         }
 
         DatabaseMenuSectionDivider()
-        DatabaseMenuSectionLabel(text = "All views")
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.database_all_views))
         DatabaseMenuOption(
-            label = "Row count",
+            label = stringResource(Res.string.database_row_count_setting),
             icon = { DatabaseOptionIcon(Res.drawable.hash) },
             trailing = { EmberrSwitch(isOn = block.showsRowCount) },
             onClick = { editor.setShowsRowCount(block.id, !block.showsRowCount) }
         )
         DatabaseColorRulesOption(block = block, editor = editor)
         DatabaseMenuOption(
-            label = "Lock database",
+            label = stringResource(Res.string.database_lock_database),
             icon = { DatabaseOptionIcon(Res.drawable.lock) },
             trailing = { EmberrSwitch(isOn = block.isLocked) },
             onClick = { closeAnd { editor.setLocked(block.id, true) } }
         )
         DatabaseMenuOption(
-            label = "Delete database",
+            label = stringResource(Res.string.database_delete_database),
             icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
             labelColor = MaterialTheme.colorScheme.error,
             onClick = { closeAnd(onDelete) }
@@ -209,12 +233,12 @@ private fun DatabaseBoardGroupingOptions(block: DatabaseBlock, view: DatabaseVie
     val groupValueType = groupColumn?.let { block.valueTypeOf(it) }
 
     DatabaseMenuLayer(
-        title = "Group by",
+        title = stringResource(Res.string.database_group_by),
         anchor = { openLayer ->
             DatabaseMenuOption(
-                label = "Group by",
+                label = stringResource(Res.string.database_group_by),
                 icon = { DatabaseOptionIcon(Res.drawable.kanban) },
-                trailing = if (groupColumn == null) null else { { DatabaseSettingValueText(text = block.labelOf(groupColumn)) } },
+                trailing = if (groupColumn == null) null else { { DatabaseSettingValueText(text = block.displayLabelOf(groupColumn)) } },
                 onClick = openLayer
             )
         }
@@ -222,7 +246,7 @@ private fun DatabaseBoardGroupingOptions(block: DatabaseBlock, view: DatabaseVie
         block.groupableColumns().forEach { column ->
             key(column.columnKey) {
                 DatabaseMenuOption(
-                    label = block.labelOf(column),
+                    label = block.displayLabelOf(column),
                     icon = { DatabaseOptionIcon(block.iconOf(column)) },
                     isSelected = column == groupColumn,
                     onClick = { closeLayerAnd { editor.changeView(block.id, view.id) { it.groupedBy(column.columnKey) } } }
@@ -237,11 +261,11 @@ private fun DatabaseBoardGroupingOptions(block: DatabaseBlock, view: DatabaseVie
             if (block.groupableColumns().isNotEmpty()) {
                 DatabaseMenuSectionDivider()
             }
-            DatabaseMenuSectionLabel(text = "Add a property")
+            DatabaseMenuSectionLabel(text = stringResource(Res.string.database_add_a_property))
         }
         builtInPropertiesToAdd.forEach { propertyType ->
             DatabaseMenuOption(
-                label = propertyType.label,
+                label = propertyType.displayName(),
                 icon = { DatabaseOptionIcon(propertyType.iconResource()) },
                 onClick = {
                     closeLayerAnd { editor.addColumn(block.id, DatabaseColumnTarget.Property(propertyType), viewIdToGroupByIt = view.id) }
@@ -270,11 +294,11 @@ private fun DatabaseBoardGroupingOptions(block: DatabaseBlock, view: DatabaseVie
         }
 
         DatabaseMenuLayer(
-            title = "New property",
+            title = stringResource(Res.string.database_new_property),
             showsCloseButton = false,
             anchor = { openNewProperty ->
                 DatabaseMenuOption(
-                    label = "New property",
+                    label = stringResource(Res.string.database_new_property),
                     icon = { DatabaseOptionIcon(Res.drawable.plus) },
                     onClick = openNewProperty
                 )
@@ -293,19 +317,19 @@ private fun DatabaseBoardGroupingOptions(block: DatabaseBlock, view: DatabaseVie
 
     if (groupValueType?.holdsDate == true) {
         DatabaseMenuLayer(
-            title = "Group dates by",
+            title = stringResource(Res.string.database_group_dates_by),
             anchor = { openLayer ->
                 DatabaseMenuOption(
-                    label = "Group dates by",
+                    label = stringResource(Res.string.database_group_dates_by),
                     icon = { DatabaseOptionIcon(Res.drawable.calendar_day) },
-                    trailing = { DatabaseSettingValueText(text = view.dateGrouping.label) },
+                    trailing = { DatabaseSettingValueText(text = view.dateGrouping.displayName()) },
                     onClick = openLayer
                 )
             }
         ) { closeLayerAnd ->
             DatabaseDateGrouping.entries.forEach { dateGrouping ->
                 DatabaseMenuOption(
-                    label = dateGrouping.label,
+                    label = dateGrouping.displayName(),
                     isSelected = dateGrouping == view.dateGrouping,
                     onClick = {
                         closeLayerAnd {
@@ -320,7 +344,7 @@ private fun DatabaseBoardGroupingOptions(block: DatabaseBlock, view: DatabaseVie
     }
 
     DatabaseMenuOption(
-        label = "Hide empty groups",
+        label = stringResource(Res.string.database_hide_empty_groups),
         icon = { DatabaseOptionIcon(Res.drawable.eye_closed) },
         trailing = { EmberrSwitch(isOn = view.hidesEmptyGroups) },
         onClick = { editor.changeView(block.id, view.id) { it.copy(hidesEmptyGroups = !it.hidesEmptyGroups) } }
@@ -336,20 +360,20 @@ private fun DatabaseGroupCalculationOption(block: DatabaseBlock, view: DatabaseV
     val columnsToCalculate = listOf<DatabaseColumnTarget>(DatabaseColumnTarget.NotesTitle) + block.columns
 
     DatabaseMenuLayer(
-        title = "Group calculation",
+        title = stringResource(Res.string.database_group_calculation),
         anchor = { openLayer ->
             DatabaseMenuOption(
-                label = "Group calculation",
+                label = stringResource(Res.string.database_group_calculation),
                 icon = { DatabaseOptionIcon(Res.drawable.sigma) },
                 trailing = if (calculationColumn == null || calculation == null) null else {
-                    { DatabaseSettingValueText(text = "${calculation.shortLabel} · ${block.labelOf(calculationColumn)}") }
+                    { DatabaseSettingValueText(text = "${calculation.shortDisplayName()} · ${block.displayLabelOf(calculationColumn)}") }
                 },
                 onClick = openLayer
             )
         }
     ) { closeCalculationAnd ->
         DatabaseMenuOption(
-            label = "Count only",
+            label = stringResource(Res.string.database_count_only),
             isSelected = calculation == null,
             onClick = {
                 closeCalculationAnd {
@@ -361,10 +385,10 @@ private fun DatabaseGroupCalculationOption(block: DatabaseBlock, view: DatabaseV
             key(column.columnKey) {
                 val valueType = block.valueTypeOf(column) ?: PropertyValueType.TEXT
                 DatabaseMenuLayer(
-                    title = block.labelOf(column),
+                    title = block.displayLabelOf(column),
                     anchor = { openColumn ->
                         DatabaseMenuOption(
-                            label = block.labelOf(column),
+                            label = block.displayLabelOf(column),
                             icon = { DatabaseOptionIcon(block.iconOf(column)) },
                             isSelected = column == calculationColumn && calculation != null,
                             onClick = openColumn
@@ -373,7 +397,7 @@ private fun DatabaseGroupCalculationOption(block: DatabaseBlock, view: DatabaseV
                 ) { closeColumnAnd ->
                     calculationsFor(valueType).forEach { option ->
                         DatabaseMenuOption(
-                            label = option.label,
+                            label = option.displayName(),
                             isSelected = column == calculationColumn && option == calculation,
                             onClick = {
                                 closeColumnAnd {

@@ -75,6 +75,18 @@ import emberr.shared.generated.resources.ellipsis
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import emberr.shared.generated.resources.movie_close_details
+import emberr.shared.generated.resources.movie_created_by
+import emberr.shared.generated.resources.movie_delete_block
+import emberr.shared.generated.resources.movie_directed_by
+import emberr.shared.generated.resources.movie_genre
+import emberr.shared.generated.resources.movie_options
+import emberr.shared.generated.resources.movie_remove_from_watchlist
+import emberr.shared.generated.resources.movie_runtime
+import emberr.shared.generated.resources.movie_seasons
+import emberr.shared.generated.resources.movie_show_details
+import emberr.shared.generated.resources.movie_tmdb_rating
+import org.jetbrains.compose.resources.stringResource
 
 private val TicketStubWidth = 150.dp
 private val TicketNotchRadius = 10.dp
@@ -245,10 +257,11 @@ internal fun MovieTicketCard(
         } else if (editor != null) {
             Box(modifier = cornerModifier) {
                 if (!isDesktopPlatform || isHovered || isMenuOpen) {
-                    IconTooltip(text = "Options") {
+                    val optionsLabel = stringResource(Res.string.movie_options)
+                    IconTooltip(text = optionsLabel) {
                         Icon(
                             painter = painterResource(Res.drawable.ellipsis),
-                            contentDescription = "Options",
+                            contentDescription = optionsLabel,
                             tint = MaterialTheme.colorScheme.outline,
                             modifier = Modifier
                                 .clip(CircleShape)
@@ -264,7 +277,7 @@ internal fun MovieTicketCard(
                     onDismiss = { isMenuOpen = false },
                     onChangeTitle = if (isInWatchlist) null else ({ editor.changeTitle(block.id) }),
                     onRefreshDetails = { editor.refreshDetails(block.id, details) },
-                    deleteLabel = if (isInWatchlist) "Remove from watchlist" else "Delete block",
+                    deleteLabel = if (isInWatchlist) stringResource(Res.string.movie_remove_from_watchlist) else stringResource(Res.string.movie_delete_block),
                     onDelete = onDelete
                 )
             }
@@ -360,7 +373,7 @@ private fun PhoneTicketContent(
     ) {
         RatingBesideStatus(
             modifier = Modifier.fillMaxSize(),
-            rating = { RatingBesideLabel(details = details, label = "TMDB rating") },
+            rating = { RatingBesideLabel(details = details, label = stringResource(Res.string.movie_tmdb_rating)) },
             fullStatus = { TicketStatusChip(block = block, onClick = onStatusClick) },
             shortStatus = { TicketStatusChip(block = block, onClick = onStatusClick, showsLabel = false) }
         )
@@ -422,12 +435,12 @@ private fun TicketMainPart(
                     ) {
                         details.lengthFact()?.let { (label, value) -> TicketFact(label = label, value = value) }
                         if (details.genres.isNotEmpty()) {
-                            TicketFact(label = "Genre", value = details.genres.joinToString(" / "))
+                            TicketFact(label = stringResource(Res.string.movie_genre), value = details.genres.joinToString(" / "))
                         }
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Show details",
+                        text = stringResource(Res.string.movie_show_details),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                         textDecoration = TextDecoration.Underline,
@@ -470,7 +483,7 @@ private fun TicketTitleLines(
     val textOverflow = if (scrollsLongText) TextOverflow.Clip else TextOverflow.Ellipsis
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
         SpacedLabel(
-            text = listOf(details.kind.label, details.yearText).filter { it.isNotBlank() }.joinToString(" · "),
+            text = listOf(details.kind.displayName(), details.yearText).filter { it.isNotBlank() }.joinToString(" · "),
             modifier = textModifier
         )
         Text(
@@ -534,7 +547,7 @@ private fun TicketStub(
         verticalArrangement = Arrangement.Center
     ) {
         RatingNumber(details = details, style = bigRatingStyle())
-        SpacedLabel(text = "TMDB rating")
+        SpacedLabel(text = stringResource(Res.string.movie_tmdb_rating))
         Spacer(modifier = Modifier.height(14.dp))
         TicketStatusChip(block = block, onClick = onStatusClick)
     }
@@ -624,7 +637,7 @@ private fun TicketStatusChip(block: MovieBlock, onClick: (() -> Unit)?, showsLab
         )
         if (showsLabel) {
             Text(
-                text = block.watchStatus.label.uppercase(),
+                text = block.watchStatus.displayName().uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 letterSpacing = 1.sp,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -704,7 +717,7 @@ internal fun BoardTicketCard(
                 modifier = Modifier.fillMaxWidth(),
                 mainPart = { BoardTicketMainPart(block = block, details = details, modifier = Modifier.fillMaxWidth()) }
             ) {
-                RatingBesideLabel(details = details, label = "TMDB rating")
+                RatingBesideLabel(details = details, label = stringResource(Res.string.movie_tmdb_rating))
             }
         }
     }
@@ -803,7 +816,7 @@ internal fun GalleryTicketCard(
             },
             fullStatus = { TicketStatusChip(block = block, onClick = onStatusClick) },
             shortStatus = {
-                IconTooltip(text = block.watchStatus.label) {
+                IconTooltip(text = block.watchStatus.displayName()) {
                     TicketStatusChip(block = block, onClick = onStatusClick, showsLabel = false)
                 }
             }
@@ -864,7 +877,7 @@ internal fun MovieDetailsTicket(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     RatingNumber(details = details, style = bigRatingStyle())
-                    SpacedLabel(text = "TMDB rating")
+                    SpacedLabel(text = stringResource(Res.string.movie_tmdb_rating))
                 }
                 DetailsCloseButton(onClose = onClose, modifier = Modifier.align(Alignment.TopEnd).padding(10.dp))
             }
@@ -889,7 +902,7 @@ internal fun MovieDetailsTicket(
         Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
             RatingBesideLabel(
                 details = details,
-                label = "TMDB rating",
+                label = stringResource(Res.string.movie_tmdb_rating),
                 modifier = Modifier.weight(1f),
                 numberStyle = titleRatingStyle()
             )
@@ -949,7 +962,7 @@ private fun DetailsCloseButton(onClose: () -> Unit, modifier: Modifier = Modifie
     ) {
         Icon(
             painter = painterResource(Res.drawable.x),
-            contentDescription = "Close details",
+            contentDescription = stringResource(Res.string.movie_close_details),
             tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(16.dp)
         )
@@ -1046,13 +1059,19 @@ private fun TicketSkeletonMainPart(
     }
 }
 
+@Composable
 private fun MovieDetails.creditLine(): String? {
     if (creditNames.isEmpty()) return null
-    val prefix = if (kind == MovieKind.MOVIE) "Directed by" else "Created by"
-    return "$prefix ${creditNames.joinToString(", ")}"
+    val names = creditNames.joinToString(", ")
+    return if (kind == MovieKind.MOVIE) {
+        stringResource(Res.string.movie_directed_by, names)
+    } else {
+        stringResource(Res.string.movie_created_by, names)
+    }
 }
 
+@Composable
 private fun MovieDetails.lengthFact(): Pair<String, String>? = when (kind) {
-    MovieKind.MOVIE -> runtimeMinutes?.let { "Runtime" to minutesText(it) }
-    MovieKind.SHOW -> seasonCount?.let { "Seasons" to it.toString() }
+    MovieKind.MOVIE -> runtimeMinutes?.let { stringResource(Res.string.movie_runtime) to minutesText(it) }
+    MovieKind.SHOW -> seasonCount?.let { stringResource(Res.string.movie_seasons) to it.toString() }
 }

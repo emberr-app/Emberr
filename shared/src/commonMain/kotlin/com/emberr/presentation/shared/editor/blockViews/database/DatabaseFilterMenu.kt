@@ -40,7 +40,6 @@ import com.emberr.domain.model.DatabaseFilter
 import com.emberr.domain.model.DatabaseFilterCondition
 import com.emberr.domain.model.DatabaseRelativeDate
 import com.emberr.domain.model.PropertyValueType
-import com.emberr.domain.model.labelOf
 import com.emberr.domain.model.tagPoolKey
 import com.emberr.domain.model.valueTypeOf
 import com.emberr.presentation.shared.components.EmberrTextField
@@ -63,6 +62,21 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Instant
+import emberr.shared.generated.resources.database_add_filter
+import emberr.shared.generated.resources.database_exact_date
+import emberr.shared.generated.resources.database_exact_date_value
+import emberr.shared.generated.resources.database_filter
+import emberr.shared.generated.resources.database_filter_by
+import emberr.shared.generated.resources.database_no_options_saved_yet
+import emberr.shared.generated.resources.database_no_people_added_yet
+import emberr.shared.generated.resources.database_pick_a_date
+import emberr.shared.generated.resources.database_pick_a_person
+import emberr.shared.generated.resources.database_pick_a_range
+import emberr.shared.generated.resources.database_pick_an_option
+import emberr.shared.generated.resources.database_remove_filter
+import emberr.shared.generated.resources.database_type_a_number
+import emberr.shared.generated.resources.database_type_a_value
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseFilterMenu(
@@ -74,9 +88,9 @@ internal fun DatabaseFilterMenu(
     val view = block.activeView()
     val columnTargets = listOf<DatabaseColumnTarget>(DatabaseColumnTarget.NotesTitle) + block.columns
 
-    DatabaseMenu(expanded = expanded, title = "Filter", onDismiss = onDismiss) { _ ->
+    DatabaseMenu(expanded = expanded, title = stringResource(Res.string.database_filter), onDismiss = onDismiss) { _ ->
         if (view.filters.isEmpty()) {
-            DatabaseMenuSectionLabel(text = "Filter by")
+            DatabaseMenuSectionLabel(text = stringResource(Res.string.database_filter_by))
             DatabaseColumnChoices(
                 block = block,
                 columns = columnTargets,
@@ -92,7 +106,7 @@ internal fun DatabaseFilterMenu(
                             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                         )
                     }
-                    DatabaseMenuSectionLabel(text = block.labelOf(filter.target))
+                    DatabaseMenuSectionLabel(text = block.displayLabelOf(filter.target))
                     DatabaseFilterEditor(
                         block = block,
                         filter = filter,
@@ -105,10 +119,10 @@ internal fun DatabaseFilterMenu(
 
             DatabaseMenuSectionDivider()
             DatabaseMenuLayer(
-                title = "Add filter",
+                title = stringResource(Res.string.database_add_filter),
                 anchor = { openLayer ->
                     DatabaseMenuOption(
-                        label = "Add filter",
+                        label = stringResource(Res.string.database_add_filter),
                         icon = { DatabaseOptionIcon(Res.drawable.plus) },
                         onClick = openLayer
                     )
@@ -132,17 +146,17 @@ internal fun DatabaseFilterEditor(
     editor: DatabaseBlockEditor,
     onChange: ((DatabaseFilter) -> DatabaseFilter) -> Unit,
     onRemove: () -> Unit,
-    removeLabel: String = "Remove filter"
+    removeLabel: String = stringResource(Res.string.database_remove_filter)
 ) {
     val valueType = block.valueTypeOf(filter.target) ?: PropertyValueType.TEXT
-    val columnLabel = block.labelOf(filter.target)
+    val columnLabel = block.displayLabelOf(filter.target)
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = DatabaseMenuRowInset, vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             DatabaseMenuLayer(
                 title = columnLabel,
                 anchor = { openLayer ->
-                    MenuChoiceButton(text = filter.condition.label, onClick = openLayer)
+                    MenuChoiceButton(text = filter.condition.displayName(), onClick = openLayer)
                 },
                 anchorIsMenuRow = false
             ) { closeLayerAnd ->
@@ -206,7 +220,7 @@ internal fun DatabaseFilterEditor(
                 else -> EmberrTextField(
                     value = filter.text,
                     onValueChange = { text -> onChange { it.copy(text = text) } },
-                    placeholder = if (valueType.holdsNumber) "Type a number" else "Type a value",
+                    placeholder = stringResource(if (valueType.holdsNumber) Res.string.database_type_a_number else Res.string.database_type_a_value),
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = if (valueType.holdsNumber) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default
                 )
@@ -225,27 +239,28 @@ private fun DatabaseFilterDateValue(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val timeZone = TimeZone.currentSystemDefault()
-    val shownValue = relativeDate?.label ?: date?.let { formatPropertyDate(it) }
+    val shownValue = relativeDate?.displayName() ?: date?.let { formatPropertyDate(it) }
 
     DatabaseMenuLayer(
         title = title,
         anchor = { openLayer ->
             DatabaseFilterValueBox(onClick = openLayer) {
-                DatabaseFilterValueText(text = shownValue ?: "Pick a date", isPlaceholder = shownValue == null)
+                DatabaseFilterValueText(text = shownValue ?: stringResource(Res.string.database_pick_a_date), isPlaceholder = shownValue == null)
             }
         },
         anchorIsMenuRow = false
     ) { closeLayerAnd ->
         DatabaseRelativeDate.entries.forEach { option ->
             DatabaseMenuOption(
-                label = option.label,
+                label = option.displayName(),
                 isSelected = option == relativeDate,
                 onClick = { closeLayerAnd { onRelativeDateChosen(option) } }
             )
         }
         DatabaseMenuSectionDivider()
         DatabaseMenuOption(
-            label = date?.let { "Exact date: ${formatPropertyDate(it)}" } ?: "Exact date",
+            label = date?.let { stringResource(Res.string.database_exact_date_value, formatPropertyDate(it)) }
+                ?: stringResource(Res.string.database_exact_date),
             isSelected = relativeDate == null && date != null,
             onClick = { closeLayerAnd { showDatePicker = true } }
         )
@@ -273,14 +288,14 @@ private fun DatabaseFilterDateRangeValue(
         title = title,
         anchor = { openLayer ->
             DatabaseFilterValueBox(onClick = openLayer) {
-                DatabaseFilterValueText(text = dateRange?.label ?: "Pick a range", isPlaceholder = dateRange == null)
+                DatabaseFilterValueText(text = dateRange?.displayName() ?: stringResource(Res.string.database_pick_a_range), isPlaceholder = dateRange == null)
             }
         },
         anchorIsMenuRow = false
     ) { closeLayerAnd ->
         DatabaseDateRange.entries.forEach { option ->
             DatabaseMenuOption(
-                label = option.label,
+                label = option.displayName(),
                 isSelected = option == dateRange,
                 onClick = { closeLayerAnd { onDateRangeChosen(option) } }
             )
@@ -301,7 +316,7 @@ private fun DatabaseFilterValueText(text: String, isPlaceholder: Boolean) {
 private fun DatabaseFilterOptionValue(tagName: String?, tagPoolKey: String?, onClick: () -> Unit) {
     DatabaseFilterValueBox(onClick = onClick) {
         if (tagName == null) {
-            Text(text = "Pick an option", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
+            Text(text = stringResource(Res.string.database_pick_an_option), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
         } else {
             PropertyTagChip(tagName = tagName, tagPoolKey = tagPoolKey, textStyle = MaterialTheme.typography.labelSmall)
         }
@@ -313,7 +328,7 @@ private fun DatabaseFilterPersonValue(personNoteId: String?, onClick: () -> Unit
     val person = rememberPeopleToPick()?.firstOrNull { it.id == personNoteId }
     DatabaseFilterValueBox(onClick = onClick) {
         if (person == null) {
-            DatabaseFilterValueText(text = "Pick a person", isPlaceholder = true)
+            DatabaseFilterValueText(text = stringResource(Res.string.database_pick_a_person), isPlaceholder = true)
         } else {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 PersonAvatar(personNoteId = person.id, name = person.name, icon = person.icon, photoPath = person.photoPath, size = 20.dp)
@@ -328,7 +343,7 @@ private fun DatabaseFilterPersonValue(personNoteId: String?, onClick: () -> Unit
 private fun DatabaseFilterPersonChoices(selectedPersonNoteId: String?, onPick: (String) -> Unit) {
     val people = rememberPeopleToPick().orEmpty()
     if (people.isEmpty()) {
-        DatabaseMenuMessage(text = "No people added yet", color = MaterialTheme.colorScheme.outline)
+        DatabaseMenuMessage(text = stringResource(Res.string.database_no_people_added_yet), color = MaterialTheme.colorScheme.outline)
     }
     people.forEach { person ->
         DatabaseMenuOption(
@@ -362,7 +377,7 @@ private fun DatabaseConditionChoices(
 ) {
     filterConditionsFor(valueType).forEach { condition ->
         DatabaseMenuOption(
-            label = condition.label,
+            label = condition.displayName(),
             isSelected = condition == selectedCondition,
             onClick = { onPick(condition) }
         )
@@ -382,7 +397,7 @@ private fun DatabaseOptionChoices(
     val tagNames = (savedTags.map { it.name } + listOfNotNull(filter.tagName)).distinctBy { it.lowercase() }
 
     if (tagNames.isEmpty()) {
-        DatabaseMenuMessage(text = "No options saved yet", color = MaterialTheme.colorScheme.outline)
+        DatabaseMenuMessage(text = stringResource(Res.string.database_no_options_saved_yet), color = MaterialTheme.colorScheme.outline)
     }
     tagNames.forEach { tagName ->
         DatabaseMenuOption(
