@@ -106,6 +106,7 @@ import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.editor.blockViews.callout.accentColor
+import com.emberr.presentation.shared.editor.blockViews.callout.displayName
 import com.emberr.presentation.shared.editor.formatting.HighlightColorCircles
 import com.emberr.presentation.shared.editor.formatting.HighlightColorMenuWidth
 import com.emberr.presentation.shared.editor.formatting.TextFormatContextMenu
@@ -144,6 +145,14 @@ import com.emberr.presentation.shared.editor.text.blockStartPadding
 import com.emberr.presentation.shared.editor.text.blockTextStyle
 import com.emberr.presentation.shared.editor.text.blockVerticalPadding
 import com.emberr.presentation.shared.editor.text.displayedCharacterRect
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.editor_fold_callout
+import emberr.shared.generated.resources.editor_pinned
+import emberr.shared.generated.resources.editor_type_something
+import emberr.shared.generated.resources.editor_unfold_callout
+import emberr.shared.generated.resources.editor_untitled_event
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 val DefaultBlockShape = RoundedCornerShape(12.dp)
 
@@ -206,9 +215,9 @@ fun NoteBlockItem(
     }
 
     val placeholderText = when {
-        block is CheckboxBlock && block.reminderTimestamp != null -> "Untitled event"
-        block is CalloutBlock -> block.calloutType.label
-        isFirstChildOfToggleOrCallout -> "Type something..."
+        block is CheckboxBlock && block.reminderTimestamp != null -> stringResource(Res.string.editor_untitled_event)
+        block is CalloutBlock -> block.calloutType.displayName()
+        isFirstChildOfToggleOrCallout -> stringResource(Res.string.editor_type_something)
         else -> emptyNotePlaceholder
     }
 
@@ -397,11 +406,12 @@ fun NoteBlockItem(
             val fadedLinkColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             val inlineSpans = block.inlineSpansOrEmpty()
             val noteTitlesById = remember(allLinkableNotes) { allLinkableNotes.associate { it.noteId to it.title } }
+            val untitledNoteTitle = stringResource(Res.string.common_untitled)
             val richTextTransformation: VisualTransformation = remember(
-                block is CodeBlock, linkColor, fadedLinkColor, isDarkTheme, validNoteIds, inlineSpans, linkHoverState.hoveredLink, noteTitlesById
+                block is CodeBlock, linkColor, fadedLinkColor, isDarkTheme, validNoteIds, inlineSpans, linkHoverState.hoveredLink, noteTitlesById, untitledNoteTitle
             ) {
                 if (block is CodeBlock) VisualTransformation.None
-                else RichTextVisualTransformation(linkColor, fadedLinkColor, isDarkTheme, validNoteIds, inlineSpans, linkHoverState.hoveredLink, noteTitlesById)
+                else RichTextVisualTransformation(linkColor, fadedLinkColor, isDarkTheme, validNoteIds, inlineSpans, linkHoverState.hoveredLink, noteTitlesById, untitledNoteTitle)
             }
             val latestText by rememberUpdatedState(text)
             val latestRichTextTransformation by rememberUpdatedState(richTextTransformation)
@@ -588,7 +598,7 @@ fun NoteBlockItem(
                     label = "calloutFoldRotation"
                 )
                 Icon(
-                    Icons.Default.ChevronRight, if (block.isExpanded) "Fold callout" else "Unfold callout",
+                    Icons.Default.ChevronRight, if (block.isExpanded) stringResource(Res.string.editor_fold_callout) else stringResource(Res.string.editor_unfold_callout),
                     tint = block.calloutType.accentColor(),
                     modifier = Modifier
                         .padding(end = if (showsPinIcon) 20.dp else 0.dp)
@@ -614,7 +624,7 @@ fun NoteBlockItem(
 
         if (showsPinIcon) {
             Icon(
-                Icons.Default.PushPin, "Pinned",
+                Icons.Default.PushPin, stringResource(Res.string.editor_pinned),
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                 modifier = Modifier
                     .align(Alignment.TopEnd)

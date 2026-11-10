@@ -76,6 +76,15 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
 import kotlin.math.pow
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.editor_copy_image
+import emberr.shared.generated.resources.editor_copy_image_title_case
+import emberr.shared.generated.resources.editor_download
+import emberr.shared.generated.resources.editor_full_screen_image
+import emberr.shared.generated.resources.editor_open_link
+import emberr.shared.generated.resources.editor_open_link_title_case
+import org.jetbrains.compose.resources.stringResource
 
 private const val DoubleTapZoomScale = 2.5f
 private const val MaximumZoomScale = 5f
@@ -254,7 +263,7 @@ fun FullScreenImageScreen(
             ) {
                 AsyncImage(
                     model = request,
-                    contentDescription = "Full Screen Image",
+                    contentDescription = stringResource(Res.string.editor_full_screen_image),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
@@ -353,7 +362,7 @@ fun FullScreenImageScreen(
             hazeState = hazeState,
             applyStatusBarPadding = true,
             contentPadding = topHeaderBarPadding(horizontal = 18.dp),
-            backTooltip = "Back",
+            backTooltip = stringResource(Res.string.common_back),
             onBackClick = closeFullScreen
         )
 
@@ -376,10 +385,10 @@ fun FullScreenImageScreen(
                 ) {
                     val iconSize = 18.dp
 
-                    IconTooltip(text = "Download", position = IconTooltipPosition.Above) {
+                    IconTooltip(text = stringResource(Res.string.editor_download), position = IconTooltipPosition.Above) {
                         Icon(
                             painter = painterResource(Res.drawable.download),
-                            contentDescription = "Download",
+                            contentDescription = stringResource(Res.string.editor_download),
                             modifier = Modifier.size(iconSize).clickable {
                                 if (hasLocalFile) onDownload()
                             },
@@ -390,10 +399,10 @@ fun FullScreenImageScreen(
                     if (onOpenSourceLink != null) {
                         Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
 
-                        IconTooltip(text = "Open link", position = IconTooltipPosition.Above) {
+                        IconTooltip(text = stringResource(Res.string.editor_open_link), position = IconTooltipPosition.Above) {
                             Icon(
                                 painter = painterResource(Res.drawable.square_top_down),
-                                contentDescription = "Open Link",
+                                contentDescription = stringResource(Res.string.editor_open_link_title_case),
                                 modifier = Modifier.size(iconSize).clickable { onOpenSourceLink() },
                                 tint = tint
                             )
@@ -402,10 +411,10 @@ fun FullScreenImageScreen(
 
                     Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
 
-                    IconTooltip(text = "Copy image", position = IconTooltipPosition.Above) {
+                    IconTooltip(text = stringResource(Res.string.editor_copy_image), position = IconTooltipPosition.Above) {
                         Icon(
                             painter = painterResource(Res.drawable.copy),
-                            contentDescription = "Copy Image",
+                            contentDescription = stringResource(Res.string.editor_copy_image_title_case),
                             modifier = Modifier.size(iconSize).clickable {
                                 if (hasLocalFile) onCopy()
                             },
@@ -415,10 +424,10 @@ fun FullScreenImageScreen(
 
                     Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
 
-                    IconTooltip(text = "Delete", position = IconTooltipPosition.Above) {
+                    IconTooltip(text = stringResource(Res.string.common_delete), position = IconTooltipPosition.Above) {
                         Icon(
                             painter = painterResource(Res.drawable.trash),
-                            contentDescription = "Delete",
+                            contentDescription = stringResource(Res.string.common_delete),
                             modifier = Modifier.size(iconSize).clickable {
                                 onDelete()
                             },

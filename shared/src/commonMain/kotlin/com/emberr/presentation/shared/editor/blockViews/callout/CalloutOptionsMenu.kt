@@ -18,6 +18,10 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrSwitch
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.editor_block_callout
+import emberr.shared.generated.resources.editor_callout_foldable
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CalloutOptionsMenu(
@@ -43,10 +47,10 @@ fun CalloutOptionsMenu(
             onDismissRequest = onDismiss,
             modifier = Modifier.width(240.dp)
         ) {
-            EmberrDesktopMenuOption(label = "Foldable", onClick = toggleFoldable, trailing = foldableSwitch)
+            EmberrDesktopMenuOption(label = stringResource(Res.string.editor_callout_foldable), onClick = toggleFoldable, trailing = foldableSwitch)
             CalloutType.entries.forEach { calloutType ->
                 EmberrDesktopMenuOption(
-                    label = calloutType.label,
+                    label = calloutType.displayName(),
                     isSelected = calloutType == block.calloutType,
                     icon = { calloutTypeIcon(calloutType) },
                     onClick = {
@@ -60,14 +64,14 @@ fun CalloutOptionsMenu(
         EmberrBottomSheet(
             expanded = expanded,
             onDismiss = onDismiss,
-            title = "Callout",
+            title = stringResource(Res.string.editor_block_callout),
             contentHorizontalPadding = 0.dp
         ) { closeAnd ->
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                EmberrBottomSheetOption(label = "Foldable", onClick = toggleFoldable, trailing = foldableSwitch)
+                EmberrBottomSheetOption(label = stringResource(Res.string.editor_callout_foldable), onClick = toggleFoldable, trailing = foldableSwitch)
                 CalloutType.entries.forEach { calloutType ->
                     EmberrBottomSheetOption(
-                        label = calloutType.label,
+                        label = calloutType.displayName(),
                         isSelected = calloutType == block.calloutType,
                         icon = { calloutTypeIcon(calloutType) },
                         onClick = { closeAnd { onUpdateStyle(calloutType, block.isFoldable) } }

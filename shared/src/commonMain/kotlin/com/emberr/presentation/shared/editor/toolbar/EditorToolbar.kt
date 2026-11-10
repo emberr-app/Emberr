@@ -65,12 +65,16 @@ import com.emberr.presentation.shared.editor.links.CanvasLinkMenuContent
 import com.emberr.presentation.shared.editor.links.DatabaseLinkMenuContent
 import com.emberr.presentation.shared.editor.links.NoteLinkMenuContent
 import com.emberr.presentation.shared.editor.mention.MENTION_RESULTS_PER_STEP
+import com.emberr.presentation.shared.editor.mention.mentionMenuLabels
 import com.emberr.presentation.shared.editor.mention.mentionMenuSections
 import com.emberr.presentation.shared.editor.slash.DesktopSlashMenuContent
 import com.emberr.presentation.shared.editor.slash.SlashMenuList
 import com.emberr.presentation.shared.editor.slash.rememberCustomProperties
 import com.emberr.presentation.shared.editor.text.currentDateText
 import com.emberr.presentation.shared.editor.text.currentTimeText
+import emberr.shared.generated.resources.editor_close_keyboard
+import emberr.shared.generated.resources.editor_close_keyboard_title_case
+import org.jetbrains.compose.resources.stringResource
 
 enum class MobileMenuState { MAIN, SLASH, MENU, MENTION, LINK_TO_NOTE, LINK_TO_CANVAS, LINK_TO_DATABASE }
 
@@ -257,8 +261,8 @@ fun EditorToolbar(
                                         onToggleFormat = onToggleFormat,
                                         onHighlightClick = { isChoosingHighlightColor = !isChoosingHighlightColor }
                                     )
-                                    ToolbarButton(tooltip = "Close keyboard", onClick = { keyboardController?.hide() }) {
-                                        Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
+                                    ToolbarButton(tooltip = stringResource(Res.string.editor_close_keyboard), onClick = { keyboardController?.hide() }) {
+                                        Icon(painterResource(Res.drawable.keyboard), stringResource(Res.string.editor_close_keyboard_title_case), tint = tint, modifier = Modifier.size(customIconSize))
                                     }
                                 }
                             } else {
@@ -289,7 +293,7 @@ fun EditorToolbar(
                                                         if (isItemEnabled) tint else tint.copy(alpha = 0.3f)
                                                     else -> buttonTint
                                                 }
-                                                ToolbarButton(enabled = isItemEnabled, tooltip = item.title, onClick = { onToolbarItemClick(item) }) {
+                                                ToolbarButton(enabled = isItemEnabled, tooltip = item.label(), onClick = { onToolbarItemClick(item) }) {
                                                     KeyboardToolbarItemIcon(item, itemTint)
                                                 }
                                             }
@@ -297,8 +301,8 @@ fun EditorToolbar(
                                     }
 
                                     if (toolbarItems.isNotEmpty()) ToolbarDivider(tint)
-                                    ToolbarButton(tooltip = "Close keyboard", onClick = { keyboardController?.hide() }) {
-                                        Icon(painterResource(Res.drawable.keyboard), "Close Keyboard", tint = tint, modifier = Modifier.size(customIconSize))
+                                    ToolbarButton(tooltip = stringResource(Res.string.editor_close_keyboard), onClick = { keyboardController?.hide() }) {
+                                        Icon(painterResource(Res.drawable.keyboard), stringResource(Res.string.editor_close_keyboard_title_case), tint = tint, modifier = Modifier.size(customIconSize))
                                     }
                                 }
                             }
@@ -386,8 +390,10 @@ fun EditorToolbar(
                                     Box(modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).verticalScroll(rememberScrollState())) {
                                         var shownNoteCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
                                         var shownPeopleCount by remember(mentionQuery) { mutableIntStateOf(MENTION_RESULTS_PER_STEP) }
-                                        val sections = remember(mentionQuery, allLinkableNotes, shownNoteCount, shownPeopleCount) {
+                                        val mentionLabels = mentionMenuLabels(mentionQuery)
+                                        val sections = remember(mentionQuery, allLinkableNotes, shownNoteCount, shownPeopleCount, mentionLabels) {
                                             mentionMenuSections(
+                                                labels = mentionLabels,
                                                 query = mentionQuery,
                                                 mentionableNotes = allLinkableNotes,
                                                 shownNoteCount = shownNoteCount,

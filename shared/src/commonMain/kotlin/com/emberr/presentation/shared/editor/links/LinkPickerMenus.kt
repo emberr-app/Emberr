@@ -59,6 +59,21 @@ import com.emberr.presentation.shared.editor.slash.SlashMenuIcon
 import com.emberr.presentation.shared.editor.slash.SlashMenuItemData
 import com.emberr.presentation.shared.editor.slash.SlashMenuList
 import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.editor_back_to_commands
+import emberr.shared.generated.resources.editor_block_link_to_canvas
+import emberr.shared.generated.resources.editor_block_link_to_database
+import emberr.shared.generated.resources.editor_block_link_to_note
+import emberr.shared.generated.resources.editor_create_new_note
+import emberr.shared.generated.resources.editor_database_in_note
+import emberr.shared.generated.resources.editor_new_note_named
+import emberr.shared.generated.resources.editor_search_canvases
+import emberr.shared.generated.resources.editor_search_databases
+import emberr.shared.generated.resources.editor_search_notes
+import emberr.shared.generated.resources.editor_untitled_canvas
+import emberr.shared.generated.resources.editor_untitled_database
+import org.jetbrains.compose.resources.stringResource
 
 private val LinkPanelHeight = 300.dp
 
@@ -117,20 +132,23 @@ fun NoteLinkMenuContent(
         allLinkableNotes.filter { it.kind == NoteKind.NOTE && it.title.contains(query, ignoreCase = true) }
     }
 
-    val entries = remember(query, filteredNotes) {
+    val createNewNoteLabel = stringResource(Res.string.editor_create_new_note)
+    val untitledLabel = stringResource(Res.string.common_untitled)
+    val newNoteForQueryLabel = stringResource(Res.string.editor_new_note_named, query)
+    val entries = remember(query, filteredNotes, createNewNoteLabel, untitledLabel, newNoteForQueryLabel) {
         buildList {
             add(
-                SlashMenuItemData("Create new note", Res.drawable.doc_text_plus) {
+                SlashMenuItemData(createNewNoteLabel, Res.drawable.doc_text_plus) {
                     onCreateBlankNote()
                 }
             )
             filteredNotes.forEach { note ->
                 val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Drawable(Res.drawable.doc_text)
-                add(SlashMenuItemData(note.title.ifEmpty { "Untitled" }, icon) { onNoteSelected(note.noteId) })
+                add(SlashMenuItemData(note.title.ifEmpty { untitledLabel }, icon) { onNoteSelected(note.noteId) })
             }
             if (query.isNotBlank()) {
                 add(
-                    SlashMenuItemData("New \"$query\" note", Res.drawable.doc_text_plus) {
+                    SlashMenuItemData(newNoteForQueryLabel, Res.drawable.doc_text_plus) {
                         onCreateNote(query.trim())
                     }
                 )
@@ -141,8 +159,8 @@ fun NoteLinkMenuContent(
     SearchableLinkList(
         query = query,
         onQueryChange = { query = it },
-        searchPlaceholder = "Search notes...",
-        sectionTitle = "Link to Note",
+        searchPlaceholder = stringResource(Res.string.editor_search_notes),
+        sectionTitle = stringResource(Res.string.editor_block_link_to_note),
         entries = entries,
         onDismissRequest = onDismissRequest,
         autoFocusSearch = autoFocusSearch,
@@ -188,9 +206,10 @@ fun CanvasLinkMenuContent(
     var query by remember { mutableStateOf("") }
     val canvases by produceState(initialValue = emptyList<NoteMetadataEntity>()) { value = loadCanvases() }
 
-    val entries = remember(query, canvases) {
+    val untitledCanvasLabel = stringResource(Res.string.editor_untitled_canvas)
+    val entries = remember(query, canvases, untitledCanvasLabel) {
         canvases
-            .map { canvas -> canvas.noteId to canvas.title.ifBlank { "Untitled canvas" } }
+            .map { canvas -> canvas.noteId to canvas.title.ifBlank { untitledCanvasLabel } }
             .filter { (_, title) -> title.contains(query, ignoreCase = true) }
             .map { (canvasNoteId, title) -> SlashMenuItemData(title, Res.drawable.group) { onCanvasSelected(canvasNoteId) } }
     }
@@ -198,8 +217,8 @@ fun CanvasLinkMenuContent(
     SearchableLinkList(
         query = query,
         onQueryChange = { query = it },
-        searchPlaceholder = "Search canvases...",
-        sectionTitle = "Link to Canvas",
+        searchPlaceholder = stringResource(Res.string.editor_search_canvases),
+        sectionTitle = stringResource(Res.string.editor_block_link_to_canvas),
         entries = entries,
         onDismissRequest = onDismissRequest,
         autoFocusSearch = autoFocusSearch,
@@ -245,12 +264,14 @@ fun DatabaseLinkMenuContent(
     var query by remember { mutableStateOf("") }
     val databases by produceState(initialValue = emptyList<LinkableDatabase>()) { value = loadDatabases() }
 
-    val entries = remember(query, databases) {
-        databases
-            .map { database ->
-                val databaseTitle = database.title.ifBlank { "Untitled database" }
-                database.databaseId to "$databaseTitle in ${database.noteTitle.ifBlank { "Untitled" }}"
-            }
+    val untitledDatabaseLabel = stringResource(Res.string.editor_untitled_database)
+    val untitledLabel = stringResource(Res.string.common_untitled)
+    val databaseLabels = databases.map { database ->
+        val databaseTitle = database.title.ifBlank { untitledDatabaseLabel }
+        database.databaseId to stringResource(Res.string.editor_database_in_note, databaseTitle, database.noteTitle.ifBlank { untitledLabel })
+    }
+    val entries = remember(query, databaseLabels) {
+        databaseLabels
             .filter { (_, label) -> label.contains(query, ignoreCase = true) }
             .map { (databaseId, label) -> SlashMenuItemData(label, Res.drawable.database) { onDatabaseSelected(databaseId) } }
     }
@@ -258,8 +279,8 @@ fun DatabaseLinkMenuContent(
     SearchableLinkList(
         query = query,
         onQueryChange = { query = it },
-        searchPlaceholder = "Search databases...",
-        sectionTitle = "Link to Database",
+        searchPlaceholder = stringResource(Res.string.editor_search_databases),
+        sectionTitle = stringResource(Res.string.editor_block_link_to_database),
         entries = entries,
         onDismissRequest = onDismissRequest,
         autoFocusSearch = autoFocusSearch,
@@ -299,7 +320,7 @@ private fun SearchableLinkList(
                 if (onBack != null) {
                     TopBarIconButton(
                         icon = painterResource(Res.drawable.chevron_left),
-                        contentDescription = "Back",
+                        contentDescription = stringResource(Res.string.common_back),
                         bgColor = Color.Transparent,
                         tint = MaterialTheme.colorScheme.primary,
                         hazeState = linkListHazeState,
@@ -329,7 +350,7 @@ private fun SearchableLinkList(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (onBack != null) {
-                IconTooltip(text = "Back to commands") {
+                IconTooltip(text = stringResource(Res.string.editor_back_to_commands)) {
                     Box(
                         modifier = Modifier
                             .size(DesktopLinkBackButtonSize)
@@ -340,7 +361,7 @@ private fun SearchableLinkList(
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.chevron_left),
-                            contentDescription = "Back",
+                            contentDescription = stringResource(Res.string.common_back),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )

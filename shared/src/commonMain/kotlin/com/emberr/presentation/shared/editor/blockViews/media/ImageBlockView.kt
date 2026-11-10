@@ -79,6 +79,22 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.abs
+import emberr.shared.generated.resources.editor_failed_to_copy_image
+import emberr.shared.generated.resources.editor_failed_to_save_image
+import emberr.shared.generated.resources.editor_image_copied
+import emberr.shared.generated.resources.editor_image_saved_to_downloads
+import emberr.shared.generated.resources.editor_image_saved_to_photos
+import org.jetbrains.compose.resources.getString
+import emberr.shared.generated.resources.editor_could_not_load_image_from_link
+import emberr.shared.generated.resources.editor_downloading_image
+import emberr.shared.generated.resources.editor_failed_to_download_image
+import emberr.shared.generated.resources.editor_note_image
+import emberr.shared.generated.resources.editor_paste_image_link_or_upload
+import emberr.shared.generated.resources.editor_take_photo
+import emberr.shared.generated.resources.editor_take_photo_title_case
+import emberr.shared.generated.resources.editor_upload_image
+import emberr.shared.generated.resources.editor_upload_image_title_case
+import org.jetbrains.compose.resources.stringResource
 
 private val MaximumImageBlockHeight = 320.dp
 private val LoadingImageBlockHeight = 180.dp
@@ -154,7 +170,7 @@ fun ImageBlockView(
                         )
                         Spacer(Modifier.width(10.dp))
                         Text(
-                            "Failed to download image - tap to retry",
+                            stringResource(Res.string.editor_failed_to_download_image),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -168,7 +184,7 @@ fun ImageBlockView(
                         )
                         Spacer(Modifier.width(10.dp))
                         Text(
-                            transferText ?: "Downloading image...",
+                            transferText ?: stringResource(Res.string.editor_downloading_image),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -236,7 +252,7 @@ fun ImageBlockView(
                 ) {
                     AsyncImage(
                         model = request,
-                        contentDescription = "Note Image",
+                        contentDescription = stringResource(Res.string.editor_note_image),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
                         onSuccess = { successState ->
@@ -293,9 +309,9 @@ fun ImageBlockView(
                                     val success = imageDownloader.downloadImage(absolutePath, fileName)
                                     showFeedback(
                                         if (success) {
-                                            if (isDesktopPlatform) "Image saved to Downloads" else "Image saved to Photos"
+                                            if (isDesktopPlatform) getString(Res.string.editor_image_saved_to_downloads) else getString(Res.string.editor_image_saved_to_photos)
                                         } else {
-                                            "Failed to save image"
+                                            getString(Res.string.editor_failed_to_save_image)
                                         }
                                     )
                                 }
@@ -303,7 +319,7 @@ fun ImageBlockView(
                             onCopy = {
                                 coroutineScope.launch {
                                     val success = ImageClipboard.copyImageToClipboard(absolutePath)
-                                    showFeedback(if (success) "Image copied to clipboard" else "Failed to copy image")
+                                    showFeedback(if (success) getString(Res.string.editor_image_copied) else getString(Res.string.editor_failed_to_copy_image))
                                 }
                             },
                             onDelete = {
@@ -372,7 +388,7 @@ private fun EmptyImageBlock(
                 Box(modifier = Modifier.weight(1f)) {
                     if (linkText.isEmpty()) {
                         Text(
-                            text = "Paste an image link, or upload one",
+                            text = stringResource(Res.string.editor_paste_image_link_or_upload),
                             style = MaterialTheme.typography.bodyLarge,
                             color = hintColor,
                             maxLines = 1,
@@ -421,18 +437,18 @@ private fun EmptyImageBlock(
                     .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             )
             Spacer(Modifier.width(EmptyImageButtonSidePadding))
-            IconTooltip(text = "Upload image") {
+            IconTooltip(text = stringResource(Res.string.editor_upload_image)) {
                 EmptyImageBlockButton(
                     icon = Res.drawable.upload2,
-                    contentDescription = "Upload Image",
+                    contentDescription = stringResource(Res.string.editor_upload_image_title_case),
                     onClick = { if (inSelectionMode) onToggleSelection() else onRequestPicker() }
                 )
             }
             if (!isDesktopPlatform) {
-                IconTooltip(text = "Take photo") {
+                IconTooltip(text = stringResource(Res.string.editor_take_photo)) {
                     EmptyImageBlockButton(
                         icon = Res.drawable.camera,
-                        contentDescription = "Take Photo",
+                        contentDescription = stringResource(Res.string.editor_take_photo_title_case),
                         onClick = { if (inSelectionMode) onToggleSelection() else onRequestCamera() }
                     )
                 }
@@ -442,7 +458,7 @@ private fun EmptyImageBlock(
 
         if (hasFetchFailed) {
             Text(
-                text = "Couldn't load an image from this link",
+                text = stringResource(Res.string.editor_could_not_load_image_from_link),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(start = 44.dp, end = 14.dp, bottom = 10.dp)

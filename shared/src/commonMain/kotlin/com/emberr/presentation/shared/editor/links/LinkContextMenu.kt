@@ -13,6 +13,16 @@ import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.presentation.shared.components.EmberrPopupMenuRow
 import com.emberr.presentation.shared.components.EmberrPopupMenuSurface
 import com.emberr.presentation.shared.components.MenuAtClickPositionProvider
+import emberr.shared.generated.resources.editor_call_number
+import emberr.shared.generated.resources.editor_copy_email
+import emberr.shared.generated.resources.editor_copy_link_sentence_case
+import emberr.shared.generated.resources.editor_copy_number
+import emberr.shared.generated.resources.editor_open_link
+import emberr.shared.generated.resources.editor_open_note
+import emberr.shared.generated.resources.editor_send_email
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.common_untitled
 
 @Composable
 fun LinkContextMenu(
@@ -40,42 +50,43 @@ fun LinkContextMenu(
             EmberrPopupMenuSurface {
                 when (link) {
                     is HoveredLink.Web -> {
-                        EmberrPopupMenuRow("Open link") {
+                        EmberrPopupMenuRow(stringResource(Res.string.editor_open_link)) {
                             hoverState.closeMenu()
                             webLinkActions.openLink(link.url)
                         }
-                        EmberrPopupMenuRow("Copy link") {
+                        EmberrPopupMenuRow(stringResource(Res.string.editor_copy_link_sentence_case)) {
                             hoverState.closeMenu()
                             webLinkActions.copyLink(link.url)
                         }
                     }
                     is HoveredLink.Note -> {
-                        val noteTitle = findNote(link.noteId)?.title?.ifBlank { "Untitled" } ?: "Untitled"
-                        EmberrPopupMenuRow("Open note") {
+                        val untitledLabel = stringResource(Res.string.common_untitled)
+                        val noteTitle = findNote(link.noteId)?.title?.ifBlank { untitledLabel } ?: untitledLabel
+                        EmberrPopupMenuRow(stringResource(Res.string.editor_open_note)) {
                             hoverState.closeMenu()
                             onOpenNoteLink(link.noteId)
                         }
-                        EmberrPopupMenuRow("Copy link") {
+                        EmberrPopupMenuRow(stringResource(Res.string.editor_copy_link_sentence_case)) {
                             hoverState.closeMenu()
                             webLinkActions.copyLink("[$noteTitle](emberr://note/${link.noteId})")
                         }
                     }
                     is HoveredLink.Email -> {
-                        EmberrPopupMenuRow("Send email") {
+                        EmberrPopupMenuRow(stringResource(Res.string.editor_send_email)) {
                             hoverState.closeMenu()
                             webLinkActions.openEmail(link.email)
                         }
-                        EmberrPopupMenuRow("Copy email") {
+                        EmberrPopupMenuRow(stringResource(Res.string.editor_copy_email)) {
                             hoverState.closeMenu()
                             webLinkActions.copyLink(link.email)
                         }
                     }
                     is HoveredLink.Phone -> {
-                        EmberrPopupMenuRow("Call number") {
+                        EmberrPopupMenuRow(stringResource(Res.string.editor_call_number)) {
                             hoverState.closeMenu()
                             webLinkActions.openPhone(link.phone)
                         }
-                        EmberrPopupMenuRow("Copy number") {
+                        EmberrPopupMenuRow(stringResource(Res.string.editor_copy_number)) {
                             hoverState.closeMenu()
                             webLinkActions.copyLink(link.phone)
                         }

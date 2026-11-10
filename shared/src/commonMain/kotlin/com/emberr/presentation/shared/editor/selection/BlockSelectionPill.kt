@@ -57,6 +57,24 @@ import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
 import com.emberr.presentation.shared.editor.toolbar.DefaultCornerShape
+import emberr.shared.generated.resources.editor_pin
+import emberr.shared.generated.resources.editor_pin_block
+import emberr.shared.generated.resources.editor_unpin
+import emberr.shared.generated.resources.editor_unpin_block
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.editor_add_above
+import emberr.shared.generated.resources.editor_add_below
+import emberr.shared.generated.resources.editor_add_block_above_sentence_case
+import emberr.shared.generated.resources.editor_add_block_below_sentence_case
+import emberr.shared.generated.resources.editor_clear_selection_sentence_case
+import emberr.shared.generated.resources.editor_copy
+import emberr.shared.generated.resources.editor_cut
+import emberr.shared.generated.resources.editor_preview
+import emberr.shared.generated.resources.editor_select_all
+import emberr.shared.generated.resources.editor_select_all_title_case
+import emberr.shared.generated.resources.editor_style_blocks
+import emberr.shared.generated.resources.editor_style_selected_blocks
 
 @Composable
 fun SelectionModeObserver(isSelectionMode: Boolean, onSelectionModeChange: (Boolean) -> Unit) {
@@ -118,13 +136,13 @@ fun BlockSelectionPill(
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 val iconSize = 18.dp
-                IconTooltip(text = "Clear selection", position = IconTooltipPosition.Above) {
+                IconTooltip(text = stringResource(Res.string.editor_clear_selection_sentence_case), position = IconTooltipPosition.Above) {
                     Icon(painterResource(Res.drawable.x), null, modifier = Modifier.size(iconSize).clickable { onClearSelection() }, tint = tint)
                 }
                 Text("$selectedCount", style = MaterialTheme.typography.bodyLarge, color = tint)
                 divider()
 
-                IconTooltip(text = if (isSelectionPinned) "Unpin" else "Pin", position = IconTooltipPosition.Above) {
+                IconTooltip(text = if (isSelectionPinned) stringResource(Res.string.editor_unpin) else stringResource(Res.string.editor_pin), position = IconTooltipPosition.Above) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
@@ -135,23 +153,23 @@ fun BlockSelectionPill(
                     ) {
                         Icon(
                             painterResource(Res.drawable.thumbtack),
-                            if (isSelectionPinned) "Unpin Block" else "Pin Block",
+                            if (isSelectionPinned) stringResource(Res.string.editor_unpin_block) else stringResource(Res.string.editor_pin_block),
                             modifier = Modifier.size(iconSize),
                             tint = tint
                         )
                     }
                 }
-                IconTooltip(text = "Delete", position = IconTooltipPosition.Above) {
-                    Icon(painterResource(Res.drawable.trash), "Delete", modifier = Modifier.size(iconSize).clickable { onDelete() }, tint = tint)
+                IconTooltip(text = stringResource(Res.string.common_delete), position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.trash), stringResource(Res.string.common_delete), modifier = Modifier.size(iconSize).clickable { onDelete() }, tint = tint)
                 }
                 divider()
 
                 if (selectedLinkedNoteBlock != null) {
                     Box {
-                        IconTooltip(text = "Preview", position = IconTooltipPosition.Above) {
+                        IconTooltip(text = stringResource(Res.string.editor_preview), position = IconTooltipPosition.Above) {
                             Icon(
                                 painterResource(Res.drawable.eye_open),
-                                "Preview",
+                                stringResource(Res.string.editor_preview),
                                 modifier = Modifier.size(iconSize + 3.dp).clickable { showLinkedNoteOptions = true },
                                 tint = tint
                             )
@@ -169,7 +187,7 @@ fun BlockSelectionPill(
                 }
 
                 if (showStyleButton) {
-                    IconTooltip(text = "Style blocks", position = IconTooltipPosition.Above) {
+                    IconTooltip(text = stringResource(Res.string.editor_style_blocks), position = IconTooltipPosition.Above) {
                         Box(
                             modifier = Modifier
                                 .clip(CircleShape)
@@ -178,27 +196,27 @@ fun BlockSelectionPill(
                                 .padding(4.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(painterResource(Res.drawable.text_tool_2), "Style Selected Blocks", modifier = Modifier.size(iconSize + 3.dp), tint = tint)
+                            Icon(painterResource(Res.drawable.text_tool_2), stringResource(Res.string.editor_style_selected_blocks), modifier = Modifier.size(iconSize + 3.dp), tint = tint)
                         }
                     }
                     divider()
                 }
 
-                IconTooltip(text = "Select all", position = IconTooltipPosition.Above) {
-                    Icon(painterResource(Res.drawable.select_all), "Select All", modifier = Modifier.size(iconSize).clickable { onSelectAll() }, tint = tint)
+                IconTooltip(text = stringResource(Res.string.editor_select_all), position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.select_all), stringResource(Res.string.editor_select_all_title_case), modifier = Modifier.size(iconSize).clickable { onSelectAll() }, tint = tint)
                 }
-                IconTooltip(text = "Copy", position = IconTooltipPosition.Above) {
-                    Icon(painterResource(Res.drawable.copy), "Copy", modifier = Modifier.size(iconSize).clickable { onCopy() }, tint = tint)
+                IconTooltip(text = stringResource(Res.string.editor_copy), position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.copy), stringResource(Res.string.editor_copy), modifier = Modifier.size(iconSize).clickable { onCopy() }, tint = tint)
                 }
-                IconTooltip(text = "Cut", position = IconTooltipPosition.Above) {
-                    Icon(painterResource(Res.drawable.scissor2), "Cut", modifier = Modifier.size(iconSize).clickable { onCut() }, tint = tint)
+                IconTooltip(text = stringResource(Res.string.editor_cut), position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.scissor2), stringResource(Res.string.editor_cut), modifier = Modifier.size(iconSize).clickable { onCut() }, tint = tint)
                 }
                 divider()
-                IconTooltip(text = "Add block above", position = IconTooltipPosition.Above) {
-                    Icon(painterResource(Res.drawable.arrow_up), "Add above", modifier = Modifier.size(iconSize).clickable { onAddBlockAbove() }, tint = tint)
+                IconTooltip(text = stringResource(Res.string.editor_add_block_above_sentence_case), position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.arrow_up), stringResource(Res.string.editor_add_above), modifier = Modifier.size(iconSize).clickable { onAddBlockAbove() }, tint = tint)
                 }
-                IconTooltip(text = "Add block below", position = IconTooltipPosition.Above) {
-                    Icon(painterResource(Res.drawable.arrow_down), "Add below", modifier = Modifier.size(iconSize).clickable { onAddBlockBelow() }, tint = tint)
+                IconTooltip(text = stringResource(Res.string.editor_add_block_below_sentence_case), position = IconTooltipPosition.Above) {
+                    Icon(painterResource(Res.drawable.arrow_down), stringResource(Res.string.editor_add_below), modifier = Modifier.size(iconSize).clickable { onAddBlockBelow() }, tint = tint)
                 }
             }
         }

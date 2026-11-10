@@ -56,6 +56,21 @@ import com.emberr.presentation.shared.editor.toolbar.InlineFormatButtons
 import com.emberr.presentation.shared.editor.toolbar.ToolbarButton
 import com.emberr.presentation.shared.editor.toolbar.ToolbarDivider
 import com.emberr.presentation.shared.editor.toolbar.ToolbarLabel
+import emberr.shared.generated.resources.editor_align_justify
+import emberr.shared.generated.resources.editor_block_callout
+import emberr.shared.generated.resources.editor_block_checkbox
+import emberr.shared.generated.resources.editor_block_code
+import emberr.shared.generated.resources.editor_block_quote
+import emberr.shared.generated.resources.editor_block_text
+import emberr.shared.generated.resources.editor_style_bar_align_center
+import emberr.shared.generated.resources.editor_style_bar_align_left
+import emberr.shared.generated.resources.editor_style_bar_align_right
+import emberr.shared.generated.resources.editor_style_bar_bulleted_list
+import emberr.shared.generated.resources.editor_style_bar_decrease_indent
+import emberr.shared.generated.resources.editor_style_bar_increase_indent
+import emberr.shared.generated.resources.editor_style_bar_numbered_list
+import emberr.shared.generated.resources.editor_style_bar_toggle_list
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BlockStyleBar(
@@ -104,31 +119,31 @@ fun BlockStyleBar(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        ToolbarButton(tooltip = "Text", onClick = { onChangeBlockType("text") }) {
-                            Icon(Icons.AutoMirrored.Filled.Subject, "Text", tint = tint, modifier = Modifier.size(iconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_block_text), onClick = { onChangeBlockType("text") }) {
+                            Icon(Icons.AutoMirrored.Filled.Subject, stringResource(Res.string.editor_block_text), tint = tint, modifier = Modifier.size(iconSize))
                         }
                         ToolbarLabel("H1", tint) { onChangeBlockType("h1") }
                         ToolbarLabel("H2", tint) { onChangeBlockType("h2") }
-                        ToolbarButton(tooltip = "Checkbox", onClick = { onChangeBlockType("checkbox") }) {
-                            Icon(painterResource(Res.drawable.check_square), "Checkbox", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_block_checkbox), onClick = { onChangeBlockType("checkbox") }) {
+                            Icon(painterResource(Res.drawable.check_square), stringResource(Res.string.editor_block_checkbox), tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
                         }
-                        ToolbarButton(tooltip = "Bulleted list", onClick = { onChangeBlockType("bullet") }) {
-                            Icon(painterResource(Res.drawable.unordered_list), "Bulleted list", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_style_bar_bulleted_list), onClick = { onChangeBlockType("bullet") }) {
+                            Icon(painterResource(Res.drawable.unordered_list), stringResource(Res.string.editor_style_bar_bulleted_list), tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
                         }
-                        ToolbarButton(tooltip = "Numbered list", onClick = { onChangeBlockType("number") }) {
-                            Icon(painterResource(Res.drawable.ordered_list), "Numbered list", tint = tint, modifier = Modifier.size(customIconSize - 3.dp))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_style_bar_numbered_list), onClick = { onChangeBlockType("number") }) {
+                            Icon(painterResource(Res.drawable.ordered_list), stringResource(Res.string.editor_style_bar_numbered_list), tint = tint, modifier = Modifier.size(customIconSize - 3.dp))
                         }
-                        ToolbarButton(tooltip = "Toggle list", onClick = { onChangeBlockType("toggle") }) {
-                            Icon(painterResource(Res.drawable.arrow_right2), "Toggle list", tint = tint, modifier = Modifier.size(customIconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_style_bar_toggle_list), onClick = { onChangeBlockType("toggle") }) {
+                            Icon(painterResource(Res.drawable.arrow_right2), stringResource(Res.string.editor_style_bar_toggle_list), tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(tooltip = "Quote", onClick = { onChangeBlockType("quote") }) {
-                            Icon(painterResource(Res.drawable.quote_down2), "Quote", tint = tint, modifier = Modifier.size(customIconSize - 3.dp))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_block_quote), onClick = { onChangeBlockType("quote") }) {
+                            Icon(painterResource(Res.drawable.quote_down2), stringResource(Res.string.editor_block_quote), tint = tint, modifier = Modifier.size(customIconSize - 3.dp))
                         }
-                        ToolbarButton(tooltip = "Callout", onClick = { onChangeBlockType("callout") }) {
-                            Icon(painterResource(Res.drawable.card_edit2), "Callout", tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_block_callout), onClick = { onChangeBlockType("callout") }) {
+                            Icon(painterResource(Res.drawable.card_edit2), stringResource(Res.string.editor_block_callout), tint = tint, modifier = Modifier.size(customIconSize - 2.dp))
                         }
-                        ToolbarButton(tooltip = "Code", onClick = { onChangeBlockType("code") }) {
-                            Icon(painterResource(Res.drawable.code), "Code", tint = tint, modifier = Modifier.size(customIconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_block_code), onClick = { onChangeBlockType("code") }) {
+                            Icon(painterResource(Res.drawable.code), stringResource(Res.string.editor_block_code), tint = tint, modifier = Modifier.size(customIconSize))
                         }
 
                         ToolbarDivider(tint)
@@ -142,26 +157,26 @@ fun BlockStyleBar(
 
                         ToolbarDivider(tint)
 
-                        ToolbarButton(tooltip = "Align left", onClick = { onSetAlignment(TextAlignment.LEFT) }) {
-                            Icon(painterResource(Res.drawable.textalign_left2), "Align left", tint = tint, modifier = Modifier.size(customIconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_style_bar_align_left), onClick = { onSetAlignment(TextAlignment.LEFT) }) {
+                            Icon(painterResource(Res.drawable.textalign_left2), stringResource(Res.string.editor_style_bar_align_left), tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(tooltip = "Align right", onClick = { onSetAlignment(TextAlignment.RIGHT) }) {
-                            Icon(painterResource(Res.drawable.textalign_right2), "Align right", tint = tint, modifier = Modifier.size(customIconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_style_bar_align_right), onClick = { onSetAlignment(TextAlignment.RIGHT) }) {
+                            Icon(painterResource(Res.drawable.textalign_right2), stringResource(Res.string.editor_style_bar_align_right), tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(tooltip = "Align center", onClick = { onSetAlignment(TextAlignment.CENTER) }) {
-                            Icon(painterResource(Res.drawable.textalign_center2), "Align center", tint = tint, modifier = Modifier.size(customIconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_style_bar_align_center), onClick = { onSetAlignment(TextAlignment.CENTER) }) {
+                            Icon(painterResource(Res.drawable.textalign_center2), stringResource(Res.string.editor_style_bar_align_center), tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(tooltip = "Justify", onClick = { onSetAlignment(TextAlignment.JUSTIFY) }) {
-                            Icon(painterResource(Res.drawable.textalign_justifycenter2), "Justify", tint = tint, modifier = Modifier.size(customIconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_align_justify), onClick = { onSetAlignment(TextAlignment.JUSTIFY) }) {
+                            Icon(painterResource(Res.drawable.textalign_justifycenter2), stringResource(Res.string.editor_align_justify), tint = tint, modifier = Modifier.size(customIconSize))
                         }
 
                         ToolbarDivider(tint)
 
-                        ToolbarButton(tooltip = "Decrease indent", onClick = { onAdjustIndentation(false) }) {
-                            Icon(painterResource(Res.drawable.indent_right), "Decrease indent", tint = tint, modifier = Modifier.size(customIconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_style_bar_decrease_indent), onClick = { onAdjustIndentation(false) }) {
+                            Icon(painterResource(Res.drawable.indent_right), stringResource(Res.string.editor_style_bar_decrease_indent), tint = tint, modifier = Modifier.size(customIconSize))
                         }
-                        ToolbarButton(tooltip = "Increase indent", onClick = { onAdjustIndentation(true) }) {
-                            Icon(painterResource(Res.drawable.indent_left), "Increase indent", tint = tint, modifier = Modifier.size(customIconSize))
+                        ToolbarButton(tooltip = stringResource(Res.string.editor_style_bar_increase_indent), onClick = { onAdjustIndentation(true) }) {
+                            Icon(painterResource(Res.drawable.indent_left), stringResource(Res.string.editor_style_bar_increase_indent), tint = tint, modifier = Modifier.size(customIconSize))
                         }
                     }
                 }

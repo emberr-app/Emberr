@@ -60,6 +60,14 @@ import kotlin.time.Instant
 import com.emberr.presentation.shared.editor.EditorActions
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Stable
+import emberr.shared.generated.resources.editor_reminder_all_day
+import emberr.shared.generated.resources.editor_reminder_all_day_range
+import emberr.shared.generated.resources.editor_reminder_date_and_time
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.editor_date
+import emberr.shared.generated.resources.editor_event_options
+import emberr.shared.generated.resources.editor_more_details
+import emberr.shared.generated.resources.editor_time
 
 private fun shortDateLabel(date: LocalDate): String =
     "${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.day}"
@@ -118,7 +126,7 @@ internal fun ColumnScope.CheckboxReminderRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (hasReminder) {
-                IconTooltip(text = "More details") {
+                IconTooltip(text = stringResource(Res.string.editor_more_details)) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(5.dp))
@@ -135,7 +143,7 @@ internal fun ColumnScope.CheckboxReminderRow(
                             .padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
                         Icon(
-                            Icons.Default.MoreVert, "Event options",
+                            Icons.Default.MoreVert, stringResource(Res.string.editor_event_options),
                             modifier = Modifier.size(15.dp),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
@@ -143,7 +151,7 @@ internal fun ColumnScope.CheckboxReminderRow(
                 }
             }
             Box {
-                IconTooltip(text = "Date") {
+                IconTooltip(text = stringResource(Res.string.editor_date)) {
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(5.dp))
@@ -164,7 +172,7 @@ internal fun ColumnScope.CheckboxReminderRow(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painterResource(Res.drawable.calendar_add), "Date",
+                            painterResource(Res.drawable.calendar_add), stringResource(Res.string.editor_date),
                             modifier = Modifier.size(15.dp),
                             tint = if (hasReminder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface
                         )
@@ -191,7 +199,7 @@ internal fun ColumnScope.CheckboxReminderRow(
                 )
             }
             Box {
-                IconTooltip(text = "Time") {
+                IconTooltip(text = stringResource(Res.string.editor_time)) {
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(5.dp))
@@ -212,7 +220,7 @@ internal fun ColumnScope.CheckboxReminderRow(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painterResource(Res.drawable.clock_circle), "Time",
+                            painterResource(Res.drawable.clock_circle), stringResource(Res.string.editor_time),
                             modifier = Modifier.size(16.dp),
                             tint = if (hasReminder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface
                         )
@@ -246,15 +254,14 @@ internal fun ColumnScope.CheckboxReminderRow(
                 )
             }
             if (hasReminder) {
-                val timeText = remember(block.reminderTimestamp, block.allDay, usesTwentyFourHourClock) {
-                    val instant = Instant.fromEpochMilliseconds(block.reminderTimestamp)
-                    val dt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                    val allDay = block.allDay
-                    when {
-                        allDay == null -> "${shortDateLabel(dt.date)}, ${formatTimeOfDay(dt.hour, dt.minute, usesTwentyFourHourClock)}"
-                        allDay.lengthInDays > 1 -> "${shortDateLabel(dt.date)} – ${shortDateLabel(allDay.lastDate(dt.date))}, All day"
-                        else -> "${shortDateLabel(dt.date)}, All day"
-                    }
+                val dt = remember(block.reminderTimestamp) {
+                    Instant.fromEpochMilliseconds(block.reminderTimestamp).toLocalDateTime(TimeZone.currentSystemDefault())
+                }
+                val allDay = block.allDay
+                val timeText = when {
+                    allDay == null -> stringResource(Res.string.editor_reminder_date_and_time, shortDateLabel(dt.date), formatTimeOfDay(dt.hour, dt.minute, usesTwentyFourHourClock))
+                    allDay.lengthInDays > 1 -> stringResource(Res.string.editor_reminder_all_day_range, shortDateLabel(dt.date), shortDateLabel(allDay.lastDate(dt.date)))
+                    else -> stringResource(Res.string.editor_reminder_all_day, shortDateLabel(dt.date))
                 }
                 val timeZone = TimeZone.currentSystemDefault()
                 val reminderDate = Instant.fromEpochMilliseconds(block.reminderTimestamp)

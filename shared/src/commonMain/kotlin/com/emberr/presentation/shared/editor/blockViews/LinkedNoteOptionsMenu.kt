@@ -17,6 +17,12 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.editor_preview_options
+import emberr.shared.generated.resources.editor_show_cover_image_sentence_case
+import emberr.shared.generated.resources.editor_show_icon
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 @Composable
 fun LinkedNoteOptionsMenu(
     expanded: Boolean,
@@ -30,7 +36,7 @@ fun LinkedNoteOptionsMenu(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Show icon",
+                text = stringResource(Res.string.editor_show_icon),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
@@ -45,7 +51,7 @@ fun LinkedNoteOptionsMenu(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Show cover image",
+                text = stringResource(Res.string.editor_show_cover_image_sentence_case),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
@@ -69,12 +75,12 @@ fun LinkedNoteOptionsMenu(
         EmberrBottomSheet(
             expanded = expanded,
             onDismiss = onDismiss,
-            title = "Preview Options"
+            title = stringResource(Res.string.editor_preview_options)
         ) { _ ->
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
                 content()
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                         .padding(vertical = 12.dp))

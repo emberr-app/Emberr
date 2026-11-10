@@ -149,12 +149,17 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import com.emberr.presentation.shared.editor.slash.buildSlashMenuSearchTexts
+import com.emberr.presentation.shared.editor.slash.rememberSlashMenuLabels
 import com.emberr.presentation.shared.editor.slash.rememberCustomProperties
 import com.emberr.presentation.shared.editor.slash.slashQueryCanStillMatch
 import com.emberr.presentation.shared.editor.text.ClearanceAwareBringIntoViewSpec
 import com.emberr.presentation.shared.editor.toolbar.HeightWithoutKeyboard
 import com.emberr.presentation.shared.editor.toolbar.MobileMenuState
 import com.emberr.presentation.shared.editor.toolbar.keepsHeightWhileKeyboardShows
+import emberr.shared.generated.resources.editor_tasks_done
+import emberr.shared.generated.resources.editor_tasks_pending
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.pluralStringResource
 
 private val LinkMenuBlockTypes = setOf("linked_note", "linked_canvas", "linked_database")
 
@@ -258,7 +263,8 @@ fun EditorScreen(
     var isSlashKilled by remember { mutableStateOf(false) }
     val previousTextMap = remember { mutableMapOf<String, String>() }
     val customProperties = rememberCustomProperties()
-    val slashMenuSearchTexts = remember(customProperties) { buildSlashMenuSearchTexts(customProperties) }
+    val slashMenuLabels = rememberSlashMenuLabels()
+    val slashMenuSearchTexts = remember(customProperties, slashMenuLabels) { buildSlashMenuSearchTexts(slashMenuLabels, customProperties) }
 
     val isScrolled by remember {
         derivedStateOf {
@@ -1083,9 +1089,9 @@ fun EditorScreen(
                         ) {
                             TaskBadge(
                                 icon = Icons.Default.RadioButtonUnchecked,
-                                label = "$pendingCount Pending"
+                                label = pluralStringResource(Res.plurals.editor_tasks_pending, pendingCount, pendingCount)
                             )
-                            TaskBadge(icon = Icons.Default.CheckCircle, label = "$doneCount Done")
+                            TaskBadge(icon = Icons.Default.CheckCircle, label = pluralStringResource(Res.plurals.editor_tasks_done, doneCount, doneCount))
                         }
                     }
                 }

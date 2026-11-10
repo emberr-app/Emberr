@@ -49,6 +49,11 @@ import emberr.shared.generated.resources.file_text
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import java.io.File
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.editor_loading
+import emberr.shared.generated.resources.editor_note_not_found
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.editor_cover_image
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -103,7 +108,7 @@ fun LinkedNoteBlockView(
                     }
                     AsyncImage(
                         model = request,
-                        contentDescription = "Cover Image",
+                        contentDescription = stringResource(Res.string.editor_cover_image),
                         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                         contentScale = ContentScale.Crop
                     )
@@ -131,9 +136,9 @@ fun LinkedNoteBlockView(
             }
 
             val titleText = when {
-                isLoading -> "Loading..."
-                metadata == null -> "Note not found"
-                else -> metadata?.title?.ifEmpty { "Untitled" } ?: "Untitled"
+                isLoading -> stringResource(Res.string.editor_loading)
+                metadata == null -> stringResource(Res.string.editor_note_not_found)
+                else -> metadata?.title?.ifEmpty { stringResource(Res.string.common_untitled) } ?: stringResource(Res.string.common_untitled)
             }
             val isMissing = !isLoading && metadata == null
 

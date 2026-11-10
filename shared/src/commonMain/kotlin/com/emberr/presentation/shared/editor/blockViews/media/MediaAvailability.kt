@@ -15,6 +15,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.editor_downloading_progress
+import emberr.shared.generated.resources.editor_uploading
+import emberr.shared.generated.resources.editor_uploading_progress
+import emberr.shared.generated.resources.editor_waiting_for_other_device_upload
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.StringResource
 
 sealed class MediaAvailability {
     data object Available : MediaAvailability()
@@ -68,15 +75,16 @@ fun rememberMediaTransferText(fileName: String, availability: MediaAvailability)
 
     return when {
         availability == MediaAvailability.Downloading && phase == MediaTransferPhase.DOWNLOADING ->
-            bytes?.let { describeTransfer("Downloading", it) }
-        availability == MediaAvailability.Downloading && isWaitingForUpload -> "Waiting for the other device to upload..."
+            bytes?.let { describeTransfer(Res.string.editor_downloading_progress, it) }
+        availability == MediaAvailability.Downloading && isWaitingForUpload -> stringResource(Res.string.editor_waiting_for_other_device_upload)
         availability == MediaAvailability.Available && phase == MediaTransferPhase.UPLOADING ->
-            bytes?.let { describeTransfer("Uploading", it) } ?: "Uploading..."
+            bytes?.let { describeTransfer(Res.string.editor_uploading_progress, it) } ?: stringResource(Res.string.editor_uploading)
         else -> null
     }
 }
 
-private fun describeTransfer(action: String, bytes: MediaTransferBytes): String {
+@Composable
+private fun describeTransfer(phrase: StringResource, bytes: MediaTransferBytes): String {
     val percent = if (bytes.total > 0) (bytes.done * 100 / bytes.total).coerceIn(0, 100) else 100
-    return "$action $percent% · ${formatByteSize(bytes.done)} of ${formatByteSize(bytes.total)}"
+    return stringResource(phrase, percent, formatByteSize(bytes.done), formatByteSize(bytes.total))
 }

@@ -64,6 +64,12 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.link
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.editor_copied_url
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.editor_copy_link_sentence_case
+import emberr.shared.generated.resources.editor_copy_url
+import emberr.shared.generated.resources.editor_paste_link_press_enter
+import emberr.shared.generated.resources.editor_preview
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -79,6 +85,7 @@ fun BookmarkBlockView(
     var inputUrl by remember { mutableStateOf(block.url) }
     val webLinkActions = rememberWebLinkActions()
     val clipboardManager = LocalClipboardManager.current
+    val copiedUrlMessage = stringResource(Res.string.editor_copied_url)
 
     Box(
         modifier = Modifier
@@ -136,7 +143,7 @@ fun BookmarkBlockView(
                     decorationBox = { inner ->
                         if (inputUrl.isEmpty()) {
                             Text(
-                                "Paste a link and press Enter...",
+                                stringResource(Res.string.editor_paste_link_press_enter),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.outline
                             )
@@ -170,16 +177,16 @@ fun BookmarkBlockView(
 
                         if (block.url.isNotEmpty() && block.previewImageUrl == null) {
                             Spacer(modifier = Modifier.width(8.dp))
-                            IconTooltip(text = "Copy link") {
+                            IconTooltip(text = stringResource(Res.string.editor_copy_link_sentence_case)) {
                                 Icon(
                                     painterResource(Res.drawable.copy),
-                                    contentDescription = "Copy URL",
+                                    contentDescription = stringResource(Res.string.editor_copy_url),
                                     tint = MaterialTheme.colorScheme.outline,
                                     modifier = Modifier
                                         .size(18.dp)
                                         .clickable {
                                             clipboardManager.setText(AnnotatedString(block.url))
-                                            showNativeToast("copied url")
+                                            showNativeToast(copiedUrlMessage)
                                         }
                                 )
                             }
@@ -237,7 +244,7 @@ fun BookmarkBlockView(
                                         .build()
                                 )
                                 .build(),
-                            contentDescription = "Preview",
+                            contentDescription = stringResource(Res.string.editor_preview),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
@@ -252,10 +259,10 @@ fun BookmarkBlockView(
 
                         if (block.url.isNotEmpty()) {
                             Box(modifier = Modifier.align(Alignment.TopEnd)) {
-                                IconTooltip(text = "Copy link") {
+                                IconTooltip(text = stringResource(Res.string.editor_copy_link_sentence_case)) {
                                     Icon(
                                         painterResource(Res.drawable.copy),
-                                        contentDescription = "Copy URL",
+                                        contentDescription = stringResource(Res.string.editor_copy_url),
                                         tint = Color.White,
                                         modifier = Modifier
                                             .padding(8.dp)
@@ -266,7 +273,7 @@ fun BookmarkBlockView(
                                             .size(16.dp)
                                             .clickable {
                                                 clipboardManager.setText(AnnotatedString(block.url))
-                                                showNativeToast("copied url")
+                                                showNativeToast(copiedUrlMessage)
                                             }
                                     )
                                 }

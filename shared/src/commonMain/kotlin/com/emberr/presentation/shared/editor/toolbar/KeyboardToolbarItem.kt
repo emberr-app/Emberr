@@ -54,50 +54,96 @@ import emberr.shared.generated.resources.undo_circle
 import emberr.shared.generated.resources.unordered_list
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.editor_align_center
+import emberr.shared.generated.resources.editor_align_justify
+import emberr.shared.generated.resources.editor_align_left
+import emberr.shared.generated.resources.editor_align_right
+import emberr.shared.generated.resources.editor_block_bulleted_list
+import emberr.shared.generated.resources.editor_block_callout
+import emberr.shared.generated.resources.editor_block_canvas
+import emberr.shared.generated.resources.editor_block_checkbox
+import emberr.shared.generated.resources.editor_block_code
+import emberr.shared.generated.resources.editor_block_database
+import emberr.shared.generated.resources.editor_block_document_file
+import emberr.shared.generated.resources.editor_block_heading_1
+import emberr.shared.generated.resources.editor_block_heading_2
+import emberr.shared.generated.resources.editor_block_image
+import emberr.shared.generated.resources.editor_block_link_to_canvas
+import emberr.shared.generated.resources.editor_block_link_to_database
+import emberr.shared.generated.resources.editor_block_link_to_note
+import emberr.shared.generated.resources.editor_block_numbered_list
+import emberr.shared.generated.resources.editor_block_quote
+import emberr.shared.generated.resources.editor_block_simple_table
+import emberr.shared.generated.resources.editor_block_text
+import emberr.shared.generated.resources.editor_block_toggle_list
+import emberr.shared.generated.resources.editor_block_voice_note
+import emberr.shared.generated.resources.editor_block_web_bookmark
+import emberr.shared.generated.resources.editor_current_date
+import emberr.shared.generated.resources.editor_current_time
+import emberr.shared.generated.resources.editor_format_bold
+import emberr.shared.generated.resources.editor_format_highlight
+import emberr.shared.generated.resources.editor_format_italic
+import emberr.shared.generated.resources.editor_format_strikethrough
+import emberr.shared.generated.resources.editor_format_underline
+import emberr.shared.generated.resources.editor_indent_decrease
+import emberr.shared.generated.resources.editor_indent_increase
+import emberr.shared.generated.resources.editor_toolbar_mention_a_note
+import emberr.shared.generated.resources.editor_toolbar_more_blocks
+import emberr.shared.generated.resources.editor_toolbar_redo
+import emberr.shared.generated.resources.editor_toolbar_select_block
+import emberr.shared.generated.resources.editor_toolbar_separator
+import emberr.shared.generated.resources.editor_toolbar_solid_line_divider
+import emberr.shared.generated.resources.editor_toolbar_three_dots_divider
+import emberr.shared.generated.resources.editor_toolbar_undo
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.StringResource
 
-enum class KeyboardToolbarItem(val title: String) {
-    UNDO("Undo"),
-    REDO("Redo"),
-    LINK_TO_NOTE("Mention a Note"),
-    SELECT_BLOCK("Select Block"),
-    CURRENT_TIME("Current Time"),
-    CURRENT_DATE("Current Date"),
-    TEXT("Text"),
-    HEADING_1("Heading 1"),
-    HEADING_2("Heading 2"),
-    CHECKBOX("Checkbox"),
-    BULLETED_LIST("Bulleted List"),
-    NUMBERED_LIST("Numbered List"),
-    TOGGLE_LIST("Toggle List"),
-    QUOTE("Quote"),
-    CALLOUT("Callout"),
-    CODE("Code"),
-    VOICE_NOTE("Voice Note"),
-    IMAGE("Image"),
-    DOCUMENT("Document / File"),
-    WEB_BOOKMARK("Web Bookmark"),
-    SIMPLE_TABLE("Simple Table"),
-    DATABASE("Database"),
-    CANVAS("Canvas"),
-    LINKED_NOTE("Link to Note"),
-    LINKED_CANVAS("Link to Canvas"),
-    LINKED_DATABASE("Link to Database"),
-    SOLID_LINE_DIVIDER("Solid Line Divider"),
-    THREE_DOTS_DIVIDER("Three Dots Divider"),
-    BOLD("Bold"),
-    ITALIC("Italic"),
-    STRIKETHROUGH("Strikethrough"),
-    UNDERLINE("Underline"),
-    HIGHLIGHT("Highlight"),
-    ALIGN_LEFT("Align Left"),
-    ALIGN_RIGHT("Align Right"),
-    ALIGN_CENTER("Align Center"),
-    JUSTIFY("Justify"),
-    DECREASE_INDENT("Decrease Indent"),
-    INCREASE_INDENT("Increase Indent"),
-    MORE_BLOCKS("More Blocks"),
-    DIVIDER("Separator")
+enum class KeyboardToolbarItem(val titleResource: StringResource) {
+    UNDO(Res.string.editor_toolbar_undo),
+    REDO(Res.string.editor_toolbar_redo),
+    LINK_TO_NOTE(Res.string.editor_toolbar_mention_a_note),
+    SELECT_BLOCK(Res.string.editor_toolbar_select_block),
+    CURRENT_TIME(Res.string.editor_current_time),
+    CURRENT_DATE(Res.string.editor_current_date),
+    TEXT(Res.string.editor_block_text),
+    HEADING_1(Res.string.editor_block_heading_1),
+    HEADING_2(Res.string.editor_block_heading_2),
+    CHECKBOX(Res.string.editor_block_checkbox),
+    BULLETED_LIST(Res.string.editor_block_bulleted_list),
+    NUMBERED_LIST(Res.string.editor_block_numbered_list),
+    TOGGLE_LIST(Res.string.editor_block_toggle_list),
+    QUOTE(Res.string.editor_block_quote),
+    CALLOUT(Res.string.editor_block_callout),
+    CODE(Res.string.editor_block_code),
+    VOICE_NOTE(Res.string.editor_block_voice_note),
+    IMAGE(Res.string.editor_block_image),
+    DOCUMENT(Res.string.editor_block_document_file),
+    WEB_BOOKMARK(Res.string.editor_block_web_bookmark),
+    SIMPLE_TABLE(Res.string.editor_block_simple_table),
+    DATABASE(Res.string.editor_block_database),
+    CANVAS(Res.string.editor_block_canvas),
+    LINKED_NOTE(Res.string.editor_block_link_to_note),
+    LINKED_CANVAS(Res.string.editor_block_link_to_canvas),
+    LINKED_DATABASE(Res.string.editor_block_link_to_database),
+    SOLID_LINE_DIVIDER(Res.string.editor_toolbar_solid_line_divider),
+    THREE_DOTS_DIVIDER(Res.string.editor_toolbar_three_dots_divider),
+    BOLD(Res.string.editor_format_bold),
+    ITALIC(Res.string.editor_format_italic),
+    STRIKETHROUGH(Res.string.editor_format_strikethrough),
+    UNDERLINE(Res.string.editor_format_underline),
+    HIGHLIGHT(Res.string.editor_format_highlight),
+    ALIGN_LEFT(Res.string.editor_align_left),
+    ALIGN_RIGHT(Res.string.editor_align_right),
+    ALIGN_CENTER(Res.string.editor_align_center),
+    JUSTIFY(Res.string.editor_align_justify),
+    DECREASE_INDENT(Res.string.editor_indent_decrease),
+    INCREASE_INDENT(Res.string.editor_indent_increase),
+    MORE_BLOCKS(Res.string.editor_toolbar_more_blocks),
+    DIVIDER(Res.string.editor_toolbar_separator)
 }
+
+@Composable
+fun KeyboardToolbarItem.label(): String = stringResource(titleResource)
 
 val DefaultKeyboardToolbarItems: List<KeyboardToolbarItem> = listOf(
     KeyboardToolbarItem.UNDO,
@@ -174,7 +220,7 @@ internal fun KeyboardToolbarItemIcon(item: KeyboardToolbarItem, tint: Color) {
         KeyboardToolbarItem.SELECT_BLOCK -> ToolbarItemDrawable(Res.drawable.mouse_square2, item, tint, 16.dp)
         KeyboardToolbarItem.CURRENT_TIME -> ToolbarItemDrawable(Res.drawable.clock_circle, item, tint, 17.dp)
         KeyboardToolbarItem.CURRENT_DATE -> ToolbarItemDrawable(Res.drawable.calendar_date, item, tint, 17.dp)
-        KeyboardToolbarItem.TEXT -> Icon(Icons.AutoMirrored.Filled.Subject, item.title, tint = tint, modifier = Modifier.size(19.dp))
+        KeyboardToolbarItem.TEXT -> Icon(Icons.AutoMirrored.Filled.Subject, item.label(), tint = tint, modifier = Modifier.size(19.dp))
         KeyboardToolbarItem.HEADING_1 -> Text("H1", style = MaterialTheme.typography.labelSmall, color = tint)
         KeyboardToolbarItem.HEADING_2 -> Text("H2", style = MaterialTheme.typography.labelSmall, color = tint)
         KeyboardToolbarItem.CHECKBOX -> ToolbarItemDrawable(Res.drawable.check_square, item, tint, 16.dp)
@@ -219,5 +265,5 @@ internal fun KeyboardToolbarItemIcon(item: KeyboardToolbarItem, tint: Color) {
 
 @Composable
 private fun ToolbarItemDrawable(drawable: DrawableResource, item: KeyboardToolbarItem, tint: Color, size: Dp) {
-    Icon(painterResource(drawable), item.title, tint = tint, modifier = Modifier.size(size))
+    Icon(painterResource(drawable), item.label(), tint = tint, modifier = Modifier.size(size))
 }

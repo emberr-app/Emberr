@@ -44,6 +44,13 @@ import emberr.shared.generated.resources.text_highlight
 import emberr.shared.generated.resources.text_x
 import emberr.shared.generated.resources.underline
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.editor_close_colours
+import emberr.shared.generated.resources.editor_format_bold
+import emberr.shared.generated.resources.editor_format_highlight
+import emberr.shared.generated.resources.editor_format_italic
+import emberr.shared.generated.resources.editor_format_strikethrough
+import emberr.shared.generated.resources.editor_format_underline
+import org.jetbrains.compose.resources.stringResource
 
 internal val DefaultCornerShape = RoundedCornerShape(12.dp)
 
@@ -55,20 +62,20 @@ internal fun InlineFormatButtons(
     onHighlightClick: () -> Unit,
     enabled: Boolean = true
 ) {
-    ToolbarButton(enabled = enabled, tooltip = "Bold", onClick = { onToggleFormat("bold") }) {
-        Icon(painterResource(Res.drawable.format_bold), "Bold", tint = tint, modifier = Modifier.size(iconSize - 4.dp))
+    ToolbarButton(enabled = enabled, tooltip = stringResource(Res.string.editor_format_bold), onClick = { onToggleFormat("bold") }) {
+        Icon(painterResource(Res.drawable.format_bold), stringResource(Res.string.editor_format_bold), tint = tint, modifier = Modifier.size(iconSize - 4.dp))
     }
-    ToolbarButton(enabled = enabled, tooltip = "Italic", onClick = { onToggleFormat("italic") }) {
-        Icon(painterResource(Res.drawable.italic), "Italic", tint = tint, modifier = Modifier.size(iconSize - 4.dp))
+    ToolbarButton(enabled = enabled, tooltip = stringResource(Res.string.editor_format_italic), onClick = { onToggleFormat("italic") }) {
+        Icon(painterResource(Res.drawable.italic), stringResource(Res.string.editor_format_italic), tint = tint, modifier = Modifier.size(iconSize - 4.dp))
     }
-    ToolbarButton(enabled = enabled, tooltip = "Strikethrough", onClick = { onToggleFormat("strike") }) {
-        Icon(painterResource(Res.drawable.text_x), "Strikethrough", tint = tint, modifier = Modifier.size(iconSize - 2.dp))
+    ToolbarButton(enabled = enabled, tooltip = stringResource(Res.string.editor_format_strikethrough), onClick = { onToggleFormat("strike") }) {
+        Icon(painterResource(Res.drawable.text_x), stringResource(Res.string.editor_format_strikethrough), tint = tint, modifier = Modifier.size(iconSize - 2.dp))
     }
-    ToolbarButton(enabled = enabled, tooltip = "Underline", onClick = { onToggleFormat("underline") }) {
-        Icon(painterResource(Res.drawable.underline), "Underline", tint = tint, modifier = Modifier.size(iconSize - 2.dp))
+    ToolbarButton(enabled = enabled, tooltip = stringResource(Res.string.editor_format_underline), onClick = { onToggleFormat("underline") }) {
+        Icon(painterResource(Res.drawable.underline), stringResource(Res.string.editor_format_underline), tint = tint, modifier = Modifier.size(iconSize - 2.dp))
     }
-    ToolbarButton(enabled = enabled, tooltip = "Highlight", onClick = onHighlightClick) {
-        Icon(painterResource(Res.drawable.text_highlight), "Highlight", tint = tint, modifier = Modifier.size(iconSize + 1.dp))
+    ToolbarButton(enabled = enabled, tooltip = stringResource(Res.string.editor_format_highlight), onClick = onHighlightClick) {
+        Icon(painterResource(Res.drawable.text_highlight), stringResource(Res.string.editor_format_highlight), tint = tint, modifier = Modifier.size(iconSize + 1.dp))
     }
 }
 
@@ -90,7 +97,7 @@ internal fun FloatingHighlightColors(onColorChosen: (String) -> Unit, onClose: (
         ) {
             Icon(
                 Icons.Default.Close,
-                "Close colours",
+                stringResource(Res.string.editor_close_colours),
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(FloatingSwatchSize / 2)
             )

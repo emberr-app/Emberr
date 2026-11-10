@@ -105,6 +105,7 @@ import com.emberr.presentation.shared.editor.NOTE_TITLE_FIELD_ID
 import com.emberr.presentation.shared.editor.text.withTextInsertedAtCursor
 import com.emberr.presentation.shared.editor.slash.SlashMenuList
 import com.emberr.presentation.shared.editor.slash.dateAndTimeSlashMenuSection
+import com.emberr.presentation.shared.editor.slash.rememberSlashMenuLabels
 import com.emberr.presentation.shared.editor.slash.matchesSlashQuery
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import androidx.compose.ui.unit.IntOffset
@@ -1186,9 +1187,10 @@ private fun NoteTitleField(
         onTitleChange(newText)
     }
 
-    val slashMenuSection = remember(slashQuery, usesTwentyFourHourClock) {
+    val slashMenuLabels = rememberSlashMenuLabels()
+    val slashMenuSection = remember(slashQuery, usesTwentyFourHourClock, slashMenuLabels) {
         slashQuery?.let { query ->
-            dateAndTimeSlashMenuSection(::replaceSlashQueryWith, usesTwentyFourHourClock)
+            dateAndTimeSlashMenuSection(slashMenuLabels, ::replaceSlashQueryWith, usesTwentyFourHourClock)
                 .let { section -> section.copy(items = section.items.filter { it.matchesSlashQuery(query) }) }
                 .takeIf { it.items.isNotEmpty() }
         }

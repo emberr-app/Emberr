@@ -27,7 +27,8 @@ data class RichTextVisualTransformation(
     private val validNoteIds: Set<String>,
     private val inlineSpans: List<InlineSpan> = emptyList(),
     private val hoveredLink: HoveredLink? = null,
-    private val noteTitlesById: Map<String, String> = emptyMap()
+    private val noteTitlesById: Map<String, String> = emptyMap(),
+    private val untitledNoteTitle: String
 ) : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val originalText = text.text
@@ -60,7 +61,7 @@ data class RichTextVisualTransformation(
             }
 
             val noteId = match.groupValues[2]
-            val title = noteTitlesById[noteId]?.ifEmpty { "Untitled" } ?: match.groupValues[1]
+            val title = noteTitlesById[noteId]?.ifEmpty { untitledNoteTitle } ?: match.groupValues[1]
             val linkText = "@$title"
             val isMissing = !validNoteIds.contains(noteId)
 

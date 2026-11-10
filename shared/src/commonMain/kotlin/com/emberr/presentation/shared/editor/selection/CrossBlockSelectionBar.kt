@@ -53,6 +53,17 @@ import emberr.shared.generated.resources.underline
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.editor_copy
+import emberr.shared.generated.resources.editor_cut
+import emberr.shared.generated.resources.editor_format_bold
+import emberr.shared.generated.resources.editor_format_highlight
+import emberr.shared.generated.resources.editor_format_italic
+import emberr.shared.generated.resources.editor_format_strikethrough
+import emberr.shared.generated.resources.editor_format_underline
+import emberr.shared.generated.resources.editor_paste
+import emberr.shared.generated.resources.editor_select_all
+import org.jetbrains.compose.resources.stringResource
 
 private val SelectionBarShape = RoundedCornerShape(12.dp)
 private val SelectionBarGapFromText = 8.dp
@@ -136,24 +147,24 @@ private fun SelectionBarContent(
                     .padding(horizontal = 6.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                actions.copy?.let { SelectionBarButton(Res.drawable.copy, "Copy", 18.dp, it) }
-                actions.cut?.let { SelectionBarButton(Res.drawable.scissor2, "Cut", 18.dp, it) }
+                actions.copy?.let { SelectionBarButton(Res.drawable.copy, stringResource(Res.string.editor_copy), 18.dp, it) }
+                actions.cut?.let { SelectionBarButton(Res.drawable.scissor2, stringResource(Res.string.editor_cut), 18.dp, it) }
                 actions.paste?.let { paste ->
-                    SelectionBarButtonFrame(tooltip = "Paste", onClick = paste) {
-                        Icon(Icons.Default.ContentPaste, "Paste", modifier = Modifier.size(19.dp), tint = tint)
+                    SelectionBarButtonFrame(tooltip = stringResource(Res.string.editor_paste), onClick = paste) {
+                        Icon(Icons.Default.ContentPaste, stringResource(Res.string.editor_paste), modifier = Modifier.size(19.dp), tint = tint)
                     }
                 }
-                actions.delete?.let { SelectionBarButton(Res.drawable.trash, "Delete", 18.dp, it) }
+                actions.delete?.let { SelectionBarButton(Res.drawable.trash, stringResource(Res.string.common_delete), 18.dp, it) }
                 actions.selectAll?.let { selectAll ->
-                    SelectionBarButton(Res.drawable.select_all, "Select all", 18.dp, selectAll)
+                    SelectionBarButton(Res.drawable.select_all, stringResource(Res.string.editor_select_all), 18.dp, selectAll)
                 }
                 if (toggleFormat != null) {
                     Box(Modifier.padding(horizontal = 6.dp).width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
-                    SelectionBarButton(Res.drawable.format_bold, "Bold", 14.dp) { toggleFormat("bold") }
-                    SelectionBarButton(Res.drawable.italic, "Italic", 14.dp) { toggleFormat("italic") }
-                    SelectionBarButton(Res.drawable.text_x, "Strikethrough", 16.dp) { toggleFormat("strike") }
-                    SelectionBarButton(Res.drawable.underline, "Underline", 16.dp) { toggleFormat("underline") }
-                    SelectionBarButton(Res.drawable.text_highlight, "Highlight", 19.dp) { onChoosingHighlightColorChange(true) }
+                    SelectionBarButton(Res.drawable.format_bold, stringResource(Res.string.editor_format_bold), 14.dp) { toggleFormat("bold") }
+                    SelectionBarButton(Res.drawable.italic, stringResource(Res.string.editor_format_italic), 14.dp) { toggleFormat("italic") }
+                    SelectionBarButton(Res.drawable.text_x, stringResource(Res.string.editor_format_strikethrough), 16.dp) { toggleFormat("strike") }
+                    SelectionBarButton(Res.drawable.underline, stringResource(Res.string.editor_format_underline), 16.dp) { toggleFormat("underline") }
+                    SelectionBarButton(Res.drawable.text_highlight, stringResource(Res.string.editor_format_highlight), 19.dp) { onChoosingHighlightColorChange(true) }
                 }
             }
         }

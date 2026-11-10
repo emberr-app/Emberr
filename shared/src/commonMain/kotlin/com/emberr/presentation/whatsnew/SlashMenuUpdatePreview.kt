@@ -56,6 +56,7 @@ import com.emberr.presentation.shared.editor.slash.SlashMenuList
 import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
 import com.emberr.presentation.shared.editor.slash.buildSlashMenuSearchTexts
 import com.emberr.presentation.shared.editor.slash.filteredSlashMenuSections
+import com.emberr.presentation.shared.editor.slash.rememberSlashMenuLabels
 import com.emberr.presentation.shared.editor.slash.slashQueryCanStillMatch
 import com.emberr.presentation.shared.editor.toolbar.DefaultKeyboardToolbarItems
 import com.emberr.presentation.shared.editor.toolbar.KeyboardToolbarItem
@@ -107,7 +108,8 @@ private fun isSlashMenuKilledAfter(
 @Composable
 internal fun SlashMenuUpdatePreview() {
     val usesTwentyFourHourClock = LocalUsesTwentyFourHourClock.current
-    val slashMenuSearchTexts = remember { buildSlashMenuSearchTexts() }
+    val slashMenuLabels = rememberSlashMenuLabels()
+    val slashMenuSearchTexts = remember(slashMenuLabels) { buildSlashMenuSearchTexts(slashMenuLabels) }
     var typedText by remember { mutableStateOf("") }
     var isSlashKilled by remember { mutableStateOf(false) }
     var shownMenuQuery by remember { mutableStateOf("") }
@@ -175,8 +177,9 @@ internal fun SlashMenuUpdatePreview() {
         }
     }
 
-    val menuSections = remember(shownMenuQuery, usesTwentyFourHourClock) {
+    val menuSections = remember(shownMenuQuery, usesTwentyFourHourClock, slashMenuLabels) {
         filteredSlashMenuSections(
+            labels = slashMenuLabels,
             query = shownMenuQuery,
             onChangeBlockType = {},
             onToggleFormat = {},

@@ -24,6 +24,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
+import emberr.shared.generated.resources.editor_close_colours
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 val HighlightColorMenuWidth = 380.dp
 private val HighlightCircleSize = 24.dp
@@ -55,7 +58,7 @@ fun HighlightColorCircles(onColorChosen: (String) -> Unit, onClose: () -> Unit) 
         ) {
             Icon(
                 Icons.Default.Close,
-                "Close colours",
+                stringResource(Res.string.editor_close_colours),
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(HighlightCircleSize / 2)
             )

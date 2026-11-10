@@ -152,6 +152,44 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.editor_table_column_width_px
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.editor_block_code
+import emberr.shared.generated.resources.editor_format_bold
+import emberr.shared.generated.resources.editor_format_italic
+import emberr.shared.generated.resources.editor_format_strikethrough
+import emberr.shared.generated.resources.editor_format_underline
+import emberr.shared.generated.resources.editor_slash_section_alignment
+import emberr.shared.generated.resources.editor_table_add_column
+import emberr.shared.generated.resources.editor_table_add_row
+import emberr.shared.generated.resources.editor_table_background_color
+import emberr.shared.generated.resources.editor_table_cell_actions
+import emberr.shared.generated.resources.editor_table_column_width
+import emberr.shared.generated.resources.editor_table_content_email
+import emberr.shared.generated.resources.editor_table_content_link
+import emberr.shared.generated.resources.editor_table_content_phone
+import emberr.shared.generated.resources.editor_table_content_type
+import emberr.shared.generated.resources.editor_table_decrease_column_width
+import emberr.shared.generated.resources.editor_table_delete_column
+import emberr.shared.generated.resources.editor_table_delete_row
+import emberr.shared.generated.resources.editor_table_delete_table
+import emberr.shared.generated.resources.editor_table_format
+import emberr.shared.generated.resources.editor_table_increase_column_width
+import emberr.shared.generated.resources.editor_table_insert_column_left
+import emberr.shared.generated.resources.editor_table_insert_column_right
+import emberr.shared.generated.resources.editor_table_insert_row_above
+import emberr.shared.generated.resources.editor_table_insert_row_below
+import emberr.shared.generated.resources.editor_table_move_column_left
+import emberr.shared.generated.resources.editor_table_move_column_right
+import emberr.shared.generated.resources.editor_table_move_row_down
+import emberr.shared.generated.resources.editor_table_move_row_up
+import emberr.shared.generated.resources.editor_table_new_row
+import emberr.shared.generated.resources.editor_table_reset_style
+import emberr.shared.generated.resources.editor_table_style_cell
+import emberr.shared.generated.resources.editor_table_style_column
+import emberr.shared.generated.resources.editor_table_style_row
+import emberr.shared.generated.resources.editor_table_text_color
 
 private const val DefaultColumnWidth = 140
 private val CellMinHeight = 44.dp
@@ -390,38 +428,38 @@ fun TableBlockView(
         val rowIndex = activeRowIndex
         val colIndex = activeColIndex
         if (rowIndex in rows.indices && colIndex in 0 until columnCount) {
-            SheetMenuRow(painterResource(Res.drawable.arrow_up), "Insert Row Above") {
+            SheetMenuRow(painterResource(Res.drawable.arrow_up), stringResource(Res.string.editor_table_insert_row_above)) {
                 insertRowAt(rowIndex); closeMenu()
             }
-            SheetMenuRow(painterResource(Res.drawable.arrow_down), "Insert Row Below") {
+            SheetMenuRow(painterResource(Res.drawable.arrow_down), stringResource(Res.string.editor_table_insert_row_below)) {
                 insertRowAt(rowIndex + 1); closeMenu()
             }
-            SheetMenuRow(painterResource(Res.drawable.arrow_left), "Insert Column Left") {
+            SheetMenuRow(painterResource(Res.drawable.arrow_left), stringResource(Res.string.editor_table_insert_column_left)) {
                 insertColumnAt(colIndex); closeMenu()
             }
-            SheetMenuRow(painterResource(Res.drawable.arrow_right), "Insert Column Right") {
+            SheetMenuRow(painterResource(Res.drawable.arrow_right), stringResource(Res.string.editor_table_insert_column_right)) {
                 insertColumnAt(colIndex + 1); closeMenu()
             }
 
             TableMenuDivider()
 
             if (rowIndex > 0) {
-                SheetMenuRow(rememberVectorPainter(Icons.Default.ArrowUpward), "Move Row Up") {
+                SheetMenuRow(rememberVectorPainter(Icons.Default.ArrowUpward), stringResource(Res.string.editor_table_move_row_up)) {
                     moveRow(rowIndex, rowIndex - 1); closeMenu()
                 }
             }
             if (rowIndex < rows.lastIndex) {
-                SheetMenuRow(rememberVectorPainter(Icons.Default.ArrowDownward), "Move Row Down") {
+                SheetMenuRow(rememberVectorPainter(Icons.Default.ArrowDownward), stringResource(Res.string.editor_table_move_row_down)) {
                     moveRow(rowIndex, rowIndex + 1); closeMenu()
                 }
             }
             if (colIndex > 0) {
-                SheetMenuRow(painterResource(Res.drawable.move_left), "Move Column Left") {
+                SheetMenuRow(painterResource(Res.drawable.move_left), stringResource(Res.string.editor_table_move_column_left)) {
                     moveColumn(colIndex, colIndex - 1); closeMenu()
                 }
             }
             if (colIndex < columnCount - 1) {
-                SheetMenuRow(painterResource(Res.drawable.move_right), "Move Column Right") {
+                SheetMenuRow(painterResource(Res.drawable.move_right), stringResource(Res.string.editor_table_move_column_right)) {
                     moveColumn(colIndex, colIndex + 1); closeMenu()
                 }
             }
@@ -429,13 +467,13 @@ fun TableBlockView(
             if (!isDesktopPlatform) {
                 TableMenuDivider()
 
-                StyleSectionLabel("Column Width")
+                StyleSectionLabel(stringResource(Res.string.editor_table_column_width))
                 Row(
                     modifier = Modifier.padding(bottom = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    IconTooltip(text = "Decrease column width") {
+                    IconTooltip(text = stringResource(Res.string.editor_table_decrease_column_width)) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = MaterialTheme.colorScheme.surface,
@@ -444,7 +482,7 @@ fun TableBlockView(
                         ) {
                             Icon(
                                 painterResource(Res.drawable.minus),
-                                contentDescription = "Decrease column width",
+                                contentDescription = stringResource(Res.string.editor_table_decrease_column_width),
                                 modifier = Modifier.padding(8.dp).size(18.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
@@ -452,14 +490,14 @@ fun TableBlockView(
                     }
 
                     Text(
-                        text = "${columnWidthFor(colIndex)} px",
+                        text = stringResource(Res.string.editor_table_column_width_px, columnWidthFor(colIndex)),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.widthIn(min = 50.dp),
                         textAlign = TextAlign.Center
                     )
 
-                    IconTooltip(text = "Increase column width") {
+                    IconTooltip(text = stringResource(Res.string.editor_table_increase_column_width)) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = MaterialTheme.colorScheme.surface,
@@ -468,7 +506,7 @@ fun TableBlockView(
                         ) {
                             Icon(
                                 painterResource(Res.drawable.plus),
-                                contentDescription = "Increase column width",
+                                contentDescription = stringResource(Res.string.editor_table_increase_column_width),
                                 modifier = Modifier.padding(8.dp).size(18.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
@@ -480,9 +518,9 @@ fun TableBlockView(
             TableMenuDivider()
 
             listOf(
-                "Style Cell" to TableStyleScope.CELL,
-                "Style Row" to TableStyleScope.ROW,
-                "Style Column" to TableStyleScope.COLUMN
+                stringResource(Res.string.editor_table_style_cell) to TableStyleScope.CELL,
+                stringResource(Res.string.editor_table_style_row) to TableStyleScope.ROW,
+                stringResource(Res.string.editor_table_style_column) to TableStyleScope.COLUMN
             ).forEach { (label, scope) ->
                 TableStyleMenuLayer(
                     label = label,
@@ -494,10 +532,10 @@ fun TableBlockView(
 
             TableMenuDivider()
 
-            SheetMenuRow(painterResource(Res.drawable.trash), "Delete Row", MaterialTheme.colorScheme.error) {
+            SheetMenuRow(painterResource(Res.drawable.trash), stringResource(Res.string.editor_table_delete_row), MaterialTheme.colorScheme.error) {
                 deleteRowAt(rowIndex); closeMenu()
             }
-            SheetMenuRow(painterResource(Res.drawable.trash), "Delete Column", MaterialTheme.colorScheme.error) {
+            SheetMenuRow(painterResource(Res.drawable.trash), stringResource(Res.string.editor_table_delete_column), MaterialTheme.colorScheme.error) {
                 deleteColumnAt(colIndex); closeMenu()
             }
         }
@@ -547,7 +585,7 @@ fun TableBlockView(
                                                         expanded = isActiveCell && showCellActions,
                                                         onDismissRequest = { closeMenu() }
                                                     ) {
-                                                        TableMenuPopupContent(title = "Cell Actions") { cellActionsBody() }
+                                                        TableMenuPopupContent(title = stringResource(Res.string.editor_table_cell_actions)) { cellActionsBody() }
                                                     }
                                                 }
 
@@ -596,8 +634,8 @@ fun TableBlockView(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (rowIndex == 0 && !inSelectionMode) {
-                                            IconTooltip(text = "Add column") {
-                                                Icon(painterResource(Res.drawable.plus), contentDescription = "Add column", modifier = Modifier.size(17.dp), tint = MaterialTheme.colorScheme.outline)
+                                            IconTooltip(text = stringResource(Res.string.editor_table_add_column)) {
+                                                Icon(painterResource(Res.drawable.plus), contentDescription = stringResource(Res.string.editor_table_add_column), modifier = Modifier.size(17.dp), tint = MaterialTheme.colorScheme.outline)
                                             }
                                         }
                                     }
@@ -625,15 +663,15 @@ fun TableBlockView(
                             .padding(horizontal = 8.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(painterResource(Res.drawable.plus), contentDescription = "Add row", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(painterResource(Res.drawable.plus), contentDescription = stringResource(Res.string.editor_table_add_row), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface)
                         Spacer(Modifier.width(7.dp))
-                        Text(text = "New Row", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                        Text(text = stringResource(Res.string.editor_table_new_row), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
                     }
                     Spacer(Modifier.weight(1f))
-                    IconTooltip(text = "Delete table") {
+                    IconTooltip(text = stringResource(Res.string.editor_table_delete_table)) {
                         Icon(
                             painterResource(Res.drawable.trash),
-                            contentDescription = "Delete table",
+                            contentDescription = stringResource(Res.string.editor_table_delete_table),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .padding(top = 6.dp)
@@ -657,12 +695,12 @@ fun TableBlockView(
         EmberrBottomSheet(
             expanded = showCellActions,
             onDismiss = { closeMenu() },
-            title = "Cell Actions"
+            title = stringResource(Res.string.editor_table_cell_actions)
         ) { _ ->
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
                 cellActionsBody()
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = { closeMenu() },
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 12.dp)
@@ -906,7 +944,7 @@ private fun TableStyleSheetContent(
     onStyleChange: (TableCellStyle) -> Unit,
     onReset: () -> Unit
 ) {
-    DatabaseMenuSectionLabel(text = "Text color")
+    DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_text_color))
     DatabaseStyleColorChoices(
         selectedColorName = colorChoiceNameFor(style.textColorHex),
         colorOf = { databaseTextColorNamed(it.storageName) },
@@ -914,7 +952,7 @@ private fun TableStyleSheetContent(
     )
 
     DatabaseMenuSectionDivider()
-    DatabaseMenuSectionLabel(text = "Background color")
+    DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_background_color))
     DatabaseStyleColorChoices(
         selectedColorName = colorChoiceNameFor(style.backgroundColorHex),
         colorOf = { databaseBackgroundColorNamed(it.storageName) },
@@ -922,26 +960,26 @@ private fun TableStyleSheetContent(
     )
 
     DatabaseMenuSectionDivider()
-    DatabaseMenuSectionLabel(text = "Alignment")
+    DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_slash_section_alignment))
     DatabaseAlignmentOptions(selectedAlignment = style.alignment) { onStyleChange(style.copy(alignment = it)) }
 
     DatabaseMenuSectionDivider()
-    DatabaseMenuSectionLabel(text = "Format")
-    TableStyleToggleOption("Bold", Res.drawable.format_bold, style.isBold) { onStyleChange(style.copy(isBold = !style.isBold)) }
-    TableStyleToggleOption("Italic", Res.drawable.italic, style.isItalic) { onStyleChange(style.copy(isItalic = !style.isItalic)) }
-    TableStyleToggleOption("Underline", Res.drawable.underline, style.isUnderlined) { onStyleChange(style.copy(isUnderlined = !style.isUnderlined)) }
-    TableStyleToggleOption("Strikethrough", Res.drawable.text_x, style.isStrikeThrough) { onStyleChange(style.copy(isStrikeThrough = !style.isStrikeThrough)) }
-    TableStyleToggleOption("Code", Res.drawable.code, style.isCode) { onStyleChange(style.copy(isCode = !style.isCode)) }
+    DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_format))
+    TableStyleToggleOption(stringResource(Res.string.editor_format_bold), Res.drawable.format_bold, style.isBold) { onStyleChange(style.copy(isBold = !style.isBold)) }
+    TableStyleToggleOption(stringResource(Res.string.editor_format_italic), Res.drawable.italic, style.isItalic) { onStyleChange(style.copy(isItalic = !style.isItalic)) }
+    TableStyleToggleOption(stringResource(Res.string.editor_format_underline), Res.drawable.underline, style.isUnderlined) { onStyleChange(style.copy(isUnderlined = !style.isUnderlined)) }
+    TableStyleToggleOption(stringResource(Res.string.editor_format_strikethrough), Res.drawable.text_x, style.isStrikeThrough) { onStyleChange(style.copy(isStrikeThrough = !style.isStrikeThrough)) }
+    TableStyleToggleOption(stringResource(Res.string.editor_block_code), Res.drawable.code, style.isCode) { onStyleChange(style.copy(isCode = !style.isCode)) }
 
     DatabaseMenuSectionDivider()
-    DatabaseMenuSectionLabel(text = "Content type")
-    TableContentTypeOption("Link", Res.drawable.link, TableCellContentType.LINK, style, onStyleChange)
-    TableContentTypeOption("Phone", Res.drawable.phone, TableCellContentType.PHONE, style, onStyleChange)
-    TableContentTypeOption("Email", Res.drawable.mail, TableCellContentType.EMAIL, style, onStyleChange)
+    DatabaseMenuSectionLabel(text = stringResource(Res.string.editor_table_content_type))
+    TableContentTypeOption(stringResource(Res.string.editor_table_content_link), Res.drawable.link, TableCellContentType.LINK, style, onStyleChange)
+    TableContentTypeOption(stringResource(Res.string.editor_table_content_phone), Res.drawable.phone, TableCellContentType.PHONE, style, onStyleChange)
+    TableContentTypeOption(stringResource(Res.string.editor_table_content_email), Res.drawable.mail, TableCellContentType.EMAIL, style, onStyleChange)
 
     DatabaseMenuSectionDivider()
     DatabaseMenuOption(
-        label = "Reset style",
+        label = stringResource(Res.string.editor_table_reset_style),
         icon = { DatabaseOptionIcon(Res.drawable.trash, tint = MaterialTheme.colorScheme.error) },
         labelColor = MaterialTheme.colorScheme.error,
         onClick = onReset

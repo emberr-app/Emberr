@@ -36,6 +36,13 @@ import com.emberr.presentation.shared.editor.components.DesktopCursor
 import com.emberr.presentation.shared.editor.components.desktopPointerCursor
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
+import emberr.shared.generated.resources.editor_copied_link
+import emberr.shared.generated.resources.editor_could_not_copy_link
+import emberr.shared.generated.resources.editor_could_not_open_email
+import emberr.shared.generated.resources.editor_could_not_open_link
+import emberr.shared.generated.resources.editor_could_not_open_phone
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 const val WEB_LINK_TAG = "WEB_LINK"
 const val NOTE_LINK_TAG = "NOTE_LINK"
@@ -390,7 +397,12 @@ fun rememberWebLinkColor(): Color =
 fun rememberWebLinkActions(): WebLinkActions {
     val uriHandler = LocalUriHandler.current
     val clipboardManager = LocalClipboardManager.current
-    return remember(uriHandler, clipboardManager) {
+    val couldNotOpenLinkMessage = stringResource(Res.string.editor_could_not_open_link)
+    val couldNotOpenEmailMessage = stringResource(Res.string.editor_could_not_open_email)
+    val couldNotOpenPhoneMessage = stringResource(Res.string.editor_could_not_open_phone)
+    val copiedLinkMessage = stringResource(Res.string.editor_copied_link)
+    val couldNotCopyLinkMessage = stringResource(Res.string.editor_could_not_copy_link)
+    return remember(uriHandler, clipboardManager, couldNotOpenLinkMessage, couldNotOpenEmailMessage, couldNotOpenPhoneMessage, copiedLinkMessage, couldNotCopyLinkMessage) {
         WebLinkActions(
             openLink = { url ->
                 val link = toOpenableWebLink(url)
@@ -398,7 +410,7 @@ fun rememberWebLinkActions(): WebLinkActions {
                     try {
                         uriHandler.openUri(link)
                     } catch (_: Exception) {
-                        showNativeToast("could not open link")
+                        showNativeToast(couldNotOpenLinkMessage)
                     }
                 }
             },
@@ -406,23 +418,23 @@ fun rememberWebLinkActions(): WebLinkActions {
                 try {
                     uriHandler.openUri("mailto:$email")
                 } catch (_: Exception) {
-                    showNativeToast("could not open email")
+                    showNativeToast(couldNotOpenEmailMessage)
                 }
             },
             openPhone = { phone ->
                 try {
                     uriHandler.openUri("tel:$phone")
                 } catch (_: Exception) {
-                    showNativeToast("could not open phone")
+                    showNativeToast(couldNotOpenPhoneMessage)
                 }
             },
             copyLink = { url ->
                 try {
                     clipboardManager.setText(AnnotatedString(url))
                     triggerHapticFeedback()
-                    showNativeToast("copied link")
+                    showNativeToast(copiedLinkMessage)
                 } catch (_: Exception) {
-                    showNativeToast("could not copy link")
+                    showNativeToast(couldNotCopyLinkMessage)
                 }
             }
         )

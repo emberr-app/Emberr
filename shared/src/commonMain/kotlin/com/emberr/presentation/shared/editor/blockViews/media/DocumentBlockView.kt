@@ -35,7 +35,13 @@ import emberr.shared.generated.resources.circle_x
 import emberr.shared.generated.resources.document_text_12
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import emberr.shared.generated.resources.editor_attach_a_file
+import emberr.shared.generated.resources.editor_downloading
+import emberr.shared.generated.resources.editor_failed_to_download
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.editor_document_format_file
 
+@Composable
 private fun documentFormatLabel(fileName: String, mimeType: String?): String {
     val extension = fileName.substringAfterLast('.', "").uppercase()
     if (extension.isNotEmpty() && extension.length <= 5) return extension
@@ -53,7 +59,7 @@ private fun documentFormatLabel(fileName: String, mimeType: String?): String {
         "image/webp" -> "WEBP"
         "text/plain" -> "TXT"
         "application/zip" -> "ZIP"
-        else -> "FILE"
+        else -> stringResource(Res.string.editor_document_format_file)
     }
 }
 
@@ -91,7 +97,7 @@ fun DocumentBlockView(
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(14.dp)) {
                 Icon(painterResource(Res.drawable.document_text_12), contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(10.dp))
-                Text("Attach a file", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
+                Text(stringResource(Res.string.editor_attach_a_file), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
             }
         }
     } else {
@@ -140,12 +146,12 @@ fun DocumentBlockView(
                 )
                 when (availability) {
                     MediaAvailability.Failed -> Text(
-                        text = "Failed to download - tap to retry",
+                        text = stringResource(Res.string.editor_failed_to_download),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error
                     )
                     MediaAvailability.Downloading -> Text(
-                        text = "${transferText ?: "Downloading..."}    ${documentFormatLabel(block.fileName, block.mimeType)}",
+                        text = "${transferText ?: stringResource(Res.string.editor_downloading)}    ${documentFormatLabel(block.fileName, block.mimeType)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline
                     )
