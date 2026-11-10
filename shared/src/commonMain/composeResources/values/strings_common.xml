@@ -19,4 +19,5 @@
     <string name="common_color_orange">Orange</string>
     <string name="common_color_pink">Pink</string>
     <string name="common_color_purple">Purple</string>
+    <string name="common_create">Create</string>
 </resources>

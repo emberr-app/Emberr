@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Tasks</string>
+    <string name="overview_section_bookmarks">Bookmarks</string>
+    <string name="overview_section_images">Images</string>
+    <string name="overview_section_documents">Documents</string>
+    <string name="overview_tasks_repeating">Repeating</string>
+    <string name="overview_tasks_note">Note</string>
+    <string name="overview_tasks_today">Today</string>
+    <string name="overview_tasks_tomorrow">Tomorrow</string>
+    <string name="overview_tasks_yesterday">Yesterday</string>
+    <string name="overview_tasks_none_completed">No completed tasks yet.</string>
+    <string name="overview_tasks_all_caught_up">All caught up!</string>
+    <string name="overview_tasks_completed">Completed</string>
+    <string name="overview_tasks_completed_tasks">Completed Tasks</string>
+    <string name="overview_tasks_hide_completed">Hide completed</string>
+    <string name="overview_tasks_show_completed">Show completed</string>
+    <string name="overview_tasks_add_task_description">Add Task</string>
+    <string name="overview_tasks_add_task">Add task</string>
+    <string name="overview_images_empty">No images saved yet.</string>
+    <string name="overview_images_add_image_description">Add Image</string>
+    <string name="overview_images_add_image">Add image</string>
+    <string name="overview_documents_empty">No documents attached yet.</string>
+    <string name="overview_documents_add_document_description">Add Document</string>
+    <string name="overview_documents_add_document">Add document</string>
+    <string name="overview_bookmarks_empty">No saved links yet.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Add Bookmark</string>
+    <string name="overview_bookmarks_add_bookmark">Add bookmark</string>
+    <string name="overview_bookmarks_add_link">Add Link</string>
+    <string name="overview_bookmarks_paste_link">Paste a link...</string>
+    <string name="overview_bookmarks_clear_link">Clear link</string>
+    <string name="overview_bookmarks_all">All</string>
+    <string name="overview_bookmarks_others">Others</string>
+</resources>

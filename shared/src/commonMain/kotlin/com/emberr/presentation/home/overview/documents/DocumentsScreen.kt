@@ -36,6 +36,12 @@ import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.circle_plus
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.overview_documents_add_document
+import emberr.shared.generated.resources.overview_documents_add_document_description
+import emberr.shared.generated.resources.overview_documents_empty
+import emberr.shared.generated.resources.overview_section_documents
+import org.jetbrains.compose.resources.stringResource
 
 private val SelectionHighlightShape = RoundedCornerShape(12.dp)
 
@@ -124,7 +130,7 @@ fun DocumentsScreen(
                         it.copy(fontSize = it.fontSize * 1.5f, lineHeight = it.lineHeight * 1.2f)
                     }
                     Text(
-                        text = "Documents",
+                        text = stringResource(Res.string.overview_section_documents),
                         style = titleStyle,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -151,7 +157,7 @@ fun DocumentsScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "No documents attached yet.",
+                                stringResource(Res.string.overview_documents_empty),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -191,11 +197,11 @@ fun DocumentsScreen(
             EmberrTopHeaderBar(
                 modifier = Modifier.align(Alignment.TopCenter),
                 topEdgeFadeAlpha = if (isAtScrollTop) 0f else 1f,
-                title = "Documents",
+                title = stringResource(Res.string.overview_section_documents),
                 titleVisibility = titleCollapseProgress,
                 onTitleClick = onCollapsedTitleClick,
                 hazeState = hazeState,
-                backTooltip = "Back",
+                backTooltip = stringResource(Res.string.common_back),
                 onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                 onBackClick = {
                     if (isSelectionMode) viewModel.clearSelection() else onNavigateBack()
@@ -204,12 +210,12 @@ fun DocumentsScreen(
                     if (!isSelectionMode) {
                         TopBarIconButton(
                             icon = painterResource(Res.drawable.circle_plus),
-                            contentDescription = "Add Document",
+                            contentDescription = stringResource(Res.string.overview_documents_add_document_description),
                             bgColor = Color.Transparent,
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
-                            tooltip = "Add document",
+                            tooltip = stringResource(Res.string.overview_documents_add_document),
                             onClick = onTriggerDocumentPicker
                         )
                     }

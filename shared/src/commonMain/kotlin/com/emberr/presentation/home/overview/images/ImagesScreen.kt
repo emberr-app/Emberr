@@ -36,6 +36,12 @@ import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.circle_plus
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.overview_images_add_image
+import emberr.shared.generated.resources.overview_images_add_image_description
+import emberr.shared.generated.resources.overview_images_empty
+import emberr.shared.generated.resources.overview_section_images
+import org.jetbrains.compose.resources.stringResource
 
 private val SelectionHighlightShape = RoundedCornerShape(12.dp)
 private val DesktopImageCardHeight = 220.dp
@@ -126,7 +132,7 @@ fun ImagesScreen(
                         it.copy(fontSize = it.fontSize * 1.5f, lineHeight = it.lineHeight * 1.2f)
                     }
                     Text(
-                        text = "Images",
+                        text = stringResource(Res.string.overview_section_images),
                         style = titleStyle,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -153,7 +159,7 @@ fun ImagesScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "No images saved yet.",
+                                stringResource(Res.string.overview_images_empty),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -194,11 +200,11 @@ fun ImagesScreen(
             EmberrTopHeaderBar(
                 modifier = Modifier.align(Alignment.TopCenter),
                 topEdgeFadeAlpha = if (isAtScrollTop) 0f else 1f,
-                title = "Images",
+                title = stringResource(Res.string.overview_section_images),
                 titleVisibility = titleCollapseProgress,
                 onTitleClick = onCollapsedTitleClick,
                 hazeState = hazeState,
-                backTooltip = "Back",
+                backTooltip = stringResource(Res.string.common_back),
                 onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                 onBackClick = {
                     if (isSelectionMode) viewModel.clearSelection() else onNavigateBack()
@@ -207,12 +213,12 @@ fun ImagesScreen(
                     if (!isSelectionMode) {
                         TopBarIconButton(
                             icon = painterResource(Res.drawable.circle_plus),
-                            contentDescription = "Add Image",
+                            contentDescription = stringResource(Res.string.overview_images_add_image_description),
                             bgColor = Color.Transparent,
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
-                            tooltip = "Add image",
+                            tooltip = stringResource(Res.string.overview_images_add_image),
                             onClick = onTriggerImagePicker
                         )
                     }

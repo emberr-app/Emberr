@@ -49,6 +49,13 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.koinInject
 import java.io.File
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.note_cover_image
+import emberr.shared.generated.resources.note_drag_image_to_reposition
+import emberr.shared.generated.resources.note_reposition
+import emberr.shared.generated.resources.note_save_position
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun NoteCoverImage(
@@ -118,7 +125,7 @@ internal fun NoteCoverImage(
         Box(modifier = Modifier.fillMaxSize().hazeSource(state = coverHazeState)) {
             AsyncImage(
                 model = request,
-                contentDescription = "Cover Image",
+                contentDescription = stringResource(Res.string.note_cover_image),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 alignment = alignment,
@@ -132,7 +139,7 @@ internal fun NoteCoverImage(
 
         if (isRepositioning) {
             CoverPill(
-                text = "Drag image to reposition",
+                text = stringResource(Res.string.note_drag_image_to_reposition),
                 hazeState = coverHazeState,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -144,13 +151,13 @@ internal fun NoteCoverImage(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = actionsEndPadding, bottom = 12.dp)
             ) {
                 if (isRepositioning) {
-                    CoverPill(text = "Save position", hazeState = coverHazeState, onClick = {
+                    CoverPill(text = stringResource(Res.string.note_save_position), hazeState = coverHazeState, onClick = {
                         draftPosition?.let { position -> coverPositionStore.savePosition(noteId, coverImagePath, position) }
                         closeActions()
                     })
-                    CoverPill(text = "Cancel", hazeState = coverHazeState, onClick = ::closeActions)
+                    CoverPill(text = stringResource(Res.string.common_cancel), hazeState = coverHazeState, onClick = ::closeActions)
                 } else {
-                    CoverPill(text = "Reposition", hazeState = coverHazeState, onClick = {
+                    CoverPill(text = stringResource(Res.string.note_reposition), hazeState = coverHazeState, onClick = {
                         draftPosition = savedPosition
                         wasTapped = false
                     })

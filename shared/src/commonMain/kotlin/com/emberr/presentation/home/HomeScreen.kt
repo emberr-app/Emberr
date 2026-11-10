@@ -120,6 +120,74 @@ import emberr.shared.generated.resources.trash
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import com.emberr.presentation.home.overview.label
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_create
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.home_breadcrumb_home
+import emberr.shared.generated.resources.home_calendar
+import emberr.shared.generated.resources.home_canvas
+import emberr.shared.generated.resources.home_cover
+import emberr.shared.generated.resources.home_delete_template
+import emberr.shared.generated.resources.home_edit_template
+import emberr.shared.generated.resources.home_empty_note
+import emberr.shared.generated.resources.home_empty_space_a_folder
+import emberr.shared.generated.resources.home_empty_space_a_new_note
+import emberr.shared.generated.resources.home_empty_space_or
+import emberr.shared.generated.resources.home_empty_space_start_with
+import emberr.shared.generated.resources.home_favorite
+import emberr.shared.generated.resources.home_favorites
+import emberr.shared.generated.resources.home_folder_name_placeholder
+import emberr.shared.generated.resources.home_in_parent
+import emberr.shared.generated.resources.home_more_settings
+import emberr.shared.generated.resources.home_move_to_trash
+import emberr.shared.generated.resources.home_name_placeholder
+import emberr.shared.generated.resources.home_nesting_inside_folder
+import emberr.shared.generated.resources.home_new_folder
+import emberr.shared.generated.resources.home_new_folder_tooltip
+import emberr.shared.generated.resources.home_new_note
+import emberr.shared.generated.resources.home_new_note_in_folder
+import emberr.shared.generated.resources.home_new_note_tooltip
+import emberr.shared.generated.resources.home_new_subfolder
+import emberr.shared.generated.resources.home_new_template
+import emberr.shared.generated.resources.home_no_templates_match
+import emberr.shared.generated.resources.home_no_templates_yet
+import emberr.shared.generated.resources.home_note
+import emberr.shared.generated.resources.home_note_title_placeholder
+import emberr.shared.generated.resources.home_notes
+import emberr.shared.generated.resources.home_open_calendar
+import emberr.shared.generated.resources.home_organize_your_notes
+import emberr.shared.generated.resources.home_overview_attached
+import emberr.shared.generated.resources.home_overview_saved
+import emberr.shared.generated.resources.home_overview_tasks_left
+import emberr.shared.generated.resources.home_recents
+import emberr.shared.generated.resources.home_rename
+import emberr.shared.generated.resources.home_rename_subtitle
+import emberr.shared.generated.resources.home_search_templates
+import emberr.shared.generated.resources.home_search_templates_placeholder
+import emberr.shared.generated.resources.home_selected
+import emberr.shared.generated.resources.home_settings
+import emberr.shared.generated.resources.home_sort
+import emberr.shared.generated.resources.home_sort_ascending
+import emberr.shared.generated.resources.home_sort_by
+import emberr.shared.generated.resources.home_sort_date_created
+import emberr.shared.generated.resources.home_sort_descending
+import emberr.shared.generated.resources.home_sort_last_edited
+import emberr.shared.generated.resources.home_sort_manual
+import emberr.shared.generated.resources.home_sort_name
+import emberr.shared.generated.resources.home_sort_notes
+import emberr.shared.generated.resources.home_sort_type
+import emberr.shared.generated.resources.home_switch_space
+import emberr.shared.generated.resources.home_templates
+import emberr.shared.generated.resources.home_templates_subtitle
+import emberr.shared.generated.resources.home_toggle_favorites
+import emberr.shared.generated.resources.home_toggle_notes
+import emberr.shared.generated.resources.home_toggle_recents
+import emberr.shared.generated.resources.home_toggle_sidebar
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 private val HORIZONTAL_PADDING = 16.dp
 private val SECTION_HEADER_START_PADDING = HORIZONTAL_PADDING + 4.dp
@@ -482,13 +550,13 @@ fun HomeScreen(
                                             Box(Modifier.weight(1f)) {
                                                 when (section) {
                                                     OverviewSection.TASKS ->
-                                                        OverviewCard(section.title, "$remindersCount left", onClick = { onNavigateToReminders() })
+                                                        OverviewCard(section.label(), pluralStringResource(Res.plurals.home_overview_tasks_left, remindersCount, remindersCount), onClick = { onNavigateToReminders() })
                                                     OverviewSection.BOOKMARKS ->
-                                                        OverviewCard(section.title, "$bookmarksCount saved", onClick = { onNavigateToBookmarks() })
+                                                        OverviewCard(section.label(), pluralStringResource(Res.plurals.home_overview_saved, bookmarksCount, bookmarksCount), onClick = { onNavigateToBookmarks() })
                                                     OverviewSection.IMAGES ->
-                                                        OverviewCard(section.title, "$imagesCount saved", onClick = { onNavigateToImages() })
+                                                        OverviewCard(section.label(), pluralStringResource(Res.plurals.home_overview_saved, imagesCount, imagesCount), onClick = { onNavigateToImages() })
                                                     OverviewSection.DOCUMENTS ->
-                                                        OverviewCard(section.title, "$documentsCount attached", onClick = { onNavigateToDocuments() })
+                                                        OverviewCard(section.label(), pluralStringResource(Res.plurals.home_overview_attached, documentsCount, documentsCount), onClick = { onNavigateToDocuments() })
                                                 }
                                             }
                                         }
@@ -516,11 +584,11 @@ fun HomeScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        "Favorites",
+                                        stringResource(Res.string.home_favorites),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
-                                    SectionToggleIcon(isFavoritesExpanded, "Toggle Favorites")
+                                    SectionToggleIcon(isFavoritesExpanded, stringResource(Res.string.home_toggle_favorites))
                                 }
                             }
                         }
@@ -602,18 +670,18 @@ fun HomeScreen(
                             Row(modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null, placementSpec = rowPlacementSpec).fillMaxWidth().padding(start = SECTION_HEADER_START_PADDING, end = HORIZONTAL_PADDING, top = if (hasContentAboveNotes) 26.dp else 0.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                                 Row(modifier = Modifier.clip(RoundedCornerShape(4.dp)).noRippleClickable { viewModel.toggleHomeSection(SyncConstants.HOME_SECTION_NOTES) }.padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        "Notes",
+                                        stringResource(Res.string.home_notes),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
-                                    SectionToggleIcon(isNotesExpanded, "Toggle Notes")
+                                    SectionToggleIcon(isNotesExpanded, stringResource(Res.string.home_toggle_notes))
                                 }
                                 if (!isSelectionMode && isDesktopPlatform) {
                                     Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
                                         Box {
                                             Icon(
                                                 painterResource(Res.drawable.arrow_up_down),
-                                                "Sort",
+                                                stringResource(Res.string.home_sort),
                                                 modifier = Modifier.size(20.dp).clip(CircleShape)
                                                     .noRippleClickable { showSortMenu = true },
                                                 tint = MaterialTheme.colorScheme.onSurface
@@ -638,7 +706,7 @@ fun HomeScreen(
                                         Box {
                                             Icon(
                                                 painterResource(Res.drawable.folder_plus),
-                                                "New Folder",
+                                                stringResource(Res.string.home_new_folder),
                                                 modifier = Modifier.size(20.dp)
                                                     .noRippleClickable {
                                                         addFolderParentId = null
@@ -661,7 +729,7 @@ fun HomeScreen(
                                                         )
                                                     ) {
                                                         Text(
-                                                            "New Folder",
+                                                            stringResource(Res.string.home_new_folder),
                                                             style = MaterialTheme.typography.bodyLarge,
                                                             fontWeight = FontWeight.Bold,
                                                             color = MaterialTheme.colorScheme.onSurface,
@@ -670,7 +738,7 @@ fun HomeScreen(
                                                         EmberrTextField(
                                                             value = addFolderInput,
                                                             onValueChange = { addFolderInput = it },
-                                                            placeholder = "e.g. Personal, Work...",
+                                                            placeholder = stringResource(Res.string.home_folder_name_placeholder),
                                                             modifier = Modifier.fillMaxWidth(),
                                                             onSubmit = {
                                                                 if (addFolderInput.isNotBlank()) {
@@ -684,12 +752,12 @@ fun HomeScreen(
                                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                                                         ) {
                                                             EmberrButtonSecondary(
-                                                                text = "Cancel",
+                                                                text = stringResource(Res.string.common_cancel),
                                                                 onClick = { showAddFolderPopup = false },
                                                                 modifier = Modifier.weight(1f)
                                                             )
                                                             EmberrButtonPrimary(
-                                                                text = "Create",
+                                                                text = stringResource(Res.string.common_create),
                                                                 onClick = {
                                                                     if (addFolderInput.isNotBlank()) {
                                                                         handleCreateFolder(addFolderInput.trim())
@@ -704,7 +772,7 @@ fun HomeScreen(
                                             }
                                         }
                                         Box {
-                                            Icon(painterResource(Res.drawable.pen_square), "New Note", modifier = Modifier.size(22.dp).noRippleClickable { addNoteTargetFolderId = null; if (isDesktopPlatform) { addNoteInput = ""; showAddNotePopup = true } else showAddNoteDialog = true }, tint = MaterialTheme.colorScheme.onSurface)
+                                            Icon(painterResource(Res.drawable.pen_square), stringResource(Res.string.home_new_note), modifier = Modifier.size(22.dp).noRippleClickable { addNoteTargetFolderId = null; if (isDesktopPlatform) { addNoteInput = ""; showAddNotePopup = true } else showAddNoteDialog = true }, tint = MaterialTheme.colorScheme.onSurface)
                                             if (isDesktopPlatform) {
                                                 EmberrDesktopMenu(expanded = showAddNotePopup, onDismissRequest = { showAddNotePopup = false }, modifier = Modifier.width(280.dp)) {
                                                     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
@@ -715,15 +783,15 @@ fun HomeScreen(
                                                             horizontalArrangement = Arrangement.SpaceBetween
                                                         ) {
                                                             Text(
-                                                                "New Note",
+                                                                stringResource(Res.string.home_new_note),
                                                                 style = MaterialTheme.typography.bodyLarge,
                                                                 fontWeight = FontWeight.Bold,
                                                                 color = MaterialTheme.colorScheme.onSurface
                                                             )
-                                                            IconTooltip(text = "Templates") {
+                                                            IconTooltip(text = stringResource(Res.string.home_templates)) {
                                                                 Icon(
                                                                     painter = painterResource(Res.drawable.template),
-                                                                    contentDescription = "Templates",
+                                                                    contentDescription = stringResource(Res.string.home_templates),
                                                                     tint = MaterialTheme.colorScheme.onSurface,
                                                                     modifier = Modifier.size(24.dp)
                                                                         .noRippleClickable {
@@ -736,7 +804,7 @@ fun HomeScreen(
                                                         EmberrTextField(
                                                             value = addNoteInput,
                                                             onValueChange = { addNoteInput = it },
-                                                            placeholder = "Note title...",
+                                                            placeholder = stringResource(Res.string.home_note_title_placeholder),
                                                             modifier = Modifier.fillMaxWidth(),
                                                             onSubmit = {
                                                                 if (addNoteInput.isNotBlank()) {
@@ -752,14 +820,14 @@ fun HomeScreen(
                                                             )
                                                         ) {
                                                             EmberrButtonSecondary(
-                                                                text = "Cancel",
+                                                                text = stringResource(Res.string.common_cancel),
                                                                 onClick = {
                                                                     showAddNotePopup = false
                                                                 },
                                                                 modifier = Modifier.weight(1f)
                                                             )
                                                             EmberrButtonPrimary(
-                                                                text = "Create",
+                                                                text = stringResource(Res.string.common_create),
                                                                 onClick = {
                                                                     if (addNoteInput.isNotBlank()) {
                                                                         handleCreateNote(
@@ -801,27 +869,27 @@ fun HomeScreen(
                                             items = listOf(
                                                 TopBarIconButtonItem(
                                                     icon = painterResource(Res.drawable.arrow_up_down),
-                                                    contentDescription = "Sort",
+                                                    contentDescription = stringResource(Res.string.home_sort),
                                                     onClick = { showSortMenu = true },
-                                                    tooltip = "Sort notes"
+                                                    tooltip = stringResource(Res.string.home_sort_notes)
                                                 ),
                                                 TopBarIconButtonItem(
                                                     icon = painterResource(Res.drawable.folder_plus),
-                                                    contentDescription = "New Folder",
+                                                    contentDescription = stringResource(Res.string.home_new_folder),
                                                     onClick = {
                                                         addFolderParentId = null
                                                         showAddFolderDialog = true
                                                     },
-                                                    tooltip = "New folder"
+                                                    tooltip = stringResource(Res.string.home_new_folder_tooltip)
                                                 ),
                                                 TopBarIconButtonItem(
                                                     icon = painterResource(Res.drawable.pen_square),
-                                                    contentDescription = "New Note",
+                                                    contentDescription = stringResource(Res.string.home_new_note),
                                                     onClick = {
                                                         addNoteTargetFolderId = null
                                                         showAddNoteDialog = true
                                                     },
-                                                    tooltip = "New note"
+                                                    tooltip = stringResource(Res.string.home_new_note_tooltip)
                                                 )
                                             )
                                         )
@@ -961,11 +1029,11 @@ fun HomeScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        "Recents",
+                                        stringResource(Res.string.home_recents),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
-                                    SectionToggleIcon(isRecentsExpanded, "Toggle Recents")
+                                    SectionToggleIcon(isRecentsExpanded, stringResource(Res.string.home_toggle_recents))
                                 }
                             }
                         }
@@ -1055,7 +1123,7 @@ fun HomeScreen(
                     {
                         Icon(
                             painter = painterResource(Res.drawable.chevron_down),
-                            contentDescription = "Switch space",
+                            contentDescription = stringResource(Res.string.home_switch_space),
                             tint = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier
                                 .padding(start = 8.dp, top = 6.dp)
@@ -1080,7 +1148,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 Icons.Default.Menu,
-                                contentDescription = "Toggle sidebar",
+                                contentDescription = stringResource(Res.string.home_toggle_sidebar),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -1096,15 +1164,15 @@ fun HomeScreen(
                             items = listOf(
                                 TopBarIconButtonItem(
                                     icon = painterResource(Res.drawable.calendar),
-                                    contentDescription = "Open Calendar",
+                                    contentDescription = stringResource(Res.string.home_open_calendar),
                                     onClick = onNavigateToCalendar,
-                                    tooltip = "Calendar"
+                                    tooltip = stringResource(Res.string.home_calendar)
                                 ),
                                 TopBarIconButtonItem(
                                     icon = painterResource(Res.drawable.ellipsis),
-                                    contentDescription = "Settings",
+                                    contentDescription = stringResource(Res.string.home_settings),
                                     onClick = { showUserSettingsMenu = true },
-                                    tooltip = "More settings"
+                                    tooltip = stringResource(Res.string.home_more_settings)
                                 )
                             )
                         )
@@ -1164,14 +1232,14 @@ fun HomeScreen(
                 onClearSelection = { viewModel.clearSelection() },
                 actions = buildList {
                     if (selectionMenu.showRename) {
-                        add(SelectionPillAction(Res.drawable.pen, "Rename") { showRenameSheet = true })
+                        add(SelectionPillAction(Res.drawable.pen, stringResource(Res.string.home_rename)) { showRenameSheet = true })
                     }
                     if (selectionMenu.showFavorite) {
-                        add(SelectionPillAction(Res.drawable.star, selectionMenu.favoriteLabel) {
+                        add(SelectionPillAction(Res.drawable.star, selectionMenu.favoriteLabel()) {
                             viewModel.setNotesFavorite(selectedNoteIds, selectionMenu.makeFavorite)
                         })
                     }
-                    add(SelectionPillAction(Res.drawable.trash, "Move to Trash") { viewModel.deleteSelectedItems() })
+                    add(SelectionPillAction(Res.drawable.trash, stringResource(Res.string.home_move_to_trash)) { viewModel.deleteSelectedItems() })
                 },
                 modifier = Modifier.align(Alignment.BottomCenter),
                 hazeState = hazeState
@@ -1238,27 +1306,27 @@ fun HomeScreen(
 fun DesktopSortMenu(currentSortType: SortType, currentSortOrder: SortOrder, onDismiss: () -> Unit, onSortChanged: (SortType, SortOrder) -> Unit) {
     Column(modifier = Modifier.width(200.dp).padding(vertical = 4.dp)) {
         EmberrDesktopMenuOption(
-            label = "Last Edited",
+            label = stringResource(Res.string.home_sort_last_edited),
             isSelected = currentSortType == SortType.LAST_EDITED,
             onClick = { onDismiss(); onSortChanged(SortType.LAST_EDITED, currentSortOrder) }
         )
         EmberrDesktopMenuOption(
-            label = "Date Created",
+            label = stringResource(Res.string.home_sort_date_created),
             isSelected = currentSortType == SortType.DATE_CREATED,
             onClick = { onDismiss(); onSortChanged(SortType.DATE_CREATED, currentSortOrder) }
         )
         EmberrDesktopMenuOption(
-            label = "Name (A-Z)",
+            label = stringResource(Res.string.home_sort_name),
             isSelected = currentSortType == SortType.NAME,
             onClick = { onDismiss(); onSortChanged(SortType.NAME, currentSortOrder) }
         )
         EmberrDesktopMenuOption(
-            label = "Type",
+            label = stringResource(Res.string.home_sort_type),
             isSelected = currentSortType == SortType.TYPE,
             onClick = { onDismiss(); onSortChanged(SortType.TYPE, currentSortOrder) }
         )
         EmberrDesktopMenuOption(
-            label = "Manual",
+            label = stringResource(Res.string.home_sort_manual),
             isSelected = currentSortType == SortType.MANUAL,
             onClick = { onDismiss(); onSortChanged(SortType.MANUAL, currentSortOrder) }
         )
@@ -1267,12 +1335,12 @@ fun DesktopSortMenu(currentSortType: SortType, currentSortOrder: SortOrder, onDi
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
         )
         EmberrDesktopMenuOption(
-            label = "Ascending",
+            label = stringResource(Res.string.home_sort_ascending),
             isSelected = currentSortOrder == SortOrder.ASCENDING,
             onClick = { onDismiss(); onSortChanged(currentSortType, SortOrder.ASCENDING) }
         )
         EmberrDesktopMenuOption(
-            label = "Descending",
+            label = stringResource(Res.string.home_sort_descending),
             isSelected = currentSortOrder == SortOrder.DESCENDING,
             onClick = { onDismiss(); onSortChanged(currentSortType, SortOrder.DESCENDING) }
         )
@@ -1301,26 +1369,26 @@ private fun HomeEmptyState(
         )
         Spacer(Modifier.height(10.dp))
         Text(
-            "This space is empty. Start with",
+            stringResource(Res.string.home_empty_space_start_with),
             style = MaterialTheme.typography.labelSmall,
             color = mutedColor
         )
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "a new note",
+                stringResource(Res.string.home_empty_space_a_new_note),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
                 color = actionColor,
                 modifier = newNoteActionModifier.noRippleClickable(onCreateNote).padding(vertical = 6.dp, horizontal = 4.dp)
             )
             Text(
-                "or",
+                stringResource(Res.string.home_empty_space_or),
                 style = MaterialTheme.typography.labelSmall,
                 color = mutedColor
             )
             Text(
-                "a folder",
+                stringResource(Res.string.home_empty_space_a_folder),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
                 color = actionColor,
@@ -1356,7 +1424,7 @@ fun BreadcrumbTrail(selectedFolderId: String?, breadcrumbs: List<FolderEntity>, 
         item {
             val isRoot = selectedFolderId == null
             Text(
-                "Home",
+                stringResource(Res.string.home_breadcrumb_home),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (isRoot) FontWeight.Bold else FontWeight.Medium,
                 color = if (isRoot) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface,
@@ -1434,7 +1502,7 @@ fun NoteCard(
                         val coverAlignment = coverAlignmentFor(coverPosition)
                         AsyncImage(
                             model = request,
-                            contentDescription = "Cover",
+                            contentDescription = stringResource(Res.string.home_cover),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
                             alignment = coverAlignment
@@ -1463,7 +1531,7 @@ fun NoteCard(
                 )
             ) {
                 Text(
-                    note.title.ifEmpty { "Untitled" },
+                    note.title.ifEmpty { stringResource(Res.string.common_untitled) },
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = titleColor,
@@ -1472,7 +1540,7 @@ fun NoteCard(
                 )
                 parentTitle?.let {
                     Text(
-                        text = "in $it",
+                        text = stringResource(Res.string.home_in_parent, it),
                         style = MaterialTheme.typography.labelSmall,
                         color = mutedColor,
                         maxLines = 1,
@@ -1480,7 +1548,7 @@ fun NoteCard(
                     )
                 }
                 Spacer(Modifier.height(4.dp))
-                Text(text = note.snippet.takeIf { it.isNotBlank() } ?: if (isCanvas) "Canvas" else "Empty note...",
+                Text(text = note.snippet.takeIf { it.isNotBlank() } ?: if (isCanvas) stringResource(Res.string.home_canvas) else stringResource(Res.string.home_empty_note),
                     style = MaterialTheme.typography.labelSmall,
                     color = mutedColor,
                     maxLines = 3,
@@ -1495,14 +1563,14 @@ fun NoteCard(
         )
         if (hasCanvasIcon) Icon(
             painterResource(Res.drawable.group),
-            contentDescription = "Canvas",
+            contentDescription = stringResource(Res.string.home_canvas),
             tint = titleColor,
             modifier = Modifier.align(Alignment.TopStart).padding(start = 12.dp)
                 .offset(y = coverHeight - iconOverhang).size(22.dp)
         )
         if (note.isFavorite) Icon(
             Icons.Default.Star,
-            "Favorite",
+            stringResource(Res.string.home_favorite),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(14.dp)
         )
@@ -1513,7 +1581,7 @@ fun NoteCard(
         ) {
             Icon(
                 Icons.Default.Check,
-                "Selected",
+                stringResource(Res.string.home_selected),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(14.dp)
             )
@@ -1527,10 +1595,10 @@ fun RenameBottomSheet(
     currentName: String,
     onDismiss: () -> Unit,
     onRename: (String) -> Unit,
-    title: String = "Rename",
-    subtitle: String = "Pick a new name.",
-    confirmLabel: String = "Save",
-    placeholder: String = "Name..."
+    title: String = stringResource(Res.string.home_rename),
+    subtitle: String = stringResource(Res.string.home_rename_subtitle),
+    confirmLabel: String = stringResource(Res.string.common_save),
+    placeholder: String = stringResource(Res.string.home_name_placeholder)
 ) {
     var newName by remember(currentName) { mutableStateOf(currentName) }
     EmberrBottomSheet(
@@ -1552,7 +1620,7 @@ fun RenameBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { closeAnd(onDismiss) },
                     modifier = Modifier.weight(1f)
                 )
@@ -1577,15 +1645,15 @@ fun AddFolderBottomSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = if (destinationFolderName != null) "New Subfolder" else "New Folder",
-        subtitle = if (destinationFolderName != null) "Nesting inside $destinationFolderName."
-        else "Organize your notes."
+        title = if (destinationFolderName != null) stringResource(Res.string.home_new_subfolder) else stringResource(Res.string.home_new_folder),
+        subtitle = if (destinationFolderName != null) stringResource(Res.string.home_nesting_inside_folder, destinationFolderName)
+        else stringResource(Res.string.home_organize_your_notes)
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 16.dp)) {
             EmberrTextField(
                 value = folderName,
                 onValueChange = { folderName = it },
-                placeholder = "e.g. Personal, Work...",
+                placeholder = stringResource(Res.string.home_folder_name_placeholder),
                 modifier = Modifier.fillMaxWidth(),
                 onSubmit = { if (folderName.isNotBlank()) closeAnd { onCreate(folderName.trim()) } }
             )
@@ -1594,12 +1662,12 @@ fun AddFolderBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { closeAnd(onDismiss) },
                     modifier = Modifier.weight(1f)
                 )
                 EmberrButtonPrimary(
-                    text = "Create",
+                    text = stringResource(Res.string.common_create),
                     onClick = { if (folderName.isNotBlank()) closeAnd { onCreate(folderName.trim()) } },
                     modifier = Modifier.weight(1f)
                 )
@@ -1618,12 +1686,12 @@ private fun NewNoteMobileMenu(
 ) {
     EmberrMobileMenu(anchor = anchor, expanded = expanded, onDismissRequest = onDismissRequest) {
         EmberrMobileMenuOption(
-            label = "Note",
+            label = stringResource(Res.string.home_note),
             icon = { NewNoteMenuIcon(Res.drawable.file_text) },
             onClick = { onCreateNote(NoteKind.NOTE) }
         )
         EmberrMobileMenuOption(
-            label = "Canvas",
+            label = stringResource(Res.string.home_canvas),
             icon = { NewNoteMenuIcon(Res.drawable.group) },
             onClick = { onCreateNote(NoteKind.CANVAS) }
         )
@@ -1632,7 +1700,7 @@ private fun NewNoteMobileMenu(
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
         )
         EmberrMobileMenuOption(
-            label = "Templates",
+            label = stringResource(Res.string.home_templates),
             icon = { NewNoteMenuIcon(Res.drawable.template) },
             onClick = onOpenTemplates
         )
@@ -1665,7 +1733,7 @@ private fun NewNoteInFolderMenu(
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Text(
-                text = "New Note in $folderName",
+                text = stringResource(Res.string.home_new_note_in_folder, folderName),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -1676,7 +1744,7 @@ private fun NewNoteInFolderMenu(
             EmberrTextField(
                 value = input,
                 onValueChange = onInputChange,
-                placeholder = "Note title...",
+                placeholder = stringResource(Res.string.home_note_title_placeholder),
                 modifier = Modifier.fillMaxWidth(),
                 onSubmit = { if (input.isNotBlank()) onCreate(input.trim()) }
             )
@@ -1685,12 +1753,12 @@ private fun NewNoteInFolderMenu(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
                 )
                 EmberrButtonPrimary(
-                    text = "Create",
+                    text = stringResource(Res.string.common_create),
                     onClick = { if (input.isNotBlank()) onCreate(input.trim()) },
                     modifier = Modifier.weight(1f)
                 )
@@ -1715,14 +1783,14 @@ fun TemplatesMenuContent(
             EmberrTextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
-                placeholder = "Search templates...",
+                placeholder = stringResource(Res.string.home_search_templates_placeholder),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp).padding(horizontal = 12.dp, vertical = 12.dp)
             )
         }
 
         if (templates.isEmpty()) {
             Text(
-                text = if (searchQuery.isBlank()) "No templates yet." else "No templates match \"$searchQuery\".",
+                text = if (searchQuery.isBlank()) stringResource(Res.string.home_no_templates_yet) else stringResource(Res.string.home_no_templates_match, searchQuery),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(vertical = 14.dp)
@@ -1761,7 +1829,7 @@ private fun NewTemplateRow(onClick: () -> Unit) {
             modifier = Modifier.size(16.dp)
         )
         Spacer(Modifier.width(10.dp))
-        Text("New template", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+        Text(stringResource(Res.string.home_new_template), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
@@ -1796,25 +1864,25 @@ private fun TemplateRow(
             }
             Spacer(Modifier.width(10.dp))
             Text(
-                template.title.ifBlank { "Untitled" },
+                template.title.ifBlank { stringResource(Res.string.common_untitled) },
                 style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false)
             )
         }
         Spacer(Modifier.width(12.dp))
-        IconTooltip(text = "Edit template") {
+        IconTooltip(text = stringResource(Res.string.home_edit_template)) {
             Icon(
                 painter = painterResource(Res.drawable.pen),
-                contentDescription = "Edit template",
+                contentDescription = stringResource(Res.string.home_edit_template),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                 modifier = Modifier.size(15.dp).noRippleClickable(onEdit)
             )
         }
         Spacer(Modifier.width(14.dp))
-        IconTooltip(text = "Delete template") {
+        IconTooltip(text = stringResource(Res.string.home_delete_template)) {
             Icon(
                 painter = painterResource(Res.drawable.trash),
-                contentDescription = "Delete template",
+                contentDescription = stringResource(Res.string.home_delete_template),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                 modifier = Modifier.size(16.dp).noRippleClickable(onDelete)
             )
@@ -1838,15 +1906,15 @@ fun TemplatesBottomSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Templates",
-        subtitle = "Start a new note from a template.",
+        title = stringResource(Res.string.home_templates),
+        subtitle = stringResource(Res.string.home_templates_subtitle),
         contentHorizontalPadding = 0.dp,
         scrollsContent = false
     ) { closeAnd ->
         EmberrSearchSheetBody(
             searchText = searchQuery,
             onSearchTextChange = onSearchQueryChange,
-            placeholder = "Search templates",
+            placeholder = stringResource(Res.string.home_search_templates),
             contentHorizontalPadding = TemplatesSheetSidePadding
         ) {
             TemplatesMenuContent(
@@ -1877,7 +1945,7 @@ fun TemplatesDesktopMenu(
     EmberrDesktopMenu(expanded = expanded, onDismissRequest = onDismissRequest, modifier = Modifier.width(300.dp)) {
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
             Text(
-                "Templates", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold,
+                stringResource(Res.string.home_templates), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
             )
@@ -1899,32 +1967,32 @@ fun SortBottomSheet(expanded: Boolean, currentSortType: SortType, currentSortOrd
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Sort by",
+        title = stringResource(Res.string.home_sort_by),
         contentHorizontalPadding = 0.dp
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             EmberrBottomSheetOption(
-                label = "Last Edited",
+                label = stringResource(Res.string.home_sort_last_edited),
                 isSelected = currentSortType == SortType.LAST_EDITED,
                 onClick = { closeAnd { onSortChanged(SortType.LAST_EDITED, currentSortOrder) } }
             )
             EmberrBottomSheetOption(
-                label = "Date Created",
+                label = stringResource(Res.string.home_sort_date_created),
                 isSelected = currentSortType == SortType.DATE_CREATED,
                 onClick = { closeAnd { onSortChanged(SortType.DATE_CREATED, currentSortOrder) } }
             )
             EmberrBottomSheetOption(
-                label = "Name (A-Z)",
+                label = stringResource(Res.string.home_sort_name),
                 isSelected = currentSortType == SortType.NAME,
                 onClick = { closeAnd { onSortChanged(SortType.NAME, currentSortOrder) } }
             )
             EmberrBottomSheetOption(
-                label = "Type",
+                label = stringResource(Res.string.home_sort_type),
                 isSelected = currentSortType == SortType.TYPE,
                 onClick = { closeAnd { onSortChanged(SortType.TYPE, currentSortOrder) } }
             )
             EmberrBottomSheetOption(
-                label = "Manual",
+                label = stringResource(Res.string.home_sort_manual),
                 isSelected = currentSortType == SortType.MANUAL,
                 onClick = { closeAnd { onSortChanged(SortType.MANUAL, currentSortOrder) } }
             )
@@ -1933,18 +2001,18 @@ fun SortBottomSheet(expanded: Boolean, currentSortType: SortType, currentSortOrd
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
             )
             EmberrBottomSheetOption(
-                label = "Ascending",
+                label = stringResource(Res.string.home_sort_ascending),
                 isSelected = currentSortOrder == SortOrder.ASCENDING,
                 onClick = { closeAnd { onSortChanged(currentSortType, SortOrder.ASCENDING) } }
             )
             EmberrBottomSheetOption(
-                label = "Descending",
+                label = stringResource(Res.string.home_sort_descending),
                 isSelected = currentSortOrder == SortOrder.DESCENDING,
                 onClick = { closeAnd { onSortChanged(currentSortType, SortOrder.DESCENDING) } }
             )
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp, horizontal = 20.dp)

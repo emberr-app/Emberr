@@ -260,6 +260,7 @@ import com.emberr.presentation.shared.components.highContrastBorder
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import com.emberr.presentation.home.overview.label
 
 private const val PRIVACY_POLICY_URL = "https://github.com/emberr-app/Emberr/blob/main/PRIVACY.md"
 private val SettingsCardShape = RoundedCornerShape(18.dp)
@@ -1395,7 +1396,7 @@ private fun AppearanceSettingsSection(
             if (index > 0) SettingsDivider()
             SettingsToggleRow(
                 icon = painterResource(section.icon),
-                title = section.title,
+                title = section.label(),
                 isChecked = section.storageKey !in hiddenOverviewSections,
                 onCheckedChange = { isVisible -> onOverviewSectionVisibleChange(section, isVisible) }
             )

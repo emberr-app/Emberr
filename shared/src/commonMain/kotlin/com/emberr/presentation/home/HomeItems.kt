@@ -107,17 +107,15 @@ fun List<HomeItem>.movedTo(draggedKey: String, targetKey: String): List<HomeItem
 data class TreeSelectionMenu(
     val showRename: Boolean,
     val showFavorite: Boolean,
-    val favoriteLabel: String,
     val makeFavorite: Boolean,
-    val deleteLabel: String
+    val selectedCount: Int
 )
 
 val SINGLE_ITEM_TREE_MENU = TreeSelectionMenu(
     showRename = true,
     showFavorite = false,
-    favoriteLabel = "Add to Favorites",
     makeFavorite = true,
-    deleteLabel = "Delete"
+    selectedCount = 1
 )
 
 fun treeSelectionMenu(
@@ -132,9 +130,8 @@ fun treeSelectionMenu(
     return TreeSelectionMenu(
         showRename = selectedCount == 1,
         showFavorite = holdsOnlyNotes,
-        favoriteLabel = if (everySelectedNoteIsFavorite) "Remove from Favorites" else "Add to Favorites",
         makeFavorite = !everySelectedNoteIsFavorite,
-        deleteLabel = if (selectedCount > 1) "Delete $selectedCount items" else "Delete"
+        selectedCount = selectedCount
     )
 }
 
