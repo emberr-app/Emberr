@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">Pessoas</string>
+    <string name="people_clear_selection">Limpar seleção</string>
+    <string name="people_select_all">Selecionar tudo</string>
+    <string name="people_deselect_all">Desmarcar tudo</string>
+    <string name="people_add_people">Adicionar pessoas</string>
+    <string name="people_create_new_contact">Criar novo contato</string>
+    <string name="people_import_from_vcf_file">Importar de arquivo .vcf</string>
+    <string name="people_import_from_phone">Importar do celular</string>
+    <string name="people_search_people">Pesquisar pessoas</string>
+    <string name="people_move_to_trash">Mover para a lixeira</string>
+    <string name="people_next">Próximo</string>
+    <string name="people_untitled_event">Evento sem título</string>
+    <string name="people_no_upcoming_events">Nenhum evento próximo</string>
+    <string name="people_selected">Selecionado</string>
+    <string name="people_empty_title">Nenhuma pessoa ainda</string>
+    <string name="people_empty_message">Adicione alguém sobre quem você quer lembrar coisas. As pessoas que você adiciona a um evento também aparecem aqui.</string>
+    <string name="people_new_person">Nova pessoa</string>
+    <string name="people_import_contacts">Importar contatos</string>
+    <string name="people_no_one_matches">Ninguém corresponde a “%1$s”</string>
+    <string name="people_create_named">Criar “%1$s”</string>
+    <plurals name="people_selected_count">
+        <item quantity="one">%1$d selecionado</item>
+        <item quantity="other">%1$d selecionados</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="one">%1$d pessoa</item>
+        <item quantity="other">%1$d pessoas</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="one">%1$d evento</item>
+        <item quantity="other">%1$d eventos</item>
+    </plurals>
+
+    <string name="people_importing_contacts">Importando contatos…</string>
+    <string name="people_importing_contacts_progress">Importando contatos… %1$d de %2$d</string>
+    <string name="people_already_importing_contacts">Já importando contatos</string>
+    <string name="people_could_not_read_file">Não foi possível ler o arquivo</string>
+    <string name="people_could_not_read_contact">Não foi possível ler o contato</string>
+    <string name="people_no_contacts_app_found">Nenhum app de contatos encontrado</string>
+    <string name="people_choose_contact_files">Escolher arquivos de contatos</string>
+    <string name="people_no_contacts_found">Nenhum contato encontrado</string>
+    <string name="people_could_not_add_contacts">Não foi possível adicionar os contatos</string>
+    <string name="people_already_in_people">Já está em Pessoas</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="one">%1$d já está em Pessoas</item>
+        <item quantity="other">Todos os %1$d já estão em Pessoas</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="one">%1$d pessoa adicionada</item>
+        <item quantity="other">%1$d pessoas adicionadas</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="one">%1$d ignorada por já estar em Pessoas</item>
+        <item quantity="other">%1$d ignoradas por já estarem em Pessoas</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="one">não foi possível adicionar %1$d</item>
+        <item quantity="other">não foi possível adicionar %1$d</item>
+    </plurals>
+    <string name="people_could_not_create_person">Não foi possível criar a pessoa</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="one">%1$d pessoa movida para a lixeira</item>
+        <item quantity="other">%1$d pessoas movidas para a lixeira</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="one">%1$d de %2$d pessoas movida para a lixeira</item>
+        <item quantity="other">%1$d de %2$d pessoas movidas para a lixeira</item>
+    </plurals>
+    <string name="people_could_not_save_detail">Não foi possível salvar o detalhe</string>
+    <string name="people_could_not_remove_detail">Não foi possível remover o detalhe</string>
+
+    <string name="people_meta_next_and_last_seen">Próximo em %1$s · visto por último %2$s</string>
+    <string name="people_meta_next">Próximo em %1$s</string>
+    <string name="people_meta_last_seen">Visto por último %1$s</string>
+    <string name="people_meta_no_events">Nenhum evento ainda</string>
+    <string name="people_birthday_with_age">%1$s, %2$d · faz %3$d</string>
+    <string name="people_all_day">Dia inteiro</string>
+    <string name="people_event_with_names">com %1$s</string>
+
+    <string name="people_copied">Copiado</string>
+    <string name="people_could_not_copy">Não foi possível copiar</string>
+    <string name="people_could_not_open_link">Não foi possível abrir o link</string>
+    <string name="people_write_anything_about">Escreva qualquer coisa sobre %1$s…</string>
+    <string name="people_write_anything_about_them">Escreva qualquer coisa sobre essa pessoa…</string>
+    <string name="people_notes">Notas</string>
+    <string name="people_remove_icon">Remover ícone</string>
+    <string name="people_change_icon">Alterar ícone</string>
+    <string name="people_change_photo">Alterar foto</string>
+    <string name="people_remove_photo">Remover foto</string>
+    <string name="people_open">Abrir</string>
+    <string name="people_more">Mais</string>
+    <string name="people_call">Ligar</string>
+    <string name="people_message">Mensagem</string>
+    <string name="people_email">E-mail</string>
+    <string name="people_write_email">Escrever e-mail</string>
+    <string name="people_copy">Copiar</string>
+    <string name="people_new_event">Novo evento</string>
+    <string name="people_name">Nome</string>
+
+    <string name="people_details">Detalhes</string>
+    <string name="people_more_details">Mais detalhes</string>
+    <string name="people_upcoming">Próximos</string>
+    <string name="people_nothing_planned_with">Nada planejado com %1$s</string>
+    <string name="people_nothing_planned_with_them">Nada planejado com essa pessoa</string>
+    <string name="people_past">Anteriores</string>
+    <string name="people_no_past_events">Nenhum evento anterior</string>
+    <string name="people_show_fewer">Mostrar menos</string>
+    <string name="people_show_all_count">Mostrar todos os %1$d</string>
+
+    <string name="people_detail_phone">Telefone</string>
+    <string name="people_detail_email">E-mail</string>
+    <string name="people_detail_birthday">Aniversário</string>
+    <string name="people_detail_address">Endereço</string>
+    <string name="people_detail_company">Empresa</string>
+    <string name="people_detail_role">Cargo</string>
+    <string name="people_detail_website">Site</string>
+    <string name="people_detail_social">Rede social</string>
+    <string name="people_detail_relationship">Relação</string>
+    <string name="people_detail_custom">Personalizado</string>
+    <string name="people_add_phone">Adicionar telefone</string>
+    <string name="people_add_email">Adicionar e-mail</string>
+    <string name="people_add_birthday">Adicionar aniversário</string>
+    <string name="people_add_address">Adicionar endereço</string>
+    <string name="people_add_company">Adicionar empresa</string>
+    <string name="people_add_role">Adicionar cargo</string>
+    <string name="people_add_website">Adicionar site</string>
+    <string name="people_add_social">Adicionar rede social</string>
+    <string name="people_add_relationship">Adicionar relação</string>
+    <string name="people_add_custom">Adicionar personalizado</string>
+    <string name="people_edit_phone">Editar telefone</string>
+    <string name="people_edit_email">Editar e-mail</string>
+    <string name="people_edit_birthday">Editar aniversário</string>
+    <string name="people_edit_address">Editar endereço</string>
+    <string name="people_edit_company">Editar empresa</string>
+    <string name="people_edit_role">Editar cargo</string>
+    <string name="people_edit_website">Editar site</string>
+    <string name="people_edit_social">Editar rede social</string>
+    <string name="people_edit_relationship">Editar relação</string>
+    <string name="people_edit_custom">Editar personalizado</string>
+
+    <string name="people_placeholder_phone_number">Número de telefone</string>
+    <string name="people_placeholder_address">Rua, bairro, cidade</string>
+    <string name="people_placeholder_company">Onde trabalha</string>
+    <string name="people_placeholder_role">O que faz</string>
+    <string name="people_placeholder_relationship">Amigo da faculdade</string>
+    <string name="people_placeholder_custom">Qualquer coisa</string>
+
+    <string name="people_add_detail">Adicionar detalhe</string>
+    <string name="people_already_added">Já adicionado</string>
+    <string name="people_remove">Remover</string>
+    <string name="people_cannot_be_empty">Isto não pode ficar vazio</string>
+    <string name="people_custom_label">Rótulo personalizado</string>
+    <string name="people_custom_label_placeholder">Rótulo personalizado</string>
+    <string name="people_label_optional">Rótulo (opcional)</string>
+    <string name="people_birthday_month">Mês</string>
+    <string name="people_birthday_day">Dia</string>
+    <string name="people_birthday_year">Ano</string>
+    <string name="people_birthday_optional">opcional</string>
+    <string name="people_birthday_year_example">ex.: 1996</string>
+    <string name="people_birthday_date_not_in_year">%1$s não existe em %2$s</string>
+    <string name="people_birthday_year_range">Use um ano de %1$d a %2$d</string>
+</resources>

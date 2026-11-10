@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="database_repeat_explanation">O Emberr adiciona uma linha a partir deste modelo em cada dia de repetição, à hora escolhida, enquanto a app está aberta. Se a app estava fechada nesse momento, a linha é adicionada da próxima vez que a abrires nesse dia.</string>
+    <string name="database_repeat_at_a_set_time">A uma hora definida</string>
+    <string name="database_relative_date_one_week_ago">Há uma semana</string>
+    <string name="database_relative_date_one_month_ago">Há um mês</string>
+    <string name="database_calculation_group_percent">Percentagem</string>
+    <string name="database_calculation_percent_empty">Percentagem vazia</string>
+    <string name="database_calculation_percent_not_empty">Percentagem não vazia</string>
+    <string name="database_calculation_percent_checked">Percentagem marcada</string>
+    <string name="database_calculation_percent_unchecked">Percentagem desmarcada</string>
+    <string name="database_number_style_percent">Percentagem</string>
+    <string name="database_board_needs_group_column">Adiciona uma coluna de Estado, Tags, Pessoas, Caixa de seleção ou Data para agrupar este quadro.</string>
+    <string name="database_delete_rule">Eliminar regra</string>
+    <string name="database_type_a_number">Escreve um número</string>
+    <string name="database_type_a_value">Escreve um valor</string>
+    <string name="database_pick_a_date">Escolhe uma data</string>
+    <string name="database_pick_a_range">Escolhe um intervalo</string>
+    <string name="database_pick_an_option">Escolhe uma opção</string>
+    <string name="database_pick_a_person">Escolhe uma pessoa</string>
+    <string name="database_no_people_added_yet">Ainda nenhuma pessoa adicionada</string>
+    <string name="database_no_options_saved_yet">Ainda nenhuma opção guardada</string>
+    <string name="database_formula_placeholder">Toca nas peças abaixo ou escreve</string>
+    <string name="database_formula_hint">Toca numa propriedade, operação ou função para a adicionar.</string>
+    <string name="database_delete_row">Eliminar linha</string>
+    <plurals name="database_remove_column_with_values">
+        <item quantity="one">Remover %1$s? Os valores dela em %2$d linha serão eliminados.</item>
+        <item quantity="other">Remover %1$s? Os valores dela em %2$d linhas serão eliminados.</item>
+    </plurals>
+    <string name="database_delete_shared_property_question">Eliminar %1$s? Será removida de todas as notas e bases de dados que a usam.</string>
+    <string name="database_delete_property_question">Eliminar %1$s?</string>
+    <plurals name="database_delete_property_with_values">
+        <item quantity="one">Eliminar %1$s? Os valores dela em %2$d linha serão eliminados.</item>
+        <item quantity="other">Eliminar %1$s? Os valores dela em %2$d linhas serão eliminados.</item>
+    </plurals>
+    <string name="database_in_this_database">Nesta base de dados</string>
+    <string name="database_delete_property">Eliminar propriedade</string>
+    <string name="database_settings_title">Definições da base de dados</string>
+    <string name="database_named_view">Vista %1$s</string>
+    <string name="database_all_views">Todas as vistas</string>
+    <string name="database_lock_database">Bloquear base de dados</string>
+    <string name="database_delete_database">Eliminar base de dados</string>
+    <string name="database_set_property_for_selected_rows">Define uma propriedade para todas as linhas selecionadas</string>
+    <string name="database_rename_view">Mudar o nome da vista</string>
+    <string name="database_delete_view">Eliminar vista</string>
+    <string name="database_view_name">Nome da vista</string>
+    <string name="database_add_view">Adicionar vista</string>
+    <string name="database_missing">Esta base de dados foi eliminada ou ainda não foi sincronizada com este dispositivo.</string>
+    <string name="database_settings">Definições</string>
+    <string name="database_search_this_database">Pesquisar nesta base de dados</string>
+</resources>

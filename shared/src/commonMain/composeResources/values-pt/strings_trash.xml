@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">A lixeira está vazia</string>
+    <string name="trash_title">Lixeira</string>
+    <string name="trash_empty_trash">Esvaziar lixeira</string>
+    <string name="trash_empty_trash_tooltip">Esvaziar lixeira</string>
+    <string name="trash_restore_note">Restaurar nota</string>
+    <string name="trash_delete_permanently">Excluir permanentemente</string>
+    <string name="trash_manage_note">Gerenciar nota</string>
+    <string name="trash_manage_note_subtitle">As notas na lixeira são excluídas automaticamente após 30 dias.</string>
+    <string name="trash_empty_trash_question">Esvaziar a lixeira?</string>
+    <string name="trash_empty_trash_subtitle">Isso excluirá permanentemente todas as notas que estão na lixeira. Essa ação não pode ser desfeita.</string>
+</resources>

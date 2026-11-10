@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Importer depuis</string>
+    <string name="import_text_and_markdown">Texte et Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Fonctionne aussi pour les notes Obsidian et Bear.\nCertaines fonctions d'Obsidian peuvent ne pas être entièrement importées.</string>
+
+    <string name="import_button">Importer</string>
+    <string name="import_done">Terminé</string>
+    <string name="import_stop">Arrêter l'import</string>
+    <string name="import_or_drop_here">ou déposez ici</string>
+    <string name="import_choose_again_hint_desktop">Cliquez pour choisir à nouveau, ou déposez ici.</string>
+    <string name="import_choose_again_hint_touch">Appuyez pour choisir à nouveau.</string>
+    <string name="import_stopping">Arrêt et suppression des éléments importés…</string>
+    <string name="import_stopped">Import arrêté</string>
+    <string name="import_nothing_added">Rien n'a été ajouté.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="one">%1$d espace</item>
+        <item quantity="other">%1$d espaces</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="one">%1$d dossier</item>
+        <item quantity="other">%1$d dossiers</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="one">%1$d pièce jointe</item>
+        <item quantity="other">%1$d pièces jointes</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Importez une sauvegarde sans remplacer vos notes actuelles.</string>
+    <string name="import_emberr_copying_media">Copie des médias %1$d sur %2$d…</string>
+    <string name="import_emberr_getting_ready">Préparation…</string>
+    <string name="import_emberr_saving">Enregistrement de l'import…</string>
+    <string name="import_emberr_failed">Échec de l'import</string>
+    <string name="import_emberr_choose_backup_file">Choisir un fichier de sauvegarde</string>
+    <string name="import_emberr_choose_backup_hint">Fichier .emberr issu d'Exporter une sauvegarde</string>
+    <string name="import_emberr_reading_backup">Lecture de la sauvegarde…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Choisir un autre fichier</string>
+    <string name="import_emberr_spaces_to_import">Espaces à importer</string>
+    <string name="import_emberr_choose_backup_first">Choisissez d'abord une sauvegarde</string>
+    <string name="import_emberr_daily_notes">Notes du jour</string>
+    <string name="import_emberr_calendar">Calendrier</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Notes du jour et événements du calendrier ajoutés</string>
+    <string name="import_emberr_added_daily_notes">Notes du jour ajoutées</string>
+    <string name="import_emberr_added_calendar">Événements du calendrier ajoutés</string>
+    <string name="import_emberr_finished">Import terminé</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="one">%1$d espace importé</item>
+        <item quantity="other">%1$d espaces importés</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">%1$d fichier média introuvable dans la sauvegarde, il apparaîtra comme manquant.</item>
+        <item quantity="other">%1$d fichiers médias introuvables dans la sauvegarde, ils apparaîtront comme manquants.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Erreur inconnue</string>
+    <string name="import_emberr_picker_title">Choisir une sauvegarde Emberr</string>
+
+    <string name="import_markdown_subtitle">Transformez des fichiers .md, .txt et .canvas, ou un .zip avec dossiers, en notes Emberr.</string>
+    <string name="import_markdown_copying_file">Copie de %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">Import de la note %1$d sur %2$d…</item>
+        <item quantity="other">Import des notes %1$d sur %2$d…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Choisir des fichiers ou un .zip</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas ou .zip</string>
+    <string name="import_markdown_reading_files">Lecture des fichiers…</string>
+    <string name="import_markdown_could_not_read">Impossible de lire ces fichiers. %1$s</string>
+    <string name="import_markdown_save_to_space">Enregistrer dans l'espace</string>
+    <string name="import_markdown_import_as">Importer en tant que</string>
+    <string name="import_markdown_emberr_notes">Notes Emberr</string>
+    <string name="import_markdown_emberr_notes_subtitle">Chaque fichier devient une note composée de blocs.</string>
+    <string name="import_markdown_markdown_files">Fichiers Markdown</string>
+    <string name="import_markdown_coming_soon">Bientôt disponible</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="one">%1$d note importée</item>
+        <item quantity="other">%1$d notes importées</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="one">%1$d note importée dans %2$s</item>
+        <item quantity="other">%1$d notes importées dans %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">Impossible d'importer %1$d : %2$s</string>
+    <string name="import_markdown_choose_folder">Choisir un dossier</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d fichier</item>
+        <item quantity="other">%1$d fichiers</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d ignorés : %2$s</string>
+    <string name="import_markdown_choose_different_files">Choisir d'autres fichiers</string>
+    <string name="import_markdown_picker_title">Choisir les fichiers à importer</string>
+</resources>

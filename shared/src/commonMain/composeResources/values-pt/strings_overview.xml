@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Tarefas</string>
+    <string name="overview_section_bookmarks">Marcadores</string>
+    <string name="overview_section_images">Imagens</string>
+    <string name="overview_section_documents">Documentos</string>
+    <string name="overview_tasks_repeating">Recorrentes</string>
+    <string name="overview_tasks_note">Nota</string>
+    <string name="overview_tasks_today">Hoje</string>
+    <string name="overview_tasks_tomorrow">Amanhã</string>
+    <string name="overview_tasks_yesterday">Ontem</string>
+    <string name="overview_tasks_none_completed">Nenhuma tarefa concluída ainda.</string>
+    <string name="overview_tasks_all_caught_up">Tudo em dia!</string>
+    <string name="overview_tasks_completed">Concluídas</string>
+    <string name="overview_tasks_completed_tasks">Tarefas concluídas</string>
+    <string name="overview_tasks_hide_completed">Ocultar concluídas</string>
+    <string name="overview_tasks_show_completed">Mostrar concluídas</string>
+    <string name="overview_tasks_add_task_description">Adicionar tarefa</string>
+    <string name="overview_tasks_add_task">Adicionar tarefa</string>
+    <string name="overview_images_empty">Nenhuma imagem salva ainda.</string>
+    <string name="overview_images_add_image_description">Adicionar imagem</string>
+    <string name="overview_images_add_image">Adicionar imagem</string>
+    <string name="overview_documents_empty">Nenhum documento anexado ainda.</string>
+    <string name="overview_documents_add_document_description">Adicionar documento</string>
+    <string name="overview_documents_add_document">Adicionar documento</string>
+    <string name="overview_bookmarks_empty">Nenhum link salvo ainda.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Adicionar marcador</string>
+    <string name="overview_bookmarks_add_bookmark">Adicionar marcador</string>
+    <string name="overview_bookmarks_add_link">Adicionar link</string>
+    <string name="overview_bookmarks_paste_link">Cole um link...</string>
+    <string name="overview_bookmarks_clear_link">Limpar link</string>
+    <string name="overview_bookmarks_all">Todos</string>
+    <string name="overview_bookmarks_others">Outros</string>
+</resources>

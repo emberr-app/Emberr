@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Abrir Emberr</string>
+    <string name="desktop_tray_close_window">Cerrar ventana</string>
+    <string name="desktop_tray_quit">Salir</string>
+    <string name="desktop_sticky_note">Nota adhesiva</string>
+    <string name="desktop_select_image">Seleccionar imagen</string>
+    <string name="desktop_select_document">Seleccionar documento</string>
+    <string name="desktop_file_not_found_message">Este archivo ya no está disponible en este dispositivo.</string>
+    <string name="desktop_file_not_found_title">Archivo no encontrado</string>
+    <string name="desktop_open_file_failed">No se pudo abrir el archivo: %1$s</string>
+    <string name="desktop_error">Error</string>
+    <string name="desktop_backup_only_on_android_message">Las copias de seguridad automáticas en segundo plano por ahora solo funcionan en la app de Android. ¡Aún puedes usar el botón 'Exportar copia de seguridad'!</string>
+    <string name="desktop_backup_only_on_android_title">Función de escritorio</string>
+    <string name="desktop_update_available">Actualización disponible</string>
+    <string name="desktop_update_available_message">Emberr %1$s está disponible. Usas la %2$s. Se descarga en segundo plano mientras sigues trabajando.</string>
+    <string name="desktop_update_download">Descargar</string>
+    <string name="desktop_update_ready_to_install">Actualización lista para instalar</string>
+    <string name="desktop_update_ready_message">Reinicia Emberr para empezar a usar la versión %1$s. Si eliges Más tarde, la actualización se aplicará la próxima vez que abras Emberr.</string>
+    <string name="desktop_update_restart">Reiniciar</string>
+    <string name="desktop_update_failed">No se pudo actualizar Emberr</string>
+    <string name="desktop_update_later">Más tarde</string>
+    <string name="desktop_ok">Aceptar</string>
+    <string name="desktop_new_note_in_folder">Nueva nota en la carpeta</string>
+    <string name="desktop_new_note_here">Nueva nota aquí</string>
+    <string name="desktop_rename_folder">Renombrar carpeta</string>
+    <string name="desktop_add_subfolder">Agregar subcarpeta</string>
+    <string name="desktop_rename_note">Renombrar nota</string>
+    <string name="desktop_open_in_split_view">Abrir en vista dividida</string>
+    <string name="desktop_toggle_section">Mostrar u ocultar %1$s</string>
+    <string name="desktop_empty_space">Este espacio está vacío.</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">Empieza con %1$s o %2$s</string>
+    <string name="desktop_empty_space_a_note">una nota</string>
+    <string name="desktop_create_space">Crear espacio</string>
+    <string name="desktop_add_space">Agregar espacio</string>
+    <string name="desktop_space_options">Opciones del espacio</string>
+    <string name="desktop_close_pane">Cerrar panel</string>
+    <string name="desktop_close_this_screen">Cerrar esta pantalla</string>
+    <string name="desktop_drag_to_swap_screens">Arrastra para intercambiar pantallas</string>
+    <string name="desktop_search_no_match">Ninguna nota, evento o persona coincide con "%1$s"</string>
+    <string name="desktop_hide_sidebar">Ocultar barra lateral</string>
+    <string name="desktop_collapse_sidebar">Contraer barra lateral</string>
+    <string name="desktop_select_a_note">Selecciona una nota de la barra lateral</string>
+    <string name="desktop_folder">Carpeta</string>
+    <string name="desktop_sync">Sincronizar</string>
+</resources>

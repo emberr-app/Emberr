@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">Cronologia</string>
+    <string name="daily_close_timeline">Chiudi cronologia</string>
+    <string name="daily_open_timeline">Apri cronologia</string>
+    <string name="daily_search_the_timeline">Cerca nella cronologia</string>
+    <string name="daily_previous_match">Risultato precedente</string>
+    <string name="daily_next_match">Risultato successivo</string>
+    <string name="daily_nothing_on_this_day_yet">Ancora niente in questo giorno.</string>
+    <string name="daily_nothing_written_yet">Ancora niente di scritto.</string>
+    <string name="daily_code">Codice</string>
+    <string name="daily_today">Oggi</string>
+    <string name="daily_tomorrow">Domani</string>
+    <string name="daily_yesterday">Ieri</string>
+    <string name="daily_go_to_today">Vai a oggi</string>
+    <string name="daily_previous_month">Mese precedente</string>
+    <string name="daily_next_month">Mese successivo</string>
+    <string name="daily_previous">Precedente</string>
+    <string name="daily_next">Successivo</string>
+    <string name="daily_open_calendar">Apri calendario</string>
+    <string name="daily_calendar">Calendario</string>
+    <string name="daily_settings">Impostazioni</string>
+    <string name="daily_more_settings">Altre impostazioni</string>
+    <string name="daily_click_to_write_your_thoughts">Fai clic per scrivere i tuoi pensieri</string>
+    <string name="daily_tap_to_write_your_thoughts">Tocca per scrivere i tuoi pensieri</string>
+</resources>

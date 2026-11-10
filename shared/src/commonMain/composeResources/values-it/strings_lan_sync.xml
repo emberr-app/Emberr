@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Inattivo</string>
+    <string name="lan_sync_status_not_paired">Non abbinato!</string>
+    <string name="lan_sync_status_already_in_progress">Sincronizzazione già in corso</string>
+    <string name="lan_sync_status_syncing">Sincronizzazione...</string>
+    <string name="lan_sync_status_auto_syncing">Sincronizzazione automatica...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Recupero dal desktop...</string>
+    <string name="lan_sync_status_success">Fatto!</string>
+    <string name="lan_sync_status_synced_successfully">Sincronizzazione riuscita</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Sincronizzato, %1$d elemento non è stato salvato</item>
+        <item quantity="other">Sincronizzato, %1$d elementi non sono stati salvati</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Sincronizzazione parziale, nuovo tentativo in seguito</string>
+    <string name="lan_sync_status_update_both_devices">Aggiorna Emberr su entrambi i dispositivi</string>
+    <string name="lan_sync_status_desktop_offline">Desktop offline</string>
+    <string name="lan_sync_status_failed">Non riuscito: %1$s</string>
+    <string name="lan_sync_status_sync_error">Errore di sincronizzazione: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Abbina dispositivo mobile</string>
+    <string name="lan_sync_pair_dialog_message">Scansiona questo codice QR con l'app mobile di Emberr per collegarti in modo sicuro al desktop.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Token segreto: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Scansiona il codice QR mostrato sul desktop.</string>
+    <string name="lan_sync_scanner_desktop_hint">Sul desktop, apri Impostazioni → Sincronizzazione LAN → Abbina dispositivo mobile.</string>
+    <string name="lan_sync_camera_access_needed">Serve l'accesso alla fotocamera</string>
+    <string name="lan_sync_camera_allow_message">Consenti l'uso della fotocamera per scansionare il codice di abbinamento sul desktop.</string>
+    <string name="lan_sync_camera_turn_on_message">Attiva Fotocamera in Autorizzazioni, poi torna qui.</string>
+    <string name="lan_sync_allow_camera">Consenti fotocamera</string>
+    <string name="lan_sync_open_app_settings">Apri impostazioni app</string>
+    <string name="lan_sync_camera_mobile_only">La scansione con la fotocamera è supportata solo sui dispositivi mobili.</string>
+</resources>

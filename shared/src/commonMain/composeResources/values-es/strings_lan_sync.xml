@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Inactivo</string>
+    <string name="lan_sync_status_not_paired">¡No vinculado!</string>
+    <string name="lan_sync_status_already_in_progress">Ya hay una sincronización en curso</string>
+    <string name="lan_sync_status_syncing">Sincronizando...</string>
+    <string name="lan_sync_status_auto_syncing">Sincronizando automáticamente...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Obteniendo datos de la computadora...</string>
+    <string name="lan_sync_status_success">¡Listo!</string>
+    <string name="lan_sync_status_synced_successfully">Sincronizado correctamente</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Sincronizado, %1$d elemento no se pudo guardar</item>
+        <item quantity="other">Sincronizado, %1$d elementos no se pudieron guardar</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Sincronización parcial, se volverá a intentar</string>
+    <string name="lan_sync_status_update_both_devices">Actualiza Emberr en ambos dispositivos</string>
+    <string name="lan_sync_status_desktop_offline">Computadora sin conexión</string>
+    <string name="lan_sync_status_failed">Error: %1$s</string>
+    <string name="lan_sync_status_sync_error">Error de sincronización: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Vincular dispositivo móvil</string>
+    <string name="lan_sync_pair_dialog_message">Escanea este código QR con la app móvil de Emberr para conectarte de forma segura a tu computadora.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Token secreto: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Escanea el código QR que aparece en tu computadora.</string>
+    <string name="lan_sync_scanner_desktop_hint">En tu computadora, abre Ajustes → Sincronización LAN → Vincular dispositivo móvil.</string>
+    <string name="lan_sync_camera_access_needed">Se necesita acceso a la cámara</string>
+    <string name="lan_sync_camera_allow_message">Permite el uso de la cámara para escanear el código de vinculación de tu computadora.</string>
+    <string name="lan_sync_camera_turn_on_message">Activa la cámara en Permisos y luego vuelve aquí.</string>
+    <string name="lan_sync_allow_camera">Permitir cámara</string>
+    <string name="lan_sync_open_app_settings">Abrir ajustes de la app</string>
+    <string name="lan_sync_camera_mobile_only">El escaneo con cámara solo funciona en dispositivos móviles.</string>
+</resources>

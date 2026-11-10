@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Indietro</string>
+    <string name="common_cancel">Annulla</string>
+    <string name="common_save">Salva</string>
+    <string name="common_close">Chiudi</string>
+    <string name="common_delete">Elimina</string>
+    <string name="common_on">Attivo</string>
+    <string name="common_off">Disattivo</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">Senza titolo</string>
+    <string name="common_color_yellow">Giallo</string>
+    <string name="common_color_lime">Lime</string>
+    <string name="common_color_grey">Grigio</string>
+    <string name="common_color_red">Rosso</string>
+    <string name="common_color_blue">Blu</string>
+    <string name="common_color_green">Verde</string>
+    <string name="common_color_orange">Arancione</string>
+    <string name="common_color_pink">Rosa</string>
+    <string name="common_color_purple">Viola</string>
+    <string name="common_create">Crea</string>
+    <string name="common_more">Altro</string>
+</resources>

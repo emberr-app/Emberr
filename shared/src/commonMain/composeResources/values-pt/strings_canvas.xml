@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="canvas_options">Opções</string>
+    <string name="canvas_more_options">Mais opções</string>
+    <string name="canvas_rename">Renomear</string>
+    <string name="canvas_open_as_sticky_note">Abrir como nota adesiva</string>
+    <string name="canvas_move_to_trash">Mover para a lixeira</string>
+    <string name="canvas_add_to_favorites">Adicionar aos Favoritos</string>
+    <string name="canvas_remove_from_favorites">Remover dos Favoritos</string>
+    <string name="canvas_sheet_title">Canvas</string>
+    <string name="canvas_rename_canvas">Renomear canvas</string>
+    <string name="canvas_title_placeholder">Título do canvas...</string>
+    <string name="canvas_untitled_canvas">Canvas sem título</string>
+
+    <string name="canvas_shapes">Formas</string>
+    <string name="canvas_shape_rectangle">Retângulo</string>
+    <string name="canvas_shape_square">Quadrado</string>
+    <string name="canvas_shape_circle">Círculo</string>
+    <string name="canvas_shape_oval">Oval</string>
+    <string name="canvas_shape_triangle">Triângulo</string>
+    <string name="canvas_shape_diamond">Losango</string>
+    <string name="canvas_shape_pentagon">Pentágono</string>
+    <string name="canvas_shape_hexagon">Hexágono</string>
+    <string name="canvas_shape_parallelogram">Paralelogramo</string>
+    <string name="canvas_shape_trapezoid">Trapézio</string>
+    <string name="canvas_shape_pill">Pílula</string>
+    <string name="canvas_shape_database">Banco de dados</string>
+    <string name="canvas_shape_double_rectangle">Retângulo duplo</string>
+    <string name="canvas_shape_double_square">Quadrado duplo</string>
+    <string name="canvas_shape_double_circle">Círculo duplo</string>
+    <string name="canvas_shape_double_triangle">Triângulo duplo</string>
+
+    <string name="canvas_clear">Limpar</string>
+    <string name="canvas_zoom_in">Aumentar zoom</string>
+    <string name="canvas_zoom_out">Diminuir zoom</string>
+    <string name="canvas_go_to_boxes">Ir para as caixas</string>
+    <string name="canvas_undo">Desfazer</string>
+    <string name="canvas_redo">Refazer</string>
+
+    <string name="canvas_tool_pen">Caneta</string>
+    <string name="canvas_tool_highlighter">Marca-texto</string>
+    <string name="canvas_tool_eraser">Borracha</string>
+    <string name="canvas_tool_text">Texto</string>
+    <string name="canvas_tool_shapes">Formas</string>
+    <string name="canvas_tool_line">Linha</string>
+    <string name="canvas_tool_image">Imagem</string>
+
+    <string name="canvas_default_ink">Tinta padrão</string>
+    <string name="canvas_no_background">Sem fundo</string>
+    <string name="canvas_stroke">Traço</string>
+    <string name="canvas_stroke_width">Espessura do traço</string>
+    <string name="canvas_pressure">Pressão</string>
+    <string name="canvas_same_thickness">Mesma espessura</string>
+    <string name="canvas_follow_pressure">Seguir pressão</string>
+    <string name="canvas_opacity">Opacidade</string>
+    <string name="canvas_size">Tamanho</string>
+    <string name="canvas_font">Fonte</string>
+    <string name="canvas_weight">Peso</string>
+    <string name="canvas_color">Cor</string>
+    <string name="canvas_background">Fundo</string>
+    <string name="canvas_align">Alinhar</string>
+    <string name="canvas_line">Linha</string>
+    <string name="canvas_line_style">Estilo da linha</string>
+
+    <string name="canvas_width_thin">Fina</string>
+    <string name="canvas_width_medium">Média</string>
+    <string name="canvas_width_thick">Grossa</string>
+    <string name="canvas_size_small">Pequeno</string>
+    <string name="canvas_size_medium">Médio</string>
+    <string name="canvas_size_large">Grande</string>
+    <string name="canvas_weight_regular">Normal</string>
+    <string name="canvas_weight_medium">Médio</string>
+    <string name="canvas_weight_bold">Negrito</string>
+    <string name="canvas_font_default">Padrão</string>
+    <string name="canvas_align_left">Alinhar à esquerda</string>
+    <string name="canvas_align_center">Centralizar</string>
+    <string name="canvas_align_right">Alinhar à direita</string>
+
+    <string name="canvas_line_arrow">Seta</string>
+    <string name="canvas_line_dotted_arrow">Seta pontilhada</string>
+    <string name="canvas_line_dashed_arrow">Seta tracejada</string>
+    <string name="canvas_line_solid_line">Linha contínua</string>
+    <string name="canvas_line_dotted_line">Linha pontilhada</string>
+    <string name="canvas_line_dashed_line">Linha tracejada</string>
+
+    <string name="canvas_show_dots">Mostrar pontos</string>
+    <string name="canvas_hide_dots">Ocultar pontos</string>
+    <string name="canvas_full_screen">Tela cheia</string>
+    <string name="canvas_exit_full_screen">Sair da tela cheia</string>
+
+    <string name="canvas_delete_box">Excluir caixa</string>
+    <string name="canvas_box_color">Cor da caixa</string>
+    <string name="canvas_paste_image">Colar imagem</string>
+    <string name="canvas_adding_image">Adicionando imagem...</string>
+    <string name="canvas_add_label">Adicionar rótulo</string>
+    <string name="canvas_edit_label">Editar rótulo</string>
+    <string name="canvas_ungroup">Desagrupar</string>
+    <string name="canvas_create_group">Criar grupo</string>
+
+    <string name="canvas_image">Imagem do canvas</string>
+    <string name="canvas_image_failed_to_download">Falha ao baixar a imagem</string>
+    <string name="canvas_downloading_image">Baixando imagem...</string>
+</resources>

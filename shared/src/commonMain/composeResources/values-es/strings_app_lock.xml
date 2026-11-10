@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr está bloqueado</string>
+    <string name="app_lock_screen_detail">Usa tu huella, tu rostro o el bloqueo de pantalla para abrirlo.</string>
+    <string name="app_lock_unlock">Desbloquear</string>
+    <string name="app_lock_prompt_subtitle">Usa tu huella, tu rostro o el bloqueo de pantalla</string>
+    <string name="app_lock_unlock_emberr">Desbloquear Emberr</string>
+    <string name="app_lock_off_no_screen_lock">El bloqueo de la app está desactivado porque este teléfono no tiene bloqueo de pantalla.</string>
+</resources>

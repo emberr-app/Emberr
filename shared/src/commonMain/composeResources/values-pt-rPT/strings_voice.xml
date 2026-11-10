@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">A ouvir...</string>
+    <string name="voice_tap_the_orb">Toca na esfera para falar</string>
+    <string name="voice_add_tasks_with_voice">(adiciona tarefas por voz)</string>
+    <string name="voice_install_speech_app">Instala uma aplicação de reconhecimento de fala para usar tarefas por voz</string>
+    <string name="voice_tap_a_task_to_fix_it">Toca numa tarefa para a corrigir</string>
+</resources>

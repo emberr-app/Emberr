@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_note_picker_hint">Começa a escrever para pesquisar ou cria uma nova nota</string>
+    <string name="components_people_search_placeholder">Pesquisa ou adiciona uma pessoa</string>
+    <string name="components_people_type_name_hint">Escreve um nome para adicionar uma pessoa</string>
+</resources>

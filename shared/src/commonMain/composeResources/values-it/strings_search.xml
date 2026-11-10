@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Inizia a digitare per cercare in titoli, estratti e contenuto delle note.</string>
+    <string name="search_nothing_found">Nessuna nota, evento o persona trovati.</string>
+    <string name="search_people">Persone</string>
+    <string name="search_events">Eventi</string>
+    <string name="search_notes">Note</string>
+    <string name="search_rename_note">Rinomina nota</string>
+    <string name="search_note_title_placeholder">Titolo della nota...</string>
+    <string name="search_rename">Rinomina</string>
+    <string name="search_move_to_trash">Sposta nel cestino</string>
+    <string name="search_untitled_event">Evento senza titolo</string>
+    <string name="search_repeats">Si ripete</string>
+    <string name="search_pinned">Fissate</string>
+    <string name="search_in_parent">in %1$s</string>
+    <string name="search_daily">Diario</string>
+    <string name="search_add_to_favorites">Aggiungi ai Preferiti</string>
+    <string name="search_remove_from_favorites">Rimuovi dai Preferiti</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">Mostra %1$d persona</item>
+        <item quantity="other">Mostra tutte le %1$d persone</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">Mostra %1$d evento</item>
+        <item quantity="other">Mostra tutti i %1$d eventi</item>
+    </plurals>
+</resources>

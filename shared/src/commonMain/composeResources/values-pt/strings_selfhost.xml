@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Servidor próprio</string>
+
+    <string name="selfhost_group_server_details">Dados do servidor</string>
+    <string name="selfhost_group_recovery_passphrase">Frase-senha de recuperação</string>
+    <string name="selfhost_group_unlock_vault">Desbloquear cofre</string>
+    <string name="selfhost_group_status">Status</string>
+
+    <string name="selfhost_setting_up">Configurando</string>
+    <string name="selfhost_unlock_and_sync">Desbloquear e sincronizar</string>
+    <string name="selfhost_create_vault_and_sync">Criar cofre e sincronizar</string>
+    <string name="selfhost_server_address_rejected">Endereço do servidor recusado</string>
+    <string name="selfhost_got_it">Entendi</string>
+
+    <string name="selfhost_status_connected">Status: conectado</string>
+    <string name="selfhost_cancelling">Cancelando...</string>
+    <string name="selfhost_cancel_sync">Cancelar sincronização</string>
+    <string name="selfhost_cancel_sync_hint">Cancelar pausa a sincronização até você reiniciar o app ou tocar em Sincronizar agora.</string>
+    <string name="selfhost_sync_now">Sincronizar agora</string>
+    <string name="selfhost_syncing">Sincronizando...</string>
+    <string name="selfhost_never_synced">Nunca sincronizado</string>
+    <string name="selfhost_last_synced">Última sincronização: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d nota aguardando sincronização</item>
+        <item quantity="other">%1$d notas aguardando sincronização</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Notas</string>
+    <string name="selfhost_progress_images">Imagens</string>
+
+    <string name="selfhost_passphrase_needed_hint">Você precisa desta frase-senha para conectar outro celular ou computador a este servidor.</string>
+    <string name="selfhost_show_passphrase_button">Mostrar frase-senha</string>
+    <string name="selfhost_unlock_prompt_title">Frase-senha de recuperação</string>
+    <string name="selfhost_unlock_prompt_description">Desbloqueie para ver sua frase-senha de recuperação</string>
+    <string name="selfhost_save_passphrase_hint">Este dispositivo foi conectado antes de o Emberr salvar a frase-senha. Digite-a uma vez para salvá-la aqui e poder vê-la depois.</string>
+    <string name="selfhost_checking">Verificando</string>
+    <string name="selfhost_save_passphrase">Salvar frase-senha</string>
+    <string name="selfhost_disconnect_vault">Desconectar cofre</string>
+    <string name="selfhost_recovery_dialog_message">Digite isto no outro dispositivo quando ele pedir para desbloquear o cofre. Não compartilhe com ninguém.</string>
+    <string name="selfhost_done">Concluído</string>
+    <string name="selfhost_disconnect_vault_question">Desconectar cofre?</string>
+    <string name="selfhost_disconnect_message">Suas notas ficam neste dispositivo e no servidor. Você vai precisar da frase-senha de recuperação para reconectar.</string>
+    <string name="selfhost_disconnect">Desconectar</string>
+
+    <string name="selfhost_checking_for_changes">Procurando alterações...</string>
+    <string name="selfhost_finishing_up">Finalizando...</string>
+    <string name="selfhost_sending_percent">Enviando %1$d%</string>
+    <string name="selfhost_nothing_to_send">Nada para enviar</string>
+    <string name="selfhost_receiving_percent">Recebendo %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Nada para receber</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%1$d de %2$d nota</item>
+        <item quantity="other">%1$d de %2$d notas</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s de %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Digite o endereço WebDAV e o login do seu servidor, por exemplo Nextcloud ou um NAS. O Emberr criptografa suas notas antes que saiam deste dispositivo.</string>
+    <string name="selfhost_username">Nome de usuário</string>
+    <string name="selfhost_password">Senha</string>
+    <string name="selfhost_hide_password">Ocultar senha</string>
+    <string name="selfhost_show_password">Mostrar senha</string>
+    <string name="selfhost_testing">Testando</string>
+    <string name="selfhost_test_connection">Testar conexão</string>
+    <string name="selfhost_contacting_server">Contatando o servidor...</string>
+
+    <string name="selfhost_restore_hint">Este servidor já tem um cofre do Emberr. Digite a frase-senha de recuperação de 16 caracteres mostrada quando o cofre foi criado.</string>
+    <string name="selfhost_restore_find_hint">Não a encontra? Abra Configurações → Servidor próprio → Mostrar frase-senha em um dispositivo que já esteja conectado.</string>
+    <string name="selfhost_passphrase_placeholder">Frase-senha de 16 caracteres</string>
+    <string name="selfhost_hide_passphrase">Ocultar frase-senha</string>
+    <string name="selfhost_show_passphrase">Mostrar frase-senha</string>
+
+    <string name="selfhost_save_passphrase_now">Salve esta frase-senha agora</string>
+    <string name="selfhost_fact_type_on_other_devices">Você vai digitá-la em todo outro celular ou computador que conectar a este servidor.</string>
+    <string name="selfhost_fact_locks_notes">Ela tranca suas notas no servidor. Ninguém pode lê-las sem ela, nem mesmo o Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">O Emberr não pode redefini-la. Guarde-a em um gerenciador de senhas ou anote.</string>
+    <string name="selfhost_fact_see_again_later">Você pode vê-la de novo depois em Configurações → Servidor próprio em qualquer dispositivo conectado.</string>
+    <string name="selfhost_new_passphrase">Nova frase-senha</string>
+    <string name="selfhost_generate_new_passphrase">Gerar nova frase-senha</string>
+    <string name="selfhost_saved_passphrase_confirmation">Salvei esta frase-senha em um lugar seguro</string>
+    <string name="selfhost_copy_passphrase">Copiar frase-senha</string>
+    <string name="selfhost_copy_address">Copiar endereço</string>
+    <string name="selfhost_copied_address">endereço copiado</string>
+
+    <string name="selfhost_invalid_credentials">Nome de usuário ou senha inválidos</string>
+    <string name="selfhost_server_returned_error">O servidor retornou um erro (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Não foi possível acessar o servidor</string>
+    <string name="selfhost_could_not_check_vault">Não foi possível verificar se já existe um cofre: %1$s</string>
+    <string name="selfhost_unknown_error">erro desconhecido</string>
+    <string name="selfhost_existing_vault_found">Cofre existente encontrado neste servidor</string>
+    <string name="selfhost_no_existing_vault">Nenhum cofre existente, um novo será criado</string>
+    <string name="selfhost_no_vault_file_to_restore">Nenhum arquivo de cofre foi encontrado no servidor para restaurar</string>
+    <string name="selfhost_old_or_damaged_vault_data">Esta pasta do servidor tem dados de sincronização de um cofre antigo ou danificado. Exclua a pasta emberr_sync no seu servidor e configure de novo.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Já existe um cofre neste servidor. Digite a frase-senha de recuperação abaixo para restaurá-lo.</string>
+    <string name="selfhost_could_not_set_up">Não foi possível configurar a sincronização segura</string>
+    <string name="selfhost_no_vault_on_server">Nenhum cofre foi encontrado no servidor.</string>
+    <string name="selfhost_wrong_passphrase">Essa frase-senha não desbloqueia este cofre.</string>
+    <string name="selfhost_could_not_check_passphrase">Não foi possível verificar a frase-senha: %1$s</string>
+
+    <string name="selfhost_update_required_title">Sincronização com servidor próprio pausada</string>
+    <string name="selfhost_update_required_message">%1$s Suas notas estão seguras e continuam sendo salvas neste dispositivo.</string>
+    <string name="selfhost_later">Depois</string>
+    <string name="selfhost_update">Atualizar</string>
+</resources>

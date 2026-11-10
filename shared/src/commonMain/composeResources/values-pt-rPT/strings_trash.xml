@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">A reciclagem está vazia</string>
+    <string name="trash_title">Reciclagem</string>
+    <string name="trash_empty_trash">Esvaziar reciclagem</string>
+    <string name="trash_empty_trash_tooltip">Esvaziar reciclagem</string>
+    <string name="trash_delete_permanently">Eliminar permanentemente</string>
+    <string name="trash_manage_note">Gerir nota</string>
+    <string name="trash_manage_note_subtitle">As notas na reciclagem são eliminadas automaticamente após 30 dias.</string>
+    <string name="trash_empty_trash_question">Esvaziar a reciclagem?</string>
+    <string name="trash_empty_trash_subtitle">Isto eliminará permanentemente todas as notas que estão na reciclagem. Esta ação não pode ser desfeita.</string>
+</resources>

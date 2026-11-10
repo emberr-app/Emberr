@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="property_type_status">Estado</string>
+    <string name="property_include_time">Incluir hora</string>
+    <string name="property_delete_tag">Eliminar tag</string>
+    <string name="property_delete_tag_message">Eliminar "%1$s"? Será removida de todas as notas que a usam.</string>
+    <string name="property_tag_create_hint">Escreve um nome para criar uma</string>
+</resources>

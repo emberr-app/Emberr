@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">Preferiti</string>
+    <string name="home_toggle_favorites">Mostra/nascondi Preferiti</string>
+    <string name="home_notes">Note</string>
+    <string name="home_toggle_notes">Mostra/nascondi Note</string>
+    <string name="home_recents">Recenti</string>
+    <string name="home_toggle_recents">Mostra/nascondi Recenti</string>
+    <string name="home_sort">Ordina</string>
+    <string name="home_sort_notes">Ordina note</string>
+    <string name="home_new_folder">Nuova cartella</string>
+    <string name="home_new_folder_tooltip">Nuova cartella</string>
+    <string name="home_new_subfolder">Nuova sottocartella</string>
+    <string name="home_folder_name_placeholder">es. Personale, Lavoro...</string>
+    <string name="home_new_note">Nuova nota</string>
+    <string name="home_new_note_tooltip">Nuova nota</string>
+    <string name="home_new_note_in_folder">Nuova nota in %1$s</string>
+    <string name="home_note_title_placeholder">Titolo della nota...</string>
+    <string name="home_templates">Modelli</string>
+    <string name="home_switch_space">Cambia spazio</string>
+    <string name="home_toggle_sidebar">Mostra/nascondi barra laterale</string>
+    <string name="home_open_calendar">Apri calendario</string>
+    <string name="home_calendar">Calendario</string>
+    <string name="home_settings">Impostazioni</string>
+    <string name="home_more_settings">Altre impostazioni</string>
+    <string name="home_rename">Rinomina</string>
+    <string name="home_move_to_trash">Sposta nel cestino</string>
+    <string name="home_add_to_favorites">Aggiungi ai Preferiti</string>
+    <string name="home_remove_from_favorites">Rimuovi dai Preferiti</string>
+    <string name="home_sort_last_edited">Ultima modifica</string>
+    <string name="home_sort_date_created">Data di creazione</string>
+    <string name="home_sort_name">Nome (A-Z)</string>
+    <string name="home_sort_type">Tipo</string>
+    <string name="home_sort_manual">Manuale</string>
+    <string name="home_sort_ascending">Crescente</string>
+    <string name="home_sort_descending">Decrescente</string>
+    <string name="home_sort_by">Ordina per</string>
+    <string name="home_empty_space_start_with">Questo spazio è vuoto. Inizia con</string>
+    <string name="home_empty_space_a_new_note">una nuova nota</string>
+    <string name="home_empty_space_note_or_folder">%1$s o %2$s</string>
+    <string name="home_empty_space_a_folder">una cartella</string>
+    <string name="home_breadcrumb_home">Home</string>
+    <string name="home_cover">Copertina</string>
+    <string name="home_in_parent">in %1$s</string>
+    <string name="home_canvas">Lavagna</string>
+    <string name="home_note">Nota</string>
+    <string name="home_empty_note">Nota vuota...</string>
+    <string name="home_favorite">Preferito</string>
+    <string name="home_selected">Selezionato</string>
+    <string name="home_rename_subtitle">Scegli un nuovo nome.</string>
+    <string name="home_name_placeholder">Nome...</string>
+    <string name="home_nesting_inside_folder">Dentro %1$s.</string>
+    <string name="home_organize_your_notes">Organizza le tue note.</string>
+    <string name="home_search_templates_placeholder">Cerca modelli...</string>
+    <string name="home_search_templates">Cerca modelli</string>
+    <string name="home_no_templates_yet">Ancora nessun modello.</string>
+    <string name="home_no_templates_match">Nessun modello corrisponde a "%1$s".</string>
+    <string name="home_new_template">Nuovo modello</string>
+    <string name="home_edit_template">Modifica modello</string>
+    <string name="home_delete_template">Elimina modello</string>
+    <string name="home_templates_subtitle">Inizia una nuova nota da un modello.</string>
+    <string name="home_new_subfolder_in_folder">Nuova sottocartella in %1$s</string>
+    <string name="home_new_note_in_folder_description">Nuova nota in %1$s</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="one">%1$d rimasta</item>
+        <item quantity="other">%1$d rimaste</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="one">%1$d salvato</item>
+        <item quantity="other">%1$d salvati</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="one">%1$d allegato</item>
+        <item quantity="other">%1$d allegati</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="one">Elimina %1$d elemento</item>
+        <item quantity="other">Elimina %1$d elementi</item>
+    </plurals>
+</resources>

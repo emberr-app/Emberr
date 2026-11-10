@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Attività</string>
+    <string name="overview_section_bookmarks">Segnalibri</string>
+    <string name="overview_section_images">Immagini</string>
+    <string name="overview_section_documents">Documenti</string>
+    <string name="overview_tasks_repeating">Ricorrente</string>
+    <string name="overview_tasks_note">Nota</string>
+    <string name="overview_tasks_today">Oggi</string>
+    <string name="overview_tasks_tomorrow">Domani</string>
+    <string name="overview_tasks_yesterday">Ieri</string>
+    <string name="overview_tasks_none_completed">Ancora nessuna attività completata.</string>
+    <string name="overview_tasks_all_caught_up">Tutto fatto!</string>
+    <string name="overview_tasks_completed">Completate</string>
+    <string name="overview_tasks_completed_tasks">Attività completate</string>
+    <string name="overview_tasks_hide_completed">Nascondi completate</string>
+    <string name="overview_tasks_show_completed">Mostra completate</string>
+    <string name="overview_tasks_add_task_description">Aggiungi attività</string>
+    <string name="overview_tasks_add_task">Aggiungi attività</string>
+    <string name="overview_images_empty">Ancora nessuna immagine salvata.</string>
+    <string name="overview_images_add_image_description">Aggiungi immagine</string>
+    <string name="overview_images_add_image">Aggiungi immagine</string>
+    <string name="overview_documents_empty">Ancora nessun documento allegato.</string>
+    <string name="overview_documents_add_document_description">Aggiungi documento</string>
+    <string name="overview_documents_add_document">Aggiungi documento</string>
+    <string name="overview_bookmarks_empty">Ancora nessun link salvato.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Aggiungi segnalibro</string>
+    <string name="overview_bookmarks_add_bookmark">Aggiungi segnalibro</string>
+    <string name="overview_bookmarks_add_link">Aggiungi link</string>
+    <string name="overview_bookmarks_paste_link">Incolla un link...</string>
+    <string name="overview_bookmarks_clear_link">Cancella link</string>
+    <string name="overview_bookmarks_all">Tutti</string>
+    <string name="overview_bookmarks_others">Altri</string>
+</resources>

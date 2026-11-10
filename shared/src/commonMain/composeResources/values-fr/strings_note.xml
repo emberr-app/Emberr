@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">Tapez / pour les commandes...</string>
+    <string name="note_copied_to_clipboard">Copié dans le presse-papiers</string>
+    <string name="note_copied_as_markdown">Copié en Markdown</string>
+    <string name="note_options">Options</string>
+    <string name="note_more_options">Plus d'options</string>
+    <string name="note_choose_icon">Choisir une icône</string>
+    <string name="note_search_emojis">Rechercher des emojis</string>
+    <string name="note_no_emojis_found">Aucun emoji trouvé</string>
+    <string name="note_editing_template">Modification du modèle</string>
+    <string name="note_icon_options">Options de l'icône</string>
+    <string name="note_change_icon">Changer l'icône</string>
+    <string name="note_add_icon">Ajouter une icône</string>
+    <string name="note_remove_icon">Supprimer l'icône</string>
+    <string name="note_cover_options">Options de couverture</string>
+    <string name="note_upload_cover">Importer une couverture</string>
+    <string name="note_remove_cover">Supprimer la couverture</string>
+    <string name="note_hide_word_count">Masquer le nombre de mots</string>
+    <string name="note_show_word_count">Afficher le nombre de mots</string>
+    <string name="note_alignment">Alignement</string>
+    <string name="note_note_width">Largeur de la note</string>
+    <string name="note_unfavorite">Retirer des favoris</string>
+    <string name="note_favorite">Favori</string>
+    <string name="note_open_as_sticky_note">Ouvrir en note adhésive</string>
+    <string name="note_export_note">Exporter la note</string>
+    <string name="note_copy_text">Copier le texte</string>
+    <string name="note_copy_as_markdown">Copier en Markdown</string>
+    <string name="note_download_markdown">Télécharger le .md</string>
+    <string name="note_download_pdf">Télécharger le PDF</string>
+    <string name="note_move_to_trash">Placer dans la corbeille</string>
+    <string name="note_width_narrow">Étroite</string>
+    <string name="note_width_full">Pleine</string>
+    <string name="note_align_left">Gauche</string>
+    <string name="note_align_center">Centre</string>
+    <string name="note_align_right">Droite</string>
+    <string name="note_align_justify">Justifié</string>
+    <string name="note_note_options">Options de la note</string>
+    <string name="note_export_options">Options d'exportation</string>
+    <string name="note_paste_image_link">Collez le lien d'une image</string>
+    <string name="note_cover_image">Image de couverture</string>
+    <string name="note_drag_image_to_reposition">Faites glisser l'image pour la repositionner</string>
+    <string name="note_save_position">Enregistrer la position</string>
+    <string name="note_reposition">Repositionner</string>
+    <string name="note_collapse_panel">Réduire le panneau</string>
+    <string name="note_expand_panel">Développer le panneau</string>
+    <plurals name="note_word_count">
+        <item quantity="one">%1$d mot</item>
+        <item quantity="other">%1$d mots</item>
+    </plurals>
+</resources>

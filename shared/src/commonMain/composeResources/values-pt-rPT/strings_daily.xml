@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_settings">Definições</string>
+    <string name="daily_more_settings">Mais definições</string>
+    <string name="daily_click_to_write_your_thoughts">Clica para escrever os teus pensamentos</string>
+    <string name="daily_tap_to_write_your_thoughts">Toca para escrever os teus pensamentos</string>
+</resources>

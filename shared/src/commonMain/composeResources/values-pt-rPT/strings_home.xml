@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_switch_space">Mudar de espaço</string>
+    <string name="home_settings">Definições</string>
+    <string name="home_more_settings">Mais definições</string>
+    <string name="home_move_to_trash">Mover para a reciclagem</string>
+    <string name="home_empty_space_start_with">Este espaço está vazio. Começa com</string>
+    <string name="home_rename_subtitle">Escolhe um novo nome.</string>
+    <string name="home_organize_your_notes">Organiza as tuas notas.</string>
+    <string name="home_delete_template">Eliminar modelo</string>
+    <string name="home_templates_subtitle">Começa uma nova nota a partir de um modelo.</string>
+    <plurals name="home_overview_saved">
+        <item quantity="one">%1$d guardado</item>
+        <item quantity="other">%1$d guardados</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="one">Eliminar %1$d item</item>
+        <item quantity="other">Eliminar %1$d itens</item>
+    </plurals>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Il cestino è vuoto</string>
+    <string name="trash_title">Cestino</string>
+    <string name="trash_empty_trash">Svuota cestino</string>
+    <string name="trash_empty_trash_tooltip">Svuota cestino</string>
+    <string name="trash_restore_note">Ripristina nota</string>
+    <string name="trash_delete_permanently">Elimina definitivamente</string>
+    <string name="trash_manage_note">Gestisci nota</string>
+    <string name="trash_manage_note_subtitle">Le note nel cestino vengono eliminate automaticamente dopo 30 giorni.</string>
+    <string name="trash_empty_trash_question">Svuotare il cestino?</string>
+    <string name="trash_empty_trash_subtitle">Tutte le note attualmente nel cestino verranno eliminate definitivamente. L'azione non può essere annullata.</string>
+</resources>

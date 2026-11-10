@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Guardar contenido compartido</string>
+    <string name="share_save_to_overview">Guardar en Resumen</string>
+    <string name="share_save_to_a_note">Guardar en una nota</string>
+    <string name="share_shared_image">Imagen compartida</string>
+    <string name="share_failed_to_save">No se pudo guardar el contenido compartido.</string>
+    <string name="share_saved_to_inbox">Guardado en la bandeja de entrada</string>
+    <string name="share_note_no_longer_available">Esa nota ya no está disponible.</string>
+    <plurals name="share_images_selected">
+        <item quantity="one">%1$d imagen seleccionada</item>
+        <item quantity="other">%1$d imágenes seleccionadas</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="one">%1$d archivo seleccionado</item>
+        <item quantity="other">%1$d archivos seleccionados</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="one">Se guardó %1$d elemento en la bandeja de entrada</item>
+        <item quantity="other">Se guardaron %1$d elementos en la bandeja de entrada</item>
+    </plurals>
+</resources>

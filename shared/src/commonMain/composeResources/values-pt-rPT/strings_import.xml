@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_or_drop_here">ou larga aqui</string>
+    <string name="import_choose_again_hint_desktop">Clica para escolher novamente ou larga aqui.</string>
+    <string name="import_choose_again_hint_touch">Toca para escolher novamente.</string>
+    <string name="import_stopping">A parar e a remover o que foi importado…</string>
+    <string name="import_emberr_subtitle">Importa um backup sem substituir as tuas notas atuais.</string>
+    <string name="import_emberr_copying_media">A copiar multimédia %1$d de %2$d…</string>
+    <string name="import_emberr_getting_ready">A preparar…</string>
+    <string name="import_emberr_saving">A guardar a importação…</string>
+    <string name="import_emberr_choose_backup_file">Escolher ficheiro de backup</string>
+    <string name="import_emberr_choose_backup_hint">Ficheiro .emberr de Exportar backup</string>
+    <string name="import_emberr_reading_backup">A ler o backup…</string>
+    <string name="import_emberr_choose_different_file">Escolher outro ficheiro</string>
+    <string name="import_emberr_choose_backup_first">Escolhe um backup primeiro</string>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">%1$d ficheiro multimédia não foi encontrado no backup, por isso vai aparecer como em falta.</item>
+        <item quantity="other">%1$d ficheiros multimédia não foram encontrados no backup, por isso vão aparecer como em falta.</item>
+    </plurals>
+    <string name="import_emberr_picker_title">Escolhe um backup do Emberr</string>
+    <string name="import_markdown_subtitle">Transforma ficheiros .md, .txt e .canvas, ou um .zip com pastas, em notas do Emberr.</string>
+    <string name="import_markdown_copying_file">A copiar %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">A importar %1$d de %2$d nota…</item>
+        <item quantity="other">A importar %1$d de %2$d notas…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Escolher ficheiros ou um .zip</string>
+    <string name="import_markdown_reading_files">A ler ficheiros…</string>
+    <string name="import_markdown_could_not_read">Não foi possível ler esses ficheiros. %1$s</string>
+    <string name="import_markdown_save_to_space">Guardar no espaço</string>
+    <string name="import_markdown_emberr_notes_subtitle">Cada ficheiro torna-se uma nota feita de blocos.</string>
+    <string name="import_markdown_markdown_files">Ficheiros Markdown</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d ficheiro</item>
+        <item quantity="other">%1$d ficheiros</item>
+    </plurals>
+    <string name="import_markdown_choose_different_files">Escolher outros ficheiros</string>
+    <string name="import_markdown_picker_title">Escolhe ficheiros para importar</string>
+</resources>

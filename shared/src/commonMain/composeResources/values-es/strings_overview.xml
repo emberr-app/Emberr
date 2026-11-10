@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Tareas</string>
+    <string name="overview_section_bookmarks">Marcadores</string>
+    <string name="overview_section_images">Imágenes</string>
+    <string name="overview_section_documents">Documentos</string>
+    <string name="overview_tasks_repeating">Periódicas</string>
+    <string name="overview_tasks_note">Nota</string>
+    <string name="overview_tasks_today">Hoy</string>
+    <string name="overview_tasks_tomorrow">Mañana</string>
+    <string name="overview_tasks_yesterday">Ayer</string>
+    <string name="overview_tasks_none_completed">Aún no hay tareas completadas.</string>
+    <string name="overview_tasks_all_caught_up">¡Todo al día!</string>
+    <string name="overview_tasks_completed">Completadas</string>
+    <string name="overview_tasks_completed_tasks">Tareas completadas</string>
+    <string name="overview_tasks_hide_completed">Ocultar completadas</string>
+    <string name="overview_tasks_show_completed">Mostrar completadas</string>
+    <string name="overview_tasks_add_task_description">Agregar tarea</string>
+    <string name="overview_tasks_add_task">Agregar tarea</string>
+    <string name="overview_images_empty">Aún no hay imágenes guardadas.</string>
+    <string name="overview_images_add_image_description">Agregar imagen</string>
+    <string name="overview_images_add_image">Agregar imagen</string>
+    <string name="overview_documents_empty">Aún no hay documentos adjuntos.</string>
+    <string name="overview_documents_add_document_description">Agregar documento</string>
+    <string name="overview_documents_add_document">Agregar documento</string>
+    <string name="overview_bookmarks_empty">Aún no hay enlaces guardados.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Agregar marcador</string>
+    <string name="overview_bookmarks_add_bookmark">Agregar marcador</string>
+    <string name="overview_bookmarks_add_link">Agregar enlace</string>
+    <string name="overview_bookmarks_paste_link">Pega un enlace...</string>
+    <string name="overview_bookmarks_clear_link">Borrar enlace</string>
+    <string name="overview_bookmarks_all">Todos</string>
+    <string name="overview_bookmarks_others">Otros</string>
+</resources>

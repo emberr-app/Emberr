@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Salva contenuto condiviso</string>
+    <string name="share_save_to_overview">Salva nella panoramica</string>
+    <string name="share_save_to_a_note">Salva in una nota</string>
+    <string name="share_shared_image">Immagine condivisa</string>
+    <string name="share_failed_to_save">Impossibile salvare il contenuto condiviso.</string>
+    <string name="share_saved_to_inbox">Salvato in In arrivo</string>
+    <string name="share_note_no_longer_available">Quella nota non è più disponibile.</string>
+    <plurals name="share_images_selected">
+        <item quantity="one">%1$d immagine selezionata</item>
+        <item quantity="other">%1$d immagini selezionate</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="one">%1$d file selezionato</item>
+        <item quantity="other">%1$d file selezionati</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="one">%1$d elemento salvato in In arrivo</item>
+        <item quantity="other">%1$d elementi salvati in In arrivo</item>
+    </plurals>
+</resources>

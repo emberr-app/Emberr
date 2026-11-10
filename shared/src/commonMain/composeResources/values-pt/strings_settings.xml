@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Configurações</string>
+
+    <string name="settings_group_reminders">Lembretes</string>
+    <string name="settings_group_data_storage">Dados e armazenamento</string>
+    <string name="settings_group_sync_backup">Sincronização e backup</string>
+    <string name="settings_group_lan_sync">Sincronização LAN</string>
+    <string name="settings_group_security">Segurança</string>
+    <string name="settings_group_editor">Editor</string>
+    <string name="settings_group_appearance">Aparência</string>
+    <string name="settings_group_date_time">Data e hora</string>
+    <string name="settings_group_layout">Layout</string>
+    <string name="settings_group_overview">Visão geral</string>
+    <string name="settings_group_desktop_window">Janela do desktop</string>
+    <string name="settings_group_ai">IA</string>
+    <string name="settings_group_need_help">Precisa de ajuda?</string>
+    <string name="settings_group_updates">Atualizações</string>
+    <string name="settings_group_danger_zone">Zona de perigo</string>
+
+    <string name="settings_unrestricted_background">Segundo plano sem restrições</string>
+
+    <string name="settings_import">Importar</string>
+    <string name="settings_export_backup">Exportar backup</string>
+    <string name="settings_automatic_backups">Backups automáticos</string>
+    <string name="settings_backup_frequency_daily">Diário</string>
+    <string name="settings_backup_frequency_weekly">Semanal</string>
+    <string name="settings_backup_day">Dia do backup</string>
+    <string name="settings_backup_time">Horário do backup</string>
+    <string name="settings_backup_location">Local do backup</string>
+    <string name="settings_backup_location_change">Alterar</string>
+    <string name="settings_select_backup_day">Escolher dia do backup</string>
+
+    <string name="settings_self_host">Servidor próprio</string>
+    <string name="settings_self_host_blocked_by_lan_sync">Desvincule a sincronização LAN para usar o servidor próprio.</string>
+    <string name="settings_self_host_blocked_by_cloud">Saia do Emberr Cloud para usar o servidor próprio.</string>
+    <string name="settings_emberr_cloud">Emberr Cloud</string>
+    <string name="settings_cloud_blocked_by_self_host">Desconecte o servidor próprio para usar o Emberr Cloud.</string>
+    <string name="settings_cloud_blocked_by_lan_sync">Desvincule a sincronização LAN para usar o Emberr Cloud.</string>
+    <string name="settings_sync_network_both">Ambos</string>
+    <string name="settings_sync_network_wifi_only">Só Wi-Fi</string>
+    <string name="settings_sync_network_data_only">Só dados móveis</string>
+    <string name="settings_sync_network_hint">O servidor próprio e o Emberr Cloud só sincronizam pela rede que você escolher.</string>
+
+    <string name="settings_lan_sync_blocked_by_self_host">Desconecte o servidor próprio para usar a sincronização LAN.</string>
+    <string name="settings_lan_sync_blocked_by_cloud">Saia do Emberr Cloud para usar a sincronização LAN.</string>
+    <string name="settings_lan_sync_paired_desktop">Vinculado. Este desktop sincroniza automaticamente sempre que seu celular se conecta pela LAN.</string>
+    <string name="settings_sync_now">Sincronizar agora</string>
+    <string name="settings_unpair_from_mobile_device">Desvincular do celular</string>
+    <string name="settings_unpair_from_desktop">Desvincular do desktop</string>
+    <string name="settings_sync_port">Porta de sincronização</string>
+    <string name="settings_sync_port_hint">Só vale depois de reiniciar o Emberr. Altere se outro programa neste computador já estiver usando a porta atual.</string>
+    <string name="settings_pair_mobile_device">Vincular celular</string>
+    <string name="settings_pair_with_desktop">Vincular ao desktop</string>
+    <string name="settings_unpair_dialog_title">Desvincular dispositivo?</string>
+    <string name="settings_unpair_dialog_message_desktop">Remove o vínculo de sincronização deste desktop. Desvincule no celular também.</string>
+    <string name="settings_unpair_dialog_message_phone">Remove o vínculo de sincronização deste dispositivo. Mantenha o app do desktop aberto ou desvincule lá também.</string>
+    <string name="settings_unpair">Desvincular</string>
+
+    <string name="settings_theme">Tema</string>
+    <string name="settings_top_bar_fade">Esmaecer barra superior</string>
+    <string name="settings_top_bar_fade_subtitle">Escolha como o conteúdo esmaece atrás da barra superior enquanto você rola.</string>
+    <string name="settings_top_bar_fade_progressive">Progressivo</string>
+    <string name="settings_top_bar_fade_blur">Desfoque</string>
+    <string name="settings_top_bar_fade_color">Cor</string>
+    <string name="settings_top_bar_fade_none">Nenhum</string>
+    <string name="settings_top_bar_fade_fallback">Alternativa</string>
+    <string name="settings_top_bar_fade_progressive_blur">Desfoque progressivo</string>
+    <string name="settings_top_bar_fade_progressive_color">Cor progressiva</string>
+    <string name="settings_interface_scale">Escala da interface</string>
+    <string name="settings_interface_scale_hint">Deixa tudo no app maior ou menor.</string>
+    <string name="settings_interface_scale_smaller">Menor</string>
+    <string name="settings_interface_scale_bigger">Maior</string>
+    <string name="settings_interface_scale_reset">Redefinir para 100%</string>
+    <string name="settings_interface_scale_toast">Escala da interface %1$d%</string>
+    <string name="settings_font_size">Tamanho da fonte</string>
+    <string name="settings_font_size_extra_small">Muito pequeno</string>
+    <string name="settings_font_size_small">Pequeno</string>
+    <string name="settings_font_size_default">Padrão</string>
+    <string name="settings_font_size_large">Grande</string>
+    <string name="settings_font_size_extra_large">Muito grande</string>
+    <string name="settings_font_style">Estilo da fonte</string>
+    <string name="settings_font_style_system">Sistema</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_system">Padrão do sistema</string>
+    <string name="settings_language_restart_message">O Emberr precisa reiniciar para mostrar o novo idioma. O trabalho é salvo enquanto você digita, então reiniciar agora é seguro.</string>
+
+    <string name="settings_time_format">Formato de hora</string>
+    <string name="settings_time_format_system">Padrão do sistema</string>
+    <string name="settings_time_format_twelve_hour">12 horas</string>
+    <string name="settings_time_format_twenty_four_hour">24 horas</string>
+    <string name="settings_first_day_of_week">Primeiro dia da semana</string>
+    <string name="settings_first_day_of_week_desktop_hint">Mesma opção que Primeiro dia da semana nas configurações do Calendário.</string>
+    <string name="settings_first_day_of_week_system">Padrão do sistema</string>
+    <string name="settings_first_day_of_week_saturday">Sábado</string>
+    <string name="settings_first_day_of_week_sunday">Domingo</string>
+    <string name="settings_first_day_of_week_monday">Segunda-feira</string>
+
+    <string name="settings_daily_notes">Notas diárias</string>
+    <string name="settings_daily_notes_hint">Oculta as notas diárias. As existentes são mantidas.</string>
+    <string name="settings_daily_quote">Citação do dia</string>
+    <string name="settings_daily_quote_hint">Mostra uma citação nos dias vazios.</string>
+    <string name="settings_open_home_first">Abrir no Início</string>
+    <string name="settings_mic_button">Botão de microfone</string>
+    <string name="settings_overview_sidebar_footnote">Atalhos mostrados na barra lateral.</string>
+
+    <string name="settings_subnote_opening">Abertura de subnotas</string>
+    <string name="settings_subnote_opening_side_panel">Painel lateral</string>
+    <string name="settings_subnote_opening_center_dialog">Janela central</string>
+    <string name="settings_subnote_opening_full_right_panel">Painel direito inteiro</string>
+    <string name="settings_show_scrollbar">Mostrar barra de rolagem</string>
+    <string name="settings_show_scrollbar_hint">Mostra barras de rolagem em listas, notas e tabelas.</string>
+    <string name="settings_custom_title_bar">Barra de título personalizada</string>
+    <string name="settings_custom_title_bar_hint">Usa a barra de título do próprio Emberr. Vale após reiniciar.</string>
+    <string name="settings_auto_hide_title_bar">Ocultar barra de título</string>
+    <string name="settings_auto_hide_title_bar_hint">Mostra a barra de título quando você aponta para a borda superior.</string>
+    <string name="settings_restart_to_apply_title">Reinicie para aplicar</string>
+    <string name="settings_restart_to_apply_message">A janela não consegue alternar entre a própria barra de título e a do sistema enquanto está aberta, então o Emberr precisa reiniciar para aplicar isso. O trabalho é salvo enquanto você digita, então reiniciar agora é seguro.</string>
+    <string name="settings_restart_later">Depois</string>
+    <string name="settings_restart_now">Reiniciar agora</string>
+
+    <string name="settings_turn_off_ai_features">Desativar recursos de IA</string>
+    <string name="settings_ai_removing_data">Removendo modelos, embeddings e chaves salvas…</string>
+    <string name="settings_ai_off_hint">A IA está desativada. Modelos e chaves foram removidos. Os chats são mantidos.</string>
+    <string name="settings_ai_on_hint">Oculta o assistente e exclui modelos e chaves. Os chats são mantidos.</string>
+    <string name="settings_turn_off_ai_dialog_title">Desativar recursos de IA?</string>
+    <string name="settings_turn_off_ai_dialog_message">Exclui os modelos baixados, o índice de pesquisa e as chaves de API salvas. Suas notas e chats são mantidos.</string>
+    <string name="settings_turn_off">Desativar</string>
+    <string name="settings_ai_purge_failed">Não foi possível terminar de remover os dados de IA: %1$s</string>
+    <plurals name="settings_ai_purge_files_left">
+        <item quantity="one">%1$s liberados, mas %2$d arquivo não pôde ser removido: %3$s</item>
+        <item quantity="other">%1$s liberados, mas %2$d arquivos não puderam ser removidos: %3$s</item>
+    </plurals>
+    <string name="settings_ai_purge_freed">%1$s de arquivos de modelo liberados.</string>
+    <string name="settings_ai_purge_nothing_to_remove">Não havia arquivos de modelo no disco para remover.</string>
+
+    <string name="settings_keyboard_toolbar">Barra de ferramentas do teclado</string>
+
+    <string name="settings_faq">Perguntas frequentes</string>
+    <string name="settings_whats_new">Novidades</string>
+    <string name="settings_privacy_policy">Política de privacidade</string>
+    <string name="settings_about_emberr">Sobre o Emberr</string>
+
+    <string name="settings_clear_all_data">Apagar todos os dados</string>
+    <string name="settings_clear_all_data_desktop_hint">Exclui todas as notas, lembretes e anexos guardados neste dispositivo. Isso não pode ser desfeito.</string>
+    <string name="settings_clear_all_data_dialog_title">Apagar todos os dados?</string>
+    <string name="settings_clear_all_data_dialog_message">Exclui tudo neste dispositivo. Seus outros dispositivos, servidor de sincronização e backups não são afetados. </string>
+    <string name="settings_clear_data_failed">Não foi possível apagar seus dados. Nada foi excluído.</string>
+    <string name="settings_erase_cloud_dialog_message">Apaga todos os seus dados do Emberr Cloud e de todos os dispositivos conectados. Você continua conectado.</string>
+    <string name="settings_erase_cloud_password">Senha</string>
+    <string name="settings_erasing">Apagando...</string>
+    <string name="settings_erase">Apagar</string>
+    <string name="settings_erase_cloud_device_not_cleared">Seus dados na nuvem foram apagados, mas este dispositivo não pôde ser limpo. Tente Apagar todos os dados de novo.</string>
+    <string name="settings_erase_cloud_incorrect_password">Senha incorreta. Tente de novo.</string>
+    <string name="settings_erase_cloud_too_many_tries">Tentativas demais. Aguarde um pouco e tente de novo.</string>
+    <string name="settings_erase_cloud_signed_out">Você foi desconectado do Emberr Cloud. Nada foi apagado.</string>
+    <string name="settings_erase_cloud_something_went_wrong">Algo deu errado. Nada foi apagado.</string>
+    <string name="settings_erase_cloud_server_unreachable">Não foi possível acessar o servidor em %1$s. Nada foi apagado.</string>
+
+    <string name="settings_theme_mode">Modo</string>
+    <string name="settings_theme_mode_system">Sistema</string>
+    <string name="settings_theme_mode_light">Claro</string>
+    <string name="settings_theme_mode_dark">Escuro</string>
+    <string name="settings_theme_group_strength">Intensidade</string>
+    <string name="settings_theme_strength">Intensidade do tema</string>
+    <string name="settings_theme_group_text_and_icons">Texto e ícones</string>
+    <string name="settings_theme_text_and_icons">Texto e ícones com tema</string>
+    <string name="settings_theme_text_and_icons_hint">Desativado, texto e ícones ficam em preto e branco.</string>
+    <string name="settings_theme_group_texture">Textura</string>
+    <string name="settings_paper_texture">Textura de papel</string>
+    <string name="settings_paper_texture_hint">Adiciona um granulado suave, como papel.</string>
+    <string name="settings_paper_texture_show_on">Mostrar em</string>
+    <string name="settings_paper_texture_area_whole_app">App inteiro</string>
+    <string name="settings_paper_texture_area_daily_notes">Notas diárias</string>
+    <string name="settings_paper_texture_area_notes">Notas</string>
+    <string name="settings_paper_texture_area_canvas">Canvas</string>
+    <string name="settings_paper_texture_areas_none">Nenhum</string>
+    <string name="settings_texture_strength">Intensidade da textura</string>
+    <string name="settings_theme_group_colors">Cores</string>
+    <string name="settings_color_theme_emberr">Emberr</string>
+    <string name="settings_color_theme_soft">Suave</string>
+    <string name="settings_color_theme_wallpaper">Papel de parede</string>
+    <string name="settings_color_theme_high_contrast">Alto contraste</string>
+    <string name="settings_color_theme_terracotta">Terracota</string>
+    <string name="settings_color_theme_paper">Papel</string>
+    <string name="settings_color_theme_nord">Nord</string>
+    <string name="settings_color_theme_forest">Floresta</string>
+    <string name="settings_color_theme_rose_pine">Rosé Pine</string>
+    <string name="settings_color_theme_catppuccin_frappe">Catppuccin Frappé</string>
+    <string name="settings_color_theme_catppuccin_mocha">Catppuccin Mocha</string>
+    <string name="settings_color_theme_tokyo_night">Tokyo Night</string>
+    <string name="settings_color_theme_gruvbox">Gruvbox</string>
+    <string name="settings_color_theme_everforest">Everforest</string>
+
+    <string name="settings_toolbar_group_in_toolbar">Na barra</string>
+    <string name="settings_toolbar_empty">Nenhum botão ainda. Adicione alguns da lista abaixo.</string>
+    <string name="settings_toolbar_reorder_footnote">Arraste a alça para reordenar. O botão de fechar o teclado fica sempre à direita.</string>
+    <string name="settings_toolbar_group_available">Disponíveis</string>
+    <string name="settings_toolbar_reset_to_default">Restaurar padrão</string>
+    <string name="settings_toolbar_reorder_button">Reordenar %1$s</string>
+    <string name="settings_toolbar_remove">Remover</string>
+    <string name="settings_toolbar_remove_button">Remover %1$s</string>
+    <string name="settings_toolbar_add_button">Adicionar %1$s</string>
+
+    <string name="settings_about_title">Sobre</string>
+    <string name="settings_about_source_code">Código-fonte</string>
+    <string name="settings_about_open_source_licenses">Licenças de código aberto</string>
+    <string name="settings_about_third_party_services">Serviços de terceiros</string>
+    <string name="settings_about_tagline">App de notas e produtividade de código aberto e offline primeiro</string>
+    <string name="settings_about_copyright">Copyright © 2026 Benny</string>
+    <string name="settings_about_license_notice">Licenciado sob a GNU AGPL v3.0. Fornecido sem qualquer garantia.</string>
+
+    <string name="settings_third_party_group_movies_shows">Filmes e séries</string>
+    <string name="settings_third_party_visit_tmdb">Visitar o TMDB</string>
+    <string name="settings_third_party_tmdb_usage">Os blocos de filme e Para assistir usam o TMDB para encontrar filmes, séries e seus detalhes.</string>
+    <string name="settings_third_party_tmdb_proxy">As buscas de filmes e séries passam por um pequeno proxy do Emberr no Cloudflare, que as envia ao TMDB e não guarda registros. Pôsteres e fotos vêm direto do TMDB. Nada das suas notas é enviado.</string>
+    <string name="settings_third_party_tmdb_notice">Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB.</string>
+    <string name="settings_third_party_justwatch_notice">Dados de onde assistir fornecidos pela JustWatch.</string>
+
+    <string name="settings_licenses_group_libraries">Bibliotecas</string>
+    <string name="settings_licenses_group_fonts">Fontes</string>
+    <string name="settings_licenses_version">Versão %1$s</string>
+    <string name="settings_licenses_by_authors">Por %1$s</string>
+    <string name="settings_licenses_unnamed_license">Licença</string>
+    <string name="settings_licenses_full_text_at">O texto completo está disponível em %1$s</string>
+    <string name="settings_licenses_visit_website">Visitar site</string>
+
+    <string name="settings_app_lock">Bloqueio do app</string>
+    <string name="settings_app_lock_needs_screen_lock">Defina primeiro um bloqueio de tela no celular.</string>
+    <string name="settings_app_lock_turn_on_prompt">Ativar o Bloqueio do app</string>
+    <string name="settings_app_lock_turn_off_prompt">Desativar o Bloqueio do app</string>
+    <string name="settings_auto_lock">Bloqueio automático</string>
+    <string name="settings_auto_lock_immediately">Imediatamente</string>
+    <string name="settings_auto_lock_after_one_minute">Após 1 minuto</string>
+    <string name="settings_auto_lock_after_five_minutes">Após 5 minutos</string>
+    <string name="settings_auto_lock_after_fifteen_minutes">Após 15 minutos</string>
+    <string name="settings_auto_lock_after_one_hour">Após 1 hora</string>
+    <string name="settings_screen_security">Segurança da tela</string>
+    <string name="settings_screen_security_hint">Oculta o conteúdo do Emberr nos apps recentes.</string>
+    <string name="settings_screen_security_hint_with_screenshots">Oculta o conteúdo do Emberr nos apps recentes. Capturas de tela também são bloqueadas.</string>
+
+    <string name="settings_credential_storage">Armazenamento de credenciais</string>
+    <string name="settings_credential_storage_checking">Verificando</string>
+    <string name="settings_credential_storage_plain_text">Texto simples</string>
+    <string name="settings_credential_storage_got_it">Entendi</string>
+    <string name="settings_credential_storage_checking_detail">O Emberr ainda está verificando qual gerenciador de credenciais este sistema oferece.</string>
+    <string name="settings_credential_storage_protected_detail">Suas chaves de API de IA e chaves de sincronização ficam com o %1$s, gerenciado pelo seu sistema operacional. Elas nunca são gravadas nos arquivos do Emberr.</string>
+    <string name="settings_credential_storage_plain_text_detail">Suas chaves de API de IA e chaves de sincronização estão salvas como texto legível em ~/.emberr/secrets.properties. Qualquer pessoa que consiga ler sua pasta pessoal pode lê-las.\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_title">Suas chaves não estão protegidas</string>
+    <string name="settings_plain_text_warning_message">Este sistema não tem um gerenciador de credenciais que o Emberr possa usar, então suas chaves de API de IA e chaves de sincronização são salvas como texto legível em ~/.emberr/secrets.properties. Só a sua conta de usuário pode ler o arquivo, mas ele não é criptografado.\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_understood">Entendi</string>
+
+    <string name="settings_update_check_on_launch">Procurar atualizações ao abrir</string>
+    <string name="settings_update_checking">Procurando atualizações...</string>
+    <string name="settings_update_download_version">Baixar Emberr %1$s</string>
+    <string name="settings_update_downloading">Baixando atualização...</string>
+    <string name="settings_update_restart_to_update">Reiniciar para atualizar</string>
+    <string name="settings_update_check_now">Procurar atualizações</string>
+    <string name="settings_update_up_to_date">Atualizado</string>
+    <string name="settings_update_new">Nova</string>
+    <string name="settings_update_failed">Falhou</string>
+
+    <string name="settings_export_backup_subtitle">Escolha o que salvar.</string>
+    <string name="settings_export_backup_select_spaces">Escolher espaços</string>
+    <string name="settings_export_backup_daily_notes">Notas diárias</string>
+    <string name="settings_export_backup_calendar">Calendário</string>
+    <string name="settings_export_backup_export">Exportar</string>
+</resources>

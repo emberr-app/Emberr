@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">La corbeille est vide</string>
+    <string name="trash_title">Corbeille</string>
+    <string name="trash_empty_trash">Vider la corbeille</string>
+    <string name="trash_empty_trash_tooltip">Vider la corbeille</string>
+    <string name="trash_restore_note">Restaurer la note</string>
+    <string name="trash_delete_permanently">Supprimer définitivement</string>
+    <string name="trash_manage_note">Gérer la note</string>
+    <string name="trash_manage_note_subtitle">Les notes de la corbeille sont supprimées automatiquement après 30 jours.</string>
+    <string name="trash_empty_trash_question">Vider la corbeille ?</string>
+    <string name="trash_empty_trash_subtitle">Toutes les notes de la corbeille seront supprimées définitivement. Cette action est irréversible.</string>
+</resources>

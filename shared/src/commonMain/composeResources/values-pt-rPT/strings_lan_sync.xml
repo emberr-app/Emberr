@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_already_in_progress">Sincronização já em curso</string>
+    <string name="lan_sync_status_syncing">A sincronizar...</string>
+    <string name="lan_sync_status_auto_syncing">A sincronizar automaticamente...</string>
+    <string name="lan_sync_status_fetching_from_desktop">A obter do computador...</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Sincronizado, %1$d item não pôde ser guardado</item>
+        <item quantity="other">Sincronizado, %1$d itens não puderam ser guardados</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Sincronização parcial, vai tentar novamente</string>
+    <string name="lan_sync_status_update_both_devices">Atualiza o Emberr nos dois dispositivos</string>
+    <string name="lan_sync_pair_dialog_title">Vincular telemóvel</string>
+    <string name="lan_sync_pair_dialog_message">Lê este código QR com a app Emberr no telemóvel para te ligares com segurança ao teu computador.</string>
+    <string name="lan_sync_scanner_instruction">Lê o código QR mostrado no teu computador.</string>
+    <string name="lan_sync_scanner_desktop_hint">No computador, abre Definições → Sincronização LAN → Vincular telemóvel.</string>
+    <string name="lan_sync_camera_access_needed">Acesso à câmara necessário</string>
+    <string name="lan_sync_camera_allow_message">Permite a câmara para ler o código de vínculo no teu computador.</string>
+    <string name="lan_sync_camera_turn_on_message">Ativa a Câmara em Permissões e volta aqui.</string>
+    <string name="lan_sync_allow_camera">Permitir câmara</string>
+    <string name="lan_sync_open_app_settings">Abrir definições da app</string>
+    <string name="lan_sync_camera_mobile_only">A leitura pela câmara só funciona em telemóveis.</string>
+</resources>

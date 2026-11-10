@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr è bloccata</string>
+    <string name="app_lock_screen_detail">Usa l'impronta, il volto o il blocco schermo per aprirla.</string>
+    <string name="app_lock_unlock">Sblocca</string>
+    <string name="app_lock_prompt_subtitle">Usa l'impronta, il volto o il blocco schermo</string>
+    <string name="app_lock_unlock_emberr">Sblocca Emberr</string>
+    <string name="app_lock_off_no_screen_lock">Il Blocco app è disattivato perché questo telefono non ha un blocco schermo.</string>
+</resources>

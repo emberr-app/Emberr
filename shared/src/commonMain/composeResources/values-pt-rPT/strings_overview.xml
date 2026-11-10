@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_images_empty">Nenhuma imagem guardada ainda.</string>
+    <string name="overview_bookmarks_empty">Nenhum link guardado ainda.</string>
+    <string name="overview_bookmarks_paste_link">Cola um link...</string>
+</resources>

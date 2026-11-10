@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Serveur auto-hébergé</string>
+
+    <string name="selfhost_group_server_details">Détails du serveur</string>
+    <string name="selfhost_group_recovery_passphrase">Phrase secrète de récupération</string>
+    <string name="selfhost_group_unlock_vault">Déverrouiller le coffre</string>
+    <string name="selfhost_group_status">État</string>
+
+    <string name="selfhost_setting_up">Configuration</string>
+    <string name="selfhost_unlock_and_sync">Déverrouiller et synchroniser</string>
+    <string name="selfhost_create_vault_and_sync">Créer le coffre et synchroniser</string>
+    <string name="selfhost_server_address_rejected">Adresse du serveur refusée</string>
+    <string name="selfhost_got_it">Compris</string>
+
+    <string name="selfhost_status_connected">État : connecté</string>
+    <string name="selfhost_cancelling">Annulation...</string>
+    <string name="selfhost_cancel_sync">Annuler la synchro</string>
+    <string name="selfhost_cancel_sync_hint">L'annulation met la synchro en pause jusqu'au redémarrage de l'app ou jusqu'à ce que vous appuyiez sur Synchroniser.</string>
+    <string name="selfhost_sync_now">Synchroniser</string>
+    <string name="selfhost_syncing">Synchronisation...</string>
+    <string name="selfhost_never_synced">Jamais synchronisé</string>
+    <string name="selfhost_last_synced">Dernière synchro : %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d note en attente de synchro</item>
+        <item quantity="other">%1$d notes en attente de synchro</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Notes</string>
+    <string name="selfhost_progress_images">Images</string>
+
+    <string name="selfhost_passphrase_needed_hint">Cette phrase secrète est nécessaire pour connecter un autre téléphone ou ordinateur à ce serveur.</string>
+    <string name="selfhost_show_passphrase_button">Afficher la phrase secrète</string>
+    <string name="selfhost_unlock_prompt_title">Phrase secrète de récupération</string>
+    <string name="selfhost_unlock_prompt_description">Déverrouillez pour voir votre phrase secrète de récupération</string>
+    <string name="selfhost_save_passphrase_hint">Cet appareil a été connecté avant qu'Emberr enregistre la phrase secrète. Saisissez-la une fois pour l'enregistrer ici et pouvoir la revoir plus tard.</string>
+    <string name="selfhost_checking">Vérification</string>
+    <string name="selfhost_save_passphrase">Enregistrer la phrase secrète</string>
+    <string name="selfhost_disconnect_vault">Déconnecter le coffre</string>
+    <string name="selfhost_recovery_dialog_message">Saisissez-la sur l'autre appareil quand il demande de déverrouiller le coffre. Ne la partagez avec personne.</string>
+    <string name="selfhost_done">Terminé</string>
+    <string name="selfhost_disconnect_vault_question">Déconnecter le coffre ?</string>
+    <string name="selfhost_disconnect_message">Vos notes restent sur cet appareil et sur le serveur. Il vous faudra votre phrase secrète de récupération pour vous reconnecter.</string>
+    <string name="selfhost_disconnect">Déconnecter</string>
+
+    <string name="selfhost_checking_for_changes">Recherche de modifications...</string>
+    <string name="selfhost_finishing_up">Finalisation...</string>
+    <string name="selfhost_sending_percent">Envoi %1$d%</string>
+    <string name="selfhost_nothing_to_send">Rien à envoyer</string>
+    <string name="selfhost_receiving_percent">Réception %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Rien à recevoir</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%1$d note sur %2$d</item>
+        <item quantity="other">%1$d notes sur %2$d</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s Mo sur %2$s Mo</string>
+
+    <string name="selfhost_server_details_hint">Saisissez l'adresse WebDAV et les identifiants de votre serveur, par exemple Nextcloud ou un NAS. Emberr chiffre vos notes avant qu'elles quittent cet appareil.</string>
+    <string name="selfhost_username">Nom d'utilisateur</string>
+    <string name="selfhost_password">Mot de passe</string>
+    <string name="selfhost_hide_password">Masquer le mot de passe</string>
+    <string name="selfhost_show_password">Afficher le mot de passe</string>
+    <string name="selfhost_testing">Test</string>
+    <string name="selfhost_test_connection">Tester la connexion</string>
+    <string name="selfhost_contacting_server">Connexion au serveur...</string>
+
+    <string name="selfhost_restore_hint">Ce serveur contient déjà un coffre Emberr. Saisissez la phrase secrète de récupération de 16 caractères affichée lors de sa création.</string>
+    <string name="selfhost_restore_find_hint">Introuvable ? Ouvrez Réglages → Serveur auto-hébergé → Afficher la phrase secrète sur un appareil déjà connecté.</string>
+    <string name="selfhost_passphrase_placeholder">Phrase secrète de 16 caractères</string>
+    <string name="selfhost_hide_passphrase">Masquer la phrase secrète</string>
+    <string name="selfhost_show_passphrase">Afficher la phrase secrète</string>
+
+    <string name="selfhost_save_passphrase_now">Enregistrez cette phrase secrète maintenant</string>
+    <string name="selfhost_fact_type_on_other_devices">Vous la saisirez sur chaque autre téléphone ou ordinateur connecté à ce serveur.</string>
+    <string name="selfhost_fact_locks_notes">Elle verrouille vos notes sur le serveur. Personne ne peut les lire sans elle, pas même Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr ne peut pas la réinitialiser. Gardez-la dans un gestionnaire de mots de passe ou notez-la.</string>
+    <string name="selfhost_fact_see_again_later">Vous pourrez la revoir dans Réglages → Serveur auto-hébergé sur n'importe quel appareil connecté.</string>
+    <string name="selfhost_new_passphrase">Nouvelle phrase secrète</string>
+    <string name="selfhost_generate_new_passphrase">Générer une nouvelle phrase secrète</string>
+    <string name="selfhost_saved_passphrase_confirmation">J'ai gardé cette phrase secrète en lieu sûr</string>
+    <string name="selfhost_copy_passphrase">Copier la phrase secrète</string>
+    <string name="selfhost_copy_address">Copier l'adresse</string>
+    <string name="selfhost_copied_address">adresse copiée</string>
+
+    <string name="selfhost_invalid_credentials">Nom d'utilisateur ou mot de passe incorrect</string>
+    <string name="selfhost_server_returned_error">Le serveur a renvoyé une erreur (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Impossible de joindre le serveur</string>
+    <string name="selfhost_could_not_check_vault">Impossible de vérifier la présence d'un coffre : %1$s</string>
+    <string name="selfhost_unknown_error">erreur inconnue</string>
+    <string name="selfhost_existing_vault_found">Coffre existant trouvé sur ce serveur</string>
+    <string name="selfhost_no_existing_vault">Aucun coffre existant, un nouveau sera créé</string>
+    <string name="selfhost_no_vault_file_to_restore">Aucun fichier de coffre à restaurer n'a été trouvé sur le serveur</string>
+    <string name="selfhost_old_or_damaged_vault_data">Ce dossier du serveur contient des données de synchro d'un coffre ancien ou endommagé. Supprimez le dossier emberr_sync sur votre serveur, puis recommencez la configuration.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Un coffre existe déjà sur ce serveur. Saisissez sa phrase secrète de récupération ci-dessous pour le restaurer.</string>
+    <string name="selfhost_could_not_set_up">Impossible de configurer la synchro sécurisée</string>
+    <string name="selfhost_no_vault_on_server">Aucun coffre trouvé sur le serveur.</string>
+    <string name="selfhost_wrong_passphrase">Cette phrase secrète ne déverrouille pas ce coffre.</string>
+    <string name="selfhost_could_not_check_passphrase">Impossible de vérifier la phrase secrète : %1$s</string>
+
+    <string name="selfhost_update_required_title">Synchro auto-hébergée en pause</string>
+    <string name="selfhost_update_required_message">%1$s Vos notes sont en sécurité et continuent d'être enregistrées sur cet appareil.</string>
+    <string name="selfhost_later">Plus tard</string>
+    <string name="selfhost_update">Mettre à jour</string>
+</resources>

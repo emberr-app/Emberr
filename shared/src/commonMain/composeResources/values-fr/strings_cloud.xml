@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_title">Emberr Cloud</string>
+
+    <string name="cloud_server_address">Adresse du serveur</string>
+    <string name="cloud_server_address_invalid">Saisissez une adresse commençant par http:// ou https://, comme http://localhost:8080.</string>
+    <string name="cloud_server_address_saved">Adresse du serveur enregistrée</string>
+
+    <string name="cloud_welcome_hint">Synchronisez vos notes entre vos appareils avec un chiffrement de bout en bout. Seuls vos appareils peuvent les lire.</string>
+    <string name="cloud_create_account">Créer un compte</string>
+    <string name="cloud_log_in">Se connecter</string>
+    <string name="cloud_send_code">Envoyer le code</string>
+    <string name="cloud_send_new_code">Envoyer un nouveau code</string>
+    <string name="cloud_continue">Continuer</string>
+    <string name="cloud_done">Terminé</string>
+    <string name="cloud_password_not_stored_hint">Nous ne conservons pas ce mot de passe : si vous l'oubliez, nous ne pourrons pas déchiffrer vos notes.</string>
+    <string name="cloud_recovery_words">Mots de récupération</string>
+    <string name="cloud_recovery_words_explanation">Si vous oubliez votre mot de passe, ces 24 mots sont le seul moyen de retrouver votre compte. Nous ne les conservons pas, gardez-les en lieu sûr.</string>
+    <string name="cloud_recovery_words_warning">Sans votre mot de passe et ces mots, vos notes cloud ne peuvent pas être récupérées.</string>
+    <string name="cloud_recovery_words_saved_checkbox">J'ai gardé ces mots en lieu sûr</string>
+    <string name="cloud_copy_words">Copier les mots</string>
+    <string name="cloud_recovery_words_copied">Mots de récupération copiés</string>
+    <string name="cloud_forgot_password">Mot de passe oublié</string>
+    <string name="cloud_recovery_email_hint">Saisissez l'e-mail de votre compte. Nous vous enverrons un code.</string>
+    <string name="cloud_recovery_other_device_hint">Connecté sur un autre appareil ? Changez votre mot de passe là-bas.</string>
+    <string name="cloud_recovery_words_entry_hint">Saisissez les 24 mots de récupération enregistrés lors de la création de votre compte.</string>
+    <string name="cloud_recovery_words_placeholder">Vos 24 mots de récupération</string>
+    <string name="cloud_set_new_password">Définir un nouveau mot de passe</string>
+    <string name="cloud_new_password_hint">Saisissez un nouveau mot de passe pour chiffrer vos notes.</string>
+    <string name="cloud_reset_password">Réinitialiser le mot de passe</string>
+    <string name="cloud_sign_out_other_devices_title">Déconnecter les autres appareils</string>
+    <string name="cloud_sign_out_other_devices_message">Si vous pensez que quelqu'un connaît votre mot de passe, vous pouvez déconnecter tous les autres appareils qui utilisent votre compte.</string>
+    <string name="cloud_sign_out_other_devices_button">Déconnecter les autres appareils</string>
+    <string name="cloud_do_not_sign_out">Ne pas déconnecter</string>
+
+    <string name="cloud_account">Compte</string>
+    <string name="cloud_signed_in_as">Connecté en tant que %1$s</string>
+    <string name="cloud_loading_storage_used">Chargement de l'espace utilisé...</string>
+    <string name="cloud_sync">Synchro</string>
+    <string name="cloud_syncing">Synchronisation...</string>
+    <string name="cloud_last_synced">Dernière synchro %1$s</string>
+    <string name="cloud_sync_explanation">Envoie et reçoit les espaces, dossiers, notes, listes, chats et médias.</string>
+    <string name="cloud_sync_now">Synchroniser</string>
+    <string name="cloud_media">Médias</string>
+    <string name="cloud_media_last_checked">Médias vérifiés %1$s</string>
+    <string name="cloud_devices">Appareils</string>
+    <string name="cloud_loading_devices">Chargement des appareils...</string>
+    <string name="cloud_tap_device_to_sign_out">Appuyez sur un appareil pour le déconnecter.</string>
+    <string name="cloud_sign_out_of_this_device">Se déconnecter de cet appareil</string>
+    <string name="cloud_manage_account">Gérer le compte</string>
+    <string name="cloud_change_password">Changer le mot de passe</string>
+    <string name="cloud_change_email">Changer l'e-mail</string>
+    <string name="cloud_recovery_words_lock_description">Authentifiez-vous pour voir vos mots de récupération</string>
+    <string name="cloud_delete_account">Supprimer le compte</string>
+    <string name="cloud_sign_out_device_title">Déconnecter l'appareil ?</string>
+    <string name="cloud_sign_out_device_message">L'appareil suivant sera déconnecté :\n\n%1$s</string>
+    <string name="cloud_sign_out">Se déconnecter</string>
+    <string name="cloud_delete_account_title">Supprimer le compte ?</string>
+    <string name="cloud_delete_account_message">Votre compte Emberr Cloud et tout son contenu seront supprimés définitivement. Action irréversible. Les notes de cet appareil restent, sauf si vous choisissez aussi de les effacer. Nous enverrons un code à %1$s pour confirmer.</string>
+    <string name="cloud_last_used">Dernière utilisation %1$s</string>
+    <string name="cloud_this_device">Cet appareil</string>
+    <string name="cloud_sign_out_of_this_device_title">Se déconnecter de cet appareil ?</string>
+    <string name="cloud_sign_out_of_this_device_message">Cet appareil cesse d'utiliser Emberr Cloud. Vos notes sur cet appareil ne sont pas touchées.</string>
+
+    <string name="cloud_change_password_code_hint">Nous enverrons un code à %1$s pour confirmer.</string>
+    <string name="cloud_sign_out_of_other_devices">Déconnecter les autres appareils</string>
+    <string name="cloud_change_email_hint">Saisissez votre nouvelle adresse e-mail. Nous y enverrons un code.</string>
+    <string name="cloud_recovery_words_password_hint">Saisissez votre mot de passe pour voir vos mots de récupération.</string>
+    <string name="cloud_clear_notes_on_this_device">Effacer aussi les notes de cet appareil</string>
+    <string name="cloud_delete_account_warning">Votre compte Emberr Cloud sera supprimé définitivement. Action irréversible.</string>
+
+    <string name="cloud_email">E-mail</string>
+    <string name="cloud_code_placeholder">Code à 6 chiffres</string>
+    <string name="cloud_password">Mot de passe</string>
+    <string name="cloud_confirm_password">Confirmer le mot de passe</string>
+    <string name="cloud_passwords_do_not_match">Les mots de passe ne correspondent pas.</string>
+    <string name="cloud_hide_password">Masquer le mot de passe</string>
+    <string name="cloud_show_password">Afficher le mot de passe</string>
+    <string name="cloud_password_strength_weak">Robustesse : faible</string>
+    <string name="cloud_password_strength_moderate">Robustesse : moyenne</string>
+    <string name="cloud_password_strength_strong">Robustesse : forte</string>
+    <string name="cloud_code_sent">Nous avons envoyé un code à %1$s. Vérifiez votre boîte de réception (et les spams).</string>
+    <string name="cloud_new_code_sent">Nous avons envoyé un nouveau code à %1$s.</string>
+    <string name="cloud_please_wait">Veuillez patienter...</string>
+
+    <string name="cloud_sending_file">Envoi du fichier %1$d sur %2$d</string>
+    <string name="cloud_receiving_file">Réception du fichier %1$d sur %2$d</string>
+    <string name="cloud_photo_in_note">Photo dans %1$s</string>
+    <string name="cloud_video_in_note">Vidéo dans %1$s</string>
+    <string name="cloud_audio_in_note">Audio dans %1$s</string>
+    <string name="cloud_document_in_note">Document dans %1$s</string>
+    <string name="cloud_file_in_note">Fichier dans %1$s</string>
+    <string name="cloud_file_progress">%1$d% · %2$s sur %3$s</string>
+    <plurals name="cloud_files_waiting_for_upload">
+        <item quantity="one">%1$d fichier attend d'être envoyé par un autre appareil.</item>
+        <item quantity="other">%1$d fichiers attendent d'être envoyés par un autre appareil.</item>
+    </plurals>
+    <string name="cloud_files_not_sent_and_not_received">Fichiers : %1$d non envoyés, %2$d non reçus. Nouvel essai à la prochaine synchro.</string>
+    <string name="cloud_files_not_sent">Fichiers : %1$d non envoyés. Nouvel essai à la prochaine synchro.</string>
+    <string name="cloud_files_not_received">Fichiers : %1$d non reçus. Nouvel essai à la prochaine synchro.</string>
+    <string name="cloud_files_sent_and_received_counts">%1$d fichiers sur %2$d envoyés · %3$d fichiers sur %4$d reçus</string>
+    <string name="cloud_files_sent_count">%1$d fichiers sur %2$d envoyés</string>
+    <string name="cloud_files_received_count">%1$d fichiers sur %2$d reçus</string>
+
+    <string name="cloud_trial_ended">Essai gratuit terminé le %1$s · lecture seule jusqu'au %2$s</string>
+    <string name="cloud_trial_ends_today">Essai gratuit · se termine aujourd'hui</string>
+    <plurals name="cloud_trial_days_left">
+        <item quantity="one">Essai gratuit · %1$d jour restant</item>
+        <item quantity="other">Essai gratuit · %1$d jours restants</item>
+    </plurals>
+    <string name="cloud_storage_used">%1$s sur %2$s utilisés</string>
+    <string name="cloud_full_with_usage">Emberr Cloud est plein : %1$s sur %2$s utilisés. Les nouvelles notes et fichiers restent sur cet appareil et seront envoyés dès qu'il y aura de la place.</string>
+    <string name="cloud_full">Emberr Cloud est plein. Les nouvelles notes et fichiers restent sur cet appareil et seront envoyés dès qu'il y aura de la place.</string>
+    <string name="cloud_trial_ended_read_only">Votre essai gratuit est terminé, Emberr Cloud est donc en lecture seule. Cet appareil reçoit toujours les modifications de vos autres appareils, mais rien de nouveau n'est envoyé. Vos notes restent sur vos appareils.</string>
+    <plurals name="cloud_files_too_large">
+        <item quantity="one">%1$d fichier dépasse 10 Go, il reste donc uniquement sur cet appareil.</item>
+        <item quantity="other">%1$d fichiers dépassent 10 Go, ils restent donc uniquement sur cet appareil.</item>
+    </plurals>
+    <string name="cloud_copy_removed">Votre essai gratuit est terminé et la copie cloud a été supprimée le %1$s. Toutes vos notes sont toujours sur cet appareil. La synchro reprendra quand vous choisirez une offre.</string>
+
+    <string name="cloud_error_something_went_wrong">Un problème est survenu. Réessayez.</string>
+    <string name="cloud_error_signed_out">Vous avez été déconnecté. Reconnectez-vous.</string>
+    <string name="cloud_error_incorrect_password">Mot de passe incorrect. Réessayez.</string>
+    <string name="cloud_error_invalid_email">Saisissez une adresse e-mail valide.</string>
+    <string name="cloud_error_wrong_email_or_password">E-mail ou mot de passe incorrect.</string>
+    <string name="cloud_error_incorrect_code">Ce code est incorrect.</string>
+    <string name="cloud_error_expired_code">Ce code a expiré. Demandez-en un nouveau.</string>
+    <string name="cloud_error_too_many_tries">Trop de tentatives. Patientez un peu et réessayez.</string>
+    <string name="cloud_error_update_required">Mettez à jour Emberr pour utiliser Emberr Cloud.</string>
+    <string name="cloud_error_device_already_signed_out">Cet appareil était déjà déconnecté.</string>
+    <string name="cloud_error_email_already_used">Un autre compte utilise déjà cet e-mail.</string>
+    <string name="cloud_error_server_unreachable">Impossible de joindre le serveur %1$s.</string>
+    <string name="cloud_error_invalid_recovery_words">Ces mots ne forment pas une clé de récupération valide. Vérifiez qu'il y a 24 mots et l'orthographe de chacun.</string>
+    <string name="cloud_error_recovery_words_other_account">Ces mots appartiennent à un autre compte.</string>
+    <string name="cloud_account_deleted_notes_not_cleared">Votre compte a été supprimé, mais les notes de cet appareil n'ont pas pu être effacées.</string>
+    <string name="cloud_password_changed">Mot de passe modifié</string>
+    <string name="cloud_email_changed">E-mail changé en %1$s</string>
+
+    <string name="cloud_synced">Synchronisé : %1$d reçus, %2$d envoyés</string>
+    <string name="cloud_synced_with_not_sent">Synchronisé : %1$d reçus, %2$d envoyés, %3$d non envoyés</string>
+    <string name="cloud_sync_busy">Une autre synchro est en cours. Réessayez dans un instant.</string>
+    <string name="cloud_sync_update_required">Mettez à jour Emberr pour continuer à synchroniser avec Emberr Cloud.</string>
+    <string name="cloud_sync_other_method_on">Une autre méthode de synchro est active. Déconnectez le serveur auto-hébergé ou dissociez la synchro LAN pour continuer à utiliser Emberr Cloud.</string>
+    <string name="cloud_disconnect_self_host_first">Déconnectez le serveur auto-hébergé pour utiliser Emberr Cloud.</string>
+    <string name="cloud_unpair_lan_sync_first">Dissociez la synchro LAN pour utiliser Emberr Cloud.</string>
+</resources>

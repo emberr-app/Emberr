@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Inactif</string>
+    <string name="lan_sync_status_not_paired">Non associé !</string>
+    <string name="lan_sync_status_already_in_progress">Synchronisation déjà en cours</string>
+    <string name="lan_sync_status_syncing">Synchronisation...</string>
+    <string name="lan_sync_status_auto_syncing">Synchronisation auto...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Récupération depuis l'ordinateur...</string>
+    <string name="lan_sync_status_success">Réussi !</string>
+    <string name="lan_sync_status_synced_successfully">Synchronisation réussie</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Synchronisé, %1$d élément n'a pas pu être enregistré</item>
+        <item quantity="other">Synchronisé, %1$d éléments n'ont pas pu être enregistrés</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Synchro partielle, nouvel essai prévu</string>
+    <string name="lan_sync_status_update_both_devices">Mettez à jour Emberr sur les deux appareils</string>
+    <string name="lan_sync_status_desktop_offline">Ordinateur hors ligne</string>
+    <string name="lan_sync_status_failed">Échec : %1$s</string>
+    <string name="lan_sync_status_sync_error">Erreur de synchro : %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Associer un appareil mobile</string>
+    <string name="lan_sync_pair_dialog_message">Scannez ce code QR avec l'app mobile Emberr pour vous connecter en toute sécurité à votre ordinateur.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Jeton secret : %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Scannez le code QR affiché sur votre ordinateur.</string>
+    <string name="lan_sync_scanner_desktop_hint">Sur votre ordinateur, ouvrez Réglages → Synchro LAN → Associer un appareil mobile.</string>
+    <string name="lan_sync_camera_access_needed">Accès à l'appareil photo requis</string>
+    <string name="lan_sync_camera_allow_message">Autorisez l'appareil photo pour scanner le code d'association sur votre ordinateur.</string>
+    <string name="lan_sync_camera_turn_on_message">Activez Appareil photo dans Autorisations, puis revenez ici.</string>
+    <string name="lan_sync_allow_camera">Autoriser l'appareil photo</string>
+    <string name="lan_sync_open_app_settings">Ouvrir les réglages de l'app</string>
+    <string name="lan_sync_camera_mobile_only">Le scan par appareil photo n'est possible que sur les appareils mobiles.</string>
+</resources>
