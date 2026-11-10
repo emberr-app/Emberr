@@ -35,9 +35,13 @@ import com.emberr.domain.people.ContactDetailToImport
 import com.emberr.domain.people.ContactToImport
 import com.emberr.domain.people.contactDateToBirthdayText
 import com.emberr.domain.util.system.showNativeToast
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.people_could_not_read_contact
+import emberr.shared.generated.resources.people_no_contacts_app_found
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
 
 private const val ANDROID_17 = 37
 private const val CUSTOM_TYPE = 0
@@ -69,13 +73,13 @@ actual fun rememberPhoneContactPicker(onContactsPicked: (List<ContactToImport>) 
                     null
                 }
             }
-            if (contacts.isNullOrEmpty()) showNativeToast("Couldn't read the contact") else latestOnContactsPicked(contacts)
+            if (contacts.isNullOrEmpty()) showNativeToast(getString(Res.string.people_could_not_read_contact)) else latestOnContactsPicked(contacts)
         }
     }
     return {
         isNewPickerOpen = Build.VERSION.SDK_INT >= ANDROID_17 && tryLaunching { launcher.launch(newContactPickerIntent()) }
         if (!isNewPickerOpen && !tryLaunching { launcher.launch(Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI)) }) {
-            showNativeToast("No contacts app found")
+            scope.launch { showNativeToast(getString(Res.string.people_no_contacts_app_found)) }
         }
     }
 }

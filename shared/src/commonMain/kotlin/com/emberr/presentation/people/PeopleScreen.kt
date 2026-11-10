@@ -74,7 +74,6 @@ import androidx.compose.ui.zIndex
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.people.ContactImportProgress
-import com.emberr.domain.people.personDisplayName
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.settings.SettingsDivider
 import com.emberr.presentation.settings.settingsRowSize
@@ -107,11 +106,36 @@ import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.select_all
 import emberr.shared.generated.resources.trash
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.people_add_people
+import emberr.shared.generated.resources.people_clear_selection
+import emberr.shared.generated.resources.people_create_named
+import emberr.shared.generated.resources.people_create_new_contact
+import emberr.shared.generated.resources.people_deselect_all
+import emberr.shared.generated.resources.people_empty_message
+import emberr.shared.generated.resources.people_empty_title
+import emberr.shared.generated.resources.people_import_contacts
+import emberr.shared.generated.resources.people_import_from_phone
+import emberr.shared.generated.resources.people_import_from_vcf_file
+import emberr.shared.generated.resources.people_move_to_trash
+import emberr.shared.generated.resources.people_new_person
+import emberr.shared.generated.resources.people_next
+import emberr.shared.generated.resources.people_no_one_matches
+import emberr.shared.generated.resources.people_no_upcoming_events
+import emberr.shared.generated.resources.people_search_people
+import emberr.shared.generated.resources.people_select_all
+import emberr.shared.generated.resources.people_selected
+import emberr.shared.generated.resources.people_selected_count
+import emberr.shared.generated.resources.people_title
+import emberr.shared.generated.resources.people_untitled_event
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 
@@ -272,13 +296,13 @@ fun PeopleScreen(
                 .onGloballyPositioned { coordinates -> topAreaHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = if (isSelecting) "$selectedCount selected" else "People",
+                title = if (isSelecting) pluralStringResource(Res.plurals.people_selected_count, selectedCount, selectedCount) else stringResource(Res.string.people_title),
                 titleTrailingIcon = if (isDesktopPlatform && peopleCount > 0 && !isSelecting) peopleCountBadge else null,
                 topEdgeFadeAlpha = topEdgeFadeAlpha,
                 hazeState = hazeState,
                 hazeStyle = EmberrBlur.Regular,
                 contentPadding = topHeaderBarPadding(horizontal = HeaderSidePadding),
-                backTooltip = if (isSelecting) "Clear selection" else "Back",
+                backTooltip = stringResource(if (isSelecting) Res.string.people_clear_selection else Res.string.common_back),
                 onBackClick = if (isSelecting) viewModel::clearSelection else onNavigateBack,
                 actions = {
                     PeopleHeaderActions(
@@ -318,7 +342,7 @@ fun PeopleScreen(
             isVisible = isSelecting && !isDesktopPlatform,
             selectedCount = selectedCount,
             onClearSelection = viewModel::clearSelection,
-            actions = listOf(SelectionPillAction(Res.drawable.trash, "Move to Trash", viewModel::moveSelectedToTrash)),
+            actions = listOf(SelectionPillAction(Res.drawable.trash, stringResource(Res.string.people_move_to_trash), viewModel::moveSelectedToTrash)),
             hazeState = hazeState,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
@@ -355,7 +379,7 @@ private fun PeopleHeaderActions(
     onAddPeople: () -> Unit
 ) {
     if (isSelecting) {
-        val selectAllLabel = if (areAllMatchingSelected) "Deselect all" else "Select all"
+        val selectAllLabel = stringResource(if (areAllMatchingSelected) Res.string.people_deselect_all else Res.string.people_select_all)
         if (isDesktopPlatform) {
             EmberrButtonSecondary(text = selectAllLabel, onClick = onToggleSelectAll)
         } else {
@@ -372,15 +396,16 @@ private fun PeopleHeaderActions(
         }
     } else {
         var isDesktopAddMenuOpen by remember { mutableStateOf(false) }
+        val addPeopleLabel = stringResource(Res.string.people_add_people)
         Box {
             TopBarIconButton(
                 icon = painterResource(Res.drawable.plus),
-                contentDescription = "Add people",
+                contentDescription = addPeopleLabel,
                 bgColor = Color.Transparent,
                 tint = MaterialTheme.colorScheme.primary,
                 hazeState = hazeState,
                 hazeStyle = EmberrBlur.Regular,
-                tooltip = "Add people",
+                tooltip = addPeopleLabel,
                 onClick = { if (isDesktopPlatform) isDesktopAddMenuOpen = true else onAddPeople() }
             )
             if (isDesktopPlatform) {
@@ -403,8 +428,8 @@ private fun AddPeopleDesktopMenu(
     onImportFromFile: () -> Unit
 ) {
     EmberrDesktopMenu(expanded = expanded, onDismissRequest = onDismiss) {
-        AddPeopleDesktopMenuOption(label = "Create new contact", icon = Res.drawable.plus, onClick = { onDismiss(); onCreateNew() })
-        AddPeopleDesktopMenuOption(label = "Import from .vcf file", icon = Res.drawable.file_down, onClick = { onDismiss(); onImportFromFile() })
+        AddPeopleDesktopMenuOption(label = stringResource(Res.string.people_create_new_contact), icon = Res.drawable.plus, onClick = { onDismiss(); onCreateNew() })
+        AddPeopleDesktopMenuOption(label = stringResource(Res.string.people_import_from_vcf_file), icon = Res.drawable.file_down, onClick = { onDismiss(); onImportFromFile() })
     }
 }
 
@@ -431,7 +456,7 @@ private fun BoxScope.PeopleSearch(
         EmberrSearchTextField(
             value = searchText,
             onValueChange = onSearchTextChange,
-            placeholder = "Search people",
+            placeholder = stringResource(Res.string.people_search_people),
             hazeState = hazeState,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             onSubmit = onSubmit,
@@ -446,7 +471,7 @@ private fun BoxScope.PeopleSearch(
     } else {
         EmberrExpandingSearchBar(
             isOpen = isSearchOpen,
-            placeholder = "Search people",
+            placeholder = stringResource(Res.string.people_search_people),
             query = searchText,
             onQueryChange = onSearchTextChange,
             onOpenClick = onOpenSearch,
@@ -579,6 +604,7 @@ private fun PersonListRowItem(
     var showsMenu by remember { mutableStateOf(false) }
     var menuPosition by remember { mutableStateOf(DpOffset.Zero) }
     val name = row.person.title.trim()
+    val shownName = shownPersonName(name)
     val nextDate = row.nextEvent?.let(::eventDate)
 
     Box {
@@ -603,7 +629,7 @@ private fun PersonListRowItem(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = personDisplayName(name),
+                    text = shownName,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = if (name.isEmpty()) mutedTextColor() else MaterialTheme.colorScheme.onSurface,
@@ -613,10 +639,12 @@ private fun PersonListRowItem(
                 val nextEvent = row.nextEvent
                 if (nextEvent != null && nextDate != null) {
                     val onSurface = MaterialTheme.colorScheme.onSurface
+                    val nextLabel = stringResource(Res.string.people_next)
+                    val eventTitle = nextEvent.text.ifBlank { stringResource(Res.string.people_untitled_event) }
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = onSurface)) { append("Next") }
-                            append(" · ${weekdayMonthDay(nextDate, today)} · ${nextEvent.text.ifBlank { "Untitled event" }}")
+                            withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = onSurface)) { append(nextLabel) }
+                            append(" · ${weekdayMonthDay(nextDate, today)} · $eventTitle")
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = secondaryTextColor(),
@@ -625,7 +653,7 @@ private fun PersonListRowItem(
                     )
                 } else {
                     Text(
-                        text = "No upcoming events",
+                        text = stringResource(Res.string.people_no_upcoming_events),
                         style = MaterialTheme.typography.labelSmall,
                         color = mutedTextColor(),
                         maxLines = 1
@@ -652,7 +680,7 @@ private fun PersonListRowItem(
                     )
                 } else {
                     PersonActionsMenu(
-                        personName = personDisplayName(name),
+                        personName = shownName,
                         expanded = showsMenu,
                         onDismiss = { showsMenu = false },
                         onOpen = onOpen,
@@ -662,7 +690,7 @@ private fun PersonListRowItem(
             }
         } else {
             PersonActionsMenu(
-                personName = personDisplayName(name),
+                personName = shownName,
                 expanded = showsMenu,
                 onDismiss = { showsMenu = false },
                 onOpen = onOpen,
@@ -677,7 +705,7 @@ private fun SelectedPeopleDesktopMenu(expanded: Boolean, onDismiss: () -> Unit, 
     val trashColor = MaterialTheme.colorScheme.error
     EmberrDesktopMenu(expanded = expanded, onDismissRequest = onDismiss) {
         EmberrDesktopMenuOption(
-            label = "Move to Trash",
+            label = stringResource(Res.string.people_move_to_trash),
             icon = { Icon(painter = painterResource(Res.drawable.trash), contentDescription = null, tint = trashColor, modifier = Modifier.size(20.dp)) },
             labelColor = trashColor,
             onClick = {
@@ -734,7 +762,7 @@ private fun SelectableAvatar(
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.check),
-                    contentDescription = "Selected",
+                    contentDescription = stringResource(Res.string.people_selected),
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(RowCheckIconSize)
                 )
@@ -754,22 +782,22 @@ private fun PeopleEmptyState(onNewPerson: () -> Unit, onImportContacts: () -> Un
         EmptyStateArt()
         Spacer(modifier = Modifier.height(22.dp))
         Text(
-            text = "No people yet",
+            text = stringResource(Res.string.people_empty_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "Add someone you want to remember things about. People you add to an event show up here too.",
+            text = stringResource(Res.string.people_empty_message),
             style = MaterialTheme.typography.bodyLarge,
             color = secondaryTextColor(),
             textAlign = TextAlign.Center,
             modifier = Modifier.widthIn(max = 320.dp)
         )
         Spacer(modifier = Modifier.height(22.dp))
-        EmberrButtonPrimary(text = "New person", onClick = onNewPerson, modifier = Modifier.widthIn(min = 160.dp))
+        EmberrButtonPrimary(text = stringResource(Res.string.people_new_person), onClick = onNewPerson, modifier = Modifier.widthIn(min = 160.dp))
         Spacer(modifier = Modifier.height(10.dp))
-        EmberrButtonSecondary(text = "Import contacts", onClick = onImportContacts, modifier = Modifier.widthIn(min = 160.dp))
+        EmberrButtonSecondary(text = stringResource(Res.string.people_import_contacts), onClick = onImportContacts, modifier = Modifier.widthIn(min = 160.dp))
     }
 }
 
@@ -801,15 +829,15 @@ private fun AddPeopleSheet(
     onImportFromPhone: (() -> Unit)?,
     onImportFromFile: () -> Unit
 ) {
-    EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "Add people") { closeAnd ->
+    EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = stringResource(Res.string.people_add_people)) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 20.dp)) {
-            AddPeopleOption(label = "Create new contact", icon = Res.drawable.plus, onClick = { closeAnd(onCreateNew) })
+            AddPeopleOption(label = stringResource(Res.string.people_create_new_contact), icon = Res.drawable.plus, onClick = { closeAnd(onCreateNew) })
             if (onImportFromPhone != null) {
-                AddPeopleOption(label = "Import from phone", icon = Res.drawable.phone3, onClick = { closeAnd(onImportFromPhone) })
+                AddPeopleOption(label = stringResource(Res.string.people_import_from_phone), icon = Res.drawable.phone3, onClick = { closeAnd(onImportFromPhone) })
             }
-            AddPeopleOption(label = "Import from .vcf file", icon = Res.drawable.file_down, onClick = { closeAnd(onImportFromFile) })
+            AddPeopleOption(label = stringResource(Res.string.people_import_from_vcf_file), icon = Res.drawable.file_down, onClick = { closeAnd(onImportFromFile) })
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
             )
@@ -890,12 +918,12 @@ private fun PeopleNoResults(query: String, onCreate: () -> Unit, modifier: Modif
             modifier = Modifier.size(28.dp)
         )
         Text(
-            text = "No one matches “$query”",
+            text = stringResource(Res.string.people_no_one_matches, query),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
-        EmberrButtonSecondary(text = "Create “$query”", onClick = onCreate)
+        EmberrButtonSecondary(text = stringResource(Res.string.people_create_named, query), onClick = onCreate)
     }
 }

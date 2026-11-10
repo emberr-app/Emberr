@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">People</string>
+    <string name="people_clear_selection">Clear selection</string>
+    <string name="people_select_all">Select all</string>
+    <string name="people_deselect_all">Deselect all</string>
+    <string name="people_add_people">Add people</string>
+    <string name="people_create_new_contact">Create new contact</string>
+    <string name="people_import_from_vcf_file">Import from .vcf file</string>
+    <string name="people_import_from_phone">Import from phone</string>
+    <string name="people_search_people">Search people</string>
+    <string name="people_move_to_trash">Move to Trash</string>
+    <string name="people_next">Next</string>
+    <string name="people_untitled_event">Untitled event</string>
+    <string name="people_no_upcoming_events">No upcoming events</string>
+    <string name="people_selected">Selected</string>
+    <string name="people_empty_title">No people yet</string>
+    <string name="people_empty_message">Add someone you want to remember things about. People you add to an event show up here too.</string>
+    <string name="people_new_person">New person</string>
+    <string name="people_import_contacts">Import contacts</string>
+    <string name="people_no_one_matches">No one matches “%1$s”</string>
+    <string name="people_create_named">Create “%1$s”</string>
+    <plurals name="people_selected_count">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="one">%1$d person</item>
+        <item quantity="other">%1$d people</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="one">%1$d event</item>
+        <item quantity="other">%1$d events</item>
+    </plurals>
+
+    <string name="people_importing_contacts">Importing contacts…</string>
+    <string name="people_importing_contacts_progress">Importing contacts… %1$d of %2$d</string>
+    <string name="people_already_importing_contacts">Already importing contacts</string>
+    <string name="people_could_not_read_file">Couldn't read the file</string>
+    <string name="people_could_not_read_contact">Couldn't read the contact</string>
+    <string name="people_no_contacts_app_found">No contacts app found</string>
+    <string name="people_choose_contact_files">Choose Contact Files</string>
+    <string name="people_no_contacts_found">No contacts found</string>
+    <string name="people_could_not_add_contacts">Couldn't add the contacts</string>
+    <string name="people_already_in_people">Already in People</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="one">All %1$d are already in People</item>
+        <item quantity="other">All %1$d are already in People</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="one">Added %1$d person</item>
+        <item quantity="other">Added %1$d people</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="one">skipped %1$d already in People</item>
+        <item quantity="other">skipped %1$d already in People</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="one">couldn't add %1$d</item>
+        <item quantity="other">couldn't add %1$d</item>
+    </plurals>
+    <string name="people_could_not_create_person">Couldn't create the person</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="one">Moved %1$d people to Trash</item>
+        <item quantity="other">Moved %1$d people to Trash</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="one">Moved %1$d of %2$d people to Trash</item>
+        <item quantity="other">Moved %1$d of %2$d people to Trash</item>
+    </plurals>
+    <string name="people_could_not_save_detail">Couldn't save the detail</string>
+    <string name="people_could_not_remove_detail">Couldn't remove the detail</string>
+
+    <string name="people_meta_next_and_last_seen">Next on %1$s · last seen %2$s</string>
+    <string name="people_meta_next">Next on %1$s</string>
+    <string name="people_meta_last_seen">Last seen %1$s</string>
+    <string name="people_meta_no_events">No events yet</string>
+    <string name="people_birthday_with_age">%1$s, %2$d · turns %3$d</string>
+    <string name="people_all_day">All day</string>
+    <string name="people_event_with_names">with %1$s</string>
+
+    <string name="people_copied">Copied</string>
+    <string name="people_could_not_copy">Couldn't copy</string>
+    <string name="people_could_not_open_link">Couldn't open the link</string>
+    <string name="people_write_anything_about">Write anything about %1$s…</string>
+    <string name="people_write_anything_about_them">Write anything about them…</string>
+    <string name="people_notes">Notes</string>
+    <string name="people_remove_icon">Remove icon</string>
+    <string name="people_change_icon">Change icon</string>
+    <string name="people_change_photo">Change photo</string>
+    <string name="people_remove_photo">Remove photo</string>
+    <string name="people_open">Open</string>
+    <string name="people_more">More</string>
+    <string name="people_call">Call</string>
+    <string name="people_message">Message</string>
+    <string name="people_email">Email</string>
+    <string name="people_write_email">Write email</string>
+    <string name="people_copy">Copy</string>
+    <string name="people_new_event">New event</string>
+    <string name="people_name">Name</string>
+
+    <string name="people_details">Details</string>
+    <string name="people_more_details">More details</string>
+    <string name="people_upcoming">Upcoming</string>
+    <string name="people_nothing_planned_with">Nothing planned with %1$s</string>
+    <string name="people_nothing_planned_with_them">Nothing planned with them</string>
+    <string name="people_past">Past</string>
+    <string name="people_no_past_events">No past events</string>
+    <string name="people_show_fewer">Show fewer</string>
+    <string name="people_show_all_count">Show all %1$d</string>
+
+    <string name="people_detail_phone">Phone</string>
+    <string name="people_detail_email">Email</string>
+    <string name="people_detail_birthday">Birthday</string>
+    <string name="people_detail_address">Address</string>
+    <string name="people_detail_company">Company</string>
+    <string name="people_detail_role">Role</string>
+    <string name="people_detail_website">Website</string>
+    <string name="people_detail_social">Social</string>
+    <string name="people_detail_relationship">Relationship</string>
+    <string name="people_detail_custom">Custom</string>
+    <string name="people_add_phone">Add phone</string>
+    <string name="people_add_email">Add email</string>
+    <string name="people_add_birthday">Add birthday</string>
+    <string name="people_add_address">Add address</string>
+    <string name="people_add_company">Add company</string>
+    <string name="people_add_role">Add role</string>
+    <string name="people_add_website">Add website</string>
+    <string name="people_add_social">Add social</string>
+    <string name="people_add_relationship">Add relationship</string>
+    <string name="people_add_custom">Add custom</string>
+    <string name="people_edit_phone">Edit phone</string>
+    <string name="people_edit_email">Edit email</string>
+    <string name="people_edit_birthday">Edit birthday</string>
+    <string name="people_edit_address">Edit address</string>
+    <string name="people_edit_company">Edit company</string>
+    <string name="people_edit_role">Edit role</string>
+    <string name="people_edit_website">Edit website</string>
+    <string name="people_edit_social">Edit social</string>
+    <string name="people_edit_relationship">Edit relationship</string>
+    <string name="people_edit_custom">Edit custom</string>
+
+    <string name="people_placeholder_phone_number">Phone number</string>
+    <string name="people_placeholder_address">Street, area, city</string>
+    <string name="people_placeholder_company">Where they work</string>
+    <string name="people_placeholder_role">What they do</string>
+    <string name="people_placeholder_relationship">Friend from college</string>
+    <string name="people_placeholder_custom">Anything</string>
+
+    <string name="people_add_detail">Add detail</string>
+    <string name="people_already_added">Already added</string>
+    <string name="people_remove">Remove</string>
+    <string name="people_cannot_be_empty">This can’t be empty</string>
+    <string name="people_custom_label">Custom label</string>
+    <string name="people_custom_label_placeholder">Custom Label</string>
+    <string name="people_label_optional">Label (optional)</string>
+    <string name="people_birthday_month">Month</string>
+    <string name="people_birthday_day">Day</string>
+    <string name="people_birthday_year">Year</string>
+    <string name="people_birthday_optional">optional</string>
+    <string name="people_birthday_year_example">e.g. 1996</string>
+    <string name="people_birthday_date_not_in_year">%1$s isn’t in %2$s</string>
+    <string name="people_birthday_year_range">Use a year from %1$d to %2$d</string>
+</resources>

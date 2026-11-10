@@ -1,5 +1,6 @@
 package com.emberr.presentation.people
 
+import androidx.compose.runtime.Composable
 import com.emberr.domain.model.PersonDetailBlock
 import com.emberr.domain.model.PersonDetailKind
 import com.emberr.domain.people.PersonBirthday
@@ -7,7 +8,15 @@ import com.emberr.domain.people.readPersonBirthday
 import com.emberr.domain.people.toIsoText
 import com.emberr.domain.util.system.deviceRegionCode
 import com.emberr.presentation.shared.editor.links.toOpenableWebLink
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.people_placeholder_address
+import emberr.shared.generated.resources.people_placeholder_company
+import emberr.shared.generated.resources.people_placeholder_custom
+import emberr.shared.generated.resources.people_placeholder_phone_number
+import emberr.shared.generated.resources.people_placeholder_relationship
+import emberr.shared.generated.resources.people_placeholder_role
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.stringResource
 
 internal const val EARLIEST_BIRTH_YEAR = 1900
 private const val YEAR_DIGITS = 4
@@ -24,19 +33,21 @@ fun labelChoices(kind: PersonDetailKind): List<String> = when (kind) {
     else -> emptyList()
 }
 
+@Composable
 fun valuePlaceholder(kind: PersonDetailKind): String = when (kind) {
-    PersonDetailKind.PHONE -> phonePlaceholder(deviceRegionCode())
+    PersonDetailKind.PHONE -> phonePlaceholder(deviceRegionCode()) ?: stringResource(Res.string.people_placeholder_phone_number)
     PersonDetailKind.EMAIL -> "name@example.com"
     PersonDetailKind.BIRTHDAY -> ""
-    PersonDetailKind.ADDRESS -> "Street, area, city"
-    PersonDetailKind.COMPANY -> "Where they work"
-    PersonDetailKind.ROLE -> "What they do"
+    PersonDetailKind.ADDRESS -> stringResource(Res.string.people_placeholder_address)
+    PersonDetailKind.COMPANY -> stringResource(Res.string.people_placeholder_company)
+    PersonDetailKind.ROLE -> stringResource(Res.string.people_placeholder_role)
     PersonDetailKind.WEBSITE -> "example.com"
     PersonDetailKind.SOCIAL -> "@handle"
-    PersonDetailKind.RELATIONSHIP -> "Friend from college"
-    PersonDetailKind.CUSTOM -> "Anything"
+    PersonDetailKind.RELATIONSHIP -> stringResource(Res.string.people_placeholder_relationship)
+    PersonDetailKind.CUSTOM -> stringResource(Res.string.people_placeholder_custom)
 }
 
+@Composable
 fun shownDetailValue(detail: PersonDetailBlock, today: LocalDate): String =
     if (detail.kind == PersonDetailKind.BIRTHDAY) {
         readPersonBirthday(detail.value)?.let { birthday -> birthdayText(birthday, today) } ?: detail.value

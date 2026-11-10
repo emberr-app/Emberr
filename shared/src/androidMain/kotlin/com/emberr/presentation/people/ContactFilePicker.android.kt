@@ -8,9 +8,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import com.emberr.domain.util.system.showNativeToast
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.people_could_not_read_file
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
 
 private val contactFileMimeTypes = arrayOf("text/vcard", "text/x-vcard", "text/directory")
 
@@ -32,7 +35,7 @@ actual fun rememberContactFilePicker(onFilesRead: (List<ByteArray>) -> Unit): ()
                     }
                 }
             }
-            if (fileContents.isEmpty()) showNativeToast("Couldn't read the file") else latestOnFilesRead(fileContents)
+            if (fileContents.isEmpty()) showNativeToast(getString(Res.string.people_could_not_read_file)) else latestOnFilesRead(fileContents)
         }
     }
     return { launcher.launch(contactFileMimeTypes) }

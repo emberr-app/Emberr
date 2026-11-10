@@ -25,11 +25,11 @@ class PersonDetailValuesTest {
     }
 
     @Test
-    fun phonePlaceholderShowsTheRegionsCallingCodeOrPlainWords() {
+    fun phonePlaceholderShowsTheRegionsCallingCodeOrNothing() {
         assertEquals("+91", phonePlaceholder("IN"))
         assertEquals("+1", phonePlaceholder("us"))
-        assertEquals("Phone number", phonePlaceholder(null))
-        assertEquals("Phone number", phonePlaceholder("ZZ"))
+        assertNull(phonePlaceholder(null))
+        assertNull(phonePlaceholder("ZZ"))
     }
 
     @Test

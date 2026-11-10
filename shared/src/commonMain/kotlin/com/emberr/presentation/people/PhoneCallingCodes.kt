@@ -1,10 +1,8 @@
 package com.emberr.presentation.people
 
-private const val PHONE_PLACEHOLDER_WITHOUT_REGION = "Phone number"
-
-fun phonePlaceholder(regionCode: String?): String {
+fun phonePlaceholder(regionCode: String?): String? {
     val callingCode = regionCode?.uppercase()?.let { callingCodesByRegion[it] }
-    return callingCode?.let { "+$it" } ?: PHONE_PLACEHOLDER_WITHOUT_REGION
+    return callingCode?.let { "+$it" }
 }
 
 private val callingCodesByRegion: Map<String, String> = mapOf(
