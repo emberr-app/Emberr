@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_name_inbox">Inbox</string>
+    <string name="saved_name_others_folder">Overige</string>
+    <string name="saved_name_personal_space">Persoonlijk</string>
+    <string name="saved_name_new_chat">Nieuwe chat</string>
+    <string name="saved_name_canvas_group">Groep</string>
+    <string name="saved_name_unknown_link">Onbekende link</string>
+    <string name="saved_name_loading_preview">Voorbeeld laden...</string>
+    <string name="saved_name_numbered_view">%1$s %2$d</string>
+    <string name="saved_name_view_copy">%1$s kopie</string>
+    <string name="saved_name_label_mobile">Mobiel</string>
+    <string name="saved_name_label_home">Thuis</string>
+    <string name="saved_name_label_work">Werk</string>
+    <string name="saved_name_label_main">Hoofd</string>
+    <string name="saved_name_label_personal">Persoonlijk</string>
+    <string name="saved_name_label_portfolio">Portfolio</string>
+    <string name="saved_name_label_blog">Blog</string>
+    <string name="saved_name_label_anniversary">Jubileum</string>
+    <string name="saved_name_label_date">Datum</string>
+    <string name="saved_name_label_nickname">Bijnaam</string>
+    <string name="saved_name_label_birthday">Verjaardag</string>
+</resources>

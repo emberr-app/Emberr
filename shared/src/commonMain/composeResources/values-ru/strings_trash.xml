@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Корзина пуста</string>
+    <string name="trash_title">Корзина</string>
+    <string name="trash_empty_trash">Очистить корзину</string>
+    <string name="trash_empty_trash_tooltip">Очистить корзину</string>
+    <string name="trash_restore_note">Восстановить заметку</string>
+    <string name="trash_delete_permanently">Удалить навсегда</string>
+    <string name="trash_manage_note">Управление заметкой</string>
+    <string name="trash_manage_note_subtitle">Заметки в корзине автоматически удаляются через 30 дней.</string>
+    <string name="trash_empty_trash_question">Очистить корзину?</string>
+    <string name="trash_empty_trash_subtitle">Все заметки в корзине будут удалены навсегда. Это действие нельзя отменить.</string>
+</resources>

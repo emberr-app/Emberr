@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Імпорт з</string>
+    <string name="import_text_and_markdown">Текст і Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Також підходить для нотаток Obsidian і Bear.\nДеякі функції Obsidian можуть імпортуватися не повністю.</string>
+
+    <string name="import_button">Імпортувати</string>
+    <string name="import_done">Готово</string>
+    <string name="import_stop">Зупинити імпорт</string>
+    <string name="import_or_drop_here">або перетягніть сюди</string>
+    <string name="import_choose_again_hint_desktop">Натисніть, щоб вибрати знову, або перетягніть сюди.</string>
+    <string name="import_choose_again_hint_touch">Торкніться, щоб вибрати знову.</string>
+    <string name="import_stopping">Зупинення й видалення імпортованого…</string>
+    <string name="import_stopped">Імпорт зупинено</string>
+    <string name="import_nothing_added">Нічого не додано.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="one">%1$d простір</item>
+        <item quantity="few">%1$d простори</item>
+        <item quantity="many">%1$d просторів</item>
+        <item quantity="other">%1$d простору</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="one">%1$d нотатка</item>
+        <item quantity="few">%1$d нотатки</item>
+        <item quantity="many">%1$d нотаток</item>
+        <item quantity="other">%1$d нотатки</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="one">%1$d папка</item>
+        <item quantity="few">%1$d папки</item>
+        <item quantity="many">%1$d папок</item>
+        <item quantity="other">%1$d папки</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="one">%1$d вкладення</item>
+        <item quantity="few">%1$d вкладення</item>
+        <item quantity="many">%1$d вкладень</item>
+        <item quantity="other">%1$d вкладення</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Імпортуйте резервну копію, не замінюючи поточні нотатки.</string>
+    <string name="import_emberr_copying_media">Копіювання медіафайлів: %1$d з %2$d…</string>
+    <string name="import_emberr_getting_ready">Підготовка…</string>
+    <string name="import_emberr_saving">Збереження імпорту…</string>
+    <string name="import_emberr_failed">Не вдалося імпортувати</string>
+    <string name="import_emberr_choose_backup_file">Виберіть файл резервної копії</string>
+    <string name="import_emberr_choose_backup_hint">Файл .emberr з «Експорт резервної копії»</string>
+    <string name="import_emberr_reading_backup">Читання резервної копії…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Вибрати інший файл</string>
+    <string name="import_emberr_spaces_to_import">Простори для імпорту</string>
+    <string name="import_emberr_choose_backup_first">Спочатку виберіть резервну копію</string>
+    <string name="import_emberr_daily_notes">Щоденні нотатки</string>
+    <string name="import_emberr_calendar">Календар</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Щоденні нотатки й події календаря додано</string>
+    <string name="import_emberr_added_daily_notes">Щоденні нотатки додано</string>
+    <string name="import_emberr_added_calendar">Події календаря додано</string>
+    <string name="import_emberr_finished">Імпорт завершено</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="one">Імпортовано %1$d простір</item>
+        <item quantity="few">Імпортовано %1$d простори</item>
+        <item quantity="many">Імпортовано %1$d просторів</item>
+        <item quantity="other">Імпортовано %1$d простору</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">Не вдалося знайти в резервній копії %1$d медіафайл, тому він показуватиметься як відсутній.</item>
+        <item quantity="few">Не вдалося знайти в резервній копії %1$d медіафайли, тому вони показуватимуться як відсутні.</item>
+        <item quantity="many">Не вдалося знайти в резервній копії %1$d медіафайлів, тому вони показуватимуться як відсутні.</item>
+        <item quantity="other">Не вдалося знайти в резервній копії %1$d медіафайлу, тому вони показуватимуться як відсутні.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Невідома помилка</string>
+    <string name="import_emberr_picker_title">Виберіть резервну копію Emberr</string>
+
+    <string name="import_markdown_subtitle">Перетворюйте файли .md, .txt і .canvas або .zip з папками на нотатки Emberr.</string>
+    <string name="import_markdown_copying_file">Копіювання %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">Імпорт нотаток: %1$d з %2$d…</item>
+        <item quantity="few">Імпорт нотаток: %1$d з %2$d…</item>
+        <item quantity="many">Імпорт нотаток: %1$d з %2$d…</item>
+        <item quantity="other">Імпорт нотаток: %1$d з %2$d…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Виберіть файли або .zip</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas або .zip</string>
+    <string name="import_markdown_reading_files">Читання файлів…</string>
+    <string name="import_markdown_could_not_read">Не вдалося прочитати ці файли. %1$s</string>
+    <string name="import_markdown_save_to_space">Зберегти в простір</string>
+    <string name="import_markdown_import_as">Імпортувати як</string>
+    <string name="import_markdown_emberr_notes">Нотатки Emberr</string>
+    <string name="import_markdown_emberr_notes_subtitle">Кожен файл стає нотаткою з блоків.</string>
+    <string name="import_markdown_markdown_files">Файли Markdown</string>
+    <string name="import_markdown_coming_soon">Незабаром</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="one">Імпортовано %1$d нотатку</item>
+        <item quantity="few">Імпортовано %1$d нотатки</item>
+        <item quantity="many">Імпортовано %1$d нотаток</item>
+        <item quantity="other">Імпортовано %1$d нотатки</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="one">Імпортовано %1$d нотатку в %2$s</item>
+        <item quantity="few">Імпортовано %1$d нотатки в %2$s</item>
+        <item quantity="many">Імпортовано %1$d нотаток в %2$s</item>
+        <item quantity="other">Імпортовано %1$d нотатки в %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">Не вдалося імпортувати %1$d: %2$s</string>
+    <string name="import_markdown_choose_folder">Виберіть папку</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d файл</item>
+        <item quantity="few">%1$d файли</item>
+        <item quantity="many">%1$d файлів</item>
+        <item quantity="other">%1$d файлу</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">Пропущено %1$d: %2$s</string>
+    <string name="import_markdown_choose_different_files">Вибрати інші файли</string>
+    <string name="import_markdown_picker_title">Виберіть файли для імпорту</string>
+</resources>

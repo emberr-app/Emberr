@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="canvas_options">Opties</string>
+    <string name="canvas_more_options">Meer opties</string>
+    <string name="canvas_rename">Naam wijzigen</string>
+    <string name="canvas_open_as_sticky_note">Openen als plaknotitie</string>
+    <string name="canvas_move_to_trash">Naar prullenbak</string>
+    <string name="canvas_add_to_favorites">Toevoegen aan Favorieten</string>
+    <string name="canvas_remove_from_favorites">Verwijderen uit Favorieten</string>
+    <string name="canvas_sheet_title">Canvas</string>
+    <string name="canvas_rename_canvas">Naam van canvas wijzigen</string>
+    <string name="canvas_title_placeholder">Titel van canvas...</string>
+    <string name="canvas_untitled_canvas">Naamloos canvas</string>
+
+    <string name="canvas_shapes">Vormen</string>
+    <string name="canvas_shape_rectangle">Rechthoek</string>
+    <string name="canvas_shape_square">Vierkant</string>
+    <string name="canvas_shape_circle">Cirkel</string>
+    <string name="canvas_shape_oval">Ovaal</string>
+    <string name="canvas_shape_triangle">Driehoek</string>
+    <string name="canvas_shape_diamond">Ruit</string>
+    <string name="canvas_shape_pentagon">Vijfhoek</string>
+    <string name="canvas_shape_hexagon">Zeshoek</string>
+    <string name="canvas_shape_parallelogram">Parallellogram</string>
+    <string name="canvas_shape_trapezoid">Trapezium</string>
+    <string name="canvas_shape_pill">Pil</string>
+    <string name="canvas_shape_database">Database</string>
+    <string name="canvas_shape_double_rectangle">Dubbele rechthoek</string>
+    <string name="canvas_shape_double_square">Dubbel vierkant</string>
+    <string name="canvas_shape_double_circle">Dubbele cirkel</string>
+    <string name="canvas_shape_double_triangle">Dubbele driehoek</string>
+
+    <string name="canvas_clear">Wissen</string>
+    <string name="canvas_zoom_in">Inzoomen</string>
+    <string name="canvas_zoom_out">Uitzoomen</string>
+    <string name="canvas_go_to_boxes">Naar vakken gaan</string>
+    <string name="canvas_undo">Ongedaan maken</string>
+    <string name="canvas_redo">Opnieuw</string>
+
+    <string name="canvas_tool_pen">Pen</string>
+    <string name="canvas_tool_highlighter">Markeerstift</string>
+    <string name="canvas_tool_eraser">Gum</string>
+    <string name="canvas_tool_text">Tekst</string>
+    <string name="canvas_tool_shapes">Vormen</string>
+    <string name="canvas_tool_line">Lijn</string>
+    <string name="canvas_tool_image">Afbeelding</string>
+
+    <string name="canvas_default_ink">Standaardinkt</string>
+    <string name="canvas_no_background">Geen achtergrond</string>
+    <string name="canvas_stroke">Lijn</string>
+    <string name="canvas_stroke_width">Lijndikte</string>
+    <string name="canvas_pressure">Druk</string>
+    <string name="canvas_same_thickness">Gelijke dikte</string>
+    <string name="canvas_follow_pressure">Druk volgen</string>
+    <string name="canvas_opacity">Dekking</string>
+    <string name="canvas_size">Grootte</string>
+    <string name="canvas_font">Lettertype</string>
+    <string name="canvas_weight">Gewicht</string>
+    <string name="canvas_color">Kleur</string>
+    <string name="canvas_background">Achtergrond</string>
+    <string name="canvas_align">Uitlijnen</string>
+    <string name="canvas_line">Lijn</string>
+    <string name="canvas_line_style">Lijnstijl</string>
+
+    <string name="canvas_width_thin">Dun</string>
+    <string name="canvas_width_medium">Middel</string>
+    <string name="canvas_width_thick">Dik</string>
+    <string name="canvas_size_small">Klein</string>
+    <string name="canvas_size_medium">Middel</string>
+    <string name="canvas_size_large">Groot</string>
+    <string name="canvas_weight_regular">Normaal</string>
+    <string name="canvas_weight_medium">Medium</string>
+    <string name="canvas_weight_bold">Vet</string>
+    <string name="canvas_font_default">Standaard</string>
+    <string name="canvas_align_left">Links uitlijnen</string>
+    <string name="canvas_align_center">Centreren</string>
+    <string name="canvas_align_right">Rechts uitlijnen</string>
+
+    <string name="canvas_line_arrow">Pijl</string>
+    <string name="canvas_line_dotted_arrow">Gestippelde pijl</string>
+    <string name="canvas_line_dashed_arrow">Gestreepte pijl</string>
+    <string name="canvas_line_solid_line">Doorgetrokken lijn</string>
+    <string name="canvas_line_dotted_line">Gestippelde lijn</string>
+    <string name="canvas_line_dashed_line">Gestreepte lijn</string>
+
+    <string name="canvas_show_dots">Stippen tonen</string>
+    <string name="canvas_hide_dots">Stippen verbergen</string>
+    <string name="canvas_full_screen">Volledig scherm</string>
+    <string name="canvas_exit_full_screen">Volledig scherm sluiten</string>
+
+    <string name="canvas_delete_box">Vak verwijderen</string>
+    <string name="canvas_box_color">Kleur van vak</string>
+    <string name="canvas_paste_image">Afbeelding plakken</string>
+    <string name="canvas_adding_image">Afbeelding toevoegen...</string>
+    <string name="canvas_add_label">Label toevoegen</string>
+    <string name="canvas_edit_label">Label bewerken</string>
+    <string name="canvas_ungroup">Groep opheffen</string>
+    <string name="canvas_create_group">Groep maken</string>
+
+    <string name="canvas_image">Canvasafbeelding</string>
+    <string name="canvas_image_failed_to_download">Afbeelding downloaden mislukt</string>
+    <string name="canvas_downloading_image">Afbeelding downloaden...</string>
+</resources>

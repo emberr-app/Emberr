@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Bereiche</string>
+    <string name="space_create_space">Bereich erstellen</string>
+    <string name="space_rename_space">Bereich umbenennen</string>
+    <string name="space_delete_space">Bereich löschen</string>
+    <string name="space_new_space">Neuer Bereich</string>
+    <string name="space_new_space_subtitle">Arbeit, Privat, was immer du möchtest.</string>
+    <string name="space_name_placeholder">Name des Bereichs...</string>
+    <string name="space_rename_subtitle">Wähle einen neuen Namen.</string>
+    <string name="space_delete_space_question">„%1$s“ löschen?</string>
+    <string name="space_delete_space_message">Alle Notizen, Ordner, Tags und Chats in diesem Bereich werden mit gelöscht. Das kann nicht rückgängig gemacht werden.</string>
+    <string name="space_reorder_space">Bereich verschieben</string>
+</resources>

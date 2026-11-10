@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Aufgaben</string>
+    <string name="overview_section_bookmarks">Lesezeichen</string>
+    <string name="overview_section_images">Bilder</string>
+    <string name="overview_section_documents">Dokumente</string>
+    <string name="overview_tasks_repeating">Wiederkehrend</string>
+    <string name="overview_tasks_note">Notiz</string>
+    <string name="overview_tasks_today">Heute</string>
+    <string name="overview_tasks_tomorrow">Morgen</string>
+    <string name="overview_tasks_yesterday">Gestern</string>
+    <string name="overview_tasks_none_completed">Noch keine erledigten Aufgaben.</string>
+    <string name="overview_tasks_all_caught_up">Alles erledigt!</string>
+    <string name="overview_tasks_completed">Erledigt</string>
+    <string name="overview_tasks_completed_tasks">Erledigte Aufgaben</string>
+    <string name="overview_tasks_hide_completed">Erledigte ausblenden</string>
+    <string name="overview_tasks_show_completed">Erledigte anzeigen</string>
+    <string name="overview_tasks_add_task_description">Aufgabe hinzufügen</string>
+    <string name="overview_tasks_add_task">Aufgabe hinzufügen</string>
+    <string name="overview_images_empty">Noch keine Bilder gespeichert.</string>
+    <string name="overview_images_add_image_description">Bild hinzufügen</string>
+    <string name="overview_images_add_image">Bild hinzufügen</string>
+    <string name="overview_documents_empty">Noch keine Dokumente angehängt.</string>
+    <string name="overview_documents_add_document_description">Dokument hinzufügen</string>
+    <string name="overview_documents_add_document">Dokument hinzufügen</string>
+    <string name="overview_bookmarks_empty">Noch keine gespeicherten Links.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Lesezeichen hinzufügen</string>
+    <string name="overview_bookmarks_add_bookmark">Lesezeichen hinzufügen</string>
+    <string name="overview_bookmarks_add_link">Link hinzufügen</string>
+    <string name="overview_bookmarks_paste_link">Link einfügen...</string>
+    <string name="overview_bookmarks_clear_link">Link löschen</string>
+    <string name="overview_bookmarks_all">Alle</string>
+    <string name="overview_bookmarks_others">Sonstige</string>
+</resources>

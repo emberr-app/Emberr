@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Задачи</string>
+    <string name="overview_section_bookmarks">Закладки</string>
+    <string name="overview_section_images">Изображения</string>
+    <string name="overview_section_documents">Документы</string>
+    <string name="overview_tasks_repeating">Повторяющиеся</string>
+    <string name="overview_tasks_note">Заметка</string>
+    <string name="overview_tasks_today">Сегодня</string>
+    <string name="overview_tasks_tomorrow">Завтра</string>
+    <string name="overview_tasks_yesterday">Вчера</string>
+    <string name="overview_tasks_none_completed">Выполненных задач пока нет.</string>
+    <string name="overview_tasks_all_caught_up">Всё сделано!</string>
+    <string name="overview_tasks_completed">Выполнено</string>
+    <string name="overview_tasks_completed_tasks">Выполненные задачи</string>
+    <string name="overview_tasks_hide_completed">Скрыть выполненные</string>
+    <string name="overview_tasks_show_completed">Показать выполненные</string>
+    <string name="overview_tasks_add_task_description">Добавить задачу</string>
+    <string name="overview_tasks_add_task">Добавить задачу</string>
+    <string name="overview_images_empty">Сохранённых изображений пока нет.</string>
+    <string name="overview_images_add_image_description">Добавить изображение</string>
+    <string name="overview_images_add_image">Добавить изображение</string>
+    <string name="overview_documents_empty">Прикреплённых документов пока нет.</string>
+    <string name="overview_documents_add_document_description">Добавить документ</string>
+    <string name="overview_documents_add_document">Добавить документ</string>
+    <string name="overview_bookmarks_empty">Сохранённых ссылок пока нет.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Добавить закладку</string>
+    <string name="overview_bookmarks_add_bookmark">Добавить закладку</string>
+    <string name="overview_bookmarks_add_link">Добавить ссылку</string>
+    <string name="overview_bookmarks_paste_link">Вставьте ссылку...</string>
+    <string name="overview_bookmarks_clear_link">Очистить ссылку</string>
+    <string name="overview_bookmarks_all">Все</string>
+    <string name="overview_bookmarks_others">Другие</string>
+</resources>

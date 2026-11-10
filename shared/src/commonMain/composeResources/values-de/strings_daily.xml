@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">Zeitleiste</string>
+    <string name="daily_close_timeline">Zeitleiste schließen</string>
+    <string name="daily_open_timeline">Zeitleiste öffnen</string>
+    <string name="daily_search_the_timeline">Zeitleiste durchsuchen</string>
+    <string name="daily_previous_match">Vorheriger Treffer</string>
+    <string name="daily_next_match">Nächster Treffer</string>
+    <string name="daily_nothing_on_this_day_yet">An diesem Tag noch nichts.</string>
+    <string name="daily_nothing_written_yet">Noch nichts geschrieben.</string>
+    <string name="daily_code">Code</string>
+    <string name="daily_today">Heute</string>
+    <string name="daily_tomorrow">Morgen</string>
+    <string name="daily_yesterday">Gestern</string>
+    <string name="daily_go_to_today">Zu heute</string>
+    <string name="daily_previous_month">Vorheriger Monat</string>
+    <string name="daily_next_month">Nächster Monat</string>
+    <string name="daily_previous">Zurück</string>
+    <string name="daily_next">Weiter</string>
+    <string name="daily_open_calendar">Kalender öffnen</string>
+    <string name="daily_calendar">Kalender</string>
+    <string name="daily_settings">Einstellungen</string>
+    <string name="daily_more_settings">Weitere Einstellungen</string>
+    <string name="daily_click_to_write_your_thoughts">Klicke, um deine Gedanken aufzuschreiben</string>
+    <string name="daily_tap_to_write_your_thoughts">Tippe, um deine Gedanken aufzuschreiben</string>
+</resources>

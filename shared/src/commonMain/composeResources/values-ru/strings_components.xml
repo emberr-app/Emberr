@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">Очистить</string>
+    <string name="components_select_all">Выбрать все</string>
+    <string name="components_spaces_none_yet">Пока нет</string>
+    <string name="components_spaces_none">Нет</string>
+    <plurals name="components_spaces_all">
+        <item quantity="one">Все %1$d пространство</item>
+        <item quantity="few">Все %1$d пространства</item>
+        <item quantity="many">Все %1$d пространств</item>
+        <item quantity="other">Все %1$d пространства</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="one">%1$d из %2$d пространства</item>
+        <item quantity="few">%1$d из %2$d пространств</item>
+        <item quantity="many">%1$d из %2$d пространств</item>
+        <item quantity="other">%1$d из %2$d пространства</item>
+    </plurals>
+
+    <string name="components_search_notes">Поиск заметок...</string>
+    <string name="components_create_new_note">Создать заметку</string>
+    <string name="components_new_named_note">Новая заметка «%1$s»</string>
+    <string name="components_note_picker_hint">Начните вводить для поиска или создайте новую заметку</string>
+    <string name="components_link_to_note_heading">ССЫЛКА НА ЗАМЕТКУ</string>
+    <string name="components_link_to_note">Ссылка на заметку</string>
+
+    <string name="components_load_more">Загрузить ещё</string>
+    <string name="components_show_sidebar">Показать боковую панель</string>
+    <string name="components_clear_search">Очистить поиск</string>
+
+    <string name="components_people_search_placeholder">Найдите или добавьте человека</string>
+    <string name="components_people_create_failed">Не удалось создать человека</string>
+    <string name="components_people_type_name_hint">Введите имя, чтобы добавить человека</string>
+    <string name="components_people_add_people">Добавить людей</string>
+    <string name="components_people_selected">Выбрано</string>
+    <string name="components_people_create_named">Создать «%1$s»</string>
+    <string name="components_people_remove">Убрать</string>
+    <string name="components_people_remove_named">Убрать %1$s</string>
+
+    <string name="components_reminder_later_today">Позже сегодня</string>
+    <string name="components_reminder_tomorrow">Завтра</string>
+    <string name="components_reminder_this_weekend">В эти выходные</string>
+    <string name="components_reminder_next_week">На следующей неделе</string>
+    <string name="components_reminder_custom_date">Выбрать дату...</string>
+    <string name="components_reminder_remove">Удалить напоминание</string>
+    <string name="components_reminder_date">Дата</string>
+    <string name="components_reminder_all_day">Весь день</string>
+    <string name="components_reminder_in_15_mins">Через 15 мин</string>
+    <string name="components_reminder_in_1_hour">Через 1 час</string>
+    <string name="components_reminder_in_3_hours">Через 3 часа</string>
+    <string name="components_reminder_this_evening">Сегодня вечером</string>
+    <string name="components_reminder_custom_time">Выбрать время...</string>
+    <string name="components_reminder_time">Время</string>
+    <string name="components_choose_month_or_year">Выбрать месяц или год</string>
+    <string name="components_previous_month">Предыдущий месяц</string>
+    <string name="components_next_month">Следующий месяц</string>
+    <string name="components_select_date">Выберите дату</string>
+    <string name="components_month_and_year">Месяц и год</string>
+    <string name="components_select_time">Выберите время</string>
+</resources>

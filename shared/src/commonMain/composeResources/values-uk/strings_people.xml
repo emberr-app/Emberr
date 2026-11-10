@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">Люди</string>
+    <string name="people_clear_selection">Скасувати вибір</string>
+    <string name="people_select_all">Вибрати всіх</string>
+    <string name="people_deselect_all">Зняти вибір з усіх</string>
+    <string name="people_add_people">Додати людей</string>
+    <string name="people_create_new_contact">Створити новий контакт</string>
+    <string name="people_import_from_vcf_file">Імпорт із файлу .vcf</string>
+    <string name="people_import_from_phone">Імпорт із телефона</string>
+    <string name="people_search_people">Шукати людей</string>
+    <string name="people_move_to_trash">Перемістити в кошик</string>
+    <string name="people_next">Далі</string>
+    <string name="people_untitled_event">Подія без назви</string>
+    <string name="people_no_upcoming_events">Немає майбутніх подій</string>
+    <string name="people_selected">Вибрано</string>
+    <string name="people_empty_title">Поки немає людей</string>
+    <string name="people_empty_message">Додайте людину, про яку хочете щось пам'ятати. Люди, яких ви додаєте до подій, теж з'являються тут.</string>
+    <string name="people_new_person">Нова людина</string>
+    <string name="people_import_contacts">Імпортувати контакти</string>
+    <string name="people_no_one_matches">Ніхто не відповідає «%1$s»</string>
+    <string name="people_create_named">Створити «%1$s»</string>
+    <plurals name="people_selected_count">
+        <item quantity="one">Вибрано: %1$d</item>
+        <item quantity="few">Вибрано: %1$d</item>
+        <item quantity="many">Вибрано: %1$d</item>
+        <item quantity="other">Вибрано: %1$d</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="one">%1$d людина</item>
+        <item quantity="few">%1$d людини</item>
+        <item quantity="many">%1$d людей</item>
+        <item quantity="other">%1$d людини</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="one">%1$d подія</item>
+        <item quantity="few">%1$d події</item>
+        <item quantity="many">%1$d подій</item>
+        <item quantity="other">%1$d події</item>
+    </plurals>
+
+    <string name="people_importing_contacts">Імпорт контактів…</string>
+    <string name="people_importing_contacts_progress">Імпорт контактів… %1$d з %2$d</string>
+    <string name="people_already_importing_contacts">Контакти вже імпортуються</string>
+    <string name="people_could_not_read_file">Не вдалося прочитати файл</string>
+    <string name="people_could_not_read_contact">Не вдалося прочитати контакт</string>
+    <string name="people_no_contacts_app_found">Не знайдено застосунку контактів</string>
+    <string name="people_choose_contact_files">Виберіть файли контактів</string>
+    <string name="people_no_contacts_found">Контактів не знайдено</string>
+    <string name="people_could_not_add_contacts">Не вдалося додати контакти</string>
+    <string name="people_already_in_people">Уже є в розділі «Люди»</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="one">Усі (%1$d) вже є в розділі «Люди»</item>
+        <item quantity="few">Усі (%1$d) вже є в розділі «Люди»</item>
+        <item quantity="many">Усі (%1$d) вже є в розділі «Люди»</item>
+        <item quantity="other">Усі (%1$d) вже є в розділі «Люди»</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="one">Додано %1$d людину</item>
+        <item quantity="few">Додано %1$d людини</item>
+        <item quantity="many">Додано %1$d людей</item>
+        <item quantity="other">Додано %1$d людини</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="one">пропущено %1$d, що вже є в розділі «Люди»</item>
+        <item quantity="few">пропущено %1$d, що вже є в розділі «Люди»</item>
+        <item quantity="many">пропущено %1$d, що вже є в розділі «Люди»</item>
+        <item quantity="other">пропущено %1$d, що вже є в розділі «Люди»</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="one">не вдалося додати %1$d</item>
+        <item quantity="few">не вдалося додати %1$d</item>
+        <item quantity="many">не вдалося додати %1$d</item>
+        <item quantity="other">не вдалося додати %1$d</item>
+    </plurals>
+    <string name="people_could_not_create_person">Не вдалося створити людину</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="one">Переміщено в кошик: %1$d</item>
+        <item quantity="few">Переміщено в кошик: %1$d</item>
+        <item quantity="many">Переміщено в кошик: %1$d</item>
+        <item quantity="other">Переміщено в кошик: %1$d</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="one">Переміщено в кошик: %1$d з %2$d</item>
+        <item quantity="few">Переміщено в кошик: %1$d з %2$d</item>
+        <item quantity="many">Переміщено в кошик: %1$d з %2$d</item>
+        <item quantity="other">Переміщено в кошик: %1$d з %2$d</item>
+    </plurals>
+    <string name="people_could_not_save_detail">Не вдалося зберегти дані</string>
+    <string name="people_could_not_remove_detail">Не вдалося видалити дані</string>
+
+    <string name="people_meta_next_and_last_seen">Наступна зустріч %1$s · остання %2$s</string>
+    <string name="people_meta_next">Наступна зустріч %1$s</string>
+    <string name="people_meta_last_seen">Остання зустріч %1$s</string>
+    <string name="people_meta_no_events">Поки немає подій</string>
+    <string name="people_birthday_with_age">%1$s, %2$d · виповнюється %3$d</string>
+    <string name="people_all_day">Увесь день</string>
+    <string name="people_event_with_names">з %1$s</string>
+
+    <string name="people_copied">Скопійовано</string>
+    <string name="people_could_not_copy">Не вдалося скопіювати</string>
+    <string name="people_could_not_open_link">Не вдалося відкрити посилання</string>
+    <string name="people_write_anything_about">Напишіть будь-що про %1$s…</string>
+    <string name="people_write_anything_about_them">Напишіть будь-що про цю людину…</string>
+    <string name="people_notes">Нотатки</string>
+    <string name="people_remove_icon">Прибрати значок</string>
+    <string name="people_change_icon">Змінити значок</string>
+    <string name="people_change_photo">Змінити фото</string>
+    <string name="people_remove_photo">Прибрати фото</string>
+    <string name="people_open">Відкрити</string>
+    <string name="people_more">Більше</string>
+    <string name="people_call">Подзвонити</string>
+    <string name="people_message">Повідомлення</string>
+    <string name="people_email">Ел. пошта</string>
+    <string name="people_write_email">Написати листа</string>
+    <string name="people_copy">Копіювати</string>
+    <string name="people_new_event">Нова подія</string>
+    <string name="people_name">Ім'я</string>
+
+    <string name="people_details">Відомості</string>
+    <string name="people_more_details">Більше відомостей</string>
+    <string name="people_upcoming">Майбутні</string>
+    <string name="people_nothing_planned_with">Із %1$s нічого не заплановано</string>
+    <string name="people_nothing_planned_with_them">З цією людиною нічого не заплановано</string>
+    <string name="people_past">Минулі</string>
+    <string name="people_no_past_events">Немає минулих подій</string>
+    <string name="people_show_fewer">Показати менше</string>
+    <string name="people_show_all_count">Показати всі (%1$d)</string>
+
+    <string name="people_detail_phone">Телефон</string>
+    <string name="people_detail_email">Ел. пошта</string>
+    <string name="people_detail_birthday">День народження</string>
+    <string name="people_detail_address">Адреса</string>
+    <string name="people_detail_company">Компанія</string>
+    <string name="people_detail_role">Посада</string>
+    <string name="people_detail_website">Вебсайт</string>
+    <string name="people_detail_social">Соцмережі</string>
+    <string name="people_detail_relationship">Стосунки</string>
+    <string name="people_detail_custom">Власне поле</string>
+    <string name="people_add_phone">Додати телефон</string>
+    <string name="people_add_email">Додати ел. пошту</string>
+    <string name="people_add_birthday">Додати день народження</string>
+    <string name="people_add_address">Додати адресу</string>
+    <string name="people_add_company">Додати компанію</string>
+    <string name="people_add_role">Додати посаду</string>
+    <string name="people_add_website">Додати вебсайт</string>
+    <string name="people_add_social">Додати соцмережу</string>
+    <string name="people_add_relationship">Додати стосунки</string>
+    <string name="people_add_custom">Додати власне поле</string>
+    <string name="people_edit_phone">Редагувати телефон</string>
+    <string name="people_edit_email">Редагувати ел. пошту</string>
+    <string name="people_edit_birthday">Редагувати день народження</string>
+    <string name="people_edit_address">Редагувати адресу</string>
+    <string name="people_edit_company">Редагувати компанію</string>
+    <string name="people_edit_role">Редагувати посаду</string>
+    <string name="people_edit_website">Редагувати вебсайт</string>
+    <string name="people_edit_social">Редагувати соцмережу</string>
+    <string name="people_edit_relationship">Редагувати стосунки</string>
+    <string name="people_edit_custom">Редагувати власне поле</string>
+
+    <string name="people_placeholder_phone_number">Номер телефону</string>
+    <string name="people_placeholder_address">Вулиця, район, місто</string>
+    <string name="people_placeholder_company">Де працює</string>
+    <string name="people_placeholder_role">Чим займається</string>
+    <string name="people_placeholder_relationship">Друг з університету</string>
+    <string name="people_placeholder_custom">Будь-що</string>
+
+    <string name="people_add_detail">Додати дані</string>
+    <string name="people_already_added">Уже додано</string>
+    <string name="people_remove">Видалити</string>
+    <string name="people_cannot_be_empty">Це поле не може бути порожнім</string>
+    <string name="people_custom_label">Власна мітка</string>
+    <string name="people_custom_label_placeholder">Власна мітка</string>
+    <string name="people_label_optional">Мітка (необов'язково)</string>
+    <string name="people_birthday_month">Місяць</string>
+    <string name="people_birthday_day">День</string>
+    <string name="people_birthday_year">Рік</string>
+    <string name="people_birthday_optional">необов'язково</string>
+    <string name="people_birthday_year_example">напр., 1996</string>
+    <string name="people_birthday_date_not_in_year">%1$s не існує в %2$s році</string>
+    <string name="people_birthday_year_range">Вкажіть рік від %1$d до %2$d</string>
+</resources>

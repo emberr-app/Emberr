@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr ist gesperrt</string>
+    <string name="app_lock_screen_detail">Nutze Fingerabdruck, Gesicht oder Displaysperre, um es zu öffnen.</string>
+    <string name="app_lock_unlock">Entsperren</string>
+    <string name="app_lock_prompt_subtitle">Nutze Fingerabdruck, Gesicht oder Displaysperre</string>
+    <string name="app_lock_unlock_emberr">Emberr entsperren</string>
+    <string name="app_lock_off_no_screen_lock">Die App-Sperre ist aus, weil dieses Handy keine Displaysperre hat.</string>
+</resources>

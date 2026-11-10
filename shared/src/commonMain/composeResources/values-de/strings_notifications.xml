@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">Aufgabenerinnerung</string>
+    <string name="notifications_unfinished_task">Unerledigte Aufgabe</string>
+    <string name="notifications_daily_note">Tagesnotiz</string>
+    <string name="notifications_daily_title">Tagesnotiz: %1$s</string>
+    <string name="notifications_note">Notiz</string>
+    <string name="notifications_birthday">Geburtstag</string>
+    <string name="notifications_birthday_turns_age">%1$s wird heute %2$d</string>
+    <string name="notifications_birthday_today">%1$s hat heute Geburtstag</string>
+    <string name="notifications_open">Öffnen</string>
+</resources>

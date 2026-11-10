@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Eigener Server</string>
+
+    <string name="selfhost_group_server_details">Serverdetails</string>
+    <string name="selfhost_group_recovery_passphrase">Wiederherstellungs-Passphrase</string>
+    <string name="selfhost_group_unlock_vault">Tresor entsperren</string>
+    <string name="selfhost_group_status">Status</string>
+
+    <string name="selfhost_setting_up">Wird eingerichtet</string>
+    <string name="selfhost_unlock_and_sync">Entsperren und synchronisieren</string>
+    <string name="selfhost_create_vault_and_sync">Tresor erstellen und synchronisieren</string>
+    <string name="selfhost_server_address_rejected">Serveradresse abgelehnt</string>
+    <string name="selfhost_got_it">Verstanden</string>
+
+    <string name="selfhost_status_connected">Status: Verbunden</string>
+    <string name="selfhost_cancelling">Wird abgebrochen...</string>
+    <string name="selfhost_cancel_sync">Synchronisierung abbrechen</string>
+    <string name="selfhost_cancel_sync_hint">Nach dem Abbrechen ruht die Synchronisierung, bis du die App neu startest oder auf „Jetzt synchronisieren“ tippst.</string>
+    <string name="selfhost_sync_now">Jetzt synchronisieren</string>
+    <string name="selfhost_syncing">Wird synchronisiert...</string>
+    <string name="selfhost_never_synced">Noch nie synchronisiert</string>
+    <string name="selfhost_last_synced">Zuletzt synchronisiert: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d Notiz wartet auf Synchronisierung</item>
+        <item quantity="other">%1$d Notizen warten auf Synchronisierung</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Notizen</string>
+    <string name="selfhost_progress_images">Bilder</string>
+
+    <string name="selfhost_passphrase_needed_hint">Du brauchst diese Passphrase, um ein anderes Handy oder einen anderen Computer mit diesem Server zu verbinden.</string>
+    <string name="selfhost_show_passphrase_button">Passphrase anzeigen</string>
+    <string name="selfhost_unlock_prompt_title">Wiederherstellungs-Passphrase</string>
+    <string name="selfhost_unlock_prompt_description">Entsperre, um deine Wiederherstellungs-Passphrase zu sehen</string>
+    <string name="selfhost_save_passphrase_hint">Dieses Gerät wurde verbunden, bevor Emberr die Passphrase gespeichert hat. Gib sie einmal ein, um sie hier zu speichern, damit du sie später sehen kannst.</string>
+    <string name="selfhost_checking">Wird geprüft</string>
+    <string name="selfhost_save_passphrase">Passphrase speichern</string>
+    <string name="selfhost_disconnect_vault">Tresor trennen</string>
+    <string name="selfhost_recovery_dialog_message">Gib sie auf dem anderen Gerät ein, wenn es zum Entsperren des Tresors danach fragt. Teile sie mit niemandem.</string>
+    <string name="selfhost_done">Fertig</string>
+    <string name="selfhost_disconnect_vault_question">Tresor trennen?</string>
+    <string name="selfhost_disconnect_message">Deine Notizen bleiben auf diesem Gerät und auf dem Server. Zum erneuten Verbinden brauchst du deine Wiederherstellungs-Passphrase.</string>
+    <string name="selfhost_disconnect">Trennen</string>
+
+    <string name="selfhost_checking_for_changes">Suche nach Änderungen...</string>
+    <string name="selfhost_finishing_up">Wird abgeschlossen...</string>
+    <string name="selfhost_sending_percent">Senden %1$d%</string>
+    <string name="selfhost_nothing_to_send">Nichts zu senden</string>
+    <string name="selfhost_receiving_percent">Empfangen %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Nichts zu empfangen</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%1$d von %2$d Notiz</item>
+        <item quantity="other">%1$d von %2$d Notizen</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s von %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Gib die WebDAV-Adresse und die Anmeldedaten deines Servers ein, zum Beispiel Nextcloud oder ein NAS. Emberr verschlüsselt deine Notizen, bevor sie dieses Gerät verlassen.</string>
+    <string name="selfhost_username">Benutzername</string>
+    <string name="selfhost_password">Passwort</string>
+    <string name="selfhost_hide_password">Passwort verbergen</string>
+    <string name="selfhost_show_password">Passwort anzeigen</string>
+    <string name="selfhost_testing">Wird getestet</string>
+    <string name="selfhost_test_connection">Verbindung testen</string>
+    <string name="selfhost_contacting_server">Server wird kontaktiert...</string>
+
+    <string name="selfhost_restore_hint">Auf diesem Server gibt es bereits einen Emberr-Tresor. Gib die 16-stellige Wiederherstellungs-Passphrase ein, die beim Erstellen des Tresors angezeigt wurde.</string>
+    <string name="selfhost_restore_find_hint">Nicht gefunden? Öffne auf einem bereits verbundenen Gerät Einstellungen → Eigener Server → Passphrase anzeigen.</string>
+    <string name="selfhost_passphrase_placeholder">16-stellige Passphrase</string>
+    <string name="selfhost_hide_passphrase">Passphrase verbergen</string>
+    <string name="selfhost_show_passphrase">Passphrase anzeigen</string>
+
+    <string name="selfhost_save_passphrase_now">Speichere diese Passphrase jetzt</string>
+    <string name="selfhost_fact_type_on_other_devices">Du gibst sie auf jedem anderen Handy oder Computer ein, den du mit diesem Server verbindest.</string>
+    <string name="selfhost_fact_locks_notes">Sie sperrt deine Notizen auf dem Server. Ohne sie kann niemand sie lesen, nicht einmal Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr kann sie nicht zurücksetzen. Bewahre sie in einem Passwort-Manager auf oder schreib sie auf.</string>
+    <string name="selfhost_fact_see_again_later">Du kannst sie später unter Einstellungen → Eigener Server auf jedem verbundenen Gerät wieder ansehen.</string>
+    <string name="selfhost_new_passphrase">Neue Passphrase</string>
+    <string name="selfhost_generate_new_passphrase">Neue Passphrase erzeugen</string>
+    <string name="selfhost_saved_passphrase_confirmation">Ich habe diese Passphrase an einem sicheren Ort gespeichert</string>
+    <string name="selfhost_copy_passphrase">Passphrase kopieren</string>
+    <string name="selfhost_copy_address">Adresse kopieren</string>
+    <string name="selfhost_copied_address">Adresse kopiert</string>
+
+    <string name="selfhost_invalid_credentials">Ungültiger Benutzername oder ungültiges Passwort</string>
+    <string name="selfhost_server_returned_error">Der Server hat einen Fehler gemeldet (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Server nicht erreichbar</string>
+    <string name="selfhost_could_not_check_vault">Prüfung auf einen vorhandenen Tresor fehlgeschlagen: %1$s</string>
+    <string name="selfhost_unknown_error">unbekannter Fehler</string>
+    <string name="selfhost_existing_vault_found">Vorhandener Tresor auf diesem Server gefunden</string>
+    <string name="selfhost_no_existing_vault">Kein vorhandener Tresor, es wird ein neuer erstellt</string>
+    <string name="selfhost_no_vault_file_to_restore">Auf dem Server wurde keine Tresordatei zum Wiederherstellen gefunden</string>
+    <string name="selfhost_old_or_damaged_vault_data">Dieser Serverordner enthält Sync-Daten eines älteren oder beschädigten Tresors. Lösche den Ordner emberr_sync auf deinem Server und richte alles neu ein.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Auf diesem Server gibt es bereits einen Tresor. Gib unten seine Wiederherstellungs-Passphrase ein, um ihn wiederherzustellen.</string>
+    <string name="selfhost_could_not_set_up">Sichere Synchronisierung konnte nicht eingerichtet werden</string>
+    <string name="selfhost_no_vault_on_server">Auf dem Server wurde kein Tresor gefunden.</string>
+    <string name="selfhost_wrong_passphrase">Diese Passphrase entsperrt diesen Tresor nicht.</string>
+    <string name="selfhost_could_not_check_passphrase">Die Passphrase konnte nicht geprüft werden: %1$s</string>
+
+    <string name="selfhost_update_required_title">Synchronisierung mit eigenem Server pausiert</string>
+    <string name="selfhost_update_required_message">%1$s Deine Notizen sind sicher und werden weiter auf diesem Gerät gespeichert.</string>
+    <string name="selfhost_later">Später</string>
+    <string name="selfhost_update">Aktualisieren</string>
+</resources>

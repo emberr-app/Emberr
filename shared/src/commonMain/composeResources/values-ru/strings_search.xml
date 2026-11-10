@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Начните вводить, чтобы искать по названиям, фрагментам и содержимому заметок.</string>
+    <string name="search_nothing_found">Подходящих заметок, событий или людей не найдено.</string>
+    <string name="search_people">Люди</string>
+    <string name="search_events">События</string>
+    <string name="search_notes">Заметки</string>
+    <string name="search_rename_note">Переименовать заметку</string>
+    <string name="search_note_title_placeholder">Название заметки...</string>
+    <string name="search_rename">Переименовать</string>
+    <string name="search_move_to_trash">Переместить в корзину</string>
+    <string name="search_untitled_event">Событие без названия</string>
+    <string name="search_repeats">Повторяется</string>
+    <string name="search_pinned">Закреплённые</string>
+    <string name="search_in_parent">в «%1$s»</string>
+    <string name="search_daily">Ежедневник</string>
+    <string name="search_add_to_favorites">Добавить в избранное</string>
+    <string name="search_remove_from_favorites">Убрать из избранного</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">Показать всех: %1$d</item>
+        <item quantity="few">Показать всех: %1$d</item>
+        <item quantity="many">Показать всех: %1$d</item>
+        <item quantity="other">Показать всех: %1$d</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">Показать все %1$d событие</item>
+        <item quantity="few">Показать все %1$d события</item>
+        <item quantity="many">Показать все %1$d событий</item>
+        <item quantity="other">Показать все %1$d события</item>
+    </plurals>
+</resources>

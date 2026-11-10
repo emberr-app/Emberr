@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Почніть вводити, щоб шукати в назвах, уривках і вмісті нотаток.</string>
+    <string name="search_nothing_found">Не знайдено нотаток, подій чи людей.</string>
+    <string name="search_people">Люди</string>
+    <string name="search_events">Події</string>
+    <string name="search_notes">Нотатки</string>
+    <string name="search_rename_note">Перейменувати нотатку</string>
+    <string name="search_note_title_placeholder">Назва нотатки...</string>
+    <string name="search_rename">Перейменувати</string>
+    <string name="search_move_to_trash">Перемістити в кошик</string>
+    <string name="search_untitled_event">Подія без назви</string>
+    <string name="search_repeats">Повторюється</string>
+    <string name="search_pinned">Закріплені</string>
+    <string name="search_in_parent">у «%1$s»</string>
+    <string name="search_daily">Щоденник</string>
+    <string name="search_add_to_favorites">Додати у вибране</string>
+    <string name="search_remove_from_favorites">Прибрати з вибраного</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">Показати всіх (%1$d)</item>
+        <item quantity="few">Показати всіх (%1$d)</item>
+        <item quantity="many">Показати всіх (%1$d)</item>
+        <item quantity="other">Показати всіх (%1$d)</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">Показати всі події (%1$d)</item>
+        <item quantity="few">Показати всі події (%1$d)</item>
+        <item quantity="many">Показати всі події (%1$d)</item>
+        <item quantity="other">Показати всі події (%1$d)</item>
+    </plurals>
+</resources>

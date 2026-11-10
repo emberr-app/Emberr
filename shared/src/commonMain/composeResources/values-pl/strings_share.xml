@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">Zapisz udostępnioną treść</string>
+    <string name="share_save_to_overview">Zapisz w przeglądzie</string>
+    <string name="share_save_to_a_note">Zapisz w notatce</string>
+    <string name="share_shared_image">Udostępniony obraz</string>
+    <string name="share_failed_to_save">Nie udało się zapisać udostępnionej treści.</string>
+    <string name="share_saved_to_inbox">Zapisano w Skrzynce odbiorczej</string>
+    <string name="share_note_no_longer_available">Ta notatka nie jest już dostępna.</string>
+    <plurals name="share_images_selected">
+        <item quantity="one">Wybrano %1$d obraz</item>
+        <item quantity="few">Wybrano %1$d obrazy</item>
+        <item quantity="many">Wybrano %1$d obrazów</item>
+        <item quantity="other">Wybrano %1$d obrazu</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="one">Wybrano %1$d plik</item>
+        <item quantity="few">Wybrano %1$d pliki</item>
+        <item quantity="many">Wybrano %1$d plików</item>
+        <item quantity="other">Wybrano %1$d pliku</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="one">Zapisano %1$d element w Skrzynce odbiorczej</item>
+        <item quantity="few">Zapisano %1$d elementy w Skrzynce odbiorczej</item>
+        <item quantity="many">Zapisano %1$d elementów w Skrzynce odbiorczej</item>
+        <item quantity="other">Zapisano %1$d elementu w Skrzynce odbiorczej</item>
+    </plurals>
+</resources>

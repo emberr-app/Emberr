@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">Wyczyść</string>
+    <string name="components_select_all">Zaznacz wszystko</string>
+    <string name="components_spaces_none_yet">Jeszcze brak</string>
+    <string name="components_spaces_none">Brak</string>
+    <plurals name="components_spaces_all">
+        <item quantity="one">Wszystkie przestrzenie (%1$d)</item>
+        <item quantity="few">Wszystkie %1$d przestrzenie</item>
+        <item quantity="many">Wszystkie %1$d przestrzeni</item>
+        <item quantity="other">Wszystkie przestrzenie (%1$d)</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="one">%1$d z %2$d przestrzeni</item>
+        <item quantity="few">%1$d z %2$d przestrzeni</item>
+        <item quantity="many">%1$d z %2$d przestrzeni</item>
+        <item quantity="other">%1$d z %2$d przestrzeni</item>
+    </plurals>
+    <string name="components_search_notes">Szukaj notatek...</string>
+    <string name="components_create_new_note">Utwórz nową notatkę</string>
+    <string name="components_new_named_note">Nowa notatka „%1$s”</string>
+    <string name="components_note_picker_hint">Zacznij pisać, aby wyszukać, lub utwórz nową notatkę</string>
+    <string name="components_link_to_note_heading">LINK DO NOTATKI</string>
+    <string name="components_link_to_note">Link do notatki</string>
+    <string name="components_load_more">Wczytaj więcej</string>
+    <string name="components_show_sidebar">Pokaż pasek boczny</string>
+    <string name="components_clear_search">Wyczyść wyszukiwanie</string>
+    <string name="components_people_search_placeholder">Wyszukaj lub dodaj osobę</string>
+    <string name="components_people_create_failed">Nie udało się utworzyć osoby</string>
+    <string name="components_people_type_name_hint">Wpisz imię, aby dodać osobę</string>
+    <string name="components_people_add_people">Dodaj osoby</string>
+    <string name="components_people_selected">Wybrane</string>
+    <string name="components_people_create_named">Utwórz „%1$s”</string>
+    <string name="components_people_remove">Usuń</string>
+    <string name="components_people_remove_named">Usuń: %1$s</string>
+    <string name="components_reminder_later_today">Później dzisiaj</string>
+    <string name="components_reminder_tomorrow">Jutro</string>
+    <string name="components_reminder_this_weekend">W ten weekend</string>
+    <string name="components_reminder_next_week">W przyszłym tygodniu</string>
+    <string name="components_reminder_custom_date">Własna data...</string>
+    <string name="components_reminder_remove">Usuń przypomnienie</string>
+    <string name="components_reminder_date">Data</string>
+    <string name="components_reminder_all_day">Cały dzień</string>
+    <string name="components_reminder_in_15_mins">Za 15 min</string>
+    <string name="components_reminder_in_1_hour">Za godzinę</string>
+    <string name="components_reminder_in_3_hours">Za 3 godziny</string>
+    <string name="components_reminder_this_evening">Dziś wieczorem</string>
+    <string name="components_reminder_custom_time">Własna godzina...</string>
+    <string name="components_reminder_time">Godzina</string>
+    <string name="components_choose_month_or_year">Wybierz miesiąc lub rok</string>
+    <string name="components_previous_month">Poprzedni miesiąc</string>
+    <string name="components_next_month">Następny miesiąc</string>
+    <string name="components_select_date">Wybierz datę</string>
+    <string name="components_month_and_year">Miesiąc i rok</string>
+    <string name="components_select_time">Wybierz godzinę</string>
+</resources>

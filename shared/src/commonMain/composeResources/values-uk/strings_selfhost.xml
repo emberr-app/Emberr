@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Власний сервер</string>
+
+    <string name="selfhost_group_server_details">Дані сервера</string>
+    <string name="selfhost_group_recovery_passphrase">Парольна фраза відновлення</string>
+    <string name="selfhost_group_unlock_vault">Розблокування сховища</string>
+    <string name="selfhost_group_status">Стан</string>
+
+    <string name="selfhost_setting_up">Налаштування</string>
+    <string name="selfhost_unlock_and_sync">Розблокувати й синхронізувати</string>
+    <string name="selfhost_create_vault_and_sync">Створити сховище й синхронізувати</string>
+    <string name="selfhost_server_address_rejected">Адресу сервера відхилено</string>
+    <string name="selfhost_got_it">Зрозуміло</string>
+
+    <string name="selfhost_status_connected">Стан: підключено</string>
+    <string name="selfhost_cancelling">Скасування...</string>
+    <string name="selfhost_cancel_sync">Скасувати синхронізацію</string>
+    <string name="selfhost_cancel_sync_hint">Скасування призупиняє синхронізацію, доки ви не перезапустите застосунок або не торкнетеся «Синхронізувати зараз».</string>
+    <string name="selfhost_sync_now">Синхронізувати зараз</string>
+    <string name="selfhost_syncing">Синхронізація...</string>
+    <string name="selfhost_never_synced">Ще не синхронізовано</string>
+    <string name="selfhost_last_synced">Остання синхронізація: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d нотатка очікує синхронізації</item>
+        <item quantity="few">%1$d нотатки очікують синхронізації</item>
+        <item quantity="many">%1$d нотаток очікують синхронізації</item>
+        <item quantity="other">%1$d нотатки очікують синхронізації</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Нотатки</string>
+    <string name="selfhost_progress_images">Зображення</string>
+
+    <string name="selfhost_passphrase_needed_hint">Ця парольна фраза потрібна, щоб підключити до цього сервера інший телефон або комп'ютер.</string>
+    <string name="selfhost_show_passphrase_button">Показати парольну фразу</string>
+    <string name="selfhost_unlock_prompt_title">Парольна фраза відновлення</string>
+    <string name="selfhost_unlock_prompt_description">Розблокуйте, щоб побачити парольну фразу відновлення</string>
+    <string name="selfhost_save_passphrase_hint">Цей пристрій було підключено ще до того, як Emberr почав зберігати парольну фразу. Введіть її один раз, щоб зберегти тут і бачити згодом.</string>
+    <string name="selfhost_checking">Перевірка</string>
+    <string name="selfhost_save_passphrase">Зберегти парольну фразу</string>
+    <string name="selfhost_disconnect_vault">Від'єднати сховище</string>
+    <string name="selfhost_recovery_dialog_message">Введіть її на іншому пристрої, коли він попросить розблокувати сховище. Нікому її не повідомляйте.</string>
+    <string name="selfhost_done">Готово</string>
+    <string name="selfhost_disconnect_vault_question">Від'єднати сховище?</string>
+    <string name="selfhost_disconnect_message">Ваші нотатки залишаться на цьому пристрої та на сервері. Щоб підключитися знову, знадобиться парольна фраза відновлення.</string>
+    <string name="selfhost_disconnect">Від'єднати</string>
+
+    <string name="selfhost_checking_for_changes">Перевірка змін...</string>
+    <string name="selfhost_finishing_up">Завершення...</string>
+    <string name="selfhost_sending_percent">Надсилання %1$d%</string>
+    <string name="selfhost_nothing_to_send">Нічого надсилати</string>
+    <string name="selfhost_receiving_percent">Отримання %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Нічого отримувати</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">Нотатки: %1$d з %2$d</item>
+        <item quantity="few">Нотатки: %1$d з %2$d</item>
+        <item quantity="many">Нотатки: %1$d з %2$d</item>
+        <item quantity="other">Нотатки: %1$d з %2$d</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s з %2$s МБ</string>
+
+    <string name="selfhost_server_details_hint">Введіть адресу WebDAV і дані для входу на ваш сервер, наприклад Nextcloud або NAS. Emberr шифрує нотатки, перш ніж вони залишать цей пристрій.</string>
+    <string name="selfhost_username">Ім'я користувача</string>
+    <string name="selfhost_password">Пароль</string>
+    <string name="selfhost_hide_password">Приховати пароль</string>
+    <string name="selfhost_show_password">Показати пароль</string>
+    <string name="selfhost_testing">Перевірка</string>
+    <string name="selfhost_test_connection">Перевірити з'єднання</string>
+    <string name="selfhost_contacting_server">Зв'язок із сервером...</string>
+
+    <string name="selfhost_restore_hint">На цьому сервері вже є сховище Emberr. Введіть 16-символьну парольну фразу відновлення, яку було показано під час створення сховища.</string>
+    <string name="selfhost_restore_find_hint">Не можете знайти? Відкрийте Налаштування → Власний сервер → Показати парольну фразу на пристрої, який уже підключено.</string>
+    <string name="selfhost_passphrase_placeholder">16-символьна парольна фраза</string>
+    <string name="selfhost_hide_passphrase">Приховати парольну фразу</string>
+    <string name="selfhost_show_passphrase">Показати парольну фразу</string>
+
+    <string name="selfhost_save_passphrase_now">Збережіть цю парольну фразу зараз</string>
+    <string name="selfhost_fact_type_on_other_devices">Ви вводитимете її на кожному іншому телефоні чи комп'ютері, який підключите до цього сервера.</string>
+    <string name="selfhost_fact_locks_notes">Вона захищає ваші нотатки на сервері. Без неї ніхто не зможе їх прочитати, навіть Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr не може її скинути. Зберігайте її в менеджері паролів або запишіть.</string>
+    <string name="selfhost_fact_see_again_later">Згодом її можна побачити в Налаштування → Власний сервер на будь-якому підключеному пристрої.</string>
+    <string name="selfhost_new_passphrase">Нова парольна фраза</string>
+    <string name="selfhost_generate_new_passphrase">Створити нову парольну фразу</string>
+    <string name="selfhost_saved_passphrase_confirmation">Я зберіг(-ла) цю парольну фразу в надійному місці</string>
+    <string name="selfhost_copy_passphrase">Копіювати парольну фразу</string>
+    <string name="selfhost_copy_address">Копіювати адресу</string>
+    <string name="selfhost_copied_address">адресу скопійовано</string>
+
+    <string name="selfhost_invalid_credentials">Неправильне ім'я користувача або пароль</string>
+    <string name="selfhost_server_returned_error">Сервер повернув помилку (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Не вдалося зв'язатися із сервером</string>
+    <string name="selfhost_could_not_check_vault">Не вдалося перевірити наявне сховище: %1$s</string>
+    <string name="selfhost_unknown_error">невідома помилка</string>
+    <string name="selfhost_existing_vault_found">На цьому сервері знайдено наявне сховище</string>
+    <string name="selfhost_no_existing_vault">Сховища немає, буде створено нове</string>
+    <string name="selfhost_no_vault_file_to_restore">На сервері не знайдено файлу сховища для відновлення</string>
+    <string name="selfhost_old_or_damaged_vault_data">Ця папка на сервері містить дані синхронізації зі старого або пошкодженого сховища. Видаліть папку emberr_sync на сервері й налаштуйте знову.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">На цьому сервері вже є сховище. Введіть його парольну фразу відновлення нижче, щоб відновити його.</string>
+    <string name="selfhost_could_not_set_up">Не вдалося налаштувати захищену синхронізацію</string>
+    <string name="selfhost_no_vault_on_server">На сервері не знайдено сховища.</string>
+    <string name="selfhost_wrong_passphrase">Ця парольна фраза не розблоковує це сховище.</string>
+    <string name="selfhost_could_not_check_passphrase">Не вдалося перевірити парольну фразу: %1$s</string>
+
+    <string name="selfhost_update_required_title">Синхронізацію з власним сервером призупинено</string>
+    <string name="selfhost_update_required_message">%1$s Ваші нотатки в безпеці й надалі зберігаються на цьому пристрої.</string>
+    <string name="selfhost_later">Пізніше</string>
+    <string name="selfhost_update">Оновити</string>
+</resources>

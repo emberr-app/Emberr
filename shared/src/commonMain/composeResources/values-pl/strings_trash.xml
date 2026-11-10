@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Kosz jest pusty</string>
+    <string name="trash_title">Kosz</string>
+    <string name="trash_empty_trash">Opróżnij kosz</string>
+    <string name="trash_empty_trash_tooltip">Opróżnij kosz</string>
+    <string name="trash_restore_note">Przywróć notatkę</string>
+    <string name="trash_delete_permanently">Usuń na zawsze</string>
+    <string name="trash_manage_note">Zarządzaj notatką</string>
+    <string name="trash_manage_note_subtitle">Notatki w koszu są automatycznie usuwane po 30 dniach.</string>
+    <string name="trash_empty_trash_question">Opróżnić kosz?</string>
+    <string name="trash_empty_trash_subtitle">Wszystkie notatki w koszu zostaną trwale usunięte. Tej operacji nie można cofnąć.</string>
+</resources>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">Kies een ruimte</string>
+    <string name="widgets_follow_the_app">Volg de app</string>
+    <string name="widgets_follow_the_app_detail">Toont altijd de ruimte waarin je bent</string>
+    <string name="widgets_current_space">Huidige ruimte</string>
+    <string name="widgets_untitled_space">Naamloze ruimte</string>
+    <string name="widgets_favorites">Favorieten</string>
+    <string name="widgets_other">Overige</string>
+    <string name="widgets_no_notes_yet">Je hebt nog geen notities</string>
+    <string name="widgets_no_notes_match">Geen notities gevonden voor “%1$s”</string>
+    <string name="widgets_choose_a_note">Kies een notitie</string>
+    <string name="widgets_search_notes">Notities zoeken</string>
+    <string name="widgets_open_the_app_first">Open de app één keer voordat je een widget toevoegt</string>
+    <string name="widgets_choose_a_gradient">Kies een kleurverloop</string>
+    <string name="widgets_whats_on_your_mind">Waar denk je aan?</string>
+    <string name="widgets_selected">Geselecteerd</string>
+    <string name="widgets_gradient_dusk">Schemering</string>
+    <string name="widgets_gradient_copper">Koper</string>
+    <string name="widgets_gradient_forest">Bos</string>
+    <string name="widgets_gradient_lagoon">Lagune</string>
+    <string name="widgets_gradient_midnight">Middernacht</string>
+    <string name="widgets_gradient_blossom">Bloesem</string>
+    <string name="widgets_gradient_graphite">Grafiet</string>
+    <string name="widgets_gradient_aurora">Poollicht</string>
+    <string name="widgets_gradient_sunset">Zonsondergang</string>
+    <string name="widgets_gradient_slate">Leisteen</string>
+    <string name="widgets_gradient_cocoa">Cacao</string>
+    <string name="widgets_gradient_lavender">Lavendel</string>
+    <string name="widgets_untitled_event">Naamloze afspraak</string>
+    <string name="widgets_untitled_task">Naamloze taak</string>
+    <string name="widgets_note">Notitie</string>
+    <string name="widgets_repeating">Terugkerend</string>
+    <string name="widgets_today">Vandaag</string>
+    <string name="widgets_tomorrow">Morgen</string>
+    <string name="widgets_yesterday">Gisteren</string>
+    <string name="widgets_all_day">Hele dag</string>
+    <string name="widgets_date_all_day">%1$s · Hele dag</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · Hele dag</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="one">%1$d min geleden</item>
+        <item quantity="other">%1$d min geleden</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="one">%1$d uur geleden</item>
+        <item quantity="other">%1$d uur geleden</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">Gekoppelde notitie</string>
+    <string name="widgets_image">Afbeelding</string>
+    <string name="widgets_canvas">Canvas</string>
+    <string name="widgets_database">Database</string>
+    <string name="widgets_watchlist">Kijklijst</string>
+    <string name="widgets_credentials">Inloggegevens</string>
+    <string name="widgets_voice_note_length">Spraaknotitie  %1$s</string>
+    <string name="widgets_needs_newer_version">Vereist een nieuwere versie van Emberr</string>
+    <string name="widgets_table">Tabel</string>
+</resources>

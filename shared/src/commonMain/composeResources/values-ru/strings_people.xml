@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">Люди</string>
+    <string name="people_clear_selection">Снять выделение</string>
+    <string name="people_select_all">Выбрать всех</string>
+    <string name="people_deselect_all">Снять выбор со всех</string>
+    <string name="people_add_people">Добавить людей</string>
+    <string name="people_create_new_contact">Создать контакт</string>
+    <string name="people_import_from_vcf_file">Импорт из файла .vcf</string>
+    <string name="people_import_from_phone">Импорт с телефона</string>
+    <string name="people_search_people">Поиск людей</string>
+    <string name="people_move_to_trash">Переместить в корзину</string>
+    <string name="people_next">Далее</string>
+    <string name="people_untitled_event">Событие без названия</string>
+    <string name="people_no_upcoming_events">Нет предстоящих событий</string>
+    <string name="people_selected">Выбрано</string>
+    <string name="people_empty_title">Пока никого нет</string>
+    <string name="people_empty_message">Добавьте человека, о котором хотите что-то помнить. Люди, которых вы добавляете в события, тоже появятся здесь.</string>
+    <string name="people_new_person">Новый человек</string>
+    <string name="people_import_contacts">Импорт контактов</string>
+    <string name="people_no_one_matches">Никого по запросу «%1$s»</string>
+    <string name="people_create_named">Создать «%1$s»</string>
+    <plurals name="people_selected_count">
+        <item quantity="one">Выбрано: %1$d</item>
+        <item quantity="few">Выбрано: %1$d</item>
+        <item quantity="many">Выбрано: %1$d</item>
+        <item quantity="other">Выбрано: %1$d</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="one">%1$d человек</item>
+        <item quantity="few">%1$d человека</item>
+        <item quantity="many">%1$d человек</item>
+        <item quantity="other">%1$d человека</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="one">%1$d событие</item>
+        <item quantity="few">%1$d события</item>
+        <item quantity="many">%1$d событий</item>
+        <item quantity="other">%1$d события</item>
+    </plurals>
+
+    <string name="people_importing_contacts">Импорт контактов…</string>
+    <string name="people_importing_contacts_progress">Импорт контактов… %1$d из %2$d</string>
+    <string name="people_already_importing_contacts">Контакты уже импортируются</string>
+    <string name="people_could_not_read_file">Не удалось прочитать файл</string>
+    <string name="people_could_not_read_contact">Не удалось прочитать контакт</string>
+    <string name="people_no_contacts_app_found">Приложение контактов не найдено</string>
+    <string name="people_choose_contact_files">Выберите файлы контактов</string>
+    <string name="people_no_contacts_found">Контакты не найдены</string>
+    <string name="people_could_not_add_contacts">Не удалось добавить контакты</string>
+    <string name="people_already_in_people">Уже в «Людях»</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="one">Все %1$d уже есть в «Людях»</item>
+        <item quantity="few">Все %1$d уже есть в «Людях»</item>
+        <item quantity="many">Все %1$d уже есть в «Людях»</item>
+        <item quantity="other">Все %1$d уже есть в «Людях»</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="one">Добавлен %1$d человек</item>
+        <item quantity="few">Добавлено %1$d человека</item>
+        <item quantity="many">Добавлено %1$d человек</item>
+        <item quantity="other">Добавлено %1$d человека</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="one">пропущено %1$d (уже в «Людях»)</item>
+        <item quantity="few">пропущено %1$d (уже в «Людях»)</item>
+        <item quantity="many">пропущено %1$d (уже в «Людях»)</item>
+        <item quantity="other">пропущено %1$d (уже в «Людях»)</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="one">не удалось добавить %1$d</item>
+        <item quantity="few">не удалось добавить %1$d</item>
+        <item quantity="many">не удалось добавить %1$d</item>
+        <item quantity="other">не удалось добавить %1$d</item>
+    </plurals>
+    <string name="people_could_not_create_person">Не удалось создать человека</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="one">%1$d человек перемещён в корзину</item>
+        <item quantity="few">%1$d человека перемещено в корзину</item>
+        <item quantity="many">%1$d человек перемещено в корзину</item>
+        <item quantity="other">%1$d человека перемещено в корзину</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="one">В корзину перемещено %1$d из %2$d</item>
+        <item quantity="few">В корзину перемещено %1$d из %2$d</item>
+        <item quantity="many">В корзину перемещено %1$d из %2$d</item>
+        <item quantity="other">В корзину перемещено %1$d из %2$d</item>
+    </plurals>
+    <string name="people_could_not_save_detail">Не удалось сохранить данные</string>
+    <string name="people_could_not_remove_detail">Не удалось удалить данные</string>
+
+    <string name="people_meta_next_and_last_seen">Следующая встреча: %1$s · последняя: %2$s</string>
+    <string name="people_meta_next">Следующая встреча: %1$s</string>
+    <string name="people_meta_last_seen">Последняя встреча: %1$s</string>
+    <string name="people_meta_no_events">Событий пока нет</string>
+    <string name="people_birthday_with_age">%1$s %2$d · исполнится %3$d</string>
+    <string name="people_all_day">Весь день</string>
+    <string name="people_event_with_names">с %1$s</string>
+
+    <string name="people_copied">Скопировано</string>
+    <string name="people_could_not_copy">Не удалось скопировать</string>
+    <string name="people_could_not_open_link">Не удалось открыть ссылку</string>
+    <string name="people_write_anything_about">Напишите что угодно о %1$s…</string>
+    <string name="people_write_anything_about_them">Напишите что угодно об этом человеке…</string>
+    <string name="people_notes">Заметки</string>
+    <string name="people_remove_icon">Убрать значок</string>
+    <string name="people_change_icon">Сменить значок</string>
+    <string name="people_change_photo">Сменить фото</string>
+    <string name="people_remove_photo">Удалить фото</string>
+    <string name="people_open">Открыть</string>
+    <string name="people_more">Ещё</string>
+    <string name="people_call">Позвонить</string>
+    <string name="people_message">Написать</string>
+    <string name="people_email">Эл. почта</string>
+    <string name="people_write_email">Написать письмо</string>
+    <string name="people_copy">Копировать</string>
+    <string name="people_new_event">Новое событие</string>
+    <string name="people_name">Имя</string>
+
+    <string name="people_details">Сведения</string>
+    <string name="people_more_details">Больше сведений</string>
+    <string name="people_upcoming">Предстоящие</string>
+    <string name="people_nothing_planned_with">С %1$s ничего не запланировано</string>
+    <string name="people_nothing_planned_with_them">С этим человеком ничего не запланировано</string>
+    <string name="people_past">Прошедшие</string>
+    <string name="people_no_past_events">Нет прошедших событий</string>
+    <string name="people_show_fewer">Показать меньше</string>
+    <string name="people_show_all_count">Показать все (%1$d)</string>
+
+    <string name="people_detail_phone">Телефон</string>
+    <string name="people_detail_email">Эл. почта</string>
+    <string name="people_detail_birthday">День рождения</string>
+    <string name="people_detail_address">Адрес</string>
+    <string name="people_detail_company">Компания</string>
+    <string name="people_detail_role">Должность</string>
+    <string name="people_detail_website">Сайт</string>
+    <string name="people_detail_social">Соцсети</string>
+    <string name="people_detail_relationship">Отношение</string>
+    <string name="people_detail_custom">Другое</string>
+    <string name="people_add_phone">Добавить телефон</string>
+    <string name="people_add_email">Добавить эл. почту</string>
+    <string name="people_add_birthday">Добавить день рождения</string>
+    <string name="people_add_address">Добавить адрес</string>
+    <string name="people_add_company">Добавить компанию</string>
+    <string name="people_add_role">Добавить должность</string>
+    <string name="people_add_website">Добавить сайт</string>
+    <string name="people_add_social">Добавить соцсеть</string>
+    <string name="people_add_relationship">Добавить отношение</string>
+    <string name="people_add_custom">Добавить другое</string>
+    <string name="people_edit_phone">Изменить телефон</string>
+    <string name="people_edit_email">Изменить эл. почту</string>
+    <string name="people_edit_birthday">Изменить день рождения</string>
+    <string name="people_edit_address">Изменить адрес</string>
+    <string name="people_edit_company">Изменить компанию</string>
+    <string name="people_edit_role">Изменить должность</string>
+    <string name="people_edit_website">Изменить сайт</string>
+    <string name="people_edit_social">Изменить соцсеть</string>
+    <string name="people_edit_relationship">Изменить отношение</string>
+    <string name="people_edit_custom">Изменить другое</string>
+
+    <string name="people_placeholder_phone_number">Номер телефона</string>
+    <string name="people_placeholder_address">Улица, район, город</string>
+    <string name="people_placeholder_company">Где работает</string>
+    <string name="people_placeholder_role">Чем занимается</string>
+    <string name="people_placeholder_relationship">Друг по университету</string>
+    <string name="people_placeholder_custom">Что угодно</string>
+
+    <string name="people_add_detail">Добавить данные</string>
+    <string name="people_already_added">Уже добавлено</string>
+    <string name="people_remove">Удалить</string>
+    <string name="people_cannot_be_empty">Поле не может быть пустым</string>
+    <string name="people_custom_label">Своя подпись</string>
+    <string name="people_custom_label_placeholder">Своя подпись</string>
+    <string name="people_label_optional">Подпись (необязательно)</string>
+    <string name="people_birthday_month">Месяц</string>
+    <string name="people_birthday_day">День</string>
+    <string name="people_birthday_year">Год</string>
+    <string name="people_birthday_optional">необязательно</string>
+    <string name="people_birthday_year_example">например, 1996</string>
+    <string name="people_birthday_date_not_in_year">В %2$s году нет даты %1$s</string>
+    <string name="people_birthday_year_range">Укажите год от %1$d до %2$d</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">Напоминание о задаче</string>
+    <string name="notifications_unfinished_task">Незавершённая задача</string>
+    <string name="notifications_daily_note">Ежедневная заметка</string>
+    <string name="notifications_daily_title">Ежедневник: %1$s</string>
+    <string name="notifications_note">Заметка</string>
+    <string name="notifications_birthday">День рождения</string>
+    <string name="notifications_birthday_turns_age">%1$s сегодня исполняется %2$d</string>
+    <string name="notifications_birthday_today">Сегодня день рождения: %1$s</string>
+    <string name="notifications_open">Открыть</string>
+</resources>

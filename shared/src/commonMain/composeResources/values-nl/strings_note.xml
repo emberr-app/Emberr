@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">Typ / voor opdrachten...</string>
+    <string name="note_copied_to_clipboard">Gekopieerd naar klembord</string>
+    <string name="note_copied_as_markdown">Gekopieerd als Markdown</string>
+    <string name="note_options">Opties</string>
+    <string name="note_more_options">Meer opties</string>
+    <string name="note_choose_icon">Pictogram kiezen</string>
+    <string name="note_search_emojis">Emoji's zoeken</string>
+    <string name="note_no_emojis_found">Geen emoji's gevonden</string>
+    <string name="note_editing_template">Sjabloon bewerken</string>
+    <string name="note_icon_options">Pictogramopties</string>
+    <string name="note_change_icon">Pictogram wijzigen</string>
+    <string name="note_add_icon">Pictogram toevoegen</string>
+    <string name="note_remove_icon">Pictogram verwijderen</string>
+    <string name="note_cover_options">Omslagopties</string>
+    <string name="note_upload_cover">Omslag uploaden</string>
+    <string name="note_remove_cover">Omslag verwijderen</string>
+    <string name="note_hide_word_count">Aantal woorden verbergen</string>
+    <string name="note_show_word_count">Aantal woorden tonen</string>
+    <string name="note_alignment">Uitlijning</string>
+    <string name="note_note_width">Notitiebreedte</string>
+    <string name="note_unfavorite">Geen favoriet meer</string>
+    <string name="note_favorite">Favoriet</string>
+    <string name="note_open_as_sticky_note">Openen als plaknotitie</string>
+    <string name="note_export_note">Notitie exporteren</string>
+    <string name="note_copy_text">Tekst kopiëren</string>
+    <string name="note_copy_as_markdown">Kopiëren als Markdown</string>
+    <string name="note_download_markdown">.md downloaden</string>
+    <string name="note_download_pdf">PDF downloaden</string>
+    <string name="note_move_to_trash">Naar prullenbak</string>
+    <string name="note_width_narrow">Smal</string>
+    <string name="note_width_full">Volledig</string>
+    <string name="note_align_left">Links</string>
+    <string name="note_align_center">Midden</string>
+    <string name="note_align_right">Rechts</string>
+    <string name="note_align_justify">Uitvullen</string>
+    <string name="note_note_options">Notitieopties</string>
+    <string name="note_export_options">Exportopties</string>
+    <string name="note_paste_image_link">Plak een afbeeldingslink</string>
+    <string name="note_cover_image">Omslagafbeelding</string>
+    <string name="note_drag_image_to_reposition">Sleep de afbeelding om te verplaatsen</string>
+    <string name="note_save_position">Positie opslaan</string>
+    <string name="note_reposition">Verplaatsen</string>
+    <string name="note_collapse_panel">Paneel inklappen</string>
+    <string name="note_expand_panel">Paneel uitklappen</string>
+    <plurals name="note_word_count">
+        <item quantity="one">%1$d woord</item>
+        <item quantity="other">%1$d woorden</item>
+    </plurals>
+</resources>

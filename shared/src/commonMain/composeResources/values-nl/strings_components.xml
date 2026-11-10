@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">Wissen</string>
+    <string name="components_select_all">Alles selecteren</string>
+    <string name="components_spaces_none_yet">Nog geen</string>
+    <string name="components_spaces_none">Geen</string>
+    <plurals name="components_spaces_all">
+        <item quantity="one">%1$d ruimte</item>
+        <item quantity="other">Alle %1$d ruimtes</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="one">%1$d van %2$d ruimtes</item>
+        <item quantity="other">%1$d van %2$d ruimtes</item>
+    </plurals>
+    <string name="components_search_notes">Notities zoeken...</string>
+    <string name="components_create_new_note">Nieuwe notitie maken</string>
+    <string name="components_new_named_note">Nieuwe notitie “%1$s”</string>
+    <string name="components_note_picker_hint">Typ om te zoeken of maak een nieuwe notitie</string>
+    <string name="components_link_to_note_heading">LINKEN AAN NOTITIE</string>
+    <string name="components_link_to_note">Linken aan notitie</string>
+    <string name="components_load_more">Meer laden</string>
+    <string name="components_show_sidebar">Zijbalk tonen</string>
+    <string name="components_clear_search">Zoekopdracht wissen</string>
+    <string name="components_people_search_placeholder">Zoek of voeg een persoon toe</string>
+    <string name="components_people_create_failed">Kan de persoon niet maken</string>
+    <string name="components_people_type_name_hint">Typ een naam om een persoon toe te voegen</string>
+    <string name="components_people_add_people">Personen toevoegen</string>
+    <string name="components_people_selected">Geselecteerd</string>
+    <string name="components_people_create_named">“%1$s” maken</string>
+    <string name="components_people_remove">Verwijderen</string>
+    <string name="components_people_remove_named">%1$s verwijderen</string>
+    <string name="components_reminder_later_today">Later vandaag</string>
+    <string name="components_reminder_tomorrow">Morgen</string>
+    <string name="components_reminder_this_weekend">Dit weekend</string>
+    <string name="components_reminder_next_week">Volgende week</string>
+    <string name="components_reminder_custom_date">Aangepaste datum...</string>
+    <string name="components_reminder_remove">Herinnering verwijderen</string>
+    <string name="components_reminder_date">Datum</string>
+    <string name="components_reminder_all_day">Hele dag</string>
+    <string name="components_reminder_in_15_mins">Over 15 min</string>
+    <string name="components_reminder_in_1_hour">Over 1 uur</string>
+    <string name="components_reminder_in_3_hours">Over 3 uur</string>
+    <string name="components_reminder_this_evening">Vanavond</string>
+    <string name="components_reminder_custom_time">Aangepaste tijd...</string>
+    <string name="components_reminder_time">Tijd</string>
+    <string name="components_choose_month_or_year">Kies maand of jaar</string>
+    <string name="components_previous_month">Vorige maand</string>
+    <string name="components_next_month">Volgende maand</string>
+    <string name="components_select_date">Datum kiezen</string>
+    <string name="components_month_and_year">Maand &amp; jaar</string>
+    <string name="components_select_time">Tijd kiezen</string>
+</resources>

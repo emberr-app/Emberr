@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Очікування</string>
+    <string name="lan_sync_status_not_paired">Пару не створено!</string>
+    <string name="lan_sync_status_already_in_progress">Синхронізація вже триває</string>
+    <string name="lan_sync_status_syncing">Синхронізація...</string>
+    <string name="lan_sync_status_auto_syncing">Автосинхронізація...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Отримання з комп'ютера...</string>
+    <string name="lan_sync_status_success">Успішно!</string>
+    <string name="lan_sync_status_synced_successfully">Синхронізовано успішно</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Синхронізовано, %1$d елемент не вдалося зберегти</item>
+        <item quantity="few">Синхронізовано, %1$d елементи не вдалося зберегти</item>
+        <item quantity="many">Синхронізовано, %1$d елементів не вдалося зберегти</item>
+        <item quantity="other">Синхронізовано, %1$d елемента не вдалося зберегти</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Часткова синхронізація, буде повторено</string>
+    <string name="lan_sync_status_update_both_devices">Оновіть Emberr на обох пристроях</string>
+    <string name="lan_sync_status_desktop_offline">Комп'ютер не в мережі</string>
+    <string name="lan_sync_status_failed">Помилка: %1$s</string>
+    <string name="lan_sync_status_sync_error">Помилка синхронізації: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Створити пару з мобільним пристроєм</string>
+    <string name="lan_sync_pair_dialog_message">Відскануйте цей QR-код у мобільному застосунку Emberr, щоб безпечно підключитися до комп'ютера.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Секретний токен: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Відскануйте QR-код, показаний на комп'ютері.</string>
+    <string name="lan_sync_scanner_desktop_hint">На комп'ютері відкрийте Налаштування → Синхронізація через LAN → Створити пару з мобільним пристроєм.</string>
+    <string name="lan_sync_camera_access_needed">Потрібен доступ до камери</string>
+    <string name="lan_sync_camera_allow_message">Дозвольте доступ до камери, щоб відсканувати код пари на комп'ютері.</string>
+    <string name="lan_sync_camera_turn_on_message">Увімкніть «Камера» в дозволах, а потім поверніться сюди.</string>
+    <string name="lan_sync_allow_camera">Дозволити камеру</string>
+    <string name="lan_sync_open_app_settings">Відкрити налаштування застосунку</string>
+    <string name="lan_sync_camera_mobile_only">Сканування камерою підтримується лише на мобільних пристроях.</string>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Inactief</string>
+    <string name="lan_sync_status_not_paired">Niet gekoppeld!</string>
+    <string name="lan_sync_status_already_in_progress">Synchronisatie is al bezig</string>
+    <string name="lan_sync_status_syncing">Synchroniseren...</string>
+    <string name="lan_sync_status_auto_syncing">Automatisch synchroniseren...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Ophalen van desktop...</string>
+    <string name="lan_sync_status_success">Gelukt!</string>
+    <string name="lan_sync_status_synced_successfully">Gesynchroniseerd</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Gesynchroniseerd, %1$d item kon niet worden opgeslagen</item>
+        <item quantity="other">Gesynchroniseerd, %1$d items konden niet worden opgeslagen</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Gedeeltelijk gesynchroniseerd, wordt opnieuw geprobeerd</string>
+    <string name="lan_sync_status_update_both_devices">Werk Emberr bij op beide apparaten</string>
+    <string name="lan_sync_status_desktop_offline">Desktop offline</string>
+    <string name="lan_sync_status_failed">Mislukt: %1$s</string>
+    <string name="lan_sync_status_sync_error">Synchronisatiefout: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Mobiel apparaat koppelen</string>
+    <string name="lan_sync_pair_dialog_message">Scan deze QR-code met de mobiele Emberr-app om veilig met je desktop te verbinden.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Geheim token: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Scan de QR-code op je desktop.</string>
+    <string name="lan_sync_scanner_desktop_hint">Open op je desktop Instellingen → LAN-synchronisatie → Mobiel apparaat koppelen.</string>
+    <string name="lan_sync_camera_access_needed">Cameratoegang nodig</string>
+    <string name="lan_sync_camera_allow_message">Sta de camera toe om de koppelcode op je desktop te scannen.</string>
+    <string name="lan_sync_camera_turn_on_message">Zet Camera aan bij Rechten en kom dan hier terug.</string>
+    <string name="lan_sync_allow_camera">Camera toestaan</string>
+    <string name="lan_sync_open_app_settings">App-instellingen openen</string>
+    <string name="lan_sync_camera_mobile_only">Scannen met de camera werkt alleen op mobiele apparaten.</string>
+</resources>

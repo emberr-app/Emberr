@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">Bis später!</string>
+    <string name="whatsnew_whats_new_question">Was ist neu?</string>
+    <string name="whatsnew_title">Neuigkeiten</string>
+    <string name="whatsnew_version">Version %1$s</string>
+    <string name="whatsnew_new">Neu</string>
+    <string name="whatsnew_themes_heading">Designs</string>
+    <string name="whatsnew_themes_where">Einstellungen → Darstellung → Design</string>
+    <string name="whatsnew_themes_description_desktop">Wähle aus 13 Farbdesigns wie Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine und Hoher Kontrast. Jedes hat eine eigene Stärke, und du kannst wählen, ob Text und Symbole ihm auch folgen.</string>
+    <string name="whatsnew_themes_description_mobile">Wähle aus 14 Farbdesigns wie Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine und Hoher Kontrast, oder lass **Hintergrundbild** die Farben deines Hintergrundbilds übernehmen. Jedes hat eine eigene Stärke, und du kannst wählen, ob Text und Symbole ihm auch folgen. Auch deine Widgets auf dem Startbildschirm folgen dem Design.</string>
+    <string name="whatsnew_texture_heading">Papiertextur</string>
+    <string name="whatsnew_texture_where">Einstellungen → Darstellung → Design → Textur</string>
+    <string name="whatsnew_texture_description">Gib der App eine sanfte Körnung wie echtes Papier. Lege fest, wie stark sie ist und wo sie erscheint: in der ganzen App, in Notizen, auf der Leinwand oder in Tagesnotizen.</string>
+    <string name="whatsnew_scale_heading">Skalierung der Oberfläche</string>
+    <string name="whatsnew_scale_where">Einstellungen → Darstellung → Skalierung der Oberfläche</string>
+    <string name="whatsnew_scale_description_desktop">Mach alles in der App größer oder kleiner, von 80% bis 200%, oder nutze **Ctrl +**, **Ctrl −** und **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Mach alles in der App größer oder kleiner, von 80% bis 200%.</string>
+    <string name="whatsnew_widgets_heading">Widgets</string>
+    <string name="whatsnew_widgets_where">Startbildschirm lange drücken → Widgets → Emberr</string>
+    <string name="whatsnew_widgets_description">Alle Widgets haben einen neuen, aufgeräumten Look, und es gibt drei neue: **Notizkarte**, **Schnell notieren** und **Zitat des Tages**. Widgets zeigen die gewählte Notiz jetzt sofort an und sagen dir, wenn sie gelöscht wurde.</string>
+    <string name="whatsnew_editor_heading">Editor</string>
+    <string name="whatsnew_editor_where">Tippe / irgendwo in einer Notiz</string>
+    <string name="whatsnew_editor_description">Das Slash-Menü öffnet sich jetzt direkt nach jedem Zeichen, nicht nur nach einem Leerzeichen. Wenn du über einen Treffer hinaus tippst, lösche zurück und das Menü erscheint wieder.</string>
+    <string name="whatsnew_others_heading">Sonstiges</string>
+    <string name="whatsnew_others_where">Kleinere Änderungen und Fehlerbehebungen</string>
+    <string name="whatsnew_others_sliders">Schieberegler in der ganzen App haben ein neues Design.</string>
+    <string name="whatsnew_others_title_time_desktop">Tippe **/** im Titel einer Notiz, um die aktuelle Uhrzeit oder das Datum einzufügen.</string>
+    <string name="whatsnew_others_title_time_mobile">Füge die aktuelle Uhrzeit oder das Datum über die Tastatur-Symbolleiste in den Titel einer Notiz ein.</string>
+    <string name="whatsnew_others_sync_network">Die Netzwerkwahl für die Synchronisierung findest du jetzt unter **Einstellungen → Synchronisierung &amp; Backup**.</string>
+    <string name="whatsnew_others_windows_startup">Schnellerer Start unter Windows.</string>
+    <string name="whatsnew_others_small_fixes">Viele kleine Fehlerbehebungen.</string>
+    <string name="whatsnew_preview_options">Optionen</string>
+    <string name="whatsnew_preview_trip_title">Wochenendausflug</string>
+    <string name="whatsnew_preview_trip_text">Um 8 Uhr losfahren, um dem Verkehr zuvorzukommen.</string>
+    <string name="whatsnew_preview_train_tickets">Zugtickets</string>
+    <string name="whatsnew_preview_passport">Reisepass</string>
+    <string name="whatsnew_preview_camera_charger">Kameraladegerät</string>
+    <string name="whatsnew_preview_reading_list">Leseliste</string>
+    <string name="whatsnew_preview_reading_list_books">Die Wurzeln des Lebens, Piranesi, Der Astronaut</string>
+    <string name="whatsnew_preview_meeting_title">Teambesprechung</string>
+    <string name="whatsnew_preview_meeting_text">Donnerstag um 10, Raum 2.</string>
+    <string name="whatsnew_preview_typed_heading">Tagesordnung</string>
+    <string name="whatsnew_preview_quote">Das Geheimnis des Vorankommens ist der Anfang.</string>
+    <string name="whatsnew_preview_jot_prompt">Was beschäftigt dich?</string>
+    <string name="whatsnew_preview_jot_button">Schnell notieren</string>
+</resources>

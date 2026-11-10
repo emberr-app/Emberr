@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">Taken</string>
+    <string name="overview_section_bookmarks">Bladwijzers</string>
+    <string name="overview_section_images">Afbeeldingen</string>
+    <string name="overview_section_documents">Documenten</string>
+    <string name="overview_tasks_repeating">Terugkerend</string>
+    <string name="overview_tasks_note">Notitie</string>
+    <string name="overview_tasks_today">Vandaag</string>
+    <string name="overview_tasks_tomorrow">Morgen</string>
+    <string name="overview_tasks_yesterday">Gisteren</string>
+    <string name="overview_tasks_none_completed">Nog geen voltooide taken.</string>
+    <string name="overview_tasks_all_caught_up">Alles afgerond!</string>
+    <string name="overview_tasks_completed">Voltooid</string>
+    <string name="overview_tasks_completed_tasks">Voltooide taken</string>
+    <string name="overview_tasks_hide_completed">Voltooide verbergen</string>
+    <string name="overview_tasks_show_completed">Voltooide tonen</string>
+    <string name="overview_tasks_add_task_description">Taak toevoegen</string>
+    <string name="overview_tasks_add_task">Taak toevoegen</string>
+    <string name="overview_images_empty">Nog geen afbeeldingen opgeslagen.</string>
+    <string name="overview_images_add_image_description">Afbeelding toevoegen</string>
+    <string name="overview_images_add_image">Afbeelding toevoegen</string>
+    <string name="overview_documents_empty">Nog geen documenten bijgevoegd.</string>
+    <string name="overview_documents_add_document_description">Document toevoegen</string>
+    <string name="overview_documents_add_document">Document toevoegen</string>
+    <string name="overview_bookmarks_empty">Nog geen opgeslagen links.</string>
+    <string name="overview_bookmarks_add_bookmark_description">Bladwijzer toevoegen</string>
+    <string name="overview_bookmarks_add_bookmark">Bladwijzer toevoegen</string>
+    <string name="overview_bookmarks_add_link">Link toevoegen</string>
+    <string name="overview_bookmarks_paste_link">Plak een link...</string>
+    <string name="overview_bookmarks_clear_link">Link wissen</string>
+    <string name="overview_bookmarks_all">Alles</string>
+    <string name="overview_bookmarks_others">Overige</string>
+</resources>

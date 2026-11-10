@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">Ежедневник</string>
+    <string name="app_shell_home">Главная</string>
+    <string name="app_shell_ask_ai">Спросить ИИ</string>
+    <string name="app_shell_search">Поиск</string>
+    <string name="app_shell_voice_task">Голосовая задача</string>
+    <string name="app_shell_mic">Микрофон</string>
+    <string name="app_shell_search_anything">Искать что угодно</string>
+    <string name="app_shell_close_search">Закрыть поиск</string>
+    <string name="app_shell_clear_search">Очистить поиск</string>
+</resources>

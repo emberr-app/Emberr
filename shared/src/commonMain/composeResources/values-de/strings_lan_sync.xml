@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Bereit</string>
+    <string name="lan_sync_status_not_paired">Nicht gekoppelt!</string>
+    <string name="lan_sync_status_already_in_progress">Synchronisierung läuft bereits</string>
+    <string name="lan_sync_status_syncing">Wird synchronisiert...</string>
+    <string name="lan_sync_status_auto_syncing">Automatische Synchronisierung...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Wird vom Desktop abgerufen...</string>
+    <string name="lan_sync_status_success">Erfolgreich!</string>
+    <string name="lan_sync_status_synced_successfully">Erfolgreich synchronisiert</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Synchronisiert, %1$d Element konnte nicht gespeichert werden</item>
+        <item quantity="other">Synchronisiert, %1$d Elemente konnten nicht gespeichert werden</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Teilweise synchronisiert, neuer Versuch folgt</string>
+    <string name="lan_sync_status_update_both_devices">Aktualisiere Emberr auf beiden Geräten</string>
+    <string name="lan_sync_status_desktop_offline">Desktop offline</string>
+    <string name="lan_sync_status_failed">Fehlgeschlagen: %1$s</string>
+    <string name="lan_sync_status_sync_error">Sync-Fehler: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Mobilgerät koppeln</string>
+    <string name="lan_sync_pair_dialog_message">Scanne diesen QR-Code mit der Emberr-App auf dem Handy, um dich sicher mit deinem Desktop zu verbinden.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Geheimer Token: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Scanne den QR-Code, der auf deinem Desktop angezeigt wird.</string>
+    <string name="lan_sync_scanner_desktop_hint">Öffne auf deinem Desktop Einstellungen → LAN-Synchronisierung → Mobilgerät koppeln.</string>
+    <string name="lan_sync_camera_access_needed">Kamerazugriff erforderlich</string>
+    <string name="lan_sync_camera_allow_message">Erlaube den Kamerazugriff, um den Kopplungscode auf deinem Desktop zu scannen.</string>
+    <string name="lan_sync_camera_turn_on_message">Schalte „Kamera“ unter „Berechtigungen“ ein und komm dann hierher zurück.</string>
+    <string name="lan_sync_allow_camera">Kamera erlauben</string>
+    <string name="lan_sync_open_app_settings">App-Einstellungen öffnen</string>
+    <string name="lan_sync_camera_mobile_only">Scannen mit der Kamera ist nur auf Mobilgeräten möglich.</string>
+</resources>

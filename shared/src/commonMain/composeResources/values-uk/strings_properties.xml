@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Властивості</string>
+    <string name="properties_built_in">Вбудовані</string>
+    <string name="properties_built_in_hint">Вбудовані властивості не можна перейменувати чи видалити.</string>
+    <string name="properties_custom">Власні</string>
+    <string name="properties_add_property">Додати властивість</string>
+    <string name="properties_new_property">Нова властивість</string>
+    <string name="properties_edit_property">Редагувати властивість</string>
+    <string name="properties_delete_question">Видалити «%1$s»? Її буде прибрано з усіх нотаток, де вона використовується.</string>
+    <string name="properties_property_name">Назва властивості</string>
+    <string name="properties_name_taken">Властивість з такою назвою вже існує</string>
+    <string name="properties_value_type">Тип значення</string>
+    <string name="properties_value_type_locked">Тип значення не можна змінити після створення властивості.</string>
+    <string name="properties_delete_property">Видалити властивість</string>
+    <string name="properties_add">Додати</string>
+</resources>

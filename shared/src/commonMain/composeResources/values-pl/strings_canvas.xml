@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="canvas_options">Opcje</string>
+    <string name="canvas_more_options">Więcej opcji</string>
+    <string name="canvas_rename">Zmień nazwę</string>
+    <string name="canvas_open_as_sticky_note">Otwórz jako karteczkę</string>
+    <string name="canvas_move_to_trash">Przenieś do kosza</string>
+    <string name="canvas_add_to_favorites">Dodaj do ulubionych</string>
+    <string name="canvas_remove_from_favorites">Usuń z ulubionych</string>
+    <string name="canvas_sheet_title">Płótno</string>
+    <string name="canvas_rename_canvas">Zmień nazwę płótna</string>
+    <string name="canvas_title_placeholder">Tytuł płótna...</string>
+    <string name="canvas_untitled_canvas">Płótno bez tytułu</string>
+
+    <string name="canvas_shapes">Kształty</string>
+    <string name="canvas_shape_rectangle">Prostokąt</string>
+    <string name="canvas_shape_square">Kwadrat</string>
+    <string name="canvas_shape_circle">Koło</string>
+    <string name="canvas_shape_oval">Owal</string>
+    <string name="canvas_shape_triangle">Trójkąt</string>
+    <string name="canvas_shape_diamond">Romb</string>
+    <string name="canvas_shape_pentagon">Pięciokąt</string>
+    <string name="canvas_shape_hexagon">Sześciokąt</string>
+    <string name="canvas_shape_parallelogram">Równoległobok</string>
+    <string name="canvas_shape_trapezoid">Trapez</string>
+    <string name="canvas_shape_pill">Pigułka</string>
+    <string name="canvas_shape_database">Baza danych</string>
+    <string name="canvas_shape_double_rectangle">Podwójny prostokąt</string>
+    <string name="canvas_shape_double_square">Podwójny kwadrat</string>
+    <string name="canvas_shape_double_circle">Podwójne koło</string>
+    <string name="canvas_shape_double_triangle">Podwójny trójkąt</string>
+
+    <string name="canvas_clear">Wyczyść</string>
+    <string name="canvas_zoom_in">Powiększ</string>
+    <string name="canvas_zoom_out">Pomniejsz</string>
+    <string name="canvas_go_to_boxes">Przejdź do pól</string>
+    <string name="canvas_undo">Cofnij</string>
+    <string name="canvas_redo">Ponów</string>
+
+    <string name="canvas_tool_pen">Pióro</string>
+    <string name="canvas_tool_highlighter">Zakreślacz</string>
+    <string name="canvas_tool_eraser">Gumka</string>
+    <string name="canvas_tool_text">Tekst</string>
+    <string name="canvas_tool_shapes">Kształty</string>
+    <string name="canvas_tool_line">Linia</string>
+    <string name="canvas_tool_image">Obraz</string>
+
+    <string name="canvas_default_ink">Domyślny tusz</string>
+    <string name="canvas_no_background">Bez tła</string>
+    <string name="canvas_stroke">Obrys</string>
+    <string name="canvas_stroke_width">Grubość obrysu</string>
+    <string name="canvas_pressure">Nacisk</string>
+    <string name="canvas_same_thickness">Stała grubość</string>
+    <string name="canvas_follow_pressure">Zależnie od nacisku</string>
+    <string name="canvas_opacity">Krycie</string>
+    <string name="canvas_size">Rozmiar</string>
+    <string name="canvas_font">Czcionka</string>
+    <string name="canvas_weight">Grubość</string>
+    <string name="canvas_color">Kolor</string>
+    <string name="canvas_background">Tło</string>
+    <string name="canvas_align">Wyrównanie</string>
+    <string name="canvas_line">Linia</string>
+    <string name="canvas_line_style">Styl linii</string>
+
+    <string name="canvas_width_thin">Cienka</string>
+    <string name="canvas_width_medium">Średnia</string>
+    <string name="canvas_width_thick">Gruba</string>
+    <string name="canvas_size_small">Mały</string>
+    <string name="canvas_size_medium">Średni</string>
+    <string name="canvas_size_large">Duży</string>
+    <string name="canvas_weight_regular">Normalna</string>
+    <string name="canvas_weight_medium">Średnia</string>
+    <string name="canvas_weight_bold">Pogrubiona</string>
+    <string name="canvas_font_default">Domyślna</string>
+    <string name="canvas_align_left">Wyrównaj do lewej</string>
+    <string name="canvas_align_center">Wyśrodkuj</string>
+    <string name="canvas_align_right">Wyrównaj do prawej</string>
+
+    <string name="canvas_line_arrow">Strzałka</string>
+    <string name="canvas_line_dotted_arrow">Strzałka kropkowana</string>
+    <string name="canvas_line_dashed_arrow">Strzałka przerywana</string>
+    <string name="canvas_line_solid_line">Linia ciągła</string>
+    <string name="canvas_line_dotted_line">Linia kropkowana</string>
+    <string name="canvas_line_dashed_line">Linia przerywana</string>
+
+    <string name="canvas_show_dots">Pokaż kropki</string>
+    <string name="canvas_hide_dots">Ukryj kropki</string>
+    <string name="canvas_full_screen">Pełny ekran</string>
+    <string name="canvas_exit_full_screen">Zamknij pełny ekran</string>
+
+    <string name="canvas_delete_box">Usuń pole</string>
+    <string name="canvas_box_color">Kolor pola</string>
+    <string name="canvas_paste_image">Wklej obraz</string>
+    <string name="canvas_adding_image">Dodawanie obrazu...</string>
+    <string name="canvas_add_label">Dodaj etykietę</string>
+    <string name="canvas_edit_label">Edytuj etykietę</string>
+    <string name="canvas_ungroup">Rozgrupuj</string>
+    <string name="canvas_create_group">Utwórz grupę</string>
+
+    <string name="canvas_image">Obraz płótna</string>
+    <string name="canvas_image_failed_to_download">Nie udało się pobrać obrazu</string>
+    <string name="canvas_downloading_image">Pobieranie obrazu...</string>
+</resources>

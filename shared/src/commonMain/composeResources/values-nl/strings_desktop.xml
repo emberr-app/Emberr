@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Emberr openen</string>
+    <string name="desktop_tray_close_window">Venster sluiten</string>
+    <string name="desktop_tray_quit">Afsluiten</string>
+    <string name="desktop_sticky_note">Plaknotitie</string>
+    <string name="desktop_select_image">Afbeelding kiezen</string>
+    <string name="desktop_select_document">Document kiezen</string>
+    <string name="desktop_file_not_found_message">Dit bestand is niet meer beschikbaar op dit apparaat.</string>
+    <string name="desktop_file_not_found_title">Bestand niet gevonden</string>
+    <string name="desktop_open_file_failed">Kan bestand niet openen: %1$s</string>
+    <string name="desktop_error">Fout</string>
+    <string name="desktop_backup_only_on_android_message">Automatische back-ups op de achtergrond werken momenteel alleen in de Android-app. Je kunt nog steeds de knop 'Back-up exporteren' gebruiken!</string>
+    <string name="desktop_backup_only_on_android_title">Desktopfunctie</string>
+    <string name="desktop_update_available">Update beschikbaar</string>
+    <string name="desktop_update_available_message">Emberr %1$s is beschikbaar. Je gebruikt %2$s. De update wordt op de achtergrond gedownload terwijl je verder werkt.</string>
+    <string name="desktop_update_download">Downloaden</string>
+    <string name="desktop_update_ready_to_install">Update klaar om te installeren</string>
+    <string name="desktop_update_ready_message">Start Emberr opnieuw om versie %1$s te gebruiken. Kies je Later, dan wordt de update gebruikt wanneer je Emberr de volgende keer opent.</string>
+    <string name="desktop_update_restart">Opnieuw starten</string>
+    <string name="desktop_update_failed">Kan Emberr niet bijwerken</string>
+    <string name="desktop_update_later">Later</string>
+    <string name="desktop_ok">OK</string>
+    <string name="desktop_new_note_in_folder">Nieuwe notitie in map</string>
+    <string name="desktop_new_note_here">Nieuwe notitie hier</string>
+    <string name="desktop_rename_folder">Naam map wijzigen</string>
+    <string name="desktop_add_subfolder">Submap toevoegen</string>
+    <string name="desktop_rename_note">Naam notitie wijzigen</string>
+    <string name="desktop_open_in_split_view">Openen in gesplitste weergave</string>
+    <string name="desktop_toggle_section">%1$s in-/uitklappen</string>
+    <string name="desktop_empty_space">Deze ruimte is leeg.</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">Begin met %1$s of %2$s</string>
+    <string name="desktop_empty_space_a_note">een notitie</string>
+    <string name="desktop_create_space">Ruimte maken</string>
+    <string name="desktop_add_space">Ruimte toevoegen</string>
+    <string name="desktop_space_options">Ruimte-opties</string>
+    <string name="desktop_close_pane">Paneel sluiten</string>
+    <string name="desktop_close_this_screen">Dit scherm sluiten</string>
+    <string name="desktop_drag_to_swap_screens">Sleep om schermen te wisselen</string>
+    <string name="desktop_search_no_match">Geen notities, afspraken of personen gevonden voor “%1$s”</string>
+    <string name="desktop_hide_sidebar">Zijbalk verbergen</string>
+    <string name="desktop_collapse_sidebar">Zijbalk inklappen</string>
+    <string name="desktop_select_a_note">Kies een notitie in de zijbalk</string>
+    <string name="desktop_folder">Map</string>
+    <string name="desktop_sync">Synchroniseren</string>
+</resources>

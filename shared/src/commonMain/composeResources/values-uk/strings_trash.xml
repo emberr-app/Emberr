@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Кошик порожній</string>
+    <string name="trash_title">Кошик</string>
+    <string name="trash_empty_trash">Очистити кошик</string>
+    <string name="trash_empty_trash_tooltip">Очистити кошик</string>
+    <string name="trash_restore_note">Відновити нотатку</string>
+    <string name="trash_delete_permanently">Видалити назавжди</string>
+    <string name="trash_manage_note">Керування нотаткою</string>
+    <string name="trash_manage_note_subtitle">Нотатки в кошику автоматично видаляються через 30 днів.</string>
+    <string name="trash_empty_trash_question">Очистити кошик?</string>
+    <string name="trash_empty_trash_subtitle">Усі нотатки в кошику буде видалено назавжди. Цю дію не можна скасувати.</string>
+</resources>

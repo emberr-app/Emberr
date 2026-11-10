@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Importeren uit</string>
+    <string name="import_text_and_markdown">Tekst en Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Werkt ook voor notities uit Obsidian en Bear.\nSommige Obsidian-functies worden mogelijk niet volledig geïmporteerd.</string>
+
+    <string name="import_button">Importeren</string>
+    <string name="import_done">Gereed</string>
+    <string name="import_stop">Import stoppen</string>
+    <string name="import_or_drop_here">of sleep hierheen</string>
+    <string name="import_choose_again_hint_desktop">Klik om opnieuw te kiezen, of sleep hierheen.</string>
+    <string name="import_choose_again_hint_touch">Tik om opnieuw te kiezen.</string>
+    <string name="import_stopping">Stoppen en geïmporteerde items verwijderen…</string>
+    <string name="import_stopped">Import gestopt</string>
+    <string name="import_nothing_added">Er is niets toegevoegd.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="one">%1$d ruimte</item>
+        <item quantity="other">%1$d ruimtes</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="one">%1$d notitie</item>
+        <item quantity="other">%1$d notities</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="one">%1$d map</item>
+        <item quantity="other">%1$d mappen</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="one">%1$d bijlage</item>
+        <item quantity="other">%1$d bijlagen</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Importeer een back-up zonder je huidige notities te vervangen.</string>
+    <string name="import_emberr_copying_media">Media kopiëren %1$d van %2$d…</string>
+    <string name="import_emberr_getting_ready">Voorbereiden…</string>
+    <string name="import_emberr_saving">Import opslaan…</string>
+    <string name="import_emberr_failed">Import mislukt</string>
+    <string name="import_emberr_choose_backup_file">Kies een back-upbestand</string>
+    <string name="import_emberr_choose_backup_hint">.emberr-bestand uit Back-up exporteren</string>
+    <string name="import_emberr_reading_backup">Back-up lezen…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Kies een ander bestand</string>
+    <string name="import_emberr_spaces_to_import">Te importeren ruimtes</string>
+    <string name="import_emberr_choose_backup_first">Kies eerst een back-up</string>
+    <string name="import_emberr_daily_notes">Dagnotities</string>
+    <string name="import_emberr_calendar">Agenda</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Dagnotities en afspraken toegevoegd</string>
+    <string name="import_emberr_added_daily_notes">Dagnotities toegevoegd</string>
+    <string name="import_emberr_added_calendar">Afspraken toegevoegd</string>
+    <string name="import_emberr_finished">Import voltooid</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="one">%1$d ruimte geïmporteerd</item>
+        <item quantity="other">%1$d ruimtes geïmporteerd</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">Kon %1$d mediabestand niet vinden in de back-up, dus het wordt als ontbrekend getoond.</item>
+        <item quantity="other">Kon %1$d mediabestanden niet vinden in de back-up, dus ze worden als ontbrekend getoond.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Onbekende fout</string>
+    <string name="import_emberr_picker_title">Kies een Emberr-back-up</string>
+
+    <string name="import_markdown_subtitle">Maak van .md-, .txt- en .canvas-bestanden, of een .zip met mappen, Emberr-notities.</string>
+    <string name="import_markdown_copying_file">%1$s kopiëren…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">Notitie %1$d van %2$d importeren…</item>
+        <item quantity="other">Notitie %1$d van %2$d importeren…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Kies bestanden of een .zip</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas of .zip</string>
+    <string name="import_markdown_reading_files">Bestanden lezen…</string>
+    <string name="import_markdown_could_not_read">Kon die bestanden niet lezen. %1$s</string>
+    <string name="import_markdown_save_to_space">Opslaan in ruimte</string>
+    <string name="import_markdown_import_as">Importeren als</string>
+    <string name="import_markdown_emberr_notes">Emberr-notities</string>
+    <string name="import_markdown_emberr_notes_subtitle">Elk bestand wordt een notitie van blokken.</string>
+    <string name="import_markdown_markdown_files">Markdown-bestanden</string>
+    <string name="import_markdown_coming_soon">Binnenkort</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="one">%1$d notitie geïmporteerd</item>
+        <item quantity="other">%1$d notities geïmporteerd</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="one">%1$d notitie geïmporteerd in %2$s</item>
+        <item quantity="other">%1$d notities geïmporteerd in %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">Kon %1$d niet importeren: %2$s</string>
+    <string name="import_markdown_choose_folder">Kies een map</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d bestand</item>
+        <item quantity="other">%1$d bestanden</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d overgeslagen: %2$s</string>
+    <string name="import_markdown_choose_different_files">Kies andere bestanden</string>
+    <string name="import_markdown_picker_title">Kies bestanden om te importeren</string>
+</resources>

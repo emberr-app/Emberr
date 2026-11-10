@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">Dagnotities</string>
+    <string name="app_shell_home">Start</string>
+    <string name="app_shell_ask_ai">Vraag AI</string>
+    <string name="app_shell_search">Zoeken</string>
+    <string name="app_shell_voice_task">Spraaktaak</string>
+    <string name="app_shell_mic">Microfoon</string>
+    <string name="app_shell_search_anything">Zoek naar alles</string>
+    <string name="app_shell_close_search">Zoeken sluiten</string>
+    <string name="app_shell_clear_search">Zoekopdracht wissen</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Ожидание</string>
+    <string name="lan_sync_status_not_paired">Не сопряжено!</string>
+    <string name="lan_sync_status_already_in_progress">Синхронизация уже идёт</string>
+    <string name="lan_sync_status_syncing">Синхронизация...</string>
+    <string name="lan_sync_status_auto_syncing">Автосинхронизация...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Получение с компьютера...</string>
+    <string name="lan_sync_status_success">Готово!</string>
+    <string name="lan_sync_status_synced_successfully">Синхронизировано</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Синхронизировано, %1$d элемент не удалось сохранить</item>
+        <item quantity="few">Синхронизировано, %1$d элемента не удалось сохранить</item>
+        <item quantity="many">Синхронизировано, %1$d элементов не удалось сохранить</item>
+        <item quantity="other">Синхронизировано, %1$d элемента не удалось сохранить</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Частичная синхронизация, будет повтор</string>
+    <string name="lan_sync_status_update_both_devices">Обновите Emberr на обоих устройствах</string>
+    <string name="lan_sync_status_desktop_offline">Компьютер не в сети</string>
+    <string name="lan_sync_status_failed">Ошибка: %1$s</string>
+    <string name="lan_sync_status_sync_error">Ошибка синхронизации: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Подключить мобильное устройство</string>
+    <string name="lan_sync_pair_dialog_message">Отсканируйте этот QR-код в мобильном приложении Emberr, чтобы безопасно подключиться к компьютеру.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Секретный токен: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Отсканируйте QR-код, показанный на компьютере.</string>
+    <string name="lan_sync_scanner_desktop_hint">На компьютере откройте «Настройки» → «Синхронизация по LAN» → «Подключить мобильное устройство».</string>
+    <string name="lan_sync_camera_access_needed">Нужен доступ к камере</string>
+    <string name="lan_sync_camera_allow_message">Разрешите доступ к камере, чтобы отсканировать код сопряжения на компьютере.</string>
+    <string name="lan_sync_camera_turn_on_message">Включите камеру в разделе «Разрешения» и вернитесь сюда.</string>
+    <string name="lan_sync_allow_camera">Разрешить камеру</string>
+    <string name="lan_sync_open_app_settings">Открыть настройки приложения</string>
+    <string name="lan_sync_camera_mobile_only">Сканирование камерой поддерживается только на мобильных устройствах.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Bezczynny</string>
+    <string name="lan_sync_status_not_paired">Nie sparowano!</string>
+    <string name="lan_sync_status_already_in_progress">Synchronizacja już trwa</string>
+    <string name="lan_sync_status_syncing">Synchronizowanie...</string>
+    <string name="lan_sync_status_auto_syncing">Automatyczna synchronizacja...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Pobieranie z komputera...</string>
+    <string name="lan_sync_status_success">Gotowe!</string>
+    <string name="lan_sync_status_synced_successfully">Zsynchronizowano pomyślnie</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Zsynchronizowano, nie udało się zapisać %1$d elementu</item>
+        <item quantity="few">Zsynchronizowano, nie udało się zapisać %1$d elementów</item>
+        <item quantity="many">Zsynchronizowano, nie udało się zapisać %1$d elementów</item>
+        <item quantity="other">Zsynchronizowano, nie udało się zapisać %1$d elementu</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Częściowa synchronizacja, nastąpi ponowna próba</string>
+    <string name="lan_sync_status_update_both_devices">Zaktualizuj Emberr na obu urządzeniach</string>
+    <string name="lan_sync_status_desktop_offline">Komputer offline</string>
+    <string name="lan_sync_status_failed">Błąd: %1$s</string>
+    <string name="lan_sync_status_sync_error">Błąd synchronizacji: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Sparuj urządzenie mobilne</string>
+    <string name="lan_sync_pair_dialog_message">Zeskanuj ten kod QR w aplikacji mobilnej Emberr, aby bezpiecznie połączyć się z komputerem.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Tajny token: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Zeskanuj kod QR widoczny na komputerze.</string>
+    <string name="lan_sync_scanner_desktop_hint">Na komputerze otwórz Ustawienia → Synchronizacja LAN → Sparuj urządzenie mobilne.</string>
+    <string name="lan_sync_camera_access_needed">Potrzebny dostęp do aparatu</string>
+    <string name="lan_sync_camera_allow_message">Zezwól na użycie aparatu, aby zeskanować kod parowania na komputerze.</string>
+    <string name="lan_sync_camera_turn_on_message">Włącz Aparat w Uprawnieniach, a potem wróć tutaj.</string>
+    <string name="lan_sync_allow_camera">Zezwól na aparat</string>
+    <string name="lan_sync_open_app_settings">Otwórz ustawienia aplikacji</string>
+    <string name="lan_sync_camera_mobile_only">Skanowanie aparatem działa tylko na urządzeniach mobilnych.</string>
+</resources>
