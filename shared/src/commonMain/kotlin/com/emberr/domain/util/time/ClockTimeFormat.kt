@@ -1,9 +1,9 @@
 package com.emberr.domain.util.time
 
-enum class TimeFormatPreference(val displayName: String) {
-    SYSTEM("System default"),
-    TWELVE_HOUR("12-hour"),
-    TWENTY_FOUR_HOUR("24-hour");
+enum class TimeFormatPreference {
+    SYSTEM,
+    TWELVE_HOUR,
+    TWENTY_FOUR_HOUR;
 
     fun usesTwentyFourHourClock(systemUsesTwentyFourHourClock: Boolean): Boolean = when (this) {
         SYSTEM -> systemUsesTwentyFourHourClock

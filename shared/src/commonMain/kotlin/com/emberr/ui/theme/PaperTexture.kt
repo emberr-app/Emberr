@@ -72,11 +72,11 @@ fun interface PaperGrainMover {
 
 val LocalPaperGrainMover = staticCompositionLocalOf { PaperGrainMover { } }
 
-enum class PaperTextureArea(val displayName: String) {
-    WHOLE_APP("Whole App"),
-    DAILY_NOTES("Daily Notes"),
-    NOTES("Notes"),
-    CANVAS("Canvas")
+enum class PaperTextureArea {
+    WHOLE_APP,
+    DAILY_NOTES,
+    NOTES,
+    CANVAS
 }
 
 fun paperTextureAreasNamed(savedAreas: String): Set<PaperTextureArea> =
@@ -93,12 +93,6 @@ fun paperTextureAreasWithToggled(areas: Set<PaperTextureArea>, tappedArea: Paper
     PaperTextureArea.WHOLE_APP in areas -> PaperTextureArea.entries.toSet() - PaperTextureArea.WHOLE_APP - tappedArea
     tappedArea in areas -> areas - tappedArea
     else -> areas + tappedArea
-}
-
-fun paperTextureAreasLabel(areas: Set<PaperTextureArea>): String {
-    if (PaperTextureArea.WHOLE_APP in areas) return PaperTextureArea.WHOLE_APP.displayName
-    val checkedAreas = PaperTextureArea.entries.filter { it in areas }
-    return if (checkedAreas.isEmpty()) "None" else checkedAreas.joinToString(", ") { it.displayName }
 }
 
 val LocalPaperTextureAreas = staticCompositionLocalOf { setOf(PaperTextureArea.WHOLE_APP) }

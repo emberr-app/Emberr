@@ -20,11 +20,26 @@ import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.applock.SystemUnlockResult
 import com.emberr.presentation.applock.phoneHasScreenLock
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.settings_app_lock
+import emberr.shared.generated.resources.settings_app_lock_needs_screen_lock
+import emberr.shared.generated.resources.settings_app_lock_turn_off_prompt
+import emberr.shared.generated.resources.settings_app_lock_turn_on_prompt
+import emberr.shared.generated.resources.settings_auto_lock
+import emberr.shared.generated.resources.settings_auto_lock_after_fifteen_minutes
+import emberr.shared.generated.resources.settings_auto_lock_after_five_minutes
+import emberr.shared.generated.resources.settings_auto_lock_after_one_hour
+import emberr.shared.generated.resources.settings_auto_lock_after_one_minute
+import emberr.shared.generated.resources.settings_auto_lock_immediately
+import emberr.shared.generated.resources.settings_group_security
+import emberr.shared.generated.resources.settings_screen_security
+import emberr.shared.generated.resources.settings_screen_security_hint
+import emberr.shared.generated.resources.settings_screen_security_hint_with_screenshots
 import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.lock_keyhole2
 import emberr.shared.generated.resources.timer_reset
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -36,15 +51,18 @@ actual fun AppLockSettingsSection() {
     val systemUnlockPrompt = (LocalActivity.current as? MainActivity)?.systemUnlockPrompt
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val screenLockNeededMessage = stringResource(Res.string.settings_app_lock_needs_screen_lock)
+    val turnOnPromptTitle = stringResource(Res.string.settings_app_lock_turn_on_prompt)
+    val turnOffPromptTitle = stringResource(Res.string.settings_app_lock_turn_off_prompt)
 
     fun changeAppLock(turnOn: Boolean) {
         if (!context.phoneHasScreenLock()) {
-            if (turnOn) showNativeToast("Set a screen lock on your phone first.") else appLockManager.turnOff()
+            if (turnOn) showNativeToast(screenLockNeededMessage) else appLockManager.turnOff()
             return
         }
         val prompt = systemUnlockPrompt ?: return
         coroutineScope.launch {
-            val result = prompt.ask(title = if (turnOn) "Turn on App Lock" else "Turn off App Lock")
+            val result = prompt.ask(title = if (turnOn) turnOnPromptTitle else turnOffPromptTitle)
             when (result) {
                 SystemUnlockResult.Unlocked -> if (turnOn) appLockManager.turnOn() else appLockManager.turnOff()
                 SystemUnlockResult.Cancelled -> Unit
@@ -53,10 +71,10 @@ actual fun AppLockSettingsSection() {
         }
     }
 
-    SettingsGroup(title = "Security") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_security)) {
         SettingsToggleRow(
             icon = painterResource(Res.drawable.lock_keyhole2),
-            title = "App Lock",
+            title = stringResource(Res.string.settings_app_lock),
             isChecked = isAppLockOn,
             onCheckedChange = ::changeAppLock
         )
@@ -70,7 +88,7 @@ actual fun AppLockSettingsSection() {
                 SettingsDivider()
                 SettingsChoiceRow(
                     icon = painterResource(Res.drawable.timer_reset),
-                    title = "Auto-Lock",
+                    title = stringResource(Res.string.settings_auto_lock),
                     value = autoLockDelayLabel(autoLockDelay),
                     choices = AutoLockDelay.entries.map { delay ->
                         SettingsChoice(
@@ -86,24 +104,27 @@ actual fun AppLockSettingsSection() {
         SettingsDivider()
         SettingsToggleRow(
             icon = painterResource(Res.drawable.eye_closed),
-            title = "Screen Security",
+            title = stringResource(Res.string.settings_screen_security),
             isChecked = isScreenSecurityOn,
-            subtitle = screenSecurityFootnote,
+            subtitle = stringResource(screenSecurityFootnoteResource),
             onCheckedChange = appLockManager::changeScreenSecurity
         )
     }
 }
 
-private val screenSecurityFootnote = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    "Hides Emberr's content in Recents."
+private val screenSecurityFootnoteResource = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    Res.string.settings_screen_security_hint
 } else {
-    "Hides Emberr's content in Recents. Screenshots are blocked too."
+    Res.string.settings_screen_security_hint_with_screenshots
 }
 
-private fun autoLockDelayLabel(delay: AutoLockDelay): String = when (delay) {
-    AutoLockDelay.IMMEDIATELY -> "Immediately"
-    AutoLockDelay.ONE_MINUTE -> "After 1 minute"
-    AutoLockDelay.FIVE_MINUTES -> "After 5 minutes"
-    AutoLockDelay.FIFTEEN_MINUTES -> "After 15 minutes"
-    AutoLockDelay.ONE_HOUR -> "After 1 hour"
-}
+@Composable
+private fun autoLockDelayLabel(delay: AutoLockDelay): String = stringResource(
+    when (delay) {
+        AutoLockDelay.IMMEDIATELY -> Res.string.settings_auto_lock_immediately
+        AutoLockDelay.ONE_MINUTE -> Res.string.settings_auto_lock_after_one_minute
+        AutoLockDelay.FIVE_MINUTES -> Res.string.settings_auto_lock_after_five_minutes
+        AutoLockDelay.FIFTEEN_MINUTES -> Res.string.settings_auto_lock_after_fifteen_minutes
+        AutoLockDelay.ONE_HOUR -> Res.string.settings_auto_lock_after_one_hour
+    }
+)

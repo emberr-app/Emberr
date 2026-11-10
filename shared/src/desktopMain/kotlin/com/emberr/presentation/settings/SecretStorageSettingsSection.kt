@@ -19,8 +19,17 @@ import com.emberr.core.security.secrets.SecretStorageState
 import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.settings_credential_storage
+import emberr.shared.generated.resources.settings_credential_storage_checking
+import emberr.shared.generated.resources.settings_credential_storage_checking_detail
+import emberr.shared.generated.resources.settings_credential_storage_got_it
+import emberr.shared.generated.resources.settings_credential_storage_plain_text
+import emberr.shared.generated.resources.settings_credential_storage_plain_text_detail
+import emberr.shared.generated.resources.settings_credential_storage_protected_detail
+import emberr.shared.generated.resources.settings_group_security
 import emberr.shared.generated.resources.shield_alert
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -29,10 +38,10 @@ actual fun SecretStorageSettingsSection() {
     val storageState by secretStore.storageState.collectAsState()
     var isDetailDialogVisible by remember { mutableStateOf(false) }
 
-    SettingsGroup(title = "Security") {
+    SettingsGroup(title = stringResource(Res.string.settings_group_security)) {
         SettingsActionRow(
             icon = painterResource(Res.drawable.shield_alert),
-            title = "Credential storage",
+            title = stringResource(Res.string.settings_credential_storage),
             trailingLabel = shortSummaryFor(storageState),
             isDestructive = storageState is SecretStorageState.StoredInPlainText,
             onClick = { isDetailDialogVisible = true }
@@ -54,7 +63,7 @@ private fun SecretStorageDetailDialog(
 ) {
     EmberrAlertDialog(
         onDismissRequest = onDismiss,
-        title = "Credential storage"
+        title = stringResource(Res.string.settings_credential_storage)
     ) {
         Text(
             text = detailedExplanationFor(storageState),
@@ -63,29 +72,28 @@ private fun SecretStorageDetailDialog(
         )
         Spacer(Modifier.height(20.dp))
         EmberrButtonPrimary(
-            text = "Got it",
+            text = stringResource(Res.string.settings_credential_storage_got_it),
             onClick = onDismiss,
             modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
+@Composable
 private fun shortSummaryFor(storageState: SecretStorageState): String = when (storageState) {
-    is SecretStorageState.Starting -> "Checking"
+    is SecretStorageState.Starting -> stringResource(Res.string.settings_credential_storage_checking)
     is SecretStorageState.ProtectedByCredentialManager -> storageState.backendDisplayName
-    is SecretStorageState.StoredInPlainText -> "Plain text"
+    is SecretStorageState.StoredInPlainText -> stringResource(Res.string.settings_credential_storage_plain_text)
 }
 
+@Composable
 private fun detailedExplanationFor(storageState: SecretStorageState): String = when (storageState) {
     is SecretStorageState.Starting ->
-        "Emberr is still checking which credential manager this system provides."
+        stringResource(Res.string.settings_credential_storage_checking_detail)
 
     is SecretStorageState.ProtectedByCredentialManager ->
-        "Your AI API keys and sync keys are held by ${storageState.backendDisplayName}, " +
-            "managed by your operating system. They are never written to Emberr's own files."
+        stringResource(Res.string.settings_credential_storage_protected_detail, storageState.backendDisplayName)
 
     is SecretStorageState.StoredInPlainText ->
-        "Your AI API keys and sync keys are stored as readable text in " +
-            "~/.emberr/secrets.properties. Anyone who can read your home folder can read them.\n\n" +
-            "${storageState.reason}\n\n${storageState.remedy}"
+        stringResource(Res.string.settings_credential_storage_plain_text_detail, storageState.reason, storageState.remedy)
 }

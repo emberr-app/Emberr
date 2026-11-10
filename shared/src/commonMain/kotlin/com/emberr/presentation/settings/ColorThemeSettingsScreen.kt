@@ -64,7 +64,6 @@ import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.availableColorThemes
 import com.emberr.ui.theme.colorThemePreferenceNamed
 import com.emberr.ui.theme.isPaperTextureAreaChecked
-import com.emberr.ui.theme.paperTextureAreasLabel
 import com.emberr.ui.theme.paperTextureAreasNamed
 import com.emberr.ui.theme.paperTextureAreasSavedValue
 import com.emberr.ui.theme.paperTextureAreasWithToggled
@@ -72,6 +71,21 @@ import com.emberr.ui.theme.sourceColorSchemes
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.settings_paper_texture
+import emberr.shared.generated.resources.settings_paper_texture_hint
+import emberr.shared.generated.resources.settings_paper_texture_show_on
+import emberr.shared.generated.resources.settings_texture_strength
+import emberr.shared.generated.resources.settings_theme
+import emberr.shared.generated.resources.settings_theme_group_colors
+import emberr.shared.generated.resources.settings_theme_group_strength
+import emberr.shared.generated.resources.settings_theme_group_text_and_icons
+import emberr.shared.generated.resources.settings_theme_group_texture
+import emberr.shared.generated.resources.settings_theme_mode
+import emberr.shared.generated.resources.settings_theme_strength
+import emberr.shared.generated.resources.settings_theme_text_and_icons
+import emberr.shared.generated.resources.settings_theme_text_and_icons_hint
 import emberr.shared.generated.resources.check
 import emberr.shared.generated.resources.moon_cloud
 import emberr.shared.generated.resources.paper_texture
@@ -81,6 +95,7 @@ import emberr.shared.generated.resources.text_type
 import emberr.shared.generated.resources.texture_strength
 import emberr.shared.generated.resources.theme_strength
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
@@ -134,13 +149,13 @@ fun ColorThemeSettingsScreen(
             )
         ) {
             item(key = "mode") {
-                SettingsGroup(title = "Mode") {
+                SettingsGroup(title = stringResource(Res.string.settings_theme_mode)) {
                     SettingsChoiceRow(
                         icon = painterResource(if (LocalAppIsDark.current) Res.drawable.moon_cloud else Res.drawable.sun),
-                        title = "Mode",
-                        value = selectedThemeMode.displayName,
+                        title = stringResource(Res.string.settings_theme_mode),
+                        value = selectedThemeMode.label(),
                         choices = ThemePreference.entries.map { option ->
-                            SettingsChoice(label = option.displayName, isSelected = option == selectedThemeMode) {
+                            SettingsChoice(label = option.label(), isSelected = option == selectedThemeMode) {
                                 viewModel.setThemePreference(option.name)
                             }
                         }
@@ -150,10 +165,10 @@ fun ColorThemeSettingsScreen(
 
             if (selectedColorTheme != ColorThemePreference.EMBERR) {
                 item(key = "strength") {
-                    SettingsGroup(title = "Strength") {
+                    SettingsGroup(title = stringResource(Res.string.settings_theme_group_strength)) {
                         PercentSliderRow(
                             icon = painterResource(Res.drawable.theme_strength),
-                            title = "Theme Strength",
+                            title = stringResource(Res.string.settings_theme_strength),
                             percent = colorThemeStrength,
                             onPercentChange = { newStrength ->
                                 if (newStrength != colorThemeStrength) viewModel.setColorThemeStrength(newStrength)
@@ -164,24 +179,24 @@ fun ColorThemeSettingsScreen(
             }
 
             item(key = "text_and_icons") {
-                SettingsGroup(title = "Text & Icons") {
+                SettingsGroup(title = stringResource(Res.string.settings_theme_group_text_and_icons)) {
                     SettingsToggleRow(
                         icon = painterResource(Res.drawable.text_type),
-                        title = "Theme Text & Icons",
+                        title = stringResource(Res.string.settings_theme_text_and_icons),
                         isChecked = themedTextAndIcons,
-                        subtitle = "When off, text and icons stay black and white.",
+                        subtitle = stringResource(Res.string.settings_theme_text_and_icons_hint),
                         onCheckedChange = { viewModel.setThemedTextAndIcons(it) }
                     )
                 }
             }
 
             item(key = "texture") {
-                SettingsGroup(title = "Texture") {
+                SettingsGroup(title = stringResource(Res.string.settings_theme_group_texture)) {
                     SettingsToggleRow(
                         icon = painterResource(Res.drawable.paper_texture),
-                        title = "Paper Texture",
+                        title = stringResource(Res.string.settings_paper_texture),
                         isChecked = paperTextureEnabled,
-                        subtitle = "Adds a soft grain, like paper.",
+                        subtitle = stringResource(Res.string.settings_paper_texture_hint),
                         onCheckedChange = { viewModel.setPaperTextureEnabled(it) }
                     )
                     if (paperTextureEnabled) {
@@ -197,7 +212,7 @@ fun ColorThemeSettingsScreen(
                         SettingsDivider()
                         PercentSliderRow(
                             icon = painterResource(Res.drawable.texture_strength),
-                            title = "Texture Strength",
+                            title = stringResource(Res.string.settings_texture_strength),
                             percent = paperTextureStrength,
                             onPercentChange = { newStrength ->
                                 if (newStrength != paperTextureStrength) viewModel.setPaperTextureStrength(newStrength)
@@ -209,7 +224,7 @@ fun ColorThemeSettingsScreen(
 
             item(key = "colors_title") {
                 Box(modifier = Modifier.padding(start = 16.dp, top = 22.dp, end = 16.dp)) {
-                    SettingsGroupTitle(title = "Colors")
+                    SettingsGroupTitle(title = stringResource(Res.string.settings_theme_group_colors))
                 }
             }
 
@@ -253,10 +268,10 @@ fun ColorThemeSettingsScreen(
                     .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
             ) {
                 EmberrTopHeaderBar(
-                    title = "Theme",
+                    title = stringResource(Res.string.settings_theme),
                     hazeState = hazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onBackClick = onNavigateBack
                 )
             }
@@ -273,7 +288,7 @@ internal fun PaperTextureAreasRow(
     val areaOptions: @Composable () -> Unit = {
         PaperTextureArea.entries.forEach { area ->
             EmberrCheckboxOption(
-                label = area.displayName,
+                label = area.label(),
                 isChecked = isPaperTextureAreaChecked(areas, area),
                 onClick = { onToggleArea(area) }
             )
@@ -285,7 +300,7 @@ internal fun PaperTextureAreasRow(
             SettingsRowIcon(icon = painterResource(Res.drawable.show_on))
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "Show On",
+                text = stringResource(Res.string.settings_paper_texture_show_on),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
@@ -299,20 +314,20 @@ internal fun PaperTextureAreasRow(
     } else {
         SettingsActionRow(
             icon = painterResource(Res.drawable.show_on),
-            title = "Show On",
+            title = stringResource(Res.string.settings_paper_texture_show_on),
             trailingLabel = paperTextureAreasLabel(areas),
             onClick = { isMenuOpen = true }
         )
         EmberrBottomSheet(
             expanded = isMenuOpen,
             onDismiss = { isMenuOpen = false },
-            title = "Show On",
+            title = stringResource(Res.string.settings_paper_texture_show_on),
             contentHorizontalPadding = 0.dp
         ) { closeAnd ->
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                 areaOptions()
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = { closeAnd {} },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -407,7 +422,7 @@ private fun ColorThemePreviewCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = colorTheme.displayName,
+                text = colorTheme.label(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.weight(1f)

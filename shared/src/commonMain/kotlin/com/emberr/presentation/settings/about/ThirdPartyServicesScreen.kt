@@ -35,9 +35,18 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.settings_about_third_party_services
+import emberr.shared.generated.resources.settings_third_party_group_movies_shows
+import emberr.shared.generated.resources.settings_third_party_justwatch_notice
+import emberr.shared.generated.resources.settings_third_party_tmdb_notice
+import emberr.shared.generated.resources.settings_third_party_tmdb_proxy
+import emberr.shared.generated.resources.settings_third_party_tmdb_usage
+import emberr.shared.generated.resources.settings_third_party_visit_tmdb
 import emberr.shared.generated.resources.logo_tmdb
 import emberr.shared.generated.resources.square_arrow_out_up_right
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private const val TMDB_URL = "https://www.themoviedb.org"
 
@@ -64,12 +73,12 @@ fun ThirdPartyServicesScreen(onNavigateBack: () -> Unit, showTopBar: Boolean = t
             )
         ) {
             item(key = "tmdb") {
-                SettingsGroup(title = "Movies & Shows") {
+                SettingsGroup(title = stringResource(Res.string.settings_third_party_group_movies_shows)) {
                     TmdbNotice()
                     SettingsDivider()
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.square_arrow_out_up_right),
-                        title = "Visit TMDB",
+                        title = stringResource(Res.string.settings_third_party_visit_tmdb),
                         onClick = { uriHandler.openUri(TMDB_URL) }
                     )
                 }
@@ -85,10 +94,10 @@ fun ThirdPartyServicesScreen(onNavigateBack: () -> Unit, showTopBar: Boolean = t
                     .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
             ) {
                 EmberrTopHeaderBar(
-                    title = "Third-Party Services",
+                    title = stringResource(Res.string.settings_about_third_party_services),
                     hazeState = hazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onBackClick = onNavigateBack
                 )
             }
@@ -100,12 +109,12 @@ fun ThirdPartyServicesScreen(onNavigateBack: () -> Unit, showTopBar: Boolean = t
 private fun TmdbNotice() {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            text = "Movie and watchlist blocks use TMDB to find movies and shows and their details.",
+            text = stringResource(Res.string.settings_third_party_tmdb_usage),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Movie and show searches pass through Emberr's small proxy on Cloudflare, which sends them on to TMDB and keeps no logs. Posters and photos come straight from TMDB. Nothing from your notes is sent.",
+            text = stringResource(Res.string.settings_third_party_tmdb_proxy),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.padding(top = 8.dp)
@@ -119,13 +128,13 @@ private fun TmdbNotice() {
                 .height(12.dp)
         )
         Text(
-            text = "This product uses the TMDB API but is not endorsed or certified by TMDB.",
+            text = stringResource(Res.string.settings_third_party_tmdb_notice),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.padding(top = 8.dp)
         )
         Text(
-            text = "Where to watch data from JustWatch.",
+            text = stringResource(Res.string.settings_third_party_justwatch_notice),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.padding(top = 2.dp)

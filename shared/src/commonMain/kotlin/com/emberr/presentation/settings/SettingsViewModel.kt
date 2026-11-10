@@ -29,6 +29,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.settings_ai_purge_failed
+import emberr.shared.generated.resources.settings_ai_purge_files_left
+import emberr.shared.generated.resources.settings_ai_purge_freed
+import emberr.shared.generated.resources.settings_ai_purge_nothing_to_remove
+import emberr.shared.generated.resources.settings_clear_data_failed
+import emberr.shared.generated.resources.settings_erase_cloud_device_not_cleared
+import emberr.shared.generated.resources.settings_erase_cloud_incorrect_password
+import emberr.shared.generated.resources.settings_erase_cloud_server_unreachable
+import emberr.shared.generated.resources.settings_erase_cloud_signed_out
+import emberr.shared.generated.resources.settings_erase_cloud_something_went_wrong
+import emberr.shared.generated.resources.settings_erase_cloud_too_many_tries
+import org.jetbrains.compose.resources.getPluralString
+import org.jetbrains.compose.resources.getString
 
 class SettingsViewModel(
     private val settingsManager: SettingsManager,
@@ -368,7 +382,7 @@ class SettingsViewModel(
                 val report = disableAiFeaturesUseCase.execute()
                 _aiPurgeResultMessage.value = describePurgeResult(report)
             } catch (e: Exception) {
-                _aiPurgeResultMessage.value = "Couldn't finish removing AI data: ${e.message}"
+                _aiPurgeResultMessage.value = getString(Res.string.settings_ai_purge_failed, e.message.toString())
             } finally {
                 _isPurgingAiData.value = false
             }
@@ -378,7 +392,7 @@ class SettingsViewModel(
     fun clearAllData() {
         viewModelScope.launch {
             if (!eraseAllAppData()) {
-                showNativeToast("Couldn't clear your data. Nothing was deleted.")
+                showNativeToast(getString(Res.string.settings_clear_data_failed))
             }
         }
     }
@@ -408,31 +422,36 @@ class SettingsViewModel(
         }
     }
 
-    private fun cloudEraseErrorMessage(result: CloudEraseResult): String? = when (result) {
+    private suspend fun cloudEraseErrorMessage(result: CloudEraseResult): String? = when (result) {
         CloudEraseResult.Erased -> null
         CloudEraseResult.ThisDeviceNotCleared ->
-            "Your cloud data was erased, but this device could not be cleared. Try Clear All Data again."
+            getString(Res.string.settings_erase_cloud_device_not_cleared)
         is CloudEraseResult.NothingErased -> when (val error = result.error) {
             is CloudApiException -> when (error.code) {
-                CloudApiErrorCode.INVALID_PASSWORD -> "Incorrect password. Try again."
-                CloudApiErrorCode.TOO_MANY_REQUESTS -> "Too many tries. Wait a bit and try again."
-                CloudApiErrorCode.INVALID_TOKEN -> "You were signed out of Emberr Cloud. Nothing was erased."
-                else -> "Something went wrong. Nothing was erased."
+                CloudApiErrorCode.INVALID_PASSWORD -> getString(Res.string.settings_erase_cloud_incorrect_password)
+                CloudApiErrorCode.TOO_MANY_REQUESTS -> getString(Res.string.settings_erase_cloud_too_many_tries)
+                CloudApiErrorCode.INVALID_TOKEN -> getString(Res.string.settings_erase_cloud_signed_out)
+                else -> getString(Res.string.settings_erase_cloud_something_went_wrong)
             }
             is CloudServerUnreachableException ->
-                "Can't reach the server at ${settingsManager.getCloudServerAddress()}. Nothing was erased."
-            else -> "Something went wrong. Nothing was erased."
+                getString(Res.string.settings_erase_cloud_server_unreachable, settingsManager.getCloudServerAddress())
+            else -> getString(Res.string.settings_erase_cloud_something_went_wrong)
         }
     }
 
-    private fun describePurgeResult(report: AiPurgeReport): String {
+    private suspend fun describePurgeResult(report: AiPurgeReport): String {
         val blockedPaths = report.undeletablePaths + report.survivingPaths
         return when {
             blockedPaths.isNotEmpty() ->
-                "Freed ${formatByteSize(report.bytesFreed)}, but ${blockedPaths.size} file(s) could not be removed: " +
+                getPluralString(
+                    Res.plurals.settings_ai_purge_files_left,
+                    blockedPaths.size,
+                    formatByteSize(report.bytesFreed),
+                    blockedPaths.size,
                     blockedPaths.joinToString(", ") { it.substringAfterLast('/') }
-            report.bytesFreed > 0L -> "Freed ${formatByteSize(report.bytesFreed)} of model files."
-            else -> "No model files were on disk to remove."
+                )
+            report.bytesFreed > 0L -> getString(Res.string.settings_ai_purge_freed, formatByteSize(report.bytesFreed))
+            else -> getString(Res.string.settings_ai_purge_nothing_to_remove)
         }
     }
 }
