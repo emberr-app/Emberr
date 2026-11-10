@@ -59,6 +59,8 @@ import emberr.shared.generated.resources.selfhost_vault_exists_enter_passphrase
 import emberr.shared.generated.resources.selfhost_wrong_passphrase
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 enum class ConnectionTestStatus { NOT_TESTED, TESTING, VERIFIED, FAILED }
 
@@ -127,10 +129,9 @@ private const val WAIT_BEFORE_SHOWING_SYNC_FINISHED_MS = 1_000L
 fun formatLastSynced(epochMillis: Long?, usesTwentyFourHourClock: Boolean): String {
     if (epochMillis == null || epochMillis == 0L) return stringResource(Res.string.selfhost_never_synced)
     val local = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(TimeZone.currentSystemDefault())
-    val month = local.month.name.lowercase().replaceFirstChar { it.uppercase() }.take(3)
     return stringResource(
         Res.string.selfhost_last_synced,
-        "$month ${local.day}, ${formatTimeOfDay(local.hour, local.minute, usesTwentyFourHourClock)}"
+        "${formatDate(local.date, DateTextStyle.SHORT_MONTH_DAY)}, ${formatTimeOfDay(local.hour, local.minute, usesTwentyFourHourClock)}"
     )
 }
 

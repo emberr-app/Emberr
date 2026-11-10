@@ -30,7 +30,6 @@ import emberr.shared.generated.resources.people_meta_next_and_last_seen
 import emberr.shared.generated.resources.people_meta_no_events
 import emberr.shared.generated.resources.people_no_contacts_found
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
@@ -39,8 +38,10 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Instant
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
-private const val SHORT_NAME_LENGTH = 3
+private const val LEAP_YEAR_FOR_BIRTHDAY_TEXT = 2000
 
 @Composable
 fun personDetailSearchLine(detail: PersonDetailBlock): String {
@@ -84,23 +85,21 @@ fun peopleCountLabel(count: Int): String = pluralStringResource(Res.plurals.peop
 @Composable
 fun eventCountLabel(count: Int): String = pluralStringResource(Res.plurals.people_event_count, count, count)
 
-fun shortWeekdayName(date: LocalDate): String =
-    date.dayOfWeek.name.take(SHORT_NAME_LENGTH).lowercase().replaceFirstChar(Char::uppercase)
-
-fun shortMonthName(date: LocalDate): String =
-    date.month.name.take(SHORT_NAME_LENGTH).lowercase().replaceFirstChar(Char::uppercase)
-
-internal fun fullMonthName(monthNumber: Int): String =
-    Month(monthNumber).name.lowercase().replaceFirstChar(Char::uppercase)
+internal fun birthdayMonthDay(month: Int, day: Int): String =
+    formatDate(LocalDate(LEAP_YEAR_FOR_BIRTHDAY_TEXT, month, day), DateTextStyle.FULL_MONTH_DAY)
 
 fun weekdayMonthDay(date: LocalDate, today: LocalDate): String {
-    val text = "${shortWeekdayName(date)}, ${shortMonthName(date)} ${date.day}"
-    return if (date.year == today.year) text else "$text, ${date.year}"
+    val style = if (date.year == today.year) {
+        DateTextStyle.SHORT_WEEKDAY_SHORT_MONTH_DAY
+    } else {
+        DateTextStyle.SHORT_WEEKDAY_SHORT_MONTH_DAY_YEAR
+    }
+    return formatDate(date, style)
 }
 
 fun monthDay(date: LocalDate, today: LocalDate): String {
-    val text = "${shortMonthName(date)} ${date.day}"
-    return if (date.year == today.year) text else "$text, ${date.year}"
+    val style = if (date.year == today.year) DateTextStyle.SHORT_MONTH_DAY else DateTextStyle.SHORT_MONTH_DAY_YEAR
+    return formatDate(date, style)
 }
 
 fun eventDate(event: CalendarTaskEntity): LocalDate? =
@@ -124,7 +123,7 @@ fun personMetaLine(nextEvent: CalendarTaskEntity?, lastEvent: CalendarTaskEntity
 
 @Composable
 fun birthdayText(birthday: PersonBirthday, today: LocalDate): String {
-    val monthAndDay = "${fullMonthName(birthday.month)} ${birthday.day}"
+    val monthAndDay = birthdayMonthDay(birthday.month, birthday.day)
     val birthYear = birthday.year ?: return monthAndDay
     val hasBirthdayPassedThisYear = birthday.month < today.month.number ||
         (birthday.month == today.month.number && birthday.day < today.day)

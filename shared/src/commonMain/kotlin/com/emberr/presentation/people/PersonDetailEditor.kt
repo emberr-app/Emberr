@@ -75,8 +75,10 @@ import emberr.shared.generated.resources.people_custom_label_placeholder
 import emberr.shared.generated.resources.people_label_optional
 import emberr.shared.generated.resources.people_remove
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.shortMonthName
 
 internal const val ADD_DETAIL_ANCHOR = "add-detail"
 private const val DAYS_SHOWN_BEFORE_CHOSEN_DAY = 3
@@ -471,7 +473,7 @@ private fun BirthdayFields(
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     monthsInRow.forEach { month ->
                         PersonChoiceChip(
-                            text = shortMonthName(LocalDate(today.year, month, 1)),
+                            text = shortMonthName(Month(month)),
                             isChosen = birthday.month == month,
                             onClick = { onBirthdayChange(birthday.withMonth(month)) },
                             modifier = Modifier.weight(1f)
@@ -564,7 +566,7 @@ private fun yearMistake(birthday: BirthdayChoice, thisYear: Int): String {
     val day = birthday.day
     val isYearInRange = birthday.yearText.length == 4 && year != null && year in EARLIEST_BIRTH_YEAR..thisYear
     return if (isYearInRange && month != null && day != null) {
-        stringResource(Res.string.people_birthday_date_not_in_year, "${fullMonthName(month)} $day", birthday.yearText)
+        stringResource(Res.string.people_birthday_date_not_in_year, birthdayMonthDay(month, day), birthday.yearText)
     } else {
         stringResource(Res.string.people_birthday_year_range, EARLIEST_BIRTH_YEAR, thisYear)
     }

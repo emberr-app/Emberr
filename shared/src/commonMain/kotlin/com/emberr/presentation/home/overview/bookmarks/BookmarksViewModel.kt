@@ -33,8 +33,10 @@ import kotlinx.coroutines.withContext
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.number
+import kotlinx.datetime.LocalDate
 import java.util.UUID
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 data class BookmarkGroup(
     val monthYear: String,
@@ -81,15 +83,12 @@ class BookmarksViewModel constructor(
                 .collectLatest { allBookmarks ->
                     blockSourceMap.clear()
 
-                    val months = arrayOf("", "January", "February", "March", "April", "May",
-                        "June", "July", "August", "September", "October", "November", "December")
-
                     val grouped = allBookmarks
                         .onEach { blockSourceMap[it.blockId] = it.noteId }
                         .groupBy {
                             val localDate = Instant.fromEpochMilliseconds(it.noteUpdatedAt)
                                 .toLocalDateTime(TimeZone.currentSystemDefault()).date
-                            "${months[localDate.month.number]} ${localDate.year}"
+                            formatDate(LocalDate(localDate.year, localDate.month, 1), DateTextStyle.MONTH_YEAR)
                         }
                         .map { (monthYear, entities) ->
                             BookmarkGroup(

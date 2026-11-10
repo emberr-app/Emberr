@@ -163,6 +163,11 @@ import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.daysSinceStartOfWeek
 import com.emberr.domain.util.time.startOfWeek
 import com.emberr.presentation.shared.components.orHighContrastLine
+import com.emberr.domain.util.time.DateTextStyle
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.weekdayName
+import com.emberr.domain.util.time.shortWeekdayName
+import com.emberr.domain.util.time.weekdayLetter
 
 enum class CalendarViewMode { DAY, THREE_DAY, WEEK, MONTH }
 
@@ -878,10 +883,7 @@ private fun DesktopCalendarTitleLine(
     }
 }
 
-private fun formatLongDate(date: LocalDate): String {
-    val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
-    return "$monthName ${date.day}${ordinalSuffix(date.day)}, ${date.year}"
-}
+private fun formatLongDate(date: LocalDate): String = formatDate(date, DateTextStyle.FULL_MONTH_DAY_YEAR)
 
 @Composable
 private fun TimelineHeader(
@@ -961,30 +963,13 @@ private fun TimelineHeader(
     }
 }
 
-internal fun formatFullDate(date: LocalDate): String {
-    val monthAbbrev = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-    return "$monthAbbrev ${date.day}${ordinalSuffix(date.day)}, ${date.year}"
-}
+internal fun formatFullDate(date: LocalDate): String = formatDate(date, DateTextStyle.SHORT_MONTH_DAY_YEAR)
 
 private fun formatSelectedDateTitle(date: LocalDate): String = formatFullDate(date)
 
-private fun formatDayOfWeek(date: LocalDate): String =
-    date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+private fun formatDayOfWeek(date: LocalDate): String = weekdayName(date.dayOfWeek)
 
-internal fun formatMonthYear(date: LocalDate): String {
-    val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
-    return "$monthName ${date.year}"
-}
-
-internal fun ordinalSuffix(day: Int): String = when {
-    day in 11..13 -> "th"
-    else -> when (day % 10) {
-        1 -> "st"
-        2 -> "nd"
-        3 -> "rd"
-        else -> "th"
-    }
-}
+internal fun formatMonthYear(date: LocalDate): String = formatDate(date, DateTextStyle.MONTH_YEAR)
 
 @Composable
 private fun CalendarTimeGrid(
@@ -1416,15 +1401,9 @@ private fun CurrentTimeLine(modifier: Modifier = Modifier) {
     }
 }
 
-private fun formatShortDayLabel(date: LocalDate): String {
-    val shortDay = date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-    return "$shortDay ${date.day}"
-}
+private fun formatShortDayLabel(date: LocalDate): String = "${shortWeekdayName(date.dayOfWeek)} ${date.day}"
 
-private fun formatSingleLetterDayLabel(date: LocalDate): String {
-    val initial = date.dayOfWeek.name.take(1)
-    return "$initial ${date.day}"
-}
+private fun formatSingleLetterDayLabel(date: LocalDate): String = "${weekdayLetter(date.dayOfWeek)} ${date.day}"
 
 @Composable
 private fun MultiDayTimeGrid(
@@ -1756,7 +1735,7 @@ private fun MonthGridContent(
             daysOfWeekStartingFrom(firstDayOfWeek).forEach { day ->
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     Text(
-                        text = day.name.take(1),
+                        text = weekdayLetter(day),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (day == DayOfWeek.SUNDAY) {
                             MaterialTheme.colorScheme.error

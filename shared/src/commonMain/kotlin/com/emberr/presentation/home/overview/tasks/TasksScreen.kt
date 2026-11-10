@@ -70,6 +70,8 @@ import emberr.shared.generated.resources.overview_tasks_today
 import emberr.shared.generated.resources.overview_tasks_tomorrow
 import emberr.shared.generated.resources.overview_tasks_yesterday
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -430,11 +432,7 @@ private fun dailyDateLabel(dateString: String, relativeDayLabels: RelativeDayLab
         today -> relativeDayLabels.today
         today.plus(DatePeriod(days = 1)) -> relativeDayLabels.tomorrow
         today.minus(DatePeriod(days = 1)) -> relativeDayLabels.yesterday
-        else -> {
-            val shortDay = date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-            val shortMonth = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
-            "$shortDay, $shortMonth ${date.day}"
-        }
+        else -> formatDate(date, DateTextStyle.SHORT_WEEKDAY_SHORT_MONTH_DAY)
     }
 }
 

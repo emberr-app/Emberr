@@ -47,7 +47,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.emberr.domain.model.shortMonthDayText
 import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.fontFamilyFor
@@ -66,6 +65,8 @@ import emberr.shared.generated.resources.whatsnew_preview_jot_prompt
 import emberr.shared.generated.resources.whatsnew_preview_quote
 import emberr.shared.generated.resources.whatsnew_preview_reading_list
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private val WidgetShape = RoundedCornerShape(24.dp)
 private val GradientCardPadding = 18.dp
@@ -116,7 +117,7 @@ internal fun WidgetsUpdatePreview() {
         }
     }
 
-    val todayLabel = remember { shortMonthDayText(Clock.System.todayIn(TimeZone.currentSystemDefault())) }
+    val todayLabel = remember { formatDate(Clock.System.todayIn(TimeZone.currentSystemDefault()), DateTextStyle.SHORT_MONTH_DAY) }
     val wallpaperColors = if (LocalAppIsDark.current) DarkWallpaperColors else LightWallpaperColors
 
     UpdatePreviewFrame(fitsContentHeight = true) {

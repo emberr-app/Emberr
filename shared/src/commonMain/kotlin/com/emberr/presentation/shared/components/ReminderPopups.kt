@@ -77,11 +77,17 @@ import emberr.shared.generated.resources.square_arrows_right
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.Calendar
 import kotlin.math.abs
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
+import com.emberr.domain.util.time.weekdayLetter
+import com.emberr.domain.util.time.monthName
+import com.emberr.domain.util.time.dayPeriodName
 
 private val DesktopMenuWidth = 240.dp
 internal val DesktopDatePickerMenuWidth = 312.dp
@@ -371,11 +377,6 @@ private fun PresetSheetItem(
     }
 }
 // Custom date picker
-private val MonthNames = listOf(
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-)
-
 private data class CalendarDate(val year: Int, val month: Int, val day: Int) // month is 0-11
 
 private fun CalendarDate.toMillis(): Long {
@@ -465,7 +466,7 @@ private fun CustomCalendarHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "${MonthNames[viewMonth]} $viewYear",
+                text = formatDate(LocalDate(viewYear, viewMonth + 1, 1), DateTextStyle.MONTH_YEAR),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
@@ -493,7 +494,7 @@ private fun CustomCalendarHeader(
 
 @Composable
 private fun CalendarWeekdayRow() {
-    val weekdays = daysOfWeekStartingFrom(LocalFirstDayOfWeek.current).map { day -> day.name.take(1) }
+    val weekdays = daysOfWeekStartingFrom(LocalFirstDayOfWeek.current).map { day -> weekdayLetter(day) }
     Row(modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
         weekdays.forEach { label ->
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
@@ -595,7 +596,7 @@ private fun MonthYearPickerContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             WheelPicker(
-                items = MonthNames,
+                items = Month.entries.map { month -> monthName(month) },
                 selectedIndex = selectedMonth,
                 onItemSelected = { selectedMonth = it },
                 itemHeight = pickerItemHeight,
@@ -785,7 +786,7 @@ fun MinimalTimePickerDialog(
                     )
                 } else {
                     WheelPicker(
-                        items = listOf("AM", "PM"),
+                        items = listOf(dayPeriodName(isAfternoon = false), dayPeriodName(isAfternoon = true)),
                         selectedIndex = if (hourOfDay < 12) 0 else 1,
                         onItemSelected = { hourOfDay = hourOfDay % 12 + if (it == 1) 12 else 0 },
                         itemHeight = pickerItemHeight

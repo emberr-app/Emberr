@@ -120,6 +120,8 @@ import emberr.shared.generated.resources.database_no_column_value
 import emberr.shared.generated.resources.database_unchecked
 import emberr.shared.generated.resources.database_week_of_date
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private val BoardColumnGap = 12.dp
 private val BoardColumnPadding = 6.dp
@@ -976,7 +978,7 @@ internal fun DatabaseBoardGroupValue.labelText(columnLabel: String): String = wh
     is DatabaseBoardGroupValue.DatePeriod -> when (grouping) {
         DatabaseDateGrouping.DAY -> formatPropertyDate(start)
         DatabaseDateGrouping.WEEK -> stringResource(Res.string.database_week_of_date, formatPropertyDate(start))
-        DatabaseDateGrouping.MONTH -> "${start.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${start.year}"
+        DatabaseDateGrouping.MONTH -> formatDate(start, DateTextStyle.MONTH_YEAR)
         DatabaseDateGrouping.YEAR -> start.year.toString()
     }
     DatabaseBoardGroupValue.NoValue -> stringResource(Res.string.database_no_column_value, columnLabel)

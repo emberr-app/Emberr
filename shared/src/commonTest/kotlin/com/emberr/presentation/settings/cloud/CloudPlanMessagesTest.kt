@@ -5,6 +5,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.cloud_trial_days_left
 import emberr.shared.generated.resources.cloud_trial_ended
 import emberr.shared.generated.resources.cloud_trial_ends_today
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -38,7 +39,7 @@ class CloudPlanMessagesTest {
         val now = Instant.parse("2027-01-05T10:00:00Z")
 
         assertEquals(
-            CloudText.Phrase(Res.string.cloud_trial_ended, listOf("2 January 2027", "1 February 2027")),
+            CloudText.Phrase(Res.string.cloud_trial_ended, listOf(LocalDate(2027, 1, 2), LocalDate(2027, 2, 1))),
             cloudPlanText(trialEndingAt("2027-01-02T12:00:00Z"), now, TimeZone.UTC)
         )
     }

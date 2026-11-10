@@ -51,7 +51,6 @@ import emberr.shared.generated.resources.daily_previous_month
 import emberr.shared.generated.resources.daily_today
 import kotlinx.coroutines.delay
 import kotlinx.datetime.*
-import kotlinx.datetime.number
 import kotlin.time.Clock
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
@@ -59,6 +58,10 @@ import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.shortWeekdayName
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
+import com.emberr.domain.util.time.weekdayLetter
 
 @Composable
 fun CollapsedWeekStrip(
@@ -228,7 +231,7 @@ private fun WeekStripChip(
     onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(12.dp)
-    val shortDayName = date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+    val shortDayName = shortWeekdayName(date.dayOfWeek)
     val primaryTextColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
     val mutedTextColor = if (isSelected) {
         MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
@@ -298,7 +301,6 @@ fun BottomSheetMonthCalendar(
 ) {
     var currentMonth by remember(selectedDate) { mutableStateOf(LocalDate(selectedDate.year, selectedDate.month, 1)) }
     val firstDayOfWeek = LocalFirstDayOfWeek.current
-    val months = arrayOf("", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).padding(top = 12.dp)) {
         Row(
@@ -314,7 +316,7 @@ fun BottomSheetMonthCalendar(
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "${months[currentMonth.month.number]} ${currentMonth.year}",
+                    text = formatDate(currentMonth, DateTextStyle.MONTH_YEAR),
                     style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
@@ -336,7 +338,7 @@ fun BottomSheetMonthCalendar(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             daysOfWeekStartingFrom(firstDayOfWeek).forEach { day ->
                 Text(
-                    text = day.name.take(1), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
+                    text = weekdayLetter(day), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     modifier = Modifier.weight(1f), textAlign = TextAlign.Center
                 )

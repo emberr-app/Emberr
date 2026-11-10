@@ -15,6 +15,9 @@ import emberr.shared.generated.resources.cloud_trial_days_left
 import emberr.shared.generated.resources.cloud_trial_ended
 import emberr.shared.generated.resources.cloud_trial_ended_read_only
 import emberr.shared.generated.resources.cloud_trial_ends_today
+import com.emberr.domain.util.time.DateTextStyle
+import com.emberr.domain.util.time.formatDate
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
@@ -35,10 +38,12 @@ sealed interface CloudText {
 
 @Composable
 internal fun CloudText.asText(): String = when (this) {
-    is CloudText.Phrase -> stringResource(resource, *arguments.toTypedArray())
+    is CloudText.Phrase -> stringResource(resource, *arguments.map { it.asShownArgument() }.toTypedArray())
     is CloudText.Counted -> pluralStringResource(resource, count, count)
     is CloudText.Plain -> text
 }
+
+private fun Any.asShownArgument(): Any = if (this is LocalDate) formatDate(this, DateTextStyle.FULL_MONTH_DAY_YEAR) else this
 
 internal fun cloudPlanText(subscription: CloudSubscription, now: Instant, timeZone: TimeZone): CloudText? {
     if (!subscription.isTrial) return null
@@ -82,10 +87,6 @@ internal fun cloudCopyRemovedMessage(removedAtMicroseconds: Long, timeZone: Time
 private fun storageUsedArguments(accountDetails: CloudAccountDetails): List<Any> =
     listOf(formatByteSize(accountDetails.storageUsedBytes), formatByteSize(accountDetails.subscription.storageLimitBytes))
 
-private fun cloudDateText(instant: Instant, timeZone: TimeZone): String {
-    val date = instant.toLocalDateTime(timeZone).date
-    val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
-    return "${date.day} $monthName ${date.year}"
-}
+private fun cloudDateText(instant: Instant, timeZone: TimeZone): LocalDate = instant.toLocalDateTime(timeZone).date
 
 private fun instantFromMicroseconds(microseconds: Long): Instant = Instant.fromEpochMilliseconds(microseconds / 1_000)

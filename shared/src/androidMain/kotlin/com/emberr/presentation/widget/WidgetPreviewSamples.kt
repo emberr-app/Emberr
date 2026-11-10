@@ -2,7 +2,16 @@ package com.emberr.presentation.widget
 
 import androidx.compose.runtime.Composable
 import com.emberr.R
+import android.text.format.DateFormat
+import androidx.glance.LocalContext
+import com.emberr.domain.util.time.DateTextStyle
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.formatTimeOfDay
+import com.emberr.domain.util.time.monthName
+import com.emberr.domain.util.time.shortWeekdayName
+import com.emberr.domain.util.time.weekdayLetter
+import com.emberr.domain.util.time.weekdayName
 import com.emberr.presentation.widget.calendar.CalendarDayCell
 import com.emberr.presentation.widget.calendar.CalendarWidgetContent
 import com.emberr.presentation.widget.calendaragenda.AgendaDayCell
@@ -91,13 +100,13 @@ internal fun previewNoteListContent() = NoteListWidgetContent(
 internal fun previewTasksContent() = TasksWidgetContent(
     isShowingCompleted = false,
     rows = listOf(
-        previewTask("dentist", widgetText(R.string.widget_preview_call_the_dentist), timeLabel = "10:30 AM"),
+        previewTask("dentist", widgetText(R.string.widget_preview_call_the_dentist), timeLabel = previewTime(10, 30)),
         previewTask("slides", widgetText(R.string.widget_preview_finish_the_slides)),
         TasksWidgetRow.SectionHeading(key = "groceries", label = widgetText(R.string.widget_preview_groceries)),
         previewTask("milk", widgetText(R.string.widget_preview_oat_milk)),
         previewTask("bread", widgetText(R.string.widget_preview_bread)),
         TasksWidgetRow.SectionHeading(key = "repeating", label = widgetText(R.string.widget_repeating)),
-        previewTask("plants", widgetText(R.string.widget_preview_water_the_plants), timeLabel = "9:00 AM", dayLabel = widgetText(R.string.widget_preview_today))
+        previewTask("plants", widgetText(R.string.widget_preview_water_the_plants), timeLabel = previewTime(9, 0), dayLabel = widgetText(R.string.widget_preview_today))
     )
 )
 
@@ -105,11 +114,11 @@ internal fun previewTasksContent() = TasksWidgetContent(
 internal fun previewTodayTasksContent(): TodayTasksWidgetContent {
     val today = previewToday()
     return TodayTasksWidgetContent(
-        dateLabel = "${monthNameOf(today)} ${today.day}",
-        weekdayLabel = capitalized(today.dayOfWeek.name),
+        dateLabel = formatDate(today, DateTextStyle.FULL_MONTH_DAY),
+        weekdayLabel = weekdayName(today.dayOfWeek),
         rows = listOf(
-            TodayTaskRow("plants", widgetText(R.string.widget_preview_water_the_plants), isChecked = true, scheduleLabel = "9:00 AM", isOverdue = false),
-            TodayTaskRow("dentist", widgetText(R.string.widget_preview_call_the_dentist), isChecked = false, scheduleLabel = "10:30 AM", isOverdue = false),
+            TodayTaskRow("plants", widgetText(R.string.widget_preview_water_the_plants), isChecked = true, scheduleLabel = previewTime(9, 0), isOverdue = false),
+            TodayTaskRow("dentist", widgetText(R.string.widget_preview_call_the_dentist), isChecked = false, scheduleLabel = previewTime(10, 30), isOverdue = false),
             TodayTaskRow("slides", widgetText(R.string.widget_preview_finish_the_slides), isChecked = false, scheduleLabel = null, isOverdue = false)
         ),
         doneCount = 1,
@@ -142,7 +151,7 @@ internal fun previewCalendarContent(): CalendarWidgetContent {
 internal fun previewCalendarAgendaContent(): CalendarAgendaWidgetContent {
     val today = previewToday()
     val dotsByDay = previewDotsByDay(today)
-    val todayLabel = "${shortMonthNameOf(today)} ${today.day}"
+    val todayLabel = formatDate(today, DateTextStyle.SHORT_MONTH_DAY)
     return CalendarAgendaWidgetContent(
         shownMonth = monthKeyOf(today),
         monthLabel = monthNameOf(today),
@@ -157,9 +166,9 @@ internal fun previewCalendarAgendaContent(): CalendarAgendaWidgetContent {
             }
         },
         events = listOf(
-            AgendaEvent("standup", widgetText(R.string.widget_preview_team_sync), "$todayLabel · 10:00 AM", isDone = false, accentColorHex = blueHex),
-            AgendaEvent("gym", widgetText(R.string.widget_preview_gym), "$todayLabel · 6:00 PM", isDone = false, accentColorHex = greenHex),
-            AgendaEvent("dinner", widgetText(R.string.widget_preview_dinner_with_sam), "$todayLabel · 8:00 PM", isDone = false, accentColorHex = orangeHex)
+            AgendaEvent("standup", widgetText(R.string.widget_preview_team_sync), "$todayLabel · ${previewTime(10, 0)}", isDone = false, accentColorHex = blueHex),
+            AgendaEvent("gym", widgetText(R.string.widget_preview_gym), "$todayLabel · ${previewTime(18, 0)}", isDone = false, accentColorHex = greenHex),
+            AgendaEvent("dinner", widgetText(R.string.widget_preview_dinner_with_sam), "$todayLabel · ${previewTime(20, 0)}", isDone = false, accentColorHex = orangeHex)
         )
     )
 }
@@ -172,9 +181,9 @@ internal fun previewUpcomingEventsContent(): UpcomingEventsWidgetContent {
     val tomorrowLabel = widgetText(R.string.widget_preview_tomorrow)
     return UpcomingEventsWidgetContent(
         events = listOf(
-            previewUpcomingEvent("standup", widgetText(R.string.widget_preview_team_sync), today, todayLabel, "10:00 AM", blueHex),
-            previewUpcomingEvent("gym", widgetText(R.string.widget_preview_gym), today, todayLabel, "6:00 PM", greenHex),
-            previewUpcomingEvent("dentist", widgetText(R.string.widget_preview_dentist), tomorrow, tomorrowLabel, "2:30 PM", orangeHex),
+            previewUpcomingEvent("standup", widgetText(R.string.widget_preview_team_sync), today, todayLabel, previewTime(10, 0), blueHex),
+            previewUpcomingEvent("gym", widgetText(R.string.widget_preview_gym), today, todayLabel, previewTime(18, 0), greenHex),
+            previewUpcomingEvent("dentist", widgetText(R.string.widget_preview_dentist), tomorrow, tomorrowLabel, previewTime(14, 30), orangeHex),
             previewUpcomingEvent("birthday", widgetText(R.string.widget_preview_alexs_birthday), tomorrow, tomorrowLabel, null, pinkHex)
         )
     )
@@ -224,7 +233,7 @@ private fun previewUpcomingEvent(
     timeLabel = timeLabel,
     isOverdue = false,
     accentColorHex = accentColorHex,
-    weekdayShortLabel = date.dayOfWeek.name.take(3),
+    weekdayShortLabel = shortWeekdayName(date.dayOfWeek).uppercase(),
     dayOfMonthLabel = date.day.toString()
 )
 
@@ -242,7 +251,7 @@ private fun previewDotsByDay(today: LocalDate): Map<Int, List<String>> =
         today.day to listOf(blueHex, greenHex)
     )
 
-private fun previewWeekdayLabels(): List<String> = previewWeekdays.map { day -> day.name.take(1) }
+private fun previewWeekdayLabels(): List<String> = previewWeekdays.map { day -> weekdayLetter(day) }
 
 private fun previewMonthGrid(today: LocalDate): List<List<LocalDate?>> {
     val monthStart = firstOfMonth(today)
@@ -257,9 +266,8 @@ private fun previewMonthGrid(today: LocalDate): List<List<LocalDate?>> {
         .dropLastWhile { week -> week.all { date -> date == null } }
 }
 
-private fun monthNameOf(date: LocalDate): String = capitalized(date.month.name)
+private fun monthNameOf(date: LocalDate): String = monthName(date.month)
 
-private fun shortMonthNameOf(date: LocalDate): String = monthNameOf(date).take(3)
-
-private fun capitalized(upperCaseName: String): String =
-    upperCaseName.lowercase().replaceFirstChar { letter -> letter.uppercase() }
+@Composable
+private fun previewTime(hour: Int, minute: Int): String =
+    formatTimeOfDay(hour, minute, usesTwentyFourHourClock = DateFormat.is24HourFormat(LocalContext.current))

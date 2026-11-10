@@ -142,6 +142,8 @@ import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.abs
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private const val NoteLinkPrefix = "](emberr://note/"
 private val NoteLinkRegex = """\[([^\]]+)\]\(emberr://note/([^)]+)\)""".toRegex()
@@ -909,12 +911,5 @@ private fun timelineDayLabel(date: LocalDate, today: LocalDate, relativeDayLabel
     today -> relativeDayLabels.today
     today.plus(1, DateTimeUnit.DAY) -> relativeDayLabels.tomorrow
     today.plus(-1, DateTimeUnit.DAY) -> relativeDayLabels.yesterday
-    else -> {
-        val weekday = shortName(date.dayOfWeek.name)
-        val month = shortName(date.month.name)
-        "$weekday, ${date.day} $month ${date.year}"
-    }
+    else -> formatDate(date, DateTextStyle.SHORT_WEEKDAY_SHORT_MONTH_DAY_YEAR)
 }
-
-private fun shortName(enumName: String): String =
-    enumName.take(3).lowercase().replaceFirstChar { it.uppercase() }

@@ -69,7 +69,6 @@ import com.emberr.domain.model.PropertyType
 import com.emberr.domain.model.PropertyValueType
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.model.isNumberBeingTyped
-import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.time.formatTimeOfDay
 import com.emberr.presentation.shared.components.MenuAtTap
@@ -107,6 +106,8 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private val PropertyValueHorizontalPadding = 12.dp
 private val PropertyValueVerticalPadding = 9.dp
@@ -547,7 +548,7 @@ internal fun PropertyCheckboxValue(
     }
 }
 
-internal fun formatPropertyDate(date: LocalDate): String = shortDateText(date)
+internal fun formatPropertyDate(date: LocalDate): String = formatDate(date, DateTextStyle.SHORT_MONTH_DAY_YEAR)
 
 internal fun formatPropertyTime(time: LocalTime, usesTwentyFourHourClock: Boolean): String =
     formatTimeOfDay(time.hour, time.minute, usesTwentyFourHourClock)

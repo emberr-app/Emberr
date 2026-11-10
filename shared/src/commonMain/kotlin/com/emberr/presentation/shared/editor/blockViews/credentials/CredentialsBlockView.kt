@@ -40,7 +40,6 @@ import com.emberr.domain.credentials.CredentialVault
 import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.model.openableLoginUrl
-import com.emberr.domain.model.shortDateText
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
@@ -77,6 +76,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import kotlin.time.Clock
 import kotlin.time.Instant
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private val WebSchemePrefixPattern = Regex("^https?://", RegexOption.IGNORE_CASE)
@@ -307,7 +308,7 @@ internal fun editedAgoText(updatedAtMillis: Long, nowMillis: Long): String {
         hoursAgo < 24 -> pluralStringResource(Res.plurals.credentials_edited_hours_ago, hoursAgo.toInt(), hoursAgo.toInt())
         daysAgo <= 1 -> stringResource(Res.string.credentials_edited_yesterday)
         daysAgo <= 7 -> pluralStringResource(Res.plurals.credentials_edited_days_ago, daysAgo, daysAgo)
-        else -> stringResource(Res.string.credentials_edited_on_date, shortDateText(updatedDate))
+        else -> stringResource(Res.string.credentials_edited_on_date, formatDate(updatedDate, DateTextStyle.SHORT_MONTH_DAY_YEAR))
     }
 }
 

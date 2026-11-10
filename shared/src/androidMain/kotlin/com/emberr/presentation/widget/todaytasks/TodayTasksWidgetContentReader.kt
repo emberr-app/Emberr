@@ -12,13 +12,15 @@ import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlinx.datetime.number
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.widgets_untitled_task
 import emberr.shared.generated.resources.widgets_minutes_ago
 import emberr.shared.generated.resources.widgets_hours_ago
 import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.getString
+import com.emberr.domain.util.time.weekdayName
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
 
 private const val maximumTasksShown = 12
 private const val maximumCharactersPerTitle = 120
@@ -41,7 +43,7 @@ class TodayTasksWidgetContentReader(
         TodayTasksWidgetContent(
             dateLabel = formatMonthAndDay(today),
             rows = buildRows(tasks, System.currentTimeMillis()),
-            weekdayLabel = dayNames.getOrNull(today.dayOfWeek.ordinal) ?: today.dayOfWeek.name,
+            weekdayLabel = weekdayName(today.dayOfWeek),
             doneCount = tasks.count { task -> task.isChecked },
             totalCount = tasks.size
         )
@@ -78,19 +80,7 @@ class TodayTasksWidgetContentReader(
     }
 }
 
-private val monthNames = listOf(
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-)
-
-private val dayNames = listOf(
-    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-)
-
-private fun formatMonthAndDay(date: LocalDate): String {
-    val month = monthNames.getOrNull(date.month.number - 1) ?: date.month.name
-    return "$month ${date.day}"
-}
+private fun formatMonthAndDay(date: LocalDate): String = formatDate(date, DateTextStyle.FULL_MONTH_DAY)
 
 private suspend fun formatOverdueLabel(elapsedMillis: Long): String {
     val elapsedMinutes = (elapsedMillis / 60_000L).coerceAtLeast(1L)

@@ -43,6 +43,10 @@ import emberr.shared.generated.resources.widgets_date_range_all_day
 import emberr.shared.generated.resources.widgets_today
 import emberr.shared.generated.resources.widgets_tomorrow
 import org.jetbrains.compose.resources.getString
+import com.emberr.domain.util.time.monthName
+import com.emberr.domain.util.time.formatDate
+import com.emberr.domain.util.time.DateTextStyle
+import com.emberr.domain.util.time.weekdayLetter
 
 private const val weeksShown = 6
 private const val daysPerWeek = 7
@@ -93,7 +97,7 @@ class CalendarAgendaWidgetContentReader(
             CalendarAgendaWidgetContent(
                 shownMonth = monthKey,
                 monthLabel = formatMonthLabel(firstOfMonth),
-                weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> day.name.take(1) },
+                weekdayLabels = daysOfWeekStartingFrom(weekStartsOn).map { day -> weekdayLetter(day) },
                 weeks = buildWeeks(firstOfMonth, today, weekStartsOn, shownTasks, birthdayEvents),
                 events = buildEvents(shownTasks, birthdayEvents, colorsByCategoryId, today)
             )
@@ -228,13 +232,6 @@ class CalendarAgendaWidgetContentReader(
     )
 }
 
-private val monthNames = listOf(
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-)
-
-private val shortMonthNames = monthNames.map { it.take(3) }
-
 fun shiftAgendaMonth(shownMonth: String?, monthsToAdd: Int): String {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     val firstOfMonth = parseFirstOfMonth(shownMonth) ?: firstOfMonthFor(today)
@@ -256,8 +253,7 @@ private fun firstOfMonthFor(date: LocalDate): LocalDate =
 private fun monthKeyOf(date: LocalDate): String =
     "${date.year}-${date.month.number.toString().padStart(2, '0')}"
 
-private fun formatMonthLabel(firstOfMonth: LocalDate): String =
-    monthNames.getOrNull(firstOfMonth.month.number - 1) ?: firstOfMonth.month.name
+private fun formatMonthLabel(firstOfMonth: LocalDate): String = monthName(firstOfMonth.month)
 
 private class AgendaDayLabels(
     val allDay: String,
@@ -284,7 +280,4 @@ private fun formatDayLabel(date: LocalDate, today: LocalDate, labels: AgendaDayL
         else -> shortDateLabel(date)
     }
 
-private fun shortDateLabel(date: LocalDate): String {
-    val month = shortMonthNames.getOrNull(date.month.number - 1) ?: date.month.name.take(3)
-    return "$month ${date.day}"
-}
+private fun shortDateLabel(date: LocalDate): String = formatDate(date, DateTextStyle.SHORT_MONTH_DAY)

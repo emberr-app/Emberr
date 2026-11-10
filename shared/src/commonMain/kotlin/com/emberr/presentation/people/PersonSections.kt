@@ -80,6 +80,8 @@ import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.util.time.shortWeekdayName
+import com.emberr.domain.util.time.shortMonthName
 
 internal const val PAST_EVENTS_SHOWN_BEFORE_SHOW_ALL = 3
 private const val PAST_EVENT_ALPHA = 0.6f
@@ -550,8 +552,8 @@ private fun EventDateTile(date: LocalDate, isHighlighted: Boolean) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Text(text = shortWeekdayName(date), style = smallStyle, fontWeight = FontWeight.Medium, color = secondaryTextColor())
+        Text(text = shortWeekdayName(date.dayOfWeek), style = smallStyle, fontWeight = FontWeight.Medium, color = secondaryTextColor())
         Text(text = date.day.toString(), style = dayStyle, color = MaterialTheme.colorScheme.onSurface)
-        Text(text = shortMonthName(date), style = smallStyle, fontWeight = FontWeight.Medium, color = secondaryTextColor())
+        Text(text = shortMonthName(date.month), style = smallStyle, fontWeight = FontWeight.Medium, color = secondaryTextColor())
     }
 }
