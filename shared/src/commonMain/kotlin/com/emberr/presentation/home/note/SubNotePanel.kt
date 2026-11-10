@@ -35,6 +35,9 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.maximize_2
 import emberr.shared.generated.resources.minimize_2
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.note_collapse_panel
+import emberr.shared.generated.resources.note_expand_panel
+import org.jetbrains.compose.resources.stringResource
 
 private fun Painter.scaledDown(factor: Float): Painter = object : Painter() {
     override val intrinsicSize: Size = this@scaledDown.intrinsicSize
@@ -206,8 +209,8 @@ fun SubNotePanel(
                 modifier = Modifier.align(Alignment.TopStart),
                 showsSidebarToggle = false,
                 backIcon = (if (isExpanded) painterResource(Res.drawable.minimize_2) else painterResource(Res.drawable.maximize_2)).scaledDown(0.8f),
-                backContentDescription = if (isExpanded) "Collapse panel" else "Expand panel",
-                backTooltip = if (isExpanded) "Collapse panel" else "Expand panel",
+                backContentDescription = if (isExpanded) stringResource(Res.string.note_collapse_panel) else stringResource(Res.string.note_expand_panel),
+                backTooltip = if (isExpanded) stringResource(Res.string.note_collapse_panel) else stringResource(Res.string.note_expand_panel),
                 backButtonTint = MaterialTheme.colorScheme.primary,
                 topEdgeFadeAlpha = 0f,
                 hazeState = hazeState,

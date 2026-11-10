@@ -183,6 +183,51 @@ import emberr.shared.generated.resources.textalign_right2
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.note_add_icon
+import emberr.shared.generated.resources.note_align_center
+import emberr.shared.generated.resources.note_align_justify
+import emberr.shared.generated.resources.note_align_left
+import emberr.shared.generated.resources.note_align_right
+import emberr.shared.generated.resources.note_alignment
+import emberr.shared.generated.resources.note_change_icon
+import emberr.shared.generated.resources.note_choose_icon
+import emberr.shared.generated.resources.note_copied_as_markdown
+import emberr.shared.generated.resources.note_copied_to_clipboard
+import emberr.shared.generated.resources.note_copy_as_markdown
+import emberr.shared.generated.resources.note_copy_text
+import emberr.shared.generated.resources.note_cover_options
+import emberr.shared.generated.resources.note_download_markdown
+import emberr.shared.generated.resources.note_download_pdf
+import emberr.shared.generated.resources.note_editing_template
+import emberr.shared.generated.resources.note_empty_note_placeholder
+import emberr.shared.generated.resources.note_export_note
+import emberr.shared.generated.resources.note_export_options
+import emberr.shared.generated.resources.note_favorite
+import emberr.shared.generated.resources.note_hide_word_count
+import emberr.shared.generated.resources.note_icon_options
+import emberr.shared.generated.resources.note_more_options
+import emberr.shared.generated.resources.note_move_to_trash
+import emberr.shared.generated.resources.note_no_emojis_found
+import emberr.shared.generated.resources.note_note_options
+import emberr.shared.generated.resources.note_note_width
+import emberr.shared.generated.resources.note_open_as_sticky_note
+import emberr.shared.generated.resources.note_options
+import emberr.shared.generated.resources.note_remove_cover
+import emberr.shared.generated.resources.note_remove_icon
+import emberr.shared.generated.resources.note_search_emojis
+import emberr.shared.generated.resources.note_show_word_count
+import emberr.shared.generated.resources.note_unfavorite
+import emberr.shared.generated.resources.note_upload_cover
+import emberr.shared.generated.resources.note_width_full
+import emberr.shared.generated.resources.note_width_narrow
+import emberr.shared.generated.resources.note_word_count
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 enum class MenuLevel { MAIN, EXPORT, ICON, COVER, ALIGNMENT }
 
@@ -216,7 +261,7 @@ fun NoteScreen(
     isSearchActive: Boolean = false,
     hideWordCount: Boolean = false,
     customHeader: (@Composable LazyItemScope.() -> Unit)? = null,
-    emptyNotePlaceholder: String = "Type / for commands...",
+    emptyNotePlaceholder: String = stringResource(Res.string.note_empty_note_placeholder),
     extraBlockSidePadding: Dp = 0.dp,
     viewModel: NoteEditorViewModel = koinViewModel(key = noteId)
 ) {
@@ -383,7 +428,7 @@ fun NoteScreen(
         scope.launch {
             val text = viewModel.generatePlainTextExport()
             clipboardManager.setText(AnnotatedString(text))
-            showFeedback("Copied to clipboard")
+            showFeedback(getString(Res.string.note_copied_to_clipboard))
         }
     }
 
@@ -392,7 +437,7 @@ fun NoteScreen(
         scope.launch {
             val md = viewModel.generateMarkdownExport()
             clipboardManager.setText(AnnotatedString(md))
-            showFeedback("Copied as Markdown")
+            showFeedback(getString(Res.string.note_copied_as_markdown))
         }
     }
 
@@ -773,7 +818,7 @@ fun NoteScreen(
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = "$wordCount words",
+                            text = pluralStringResource(Res.plurals.note_word_count, wordCount, wordCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1
@@ -782,7 +827,7 @@ fun NoteScreen(
                 }
 
                 if (customHeader == null) EmberrTopHeaderBar(
-                    title = noteTitle.ifBlank { "Untitled" },
+                    title = noteTitle.ifBlank { stringResource(Res.string.common_untitled) },
                     titleVisibility = if (isEditingTemplate) 0f else titleCollapseProgress,
                     titleColor = topBarContentColor ?: MaterialTheme.colorScheme.onSurface,
                     onTitleClick = onCollapsedTitleClick,
@@ -795,7 +840,7 @@ fun NoteScreen(
                     ),
                     showBackButton = showBackButton,
                     reserveBackButtonSpace = false,
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                     onBackClick = {
                         if (isSelectionMode) {
@@ -816,12 +861,12 @@ fun NoteScreen(
                         Box {
                             TopBarIconButton(
                                 icon = painterResource(Res.drawable.ellipsis),
-                                contentDescription = "Options",
+                                contentDescription = stringResource(Res.string.note_options),
                                 bgColor = Color.Transparent,
                                 tint = MaterialTheme.colorScheme.primary,
                                 hazeState = hazeState,
                                 hazeStyle = topBarButtonHazeStyle ?: EmberrBlur.Regular,
-                                tooltip = "More options",
+                                tooltip = stringResource(Res.string.note_more_options),
                                 onClick = { showOptionsMenu = true }
                             )
 
@@ -979,7 +1024,7 @@ fun NoteScreen(
                     EmberrBottomSheet(
                         expanded = showIconPicker,
                         onDismiss = { showIconPicker = false },
-                        title = "Choose Icon",
+                        title = stringResource(Res.string.note_choose_icon),
                         contentHorizontalPadding = 0.dp,
                         scrollsContent = false
                     ) { _ ->
@@ -1236,7 +1281,7 @@ private fun NoteTitleField(
     Box(modifier = modifier) {
         if (noteTitle.isEmpty()) {
             Text(
-                text = "Untitled",
+                text = stringResource(Res.string.common_untitled),
                 style = style,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
@@ -1440,7 +1485,7 @@ fun CategorizedEmojiPicker(
                 EmberrTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = "Search emojis",
+                    placeholder = stringResource(Res.string.note_search_emojis),
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                 )
             }
@@ -1449,7 +1494,7 @@ fun CategorizedEmojiPicker(
                 if (searchResults.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize().padding(top = sheetHeaderHeight), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "No emojis found",
+                            text = stringResource(Res.string.note_no_emojis_found),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -1532,7 +1577,7 @@ fun CategorizedEmojiPicker(
             EmberrSearchTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = "Search emojis",
+                placeholder = stringResource(Res.string.note_search_emojis),
                 hazeState = emojiGridHazeState,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 onSubmit = { focusManager.clearFocus() },
@@ -1603,7 +1648,7 @@ private fun EditingTemplatePill(hazeState: HazeState?, modifier: Modifier = Modi
             .emberrBlur(hazeState, EmberrBlur.Regular)
     ) {
         Text(
-            text = "Editing Template",
+            text = stringResource(Res.string.note_editing_template),
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
@@ -1641,45 +1686,45 @@ fun NoteOptionsDesktopMenu(
     onOpenAsStickyNote: () -> Unit = {}
 ) {
     Column(modifier = Modifier.width(240.dp).padding(vertical = 4.dp)) {
-        DesktopSubmenuItem(painterResource(Res.drawable.ghost_smile), "Icon Options") {
-            DesktopMenuItem(painterResource(Res.drawable.ghost_smile), if (hasIcon) "Change Icon" else "Add Icon") {
+        DesktopSubmenuItem(painterResource(Res.drawable.ghost_smile), stringResource(Res.string.note_icon_options)) {
+            DesktopMenuItem(painterResource(Res.drawable.ghost_smile), if (hasIcon) stringResource(Res.string.note_change_icon) else stringResource(Res.string.note_add_icon)) {
                 onDismiss()
                 onAddIcon()
             }
             if (hasIcon) {
-                DesktopMenuItem(painterResource(Res.drawable.trash), "Remove Icon", isDestructive = true) {
+                DesktopMenuItem(painterResource(Res.drawable.trash), stringResource(Res.string.note_remove_icon), isDestructive = true) {
                     onDismiss()
                     onRemoveIcon()
                 }
             }
         }
-        DesktopSubmenuItem(painterResource(Res.drawable.image), "Cover Options") {
+        DesktopSubmenuItem(painterResource(Res.drawable.image), stringResource(Res.string.note_cover_options)) {
             CoverLinkField(
                 coverLinkFetch = coverLinkFetch,
                 onCoverLinkSubmitted = onCoverLinkSubmitted,
                 onCoverLinkApplied = onDismiss,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
             )
-            DesktopMenuItem(painterResource(Res.drawable.image), "Upload Cover") { onDismiss(); onAddCover() }
+            DesktopMenuItem(painterResource(Res.drawable.image), stringResource(Res.string.note_upload_cover)) { onDismiss(); onAddCover() }
             if (hasCover) {
-                DesktopMenuItem(painterResource(Res.drawable.trash), "Remove Cover", isDestructive = true) { onDismiss(); onRemoveCover() }
+                DesktopMenuItem(painterResource(Res.drawable.trash), stringResource(Res.string.note_remove_cover), isDestructive = true) { onDismiss(); onRemoveCover() }
             }
         }
 
         OptionsGroupDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
         val wordCountText =
-            if (showWordCount) "Hide Word Count" else "Show Word Count"
+            if (showWordCount) stringResource(Res.string.note_hide_word_count) else stringResource(Res.string.note_show_word_count)
         DesktopMenuItem(
             Icons.Default.FormatSize,
             wordCountText
         ) { onToggleWordCount() }
 
-        DesktopSubmenuItem(painterResource(Res.drawable.textalign_left2), "Alignment") {
+        DesktopSubmenuItem(painterResource(Res.drawable.textalign_left2), stringResource(Res.string.note_alignment)) {
             ALIGNMENT_OPTIONS.forEach { option ->
                 val isSelected = option.alignment == blockAlignment
                 EmberrDesktopMenuOption(
-                    label = option.label,
+                    label = stringResource(option.label),
                     isSelected = isSelected,
                     icon = { AlignmentOptionIcon(option, isSelected) },
                     onClick = { onSetAlignment(option.alignment) }
@@ -1687,7 +1732,7 @@ fun NoteOptionsDesktopMenu(
             }
         }
 
-        DesktopSubmenuItem(rememberVectorPainter(Icons.Default.Straighten), "Note Width") {
+        DesktopSubmenuItem(rememberVectorPainter(Icons.Default.Straighten), stringResource(Res.string.note_note_width)) {
             NoteWidthSlider(
                 noteWidth = noteWidth,
                 onNoteWidthChange = onNoteWidthChange,
@@ -1703,7 +1748,7 @@ fun NoteOptionsDesktopMenu(
         val favIcon =
             if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder
         val favText =
-            if (isFavorite) "Unfavorite" else "Favorite"
+            if (isFavorite) stringResource(Res.string.note_unfavorite) else stringResource(Res.string.note_favorite)
 
         if (!isEditingTemplate) {
         DesktopMenuItem(favIcon, favText) { onToggleFavorite() }}
@@ -1711,23 +1756,23 @@ fun NoteOptionsDesktopMenu(
         if (showStickyNoteOption) {
             DesktopMenuItem(
                 painterResource(Res.drawable.square_arrow_out_up_right),
-                "Open as Sticky Note"
+                stringResource(Res.string.note_open_as_sticky_note)
             ) { onOpenAsStickyNote() }
         }
 
         if (!isEditingTemplate) {
-            DesktopSubmenuItem(painterResource(Res.drawable.share), "Export Note") {
-                DesktopMenuItem(painterResource(Res.drawable.copy), "Copy Text") { onDismiss(); onCopyPlain() }
-                DesktopMenuItem(painterResource(Res.drawable.code), "Copy as Markdown") { onDismiss(); onCopyMarkdown() }
-                DesktopMenuItem(painterResource(Res.drawable.file_code_corner), "Download .md") { onDismiss(); onDownloadMarkdown() }
-                DesktopMenuItem(painterResource(Res.drawable.file_pdf), "Download PDF") { onDismiss(); onDownloadPdf() }
+            DesktopSubmenuItem(painterResource(Res.drawable.share), stringResource(Res.string.note_export_note)) {
+                DesktopMenuItem(painterResource(Res.drawable.copy), stringResource(Res.string.note_copy_text)) { onDismiss(); onCopyPlain() }
+                DesktopMenuItem(painterResource(Res.drawable.code), stringResource(Res.string.note_copy_as_markdown)) { onDismiss(); onCopyMarkdown() }
+                DesktopMenuItem(painterResource(Res.drawable.file_code_corner), stringResource(Res.string.note_download_markdown)) { onDismiss(); onDownloadMarkdown() }
+                DesktopMenuItem(painterResource(Res.drawable.file_pdf), stringResource(Res.string.note_download_pdf)) { onDismiss(); onDownloadPdf() }
             }
 
             OptionsGroupDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             DesktopMenuItem(
                 painterResource(Res.drawable.trash),
-                "Move to Trash",
+                stringResource(Res.string.note_move_to_trash),
                 isDestructive = true
             ) {
                 onDismiss(); onMoveToTrash()
@@ -1859,19 +1904,19 @@ private fun NoteWidthSlider(
             valueRange = NARROWEST_NOTE_WIDTH..SyncConstants.FULL_DESKTOP_NOTE_WIDTH
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Narrow", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-            Text("Full", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(Res.string.note_width_narrow), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(Res.string.note_width_full), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
 
-private class AlignmentOption(val alignment: TextAlignment, val icon: DrawableResource, val label: String)
+private class AlignmentOption(val alignment: TextAlignment, val icon: DrawableResource, val label: StringResource)
 
 private val ALIGNMENT_OPTIONS = listOf(
-    AlignmentOption(TextAlignment.LEFT, Res.drawable.textalign_left2, "Left"),
-    AlignmentOption(TextAlignment.CENTER, Res.drawable.textalign_center2, "Center"),
-    AlignmentOption(TextAlignment.RIGHT, Res.drawable.textalign_right2, "Right"),
-    AlignmentOption(TextAlignment.JUSTIFY, Res.drawable.textalign_justifycenter2, "Justify")
+    AlignmentOption(TextAlignment.LEFT, Res.drawable.textalign_left2, Res.string.note_align_left),
+    AlignmentOption(TextAlignment.CENTER, Res.drawable.textalign_center2, Res.string.note_align_center),
+    AlignmentOption(TextAlignment.RIGHT, Res.drawable.textalign_right2, Res.string.note_align_right),
+    AlignmentOption(TextAlignment.JUSTIFY, Res.drawable.textalign_justifycenter2, Res.string.note_align_justify)
 )
 
 @Composable
@@ -1924,7 +1969,7 @@ fun NoteOptionsBottomSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Note Options",
+        title = stringResource(Res.string.note_note_options),
     ) { closeAnd ->
       CompositionLocalProvider(
         LocalIndication provides NoRippleIndicationNodeFactory,
@@ -1933,34 +1978,34 @@ fun NoteOptionsBottomSheet(
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             BottomSheetOptionItem(
                 painterResource(Res.drawable.ghost_smile),
-                "Icon Options"
+                stringResource(Res.string.note_icon_options)
             ) { currentMenu = MenuLevel.ICON }
 
             BottomSheetOptionItem(
                 painterResource(Res.drawable.image),
-                "Cover Options"
+                stringResource(Res.string.note_cover_options)
             ) { currentMenu = MenuLevel.COVER }
 
             OptionsGroupDivider()
 
-            val wordCountText = if (showWordCount) "Hide Word Count" else "Show Word Count"
+            val wordCountText = if (showWordCount) stringResource(Res.string.note_hide_word_count) else stringResource(Res.string.note_show_word_count)
             BottomSheetOptionItem(Icons.Default.FormatSize, wordCountText) {
                 onToggleWordCount()
             }
 
             BottomSheetOptionItem(
                 painterResource(Res.drawable.textalign_left2),
-                "Alignment"
+                stringResource(Res.string.note_alignment)
             ) { currentMenu = MenuLevel.ALIGNMENT }
 
             if (!isEditingTemplate) {
                 OptionsGroupDivider()
                 val favIcon = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder
-                val favText = if (isFavorite) "Unfavorite" else "Favorite"
+                val favText = if (isFavorite) stringResource(Res.string.note_unfavorite) else stringResource(Res.string.note_favorite)
                 BottomSheetOptionItem(favIcon, favText) { onToggleFavorite() }
                 BottomSheetOptionItem(
                     painterResource(Res.drawable.share),
-                    "Export Note"
+                    stringResource(Res.string.note_export_note)
                 ) { currentMenu = MenuLevel.EXPORT }
             }
 
@@ -1968,12 +2013,12 @@ fun NoteOptionsBottomSheet(
 
             BottomSheetOptionItem(
                 painterResource(Res.drawable.trash),
-                "Move to Trash",
+                stringResource(Res.string.note_move_to_trash),
                 isDestructive = true
             ) { closeAnd { onMoveToTrash() } }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)
@@ -1986,28 +2031,28 @@ fun NoteOptionsBottomSheet(
     EmberrBottomSheet(
         expanded = currentMenu == MenuLevel.EXPORT,
         onDismiss = { currentMenu = MenuLevel.MAIN },
-        title = "Export Options",
+        title = stringResource(Res.string.note_export_options),
     ) { closeAnd ->
       CompositionLocalProvider(
         LocalIndication provides NoRippleIndicationNodeFactory,
         LocalRippleConfiguration provides null
       ) {
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
-            BottomSheetOptionItem(painterResource(Res.drawable.copy), "Copy Text") {
+            BottomSheetOptionItem(painterResource(Res.drawable.copy), stringResource(Res.string.note_copy_text)) {
                 closeAnd { onCopyPlain(); onDismiss() }
             }
-            BottomSheetOptionItem(painterResource(Res.drawable.code), "Copy as Markdown") {
+            BottomSheetOptionItem(painterResource(Res.drawable.code), stringResource(Res.string.note_copy_as_markdown)) {
                 closeAnd { onCopyMarkdown(); onDismiss() }
             }
-            BottomSheetOptionItem(painterResource(Res.drawable.file_code_corner), "Download .md") {
+            BottomSheetOptionItem(painterResource(Res.drawable.file_code_corner), stringResource(Res.string.note_download_markdown)) {
                 closeAnd { onDownloadMarkdown(); onDismiss() }
             }
-            BottomSheetOptionItem(painterResource(Res.drawable.file_pdf), "Download PDF") {
+            BottomSheetOptionItem(painterResource(Res.drawable.file_pdf), stringResource(Res.string.note_download_pdf)) {
                 closeAnd { onDownloadPdf(); onDismiss() }
             }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { currentMenu = MenuLevel.MAIN },
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp, horizontal = 20.dp)
@@ -2019,7 +2064,7 @@ fun NoteOptionsBottomSheet(
     EmberrBottomSheet(
         expanded = currentMenu == MenuLevel.ALIGNMENT,
         onDismiss = { currentMenu = MenuLevel.MAIN },
-        title = "Alignment",
+        title = stringResource(Res.string.note_alignment),
     ) { _ ->
       CompositionLocalProvider(
         LocalIndication provides NoRippleIndicationNodeFactory,
@@ -2029,7 +2074,7 @@ fun NoteOptionsBottomSheet(
             ALIGNMENT_OPTIONS.forEach { option ->
                 val isSelected = option.alignment == blockAlignment
                 EmberrBottomSheetOption(
-                    label = option.label,
+                    label = stringResource(option.label),
                     isSelected = isSelected,
                     icon = { AlignmentOptionIcon(option, isSelected) },
                     outerHorizontalPadding = 0.dp,
@@ -2038,7 +2083,7 @@ fun NoteOptionsBottomSheet(
             }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { currentMenu = MenuLevel.MAIN },
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)
@@ -2051,7 +2096,7 @@ fun NoteOptionsBottomSheet(
     EmberrBottomSheet(
         expanded = currentMenu == MenuLevel.ICON,
         onDismiss = { currentMenu = MenuLevel.MAIN },
-        title = "Icon Options",
+        title = stringResource(Res.string.note_icon_options),
     ) { closeAnd ->
       CompositionLocalProvider(
         LocalIndication provides NoRippleIndicationNodeFactory,
@@ -2060,19 +2105,19 @@ fun NoteOptionsBottomSheet(
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             BottomSheetOptionItem(
                 painterResource(Res.drawable.ghost_smile),
-                if (hasIcon) "Change Icon" else "Add Icon"
+                if (hasIcon) stringResource(Res.string.note_change_icon) else stringResource(Res.string.note_add_icon)
             ) { closeAnd { onAddIcon(); onDismiss() } }
 
             if (hasIcon) {
                 BottomSheetOptionItem(
                     painterResource(Res.drawable.trash),
-                    "Remove Icon",
+                    stringResource(Res.string.note_remove_icon),
                     isDestructive = true
                 ) { closeAnd { onRemoveIcon(); onDismiss() } }
             }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { currentMenu = MenuLevel.MAIN },
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)
@@ -2085,7 +2130,7 @@ fun NoteOptionsBottomSheet(
     EmberrBottomSheet(
         expanded = currentMenu == MenuLevel.COVER,
         onDismiss = { currentMenu = MenuLevel.MAIN },
-        title = "Cover Options",
+        title = stringResource(Res.string.note_cover_options),
     ) { closeAnd ->
       CompositionLocalProvider(
         LocalIndication provides NoRippleIndicationNodeFactory,
@@ -2101,19 +2146,19 @@ fun NoteOptionsBottomSheet(
 
             BottomSheetOptionItem(
                 painterResource(Res.drawable.image),
-                "Upload Cover"
+                stringResource(Res.string.note_upload_cover)
             ) { closeAnd { onAddCover(); onDismiss() } }
 
             if (hasCover) {
                 BottomSheetOptionItem(
                     painterResource(Res.drawable.trash),
-                    "Remove Cover",
+                    stringResource(Res.string.note_remove_cover),
                     isDestructive = true
                 ) { closeAnd { onRemoveCover(); onDismiss() } }
             }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { currentMenu = MenuLevel.MAIN },
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)

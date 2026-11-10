@@ -74,6 +74,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.overview_bookmarks_add_bookmark
+import emberr.shared.generated.resources.overview_bookmarks_add_bookmark_description
+import emberr.shared.generated.resources.overview_bookmarks_add_link
+import emberr.shared.generated.resources.overview_bookmarks_all
+import emberr.shared.generated.resources.overview_bookmarks_clear_link
+import emberr.shared.generated.resources.overview_bookmarks_empty
+import emberr.shared.generated.resources.overview_bookmarks_others
+import emberr.shared.generated.resources.overview_bookmarks_paste_link
+import emberr.shared.generated.resources.overview_section_bookmarks
+import org.jetbrains.compose.resources.stringResource
 
 private val SelectionHighlightShape = RoundedCornerShape(12.dp)
 private val CategoryPillShape = RoundedCornerShape(20.dp)
@@ -223,7 +235,7 @@ fun BookmarksScreen(
                         it.copy(fontSize = it.fontSize * 1.5f, lineHeight = it.lineHeight * 1.2f)
                     }
                     Text(
-                        text = "Bookmarks",
+                        text = stringResource(Res.string.overview_section_bookmarks),
                         style = titleStyle,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -250,7 +262,7 @@ fun BookmarksScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "No saved links yet.",
+                                stringResource(Res.string.overview_bookmarks_empty),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -292,11 +304,11 @@ fun BookmarksScreen(
             EmberrTopHeaderBar(
                 modifier = Modifier.align(Alignment.TopCenter),
                 topEdgeFadeAlpha = if (isAtScrollTop) 0f else 1f,
-                title = "Bookmarks",
+                title = stringResource(Res.string.overview_section_bookmarks),
                 titleVisibility = titleCollapseProgress,
                 onTitleClick = onCollapsedTitleClick,
                 hazeState = hazeState,
-                backTooltip = "Back",
+                backTooltip = stringResource(Res.string.common_back),
                 onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                 onBackClick = {
                     if (isSelectionMode) viewModel.clearSelection() else onNavigateBack()
@@ -305,12 +317,12 @@ fun BookmarksScreen(
                     if (!isSelectionMode) {
                         TopBarIconButton(
                             icon = painterResource(Res.drawable.circle_plus),
-                            contentDescription = "Add Bookmark",
+                            contentDescription = stringResource(Res.string.overview_bookmarks_add_bookmark_description),
                             bgColor = Color.Transparent,
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
-                            tooltip = "Add bookmark",
+                            tooltip = stringResource(Res.string.overview_bookmarks_add_bookmark),
                             onClick = { showAddUrlInput = true }
                         )
                     }
@@ -352,7 +364,7 @@ fun BookmarksScreen(
                         ) {
                             Icon(
                                 Icons.Default.Link,
-                                contentDescription = "Add Link",
+                                contentDescription = stringResource(Res.string.overview_bookmarks_add_link),
                                 modifier = Modifier.size(18.dp),
                                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                             )
@@ -381,7 +393,7 @@ fun BookmarksScreen(
                                     Box(contentAlignment = Alignment.CenterStart) {
                                         if (newUrlInput.isEmpty()) {
                                             Text(
-                                                text = "Paste a link...",
+                                                text = stringResource(Res.string.overview_bookmarks_paste_link),
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 color = defaultContentColor.copy(alpha = 0.45f)
                                             )
@@ -390,7 +402,7 @@ fun BookmarksScreen(
                                     }
                                 }
                             )
-                            IconTooltip(text = if (newUrlInput.isEmpty()) "Close" else "Clear link", position = IconTooltipPosition.Above) {
+                            IconTooltip(text = if (newUrlInput.isEmpty()) stringResource(Res.string.common_close) else stringResource(Res.string.overview_bookmarks_clear_link), position = IconTooltipPosition.Above) {
                                 Box(
                                     modifier = Modifier
                                         .size(36.dp)
@@ -407,7 +419,7 @@ fun BookmarksScreen(
                                 ) {
                                     Icon(
                                         painter = painterResource(Res.drawable.x),
-                                        contentDescription = if (newUrlInput.isEmpty()) "Close" else "Clear link",
+                                        contentDescription = if (newUrlInput.isEmpty()) stringResource(Res.string.common_close) else stringResource(Res.string.overview_bookmarks_clear_link),
                                         modifier = Modifier.size(17.dp),
                                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                                     )
@@ -599,7 +611,7 @@ private fun BookmarkCategoryPills(
         verticalAlignment = Alignment.CenterVertically
     ) {
         BookmarkCategoryPill(
-            label = "All",
+            label = stringResource(Res.string.overview_bookmarks_all),
             isSelected = selectedCategory == null,
             isLifted = false,
             hazeState = hazeState,
@@ -631,7 +643,7 @@ private fun BookmarkCategoryPills(
                         }
                 ) {
                     BookmarkCategoryPill(
-                        label = category,
+                        label = if (category == OtherBookmarksCategory) stringResource(Res.string.overview_bookmarks_others) else category,
                         isSelected = selectedCategory == category,
                         isLifted = isLifted,
                         hazeState = hazeState,

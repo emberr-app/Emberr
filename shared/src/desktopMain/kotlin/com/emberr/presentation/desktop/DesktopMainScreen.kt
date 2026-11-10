@@ -202,6 +202,7 @@ import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
 import java.awt.Cursor
+import com.emberr.presentation.home.overview.label
 
 private val PANEL_PADDING = 16.dp
 private val PANEL_TOP_MARGIN = 12.dp
@@ -1588,7 +1589,7 @@ fun DesktopMainScreen(
                                                 }
                                                 OverviewRow(
                                                     painterResource(section.icon),
-                                                    section.title,
+                                                    section.label(),
                                                     subtitle,
                                                     isSelected = splitState.isShowing(sectionPane)
                                                 ) { detail = sectionPane; isPeeking = false }

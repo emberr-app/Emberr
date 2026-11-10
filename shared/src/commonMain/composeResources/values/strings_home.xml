@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">Favorites</string>
+    <string name="home_toggle_favorites">Toggle Favorites</string>
+    <string name="home_notes">Notes</string>
+    <string name="home_toggle_notes">Toggle Notes</string>
+    <string name="home_recents">Recents</string>
+    <string name="home_toggle_recents">Toggle Recents</string>
+    <string name="home_sort">Sort</string>
+    <string name="home_sort_notes">Sort notes</string>
+    <string name="home_new_folder">New Folder</string>
+    <string name="home_new_folder_tooltip">New folder</string>
+    <string name="home_new_subfolder">New Subfolder</string>
+    <string name="home_folder_name_placeholder">e.g. Personal, Work...</string>
+    <string name="home_new_note">New Note</string>
+    <string name="home_new_note_tooltip">New note</string>
+    <string name="home_new_note_in_folder">New Note in %1$s</string>
+    <string name="home_note_title_placeholder">Note title...</string>
+    <string name="home_templates">Templates</string>
+    <string name="home_switch_space">Switch space</string>
+    <string name="home_toggle_sidebar">Toggle sidebar</string>
+    <string name="home_open_calendar">Open Calendar</string>
+    <string name="home_calendar">Calendar</string>
+    <string name="home_settings">Settings</string>
+    <string name="home_more_settings">More settings</string>
+    <string name="home_rename">Rename</string>
+    <string name="home_move_to_trash">Move to Trash</string>
+    <string name="home_add_to_favorites">Add to Favorites</string>
+    <string name="home_remove_from_favorites">Remove from Favorites</string>
+    <string name="home_sort_last_edited">Last Edited</string>
+    <string name="home_sort_date_created">Date Created</string>
+    <string name="home_sort_name">Name (A-Z)</string>
+    <string name="home_sort_type">Type</string>
+    <string name="home_sort_manual">Manual</string>
+    <string name="home_sort_ascending">Ascending</string>
+    <string name="home_sort_descending">Descending</string>
+    <string name="home_sort_by">Sort by</string>
+    <string name="home_empty_space_start_with">This space is empty. Start with</string>
+    <string name="home_empty_space_a_new_note">a new note</string>
+    <string name="home_empty_space_or">or</string>
+    <string name="home_empty_space_a_folder">a folder</string>
+    <string name="home_breadcrumb_home">Home</string>
+    <string name="home_cover">Cover</string>
+    <string name="home_in_parent">in %1$s</string>
+    <string name="home_canvas">Canvas</string>
+    <string name="home_note">Note</string>
+    <string name="home_empty_note">Empty note...</string>
+    <string name="home_favorite">Favorite</string>
+    <string name="home_selected">Selected</string>
+    <string name="home_rename_subtitle">Pick a new name.</string>
+    <string name="home_name_placeholder">Name...</string>
+    <string name="home_nesting_inside_folder">Nesting inside %1$s.</string>
+    <string name="home_organize_your_notes">Organize your notes.</string>
+    <string name="home_search_templates_placeholder">Search templates...</string>
+    <string name="home_search_templates">Search templates</string>
+    <string name="home_no_templates_yet">No templates yet.</string>
+    <string name="home_no_templates_match">No templates match "%1$s".</string>
+    <string name="home_new_template">New template</string>
+    <string name="home_edit_template">Edit template</string>
+    <string name="home_delete_template">Delete template</string>
+    <string name="home_templates_subtitle">Start a new note from a template.</string>
+    <string name="home_new_subfolder_in_folder">New subfolder in %1$s</string>
+    <string name="home_new_note_in_folder_description">New note in %1$s</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="one">%1$d left</item>
+        <item quantity="other">%1$d left</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="one">%1$d saved</item>
+        <item quantity="other">%1$d saved</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="one">%1$d attached</item>
+        <item quantity="other">%1$d attached</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="one">Delete %1$d item</item>
+        <item quantity="other">Delete %1$d items</item>
+    </plurals>
+</resources>

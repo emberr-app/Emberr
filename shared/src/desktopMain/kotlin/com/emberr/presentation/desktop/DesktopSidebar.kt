@@ -84,6 +84,8 @@ import emberr.shared.generated.resources.star
 import emberr.shared.generated.resources.template
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import com.emberr.presentation.home.deleteLabel
+import com.emberr.presentation.home.favoriteLabel
 
 private val INDENT_STEP          = 32.dp
 private val SIDEBAR_BASE_START   = 8.dp
@@ -449,7 +451,7 @@ fun SidebarFolderRow(
                         SidebarMenuItem("Add Subfolder", Icons.Default.CreateNewFolder) { showContextMenu = false; showAddSubfolderPopup = true }
                         SidebarMenuItem("Rename", Icons.Default.Edit) { showContextMenu = false; showRenamePopup = true }
                     }
-                    SidebarMenuItem(menu.deleteLabel, Icons.Default.Delete, isDestructive = true) { showContextMenu = false; onDelete() }
+                    SidebarMenuItem(menu.deleteLabel(), Icons.Default.Delete, isDestructive = true) { showContextMenu = false; onDelete() }
                 }
             }
         }
@@ -642,9 +644,9 @@ fun SidebarNoteRow(
                         SidebarMenuItem("Rename", Icons.Default.Edit) { showContextMenu = false; showRenamePopup = true }
                     }
                     if (menu.showFavorite) {
-                        SidebarMenuItem(menu.favoriteLabel, Icons.Default.Star) { showContextMenu = false; onToggleFavorite() }
+                        SidebarMenuItem(menu.favoriteLabel(), Icons.Default.Star) { showContextMenu = false; onToggleFavorite() }
                     }
-                    SidebarMenuItem(menu.deleteLabel, Icons.Default.Delete, isDestructive = true) { showContextMenu = false; onDelete() }
+                    SidebarMenuItem(menu.deleteLabel(), Icons.Default.Delete, isDestructive = true) { showContextMenu = false; onDelete() }
                 }
             }
         }

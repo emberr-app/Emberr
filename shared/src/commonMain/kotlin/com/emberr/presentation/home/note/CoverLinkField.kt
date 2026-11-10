@@ -41,6 +41,9 @@ import com.emberr.presentation.shared.editor.ImageLinkFetch
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.link
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.editor_could_not_load_image_from_link
+import emberr.shared.generated.resources.note_paste_image_link
+import org.jetbrains.compose.resources.stringResource
 
 private val CoverLinkFieldShape = RoundedCornerShape(12.dp)
 
@@ -86,7 +89,7 @@ internal fun CoverLinkField(
             Box(modifier = Modifier.weight(1f)) {
                 if (linkText.isEmpty()) {
                     Text(
-                        text = "Paste an image link",
+                        text = stringResource(Res.string.note_paste_image_link),
                         style = MaterialTheme.typography.bodyLarge,
                         color = hintColor,
                         maxLines = 1,
@@ -130,7 +133,7 @@ internal fun CoverLinkField(
 
         if (hasFetchFailed) {
             Text(
-                text = "Couldn't load an image from this link",
+                text = stringResource(Res.string.editor_could_not_load_image_from_link),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(start = 12.dp, top = 6.dp)

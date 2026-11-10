@@ -56,6 +56,12 @@ import emberr.shared.generated.resources.folder_plus
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.star
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.home_favorite
+import emberr.shared.generated.resources.home_new_note_in_folder_description
+import emberr.shared.generated.resources.home_new_subfolder_in_folder
+import emberr.shared.generated.resources.home_selected
+import org.jetbrains.compose.resources.stringResource
 
 private val TREE_INDENT_STEP        = 32.dp
 private val TREE_ROW_MIN_HEIGHT     = 42.dp
@@ -131,14 +137,14 @@ fun MobileTreeFolderRow(
             if (showAddSubfolderAction) {
                 MobileTreeRowAction(
                     painter = painterResource(Res.drawable.folder_plus),
-                    description = "New subfolder in ${folder.name}",
+                    description = stringResource(Res.string.home_new_subfolder_in_folder, folder.name),
                     onClick = onAddSubfolder
                 )
             }
             if (showAddNoteAction) {
                 MobileTreeRowAction(
                     painter = painterResource(Res.drawable.plus),
-                    description = "New note in ${folder.name}",
+                    description = stringResource(Res.string.home_new_note_in_folder_description, folder.name),
                     onClick = onAddNote,
                     modifier = addNoteActionModifier
                 )
@@ -182,7 +188,7 @@ fun MobileTreeNoteRow(
         }
         Spacer(Modifier.width(10.dp))
         Text(
-            text = note.title.ifEmpty { "Untitled" },
+            text = note.title.ifEmpty { stringResource(Res.string.common_untitled) },
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
@@ -192,7 +198,7 @@ fun MobileTreeNoteRow(
         if (note.isFavorite) {
             Icon(
                 painter = painterResource(Res.drawable.star),
-                contentDescription = "Favorite",
+                contentDescription = stringResource(Res.string.home_favorite),
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 modifier = Modifier.padding(horizontal = 6.dp).size(14.dp)
             )
@@ -358,7 +364,7 @@ private fun MobileTreeTrailingCheck() {
     ) {
         Icon(
             imageVector = Icons.Default.Check,
-            contentDescription = "Selected",
+            contentDescription = stringResource(Res.string.home_selected),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(13.dp)
         )

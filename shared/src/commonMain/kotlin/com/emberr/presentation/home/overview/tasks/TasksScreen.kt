@@ -54,6 +54,22 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check_square
 import emberr.shared.generated.resources.circle_plus
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.overview_section_tasks
+import emberr.shared.generated.resources.overview_tasks_add_task
+import emberr.shared.generated.resources.overview_tasks_add_task_description
+import emberr.shared.generated.resources.overview_tasks_all_caught_up
+import emberr.shared.generated.resources.overview_tasks_completed
+import emberr.shared.generated.resources.overview_tasks_completed_tasks
+import emberr.shared.generated.resources.overview_tasks_hide_completed
+import emberr.shared.generated.resources.overview_tasks_none_completed
+import emberr.shared.generated.resources.overview_tasks_note
+import emberr.shared.generated.resources.overview_tasks_repeating
+import emberr.shared.generated.resources.overview_tasks_show_completed
+import emberr.shared.generated.resources.overview_tasks_today
+import emberr.shared.generated.resources.overview_tasks_tomorrow
+import emberr.shared.generated.resources.overview_tasks_yesterday
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,20 +97,27 @@ fun TasksScreen(
     val inboxNoteIds = remember(noteTitleById) {
         noteTitleById.filterValues { it.equals("Inbox", ignoreCase = true) }.keys + ACCOUNT_TASKS_INBOX_NOTE_ID
     }
-    val sectionLabelFor = remember(blockLocations, inboxNoteIds, noteHeadingById, repeatDaysByBlockId) {
+    val repeatingLabel = stringResource(Res.string.overview_tasks_repeating)
+    val noteLabel = stringResource(Res.string.overview_tasks_note)
+    val relativeDayLabels = RelativeDayLabels(
+        today = stringResource(Res.string.overview_tasks_today),
+        tomorrow = stringResource(Res.string.overview_tasks_tomorrow),
+        yesterday = stringResource(Res.string.overview_tasks_yesterday)
+    )
+    val sectionLabelFor = remember(blockLocations, inboxNoteIds, noteHeadingById, repeatDaysByBlockId, repeatingLabel, noteLabel, relativeDayLabels) {
         { block: NoteBlock ->
             val location = blockLocations[block.id]
             when {
-                block.id in repeatDaysByBlockId -> "Repeating"
+                block.id in repeatDaysByBlockId -> repeatingLabel
                 location == null -> null
                 !location.isDaily && location.noteId in inboxNoteIds -> null
-                location.isDaily -> dailyDateLabel(location.noteId)
-                else -> noteHeadingById[location.noteId] ?: "Note"
+                location.isDaily -> dailyDateLabel(location.noteId, relativeDayLabels)
+                else -> noteHeadingById[location.noteId] ?: noteLabel
             }
         }
     }
-    val trailingLabelFor = remember(repeatDaysByBlockId) {
-        { block: NoteBlock -> repeatDaysByBlockId[block.id]?.let(::dailyDateLabel) }
+    val trailingLabelFor = remember(repeatDaysByBlockId, relativeDayLabels) {
+        { block: NoteBlock -> repeatDaysByBlockId[block.id]?.let { dateString -> dailyDateLabel(dateString, relativeDayLabels) } }
     }
     val groupedBlocks = remember(blocks, blockLocations, inboxNoteIds, noteHeadingById, repeatDaysByBlockId) {
         val (repeatingBlocks, nonRepeatingBlocks) = blocks.partition { block -> block.id in repeatDaysByBlockId }
@@ -202,7 +225,7 @@ fun TasksScreen(
                                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                             } else {
                                 Text(
-                                    text = if (isShowingCompleted) "No completed tasks yet." else "All caught up!",
+                                    text = if (isShowingCompleted) stringResource(Res.string.overview_tasks_none_completed) else stringResource(Res.string.overview_tasks_all_caught_up),
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -327,12 +350,12 @@ fun TasksScreen(
             EmberrTopHeaderBar(
                 modifier = Modifier.align(Alignment.TopCenter),
                 topEdgeFadeAlpha = if (isAtScrollTop) 0f else 1f,
-                title = if (isShowingCompleted) "Completed" else "Tasks",
+                title = if (isShowingCompleted) stringResource(Res.string.overview_tasks_completed) else stringResource(Res.string.overview_section_tasks),
                 titleVisibility = titleCollapseProgress,
                 titleSideInset = 112.dp,
                 onTitleClick = onCollapsedTitleClick,
                 hazeState = hazeState,
-                backTooltip = "Back",
+                backTooltip = stringResource(Res.string.common_back),
                 onPositioned = { topBarBottomPx = it.positionInRoot().y + it.size.height },
                 onBackClick = {
                     if (isSelectionMode) viewModel.clearSelection()
@@ -344,23 +367,23 @@ fun TasksScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             TopBarIconButton(
                                 icon = painterResource(Res.drawable.check_square),
-                                contentDescription = "Completed Tasks",
+                                contentDescription = stringResource(Res.string.overview_tasks_completed_tasks),
                                 bgColor = Color.Transparent,
                                 tint = if (isShowingCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                 hazeState = hazeState,
                                 hazeStyle = EmberrBlur.Regular,
-                                tooltip = if (isShowingCompleted) "Hide completed" else "Show completed",
+                                tooltip = if (isShowingCompleted) stringResource(Res.string.overview_tasks_hide_completed) else stringResource(Res.string.overview_tasks_show_completed),
                                 onClick = { viewModel.toggleCompletedView() }
                             )
 
                             TopBarIconButton(
                                 icon = painterResource(Res.drawable.circle_plus),
-                                contentDescription = "Add Task",
+                                contentDescription = stringResource(Res.string.overview_tasks_add_task_description),
                                 bgColor = Color.Transparent,
                                 tint = MaterialTheme.colorScheme.primary,
                                 hazeState = hazeState,
                                 hazeStyle = EmberrBlur.Regular,
-                                tooltip = "Add task",
+                                tooltip = stringResource(Res.string.overview_tasks_add_task),
                                 onClick = { viewModel.insertNewReminder() }
                             )
                         }
@@ -394,7 +417,9 @@ fun TasksScreen(
     }
 }
 
-private fun dailyDateLabel(dateString: String): String {
+private data class RelativeDayLabels(val today: String, val tomorrow: String, val yesterday: String)
+
+private fun dailyDateLabel(dateString: String, relativeDayLabels: RelativeDayLabels): String {
     val date = try {
         LocalDate.parse(dateString)
     } catch (e: IllegalArgumentException) {
@@ -402,9 +427,9 @@ private fun dailyDateLabel(dateString: String): String {
     }
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     return when (date) {
-        today -> "Today"
-        today.plus(DatePeriod(days = 1)) -> "Tomorrow"
-        today.minus(DatePeriod(days = 1)) -> "Yesterday"
+        today -> relativeDayLabels.today
+        today.plus(DatePeriod(days = 1)) -> relativeDayLabels.tomorrow
+        today.minus(DatePeriod(days = 1)) -> relativeDayLabels.yesterday
         else -> {
             val shortDay = date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
             val shortMonth = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
@@ -419,7 +444,7 @@ private fun ScreenTitle(isShowingCompleted: Boolean, modifier: Modifier = Modifi
         it.copy(fontSize = it.fontSize * 1.5f, lineHeight = it.lineHeight * 1.2f)
     }
     Text(
-        text = if (isShowingCompleted) "Completed" else "Tasks",
+        text = if (isShowingCompleted) stringResource(Res.string.overview_tasks_completed) else stringResource(Res.string.overview_section_tasks),
         style = titleStyle,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onBackground,
