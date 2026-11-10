@@ -55,6 +55,7 @@ import com.emberr.presentation.shared.components.GestureCoordinates
 import com.emberr.presentation.shared.components.PersonPill
 import com.emberr.presentation.shared.components.rememberPeopleToPick
 import com.emberr.presentation.shared.components.boardDragGesture
+import com.emberr.presentation.shared.components.shownNoteTitle
 import com.emberr.presentation.shared.cover.coverAlignmentFor
 import com.emberr.presentation.shared.cover.rememberSavedCoverPosition
 import coil3.compose.LocalPlatformContext
@@ -82,7 +83,6 @@ import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.roundToInt
 import com.emberr.presentation.shared.editor.blockViews.property.displayLabel
-import emberr.shared.generated.resources.common_untitled
 import org.jetbrains.compose.resources.stringResource
 
 private val CardGap = 12.dp
@@ -317,7 +317,7 @@ internal fun DatabaseRowCard(
                     Spacer(modifier = Modifier.width(6.dp))
                 }
                 Text(
-                    text = row.title.ifBlank { stringResource(Res.string.common_untitled) },
+                    text = shownNoteTitle(row.title),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = if (row.title.isBlank()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,

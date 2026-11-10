@@ -27,11 +27,12 @@ import com.emberr.domain.model.DatabaseTemplateRepeat
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrSearchSheetBody
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.NoteTitleNames
+import com.emberr.presentation.shared.components.rememberNoteTitleNames
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.common_delete
 import emberr.shared.generated.resources.common_off
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.database_edit
 import emberr.shared.generated.resources.database_named_template_options
 import emberr.shared.generated.resources.database_new_template
@@ -69,8 +70,8 @@ internal fun DatabaseTemplateMenu(
     val templates by remember(editor) { editor.databaseTemplates }.collectAsState(initial = emptyList())
     val defaultTemplateId = block.defaultTemplateId?.takeIf { templateId -> templates.any { it.noteId == templateId } }
     var searchQuery by remember(expanded) { mutableStateOf("") }
-    val untitledText = stringResource(Res.string.common_untitled)
-    val matchingTemplates = templates.filter { templateLabel(it, untitledText).contains(searchQuery.trim(), ignoreCase = true) }
+    val noteTitleNames = rememberNoteTitleNames()
+    val matchingTemplates = templates.filter { templateLabel(it, noteTitleNames).contains(searchQuery.trim(), ignoreCase = true) }
 
     DatabaseMenu(expanded = expanded, title = stringResource(Res.string.database_templates), onDismiss = onDismiss, hasSearchBar = true) { closeAnd ->
         val templateChoices = @Composable {
@@ -93,7 +94,7 @@ internal fun DatabaseTemplateMenu(
             matchingTemplates.forEach { template ->
                 key(template.noteId) {
                     DatabaseTemplateOption(
-                        label = templateLabel(template, untitledText),
+                        label = templateLabel(template, noteTitleNames),
                         icon = Res.drawable.file_text,
                         isDefault = template.noteId == defaultTemplateId,
                         onUse = { closeAnd { editor.addRowFromTemplate(block.id, template.noteId) } },
@@ -135,7 +136,7 @@ internal fun DatabaseTemplateMenu(
     }
 }
 
-private fun templateLabel(template: NoteMetadataEntity, untitledText: String): String = template.title.ifBlank { untitledText }
+private fun templateLabel(template: NoteMetadataEntity, noteTitleNames: NoteTitleNames): String = noteTitleNames.shown(template.title)
 
 @Composable
 private fun DatabaseTemplateOption(

@@ -246,7 +246,7 @@
         <item quantity="other">%1$d selected</item>
     </plurals>
     <plurals name="database_edit_rows">
-        <item quantity="one">Edit %1$d rows</item>
+        <item quantity="one">Edit %1$d row</item>
         <item quantity="other">Edit %1$d rows</item>
     </plurals>
     <string name="database_duplicate">Duplicate</string>

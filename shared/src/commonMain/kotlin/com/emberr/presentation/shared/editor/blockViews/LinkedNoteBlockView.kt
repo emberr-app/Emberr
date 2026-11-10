@@ -43,13 +43,13 @@ import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.presentation.shared.components.shownNoteTitle
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import java.io.File
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.editor_loading
 import emberr.shared.generated.resources.editor_note_not_found
 import org.jetbrains.compose.resources.stringResource
@@ -138,7 +138,7 @@ fun LinkedNoteBlockView(
             val titleText = when {
                 isLoading -> stringResource(Res.string.editor_loading)
                 metadata == null -> stringResource(Res.string.editor_note_not_found)
-                else -> metadata?.title?.ifEmpty { stringResource(Res.string.common_untitled) } ?: stringResource(Res.string.common_untitled)
+                else -> shownNoteTitle(metadata?.title.orEmpty())
             }
             val isMissing = !isLoading && metadata == null
 

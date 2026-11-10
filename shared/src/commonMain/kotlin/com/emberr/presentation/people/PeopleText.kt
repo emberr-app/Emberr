@@ -45,7 +45,7 @@ private const val LEAP_YEAR_FOR_BIRTHDAY_TEXT = 2000
 
 @Composable
 fun personDetailSearchLine(detail: PersonDetailBlock): String {
-    val heading = detail.label?.trim()?.takeIf { it.isNotEmpty() } ?: detail.kind.displayName()
+    val heading = detail.label?.trim()?.takeIf { it.isNotEmpty() }?.let { shownDetailLabel(it) } ?: detail.kind.displayName()
     return "$heading · ${detail.value}"
 }
 

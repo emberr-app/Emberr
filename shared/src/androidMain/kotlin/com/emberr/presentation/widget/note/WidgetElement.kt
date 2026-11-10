@@ -31,6 +31,7 @@ import com.emberr.domain.model.highlightColorNameOrNull
 import com.emberr.domain.model.inlineSpansOrEmpty
 import com.emberr.domain.model.summaryLine
 import com.emberr.domain.model.valueAsText
+import com.emberr.presentation.shared.components.loadShownBookmarkTitle
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import com.emberr.presentation.shared.editor.blockViews.callout.nameResource
@@ -182,7 +183,7 @@ private suspend fun convertBlockToElements(
 
     is BookmarkBlock -> textLine(
         block = block,
-        text = block.title?.takeIf { it.isNotBlank() } ?: block.url,
+        text = block.title?.takeIf { it.isNotBlank() }?.let { loadShownBookmarkTitle(it) } ?: block.url,
         style = WidgetTextStyleName.SUBTLE
     )
 

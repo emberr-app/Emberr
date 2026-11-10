@@ -27,9 +27,9 @@ import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.presentation.shared.components.PersonOption
+import com.emberr.presentation.shared.components.loadNoteTitleNames
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar_could_not_create_person
-import emberr.shared.generated.resources.common_untitled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -228,7 +228,7 @@ class CalendarViewModel(
     suspend fun sourceNoteTitle(event: CalendarEvent): String? {
         if (event.sourceType != TaskSource.NOTE) return null
         val note = runCatching { repository.getNoteById(event.noteId) }.getOrNull() ?: return null
-        return note.title.trim().ifBlank { getString(Res.string.common_untitled) }
+        return loadNoteTitleNames().shown(note.title.trim())
     }
 
     // Used by the checkbox row's three-dot menu (Daily/Note screens) to look up the CalendarEvent

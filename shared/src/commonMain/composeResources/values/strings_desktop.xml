@@ -29,7 +29,7 @@
     <string name="desktop_open_in_split_view">Open in split view</string>
     <string name="desktop_toggle_section">Toggle %1$s</string>
     <string name="desktop_empty_space">This space is empty.</string>
-    <string name="desktop_empty_space_start_with">Start with</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">Start with %1$s or %2$s</string>
     <string name="desktop_empty_space_a_note">a note</string>
     <string name="desktop_create_space">Create space</string>
     <string name="desktop_add_space">Add space</string>

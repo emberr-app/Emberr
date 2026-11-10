@@ -25,6 +25,7 @@ import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
+import com.emberr.presentation.shared.components.VIEW_COPY_SUFFIX
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -98,7 +99,7 @@ class WatchlistBlockEditor(
 
     @OptIn(ExperimentalUuidApi::class)
     fun duplicateView(block: WatchlistBlock, view: WatchlistViewSettings) {
-        val copy = view.copy(id = Uuid.random().toString(), name = "${view.name} copy")
+        val copy = view.copy(id = Uuid.random().toString(), name = view.name + VIEW_COPY_SUFFIX)
         val viewIdsHere = block.viewsInOrderOf(deviceTableLayoutStore.currentLayoutOf(block.id)).map { it.id }
         val originalIndex = viewIdsHere.indexOf(view.id)
         val viewIdsWithCopy = viewIdsHere.toMutableList().apply { add(originalIndex + 1, copy.id) }

@@ -86,7 +86,7 @@ internal fun DatabaseSettingsMenu(
     val freezesTitleColumn = rememberDeviceTableLayout(block.id).freezesTitleColumn(activeView)
 
     DatabaseMenu(expanded = expanded, title = stringResource(Res.string.database_settings_title), onDismiss = onDismiss) { closeAnd ->
-        DatabaseMenuSectionLabel(text = stringResource(Res.string.database_named_view, activeView.name.ifBlank { activeView.type.displayName() }))
+        DatabaseMenuSectionLabel(text = stringResource(Res.string.database_named_view, activeView.shownName()))
         DatabaseMenuOption(
             label = stringResource(Res.string.editor_show_icon),
             icon = { DatabaseOptionIcon(Res.drawable.ghost_smile) },

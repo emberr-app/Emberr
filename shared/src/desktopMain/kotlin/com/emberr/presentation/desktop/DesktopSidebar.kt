@@ -75,8 +75,13 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.PhrasePart
 import com.emberr.presentation.shared.components.orHighContrastLine
+import com.emberr.presentation.shared.components.phraseParts
+import com.emberr.presentation.shared.components.shownFolderName
+import com.emberr.presentation.shared.components.shownNoteTitle
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.desktop_empty_space_start_with_note_or_folder
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.group
 import emberr.shared.generated.resources.plus
@@ -89,11 +94,9 @@ import com.emberr.presentation.home.favoriteLabel
 import emberr.shared.generated.resources.common_cancel
 import emberr.shared.generated.resources.common_create
 import emberr.shared.generated.resources.common_save
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.desktop_add_subfolder
 import emberr.shared.generated.resources.desktop_empty_space
 import emberr.shared.generated.resources.desktop_empty_space_a_note
-import emberr.shared.generated.resources.desktop_empty_space_start_with
 import emberr.shared.generated.resources.desktop_new_note_here
 import emberr.shared.generated.resources.desktop_new_note_in_folder
 import emberr.shared.generated.resources.desktop_open_in_split_view
@@ -102,7 +105,6 @@ import emberr.shared.generated.resources.desktop_rename_note
 import emberr.shared.generated.resources.desktop_toggle_section
 import emberr.shared.generated.resources.home_canvas
 import emberr.shared.generated.resources.home_empty_space_a_folder
-import emberr.shared.generated.resources.home_empty_space_or
 import emberr.shared.generated.resources.home_favorite
 import emberr.shared.generated.resources.home_name_placeholder
 import emberr.shared.generated.resources.home_new_subfolder
@@ -416,7 +418,7 @@ fun SidebarFolderRow(
             }
             Spacer(Modifier.width(ROW_LABEL_GAP))
             Text(
-                text = folder.name,
+                text = shownFolderName(folder.name),
                 style = sidebarRowTextStyle,
                 fontWeight = FontWeight.Normal,
                 color = if (isIntoTarget) MaterialTheme.colorScheme.primary
@@ -455,7 +457,7 @@ fun SidebarFolderRow(
                 EmberrDesktopMenu(expanded = showRenamePopup, onDismissRequest = { showRenamePopup = false }, modifier = Modifier.width(280.dp)) {
                     DesktopNamePopup(
                         title = stringResource(Res.string.desktop_rename_folder),
-                        initialValue = folder.name,
+                        initialValue = shownFolderName(folder.name),
                         confirmLabel = stringResource(Res.string.common_save),
                         onConfirm = { name -> onRename(name); showRenamePopup = false },
                         onDismiss = { showRenamePopup = false }
@@ -621,7 +623,7 @@ fun SidebarNoteRow(
             }
             Spacer(Modifier.width(ROW_LABEL_GAP))
             Text(
-                text = note.title.ifEmpty { stringResource(Res.string.common_untitled) },
+                text = shownNoteTitle(note.title),
                 style = sidebarRowTextStyle,
                 fontWeight = if (isActive) FontWeight.Medium else FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isActive) 1f else 0.82f),
@@ -899,36 +901,25 @@ fun SidebarEmptyNotesHint(
         )
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = stringResource(Res.string.desktop_empty_space_start_with),
-                style = MaterialTheme.typography.labelSmall,
-                color = mutedColor
-            )
-            Text(
-                text = stringResource(Res.string.desktop_empty_space_a_note),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Medium,
-                color = actionColor,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .sidebarNoRippleClickable(onCreateNote)
-                    .padding(horizontal = 4.dp, vertical = 2.dp)
-            )
-            Text(
-                text = stringResource(Res.string.home_empty_space_or),
-                style = MaterialTheme.typography.labelSmall,
-                color = mutedColor
-            )
-            Text(
-                text = stringResource(Res.string.home_empty_space_a_folder),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Medium,
-                color = actionColor,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .sidebarNoRippleClickable(onCreateFolder)
-                    .padding(horizontal = 4.dp, vertical = 2.dp)
-            )
+            phraseParts(stringResource(Res.string.desktop_empty_space_start_with_note_or_folder)).forEach { part ->
+                when (part) {
+                    is PhrasePart.Words -> Text(
+                        text = part.text,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = mutedColor
+                    )
+                    is PhrasePart.Slot -> Text(
+                        text = stringResource(if (part.number == 1) Res.string.desktop_empty_space_a_note else Res.string.home_empty_space_a_folder),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = actionColor,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .sidebarNoRippleClickable(if (part.number == 1) onCreateNote else onCreateFolder)
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                    )
+                }
+            }
         }
     }
 }

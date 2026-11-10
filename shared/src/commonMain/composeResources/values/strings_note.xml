@@ -45,7 +45,7 @@
     <string name="note_collapse_panel">Collapse panel</string>
     <string name="note_expand_panel">Expand panel</string>
     <plurals name="note_word_count">
-        <item quantity="one">%1$d words</item>
+        <item quantity="one">%1$d word</item>
         <item quantity="other">%1$d words</item>
     </plurals>
 </resources>

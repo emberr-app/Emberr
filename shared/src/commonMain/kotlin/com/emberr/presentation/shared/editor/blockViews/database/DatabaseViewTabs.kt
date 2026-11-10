@@ -233,14 +233,14 @@ private fun DatabaseViewTab(
             Icon(painter = painterResource(view.type.iconResource()), contentDescription = null, tint = databaseInlineIconTint(mobileTint = color), modifier = Modifier.size(DatabaseInlineIconSize))
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = view.name.ifBlank { view.type.displayName() },
+                text = view.shownName(),
                 style = if (isDesktopPlatform) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelSmall,
                 color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 maxLines = 1
             )
         }
 
-        DatabaseMenu(expanded = showMenu, title = view.name.ifBlank { view.type.displayName() }, onDismiss = { showMenu = false }) { closeAnd ->
+        DatabaseMenu(expanded = showMenu, title = view.shownName(), onDismiss = { showMenu = false }) { closeAnd ->
             DatabaseMenuLayer(
                 title = stringResource(Res.string.database_rename_view),
                 showsCloseButton = false,
@@ -249,7 +249,7 @@ private fun DatabaseViewTab(
                 }
             ) { closeLayerAnd ->
                 DatabaseRenameViewPage(
-                    currentName = view.name,
+                    currentName = view.shownName(),
                     onCancel = { closeLayerAnd { } },
                     onRename = { name -> closeLayerAnd { closeAnd { editor.renameView(block.id, view.id, name) } } }
                 )

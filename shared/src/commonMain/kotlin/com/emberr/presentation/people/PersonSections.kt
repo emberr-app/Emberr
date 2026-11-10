@@ -277,7 +277,7 @@ private fun PersonDetailRow(
         Column(modifier = Modifier.weight(1f)) {
             detail.label?.takeIf { it.isNotBlank() }?.let { label ->
                 Text(
-                    text = label,
+                    text = shownDetailLabel(label),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium,
                     color = mutedTextColor()

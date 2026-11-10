@@ -34,6 +34,17 @@ import emberr.shared.generated.resources.people_edit_relationship
 import emberr.shared.generated.resources.people_edit_role
 import emberr.shared.generated.resources.people_edit_social
 import emberr.shared.generated.resources.people_edit_website
+import emberr.shared.generated.resources.saved_name_label_anniversary
+import emberr.shared.generated.resources.saved_name_label_birthday
+import emberr.shared.generated.resources.saved_name_label_blog
+import emberr.shared.generated.resources.saved_name_label_date
+import emberr.shared.generated.resources.saved_name_label_home
+import emberr.shared.generated.resources.saved_name_label_main
+import emberr.shared.generated.resources.saved_name_label_mobile
+import emberr.shared.generated.resources.saved_name_label_nickname
+import emberr.shared.generated.resources.saved_name_label_personal
+import emberr.shared.generated.resources.saved_name_label_portfolio
+import emberr.shared.generated.resources.saved_name_label_work
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -86,3 +97,21 @@ internal fun PersonDetailKind.editDetailTitle(): String = stringResource(
 
 @Composable
 internal fun shownPersonName(title: String): String = title.trim().ifEmpty { stringResource(Res.string.common_untitled) }
+
+private val detailLabelPhrases = mapOf(
+    "Mobile" to Res.string.saved_name_label_mobile,
+    "Home" to Res.string.saved_name_label_home,
+    "Work" to Res.string.saved_name_label_work,
+    "Main" to Res.string.saved_name_label_main,
+    "Personal" to Res.string.saved_name_label_personal,
+    "Portfolio" to Res.string.saved_name_label_portfolio,
+    "Blog" to Res.string.saved_name_label_blog,
+    "Anniversary" to Res.string.saved_name_label_anniversary,
+    "Date" to Res.string.saved_name_label_date,
+    "Nickname" to Res.string.saved_name_label_nickname,
+    "Birthday" to Res.string.saved_name_label_birthday
+)
+
+@Composable
+internal fun shownDetailLabel(storedLabel: String): String =
+    detailLabelPhrases[storedLabel.trim()]?.let { stringResource(it) } ?: storedLabel

@@ -226,7 +226,7 @@ fun EmberrSpaceCheckboxOptions(
     )
     spaces.forEach { space ->
         EmberrCheckboxOption(
-            label = space.displayName,
+            label = shownSpaceName(space.displayName),
             isChecked = space.spaceId in checkedSpaceIds,
             onClick = {
                 onCheckedSpaceIdsChange(
@@ -241,7 +241,7 @@ fun EmberrSpaceCheckboxOptions(
 fun checkedSpacesLabel(spaces: List<SpaceEntity>, checkedSpaceIds: Set<String>): String = when {
     spaces.isEmpty() -> stringResource(Res.string.components_spaces_none_yet)
     checkedSpaceIds.isEmpty() -> stringResource(Res.string.components_spaces_none)
-    checkedSpaceIds.size == spaces.size && spaces.size == 1 -> spaces.single().displayName
+    checkedSpaceIds.size == spaces.size && spaces.size == 1 -> shownSpaceName(spaces.single().displayName)
     checkedSpaceIds.size == spaces.size -> pluralStringResource(Res.plurals.components_spaces_all, spaces.size, spaces.size)
     else -> pluralStringResource(Res.plurals.components_spaces_some_of_total, spaces.size, checkedSpaceIds.size, spaces.size)
 }

@@ -20,6 +20,7 @@ import com.emberr.domain.importer.ImportResult
 import com.emberr.domain.importer.ImportSummary
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrChoiceRow
+import com.emberr.presentation.shared.components.shownSpaceName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.folder
@@ -113,7 +114,7 @@ fun MarkdownImportSheet(
                 )
                 is ImportProgress.Finished -> ImportFinishedMessage(
                     result = importProgress.result,
-                    spaceName = spaces.firstOrNull { it.spaceId == importProgress.result.spaceId }?.displayName,
+                    spaceName = spaces.firstOrNull { it.spaceId == importProgress.result.spaceId }?.let { shownSpaceName(it.displayName) },
                     onDoneClick = onDismiss
                 )
             }
@@ -159,12 +160,12 @@ private fun ImportChoices(
     Column(modifier = Modifier.padding(top = 16.dp)) {
         EmberrChoiceRow(
             label = stringResource(Res.string.import_markdown_save_to_space),
-            value = spaces.firstOrNull { it.spaceId == selectedSpaceId }?.displayName.orEmpty(),
+            value = shownSpaceName(spaces.firstOrNull { it.spaceId == selectedSpaceId }?.displayName.orEmpty()),
             icon = Res.drawable.folder
         ) { closeMenuAnd ->
             spaces.forEach { space ->
                 ImportMenuOption(
-                    label = space.displayName,
+                    label = shownSpaceName(space.displayName),
                     isSelected = space.spaceId == selectedSpaceId,
                     onClick = { closeMenuAnd { onSpaceSelected(space.spaceId) } }
                 )

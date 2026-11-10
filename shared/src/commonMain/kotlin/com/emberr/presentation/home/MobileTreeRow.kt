@@ -49,6 +49,8 @@ import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.presentation.shared.components.AnimatedFolderIcon
+import com.emberr.presentation.shared.components.shownFolderName
+import com.emberr.presentation.shared.components.shownNoteTitle
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.file_text
 import emberr.shared.generated.resources.group
@@ -56,7 +58,6 @@ import emberr.shared.generated.resources.folder_plus
 import emberr.shared.generated.resources.plus
 import emberr.shared.generated.resources.star
 import org.jetbrains.compose.resources.painterResource
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.home_favorite
 import emberr.shared.generated.resources.home_new_note_in_folder_description
 import emberr.shared.generated.resources.home_new_subfolder_in_folder
@@ -114,7 +115,7 @@ fun MobileTreeFolderRow(
         )
         Spacer(Modifier.width(10.dp))
         Text(
-            text = folder.name,
+            text = shownFolderName(folder.name),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = if (isIntoTarget) MaterialTheme.colorScheme.primary
@@ -137,14 +138,14 @@ fun MobileTreeFolderRow(
             if (showAddSubfolderAction) {
                 MobileTreeRowAction(
                     painter = painterResource(Res.drawable.folder_plus),
-                    description = stringResource(Res.string.home_new_subfolder_in_folder, folder.name),
+                    description = stringResource(Res.string.home_new_subfolder_in_folder, shownFolderName(folder.name)),
                     onClick = onAddSubfolder
                 )
             }
             if (showAddNoteAction) {
                 MobileTreeRowAction(
                     painter = painterResource(Res.drawable.plus),
-                    description = stringResource(Res.string.home_new_note_in_folder_description, folder.name),
+                    description = stringResource(Res.string.home_new_note_in_folder_description, shownFolderName(folder.name)),
                     onClick = onAddNote,
                     modifier = addNoteActionModifier
                 )
@@ -188,7 +189,7 @@ fun MobileTreeNoteRow(
         }
         Spacer(Modifier.width(10.dp))
         Text(
-            text = note.title.ifEmpty { stringResource(Res.string.common_untitled) },
+            text = shownNoteTitle(note.title),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,

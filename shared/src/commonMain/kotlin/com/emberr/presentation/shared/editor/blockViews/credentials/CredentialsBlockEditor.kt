@@ -508,7 +508,7 @@ private fun CredentialFieldEditorRow(
     }
     val labelInput = @Composable { modifier: Modifier ->
         CredentialGhostInput(
-            value = draft.label,
+            value = shownCredentialLabel(draft.label),
             onValueChange = { draft.label = it },
             placeholder = draft.kind.displayLabel(),
             modifier = modifier

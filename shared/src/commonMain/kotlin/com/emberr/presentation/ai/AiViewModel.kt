@@ -36,6 +36,7 @@ import com.emberr.domain.ai.models.hasResumableDownload
 import com.emberr.domain.ai.models.resumeProgressFraction
 import com.emberr.domain.ai.models.restoreModelFile
 import com.emberr.domain.ai.models.softDeleteModelFile
+import com.emberr.presentation.shared.components.NEW_CHAT_TITLE
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -613,7 +614,7 @@ class RagViewModel(
 
             val title = chatSessionRepository.getSession(sessionId)?.title
                 ?: currentMessages.firstOrNull { it.isUser }?.text?.take(TITLE_MAX_CHARS)?.ifBlank { null }
-                ?: DEFAULT_SESSION_TITLE
+                ?: NEW_CHAT_TITLE
 
             chatSessionRepository.saveSession(
                 ChatSession(
@@ -685,7 +686,6 @@ class RagViewModel(
         const val MAX_HISTORY_TURNS_EXTERNAL = 50
         const val MAX_HISTORY_MESSAGE_CHARS = 4000
         const val TITLE_MAX_CHARS = 60
-        const val DEFAULT_SESSION_TITLE = "New Chat"
         const val DEFAULT_MAX_OUTPUT_TOKENS = 1024
         const val DEFAULT_LOCAL_CONTEXT_LENGTH = 4096
     }

@@ -5,6 +5,8 @@ import androidx.compose.material.icons.filled.Add
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.people.personDisplayName
+import com.emberr.presentation.shared.components.NoteTitleNames
+import com.emberr.presentation.shared.components.rememberNoteTitleNames
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.doc_text
 import emberr.shared.generated.resources.doc_text_plus
@@ -13,7 +15,6 @@ import androidx.compose.runtime.Composable
 import com.emberr.presentation.shared.editor.slash.SlashMenuIcon
 import com.emberr.presentation.shared.editor.slash.SlashMenuItemData
 import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.editor_create_new_note
 import emberr.shared.generated.resources.editor_load_more
 import emberr.shared.generated.resources.editor_mention_section_notes
@@ -25,7 +26,7 @@ const val MENTION_RESULTS_PER_STEP = 5
 
 data class MentionMenuLabels(
     val createNewNote: String,
-    val untitled: String,
+    val noteTitleNames: NoteTitleNames,
     val newNoteForQuery: String,
     val notes: String,
     val people: String,
@@ -35,7 +36,7 @@ data class MentionMenuLabels(
 @Composable
 fun mentionMenuLabels(query: String): MentionMenuLabels = MentionMenuLabels(
     createNewNote = stringResource(Res.string.editor_create_new_note),
-    untitled = stringResource(Res.string.common_untitled),
+    noteTitleNames = rememberNoteTitleNames(),
     newNoteForQuery = stringResource(Res.string.editor_new_note_named, query),
     notes = stringResource(Res.string.editor_mention_section_notes),
     people = stringResource(Res.string.editor_mention_section_people),
@@ -62,7 +63,7 @@ fun mentionMenuSections(
         add(SlashMenuItemData(labels.createNewNote, SlashMenuIcon.Drawable(Res.drawable.doc_text_plus), onCreateBlankNote))
         notes.take(shownNoteCount).forEach { note ->
             val icon = note.icon?.let { SlashMenuIcon.Label(it) } ?: SlashMenuIcon.Drawable(Res.drawable.doc_text)
-            add(SlashMenuItemData(note.title.ifEmpty { labels.untitled }, icon) { onPick(note) })
+            add(SlashMenuItemData(labels.noteTitleNames.shown(note.title), icon) { onPick(note) })
         }
         if (notes.size > shownNoteCount) add(loadMoreEntry(labels.loadMore, onShowMoreNotes))
         if (query.isNotBlank()) {

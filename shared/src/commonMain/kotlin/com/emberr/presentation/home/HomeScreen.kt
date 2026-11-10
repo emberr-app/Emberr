@@ -32,6 +32,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import com.emberr.presentation.shared.components.PhrasePart
+import com.emberr.presentation.shared.components.phraseParts
+import com.emberr.presentation.shared.components.shownFolderName
+import com.emberr.presentation.shared.components.shownNoteTitle
+import com.emberr.presentation.shared.components.shownSpaceName
 import com.emberr.presentation.shared.rememberStableStatusBarsPadding
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
@@ -92,6 +97,7 @@ import com.emberr.presentation.sync.text
 import com.emberr.domain.util.system.showNativeToast
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import emberr.shared.generated.resources.home_empty_space_note_or_folder
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import org.koin.compose.koinInject
@@ -125,7 +131,6 @@ import emberr.shared.generated.resources.common_cancel
 import emberr.shared.generated.resources.common_close
 import emberr.shared.generated.resources.common_create
 import emberr.shared.generated.resources.common_save
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.home_breadcrumb_home
 import emberr.shared.generated.resources.home_calendar
 import emberr.shared.generated.resources.home_canvas
@@ -135,7 +140,6 @@ import emberr.shared.generated.resources.home_edit_template
 import emberr.shared.generated.resources.home_empty_note
 import emberr.shared.generated.resources.home_empty_space_a_folder
 import emberr.shared.generated.resources.home_empty_space_a_new_note
-import emberr.shared.generated.resources.home_empty_space_or
 import emberr.shared.generated.resources.home_empty_space_start_with
 import emberr.shared.generated.resources.home_favorite
 import emberr.shared.generated.resources.home_favorites
@@ -448,10 +452,10 @@ fun HomeScreen(
     val renameCurrentName = when {
         renameTargetNoteId != null ->
             (notesByFolder.values.flatten() + favoriteNotes + recentNotes)
-                .find { it.noteId == renameTargetNoteId }?.title.orEmpty()
+                .find { it.noteId == renameTargetNoteId }?.title.orEmpty().let { if (it.isBlank()) it else shownNoteTitle(it) }
 
         renameTargetFolderId != null ->
-            foldersByParent.values.flatten().find { it.folderId == renameTargetFolderId }?.name.orEmpty()
+            shownFolderName(foldersByParent.values.flatten().find { it.folderId == renameTargetFolderId }?.name.orEmpty())
 
         else -> ""
     }
@@ -994,7 +998,7 @@ fun HomeScreen(
                                         if (isDesktopPlatform) {
                                             NewNoteInFolderMenu(
                                                 expanded = addNoteMenuFolderId == row.folder.folderId,
-                                                folderName = row.folder.name,
+                                                folderName = shownFolderName(row.folder.name),
                                                 input = addNoteInput,
                                                 onInputChange = { addNoteInput = it },
                                                 onDismiss = { addNoteMenuFolderId = null },
@@ -1115,7 +1119,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .pointerInput(Unit) { detectTapGestures {} },
-                title = if (isSelectionMode) "" else activeSpace?.displayName.orEmpty(),
+                title = if (isSelectionMode) "" else shownSpaceName(activeSpace?.displayName.orEmpty()),
                 titlePlacement = TopHeaderTitlePlacement.Start,
                 titleStyle = MaterialTheme.typography.titleLarge,
                 titleColor = MaterialTheme.colorScheme.onBackground,
@@ -1251,7 +1255,7 @@ fun HomeScreen(
                     onDismiss = { showAddFolderDialog = false; addFolderParentId = null },
                     onCreate = handleCreateFolder,
                     destinationFolderName = addFolderParentId?.let { folderId ->
-                        foldersByParent.values.flatten().find { it.folderId == folderId }?.name
+                        foldersByParent.values.flatten().find { it.folderId == folderId }?.name?.let { shownFolderName(it) }
                     }
                 )
                 NewNoteMobileMenu(
@@ -1375,25 +1379,32 @@ private fun HomeEmptyState(
         )
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                stringResource(Res.string.home_empty_space_a_new_note),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Medium,
-                color = actionColor,
-                modifier = newNoteActionModifier.noRippleClickable(onCreateNote).padding(vertical = 6.dp, horizontal = 4.dp)
-            )
-            Text(
-                stringResource(Res.string.home_empty_space_or),
-                style = MaterialTheme.typography.labelSmall,
-                color = mutedColor
-            )
-            Text(
-                stringResource(Res.string.home_empty_space_a_folder),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Medium,
-                color = actionColor,
-                modifier = Modifier.noRippleClickable(onCreateFolder).padding(vertical = 6.dp, horizontal = 4.dp)
-            )
+            phraseParts(stringResource(Res.string.home_empty_space_note_or_folder)).forEach { part ->
+                when (part) {
+                    is PhrasePart.Words -> Text(
+                        part.text,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = mutedColor
+                    )
+                    is PhrasePart.Slot -> if (part.number == 1) {
+                        Text(
+                            stringResource(Res.string.home_empty_space_a_new_note),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = actionColor,
+                            modifier = newNoteActionModifier.noRippleClickable(onCreateNote).padding(vertical = 6.dp, horizontal = 4.dp)
+                        )
+                    } else {
+                        Text(
+                            stringResource(Res.string.home_empty_space_a_folder),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = actionColor,
+                            modifier = Modifier.noRippleClickable(onCreateFolder).padding(vertical = 6.dp, horizontal = 4.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -1439,7 +1450,7 @@ fun BreadcrumbTrail(selectedFolderId: String?, breadcrumbs: List<FolderEntity>, 
             )
             val isLast = folder.folderId == selectedFolderId
             Text(
-                folder.name,
+                shownFolderName(folder.name),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (isLast) FontWeight.Bold else FontWeight.Medium,
                 color = if (isLast) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface,
@@ -1531,7 +1542,7 @@ fun NoteCard(
                 )
             ) {
                 Text(
-                    note.title.ifEmpty { stringResource(Res.string.common_untitled) },
+                    shownNoteTitle(note.title),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = titleColor,
@@ -1864,7 +1875,7 @@ private fun TemplateRow(
             }
             Spacer(Modifier.width(10.dp))
             Text(
-                template.title.ifBlank { stringResource(Res.string.common_untitled) },
+                shownNoteTitle(template.title),
                 style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false)
             )

@@ -96,6 +96,8 @@ import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.network.HtmlMetadataFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.voice.AudioRecorder
+import com.emberr.presentation.shared.components.OTHERS_FOLDER_NAME
+import com.emberr.presentation.shared.editor.blockViews.credentials.defaultLabel
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockHost
@@ -2627,8 +2629,8 @@ abstract class BaseEditorViewModel(
                 "credentials" -> CredentialsBlock(
                     id = newId,
                     fields = listOf(
-                        CredentialField(id = UUID.randomUUID().toString(), kind = CredentialFieldKind.USERNAME, label = "Username"),
-                        CredentialField(id = UUID.randomUUID().toString(), kind = CredentialFieldKind.PASSWORD, label = "Password")
+                        CredentialField(id = UUID.randomUUID().toString(), kind = CredentialFieldKind.USERNAME, label = CredentialFieldKind.USERNAME.defaultLabel()),
+                        CredentialField(id = UUID.randomUUID().toString(), kind = CredentialFieldKind.PASSWORD, label = CredentialFieldKind.PASSWORD.defaultLabel())
                     ),
                     indentationLevel = indent,
                     isPinned = isPinnedContext,
@@ -3075,7 +3077,6 @@ abstract class BaseEditorViewModel(
     }
 
     companion object {
-        private const val OTHERS_FOLDER_NAME = "Others"
         private val othersFolderMutex = Mutex()
     }
 }

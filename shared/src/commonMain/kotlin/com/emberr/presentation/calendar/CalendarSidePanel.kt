@@ -48,6 +48,8 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.util.time.daysOfWeekStartingFrom
 import com.emberr.domain.util.time.startOfWeek
 import com.emberr.presentation.shared.components.IconTooltip
+import com.emberr.presentation.shared.components.shownCategoryName
+import com.emberr.presentation.shared.components.shownSpaceName
 import com.emberr.ui.theme.LocalFirstDayOfWeek
 import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
@@ -120,7 +122,7 @@ internal fun CalendarSidePanel(
             SidePanelSectionTitle(title = stringResource(Res.string.calendar_categories))
             categories.forEach { category ->
                 SidePanelVisibilityRow(
-                    label = category.name,
+                    label = shownCategoryName(category.name),
                     color = category.colorHex.toCategoryColor(),
                     isShown = category.id !in hiddenCategoryVisibilityKeys,
                     onClick = { onToggleVisibility(category.id) }
@@ -138,7 +140,7 @@ internal fun CalendarSidePanel(
                 spaces.forEach { space ->
                     val spaceVisibilityKey = spaceVisibilityKeyFor(space.spaceId)
                     SidePanelVisibilityRow(
-                        label = space.displayName.trim().ifBlank { stringResource(Res.string.calendar_untitled_space) },
+                        label = shownSpaceName(space.displayName.trim().ifBlank { stringResource(Res.string.calendar_untitled_space) }),
                         color = MaterialTheme.colorScheme.outline,
                         isShown = spaceVisibilityKey !in hiddenCategoryVisibilityKeys,
                         onClick = { onToggleVisibility(spaceVisibilityKey) }

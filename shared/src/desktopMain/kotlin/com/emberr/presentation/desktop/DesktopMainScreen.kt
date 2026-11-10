@@ -61,6 +61,11 @@ import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.TextAlignment
 import com.emberr.presentation.LocalCanvasFullScreenOverlay
+import com.emberr.presentation.shared.components.OTHERS_FOLDER_NAME
+import com.emberr.presentation.shared.components.rememberNoteTitleNames
+import com.emberr.presentation.shared.components.shownFolderName
+import com.emberr.presentation.shared.components.shownNoteTitle
+import com.emberr.presentation.shared.components.shownSpaceName
 import com.emberr.presentation.shared.editor.blockViews.database.DatabaseBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.movie.MovieBlockEditor
 import com.emberr.presentation.shared.editor.blockViews.movie.WatchlistBlockEditor
@@ -211,7 +216,6 @@ import emberr.shared.generated.resources.common_cancel
 import emberr.shared.generated.resources.common_create
 import emberr.shared.generated.resources.common_delete
 import emberr.shared.generated.resources.common_save
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.daily_open_timeline
 import emberr.shared.generated.resources.daily_timeline
 import emberr.shared.generated.resources.desktop_collapse_sidebar
@@ -797,7 +801,7 @@ private fun SidebarSearchResultRow(
     )
     val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
     val dailyDateString = result.note.dateString?.takeIf { result.note.isDaily }
-    val titleText = if (result.isPinnedBlocks) stringResource(Res.string.search_pinned) else dailyDateString ?: result.note.title.ifBlank { stringResource(Res.string.common_untitled) }
+    val titleText = if (result.isPinnedBlocks) stringResource(Res.string.search_pinned) else dailyDateString ?: shownNoteTitle(result.note.title)
     val snippetText = result.matchedText.takeIf { it.isNotBlank() && it != result.note.title }
 
     Box {
@@ -1648,7 +1652,7 @@ fun DesktopMainScreen(
 
                                 item(key = "sb_space_header") {
                                     SidebarSpaceHeader(
-                                        displayName = spaces.firstOrNull { it.spaceId == activeSpaceId }?.displayName.orEmpty(),
+                                        displayName = shownSpaceName(spaces.firstOrNull { it.spaceId == activeSpaceId }?.displayName.orEmpty()),
                                         canDelete = spaces.size > 1,
                                         onRename = { name -> spaceViewModel.renameSpace(activeSpaceId, name) },
                                         onDelete = { spaceViewModel.deleteSpace(activeSpaceId) },
@@ -2331,9 +2335,10 @@ fun DesktopMainScreen(
                     }
                 }
 
-                val untitledDragLabel = stringResource(Res.string.common_untitled)
+                val noteTitleNames = rememberNoteTitleNames()
                 val noteDragLabel = stringResource(Res.string.home_note)
                 val folderDragLabel = stringResource(Res.string.desktop_folder)
+                val othersFolderLabel = shownFolderName(OTHERS_FOLDER_NAME)
                 DesktopListDragChip(
                     dragState = dragState,
                     containerOriginInWindow = screenOriginInWindow,
@@ -2342,11 +2347,11 @@ fun DesktopMainScreen(
                             payload.startsWith(DRAG_PREFIX_NOTE) -> {
                                 val id = payload.removePrefix(DRAG_PREFIX_NOTE)
                                 (notesByFolder.values.flatten() + favoriteNotes + recentNotes + searchResults.map { it.note })
-                                    .find { it.noteId == id }?.title?.ifEmpty { untitledDragLabel } ?: noteDragLabel
+                                    .find { it.noteId == id }?.title?.let { noteTitleNames.shown(it) } ?: noteDragLabel
                             }
                             payload.startsWith(DRAG_PREFIX_FOLDER) -> {
                                 val id = payload.removePrefix(DRAG_PREFIX_FOLDER)
-                                foldersByParent.values.flatten().find { it.folderId == id }?.name ?: folderDragLabel
+                                foldersByParent.values.flatten().find { it.folderId == id }?.name?.let { if (it == OTHERS_FOLDER_NAME) othersFolderLabel else it } ?: folderDragLabel
                             }
                             else -> ""
                         }

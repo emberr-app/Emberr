@@ -137,6 +137,7 @@ import com.emberr.presentation.shared.components.DesktopSidebarToggleButton
 import com.emberr.presentation.shared.components.DesktopSidebarToggleGap
 import com.emberr.presentation.shared.components.KmpBackHandler
 import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
+import com.emberr.presentation.shared.components.shownCanvasGroupTitle
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.highlightBackgroundFor
 import com.emberr.ui.theme.LocalHoldsPaperGrainStill
@@ -1904,16 +1905,17 @@ internal fun CanvasGroupCard(
                         .padding(start = 4.dp, bottom = 4.dp),
                     contentAlignment = Alignment.BottomStart
                 ) {
+                    val shownTitle = shownCanvasGroupTitle(group.text)
                     if (isEditingTitle) {
                         CanvasNodeTextField(
-                            text = group.text,
+                            text = shownTitle,
                             textStyle = titleStyle,
                             cursorColor = cursorColor,
                             onTextChange = onTitleChange,
                             singleLine = true
                         )
                     } else {
-                        Text(text = group.text, style = titleStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(text = shownTitle, style = titleStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
                 Box(

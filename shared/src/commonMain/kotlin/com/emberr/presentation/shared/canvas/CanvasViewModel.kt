@@ -36,6 +36,7 @@ import com.emberr.domain.util.media.ImageClipboard
 import com.emberr.domain.util.media.MediaInfo
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.media.readImagePixelSize
+import com.emberr.presentation.shared.components.CANVAS_GROUP_DEFAULT_TITLE
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.NoteSyncEvent
@@ -66,7 +67,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 private const val SAVE_DELAY_MILLIS = 500L
-private const val DEFAULT_GROUP_TITLE = "Group"
 private const val NEW_IMAGE_LONGEST_SIDE = 320f
 
 class CanvasViewModel(
@@ -398,7 +398,7 @@ class CanvasViewModel(
             y = groupBounds.top,
             width = groupBounds.width,
             height = groupBounds.height,
-            text = DEFAULT_GROUP_TITLE,
+            text = CANVAS_GROUP_DEFAULT_TITLE,
             createdAt = now,
             updatedAt = now,
             type = CanvasNodeType.GROUP

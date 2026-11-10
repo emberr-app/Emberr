@@ -14,8 +14,10 @@ import com.emberr.domain.model.DatabaseNumberDisplay
 import com.emberr.domain.model.DatabaseNumberStyle
 import com.emberr.domain.model.DatabaseRelativeDate
 import com.emberr.domain.model.DatabaseRepeatFrequency
+import com.emberr.domain.model.DatabaseView
 import com.emberr.domain.model.DatabaseViewType
 import com.emberr.domain.model.labelOf
+import com.emberr.presentation.shared.components.shownViewName
 import com.emberr.presentation.shared.editor.blockViews.property.displayName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.database_calculation_average
@@ -279,3 +281,7 @@ fun DatabaseBlock.displayLabelOf(column: DatabaseColumnTarget): String = when (c
     is DatabaseColumnTarget.Property -> column.propertyType.displayName()
     is DatabaseColumnTarget.CustomProperty -> labelOf(column)
 }
+
+@Composable
+fun DatabaseView.shownName(): String =
+    if (name.isBlank()) type.displayName() else shownViewName(name, DatabaseViewType.entries.associate { it.label to it.displayName() })

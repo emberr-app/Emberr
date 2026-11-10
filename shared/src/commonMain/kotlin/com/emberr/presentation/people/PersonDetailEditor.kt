@@ -273,10 +273,11 @@ private fun DetailEditorContent(
     val isBirthday = kind == PersonDetailKind.BIRTHDAY
     val choices = labelChoices(kind)
     val savedLabel = popup.detail?.label.orEmpty()
+    val shownSavedLabel = shownDetailLabel(savedLabel)
     val thisYear = editing.today.year
 
     var chosenLabel by remember(popup) { mutableStateOf(savedLabel.takeIf { it in choices }) }
-    var typedLabel by remember(popup) { mutableStateOf(if (savedLabel in choices) "" else savedLabel) }
+    var typedLabel by remember(popup) { mutableStateOf(if (savedLabel in choices) "" else shownSavedLabel) }
     var showsTypedLabel by remember(popup) { mutableStateOf(choices.isEmpty() || typedLabel.isNotEmpty()) }
     var shouldFocusTypedLabel by remember(popup) { mutableStateOf(false) }
     val typedLabelFocusRequester = remember { FocusRequester() }
@@ -301,7 +302,8 @@ private fun DetailEditorContent(
             showsMistakes = true
             return
         }
-        val label = if (isBirthday) null else typedLabel.trim().ifEmpty { chosenLabel.orEmpty() }.takeIf { it.isNotEmpty() }
+        val typedLabelToSave = typedLabel.trim().let { if (it == shownSavedLabel.trim()) savedLabel.trim() else it }
+        val label = if (isBirthday) null else typedLabelToSave.ifEmpty { chosenLabel.orEmpty() }.takeIf { it.isNotEmpty() }
         finish { editing.onSave(kind, popup.detail, label, valueToSave) }
     }
 
@@ -341,7 +343,7 @@ private fun DetailEditorContent(
                     ) {
                         choices.forEach { choice ->
                             PersonChoiceChip(
-                                text = choice,
+                                text = shownDetailLabel(choice),
                                 isChosen = chosenLabel == choice,
                                 onClick = {
                                     chosenLabel = if (chosenLabel == choice) null else choice

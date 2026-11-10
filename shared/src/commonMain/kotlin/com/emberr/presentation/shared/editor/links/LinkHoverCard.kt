@@ -51,6 +51,7 @@ import com.emberr.domain.sample.lastEditedAtForDisplay
 import com.emberr.domain.util.network.HtmlMetadataFetcher
 import com.emberr.domain.util.network.UrlMetadata
 import com.emberr.presentation.shared.components.EmberrShadowElevation
+import com.emberr.presentation.shared.components.shownNoteTitle
 import com.emberr.presentation.shared.editor.components.DesktopCursor
 import com.emberr.presentation.shared.editor.components.desktopPointerCursor
 import kotlinx.coroutines.CoroutineScope
@@ -62,7 +63,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
-import emberr.shared.generated.resources.common_untitled
 import emberr.shared.generated.resources.editor_edited_on_date
 import emberr.shared.generated.resources.editor_note_not_found
 import emberr.shared.generated.resources.Res
@@ -274,7 +274,7 @@ private fun WebLinkCardContent(url: String) {
 private fun NoteLinkCardContent(note: NoteMetadataEntity?) {
     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
         val icon = note?.icon
-        val title = note?.title?.ifBlank { stringResource(Res.string.common_untitled) } ?: stringResource(Res.string.editor_note_not_found)
+        val title = note?.title?.let { shownNoteTitle(it) } ?: stringResource(Res.string.editor_note_not_found)
 
         Text(
             text = if (icon.isNullOrBlank()) title else "$icon  $title",
