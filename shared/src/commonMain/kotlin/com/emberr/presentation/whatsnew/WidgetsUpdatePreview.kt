@@ -61,6 +61,11 @@ import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.whatsnew_preview_jot_button
+import emberr.shared.generated.resources.whatsnew_preview_jot_prompt
+import emberr.shared.generated.resources.whatsnew_preview_quote
+import emberr.shared.generated.resources.whatsnew_preview_reading_list
+import org.jetbrains.compose.resources.stringResource
 
 private val WidgetShape = RoundedCornerShape(24.dp)
 private val GradientCardPadding = 18.dp
@@ -208,7 +213,7 @@ private fun QuoteWidgetCopy(todayLabel: String) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "The secret of getting ahead is getting started.",
+                text = stringResource(Res.string.whatsnew_preview_quote),
                 textAlign = TextAlign.Center,
                 style = TextStyle(
                     fontFamily = loraFontFamily,
@@ -249,7 +254,7 @@ private fun NoteCardWidgetCopy() {
             modifier = Modifier.padding(start = NoteCardSidePadding - 2.dp, top = coverBandHeight - NoteCardIconOverhang - 6.dp)
         )
         Text(
-            text = "Reading list",
+            text = stringResource(Res.string.whatsnew_preview_reading_list),
             maxLines = 1,
             style = TextStyle(
                 fontFamily = FontFamily.Default,
@@ -315,7 +320,7 @@ private fun JotWidgetCopy(todayLabel: String, tapCount: Int) {
         GradientCardHeader(todayLabel = todayLabel, dateFontFamily = FontFamily.Default)
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "What's on your mind?",
+            text = stringResource(Res.string.whatsnew_preview_jot_prompt),
             maxLines = 2,
             style = TextStyle(
                 fontFamily = FontFamily.Default,
@@ -366,7 +371,7 @@ private fun JotButtonCopy(tapCount: Int) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Jot it down",
+            text = stringResource(Res.string.whatsnew_preview_jot_button),
             maxLines = 1,
             style = TextStyle(
                 fontFamily = FontFamily.Default,

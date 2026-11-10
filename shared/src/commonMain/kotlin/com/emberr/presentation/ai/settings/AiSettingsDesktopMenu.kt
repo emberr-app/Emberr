@@ -25,6 +25,15 @@ import com.emberr.presentation.shared.components.orHighContrastLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.ai_back_to_options
+import emberr.shared.generated.resources.ai_external_ai
+import emberr.shared.generated.resources.ai_external_ai_with_provider
+import emberr.shared.generated.resources.ai_fine_tuning
+import emberr.shared.generated.resources.ai_knowledge_source
+import emberr.shared.generated.resources.ai_local_ai
+import emberr.shared.generated.resources.ai_local_ai_unavailable
+import emberr.shared.generated.resources.ai_response_length
+import org.jetbrains.compose.resources.stringResource
 
 private enum class AiSettingsMenuLevel { MAIN, FINE_TUNING }
 
@@ -46,20 +55,20 @@ internal fun AiSettingsMenuContent(
             AiSettingsMenuLevel.MAIN -> {
                 RagDesktopMenuItem(
                     text = if (viewModel.localAiUnsupportedReason == null)
-                        "Local AI"
+                        stringResource(Res.string.ai_local_ai)
                     else
-                        "Local AI — unavailable",
+                        stringResource(Res.string.ai_local_ai_unavailable),
                     onClick = onLocalAiClick
                 )
                 RagDesktopMenuItem(
                     text = if (aiGenerationMode == AiGenerationMode.EXTERNAL)
-                        "External AI — ${selectedExternalAiProvider.displayName}"
+                        stringResource(Res.string.ai_external_ai_with_provider, selectedExternalAiProvider.label())
                     else
-                        "External AI",
+                        stringResource(Res.string.ai_external_ai),
                     onClick = onExternalAiClick
                 )
                 RagDesktopMenuItem(
-                    text = "Fine-tuning",
+                    text = stringResource(Res.string.ai_fine_tuning),
                     onClick = { currentMenu = AiSettingsMenuLevel.FINE_TUNING }
                 )
             }
@@ -67,7 +76,7 @@ internal fun AiSettingsMenuContent(
             AiSettingsMenuLevel.FINE_TUNING -> {
                 RagDesktopMenuItem(
                     icon = { Icon(painterResource(Res.drawable.chevron_left), contentDescription = null, modifier = Modifier.size(20.dp)) },
-                    text = "Back to Options",
+                    text = stringResource(Res.string.ai_back_to_options),
                     onClick = { currentMenu = AiSettingsMenuLevel.MAIN }
                 )
                 HorizontalDivider(
@@ -75,23 +84,23 @@ internal fun AiSettingsMenuContent(
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                 )
                 Text(
-                    text = "Knowledge Source",
+                    text = stringResource(Res.string.ai_knowledge_source),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
                 EmberrDesktopMenuOption(
-                    label = "Default",
+                    label = KnowledgeMode.DEFAULT.label(),
                     isSelected = knowledgeMode == KnowledgeMode.DEFAULT,
                     onClick = { onDismiss(); viewModel.selectKnowledgeMode(KnowledgeMode.DEFAULT) }
                 )
                 EmberrDesktopMenuOption(
-                    label = "Only notes knowledge",
+                    label = KnowledgeMode.NOTES_ONLY.label(),
                     isSelected = knowledgeMode == KnowledgeMode.NOTES_ONLY,
                     onClick = { onDismiss(); viewModel.selectKnowledgeMode(KnowledgeMode.NOTES_ONLY) }
                 )
                 EmberrDesktopMenuOption(
-                    label = "Only real-world knowledge",
+                    label = KnowledgeMode.WORLD_ONLY.label(),
                     isSelected = knowledgeMode == KnowledgeMode.WORLD_ONLY,
                     onClick = { onDismiss(); viewModel.selectKnowledgeMode(KnowledgeMode.WORLD_ONLY) }
                 )
@@ -100,14 +109,14 @@ internal fun AiSettingsMenuContent(
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
                 )
                 Text(
-                    text = "Response Length",
+                    text = stringResource(Res.string.ai_response_length),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
                 responseLengthOptions.forEach { option ->
                     EmberrDesktopMenuOption(
-                        label = option.label,
+                        label = stringResource(option.label),
                         isSelected = selectedMaxOutputTokens == option.tokens,
                         onClick = { onDismiss(); viewModel.selectMaxOutputTokens(option.tokens) }
                     )

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">Start typing to search titles, snippets, and note content.</string>
+    <string name="search_nothing_found">No matching notes, events or people found.</string>
+    <string name="search_people">People</string>
+    <string name="search_events">Events</string>
+    <string name="search_notes">Notes</string>
+    <string name="search_rename_note">Rename Note</string>
+    <string name="search_note_title_placeholder">Note title...</string>
+    <string name="search_rename">Rename</string>
+    <string name="search_move_to_trash">Move to Trash</string>
+    <string name="search_untitled_event">Untitled event</string>
+    <string name="search_repeats">Repeats</string>
+    <string name="search_pinned">Pinned</string>
+    <string name="search_in_parent">in %1$s</string>
+    <string name="search_daily">Daily</string>
+    <string name="search_add_to_favorites">Add to Favorites</string>
+    <string name="search_remove_from_favorites">Remove from Favorites</string>
+    <plurals name="search_show_all_people">
+        <item quantity="one">Show all %1$d people</item>
+        <item quantity="other">Show all %1$d people</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="one">Show all %1$d events</item>
+        <item quantity="other">Show all %1$d events</item>
+    </plurals>
+</resources>

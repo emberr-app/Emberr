@@ -6,7 +6,6 @@ import com.emberr.domain.people.BIRTHDAYS_CATEGORY_ID
 import com.emberr.domain.people.BirthdayOnDate
 import com.emberr.domain.people.PersonWithDetails
 import com.emberr.domain.people.birthdaysInRange
-import com.emberr.domain.people.personDisplayName
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar_birthday_title
 import emberr.shared.generated.resources.calendar_birthday_title_turning
@@ -16,6 +15,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.getString
+import emberr.shared.generated.resources.common_untitled
 
 suspend fun nextBirthdayEvents(people: List<PersonWithDetails>, today: LocalDate): List<CalendarEvent> =
     birthdaysInRange(people, today, today.plus(1, DateTimeUnit.YEAR))
@@ -23,7 +23,7 @@ suspend fun nextBirthdayEvents(people: List<PersonWithDetails>, today: LocalDate
         .map { birthday -> birthday.toCalendarEvent() }
 
 suspend fun BirthdayOnDate.toCalendarEvent(): CalendarEvent {
-    val name = personDisplayName(personName)
+    val name = personName.trim().ifEmpty { getString(Res.string.common_untitled) }
     val title = if (turningAge == null) {
         getString(Res.string.calendar_birthday_title, name)
     } else {

@@ -17,6 +17,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_thinking
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ThinkingIndicator() {
@@ -25,7 +28,7 @@ internal fun ThinkingIndicator() {
         modifier = Modifier.padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
     ) {
         Text(
-            text = "Thinking",
+            text = stringResource(Res.string.ai_thinking),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary
         )

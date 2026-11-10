@@ -13,6 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.EmberrShadowElevation
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_on_device_unavailable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun UnsupportedHardwareNotice(reason: String, modifier: Modifier = Modifier) {
@@ -25,7 +28,7 @@ internal fun UnsupportedHardwareNotice(reason: String, modifier: Modifier = Modi
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
             Text(
-                text = "On-device AI is unavailable here",
+                text = stringResource(Res.string.ai_on_device_unavailable),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )

@@ -411,24 +411,23 @@ private val EverforestDarkColorScheme = darkColorScheme(
 class ThemeColorSchemes(val light: ColorScheme, val dark: ColorScheme)
 
 enum class ColorThemePreference(
-    val displayName: String,
     val lightColorScheme: ColorScheme,
     val darkColorScheme: ColorScheme
 ) {
-    EMBERR("Emberr", EmberrLightColorScheme, EmberrDarkColorScheme),
-    SOFT("Soft", SoftLightColorScheme, SoftDarkColorScheme),
-    WALLPAPER("Wallpaper", EmberrLightColorScheme, EmberrDarkColorScheme),
-    HIGH_CONTRAST("High Contrast", HighContrastLightColorScheme, HighContrastDarkColorScheme),
-    TERRACOTTA("Terracotta", TerracottaLightColorScheme, TerracottaDarkColorScheme),
-    PAPER("Paper", PaperLightColorScheme, PaperDarkColorScheme),
-    NORD("Nord", NordLightColorScheme, NordDarkColorScheme),
-    FOREST("Forest", ForestLightColorScheme, ForestDarkColorScheme),
-    ROSE("Rosé Pine", RosePineDawnColorScheme, RosePineMainColorScheme),
-    CATPPUCCIN_FRAPPE("Catppuccin Frappé", CatppuccinLatteColorScheme, CatppuccinFrappeColorScheme),
-    CATPPUCCIN("Catppuccin Mocha", CatppuccinLatteColorScheme, CatppuccinMochaColorScheme),
-    TOKYO_NIGHT("Tokyo Night", TokyoNightLightColorScheme, TokyoNightDarkColorScheme),
-    GRUVBOX("Gruvbox", GruvboxLightColorScheme, GruvboxDarkColorScheme),
-    EVERFOREST("Everforest", EverforestLightColorScheme, EverforestDarkColorScheme);
+    EMBERR(EmberrLightColorScheme, EmberrDarkColorScheme),
+    SOFT(SoftLightColorScheme, SoftDarkColorScheme),
+    WALLPAPER(EmberrLightColorScheme, EmberrDarkColorScheme),
+    HIGH_CONTRAST(HighContrastLightColorScheme, HighContrastDarkColorScheme),
+    TERRACOTTA(TerracottaLightColorScheme, TerracottaDarkColorScheme),
+    PAPER(PaperLightColorScheme, PaperDarkColorScheme),
+    NORD(NordLightColorScheme, NordDarkColorScheme),
+    FOREST(ForestLightColorScheme, ForestDarkColorScheme),
+    ROSE(RosePineDawnColorScheme, RosePineMainColorScheme),
+    CATPPUCCIN_FRAPPE(CatppuccinLatteColorScheme, CatppuccinFrappeColorScheme),
+    CATPPUCCIN(CatppuccinLatteColorScheme, CatppuccinMochaColorScheme),
+    TOKYO_NIGHT(TokyoNightLightColorScheme, TokyoNightDarkColorScheme),
+    GRUVBOX(GruvboxLightColorScheme, GruvboxDarkColorScheme),
+    EVERFOREST(EverforestLightColorScheme, EverforestDarkColorScheme);
 
     val builtInColorSchemes: ThemeColorSchemes
         get() = ThemeColorSchemes(lightColorScheme, darkColorScheme)

@@ -97,6 +97,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.whatsnew_new
+import emberr.shared.generated.resources.whatsnew_see_you_later
+import emberr.shared.generated.resources.whatsnew_title
+import emberr.shared.generated.resources.whatsnew_version
+import emberr.shared.generated.resources.whatsnew_whats_new_question
+import org.jetbrains.compose.resources.stringResource
 
 private val UpdatePeekGhostSize = 56.dp
 private val UpdatePeekVisibleHeight = 32.dp
@@ -160,7 +167,7 @@ fun EmberrUpdatePeek(
             )
         ) {
             UpdatePeekPill(
-                label = if (isSayingGoodbye) "See you later!" else "What's new?",
+                label = stringResource(if (isSayingGoodbye) Res.string.whatsnew_see_you_later else Res.string.whatsnew_whats_new_question),
                 hazeState = hazeState,
                 isClickable = !isSayingGoodbye,
                 onClick = { isDialogOpen = true }
@@ -331,14 +338,14 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                                 leadingContent = {
                                     Column {
                                         Text(
-                                            text = "What's new",
+                                            text = stringResource(Res.string.whatsnew_title),
                                             style = MaterialTheme.typography.titleLarge,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         appVersionName?.let { version ->
                                             Text(
-                                                text = "Version $version",
+                                                text = stringResource(Res.string.whatsnew_version, version),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.outline
                                             )
@@ -348,12 +355,12 @@ fun EmberrUpdateDialog(onDismissRequest: () -> Unit) {
                                 actions = {
                                     TopBarIconButton(
                                         icon = painterResource(Res.drawable.x),
-                                        contentDescription = "Close",
+                                        contentDescription = stringResource(Res.string.common_close),
                                         bgColor = Color.Transparent,
                                         tint = MaterialTheme.colorScheme.primary,
                                         hazeState = dialogHazeState,
                                         hazeStyle = headerBlurStyle,
-                                        tooltip = "Close",
+                                        tooltip = stringResource(Res.string.common_close),
                                         onClick = onDismissRequest
                                     )
                                 }
@@ -381,7 +388,7 @@ private fun UpdateNotesSectionView(section: UpdateNotesSection) {
 
         section.description?.let { description ->
             Text(
-                text = textWithBoldMarkedParts(description),
+                text = textWithBoldMarkedParts(stringResource(description)),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -395,7 +402,7 @@ private fun UpdateNotesSectionView(section: UpdateNotesSection) {
                     color = MaterialTheme.colorScheme.outline
                 )
                 Text(
-                    text = textWithBoldMarkedParts(item),
+                    text = textWithBoldMarkedParts(stringResource(item)),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -412,7 +419,7 @@ private fun UpdateNotesSectionHeading(section: UpdateNotesSection) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = section.heading,
+                text = stringResource(section.heading),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -423,7 +430,7 @@ private fun UpdateNotesSectionHeading(section: UpdateNotesSection) {
         }
         section.whereToFind?.let { whereToFind ->
             Text(
-                text = whereToFind,
+                text = stringResource(whereToFind),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -438,7 +445,7 @@ private fun newPillColor(): Color =
 @Composable
 private fun UpdateNewPill() {
     Text(
-        text = "New",
+        text = stringResource(Res.string.whatsnew_new),
         style = MaterialTheme.typography.labelSmall,
         fontWeight = FontWeight.Medium,
         color = MaterialTheme.colorScheme.onSurface,

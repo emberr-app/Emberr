@@ -42,6 +42,33 @@ import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrTextField
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_context_length
+import emberr.shared.generated.resources.ai_context_length_hint
+import emberr.shared.generated.resources.ai_copying_model_file
+import emberr.shared.generated.resources.ai_delete_model
+import emberr.shared.generated.resources.ai_download
+import emberr.shared.generated.resources.ai_downloading_percent
+import emberr.shared.generated.resources.ai_got_it
+import emberr.shared.generated.resources.ai_installed_models
+import emberr.shared.generated.resources.ai_local_ai
+import emberr.shared.generated.resources.ai_manage_on_device_models
+import emberr.shared.generated.resources.ai_model_pending_deletion
+import emberr.shared.generated.resources.ai_pause_download
+import emberr.shared.generated.resources.ai_paused
+import emberr.shared.generated.resources.ai_proceed
+import emberr.shared.generated.resources.ai_recommended_balanced
+import emberr.shared.generated.resources.ai_recommended_downloaded
+import emberr.shared.generated.resources.ai_restore_model
+import emberr.shared.generated.resources.ai_resume_download
+import emberr.shared.generated.resources.ai_unverified_model_type
+import emberr.shared.generated.resources.ai_upload_your_own_model
+import emberr.shared.generated.resources.ai_uploaded_successfully
+import emberr.shared.generated.resources.ai_uploading_custom_model
+import emberr.shared.generated.resources.ai_uploading_custom_model_warning
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun LocalAiSettingsSheet(
@@ -85,15 +112,15 @@ internal fun LocalAiSettingsSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Local AI",
-        subtitle = "Manage the on-device models.",
+        title = stringResource(Res.string.ai_local_ai),
+        subtitle = stringResource(Res.string.ai_manage_on_device_models),
     ) { _ ->
         val unsupportedHardwareReason = viewModel.localAiUnsupportedReason
         if (unsupportedHardwareReason != null) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
                 UnsupportedHardwareNotice(reason = unsupportedHardwareReason)
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
                 )
@@ -109,13 +136,14 @@ internal fun LocalAiSettingsSheet(
                 icon = null,
                 title = "qwen2.5-1.5b-instruct-q8_0",
                 subtitle = when (currentDownloadProgress) {
-                    is ModelDownloadProgress.Downloading -> "Downloading… ${(currentDownloadProgress.fraction * 100).toInt()}%"
+                    is ModelDownloadProgress.Downloading ->
+                        stringResource(Res.string.ai_downloading_percent, (currentDownloadProgress.fraction * 100).toInt())
                     is ModelDownloadProgress.Failed -> currentDownloadProgress.message
-                    ModelDownloadProgress.Paused -> "Paused."
+                    ModelDownloadProgress.Paused -> stringResource(Res.string.ai_paused)
                     else -> if (isDefaultModelInstalled)
-                        "Recommended - already downloaded."
+                        stringResource(Res.string.ai_recommended_downloaded)
                     else
-                        "Recommended - balanced quality and speed."
+                        stringResource(Res.string.ai_recommended_balanced)
                 },
                 onClick = {}
             )
@@ -124,9 +152,9 @@ internal fun LocalAiSettingsSheet(
                 Spacer(Modifier.height(10.dp))
                 EmberrButtonPrimary(
                     text = when {
-                        isDownloading -> "Pause Download"
-                        isResumable -> "Resume Download"
-                        else -> "Download"
+                        isDownloading -> stringResource(Res.string.ai_pause_download)
+                        isResumable -> stringResource(Res.string.ai_resume_download)
+                        else -> stringResource(Res.string.ai_download)
                     },
                     onClick = {
                         if (isDownloading) {
@@ -146,16 +174,16 @@ internal fun LocalAiSettingsSheet(
 
             EmberrButtonPrimary(
                 text = if (isUploading)
-                    "Copying model file… ${(uploadProgress * 100).toInt()}%"
+                    stringResource(Res.string.ai_copying_model_file, (uploadProgress * 100).toInt())
                 else
-                    "Upload your own model",
+                    stringResource(Res.string.ai_upload_your_own_model),
                 enabled = !isUploading,
                 onClick = { showUploadWarning = true },
                 modifier = Modifier.fillMaxWidth()
             )
 
             val uploadStatusMessage = when (currentUploadState) {
-                LocalModelUploadState.Success -> "Uploaded successfully."
+                LocalModelUploadState.Success -> stringResource(Res.string.ai_uploaded_successfully)
                 is LocalModelUploadState.Failed -> currentUploadState.message
                 else -> null
             }
@@ -170,7 +198,7 @@ internal fun LocalAiSettingsSheet(
 
             Spacer(Modifier.height(20.dp))
             Text(
-                text = "Context Length",
+                text = stringResource(Res.string.ai_context_length),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
@@ -191,7 +219,7 @@ internal fun LocalAiSettingsSheet(
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Applies to the selected model. 4096 suits Qwen - for other models, use their training context length.",
+                text = stringResource(Res.string.ai_context_length_hint),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
@@ -199,7 +227,7 @@ internal fun LocalAiSettingsSheet(
             if (installedLocalModels.isNotEmpty()) {
                 Spacer(Modifier.height(20.dp))
                 Text(
-                    text = "Installed models",
+                    text = stringResource(Res.string.ai_installed_models),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -212,7 +240,7 @@ internal fun LocalAiSettingsSheet(
                         labelMaxLines = 1,
                         isSelected = !isPendingDeletion && selectedLocalModelFileName == model.fileName,
                         subtitle = if (isPendingDeletion)
-                            "Deleted — will be removed permanently on next app restart."
+                            stringResource(Res.string.ai_model_pending_deletion)
                         else
                             null,
                         outerHorizontalPadding = 0.dp,
@@ -222,10 +250,10 @@ internal fun LocalAiSettingsSheet(
                         trailing = {
                             if (isPendingDeletion) {
                                 Spacer(Modifier.width(6.dp))
-                                IconTooltip(text = "Restore model") {
+                                IconTooltip(text = stringResource(Res.string.ai_restore_model)) {
                                     Icon(
                                         Icons.Default.Restore,
-                                        contentDescription = "Restore model",
+                                        contentDescription = stringResource(Res.string.ai_restore_model),
                                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                         modifier = Modifier
                                             .size(20.dp)
@@ -235,10 +263,10 @@ internal fun LocalAiSettingsSheet(
                                 Spacer(Modifier.width(5.dp))
                             } else {
                                 Spacer(Modifier.width(6.dp))
-                                IconTooltip(text = "Delete model") {
+                                IconTooltip(text = stringResource(Res.string.ai_delete_model)) {
                                     Icon(
                                         Icons.Default.Delete,
-                                        contentDescription = "Delete model",
+                                        contentDescription = stringResource(Res.string.ai_delete_model),
                                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                         modifier = Modifier
                                             .size(20.dp)
@@ -254,7 +282,7 @@ internal fun LocalAiSettingsSheet(
             }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)
@@ -265,10 +293,10 @@ internal fun LocalAiSettingsSheet(
     if (showUploadWarning) {
         EmberrAlertDialog(
             onDismissRequest = { showUploadWarning = false },
-            title = "Uploading a custom model"
+            title = stringResource(Res.string.ai_uploading_custom_model)
         ) {
             Text(
-                text = "Heavy or high-parameter models can use a lot of RAM and may freeze or crash your device. Only upload a model you know your device can handle.",
+                text = stringResource(Res.string.ai_uploading_custom_model_warning),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
@@ -278,12 +306,12 @@ internal fun LocalAiSettingsSheet(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { showUploadWarning = false },
                     modifier = Modifier.weight(1f)
                 )
                 EmberrButtonPrimary(
-                    text = "Proceed",
+                    text = stringResource(Res.string.ai_proceed),
                     onClick = {
                         showUploadWarning = false
                         onPickDocument { path -> viewModel.uploadGeneratorModel(path) }
@@ -298,14 +326,14 @@ internal fun LocalAiSettingsSheet(
         AlertDialog(
             onDismissRequest = { viewModel.dismissUploadedModelFinetuneWarning() },
             title = {
-                Text("Unverified model type", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(Res.string.ai_unverified_model_type), style = MaterialTheme.typography.titleLarge)
             },
             text = {
                 Text(finetuneWarning.orEmpty(), style = MaterialTheme.typography.labelSmall)
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissUploadedModelFinetuneWarning() }) {
-                    Text("Got it", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(Res.string.ai_got_it), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         )

@@ -27,6 +27,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.share_failed_to_save
+import emberr.shared.generated.resources.share_note_no_longer_available
+import emberr.shared.generated.resources.share_saved_items_to_inbox
+import emberr.shared.generated.resources.share_saved_to_inbox
+import org.jetbrains.compose.resources.getPluralString
+import org.jetbrains.compose.resources.getString
 
 class ShareViewModel(
     private val repository: NoteRepository,
@@ -146,7 +153,7 @@ class ShareViewModel(
             try {
                 val newBlocks = buildBlocks(share)
                 if (newBlocks.isEmpty()) {
-                    notify("Failed to save shared content.")
+                    notify(getString(Res.string.share_failed_to_save))
                     return@launch
                 }
 
@@ -161,10 +168,13 @@ class ShareViewModel(
                 }
 
                 newBlocks.filterIsInstance<BookmarkBlock>().forEach { scheduleLinkMetadataRefresh(inboxNoteId, it) }
-                notify(if (newBlocks.size > 1) "Saved ${newBlocks.size} items to Inbox" else "Saved to Inbox")
+                notify(
+                    if (newBlocks.size > 1) getPluralString(Res.plurals.share_saved_items_to_inbox, newBlocks.size, newBlocks.size)
+                    else getString(Res.string.share_saved_to_inbox)
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
-                notify("Failed to save shared content.")
+                notify(getString(Res.string.share_failed_to_save))
             }
         }
     }
@@ -176,7 +186,7 @@ class ShareViewModel(
             try {
                 val newBlocks = buildBlocks(share)
                 if (newBlocks.isEmpty()) {
-                    notify("Failed to save shared content.")
+                    notify(getString(Res.string.share_failed_to_save))
                     return@launch
                 }
 
@@ -192,7 +202,7 @@ class ShareViewModel(
                 }
 
                 if (!saved) {
-                    notify("That note is no longer available.")
+                    notify(getString(Res.string.share_note_no_longer_available))
                     return@launch
                 }
 
@@ -200,7 +210,7 @@ class ShareViewModel(
                 _navigateToNoteId.value = noteId
             } catch (e: Exception) {
                 e.printStackTrace()
-                notify("Failed to save shared content.")
+                notify(getString(Res.string.share_failed_to_save))
             }
         }
     }
@@ -212,7 +222,7 @@ class ShareViewModel(
             try {
                 val newBlocks = buildBlocks(share)
                 if (newBlocks.isEmpty()) {
-                    notify("Failed to save shared content.")
+                    notify(getString(Res.string.share_failed_to_save))
                     return@launch
                 }
 
@@ -230,7 +240,7 @@ class ShareViewModel(
                 _navigateToNoteId.value = newNoteId
             } catch (e: Exception) {
                 e.printStackTrace()
-                notify("Failed to save shared content.")
+                notify(getString(Res.string.share_failed_to_save))
             }
         }
     }

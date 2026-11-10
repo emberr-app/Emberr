@@ -17,6 +17,15 @@ import com.emberr.presentation.ai.RagViewModel
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_fine_tuning
+import emberr.shared.generated.resources.ai_knowledge_default_subtitle
+import emberr.shared.generated.resources.ai_knowledge_notes_only_subtitle
+import emberr.shared.generated.resources.ai_knowledge_source
+import emberr.shared.generated.resources.ai_knowledge_world_only_subtitle
+import emberr.shared.generated.resources.ai_response_length
+import emberr.shared.generated.resources.common_close
+import org.jetbrains.compose.resources.stringResource
 
 private val SectionLabelHorizontalPadding = 20.dp
 
@@ -32,40 +41,40 @@ internal fun FineTuningSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Fine-tuning",
+        title = stringResource(Res.string.ai_fine_tuning),
         contentHorizontalPadding = 0.dp
     ) { closeAnd ->
 
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
             Text(
-                text = "Knowledge Source",
+                text = stringResource(Res.string.ai_knowledge_source),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(horizontal = SectionLabelHorizontalPadding)
             )
             Spacer(Modifier.height(8.dp))
             EmberrBottomSheetOption(
-                label = "Default",
-                subtitle = "Combines your notes with real-world knowledge.",
+                label = KnowledgeMode.DEFAULT.label(),
+                subtitle = stringResource(Res.string.ai_knowledge_default_subtitle),
                 isSelected = selectedMode == KnowledgeMode.DEFAULT,
                 onClick = { closeAnd { viewModel.selectKnowledgeMode(KnowledgeMode.DEFAULT) } }
             )
             EmberrBottomSheetOption(
-                label = "Only notes knowledge",
-                subtitle = "Answers strictly from your notes — no outside knowledge.",
+                label = KnowledgeMode.NOTES_ONLY.label(),
+                subtitle = stringResource(Res.string.ai_knowledge_notes_only_subtitle),
                 isSelected = selectedMode == KnowledgeMode.NOTES_ONLY,
                 onClick = { closeAnd { viewModel.selectKnowledgeMode(KnowledgeMode.NOTES_ONLY) } }
             )
             EmberrBottomSheetOption(
-                label = "Only real-world knowledge",
-                subtitle = "Acts like a regular chatbot — doesn't use your notes at all.",
+                label = KnowledgeMode.WORLD_ONLY.label(),
+                subtitle = stringResource(Res.string.ai_knowledge_world_only_subtitle),
                 isSelected = selectedMode == KnowledgeMode.WORLD_ONLY,
                 onClick = { closeAnd { viewModel.selectKnowledgeMode(KnowledgeMode.WORLD_ONLY) } }
             )
 
             Spacer(Modifier.height(20.dp))
             Text(
-                text = "Response Length",
+                text = stringResource(Res.string.ai_response_length),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(horizontal = SectionLabelHorizontalPadding)
@@ -73,15 +82,15 @@ internal fun FineTuningSheet(
             Spacer(Modifier.height(8.dp))
             responseLengthOptions.forEach { option ->
                 EmberrBottomSheetOption(
-                    label = option.label,
-                    subtitle = option.subtitle,
+                    label = stringResource(option.label),
+                    subtitle = stringResource(option.subtitle),
                     isSelected = selectedMaxOutputTokens == option.tokens,
                     onClick = { closeAnd { viewModel.selectMaxOutputTokens(option.tokens) } }
                 )
             }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { closeAnd { } },
                 modifier = Modifier.fillMaxWidth()
                     .padding(top = 12.dp, start = 20.dp, end = 20.dp)

@@ -35,6 +35,15 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.download3
 import emberr.shared.generated.resources.floppy
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.share_files_selected
+import emberr.shared.generated.resources.share_images_selected
+import emberr.shared.generated.resources.share_save_shared_content
+import emberr.shared.generated.resources.share_save_to_a_note
+import emberr.shared.generated.resources.share_save_to_overview
+import emberr.shared.generated.resources.share_shared_image
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ShareReceiverSheet(
@@ -56,7 +65,7 @@ fun ShareReceiverSheet(
     EmberrBottomSheet(
         expanded = share != null,
         onDismiss = onDismiss,
-        title = "Save Shared Content"
+        title = stringResource(Res.string.share_save_shared_content)
     ) { _ ->
         Column(modifier = Modifier.padding(bottom = 16.dp)) {
             lastShare?.let { SharePreviewRow(it) }
@@ -68,19 +77,19 @@ fun ShareReceiverSheet(
 
             ShareTargetRow(
                 icon = painterResource(Res.drawable.download3),
-                label = "Save to Overview",
+                label = stringResource(Res.string.share_save_to_overview),
                 onClick = onSaveToInbox
             )
             ShareTargetRow(
                 icon = painterResource(Res.drawable.floppy),
-                label = "Save to a Note",
+                label = stringResource(Res.string.share_save_to_a_note),
                 onClick = { showNotePicker = true }
             )
 
             Spacer(Modifier.height(8.dp))
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)
@@ -135,7 +144,7 @@ private fun SharePreviewRow(share: PendingShare) {
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = "Shared image",
+                    text = stringResource(Res.string.share_shared_image),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -166,7 +175,11 @@ private fun SharePreviewRow(share: PendingShare) {
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = "${share.items.size} ${if (allImages) "images" else "files"} selected",
+                    text = pluralStringResource(
+                        if (allImages) Res.plurals.share_images_selected else Res.plurals.share_files_selected,
+                        share.items.size,
+                        share.items.size
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )

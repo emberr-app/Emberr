@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Trash is empty</string>
+    <string name="trash_title">Trash</string>
+    <string name="trash_empty_trash">Empty Trash</string>
+    <string name="trash_empty_trash_tooltip">Empty trash</string>
+    <string name="trash_restore_note">Restore Note</string>
+    <string name="trash_delete_permanently">Delete Permanently</string>
+    <string name="trash_manage_note">Manage Note</string>
+    <string name="trash_manage_note_subtitle">Notes in trash are automatically deleted after 30 days.</string>
+    <string name="trash_empty_trash_question">Empty Trash?</string>
+    <string name="trash_empty_trash_subtitle">This will permanently delete all notes currently in the trash. This action cannot be undone.</string>
+</resources>

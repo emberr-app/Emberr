@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">Listening...</string>
+    <string name="voice_tap_the_orb">Tap the orb to speak</string>
+    <string name="voice_add_tasks_with_voice">(add tasks with voice)</string>
+    <string name="voice_install_speech_app">Install a speech recognition app to use voice tasks</string>
+    <string name="voice_tap_a_task_to_fix_it">Tap a task to fix it</string>
+    <string name="voice_discard">Discard</string>
+    <string name="voice_add">Add</string>
+    <string name="voice_empty_tasks_are_skipped">Empty tasks are skipped</string>
+    <string name="voice_today">Today</string>
+    <string name="voice_tomorrow">Tomorrow</string>
+    <string name="voice_add_time">Add time</string>
+</resources>

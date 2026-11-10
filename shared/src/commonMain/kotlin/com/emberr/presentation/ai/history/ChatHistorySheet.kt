@@ -27,6 +27,14 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrSearchSheetBody
 import com.emberr.presentation.shared.components.EmberrTextField
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_chat_history_title
+import emberr.shared.generated.resources.ai_new_chat
+import emberr.shared.generated.resources.ai_no_chats_match
+import emberr.shared.generated.resources.ai_no_chats_yet
+import emberr.shared.generated.resources.ai_recent_chats
+import emberr.shared.generated.resources.ai_search_chats
+import org.jetbrains.compose.resources.stringResource
 
 private val SheetEdgePadding = 20.dp
 
@@ -39,7 +47,7 @@ internal fun ChatHistorySheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Chat History",
+        title = stringResource(Res.string.ai_chat_history_title),
         contentHorizontalPadding = 0.dp,
         scrollsContent = false
     ) { closeAnd ->
@@ -65,7 +73,7 @@ internal fun ChatHistoryMenuContent(
 
     val historyRows = @Composable {
         Text(
-            text = "Recent Chats",
+            text = stringResource(Res.string.ai_recent_chats),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.padding(horizontal = sectionLabelHorizontalPadding)
@@ -74,7 +82,7 @@ internal fun ChatHistoryMenuContent(
 
         if (filteredSessions.isEmpty()) {
             Text(
-                text = if (searchQuery.isBlank()) "No chats yet." else "No chats match your search.",
+                text = stringResource(if (searchQuery.isBlank()) Res.string.ai_no_chats_yet else Res.string.ai_no_chats_match),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(vertical = 12.dp, horizontal = rowHorizontalPadding)
@@ -102,9 +110,9 @@ internal fun ChatHistoryMenuContent(
             )
         }
         if (isDesktopPlatform) {
-            RagDesktopMenuItem(icon = newChatIcon, text = "New chat", onClick = { closeAnd { viewModel.clearChat() } })
+            RagDesktopMenuItem(icon = newChatIcon, text = stringResource(Res.string.ai_new_chat), onClick = { closeAnd { viewModel.clearChat() } })
         } else {
-            EmberrBottomSheetOption(label = "New chat", icon = newChatIcon, onClick = { closeAnd { viewModel.clearChat() } })
+            EmberrBottomSheetOption(label = stringResource(Res.string.ai_new_chat), icon = newChatIcon, onClick = { closeAnd { viewModel.clearChat() } })
         }
     }
 
@@ -114,7 +122,7 @@ internal fun ChatHistoryMenuContent(
             EmberrTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = "Search chats",
+                placeholder = stringResource(Res.string.ai_search_chats),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = rowHorizontalPadding)
             )
@@ -125,7 +133,7 @@ internal fun ChatHistoryMenuContent(
         EmberrSearchSheetBody(
             searchText = searchQuery,
             onSearchTextChange = { searchQuery = it },
-            placeholder = "Search chats"
+            placeholder = stringResource(Res.string.ai_search_chats)
         ) {
             historyRows()
         }

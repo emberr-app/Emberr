@@ -3,12 +3,39 @@ package com.emberr.presentation.whatsnew
 import androidx.compose.runtime.Composable
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.domain.util.system.isWindowsDesktop
+import emberr.shared.generated.resources.Res
+import org.jetbrains.compose.resources.StringResource
+import emberr.shared.generated.resources.whatsnew_editor_description
+import emberr.shared.generated.resources.whatsnew_editor_heading
+import emberr.shared.generated.resources.whatsnew_editor_where
+import emberr.shared.generated.resources.whatsnew_others_heading
+import emberr.shared.generated.resources.whatsnew_others_sliders
+import emberr.shared.generated.resources.whatsnew_others_small_fixes
+import emberr.shared.generated.resources.whatsnew_others_sync_network
+import emberr.shared.generated.resources.whatsnew_others_title_time_desktop
+import emberr.shared.generated.resources.whatsnew_others_title_time_mobile
+import emberr.shared.generated.resources.whatsnew_others_where
+import emberr.shared.generated.resources.whatsnew_others_windows_startup
+import emberr.shared.generated.resources.whatsnew_scale_description_desktop
+import emberr.shared.generated.resources.whatsnew_scale_description_mobile
+import emberr.shared.generated.resources.whatsnew_scale_heading
+import emberr.shared.generated.resources.whatsnew_scale_where
+import emberr.shared.generated.resources.whatsnew_texture_description
+import emberr.shared.generated.resources.whatsnew_texture_heading
+import emberr.shared.generated.resources.whatsnew_texture_where
+import emberr.shared.generated.resources.whatsnew_themes_description_desktop
+import emberr.shared.generated.resources.whatsnew_themes_description_mobile
+import emberr.shared.generated.resources.whatsnew_themes_heading
+import emberr.shared.generated.resources.whatsnew_themes_where
+import emberr.shared.generated.resources.whatsnew_widgets_description
+import emberr.shared.generated.resources.whatsnew_widgets_heading
+import emberr.shared.generated.resources.whatsnew_widgets_where
 
 internal class UpdateNotesSection(
-    val heading: String,
-    val whereToFind: String? = null,
-    val description: String? = null,
-    val items: List<String> = emptyList(),
+    val heading: StringResource,
+    val whereToFind: StringResource? = null,
+    val description: StringResource? = null,
+    val items: List<StringResource> = emptyList(),
     val isNew: Boolean = false,
     val screenshotPaths: List<String> = emptyList(),
     val preview: (@Composable () -> Unit)? = null
@@ -16,70 +43,63 @@ internal class UpdateNotesSection(
 
 internal val CurrentUpdateNotes = listOfNotNull(
     UpdateNotesSection(
-        heading = "Themes",
-        whereToFind = "Settings → Appearance → Theme",
+        heading = Res.string.whatsnew_themes_heading,
+        whereToFind = Res.string.whatsnew_themes_where,
         isNew = true,
         preview = { ThemesUpdatePreview() },
         description = if (isDesktopPlatform) {
-            "Pick from 13 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast. " +
-                "Each one has a strength setting, and you can choose whether text and icons follow it too."
+            Res.string.whatsnew_themes_description_desktop
         } else {
-            "Pick from 14 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast, " +
-                "or let **Wallpaper** take its colors from your wallpaper. " +
-                "Each one has a strength setting, and you can choose whether text and icons follow it too. " +
-                "Your home screen widgets follow the theme as well."
+            Res.string.whatsnew_themes_description_mobile
         }
     ),
     UpdateNotesSection(
-        heading = "Paper Texture",
-        whereToFind = "Settings → Appearance → Theme → Texture",
+        heading = Res.string.whatsnew_texture_heading,
+        whereToFind = Res.string.whatsnew_texture_where,
         isNew = true,
         preview = { PaperTextureUpdatePreview() },
-        description = "Give the app a soft grain, like real paper. " +
-            "Set how strong it is, and choose where it shows: the whole app, notes, canvas or Daily Notes."
+        description = Res.string.whatsnew_texture_description
     ),
     UpdateNotesSection(
-        heading = "Interface Scale",
-        whereToFind = "Settings → Appearance → Interface Scale",
+        heading = Res.string.whatsnew_scale_heading,
+        whereToFind = Res.string.whatsnew_scale_where,
         isNew = true,
         preview = { InterfaceScaleUpdatePreview() },
         description = if (isDesktopPlatform) {
-            "Make everything in the app bigger or smaller, from 80% to 200%, or use **Ctrl +**, **Ctrl −** and **Ctrl 0**."
+            Res.string.whatsnew_scale_description_desktop
         } else {
-            "Make everything in the app bigger or smaller, from 80% to 200%."
+            Res.string.whatsnew_scale_description_mobile
         }
     ),
     if (isDesktopPlatform) {
         null
     } else {
         UpdateNotesSection(
-            heading = "Widgets",
-            whereToFind = "Long-press your home screen → Widgets → Emberr",
+            heading = Res.string.whatsnew_widgets_heading,
+            whereToFind = Res.string.whatsnew_widgets_where,
             preview = { WidgetsUpdatePreview() },
-            description = "Every widget has a cleaner new look, and there are three new ones: **Note card**, **Jot it down** " +
-                "and **Quote of the day**. Widgets now show the note you picked right away, and tell you when that note has been deleted."
+            description = Res.string.whatsnew_widgets_description
         )
     },
     UpdateNotesSection(
-        heading = "Editor",
-        whereToFind = "Type / anywhere in a note",
+        heading = Res.string.whatsnew_editor_heading,
+        whereToFind = Res.string.whatsnew_editor_where,
         preview = { SlashMenuUpdatePreview() },
-        description = "The slash menu now opens right after any character, not only after a space. " +
-            "If you type past a match, delete back and the menu comes back."
+        description = Res.string.whatsnew_editor_description
     ),
     UpdateNotesSection(
-        heading = "Others",
-        whereToFind = "Smaller changes and fixes",
+        heading = Res.string.whatsnew_others_heading,
+        whereToFind = Res.string.whatsnew_others_where,
         items = listOfNotNull(
-            "Sliders across the app have a new design.",
+            Res.string.whatsnew_others_sliders,
             if (isDesktopPlatform) {
-                "Type **/** in a note's title to add the current time or date."
+                Res.string.whatsnew_others_title_time_desktop
             } else {
-                "Add the current time or date to a note's title from the keyboard toolbar."
+                Res.string.whatsnew_others_title_time_mobile
             },
-            if (isDesktopPlatform) null else "The network choice for sync is now in **Settings → Sync & Backup**.",
-            if (isWindowsDesktop) "Faster startup on Windows." else null,
-            "Plenty of small fixes."
+            if (isDesktopPlatform) null else Res.string.whatsnew_others_sync_network,
+            if (isWindowsDesktop) Res.string.whatsnew_others_windows_startup else null,
+            Res.string.whatsnew_others_small_fixes
         )
     )
 )

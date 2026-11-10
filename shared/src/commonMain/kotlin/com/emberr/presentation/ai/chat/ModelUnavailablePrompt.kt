@@ -22,6 +22,17 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.ai.models.ModelDownloadProgress
 import com.emberr.presentation.ai.components.ModelOptionCard
 import com.emberr.presentation.ai.components.UnsupportedHardwareNotice
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_connect_cloud_provider
+import emberr.shared.generated.resources.ai_connect_cloud_provider_subtitle
+import emberr.shared.generated.resources.ai_download_stopped_tap_to_retry
+import emberr.shared.generated.resources.ai_downloading_tap_to_manage
+import emberr.shared.generated.resources.ai_no_ai_connected
+import emberr.shared.generated.resources.ai_paused_tap_to_resume
+import emberr.shared.generated.resources.ai_private_and_offline
+import emberr.shared.generated.resources.ai_run_on_this_device
+import emberr.shared.generated.resources.ai_setting_up_your_ai
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ModelUnavailablePrompt(
@@ -48,7 +59,7 @@ internal fun ModelUnavailablePrompt(
         )
         Spacer(Modifier.height(20.dp))
         Text(
-            text = if (isDownloading) "Setting up your AI" else "No AI connected yet",
+            text = stringResource(if (isDownloading) Res.string.ai_setting_up_your_ai else Res.string.ai_no_ai_connected),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
@@ -57,12 +68,13 @@ internal fun ModelUnavailablePrompt(
 
         if (localAiUnsupportedReason == null) {
             ModelOptionCard(
-                title = "Run AI on this device",
+                title = stringResource(Res.string.ai_run_on_this_device),
                 subtitle = when (downloadProgress) {
-                    is ModelDownloadProgress.Downloading -> "Downloading… ${(downloadProgress.fraction * 100).toInt()}% — tap to manage"
-                    is ModelDownloadProgress.Failed -> "Download stopped. Tap to try again."
-                    ModelDownloadProgress.Paused -> "Paused. Tap to resume the download."
-                    else -> "Private and offline. Download or add your own model."
+                    is ModelDownloadProgress.Downloading ->
+                        stringResource(Res.string.ai_downloading_tap_to_manage, (downloadProgress.fraction * 100).toInt())
+                    is ModelDownloadProgress.Failed -> stringResource(Res.string.ai_download_stopped_tap_to_retry)
+                    ModelDownloadProgress.Paused -> stringResource(Res.string.ai_paused_tap_to_resume)
+                    else -> stringResource(Res.string.ai_private_and_offline)
                 },
                 onClick = onDownloadClick,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
@@ -73,8 +85,8 @@ internal fun ModelUnavailablePrompt(
         Spacer(Modifier.height(10.dp))
 
         ModelOptionCard(
-            title = "Connect a cloud provider",
-            subtitle = "Use your own API key with OpenAI, Claude, Gemini and more.",
+            title = stringResource(Res.string.ai_connect_cloud_provider),
+            subtitle = stringResource(Res.string.ai_connect_cloud_provider_subtitle),
             onClick = onApiKeyClick,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
         )

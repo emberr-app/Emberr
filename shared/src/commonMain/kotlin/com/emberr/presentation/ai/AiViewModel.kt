@@ -44,6 +44,12 @@ import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_finetune_warning
+import emberr.shared.generated.resources.ai_local_ai_cannot_run
+import emberr.shared.generated.resources.ai_sorry_error
+import emberr.shared.generated.resources.ai_sorry_error_with_reason
+import org.jetbrains.compose.resources.getString
 
 sealed interface EmbeddingSetupState {
     data object Checking : EmbeddingSetupState
@@ -432,8 +438,7 @@ class RagViewModel(
             null
         }
         if (finetuneType == null || finetuneType == "base") {
-            _uploadedModelFinetuneWarning.value =
-                "This model doesn't appear to be instruction/chat-tuned. It may produce poor or incoherent chat replies."
+            _uploadedModelFinetuneWarning.value = getString(Res.string.ai_finetune_warning)
         }
     }
 
@@ -540,9 +545,9 @@ class RagViewModel(
                 if (activeGenerationJob === thisJob) {
                     val friendlyMessage = when (e) {
                         is LocalAiUnsupportedException -> e.message
-                            ?: "Local AI cannot run on this hardware."
-                        is ExternalAiException -> e.message ?: "Sorry, an error occurred."
-                        else -> "Sorry, an error occurred: ${e.message}"
+                            ?: getString(Res.string.ai_local_ai_cannot_run)
+                        is ExternalAiException -> e.message ?: getString(Res.string.ai_sorry_error)
+                        else -> getString(Res.string.ai_sorry_error_with_reason, e.message.toString())
                     }
                     val list = _messages.value.toMutableList()
                     val last = list.last()

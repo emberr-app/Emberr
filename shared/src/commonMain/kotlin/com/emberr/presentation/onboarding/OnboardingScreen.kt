@@ -11,6 +11,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.emberr.domain.util.system.isDesktopPlatform
 import org.koin.compose.viewmodel.koinViewModel
+import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.onboarding_continue
 
 @Composable
 fun OnboardingScreen(
@@ -56,7 +59,7 @@ fun OnboardingScreen(
         },
         bottomBar = {
             OnboardingFlowBottomBar(
-                label = currentStep.buttonLabel,
+                label = currentStep.buttonLabel ?: stringResource(Res.string.onboarding_continue),
                 showBack = currentStepIndex > 0,
                 onBack = ::goToPreviousStep,
                 onNext = ::goToNextStep
