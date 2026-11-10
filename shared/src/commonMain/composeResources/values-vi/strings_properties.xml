@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Thuộc tính</string>
+    <string name="properties_built_in">Có sẵn</string>
+    <string name="properties_built_in_hint">Không thể đổi tên hoặc xóa thuộc tính có sẵn.</string>
+    <string name="properties_custom">Tùy chỉnh</string>
+    <string name="properties_add_property">Thêm thuộc tính</string>
+    <string name="properties_new_property">Thuộc tính mới</string>
+    <string name="properties_edit_property">Sửa thuộc tính</string>
+    <string name="properties_delete_question">Xóa "%1$s"? Thuộc tính này sẽ bị xóa khỏi mọi ghi chú đang dùng nó.</string>
+    <string name="properties_property_name">Tên thuộc tính</string>
+    <string name="properties_name_taken">Đã có thuộc tính mang tên này</string>
+    <string name="properties_value_type">Loại giá trị</string>
+    <string name="properties_value_type_locked">Không thể đổi loại giá trị sau khi đã tạo thuộc tính.</string>
+    <string name="properties_delete_property">Xóa thuộc tính</string>
+    <string name="properties_add">Thêm</string>
+</resources>

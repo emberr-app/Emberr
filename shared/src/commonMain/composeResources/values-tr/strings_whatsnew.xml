@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">Sonra görüşürüz!</string>
+    <string name="whatsnew_whats_new_question">Neler yeni?</string>
+    <string name="whatsnew_title">Yenilikler</string>
+    <string name="whatsnew_version">Sürüm %1$s</string>
+    <string name="whatsnew_new">Yeni</string>
+    <string name="whatsnew_themes_heading">Temalar</string>
+    <string name="whatsnew_themes_where">Ayarlar → Görünüm → Tema</string>
+    <string name="whatsnew_themes_description_desktop">Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine ve Yüksek kontrast gibi 13 renk teması arasından seçin. Her birinin bir yoğunluk ayarı var ve metinlerle simgelerin de temayı izleyip izlemeyeceğini seçebilirsiniz.</string>
+    <string name="whatsnew_themes_description_mobile">Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine ve Yüksek kontrast gibi 14 renk teması arasından seçin ya da **Duvar kağıdı** renklerini duvar kağıdınızdan alsın. Her birinin bir yoğunluk ayarı var ve metinlerle simgelerin de temayı izleyip izlemeyeceğini seçebilirsiniz. Ana ekran widget'larınız da temayı izler.</string>
+    <string name="whatsnew_texture_heading">Kağıt dokusu</string>
+    <string name="whatsnew_texture_where">Ayarlar → Görünüm → Tema → Doku</string>
+    <string name="whatsnew_texture_description">Uygulamaya gerçek kağıt gibi yumuşak bir doku verin. Ne kadar güçlü olacağını ve nerede görüneceğini seçin: tüm uygulama, notlar, tuval veya Günlük notlar.</string>
+    <string name="whatsnew_scale_heading">Arayüz ölçeği</string>
+    <string name="whatsnew_scale_where">Ayarlar → Görünüm → Arayüz ölçeği</string>
+    <string name="whatsnew_scale_description_desktop">Uygulamadaki her şeyi %80 ile %200 arasında büyütün veya küçültün ya da **Ctrl +**, **Ctrl −** ve **Ctrl 0** kullanın.</string>
+    <string name="whatsnew_scale_description_mobile">Uygulamadaki her şeyi %80 ile %200 arasında büyütün veya küçültün.</string>
+    <string name="whatsnew_widgets_heading">Widget'lar</string>
+    <string name="whatsnew_widgets_where">Ana ekrana uzun basın → Widget'lar → Emberr</string>
+    <string name="whatsnew_widgets_description">Her widget daha sade yeni bir görünüme kavuştu ve üç yeni widget var: **Not kartı**, **Hemen yaz** ve **Günün sözü**. Widget'lar artık seçtiğiniz notu hemen gösteriyor ve not silindiğinde size haber veriyor.</string>
+    <string name="whatsnew_editor_heading">Düzenleyici</string>
+    <string name="whatsnew_editor_where">Notun herhangi bir yerinde / yazın</string>
+    <string name="whatsnew_editor_description">Eğik çizgi menüsü artık yalnızca boşluktan sonra değil, herhangi bir karakterden hemen sonra açılıyor. Eşleşmenin ötesine yazarsanız geri silin, menü yeniden açılır.</string>
+    <string name="whatsnew_others_heading">Diğer</string>
+    <string name="whatsnew_others_where">Küçük değişiklikler ve düzeltmeler</string>
+    <string name="whatsnew_others_sliders">Uygulamadaki kaydırıcıların tasarımı yenilendi.</string>
+    <string name="whatsnew_others_title_time_desktop">Geçerli saati veya tarihi eklemek için not başlığına **/** yazın.</string>
+    <string name="whatsnew_others_title_time_mobile">Klavye araç çubuğundan not başlığına geçerli saati veya tarihi ekleyin.</string>
+    <string name="whatsnew_others_sync_network">Eşitleme için ağ seçimi artık **Ayarlar → Eşitleme ve yedek** bölümünde.</string>
+    <string name="whatsnew_others_windows_startup">Windows'ta daha hızlı açılış.</string>
+    <string name="whatsnew_others_small_fixes">Pek çok küçük düzeltme.</string>
+    <string name="whatsnew_preview_options">Seçenekler</string>
+    <string name="whatsnew_preview_trip_title">Hafta sonu gezisi</string>
+    <string name="whatsnew_preview_trip_text">Trafiğe takılmamak için 8'de yola çık.</string>
+    <string name="whatsnew_preview_train_tickets">Tren biletleri</string>
+    <string name="whatsnew_preview_passport">Pasaport</string>
+    <string name="whatsnew_preview_camera_charger">Kamera şarj aleti</string>
+    <string name="whatsnew_preview_reading_list">Okuma listesi</string>
+    <string name="whatsnew_preview_reading_list_books">Ağaçların Sırrı, Piranesi, Hail Mary Projesi</string>
+    <string name="whatsnew_preview_meeting_title">Ekip toplantısı</string>
+    <string name="whatsnew_preview_meeting_text">Perşembe saat 10, oda 2.</string>
+    <string name="whatsnew_preview_typed_heading">Gündem</string>
+    <string name="whatsnew_preview_quote">İlerlemenin sırrı başlamaktır.</string>
+    <string name="whatsnew_preview_jot_prompt">Aklınızda ne var?</string>
+    <string name="whatsnew_preview_jot_button">Hemen yaz</string>
+</resources>

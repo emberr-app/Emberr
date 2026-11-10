@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Setelan</string>
+
+    <string name="settings_group_reminders">Pengingat</string>
+    <string name="settings_group_data_storage">Data &amp; penyimpanan</string>
+    <string name="settings_group_sync_backup">Sinkronisasi &amp; cadangan</string>
+    <string name="settings_group_lan_sync">Sinkronisasi LAN</string>
+    <string name="settings_group_security">Keamanan</string>
+    <string name="settings_group_editor">Editor</string>
+    <string name="settings_group_appearance">Tampilan</string>
+    <string name="settings_group_date_time">Tanggal &amp; waktu</string>
+    <string name="settings_group_layout">Tata letak</string>
+    <string name="settings_group_overview">Ringkasan</string>
+    <string name="settings_group_desktop_window">Jendela desktop</string>
+    <string name="settings_group_ai">AI</string>
+    <string name="settings_group_need_help">Butuh bantuan?</string>
+    <string name="settings_group_updates">Pembaruan</string>
+    <string name="settings_group_danger_zone">Zona berbahaya</string>
+
+    <string name="settings_unrestricted_background">Latar belakang tanpa batasan</string>
+
+    <string name="settings_import">Impor</string>
+    <string name="settings_export_backup">Ekspor cadangan</string>
+    <string name="settings_automatic_backups">Cadangan otomatis</string>
+    <string name="settings_backup_frequency_daily">Setiap hari</string>
+    <string name="settings_backup_frequency_weekly">Setiap minggu</string>
+    <string name="settings_backup_day">Hari pencadangan</string>
+    <string name="settings_backup_time">Waktu pencadangan</string>
+    <string name="settings_backup_location">Lokasi cadangan</string>
+    <string name="settings_backup_location_change">Ubah</string>
+    <string name="settings_select_backup_day">Pilih hari pencadangan</string>
+
+    <string name="settings_self_host">Server sendiri</string>
+    <string name="settings_self_host_blocked_by_lan_sync">Putuskan pasangan sinkronisasi LAN untuk memakai server sendiri.</string>
+    <string name="settings_self_host_blocked_by_cloud">Keluar dari Emberr Cloud untuk memakai server sendiri.</string>
+    <string name="settings_emberr_cloud">Emberr Cloud</string>
+    <string name="settings_cloud_blocked_by_self_host">Putuskan server sendiri untuk memakai Emberr Cloud.</string>
+    <string name="settings_cloud_blocked_by_lan_sync">Putuskan pasangan sinkronisasi LAN untuk memakai Emberr Cloud.</string>
+    <string name="settings_sync_network_both">Keduanya</string>
+    <string name="settings_sync_network_wifi_only">Hanya Wi-Fi</string>
+    <string name="settings_sync_network_data_only">Hanya data seluler</string>
+    <string name="settings_sync_network_hint">Server sendiri dan Emberr Cloud hanya menyinkronkan lewat jaringan yang Anda pilih.</string>
+
+    <string name="settings_lan_sync_blocked_by_self_host">Putuskan server sendiri untuk memakai sinkronisasi LAN.</string>
+    <string name="settings_lan_sync_blocked_by_cloud">Keluar dari Emberr Cloud untuk memakai sinkronisasi LAN.</string>
+    <string name="settings_lan_sync_paired_desktop">Terpasang. Desktop ini otomatis menyinkronkan setiap kali ponsel Anda terhubung lewat LAN.</string>
+    <string name="settings_sync_now">Sinkronkan sekarang</string>
+    <string name="settings_unpair_from_mobile_device">Putuskan pasangan dari perangkat seluler</string>
+    <string name="settings_unpair_from_desktop">Putuskan pasangan dari desktop</string>
+    <string name="settings_sync_port">Port sinkronisasi</string>
+    <string name="settings_sync_port_hint">Baru berlaku setelah Emberr dimulai ulang. Ubah ini jika program lain di komputer ini sudah memakai port saat ini.</string>
+    <string name="settings_pair_mobile_device">Pasangkan perangkat seluler</string>
+    <string name="settings_pair_with_desktop">Pasangkan dengan desktop</string>
+    <string name="settings_unpair_dialog_title">Putuskan pasangan perangkat?</string>
+    <string name="settings_unpair_dialog_message_desktop">Menghapus pasangan sinkronisasi dari desktop ini. Putuskan juga di ponsel Anda.</string>
+    <string name="settings_unpair_dialog_message_phone">Menghapus pasangan sinkronisasi dari perangkat ini. Biarkan aplikasi desktop tetap terbuka, atau putuskan juga di sana.</string>
+    <string name="settings_unpair">Putuskan</string>
+
+    <string name="settings_theme">Tema</string>
+    <string name="settings_top_bar_fade">Pudar bilah atas</string>
+    <string name="settings_top_bar_fade_subtitle">Pilih cara konten memudar di balik bilah atas saat Anda menggulir.</string>
+    <string name="settings_top_bar_fade_progressive">Bertahap</string>
+    <string name="settings_top_bar_fade_blur">Buram</string>
+    <string name="settings_top_bar_fade_color">Warna</string>
+    <string name="settings_top_bar_fade_none">Tidak ada</string>
+    <string name="settings_top_bar_fade_fallback">Alternatif</string>
+    <string name="settings_top_bar_fade_progressive_blur">Buram bertahap</string>
+    <string name="settings_top_bar_fade_progressive_color">Warna bertahap</string>
+    <string name="settings_interface_scale">Skala antarmuka</string>
+    <string name="settings_interface_scale_hint">Membuat semua yang ada di aplikasi lebih besar atau lebih kecil.</string>
+    <string name="settings_interface_scale_smaller">Lebih kecil</string>
+    <string name="settings_interface_scale_bigger">Lebih besar</string>
+    <string name="settings_interface_scale_reset">Setel ulang ke 100%</string>
+    <string name="settings_interface_scale_toast">Skala antarmuka %1$d%</string>
+    <string name="settings_font_size">Ukuran font</string>
+    <string name="settings_font_size_extra_small">Sangat kecil</string>
+    <string name="settings_font_size_small">Kecil</string>
+    <string name="settings_font_size_default">Default</string>
+    <string name="settings_font_size_large">Besar</string>
+    <string name="settings_font_size_extra_large">Sangat besar</string>
+    <string name="settings_font_style">Gaya font</string>
+    <string name="settings_font_style_system">Sistem</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="settings_search_languages">Cari bahasa</string>
+    <string name="settings_language_system">Default sistem</string>
+    <string name="settings_language_restart_message">Emberr perlu dimulai ulang untuk menampilkan bahasa baru. Pekerjaan Anda tersimpan saat Anda mengetik, jadi aman untuk memulai ulang sekarang.</string>
+
+    <string name="settings_time_format">Format waktu</string>
+    <string name="settings_time_format_system">Default sistem</string>
+    <string name="settings_time_format_twelve_hour">12 jam</string>
+    <string name="settings_time_format_twenty_four_hour">24 jam</string>
+    <string name="settings_first_day_of_week">Hari pertama dalam minggu</string>
+    <string name="settings_first_day_of_week_desktop_hint">Setelan yang sama dengan Hari pertama dalam minggu di setelan Kalender.</string>
+    <string name="settings_first_day_of_week_system">Default sistem</string>
+    <string name="settings_first_day_of_week_saturday">Sabtu</string>
+    <string name="settings_first_day_of_week_sunday">Minggu</string>
+    <string name="settings_first_day_of_week_monday">Senin</string>
+
+    <string name="settings_daily_notes">Catatan harian</string>
+    <string name="settings_daily_notes_hint">Menyembunyikan catatan harian. Catatan yang sudah ada tetap disimpan.</string>
+    <string name="settings_daily_quote">Kutipan harian</string>
+    <string name="settings_daily_quote_hint">Menampilkan kutipan di hari yang kosong.</string>
+    <string name="settings_open_home_first">Buka Beranda dulu</string>
+    <string name="settings_mic_button">Tombol mikrofon</string>
+    <string name="settings_overview_sidebar_footnote">Pintasan yang ditampilkan di bilah sisi.</string>
+
+    <string name="settings_subnote_opening">Cara membuka subcatatan</string>
+    <string name="settings_subnote_opening_side_panel">Panel samping</string>
+    <string name="settings_subnote_opening_center_dialog">Dialog tengah</string>
+    <string name="settings_subnote_opening_full_right_panel">Panel kanan penuh</string>
+    <string name="settings_show_scrollbar">Tampilkan bilah gulir</string>
+    <string name="settings_show_scrollbar_hint">Menampilkan bilah gulir di daftar, catatan, dan tabel.</string>
+    <string name="settings_custom_title_bar">Bilah judul kustom</string>
+    <string name="settings_custom_title_bar_hint">Memakai bilah judul milik Emberr. Berlaku setelah dimulai ulang.</string>
+    <string name="settings_auto_hide_title_bar">Sembunyikan bilah judul otomatis</string>
+    <string name="settings_auto_hide_title_bar_hint">Menampilkan bilah judul saat Anda menunjuk ke tepi atas.</string>
+    <string name="settings_restart_to_apply_title">Mulai ulang untuk menerapkan</string>
+    <string name="settings_restart_to_apply_message">Jendela tidak bisa beralih antara bilah judulnya sendiri dan bilah judul desktop saat sedang terbuka, jadi Emberr perlu dimulai ulang untuk menerapkan ini. Pekerjaan Anda tersimpan saat Anda mengetik, jadi aman untuk memulai ulang sekarang.</string>
+    <string name="settings_restart_later">Nanti</string>
+    <string name="settings_restart_now">Mulai ulang sekarang</string>
+
+    <string name="settings_turn_off_ai_features">Matikan fitur AI</string>
+    <string name="settings_ai_removing_data">Menghapus model, embedding, dan kunci tersimpan…</string>
+    <string name="settings_ai_off_hint">AI mati. Model dan kunci telah dihapus. Obrolan tetap disimpan.</string>
+    <string name="settings_ai_on_hint">Menyembunyikan asisten dan menghapus model serta kunci. Obrolan tetap disimpan.</string>
+    <string name="settings_turn_off_ai_dialog_title">Matikan fitur AI?</string>
+    <string name="settings_turn_off_ai_dialog_message">Menghapus model yang diunduh, indeks pencarian, dan kunci API tersimpan. Catatan dan obrolan Anda tetap disimpan.</string>
+    <string name="settings_turn_off">Matikan</string>
+    <string name="settings_ai_purge_failed">Tidak dapat selesai menghapus data AI: %1$s</string>
+    <plurals name="settings_ai_purge_files_left">
+        <item quantity="other">%1$s dikosongkan, tetapi %2$d file tidak dapat dihapus: %3$s</item>
+    </plurals>
+    <string name="settings_ai_purge_freed">%1$s file model dikosongkan.</string>
+    <string name="settings_ai_purge_nothing_to_remove">Tidak ada file model di disk untuk dihapus.</string>
+
+    <string name="settings_keyboard_toolbar">Bilah alat keyboard</string>
+
+    <string name="settings_faq">FAQ</string>
+    <string name="settings_whats_new">Yang Baru</string>
+    <string name="settings_privacy_policy">Kebijakan privasi</string>
+    <string name="settings_about_emberr">Tentang Emberr</string>
+
+    <string name="settings_clear_all_data">Hapus semua data</string>
+    <string name="settings_clear_all_data_desktop_hint">Menghapus setiap catatan, pengingat, dan lampiran yang tersimpan di perangkat ini. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="settings_clear_all_data_dialog_title">Hapus semua data?</string>
+    <string name="settings_clear_all_data_dialog_message">Menghapus semua yang ada di perangkat ini. Perangkat Anda yang lain, server sinkronisasi, dan cadangan tidak tersentuh. </string>
+    <string name="settings_clear_data_failed">Tidak dapat menghapus data Anda. Tidak ada yang dihapus.</string>
+    <string name="settings_erase_cloud_dialog_message">Menghapus semua data Anda dari Emberr Cloud dan setiap perangkat yang masuk. Anda tetap masuk.</string>
+    <string name="settings_erase_cloud_password">Kata sandi</string>
+    <string name="settings_erasing">Menghapus...</string>
+    <string name="settings_erase">Hapus</string>
+    <string name="settings_erase_cloud_device_not_cleared">Data cloud Anda telah dihapus, tetapi perangkat ini tidak dapat dikosongkan. Coba Hapus semua data lagi.</string>
+    <string name="settings_erase_cloud_incorrect_password">Kata sandi salah. Coba lagi.</string>
+    <string name="settings_erase_cloud_too_many_tries">Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.</string>
+    <string name="settings_erase_cloud_signed_out">Anda telah keluar dari Emberr Cloud. Tidak ada yang dihapus.</string>
+    <string name="settings_erase_cloud_something_went_wrong">Terjadi kesalahan. Tidak ada yang dihapus.</string>
+    <string name="settings_erase_cloud_server_unreachable">Tidak dapat menjangkau server di %1$s. Tidak ada yang dihapus.</string>
+
+    <string name="settings_theme_mode">Mode</string>
+    <string name="settings_theme_mode_system">Sistem</string>
+    <string name="settings_theme_mode_light">Terang</string>
+    <string name="settings_theme_mode_dark">Gelap</string>
+    <string name="settings_theme_group_strength">Intensitas</string>
+    <string name="settings_theme_strength">Intensitas tema</string>
+    <string name="settings_theme_group_text_and_icons">Teks &amp; ikon</string>
+    <string name="settings_theme_text_and_icons">Tema teks &amp; ikon</string>
+    <string name="settings_theme_text_and_icons_hint">Jika mati, teks dan ikon tetap hitam dan putih.</string>
+    <string name="settings_theme_group_texture">Tekstur</string>
+    <string name="settings_paper_texture">Tekstur kertas</string>
+    <string name="settings_paper_texture_hint">Menambahkan butiran halus, seperti kertas.</string>
+    <string name="settings_paper_texture_show_on">Tampilkan di</string>
+    <string name="settings_paper_texture_area_whole_app">Seluruh aplikasi</string>
+    <string name="settings_paper_texture_area_daily_notes">Catatan harian</string>
+    <string name="settings_paper_texture_area_notes">Catatan</string>
+    <string name="settings_paper_texture_area_canvas">Kanvas</string>
+    <string name="settings_paper_texture_areas_none">Tidak ada</string>
+    <string name="settings_texture_strength">Intensitas tekstur</string>
+    <string name="settings_theme_group_colors">Warna</string>
+    <string name="settings_color_theme_emberr">Emberr</string>
+    <string name="settings_color_theme_soft">Lembut</string>
+    <string name="settings_color_theme_wallpaper">Wallpaper</string>
+    <string name="settings_color_theme_high_contrast">Kontras tinggi</string>
+    <string name="settings_color_theme_terracotta">Terakota</string>
+    <string name="settings_color_theme_paper">Kertas</string>
+    <string name="settings_color_theme_nord">Nord</string>
+    <string name="settings_color_theme_forest">Hutan</string>
+    <string name="settings_color_theme_rose_pine">Rosé Pine</string>
+    <string name="settings_color_theme_catppuccin_frappe">Catppuccin Frappé</string>
+    <string name="settings_color_theme_catppuccin_mocha">Catppuccin Mocha</string>
+    <string name="settings_color_theme_tokyo_night">Tokyo Night</string>
+    <string name="settings_color_theme_gruvbox">Gruvbox</string>
+    <string name="settings_color_theme_everforest">Everforest</string>
+
+    <string name="settings_toolbar_group_in_toolbar">Di bilah alat</string>
+    <string name="settings_toolbar_empty">Belum ada tombol. Tambahkan dari daftar di bawah.</string>
+    <string name="settings_toolbar_reorder_footnote">Seret pegangan untuk mengurutkan ulang. Tombol tutup keyboard selalu berada di kanan.</string>
+    <string name="settings_toolbar_group_available">Tersedia</string>
+    <string name="settings_toolbar_reset_to_default">Setel ulang ke default</string>
+    <string name="settings_toolbar_reorder_button">Urutkan ulang %1$s</string>
+    <string name="settings_toolbar_remove">Hapus</string>
+    <string name="settings_toolbar_remove_button">Hapus %1$s</string>
+    <string name="settings_toolbar_add_button">Tambahkan %1$s</string>
+
+    <string name="settings_about_title">Tentang</string>
+    <string name="settings_about_source_code">Kode sumber</string>
+    <string name="settings_about_open_source_licenses">Lisensi sumber terbuka</string>
+    <string name="settings_about_third_party_services">Layanan pihak ketiga</string>
+    <string name="settings_about_tagline">Aplikasi catatan dan produktivitas sumber terbuka yang mengutamakan offline</string>
+    <string name="settings_about_copyright">Hak cipta © 2026 Benny</string>
+    <string name="settings_about_license_notice">Dilisensikan di bawah GNU AGPL v3.0. Disediakan tanpa jaminan apa pun.</string>
+
+    <string name="settings_third_party_group_movies_shows">Film &amp; serial</string>
+    <string name="settings_third_party_visit_tmdb">Kunjungi TMDB</string>
+    <string name="settings_third_party_tmdb_usage">Blok film dan daftar tonton memakai TMDB untuk mencari film dan serial beserta detailnya.</string>
+    <string name="settings_third_party_tmdb_proxy">Pencarian film dan serial melewati proxy kecil milik Emberr di Cloudflare, yang meneruskannya ke TMDB tanpa menyimpan log. Poster dan foto langsung dari TMDB. Tidak ada isi catatan Anda yang dikirim.</string>
+    <string name="settings_third_party_tmdb_notice">Produk ini memakai API TMDB tetapi tidak didukung atau disertifikasi oleh TMDB.</string>
+    <string name="settings_third_party_justwatch_notice">Data tempat menonton dari JustWatch.</string>
+
+    <string name="settings_licenses_group_libraries">Pustaka</string>
+    <string name="settings_licenses_group_fonts">Font</string>
+    <string name="settings_licenses_version">Versi %1$s</string>
+    <string name="settings_licenses_by_authors">Oleh %1$s</string>
+    <string name="settings_licenses_unnamed_license">Lisensi</string>
+    <string name="settings_licenses_full_text_at">Teks lengkap tersedia di %1$s</string>
+    <string name="settings_licenses_visit_website">Kunjungi situs web</string>
+
+    <string name="settings_app_lock">Kunci Aplikasi</string>
+    <string name="settings_app_lock_needs_screen_lock">Atur kunci layar di ponsel Anda terlebih dahulu.</string>
+    <string name="settings_app_lock_turn_on_prompt">Aktifkan Kunci Aplikasi</string>
+    <string name="settings_app_lock_turn_off_prompt">Matikan Kunci Aplikasi</string>
+    <string name="settings_auto_lock">Kunci otomatis</string>
+    <string name="settings_auto_lock_immediately">Segera</string>
+    <string name="settings_auto_lock_after_one_minute">Setelah 1 menit</string>
+    <string name="settings_auto_lock_after_five_minutes">Setelah 5 menit</string>
+    <string name="settings_auto_lock_after_fifteen_minutes">Setelah 15 menit</string>
+    <string name="settings_auto_lock_after_one_hour">Setelah 1 jam</string>
+    <string name="settings_screen_security">Keamanan layar</string>
+    <string name="settings_screen_security_hint">Menyembunyikan konten Emberr di Terbaru.</string>
+    <string name="settings_screen_security_hint_with_screenshots">Menyembunyikan konten Emberr di Terbaru. Tangkapan layar juga diblokir.</string>
+
+    <string name="settings_credential_storage">Penyimpanan kredensial</string>
+    <string name="settings_credential_storage_checking">Memeriksa</string>
+    <string name="settings_credential_storage_plain_text">Teks biasa</string>
+    <string name="settings_credential_storage_got_it">Mengerti</string>
+    <string name="settings_credential_storage_checking_detail">Emberr masih memeriksa pengelola kredensial yang disediakan sistem ini.</string>
+    <string name="settings_credential_storage_protected_detail">Kunci API AI dan kunci sinkronisasi Anda disimpan oleh %1$s, yang dikelola oleh sistem operasi Anda. Kunci tersebut tidak pernah ditulis ke file milik Emberr.</string>
+    <string name="settings_credential_storage_plain_text_detail">Kunci API AI dan kunci sinkronisasi Anda disimpan sebagai teks yang dapat dibaca di ~/.emberr/secrets.properties. Siapa pun yang dapat membaca folder rumah Anda dapat membacanya.\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_title">Kunci Anda tidak terlindungi</string>
+    <string name="settings_plain_text_warning_message">Sistem ini tidak memiliki pengelola kredensial yang dapat dipakai Emberr, jadi kunci API AI dan kunci sinkronisasi Anda disimpan sebagai teks yang dapat dibaca di ~/.emberr/secrets.properties. File ini hanya dapat dibaca oleh akun pengguna Anda, tetapi tidak dienkripsi.\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_understood">Saya mengerti</string>
+
+    <string name="settings_update_check_on_launch">Periksa pembaruan saat dibuka</string>
+    <string name="settings_update_checking">Memeriksa pembaruan...</string>
+    <string name="settings_update_download_version">Unduh Emberr %1$s</string>
+    <string name="settings_update_downloading">Mengunduh pembaruan...</string>
+    <string name="settings_update_restart_to_update">Mulai ulang untuk memperbarui</string>
+    <string name="settings_update_check_now">Periksa pembaruan</string>
+    <string name="settings_update_up_to_date">Sudah terbaru</string>
+    <string name="settings_update_new">Baru</string>
+    <string name="settings_update_failed">Gagal</string>
+
+    <string name="settings_export_backup_subtitle">Pilih yang ingin disimpan.</string>
+    <string name="settings_export_backup_select_spaces">Pilih ruang</string>
+    <string name="settings_export_backup_daily_notes">Catatan harian</string>
+    <string name="settings_export_backup_calendar">Kalender</string>
+    <string name="settings_export_backup_export">Ekspor</string>
+</resources>

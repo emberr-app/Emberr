@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">शेयर किया गया कंटेंट सेव करें</string>
+    <string name="share_save_to_overview">ओवरव्यू में सेव करें</string>
+    <string name="share_save_to_a_note">किसी नोट में सेव करें</string>
+    <string name="share_shared_image">शेयर की गई इमेज</string>
+    <string name="share_failed_to_save">शेयर किया गया कंटेंट सेव नहीं हो सका।</string>
+    <string name="share_saved_to_inbox">इनबॉक्स में सेव हो गया</string>
+    <string name="share_note_no_longer_available">वह नोट अब उपलब्ध नहीं है।</string>
+    <plurals name="share_images_selected">
+        <item quantity="one">%1$d इमेज चुनी गई</item>
+        <item quantity="other">%1$d इमेज चुनी गईं</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="one">%1$d फ़ाइल चुनी गई</item>
+        <item quantity="other">%1$d फ़ाइलें चुनी गईं</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="one">%1$d आइटम इनबॉक्स में सेव हुआ</item>
+        <item quantity="other">%1$d आइटम इनबॉक्स में सेव हुए</item>
+    </plurals>
+</resources>

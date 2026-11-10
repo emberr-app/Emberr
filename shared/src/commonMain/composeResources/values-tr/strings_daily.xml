@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">Zaman çizelgesi</string>
+    <string name="daily_close_timeline">Zaman çizelgesini kapat</string>
+    <string name="daily_open_timeline">Zaman çizelgesini aç</string>
+    <string name="daily_search_the_timeline">Zaman çizelgesinde ara</string>
+    <string name="daily_previous_match">Önceki eşleşme</string>
+    <string name="daily_next_match">Sonraki eşleşme</string>
+    <string name="daily_nothing_on_this_day_yet">Bu günde henüz bir şey yok.</string>
+    <string name="daily_nothing_written_yet">Henüz bir şey yazılmadı.</string>
+    <string name="daily_code">Kod</string>
+    <string name="daily_today">Bugün</string>
+    <string name="daily_tomorrow">Yarın</string>
+    <string name="daily_yesterday">Dün</string>
+    <string name="daily_go_to_today">Bugüne git</string>
+    <string name="daily_previous_month">Önceki ay</string>
+    <string name="daily_next_month">Sonraki ay</string>
+    <string name="daily_previous">Önceki</string>
+    <string name="daily_next">Sonraki</string>
+    <string name="daily_open_calendar">Takvimi aç</string>
+    <string name="daily_calendar">Takvim</string>
+    <string name="daily_settings">Ayarlar</string>
+    <string name="daily_more_settings">Diğer ayarlar</string>
+    <string name="daily_click_to_write_your_thoughts">Düşüncelerinizi yazmak için tıklayın</string>
+    <string name="daily_tap_to_write_your_thoughts">Düşüncelerinizi yazmak için dokunun</string>
+</resources>

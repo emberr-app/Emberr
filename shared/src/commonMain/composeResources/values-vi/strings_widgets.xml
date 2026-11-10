@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">Chọn không gian</string>
+    <string name="widgets_follow_the_app">Theo ứng dụng</string>
+    <string name="widgets_follow_the_app_detail">Luôn hiển thị không gian bạn đang ở</string>
+    <string name="widgets_current_space">Không gian hiện tại</string>
+    <string name="widgets_untitled_space">Không gian không có tiêu đề</string>
+    <string name="widgets_favorites">Yêu thích</string>
+    <string name="widgets_other">Khác</string>
+    <string name="widgets_no_notes_yet">Bạn chưa có ghi chú nào</string>
+    <string name="widgets_no_notes_match">Không có ghi chú nào khớp với "%1$s"</string>
+    <string name="widgets_choose_a_note">Chọn ghi chú</string>
+    <string name="widgets_search_notes">Tìm ghi chú</string>
+    <string name="widgets_open_the_app_first">Hãy mở ứng dụng một lần trước khi thêm tiện ích</string>
+    <string name="widgets_choose_a_gradient">Chọn dải màu</string>
+    <string name="widgets_whats_on_your_mind">Bạn đang nghĩ gì?</string>
+    <string name="widgets_selected">Đã chọn</string>
+    <string name="widgets_gradient_dusk">Hoàng hôn</string>
+    <string name="widgets_gradient_copper">Đồng</string>
+    <string name="widgets_gradient_forest">Rừng xanh</string>
+    <string name="widgets_gradient_lagoon">Đầm phá</string>
+    <string name="widgets_gradient_midnight">Nửa đêm</string>
+    <string name="widgets_gradient_blossom">Hoa nở</string>
+    <string name="widgets_gradient_graphite">Than chì</string>
+    <string name="widgets_gradient_aurora">Cực quang</string>
+    <string name="widgets_gradient_sunset">Chiều tà</string>
+    <string name="widgets_gradient_slate">Đá phiến</string>
+    <string name="widgets_gradient_cocoa">Ca cao</string>
+    <string name="widgets_gradient_lavender">Oải hương</string>
+    <string name="widgets_untitled_event">Sự kiện không có tiêu đề</string>
+    <string name="widgets_untitled_task">Việc không có tiêu đề</string>
+    <string name="widgets_note">Ghi chú</string>
+    <string name="widgets_repeating">Lặp lại</string>
+    <string name="widgets_today">Hôm nay</string>
+    <string name="widgets_tomorrow">Ngày mai</string>
+    <string name="widgets_yesterday">Hôm qua</string>
+    <string name="widgets_all_day">Cả ngày</string>
+    <string name="widgets_date_all_day">%1$s · Cả ngày</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · Cả ngày</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="other">%1$d phút trước</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="other">%1$d giờ trước</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">Ghi chú liên kết</string>
+    <string name="widgets_image">Hình ảnh</string>
+    <string name="widgets_canvas">Bảng vẽ</string>
+    <string name="widgets_database">Cơ sở dữ liệu</string>
+    <string name="widgets_watchlist">Danh sách xem</string>
+    <string name="widgets_credentials">Thông tin đăng nhập</string>
+    <string name="widgets_voice_note_length">Ghi âm  %1$s</string>
+    <string name="widgets_needs_newer_version">Cần phiên bản Emberr mới hơn</string>
+    <string name="widgets_table">Bảng</string>
+</resources>

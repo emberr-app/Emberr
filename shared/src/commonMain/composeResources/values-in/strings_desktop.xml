@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Buka Emberr</string>
+    <string name="desktop_tray_close_window">Tutup jendela</string>
+    <string name="desktop_tray_quit">Keluar</string>
+    <string name="desktop_sticky_note">Catatan tempel</string>
+    <string name="desktop_select_image">Pilih gambar</string>
+    <string name="desktop_select_document">Pilih dokumen</string>
+    <string name="desktop_file_not_found_message">File ini tidak lagi tersedia di perangkat ini.</string>
+    <string name="desktop_file_not_found_title">File tidak ditemukan</string>
+    <string name="desktop_open_file_failed">Gagal membuka file: %1$s</string>
+    <string name="desktop_error">Kesalahan</string>
+    <string name="desktop_backup_only_on_android_message">Cadangan otomatis di latar belakang saat ini hanya didukung di aplikasi Android. Anda tetap bisa menggunakan tombol 'Ekspor cadangan' secara manual!</string>
+    <string name="desktop_backup_only_on_android_title">Fitur desktop</string>
+    <string name="desktop_update_available">Pembaruan tersedia</string>
+    <string name="desktop_update_available_message">Emberr %1$s sudah tersedia. Anda menggunakan %2$s. Pembaruan diunduh di latar belakang selagi Anda bekerja.</string>
+    <string name="desktop_update_download">Unduh</string>
+    <string name="desktop_update_ready_to_install">Pembaruan siap dipasang</string>
+    <string name="desktop_update_ready_message">Mulai ulang Emberr untuk mulai menggunakan versi %1$s. Jika Anda memilih Nanti, pembaruan dipakai saat Anda membuka Emberr berikutnya.</string>
+    <string name="desktop_update_restart">Mulai ulang</string>
+    <string name="desktop_update_failed">Tidak dapat memperbarui Emberr</string>
+    <string name="desktop_update_later">Nanti</string>
+    <string name="desktop_ok">OK</string>
+    <string name="desktop_new_note_in_folder">Catatan baru di folder</string>
+    <string name="desktop_new_note_here">Catatan baru di sini</string>
+    <string name="desktop_rename_folder">Ganti nama folder</string>
+    <string name="desktop_add_subfolder">Tambah subfolder</string>
+    <string name="desktop_rename_note">Ganti nama catatan</string>
+    <string name="desktop_open_in_split_view">Buka di tampilan terpisah</string>
+    <string name="desktop_toggle_section">Ciutkan/bentangkan %1$s</string>
+    <string name="desktop_empty_space">Ruang ini kosong.</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">Mulai dengan %1$s atau %2$s</string>
+    <string name="desktop_empty_space_a_note">catatan</string>
+    <string name="desktop_create_space">Buat ruang</string>
+    <string name="desktop_add_space">Tambah ruang</string>
+    <string name="desktop_space_options">Opsi ruang</string>
+    <string name="desktop_close_pane">Tutup panel</string>
+    <string name="desktop_close_this_screen">Tutup layar ini</string>
+    <string name="desktop_drag_to_swap_screens">Seret untuk menukar layar</string>
+    <string name="desktop_search_no_match">Tidak ada catatan, acara, atau orang yang cocok dengan "%1$s"</string>
+    <string name="desktop_hide_sidebar">Sembunyikan bilah sisi</string>
+    <string name="desktop_collapse_sidebar">Ciutkan bilah sisi</string>
+    <string name="desktop_select_a_note">Pilih catatan dari bilah sisi</string>
+    <string name="desktop_folder">Folder</string>
+    <string name="desktop_sync">Sinkronkan</string>
+</resources>

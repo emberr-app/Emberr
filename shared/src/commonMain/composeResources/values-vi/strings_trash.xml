@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Thùng rác trống</string>
+    <string name="trash_title">Thùng rác</string>
+    <string name="trash_empty_trash">Dọn sạch thùng rác</string>
+    <string name="trash_empty_trash_tooltip">Dọn sạch thùng rác</string>
+    <string name="trash_restore_note">Khôi phục ghi chú</string>
+    <string name="trash_delete_permanently">Xóa vĩnh viễn</string>
+    <string name="trash_manage_note">Quản lý ghi chú</string>
+    <string name="trash_manage_note_subtitle">Ghi chú trong thùng rác sẽ tự động bị xóa sau 30 ngày.</string>
+    <string name="trash_empty_trash_question">Dọn sạch thùng rác?</string>
+    <string name="trash_empty_trash_subtitle">Thao tác này sẽ xóa vĩnh viễn mọi ghi chú hiện có trong thùng rác. Không thể hoàn tác.</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Ruang</string>
+    <string name="space_create_space">Buat ruang</string>
+    <string name="space_rename_space">Ganti nama ruang</string>
+    <string name="space_delete_space">Hapus ruang</string>
+    <string name="space_new_space">Ruang baru</string>
+    <string name="space_new_space_subtitle">Kerja, Pribadi, apa saja yang Anda suka.</string>
+    <string name="space_name_placeholder">Nama ruang...</string>
+    <string name="space_rename_subtitle">Pilih nama baru.</string>
+    <string name="space_delete_space_question">Hapus "%1$s"?</string>
+    <string name="space_delete_space_message">Semua catatan, folder, tag, dan obrolan di ruang ini ikut dihapus. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="space_reorder_space">Ubah urutan ruang</string>
+</resources>

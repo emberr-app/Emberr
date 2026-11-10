@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Nhập từ</string>
+    <string name="import_text_and_markdown">Văn bản &amp; Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Cũng dùng được cho ghi chú Obsidian và Bear.\nMột số tính năng Obsidian có thể không được nhập đầy đủ.</string>
+
+    <string name="import_button">Nhập</string>
+    <string name="import_done">Xong</string>
+    <string name="import_stop">Dừng nhập</string>
+    <string name="import_or_drop_here">hoặc thả vào đây</string>
+    <string name="import_choose_again_hint_desktop">Nhấp để chọn lại, hoặc thả vào đây.</string>
+    <string name="import_choose_again_hint_touch">Nhấn để chọn lại.</string>
+    <string name="import_stopping">Đang dừng và xóa những gì đã nhập…</string>
+    <string name="import_stopped">Đã dừng nhập</string>
+    <string name="import_nothing_added">Chưa thêm gì.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="other">%1$d không gian</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="other">%1$d ghi chú</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="other">%1$d thư mục</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="other">%1$d tệp đính kèm</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Nhập bản sao lưu mà không thay thế ghi chú hiện tại.</string>
+    <string name="import_emberr_copying_media">Đang sao chép tệp đa phương tiện %1$d/%2$d…</string>
+    <string name="import_emberr_getting_ready">Đang chuẩn bị…</string>
+    <string name="import_emberr_saving">Đang lưu dữ liệu nhập…</string>
+    <string name="import_emberr_failed">Nhập thất bại</string>
+    <string name="import_emberr_choose_backup_file">Chọn tệp sao lưu</string>
+    <string name="import_emberr_choose_backup_hint">Tệp .emberr từ Xuất bản sao lưu</string>
+    <string name="import_emberr_reading_backup">Đang đọc bản sao lưu…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Chọn tệp khác</string>
+    <string name="import_emberr_spaces_to_import">Không gian cần nhập</string>
+    <string name="import_emberr_choose_backup_first">Hãy chọn bản sao lưu trước</string>
+    <string name="import_emberr_daily_notes">Ghi chú hằng ngày</string>
+    <string name="import_emberr_calendar">Lịch</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Đã thêm ghi chú hằng ngày và sự kiện lịch</string>
+    <string name="import_emberr_added_daily_notes">Đã thêm ghi chú hằng ngày</string>
+    <string name="import_emberr_added_calendar">Đã thêm sự kiện lịch</string>
+    <string name="import_emberr_finished">Đã nhập xong</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="other">Đã nhập %1$d không gian</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="other">Không tìm thấy %1$d tệp đa phương tiện trong bản sao lưu, nên chúng sẽ hiển thị là bị thiếu.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Lỗi không xác định</string>
+    <string name="import_emberr_picker_title">Chọn bản sao lưu Emberr</string>
+
+    <string name="import_markdown_subtitle">Chuyển tệp .md, .txt và .canvas, hoặc tệp .zip có thư mục, thành ghi chú Emberr.</string>
+    <string name="import_markdown_copying_file">Đang sao chép %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="other">Đang nhập ghi chú %1$d/%2$d…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Chọn tệp hoặc tệp .zip</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas hoặc .zip</string>
+    <string name="import_markdown_reading_files">Đang đọc tệp…</string>
+    <string name="import_markdown_could_not_read">Không đọc được các tệp đó. %1$s</string>
+    <string name="import_markdown_save_to_space">Lưu vào không gian</string>
+    <string name="import_markdown_import_as">Nhập dưới dạng</string>
+    <string name="import_markdown_emberr_notes">Ghi chú Emberr</string>
+    <string name="import_markdown_emberr_notes_subtitle">Mỗi tệp trở thành một ghi chú gồm các khối.</string>
+    <string name="import_markdown_markdown_files">Tệp Markdown</string>
+    <string name="import_markdown_coming_soon">Sắp ra mắt</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="other">Đã nhập %1$d ghi chú</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="other">Đã nhập %1$d ghi chú vào %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">Không nhập được %1$d: %2$s</string>
+    <string name="import_markdown_choose_folder">Chọn thư mục</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="other">%1$d tệp</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">Bỏ qua %1$d: %2$s</string>
+    <string name="import_markdown_choose_different_files">Chọn tệp khác</string>
+    <string name="import_markdown_picker_title">Chọn tệp để nhập</string>
+</resources>

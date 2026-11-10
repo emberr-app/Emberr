@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">Hapus</string>
+    <string name="components_select_all">Pilih semua</string>
+    <string name="components_spaces_none_yet">Belum ada</string>
+    <string name="components_spaces_none">Tidak ada</string>
+    <plurals name="components_spaces_all">
+        <item quantity="other">Semua %1$d ruang</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="other">%1$d dari %2$d ruang</item>
+    </plurals>
+
+    <string name="components_search_notes">Cari catatan...</string>
+    <string name="components_create_new_note">Buat catatan baru</string>
+    <string name="components_new_named_note">Catatan baru "%1$s"</string>
+    <string name="components_note_picker_hint">Mulai mengetik untuk mencari, atau buat catatan baru</string>
+    <string name="components_link_to_note_heading">TAUTKAN KE CATATAN</string>
+    <string name="components_link_to_note">Tautkan ke catatan</string>
+
+    <string name="components_load_more">Muat lainnya</string>
+    <string name="components_show_sidebar">Tampilkan bilah sisi</string>
+    <string name="components_clear_search">Hapus pencarian</string>
+
+    <string name="components_people_search_placeholder">Cari atau tambahkan orang</string>
+    <string name="components_people_create_failed">Tidak dapat membuat orang</string>
+    <string name="components_people_type_name_hint">Ketik nama untuk menambahkan orang</string>
+    <string name="components_people_add_people">Tambahkan orang</string>
+    <string name="components_people_selected">Dipilih</string>
+    <string name="components_people_create_named">Buat “%1$s”</string>
+    <string name="components_people_remove">Hapus</string>
+    <string name="components_people_remove_named">Hapus %1$s</string>
+
+    <string name="components_reminder_later_today">Nanti hari ini</string>
+    <string name="components_reminder_tomorrow">Besok</string>
+    <string name="components_reminder_this_weekend">Akhir pekan ini</string>
+    <string name="components_reminder_next_week">Minggu depan</string>
+    <string name="components_reminder_custom_date">Tanggal khusus...</string>
+    <string name="components_reminder_remove">Hapus pengingat</string>
+    <string name="components_reminder_date">Tanggal</string>
+    <string name="components_reminder_all_day">Sepanjang hari</string>
+    <string name="components_reminder_in_15_mins">Dalam 15 menit</string>
+    <string name="components_reminder_in_1_hour">Dalam 1 jam</string>
+    <string name="components_reminder_in_3_hours">Dalam 3 jam</string>
+    <string name="components_reminder_this_evening">Malam ini</string>
+    <string name="components_reminder_custom_time">Waktu khusus...</string>
+    <string name="components_reminder_time">Waktu</string>
+    <string name="components_choose_month_or_year">Pilih bulan atau tahun</string>
+    <string name="components_previous_month">Bulan sebelumnya</string>
+    <string name="components_next_month">Bulan berikutnya</string>
+    <string name="components_select_date">Pilih tanggal</string>
+    <string name="components_month_and_year">Bulan &amp; tahun</string>
+    <string name="components_select_time">Pilih waktu</string>
+</resources>

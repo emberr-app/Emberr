@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">Orang</string>
+    <string name="people_clear_selection">Hapus pilihan</string>
+    <string name="people_select_all">Pilih semua</string>
+    <string name="people_deselect_all">Batalkan semua pilihan</string>
+    <string name="people_add_people">Tambahkan orang</string>
+    <string name="people_create_new_contact">Buat kontak baru</string>
+    <string name="people_import_from_vcf_file">Impor dari file .vcf</string>
+    <string name="people_import_from_phone">Impor dari ponsel</string>
+    <string name="people_search_people">Cari orang</string>
+    <string name="people_move_to_trash">Pindahkan ke Sampah</string>
+    <string name="people_next">Berikutnya</string>
+    <string name="people_untitled_event">Acara tanpa judul</string>
+    <string name="people_no_upcoming_events">Tidak ada acara mendatang</string>
+    <string name="people_selected">Dipilih</string>
+    <string name="people_empty_title">Belum ada orang</string>
+    <string name="people_empty_message">Tambahkan seseorang yang ingin Anda ingat. Orang yang Anda tambahkan ke acara juga muncul di sini.</string>
+    <string name="people_new_person">Orang baru</string>
+    <string name="people_import_contacts">Impor kontak</string>
+    <string name="people_no_one_matches">Tidak ada yang cocok dengan “%1$s”</string>
+    <string name="people_create_named">Buat “%1$s”</string>
+    <plurals name="people_selected_count">
+        <item quantity="other">%1$d dipilih</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="other">%1$d orang</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="other">%1$d acara</item>
+    </plurals>
+
+    <string name="people_importing_contacts">Mengimpor kontak…</string>
+    <string name="people_importing_contacts_progress">Mengimpor kontak… %1$d dari %2$d</string>
+    <string name="people_already_importing_contacts">Kontak sedang diimpor</string>
+    <string name="people_could_not_read_file">Tidak dapat membaca file</string>
+    <string name="people_could_not_read_contact">Tidak dapat membaca kontak</string>
+    <string name="people_no_contacts_app_found">Aplikasi kontak tidak ditemukan</string>
+    <string name="people_choose_contact_files">Pilih file kontak</string>
+    <string name="people_no_contacts_found">Kontak tidak ditemukan</string>
+    <string name="people_could_not_add_contacts">Tidak dapat menambahkan kontak</string>
+    <string name="people_already_in_people">Sudah ada di Orang</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="other">Semua %1$d sudah ada di Orang</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="other">%1$d orang ditambahkan</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="other">%1$d dilewati karena sudah ada di Orang</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="other">%1$d tidak dapat ditambahkan</item>
+    </plurals>
+    <string name="people_could_not_create_person">Tidak dapat membuat orang</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="other">%1$d orang dipindahkan ke Sampah</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="other">%1$d dari %2$d orang dipindahkan ke Sampah</item>
+    </plurals>
+    <string name="people_could_not_save_detail">Tidak dapat menyimpan detail</string>
+    <string name="people_could_not_remove_detail">Tidak dapat menghapus detail</string>
+
+    <string name="people_meta_next_and_last_seen">Berikutnya %1$s · terakhir bertemu %2$s</string>
+    <string name="people_meta_next">Berikutnya %1$s</string>
+    <string name="people_meta_last_seen">Terakhir bertemu %1$s</string>
+    <string name="people_meta_no_events">Belum ada acara</string>
+    <string name="people_birthday_with_age">%1$s, %2$d · ke-%3$d</string>
+    <string name="people_all_day">Sepanjang hari</string>
+    <string name="people_event_with_names">dengan %1$s</string>
+
+    <string name="people_copied">Disalin</string>
+    <string name="people_could_not_copy">Tidak dapat menyalin</string>
+    <string name="people_could_not_open_link">Tidak dapat membuka tautan</string>
+    <string name="people_write_anything_about">Tulis apa saja tentang %1$s…</string>
+    <string name="people_write_anything_about_them">Tulis apa saja tentang dia…</string>
+    <string name="people_notes">Catatan</string>
+    <string name="people_remove_icon">Hapus ikon</string>
+    <string name="people_change_icon">Ganti ikon</string>
+    <string name="people_change_photo">Ganti foto</string>
+    <string name="people_remove_photo">Hapus foto</string>
+    <string name="people_open">Buka</string>
+    <string name="people_more">Lainnya</string>
+    <string name="people_call">Telepon</string>
+    <string name="people_message">Pesan</string>
+    <string name="people_email">Email</string>
+    <string name="people_write_email">Tulis email</string>
+    <string name="people_copy">Salin</string>
+    <string name="people_new_event">Acara baru</string>
+    <string name="people_name">Nama</string>
+
+    <string name="people_details">Detail</string>
+    <string name="people_more_details">Detail lainnya</string>
+    <string name="people_upcoming">Mendatang</string>
+    <string name="people_nothing_planned_with">Tidak ada rencana dengan %1$s</string>
+    <string name="people_nothing_planned_with_them">Tidak ada rencana dengannya</string>
+    <string name="people_past">Lalu</string>
+    <string name="people_no_past_events">Tidak ada acara sebelumnya</string>
+    <string name="people_show_fewer">Tampilkan lebih sedikit</string>
+    <string name="people_show_all_count">Tampilkan semua %1$d</string>
+
+    <string name="people_detail_phone">Telepon</string>
+    <string name="people_detail_email">Email</string>
+    <string name="people_detail_birthday">Ulang tahun</string>
+    <string name="people_detail_address">Alamat</string>
+    <string name="people_detail_company">Perusahaan</string>
+    <string name="people_detail_role">Jabatan</string>
+    <string name="people_detail_website">Situs web</string>
+    <string name="people_detail_social">Media sosial</string>
+    <string name="people_detail_relationship">Hubungan</string>
+    <string name="people_detail_custom">Khusus</string>
+    <string name="people_add_phone">Tambah telepon</string>
+    <string name="people_add_email">Tambah email</string>
+    <string name="people_add_birthday">Tambah ulang tahun</string>
+    <string name="people_add_address">Tambah alamat</string>
+    <string name="people_add_company">Tambah perusahaan</string>
+    <string name="people_add_role">Tambah jabatan</string>
+    <string name="people_add_website">Tambah situs web</string>
+    <string name="people_add_social">Tambah media sosial</string>
+    <string name="people_add_relationship">Tambah hubungan</string>
+    <string name="people_add_custom">Tambah khusus</string>
+    <string name="people_edit_phone">Edit telepon</string>
+    <string name="people_edit_email">Edit email</string>
+    <string name="people_edit_birthday">Edit ulang tahun</string>
+    <string name="people_edit_address">Edit alamat</string>
+    <string name="people_edit_company">Edit perusahaan</string>
+    <string name="people_edit_role">Edit jabatan</string>
+    <string name="people_edit_website">Edit situs web</string>
+    <string name="people_edit_social">Edit media sosial</string>
+    <string name="people_edit_relationship">Edit hubungan</string>
+    <string name="people_edit_custom">Edit khusus</string>
+
+    <string name="people_placeholder_phone_number">Nomor telepon</string>
+    <string name="people_placeholder_address">Jalan, kawasan, kota</string>
+    <string name="people_placeholder_company">Tempat dia bekerja</string>
+    <string name="people_placeholder_role">Pekerjaannya</string>
+    <string name="people_placeholder_relationship">Teman kuliah</string>
+    <string name="people_placeholder_custom">Apa saja</string>
+
+    <string name="people_add_detail">Tambah detail</string>
+    <string name="people_already_added">Sudah ditambahkan</string>
+    <string name="people_remove">Hapus</string>
+    <string name="people_cannot_be_empty">Ini tidak boleh kosong</string>
+    <string name="people_custom_label">Label khusus</string>
+    <string name="people_custom_label_placeholder">Label khusus</string>
+    <string name="people_label_optional">Label (opsional)</string>
+    <string name="people_birthday_month">Bulan</string>
+    <string name="people_birthday_day">Hari</string>
+    <string name="people_birthday_year">Tahun</string>
+    <string name="people_birthday_optional">opsional</string>
+    <string name="people_birthday_year_example">mis. 1996</string>
+    <string name="people_birthday_date_not_in_year">%1$s tidak ada di tahun %2$s</string>
+    <string name="people_birthday_year_range">Gunakan tahun dari %1$d hingga %2$d</string>
+</resources>

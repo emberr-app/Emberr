@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">Hẹn gặp lại!</string>
+    <string name="whatsnew_whats_new_question">Có gì mới?</string>
+    <string name="whatsnew_title">Có gì mới</string>
+    <string name="whatsnew_version">Phiên bản %1$s</string>
+    <string name="whatsnew_new">Mới</string>
+    <string name="whatsnew_themes_heading">Chủ đề</string>
+    <string name="whatsnew_themes_where">Cài đặt → Giao diện → Chủ đề</string>
+    <string name="whatsnew_themes_description_desktop">Chọn trong 13 chủ đề màu, như Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine và Tương phản cao. Mỗi chủ đề có thể chỉnh độ đậm, và bạn có thể chọn để chữ và biểu tượng cũng theo màu chủ đề.</string>
+    <string name="whatsnew_themes_description_mobile">Chọn trong 14 chủ đề màu, như Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine và Tương phản cao, hoặc để **Hình nền** lấy màu từ hình nền của bạn. Mỗi chủ đề có thể chỉnh độ đậm, và bạn có thể chọn để chữ và biểu tượng cũng theo màu chủ đề. Tiện ích trên màn hình chính cũng theo chủ đề.</string>
+    <string name="whatsnew_texture_heading">Vân giấy</string>
+    <string name="whatsnew_texture_where">Cài đặt → Giao diện → Chủ đề → Vân</string>
+    <string name="whatsnew_texture_description">Thêm cho ứng dụng lớp vân hạt nhẹ, như giấy thật. Chỉnh độ đậm và chọn nơi hiển thị: toàn ứng dụng, ghi chú, bảng vẽ hoặc ghi chú hằng ngày.</string>
+    <string name="whatsnew_scale_heading">Tỷ lệ giao diện</string>
+    <string name="whatsnew_scale_where">Cài đặt → Giao diện → Tỷ lệ giao diện</string>
+    <string name="whatsnew_scale_description_desktop">Làm mọi thứ trong ứng dụng to hơn hoặc nhỏ hơn, từ 80% đến 200%, hoặc dùng **Ctrl +**, **Ctrl −** và **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Làm mọi thứ trong ứng dụng to hơn hoặc nhỏ hơn, từ 80% đến 200%.</string>
+    <string name="whatsnew_widgets_heading">Tiện ích</string>
+    <string name="whatsnew_widgets_where">Nhấn giữ màn hình chính → Tiện ích → Emberr</string>
+    <string name="whatsnew_widgets_description">Mọi tiện ích đều có giao diện mới gọn gàng hơn, và có thêm ba tiện ích mới: **Thẻ ghi chú**, **Ghi nhanh** và **Trích dẫn trong ngày**. Tiện ích giờ hiển thị ngay ghi chú bạn đã chọn, và báo cho bạn khi ghi chú đó đã bị xóa.</string>
+    <string name="whatsnew_editor_heading">Trình soạn thảo</string>
+    <string name="whatsnew_editor_where">Gõ / ở bất kỳ đâu trong ghi chú</string>
+    <string name="whatsnew_editor_description">Menu gạch chéo giờ mở ngay sau bất kỳ ký tự nào, không chỉ sau dấu cách. Nếu bạn gõ quá kết quả khớp, hãy xóa lùi lại và menu sẽ hiện trở lại.</string>
+    <string name="whatsnew_others_heading">Khác</string>
+    <string name="whatsnew_others_where">Thay đổi nhỏ và sửa lỗi</string>
+    <string name="whatsnew_others_sliders">Thanh trượt trong toàn ứng dụng có thiết kế mới.</string>
+    <string name="whatsnew_others_title_time_desktop">Gõ **/** trong tiêu đề ghi chú để thêm giờ hoặc ngày hiện tại.</string>
+    <string name="whatsnew_others_title_time_mobile">Thêm giờ hoặc ngày hiện tại vào tiêu đề ghi chú từ thanh công cụ bàn phím.</string>
+    <string name="whatsnew_others_sync_network">Lựa chọn mạng cho đồng bộ giờ nằm trong **Cài đặt → Đồng bộ &amp; sao lưu**.</string>
+    <string name="whatsnew_others_windows_startup">Khởi động nhanh hơn trên Windows.</string>
+    <string name="whatsnew_others_small_fixes">Nhiều bản sửa lỗi nhỏ.</string>
+    <string name="whatsnew_preview_options">Tùy chọn</string>
+    <string name="whatsnew_preview_trip_title">Chuyến đi cuối tuần</string>
+    <string name="whatsnew_preview_trip_text">Đi trước 8 giờ sáng để tránh kẹt xe.</string>
+    <string name="whatsnew_preview_train_tickets">Vé tàu</string>
+    <string name="whatsnew_preview_passport">Hộ chiếu</string>
+    <string name="whatsnew_preview_camera_charger">Sạc máy ảnh</string>
+    <string name="whatsnew_preview_reading_list">Danh sách đọc</string>
+    <string name="whatsnew_preview_reading_list_books">The Overstory, Piranesi, Project Hail Mary</string>
+    <string name="whatsnew_preview_meeting_title">Họp nhóm</string>
+    <string name="whatsnew_preview_meeting_text">Thứ Năm lúc 10 giờ, phòng 2.</string>
+    <string name="whatsnew_preview_typed_heading">Chương trình</string>
+    <string name="whatsnew_preview_quote">Bí quyết để tiến lên là bắt đầu.</string>
+    <string name="whatsnew_preview_jot_prompt">Bạn đang nghĩ gì?</string>
+    <string name="whatsnew_preview_jot_button">Ghi nhanh</string>
+</resources>

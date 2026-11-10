@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">टाइमलाइन</string>
+    <string name="daily_close_timeline">टाइमलाइन बंद करें</string>
+    <string name="daily_open_timeline">टाइमलाइन खोलें</string>
+    <string name="daily_search_the_timeline">टाइमलाइन में खोजें</string>
+    <string name="daily_previous_match">पिछला मिलान</string>
+    <string name="daily_next_match">अगला मिलान</string>
+    <string name="daily_nothing_on_this_day_yet">इस दिन अभी कुछ नहीं है।</string>
+    <string name="daily_nothing_written_yet">अभी कुछ नहीं लिखा गया है।</string>
+    <string name="daily_code">कोड</string>
+    <string name="daily_today">आज</string>
+    <string name="daily_tomorrow">आने वाला कल</string>
+    <string name="daily_yesterday">बीता कल</string>
+    <string name="daily_go_to_today">आज पर जाएँ</string>
+    <string name="daily_previous_month">पिछला महीना</string>
+    <string name="daily_next_month">अगला महीना</string>
+    <string name="daily_previous">पिछला</string>
+    <string name="daily_next">अगला</string>
+    <string name="daily_open_calendar">कैलेंडर खोलें</string>
+    <string name="daily_calendar">कैलेंडर</string>
+    <string name="daily_settings">सेटिंग</string>
+    <string name="daily_more_settings">और सेटिंग</string>
+    <string name="daily_click_to_write_your_thoughts">अपने विचार लिखने के लिए क्लिक करें</string>
+    <string name="daily_tap_to_write_your_thoughts">अपने विचार लिखने के लिए टैप करें</string>
+</resources>

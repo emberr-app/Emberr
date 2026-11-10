@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">Çöp Kutusu boş</string>
+    <string name="trash_title">Çöp Kutusu</string>
+    <string name="trash_empty_trash">Çöp Kutusunu boşalt</string>
+    <string name="trash_empty_trash_tooltip">Çöp Kutusunu boşalt</string>
+    <string name="trash_restore_note">Notu geri yükle</string>
+    <string name="trash_delete_permanently">Kalıcı olarak sil</string>
+    <string name="trash_manage_note">Notu yönet</string>
+    <string name="trash_manage_note_subtitle">Çöp Kutusundaki notlar 30 gün sonra otomatik olarak silinir.</string>
+    <string name="trash_empty_trash_question">Çöp Kutusu boşaltılsın mı?</string>
+    <string name="trash_empty_trash_subtitle">Bu işlem, Çöp Kutusundaki tüm notları kalıcı olarak siler. Bu işlem geri alınamaz.</string>
+</resources>

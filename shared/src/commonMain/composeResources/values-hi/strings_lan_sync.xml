@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">निष्क्रिय</string>
+    <string name="lan_sync_status_not_paired">पेयर नहीं है!</string>
+    <string name="lan_sync_status_already_in_progress">सिंक पहले से चल रहा है</string>
+    <string name="lan_sync_status_syncing">सिंक हो रहा है...</string>
+    <string name="lan_sync_status_auto_syncing">ऑटो-सिंक हो रहा है...</string>
+    <string name="lan_sync_status_fetching_from_desktop">डेस्कटॉप से लाया जा रहा है...</string>
+    <string name="lan_sync_status_success">हो गया!</string>
+    <string name="lan_sync_status_synced_successfully">सफलतापूर्वक सिंक हुआ</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">सिंक हुआ, %1$d आइटम सेव नहीं हो सका</item>
+        <item quantity="other">सिंक हुआ, %1$d आइटम सेव नहीं हो सके</item>
+    </plurals>
+    <string name="lan_sync_status_partial">आंशिक सिंक, फिर से कोशिश होगी</string>
+    <string name="lan_sync_status_update_both_devices">दोनों डिवाइस पर Emberr अपडेट करें</string>
+    <string name="lan_sync_status_desktop_offline">डेस्कटॉप ऑफ़लाइन है</string>
+    <string name="lan_sync_status_failed">विफल: %1$s</string>
+    <string name="lan_sync_status_sync_error">सिंक में गड़बड़ी: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">मोबाइल डिवाइस पेयर करें</string>
+    <string name="lan_sync_pair_dialog_message">अपने डेस्कटॉप से सुरक्षित रूप से जुड़ने के लिए Emberr मोबाइल ऐप से यह QR कोड स्कैन करें।</string>
+    <string name="lan_sync_pair_dialog_secret_token">गुप्त टोकन: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">अपने डेस्कटॉप पर दिखाया गया QR कोड स्कैन करें।</string>
+    <string name="lan_sync_scanner_desktop_hint">अपने डेस्कटॉप पर सेटिंग → LAN सिंक → मोबाइल डिवाइस पेयर करें खोलें।</string>
+    <string name="lan_sync_camera_access_needed">कैमरा एक्सेस ज़रूरी है</string>
+    <string name="lan_sync_camera_allow_message">अपने डेस्कटॉप पर पेयरिंग कोड स्कैन करने के लिए कैमरे की अनुमति दें।</string>
+    <string name="lan_sync_camera_turn_on_message">अनुमतियों में कैमरा चालू करें, फिर यहाँ वापस आएँ।</string>
+    <string name="lan_sync_allow_camera">कैमरे की अनुमति दें</string>
+    <string name="lan_sync_open_app_settings">ऐप सेटिंग खोलें</string>
+    <string name="lan_sync_camera_mobile_only">कैमरा स्कैनिंग केवल मोबाइल डिवाइस पर काम करती है।</string>
+</resources>

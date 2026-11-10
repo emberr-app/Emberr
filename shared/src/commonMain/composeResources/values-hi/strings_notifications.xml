@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">काम का रिमाइंडर</string>
+    <string name="notifications_unfinished_task">अधूरा काम</string>
+    <string name="notifications_daily_note">दैनिक नोट</string>
+    <string name="notifications_daily_title">दैनिक: %1$s</string>
+    <string name="notifications_note">नोट</string>
+    <string name="notifications_birthday">जन्मदिन</string>
+    <string name="notifications_birthday_turns_age">%1$s आज %2$d साल के हो गए</string>
+    <string name="notifications_birthday_today">आज %1$s का जन्मदिन है</string>
+    <string name="notifications_open">खोलें</string>
+</resources>

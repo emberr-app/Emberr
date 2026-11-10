@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">काम</string>
+    <string name="overview_section_bookmarks">बुकमार्क</string>
+    <string name="overview_section_images">इमेज</string>
+    <string name="overview_section_documents">दस्तावेज़</string>
+    <string name="overview_tasks_repeating">दोहराने वाले</string>
+    <string name="overview_tasks_note">नोट</string>
+    <string name="overview_tasks_today">आज</string>
+    <string name="overview_tasks_tomorrow">आने वाला कल</string>
+    <string name="overview_tasks_yesterday">बीता कल</string>
+    <string name="overview_tasks_none_completed">अभी कोई काम पूरा नहीं हुआ है।</string>
+    <string name="overview_tasks_all_caught_up">सब काम पूरे हो गए!</string>
+    <string name="overview_tasks_completed">पूरे हुए</string>
+    <string name="overview_tasks_completed_tasks">पूरे हुए काम</string>
+    <string name="overview_tasks_hide_completed">पूरे हुए छिपाएँ</string>
+    <string name="overview_tasks_show_completed">पूरे हुए दिखाएँ</string>
+    <string name="overview_tasks_add_task_description">काम जोड़ें</string>
+    <string name="overview_tasks_add_task">काम जोड़ें</string>
+    <string name="overview_images_empty">अभी कोई इमेज सेव नहीं है।</string>
+    <string name="overview_images_add_image_description">इमेज जोड़ें</string>
+    <string name="overview_images_add_image">इमेज जोड़ें</string>
+    <string name="overview_documents_empty">अभी कोई दस्तावेज़ नहीं जोड़ा गया है।</string>
+    <string name="overview_documents_add_document_description">दस्तावेज़ जोड़ें</string>
+    <string name="overview_documents_add_document">दस्तावेज़ जोड़ें</string>
+    <string name="overview_bookmarks_empty">अभी कोई लिंक सेव नहीं है।</string>
+    <string name="overview_bookmarks_add_bookmark_description">बुकमार्क जोड़ें</string>
+    <string name="overview_bookmarks_add_bookmark">बुकमार्क जोड़ें</string>
+    <string name="overview_bookmarks_add_link">लिंक जोड़ें</string>
+    <string name="overview_bookmarks_paste_link">लिंक पेस्ट करें...</string>
+    <string name="overview_bookmarks_clear_link">लिंक साफ़ करें</string>
+    <string name="overview_bookmarks_all">सभी</string>
+    <string name="overview_bookmarks_others">अन्य</string>
+</resources>

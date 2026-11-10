@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Şuradan içe aktar</string>
+    <string name="import_text_and_markdown">Metin ve Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Obsidian ve Bear notları için de çalışır.\nBazı Obsidian özellikleri tam olarak aktarılamayabilir.</string>
+
+    <string name="import_button">İçe aktar</string>
+    <string name="import_done">Bitti</string>
+    <string name="import_stop">İçe aktarmayı durdur</string>
+    <string name="import_or_drop_here">veya buraya bırakın</string>
+    <string name="import_choose_again_hint_desktop">Yeniden seçmek için tıklayın veya buraya bırakın.</string>
+    <string name="import_choose_again_hint_touch">Yeniden seçmek için dokunun.</string>
+    <string name="import_stopping">Durduruluyor ve aktarılanlar kaldırılıyor…</string>
+    <string name="import_stopped">İçe aktarma durduruldu</string>
+    <string name="import_nothing_added">Hiçbir şey eklenmedi.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="one">%1$d alan</item>
+        <item quantity="other">%1$d alan</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="one">%1$d not</item>
+        <item quantity="other">%1$d not</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="one">%1$d klasör</item>
+        <item quantity="other">%1$d klasör</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="one">%1$d ek</item>
+        <item quantity="other">%1$d ek</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Mevcut notlarınızı değiştirmeden bir yedeği içe aktarın.</string>
+    <string name="import_emberr_copying_media">Medya kopyalanıyor: %1$d / %2$d…</string>
+    <string name="import_emberr_getting_ready">Hazırlanıyor…</string>
+    <string name="import_emberr_saving">İçe aktarılanlar kaydediliyor…</string>
+    <string name="import_emberr_failed">İçe aktarma başarısız</string>
+    <string name="import_emberr_choose_backup_file">Yedek dosyası seç</string>
+    <string name="import_emberr_choose_backup_hint">Yedeği dışa aktar ile oluşturulan .emberr dosyası</string>
+    <string name="import_emberr_reading_backup">Yedek okunuyor…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Başka bir dosya seçin</string>
+    <string name="import_emberr_spaces_to_import">İçe aktarılacak alanlar</string>
+    <string name="import_emberr_choose_backup_first">Önce bir yedek seçin</string>
+    <string name="import_emberr_daily_notes">Günlük notlar</string>
+    <string name="import_emberr_calendar">Takvim</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Günlük notlar ve takvim etkinlikleri eklendi</string>
+    <string name="import_emberr_added_daily_notes">Günlük notlar eklendi</string>
+    <string name="import_emberr_added_calendar">Takvim etkinlikleri eklendi</string>
+    <string name="import_emberr_finished">İçe aktarma tamamlandı</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="one">%1$d alan içe aktarıldı</item>
+        <item quantity="other">%1$d alan içe aktarıldı</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">Yedekte %1$d medya dosyası bulunamadı, bu yüzden eksik olarak görünecek.</item>
+        <item quantity="other">Yedekte %1$d medya dosyası bulunamadı, bu yüzden eksik olarak görünecekler.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Bilinmeyen hata</string>
+    <string name="import_emberr_picker_title">Bir Emberr yedeği seçin</string>
+
+    <string name="import_markdown_subtitle">.md, .txt ve .canvas dosyalarını ya da klasörlü bir .zip dosyasını Emberr notlarına dönüştürün.</string>
+    <string name="import_markdown_copying_file">%1$s kopyalanıyor…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">Not içe aktarılıyor: %1$d / %2$d…</item>
+        <item quantity="other">Notlar içe aktarılıyor: %1$d / %2$d…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Dosya veya .zip seç</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas veya .zip</string>
+    <string name="import_markdown_reading_files">Dosyalar okunuyor…</string>
+    <string name="import_markdown_could_not_read">Bu dosyalar okunamadı. %1$s</string>
+    <string name="import_markdown_save_to_space">Alana kaydet</string>
+    <string name="import_markdown_import_as">Şu olarak içe aktar</string>
+    <string name="import_markdown_emberr_notes">Emberr notları</string>
+    <string name="import_markdown_emberr_notes_subtitle">Her dosya bloklardan oluşan bir nota dönüşür.</string>
+    <string name="import_markdown_markdown_files">Markdown dosyaları</string>
+    <string name="import_markdown_coming_soon">Yakında</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="one">%1$d not içe aktarıldı</item>
+        <item quantity="other">%1$d not içe aktarıldı</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="one">%1$d not şu alana aktarıldı: %2$s</item>
+        <item quantity="other">%1$d not şu alana aktarıldı: %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">%1$d dosya içe aktarılamadı: %2$s</string>
+    <string name="import_markdown_choose_folder">Bir klasör seç</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d dosya</item>
+        <item quantity="other">%1$d dosya</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d dosya atlandı: %2$s</string>
+    <string name="import_markdown_choose_different_files">Başka dosyalar seçin</string>
+    <string name="import_markdown_picker_title">İçe aktarılacak dosyaları seçin</string>
+</resources>

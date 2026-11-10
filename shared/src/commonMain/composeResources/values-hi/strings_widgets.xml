@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">स्पेस चुनें</string>
+    <string name="widgets_follow_the_app">ऐप के हिसाब से</string>
+    <string name="widgets_follow_the_app_detail">आप जिस स्पेस में हैं, वही हमेशा दिखाता है</string>
+    <string name="widgets_current_space">मौजूदा स्पेस</string>
+    <string name="widgets_untitled_space">बिना शीर्षक स्पेस</string>
+    <string name="widgets_favorites">पसंदीदा</string>
+    <string name="widgets_other">अन्य</string>
+    <string name="widgets_no_notes_yet">आपके पास अभी कोई नोट नहीं है</string>
+    <string name="widgets_no_notes_match">"%1$s" से कोई नोट मेल नहीं खाता</string>
+    <string name="widgets_choose_a_note">नोट चुनें</string>
+    <string name="widgets_search_notes">नोट खोजें</string>
+    <string name="widgets_open_the_app_first">विजेट जोड़ने से पहले ऐप एक बार खोलें</string>
+    <string name="widgets_choose_a_gradient">ग्रेडिएंट चुनें</string>
+    <string name="widgets_whats_on_your_mind">आपके मन में क्या है?</string>
+    <string name="widgets_selected">चुना गया</string>
+    <string name="widgets_gradient_dusk">सांझ</string>
+    <string name="widgets_gradient_copper">तांबा</string>
+    <string name="widgets_gradient_forest">जंगल</string>
+    <string name="widgets_gradient_lagoon">लैगून</string>
+    <string name="widgets_gradient_midnight">आधी रात</string>
+    <string name="widgets_gradient_blossom">बहार</string>
+    <string name="widgets_gradient_graphite">ग्रेफ़ाइट</string>
+    <string name="widgets_gradient_aurora">ऑरोरा</string>
+    <string name="widgets_gradient_sunset">सूर्यास्त</string>
+    <string name="widgets_gradient_slate">स्लेट</string>
+    <string name="widgets_gradient_cocoa">कोको</string>
+    <string name="widgets_gradient_lavender">लैवेंडर</string>
+    <string name="widgets_untitled_event">बिना शीर्षक इवेंट</string>
+    <string name="widgets_untitled_task">बिना शीर्षक काम</string>
+    <string name="widgets_note">नोट</string>
+    <string name="widgets_repeating">दोहराने वाले</string>
+    <string name="widgets_today">आज</string>
+    <string name="widgets_tomorrow">आने वाला कल</string>
+    <string name="widgets_yesterday">बीता कल</string>
+    <string name="widgets_all_day">पूरे दिन</string>
+    <string name="widgets_date_all_day">%1$s · पूरे दिन</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · पूरे दिन</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="one">%1$d मिनट पहले</item>
+        <item quantity="other">%1$d मिनट पहले</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="one">%1$d घंटा पहले</item>
+        <item quantity="other">%1$d घंटे पहले</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">लिंक किया गया नोट</string>
+    <string name="widgets_image">इमेज</string>
+    <string name="widgets_canvas">कैनवास</string>
+    <string name="widgets_database">डेटाबेस</string>
+    <string name="widgets_watchlist">वॉचलिस्ट</string>
+    <string name="widgets_credentials">लॉगिन जानकारी</string>
+    <string name="widgets_voice_note_length">वॉइस नोट  %1$s</string>
+    <string name="widgets_needs_newer_version">Emberr का नया वर्शन चाहिए</string>
+    <string name="widgets_table">तालिका</string>
+</resources>

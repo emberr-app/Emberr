@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Kendi sunucunuz</string>
+
+    <string name="selfhost_group_server_details">Sunucu bilgileri</string>
+    <string name="selfhost_group_recovery_passphrase">Kurtarma parola ifadesi</string>
+    <string name="selfhost_group_unlock_vault">Kasanın kilidini aç</string>
+    <string name="selfhost_group_status">Durum</string>
+
+    <string name="selfhost_setting_up">Kuruluyor</string>
+    <string name="selfhost_unlock_and_sync">Kilidi aç ve eşitle</string>
+    <string name="selfhost_create_vault_and_sync">Kasa oluştur ve eşitle</string>
+    <string name="selfhost_server_address_rejected">Sunucu adresi reddedildi</string>
+    <string name="selfhost_got_it">Anladım</string>
+
+    <string name="selfhost_status_connected">Durum: Bağlı</string>
+    <string name="selfhost_cancelling">İptal ediliyor...</string>
+    <string name="selfhost_cancel_sync">Eşitlemeyi iptal et</string>
+    <string name="selfhost_cancel_sync_hint">İptal etmek, uygulamayı yeniden başlatana veya Şimdi eşitle'ye dokunana kadar eşitlemeyi duraklatır.</string>
+    <string name="selfhost_sync_now">Şimdi eşitle</string>
+    <string name="selfhost_syncing">Eşitleniyor...</string>
+    <string name="selfhost_never_synced">Hiç eşitlenmedi</string>
+    <string name="selfhost_last_synced">Son eşitleme: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d not eşitlenmeyi bekliyor</item>
+        <item quantity="other">%1$d not eşitlenmeyi bekliyor</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Notlar</string>
+    <string name="selfhost_progress_images">Görseller</string>
+
+    <string name="selfhost_passphrase_needed_hint">Bu sunucuya başka bir telefon veya bilgisayar bağlamak için bu parola ifadesine ihtiyacınız var.</string>
+    <string name="selfhost_show_passphrase_button">Parola ifadesini göster</string>
+    <string name="selfhost_unlock_prompt_title">Kurtarma parola ifadesi</string>
+    <string name="selfhost_unlock_prompt_description">Kurtarma parola ifadenizi görmek için kilidi açın</string>
+    <string name="selfhost_save_passphrase_hint">Bu cihaz, Emberr parola ifadesini kaydetmeden önce bağlanmış. Daha sonra görebilmek için burada kaydetmek üzere bir kez girin.</string>
+    <string name="selfhost_checking">Kontrol ediliyor</string>
+    <string name="selfhost_save_passphrase">Parola ifadesini kaydet</string>
+    <string name="selfhost_disconnect_vault">Kasanın bağlantısını kes</string>
+    <string name="selfhost_recovery_dialog_message">Diğer cihaz kasanın kilidini açmanızı istediğinde bunu girin. Kimseyle paylaşmayın.</string>
+    <string name="selfhost_done">Bitti</string>
+    <string name="selfhost_disconnect_vault_question">Kasanın bağlantısı kesilsin mi?</string>
+    <string name="selfhost_disconnect_message">Notlarınız bu cihazda ve sunucuda kalır. Yeniden bağlanmak için kurtarma parola ifadenize ihtiyacınız olacak.</string>
+    <string name="selfhost_disconnect">Bağlantıyı kes</string>
+
+    <string name="selfhost_checking_for_changes">Değişiklikler kontrol ediliyor...</string>
+    <string name="selfhost_finishing_up">Tamamlanıyor...</string>
+    <string name="selfhost_sending_percent">Gönderiliyor %1$d%</string>
+    <string name="selfhost_nothing_to_send">Gönderilecek bir şey yok</string>
+    <string name="selfhost_receiving_percent">Alınıyor %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Alınacak bir şey yok</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%1$d / %2$d not</item>
+        <item quantity="other">%1$d / %2$d not</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s / %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Sunucunuzun WebDAV adresini ve giriş bilgilerini girin; örneğin Nextcloud veya bir NAS. Emberr, notlarınızı bu cihazdan çıkmadan önce şifreler.</string>
+    <string name="selfhost_username">Kullanıcı adı</string>
+    <string name="selfhost_password">Şifre</string>
+    <string name="selfhost_hide_password">Şifreyi gizle</string>
+    <string name="selfhost_show_password">Şifreyi göster</string>
+    <string name="selfhost_testing">Test ediliyor</string>
+    <string name="selfhost_test_connection">Bağlantıyı test et</string>
+    <string name="selfhost_contacting_server">Sunucuya bağlanılıyor...</string>
+
+    <string name="selfhost_restore_hint">Bu sunucuda zaten bir Emberr kasası var. Kasa oluşturulurken gösterilen 16 karakterlik kurtarma parola ifadesini girin.</string>
+    <string name="selfhost_restore_find_hint">Bulamıyor musunuz? Zaten bağlı olan bir cihazda Ayarlar → Kendi sunucunuz → Parola ifadesini göster'i açın.</string>
+    <string name="selfhost_passphrase_placeholder">16 karakterlik parola ifadesi</string>
+    <string name="selfhost_hide_passphrase">Parola ifadesini gizle</string>
+    <string name="selfhost_show_passphrase">Parola ifadesini göster</string>
+
+    <string name="selfhost_save_passphrase_now">Bu parola ifadesini şimdi kaydedin</string>
+    <string name="selfhost_fact_type_on_other_devices">Bu sunucuya bağladığınız diğer her telefon veya bilgisayarda bunu yazacaksınız.</string>
+    <string name="selfhost_fact_locks_notes">Sunucudaki notlarınızı kilitler. Bu olmadan, Emberr dahil kimse onları okuyamaz.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr bunu sıfırlayamaz. Bir şifre yöneticisinde saklayın veya bir yere yazın.</string>
+    <string name="selfhost_fact_see_again_later">Daha sonra bağlı herhangi bir cihazda Ayarlar → Kendi sunucunuz bölümünden yeniden görebilirsiniz.</string>
+    <string name="selfhost_new_passphrase">Yeni parola ifadesi</string>
+    <string name="selfhost_generate_new_passphrase">Yeni parola ifadesi oluştur</string>
+    <string name="selfhost_saved_passphrase_confirmation">Bu parola ifadesini güvenli bir yere kaydettim</string>
+    <string name="selfhost_copy_passphrase">Parola ifadesini kopyala</string>
+    <string name="selfhost_copy_address">Adresi kopyala</string>
+    <string name="selfhost_copied_address">adres kopyalandı</string>
+
+    <string name="selfhost_invalid_credentials">Geçersiz kullanıcı adı veya şifre</string>
+    <string name="selfhost_server_returned_error">Sunucu bir hata döndürdü (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Sunucuya ulaşılamadı</string>
+    <string name="selfhost_could_not_check_vault">Mevcut bir kasa kontrol edilemedi: %1$s</string>
+    <string name="selfhost_unknown_error">bilinmeyen hata</string>
+    <string name="selfhost_existing_vault_found">Bu sunucuda mevcut bir kasa bulundu</string>
+    <string name="selfhost_no_existing_vault">Mevcut kasa yok, yeni bir kasa oluşturulacak</string>
+    <string name="selfhost_no_vault_file_to_restore">Sunucuda geri yüklenecek bir kasa dosyası bulunamadı</string>
+    <string name="selfhost_old_or_damaged_vault_data">Bu sunucu klasöründe eski veya hasarlı bir kasaya ait eşitleme verileri var. Sunucunuzdaki emberr_sync klasörünü silin, ardından yeniden kurun.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">Bu sunucuda zaten bir kasa var. Geri yüklemek için kurtarma parola ifadesini aşağıya girin.</string>
+    <string name="selfhost_could_not_set_up">Güvenli eşitleme kurulamadı</string>
+    <string name="selfhost_no_vault_on_server">Sunucuda kasa bulunamadı.</string>
+    <string name="selfhost_wrong_passphrase">Bu parola ifadesi bu kasanın kilidini açmıyor.</string>
+    <string name="selfhost_could_not_check_passphrase">Parola ifadesi kontrol edilemedi: %1$s</string>
+
+    <string name="selfhost_update_required_title">Kendi sunucu eşitlemesi duraklatıldı</string>
+    <string name="selfhost_update_required_message">%1$s Notlarınız güvende ve bu cihazda kaydedilmeye devam ediyor.</string>
+    <string name="selfhost_later">Daha sonra</string>
+    <string name="selfhost_update">Güncelle</string>
+</resources>

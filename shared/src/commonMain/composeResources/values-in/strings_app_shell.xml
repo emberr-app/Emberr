@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">Catatan harian</string>
+    <string name="app_shell_home">Beranda</string>
+    <string name="app_shell_ask_ai">Tanya AI</string>
+    <string name="app_shell_search">Cari</string>
+    <string name="app_shell_voice_task">Tugas suara</string>
+    <string name="app_shell_mic">Mikrofon</string>
+    <string name="app_shell_search_anything">Cari apa saja</string>
+    <string name="app_shell_close_search">Tutup pencarian</string>
+    <string name="app_shell_clear_search">Hapus pencarian</string>
+</resources>

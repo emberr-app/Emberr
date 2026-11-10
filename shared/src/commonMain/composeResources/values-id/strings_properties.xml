@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Properti</string>
+    <string name="properties_built_in">Bawaan</string>
+    <string name="properties_built_in_hint">Properti bawaan tidak dapat diganti nama atau dihapus.</string>
+    <string name="properties_custom">Kustom</string>
+    <string name="properties_add_property">Tambah properti</string>
+    <string name="properties_new_property">Properti baru</string>
+    <string name="properties_edit_property">Edit properti</string>
+    <string name="properties_delete_question">Hapus "%1$s"? Properti ini akan dihapus dari setiap catatan yang menggunakannya.</string>
+    <string name="properties_property_name">Nama properti</string>
+    <string name="properties_name_taken">Properti dengan nama ini sudah ada</string>
+    <string name="properties_value_type">Jenis nilai</string>
+    <string name="properties_value_type_locked">Jenis nilai tidak dapat diubah setelah properti dibuat.</string>
+    <string name="properties_delete_property">Hapus properti</string>
+    <string name="properties_add">Tambah</string>
+</resources>

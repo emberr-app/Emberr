@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">Ghi chú hằng ngày</string>
+    <string name="app_shell_home">Trang chủ</string>
+    <string name="app_shell_ask_ai">Hỏi AI</string>
+    <string name="app_shell_search">Tìm kiếm</string>
+    <string name="app_shell_voice_task">Việc cần làm bằng giọng nói</string>
+    <string name="app_shell_mic">Micrô</string>
+    <string name="app_shell_search_anything">Tìm mọi thứ</string>
+    <string name="app_shell_close_search">Đóng tìm kiếm</string>
+    <string name="app_shell_clear_search">Xóa tìm kiếm</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">Görev anımsatıcısı</string>
+    <string name="notifications_unfinished_task">Bitmemiş görev</string>
+    <string name="notifications_daily_note">Günlük not</string>
+    <string name="notifications_daily_title">Günlük: %1$s</string>
+    <string name="notifications_note">Not</string>
+    <string name="notifications_birthday">Doğum günü</string>
+    <string name="notifications_birthday_turns_age">%1$s bugün %2$d yaşına giriyor</string>
+    <string name="notifications_birthday_today">Bugün doğum günü: %1$s</string>
+    <string name="notifications_open">Aç</string>
+</resources>

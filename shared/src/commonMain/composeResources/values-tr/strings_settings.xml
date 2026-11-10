@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Ayarlar</string>
+
+    <string name="settings_group_reminders">Anımsatıcılar</string>
+    <string name="settings_group_data_storage">Veri ve depolama</string>
+    <string name="settings_group_sync_backup">Eşitleme ve yedek</string>
+    <string name="settings_group_lan_sync">LAN eşitleme</string>
+    <string name="settings_group_security">Güvenlik</string>
+    <string name="settings_group_editor">Düzenleyici</string>
+    <string name="settings_group_appearance">Görünüm</string>
+    <string name="settings_group_date_time">Tarih ve saat</string>
+    <string name="settings_group_layout">Düzen</string>
+    <string name="settings_group_overview">Genel bakış</string>
+    <string name="settings_group_desktop_window">Masaüstü penceresi</string>
+    <string name="settings_group_ai">Yapay zeka</string>
+    <string name="settings_group_need_help">Yardım mı lazım?</string>
+    <string name="settings_group_updates">Güncellemeler</string>
+    <string name="settings_group_danger_zone">Tehlikeli bölge</string>
+
+    <string name="settings_unrestricted_background">Kısıtlamasız arka plan</string>
+
+    <string name="settings_import">İçe aktar</string>
+    <string name="settings_export_backup">Yedeği dışa aktar</string>
+    <string name="settings_automatic_backups">Otomatik yedekler</string>
+    <string name="settings_backup_frequency_daily">Her gün</string>
+    <string name="settings_backup_frequency_weekly">Her hafta</string>
+    <string name="settings_backup_day">Yedekleme günü</string>
+    <string name="settings_backup_time">Yedekleme saati</string>
+    <string name="settings_backup_location">Yedek konumu</string>
+    <string name="settings_backup_location_change">Değiştir</string>
+    <string name="settings_select_backup_day">Yedekleme gününü seçin</string>
+
+    <string name="settings_self_host">Kendi sunucunuz</string>
+    <string name="settings_self_host_blocked_by_lan_sync">Kendi sunucunuzu kullanmak için LAN eşitleme eşlemesini kaldırın.</string>
+    <string name="settings_self_host_blocked_by_cloud">Kendi sunucunuzu kullanmak için Emberr Cloud oturumunu kapatın.</string>
+    <string name="settings_emberr_cloud">Emberr Cloud</string>
+    <string name="settings_cloud_blocked_by_self_host">Emberr Cloud'u kullanmak için Kendi sunucunuz bağlantısını kesin.</string>
+    <string name="settings_cloud_blocked_by_lan_sync">Emberr Cloud'u kullanmak için LAN eşitleme eşlemesini kaldırın.</string>
+    <string name="settings_sync_network_both">Her ikisi</string>
+    <string name="settings_sync_network_wifi_only">Yalnızca Wi-Fi</string>
+    <string name="settings_sync_network_data_only">Yalnızca mobil veri</string>
+    <string name="settings_sync_network_hint">Kendi sunucunuz ve Emberr Cloud yalnızca seçtiğiniz ağ üzerinden eşitler.</string>
+
+    <string name="settings_lan_sync_blocked_by_self_host">LAN eşitlemeyi kullanmak için Kendi sunucunuz bağlantısını kesin.</string>
+    <string name="settings_lan_sync_blocked_by_cloud">LAN eşitlemeyi kullanmak için Emberr Cloud oturumunu kapatın.</string>
+    <string name="settings_lan_sync_paired_desktop">Eşlendi. Telefonunuz LAN üzerinden bağlandığında bu masaüstü otomatik olarak eşitlenir.</string>
+    <string name="settings_sync_now">Şimdi eşitle</string>
+    <string name="settings_unpair_from_mobile_device">Mobil cihazla eşlemeyi kaldır</string>
+    <string name="settings_unpair_from_desktop">Masaüstüyle eşlemeyi kaldır</string>
+    <string name="settings_sync_port">Eşitleme bağlantı noktası</string>
+    <string name="settings_sync_port_hint">Yalnızca Emberr yeniden başlatıldıktan sonra geçerli olur. Bu bilgisayardaki başka bir program mevcut bağlantı noktasını kullanıyorsa bunu değiştirin.</string>
+    <string name="settings_pair_mobile_device">Mobil cihazı eşle</string>
+    <string name="settings_pair_with_desktop">Masaüstüyle eşle</string>
+    <string name="settings_unpair_dialog_title">Cihaz eşlemesi kaldırılsın mı?</string>
+    <string name="settings_unpair_dialog_message_desktop">Eşitleme eşlemesini bu masaüstünden kaldırır. Telefonunuzda da eşlemeyi kaldırın.</string>
+    <string name="settings_unpair_dialog_message_phone">Eşitleme eşlemesini bu cihazdan kaldırır. Masaüstü uygulamasını açık tutun veya orada da eşlemeyi kaldırın.</string>
+    <string name="settings_unpair">Eşlemeyi kaldır</string>
+
+    <string name="settings_theme">Tema</string>
+    <string name="settings_top_bar_fade">Üst çubuk solması</string>
+    <string name="settings_top_bar_fade_subtitle">Kaydırırken içeriğin üst çubuğun arkasında nasıl solacağını seçin.</string>
+    <string name="settings_top_bar_fade_progressive">Kademeli</string>
+    <string name="settings_top_bar_fade_blur">Bulanık</string>
+    <string name="settings_top_bar_fade_color">Renk</string>
+    <string name="settings_top_bar_fade_none">Yok</string>
+    <string name="settings_top_bar_fade_fallback">Yedek görünüm</string>
+    <string name="settings_top_bar_fade_progressive_blur">Kademeli bulanık</string>
+    <string name="settings_top_bar_fade_progressive_color">Kademeli renk</string>
+    <string name="settings_interface_scale">Arayüz ölçeği</string>
+    <string name="settings_interface_scale_hint">Uygulamadaki her şeyi büyütür veya küçültür.</string>
+    <string name="settings_interface_scale_smaller">Daha küçük</string>
+    <string name="settings_interface_scale_bigger">Daha büyük</string>
+    <string name="settings_interface_scale_reset">%100'e sıfırla</string>
+    <string name="settings_interface_scale_toast">Arayüz ölçeği %1$d%</string>
+    <string name="settings_font_size">Yazı boyutu</string>
+    <string name="settings_font_size_extra_small">Çok küçük</string>
+    <string name="settings_font_size_small">Küçük</string>
+    <string name="settings_font_size_default">Varsayılan</string>
+    <string name="settings_font_size_large">Büyük</string>
+    <string name="settings_font_size_extra_large">Çok büyük</string>
+    <string name="settings_font_style">Yazı tipi</string>
+    <string name="settings_font_style_system">Sistem</string>
+    <string name="settings_language">Dil</string>
+    <string name="settings_search_languages">Dil ara</string>
+    <string name="settings_language_system">Sistem varsayılanı</string>
+    <string name="settings_language_restart_message">Yeni dili göstermek için Emberr'ın yeniden başlaması gerekiyor. Çalışmalarınız yazarken kaydedilir, bu yüzden şimdi yeniden başlatmak güvenlidir.</string>
+
+    <string name="settings_time_format">Saat biçimi</string>
+    <string name="settings_time_format_system">Sistem varsayılanı</string>
+    <string name="settings_time_format_twelve_hour">12 saat</string>
+    <string name="settings_time_format_twenty_four_hour">24 saat</string>
+    <string name="settings_first_day_of_week">Haftanın ilk günü</string>
+    <string name="settings_first_day_of_week_desktop_hint">Takvim ayarlarındaki Haftanın ilk günü ile aynı ayardır.</string>
+    <string name="settings_first_day_of_week_system">Sistem varsayılanı</string>
+    <string name="settings_first_day_of_week_saturday">Cumartesi</string>
+    <string name="settings_first_day_of_week_sunday">Pazar</string>
+    <string name="settings_first_day_of_week_monday">Pazartesi</string>
+
+    <string name="settings_daily_notes">Günlük notlar</string>
+    <string name="settings_daily_notes_hint">Günlük notları gizler. Mevcut notlar korunur.</string>
+    <string name="settings_daily_quote">Günün sözü</string>
+    <string name="settings_daily_quote_hint">Boş günlerde bir söz gösterir.</string>
+    <string name="settings_open_home_first">Önce Ana sayfayı aç</string>
+    <string name="settings_mic_button">Mikrofon düğmesi</string>
+    <string name="settings_overview_sidebar_footnote">Kenar çubuğunda gösterilen kısayollar.</string>
+
+    <string name="settings_subnote_opening">Alt notun açılışı</string>
+    <string name="settings_subnote_opening_side_panel">Yan panel</string>
+    <string name="settings_subnote_opening_center_dialog">Ortada pencere</string>
+    <string name="settings_subnote_opening_full_right_panel">Tam sağ panel</string>
+    <string name="settings_show_scrollbar">Kaydırma çubuğunu göster</string>
+    <string name="settings_show_scrollbar_hint">Listelerde, notlarda ve tablolarda kaydırma çubuklarını gösterir.</string>
+    <string name="settings_custom_title_bar">Özel başlık çubuğu</string>
+    <string name="settings_custom_title_bar_hint">Emberr'ın kendi başlık çubuğunu kullanır. Yeniden başlatınca geçerli olur.</string>
+    <string name="settings_auto_hide_title_bar">Başlık çubuğunu otomatik gizle</string>
+    <string name="settings_auto_hide_title_bar_hint">İmleci üst kenara getirdiğinizde başlık çubuğunu gösterir.</string>
+    <string name="settings_restart_to_apply_title">Uygulamak için yeniden başlatın</string>
+    <string name="settings_restart_to_apply_message">Pencere açıkken kendi başlık çubuğu ile masaüstünün başlık çubuğu arasında geçiş yapamaz, bu yüzden bunu uygulamak için Emberr'ın yeniden başlaması gerekiyor. Çalışmalarınız yazarken kaydedilir, bu yüzden şimdi yeniden başlatmak güvenlidir.</string>
+    <string name="settings_restart_later">Daha sonra</string>
+    <string name="settings_restart_now">Şimdi yeniden başlat</string>
+
+    <string name="settings_turn_off_ai_features">Yapay zeka özelliklerini kapat</string>
+    <string name="settings_ai_removing_data">Modeller, gömmeler ve kayıtlı anahtarlar kaldırılıyor…</string>
+    <string name="settings_ai_off_hint">Yapay zeka kapalı. Modeller ve anahtarlar kaldırıldı. Sohbetler korunur.</string>
+    <string name="settings_ai_on_hint">Asistanı gizler, modelleri ve anahtarları siler. Sohbetler korunur.</string>
+    <string name="settings_turn_off_ai_dialog_title">Yapay zeka özellikleri kapatılsın mı?</string>
+    <string name="settings_turn_off_ai_dialog_message">İndirilen modelleri, arama dizinini ve kayıtlı API anahtarlarını siler. Notlarınız ve sohbetleriniz korunur.</string>
+    <string name="settings_turn_off">Kapat</string>
+    <string name="settings_ai_purge_failed">Yapay zeka verileri tamamen kaldırılamadı: %1$s</string>
+    <plurals name="settings_ai_purge_files_left">
+        <item quantity="one">%1$s boşaltıldı, ancak %2$d dosya kaldırılamadı: %3$s</item>
+        <item quantity="other">%1$s boşaltıldı, ancak %2$d dosya kaldırılamadı: %3$s</item>
+    </plurals>
+    <string name="settings_ai_purge_freed">%1$s model dosyası alanı boşaltıldı.</string>
+    <string name="settings_ai_purge_nothing_to_remove">Diskte kaldırılacak model dosyası yoktu.</string>
+
+    <string name="settings_keyboard_toolbar">Klavye araç çubuğu</string>
+
+    <string name="settings_faq">SSS</string>
+    <string name="settings_whats_new">Yenilikler</string>
+    <string name="settings_privacy_policy">Gizlilik politikası</string>
+    <string name="settings_about_emberr">Emberr hakkında</string>
+
+    <string name="settings_clear_all_data">Tüm verileri temizle</string>
+    <string name="settings_clear_all_data_desktop_hint">Bu cihazda saklanan tüm notları, anımsatıcıları ve ekleri siler. Bu işlem geri alınamaz.</string>
+    <string name="settings_clear_all_data_dialog_title">Tüm veriler temizlensin mi?</string>
+    <string name="settings_clear_all_data_dialog_message">Bu cihazdaki her şeyi siler. Diğer cihazlarınıza, eşitleme sunucunuza ve yedeklerinize dokunulmaz. </string>
+    <string name="settings_clear_data_failed">Verileriniz temizlenemedi. Hiçbir şey silinmedi.</string>
+    <string name="settings_erase_cloud_dialog_message">Tüm verilerinizi Emberr Cloud'dan ve oturum açılmış her cihazdan siler. Oturumunuz açık kalır.</string>
+    <string name="settings_erase_cloud_password">Şifre</string>
+    <string name="settings_erasing">Siliniyor...</string>
+    <string name="settings_erase">Sil</string>
+    <string name="settings_erase_cloud_device_not_cleared">Bulut verileriniz silindi ancak bu cihaz temizlenemedi. Tüm verileri temizle'yi yeniden deneyin.</string>
+    <string name="settings_erase_cloud_incorrect_password">Şifre yanlış. Yeniden deneyin.</string>
+    <string name="settings_erase_cloud_too_many_tries">Çok fazla deneme. Biraz bekleyip yeniden deneyin.</string>
+    <string name="settings_erase_cloud_signed_out">Emberr Cloud oturumunuz kapatıldı. Hiçbir şey silinmedi.</string>
+    <string name="settings_erase_cloud_something_went_wrong">Bir sorun oluştu. Hiçbir şey silinmedi.</string>
+    <string name="settings_erase_cloud_server_unreachable">Sunucuya ulaşılamıyor: %1$s. Hiçbir şey silinmedi.</string>
+
+    <string name="settings_theme_mode">Mod</string>
+    <string name="settings_theme_mode_system">Sistem</string>
+    <string name="settings_theme_mode_light">Açık</string>
+    <string name="settings_theme_mode_dark">Koyu</string>
+    <string name="settings_theme_group_strength">Yoğunluk</string>
+    <string name="settings_theme_strength">Tema yoğunluğu</string>
+    <string name="settings_theme_group_text_and_icons">Metin ve simgeler</string>
+    <string name="settings_theme_text_and_icons">Temalı metin ve simgeler</string>
+    <string name="settings_theme_text_and_icons_hint">Kapalıyken metin ve simgeler siyah beyaz kalır.</string>
+    <string name="settings_theme_group_texture">Doku</string>
+    <string name="settings_paper_texture">Kağıt dokusu</string>
+    <string name="settings_paper_texture_hint">Kağıt gibi yumuşak bir doku ekler.</string>
+    <string name="settings_paper_texture_show_on">Gösterileceği yer</string>
+    <string name="settings_paper_texture_area_whole_app">Tüm uygulama</string>
+    <string name="settings_paper_texture_area_daily_notes">Günlük notlar</string>
+    <string name="settings_paper_texture_area_notes">Notlar</string>
+    <string name="settings_paper_texture_area_canvas">Tuval</string>
+    <string name="settings_paper_texture_areas_none">Hiçbiri</string>
+    <string name="settings_texture_strength">Doku yoğunluğu</string>
+    <string name="settings_theme_group_colors">Renkler</string>
+    <string name="settings_color_theme_emberr">Emberr</string>
+    <string name="settings_color_theme_soft">Yumuşak</string>
+    <string name="settings_color_theme_wallpaper">Duvar kağıdı</string>
+    <string name="settings_color_theme_high_contrast">Yüksek kontrast</string>
+    <string name="settings_color_theme_terracotta">Terakota</string>
+    <string name="settings_color_theme_paper">Kağıt</string>
+    <string name="settings_color_theme_nord">Nord</string>
+    <string name="settings_color_theme_forest">Orman</string>
+    <string name="settings_color_theme_rose_pine">Rosé Pine</string>
+    <string name="settings_color_theme_catppuccin_frappe">Catppuccin Frappé</string>
+    <string name="settings_color_theme_catppuccin_mocha">Catppuccin Mocha</string>
+    <string name="settings_color_theme_tokyo_night">Tokyo Night</string>
+    <string name="settings_color_theme_gruvbox">Gruvbox</string>
+    <string name="settings_color_theme_everforest">Everforest</string>
+
+    <string name="settings_toolbar_group_in_toolbar">Araç çubuğunda</string>
+    <string name="settings_toolbar_empty">Henüz düğme yok. Aşağıdaki listeden ekleyin.</string>
+    <string name="settings_toolbar_reorder_footnote">Yeniden sıralamak için tutamacı sürükleyin. Klavyeyi kapatma düğmesi her zaman sağda kalır.</string>
+    <string name="settings_toolbar_group_available">Kullanılabilir</string>
+    <string name="settings_toolbar_reset_to_default">Varsayılana sıfırla</string>
+    <string name="settings_toolbar_reorder_button">Yeniden sırala: %1$s</string>
+    <string name="settings_toolbar_remove">Kaldır</string>
+    <string name="settings_toolbar_remove_button">Kaldır: %1$s</string>
+    <string name="settings_toolbar_add_button">Ekle: %1$s</string>
+
+    <string name="settings_about_title">Hakkında</string>
+    <string name="settings_about_source_code">Kaynak kodu</string>
+    <string name="settings_about_open_source_licenses">Açık kaynak lisansları</string>
+    <string name="settings_about_third_party_services">Üçüncü taraf hizmetler</string>
+    <string name="settings_about_tagline">Açık kaynaklı, çevrimdışı öncelikli not ve verimlilik uygulaması</string>
+    <string name="settings_about_copyright">Telif hakkı © 2026 Benny</string>
+    <string name="settings_about_license_notice">GNU AGPL v3.0 lisansı altındadır. Hiçbir garanti olmadan sunulur.</string>
+
+    <string name="settings_third_party_group_movies_shows">Filmler ve diziler</string>
+    <string name="settings_third_party_visit_tmdb">TMDB'yi ziyaret et</string>
+    <string name="settings_third_party_tmdb_usage">Film ve izleme listesi blokları, filmleri, dizileri ve ayrıntılarını bulmak için TMDB'yi kullanır.</string>
+    <string name="settings_third_party_tmdb_proxy">Film ve dizi aramaları, Emberr'ın Cloudflare üzerindeki küçük proxy'sinden geçer; proxy aramaları TMDB'ye iletir ve kayıt tutmaz. Afişler ve fotoğraflar doğrudan TMDB'den gelir. Notlarınızdan hiçbir şey gönderilmez.</string>
+    <string name="settings_third_party_tmdb_notice">Bu ürün TMDB API'sini kullanır ancak TMDB tarafından onaylanmamış veya sertifikalandırılmamıştır.</string>
+    <string name="settings_third_party_justwatch_notice">Nerede izlenir verileri JustWatch'tan alınır.</string>
+
+    <string name="settings_licenses_group_libraries">Kütüphaneler</string>
+    <string name="settings_licenses_group_fonts">Yazı tipleri</string>
+    <string name="settings_licenses_version">Sürüm %1$s</string>
+    <string name="settings_licenses_by_authors">Yazan: %1$s</string>
+    <string name="settings_licenses_unnamed_license">Lisans</string>
+    <string name="settings_licenses_full_text_at">Tam metin şurada: %1$s</string>
+    <string name="settings_licenses_visit_website">Web sitesini ziyaret et</string>
+
+    <string name="settings_app_lock">Uygulama Kilidi</string>
+    <string name="settings_app_lock_needs_screen_lock">Önce telefonunuzda bir ekran kilidi ayarlayın.</string>
+    <string name="settings_app_lock_turn_on_prompt">Uygulama Kilidini aç</string>
+    <string name="settings_app_lock_turn_off_prompt">Uygulama Kilidini kapat</string>
+    <string name="settings_auto_lock">Otomatik kilit</string>
+    <string name="settings_auto_lock_immediately">Hemen</string>
+    <string name="settings_auto_lock_after_one_minute">1 dakika sonra</string>
+    <string name="settings_auto_lock_after_five_minutes">5 dakika sonra</string>
+    <string name="settings_auto_lock_after_fifteen_minutes">15 dakika sonra</string>
+    <string name="settings_auto_lock_after_one_hour">1 saat sonra</string>
+    <string name="settings_screen_security">Ekran güvenliği</string>
+    <string name="settings_screen_security_hint">Emberr içeriğini Son uygulamalar'da gizler.</string>
+    <string name="settings_screen_security_hint_with_screenshots">Emberr içeriğini Son uygulamalar'da gizler. Ekran görüntüleri de engellenir.</string>
+
+    <string name="settings_credential_storage">Kimlik bilgisi depolama</string>
+    <string name="settings_credential_storage_checking">Kontrol ediliyor</string>
+    <string name="settings_credential_storage_plain_text">Düz metin</string>
+    <string name="settings_credential_storage_got_it">Anladım</string>
+    <string name="settings_credential_storage_checking_detail">Emberr, bu sistemin hangi kimlik bilgisi yöneticisini sunduğunu hâlâ kontrol ediyor.</string>
+    <string name="settings_credential_storage_protected_detail">Yapay zeka API anahtarlarınız ve eşitleme anahtarlarınız, işletim sisteminizin yönettiği %1$s tarafından tutulur. Hiçbir zaman Emberr'ın kendi dosyalarına yazılmazlar.</string>
+    <string name="settings_credential_storage_plain_text_detail">Yapay zeka API anahtarlarınız ve eşitleme anahtarlarınız ~/.emberr/secrets.properties dosyasında okunabilir metin olarak saklanır. Ana klasörünüzü okuyabilen herkes onları okuyabilir.\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_title">Anahtarlarınız korunmuyor</string>
+    <string name="settings_plain_text_warning_message">Bu sistemde Emberr'ın kullanabileceği bir kimlik bilgisi yöneticisi yok, bu yüzden yapay zeka API anahtarlarınız ve eşitleme anahtarlarınız ~/.emberr/secrets.properties dosyasına okunabilir metin olarak kaydedilir. Dosyayı yalnızca kullanıcı hesabınız okuyabilir, ancak şifreli değildir.\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_understood">Anlıyorum</string>
+
+    <string name="settings_update_check_on_launch">Açılışta güncellemeleri denetle</string>
+    <string name="settings_update_checking">Güncellemeler denetleniyor...</string>
+    <string name="settings_update_download_version">Emberr %1$s sürümünü indir</string>
+    <string name="settings_update_downloading">Güncelleme indiriliyor...</string>
+    <string name="settings_update_restart_to_update">Güncellemek için yeniden başlat</string>
+    <string name="settings_update_check_now">Güncellemeleri denetle</string>
+    <string name="settings_update_up_to_date">Güncel</string>
+    <string name="settings_update_new">Yeni</string>
+    <string name="settings_update_failed">Başarısız</string>
+
+    <string name="settings_export_backup_subtitle">Neyin kaydedileceğini seçin.</string>
+    <string name="settings_export_backup_select_spaces">Alanları seçin</string>
+    <string name="settings_export_backup_daily_notes">Günlük notlar</string>
+    <string name="settings_export_backup_calendar">Takvim</string>
+    <string name="settings_export_backup_export">Dışa aktar</string>
+</resources>

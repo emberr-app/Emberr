@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">Boşta</string>
+    <string name="lan_sync_status_not_paired">Eşlenmedi!</string>
+    <string name="lan_sync_status_already_in_progress">Eşitleme zaten sürüyor</string>
+    <string name="lan_sync_status_syncing">Eşitleniyor...</string>
+    <string name="lan_sync_status_auto_syncing">Otomatik eşitleniyor...</string>
+    <string name="lan_sync_status_fetching_from_desktop">Masaüstünden alınıyor...</string>
+    <string name="lan_sync_status_success">Başarılı!</string>
+    <string name="lan_sync_status_synced_successfully">Başarıyla eşitlendi</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="one">Eşitlendi, %1$d öğe kaydedilemedi</item>
+        <item quantity="other">Eşitlendi, %1$d öğe kaydedilemedi</item>
+    </plurals>
+    <string name="lan_sync_status_partial">Kısmi eşitleme, yeniden denenecek</string>
+    <string name="lan_sync_status_update_both_devices">Emberr'ı iki cihazda da güncelleyin</string>
+    <string name="lan_sync_status_desktop_offline">Masaüstü çevrimdışı</string>
+    <string name="lan_sync_status_failed">Başarısız: %1$s</string>
+    <string name="lan_sync_status_sync_error">Eşitleme hatası: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">Mobil cihazı eşle</string>
+    <string name="lan_sync_pair_dialog_message">Masaüstünüze güvenli şekilde bağlanmak için bu QR kodunu Emberr mobil uygulamasıyla tarayın.</string>
+    <string name="lan_sync_pair_dialog_secret_token">Gizli anahtar: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">Masaüstünüzde gösterilen QR kodunu tarayın.</string>
+    <string name="lan_sync_scanner_desktop_hint">Masaüstünüzde Ayarlar → LAN eşitleme → Mobil cihazı eşle'yi açın.</string>
+    <string name="lan_sync_camera_access_needed">Kamera erişimi gerekli</string>
+    <string name="lan_sync_camera_allow_message">Masaüstünüzdeki eşleme kodunu taramak için kameraya izin verin.</string>
+    <string name="lan_sync_camera_turn_on_message">İzinler'de Kamera'yı açın, sonra buraya geri dönün.</string>
+    <string name="lan_sync_allow_camera">Kameraya izin ver</string>
+    <string name="lan_sync_open_app_settings">Uygulama ayarlarını aç</string>
+    <string name="lan_sync_camera_mobile_only">Kamerayla tarama yalnızca mobil cihazlarda desteklenir.</string>
+</resources>

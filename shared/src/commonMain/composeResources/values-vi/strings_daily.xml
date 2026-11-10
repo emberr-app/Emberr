@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">Dòng thời gian</string>
+    <string name="daily_close_timeline">Đóng dòng thời gian</string>
+    <string name="daily_open_timeline">Mở dòng thời gian</string>
+    <string name="daily_search_the_timeline">Tìm trong dòng thời gian</string>
+    <string name="daily_previous_match">Kết quả trước</string>
+    <string name="daily_next_match">Kết quả tiếp theo</string>
+    <string name="daily_nothing_on_this_day_yet">Chưa có gì vào ngày này.</string>
+    <string name="daily_nothing_written_yet">Chưa viết gì.</string>
+    <string name="daily_code">Mã</string>
+    <string name="daily_today">Hôm nay</string>
+    <string name="daily_tomorrow">Ngày mai</string>
+    <string name="daily_yesterday">Hôm qua</string>
+    <string name="daily_go_to_today">Đến hôm nay</string>
+    <string name="daily_previous_month">Tháng trước</string>
+    <string name="daily_next_month">Tháng sau</string>
+    <string name="daily_previous">Trước</string>
+    <string name="daily_next">Sau</string>
+    <string name="daily_open_calendar">Mở lịch</string>
+    <string name="daily_calendar">Lịch</string>
+    <string name="daily_settings">Cài đặt</string>
+    <string name="daily_more_settings">Cài đặt khác</string>
+    <string name="daily_click_to_write_your_thoughts">Nhấp để viết suy nghĩ của bạn</string>
+    <string name="daily_tap_to_write_your_thoughts">Nhấn để viết suy nghĩ của bạn</string>
+</resources>

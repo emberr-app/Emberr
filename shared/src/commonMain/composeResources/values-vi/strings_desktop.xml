@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Mở Emberr</string>
+    <string name="desktop_tray_close_window">Đóng cửa sổ</string>
+    <string name="desktop_tray_quit">Thoát</string>
+    <string name="desktop_sticky_note">Ghi chú dán</string>
+    <string name="desktop_select_image">Chọn hình ảnh</string>
+    <string name="desktop_select_document">Chọn tài liệu</string>
+    <string name="desktop_file_not_found_message">Tệp này không còn trên thiết bị này.</string>
+    <string name="desktop_file_not_found_title">Không tìm thấy tệp</string>
+    <string name="desktop_open_file_failed">Không mở được tệp: %1$s</string>
+    <string name="desktop_error">Lỗi</string>
+    <string name="desktop_backup_only_on_android_message">Sao lưu tự động trong nền hiện chỉ có trên ứng dụng Android. Bạn vẫn có thể dùng nút 'Xuất bản sao lưu'!</string>
+    <string name="desktop_backup_only_on_android_title">Tính năng máy tính</string>
+    <string name="desktop_update_available">Có bản cập nhật</string>
+    <string name="desktop_update_available_message">Đã có Emberr %1$s. Bạn đang dùng %2$s. Bản cập nhật sẽ tải trong nền khi bạn tiếp tục làm việc.</string>
+    <string name="desktop_update_download">Tải xuống</string>
+    <string name="desktop_update_ready_to_install">Bản cập nhật đã sẵn sàng để cài</string>
+    <string name="desktop_update_ready_message">Khởi động lại Emberr để bắt đầu dùng phiên bản %1$s. Nếu chọn Để sau, bản cập nhật sẽ được dùng vào lần tới bạn mở Emberr.</string>
+    <string name="desktop_update_restart">Khởi động lại</string>
+    <string name="desktop_update_failed">Không thể cập nhật Emberr</string>
+    <string name="desktop_update_later">Để sau</string>
+    <string name="desktop_ok">OK</string>
+    <string name="desktop_new_note_in_folder">Ghi chú mới trong thư mục</string>
+    <string name="desktop_new_note_here">Ghi chú mới tại đây</string>
+    <string name="desktop_rename_folder">Đổi tên thư mục</string>
+    <string name="desktop_add_subfolder">Thêm thư mục con</string>
+    <string name="desktop_rename_note">Đổi tên ghi chú</string>
+    <string name="desktop_open_in_split_view">Mở trong chế độ chia đôi màn hình</string>
+    <string name="desktop_toggle_section">Thu gọn/mở rộng %1$s</string>
+    <string name="desktop_empty_space">Không gian này trống.</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">Bắt đầu với %1$s hoặc %2$s</string>
+    <string name="desktop_empty_space_a_note">một ghi chú</string>
+    <string name="desktop_create_space">Tạo không gian</string>
+    <string name="desktop_add_space">Thêm không gian</string>
+    <string name="desktop_space_options">Tùy chọn không gian</string>
+    <string name="desktop_close_pane">Đóng ngăn</string>
+    <string name="desktop_close_this_screen">Đóng màn hình này</string>
+    <string name="desktop_drag_to_swap_screens">Kéo để đổi chỗ màn hình</string>
+    <string name="desktop_search_no_match">Không có ghi chú, sự kiện hay người nào khớp với "%1$s"</string>
+    <string name="desktop_hide_sidebar">Ẩn thanh bên</string>
+    <string name="desktop_collapse_sidebar">Thu gọn thanh bên</string>
+    <string name="desktop_select_a_note">Chọn một ghi chú từ thanh bên</string>
+    <string name="desktop_folder">Thư mục</string>
+    <string name="desktop_sync">Đồng bộ</string>
+</resources>

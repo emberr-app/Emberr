@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">Temizle</string>
+    <string name="components_select_all">Tümünü seç</string>
+    <string name="components_spaces_none_yet">Henüz yok</string>
+    <string name="components_spaces_none">Hiçbiri</string>
+    <plurals name="components_spaces_all">
+        <item quantity="one">Tüm alanlar (%1$d)</item>
+        <item quantity="other">Tüm alanlar (%1$d)</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="one">%1$d / %2$d alan</item>
+        <item quantity="other">%1$d / %2$d alan</item>
+    </plurals>
+
+    <string name="components_search_notes">Notlarda ara...</string>
+    <string name="components_create_new_note">Yeni not oluştur</string>
+    <string name="components_new_named_note">Yeni not: "%1$s"</string>
+    <string name="components_note_picker_hint">Aramak için yazmaya başlayın veya yeni bir not oluşturun</string>
+    <string name="components_link_to_note_heading">NOTA BAĞLANTI</string>
+    <string name="components_link_to_note">Nota bağla</string>
+
+    <string name="components_load_more">Daha fazla yükle</string>
+    <string name="components_show_sidebar">Kenar çubuğunu göster</string>
+    <string name="components_clear_search">Aramayı temizle</string>
+
+    <string name="components_people_search_placeholder">Kişi arayın veya ekleyin</string>
+    <string name="components_people_create_failed">Kişi oluşturulamadı</string>
+    <string name="components_people_type_name_hint">Kişi eklemek için bir ad yazın</string>
+    <string name="components_people_add_people">Kişi ekle</string>
+    <string name="components_people_selected">Seçilenler</string>
+    <string name="components_people_create_named">“%1$s” oluştur</string>
+    <string name="components_people_remove">Kaldır</string>
+    <string name="components_people_remove_named">Kaldır: %1$s</string>
+
+    <string name="components_reminder_later_today">Bugün daha sonra</string>
+    <string name="components_reminder_tomorrow">Yarın</string>
+    <string name="components_reminder_this_weekend">Bu hafta sonu</string>
+    <string name="components_reminder_next_week">Gelecek hafta</string>
+    <string name="components_reminder_custom_date">Özel tarih...</string>
+    <string name="components_reminder_remove">Anımsatıcıyı kaldır</string>
+    <string name="components_reminder_date">Tarih</string>
+    <string name="components_reminder_all_day">Tüm gün</string>
+    <string name="components_reminder_in_15_mins">15 dk sonra</string>
+    <string name="components_reminder_in_1_hour">1 saat sonra</string>
+    <string name="components_reminder_in_3_hours">3 saat sonra</string>
+    <string name="components_reminder_this_evening">Bu akşam</string>
+    <string name="components_reminder_custom_time">Özel saat...</string>
+    <string name="components_reminder_time">Saat</string>
+    <string name="components_choose_month_or_year">Ay veya yıl seçin</string>
+    <string name="components_previous_month">Önceki ay</string>
+    <string name="components_next_month">Sonraki ay</string>
+    <string name="components_select_date">Tarih seçin</string>
+    <string name="components_month_and_year">Ay ve yıl</string>
+    <string name="components_select_time">Saat seçin</string>
+</resources>

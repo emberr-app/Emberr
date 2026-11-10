@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">कमांड के लिए / टाइप करें...</string>
+    <string name="note_copied_to_clipboard">क्लिपबोर्ड पर कॉपी हो गया</string>
+    <string name="note_copied_as_markdown">Markdown के रूप में कॉपी हो गया</string>
+    <string name="note_options">विकल्प</string>
+    <string name="note_more_options">और विकल्प</string>
+    <string name="note_choose_icon">आइकन चुनें</string>
+    <string name="note_search_emojis">इमोजी खोजें</string>
+    <string name="note_no_emojis_found">कोई इमोजी नहीं मिला</string>
+    <string name="note_editing_template">टेम्पलेट बदला जा रहा है</string>
+    <string name="note_icon_options">आइकन के विकल्प</string>
+    <string name="note_change_icon">आइकन बदलें</string>
+    <string name="note_add_icon">आइकन जोड़ें</string>
+    <string name="note_remove_icon">आइकन हटाएँ</string>
+    <string name="note_cover_options">कवर के विकल्प</string>
+    <string name="note_upload_cover">कवर अपलोड करें</string>
+    <string name="note_remove_cover">कवर हटाएँ</string>
+    <string name="note_hide_word_count">शब्द गिनती छिपाएँ</string>
+    <string name="note_show_word_count">शब्द गिनती दिखाएँ</string>
+    <string name="note_alignment">अलाइनमेंट</string>
+    <string name="note_note_width">नोट की चौड़ाई</string>
+    <string name="note_unfavorite">पसंदीदा से हटाएँ</string>
+    <string name="note_favorite">पसंदीदा</string>
+    <string name="note_open_as_sticky_note">स्टिकी नोट के रूप में खोलें</string>
+    <string name="note_export_note">नोट एक्सपोर्ट करें</string>
+    <string name="note_copy_text">टेक्स्ट कॉपी करें</string>
+    <string name="note_copy_as_markdown">Markdown के रूप में कॉपी करें</string>
+    <string name="note_download_markdown">.md डाउनलोड करें</string>
+    <string name="note_download_pdf">PDF डाउनलोड करें</string>
+    <string name="note_move_to_trash">ट्रैश में ले जाएँ</string>
+    <string name="note_width_narrow">संकरा</string>
+    <string name="note_width_full">पूरा</string>
+    <string name="note_align_left">बाएँ</string>
+    <string name="note_align_center">बीच में</string>
+    <string name="note_align_right">दाएँ</string>
+    <string name="note_align_justify">दोनों तरफ़ बराबर</string>
+    <string name="note_note_options">नोट के विकल्प</string>
+    <string name="note_export_options">एक्सपोर्ट के विकल्प</string>
+    <string name="note_paste_image_link">इमेज का लिंक पेस्ट करें</string>
+    <string name="note_cover_image">कवर इमेज</string>
+    <string name="note_drag_image_to_reposition">जगह बदलने के लिए इमेज खींचें</string>
+    <string name="note_save_position">जगह सेव करें</string>
+    <string name="note_reposition">जगह बदलें</string>
+    <string name="note_collapse_panel">पैनल समेटें</string>
+    <string name="note_expand_panel">पैनल फैलाएँ</string>
+    <plurals name="note_word_count">
+        <item quantity="one">%1$d शब्द</item>
+        <item quantity="other">%1$d शब्द</item>
+    </plurals>
+</resources>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">साफ़ करें</string>
+    <string name="components_select_all">सभी चुनें</string>
+    <string name="components_spaces_none_yet">अभी कोई नहीं</string>
+    <string name="components_spaces_none">कोई नहीं</string>
+    <plurals name="components_spaces_all">
+        <item quantity="one">सभी %1$d स्पेस</item>
+        <item quantity="other">सभी %1$d स्पेस</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="one">%2$d में से %1$d स्पेस</item>
+        <item quantity="other">%2$d में से %1$d स्पेस</item>
+    </plurals>
+
+    <string name="components_search_notes">नोट खोजें...</string>
+    <string name="components_create_new_note">नया नोट बनाएँ</string>
+    <string name="components_new_named_note">नया "%1$s" नोट</string>
+    <string name="components_note_picker_hint">खोजने के लिए टाइप करें या नया नोट बनाएँ</string>
+    <string name="components_link_to_note_heading">नोट से लिंक करें</string>
+    <string name="components_link_to_note">नोट से लिंक करें</string>
+
+    <string name="components_load_more">और लोड करें</string>
+    <string name="components_show_sidebar">साइडबार दिखाएँ</string>
+    <string name="components_clear_search">खोज साफ़ करें</string>
+
+    <string name="components_people_search_placeholder">व्यक्ति खोजें या जोड़ें</string>
+    <string name="components_people_create_failed">व्यक्ति नहीं बनाया जा सका</string>
+    <string name="components_people_type_name_hint">व्यक्ति जोड़ने के लिए नाम टाइप करें</string>
+    <string name="components_people_add_people">लोग जोड़ें</string>
+    <string name="components_people_selected">चुने गए</string>
+    <string name="components_people_create_named">“%1$s” बनाएँ</string>
+    <string name="components_people_remove">हटाएँ</string>
+    <string name="components_people_remove_named">%1$s को हटाएँ</string>
+
+    <string name="components_reminder_later_today">आज बाद में</string>
+    <string name="components_reminder_tomorrow">कल</string>
+    <string name="components_reminder_this_weekend">इस वीकेंड</string>
+    <string name="components_reminder_next_week">अगले हफ़्ते</string>
+    <string name="components_reminder_custom_date">अपनी तारीख...</string>
+    <string name="components_reminder_remove">रिमाइंडर हटाएँ</string>
+    <string name="components_reminder_date">तारीख</string>
+    <string name="components_reminder_all_day">पूरे दिन</string>
+    <string name="components_reminder_in_15_mins">15 मिनट में</string>
+    <string name="components_reminder_in_1_hour">1 घंटे में</string>
+    <string name="components_reminder_in_3_hours">3 घंटे में</string>
+    <string name="components_reminder_this_evening">आज शाम</string>
+    <string name="components_reminder_custom_time">अपना समय...</string>
+    <string name="components_reminder_time">समय</string>
+    <string name="components_choose_month_or_year">महीना या साल चुनें</string>
+    <string name="components_previous_month">पिछला महीना</string>
+    <string name="components_next_month">अगला महीना</string>
+    <string name="components_select_date">तारीख चुनें</string>
+    <string name="components_month_and_year">महीना और साल</string>
+    <string name="components_select_time">समय चुनें</string>
+</resources>

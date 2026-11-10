@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">सेटिंग</string>
+
+    <string name="settings_group_reminders">रिमाइंडर</string>
+    <string name="settings_group_data_storage">डेटा और स्टोरेज</string>
+    <string name="settings_group_sync_backup">सिंक और बैकअप</string>
+    <string name="settings_group_lan_sync">LAN सिंक</string>
+    <string name="settings_group_security">सुरक्षा</string>
+    <string name="settings_group_editor">एडिटर</string>
+    <string name="settings_group_appearance">रूप-रंग</string>
+    <string name="settings_group_date_time">तारीख और समय</string>
+    <string name="settings_group_layout">लेआउट</string>
+    <string name="settings_group_overview">ओवरव्यू</string>
+    <string name="settings_group_desktop_window">डेस्कटॉप विंडो</string>
+    <string name="settings_group_ai">AI</string>
+    <string name="settings_group_need_help">मदद चाहिए?</string>
+    <string name="settings_group_updates">अपडेट</string>
+    <string name="settings_group_danger_zone">खतरे वाला क्षेत्र</string>
+
+    <string name="settings_unrestricted_background">बैकग्राउंड पर कोई रोक नहीं</string>
+
+    <string name="settings_import">इंपोर्ट करें</string>
+    <string name="settings_export_backup">बैकअप एक्सपोर्ट करें</string>
+    <string name="settings_automatic_backups">ऑटोमैटिक बैकअप</string>
+    <string name="settings_backup_frequency_daily">हर दिन</string>
+    <string name="settings_backup_frequency_weekly">हर हफ़्ते</string>
+    <string name="settings_backup_day">बैकअप का दिन</string>
+    <string name="settings_backup_time">बैकअप का समय</string>
+    <string name="settings_backup_location">बैकअप की जगह</string>
+    <string name="settings_backup_location_change">बदलें</string>
+    <string name="settings_select_backup_day">बैकअप का दिन चुनें</string>
+
+    <string name="settings_self_host">अपना सर्वर</string>
+    <string name="settings_self_host_blocked_by_lan_sync">अपना सर्वर इस्तेमाल करने के लिए LAN सिंक अनपेयर करें।</string>
+    <string name="settings_self_host_blocked_by_cloud">अपना सर्वर इस्तेमाल करने के लिए Emberr Cloud से साइन आउट करें।</string>
+    <string name="settings_emberr_cloud">Emberr Cloud</string>
+    <string name="settings_cloud_blocked_by_self_host">Emberr Cloud इस्तेमाल करने के लिए अपना सर्वर डिस्कनेक्ट करें।</string>
+    <string name="settings_cloud_blocked_by_lan_sync">Emberr Cloud इस्तेमाल करने के लिए LAN सिंक अनपेयर करें।</string>
+    <string name="settings_sync_network_both">दोनों</string>
+    <string name="settings_sync_network_wifi_only">सिर्फ़ Wi-Fi</string>
+    <string name="settings_sync_network_data_only">सिर्फ़ मोबाइल डेटा</string>
+    <string name="settings_sync_network_hint">अपना सर्वर और Emberr Cloud सिर्फ़ आपके चुने नेटवर्क पर सिंक करते हैं।</string>
+
+    <string name="settings_lan_sync_blocked_by_self_host">LAN सिंक इस्तेमाल करने के लिए अपना सर्वर डिस्कनेक्ट करें।</string>
+    <string name="settings_lan_sync_blocked_by_cloud">LAN सिंक इस्तेमाल करने के लिए Emberr Cloud से साइन आउट करें।</string>
+    <string name="settings_lan_sync_paired_desktop">पेयर हो गया। जब भी आपका फ़ोन LAN पर जुड़ता है, यह डेस्कटॉप अपने-आप सिंक हो जाता है।</string>
+    <string name="settings_sync_now">अभी सिंक करें</string>
+    <string name="settings_unpair_from_mobile_device">मोबाइल डिवाइस से अनपेयर करें</string>
+    <string name="settings_unpair_from_desktop">डेस्कटॉप से अनपेयर करें</string>
+    <string name="settings_sync_port">सिंक पोर्ट</string>
+    <string name="settings_sync_port_hint">Emberr दोबारा शुरू करने के बाद ही लागू होता है। अगर इस कंप्यूटर पर कोई दूसरा प्रोग्राम पहले से यह पोर्ट इस्तेमाल कर रहा है, तो इसे बदलें।</string>
+    <string name="settings_pair_mobile_device">मोबाइल डिवाइस पेयर करें</string>
+    <string name="settings_pair_with_desktop">डेस्कटॉप से पेयर करें</string>
+    <string name="settings_unpair_dialog_title">डिवाइस अनपेयर करें?</string>
+    <string name="settings_unpair_dialog_message_desktop">इस डेस्कटॉप से सिंक पेयरिंग हटा देता है। अपने फ़ोन पर भी अनपेयर करें।</string>
+    <string name="settings_unpair_dialog_message_phone">इस डिवाइस से सिंक पेयरिंग हटा देता है। डेस्कटॉप ऐप खुला रखें, या वहाँ भी अनपेयर करें।</string>
+    <string name="settings_unpair">अनपेयर करें</string>
+
+    <string name="settings_theme">थीम</string>
+    <string name="settings_top_bar_fade">टॉप बार फ़ेड</string>
+    <string name="settings_top_bar_fade_subtitle">चुनें कि स्क्रॉल करते समय कंटेंट टॉप बार के पीछे कैसे फीका हो।</string>
+    <string name="settings_top_bar_fade_progressive">धीरे-धीरे</string>
+    <string name="settings_top_bar_fade_blur">धुंधला</string>
+    <string name="settings_top_bar_fade_color">रंग</string>
+    <string name="settings_top_bar_fade_none">कोई नहीं</string>
+    <string name="settings_top_bar_fade_fallback">विकल्प</string>
+    <string name="settings_top_bar_fade_progressive_blur">धीरे-धीरे धुंधला</string>
+    <string name="settings_top_bar_fade_progressive_color">धीरे-धीरे रंग</string>
+    <string name="settings_interface_scale">इंटरफ़ेस स्केल</string>
+    <string name="settings_interface_scale_hint">ऐप में सब कुछ बड़ा या छोटा करता है।</string>
+    <string name="settings_interface_scale_smaller">छोटा</string>
+    <string name="settings_interface_scale_bigger">बड़ा</string>
+    <string name="settings_interface_scale_reset">100% पर रीसेट करें</string>
+    <string name="settings_interface_scale_toast">इंटरफ़ेस स्केल %1$d%</string>
+    <string name="settings_font_size">फ़ॉन्ट साइज़</string>
+    <string name="settings_font_size_extra_small">बहुत छोटा</string>
+    <string name="settings_font_size_small">छोटा</string>
+    <string name="settings_font_size_default">डिफ़ॉल्ट</string>
+    <string name="settings_font_size_large">बड़ा</string>
+    <string name="settings_font_size_extra_large">बहुत बड़ा</string>
+    <string name="settings_font_style">फ़ॉन्ट स्टाइल</string>
+    <string name="settings_font_style_system">सिस्टम</string>
+    <string name="settings_language">भाषा</string>
+    <string name="settings_search_languages">भाषाएँ खोजें</string>
+    <string name="settings_language_system">सिस्टम डिफ़ॉल्ट</string>
+    <string name="settings_language_restart_message">नई भाषा दिखाने के लिए Emberr को दोबारा शुरू होना होगा। आपका काम टाइप करते समय ही सेव हो जाता है, इसलिए अभी दोबारा शुरू करना सुरक्षित है।</string>
+
+    <string name="settings_time_format">समय का फ़ॉर्मैट</string>
+    <string name="settings_time_format_system">सिस्टम डिफ़ॉल्ट</string>
+    <string name="settings_time_format_twelve_hour">12-घंटे</string>
+    <string name="settings_time_format_twenty_four_hour">24-घंटे</string>
+    <string name="settings_first_day_of_week">हफ़्ते का पहला दिन</string>
+    <string name="settings_first_day_of_week_desktop_hint">कैलेंडर सेटिंग में हफ़्ते का पहला दिन वाली ही सेटिंग।</string>
+    <string name="settings_first_day_of_week_system">सिस्टम डिफ़ॉल्ट</string>
+    <string name="settings_first_day_of_week_saturday">शनिवार</string>
+    <string name="settings_first_day_of_week_sunday">रविवार</string>
+    <string name="settings_first_day_of_week_monday">सोमवार</string>
+
+    <string name="settings_daily_notes">दैनिक नोट</string>
+    <string name="settings_daily_notes_hint">दैनिक नोट छिपाता है। मौजूदा नोट बने रहते हैं।</string>
+    <string name="settings_daily_quote">दैनिक विचार</string>
+    <string name="settings_daily_quote_hint">खाली दिनों पर एक विचार दिखाता है।</string>
+    <string name="settings_open_home_first">पहले होम खोलें</string>
+    <string name="settings_mic_button">माइक बटन</string>
+    <string name="settings_overview_sidebar_footnote">साइडबार में दिखने वाले शॉर्टकट।</string>
+
+    <string name="settings_subnote_opening">उप-नोट कैसे खुलें</string>
+    <string name="settings_subnote_opening_side_panel">साइड पैनल</string>
+    <string name="settings_subnote_opening_center_dialog">बीच में डायलॉग</string>
+    <string name="settings_subnote_opening_full_right_panel">पूरा दायाँ पैनल</string>
+    <string name="settings_show_scrollbar">स्क्रॉलबार दिखाएँ</string>
+    <string name="settings_show_scrollbar_hint">सूचियों, नोट और तालिकाओं में स्क्रॉलबार दिखाता है।</string>
+    <string name="settings_custom_title_bar">कस्टम टाइटल बार</string>
+    <string name="settings_custom_title_bar_hint">Emberr का अपना टाइटल बार इस्तेमाल करता है। दोबारा शुरू करने के बाद लागू होता है।</string>
+    <string name="settings_auto_hide_title_bar">टाइटल बार अपने-आप छिपाएँ</string>
+    <string name="settings_auto_hide_title_bar_hint">ऊपरी किनारे पर पॉइंटर ले जाने पर टाइटल बार दिखाता है।</string>
+    <string name="settings_restart_to_apply_title">लागू करने के लिए दोबारा शुरू करें</string>
+    <string name="settings_restart_to_apply_message">विंडो खुली रहते हुए अपने टाइटल बार और डेस्कटॉप के टाइटल बार के बीच नहीं बदल सकती, इसलिए इसे लागू करने के लिए Emberr को दोबारा शुरू होना होगा। आपका काम टाइप करते समय ही सेव हो जाता है, इसलिए अभी दोबारा शुरू करना सुरक्षित है।</string>
+    <string name="settings_restart_later">बाद में</string>
+    <string name="settings_restart_now">अभी दोबारा शुरू करें</string>
+
+    <string name="settings_turn_off_ai_features">AI सुविधाएँ बंद करें</string>
+    <string name="settings_ai_removing_data">मॉडल, एम्बेडिंग और सेव की गई की हटाई जा रही हैं…</string>
+    <string name="settings_ai_off_hint">AI बंद है। मॉडल और की हटा दी गई हैं। चैट बनी रहती हैं।</string>
+    <string name="settings_ai_on_hint">असिस्टेंट छिपाता है और मॉडल व की मिटा देता है। चैट बनी रहती हैं।</string>
+    <string name="settings_turn_off_ai_dialog_title">AI सुविधाएँ बंद करें?</string>
+    <string name="settings_turn_off_ai_dialog_message">डाउनलोड किए गए मॉडल, सर्च इंडेक्स और सेव की गई API की मिटा देता है। आपके नोट और चैट बने रहते हैं।</string>
+    <string name="settings_turn_off">बंद करें</string>
+    <string name="settings_ai_purge_failed">AI डेटा पूरी तरह हटाया नहीं जा सका: %1$s</string>
+    <plurals name="settings_ai_purge_files_left">
+        <item quantity="one">%1$s खाली हुआ, पर %2$d फ़ाइल हटाई नहीं जा सकी: %3$s</item>
+        <item quantity="other">%1$s खाली हुआ, पर %2$d फ़ाइलें हटाई नहीं जा सकीं: %3$s</item>
+    </plurals>
+    <string name="settings_ai_purge_freed">%1$s की मॉडल फ़ाइलें हटाकर जगह खाली हुई।</string>
+    <string name="settings_ai_purge_nothing_to_remove">डिस्क पर हटाने के लिए कोई मॉडल फ़ाइल नहीं थी।</string>
+
+    <string name="settings_keyboard_toolbar">कीबोर्ड टूलबार</string>
+
+    <string name="settings_faq">अक्सर पूछे जाने वाले सवाल</string>
+    <string name="settings_whats_new">नया क्या है</string>
+    <string name="settings_privacy_policy">प्राइवेसी पॉलिसी</string>
+    <string name="settings_about_emberr">Emberr के बारे में</string>
+
+    <string name="settings_clear_all_data">सारा डेटा साफ़ करें</string>
+    <string name="settings_clear_all_data_desktop_hint">इस डिवाइस पर रखे हर नोट, रिमाइंडर और अटैचमेंट को मिटा देता है। इसे वापस नहीं किया जा सकता।</string>
+    <string name="settings_clear_all_data_dialog_title">सारा डेटा साफ़ करें?</string>
+    <string name="settings_clear_all_data_dialog_message">इस डिवाइस पर सब कुछ मिटा देता है। आपके दूसरे डिवाइस, सिंक सर्वर और बैकअप नहीं छुए जाते। </string>
+    <string name="settings_clear_data_failed">आपका डेटा साफ़ नहीं हो सका। कुछ भी नहीं मिटाया गया।</string>
+    <string name="settings_erase_cloud_dialog_message">Emberr Cloud और हर साइन-इन डिवाइस से आपका सारा डेटा मिटा देता है। आप साइन इन रहेंगे।</string>
+    <string name="settings_erase_cloud_password">पासवर्ड</string>
+    <string name="settings_erasing">मिटाया जा रहा है...</string>
+    <string name="settings_erase">मिटाएँ</string>
+    <string name="settings_erase_cloud_device_not_cleared">आपका क्लाउड डेटा मिटा दिया गया, पर यह डिवाइस साफ़ नहीं हो सका। सारा डेटा साफ़ करें फिर से आज़माएँ।</string>
+    <string name="settings_erase_cloud_incorrect_password">गलत पासवर्ड। फिर से कोशिश करें।</string>
+    <string name="settings_erase_cloud_too_many_tries">बहुत ज़्यादा कोशिशें। थोड़ा रुककर फिर से कोशिश करें।</string>
+    <string name="settings_erase_cloud_signed_out">आप Emberr Cloud से साइन आउट हो गए। कुछ भी नहीं मिटाया गया।</string>
+    <string name="settings_erase_cloud_something_went_wrong">कुछ गड़बड़ हो गई। कुछ भी नहीं मिटाया गया।</string>
+    <string name="settings_erase_cloud_server_unreachable">%1$s पर सर्वर तक नहीं पहुँच सके। कुछ भी नहीं मिटाया गया।</string>
+
+    <string name="settings_theme_mode">मोड</string>
+    <string name="settings_theme_mode_system">सिस्टम</string>
+    <string name="settings_theme_mode_light">लाइट</string>
+    <string name="settings_theme_mode_dark">डार्क</string>
+    <string name="settings_theme_group_strength">तीव्रता</string>
+    <string name="settings_theme_strength">थीम की तीव्रता</string>
+    <string name="settings_theme_group_text_and_icons">टेक्स्ट और आइकन</string>
+    <string name="settings_theme_text_and_icons">थीम वाले टेक्स्ट और आइकन</string>
+    <string name="settings_theme_text_and_icons_hint">बंद होने पर टेक्स्ट और आइकन काले-सफ़ेद रहते हैं।</string>
+    <string name="settings_theme_group_texture">टेक्सचर</string>
+    <string name="settings_paper_texture">पेपर टेक्सचर</string>
+    <string name="settings_paper_texture_hint">कागज़ जैसा हल्का दानेदार रूप जोड़ता है।</string>
+    <string name="settings_paper_texture_show_on">कहाँ दिखे</string>
+    <string name="settings_paper_texture_area_whole_app">पूरा ऐप</string>
+    <string name="settings_paper_texture_area_daily_notes">दैनिक नोट</string>
+    <string name="settings_paper_texture_area_notes">नोट</string>
+    <string name="settings_paper_texture_area_canvas">कैनवास</string>
+    <string name="settings_paper_texture_areas_none">कहीं नहीं</string>
+    <string name="settings_texture_strength">टेक्सचर की तीव्रता</string>
+    <string name="settings_theme_group_colors">रंग</string>
+    <string name="settings_color_theme_emberr">Emberr</string>
+    <string name="settings_color_theme_soft">सॉफ़्ट</string>
+    <string name="settings_color_theme_wallpaper">वॉलपेपर</string>
+    <string name="settings_color_theme_high_contrast">हाई कंट्रास्ट</string>
+    <string name="settings_color_theme_terracotta">टेराकोटा</string>
+    <string name="settings_color_theme_paper">कागज़</string>
+    <string name="settings_color_theme_nord">Nord</string>
+    <string name="settings_color_theme_forest">जंगल</string>
+    <string name="settings_color_theme_rose_pine">Rosé Pine</string>
+    <string name="settings_color_theme_catppuccin_frappe">Catppuccin Frappé</string>
+    <string name="settings_color_theme_catppuccin_mocha">Catppuccin Mocha</string>
+    <string name="settings_color_theme_tokyo_night">Tokyo Night</string>
+    <string name="settings_color_theme_gruvbox">Gruvbox</string>
+    <string name="settings_color_theme_everforest">Everforest</string>
+
+    <string name="settings_toolbar_group_in_toolbar">टूलबार में</string>
+    <string name="settings_toolbar_empty">अभी कोई बटन नहीं। नीचे दी गई सूची से कुछ जोड़ें।</string>
+    <string name="settings_toolbar_reorder_footnote">क्रम बदलने के लिए हैंडल खींचें। कीबोर्ड बंद करने का बटन हमेशा दाईं ओर रहता है।</string>
+    <string name="settings_toolbar_group_available">उपलब्ध</string>
+    <string name="settings_toolbar_reset_to_default">डिफ़ॉल्ट पर रीसेट करें</string>
+    <string name="settings_toolbar_reorder_button">%1$s का क्रम बदलें</string>
+    <string name="settings_toolbar_remove">हटाएँ</string>
+    <string name="settings_toolbar_remove_button">%1$s हटाएँ</string>
+    <string name="settings_toolbar_add_button">%1$s जोड़ें</string>
+
+    <string name="settings_about_title">जानकारी</string>
+    <string name="settings_about_source_code">सोर्स कोड</string>
+    <string name="settings_about_open_source_licenses">ओपन-सोर्स लाइसेंस</string>
+    <string name="settings_about_third_party_services">थर्ड-पार्टी सेवाएँ</string>
+    <string name="settings_about_tagline">ओपन-सोर्स, ऑफ़लाइन-फ़र्स्ट नोट और प्रोडक्टिविटी ऐप</string>
+    <string name="settings_about_copyright">Copyright © 2026 Benny</string>
+    <string name="settings_about_license_notice">GNU AGPL v3.0 के तहत लाइसेंस प्राप्त। बिना किसी वारंटी के दिया गया।</string>
+
+    <string name="settings_third_party_group_movies_shows">फ़िल्में और शो</string>
+    <string name="settings_third_party_visit_tmdb">TMDB पर जाएँ</string>
+    <string name="settings_third_party_tmdb_usage">फ़िल्म और वॉचलिस्ट ब्लॉक फ़िल्में, शो और उनकी जानकारी ढूँढने के लिए TMDB का इस्तेमाल करते हैं।</string>
+    <string name="settings_third_party_tmdb_proxy">फ़िल्मों और शो की खोज Cloudflare पर Emberr के एक छोटे प्रॉक्सी से होकर जाती है, जो उन्हें TMDB तक भेजता है और कोई लॉग नहीं रखता। पोस्टर और फ़ोटो सीधे TMDB से आते हैं। आपके नोट से कुछ भी नहीं भेजा जाता।</string>
+    <string name="settings_third_party_tmdb_notice">यह प्रोडक्ट TMDB API का इस्तेमाल करता है, पर TMDB इसका समर्थन या प्रमाणन नहीं करता।</string>
+    <string name="settings_third_party_justwatch_notice">कहाँ देखें, यह डेटा JustWatch से।</string>
+
+    <string name="settings_licenses_group_libraries">लाइब्रेरी</string>
+    <string name="settings_licenses_group_fonts">फ़ॉन्ट</string>
+    <string name="settings_licenses_version">वर्शन %1$s</string>
+    <string name="settings_licenses_by_authors">%1$s द्वारा</string>
+    <string name="settings_licenses_unnamed_license">लाइसेंस</string>
+    <string name="settings_licenses_full_text_at">पूरा टेक्स्ट %1$s पर उपलब्ध है</string>
+    <string name="settings_licenses_visit_website">वेबसाइट पर जाएँ</string>
+
+    <string name="settings_app_lock">ऐप लॉक</string>
+    <string name="settings_app_lock_needs_screen_lock">पहले अपने फ़ोन पर स्क्रीन लॉक सेट करें।</string>
+    <string name="settings_app_lock_turn_on_prompt">ऐप लॉक चालू करें</string>
+    <string name="settings_app_lock_turn_off_prompt">ऐप लॉक बंद करें</string>
+    <string name="settings_auto_lock">ऑटो-लॉक</string>
+    <string name="settings_auto_lock_immediately">तुरंत</string>
+    <string name="settings_auto_lock_after_one_minute">1 मिनट बाद</string>
+    <string name="settings_auto_lock_after_five_minutes">5 मिनट बाद</string>
+    <string name="settings_auto_lock_after_fifteen_minutes">15 मिनट बाद</string>
+    <string name="settings_auto_lock_after_one_hour">1 घंटे बाद</string>
+    <string name="settings_screen_security">स्क्रीन सुरक्षा</string>
+    <string name="settings_screen_security_hint">हाल के ऐप में Emberr का कंटेंट छिपाता है।</string>
+    <string name="settings_screen_security_hint_with_screenshots">हाल के ऐप में Emberr का कंटेंट छिपाता है। स्क्रीनशॉट भी ब्लॉक होते हैं।</string>
+
+    <string name="settings_credential_storage">लॉगिन जानकारी का स्टोरेज</string>
+    <string name="settings_credential_storage_checking">जाँच हो रही है</string>
+    <string name="settings_credential_storage_plain_text">सादा टेक्स्ट</string>
+    <string name="settings_credential_storage_got_it">समझ गया</string>
+    <string name="settings_credential_storage_checking_detail">Emberr अभी जाँच रहा है कि यह सिस्टम कौन-सा क्रेडेंशियल मैनेजर देता है।</string>
+    <string name="settings_credential_storage_protected_detail">आपकी AI API की और सिंक की %1$s में रखी हैं, जिसे आपका ऑपरेटिंग सिस्टम मैनेज करता है। ये कभी Emberr की अपनी फ़ाइलों में नहीं लिखी जातीं।</string>
+    <string name="settings_credential_storage_plain_text_detail">आपकी AI API की और सिंक की ~/.emberr/secrets.properties में पढ़ने लायक टेक्स्ट के रूप में रखी हैं। जो भी आपका होम फ़ोल्डर पढ़ सकता है, वह इन्हें पढ़ सकता है।\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_title">आपकी की सुरक्षित नहीं हैं</string>
+    <string name="settings_plain_text_warning_message">इस सिस्टम में ऐसा कोई क्रेडेंशियल मैनेजर नहीं है जिसे Emberr इस्तेमाल कर सके, इसलिए आपकी AI API की और सिंक की ~/.emberr/secrets.properties में पढ़ने लायक टेक्स्ट के रूप में सेव हैं। यह फ़ाइल सिर्फ़ आपका यूज़र अकाउंट पढ़ सकता है, पर यह एन्क्रिप्टेड नहीं है।\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_understood">मैं समझता/समझती हूँ</string>
+
+    <string name="settings_update_check_on_launch">ऐप खुलने पर अपडेट जाँचें</string>
+    <string name="settings_update_checking">अपडेट जाँचे जा रहे हैं...</string>
+    <string name="settings_update_download_version">Emberr %1$s डाउनलोड करें</string>
+    <string name="settings_update_downloading">अपडेट डाउनलोड हो रहा है...</string>
+    <string name="settings_update_restart_to_update">अपडेट के लिए दोबारा शुरू करें</string>
+    <string name="settings_update_check_now">अपडेट जाँचें</string>
+    <string name="settings_update_up_to_date">अप टू डेट</string>
+    <string name="settings_update_new">नया</string>
+    <string name="settings_update_failed">विफल</string>
+
+    <string name="settings_export_backup_subtitle">चुनें कि क्या सेव करना है।</string>
+    <string name="settings_export_backup_select_spaces">स्पेस चुनें</string>
+    <string name="settings_export_backup_daily_notes">दैनिक नोट</string>
+    <string name="settings_export_backup_calendar">कैलेंडर</string>
+    <string name="settings_export_backup_export">एक्सपोर्ट करें</string>
+</resources>

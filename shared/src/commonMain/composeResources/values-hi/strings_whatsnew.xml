@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">फिर मिलेंगे!</string>
+    <string name="whatsnew_whats_new_question">नया क्या है?</string>
+    <string name="whatsnew_title">नया क्या है</string>
+    <string name="whatsnew_version">वर्शन %1$s</string>
+    <string name="whatsnew_new">नया</string>
+    <string name="whatsnew_themes_heading">थीम</string>
+    <string name="whatsnew_themes_where">सेटिंग → रूप-रंग → थीम</string>
+    <string name="whatsnew_themes_description_desktop">13 कलर थीम में से चुनें, जैसे Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine और हाई कंट्रास्ट। हर थीम की तीव्रता सेट की जा सकती है, और आप चुन सकते हैं कि टेक्स्ट और आइकन भी उसके रंग लें या नहीं।</string>
+    <string name="whatsnew_themes_description_mobile">14 कलर थीम में से चुनें, जैसे Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine और हाई कंट्रास्ट, या **वॉलपेपर** को अपने वॉलपेपर से रंग लेने दें। हर थीम की तीव्रता सेट की जा सकती है, और आप चुन सकते हैं कि टेक्स्ट और आइकन भी उसके रंग लें या नहीं। आपके होम स्क्रीन विजेट भी थीम के साथ बदलते हैं।</string>
+    <string name="whatsnew_texture_heading">पेपर टेक्सचर</string>
+    <string name="whatsnew_texture_where">सेटिंग → रूप-रंग → थीम → टेक्सचर</string>
+    <string name="whatsnew_texture_description">ऐप को असली कागज़ जैसा हल्का दानेदार रूप दें। तय करें कि यह कितना गहरा हो, और कहाँ दिखे: पूरे ऐप में, नोट में, कैनवास पर या दैनिक नोट में।</string>
+    <string name="whatsnew_scale_heading">इंटरफ़ेस स्केल</string>
+    <string name="whatsnew_scale_where">सेटिंग → रूप-रंग → इंटरफ़ेस स्केल</string>
+    <string name="whatsnew_scale_description_desktop">ऐप में सब कुछ 80% से 200% तक बड़ा या छोटा करें, या **Ctrl +**, **Ctrl −** और **Ctrl 0** इस्तेमाल करें।</string>
+    <string name="whatsnew_scale_description_mobile">ऐप में सब कुछ 80% से 200% तक बड़ा या छोटा करें।</string>
+    <string name="whatsnew_widgets_heading">विजेट</string>
+    <string name="whatsnew_widgets_where">होम स्क्रीन को देर तक दबाएँ → विजेट → Emberr</string>
+    <string name="whatsnew_widgets_description">हर विजेट का रूप नया और साफ़-सुथरा है, और तीन नए विजेट हैं: **नोट कार्ड**, **झट से लिखें** और **आज का विचार**। विजेट अब आपका चुना नोट तुरंत दिखाते हैं, और बताते हैं जब वह नोट मिटा दिया गया हो।</string>
+    <string name="whatsnew_editor_heading">एडिटर</string>
+    <string name="whatsnew_editor_where">नोट में कहीं भी / टाइप करें</string>
+    <string name="whatsnew_editor_description">स्लैश मेनू अब किसी भी अक्षर के ठीक बाद खुलता है, सिर्फ़ स्पेस के बाद नहीं। अगर आप मिलते-जुलते नतीजे से आगे टाइप कर दें, तो वापस मिटाएँ और मेनू फिर आ जाएगा।</string>
+    <string name="whatsnew_others_heading">अन्य</string>
+    <string name="whatsnew_others_where">छोटे बदलाव और सुधार</string>
+    <string name="whatsnew_others_sliders">पूरे ऐप में स्लाइडर का डिज़ाइन नया है।</string>
+    <string name="whatsnew_others_title_time_desktop">मौजूदा समय या तारीख जोड़ने के लिए नोट के शीर्षक में **/** टाइप करें।</string>
+    <string name="whatsnew_others_title_time_mobile">कीबोर्ड टूलबार से नोट के शीर्षक में मौजूदा समय या तारीख जोड़ें।</string>
+    <string name="whatsnew_others_sync_network">सिंक के लिए नेटवर्क का विकल्प अब **सेटिंग → सिंक और बैकअप** में है।</string>
+    <string name="whatsnew_others_windows_startup">Windows पर ऐप अब तेज़ी से खुलता है।</string>
+    <string name="whatsnew_others_small_fixes">कई छोटे सुधार।</string>
+    <string name="whatsnew_preview_options">विकल्प</string>
+    <string name="whatsnew_preview_trip_title">वीकेंड ट्रिप</string>
+    <string name="whatsnew_preview_trip_text">ट्रैफ़िक से बचने के लिए सुबह 8 बजे तक निकलें।</string>
+    <string name="whatsnew_preview_train_tickets">ट्रेन टिकट</string>
+    <string name="whatsnew_preview_passport">पासपोर्ट</string>
+    <string name="whatsnew_preview_camera_charger">कैमरा चार्जर</string>
+    <string name="whatsnew_preview_reading_list">पढ़ने की सूची</string>
+    <string name="whatsnew_preview_reading_list_books">The Overstory, Piranesi, Project Hail Mary</string>
+    <string name="whatsnew_preview_meeting_title">टीम मीटिंग</string>
+    <string name="whatsnew_preview_meeting_text">गुरुवार 10 बजे, कमरा 2।</string>
+    <string name="whatsnew_preview_typed_heading">एजेंडा</string>
+    <string name="whatsnew_preview_quote">आगे बढ़ने का राज़ है शुरुआत करना।</string>
+    <string name="whatsnew_preview_jot_prompt">आपके मन में क्या है?</string>
+    <string name="whatsnew_preview_jot_button">झट से लिखें</string>
+</resources>
