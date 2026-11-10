@@ -31,6 +31,11 @@ import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.presentation.shared.editor.blockViews.media.MediaAvailability
 import com.emberr.presentation.shared.editor.blockViews.media.rememberMediaAvailability
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.canvas_downloading_image
+import emberr.shared.generated.resources.canvas_image
+import emberr.shared.generated.resources.canvas_image_failed_to_download
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.roundToInt
@@ -74,7 +79,7 @@ internal fun CanvasImageCard(node: CanvasNodeEntity, viewport: CanvasViewport, i
                 if (availability == MediaAvailability.Available) {
                     AsyncImage(
                         model = request,
-                        contentDescription = "Canvas image",
+                        contentDescription = stringResource(Res.string.canvas_image),
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -84,7 +89,7 @@ internal fun CanvasImageCard(node: CanvasNodeEntity, viewport: CanvasViewport, i
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (availability == MediaAvailability.Failed) "Image failed to download" else "Downloading image...",
+                            text = stringResource(if (availability == MediaAvailability.Failed) Res.string.canvas_image_failed_to_download else Res.string.canvas_downloading_image),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.outline,
                             textAlign = TextAlign.Center

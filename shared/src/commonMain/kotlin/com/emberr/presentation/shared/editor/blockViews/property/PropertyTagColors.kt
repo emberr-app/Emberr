@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.repository.NoteRepository
+import com.emberr.presentation.shared.components.label
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import emberr.shared.generated.resources.Res
@@ -84,7 +85,7 @@ fun PropertyTagColorChoices(
         HighlightColor.entries.forEach { highlightColor ->
             PropertyTagColorSwatch(
                 color = highlightColor.backgroundFor(isDarkTheme),
-                label = highlightColor.displayName,
+                label = highlightColor.label(),
                 isSelected = selectedColorName == highlightColor.storageName,
                 isAutomatic = false,
                 onClick = { onColorChosen(highlightColor.storageName) }

@@ -10,4 +10,13 @@
     <string name="common_version_label">v%1$s</string>
     <string name="common_percent_value">%1$d%</string>
     <string name="common_untitled">Untitled</string>
+    <string name="common_color_yellow">Yellow</string>
+    <string name="common_color_lime">Lime</string>
+    <string name="common_color_grey">Grey</string>
+    <string name="common_color_red">Red</string>
+    <string name="common_color_blue">Blue</string>
+    <string name="common_color_green">Green</string>
+    <string name="common_color_orange">Orange</string>
+    <string name="common_color_pink">Pink</string>
+    <string name="common_color_purple">Purple</string>
 </resources>

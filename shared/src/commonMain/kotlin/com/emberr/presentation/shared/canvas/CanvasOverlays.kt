@@ -104,11 +104,104 @@ import com.emberr.presentation.shared.components.TopBarIconButtonItem
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.label
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_left
+import emberr.shared.generated.resources.canvas_add_to_favorites
+import emberr.shared.generated.resources.canvas_adding_image
+import emberr.shared.generated.resources.canvas_align
+import emberr.shared.generated.resources.canvas_align_center
+import emberr.shared.generated.resources.canvas_align_left
+import emberr.shared.generated.resources.canvas_align_right
+import emberr.shared.generated.resources.canvas_background
+import emberr.shared.generated.resources.canvas_box_color
+import emberr.shared.generated.resources.canvas_clear
+import emberr.shared.generated.resources.canvas_color
+import emberr.shared.generated.resources.canvas_default_ink
+import emberr.shared.generated.resources.canvas_delete_box
+import emberr.shared.generated.resources.canvas_exit_full_screen
+import emberr.shared.generated.resources.canvas_follow_pressure
+import emberr.shared.generated.resources.canvas_font
+import emberr.shared.generated.resources.canvas_font_default
+import emberr.shared.generated.resources.canvas_full_screen
+import emberr.shared.generated.resources.canvas_go_to_boxes
+import emberr.shared.generated.resources.canvas_hide_dots
+import emberr.shared.generated.resources.canvas_line
+import emberr.shared.generated.resources.canvas_line_arrow
+import emberr.shared.generated.resources.canvas_line_dashed_arrow
+import emberr.shared.generated.resources.canvas_line_dashed_line
+import emberr.shared.generated.resources.canvas_line_dotted_arrow
+import emberr.shared.generated.resources.canvas_line_dotted_line
+import emberr.shared.generated.resources.canvas_line_solid_line
+import emberr.shared.generated.resources.canvas_line_style
+import emberr.shared.generated.resources.canvas_more_options
+import emberr.shared.generated.resources.canvas_move_to_trash
+import emberr.shared.generated.resources.canvas_no_background
+import emberr.shared.generated.resources.canvas_opacity
+import emberr.shared.generated.resources.canvas_open_as_sticky_note
+import emberr.shared.generated.resources.canvas_options
+import emberr.shared.generated.resources.canvas_paste_image
+import emberr.shared.generated.resources.canvas_pressure
+import emberr.shared.generated.resources.canvas_redo
+import emberr.shared.generated.resources.canvas_remove_from_favorites
+import emberr.shared.generated.resources.canvas_rename
+import emberr.shared.generated.resources.canvas_rename_canvas
+import emberr.shared.generated.resources.canvas_same_thickness
+import emberr.shared.generated.resources.canvas_shape_circle
+import emberr.shared.generated.resources.canvas_shape_database
+import emberr.shared.generated.resources.canvas_shape_diamond
+import emberr.shared.generated.resources.canvas_shape_double_circle
+import emberr.shared.generated.resources.canvas_shape_double_rectangle
+import emberr.shared.generated.resources.canvas_shape_double_square
+import emberr.shared.generated.resources.canvas_shape_double_triangle
+import emberr.shared.generated.resources.canvas_shape_hexagon
+import emberr.shared.generated.resources.canvas_shape_oval
+import emberr.shared.generated.resources.canvas_shape_parallelogram
+import emberr.shared.generated.resources.canvas_shape_pentagon
+import emberr.shared.generated.resources.canvas_shape_pill
+import emberr.shared.generated.resources.canvas_shape_rectangle
+import emberr.shared.generated.resources.canvas_shape_square
+import emberr.shared.generated.resources.canvas_shape_trapezoid
+import emberr.shared.generated.resources.canvas_shape_triangle
+import emberr.shared.generated.resources.canvas_shapes
+import emberr.shared.generated.resources.canvas_sheet_title
+import emberr.shared.generated.resources.canvas_show_dots
+import emberr.shared.generated.resources.canvas_size
+import emberr.shared.generated.resources.canvas_size_large
+import emberr.shared.generated.resources.canvas_size_medium
+import emberr.shared.generated.resources.canvas_size_small
+import emberr.shared.generated.resources.canvas_stroke
+import emberr.shared.generated.resources.canvas_stroke_width
+import emberr.shared.generated.resources.canvas_title_placeholder
+import emberr.shared.generated.resources.canvas_tool_eraser
+import emberr.shared.generated.resources.canvas_tool_highlighter
+import emberr.shared.generated.resources.canvas_tool_image
+import emberr.shared.generated.resources.canvas_tool_line
+import emberr.shared.generated.resources.canvas_tool_pen
+import emberr.shared.generated.resources.canvas_tool_shapes
+import emberr.shared.generated.resources.canvas_tool_text
+import emberr.shared.generated.resources.canvas_undo
+import emberr.shared.generated.resources.canvas_untitled_canvas
+import emberr.shared.generated.resources.canvas_weight
+import emberr.shared.generated.resources.canvas_weight_bold
+import emberr.shared.generated.resources.canvas_weight_medium
+import emberr.shared.generated.resources.canvas_weight_regular
+import emberr.shared.generated.resources.canvas_width_medium
+import emberr.shared.generated.resources.canvas_width_thick
+import emberr.shared.generated.resources.canvas_width_thin
+import emberr.shared.generated.resources.canvas_zoom_in
+import emberr.shared.generated.resources.canvas_zoom_out
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_color_blue
+import emberr.shared.generated.resources.common_color_green
+import emberr.shared.generated.resources.common_color_orange
+import emberr.shared.generated.resources.common_color_red
+import emberr.shared.generated.resources.common_percent_value
+import emberr.shared.generated.resources.common_save
 import emberr.shared.generated.resources.dot_grid
 import emberr.shared.generated.resources.dot_grid_off
 import emberr.shared.generated.resources.ellipsis
@@ -139,7 +232,9 @@ import emberr.shared.generated.resources.x
 import emberr.shared.generated.resources.yuyushort_regular
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -161,15 +256,19 @@ private val ToolPanelWidth = 212.dp
 private val ToolPanelSwatchShape = RoundedCornerShape(6.dp)
 private val ToolPanelSwatchRingShape = RoundedCornerShape(8.dp)
 private val ToolPanelOptionShape = RoundedCornerShape(10.dp)
-private val WidthOptionLabels = listOf("Thin", "Medium", "Thick")
+private val WidthOptionLabels = listOf(Res.string.canvas_width_thin, Res.string.canvas_width_medium, Res.string.canvas_width_thick)
 private val WidthPreviewThicknesses = listOf(1.5.dp, 3.dp, 5.dp)
 private val HighlighterColorsAfterYellow = listOf(HighlightColor.GREEN, HighlightColor.BLUE, HighlightColor.PINK, HighlightColor.ORANGE)
 val ERASER_RADIUS_OPTIONS = listOf(6f, 10f, 18f)
-private val EraserSizeLabels = listOf("Small", "Medium", "Large")
+private val EraserSizeLabels = listOf(Res.string.canvas_size_small, Res.string.canvas_size_medium, Res.string.canvas_size_large)
 private val EraserPreviewRadii = listOf(3.dp, 5.dp, 8.dp)
 private const val PRESSURE_PREVIEW_POINTS = 24
-private val TextWeightOptions = listOf(FontWeight.Normal.weight to "Regular", FontWeight.Medium.weight to "Medium", FontWeight.Bold.weight to "Bold")
-private val TextSizeOptions = listOf(16f to "Small", 24f to "Medium", 32f to "Large")
+private val TextWeightOptions = listOf(
+    FontWeight.Normal.weight to Res.string.canvas_weight_regular,
+    FontWeight.Medium.weight to Res.string.canvas_weight_medium,
+    FontWeight.Bold.weight to Res.string.canvas_weight_bold
+)
+private val TextSizeOptions = listOf(16f to Res.string.canvas_size_small, 24f to Res.string.canvas_size_medium, 32f to Res.string.canvas_size_large)
 private val TextSizePreviewSizes = listOf(11.sp, 14.sp, 17.sp)
 private val MobilePillHorizontalPadding = 8.dp
 private val MobilePillItemSpacing = 4.dp
@@ -204,12 +303,12 @@ fun CanvasOptionsButton(
     Box(modifier) {
         TopBarIconButton(
             icon = painterResource(Res.drawable.ellipsis),
-            contentDescription = "Options",
+            contentDescription = stringResource(Res.string.canvas_options),
             bgColor = Color.Transparent,
             tint = MaterialTheme.colorScheme.primary,
             hazeState = hazeState,
             hazeStyle = EmberrBlur.Regular,
-            tooltip = "More options",
+            tooltip = stringResource(Res.string.canvas_more_options),
             tooltipPosition = IconTooltipPosition.Start,
             onClick = { showOptionsMenu = true }
         )
@@ -274,7 +373,7 @@ private fun CanvasDesktopOptionsMenus(
 ) {
     EmberrDesktopMenu(expanded = showOptionsMenu, onDismissRequest = onDismissOptions) {
         Column(Modifier.width(240.dp).padding(vertical = 4.dp)) {
-            DesktopMenuItem(painterResource(Res.drawable.pen), "Rename") { onOpenRename() }
+            DesktopMenuItem(painterResource(Res.drawable.pen), stringResource(Res.string.canvas_rename)) { onOpenRename() }
             if (showFavoriteOption) {
                 DesktopMenuItem(favoriteIconFor(isFavorite), favoriteLabelFor(isFavorite)) {
                     onDismissOptions()
@@ -282,13 +381,13 @@ private fun CanvasDesktopOptionsMenus(
                 }
             }
             if (showStickyNoteOption) {
-                DesktopMenuItem(painterResource(Res.drawable.square_arrow_out_up_right), "Open as Sticky Note") {
+                DesktopMenuItem(painterResource(Res.drawable.square_arrow_out_up_right), stringResource(Res.string.canvas_open_as_sticky_note)) {
                     onDismissOptions()
                     onOpenAsStickyNote()
                 }
             }
             if (showMoveToTrashOption) {
-                DesktopMenuItem(painterResource(Res.drawable.trash), "Move to Trash", isDestructive = true) {
+                DesktopMenuItem(painterResource(Res.drawable.trash), stringResource(Res.string.canvas_move_to_trash), isDestructive = true) {
                     onDismissOptions()
                     onMoveToTrash()
                 }
@@ -315,8 +414,9 @@ private fun CanvasDesktopOptionsMenus(
 private fun favoriteIconFor(isFavorite: Boolean): Painter =
     rememberVectorPainter(if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder)
 
+@Composable
 private fun favoriteLabelFor(isFavorite: Boolean): String =
-    if (isFavorite) "Remove from Favorites" else "Add to Favorites"
+    stringResource(if (isFavorite) Res.string.canvas_remove_from_favorites else Res.string.canvas_add_to_favorites)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -339,18 +439,18 @@ private fun CanvasMobileOptionsSheets(
         if (showRenameSheet) currentTitle = loadCurrentTitle()
     }
 
-    EmberrBottomSheet(expanded = showOptionsSheet, onDismiss = onDismissOptions, title = "Canvas") { closeAnd ->
+    EmberrBottomSheet(expanded = showOptionsSheet, onDismiss = onDismissOptions, title = stringResource(Res.string.canvas_sheet_title)) { closeAnd ->
         CompositionLocalProvider(
             LocalIndication provides NoRippleIndicationNodeFactory,
             LocalRippleConfiguration provides null
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
-                BottomSheetOptionItem(painterResource(Res.drawable.pen), "Rename") { closeAnd(onOpenRename) }
+                BottomSheetOptionItem(painterResource(Res.drawable.pen), stringResource(Res.string.canvas_rename)) { closeAnd(onOpenRename) }
                 if (showFavoriteOption) {
                     BottomSheetOptionItem(favoriteIconFor(isFavorite), favoriteLabelFor(isFavorite)) { closeAnd(onToggleFavorite) }
                 }
                 if (showMoveToTrashOption) {
-                    BottomSheetOptionItem(painterResource(Res.drawable.trash), "Move to Trash", isDestructive = true) {
+                    BottomSheetOptionItem(painterResource(Res.drawable.trash), stringResource(Res.string.canvas_move_to_trash), isDestructive = true) {
                         closeAnd(onMoveToTrash)
                     }
                 }
@@ -365,8 +465,8 @@ private fun CanvasMobileOptionsSheets(
             onRename(newTitle)
             onDismissRename()
         },
-        title = "Rename Canvas",
-        placeholder = "Canvas title..."
+        title = stringResource(Res.string.canvas_rename_canvas),
+        placeholder = stringResource(Res.string.canvas_title_placeholder)
     )
 }
 
@@ -384,7 +484,7 @@ fun CanvasTitlePill(title: String, hazeState: HazeState, modifier: Modifier = Mo
     ) {
         Box(modifier = Modifier.padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) {
             Text(
-                text = title.ifBlank { "Untitled canvas" },
+                text = title.ifBlank { stringResource(Res.string.canvas_untitled_canvas) },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.primary,
@@ -400,12 +500,12 @@ fun CanvasBackButton(hazeState: HazeState, onClick: () -> Unit, modifier: Modifi
     Box(modifier) {
         TopBarIconButton(
             icon = painterResource(Res.drawable.arrow_left),
-            contentDescription = "Back",
+            contentDescription = stringResource(Res.string.common_back),
             bgColor = Color.Transparent,
             tint = MaterialTheme.colorScheme.primary,
             hazeState = hazeState,
             hazeStyle = EmberrBlur.Regular,
-            tooltip = "Back",
+            tooltip = stringResource(Res.string.common_back),
             onClick = onClick
         )
     }
@@ -426,7 +526,7 @@ private fun CanvasShapeGrid(tint: Color, onShapeSelected: (CanvasNodeShape) -> U
 
 @Composable
 private fun CanvasShapeOption(shape: CanvasNodeShape, tint: Color, onClick: () -> Unit) {
-    val label = shape.label
+    val label = shape.label()
     IconTooltip(text = label) {
         Box(
             modifier = Modifier
@@ -460,7 +560,7 @@ private fun ShapeIcon(shape: CanvasNodeShape, tint: Color) {
 @Composable
 fun CanvasShapePanel(hazeState: HazeState, onShapeSelected: (CanvasNodeShape) -> Unit, modifier: Modifier = Modifier) {
     CanvasToolPanelSurface(hazeState = hazeState, modifier = modifier) {
-        ToolPanelSection("Shapes") {
+        ToolPanelSection(stringResource(Res.string.canvas_shapes)) {
             CanvasShapeGrid(tint = MaterialTheme.colorScheme.primary, onShapeSelected = onShapeSelected)
         }
     }
@@ -471,7 +571,7 @@ fun CanvasMobileShapeSettings(hazeState: HazeState, onShapeSelected: (CanvasNode
     Box(modifier) {
         CanvasMobilePill(hazeState, isScrollable = true) {
             CanvasNodeShape.entries.forEach { shape ->
-                MobilePillItem(label = shape.label, isSelected = false, onClick = { onShapeSelected(shape) }) { color ->
+                MobilePillItem(label = shape.label(), isSelected = false, onClick = { onShapeSelected(shape) }) { color ->
                     ShapeIcon(shape = shape, tint = color)
                 }
             }
@@ -479,25 +579,27 @@ fun CanvasMobileShapeSettings(hazeState: HazeState, onShapeSelected: (CanvasNode
     }
 }
 
-private val CanvasNodeShape.label: String
-    get() = when (this) {
-        CanvasNodeShape.RECTANGLE -> "Rectangle"
-        CanvasNodeShape.SQUARE -> "Square"
-        CanvasNodeShape.CIRCLE -> "Circle"
-        CanvasNodeShape.OVAL -> "Oval"
-        CanvasNodeShape.TRIANGLE -> "Triangle"
-        CanvasNodeShape.DIAMOND -> "Diamond"
-        CanvasNodeShape.PENTAGON -> "Pentagon"
-        CanvasNodeShape.HEXAGON -> "Hexagon"
-        CanvasNodeShape.PARALLELOGRAM -> "Parallelogram"
-        CanvasNodeShape.TRAPEZOID -> "Trapezoid"
-        CanvasNodeShape.PILL -> "Pill"
-        CanvasNodeShape.DATABASE -> "Database"
-        CanvasNodeShape.DOUBLE_RECTANGLE -> "Double rectangle"
-        CanvasNodeShape.DOUBLE_SQUARE -> "Double square"
-        CanvasNodeShape.DOUBLE_CIRCLE -> "Double circle"
-        CanvasNodeShape.DOUBLE_TRIANGLE -> "Double triangle"
+@Composable
+private fun CanvasNodeShape.label(): String = stringResource(
+    when (this) {
+        CanvasNodeShape.RECTANGLE -> Res.string.canvas_shape_rectangle
+        CanvasNodeShape.SQUARE -> Res.string.canvas_shape_square
+        CanvasNodeShape.CIRCLE -> Res.string.canvas_shape_circle
+        CanvasNodeShape.OVAL -> Res.string.canvas_shape_oval
+        CanvasNodeShape.TRIANGLE -> Res.string.canvas_shape_triangle
+        CanvasNodeShape.DIAMOND -> Res.string.canvas_shape_diamond
+        CanvasNodeShape.PENTAGON -> Res.string.canvas_shape_pentagon
+        CanvasNodeShape.HEXAGON -> Res.string.canvas_shape_hexagon
+        CanvasNodeShape.PARALLELOGRAM -> Res.string.canvas_shape_parallelogram
+        CanvasNodeShape.TRAPEZOID -> Res.string.canvas_shape_trapezoid
+        CanvasNodeShape.PILL -> Res.string.canvas_shape_pill
+        CanvasNodeShape.DATABASE -> Res.string.canvas_shape_database
+        CanvasNodeShape.DOUBLE_RECTANGLE -> Res.string.canvas_shape_double_rectangle
+        CanvasNodeShape.DOUBLE_SQUARE -> Res.string.canvas_shape_double_square
+        CanvasNodeShape.DOUBLE_CIRCLE -> Res.string.canvas_shape_double_circle
+        CanvasNodeShape.DOUBLE_TRIANGLE -> Res.string.canvas_shape_double_triangle
     }
+)
 
 @Composable
 fun CanvasSelectionActionBar(
@@ -531,7 +633,7 @@ fun CanvasSelectionActionBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                SelectionBarIcon(painterResource(Res.drawable.x), "Clear", tint, onClose)
+                SelectionBarIcon(painterResource(Res.drawable.x), stringResource(Res.string.canvas_clear), tint, onClose)
                 Text(
                     text = "$selectedCount",
                     style = MaterialTheme.typography.bodyLarge,
@@ -539,7 +641,7 @@ fun CanvasSelectionActionBar(
                 )
                 Box(Modifier.width(1.dp).height(18.dp).background(tint.copy(alpha = 0.2f)))
                 options.forEach { option ->
-                    SelectionBarIcon(painterResource(option.icon), option.label, tint, option.onClick)
+                    SelectionBarIcon(painterResource(option.icon), stringResource(option.label), tint, option.onClick)
                 }
             }
         }
@@ -567,11 +669,14 @@ fun CanvasZoomButtons(
     onShowBusiestArea: () -> Unit,
     onZoomOut: () -> Unit
 ) {
+    val zoomInLabel = stringResource(Res.string.canvas_zoom_in)
+    val goToBoxesLabel = stringResource(Res.string.canvas_go_to_boxes)
+    val zoomOutLabel = stringResource(Res.string.canvas_zoom_out)
     TopBarIconButtonGroup(
         items = listOf(
-            TopBarIconButtonItem(painterResource(Res.drawable.plus), "Zoom in", onZoomIn, tooltip = "Zoom in"),
-            TopBarIconButtonItem(painterResource(Res.drawable.scan_line), "Go to boxes", onShowBusiestArea, tooltip = "Go to boxes"),
-            TopBarIconButtonItem(painterResource(Res.drawable.minus), "Zoom out", onZoomOut, tooltip = "Zoom out")
+            TopBarIconButtonItem(painterResource(Res.drawable.plus), zoomInLabel, onZoomIn, tooltip = zoomInLabel),
+            TopBarIconButtonItem(painterResource(Res.drawable.scan_line), goToBoxesLabel, onShowBusiestArea, tooltip = goToBoxesLabel),
+            TopBarIconButtonItem(painterResource(Res.drawable.minus), zoomOutLabel, onZoomOut, tooltip = zoomOutLabel)
         ),
         bgColor = Color.Transparent,
         tint = MaterialTheme.colorScheme.primary,
@@ -584,10 +689,12 @@ fun CanvasZoomButtons(
 
 @Composable
 fun CanvasUndoRedoButtons(hazeState: HazeState, onUndo: () -> Unit, onRedo: () -> Unit) {
+    val undoLabel = stringResource(Res.string.canvas_undo)
+    val redoLabel = stringResource(Res.string.canvas_redo)
     TopBarIconButtonGroup(
         items = listOf(
-            TopBarIconButtonItem(painterResource(Res.drawable.undo_circle), "Undo", onUndo, tooltip = "Undo"),
-            TopBarIconButtonItem(painterResource(Res.drawable.redo_circle), "Redo", onRedo, tooltip = "Redo")
+            TopBarIconButtonItem(painterResource(Res.drawable.undo_circle), undoLabel, onUndo, tooltip = undoLabel),
+            TopBarIconButtonItem(painterResource(Res.drawable.redo_circle), redoLabel, onRedo, tooltip = redoLabel)
         ),
         bgColor = Color.Transparent,
         tint = MaterialTheme.colorScheme.primary,
@@ -622,28 +729,31 @@ private val CanvasTool.iconSize: Dp
         CanvasTool.IMAGE -> 22.dp
     }
 
-private val CanvasTool.label: String
-    get() = when (this) {
-        CanvasTool.PEN -> "Pen"
-        CanvasTool.HIGHLIGHTER -> "Highlighter"
-        CanvasTool.ERASER -> "Eraser"
-        CanvasTool.TEXT -> "Text"
-        CanvasTool.SHAPES -> "Shapes"
-        CanvasTool.LINE -> "Line"
-        CanvasTool.IMAGE -> "Image"
+@Composable
+private fun CanvasTool.label(): String = stringResource(
+    when (this) {
+        CanvasTool.PEN -> Res.string.canvas_tool_pen
+        CanvasTool.HIGHLIGHTER -> Res.string.canvas_tool_highlighter
+        CanvasTool.ERASER -> Res.string.canvas_tool_eraser
+        CanvasTool.TEXT -> Res.string.canvas_tool_text
+        CanvasTool.SHAPES -> Res.string.canvas_tool_shapes
+        CanvasTool.LINE -> Res.string.canvas_tool_line
+        CanvasTool.IMAGE -> Res.string.canvas_tool_image
     }
+)
 
 @Composable
 fun CanvasToolbar(hazeState: HazeState, activeTool: CanvasTool?, onToolClick: (CanvasTool) -> Unit) {
     TopBarIconButtonGroup(
         items = CanvasTool.entries.map { tool ->
+            val toolLabel = tool.label()
             TopBarIconButtonItem(
                 icon = painterResource(tool.icon),
-                contentDescription = tool.label,
+                contentDescription = toolLabel,
                 onClick = { onToolClick(tool) },
                 isSelected = tool == activeTool,
                 iconSize = tool.iconSize,
-                tooltip = tool.label
+                tooltip = toolLabel
             )
         },
         bgColor = Color.Transparent,
@@ -663,19 +773,29 @@ private data class StrokeColorChoice(val colorName: String?, val color: Color, v
 private fun strokeColorChoicesFor(tool: CanvasStrokeTool): List<StrokeColorChoice> {
     val isDarkTheme = LocalAppIsDark.current
     return when (tool) {
-        CanvasStrokeTool.PEN, CanvasStrokeTool.LINE -> listOf(StrokeColorChoice(null, MaterialTheme.colorScheme.onSurface, "Default ink")) +
+        CanvasStrokeTool.PEN, CanvasStrokeTool.LINE -> listOf(StrokeColorChoice(null, MaterialTheme.colorScheme.onSurface, stringResource(Res.string.canvas_default_ink))) +
             CanvasInkColor.entries.map { inkColor ->
-                StrokeColorChoice(inkColor.storageName, inkColor.color, inkColor.storageName.replaceFirstChar { it.uppercase() })
+                StrokeColorChoice(inkColor.storageName, inkColor.color, inkColor.label())
             }
         CanvasStrokeTool.HIGHLIGHTER -> {
             val yellow = HighlightColor.defaultColor
-            listOf(StrokeColorChoice(null, yellow.backgroundFor(isDarkTheme), yellow.displayName)) +
+            listOf(StrokeColorChoice(null, yellow.backgroundFor(isDarkTheme), yellow.label())) +
                 HighlighterColorsAfterYellow.map { highlightColor ->
-                    StrokeColorChoice(highlightColor.storageName, highlightColor.backgroundFor(isDarkTheme), highlightColor.displayName)
+                    StrokeColorChoice(highlightColor.storageName, highlightColor.backgroundFor(isDarkTheme), highlightColor.label())
                 }
         }
     }
 }
+
+@Composable
+private fun CanvasInkColor.label(): String = stringResource(
+    when (this) {
+        CanvasInkColor.RED -> Res.string.common_color_red
+        CanvasInkColor.GREEN -> Res.string.common_color_green
+        CanvasInkColor.BLUE -> Res.string.common_color_blue
+        CanvasInkColor.ORANGE -> Res.string.common_color_orange
+    }
+)
 
 @Composable
 fun CanvasStrokeStylePanel(
@@ -692,7 +812,7 @@ fun CanvasStrokeStylePanel(
     }
 
     CanvasToolPanelSurface(hazeState = hazeState, modifier = modifier) {
-        ToolPanelSection("Stroke") {
+        ToolPanelSection(stringResource(Res.string.canvas_stroke)) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 strokeColorChoicesFor(tool).forEach { choice ->
                     ToolPanelColorSwatch(
@@ -704,32 +824,32 @@ fun CanvasStrokeStylePanel(
                 }
             }
         }
-        ToolPanelSection("Stroke width") {
+        ToolPanelSection(stringResource(Res.string.canvas_stroke_width)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 tool.widthOptions.forEachIndexed { index, width ->
                     ToolPanelOptionButton(
-                        label = WidthOptionLabels[index],
+                        label = stringResource(WidthOptionLabels[index]),
                         isSelected = style.width == width,
                         onClick = { change(style.copy(width = width)) }
                     ) { color -> WidthPreview(thickness = WidthPreviewThicknesses[index], color = color) }
                 }
             }
         }
-        ToolPanelSection("Pressure") {
+        ToolPanelSection(stringResource(Res.string.canvas_pressure)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ToolPanelOptionButton(
-                    label = "Same thickness",
+                    label = stringResource(Res.string.canvas_same_thickness),
                     isSelected = !style.usesPressure,
                     onClick = { change(style.copy(usesPressure = false)) }
                 ) { color -> PressurePreview(usesPressure = false, color = color) }
                 ToolPanelOptionButton(
-                    label = "Follow pressure",
+                    label = stringResource(Res.string.canvas_follow_pressure),
                     isSelected = style.usesPressure,
                     onClick = { change(style.copy(usesPressure = true)) }
                 ) { color -> PressurePreview(usesPressure = true, color = color) }
             }
         }
-        ToolPanelSection("Opacity") {
+        ToolPanelSection(stringResource(Res.string.canvas_opacity)) {
             EmberrSlider(
                 value = style.opacity,
                 onValueChange = { opacity -> onStyleChange(style.copy(opacity = opacity)) },
@@ -752,11 +872,11 @@ fun CanvasEraserSizePanel(
     modifier: Modifier = Modifier
 ) {
     CanvasToolPanelSurface(hazeState = hazeState, modifier = modifier) {
-        ToolPanelSection("Size") {
+        ToolPanelSection(stringResource(Res.string.canvas_size)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ERASER_RADIUS_OPTIONS.forEachIndexed { index, option ->
                     ToolPanelOptionButton(
-                        label = EraserSizeLabels[index],
+                        label = stringResource(EraserSizeLabels[index]),
                         isSelected = radius == option,
                         onClick = {
                             onRadiusChange(option)
@@ -773,10 +893,10 @@ fun CanvasEraserSizePanel(
     }
 }
 
-enum class CanvasTextFont(val storageName: String?, val label: String, val hasMediumWeight: Boolean) {
+enum class CanvasTextFont(val storageName: String?, val fontName: String?, val hasMediumWeight: Boolean) {
     FUZZY_BUBBLES("fuzzybubbles", "Fuzzy Bubbles", hasMediumWeight = false),
     YUYU_SHORT("yuyushort", "Yuyu Short", hasMediumWeight = false),
-    DEFAULT(null, "Default", hasMediumWeight = true),
+    DEFAULT(null, null, hasMediumWeight = true),
     SERIF("serif", "Serif", hasMediumWeight = false),
     MONOSPACE("monospace", "Monospace", hasMediumWeight = false);
 
@@ -785,15 +905,18 @@ enum class CanvasTextFont(val storageName: String?, val label: String, val hasMe
     }
 }
 
-enum class CanvasTextAlignment(val storageName: String?, val label: String, val icon: DrawableResource, val textAlign: TextAlign) {
-    LEFT(null, "Align left", Res.drawable.textalign_left2, TextAlign.Start),
-    CENTER("center", "Align center", Res.drawable.textalign_center2, TextAlign.Center),
-    RIGHT("right", "Align right", Res.drawable.textalign_right2, TextAlign.End);
+enum class CanvasTextAlignment(val storageName: String?, val label: StringResource, val icon: DrawableResource, val textAlign: TextAlign) {
+    LEFT(null, Res.string.canvas_align_left, Res.drawable.textalign_left2, TextAlign.Start),
+    CENTER("center", Res.string.canvas_align_center, Res.drawable.textalign_center2, TextAlign.Center),
+    RIGHT("right", Res.string.canvas_align_right, Res.drawable.textalign_right2, TextAlign.End);
 
     companion object {
         fun named(storageName: String?): CanvasTextAlignment = entries.firstOrNull { it.storageName == storageName } ?: LEFT
     }
 }
+
+@Composable
+private fun CanvasTextFont.label(): String = fontName ?: stringResource(Res.string.canvas_font_default)
 
 @Composable
 fun CanvasTextFont.fontFamily(): FontFamily? = when (this) {
@@ -812,7 +935,7 @@ private fun CanvasTextStyle.withFont(font: CanvasTextFont): CanvasTextStyle {
     return copy(fontFamily = font.storageName, fontWeight = if (keepsWeight) fontWeight else FontWeight.Normal.weight)
 }
 
-private fun weightOptionsFor(style: CanvasTextStyle): List<Pair<Int, String>> {
+private fun weightOptionsFor(style: CanvasTextStyle): List<Pair<Int, StringResource>> {
     val font = CanvasTextFont.named(style.fontFamily)
     return TextWeightOptions.filter { (weight, _) -> font.hasMediumWeight || weight != FontWeight.Medium.weight }
 }
@@ -827,11 +950,11 @@ fun CanvasTextStylePanel(
     val isDarkTheme = LocalAppIsDark.current
 
     CanvasToolPanelSurface(hazeState = hazeState, modifier = modifier, sectionSpacing = 12.dp) {
-        ToolPanelSection("Font") {
+        ToolPanelSection(stringResource(Res.string.canvas_font)) {
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 CanvasTextFont.entries.forEach { font ->
                     ToolPanelOptionButton(
-                        label = font.label,
+                        label = font.label(),
                         isSelected = style.fontFamily == font.storageName,
                         onClick = { onStyleChange(style.withFont(font)) },
                         width = 32.dp
@@ -839,69 +962,69 @@ fun CanvasTextStylePanel(
                 }
             }
         }
-        ToolPanelSection("Weight") {
+        ToolPanelSection(stringResource(Res.string.canvas_weight)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 weightOptionsFor(style).forEach { (weight, label) ->
                     ToolPanelOptionButton(
-                        label = label,
+                        label = stringResource(label),
                         isSelected = style.fontWeight == weight,
                         onClick = { onStyleChange(style.copy(fontWeight = weight)) }
                     ) { color -> Text("Aa", color = color, fontWeight = FontWeight(weight), fontSize = 14.sp) }
                 }
             }
         }
-        ToolPanelSection("Color") {
+        ToolPanelSection(stringResource(Res.string.canvas_color)) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 ToolPanelColorSwatch(
                     color = MaterialTheme.colorScheme.onSurface,
-                    label = "Default ink",
+                    label = stringResource(Res.string.canvas_default_ink),
                     isSelected = style.textColor == null,
                     onClick = { onStyleChange(style.copy(textColor = null)) }
                 )
                 CanvasInkColor.entries.forEach { inkColor ->
                     ToolPanelColorSwatch(
                         color = inkColor.color,
-                        label = inkColor.storageName.replaceFirstChar { it.uppercase() },
+                        label = inkColor.label(),
                         isSelected = style.textColor == inkColor.storageName,
                         onClick = { onStyleChange(style.copy(textColor = inkColor.storageName)) }
                     )
                 }
             }
         }
-        ToolPanelSection("Background") {
+        ToolPanelSection(stringResource(Res.string.canvas_background)) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 ToolPanelColorSwatch(
                     color = null,
-                    label = "No background",
+                    label = stringResource(Res.string.canvas_no_background),
                     isSelected = style.backgroundColor == null,
                     onClick = { onStyleChange(style.copy(backgroundColor = null)) }
                 )
                 TextBackgroundColors.forEach { highlightColor ->
                     ToolPanelColorSwatch(
                         color = highlightColor.backgroundFor(isDarkTheme),
-                        label = highlightColor.displayName,
+                        label = highlightColor.label(),
                         isSelected = style.backgroundColor == highlightColor.storageName,
                         onClick = { onStyleChange(style.copy(backgroundColor = highlightColor.storageName)) }
                     )
                 }
             }
         }
-        ToolPanelSection("Size") {
+        ToolPanelSection(stringResource(Res.string.canvas_size)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextSizeOptions.forEachIndexed { index, (size, label) ->
                     ToolPanelOptionButton(
-                        label = label,
+                        label = stringResource(label),
                         isSelected = style.fontSize == size,
                         onClick = { onStyleChange(style.copy(fontSize = size)) }
                     ) { color -> Text("A", color = color, fontSize = TextSizePreviewSizes[index]) }
                 }
             }
         }
-        ToolPanelSection("Align") {
+        ToolPanelSection(stringResource(Res.string.canvas_align)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 CanvasTextAlignment.entries.forEach { alignment ->
                     ToolPanelOptionButton(
-                        label = alignment.label,
+                        label = stringResource(alignment.label),
                         isSelected = style.textAlign == alignment.storageName,
                         onClick = { onStyleChange(style.copy(textAlign = alignment.storageName)) }
                     ) { color -> Icon(painterResource(alignment.icon), contentDescription = null, tint = color, modifier = Modifier.size(18.dp)) }
@@ -1011,20 +1134,20 @@ private fun PressurePreview(usesPressure: Boolean, color: Color) {
     }
 }
 
-enum class CanvasStrokeSettingsCategory(val label: String) {
-    STROKE("Stroke"),
-    WIDTH("Stroke width"),
-    PRESSURE("Pressure"),
-    OPACITY("Opacity")
+enum class CanvasStrokeSettingsCategory(val label: StringResource) {
+    STROKE(Res.string.canvas_stroke),
+    WIDTH(Res.string.canvas_stroke_width),
+    PRESSURE(Res.string.canvas_pressure),
+    OPACITY(Res.string.canvas_opacity)
 }
 
-enum class CanvasTextSettingsCategory(val label: String) {
-    FONT("Font"),
-    WEIGHT("Weight"),
-    COLOR("Color"),
-    BACKGROUND("Background"),
-    SIZE("Size"),
-    ALIGN("Align")
+enum class CanvasTextSettingsCategory(val label: StringResource) {
+    FONT(Res.string.canvas_font),
+    WEIGHT(Res.string.canvas_weight),
+    COLOR(Res.string.canvas_color),
+    BACKGROUND(Res.string.canvas_background),
+    SIZE(Res.string.canvas_size),
+    ALIGN(Res.string.canvas_align)
 }
 
 @Composable
@@ -1057,7 +1180,7 @@ fun CanvasMobileStrokeSettings(
             CanvasStrokeSettingsCategory.WIDTH -> CanvasMobilePill(hazeState) {
                 widthOptions.forEachIndexed { index, width ->
                     MobilePillItem(
-                        label = WidthOptionLabels[index],
+                        label = stringResource(WidthOptionLabels[index]),
                         isSelected = style.width == width,
                         onClick = { onStyleChange(style.copy(width = width)) }
                     ) { color -> WidthPreview(thickness = WidthPreviewThicknesses[index], color = color) }
@@ -1065,12 +1188,12 @@ fun CanvasMobileStrokeSettings(
             }
             CanvasStrokeSettingsCategory.PRESSURE -> CanvasMobilePill(hazeState) {
                 MobilePillItem(
-                    label = "Same thickness",
+                    label = stringResource(Res.string.canvas_same_thickness),
                     isSelected = !style.usesPressure,
                     onClick = { onStyleChange(style.copy(usesPressure = false)) }
                 ) { color -> PressurePreview(usesPressure = false, color = color) }
                 MobilePillItem(
-                    label = "Follow pressure",
+                    label = stringResource(Res.string.canvas_follow_pressure),
                     isSelected = style.usesPressure,
                     onClick = { onStyleChange(style.copy(usesPressure = true)) }
                 ) { color -> PressurePreview(usesPressure = true, color = color) }
@@ -1082,7 +1205,7 @@ fun CanvasMobileStrokeSettings(
                     modifier = Modifier.width(MobileOpacitySliderWidth).padding(start = 8.dp)
                 )
                 Text(
-                    text = "${(style.opacity * 100).roundToInt()}%",
+                    text = stringResource(Res.string.common_percent_value, (style.opacity * 100).roundToInt()),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.width(44.dp).padding(start = 8.dp)
@@ -1094,7 +1217,7 @@ fun CanvasMobileStrokeSettings(
         CanvasMobilePill(hazeState) {
             CanvasStrokeSettingsCategory.entries.forEach { category ->
                 MobilePillItem(
-                    label = category.label,
+                    label = stringResource(category.label),
                     isSelected = openCategory == category,
                     onClick = { onCategoryClick(category) }
                 ) { color ->
@@ -1127,7 +1250,7 @@ fun CanvasMobileEraserSettings(
         CanvasMobilePill(hazeState) {
             ERASER_RADIUS_OPTIONS.forEachIndexed { index, option ->
                 MobilePillItem(
-                    label = EraserSizeLabels[index],
+                    label = stringResource(EraserSizeLabels[index]),
                     isSelected = radius == option,
                     onClick = { onRadiusChange(option) }
                 ) { color ->
@@ -1161,7 +1284,7 @@ fun CanvasMobileTextSettings(
             CanvasTextSettingsCategory.FONT -> CanvasMobilePill(hazeState) {
                 CanvasTextFont.entries.forEach { font ->
                     MobilePillItem(
-                        label = font.label,
+                        label = font.label(),
                         isSelected = style.fontFamily == font.storageName,
                         onClick = { onStyleChange(style.withFont(font)) }
                     ) { color -> Text("Aa", color = color, fontFamily = font.fontFamily(), fontSize = 14.sp) }
@@ -1170,7 +1293,7 @@ fun CanvasMobileTextSettings(
             CanvasTextSettingsCategory.WEIGHT -> CanvasMobilePill(hazeState) {
                 weightOptionsFor(style).forEach { (weight, label) ->
                     MobilePillItem(
-                        label = label,
+                        label = stringResource(label),
                         isSelected = style.fontWeight == weight,
                         onClick = { onStyleChange(style.copy(fontWeight = weight)) }
                     ) { color -> Text("Aa", color = color, fontFamily = currentFont.fontFamily(), fontWeight = FontWeight(weight), fontSize = 14.sp) }
@@ -1189,14 +1312,14 @@ fun CanvasMobileTextSettings(
             CanvasTextSettingsCategory.BACKGROUND -> CanvasMobilePill(hazeState) {
                 MobileColorOption(
                     color = null,
-                    label = "No background",
+                    label = stringResource(Res.string.canvas_no_background),
                     isSelected = style.backgroundColor == null,
                     onClick = { onStyleChange(style.copy(backgroundColor = null)) }
                 )
                 TextBackgroundColors.forEach { highlightColor ->
                     MobileColorOption(
                         color = highlightColor.backgroundFor(isDarkTheme),
-                        label = highlightColor.displayName,
+                        label = highlightColor.label(),
                         isSelected = style.backgroundColor == highlightColor.storageName,
                         onClick = { onStyleChange(style.copy(backgroundColor = highlightColor.storageName)) }
                     )
@@ -1205,7 +1328,7 @@ fun CanvasMobileTextSettings(
             CanvasTextSettingsCategory.SIZE -> CanvasMobilePill(hazeState) {
                 TextSizeOptions.forEachIndexed { index, (size, label) ->
                     MobilePillItem(
-                        label = label,
+                        label = stringResource(label),
                         isSelected = style.fontSize == size,
                         onClick = { onStyleChange(style.copy(fontSize = size)) }
                     ) { color -> Text("A", color = color, fontSize = TextSizePreviewSizes[index]) }
@@ -1214,7 +1337,7 @@ fun CanvasMobileTextSettings(
             CanvasTextSettingsCategory.ALIGN -> CanvasMobilePill(hazeState) {
                 CanvasTextAlignment.entries.forEach { alignment ->
                     MobilePillItem(
-                        label = alignment.label,
+                        label = stringResource(alignment.label),
                         isSelected = style.textAlign == alignment.storageName,
                         onClick = { onStyleChange(style.copy(textAlign = alignment.storageName)) }
                     ) { color -> Icon(painterResource(alignment.icon), contentDescription = null, tint = color, modifier = Modifier.size(18.dp)) }
@@ -1226,7 +1349,7 @@ fun CanvasMobileTextSettings(
         CanvasMobilePill(hazeState) {
             CanvasTextSettingsCategory.entries.forEach { category ->
                 MobilePillItem(
-                    label = category.label,
+                    label = stringResource(category.label),
                     isSelected = openCategory == category,
                     onClick = { onCategoryClick(category) }
                 ) { color ->
@@ -1352,15 +1475,17 @@ private fun WidthPreview(thickness: Dp, color: Color) {
     }
 }
 
-private val CanvasLineStyle.label: String
-    get() = when (this) {
-        CanvasLineStyle.ARROW -> "Arrow"
-        CanvasLineStyle.DOTTED_ARROW -> "Dotted arrow"
-        CanvasLineStyle.DASHED_ARROW -> "Dashed arrow"
-        CanvasLineStyle.SOLID_LINE -> "Solid line"
-        CanvasLineStyle.DOTTED_LINE -> "Dotted line"
-        CanvasLineStyle.DASHED_LINE -> "Dashed line"
+@Composable
+private fun CanvasLineStyle.label(): String = stringResource(
+    when (this) {
+        CanvasLineStyle.ARROW -> Res.string.canvas_line_arrow
+        CanvasLineStyle.DOTTED_ARROW -> Res.string.canvas_line_dotted_arrow
+        CanvasLineStyle.DASHED_ARROW -> Res.string.canvas_line_dashed_arrow
+        CanvasLineStyle.SOLID_LINE -> Res.string.canvas_line_solid_line
+        CanvasLineStyle.DOTTED_LINE -> Res.string.canvas_line_dotted_line
+        CanvasLineStyle.DASHED_LINE -> Res.string.canvas_line_dashed_line
     }
+)
 
 @Composable
 private fun LinePreview(style: CanvasLineStyle, color: Color) {
@@ -1386,13 +1511,13 @@ fun CanvasLinePanel(
     modifier: Modifier = Modifier
 ) {
     CanvasToolPanelSurface(hazeState = hazeState, modifier = modifier) {
-        ToolPanelSection("Line") {
+        ToolPanelSection(stringResource(Res.string.canvas_line)) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 CanvasLineStyle.entries.chunked(3).forEach { rowOfStyles ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         rowOfStyles.forEach { style ->
                             ToolPanelOptionButton(
-                                label = style.label,
+                                label = style.label(),
                                 isSelected = selectedStyle == style,
                                 onClick = { onStyleChange(style) }
                             ) { color -> LinePreview(style = style, color = color) }
@@ -1401,7 +1526,7 @@ fun CanvasLinePanel(
                 }
             }
         }
-        ToolPanelSection("Stroke") {
+        ToolPanelSection(stringResource(Res.string.canvas_stroke)) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 strokeColorChoicesFor(CanvasStrokeTool.LINE).forEach { choice ->
                     ToolPanelColorSwatch(
@@ -1413,11 +1538,11 @@ fun CanvasLinePanel(
                 }
             }
         }
-        ToolPanelSection("Stroke width") {
+        ToolPanelSection(stringResource(Res.string.canvas_stroke_width)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 CanvasStrokeTool.LINE.widthOptions.forEachIndexed { index, width ->
                     ToolPanelOptionButton(
-                        label = WidthOptionLabels[index],
+                        label = stringResource(WidthOptionLabels[index]),
                         isSelected = strokeStyle.width == width,
                         onClick = { onStrokeStyleChange(strokeStyle.copy(width = width)) }
                     ) { color -> WidthPreview(thickness = WidthPreviewThicknesses[index], color = color) }
@@ -1427,10 +1552,10 @@ fun CanvasLinePanel(
     }
 }
 
-enum class CanvasLineSettingsCategory(val label: String) {
-    STYLE("Line style"),
-    STROKE("Stroke"),
-    WIDTH("Stroke width")
+enum class CanvasLineSettingsCategory(val label: StringResource) {
+    STYLE(Res.string.canvas_line_style),
+    STROKE(Res.string.canvas_stroke),
+    WIDTH(Res.string.canvas_stroke_width)
 }
 
 @Composable
@@ -1454,7 +1579,7 @@ fun CanvasMobileLineSettings(
             CanvasLineSettingsCategory.STYLE -> CanvasMobilePill(hazeState) {
                 CanvasLineStyle.entries.forEach { style ->
                     MobilePillItem(
-                        label = style.label,
+                        label = style.label(),
                         isSelected = selectedStyle == style,
                         onClick = { onStyleChange(style) }
                     ) { color -> LinePreview(style = style, color = color) }
@@ -1473,7 +1598,7 @@ fun CanvasMobileLineSettings(
             CanvasLineSettingsCategory.WIDTH -> CanvasMobilePill(hazeState) {
                 widthOptions.forEachIndexed { index, width ->
                     MobilePillItem(
-                        label = WidthOptionLabels[index],
+                        label = stringResource(WidthOptionLabels[index]),
                         isSelected = strokeStyle.width == width,
                         onClick = { onStrokeStyleChange(strokeStyle.copy(width = width)) }
                     ) { color -> WidthPreview(thickness = WidthPreviewThicknesses[index], color = color) }
@@ -1485,7 +1610,7 @@ fun CanvasMobileLineSettings(
         CanvasMobilePill(hazeState) {
             CanvasLineSettingsCategory.entries.forEach { category ->
                 MobilePillItem(
-                    label = category.label,
+                    label = stringResource(category.label),
                     isSelected = openCategory == category,
                     onClick = { onCategoryClick(category) }
                 ) { color ->
@@ -1502,14 +1627,15 @@ fun CanvasMobileLineSettings(
 
 @Composable
 fun CanvasDotGridButton(hazeState: HazeState, isDotGridVisible: Boolean, onToggle: () -> Unit) {
+    val dotGridLabel = stringResource(if (isDotGridVisible) Res.string.canvas_hide_dots else Res.string.canvas_show_dots)
     TopBarIconButton(
         icon = painterResource(if (isDotGridVisible) Res.drawable.dot_grid else Res.drawable.dot_grid_off),
-        contentDescription = if (isDotGridVisible) "Hide dots" else "Show dots",
+        contentDescription = dotGridLabel,
         bgColor = Color.Transparent,
         tint = MaterialTheme.colorScheme.primary,
         hazeState = hazeState,
         hazeStyle = EmberrBlur.Regular,
-        tooltip = if (isDotGridVisible) "Hide dots" else "Show dots",
+        tooltip = dotGridLabel,
         tooltipPosition = IconTooltipPosition.Start,
         onClick = onToggle
     )
@@ -1517,15 +1643,16 @@ fun CanvasDotGridButton(hazeState: HazeState, isDotGridVisible: Boolean, onToggl
 
 @Composable
 fun CanvasFullScreenButton(hazeState: HazeState, isFullScreen: Boolean, onToggle: () -> Unit) {
+    val fullScreenLabel = stringResource(if (isFullScreen) Res.string.canvas_exit_full_screen else Res.string.canvas_full_screen)
     TopBarIconButton(
         icon = painterResource(if (isFullScreen) Res.drawable.minimize_2 else Res.drawable.maximize_2),
-        contentDescription = if (isFullScreen) "Exit full screen" else "Full screen",
+        contentDescription = fullScreenLabel,
         bgColor = Color.Transparent,
         tint = MaterialTheme.colorScheme.primary,
         hazeState = hazeState,
         hazeStyle = EmberrBlur.Regular,
         iconSize = 18.dp,
-        tooltip = if (isFullScreen) "Exit full screen" else "Full screen",
+        tooltip = fullScreenLabel,
         tooltipPosition = IconTooltipPosition.Start,
         onClick = onToggle
     )
@@ -1543,7 +1670,7 @@ private fun CanvasRenamePopup(
 
     Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(
-            text = "Rename Canvas",
+            text = stringResource(Res.string.canvas_rename_canvas),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -1552,13 +1679,13 @@ private fun CanvasRenamePopup(
         EmberrTextField(
             value = titleInput,
             onValueChange = { titleInput = it },
-            placeholder = "Canvas title...",
+            placeholder = stringResource(Res.string.canvas_title_placeholder),
             modifier = Modifier.fillMaxWidth(),
             onSubmit = submit
         )
         Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
-            EmberrButtonPrimary(text = "Save", onClick = submit, modifier = Modifier.weight(1f))
+            EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.weight(1f))
+            EmberrButtonPrimary(text = stringResource(Res.string.common_save), onClick = submit, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -1594,10 +1721,10 @@ fun CanvasSelectionPill(
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SelectionPillButton(painterResource(Res.drawable.trash), "Delete box", onDelete)
+        SelectionPillButton(painterResource(Res.drawable.trash), stringResource(Res.string.canvas_delete_box), onDelete)
         if (showsColorOption) {
             Box {
-                SelectionPillButton(painterResource(Res.drawable.palette), "Box color") { showPalette = true }
+                SelectionPillButton(painterResource(Res.drawable.palette), stringResource(Res.string.canvas_box_color)) { showPalette = true }
                 EmberrDesktopMenu(expanded = showPalette, onDismissRequest = { showPalette = false }) {
                     CanvasColorPalette(
                         currentColorName = currentColorName,
@@ -1642,7 +1769,7 @@ fun CanvasPastePill(anchorOnScreen: Offset, onPaste: () -> Unit) {
             tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(18.dp)
         )
-        Text("Paste image", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        Text(stringResource(Res.string.canvas_paste_image), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
@@ -1682,7 +1809,7 @@ fun CanvasAddingImageOverlay() {
                     strokeWidth = 3.dp,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Text("Adding image...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(Res.string.canvas_adding_image), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }
@@ -1736,7 +1863,7 @@ private fun CanvasColorPalette(currentColorName: String?, onColorSelected: (Stri
 }
 
 data class CanvasMenuOption(
-    val label: String,
+    val label: StringResource,
     val icon: DrawableResource,
     val isDestructive: Boolean = false,
     val onClick: () -> Unit
@@ -1752,7 +1879,7 @@ fun CanvasContextMenu(
         EmberrDesktopMenu(expanded = options.isNotEmpty(), onDismissRequest = onDismiss) {
             Column(Modifier.width(200.dp).padding(vertical = 4.dp)) {
                 options.forEach { option ->
-                    DesktopMenuItem(painterResource(option.icon), option.label, isDestructive = option.isDestructive) {
+                    DesktopMenuItem(painterResource(option.icon), stringResource(option.label), isDestructive = option.isDestructive) {
                         option.onClick()
                         onDismiss()
                     }

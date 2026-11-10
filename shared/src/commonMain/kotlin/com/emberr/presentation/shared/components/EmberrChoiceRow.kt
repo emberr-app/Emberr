@@ -32,8 +32,16 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_down
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.components_select_all
+import emberr.shared.generated.resources.components_spaces_all
+import emberr.shared.generated.resources.components_spaces_none
+import emberr.shared.generated.resources.components_spaces_none_yet
+import emberr.shared.generated.resources.components_spaces_some_of_total
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 private val ChoiceSheetButtonPadding = 20.dp
 private val ChoiceMenuMinWidth = 160.dp
@@ -87,7 +95,7 @@ fun EmberrChoiceRow(
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                 menuContent(closeAnd)
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = { closeAnd {} },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -212,7 +220,7 @@ fun EmberrSpaceCheckboxOptions(
 ) {
     val allSpaceIds = spaces.map { it.spaceId }.toSet()
     EmberrCheckboxOption(
-        label = "Select All",
+        label = stringResource(Res.string.components_select_all),
         isChecked = checkedSpaceIds == allSpaceIds,
         onClick = { onCheckedSpaceIdsChange(if (checkedSpaceIds == allSpaceIds) emptySet() else allSpaceIds) }
     )
@@ -229,10 +237,11 @@ fun EmberrSpaceCheckboxOptions(
     }
 }
 
+@Composable
 fun checkedSpacesLabel(spaces: List<SpaceEntity>, checkedSpaceIds: Set<String>): String = when {
-    spaces.isEmpty() -> "None yet"
-    checkedSpaceIds.isEmpty() -> "None"
+    spaces.isEmpty() -> stringResource(Res.string.components_spaces_none_yet)
+    checkedSpaceIds.isEmpty() -> stringResource(Res.string.components_spaces_none)
     checkedSpaceIds.size == spaces.size && spaces.size == 1 -> spaces.single().displayName
-    checkedSpaceIds.size == spaces.size -> "All ${spaces.size} spaces"
-    else -> "${checkedSpaceIds.size} of ${spaces.size} spaces"
+    checkedSpaceIds.size == spaces.size -> pluralStringResource(Res.plurals.components_spaces_all, spaces.size, spaces.size)
+    else -> pluralStringResource(Res.plurals.components_spaces_some_of_total, spaces.size, checkedSpaceIds.size, spaces.size)
 }

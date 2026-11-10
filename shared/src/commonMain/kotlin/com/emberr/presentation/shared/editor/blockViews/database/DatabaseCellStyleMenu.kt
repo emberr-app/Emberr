@@ -29,6 +29,7 @@ import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.DatabaseCellStyle
 import com.emberr.domain.model.DatabaseColumnTarget
 import com.emberr.domain.model.TextAlignment
+import com.emberr.presentation.shared.components.label
 import com.emberr.presentation.shared.editor.formatting.removeHighlightMark
 import com.emberr.ui.theme.HighlightColor
 import com.emberr.ui.theme.LocalAppIsDark
@@ -162,7 +163,7 @@ internal fun DatabaseStyleColorChoices(
         HighlightColor.entries.forEach { highlightColor ->
             DatabaseStyleSwatch(
                 color = colorOf(highlightColor) ?: Color.Transparent,
-                label = highlightColor.displayName,
+                label = highlightColor.label(),
                 isSelected = selectedColorName == highlightColor.storageName,
                 showsNoColorMark = false,
                 onClick = { onColorChosen(highlightColor.storageName) }

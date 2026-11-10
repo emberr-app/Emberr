@@ -56,7 +56,9 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
+import emberr.shared.generated.resources.common_back
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 val TopHeaderBarButtonSize = 44.dp
@@ -112,7 +114,7 @@ fun EmberrTopHeaderBar(
     reserveBackButtonSpace: Boolean = true,
     showsSidebarToggle: Boolean = true,
     backIcon: Painter = painterResource(Res.drawable.chevron_left),
-    backContentDescription: String = "Back",
+    backContentDescription: String = stringResource(Res.string.common_back),
     backTooltip: String? = null,
     backButtonTint: Color = MaterialTheme.colorScheme.primary,
     backButtonBackground: Color = Color.Transparent,

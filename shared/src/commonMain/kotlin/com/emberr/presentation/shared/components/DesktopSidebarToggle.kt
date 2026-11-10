@@ -9,8 +9,10 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.components_show_sidebar
 import emberr.shared.generated.resources.sidebar
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 val LocalDesktopSidebarToggle = compositionLocalOf<(() -> Unit)?> { null }
 
@@ -25,15 +27,16 @@ fun DesktopSidebarToggleButton(
     bgColor: Color = Color.Transparent
 ) {
     val sidebarIcon = painterResource(Res.drawable.sidebar)
+    val showSidebarLabel = stringResource(Res.string.components_show_sidebar)
     TopBarIconButton(
         icon = remember(sidebarIcon) { sidebarIcon.flippedHorizontally() },
-        contentDescription = "Show sidebar",
+        contentDescription = showSidebarLabel,
         bgColor = bgColor,
         tint = tint,
         hazeState = hazeState,
         hazeStyle = hazeStyle,
         size = TopHeaderBarButtonSize,
-        tooltip = "Show sidebar",
+        tooltip = showSidebarLabel,
         onClick = onClick
     )
 }
