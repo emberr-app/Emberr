@@ -65,6 +65,21 @@ import emberr.shared.generated.resources.plus
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_create
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.desktop_add_space
+import emberr.shared.generated.resources.desktop_create_space
+import emberr.shared.generated.resources.desktop_space_options
+import emberr.shared.generated.resources.space_create_space
+import emberr.shared.generated.resources.space_delete_space
+import emberr.shared.generated.resources.space_delete_space_message
+import emberr.shared.generated.resources.space_delete_space_question
+import emberr.shared.generated.resources.space_name_placeholder
+import emberr.shared.generated.resources.space_new_space
+import emberr.shared.generated.resources.space_rename_space
+import org.jetbrains.compose.resources.stringResource
 
 private val BAR_HEIGHT = 44.dp
 private val DOT_SIZE = 8.dp
@@ -110,7 +125,7 @@ fun DesktopSpaceBar(
         )
 
         Box(modifier = Modifier.align(Alignment.CenterEnd).padding(end = PLUS_BUTTON_END_PADDING)) {
-            IconTooltip(text = "Create space", position = IconTooltipPosition.Above) {
+            IconTooltip(text = stringResource(Res.string.desktop_create_space), position = IconTooltipPosition.Above) {
                 AddSpaceButton(onClick = { showAddMenu = true })
             }
 
@@ -119,7 +134,7 @@ fun DesktopSpaceBar(
                 onDismissRequest = { showAddMenu = false }
             ) {
                 SpaceMenuItems {
-                    SpaceMenuItem(text = "Create Space", icon = Icons.Default.Add) {
+                    SpaceMenuItem(text = stringResource(Res.string.space_create_space), icon = Icons.Default.Add) {
                         showAddMenu = false
                         showCreatePopup = true
                     }
@@ -132,12 +147,12 @@ fun DesktopSpaceBar(
                 modifier = Modifier.width(280.dp)
             ) {
                 DesktopNamePopup(
-                    title = "New Space",
+                    title = stringResource(Res.string.space_new_space),
                     initialValue = "",
-                    confirmLabel = "Create",
+                    confirmLabel = stringResource(Res.string.common_create),
                     onConfirm = { name -> onCreateSpace(name); showCreatePopup = false },
                     onDismiss = { showCreatePopup = false },
-                    placeholder = "Space name..."
+                    placeholder = stringResource(Res.string.space_name_placeholder)
                 )
             }
         }
@@ -281,7 +296,7 @@ private fun AddSpaceButton(onClick: () -> Unit) {
     ) {
         Icon(
             painter = painterResource(Res.drawable.plus),
-            contentDescription = "Add space",
+            contentDescription = stringResource(Res.string.desktop_add_space),
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
             modifier = Modifier.size(PLUS_ICON_SIZE)
         )
@@ -336,12 +351,12 @@ fun SidebarSpaceHeader(
                 onDismissRequest = { showMenu = false }
             ) {
                 SpaceMenuItems {
-                    SpaceMenuItem(text = "Rename Space", icon = Icons.Default.Edit) {
+                    SpaceMenuItem(text = stringResource(Res.string.space_rename_space), icon = Icons.Default.Edit) {
                         showMenu = false
                         showRenamePopup = true
                     }
                     SpaceMenuItem(
-                        text = "Delete Space",
+                        text = stringResource(Res.string.space_delete_space),
                         icon = Icons.Default.Delete,
                         isDestructive = true,
                         enabled = canDelete
@@ -358,12 +373,12 @@ fun SidebarSpaceHeader(
                 modifier = Modifier.width(280.dp)
             ) {
                 DesktopNamePopup(
-                    title = "Rename Space",
+                    title = stringResource(Res.string.space_rename_space),
                     initialValue = displayName,
-                    confirmLabel = "Save",
+                    confirmLabel = stringResource(Res.string.common_save),
                     onConfirm = { name -> onRename(name); showRenamePopup = false },
                     onDismiss = { showRenamePopup = false },
-                    placeholder = "Space name..."
+                    placeholder = stringResource(Res.string.space_name_placeholder)
                 )
             }
 
@@ -403,7 +418,7 @@ private fun SpaceMenuButton(alpha: Float, onClick: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Default.MoreHoriz,
-            contentDescription = "Space options",
+            contentDescription = stringResource(Res.string.desktop_space_options),
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f * alpha),
             modifier = Modifier.size(MENU_ICON_SIZE)
         )
@@ -418,20 +433,20 @@ private fun DeleteSpaceConfirmation(
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(
-            text = "Delete \"$displayName\"?",
+            text = stringResource(Res.string.space_delete_space_question, displayName),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(6.dp))
         Text(
-            text = "Every note, folder, tag and chat in this space is deleted with it. This cannot be undone.",
+            text = stringResource(Res.string.space_delete_space_message),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
         Spacer(Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
+            EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.weight(1f))
             Button(
                 onClick = onConfirm,
                 modifier = Modifier.weight(1f).height(46.dp),
@@ -442,7 +457,7 @@ private fun DeleteSpaceConfirmation(
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None)
             ) {
-                Text(text = "Delete", style = MaterialTheme.typography.bodyLarge)
+                Text(text = stringResource(Res.string.common_delete), style = MaterialTheme.typography.bodyLarge)
             }
         }
     }

@@ -86,6 +86,31 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import com.emberr.presentation.home.deleteLabel
 import com.emberr.presentation.home.favoriteLabel
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_create
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.desktop_add_subfolder
+import emberr.shared.generated.resources.desktop_empty_space
+import emberr.shared.generated.resources.desktop_empty_space_a_note
+import emberr.shared.generated.resources.desktop_empty_space_start_with
+import emberr.shared.generated.resources.desktop_new_note_here
+import emberr.shared.generated.resources.desktop_new_note_in_folder
+import emberr.shared.generated.resources.desktop_open_in_split_view
+import emberr.shared.generated.resources.desktop_rename_folder
+import emberr.shared.generated.resources.desktop_rename_note
+import emberr.shared.generated.resources.desktop_toggle_section
+import emberr.shared.generated.resources.home_canvas
+import emberr.shared.generated.resources.home_empty_space_a_folder
+import emberr.shared.generated.resources.home_empty_space_or
+import emberr.shared.generated.resources.home_favorite
+import emberr.shared.generated.resources.home_name_placeholder
+import emberr.shared.generated.resources.home_new_subfolder
+import emberr.shared.generated.resources.home_note
+import emberr.shared.generated.resources.home_rename
+import emberr.shared.generated.resources.home_selected
+import emberr.shared.generated.resources.home_templates
+import org.jetbrains.compose.resources.stringResource
 
 private val INDENT_STEP          = 32.dp
 private val SIDEBAR_BASE_START   = 8.dp
@@ -165,7 +190,7 @@ internal fun DesktopNamePopup(
     confirmLabel: String,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
-    placeholder: String = "Name..."
+    placeholder: String = stringResource(Res.string.home_name_placeholder)
 ) {
     var input by remember(initialValue) { mutableStateOf(initialValue) }
     val onSubmit: () -> Unit = { if (input.isNotBlank()) onConfirm(input.trim()) }
@@ -179,7 +204,7 @@ internal fun DesktopNamePopup(
         )
         EmberrTextField(value = input, onValueChange = { input = it }, placeholder = placeholder, modifier = Modifier.fillMaxWidth(), onSubmit = onSubmit)
         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            EmberrButtonSecondary(text = "Cancel", onClick = onDismiss, modifier = Modifier.weight(1f))
+            EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.weight(1f))
             EmberrButtonPrimary(text = confirmLabel, onClick = onSubmit, modifier = Modifier.weight(1f))
         }
     }
@@ -204,12 +229,12 @@ internal fun DesktopNewNoteMenu(
     ) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             EmberrDesktopMenuOption(
-                label = "Note",
+                label = stringResource(Res.string.home_note),
                 icon = { NewNoteMenuIcon(Res.drawable.file_text) },
                 onClick = { onDismissRequest(); onCreateNote(NoteKind.NOTE) }
             )
             EmberrDesktopMenuOption(
-                label = "Canvas",
+                label = stringResource(Res.string.home_canvas),
                 icon = { NewNoteMenuIcon(Res.drawable.group) },
                 onClick = { onDismissRequest(); onCreateNote(NoteKind.CANVAS) }
             )
@@ -221,7 +246,7 @@ internal fun DesktopNewNoteMenu(
                 menuWidthEstimate = TemplatesMenuWidthEstimate,
                 anchor = { openTemplates, _ ->
                     EmberrDesktopMenuOption(
-                        label = "Templates",
+                        label = stringResource(Res.string.home_templates),
                         icon = { NewNoteMenuIcon(Res.drawable.template) },
                         onClick = openTemplates
                     )
@@ -403,8 +428,8 @@ fun SidebarFolderRow(
             when {
                 isSelected -> SidebarTrailingCheck()
                 isHovered && !dragState.dragging -> {
-                    IconTooltip(text = "New note in folder") {
-                        SidebarHoverAction(painterResource(Res.drawable.plus), "New note here") { showAddNotePopup = true }
+                    IconTooltip(text = stringResource(Res.string.desktop_new_note_in_folder)) {
+                        SidebarHoverAction(painterResource(Res.drawable.plus), stringResource(Res.string.desktop_new_note_here)) { showAddNotePopup = true }
                     }
                     Spacer(Modifier.width(2.dp))
                 }
@@ -420,18 +445,18 @@ fun SidebarFolderRow(
                 )
                 EmberrDesktopMenu(expanded = showAddSubfolderPopup, onDismissRequest = { showAddSubfolderPopup = false }, modifier = Modifier.width(280.dp)) {
                     DesktopNamePopup(
-                        title = "New Subfolder",
+                        title = stringResource(Res.string.home_new_subfolder),
                         initialValue = "",
-                        confirmLabel = "Create",
+                        confirmLabel = stringResource(Res.string.common_create),
                         onConfirm = { name -> onAddSubfolder(name); showAddSubfolderPopup = false },
                         onDismiss = { showAddSubfolderPopup = false }
                     )
                 }
                 EmberrDesktopMenu(expanded = showRenamePopup, onDismissRequest = { showRenamePopup = false }, modifier = Modifier.width(280.dp)) {
                     DesktopNamePopup(
-                        title = "Rename Folder",
+                        title = stringResource(Res.string.desktop_rename_folder),
                         initialValue = folder.name,
-                        confirmLabel = "Save",
+                        confirmLabel = stringResource(Res.string.common_save),
                         onConfirm = { name -> onRename(name); showRenamePopup = false },
                         onDismiss = { showRenamePopup = false }
                     )
@@ -448,8 +473,8 @@ fun SidebarFolderRow(
             ) {
                 SidebarMenuItems {
                     if (menu.showRename) {
-                        SidebarMenuItem("Add Subfolder", Icons.Default.CreateNewFolder) { showContextMenu = false; showAddSubfolderPopup = true }
-                        SidebarMenuItem("Rename", Icons.Default.Edit) { showContextMenu = false; showRenamePopup = true }
+                        SidebarMenuItem(stringResource(Res.string.desktop_add_subfolder), Icons.Default.CreateNewFolder) { showContextMenu = false; showAddSubfolderPopup = true }
+                        SidebarMenuItem(stringResource(Res.string.home_rename), Icons.Default.Edit) { showContextMenu = false; showRenamePopup = true }
                     }
                     SidebarMenuItem(menu.deleteLabel(), Icons.Default.Delete, isDestructive = true) { showContextMenu = false; onDelete() }
                 }
@@ -596,7 +621,7 @@ fun SidebarNoteRow(
             }
             Spacer(Modifier.width(ROW_LABEL_GAP))
             Text(
-                text = note.title.ifEmpty { "Untitled" },
+                text = note.title.ifEmpty { stringResource(Res.string.common_untitled) },
                 style = sidebarRowTextStyle,
                 fontWeight = if (isActive) FontWeight.Medium else FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isActive) 1f else 0.82f),
@@ -609,7 +634,7 @@ fun SidebarNoteRow(
                 note.isFavorite -> {
                     Icon(
                         painterResource(Res.drawable.star),
-                        contentDescription = "Favorite",
+                        contentDescription = stringResource(Res.string.home_favorite),
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                         modifier = Modifier.padding(end = 6.dp).size(14.dp)
                     )
@@ -619,9 +644,9 @@ fun SidebarNoteRow(
             Box {
                 EmberrDesktopMenu(expanded = showRenamePopup, onDismissRequest = { showRenamePopup = false }, modifier = Modifier.width(280.dp)) {
                     DesktopNamePopup(
-                        title = "Rename Note",
+                        title = stringResource(Res.string.desktop_rename_note),
                         initialValue = note.title,
-                        confirmLabel = "Save",
+                        confirmLabel = stringResource(Res.string.common_save),
                         onConfirm = { name -> onRename(name); showRenamePopup = false },
                         onDismiss = { showRenamePopup = false }
                     )
@@ -638,10 +663,10 @@ fun SidebarNoteRow(
             ) {
                 SidebarMenuItems {
                     if (onOpenInSplitView != null) {
-                        SidebarMenuItem("Open in split view", Icons.Default.VerticalSplit) { showContextMenu = false; onOpenInSplitView() }
+                        SidebarMenuItem(stringResource(Res.string.desktop_open_in_split_view), Icons.Default.VerticalSplit) { showContextMenu = false; onOpenInSplitView() }
                     }
                     if (menu.showRename) {
-                        SidebarMenuItem("Rename", Icons.Default.Edit) { showContextMenu = false; showRenamePopup = true }
+                        SidebarMenuItem(stringResource(Res.string.home_rename), Icons.Default.Edit) { showContextMenu = false; showRenamePopup = true }
                     }
                     if (menu.showFavorite) {
                         SidebarMenuItem(menu.favoriteLabel(), Icons.Default.Star) { showContextMenu = false; onToggleFavorite() }
@@ -747,7 +772,7 @@ fun SidebarSectionHeader(
             )
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Toggle $title",
+                contentDescription = stringResource(Res.string.desktop_toggle_section, title),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = chevronAlpha),
                 modifier = Modifier.padding(start = 2.dp).size(22.dp).rotate(chevronRotation)
             )
@@ -806,7 +831,7 @@ private fun SidebarTrailingCheck() {
     ) {
         Icon(
             imageVector = Icons.Default.Check,
-            contentDescription = "Selected",
+            contentDescription = stringResource(Res.string.home_selected),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(13.dp)
         )
@@ -868,19 +893,19 @@ fun SidebarEmptyNotesHint(
             .padding(start = ROW_ICON_START, end = 10.dp, top = 6.dp, bottom = 8.dp)
     ) {
         Text(
-            text = "This space is empty.",
+            text = stringResource(Res.string.desktop_empty_space),
             style = MaterialTheme.typography.labelSmall,
             color = mutedColor
         )
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Start with",
+                text = stringResource(Res.string.desktop_empty_space_start_with),
                 style = MaterialTheme.typography.labelSmall,
                 color = mutedColor
             )
             Text(
-                text = "a note",
+                text = stringResource(Res.string.desktop_empty_space_a_note),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
                 color = actionColor,
@@ -890,12 +915,12 @@ fun SidebarEmptyNotesHint(
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             )
             Text(
-                text = "or",
+                text = stringResource(Res.string.home_empty_space_or),
                 style = MaterialTheme.typography.labelSmall,
                 color = mutedColor
             )
             Text(
-                text = "a folder",
+                text = stringResource(Res.string.home_empty_space_a_folder),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
                 color = actionColor,

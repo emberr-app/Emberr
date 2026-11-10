@@ -81,6 +81,16 @@ import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.x
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.app_shell_ask_ai
+import emberr.shared.generated.resources.app_shell_clear_search
+import emberr.shared.generated.resources.app_shell_close_search
+import emberr.shared.generated.resources.app_shell_daily_notes
+import emberr.shared.generated.resources.app_shell_home
+import emberr.shared.generated.resources.app_shell_mic
+import emberr.shared.generated.resources.app_shell_search
+import emberr.shared.generated.resources.app_shell_search_anything
+import emberr.shared.generated.resources.app_shell_voice_task
+import org.jetbrains.compose.resources.stringResource
 
 internal val EXPANDED_BOTTOM_BAR_PILL_HEIGHT = 52.dp
 internal val COMPACT_BOTTOM_BAR_PILL_HEIGHT = 44.dp
@@ -249,7 +259,7 @@ fun EmberrBottomBar(
                                 if (isDailyNotesEnabled) {
                                     BottomNavItem(
                                         icon = painterResource(Res.drawable.daily),
-                                        tooltip = "Daily notes",
+                                        tooltip = stringResource(Res.string.app_shell_daily_notes),
                                         isSelected = activeTab == Screen.Daily.route,
                                         modifier = Modifier.weight(1f).height(navItemHeight)
                                     ) {
@@ -262,7 +272,7 @@ fun EmberrBottomBar(
                                 }
                                 BottomNavItem(
                                     icon = painterResource(Res.drawable.house),
-                                    tooltip = "Home",
+                                    tooltip = stringResource(Res.string.app_shell_home),
                                     isSelected = activeTab == Screen.Home.route,
                                     modifier = Modifier.weight(1f).height(navItemHeight)
                                 ) {
@@ -275,7 +285,7 @@ fun EmberrBottomBar(
                                 if (isAiEnabled) {
                                     BottomNavItem(
                                         icon = painterResource(Res.drawable.astroid),
-                                        tooltip = "Ask AI",
+                                        tooltip = stringResource(Res.string.app_shell_ask_ai),
                                         isSelected = false,
                                         modifier = Modifier.weight(1f).height(navItemHeight),
                                         iconModifier = with(sharedTransitionScope) {
@@ -290,7 +300,7 @@ fun EmberrBottomBar(
                                 }
                                 BottomNavItem(
                                     icon = painterResource(Res.drawable.search),
-                                    tooltip = "Search",
+                                    tooltip = stringResource(Res.string.app_shell_search),
                                     isSelected = false,
                                     modifier = Modifier.weight(1f).height(navItemHeight),
                                     onClick = onSearchClick
@@ -306,9 +316,9 @@ fun EmberrBottomBar(
                                             .clip(CircleShape)
                                             .clickable { onMicClick() }
                                     ) {
-                                        IconTooltip(text = "Voice task", position = IconTooltipPosition.Above) {
+                                        IconTooltip(text = stringResource(Res.string.app_shell_voice_task), position = IconTooltipPosition.Above) {
                                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                                Icon(painterResource(Res.drawable.microphone), "Mic", modifier = Modifier.size(20.dp))
+                                                Icon(painterResource(Res.drawable.microphone), stringResource(Res.string.app_shell_mic), modifier = Modifier.size(20.dp))
                                             }
                                         }
                                     }
@@ -327,7 +337,7 @@ internal fun BottomBarSearchField(
     query: String,
     onQueryChange: (String) -> Unit,
     onCloseClick: () -> Unit,
-    placeholder: String = "Search anything",
+    placeholder: String = stringResource(Res.string.app_shell_search_anything),
     isSearchIconVisible: Boolean = true
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -371,7 +381,7 @@ internal fun BottomBarSearchField(
                 }
             }
         )
-        IconTooltip(text = if (query.isEmpty()) "Close search" else "Clear search", position = IconTooltipPosition.Above) {
+        IconTooltip(text = if (query.isEmpty()) stringResource(Res.string.app_shell_close_search) else stringResource(Res.string.app_shell_clear_search), position = IconTooltipPosition.Above) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
@@ -381,7 +391,7 @@ internal fun BottomBarSearchField(
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.x),
-                    contentDescription = if (query.isEmpty()) "Close search" else "Clear search",
+                    contentDescription = if (query.isEmpty()) stringResource(Res.string.app_shell_close_search) else stringResource(Res.string.app_shell_clear_search),
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     modifier = Modifier.size(17.dp)
                 )

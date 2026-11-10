@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Open Emberr</string>
+    <string name="desktop_tray_close_window">Close Window</string>
+    <string name="desktop_tray_quit">Quit</string>
+    <string name="desktop_sticky_note">Sticky Note</string>
+    <string name="desktop_select_image">Select Image</string>
+    <string name="desktop_select_document">Select Document</string>
+    <string name="desktop_file_not_found_message">This file is no longer available on this device.</string>
+    <string name="desktop_file_not_found_title">File Not Found</string>
+    <string name="desktop_open_file_failed">Failed to open file: %1$s</string>
+    <string name="desktop_error">Error</string>
+    <string name="desktop_backup_only_on_android_message">Automated background backups are currently only supported on the Android app. You can still use the manual 'Export Backup' button!</string>
+    <string name="desktop_backup_only_on_android_title">Desktop Feature</string>
+    <string name="desktop_update_available">Update available</string>
+    <string name="desktop_update_available_message">Emberr %1$s is available. You are using %2$s. It downloads in the background while you keep working.</string>
+    <string name="desktop_update_download">Download</string>
+    <string name="desktop_update_ready_to_install">Update ready to install</string>
+    <string name="desktop_update_ready_message">Restart Emberr to start using version %1$s. If you choose Later, the update is used the next time you open Emberr.</string>
+    <string name="desktop_update_restart">Restart</string>
+    <string name="desktop_update_failed">Couldn't update Emberr</string>
+    <string name="desktop_update_later">Later</string>
+    <string name="desktop_ok">OK</string>
+    <string name="desktop_new_note_in_folder">New note in folder</string>
+    <string name="desktop_new_note_here">New note here</string>
+    <string name="desktop_rename_folder">Rename Folder</string>
+    <string name="desktop_add_subfolder">Add Subfolder</string>
+    <string name="desktop_rename_note">Rename Note</string>
+    <string name="desktop_open_in_split_view">Open in split view</string>
+    <string name="desktop_toggle_section">Toggle %1$s</string>
+    <string name="desktop_empty_space">This space is empty.</string>
+    <string name="desktop_empty_space_start_with">Start with</string>
+    <string name="desktop_empty_space_a_note">a note</string>
+    <string name="desktop_create_space">Create space</string>
+    <string name="desktop_add_space">Add space</string>
+    <string name="desktop_space_options">Space options</string>
+    <string name="desktop_close_pane">Close pane</string>
+    <string name="desktop_close_this_screen">Close this screen</string>
+    <string name="desktop_drag_to_swap_screens">Drag to swap screens</string>
+    <string name="desktop_search_no_match">No notes, events or people match "%1$s"</string>
+    <string name="desktop_hide_sidebar">Hide sidebar</string>
+    <string name="desktop_collapse_sidebar">Collapse sidebar</string>
+    <string name="desktop_select_a_note">Select a note from the sidebar</string>
+    <string name="desktop_folder">Folder</string>
+    <string name="desktop_sync">Sync</string>
+</resources>
