@@ -5,20 +5,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import com.emberr.domain.importer.ImportPaths
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.import_emberr_picker_title
+import emberr.shared.generated.resources.import_markdown_picker_title
+import org.jetbrains.compose.resources.stringResource
 import java.awt.Dialog
 import java.awt.FileDialog
 import java.awt.Frame
 import java.awt.KeyboardFocusManager
 
-private const val IMPORT_PICKER_TITLE = "Choose Files to Import"
-private const val BACKUP_PICKER_TITLE = "Choose an Emberr Backup"
-
 @Composable
 actual fun rememberImportFilePicker(onFilesPicked: (List<String>) -> Unit): () -> Unit {
     val latestOnFilesPicked by rememberUpdatedState(onFilesPicked)
+    val latestPickerTitle by rememberUpdatedState(stringResource(Res.string.import_markdown_picker_title))
     return remember {
         {
-            val dialog = fileDialogAboveActiveWindow(IMPORT_PICKER_TITLE)
+            val dialog = fileDialogAboveActiveWindow(latestPickerTitle)
             dialog.isMultipleMode = true
             dialog.setFilenameFilter { _, name -> ImportPaths.isSupportedPickedFile(name) }
             dialog.isVisible = true
@@ -30,9 +32,10 @@ actual fun rememberImportFilePicker(onFilesPicked: (List<String>) -> Unit): () -
 @Composable
 actual fun rememberBackupFilePicker(onFilePicked: (String) -> Unit): () -> Unit {
     val latestOnFilePicked by rememberUpdatedState(onFilePicked)
+    val latestPickerTitle by rememberUpdatedState(stringResource(Res.string.import_emberr_picker_title))
     return remember {
         {
-            val dialog = fileDialogAboveActiveWindow(BACKUP_PICKER_TITLE)
+            val dialog = fileDialogAboveActiveWindow(latestPickerTitle)
             dialog.setFilenameFilter { _, name -> name.endsWith(".emberr", ignoreCase = true) || name.endsWith(".zip", ignoreCase = true) }
             dialog.isVisible = true
             dialog.files.firstOrNull()?.let { file -> latestOnFilePicked(file.absolutePath) }

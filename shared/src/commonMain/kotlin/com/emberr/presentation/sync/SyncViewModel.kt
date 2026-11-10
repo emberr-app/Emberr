@@ -41,7 +41,7 @@ class SyncViewModel(
     val serverStatus: StateFlow<SyncServerStatus>? = null
 ) : ViewModel() {
 
-    private val _syncStatus = MutableStateFlow("Idle")
+    private val _syncStatus = MutableStateFlow<LanSyncStatus>(LanSyncStatus.Idle)
     val syncStatus = _syncStatus.asStateFlow()
 
     // Prevents concurrent sync cycles (e.g. manual trigger vs background watchdog) from executing simultaneously.
@@ -90,7 +90,7 @@ class SyncViewModel(
     }
 
     fun resetSyncStatus() {
-        _syncStatus.value = "Idle"
+        _syncStatus.value = LanSyncStatus.Idle
     }
 
     fun getSyncPort(): Int = settingsManager.getSyncPort()
@@ -147,7 +147,7 @@ class SyncViewModel(
 
             pairingState.unpairLocally()
             lanSyncServerController.stopNow()
-            _syncStatus.value = "Idle"
+            _syncStatus.value = LanSyncStatus.Idle
         }
     }
 
@@ -157,16 +157,16 @@ class SyncViewModel(
             val token = settingsManager.getSyncAuthToken()
 
             if (ip.isBlank() || token.isBlank()) {
-                _syncStatus.value = "Not Paired!"
+                _syncStatus.value = LanSyncStatus.NotPaired
                 return@launch
             }
 
             if (!syncMutex.tryLock()) {
-                _syncStatus.value = "Sync already in progress"
+                _syncStatus.value = LanSyncStatus.AlreadyInProgress
                 return@launch
             }
 
-            _syncStatus.value = "Syncing..."
+            _syncStatus.value = LanSyncStatus.Syncing
 
             // Collecting and pushing changes run without holding SyncCoordinator.mutex.
             // Database writes acquire the mutex per envelope inside applyRemoteChanges.
@@ -179,7 +179,7 @@ class SyncViewModel(
                 val pushedCleanly = syncClient.pushChanges(localChanges)
                 if (pushedCleanly) settingsManager.saveLastPushedTimestamp(syncStart)
 
-                _syncStatus.value = "Fetching from Desktop..."
+                _syncStatus.value = LanSyncStatus.FetchingFromDesktop
                 val fetched = syncClient.fetchChanges(sinceWithSafetyOverlap(lastFetchedTimestamp))
                 val startedOver = startOverIfThisIsADifferentDesktop(
                     reportedDesktopId = fetched.desktopId,
@@ -189,33 +189,29 @@ class SyncViewModel(
                 if (appliedCleanly && !startedOver) settingsManager.saveLastFetchedTimestamp(fetched.serverSnapshotAt ?: syncStart)
 
                 if (pushedCleanly && appliedCleanly && !startedOver) {
-                    _syncStatus.value = statusAfterCleanSync(fetched.changesWaitingToRetry, successText = "Success!")
+                    _syncStatus.value = statusAfterCleanSync(fetched.changesWaitingToRetry, successStatus = LanSyncStatus.Success)
 
                     // Reconcile files after a successful sync.
                     syncRepository.reconcileMedia()
                 } else {
-                    _syncStatus.value = "Partial sync, will retry"
+                    _syncStatus.value = LanSyncStatus.PartialSync
                 }
 
             } catch (e: LanSyncSchemaMismatchException) {
                 LanSyncLog.e("manual sync blocked by schema mismatch: ${e.message}", e)
-                _syncStatus.value = "Update Emberr on both devices"
+                _syncStatus.value = LanSyncStatus.UpdateBothDevices
             } catch (e: Exception) {
                 e.printStackTrace()
-                _syncStatus.value = "Failed: ${e.message}"
+                _syncStatus.value = LanSyncStatus.Failed(e.message)
             } finally {
                 syncMutex.unlock()
             }
         }
     }
 
-    private suspend fun statusAfterCleanSync(changesWaitingOnDesktop: Int, successText: String): String {
+    private suspend fun statusAfterCleanSync(changesWaitingOnDesktop: Int, successStatus: LanSyncStatus): LanSyncStatus {
         val changesWaiting = syncRepository.countChangesWaitingToRetry() + changesWaitingOnDesktop
-        return when (changesWaiting) {
-            0 -> successText
-            1 -> "Synced, 1 item couldn't be saved"
-            else -> "Synced, $changesWaiting items couldn't be saved"
-        }
+        return if (changesWaiting == 0) successStatus else LanSyncStatus.SyncedWithUnsavedItems(changesWaiting)
     }
 
     fun triggerAutoSync(discoveryManager: com.emberr.domain.sync.discovery.SyncDiscoveryManager) {
@@ -250,7 +246,7 @@ class SyncViewModel(
             val syncStart = System.currentTimeMillis()
             val lastPushedTimestamp = settingsManager.getLastPushedTimestamp()
             val lastFetchedTimestamp = settingsManager.getLastFetchedTimestamp()
-            _syncStatus.value = "Auto-Syncing..."
+            _syncStatus.value = LanSyncStatus.AutoSyncing
 
             val localChanges = syncRepository.collectLocalChanges(sinceWithSafetyOverlap(lastPushedTimestamp), uploadMedia = true)
             val pushedCleanly = syncClient.pushChanges(localChanges)
@@ -265,22 +261,22 @@ class SyncViewModel(
             if (appliedCleanly && !startedOver) settingsManager.saveLastFetchedTimestamp(fetched.serverSnapshotAt ?: syncStart)
 
             if (pushedCleanly && appliedCleanly && !startedOver) {
-                _syncStatus.value = statusAfterCleanSync(fetched.changesWaitingToRetry, successText = "Synced Successfully")
+                _syncStatus.value = statusAfterCleanSync(fetched.changesWaitingToRetry, successStatus = LanSyncStatus.SyncedSuccessfully)
                 true
             } else {
-                _syncStatus.value = "Partial sync, will retry"
+                _syncStatus.value = LanSyncStatus.PartialSync
                 false
             }
         } catch (e: LanSyncSchemaMismatchException) {
             LanSyncLog.e("auto sync blocked by schema mismatch: ${e.message}", e)
-            _syncStatus.value = "Update Emberr on both devices"
+            _syncStatus.value = LanSyncStatus.UpdateBothDevices
             false
         } catch (_: java.net.ConnectException) {
-            _syncStatus.value = "Desktop Offline"
+            _syncStatus.value = LanSyncStatus.DesktopOffline
             false
         } catch (e: Exception) {
             e.printStackTrace()
-            _syncStatus.value = "Sync Error: ${e.javaClass.simpleName}"
+            _syncStatus.value = LanSyncStatus.SyncError(e.javaClass.simpleName)
             false
         } finally {
             syncMutex.unlock()

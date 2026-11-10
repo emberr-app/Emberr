@@ -21,8 +21,16 @@ import com.emberr.presentation.shared.components.EmberrSwitchRow
 import com.emberr.presentation.shared.components.checkedSpacesLabel
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar
+import emberr.shared.generated.resources.common_close
 import emberr.shared.generated.resources.daily
 import emberr.shared.generated.resources.folder
+import emberr.shared.generated.resources.settings_export_backup
+import emberr.shared.generated.resources.settings_export_backup_calendar
+import emberr.shared.generated.resources.settings_export_backup_daily_notes
+import emberr.shared.generated.resources.settings_export_backup_export
+import emberr.shared.generated.resources.settings_export_backup_select_spaces
+import emberr.shared.generated.resources.settings_export_backup_subtitle
+import org.jetbrains.compose.resources.stringResource
 
 private val ExportSheetButtonPadding = 20.dp
 
@@ -41,13 +49,13 @@ fun ExportSpacesSheet(
     EmberrBottomSheet(
         expanded = true,
         onDismiss = onDismiss,
-        title = "Export Backup",
-        subtitle = "Choose what to save.",
+        title = stringResource(Res.string.settings_export_backup),
+        subtitle = stringResource(Res.string.settings_export_backup_subtitle),
         contentHorizontalPadding = 0.dp
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
             EmberrChoiceRow(
-                label = "Select Spaces",
+                label = stringResource(Res.string.settings_export_backup_select_spaces),
                 value = checkedSpacesLabel(spaces, checkedSpaceIds),
                 icon = Res.drawable.folder
             ) {
@@ -58,19 +66,19 @@ fun ExportSpacesSheet(
                 )
             }
             EmberrSwitchRow(
-                label = "Daily Notes",
+                label = stringResource(Res.string.settings_export_backup_daily_notes),
                 icon = Res.drawable.daily,
                 isOn = includesDailyNotes,
                 onClick = { includesDailyNotes = !includesDailyNotes }
             )
             EmberrSwitchRow(
-                label = "Calendar",
+                label = stringResource(Res.string.settings_export_backup_calendar),
                 icon = Res.drawable.calendar,
                 isOn = includesCalendar,
                 onClick = { includesCalendar = !includesCalendar }
             )
             EmberrButtonPrimary(
-                text = "Export",
+                text = stringResource(Res.string.settings_export_backup_export),
                 onClick = {
                     closeAnd { onExportClick(BackupContentChoice(checkedSpaceIds, includesDailyNotes, includesCalendar)) }
                 },
@@ -80,7 +88,7 @@ fun ExportSpacesSheet(
                     .padding(top = 16.dp, start = ExportSheetButtonPadding, end = ExportSheetButtonPadding)
             )
             EmberrButtonSecondary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { closeAnd {} },
                 modifier = Modifier
                     .fillMaxWidth()

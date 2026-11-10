@@ -17,6 +17,12 @@ import com.emberr.domain.selfhost.sync.SelfHostUpdateRequiredSignal
 import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.selfhost_later
+import emberr.shared.generated.resources.selfhost_update
+import emberr.shared.generated.resources.selfhost_update_required_message
+import emberr.shared.generated.resources.selfhost_update_required_title
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SelfHostUpdateRequiredDialog(onUpdateClick: () -> Unit) {
@@ -25,10 +31,10 @@ fun SelfHostUpdateRequiredDialog(onUpdateClick: () -> Unit) {
 
     EmberrAlertDialog(
         onDismissRequest = SelfHostUpdateRequiredSignal::dismissDialog,
-        title = "Self-host sync paused"
+        title = stringResource(Res.string.selfhost_update_required_title)
     ) {
         Text(
-            text = "$SELF_HOST_UPDATE_REQUIRED_MESSAGE Your notes are safe and keep saving on this device.",
+            text = stringResource(Res.string.selfhost_update_required_message, SELF_HOST_UPDATE_REQUIRED_MESSAGE),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
         )
@@ -38,12 +44,12 @@ fun SelfHostUpdateRequiredDialog(onUpdateClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             EmberrButtonSecondary(
-                text = "Later",
+                text = stringResource(Res.string.selfhost_later),
                 onClick = SelfHostUpdateRequiredSignal::dismissDialog,
                 modifier = Modifier.weight(1f)
             )
             EmberrButtonPrimary(
-                text = "Update",
+                text = stringResource(Res.string.selfhost_update),
                 onClick = {
                     SelfHostUpdateRequiredSignal.dismissDialog()
                     onUpdateClick()

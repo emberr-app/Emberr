@@ -256,4 +256,10 @@
     <string name="settings_update_up_to_date">Up to date</string>
     <string name="settings_update_new">New</string>
     <string name="settings_update_failed">Failed</string>
+
+    <string name="settings_export_backup_subtitle">Choose what to save.</string>
+    <string name="settings_export_backup_select_spaces">Select Spaces</string>
+    <string name="settings_export_backup_daily_notes">Daily Notes</string>
+    <string name="settings_export_backup_calendar">Calendar</string>
+    <string name="settings_export_backup_export">Export</string>
 </resources>

@@ -85,6 +85,7 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.sync.SyncPairingDialog
 import com.emberr.presentation.sync.SyncScannerDialog
 import com.emberr.presentation.sync.SyncViewModel
+import com.emberr.presentation.sync.text
 import com.emberr.domain.util.system.showNativeToast
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -316,6 +317,7 @@ fun SettingsScreen(
     val isErasingCloudData by viewModel.isErasingCloudData.collectAsState()
     val cloudEraseErrorMessage by viewModel.cloudEraseErrorMessage.collectAsState()
     val syncStatus by syncViewModel.syncStatus.collectAsState()
+    val syncStatusText = syncStatus.text()
     val serverStatus = syncViewModel.serverStatus?.collectAsState()?.value
     val serverUnavailableReason = (serverStatus as? SyncServerStatus.Unavailable)?.reason
     var showPairingDialog by remember { mutableStateOf(false) }
@@ -375,8 +377,8 @@ fun SettingsScreen(
     }
 
     LaunchedEffect(syncStatus) {
-        if (syncStatus != "Idle" && syncStatus != "Syncing...") {
-            showNativeToast(syncStatus)
+        if (syncStatus.shouldShowAsMessage) {
+            showNativeToast(syncStatusText)
             syncViewModel.resetSyncStatus()
         }
     }
@@ -434,7 +436,7 @@ fun SettingsScreen(
                     isSignedInToCloud = isSignedInToCloud,
                     syncNetwork = syncNetwork,
                     onSyncNetworkSelected = viewModel::setSyncNetwork,
-                    syncStatus = syncStatus,
+                    syncStatus = syncStatusText,
                     serverUnavailableReason = serverUnavailableReason,
                     syncPortInput = syncPortInput,
                     onSyncPortChange = { input ->

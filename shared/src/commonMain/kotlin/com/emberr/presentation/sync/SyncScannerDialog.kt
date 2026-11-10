@@ -17,8 +17,17 @@ import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.camera
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.lan_sync_allow_camera
+import emberr.shared.generated.resources.lan_sync_camera_access_needed
+import emberr.shared.generated.resources.lan_sync_camera_allow_message
+import emberr.shared.generated.resources.lan_sync_camera_turn_on_message
+import emberr.shared.generated.resources.lan_sync_open_app_settings
+import emberr.shared.generated.resources.lan_sync_scanner_desktop_hint
+import emberr.shared.generated.resources.lan_sync_scanner_instruction
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private const val SCANNER_WIDTH_TO_HEIGHT = 0.8f
 private val ScannerShade = Color.Black.copy(alpha = 0.55f)
@@ -53,7 +62,7 @@ fun SyncScannerDialog(
                 )
 
                 Text(
-                    text = "Scan the QR code shown on your desktop.",
+                    text = stringResource(Res.string.lan_sync_scanner_instruction),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White,
                     textAlign = TextAlign.Center,
@@ -73,7 +82,7 @@ fun SyncScannerDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "On your desktop, open Settings → LAN Sync → Pair Mobile Device.",
+                        text = stringResource(Res.string.lan_sync_scanner_desktop_hint),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.75f),
                         textAlign = TextAlign.Center
@@ -82,7 +91,7 @@ fun SyncScannerDialog(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     EmberrButtonPrimary(
-                        text = "Close",
+                        text = stringResource(Res.string.common_close),
                         onClick = { closeAnd {} },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -120,7 +129,7 @@ private fun CameraPermissionMissing(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Camera access needed",
+                text = stringResource(Res.string.lan_sync_camera_access_needed),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -131,9 +140,9 @@ private fun CameraPermissionMissing(
 
             Text(
                 text = if (canShowPermissionPopup) {
-                    "Allow the camera to scan the pairing code on your desktop."
+                    stringResource(Res.string.lan_sync_camera_allow_message)
                 } else {
-                    "Turn on Camera in Permissions, then come back here."
+                    stringResource(Res.string.lan_sync_camera_turn_on_message)
                 },
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White.copy(alpha = 0.7f),
@@ -143,7 +152,11 @@ private fun CameraPermissionMissing(
 
         Column(modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 20.dp)) {
             EmberrButtonPrimary(
-                text = if (canShowPermissionPopup) "Allow Camera" else "Open App Settings",
+                text = if (canShowPermissionPopup) {
+                    stringResource(Res.string.lan_sync_allow_camera)
+                } else {
+                    stringResource(Res.string.lan_sync_open_app_settings)
+                },
                 onClick = onAllowCamera,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -151,7 +164,7 @@ private fun CameraPermissionMissing(
             Spacer(modifier = Modifier.height(10.dp))
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onClose,
                 modifier = Modifier.fillMaxWidth()
             )

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">Import From</string>
+    <string name="import_text_and_markdown">Text &amp; Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Also works for Obsidian and Bear notes.\nSome Obsidian features may not import fully.</string>
+
+    <string name="import_button">Import</string>
+    <string name="import_done">Done</string>
+    <string name="import_stop">Stop import</string>
+    <string name="import_or_drop_here">or drop here</string>
+    <string name="import_choose_again_hint_desktop">Click to choose again, or drop here.</string>
+    <string name="import_choose_again_hint_touch">Tap to choose again.</string>
+    <string name="import_stopping">Stopping and removing what was imported…</string>
+    <string name="import_stopped">Import stopped</string>
+    <string name="import_nothing_added">Nothing was added.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="one">%1$d space</item>
+        <item quantity="other">%1$d spaces</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="one">%1$d folder</item>
+        <item quantity="other">%1$d folders</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="one">%1$d attachment</item>
+        <item quantity="other">%1$d attachments</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">Import a backup without replacing your current notes.</string>
+    <string name="import_emberr_copying_media">Copying media %1$d of %2$d…</string>
+    <string name="import_emberr_getting_ready">Getting ready…</string>
+    <string name="import_emberr_saving">Saving the import…</string>
+    <string name="import_emberr_failed">Import failed</string>
+    <string name="import_emberr_choose_backup_file">Choose a Backup File</string>
+    <string name="import_emberr_choose_backup_hint">.emberr file from Export Backup</string>
+    <string name="import_emberr_reading_backup">Reading the backup…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">Choose a different file</string>
+    <string name="import_emberr_spaces_to_import">Spaces to Import</string>
+    <string name="import_emberr_choose_backup_first">Choose a backup first</string>
+    <string name="import_emberr_daily_notes">Daily Notes</string>
+    <string name="import_emberr_calendar">Calendar</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">Daily notes and calendar events added</string>
+    <string name="import_emberr_added_daily_notes">Daily notes added</string>
+    <string name="import_emberr_added_calendar">Calendar events added</string>
+    <string name="import_emberr_finished">Import finished</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="one">Imported %1$d space</item>
+        <item quantity="other">Imported %1$d spaces</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="one">Couldn\'t find %1$d media file in the backup, so it will show as missing.</item>
+        <item quantity="other">Couldn\'t find %1$d media files in the backup, so they will show as missing.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">Unknown error</string>
+    <string name="import_emberr_picker_title">Choose an Emberr Backup</string>
+
+    <string name="import_markdown_subtitle">Turn .md, .txt and .canvas files, or a .zip with folders, into Emberr notes.</string>
+    <string name="import_markdown_copying_file">Copying %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="one">Importing %1$d of %2$d note…</item>
+        <item quantity="other">Importing %1$d of %2$d notes…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">Choose Files or a .zip</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas or .zip</string>
+    <string name="import_markdown_reading_files">Reading files…</string>
+    <string name="import_markdown_could_not_read">Couldn\'t read those files. %1$s</string>
+    <string name="import_markdown_save_to_space">Save to Space</string>
+    <string name="import_markdown_import_as">Import As</string>
+    <string name="import_markdown_emberr_notes">Emberr Notes</string>
+    <string name="import_markdown_emberr_notes_subtitle">Each file becomes a note made of blocks.</string>
+    <string name="import_markdown_markdown_files">Markdown Files</string>
+    <string name="import_markdown_coming_soon">Coming soon</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="one">Imported %1$d note</item>
+        <item quantity="other">Imported %1$d notes</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="one">Imported %1$d note into %2$s</item>
+        <item quantity="other">Imported %1$d notes into %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">Couldn\'t import %1$d: %2$s</string>
+    <string name="import_markdown_choose_folder">Choose a Folder</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d skipped: %2$s</string>
+    <string name="import_markdown_choose_different_files">Choose different files</string>
+    <string name="import_markdown_picker_title">Choose Files to Import</string>
+</resources>

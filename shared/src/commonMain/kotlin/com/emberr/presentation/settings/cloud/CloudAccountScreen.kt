@@ -91,6 +91,98 @@ import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.cloud_account
+import emberr.shared.generated.resources.cloud_audio_in_note
+import emberr.shared.generated.resources.cloud_change_email
+import emberr.shared.generated.resources.cloud_change_email_hint
+import emberr.shared.generated.resources.cloud_change_password
+import emberr.shared.generated.resources.cloud_change_password_code_hint
+import emberr.shared.generated.resources.cloud_clear_notes_on_this_device
+import emberr.shared.generated.resources.cloud_code_placeholder
+import emberr.shared.generated.resources.cloud_code_sent
+import emberr.shared.generated.resources.cloud_confirm_password
+import emberr.shared.generated.resources.cloud_continue
+import emberr.shared.generated.resources.cloud_copy_words
+import emberr.shared.generated.resources.cloud_create_account
+import emberr.shared.generated.resources.cloud_delete_account
+import emberr.shared.generated.resources.cloud_delete_account_message
+import emberr.shared.generated.resources.cloud_delete_account_title
+import emberr.shared.generated.resources.cloud_delete_account_warning
+import emberr.shared.generated.resources.cloud_devices
+import emberr.shared.generated.resources.cloud_do_not_sign_out
+import emberr.shared.generated.resources.cloud_document_in_note
+import emberr.shared.generated.resources.cloud_done
+import emberr.shared.generated.resources.cloud_email
+import emberr.shared.generated.resources.cloud_file_in_note
+import emberr.shared.generated.resources.cloud_file_progress
+import emberr.shared.generated.resources.cloud_files_not_received
+import emberr.shared.generated.resources.cloud_files_not_sent
+import emberr.shared.generated.resources.cloud_files_not_sent_and_not_received
+import emberr.shared.generated.resources.cloud_files_received_count
+import emberr.shared.generated.resources.cloud_files_sent_and_received_counts
+import emberr.shared.generated.resources.cloud_files_sent_count
+import emberr.shared.generated.resources.cloud_files_waiting_for_upload
+import emberr.shared.generated.resources.cloud_forgot_password
+import emberr.shared.generated.resources.cloud_hide_password
+import emberr.shared.generated.resources.cloud_last_synced
+import emberr.shared.generated.resources.cloud_last_used
+import emberr.shared.generated.resources.cloud_loading_devices
+import emberr.shared.generated.resources.cloud_loading_storage_used
+import emberr.shared.generated.resources.cloud_log_in
+import emberr.shared.generated.resources.cloud_manage_account
+import emberr.shared.generated.resources.cloud_media
+import emberr.shared.generated.resources.cloud_media_last_checked
+import emberr.shared.generated.resources.cloud_new_password_hint
+import emberr.shared.generated.resources.cloud_password
+import emberr.shared.generated.resources.cloud_password_not_stored_hint
+import emberr.shared.generated.resources.cloud_password_strength_moderate
+import emberr.shared.generated.resources.cloud_password_strength_strong
+import emberr.shared.generated.resources.cloud_password_strength_weak
+import emberr.shared.generated.resources.cloud_passwords_do_not_match
+import emberr.shared.generated.resources.cloud_photo_in_note
+import emberr.shared.generated.resources.cloud_please_wait
+import emberr.shared.generated.resources.cloud_receiving_file
+import emberr.shared.generated.resources.cloud_recovery_email_hint
+import emberr.shared.generated.resources.cloud_recovery_other_device_hint
+import emberr.shared.generated.resources.cloud_recovery_words
+import emberr.shared.generated.resources.cloud_recovery_words_copied
+import emberr.shared.generated.resources.cloud_recovery_words_entry_hint
+import emberr.shared.generated.resources.cloud_recovery_words_explanation
+import emberr.shared.generated.resources.cloud_recovery_words_lock_description
+import emberr.shared.generated.resources.cloud_recovery_words_password_hint
+import emberr.shared.generated.resources.cloud_recovery_words_placeholder
+import emberr.shared.generated.resources.cloud_recovery_words_saved_checkbox
+import emberr.shared.generated.resources.cloud_recovery_words_warning
+import emberr.shared.generated.resources.cloud_reset_password
+import emberr.shared.generated.resources.cloud_send_code
+import emberr.shared.generated.resources.cloud_send_new_code
+import emberr.shared.generated.resources.cloud_sending_file
+import emberr.shared.generated.resources.cloud_server_address
+import emberr.shared.generated.resources.cloud_set_new_password
+import emberr.shared.generated.resources.cloud_show_password
+import emberr.shared.generated.resources.cloud_sign_out
+import emberr.shared.generated.resources.cloud_sign_out_device_message
+import emberr.shared.generated.resources.cloud_sign_out_device_title
+import emberr.shared.generated.resources.cloud_sign_out_of_other_devices
+import emberr.shared.generated.resources.cloud_sign_out_of_this_device
+import emberr.shared.generated.resources.cloud_sign_out_of_this_device_message
+import emberr.shared.generated.resources.cloud_sign_out_of_this_device_title
+import emberr.shared.generated.resources.cloud_sign_out_other_devices_button
+import emberr.shared.generated.resources.cloud_sign_out_other_devices_message
+import emberr.shared.generated.resources.cloud_sign_out_other_devices_title
+import emberr.shared.generated.resources.cloud_signed_in_as
+import emberr.shared.generated.resources.cloud_sync
+import emberr.shared.generated.resources.cloud_sync_explanation
+import emberr.shared.generated.resources.cloud_sync_now
+import emberr.shared.generated.resources.cloud_syncing
+import emberr.shared.generated.resources.cloud_tap_device_to_sign_out
+import emberr.shared.generated.resources.cloud_this_device
+import emberr.shared.generated.resources.cloud_title
+import emberr.shared.generated.resources.cloud_video_in_note
+import emberr.shared.generated.resources.cloud_welcome_hint
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_save
 import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.lock
@@ -99,7 +191,10 @@ import emberr.shared.generated.resources.trash
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 import kotlin.time.Instant
@@ -146,10 +241,10 @@ fun CloudAccountScreen(
                     .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
             ) {
                 EmberrTopHeaderBar(
-                    title = "Emberr Cloud",
+                    title = stringResource(Res.string.cloud_title),
                     hazeState = internalHazeState,
                     contentPadding = topHeaderBarPadding(bottom = 16.dp),
-                    backTooltip = "Back",
+                    backTooltip = stringResource(Res.string.common_back),
                     onBackClick = { if (screenState.canGoBack) viewModel.goBack() else onNavigateBack() }
                 )
             }
@@ -236,7 +331,7 @@ private fun StepGroup(title: String, content: @Composable ColumnScope.() -> Unit
 
 @Composable
 private fun ServerAddressGroup(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Server Address") {
+    StepGroup(title = stringResource(Res.string.cloud_server_address)) {
         EmberrTextField(
             value = state.serverAddressInput,
             onValueChange = viewModel::onServerAddressChanged,
@@ -245,9 +340,9 @@ private fun ServerAddressGroup(state: CloudAccountScreenState, viewModel: CloudA
             modifier = Modifier.fillMaxWidth(),
             onSubmit = viewModel::saveServerAddress
         )
-        state.serverAddressError?.let { message -> ErrorText(message = message) }
+        state.serverAddressError?.let { message -> ErrorText(message = stringResource(message)) }
         EmberrButtonSecondary(
-            text = "Save",
+            text = stringResource(Res.string.common_save),
             onClick = viewModel::saveServerAddress,
             enabled = !state.isWorking,
             modifier = Modifier.fillMaxWidth()
@@ -257,18 +352,18 @@ private fun ServerAddressGroup(state: CloudAccountScreenState, viewModel: CloudA
 
 @Composable
 private fun WelcomeStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Emberr Cloud") {
-        HintText(text = "Sync your notes between devices with end-to-end encryption. Only your devices can read them.")
+    StepGroup(title = stringResource(Res.string.cloud_title)) {
+        HintText(text = stringResource(Res.string.cloud_welcome_hint))
         state.otherSyncMethodMessage?.let { message -> HintText(text = message) }
         state.errorMessage?.let { message -> ErrorText(message = message) }
         EmberrButtonPrimary(
-            text = "Create account",
+            text = stringResource(Res.string.cloud_create_account),
             onClick = viewModel::startSignUp,
             enabled = state.canStartSignIn,
             modifier = Modifier.fillMaxWidth()
         )
         EmberrButtonSecondary(
-            text = "Log in",
+            text = stringResource(Res.string.cloud_log_in),
             onClick = viewModel::startLogIn,
             enabled = state.canStartSignIn,
             modifier = Modifier.fillMaxWidth()
@@ -278,11 +373,11 @@ private fun WelcomeStep(state: CloudAccountScreenState, viewModel: CloudAccountV
 
 @Composable
 private fun SignUpEmailStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Create account") {
+    StepGroup(title = stringResource(Res.string.cloud_create_account)) {
         EmailField(email = state.email, onEmailChanged = viewModel::onEmailChanged, onSubmit = viewModel::sendSignupCode)
         StepActions(
             state = state,
-            primaryText = "Send code",
+            primaryText = stringResource(Res.string.cloud_send_code),
             isPrimaryEnabled = state.canSendCode,
             onPrimaryClick = viewModel::sendSignupCode,
             onBack = viewModel::goBack
@@ -292,14 +387,14 @@ private fun SignUpEmailStep(state: CloudAccountScreenState, viewModel: CloudAcco
 
 @Composable
 private fun SignUpDetailsStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Create account") {
+    StepGroup(title = stringResource(Res.string.cloud_create_account)) {
         CodeSentText(email = state.email)
         CodeField(code = state.code, onCodeChanged = viewModel::onCodeChanged)
         NewPasswordFields(state = state, viewModel = viewModel, onSubmit = viewModel::createAccount)
-        HintText(text = "We don't store this password, so if you forget it, we can't decrypt your notes.")
+        HintText(text = stringResource(Res.string.cloud_password_not_stored_hint))
         StepActions(
             state = state,
-            primaryText = "Create account",
+            primaryText = stringResource(Res.string.cloud_create_account),
             isPrimaryEnabled = state.canCreateAccount,
             onPrimaryClick = viewModel::createAccount,
             onSendNewCode = viewModel::sendSignupCode,
@@ -310,21 +405,18 @@ private fun SignUpDetailsStep(state: CloudAccountScreenState, viewModel: CloudAc
 
 @Composable
 private fun SignUpRecoveryWordsStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Recovery words") {
-        HintText(
-            text = "If you forget your password, these 24 words are the only way back into your account. " +
-                "We don't store them, so save them somewhere safe."
-        )
-        WarningText(text = "Without your password and these words, your cloud notes can't be recovered.")
+    StepGroup(title = stringResource(Res.string.cloud_recovery_words)) {
+        HintText(text = stringResource(Res.string.cloud_recovery_words_explanation))
+        WarningText(text = stringResource(Res.string.cloud_recovery_words_warning))
         RecoveryWordsParagraph(words = state.newRecoveryWords)
         CopyRecoveryWordsButton(words = state.newRecoveryWords)
         CheckboxRow(
-            text = "I have saved these words somewhere safe",
+            text = stringResource(Res.string.cloud_recovery_words_saved_checkbox),
             isChecked = state.hasSavedRecoveryWords,
             onCheckedChange = viewModel::onSavedRecoveryWordsChanged
         )
         EmberrButtonPrimary(
-            text = "Continue",
+            text = stringResource(Res.string.cloud_continue),
             onClick = viewModel::finishSignUp,
             enabled = state.canFinishSignUp,
             modifier = Modifier.fillMaxWidth()
@@ -334,23 +426,23 @@ private fun SignUpRecoveryWordsStep(state: CloudAccountScreenState, viewModel: C
 
 @Composable
 private fun LogInStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Log in") {
+    StepGroup(title = stringResource(Res.string.cloud_log_in)) {
         EmailField(email = state.email, onEmailChanged = viewModel::onEmailChanged, onSubmit = viewModel::logIn)
         PasswordField(
             password = state.password,
             onPasswordChanged = viewModel::onPasswordChanged,
-            placeholder = "Password",
+            placeholder = stringResource(Res.string.cloud_password),
             onSubmit = viewModel::logIn
         )
         StepActions(
             state = state,
-            primaryText = "Log in",
+            primaryText = stringResource(Res.string.cloud_log_in),
             isPrimaryEnabled = state.canLogIn,
             onPrimaryClick = viewModel::logIn,
             onBack = viewModel::goBack
         )
         EmberrButtonSecondary(
-            text = "Forgot password",
+            text = stringResource(Res.string.cloud_forgot_password),
             onClick = viewModel::startRecovery,
             enabled = !state.isWorking,
             modifier = Modifier.fillMaxWidth()
@@ -360,13 +452,13 @@ private fun LogInStep(state: CloudAccountScreenState, viewModel: CloudAccountVie
 
 @Composable
 private fun RecoveryEmailStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Forgot password") {
-        HintText(text = "Enter your account's email. We'll send you a code.")
-        HintText(text = "Signed in on another device? Change your password there.")
+    StepGroup(title = stringResource(Res.string.cloud_forgot_password)) {
+        HintText(text = stringResource(Res.string.cloud_recovery_email_hint))
+        HintText(text = stringResource(Res.string.cloud_recovery_other_device_hint))
         EmailField(email = state.email, onEmailChanged = viewModel::onEmailChanged, onSubmit = viewModel::sendRecoveryCode)
         StepActions(
             state = state,
-            primaryText = "Send code",
+            primaryText = stringResource(Res.string.cloud_send_code),
             isPrimaryEnabled = state.canSendCode,
             onPrimaryClick = viewModel::sendRecoveryCode,
             onBack = viewModel::goBack
@@ -376,21 +468,21 @@ private fun RecoveryEmailStep(state: CloudAccountScreenState, viewModel: CloudAc
 
 @Composable
 private fun RecoveryWordsStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Forgot password") {
+    StepGroup(title = stringResource(Res.string.cloud_forgot_password)) {
         CodeSentText(email = state.email)
         CodeField(code = state.code, onCodeChanged = viewModel::onCodeChanged)
-        HintText(text = "Enter the 24 recovery words you saved when you created your account.")
+        HintText(text = stringResource(Res.string.cloud_recovery_words_entry_hint))
         EmberrTextField(
             value = state.recoveryWordsInput,
             onValueChange = viewModel::onRecoveryWordsChanged,
-            placeholder = "Your 24 recovery words",
+            placeholder = stringResource(Res.string.cloud_recovery_words_placeholder),
             singleLine = false,
             keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
             modifier = Modifier.fillMaxWidth()
         )
         StepActions(
             state = state,
-            primaryText = "Continue",
+            primaryText = stringResource(Res.string.cloud_continue),
             isPrimaryEnabled = state.canCheckRecoveryWords,
             onPrimaryClick = viewModel::checkRecoveryWords,
             onSendNewCode = viewModel::sendRecoveryCode,
@@ -404,12 +496,12 @@ private fun RecoveryNewPasswordStep(state: CloudAccountScreenState, viewModel: C
     var isAskingAboutOtherDevices by remember { mutableStateOf(false) }
     val askAboutOtherDevices: () -> Unit = { if (state.canSetNewPassword) isAskingAboutOtherDevices = true }
 
-    StepGroup(title = "Set a new password") {
-        HintText(text = "Enter a new password we can use to encrypt your notes.")
+    StepGroup(title = stringResource(Res.string.cloud_set_new_password)) {
+        HintText(text = stringResource(Res.string.cloud_new_password_hint))
         NewPasswordFields(state = state, viewModel = viewModel, onSubmit = askAboutOtherDevices)
         StepActions(
             state = state,
-            primaryText = "Reset password",
+            primaryText = stringResource(Res.string.cloud_reset_password),
             isPrimaryEnabled = state.canSetNewPassword,
             onPrimaryClick = askAboutOtherDevices,
             onBack = viewModel::goBack
@@ -419,17 +511,16 @@ private fun RecoveryNewPasswordStep(state: CloudAccountScreenState, viewModel: C
     if (isAskingAboutOtherDevices) {
         EmberrAlertDialog(
             onDismissRequest = { isAskingAboutOtherDevices = false },
-            title = "Sign out from other devices"
+            title = stringResource(Res.string.cloud_sign_out_other_devices_title)
         ) {
             Text(
-                text = "If you think someone might know your password, you can force all other devices " +
-                    "using your account to sign out.",
+                text = stringResource(Res.string.cloud_sign_out_other_devices_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
             )
             Spacer(Modifier.height(20.dp))
             EmberrButtonPrimary(
-                text = "Sign out other devices",
+                text = stringResource(Res.string.cloud_sign_out_other_devices_button),
                 onClick = {
                     isAskingAboutOtherDevices = false
                     viewModel.setNewPassword(logOutOtherDevices = true)
@@ -438,7 +529,7 @@ private fun RecoveryNewPasswordStep(state: CloudAccountScreenState, viewModel: C
             )
             Spacer(Modifier.height(10.dp))
             EmberrButtonSecondary(
-                text = "Do not sign out",
+                text = stringResource(Res.string.cloud_do_not_sign_out),
                 onClick = {
                     isAskingAboutOtherDevices = false
                     viewModel.setNewPassword(logOutOtherDevices = false)
@@ -457,55 +548,61 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
     var sessionToSignOut by remember { mutableStateOf<CloudSession?>(null) }
     var isConfirmingSignOutOfThisDevice by remember { mutableStateOf(false) }
     var isExplainingAccountDeletion by remember { mutableStateOf(false) }
+    val recoveryWordsTitle = stringResource(Res.string.cloud_recovery_words)
+    val recoveryWordsLockDescription = stringResource(Res.string.cloud_recovery_words_lock_description)
 
     Column {
-        StepGroup(title = "Account") {
+        StepGroup(title = stringResource(Res.string.cloud_account)) {
             Text(
-                text = "Signed in as ${state.signedInEmail}",
+                text = stringResource(Res.string.cloud_signed_in_as, state.signedInEmail),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
             when {
-                state.accountDetails != null -> PlanAndStorage(accountDetails = state.accountDetails, planText = state.planText)
+                state.accountDetails != null -> PlanAndStorage(accountDetails = state.accountDetails, planText = state.planText?.asText())
                 state.accountDetailsError != null -> ErrorText(message = state.accountDetailsError)
-                else -> HintText(text = "Loading storage used...")
+                else -> HintText(text = stringResource(Res.string.cloud_loading_storage_used))
             }
             state.errorMessage?.let { message -> ErrorText(message = message) }
             if (state.isWorking) WorkingIndicator()
         }
 
-        StepGroup(title = "Sync") {
+        StepGroup(title = stringResource(Res.string.cloud_sync)) {
             val lastSyncedAtMillis = state.syncStatus.lastSyncedAtMillis
             when {
-                state.syncStatus.isSyncing -> HintText(text = "Syncing...")
+                state.syncStatus.isSyncing -> HintText(text = stringResource(Res.string.cloud_syncing))
                 lastSyncedAtMillis != null ->
-                    HintText(text = "Last synced ${formatDateAndTime(lastSyncedAtMillis, usesTwentyFourHourClock)}")
-                else -> HintText(text = "Sends and receives spaces, folders, notes, lists, chats and media.")
+                    HintText(text = stringResource(Res.string.cloud_last_synced, formatDateAndTime(lastSyncedAtMillis, usesTwentyFourHourClock)))
+                else -> HintText(text = stringResource(Res.string.cloud_sync_explanation))
             }
-            state.syncProblemMessage?.let { message -> ErrorText(message = message) }
+            state.syncProblemMessage?.let { message -> ErrorText(message = message.asText()) }
             EmberrButtonSecondary(
-                text = "Sync now",
+                text = stringResource(Res.string.cloud_sync_now),
                 onClick = viewModel::syncNow,
                 enabled = !state.syncStatus.isSyncing,
                 modifier = Modifier.fillMaxWidth()
             )
             state.mediaSyncProgress?.let { progress ->
-                SyncProgressDetails(title = "Media", progress = progress, describeAmount = ::describeImageBytes)
+                SyncProgressDetails(
+                    title = stringResource(Res.string.cloud_media),
+                    progress = progress,
+                    describeAmount = { done, total -> describeImageBytes(done, total) }
+                )
             }
             state.mediaPassDetails?.let { details -> MediaFileDetails(details) }
             val lastMediaPass = state.syncStatus.lastMediaPass
             if (state.mediaSyncProgress == null && lastMediaPass != null) {
-                HintText(text = "Media last checked ${formatDateAndTime(lastMediaPass.finishedAtMillis, usesTwentyFourHourClock)}")
+                HintText(text = stringResource(Res.string.cloud_media_last_checked, formatDateAndTime(lastMediaPass.finishedAtMillis, usesTwentyFourHourClock)))
                 lastMediaPass.uploadsRefusedReason
                     ?.takeIf { reason -> state.syncStatus.lastProblem != CloudSyncResult.UploadsRefused(reason) }
-                    ?.let { reason -> ErrorText(message = uploadsRefusedMessage(reason, state.accountDetails)) }
-                filesTooLargeMessage(lastMediaPass.filesTooLargeCount)?.let { message -> ErrorText(message = message) }
-                describeFilesNotMoved(lastMediaPass)?.let { message -> ErrorText(message = message) }
+                    ?.let { reason -> ErrorText(message = uploadsRefusedMessage(reason, state.accountDetails).asText()) }
+                filesTooLargeMessage(lastMediaPass.filesTooLargeCount)?.let { message -> ErrorText(message = message.asText()) }
+                describeFilesNotMoved(lastMediaPass)?.let { message -> ErrorText(message = message.asText()) }
                 lastMediaPass.lastProblem?.let { problem -> ErrorText(message = problem) }
             }
         }
 
-        SettingsGroup(title = "Devices") {
+        SettingsGroup(title = stringResource(Res.string.cloud_devices)) {
             state.sessions?.forEachIndexed { index, session ->
                 if (index > 0) SessionDivider()
                 SessionRow(
@@ -520,11 +617,11 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
             ) {
                 when {
                     state.sessionsError != null -> ErrorText(message = state.sessionsError)
-                    state.sessions == null -> HintText(text = "Loading devices...")
-                    else -> HintText(text = "Tap a device to sign it out.")
+                    state.sessions == null -> HintText(text = stringResource(Res.string.cloud_loading_devices))
+                    else -> HintText(text = stringResource(Res.string.cloud_tap_device_to_sign_out))
                 }
                 EmberrButtonSecondary(
-                    text = "Sign out of this device",
+                    text = stringResource(Res.string.cloud_sign_out_of_this_device),
                     onClick = { isConfirmingSignOutOfThisDevice = true },
                     enabled = !state.isWorking,
                     modifier = Modifier.fillMaxWidth()
@@ -532,30 +629,30 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
             }
         }
 
-        SettingsGroup(title = "Manage Account") {
+        SettingsGroup(title = stringResource(Res.string.cloud_manage_account)) {
             SettingsActionRow(
                 icon = painterResource(Res.drawable.lock),
-                title = "Change password",
+                title = stringResource(Res.string.cloud_change_password),
                 isEnabled = !state.isWorking,
                 onClick = viewModel::startChangePassword
             )
             SettingsDivider()
             SettingsActionRow(
                 icon = painterResource(Res.drawable.mail),
-                title = "Change email",
+                title = stringResource(Res.string.cloud_change_email),
                 isEnabled = !state.isWorking,
                 onClick = viewModel::startChangeEmail
             )
             SettingsDivider()
             SettingsActionRow(
                 icon = painterResource(Res.drawable.eye_open),
-                title = "Recovery words",
+                title = recoveryWordsTitle,
                 isEnabled = !state.isWorking,
                 onClick = {
                     coroutineScope.launch {
                         val confirmation = deviceLockPrompt.confirm(
-                            title = "Recovery words",
-                            description = "Please authenticate to view your recovery words"
+                            title = recoveryWordsTitle,
+                            description = recoveryWordsLockDescription
                         )
                         when (confirmation) {
                             DeviceLockConfirmation.CONFIRMED -> viewModel.showRecoveryWords()
@@ -568,7 +665,7 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
             SettingsDivider()
             SettingsActionRow(
                 icon = painterResource(Res.drawable.trash),
-                title = "Delete account",
+                title = stringResource(Res.string.cloud_delete_account),
                 isDestructive = true,
                 isEnabled = !state.isWorking,
                 onClick = { isExplainingAccountDeletion = true }
@@ -587,9 +684,9 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
             )
         } else {
             ConfirmActionDialog(
-                title = "Sign Out Device?",
-                message = "This will sign out the following device:\n\n${session.deviceName}",
-                confirmText = "Sign out",
+                title = stringResource(Res.string.cloud_sign_out_device_title),
+                message = stringResource(Res.string.cloud_sign_out_device_message, session.deviceName),
+                confirmText = stringResource(Res.string.cloud_sign_out),
                 onDismiss = { sessionToSignOut = null },
                 onConfirm = {
                     sessionToSignOut = null
@@ -611,11 +708,9 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
 
     if (isExplainingAccountDeletion) {
         ConfirmActionDialog(
-            title = "Delete Account?",
-            message = "Your Emberr Cloud account and everything stored in it will be deleted for good. " +
-                "This can't be undone. The notes on this device stay, unless you also choose to clear them. " +
-                "We'll send a code to ${state.signedInEmail} to confirm.",
-            confirmText = "Send code",
+            title = stringResource(Res.string.cloud_delete_account_title),
+            message = stringResource(Res.string.cloud_delete_account_message, state.signedInEmail),
+            confirmText = stringResource(Res.string.cloud_send_code),
             onDismiss = { isExplainingAccountDeletion = false },
             onConfirm = {
                 isExplainingAccountDeletion = false
@@ -642,9 +737,9 @@ private fun SessionRow(session: CloudSession, isEnabled: Boolean, onClick: () ->
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            HintText(text = "Last used ${formatLastUsed(session.lastUsedAtMicroseconds, usesTwentyFourHourClock)}")
+            HintText(text = stringResource(Res.string.cloud_last_used, formatLastUsed(session.lastUsedAtMicroseconds, usesTwentyFourHourClock)))
         }
-        if (session.isCurrent) SettingsValuePill(label = "This device")
+        if (session.isCurrent) SettingsValuePill(label = stringResource(Res.string.cloud_this_device))
     }
 }
 
@@ -669,9 +764,9 @@ private fun formatDateAndTime(epochMillis: Long, usesTwentyFourHourClock: Boolea
 @Composable
 private fun SignOutOfThisDeviceDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     ConfirmActionDialog(
-        title = "Sign Out of This Device?",
-        message = "This device stops using Emberr Cloud. Your notes on this device are not touched.",
-        confirmText = "Sign out",
+        title = stringResource(Res.string.cloud_sign_out_of_this_device_title),
+        message = stringResource(Res.string.cloud_sign_out_of_this_device_message),
+        confirmText = stringResource(Res.string.cloud_sign_out),
         onDismiss = onDismiss,
         onConfirm = onConfirm
     )
@@ -694,7 +789,7 @@ private fun ConfirmActionDialog(
         Spacer(Modifier.height(20.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             EmberrButtonSecondary(
-                text = "Cancel",
+                text = stringResource(Res.string.common_cancel),
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f)
             )
@@ -709,11 +804,11 @@ private fun ConfirmActionDialog(
 
 @Composable
 private fun ChangePasswordStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Change password") {
-        HintText(text = "We'll send a code to ${state.signedInEmail} to confirm.")
+    StepGroup(title = stringResource(Res.string.cloud_change_password)) {
+        HintText(text = stringResource(Res.string.cloud_change_password_code_hint, state.signedInEmail))
         StepActions(
             state = state,
-            primaryText = "Send code",
+            primaryText = stringResource(Res.string.cloud_send_code),
             isPrimaryEnabled = !state.isWorking,
             onPrimaryClick = viewModel::sendPasswordChangeCode,
             onBack = viewModel::goBack
@@ -723,19 +818,19 @@ private fun ChangePasswordStep(state: CloudAccountScreenState, viewModel: CloudA
 
 @Composable
 private fun ChangePasswordCodeStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Change password") {
+    StepGroup(title = stringResource(Res.string.cloud_change_password)) {
         CodeSentText(email = state.email)
         CodeField(code = state.code, onCodeChanged = viewModel::onCodeChanged)
-        HintText(text = "Enter a new password we can use to encrypt your notes.")
+        HintText(text = stringResource(Res.string.cloud_new_password_hint))
         NewPasswordFields(state = state, viewModel = viewModel, onSubmit = viewModel::changePassword)
         SwitchRow(
-            text = "Sign out of other devices",
+            text = stringResource(Res.string.cloud_sign_out_of_other_devices),
             isOn = state.logOutOtherDevices,
             onChange = viewModel::onLogOutOtherDevicesChanged
         )
         StepActions(
             state = state,
-            primaryText = "Change password",
+            primaryText = stringResource(Res.string.cloud_change_password),
             isPrimaryEnabled = state.canChangePassword,
             onPrimaryClick = viewModel::changePassword,
             onSendNewCode = viewModel::sendPasswordChangeCode,
@@ -746,12 +841,12 @@ private fun ChangePasswordCodeStep(state: CloudAccountScreenState, viewModel: Cl
 
 @Composable
 private fun ChangeEmailStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Change email") {
-        HintText(text = "Enter your new email address. We'll send a code there.")
+    StepGroup(title = stringResource(Res.string.cloud_change_email)) {
+        HintText(text = stringResource(Res.string.cloud_change_email_hint))
         EmailField(email = state.email, onEmailChanged = viewModel::onEmailChanged, onSubmit = viewModel::sendChangeEmailCode)
         StepActions(
             state = state,
-            primaryText = "Send code",
+            primaryText = stringResource(Res.string.cloud_send_code),
             isPrimaryEnabled = state.canSendCode,
             onPrimaryClick = viewModel::sendChangeEmailCode,
             onBack = viewModel::goBack
@@ -761,12 +856,12 @@ private fun ChangeEmailStep(state: CloudAccountScreenState, viewModel: CloudAcco
 
 @Composable
 private fun ChangeEmailCodeStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Change email") {
+    StepGroup(title = stringResource(Res.string.cloud_change_email)) {
         CodeSentText(email = state.email)
         CodeField(code = state.code, onCodeChanged = viewModel::onCodeChanged, onSubmit = viewModel::changeEmail)
         StepActions(
             state = state,
-            primaryText = "Change email",
+            primaryText = stringResource(Res.string.cloud_change_email),
             isPrimaryEnabled = state.canChangeEmail,
             onPrimaryClick = viewModel::changeEmail,
             onSendNewCode = viewModel::sendChangeEmailCode,
@@ -777,17 +872,17 @@ private fun ChangeEmailCodeStep(state: CloudAccountScreenState, viewModel: Cloud
 
 @Composable
 private fun RecoveryWordsPasswordStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Recovery words") {
-        HintText(text = "Enter your password to view your recovery words.")
+    StepGroup(title = stringResource(Res.string.cloud_recovery_words)) {
+        HintText(text = stringResource(Res.string.cloud_recovery_words_password_hint))
         PasswordField(
             password = state.password,
             onPasswordChanged = viewModel::onPasswordChanged,
-            placeholder = "Password",
+            placeholder = stringResource(Res.string.cloud_password),
             onSubmit = viewModel::showRecoveryWordsAfterPasswordCheck
         )
         StepActions(
             state = state,
-            primaryText = "Continue",
+            primaryText = stringResource(Res.string.cloud_continue),
             isPrimaryEnabled = state.canCheckPassword,
             onPrimaryClick = viewModel::showRecoveryWordsAfterPasswordCheck,
             onBack = viewModel::goBack
@@ -797,15 +892,12 @@ private fun RecoveryWordsPasswordStep(state: CloudAccountScreenState, viewModel:
 
 @Composable
 private fun ShowRecoveryWordsStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Recovery words") {
-        HintText(
-            text = "If you forget your password, these 24 words are the only way back into your account. " +
-                "We don't store them, so save them somewhere safe."
-        )
+    StepGroup(title = stringResource(Res.string.cloud_recovery_words)) {
+        HintText(text = stringResource(Res.string.cloud_recovery_words_explanation))
         RecoveryWordsParagraph(words = state.recoveryWordsToShow)
         CopyRecoveryWordsButton(words = state.recoveryWordsToShow)
         EmberrButtonPrimary(
-            text = "Done",
+            text = stringResource(Res.string.cloud_done),
             onClick = viewModel::goBack,
             modifier = Modifier.fillMaxWidth()
         )
@@ -814,24 +906,24 @@ private fun ShowRecoveryWordsStep(state: CloudAccountScreenState, viewModel: Clo
 
 @Composable
 private fun DeleteAccountStep(state: CloudAccountScreenState, viewModel: CloudAccountViewModel) {
-    StepGroup(title = "Delete account") {
+    StepGroup(title = stringResource(Res.string.cloud_delete_account)) {
         CodeSentText(email = state.email)
         CodeField(code = state.code, onCodeChanged = viewModel::onCodeChanged)
         PasswordField(
             password = state.password,
             onPasswordChanged = viewModel::onPasswordChanged,
-            placeholder = "Password",
+            placeholder = stringResource(Res.string.cloud_password),
             onSubmit = viewModel::deleteAccount
         )
         CheckboxRow(
-            text = "Also clear the notes on this device",
+            text = stringResource(Res.string.cloud_clear_notes_on_this_device),
             isChecked = state.clearNotesOnThisDevice,
             onCheckedChange = viewModel::onClearNotesOnThisDeviceChanged
         )
-        WarningText(text = "Your Emberr Cloud account will be deleted for good. This can't be undone.")
+        WarningText(text = stringResource(Res.string.cloud_delete_account_warning))
         StepActions(
             state = state,
-            primaryText = "Delete account",
+            primaryText = stringResource(Res.string.cloud_delete_account),
             isPrimaryEnabled = state.canDeleteAccount,
             onPrimaryClick = viewModel::deleteAccount,
             onSendNewCode = viewModel::sendDeleteAccountCode,
@@ -860,14 +952,14 @@ private fun StepActions(
     if (state.isWorking) WorkingIndicator()
     if (onSendNewCode != null) {
         EmberrButtonSecondary(
-            text = "Send a new code",
+            text = stringResource(Res.string.cloud_send_new_code),
             onClick = onSendNewCode,
             enabled = !state.isWorking,
             modifier = Modifier.fillMaxWidth()
         )
     }
     EmberrButtonSecondary(
-        text = "Back",
+        text = stringResource(Res.string.common_back),
         onClick = onBack,
         enabled = !state.isWorking,
         modifier = Modifier.fillMaxWidth()
@@ -879,7 +971,7 @@ private fun EmailField(email: String, onEmailChanged: (String) -> Unit, onSubmit
     EmberrTextField(
         value = email,
         onValueChange = onEmailChanged,
-        placeholder = "Email",
+        placeholder = stringResource(Res.string.cloud_email),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrectEnabled = false),
         modifier = Modifier.fillMaxWidth(),
         onSubmit = onSubmit
@@ -891,7 +983,7 @@ private fun CodeField(code: String, onCodeChanged: (String) -> Unit, onSubmit: (
     EmberrTextField(
         value = code,
         onValueChange = onCodeChanged,
-        placeholder = "6-digit code",
+        placeholder = stringResource(Res.string.cloud_code_placeholder),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
         modifier = Modifier.fillMaxWidth(),
         onSubmit = onSubmit
@@ -903,17 +995,17 @@ private fun NewPasswordFields(state: CloudAccountScreenState, viewModel: CloudAc
     PasswordField(
         password = state.password,
         onPasswordChanged = viewModel::onPasswordChanged,
-        placeholder = "Password",
+        placeholder = stringResource(Res.string.cloud_password),
         onSubmit = onSubmit
     )
     PasswordField(
         password = state.passwordAgain,
         onPasswordChanged = viewModel::onPasswordAgainChanged,
-        placeholder = "Confirm password",
+        placeholder = stringResource(Res.string.cloud_confirm_password),
         onSubmit = onSubmit
     )
     if (state.isPasswordStrengthKnown) PasswordStrengthText(strength = state.passwordStrength)
-    if (state.passwordAgain.isNotEmpty() && !state.doPasswordsMatch) ErrorText(message = "Passwords don't match.")
+    if (state.passwordAgain.isNotEmpty() && !state.doPasswordsMatch) ErrorText(message = stringResource(Res.string.cloud_passwords_do_not_match))
 }
 
 @Composable
@@ -924,6 +1016,8 @@ internal fun PasswordField(
     onSubmit: () -> Unit
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
+    val passwordVisibilityLabel =
+        if (isPasswordVisible) stringResource(Res.string.cloud_hide_password) else stringResource(Res.string.cloud_show_password)
 
     EmberrTextField(
         value = password,
@@ -932,11 +1026,11 @@ internal fun PasswordField(
         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
-            IconTooltip(text = if (isPasswordVisible) "Hide password" else "Show password") {
+            IconTooltip(text = passwordVisibilityLabel) {
                 EmberrTextFieldIconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                     Icon(
                         painter = painterResource(if (isPasswordVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
-                        contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                        contentDescription = passwordVisibilityLabel,
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
@@ -950,12 +1044,12 @@ internal fun PasswordField(
 @Composable
 private fun PasswordStrengthText(strength: CloudPasswordStrength) {
     val (label, color) = when (strength) {
-        CloudPasswordStrength.WEAK -> "Weak" to MaterialTheme.colorScheme.error
-        CloudPasswordStrength.MODERATE -> "Moderate" to ModerateColor
-        CloudPasswordStrength.STRONG -> "Strong" to StrongColor
+        CloudPasswordStrength.WEAK -> Res.string.cloud_password_strength_weak to MaterialTheme.colorScheme.error
+        CloudPasswordStrength.MODERATE -> Res.string.cloud_password_strength_moderate to ModerateColor
+        CloudPasswordStrength.STRONG -> Res.string.cloud_password_strength_strong to StrongColor
     }
     Text(
-        text = "Password strength: $label",
+        text = stringResource(label),
         style = MaterialTheme.typography.labelSmall,
         fontWeight = FontWeight.Medium,
         color = color
@@ -982,12 +1076,13 @@ private fun RecoveryWordsParagraph(words: String) {
 @Composable
 private fun CopyRecoveryWordsButton(words: String) {
     val clipboardManager = LocalClipboardManager.current
+    val copiedMessage = stringResource(Res.string.cloud_recovery_words_copied)
 
     EmberrButtonSecondary(
-        text = "Copy words",
+        text = stringResource(Res.string.cloud_copy_words),
         onClick = {
             clipboardManager.setText(AnnotatedString(words))
-            showNativeToast("Recovery words copied")
+            showNativeToast(copiedMessage)
         },
         modifier = Modifier.fillMaxWidth()
     )
@@ -1024,7 +1119,7 @@ private fun SwitchRow(text: String, isOn: Boolean, onChange: (Boolean) -> Unit) 
 
 @Composable
 private fun CodeSentText(email: String) {
-    HintText(text = "We sent a code to $email. Check your inbox (and spam).")
+    HintText(text = stringResource(Res.string.cloud_code_sent, email))
 }
 
 @Composable
@@ -1037,7 +1132,7 @@ private fun PlanAndStorage(accountDetails: CloudAccountDetails, planText: String
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
         }
-        HintText(text = cloudStorageUsedText(accountDetails))
+        HintText(text = cloudStorageUsedText(accountDetails).asText())
         LinearProgressIndicator(
             progress = { cloudStorageUsedFraction(accountDetails) },
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
@@ -1050,26 +1145,30 @@ private fun PlanAndStorage(accountDetails: CloudAccountDetails, planText: String
 @Composable
 private fun MediaFileDetails(details: CloudMediaPassDetails) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        describeFileCounts(details)?.let { counts -> HintText(text = counts) }
+        describeFileCounts(details)?.let { counts -> HintText(text = counts.asText()) }
         details.fileInTransfer?.let { file ->
             val fileNumber = if (file.isUpload) details.filesSent + 1 else details.filesReceived + 1
             val fileCount = if (file.isUpload) details.filesToSend else details.filesToReceive
             val doneFraction = if (file.sizeBytes > 0) (file.bytesDone.toFloat() / file.sizeBytes).coerceIn(0f, 1f) else 1f
             Text(
-                text = "${if (file.isUpload) "Sending" else "Receiving"} file ${minOf(fileNumber, fileCount)} of $fileCount",
+                text = stringResource(
+                    if (file.isUpload) Res.string.cloud_sending_file else Res.string.cloud_receiving_file,
+                    minOf(fileNumber, fileCount),
+                    fileCount
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
             Text(
-                text = "${mediaKindOf(file.fileName)} in ${file.noteTitle}",
+                text = stringResource(mediaInNoteText(file.fileName), file.noteTitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             HintText(
-                text = "${(doneFraction * 100).roundToInt()}% · ${formatByteSize(file.bytesDone)} of ${formatByteSize(file.sizeBytes)}"
+                text = stringResource(Res.string.cloud_file_progress, (doneFraction * 100).roundToInt(), formatByteSize(file.bytesDone), formatByteSize(file.sizeBytes))
             )
             LinearProgressIndicator(
                 progress = { doneFraction },
@@ -1078,37 +1177,49 @@ private fun MediaFileDetails(details: CloudMediaPassDetails) {
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        when (details.filesWaitingForUpload) {
-            0 -> Unit
-            1 -> HintText(text = "1 file is waiting for another device to upload it.")
-            else -> HintText(text = "${details.filesWaitingForUpload} files are waiting for another device to upload them.")
+        if (details.filesWaitingForUpload > 0) {
+            HintText(
+                text = pluralStringResource(
+                    Res.plurals.cloud_files_waiting_for_upload,
+                    details.filesWaitingForUpload,
+                    details.filesWaitingForUpload
+                )
+            )
         }
     }
 }
 
-private fun describeFilesNotMoved(passResult: CloudMediaPassResult): String? {
-    val parts = listOfNotNull(
-        "${passResult.filesNotSentCount} not sent".takeIf { passResult.filesNotSentCount > 0 },
-        "${passResult.filesNotReceivedCount} not received".takeIf { passResult.filesNotReceivedCount > 0 }
-    )
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(prefix = "Files: ", separator = ", ", postfix = ". They will be tried again on the next sync.")
-}
-
-private fun describeFileCounts(details: CloudMediaPassDetails): String? {
-    val parts = listOfNotNull(
-        "${details.filesSent} of ${details.filesToSend} files sent".takeIf { details.filesToSend > 0 },
-        "${details.filesReceived} of ${details.filesToReceive} files received".takeIf { details.filesToReceive > 0 }
-    )
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
-}
-
-private fun mediaKindOf(fileName: String): String {
-    val mimeType = mimeTypeForExtension(fileName.substringAfterLast('.', "")) ?: return "File"
+private fun describeFilesNotMoved(passResult: CloudMediaPassResult): CloudText? {
+    val notSent = passResult.filesNotSentCount
+    val notReceived = passResult.filesNotReceivedCount
     return when {
-        mimeType.startsWith("image/") -> "Photo"
-        mimeType.startsWith("video/") -> "Video"
-        mimeType.startsWith("audio/") -> "Audio"
-        else -> "Document"
+        notSent > 0 && notReceived > 0 ->
+            CloudText.Phrase(Res.string.cloud_files_not_sent_and_not_received, listOf(notSent, notReceived))
+        notSent > 0 -> CloudText.Phrase(Res.string.cloud_files_not_sent, listOf(notSent))
+        notReceived > 0 -> CloudText.Phrase(Res.string.cloud_files_not_received, listOf(notReceived))
+        else -> null
+    }
+}
+
+private fun describeFileCounts(details: CloudMediaPassDetails): CloudText? {
+    val sentCounts = listOf(details.filesSent, details.filesToSend)
+    val receivedCounts = listOf(details.filesReceived, details.filesToReceive)
+    return when {
+        details.filesToSend > 0 && details.filesToReceive > 0 ->
+            CloudText.Phrase(Res.string.cloud_files_sent_and_received_counts, sentCounts + receivedCounts)
+        details.filesToSend > 0 -> CloudText.Phrase(Res.string.cloud_files_sent_count, sentCounts)
+        details.filesToReceive > 0 -> CloudText.Phrase(Res.string.cloud_files_received_count, receivedCounts)
+        else -> null
+    }
+}
+
+private fun mediaInNoteText(fileName: String): StringResource {
+    val mimeType = mimeTypeForExtension(fileName.substringAfterLast('.', "")) ?: return Res.string.cloud_file_in_note
+    return when {
+        mimeType.startsWith("image/") -> Res.string.cloud_photo_in_note
+        mimeType.startsWith("video/") -> Res.string.cloud_video_in_note
+        mimeType.startsWith("audio/") -> Res.string.cloud_audio_in_note
+        else -> Res.string.cloud_document_in_note
     }
 }
 
@@ -1149,7 +1260,7 @@ private fun WorkingIndicator() {
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        HintText(text = "Please wait...")
+        HintText(text = stringResource(Res.string.cloud_please_wait))
     }
 }
 

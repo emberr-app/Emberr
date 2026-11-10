@@ -22,6 +22,32 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.calendar
 import emberr.shared.generated.resources.daily
 import emberr.shared.generated.resources.folder
+import emberr.shared.generated.resources.import_emberr_added_calendar
+import emberr.shared.generated.resources.import_emberr_added_daily_notes
+import emberr.shared.generated.resources.import_emberr_added_daily_notes_and_calendar
+import emberr.shared.generated.resources.import_emberr_calendar
+import emberr.shared.generated.resources.import_emberr_choose_backup_file
+import emberr.shared.generated.resources.import_emberr_choose_backup_first
+import emberr.shared.generated.resources.import_emberr_choose_backup_hint
+import emberr.shared.generated.resources.import_emberr_choose_different_file
+import emberr.shared.generated.resources.import_emberr_copying_media
+import emberr.shared.generated.resources.import_emberr_could_not_read
+import emberr.shared.generated.resources.import_emberr_daily_notes
+import emberr.shared.generated.resources.import_emberr_failed
+import emberr.shared.generated.resources.import_emberr_finished
+import emberr.shared.generated.resources.import_emberr_getting_ready
+import emberr.shared.generated.resources.import_emberr_imported_spaces
+import emberr.shared.generated.resources.import_emberr_missing_media
+import emberr.shared.generated.resources.import_emberr_reading_backup
+import emberr.shared.generated.resources.import_emberr_saving
+import emberr.shared.generated.resources.import_emberr_spaces_to_import
+import emberr.shared.generated.resources.import_emberr_subtitle
+import emberr.shared.generated.resources.import_nothing_added
+import emberr.shared.generated.resources.import_space_count
+import emberr.shared.generated.resources.import_stopped
+import emberr.shared.generated.resources.import_stopping
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun EmberrImportSheet(
@@ -41,7 +67,7 @@ fun EmberrImportSheet(
         expanded = true,
         onDismiss = onDismiss,
         title = "Emberr",
-        subtitle = "Import a backup without replacing your current notes.",
+        subtitle = stringResource(Res.string.import_emberr_subtitle),
         contentHorizontalPadding = 0.dp,
         isDismissible = !isImporting
     ) {
@@ -61,24 +87,24 @@ fun EmberrImportSheet(
                         0f
                     },
                     progressText = if (importProgress.totalCount > 0) {
-                        "Copying media ${importProgress.copiedCount} of ${importProgress.totalCount}…"
+                        stringResource(Res.string.import_emberr_copying_media, importProgress.copiedCount, importProgress.totalCount)
                     } else {
-                        "Getting ready…"
+                        stringResource(Res.string.import_emberr_getting_ready)
                     },
                     onStopClick = onStopClick
                 )
-                EmberrImportProgress.Saving -> ImportWorkingMessage("Saving the import…")
-                EmberrImportProgress.Stopping -> ImportWorkingMessage("Stopping and removing what was imported…")
+                EmberrImportProgress.Saving -> ImportWorkingMessage(stringResource(Res.string.import_emberr_saving))
+                EmberrImportProgress.Stopping -> ImportWorkingMessage(stringResource(Res.string.import_stopping))
                 EmberrImportProgress.Stopped -> ImportOutcomeMessage(
-                    title = "Import stopped",
-                    detailLines = listOf("Nothing was added."),
+                    title = stringResource(Res.string.import_stopped),
+                    detailLines = listOf(stringResource(Res.string.import_nothing_added)),
                     errorLine = null,
                     onDoneClick = onDismiss
                 )
                 is EmberrImportProgress.Finished -> ImportFinishedMessage(importProgress.result, onDoneClick = onDismiss)
                 is EmberrImportProgress.Failed -> ImportOutcomeMessage(
-                    title = "Import failed",
-                    detailLines = listOf("Nothing was added."),
+                    title = stringResource(Res.string.import_emberr_failed),
+                    detailLines = listOf(stringResource(Res.string.import_nothing_added)),
                     errorLine = importProgress.reason,
                     onDoneClick = onDismiss
                 )
@@ -114,28 +140,28 @@ private fun BackupChoices(
     ) {
         when (pickedBackupState) {
             PickedBackupState.NothingPicked -> ImportChoosePrompt(
-                title = "Choose a Backup File",
-                hint = ".emberr file from Export Backup"
+                title = stringResource(Res.string.import_emberr_choose_backup_file),
+                hint = stringResource(Res.string.import_emberr_choose_backup_hint)
             )
-            PickedBackupState.Reading -> ImportReadingMessage("Reading the backup…")
-            is PickedBackupState.CouldNotRead -> ImportFadedLine(text = "${pickedBackupState.reason} $importChooseAgainHint")
+            PickedBackupState.Reading -> ImportReadingMessage(stringResource(Res.string.import_emberr_reading_backup))
+            is PickedBackupState.CouldNotRead -> ImportFadedLine(text = stringResource(Res.string.import_emberr_could_not_read, pickedBackupState.reason, importChooseAgainHint()))
             is PickedBackupState.Ready -> ImportPickedSummary(
                 pickedLabel = pickedBackupState.pickedName,
-                countsLine = countLabel(spaces.size, "space"),
+                countsLine = pluralStringResource(Res.plurals.import_space_count, spaces.size, spaces.size),
                 extraLines = emptyList(),
-                changeHint = "Choose a different file"
+                changeHint = stringResource(Res.string.import_emberr_choose_different_file)
             )
         }
     }
 
     Column(modifier = Modifier.padding(top = 16.dp)) {
         EmberrChoiceRow(
-            label = "Spaces to Import",
+            label = stringResource(Res.string.import_emberr_spaces_to_import),
             value = checkedSpacesLabel(spaces, checkedSpaceIds),
             icon = Res.drawable.folder
         ) {
             if (spaces.isEmpty()) {
-                ImportMenuOption(label = "Choose a backup first", isSelected = false, isAvailable = false, onClick = {})
+                ImportMenuOption(label = stringResource(Res.string.import_emberr_choose_backup_first), isSelected = false, isAvailable = false, onClick = {})
             } else {
                 EmberrSpaceCheckboxOptions(
                     spaces = spaces,
@@ -146,7 +172,7 @@ private fun BackupChoices(
         }
         if (readyBackup?.hasDailyNotes == true) {
             EmberrSwitchRow(
-                label = "Daily Notes",
+                label = stringResource(Res.string.import_emberr_daily_notes),
                 icon = Res.drawable.daily,
                 isOn = wantsDailyNotes,
                 onClick = { wantsDailyNotes = !wantsDailyNotes }
@@ -154,7 +180,7 @@ private fun BackupChoices(
         }
         if (readyBackup?.hasCalendar == true) {
             EmberrSwitchRow(
-                label = "Calendar",
+                label = stringResource(Res.string.import_emberr_calendar),
                 icon = Res.drawable.calendar,
                 isOn = wantsCalendar,
                 onClick = { wantsCalendar = !wantsCalendar }
@@ -172,18 +198,22 @@ private fun BackupChoices(
 @Composable
 private fun ImportFinishedMessage(result: EmberrImportResult, onDoneClick: () -> Unit) {
     val addedLine = when {
-        result.addedDailyNotes && result.addedCalendar -> "Daily notes and calendar events added"
-        result.addedDailyNotes -> "Daily notes added"
-        result.addedCalendar -> "Calendar events added"
+        result.addedDailyNotes && result.addedCalendar -> stringResource(Res.string.import_emberr_added_daily_notes_and_calendar)
+        result.addedDailyNotes -> stringResource(Res.string.import_emberr_added_daily_notes)
+        result.addedCalendar -> stringResource(Res.string.import_emberr_added_calendar)
         else -> null
     }
     ImportOutcomeMessage(
-        title = if (result.importedSpaceNames.isEmpty()) "Import finished" else "Imported ${countLabel(result.importedSpaceNames.size, "space")}",
+        title = if (result.importedSpaceNames.isEmpty()) {
+            stringResource(Res.string.import_emberr_finished)
+        } else {
+            pluralStringResource(Res.plurals.import_emberr_imported_spaces, result.importedSpaceNames.size, result.importedSpaceNames.size)
+        },
         detailLines = listOfNotNull(result.importedSpaceNames.joinToString(" · ").ifEmpty { null }, addedLine),
-        errorLine = when (result.missingMediaCount) {
-            0 -> null
-            1 -> "Couldn't find 1 media file in the backup, so it will show as missing."
-            else -> "Couldn't find ${result.missingMediaCount} media files in the backup, so they will show as missing."
+        errorLine = if (result.missingMediaCount == 0) {
+            null
+        } else {
+            pluralStringResource(Res.plurals.import_emberr_missing_media, result.missingMediaCount, result.missingMediaCount)
         },
         onDoneClick = onDoneClick
     )

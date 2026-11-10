@@ -15,7 +15,13 @@ import androidx.compose.ui.unit.dp
 import com.emberr.domain.sync.SyncPairingData
 import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.lan_sync_pair_dialog_message
+import emberr.shared.generated.resources.lan_sync_pair_dialog_secret_token
+import emberr.shared.generated.resources.lan_sync_pair_dialog_title
 import kotlinx.serialization.json.Json
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SyncPairingDialog(
@@ -30,14 +36,14 @@ fun SyncPairingDialog(
 
     EmberrAlertDialog(
         onDismissRequest = onDismiss,
-        title = "Pair Mobile Device"
+        title = stringResource(Res.string.lan_sync_pair_dialog_title)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Scan this QR code using the Emberr mobile app to connect securely to your desktop.",
+                text = stringResource(Res.string.lan_sync_pair_dialog_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
                 textAlign = TextAlign.Center,
@@ -61,7 +67,7 @@ fun SyncPairingDialog(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Secret Token: ${pairingData.authToken.take(8)}...",
+                text = stringResource(Res.string.lan_sync_pair_dialog_secret_token, pairingData.authToken.take(8)),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -69,7 +75,7 @@ fun SyncPairingDialog(
             Spacer(modifier = Modifier.height(20.dp))
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
             )

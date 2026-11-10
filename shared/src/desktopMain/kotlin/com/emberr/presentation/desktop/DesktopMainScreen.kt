@@ -83,6 +83,7 @@ import com.emberr.presentation.shared.components.flippedHorizontally
 import com.emberr.presentation.shared.canvas.CanvasScreen
 import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.sync.SyncViewModel
+import com.emberr.presentation.sync.text
 import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
 import com.emberr.domain.util.system.isDebugBuild
 import com.emberr.presentation.calendar.CalendarEvent
@@ -1115,6 +1116,7 @@ fun DesktopMainScreen(
     // Sync
     val snackbarHostState = remember { SnackbarHostState() }
     val syncState by syncViewModel.syncStatus.collectAsState()
+    val syncStateText = syncState.text()
 
     LaunchedEffect(isSidebarVisible) {
         if (isSidebarVisible) isPeeking = false
@@ -1141,8 +1143,8 @@ fun DesktopMainScreen(
     }
 
     LaunchedEffect(syncState) {
-        if (syncState != "Idle" && syncState != "Syncing...") {
-            snackbarHostState.showSnackbar(message = syncState)
+        if (syncState.shouldShowAsMessage) {
+            snackbarHostState.showSnackbar(message = syncStateText)
             syncViewModel.resetSyncStatus()
         }
     }

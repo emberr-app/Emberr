@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">Self-Host</string>
+
+    <string name="selfhost_group_server_details">Server Details</string>
+    <string name="selfhost_group_recovery_passphrase">Recovery Passphrase</string>
+    <string name="selfhost_group_unlock_vault">Unlock Vault</string>
+    <string name="selfhost_group_status">Status</string>
+
+    <string name="selfhost_setting_up">Setting up</string>
+    <string name="selfhost_unlock_and_sync">Unlock and Sync</string>
+    <string name="selfhost_create_vault_and_sync">Create Vault and Sync</string>
+    <string name="selfhost_server_address_rejected">Server Address Rejected</string>
+    <string name="selfhost_got_it">Got it</string>
+
+    <string name="selfhost_status_connected">Status: Connected</string>
+    <string name="selfhost_cancelling">Cancelling...</string>
+    <string name="selfhost_cancel_sync">Cancel Sync</string>
+    <string name="selfhost_cancel_sync_hint">Cancelling pauses sync until you restart the app or tap Sync Now.</string>
+    <string name="selfhost_sync_now">Sync Now</string>
+    <string name="selfhost_syncing">Syncing...</string>
+    <string name="selfhost_never_synced">Never synced</string>
+    <string name="selfhost_last_synced">Last synced: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="one">%1$d note waiting to sync</item>
+        <item quantity="other">%1$d notes waiting to sync</item>
+    </plurals>
+    <string name="selfhost_progress_notes">Notes</string>
+    <string name="selfhost_progress_images">Images</string>
+
+    <string name="selfhost_passphrase_needed_hint">You need this passphrase to connect another phone or computer to this server.</string>
+    <string name="selfhost_show_passphrase_button">Show Passphrase</string>
+    <string name="selfhost_unlock_prompt_title">Recovery passphrase</string>
+    <string name="selfhost_unlock_prompt_description">Unlock to see your recovery passphrase</string>
+    <string name="selfhost_save_passphrase_hint">This device was connected before Emberr saved the passphrase. Enter it once to save it here, so you can see it later.</string>
+    <string name="selfhost_checking">Checking</string>
+    <string name="selfhost_save_passphrase">Save Passphrase</string>
+    <string name="selfhost_disconnect_vault">Disconnect Vault</string>
+    <string name="selfhost_recovery_dialog_message">Enter this on the other device when it asks to unlock the vault. Don\'t share it with anyone.</string>
+    <string name="selfhost_done">Done</string>
+    <string name="selfhost_disconnect_vault_question">Disconnect Vault?</string>
+    <string name="selfhost_disconnect_message">Your notes stay on this device and the server. You\'ll need your recovery passphrase to reconnect.</string>
+    <string name="selfhost_disconnect">Disconnect</string>
+
+    <string name="selfhost_checking_for_changes">Checking for changes...</string>
+    <string name="selfhost_finishing_up">Finishing up...</string>
+    <string name="selfhost_sending_percent">Sending %1$d%</string>
+    <string name="selfhost_nothing_to_send">Nothing to send</string>
+    <string name="selfhost_receiving_percent">Receiving %1$d%</string>
+    <string name="selfhost_nothing_to_receive">Nothing to receive</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="one">%1$d of %2$d note</item>
+        <item quantity="other">%1$d of %2$d notes</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s of %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">Enter the WebDAV address and login of your server, for example Nextcloud or a NAS. Emberr encrypts your notes before they leave this device.</string>
+    <string name="selfhost_username">Username</string>
+    <string name="selfhost_password">Password</string>
+    <string name="selfhost_hide_password">Hide password</string>
+    <string name="selfhost_show_password">Show password</string>
+    <string name="selfhost_testing">Testing</string>
+    <string name="selfhost_test_connection">Test Connection</string>
+    <string name="selfhost_contacting_server">Contacting server...</string>
+
+    <string name="selfhost_restore_hint">This server already has an Emberr vault. Enter the 16-character recovery passphrase that was shown when the vault was created.</string>
+    <string name="selfhost_restore_find_hint">Can\'t find it? Open Settings → Self-Host → Show Passphrase on a device that is already connected.</string>
+    <string name="selfhost_passphrase_placeholder">16-character passphrase</string>
+    <string name="selfhost_hide_passphrase">Hide passphrase</string>
+    <string name="selfhost_show_passphrase">Show passphrase</string>
+
+    <string name="selfhost_save_passphrase_now">Save this passphrase now</string>
+    <string name="selfhost_fact_type_on_other_devices">You will type it on every other phone or computer you connect to this server.</string>
+    <string name="selfhost_fact_locks_notes">It locks your notes on the server. No one can read them without it, not even Emberr.</string>
+    <string name="selfhost_fact_cannot_reset">Emberr can\'t reset it. Keep it in a password manager or write it down.</string>
+    <string name="selfhost_fact_see_again_later">You can see it again later in Settings → Self-Host on any device that is connected.</string>
+    <string name="selfhost_new_passphrase">New passphrase</string>
+    <string name="selfhost_generate_new_passphrase">Generate a new passphrase</string>
+    <string name="selfhost_saved_passphrase_confirmation">I saved this passphrase somewhere safe</string>
+    <string name="selfhost_copy_passphrase">Copy passphrase</string>
+    <string name="selfhost_copy_address">Copy address</string>
+    <string name="selfhost_copied_address">copied address</string>
+
+    <string name="selfhost_invalid_credentials">Invalid username or password</string>
+    <string name="selfhost_server_returned_error">Server returned an error (%1$d)</string>
+    <string name="selfhost_could_not_reach_server">Could not reach the server</string>
+    <string name="selfhost_could_not_check_vault">Could not check for an existing vault: %1$s</string>
+    <string name="selfhost_unknown_error">unknown error</string>
+    <string name="selfhost_existing_vault_found">Existing vault found on this server</string>
+    <string name="selfhost_no_existing_vault">No existing vault, this will create a new one</string>
+    <string name="selfhost_no_vault_file_to_restore">No vault file was found on the server to restore from</string>
+    <string name="selfhost_old_or_damaged_vault_data">This server folder has sync data from an older or damaged vault. Delete the emberr_sync folder on your server, then set up again.</string>
+    <string name="selfhost_vault_exists_enter_passphrase">A vault already exists on this server. Enter its recovery passphrase below to restore it.</string>
+    <string name="selfhost_could_not_set_up">Could not set up secure sync</string>
+    <string name="selfhost_no_vault_on_server">No vault was found on the server.</string>
+    <string name="selfhost_wrong_passphrase">That passphrase doesn\'t unlock this vault.</string>
+    <string name="selfhost_could_not_check_passphrase">Could not check the passphrase: %1$s</string>
+
+    <string name="selfhost_update_required_title">Self-host sync paused</string>
+    <string name="selfhost_update_required_message">%1$s Your notes are safe and keep saving on this device.</string>
+    <string name="selfhost_later">Later</string>
+    <string name="selfhost_update">Update</string>
+</resources>
