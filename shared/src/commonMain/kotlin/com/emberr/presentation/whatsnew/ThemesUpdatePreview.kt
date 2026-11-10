@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.emberr.presentation.settings.label
 import com.emberr.presentation.shared.components.EmberrCheckbox
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.ui.theme.LocalAppIsDark
@@ -44,6 +45,15 @@ import com.emberr.ui.theme.availableColorThemes
 import com.emberr.ui.theme.sourceColorSchemes
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.whatsnew_preview_camera_charger
+import emberr.shared.generated.resources.whatsnew_preview_passport
+import emberr.shared.generated.resources.whatsnew_preview_reading_list
+import emberr.shared.generated.resources.whatsnew_preview_reading_list_books
+import emberr.shared.generated.resources.whatsnew_preview_train_tickets
+import emberr.shared.generated.resources.whatsnew_preview_trip_text
+import emberr.shared.generated.resources.whatsnew_preview_trip_title
+import org.jetbrains.compose.resources.stringResource
 
 private val ThemeShowDuration = 1400.milliseconds
 private const val THEME_COLOR_FADE_MILLIS = 700
@@ -84,7 +94,7 @@ internal fun ThemesUpdatePreview() {
             ThemePreviewNote()
         }
         ThemeNameChip(
-            themeName = shownTheme.displayName,
+            themeName = shownTheme.label(),
             swatchColors = listOf(fadingColors.background, fadingColors.surface, fadingColors.onSurface)
         )
     }
@@ -108,21 +118,21 @@ private fun ThemePreviewNote() {
         Spacer(modifier = Modifier.height(18.dp))
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
             Text(
-                text = "Weekend trip",
+                text = stringResource(Res.string.whatsnew_preview_trip_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Leave by 8am to beat the traffic.",
+                text = stringResource(Res.string.whatsnew_preview_trip_text),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(8.dp))
-            PreviewChecklistLine(text = "Train tickets", isChecked = true)
-            PreviewChecklistLine(text = "Passport", isChecked = false)
-            PreviewChecklistLine(text = "Camera charger", isChecked = false)
+            PreviewChecklistLine(text = stringResource(Res.string.whatsnew_preview_train_tickets), isChecked = true)
+            PreviewChecklistLine(text = stringResource(Res.string.whatsnew_preview_passport), isChecked = false)
+            PreviewChecklistLine(text = stringResource(Res.string.whatsnew_preview_camera_charger), isChecked = false)
             Spacer(modifier = Modifier.height(14.dp))
             Column(
                 modifier = Modifier
@@ -132,13 +142,13 @@ private fun ThemePreviewNote() {
                     .padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
                 Text(
-                    text = "Reading list",
+                    text = stringResource(Res.string.whatsnew_preview_reading_list),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "The Overstory, Piranesi, Project Hail Mary",
+                    text = stringResource(Res.string.whatsnew_preview_reading_list_books),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )

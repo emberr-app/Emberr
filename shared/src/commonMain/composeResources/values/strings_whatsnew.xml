@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">See you later!</string>
+    <string name="whatsnew_whats_new_question">What's new?</string>
+    <string name="whatsnew_title">What's new</string>
+    <string name="whatsnew_version">Version %1$s</string>
+    <string name="whatsnew_new">New</string>
+    <string name="whatsnew_themes_heading">Themes</string>
+    <string name="whatsnew_themes_where">Settings → Appearance → Theme</string>
+    <string name="whatsnew_themes_description_desktop">Pick from 13 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast. Each one has a strength setting, and you can choose whether text and icons follow it too.</string>
+    <string name="whatsnew_themes_description_mobile">Pick from 14 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast, or let **Wallpaper** take its colors from your wallpaper. Each one has a strength setting, and you can choose whether text and icons follow it too. Your home screen widgets follow the theme as well.</string>
+    <string name="whatsnew_texture_heading">Paper Texture</string>
+    <string name="whatsnew_texture_where">Settings → Appearance → Theme → Texture</string>
+    <string name="whatsnew_texture_description">Give the app a soft grain, like real paper. Set how strong it is, and choose where it shows: the whole app, notes, canvas or Daily Notes.</string>
+    <string name="whatsnew_scale_heading">Interface Scale</string>
+    <string name="whatsnew_scale_where">Settings → Appearance → Interface Scale</string>
+    <string name="whatsnew_scale_description_desktop">Make everything in the app bigger or smaller, from 80% to 200%, or use **Ctrl +**, **Ctrl −** and **Ctrl 0**.</string>
+    <string name="whatsnew_scale_description_mobile">Make everything in the app bigger or smaller, from 80% to 200%.</string>
+    <string name="whatsnew_widgets_heading">Widgets</string>
+    <string name="whatsnew_widgets_where">Long-press your home screen → Widgets → Emberr</string>
+    <string name="whatsnew_widgets_description">Every widget has a cleaner new look, and there are three new ones: **Note card**, **Jot it down** and **Quote of the day**. Widgets now show the note you picked right away, and tell you when that note has been deleted.</string>
+    <string name="whatsnew_editor_heading">Editor</string>
+    <string name="whatsnew_editor_where">Type / anywhere in a note</string>
+    <string name="whatsnew_editor_description">The slash menu now opens right after any character, not only after a space. If you type past a match, delete back and the menu comes back.</string>
+    <string name="whatsnew_others_heading">Others</string>
+    <string name="whatsnew_others_where">Smaller changes and fixes</string>
+    <string name="whatsnew_others_sliders">Sliders across the app have a new design.</string>
+    <string name="whatsnew_others_title_time_desktop">Type **/** in a note's title to add the current time or date.</string>
+    <string name="whatsnew_others_title_time_mobile">Add the current time or date to a note's title from the keyboard toolbar.</string>
+    <string name="whatsnew_others_sync_network">The network choice for sync is now in **Settings → Sync &amp; Backup**.</string>
+    <string name="whatsnew_others_windows_startup">Faster startup on Windows.</string>
+    <string name="whatsnew_others_small_fixes">Plenty of small fixes.</string>
+    <string name="whatsnew_preview_options">Options</string>
+    <string name="whatsnew_preview_trip_title">Weekend trip</string>
+    <string name="whatsnew_preview_trip_text">Leave by 8am to beat the traffic.</string>
+    <string name="whatsnew_preview_train_tickets">Train tickets</string>
+    <string name="whatsnew_preview_passport">Passport</string>
+    <string name="whatsnew_preview_camera_charger">Camera charger</string>
+    <string name="whatsnew_preview_reading_list">Reading list</string>
+    <string name="whatsnew_preview_reading_list_books">The Overstory, Piranesi, Project Hail Mary</string>
+    <string name="whatsnew_preview_meeting_title">Team meeting</string>
+    <string name="whatsnew_preview_meeting_text">Thursday at 10, room 2.</string>
+    <string name="whatsnew_preview_typed_heading">Agenda</string>
+    <string name="whatsnew_preview_quote">The secret of getting ahead is getting started.</string>
+    <string name="whatsnew_preview_jot_prompt">What's on your mind?</string>
+    <string name="whatsnew_preview_jot_button">Jot it down</string>
+</resources>

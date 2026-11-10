@@ -48,6 +48,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.trash_delete_permanently
+import emberr.shared.generated.resources.trash_empty_trash
+import emberr.shared.generated.resources.trash_empty_trash_question
+import emberr.shared.generated.resources.trash_empty_trash_subtitle
+import emberr.shared.generated.resources.trash_empty_trash_tooltip
+import emberr.shared.generated.resources.trash_is_empty
+import emberr.shared.generated.resources.trash_manage_note
+import emberr.shared.generated.resources.trash_manage_note_subtitle
+import emberr.shared.generated.resources.trash_restore_note
+import emberr.shared.generated.resources.trash_title
+import org.jetbrains.compose.resources.stringResource
 
 private val HORIZONTAL_PADDING = 16.dp
 
@@ -86,7 +100,7 @@ fun TrashScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Trash is empty",
+                    text = stringResource(Res.string.trash_is_empty),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -146,22 +160,22 @@ fun TrashScreen(
                 .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = "Trash",
+                title = stringResource(Res.string.trash_title),
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 topEdgeFadeAlpha = topEdgeFadeAlpha,
-                backTooltip = "Back",
+                backTooltip = stringResource(Res.string.common_back),
                 onBackClick = onNavigateBack,
                 actions = {
                     if (trashedNotes.isNotEmpty()) {
                         TopBarIconButton(
                             icon = Icons.Default.DeleteSweep,
-                            contentDescription = "Empty Trash",
+                            contentDescription = stringResource(Res.string.trash_empty_trash),
                             bgColor = Color.Transparent,
                             tint = MaterialTheme.colorScheme.error,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
-                            tooltip = "Empty trash",
+                            tooltip = stringResource(Res.string.trash_empty_trash_tooltip),
                             onClick = { showEmptyTrashConfirm = true }
                         )
                     }
@@ -235,7 +249,7 @@ private fun DesktopTrashNoteCard(
                 onDismissRequest = { isMenuOpen = false }
             ) {
                 EmberrDesktopMenuOption(
-                    label = "Restore Note",
+                    label = stringResource(Res.string.trash_restore_note),
                     icon = { Icon(Icons.Default.Restore, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp)) },
                     onClick = {
                         isMenuOpen = false
@@ -243,7 +257,7 @@ private fun DesktopTrashNoteCard(
                     }
                 )
                 EmberrDesktopMenuOption(
-                    label = "Delete Permanently",
+                    label = stringResource(Res.string.trash_delete_permanently),
                     icon = { Icon(Icons.Default.DeleteForever, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp)) },
                     labelColor = MaterialTheme.colorScheme.error,
                     onClick = {
@@ -266,12 +280,12 @@ fun ManageNoteBottomSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Manage Note",
-        subtitle = "Notes in trash are automatically deleted after 30 days."
+        title = stringResource(Res.string.trash_manage_note),
+        subtitle = stringResource(Res.string.trash_manage_note_subtitle)
     ) { closeAnd ->
 
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
-            BottomSheetActionItem(Icons.Default.Restore, "Restore Note") {
+            BottomSheetActionItem(Icons.Default.Restore, stringResource(Res.string.trash_restore_note)) {
                 closeAnd(onRestore)
             }
 
@@ -282,14 +296,14 @@ fun ManageNoteBottomSheet(
 
             BottomSheetActionItem(
                 Icons.Default.DeleteForever,
-                "Delete Permanently",
+                stringResource(Res.string.trash_delete_permanently),
                 isDestructive = true
             ) {
                 closeAnd(onPermanentlyDelete)
             }
 
             EmberrButtonPrimary(
-                text = "Cancel",
+                text = stringResource(Res.string.common_cancel),
                 onClick = { closeAnd(onDismiss) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)
             )
@@ -308,19 +322,19 @@ fun EmptyTrashBottomSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Empty Trash?",
-        subtitle = "This will permanently delete all notes currently in the trash. This action cannot be undone."
+        title = stringResource(Res.string.trash_empty_trash_question),
+        subtitle = stringResource(Res.string.trash_empty_trash_subtitle)
     ) { closeAnd ->
 
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
-            BottomSheetActionItem(Icons.Default.DeleteSweep, "Empty Trash", isDestructive = true) {
+            BottomSheetActionItem(Icons.Default.DeleteSweep, stringResource(Res.string.trash_empty_trash), isDestructive = true) {
                 closeAnd {
                     scope.launch { delay(250.milliseconds); onConfirmEmpty() }
                 }
             }
 
             EmberrButtonPrimary(
-                text = "Cancel",
+                text = stringResource(Res.string.common_cancel),
                 onClick = { closeAnd(onDismiss) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)
             )

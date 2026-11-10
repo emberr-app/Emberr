@@ -1,7 +1,7 @@
 package com.emberr.presentation.shared
 
-enum class SubNoteOpenMode(val displayName: String) {
-    SIDE_PANEL("Side Panel"),
-    CENTER_DIALOG("Center Dialog"),
-    FULL_RIGHT_PANEL("Full Right Panel")
+enum class SubNoteOpenMode {
+    SIDE_PANEL,
+    CENTER_DIALOG,
+    FULL_RIGHT_PANEL
 }

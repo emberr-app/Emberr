@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.emberr.domain.model.PropertyType
 import com.emberr.domain.model.PropertyValueType
+import com.emberr.presentation.shared.editor.blockViews.property.displayName
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.settings.SettingsActionRow
 import com.emberr.presentation.settings.SettingsDivider
@@ -75,6 +76,25 @@ import emberr.shared.generated.resources.trash
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_save
+import emberr.shared.generated.resources.properties_add
+import emberr.shared.generated.resources.properties_add_property
+import emberr.shared.generated.resources.properties_built_in
+import emberr.shared.generated.resources.properties_built_in_hint
+import emberr.shared.generated.resources.properties_custom
+import emberr.shared.generated.resources.properties_delete_property
+import emberr.shared.generated.resources.properties_delete_question
+import emberr.shared.generated.resources.properties_edit_property
+import emberr.shared.generated.resources.properties_name_taken
+import emberr.shared.generated.resources.properties_new_property
+import emberr.shared.generated.resources.properties_property_name
+import emberr.shared.generated.resources.properties_title
+import emberr.shared.generated.resources.properties_value_type
+import emberr.shared.generated.resources.properties_value_type_locked
+import org.jetbrains.compose.resources.stringResource
 
 private val PropertiesPaneMaxWidth = 760.dp
 private val PropertyEditorMenuWidth = 300.dp
@@ -147,34 +167,35 @@ fun PropertiesScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(modifier = Modifier.widthIn(max = PropertiesPaneMaxWidth).fillMaxWidth()) {
-                SettingsGroup(title = "Built-in") {
+                SettingsGroup(title = stringResource(Res.string.properties_built_in)) {
                     PropertyType.entries
                         .filterNot { it.isOnlyForDatabases }
-                        .sortedBy { it.label.lowercase() }
-                        .forEachIndexed { index, propertyType ->
+                        .map { propertyType -> propertyType to propertyType.displayName() }
+                        .sortedBy { (_, propertyName) -> propertyName.lowercase() }
+                        .forEachIndexed { index, (propertyType, propertyName) ->
                             if (index > 0) SettingsDivider()
                             PropertyRow(
                                 icon = propertyType.iconResource(),
-                                name = propertyType.label,
-                                valueTypeLabel = propertyType.valueType.label,
+                                name = propertyName,
+                                valueTypeLabel = propertyType.valueType.displayName(),
                                 onClick = null
                             )
                         }
                 }
                 Text(
-                    text = "Built-in properties can't be renamed or deleted.",
+                    text = stringResource(Res.string.properties_built_in_hint),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
                     modifier = Modifier.padding(start = 22.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 )
 
-                SettingsGroup(title = "Custom") {
+                SettingsGroup(title = stringResource(Res.string.properties_custom)) {
                     customProperties.forEach { property ->
                         Box {
                             PropertyRow(
                                 icon = property.valueType.iconResource(),
                                 name = property.name,
-                                valueTypeLabel = property.valueType.label,
+                                valueTypeLabel = property.valueType.displayName(),
                                 onClick = {
                                     editorState = PropertyEditorState(
                                         propertyId = property.propertyId,
@@ -194,7 +215,7 @@ fun PropertiesScreen(
                     Box {
                         SettingsActionRow(
                             icon = painterResource(Res.drawable.plus),
-                            title = "Add property",
+                            title = stringResource(Res.string.properties_add_property),
                             onClick = {
                                 editorState = PropertyEditorState(
                                     propertyId = null,
@@ -229,11 +250,11 @@ fun PropertiesScreen(
                 .onGloballyPositioned { coordinates -> topBarHeightPx = coordinates.size.height.toFloat() }
         ) {
             EmberrTopHeaderBar(
-                title = "Properties",
+                title = stringResource(Res.string.properties_title),
                 hazeState = hazeState,
                 contentPadding = topHeaderBarPadding(bottom = 16.dp),
                 topEdgeFadeAlpha = topEdgeFadeAlpha,
-                backTooltip = "Back",
+                backTooltip = stringResource(Res.string.common_back),
                 onBackClick = onNavigateBack
             )
         }
@@ -243,7 +264,7 @@ fun PropertiesScreen(
             EmberrBottomSheet(
                 expanded = state != null,
                 onDismiss = { editorState = null },
-                title = if (state?.propertyId == null) "New Property" else "Edit Property"
+                title = stringResource(if (state?.propertyId == null) Res.string.properties_new_property else Res.string.properties_edit_property)
             ) {
                 if (state != null) {
                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
@@ -327,7 +348,7 @@ internal fun PropertyEditor(
     if (state.isConfirmingDelete) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Delete \"${state.originalName}\"? It will be removed from every note that uses it.",
+                text = stringResource(Res.string.properties_delete_question, state.originalName),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
@@ -336,8 +357,8 @@ internal fun PropertyEditor(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                EmberrButtonSecondary(text = "Cancel", onClick = onDeleteCancel, modifier = Modifier.weight(1f))
-                EmberrButtonPrimary(text = "Delete", onClick = onDeleteConfirm, modifier = Modifier.weight(1f))
+                EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onDeleteCancel, modifier = Modifier.weight(1f))
+                EmberrButtonPrimary(text = stringResource(Res.string.common_delete), onClick = onDeleteConfirm, modifier = Modifier.weight(1f))
             }
         }
     } else {
@@ -347,7 +368,7 @@ internal fun PropertyEditor(
             EmberrTextField(
                 value = state.name,
                 onValueChange = onNameChange,
-                placeholder = "Property name",
+                placeholder = stringResource(Res.string.properties_property_name),
                 modifier = Modifier
                     .padding(vertical = 8.dp)
                     .fillMaxWidth()
@@ -356,7 +377,7 @@ internal fun PropertyEditor(
             )
             if (isNameTaken) {
                 Text(
-                    text = "A property with this name already exists",
+                    text = stringResource(Res.string.properties_name_taken),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(start = 4.dp, top = 6.dp)
@@ -364,7 +385,7 @@ internal fun PropertyEditor(
             }
 
             Text(
-                text = "Value type",
+                text = stringResource(Res.string.properties_value_type),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(start = 4.dp, top = 14.dp, bottom = 6.dp)
@@ -389,7 +410,7 @@ internal fun PropertyEditor(
                         }
                         if (isDesktopPlatform) {
                             EmberrDesktopMenuOption(
-                                label = valueType.label,
+                                label = valueType.displayName(),
                                 isSelected = isSelected,
                                 onClick = { onValueTypeChange(valueType) },
                                 icon = valueTypeIcon,
@@ -397,7 +418,7 @@ internal fun PropertyEditor(
                             )
                         } else {
                             EmberrBottomSheetOption(
-                                label = valueType.label,
+                                label = valueType.displayName(),
                                 isSelected = isSelected,
                                 onClick = { onValueTypeChange(valueType) },
                                 icon = valueTypeIcon,
@@ -408,13 +429,13 @@ internal fun PropertyEditor(
                 }
             } else {
                 Text(
-                    text = state.valueType.label,
+                    text = state.valueType.displayName(),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = 4.dp)
                 )
                 Text(
-                    text = "The value type can't be changed after the property is created.",
+                    text = stringResource(Res.string.properties_value_type_locked),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
                     modifier = Modifier.padding(start = 4.dp, top = 2.dp)
@@ -429,7 +450,7 @@ internal fun PropertyEditor(
                 }
                 if (isDesktopPlatform) {
                     EmberrDesktopMenuOption(
-                        label = "Delete property",
+                        label = stringResource(Res.string.properties_delete_property),
                         onClick = onDeleteRequest,
                         modifier = Modifier.padding(top = 8.dp),
                         icon = deleteIcon,
@@ -438,7 +459,7 @@ internal fun PropertyEditor(
                     )
                 } else {
                     EmberrBottomSheetOption(
-                        label = "Delete property",
+                        label = stringResource(Res.string.properties_delete_property),
                         onClick = onDeleteRequest,
                         modifier = Modifier.padding(top = 8.dp),
                         icon = deleteIcon,
@@ -454,9 +475,9 @@ internal fun PropertyEditor(
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                EmberrButtonSecondary(text = "Cancel", onClick = onCancel, modifier = Modifier.weight(1f))
+                EmberrButtonSecondary(text = stringResource(Res.string.common_cancel), onClick = onCancel, modifier = Modifier.weight(1f))
                 EmberrButtonPrimary(
-                    text = if (isNew) "Add" else "Save",
+                    text = stringResource(if (isNew) Res.string.properties_add else Res.string.common_save),
                     onClick = onSave,
                     modifier = Modifier.weight(1f),
                     enabled = state.name.isNotBlank() && !isNameTaken

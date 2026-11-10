@@ -71,6 +71,11 @@ import emberr.shared.generated.resources.keyboard
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.editor_block_heading_1
+import emberr.shared.generated.resources.whatsnew_preview_meeting_text
+import emberr.shared.generated.resources.whatsnew_preview_meeting_title
+import emberr.shared.generated.resources.whatsnew_preview_typed_heading
+import org.jetbrains.compose.resources.stringResource
 
 private val DesktopSlashPopupShape = RoundedCornerShape(18.dp)
 private val DesktopSlashPopupWidth = 290.dp
@@ -115,6 +120,8 @@ internal fun SlashMenuUpdatePreview() {
     var shownMenuQuery by remember { mutableStateOf("") }
     var isHeading by remember { mutableStateOf(false) }
     var isFirstItemPicked by remember { mutableStateOf(false) }
+    val typedHeadingText = stringResource(Res.string.whatsnew_preview_typed_heading)
+    val headingQuery = slashMenuLabels[Res.string.editor_block_heading_1].take(2).lowercase()
     var pressedKey by remember { mutableStateOf("Backspace") }
     var isKeyShown by remember { mutableStateOf(false) }
 
@@ -150,11 +157,11 @@ internal fun SlashMenuUpdatePreview() {
             isSlashKilled = false
             typedText = ""
             delay(900.milliseconds)
-            typeSlowly("Agenda")
+            typeSlowly(typedHeadingText)
             delay(400.milliseconds)
             typeSlowly("/")
             delay(1100.milliseconds)
-            typeSlowly("he")
+            typeSlowly(headingQuery)
             delay(1300.milliseconds)
             typeSlowly("zz")
             delay(1300.milliseconds)
@@ -171,7 +178,7 @@ internal fun SlashMenuUpdatePreview() {
                 delay(450.milliseconds)
                 isFirstItemPicked = false
             }
-            typedText = "Agenda"
+            typedText = typedHeadingText
             isHeading = true
             delay(2400.milliseconds)
         }
@@ -243,14 +250,14 @@ private fun SlashPreviewNote(
         Spacer(modifier = Modifier.height(18.dp))
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
             Text(
-                text = "Team meeting",
+                text = stringResource(Res.string.whatsnew_preview_meeting_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Thursday at 10, room 2.",
+                text = stringResource(Res.string.whatsnew_preview_meeting_text),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )

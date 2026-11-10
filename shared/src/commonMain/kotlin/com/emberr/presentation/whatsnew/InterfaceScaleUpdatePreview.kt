@@ -23,6 +23,8 @@ import com.emberr.presentation.settings.SettingsChoiceRow
 import com.emberr.presentation.settings.SettingsDivider
 import com.emberr.presentation.settings.SettingsGroup
 import com.emberr.presentation.settings.desktopSettingsSidePadding
+import com.emberr.presentation.settings.label
+import com.emberr.ui.theme.ColorThemePreference
 import com.emberr.ui.theme.ProvideInterfaceScale
 import com.emberr.ui.theme.interfaceScalePercentMovedBySteps
 import emberr.shared.generated.resources.Res
@@ -31,6 +33,13 @@ import emberr.shared.generated.resources.sliders_horizontal
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.settings_font_size
+import emberr.shared.generated.resources.settings_font_size_default
+import emberr.shared.generated.resources.settings_group_appearance
+import emberr.shared.generated.resources.settings_theme
+import emberr.shared.generated.resources.settings_top_bar_fade
+import emberr.shared.generated.resources.settings_top_bar_fade_blur
+import org.jetbrains.compose.resources.stringResource
 
 private val ScaleStepDelay = 300.milliseconds
 private val ScalePause = 1300.milliseconds
@@ -94,26 +103,26 @@ private fun AppearanceSettingsRows(scalePercent: Int) {
                 .fillMaxSize()
                 .padding(horizontal = desktopSettingsSidePadding(maxWidth))
         ) {
-            SettingsGroup(title = "Appearance") {
+            SettingsGroup(title = stringResource(Res.string.settings_group_appearance)) {
                 SettingsActionRow(
                     icon = painterResource(Res.drawable.palette),
-                    title = "Theme",
-                    trailingLabel = "Emberr",
+                    title = stringResource(Res.string.settings_theme),
+                    trailingLabel = ColorThemePreference.EMBERR.label(),
                     onClick = {}
                 )
                 SettingsDivider()
                 if (isDesktopPlatform) {
                     SettingsChoiceRow(
                         icon = painterResource(Res.drawable.palette),
-                        title = "Top Bar Fade",
-                        value = "Blur",
+                        title = stringResource(Res.string.settings_top_bar_fade),
+                        value = stringResource(Res.string.settings_top_bar_fade_blur),
                         choices = emptyList()
                     )
                 } else {
                     SettingsActionRow(
                         icon = painterResource(Res.drawable.palette),
-                        title = "Top Bar Fade",
-                        trailingLabel = "Blur",
+                        title = stringResource(Res.string.settings_top_bar_fade),
+                        trailingLabel = stringResource(Res.string.settings_top_bar_fade_blur),
                         onClick = {}
                     )
                 }
@@ -122,8 +131,8 @@ private fun AppearanceSettingsRows(scalePercent: Int) {
                 SettingsDivider()
                 SettingsChoiceRow(
                     icon = painterResource(Res.drawable.sliders_horizontal),
-                    title = "Font Size",
-                    value = "Default",
+                    title = stringResource(Res.string.settings_font_size),
+                    value = stringResource(Res.string.settings_font_size_default),
                     choices = emptyList()
                 )
             }

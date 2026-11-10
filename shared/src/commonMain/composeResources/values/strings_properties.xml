@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">Properties</string>
+    <string name="properties_built_in">Built-in</string>
+    <string name="properties_built_in_hint">Built-in properties can't be renamed or deleted.</string>
+    <string name="properties_custom">Custom</string>
+    <string name="properties_add_property">Add property</string>
+    <string name="properties_new_property">New Property</string>
+    <string name="properties_edit_property">Edit Property</string>
+    <string name="properties_delete_question">Delete "%1$s"? It will be removed from every note that uses it.</string>
+    <string name="properties_property_name">Property name</string>
+    <string name="properties_name_taken">A property with this name already exists</string>
+    <string name="properties_value_type">Value type</string>
+    <string name="properties_value_type_locked">The value type can't be changed after the property is created.</string>
+    <string name="properties_delete_property">Delete property</string>
+    <string name="properties_add">Add</string>
+</resources>

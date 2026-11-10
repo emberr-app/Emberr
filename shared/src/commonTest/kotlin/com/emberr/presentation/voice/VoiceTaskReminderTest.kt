@@ -11,27 +11,33 @@ class VoiceTaskReminderTest {
 
     private val today = LocalDate(2026, 9, 23)
 
+    private fun dayLabel(reminder: Long?): String =
+        voiceTaskDayLabel(reminder, today, TimeZone.UTC, todayLabel = "Today", tomorrowLabel = "Tomorrow")
+
+    private fun timeLabel(reminder: Long?): String =
+        voiceTaskTimeLabel(reminder, TimeZone.UTC, usesTwentyFourHourClock = false, addTimeLabel = "Add time")
+
     private fun timestampAt(year: Int, month: Int, day: Int, hour: Int, minute: Int): Long =
         LocalDateTime(year, month, day, hour, minute).toInstant(TimeZone.UTC).toEpochMilliseconds()
 
     @Test
     fun aTaskWithoutAReminderIsForTodayWithNoTime() {
-        assertEquals("Today", voiceTaskDayLabel(null, today, TimeZone.UTC))
-        assertEquals("Add time", voiceTaskTimeLabel(null, TimeZone.UTC, usesTwentyFourHourClock = false))
+        assertEquals("Today", dayLabel(null))
+        assertEquals("Add time", timeLabel(null))
     }
 
     @Test
     fun aReminderLaterTodayShowsTodayAndTheTime() {
         val reminder = timestampAt(2026, 9, 23, 18, 30)
 
-        assertEquals("Today", voiceTaskDayLabel(reminder, today, TimeZone.UTC))
-        assertEquals("6:30 PM", voiceTaskTimeLabel(reminder, TimeZone.UTC, usesTwentyFourHourClock = false))
+        assertEquals("Today", dayLabel(reminder))
+        assertEquals("6:30 PM", timeLabel(reminder))
     }
 
     @Test
     fun aReminderForTomorrowShowsTomorrow() {
         assertEquals("Tomorrow",
-            voiceTaskDayLabel(timestampAt(2026, 9, 24, 9, 0), today, TimeZone.UTC)
+            dayLabel(timestampAt(2026, 9, 24, 9, 0))
         )
     }
 
@@ -39,8 +45,8 @@ class VoiceTaskReminderTest {
     fun aReminderFurtherAwayShowsTheWeekdayAndDate() {
         val reminder = timestampAt(2026, 9, 25, 14, 5)
 
-        assertEquals("Fri, Sep 25", voiceTaskDayLabel(reminder, today, TimeZone.UTC))
-        assertEquals("2:05 PM", voiceTaskTimeLabel(reminder, TimeZone.UTC, usesTwentyFourHourClock = false))
+        assertEquals("Fri, Sep 25", dayLabel(reminder))
+        assertEquals("2:05 PM", timeLabel(reminder))
     }
 
     @Test

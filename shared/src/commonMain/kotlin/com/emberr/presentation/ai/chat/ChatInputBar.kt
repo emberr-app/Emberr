@@ -63,6 +63,11 @@ import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.cog
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.ai_ask_anything
+import emberr.shared.generated.resources.ai_send
+import emberr.shared.generated.resources.ai_settings
+import emberr.shared.generated.resources.ai_stop_generating
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -157,7 +162,7 @@ internal fun ChatInputBar(
             ) {
                 if (value.isEmpty()) {
                     Text(
-                        text = "Ask anything..",
+                        text = stringResource(Res.string.ai_ask_anything),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
                     )
@@ -204,7 +209,7 @@ internal fun ChatInputBar(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Box {
-                        IconTooltip(text = "AI settings", position = IconTooltipPosition.Above) {
+                        IconTooltip(text = stringResource(Res.string.ai_settings), position = IconTooltipPosition.Above) {
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
@@ -215,7 +220,7 @@ internal fun ChatInputBar(
                             ) {
                                 Icon(
                                     painterResource(Res.drawable.cog),
-                                    contentDescription = "AI settings",
+                                    contentDescription = stringResource(Res.string.ai_settings),
                                     tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier
                                         .size(18.dp)
@@ -241,7 +246,7 @@ internal fun ChatInputBar(
                     ModelPickerPill(viewModel = viewModel)
                 }
 
-                IconTooltip(text = if (isGenerating) "Stop generating" else "Send", position = IconTooltipPosition.Above) {
+                IconTooltip(text = stringResource(if (isGenerating) Res.string.ai_stop_generating else Res.string.ai_send), position = IconTooltipPosition.Above) {
                     Box(
                         modifier = Modifier
                             .size(36.dp)
@@ -255,7 +260,7 @@ internal fun ChatInputBar(
                     ) {
                         Icon(
                             imageVector = if (isGenerating) Icons.Default.Pause else Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = if (isGenerating) "Stop generating" else "Send",
+                            contentDescription = stringResource(if (isGenerating) Res.string.ai_stop_generating else Res.string.ai_send),
                             tint = if (isGenerating || canSend) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                             modifier = Modifier.size(18.dp)

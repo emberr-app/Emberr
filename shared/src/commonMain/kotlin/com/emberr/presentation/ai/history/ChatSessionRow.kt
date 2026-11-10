@@ -41,6 +41,19 @@ import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_chat_name
+import emberr.shared.generated.resources.ai_chat_options
+import emberr.shared.generated.resources.ai_chat_options_title
+import emberr.shared.generated.resources.ai_delete_this_chat
+import emberr.shared.generated.resources.ai_delete_this_chat_message
+import emberr.shared.generated.resources.ai_rename
+import emberr.shared.generated.resources.ai_rename_chat
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_save
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ChatSessionRow(
@@ -56,10 +69,10 @@ internal fun ChatSessionRow(
 
     val chatOptionsButton: @Composable () -> Unit = {
         Box {
-            IconTooltip(text = "Chat options") {
+            IconTooltip(text = stringResource(Res.string.ai_chat_options)) {
                 Icon(
                     Icons.Default.MoreVert,
-                    contentDescription = "Chat options",
+                    contentDescription = stringResource(Res.string.ai_chat_options),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier
                         .size(20.dp)
@@ -73,14 +86,14 @@ internal fun ChatSessionRow(
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Rename") },
+                        text = { Text(stringResource(Res.string.ai_rename)) },
                         onClick = {
                             showMenu = false
                             showRenameDialog = true
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Delete") },
+                        text = { Text(stringResource(Res.string.common_delete)) },
                         onClick = {
                             showMenu = false
                             showDeleteConfirm = true
@@ -124,12 +137,12 @@ internal fun ChatSessionRow(
         var titleInput by remember { mutableStateOf(session.title) }
         EmberrAlertDialog(
             onDismissRequest = { showRenameDialog = false },
-            title = "Rename chat"
+            title = stringResource(Res.string.ai_rename_chat)
         ) {
             EmberrTextField(
                 value = titleInput,
                 onValueChange = { titleInput = it },
-                placeholder = "Chat name",
+                placeholder = stringResource(Res.string.ai_chat_name),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 onSubmit = { onRename(titleInput); showRenameDialog = false }
@@ -140,12 +153,12 @@ internal fun ChatSessionRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { showRenameDialog = false },
                     modifier = Modifier.weight(1f)
                 )
                 EmberrButtonPrimary(
-                    text = "Save",
+                    text = stringResource(Res.string.common_save),
                     onClick = { onRename(titleInput); showRenameDialog = false },
                     modifier = Modifier.weight(1f)
                 )
@@ -156,10 +169,10 @@ internal fun ChatSessionRow(
     if (showDeleteConfirm) {
         EmberrAlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = "Delete this chat?"
+            title = stringResource(Res.string.ai_delete_this_chat)
         ) {
             Text(
-                text = "This chat and its history will be permanently deleted.",
+                text = stringResource(Res.string.ai_delete_this_chat_message),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
@@ -169,7 +182,7 @@ internal fun ChatSessionRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { showDeleteConfirm = false },
                     modifier = Modifier.weight(1f)
                 )
@@ -183,7 +196,7 @@ internal fun ChatSessionRow(
                     ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None)
                 ) {
-                    Text("Delete", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(Res.string.common_delete), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -200,25 +213,25 @@ private fun ChatSessionOptionsBottomSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "Chat Options",
+        title = stringResource(Res.string.ai_chat_options_title),
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             ModelOptionCard(
                 icon = { Icon(Icons.Default.Edit, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp)) },
-                title = "Rename",
+                title = stringResource(Res.string.ai_rename),
                 subtitle = null,
                 onClick = { closeAnd { onRenameClick() } }
             )
             Spacer(Modifier.height(10.dp))
             ModelOptionCard(
                 icon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp)) },
-                title = "Delete",
+                title = stringResource(Res.string.common_delete),
                 subtitle = null,
                 onClick = { closeAnd { onDeleteClick() } }
             )
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { closeAnd { } },
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)

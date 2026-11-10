@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">Spaces</string>
+    <string name="space_create_space">Create Space</string>
+    <string name="space_rename_space">Rename Space</string>
+    <string name="space_delete_space">Delete Space</string>
+    <string name="space_new_space">New Space</string>
+    <string name="space_new_space_subtitle">Work, Personal, anything you like.</string>
+    <string name="space_name_placeholder">Space name...</string>
+    <string name="space_rename_subtitle">Pick a new name.</string>
+    <string name="space_delete_space_question">Delete "%1$s"?</string>
+    <string name="space_delete_space_message">Every note, folder, tag and chat in this space is deleted with it. This cannot be undone.</string>
+    <string name="space_reorder_space">Reorder space</string>
+</resources>

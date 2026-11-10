@@ -35,6 +35,9 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.ellipsis
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.whatsnew_preview_options
+import org.jetbrains.compose.resources.stringResource
 
 internal val UpdatePreviewShape = RoundedCornerShape(22.dp)
 internal val UpdatePreviewNoteTopPadding = 20.dp
@@ -91,14 +94,14 @@ internal fun UpdatePreviewNoteTopButtons(modifier: Modifier = Modifier) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         TopBarIconButton(
             icon = painterResource(Res.drawable.chevron_left),
-            contentDescription = "Back",
+            contentDescription = stringResource(Res.string.common_back),
             bgColor = MaterialTheme.colorScheme.background,
             tint = MaterialTheme.colorScheme.primary,
             onClick = {}
         )
         TopBarIconButton(
             icon = painterResource(Res.drawable.ellipsis),
-            contentDescription = "Options",
+            contentDescription = stringResource(Res.string.whatsnew_preview_options),
             bgColor = MaterialTheme.colorScheme.background,
             tint = MaterialTheme.colorScheme.primary,
             onClick = {}

@@ -57,6 +57,39 @@ import emberr.shared.generated.resources.search
 import emberr.shared.generated.resources.shield_alert
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.ai_setup_add_the_model
+import emberr.shared.generated.resources.ai_setup_chat_answer
+import emberr.shared.generated.resources.ai_setup_chat_question
+import emberr.shared.generated.resources.ai_setup_download_lead
+import emberr.shared.generated.resources.ai_setup_download_model
+import emberr.shared.generated.resources.ai_setup_download_stopped
+import emberr.shared.generated.resources.ai_setup_embedding_model
+import emberr.shared.generated.resources.ai_setup_finish_the_download
+import emberr.shared.generated.resources.ai_setup_getting_model_ready
+import emberr.shared.generated.resources.ai_setup_index_detail
+import emberr.shared.generated.resources.ai_setup_index_headline
+import emberr.shared.generated.resources.ai_setup_index_lead
+import emberr.shared.generated.resources.ai_setup_index_my_notes
+import emberr.shared.generated.resources.ai_setup_indexing_count
+import emberr.shared.generated.resources.ai_setup_indexing_notes
+import emberr.shared.generated.resources.ai_setup_key_detail
+import emberr.shared.generated.resources.ai_setup_key_headline
+import emberr.shared.generated.resources.ai_setup_key_lead
+import emberr.shared.generated.resources.ai_setup_model_downloaded
+import emberr.shared.generated.resources.ai_setup_model_is_ready
+import emberr.shared.generated.resources.ai_setup_notes_indexed
+import emberr.shared.generated.resources.ai_setup_pause_download
+import emberr.shared.generated.resources.ai_setup_private_detail
+import emberr.shared.generated.resources.ai_setup_private_headline
+import emberr.shared.generated.resources.ai_setup_private_lead
+import emberr.shared.generated.resources.ai_setup_reading_your_notes
+import emberr.shared.generated.resources.ai_setup_resume_download
+import emberr.shared.generated.resources.ai_setup_starting
+import emberr.shared.generated.resources.ai_setup_try_again
+import emberr.shared.generated.resources.common_percent_value
+import emberr.shared.generated.resources.onboarding_chat_placeholder
+import emberr.shared.generated.resources.onboarding_continue
+import org.jetbrains.compose.resources.stringResource
 
 private enum class ModelProvider(
     val label: String,
@@ -178,25 +211,25 @@ private fun embeddingSetupStatements(
 ): List<OnboardingStep> = listOf(
     OnboardingStep(
         icon = Res.drawable.shield_alert,
-        lead = "Ask your notes anything.",
-        headline = "Answered on this device.",
-        detail = "Your question and the notes it reads never leave this machine."
+        lead = stringResource(Res.string.ai_setup_private_lead),
+        headline = stringResource(Res.string.ai_setup_private_headline),
+        detail = stringResource(Res.string.ai_setup_private_detail)
     ),
     OnboardingStep(
         icon = Res.drawable.search,
-        lead = "Your notes become",
-        headline = "a private index.",
-        detail = "Stored on your own disk. No analytics, no query history, nothing logged."
+        lead = stringResource(Res.string.ai_setup_index_lead),
+        headline = stringResource(Res.string.ai_setup_index_headline),
+        detail = stringResource(Res.string.ai_setup_index_detail)
     ),
     OnboardingStep(
         icon = Res.drawable.astroid,
-        lead = "Local first, cloud optional.",
-        headline = "Bring your own key.",
-        detail = "Add a external provider later in Settings for more powerful AI."
+        lead = stringResource(Res.string.ai_setup_key_lead),
+        headline = stringResource(Res.string.ai_setup_key_headline),
+        detail = stringResource(Res.string.ai_setup_key_detail)
     ),
     OnboardingStep(
         icon = Res.drawable.download,
-        lead = "One file to fetch.",
+        lead = stringResource(Res.string.ai_setup_download_lead),
         headline = state.downloadHeadline(isResumable),
         detail = (state as? EmbeddingSetupState.DownloadFailed)?.message
     )
@@ -263,9 +296,9 @@ private fun DownloadPanel(state: EmbeddingSetupState) {
             .verticalScroll(rememberScrollState())
     ) {
         OnboardingChatMock(
-            question = "What did I write about my research last month?",
-            answer = "You outlined three experiments and flagged the second one as blocked.",
-            placeholder = "Ask about your notes"
+            question = stringResource(Res.string.ai_setup_chat_question),
+            answer = stringResource(Res.string.ai_setup_chat_answer),
+            placeholder = stringResource(Res.string.onboarding_chat_placeholder)
         )
 
         Spacer(modifier = Modifier.height(22.dp))
@@ -275,7 +308,7 @@ private fun DownloadPanel(state: EmbeddingSetupState) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Embedding model",
+                text = stringResource(Res.string.ai_setup_embedding_model),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.weight(1f)
@@ -283,7 +316,7 @@ private fun DownloadPanel(state: EmbeddingSetupState) {
 
             if (progress != null) {
                 Text(
-                    text = "${(progress * 100).toInt()}%",
+                    text = stringResource(Res.string.common_percent_value, (progress * 100).toInt()),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
@@ -306,7 +339,7 @@ private fun DownloadPanel(state: EmbeddingSetupState) {
         Spacer(modifier = Modifier.height(18.dp))
 
         SetupStepRow(
-            label = "Model downloaded",
+            label = stringResource(Res.string.ai_setup_model_downloaded),
             isDone = state == EmbeddingSetupState.DownloadComplete ||
                 state is EmbeddingSetupState.Indexing,
             isActive = state is EmbeddingSetupState.Downloading,
@@ -316,7 +349,7 @@ private fun DownloadPanel(state: EmbeddingSetupState) {
         Spacer(modifier = Modifier.height(12.dp))
 
         SetupStepRow(
-            label = "Notes indexed",
+            label = stringResource(Res.string.ai_setup_notes_indexed),
             isDone = false,
             isActive = state is EmbeddingSetupState.Indexing,
             isFailed = false
@@ -332,7 +365,7 @@ private fun IndexingProgress(state: EmbeddingSetupState.Indexing) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Indexing notes",
+                text = stringResource(Res.string.ai_setup_indexing_notes),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -340,7 +373,7 @@ private fun IndexingProgress(state: EmbeddingSetupState.Indexing) {
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
-                text = if (state.total > 0) "${state.completed} of ${state.total}" else "Starting",
+                text = if (state.total > 0) stringResource(Res.string.ai_setup_indexing_count, state.completed, state.total) else stringResource(Res.string.ai_setup_starting),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
@@ -431,25 +464,31 @@ private fun EmbeddingSetupState.progressFraction(): Float? = when (this) {
 private fun EmbeddingSetupState.allowsReturningToModels(): Boolean =
     this == EmbeddingSetupState.Required || this is EmbeddingSetupState.DownloadFailed
 
-private fun EmbeddingSetupState.downloadHeadline(isResumable: Boolean): String = when (this) {
-    EmbeddingSetupState.Required ->
-        if (isResumable) "Finish the download." else "Add the on-device model."
+@Composable
+private fun EmbeddingSetupState.downloadHeadline(isResumable: Boolean): String = stringResource(
+    when (this) {
+        EmbeddingSetupState.Required ->
+            if (isResumable) Res.string.ai_setup_finish_the_download else Res.string.ai_setup_add_the_model
 
-    is EmbeddingSetupState.Downloading -> "Getting the model ready."
-    is EmbeddingSetupState.DownloadFailed -> "The download stopped."
-    EmbeddingSetupState.DownloadComplete -> "The model is ready."
-    is EmbeddingSetupState.Indexing -> "Reading through your notes."
-    else -> "Add the on-device model."
-}
+        is EmbeddingSetupState.Downloading -> Res.string.ai_setup_getting_model_ready
+        is EmbeddingSetupState.DownloadFailed -> Res.string.ai_setup_download_stopped
+        EmbeddingSetupState.DownloadComplete -> Res.string.ai_setup_model_is_ready
+        is EmbeddingSetupState.Indexing -> Res.string.ai_setup_reading_your_notes
+        else -> Res.string.ai_setup_add_the_model
+    }
+)
 
+@Composable
 private fun primaryActionLabel(
     currentStepIndex: Int,
     state: EmbeddingSetupState,
     isResumable: Boolean
-): String = if (currentStepIndex < DownloadStepIndex) "Continue" else when (state) {
-    EmbeddingSetupState.Required -> if (isResumable) "Resume download" else "Download model"
-    is EmbeddingSetupState.Downloading -> "Pause download"
-    is EmbeddingSetupState.DownloadFailed -> if (isResumable) "Resume download" else "Try again"
-    EmbeddingSetupState.DownloadComplete -> "Index my notes"
-    else -> "Continue"
-}
+): String = stringResource(
+    if (currentStepIndex < DownloadStepIndex) Res.string.onboarding_continue else when (state) {
+        EmbeddingSetupState.Required -> if (isResumable) Res.string.ai_setup_resume_download else Res.string.ai_setup_download_model
+        is EmbeddingSetupState.Downloading -> Res.string.ai_setup_pause_download
+        is EmbeddingSetupState.DownloadFailed -> if (isResumable) Res.string.ai_setup_resume_download else Res.string.ai_setup_try_again
+        EmbeddingSetupState.DownloadComplete -> Res.string.ai_setup_index_my_notes
+        else -> Res.string.onboarding_continue
+    }
+)

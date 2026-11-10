@@ -35,6 +35,13 @@ import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_runs_privately
+import emberr.shared.generated.resources.ai_suggestion_deadlines
+import emberr.shared.generated.resources.ai_suggestion_pending_tasks
+import emberr.shared.generated.resources.ai_suggestion_summarize
+import emberr.shared.generated.resources.ai_whats_on_your_mind
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ChatEmptyState(
@@ -42,9 +49,9 @@ internal fun ChatEmptyState(
     onSuggestionTap: (String) -> Unit
 ) {
     val suggestions = listOf(
-        "What are my deadlines this week?",
-        "Summarize my recent notes",
-        "What tasks are still pending?"
+        stringResource(Res.string.ai_suggestion_deadlines),
+        stringResource(Res.string.ai_suggestion_summarize),
+        stringResource(Res.string.ai_suggestion_pending_tasks)
     )
 
     Column(
@@ -62,14 +69,14 @@ internal fun ChatEmptyState(
         )
         Spacer(Modifier.height(20.dp))
         Text(
-            text = "What's on your mind?",
+            text = stringResource(Res.string.ai_whats_on_your_mind),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(6.dp))
         Text(
-            text = "Everything runs privately on your device.",
+            text = stringResource(Res.string.ai_runs_privately),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center

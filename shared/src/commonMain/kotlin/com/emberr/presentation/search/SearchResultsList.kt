@@ -51,7 +51,7 @@ import com.emberr.presentation.calendar.searchResultDateLabel
 import com.emberr.presentation.calendar.toCategoryColor
 import com.emberr.presentation.home.RenameBottomSheet
 import com.emberr.presentation.people.personDetailSearchLine
-import com.emberr.domain.people.personDisplayName
+import com.emberr.presentation.people.shownPersonName
 import com.emberr.presentation.shared.components.PersonAvatar
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
@@ -63,6 +63,25 @@ import emberr.shared.generated.resources.trash
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_untitled
+import emberr.shared.generated.resources.search_daily
+import emberr.shared.generated.resources.search_events
+import emberr.shared.generated.resources.search_in_parent
+import emberr.shared.generated.resources.search_move_to_trash
+import emberr.shared.generated.resources.search_note_title_placeholder
+import emberr.shared.generated.resources.search_notes
+import emberr.shared.generated.resources.search_nothing_found
+import emberr.shared.generated.resources.search_people
+import emberr.shared.generated.resources.search_pinned
+import emberr.shared.generated.resources.search_rename
+import emberr.shared.generated.resources.search_rename_note
+import emberr.shared.generated.resources.search_repeats
+import emberr.shared.generated.resources.search_show_all_events
+import emberr.shared.generated.resources.search_show_all_people
+import emberr.shared.generated.resources.search_start_typing
+import emberr.shared.generated.resources.search_untitled_event
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 private const val EMPTY_MESSAGE_DELAY_MILLIS = 350L
 private const val COLLAPSED_EVENT_RESULT_COUNT = 3
@@ -107,18 +126,22 @@ fun SearchResultsList(
         }
     }
 
+    val peopleHeader = stringResource(Res.string.search_people)
+    val eventsHeader = stringResource(Res.string.search_events)
+    val notesHeader = stringResource(Res.string.search_notes)
+
     Box(modifier = modifier) {
         when {
-            query.isBlank() -> SearchMessage("Start typing to search titles, snippets, and note content.")
+            query.isBlank() -> SearchMessage(stringResource(Res.string.search_start_typing))
             hasNoResults ->
-                if (hasSettledOnNoResults) SearchMessage("No matching notes, events or people found.")
+                if (hasSettledOnNoResults) SearchMessage(stringResource(Res.string.search_nothing_found))
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (personResults.isNotEmpty()) {
-                    item(key = "people_header") { SearchSectionHeader("People") }
+                    item(key = "people_header") { SearchSectionHeader(peopleHeader) }
                     val shownPersonResults = if (areAllPeopleShown) {
                         personResults
                     } else {
@@ -134,7 +157,7 @@ fun SearchResultsList(
                     if (shownPersonResults.size < personResults.size) {
                         item(key = "people_show_all") {
                             Text(
-                                text = "Show all ${personResults.size} people",
+                                text = pluralStringResource(Res.plurals.search_show_all_people, personResults.size, personResults.size),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
@@ -148,7 +171,7 @@ fun SearchResultsList(
                 if (eventResults.isNotEmpty()) {
                     item(key = "events_header") {
                         SearchSectionHeader(
-                            "Events",
+                            eventsHeader,
                             modifier = if (personResults.isNotEmpty()) Modifier.padding(top = 8.dp) else Modifier
                         )
                     }
@@ -167,7 +190,7 @@ fun SearchResultsList(
                     if (shownEventResults.size < eventResults.size) {
                         item(key = "events_show_all") {
                             Text(
-                                text = "Show all ${eventResults.size} events",
+                                text = pluralStringResource(Res.plurals.search_show_all_events, eventResults.size, eventResults.size),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
@@ -179,7 +202,7 @@ fun SearchResultsList(
                     }
                 }
                 if (results.isNotEmpty() && (eventResults.isNotEmpty() || personResults.isNotEmpty())) {
-                    item(key = "notes_header") { SearchSectionHeader("Notes", modifier = Modifier.padding(top = 8.dp)) }
+                    item(key = "notes_header") { SearchSectionHeader(notesHeader, modifier = Modifier.padding(top = 8.dp)) }
                 }
                 items(results, key = { it.note.noteId }) { result ->
                     SearchResultRow(
@@ -223,8 +246,8 @@ fun SearchResultsList(
                 onRenameNote(result.note.noteId, newTitle)
                 showRenameSheet = false
             },
-            title = "Rename Note",
-            placeholder = "Note title..."
+            title = stringResource(Res.string.search_rename_note),
+            placeholder = stringResource(Res.string.search_note_title_placeholder)
         )
     }
 }
@@ -241,12 +264,12 @@ private fun SearchResultOptionsSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = result.note.title.ifBlank { "Untitled" }
+        title = result.note.title.ifBlank { stringResource(Res.string.common_untitled) }
     ) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             if (result.canBeRenamed) {
                 EmberrBottomSheetOption(
-                    label = "Rename",
+                    label = stringResource(Res.string.search_rename),
                     onClick = { closeAnd(onOpenRename) },
                     icon = { SearchResultOptionIcon(painterResource(Res.drawable.pen), MaterialTheme.colorScheme.onSurface) },
                     outerHorizontalPadding = 0.dp
@@ -265,7 +288,7 @@ private fun SearchResultOptionsSheet(
                     outerHorizontalPadding = 0.dp
                 )
                 EmberrBottomSheetOption(
-                    label = "Move to Trash",
+                    label = stringResource(Res.string.search_move_to_trash),
                     onClick = { closeAnd(onTrash) },
                     icon = { SearchResultOptionIcon(painterResource(Res.drawable.trash), MaterialTheme.colorScheme.error) },
                     outerHorizontalPadding = 0.dp,
@@ -325,7 +348,7 @@ private fun EventSearchResultRow(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = highlightMatches(event.text.ifBlank { "Untitled event" }, trimmedQuery, highlightStyle),
+                text = highlightMatches(event.text.ifBlank { stringResource(Res.string.search_untitled_event) }, trimmedQuery, highlightStyle),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
@@ -362,7 +385,7 @@ private fun EventSearchResultRow(
                 Spacer(modifier = Modifier.width(6.dp))
                 Icon(
                     painter = painterResource(Res.drawable.refresh_cw),
-                    contentDescription = "Repeats",
+                    contentDescription = stringResource(Res.string.search_repeats),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     modifier = Modifier.size(12.dp)
                 )
@@ -380,7 +403,7 @@ private fun PersonSearchResultRow(
     val person = result.person
     val trimmedQuery = query.trim()
     val highlightStyle = defaultHighlightStyle(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-    val name = personDisplayName(person.title)
+    val name = shownPersonName(person.title)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -446,7 +469,7 @@ private fun SearchResultRow(
     // A daily note is stored with the title "Daily: <date>", which the calendar chip below already
     // says - so the title line shows the bare date and the chip carries the "Daily" part.
     val dailyDateString = note.dateString?.takeIf { note.isDaily }
-    val titleText = if (result.isPinnedBlocks) "Pinned" else dailyDateString ?: note.title.ifBlank { "Untitled" }
+    val titleText = if (result.isPinnedBlocks) stringResource(Res.string.search_pinned) else dailyDateString ?: note.title.ifBlank { stringResource(Res.string.common_untitled) }
 
     Column(
         modifier = Modifier
@@ -480,7 +503,7 @@ private fun SearchResultRow(
         }
         result.parentTitle?.let { parentTitle ->
             Text(
-                text = "in $parentTitle",
+                text = stringResource(Res.string.search_in_parent, parentTitle),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 maxLines = 1,
@@ -501,7 +524,7 @@ private fun SearchResultRow(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Daily",
+                    text = stringResource(Res.string.search_daily),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )

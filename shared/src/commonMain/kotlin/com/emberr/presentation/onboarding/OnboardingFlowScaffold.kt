@@ -72,6 +72,10 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.chevron_left
 import org.jetbrains.compose.resources.painterResource
 import kotlin.random.Random
+import emberr.shared.generated.resources.common_back
+import emberr.shared.generated.resources.onboarding_go_back
+import emberr.shared.generated.resources.onboarding_skip
+import org.jetbrains.compose.resources.stringResource
 
 private val WideLayoutMinWidth = 660.dp
 private val WidePaneMaxWidth = 720.dp
@@ -381,7 +385,7 @@ private fun OnboardingTopRow(showSkip: Boolean, onSkip: () -> Unit, skipInset: D
         contentAlignment = Alignment.CenterEnd
     ) {
         Text(
-            text = "Skip",
+            text = stringResource(Res.string.onboarding_skip),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Normal,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
@@ -432,7 +436,7 @@ private fun OnboardingStepBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    IconTooltip(text = "Back") {
+    IconTooltip(text = stringResource(Res.string.common_back)) {
         Box(
             modifier = modifier
                 .size(ControlHeight)
@@ -443,7 +447,7 @@ private fun OnboardingStepBackButton(
         ) {
             Icon(
                 painter = painterResource(Res.drawable.chevron_left),
-                contentDescription = "Go back",
+                contentDescription = stringResource(Res.string.onboarding_go_back),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
                 modifier = Modifier.size(20.dp)
             )

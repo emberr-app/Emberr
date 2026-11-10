@@ -33,6 +33,9 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.pen
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.ai_copy
+import emberr.shared.generated.resources.ai_edit_prompt
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ChatBubble(
@@ -80,13 +83,13 @@ internal fun ChatBubble(
             ) {
                 MessageActionIcon(
                     icon = painterResource(Res.drawable.copy),
-                    contentDescription = "Copy",
+                    contentDescription = stringResource(Res.string.ai_copy),
                     onClick = { clipboardManager.setText(AnnotatedString(message.text)) }
                 )
                 if (onEditClick != null) {
                     MessageActionIcon(
                         icon = painterResource(Res.drawable.pen),
-                        contentDescription = "Edit prompt",
+                        contentDescription = stringResource(Res.string.ai_edit_prompt),
                         onClick = onEditClick
                     )
                 }

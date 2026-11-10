@@ -45,6 +45,24 @@ import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.eye_open
 import kotlin.time.Clock
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.ai_api_key
+import emberr.shared.generated.resources.ai_api_key_saved
+import emberr.shared.generated.resources.ai_base_url
+import emberr.shared.generated.resources.ai_delete_api_key_message
+import emberr.shared.generated.resources.ai_delete_api_key_question
+import emberr.shared.generated.resources.ai_enter_model_name
+import emberr.shared.generated.resources.ai_enter_provider_api_key
+import emberr.shared.generated.resources.ai_external_ai
+import emberr.shared.generated.resources.ai_external_ai_sheet_subtitle
+import emberr.shared.generated.resources.ai_hide_api_key
+import emberr.shared.generated.resources.ai_model
+import emberr.shared.generated.resources.ai_provider
+import emberr.shared.generated.resources.ai_show_api_key
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_close
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.common_save
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ExternalAiSettingsSheet(
@@ -55,8 +73,8 @@ internal fun ExternalAiSettingsSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "External AI",
-        subtitle = "Connect an external provider using your own API key.",
+        title = stringResource(Res.string.ai_external_ai),
+        subtitle = stringResource(Res.string.ai_external_ai_sheet_subtitle),
     ) { closeAnd ->
         var isReady by remember { mutableStateOf(false) }
         var selectedProvider by remember { mutableStateOf(ExternalAiProvider.OPENAI) }
@@ -98,7 +116,7 @@ internal fun ExternalAiSettingsSheet(
 
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             Text(
-                text = "Provider",
+                text = stringResource(Res.string.ai_provider),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
@@ -109,7 +127,7 @@ internal fun ExternalAiSettingsSheet(
             ) {
                 ExternalAiProvider.entries.forEach { provider ->
                     ProviderChip(
-                        label = provider.displayName,
+                        label = provider.label(),
                         selected = provider == selectedProvider,
                         onClick = { selectedProvider = provider }
                     )
@@ -119,7 +137,7 @@ internal fun ExternalAiSettingsSheet(
             if (selectedProvider == ExternalAiProvider.CUSTOM) {
                 Spacer(Modifier.height(20.dp))
                 Text(
-                    text = "Base URL",
+                    text = stringResource(Res.string.ai_base_url),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -136,7 +154,7 @@ internal fun ExternalAiSettingsSheet(
 
             Spacer(Modifier.height(20.dp))
             Text(
-                text = "Model",
+                text = stringResource(Res.string.ai_model),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             )
@@ -144,7 +162,7 @@ internal fun ExternalAiSettingsSheet(
             EmberrTextField(
                 value = modelInput,
                 onValueChange = { modelInput = it },
-                placeholder = selectedProvider.defaultModel ?: "Enter a model name",
+                placeholder = selectedProvider.defaultModel ?: stringResource(Res.string.ai_enter_model_name),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 onSubmit = onSave
@@ -152,7 +170,7 @@ internal fun ExternalAiSettingsSheet(
 
             Spacer(Modifier.height(20.dp))
             Text(
-                text = "API Key",
+                text = stringResource(Res.string.ai_api_key),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             )
@@ -161,17 +179,17 @@ internal fun ExternalAiSettingsSheet(
                 value = apiKeyInput,
                 onValueChange = { apiKeyInput = it },
                 placeholder = if (loadedConfig?.apiKey?.isNotBlank() == true)
-                    "API key saved — enter a new key to replace"
+                    stringResource(Res.string.ai_api_key_saved)
                 else
-                    "Enter your ${selectedProvider.displayName} API key",
+                    stringResource(Res.string.ai_enter_provider_api_key, selectedProvider.label()),
                 singleLine = true,
                 visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    IconTooltip(text = if (isApiKeyVisible) "Hide API key" else "Show API key") {
+                    IconTooltip(text = stringResource(if (isApiKeyVisible) Res.string.ai_hide_api_key else Res.string.ai_show_api_key)) {
                         EmberrTextFieldIconButton(onClick = { isApiKeyVisible = !isApiKeyVisible }) {
                             Icon(
                                 painter = painterResource(if (isApiKeyVisible) Res.drawable.eye_closed else Res.drawable.eye_open),
-                                contentDescription = if (isApiKeyVisible) "Hide API key" else "Show API key",
+                                contentDescription = stringResource(if (isApiKeyVisible) Res.string.ai_hide_api_key else Res.string.ai_show_api_key),
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
@@ -189,13 +207,13 @@ internal fun ExternalAiSettingsSheet(
             ) {
                 if (loadedConfig != null) {
                     EmberrButtonSecondary(
-                        text = "Delete",
+                        text = stringResource(Res.string.common_delete),
                         onClick = { showDeleteConfirm = true },
                         modifier = Modifier.weight(1f)
                     )
                 }
                 EmberrButtonPrimary(
-                    text = "Save",
+                    text = stringResource(Res.string.common_save),
                     enabled = hasUsableKey && hasUsableEndpoint,
                     onClick = onSave,
                     modifier = Modifier.weight(1f)
@@ -203,7 +221,7 @@ internal fun ExternalAiSettingsSheet(
             }
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = { closeAnd { } },
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)
@@ -212,10 +230,10 @@ internal fun ExternalAiSettingsSheet(
             if (showDeleteConfirm) {
                 EmberrAlertDialog(
                     onDismissRequest = { showDeleteConfirm = false },
-                    title = "Delete this API key?"
+                    title = stringResource(Res.string.ai_delete_api_key_question)
                 ) {
                     Text(
-                        text = "The saved key and settings for this provider will be removed from this device.",
+                        text = stringResource(Res.string.ai_delete_api_key_message),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -225,7 +243,7 @@ internal fun ExternalAiSettingsSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         EmberrButtonSecondary(
-                            text = "Cancel",
+                            text = stringResource(Res.string.common_cancel),
                             onClick = { showDeleteConfirm = false },
                             modifier = Modifier.weight(1f)
                         )
@@ -246,7 +264,7 @@ internal fun ExternalAiSettingsSheet(
                             ),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None)
                         ) {
-                            Text("Delete", style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(Res.string.common_delete), style = MaterialTheme.typography.bodyLarge)
                         }
                     }
                 }

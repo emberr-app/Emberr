@@ -1,7 +1,7 @@
 package com.emberr.domain.ai
 
-enum class KnowledgeMode(val displayName: String) {
-    DEFAULT("Default"),
-    NOTES_ONLY("Only notes knowledge"),
-    WORLD_ONLY("Only real-world knowledge")
+enum class KnowledgeMode {
+    DEFAULT,
+    NOTES_ONLY,
+    WORLD_ONLY
 }

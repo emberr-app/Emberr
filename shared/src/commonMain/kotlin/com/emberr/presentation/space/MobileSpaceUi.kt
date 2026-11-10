@@ -60,6 +60,21 @@ import emberr.shared.generated.resources.trash
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.common_cancel
+import emberr.shared.generated.resources.common_create
+import emberr.shared.generated.resources.common_delete
+import emberr.shared.generated.resources.space_create_space
+import emberr.shared.generated.resources.space_delete_space
+import emberr.shared.generated.resources.space_delete_space_message
+import emberr.shared.generated.resources.space_delete_space_question
+import emberr.shared.generated.resources.space_name_placeholder
+import emberr.shared.generated.resources.space_new_space
+import emberr.shared.generated.resources.space_new_space_subtitle
+import emberr.shared.generated.resources.space_rename_space
+import emberr.shared.generated.resources.space_rename_subtitle
+import emberr.shared.generated.resources.space_reorder_space
+import emberr.shared.generated.resources.space_spaces
+import org.jetbrains.compose.resources.stringResource
 
 private val SPACE_ROW_HEIGHT = 48.dp
 private val HANDLE_ZONE_WIDTH = 44.dp
@@ -89,21 +104,21 @@ fun SpaceOptionsSheets(
 
     val activeSpaceName = spaces.firstOrNull { it.spaceId == activeSpaceId }?.displayName.orEmpty()
 
-    EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = "Spaces") { closeAnd ->
+    EmberrBottomSheet(expanded = expanded, onDismiss = onDismiss, title = stringResource(Res.string.space_spaces)) { closeAnd ->
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 30.dp)) {
 
             SpaceSheetRow(
-                text = "Create Space",
+                text = stringResource(Res.string.space_create_space),
                 icon = painterResource(Res.drawable.plus)
             ) { closeAnd { showCreateSheet = true } }
 
             SpaceSheetRow(
-                text = "Rename Space",
+                text = stringResource(Res.string.space_rename_space),
                 icon = painterResource(Res.drawable.pen_square)
             ) { closeAnd { showRenameSheet = true } }
 
             SpaceSheetRow(
-                text = "Delete Space",
+                text = stringResource(Res.string.space_delete_space),
                 icon = painterResource(Res.drawable.trash),
                 isDestructive = true,
                 enabled = spaces.size > 1
@@ -128,10 +143,10 @@ fun SpaceOptionsSheets(
         currentName = "",
         onDismiss = { showCreateSheet = false },
         onRename = { name -> showCreateSheet = false; onCreateSpace(name) },
-        title = "New Space",
-        subtitle = "Work, Personal, anything you like.",
-        confirmLabel = "Create",
-        placeholder = "Space name..."
+        title = stringResource(Res.string.space_new_space),
+        subtitle = stringResource(Res.string.space_new_space_subtitle),
+        confirmLabel = stringResource(Res.string.common_create),
+        placeholder = stringResource(Res.string.space_name_placeholder)
     )
 
     RenameBottomSheet(
@@ -139,18 +154,18 @@ fun SpaceOptionsSheets(
         currentName = activeSpaceName,
         onDismiss = { showRenameSheet = false },
         onRename = { name -> showRenameSheet = false; onRenameSpace(name) },
-        title = "Rename Space",
-        subtitle = "Pick a new name.",
-        placeholder = "Space name..."
+        title = stringResource(Res.string.space_rename_space),
+        subtitle = stringResource(Res.string.space_rename_subtitle),
+        placeholder = stringResource(Res.string.space_name_placeholder)
     )
 
     if (showDeleteConfirm) {
         EmberrAlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = "Delete \"$activeSpaceName\"?"
+            title = stringResource(Res.string.space_delete_space_question, activeSpaceName)
         ) {
             Text(
-                text = "Every note, folder, tag and chat in this space is deleted with it. This cannot be undone.",
+                text = stringResource(Res.string.space_delete_space_message),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
@@ -160,7 +175,7 @@ fun SpaceOptionsSheets(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 EmberrButtonSecondary(
-                    text = "Cancel",
+                    text = stringResource(Res.string.common_cancel),
                     onClick = { showDeleteConfirm = false },
                     modifier = Modifier.weight(1f)
                 )
@@ -174,7 +189,7 @@ fun SpaceOptionsSheets(
                     ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = EmberrShadowElevation.None)
                 ) {
-                    Text(text = "Delete", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = stringResource(Res.string.common_delete), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -283,7 +298,7 @@ private fun SpaceRow(displayName: String, isActive: Boolean, isBeingMoved: Boole
         ) {
             Icon(
                 imageVector = Icons.Default.DragIndicator,
-                contentDescription = "Reorder space",
+                contentDescription = stringResource(Res.string.space_reorder_space),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                 modifier = Modifier.size(HANDLE_ICON_SIZE)
             )

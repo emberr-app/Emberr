@@ -66,6 +66,11 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.rememberStableStatusBarsPadding
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_ask_emberr
+import emberr.shared.generated.resources.ai_chat_history
+import emberr.shared.generated.resources.common_back
+import org.jetbrains.compose.resources.stringResource
 
 private const val SETUP_OVERLAY_FADE_MILLIS = 650
 
@@ -281,7 +286,7 @@ private fun AiChatContent(
 
         EmberrTopHeaderBar(
             modifier = Modifier.align(Alignment.TopCenter),
-            title = if (isChatReady) "Ask Emberr" else "",
+            title = if (isChatReady) stringResource(Res.string.ai_ask_emberr) else "",
             titleColor = MaterialTheme.colorScheme.onBackground,
             titleLeadingIcon = if (isChatReady) {
                 {
@@ -299,19 +304,19 @@ private fun AiChatContent(
                 horizontal = if (isDesktopPlatform) DesktopPanelContentInset else 16.dp,
                 bottom = 8.dp
             ),
-            backTooltip = "Back",
+            backTooltip = stringResource(Res.string.common_back),
             onBackClick = onDismiss,
             actions = {
                 if (isChatReady) {
                     Box {
                         TopBarIconButton(
                             icon = rememberVectorPainter(Icons.Default.Menu),
-                            contentDescription = "Chat history",
+                            contentDescription = stringResource(Res.string.ai_chat_history),
                             bgColor = Color.Transparent,
                             tint = MaterialTheme.colorScheme.primary,
                             hazeState = hazeState,
                             hazeStyle = EmberrBlur.Regular,
-                            tooltip = "Chat history",
+                            tooltip = stringResource(Res.string.ai_chat_history),
                             onClick = { showChatHistorySheet = true }
                         )
 

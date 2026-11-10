@@ -42,6 +42,11 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.settings_paper_texture
+import emberr.shared.generated.resources.settings_paper_texture_hint
+import emberr.shared.generated.resources.settings_texture_strength
+import emberr.shared.generated.resources.settings_theme_group_texture
+import org.jetbrains.compose.resources.stringResource
 
 private val WholeAppOnly = setOf(PaperTextureArea.WHOLE_APP)
 
@@ -103,12 +108,12 @@ private fun TextureSettingsGroup(isTextureOn: Boolean, textureStrength: Int) {
                 .padding(bottom = 22.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            SettingsGroup(title = "Texture") {
+            SettingsGroup(title = stringResource(Res.string.settings_theme_group_texture)) {
                 SettingsToggleRow(
                     icon = painterResource(Res.drawable.paper_texture),
-                    title = "Paper Texture",
+                    title = stringResource(Res.string.settings_paper_texture),
                     isChecked = isTextureOn,
-                    subtitle = "Adds a soft grain, like paper.",
+                    subtitle = stringResource(Res.string.settings_paper_texture_hint),
                     onCheckedChange = {}
                 )
                 AnimatedVisibility(
@@ -122,7 +127,7 @@ private fun TextureSettingsGroup(isTextureOn: Boolean, textureStrength: Int) {
                         SettingsDivider()
                         PercentSliderRow(
                             icon = painterResource(Res.drawable.texture_strength),
-                            title = "Texture Strength",
+                            title = stringResource(Res.string.settings_texture_strength),
                             percent = textureStrength,
                             onPercentChange = {}
                         )

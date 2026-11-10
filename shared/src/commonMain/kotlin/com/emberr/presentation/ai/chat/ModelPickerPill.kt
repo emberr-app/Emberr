@@ -35,12 +35,20 @@ import com.emberr.domain.ai.external.ExternalAiProvider
 import com.emberr.domain.ai.external.ExternalAiProviderConfig
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.ai.RagViewModel
+import com.emberr.presentation.ai.settings.label
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.EmberrShadowElevation
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_choose_ai_model
+import emberr.shared.generated.resources.ai_choose_ai_model_title
+import emberr.shared.generated.resources.ai_model_local
+import emberr.shared.generated.resources.ai_model_unavailable
+import emberr.shared.generated.resources.common_close
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ModelPickerPill(viewModel: RagViewModel) {
@@ -63,9 +71,9 @@ internal fun ModelPickerPill(viewModel: RagViewModel) {
 
     val label = if (aiGenerationMode == AiGenerationMode.LOCAL) {
         selectableLocalModels.find { it.fileName == selectedLocalModelFileName }?.displayName
-            ?: if (viewModel.localAiUnsupportedReason == null) "Local" else "Unavailable"
+            ?: stringResource(if (viewModel.localAiUnsupportedReason == null) Res.string.ai_model_local else Res.string.ai_model_unavailable)
     } else {
-        selectedExternalModelName?.takeIf { it.isNotBlank() } ?: selectedExternalAiProvider.displayName
+        selectedExternalModelName?.takeIf { it.isNotBlank() } ?: selectedExternalAiProvider.label()
     }
 
     val externalConfigs = remember { mutableStateMapOf<ExternalAiProvider, ExternalAiProviderConfig?>() }
@@ -105,7 +113,7 @@ internal fun ModelPickerPill(viewModel: RagViewModel) {
                 )
                 Icon(
                     Icons.Default.ArrowDropDown,
-                    contentDescription = "Choose AI model",
+                    contentDescription = stringResource(Res.string.ai_choose_ai_model),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(16.dp)
                 )
@@ -132,7 +140,7 @@ internal fun ModelPickerPill(viewModel: RagViewModel) {
                             val isConfigured = !config?.apiKey.isNullOrBlank()
                             if (isConfigured) {
                                 EmberrDesktopMenuOption(
-                                    label = config.model.takeIf { it.isNotBlank() } ?: provider.displayName,
+                                    label = config.model.takeIf { it.isNotBlank() } ?: provider.label(),
                                     isSelected = aiGenerationMode == AiGenerationMode.EXTERNAL &&
                                             selectedExternalAiProvider == provider,
                                     onClick = { showPicker = false; viewModel.selectExternalProvider(provider) }
@@ -149,7 +157,7 @@ internal fun ModelPickerPill(viewModel: RagViewModel) {
         EmberrBottomSheet(
             expanded = showPicker,
             onDismiss = { showPicker = false },
-            title = "Choose AI Model",
+            title = stringResource(Res.string.ai_choose_ai_model_title),
             contentHorizontalPadding = 0.dp
         ) { closeAnd ->
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
@@ -172,7 +180,7 @@ internal fun ModelPickerPill(viewModel: RagViewModel) {
                             val isSelectedProvider = aiGenerationMode == AiGenerationMode.EXTERNAL &&
                                     selectedExternalAiProvider == provider
                             EmberrBottomSheetOption(
-                                label = config.model.takeIf { it.isNotBlank() } ?: provider.displayName,
+                                label = config.model.takeIf { it.isNotBlank() } ?: provider.label(),
                                 labelMaxLines = 1,
                                 isSelected = isSelectedProvider,
                                 onClick = { closeAnd { viewModel.selectExternalProvider(provider) } }
@@ -182,7 +190,7 @@ internal fun ModelPickerPill(viewModel: RagViewModel) {
                 }
 
                 EmberrButtonPrimary(
-                    text = "Close",
+                    text = stringResource(Res.string.common_close),
                     onClick = { showPicker = false },
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 12.dp, start = 20.dp, end = 20.dp)

@@ -97,6 +97,18 @@ import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.painterResource
 import com.emberr.ui.theme.LocalUsesTwentyFourHourClock
 import com.emberr.ui.theme.PaperTextureBox
+import emberr.shared.generated.resources.voice_add
+import emberr.shared.generated.resources.voice_add_tasks_with_voice
+import emberr.shared.generated.resources.voice_add_time
+import emberr.shared.generated.resources.voice_discard
+import emberr.shared.generated.resources.voice_empty_tasks_are_skipped
+import emberr.shared.generated.resources.voice_install_speech_app
+import emberr.shared.generated.resources.voice_listening
+import emberr.shared.generated.resources.voice_tap_a_task_to_fix_it
+import emberr.shared.generated.resources.voice_tap_the_orb
+import emberr.shared.generated.resources.voice_today
+import emberr.shared.generated.resources.voice_tomorrow
+import org.jetbrains.compose.resources.stringResource
 
 private val VoiceTaskDialogShape = RoundedCornerShape(24.dp)
 private const val EMBERR_GHOST_SIZE_FRACTION = 0.5f
@@ -130,9 +142,9 @@ fun VoiceTaskDialog(
     val timeZone = remember { TimeZone.currentSystemDefault() }
     val today = remember { Clock.System.todayIn(timeZone) }
     val statusText = when {
-        state.isListening -> "Listening..."
+        state.isListening -> stringResource(Res.string.voice_listening)
         state.errorMessage != null -> state.errorMessage
-        else -> "Tap the orb to speak"
+        else -> stringResource(Res.string.voice_tap_the_orb)
     }
     val taskListScrollState = rememberScrollState()
     LaunchedEffect(taskListScrollState, state.isListening) {
@@ -187,14 +199,14 @@ fun VoiceTaskDialog(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "(add tasks with voice)",
+                        text = stringResource(Res.string.voice_add_tasks_with_voice),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                     if (state.errorMessage == VOICE_RECOGNITION_UNAVAILABLE_MESSAGE) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Install a speech recognition app to use voice tasks",
+                            text = stringResource(Res.string.voice_install_speech_app),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             textAlign = TextAlign.Center
@@ -240,7 +252,7 @@ fun VoiceTaskDialog(
                         if (state.tasks.isNotEmpty()) {
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = "Tap a task to fix it",
+                                text = stringResource(Res.string.voice_tap_a_task_to_fix_it),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                             )
@@ -253,12 +265,12 @@ fun VoiceTaskDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         EmberrButtonSecondary(
-                            text = "Discard",
+                            text = stringResource(Res.string.voice_discard),
                             onClick = onDiscard,
                             modifier = Modifier.weight(1f)
                         )
                         EmberrButtonPrimary(
-                            text = "Add",
+                            text = stringResource(Res.string.voice_add),
                             onClick = onAdd,
                             enabled = state.tasks.any { it.taskText.isNotBlank() },
                             modifier = Modifier.weight(1f)
@@ -309,12 +321,23 @@ private fun EditableVoiceTaskRow(
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 ReminderChip(
                     icon = painterResource(Res.drawable.calendar_add),
-                    label = voiceTaskDayLabel(reminder, today, timeZone),
+                    label = voiceTaskDayLabel(
+                        reminder,
+                        today,
+                        timeZone,
+                        todayLabel = stringResource(Res.string.voice_today),
+                        tomorrowLabel = stringResource(Res.string.voice_tomorrow)
+                    ),
                     onClick = { openPickerOnceKeyboardCloses { isDateMenuOpen = true } }
                 )
                 ReminderChip(
                     icon = painterResource(Res.drawable.clock_circle),
-                    label = voiceTaskTimeLabel(reminder, timeZone, LocalUsesTwentyFourHourClock.current),
+                    label = voiceTaskTimeLabel(
+                        reminder,
+                        timeZone,
+                        LocalUsesTwentyFourHourClock.current,
+                        addTimeLabel = stringResource(Res.string.voice_add_time)
+                    ),
                     onClick = { openPickerOnceKeyboardCloses { isTimeMenuOpen = true } }
                 )
             }
@@ -345,7 +368,7 @@ private fun EditableVoiceTaskRow(
                 Box {
                     if (draftText.isEmpty()) {
                         Text(
-                            text = "Empty tasks are skipped",
+                            text = stringResource(Res.string.voice_empty_tasks_are_skipped),
                             style = MaterialTheme.typography.bodyLarge,
                             color = textColor.copy(alpha = 0.35f)
                         )

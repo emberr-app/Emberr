@@ -1,7 +1,6 @@
 package com.emberr.presentation.onboarding
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import com.emberr.domain.util.system.isDesktopPlatform
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.arrow_up_down
@@ -17,6 +16,38 @@ import emberr.shared.generated.resources.text_type
 import emberr.shared.generated.resources.transfer_h
 import emberr.shared.generated.resources.widget
 import org.jetbrains.compose.resources.DrawableResource
+import emberr.shared.generated.resources.onboarding_ai_headline
+import emberr.shared.generated.resources.onboarding_ai_lead
+import emberr.shared.generated.resources.onboarding_blocks_detail
+import emberr.shared.generated.resources.onboarding_blocks_headline
+import emberr.shared.generated.resources.onboarding_blocks_lead
+import emberr.shared.generated.resources.onboarding_daily_detail
+import emberr.shared.generated.resources.onboarding_daily_headline
+import emberr.shared.generated.resources.onboarding_daily_lead
+import emberr.shared.generated.resources.onboarding_done_button
+import emberr.shared.generated.resources.onboarding_done_detail
+import emberr.shared.generated.resources.onboarding_done_headline
+import emberr.shared.generated.resources.onboarding_done_lead
+import emberr.shared.generated.resources.onboarding_layout_headline
+import emberr.shared.generated.resources.onboarding_one_more_thing
+import emberr.shared.generated.resources.onboarding_permissions_headline
+import emberr.shared.generated.resources.onboarding_privacy_detail_desktop
+import emberr.shared.generated.resources.onboarding_privacy_detail_mobile
+import emberr.shared.generated.resources.onboarding_privacy_headline
+import emberr.shared.generated.resources.onboarding_privacy_lead
+import emberr.shared.generated.resources.onboarding_scrollbars_headline
+import emberr.shared.generated.resources.onboarding_scrollbars_lead
+import emberr.shared.generated.resources.onboarding_sync_detail
+import emberr.shared.generated.resources.onboarding_sync_headline
+import emberr.shared.generated.resources.onboarding_sync_lead
+import emberr.shared.generated.resources.onboarding_text_size_headline
+import emberr.shared.generated.resources.onboarding_text_size_lead
+import emberr.shared.generated.resources.onboarding_typeface_headline
+import emberr.shared.generated.resources.onboarding_typeface_lead
+import emberr.shared.generated.resources.onboarding_welcome_button
+import emberr.shared.generated.resources.onboarding_welcome_headline
+import emberr.shared.generated.resources.onboarding_welcome_lead
+import org.jetbrains.compose.resources.stringResource
 
 enum class OnboardingChoice {
     NONE,
@@ -34,78 +65,78 @@ data class OnboardingStep(
     val headline: String,
     val detail: String? = null,
     val choice: OnboardingChoice = OnboardingChoice.NONE,
-    val buttonLabel: String = "Continue",
+    val buttonLabel: String? = null,
     val hasRainbowHeadline: Boolean = false
 )
 
 @Composable
-fun rememberOnboardingSteps(): List<OnboardingStep> = remember {
+fun rememberOnboardingSteps(): List<OnboardingStep> =
     buildList {
         add(
             OnboardingStep(
                 icon = Res.drawable.pen_square,
-                lead = "Welcome to",
-                headline = "Emberr.",
-                buttonLabel = "Show me around."
+                lead = stringResource(Res.string.onboarding_welcome_lead),
+                headline = stringResource(Res.string.onboarding_welcome_headline),
+                buttonLabel = stringResource(Res.string.onboarding_welcome_button)
             )
         )
         add(
             OnboardingStep(
                 icon = Res.drawable.shield_alert,
-                lead = "No account. No cloud. No trackers.",
-                headline = "Your notes stay yours.",
+                lead = stringResource(Res.string.onboarding_privacy_lead),
+                headline = stringResource(Res.string.onboarding_privacy_headline),
                 detail = if (isDesktopPlatform) {
-                    "Everything stays on this device. No analytics, no ads."
+                    stringResource(Res.string.onboarding_privacy_detail_desktop)
                 } else {
-                    "Everything is encrypted on this device. No analytics, no ads."
+                    stringResource(Res.string.onboarding_privacy_detail_mobile)
                 }
             )
         )
         add(
             OnboardingStep(
                 icon = Res.drawable.widget,
-                lead = "Write the way you think.",
-                headline = "Everything is a block.",
-                detail = "Text, checklists, tables, databases, images, voice notes and documents all in one note."
+                lead = stringResource(Res.string.onboarding_blocks_lead),
+                headline = stringResource(Res.string.onboarding_blocks_headline),
+                detail = stringResource(Res.string.onboarding_blocks_detail)
             )
         )
         add(
             OnboardingStep(
                 icon = Res.drawable.daily,
-                lead = "Every day gets a page.",
-                headline = "Plan your days.",
-                detail = "Unfinished tasks roll into today, everything shows on a calendar, and any checkbox can remind you to the minute."
+                lead = stringResource(Res.string.onboarding_daily_lead),
+                headline = stringResource(Res.string.onboarding_daily_headline),
+                detail = stringResource(Res.string.onboarding_daily_detail)
             )
         )
         add(
             OnboardingStep(
                 icon = Res.drawable.transfer_h,
-                lead = "Your devices, your network.",
-                headline = "Sync without a middleman.",
-                detail = "Pair over your local network or use a server you own. Content is encrypted before it leaves."
+                lead = stringResource(Res.string.onboarding_sync_lead),
+                headline = stringResource(Res.string.onboarding_sync_headline),
+                detail = stringResource(Res.string.onboarding_sync_detail)
             )
         )
         add(
             OnboardingStep(
                 icon = Res.drawable.text_type,
-                lead = "Make it yours.",
-                headline = "Pick a typeface.",
+                lead = stringResource(Res.string.onboarding_typeface_lead),
+                headline = stringResource(Res.string.onboarding_typeface_headline),
                 choice = OnboardingChoice.TYPEFACE
             )
         )
         add(
             OnboardingStep(
                 icon = Res.drawable.text_tool_2,
-                lead = "Comfortable to read?",
-                headline = "Set the text size.",
+                lead = stringResource(Res.string.onboarding_text_size_lead),
+                headline = stringResource(Res.string.onboarding_text_size_headline),
                 choice = OnboardingChoice.TEXT_SIZE
             )
         )
         add(
             OnboardingStep(
                 icon = Res.drawable.astroid,
-                lead = "Ask your own notes.",
-                headline = "Bring in an assistant.",
+                lead = stringResource(Res.string.onboarding_ai_lead),
+                headline = stringResource(Res.string.onboarding_ai_headline),
                 choice = OnboardingChoice.AI_ASSISTANT
             )
         )
@@ -113,16 +144,16 @@ fun rememberOnboardingSteps(): List<OnboardingStep> = remember {
             add(
                 OnboardingStep(
                     icon = Res.drawable.sidebar,
-                    lead = "One more thing.",
-                    headline = "Where sub-notes open.",
+                    lead = stringResource(Res.string.onboarding_one_more_thing),
+                    headline = stringResource(Res.string.onboarding_layout_headline),
                     choice = OnboardingChoice.DESKTOP_LAYOUT
                 )
             )
             add(
                 OnboardingStep(
                     icon = Res.drawable.arrow_up_down,
-                    lead = "Edges, or no edges?",
-                    headline = "Show the scrollbars.",
+                    lead = stringResource(Res.string.onboarding_scrollbars_lead),
+                    headline = stringResource(Res.string.onboarding_scrollbars_headline),
                     choice = OnboardingChoice.SCROLLBARS
                 )
             )
@@ -130,8 +161,8 @@ fun rememberOnboardingSteps(): List<OnboardingStep> = remember {
             add(
                 OnboardingStep(
                     icon = Res.drawable.sliders_horizontal,
-                    lead = "One more thing.",
-                    headline = "Turn on what you need.",
+                    lead = stringResource(Res.string.onboarding_one_more_thing),
+                    headline = stringResource(Res.string.onboarding_permissions_headline),
                     choice = OnboardingChoice.PERMISSIONS
                 )
             )
@@ -139,12 +170,11 @@ fun rememberOnboardingSteps(): List<OnboardingStep> = remember {
         add(
             OnboardingStep(
                 icon = Res.drawable.square_check,
-                lead = "That is everything.",
-                headline = "You are all set.",
-                detail = "Every choice you made here lives in Settings.",
-                buttonLabel = "Start Using Emberr",
+                lead = stringResource(Res.string.onboarding_done_lead),
+                headline = stringResource(Res.string.onboarding_done_headline),
+                detail = stringResource(Res.string.onboarding_done_detail),
+                buttonLabel = stringResource(Res.string.onboarding_done_button),
                 hasRainbowHeadline = true
             )
         )
     }
-}

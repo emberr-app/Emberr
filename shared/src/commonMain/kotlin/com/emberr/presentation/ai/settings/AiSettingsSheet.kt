@@ -15,6 +15,17 @@ import com.emberr.presentation.ai.RagViewModel
 import com.emberr.presentation.ai.components.ModelOptionCard
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.ai_external_ai
+import emberr.shared.generated.resources.ai_external_ai_active
+import emberr.shared.generated.resources.ai_external_ai_subtitle
+import emberr.shared.generated.resources.ai_fine_tuning
+import emberr.shared.generated.resources.ai_local_ai
+import emberr.shared.generated.resources.ai_local_ai_subtitle
+import emberr.shared.generated.resources.ai_not_supported_by_hardware
+import emberr.shared.generated.resources.ai_settings_title
+import emberr.shared.generated.resources.common_close
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun AiSettingsSheet(
@@ -32,36 +43,36 @@ internal fun AiSettingsSheet(
     EmberrBottomSheet(
         expanded = expanded,
         onDismiss = onDismiss,
-        title = "AI Settings",
+        title = stringResource(Res.string.ai_settings_title),
     ) { _ ->
 
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             ModelOptionCard(
-                title = "Local AI",
+                title = stringResource(Res.string.ai_local_ai),
                 subtitle = if (viewModel.localAiUnsupportedReason == null)
-                    "Runs fully on-device. Private & offline."
+                    stringResource(Res.string.ai_local_ai_subtitle)
                 else
-                    "Not supported by this hardware.",
+                    stringResource(Res.string.ai_not_supported_by_hardware),
                 onClick = onLocalAiClick
             )
             Spacer(Modifier.height(10.dp))
             ModelOptionCard(
-                title = "External AI",
+                title = stringResource(Res.string.ai_external_ai),
                 subtitle = if (aiGenerationMode == AiGenerationMode.EXTERNAL)
-                    "Active — ${selectedExternalAiProvider.displayName}"
+                    stringResource(Res.string.ai_external_ai_active, selectedExternalAiProvider.label())
                 else
-                    "Connect an external provider with your own API key.",
+                    stringResource(Res.string.ai_external_ai_subtitle),
                 onClick = onExternalAiClick
             )
             Spacer(Modifier.height(10.dp))
             ModelOptionCard(
-                title = "Fine-tuning",
-                subtitle = knowledgeMode.displayName,
+                title = stringResource(Res.string.ai_fine_tuning),
+                subtitle = knowledgeMode.label(),
                 onClick = onFineTuningClick
             )
 
             EmberrButtonPrimary(
-                text = "Close",
+                text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
                     .padding(vertical = 12.dp)

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emberr.domain.util.system.AppPermission
 import com.emberr.domain.util.system.rememberAppPermissionCoordinator
+import com.emberr.presentation.settings.label
 import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.ui.theme.FontSizePreference
 import com.emberr.ui.theme.FontStylePreference
@@ -49,6 +50,30 @@ import com.emberr.ui.theme.fontFamilyFor
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.check
 import org.jetbrains.compose.resources.painterResource
+import emberr.shared.generated.resources.onboarding_allow
+import emberr.shared.generated.resources.onboarding_allowed
+import emberr.shared.generated.resources.onboarding_chat_answer
+import emberr.shared.generated.resources.onboarding_chat_placeholder
+import emberr.shared.generated.resources.onboarding_chat_question
+import emberr.shared.generated.resources.onboarding_enable_ai
+import emberr.shared.generated.resources.onboarding_enable_ai_description
+import emberr.shared.generated.resources.onboarding_permission_alarms
+import emberr.shared.generated.resources.onboarding_permission_alarms_description
+import emberr.shared.generated.resources.onboarding_permission_camera
+import emberr.shared.generated.resources.onboarding_permission_camera_description
+import emberr.shared.generated.resources.onboarding_permission_microphone
+import emberr.shared.generated.resources.onboarding_permission_microphone_description
+import emberr.shared.generated.resources.onboarding_permission_notifications
+import emberr.shared.generated.resources.onboarding_permission_notifications_description
+import emberr.shared.generated.resources.onboarding_show_scrollbars
+import emberr.shared.generated.resources.onboarding_show_scrollbars_description
+import emberr.shared.generated.resources.settings_font_size_default
+import emberr.shared.generated.resources.settings_font_size_extra_large
+import emberr.shared.generated.resources.settings_font_size_extra_small
+import emberr.shared.generated.resources.settings_font_size_large
+import emberr.shared.generated.resources.settings_font_size_small
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun OnboardingChoicePanel(
@@ -82,7 +107,7 @@ private fun TypefaceChoice(viewModel: OnboardingViewModel) {
     ) {
         FontStylePreference.entries.forEach { fontStyle ->
             ChoiceOptionRow(
-                label = fontStyle.displayName,
+                label = fontStyle.label(),
                 isSelected = fontStyle == selectedFontStyle,
                 fontFamily = fontFamilyFor(fontStyle),
                 onClick = { viewModel.setFontStylePreference(fontStyle.name) }
@@ -141,16 +166,16 @@ private fun AiAssistantChoice(viewModel: OnboardingViewModel) {
             .verticalScroll(rememberScrollState())
     ) {
         OnboardingChatMock(
-            question = "What did I decide about the trip?",
-            answer = "You settled on the last week of March and booked the coastal route.",
-            placeholder = "Ask about your notes"
+            question = stringResource(Res.string.onboarding_chat_question),
+            answer = stringResource(Res.string.onboarding_chat_answer),
+            placeholder = stringResource(Res.string.onboarding_chat_placeholder)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         ChoiceSwitchRow(
-            label = "Enable the AI assistant",
-            description = "Nothing is sent anywhere unless you add your own key.",
+            label = stringResource(Res.string.onboarding_enable_ai),
+            description = stringResource(Res.string.onboarding_enable_ai_description),
             checked = !aiFeaturesDisabled,
             onCheckedChange = { isEnabled -> viewModel.setAiFeaturesDisabled(!isEnabled) }
         )
@@ -175,7 +200,7 @@ private fun DesktopLayoutChoice(viewModel: OnboardingViewModel) {
 
         SubNoteOpenMode.entries.forEach { openMode ->
             ChoiceOptionRow(
-                label = openMode.displayName,
+                label = openMode.label(),
                 isSelected = openMode == selectedOpenMode,
                 onClick = { viewModel.setSubNoteOpenMode(openMode.name) }
             )
@@ -193,8 +218,8 @@ private fun ScrollbarsChoice(viewModel: OnboardingViewModel) {
             .verticalScroll(rememberScrollState())
     ) {
         ChoiceSwitchRow(
-            label = "Show scrollbars",
-            description = "In the sidebar, the editor and note lists.",
+            label = stringResource(Res.string.onboarding_show_scrollbars),
+            description = stringResource(Res.string.onboarding_show_scrollbars_description),
             checked = showScrollbar,
             onCheckedChange = viewModel::setShowScrollbar
         )
@@ -203,8 +228,8 @@ private fun ScrollbarsChoice(viewModel: OnboardingViewModel) {
 
 private data class OnboardingPermissionRequest(
     val permission: AppPermission,
-    val title: String,
-    val description: String
+    val title: StringResource,
+    val description: StringResource
 )
 
 @Composable
@@ -215,23 +240,23 @@ private fun PermissionsChoice() {
         listOf(
             OnboardingPermissionRequest(
                 permission = AppPermission.Notifications,
-                title = "Notifications",
-                description = "Deliver your reminders."
+                title = Res.string.onboarding_permission_notifications,
+                description = Res.string.onboarding_permission_notifications_description
             ),
             OnboardingPermissionRequest(
                 permission = AppPermission.ExactAlarms,
-                title = "Alarms and reminders",
-                description = "Fire them to the exact minute."
+                title = Res.string.onboarding_permission_alarms,
+                description = Res.string.onboarding_permission_alarms_description
             ),
             OnboardingPermissionRequest(
                 permission = AppPermission.Microphone,
-                title = "Microphone",
-                description = "Record voice notes and dictate text."
+                title = Res.string.onboarding_permission_microphone,
+                description = Res.string.onboarding_permission_microphone_description
             ),
             OnboardingPermissionRequest(
                 permission = AppPermission.Camera,
-                title = "Camera",
-                description = "Capture photos and scan QR codes."
+                title = Res.string.onboarding_permission_camera,
+                description = Res.string.onboarding_permission_camera_description
             )
         )
     }
@@ -243,8 +268,8 @@ private fun PermissionsChoice() {
     ) {
         permissionRequests.forEach { permissionRequest ->
             PermissionRow(
-                title = permissionRequest.title,
-                description = permissionRequest.description,
+                title = stringResource(permissionRequest.title),
+                description = stringResource(permissionRequest.description),
                 isGranted = permissionCoordinator.isGranted(permissionRequest.permission),
                 onRequest = { permissionCoordinator.request(permissionRequest.permission) }
             )
@@ -298,13 +323,13 @@ private fun PermissionRow(
             if (isCurrentlyGranted) {
                 Icon(
                     painter = painterResource(Res.drawable.check),
-                    contentDescription = "Allowed",
+                    contentDescription = stringResource(Res.string.onboarding_allowed),
                     tint = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.size(16.dp)
                 )
             } else {
                 Text(
-                    text = "Allow",
+                    text = stringResource(Res.string.onboarding_allow),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onBackground
@@ -418,13 +443,16 @@ private fun optionColorFor(isSelected: Boolean): Color = if (isSelected) {
     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
 }
 
-private fun FontSizePreference.displayLabel(): String = when (this) {
-    FontSizePreference.EXTRA_SMALL -> "Extra Small"
-    FontSizePreference.SMALL -> "Small"
-    FontSizePreference.DEFAULT -> "Default"
-    FontSizePreference.LARGE -> "Large"
-    FontSizePreference.EXTRA_LARGE -> "Extra Large"
-}
+@Composable
+private fun FontSizePreference.displayLabel(): String = stringResource(
+    when (this) {
+        FontSizePreference.EXTRA_SMALL -> Res.string.settings_font_size_extra_small
+        FontSizePreference.SMALL -> Res.string.settings_font_size_small
+        FontSizePreference.DEFAULT -> Res.string.settings_font_size_default
+        FontSizePreference.LARGE -> Res.string.settings_font_size_large
+        FontSizePreference.EXTRA_LARGE -> Res.string.settings_font_size_extra_large
+    }
+)
 
 private fun FontSizePreference.previewTextSize(): TextUnit = when (this) {
     FontSizePreference.EXTRA_SMALL -> 13.sp

@@ -19,6 +19,9 @@ import com.emberr.ui.theme.LocalEmberrFontStyle
 import com.emberr.ui.theme.fontFamilyFor
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.splash_tagline
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun LoadingScreen(onLoadingComplete: () -> Unit) {
@@ -45,7 +48,7 @@ fun LoadingScreen(onLoadingComplete: () -> Unit) {
             )
 
             Text(
-                text = "Capture your thoughts",
+                text = stringResource(Res.string.splash_tagline),
                 fontFamily = fontFamilyFor(LocalEmberrFontStyle.current),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurface
