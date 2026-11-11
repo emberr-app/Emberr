@@ -21,6 +21,9 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v7
 
+      - name: Check the translations
+        run: python3 -I scripts/check-translations.py
+
       - name: Set up the JetBrains JDK 21
         id: jetbrains-jdk
         uses: actions/setup-java@v6

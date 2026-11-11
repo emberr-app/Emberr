@@ -121,6 +121,8 @@ def main():
     for problem in problems:
         print(problem)
     print(f"{len(problems)} problems in {', '.join(languages)}")
+    if problems:
+        sys.exit(1)
 
 
 main()

@@ -1,91 +1,80 @@
 # Translations
 
-Emberr is translated into 17 languages besides English. This page is for anyone adding a feature, fixing a translation or adding a language.
+Emberr is available in English plus 17 languages.
 
-## Where the text lives
+## Files
 
-| What | English | Translations |
-|---|---|---|
-| App text (screens, menus, toasts, errors) | `shared/src/commonMain/composeResources/values/strings_<area>.xml` | `values-<lang>/strings_<area>.xml`, same file names |
-| Glance widgets and Android notifications | `shared/src/androidMain/res/values/strings.xml` | `res/values-<lang>/strings.xml` |
-| Emoji search names | — | `composeResources/files/emoji-names/<lang>.json`, built from Unicode CLDR |
+- App text: `shared/src/commonMain/composeResources/values/strings_<area>.xml`
+- Translations: the same file in `values-<lang>/`
+- Widgets and Android notifications: `shared/src/androidMain/res/values/strings.xml` (and `values-<lang>/`)
+- Emoji search names: `composeResources/files/emoji-names/<lang>.json`
 
-There is one strings file per area (`strings_settings.xml`, `strings_editor.xml`, `strings_calendar.xml`, …). Keys start with the area (`settings_`, `editor_`, `calendar_`), and shared words like Cancel, Save and Delete live in `strings_common.xml` (`common_`).
+Keys start with their area (`calendar_`, `editor_`). Common words like Save and Cancel are in `strings_common.xml`.
 
-Language folders: `de`, `es`, `fr`, `hi`, `id` (+ `in`), `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-rPT`, `ru`, `tr`, `uk`, `vi`, `zh`.
+Three special folders:
 
-- **`values-pt`** is Brazilian Portuguese. **`values-pt-rPT`** holds only the phrases that differ in Portugal (tu instead of você, ecrã, telemóvel, ficheiro, guardar, eliminar, definições, palavra-passe). Everything else falls back to the Brazilian file.
-- **`values-in`** must be an exact copy of **`values-id`**, because Android still reports Indonesian with its old code `in`. Android `res` only has `values-in`.
-- **`values-zh`** is Simplified Chinese. Phones set to Traditional Chinese get it too until a `values-zh-rTW` exists.
+- `values-pt` is Brazilian Portuguese. `values-pt-rPT` only has the phrases that are different in Portugal.
+- `values-in` must be an exact copy of `values-id`. Android still uses the old code `in` for Indonesian.
+- `values-zh` is Simplified Chinese.
 
-## Adding or changing a phrase
+## Adding a phrase
 
-1. Add the English phrase to the right `strings_<area>.xml` with an area-prefixed key. Never put text users see directly in Kotlin.
-2. Read it in code:
-   - In a composable: `stringResource(Res.string.key)`, or `pluralStringResource(Res.plurals.key, count, count)` for counts.
-   - Outside composables: return a small message or reason type and turn it into text in the UI. Use `getString(...)` only inside code that is already a coroutine.
-3. Add the translation to every language folder, in the same position as in English.
-4. Run the checker (below). It must report 0 problems.
+1. Add it in English to the right `strings_<area>.xml`. Don't put text in Kotlin.
+2. Use it with `stringResource(Res.string.key)`, or `pluralStringResource(...)` for counts.
+3. Add the translation to every language folder.
+4. Run `python3 -I scripts/check-translations.py`. It should say `0 problems`. GitHub runs it on every PR too.
 
-Changing the English meaning of a phrase means updating every translation of it too.
+If you change what an English phrase means, update its translations too.
 
 ## Rules
 
-- **Whole sentences.** Use placeholders (`%1$s`, `%2$d`) and `<plurals>`. Never glue a sentence from pieces or add an "s" by hand, because word order and plural forms differ between languages. Translators may reorder placeholders, but each must appear exactly as in English.
-- **Apostrophes and quotes:**
-  - Compose resources files: write `'` and `"` plain. Compose shows `\'` with the backslash.
-  - Android `res` files: `\'` is required (a plain `'` breaks the build), and a literal percent is `%%`. Avoid plain `"` inside text there; typographic quotes are fine.
-  - Escape `&` as `&amp;` and `<` as `&lt;` in both.
-- **No comments** in strings files.
-- **Brand and product names stay as they are:** Emberr, Emberr Cloud, TMDB, IMDb, WebDAV, GitHub, Notion, Joplin, Markdown, Obsidian, Android, Windows, macOS, Linux, PDF, ZIP, font names and keyboard keys (Ctrl, Shift, Enter, Esc).
-- **Phrases ending in `...`** (three dots) must keep `...`, because the code strips that suffix. Phrases ending in `…` keep `…`.
-- **Keep `**bold**` markers** in What's New text around the matching words.
-- **Keep it short.** Buttons, chips and menu items have little room. They shrink a little to stay on one line, but a shorter translation is always better.
-- **Capitalization:** English uses Title Case for many buttons and titles; most other languages use sentence case (German still capitalizes nouns).
-- **"Daily"** is both the feature (the daily note page) and a frequency (daily backup, daily repeat). Read the key to tell which.
-- **Saved data stays English.** Default names saved into notes ("Untitled", "Inbox", "Table", "Board 2", "Mobile", "Personal", "Birthdays") are stored in English and translated only on screen (`SavedDefaultNames.kt`). Their phrases are in `strings_saved_names.xml`.
-- **Dates, times and numbers** come from the system for the current language. Never write month or day names, or decimal separators, into a phrase by hand.
-- The formula language in database formulas (`prop()`, `sum()`, `true`, `days`) stays English; only its error messages are translated.
+- Write full sentences with placeholders (`%1$s`, `%1$d`). Don't build a sentence from pieces.
+- Use `<plurals>` for counts. Don't add an "s" in code.
+- Apostrophes:
+  - In `composeResources` files, write `'` plain. `\'` shows up on screen with the backslash.
+  - In Android `res` files, write `\'`. A plain `'` breaks the build.
+- Keep brand names as they are (Emberr, TMDB, WebDAV, GitHub, Markdown…).
+- If English ends with `...`, the translation must too.
+- Keep translations short. Buttons and menus don't have much room.
+- Don't write month or day names into phrases. The app gets them from the system.
+- Names saved into notes ("Untitled", "Inbox", "Table") stay English in the database. The app translates them on screen.
+- Formula function names (`sum()`, `prop()`) stay English.
 
 ## Plurals
 
-| Languages | Quantities to write |
+| Languages | Write these |
 |---|---|
-| es, pt, pt-rPT, fr, it, de, nl, tr, hi | `one`, `other` |
+| es, pt, fr, it, de, nl, tr, hi | `one`, `other` |
 | pl, uk, ru | `one`, `few`, `many`, `other` |
-| ja, ko, zh, vi, id (+ in) | `other` only |
+| ja, ko, zh, vi, id | `other` |
 
-- French `one` covers 0 and 1.
-- Russian and Ukrainian `one` also covers 21, 31, 101 …, and Hindi `one` also covers 0, so in **ru, uk and hi every quantity must contain every placeholder** English `other` has. Polish `one` is only 1 and may drop the number like English does.
-- Polish/Russian/Ukrainian `other` is used for fractions; give it the genitive-singular form ("%1$d заметки", "%1$d notatki").
-- Turkish nouns stay singular after a number ("3 not"), so both forms often look the same.
-- ja/ko/zh: use counters where natural ("%1$d件", "%1$d개", "%1$d 条").
+In Russian, Ukrainian and Hindi, `one` is also used for other numbers (21, 31… or 0), so always keep the number in it.
 
-## Tone and address form
+## Tone
 
-| Language | Address form | Notes |
+| Language | Say "you" as | Notes |
 |---|---|---|
-| Spanish `es` | informal **tú** | Neutral Latin-American/international ("Toca para elegir"), "computadora" |
-| Portuguese Brazil `pt` | **você** | Brazilian vocabulary: celular, tela, arquivo, excluir, salvar |
-| Portuguese Portugal `pt-rPT` | **tu** | ecrã, telemóvel, ficheiro, guardar, eliminar, definições, palavra-passe |
-| French `fr` | **vous** | Like Apple/Google French ("Appuyez pour choisir"). Space before `:` `?` `!` is correct French typography |
-| Italian `it` | informal **tu** | Plain imperative buttons ("Elimina", "Salva", "Annulla") |
-| German `de` | informal **du** | Like Notion/Apple German. Quotes „…“ |
-| Dutch `nl` | informal **je/jij** | Sentence case |
-| Polish `pl` | informal **ty** | Imperative buttons ("Zapisz", "Usuń"). Quotes „…” |
-| Ukrainian `uk` | polite **ви** | "застосунок" for app. Quotes «…» |
-| Russian `ru` | polite **вы** | Use ё where standard. Quotes «…» |
-| Turkish `tr` | polite/neutral imperative | "Seçmek için dokunun". Mind İ/ı. Avoid suffixes after placeholders ("Doğum günü: %1$s") |
-| Indonesian `id` | neutral **Anda** | Short imperative buttons ("Simpan", "Hapus", "Batal") |
-| Vietnamese `vi` | no pronoun, **bạn** when needed | "Nhấn để chọn" |
-| Hindi `hi` | **आप** | Everyday Hindi as in Google/Android; common tech words in Devanagari (नोट, ऐप, सिंक). Latin digits. Danda "।" only in full sentences |
-| Japanese `ja` | no pronoun | です/ます in sentences, short nouns on buttons ("保存", "削除"). No space between Japanese and numbers; full-width 「」、。 |
-| Korean `ko` | no pronoun | 해요/하세요 style ("탭하여 선택하세요"), short noun buttons ("저장", "삭제"). Normal 띄어쓰기 |
-| Chinese `zh` | 你 when needed | Simplified, mainland vocabulary. Full-width punctuation; half-width space between Chinese and numbers or Latin words ("导出 PDF") |
+| Spanish | tú | Latin-American |
+| Portuguese (Brazil) | você | celular, tela, arquivo |
+| Portuguese (Portugal) | tu | telemóvel, ecrã, ficheiro |
+| French | vous | |
+| Italian | tu | |
+| German | du | |
+| Dutch | je | |
+| Polish | ty | |
+| Ukrainian | ви | |
+| Russian | вы | |
+| Turkish | polite | |
+| Indonesian | Anda | |
+| Vietnamese | bạn (or none) | |
+| Hindi | आप | |
+| Japanese | none | です/ます in sentences |
+| Korean | none | 해요 style |
+| Chinese | 你 (or none) | |
 
 ## Glossary
 
-Use these words consistently.
+Use the same word for the same thing everywhere.
 
 ### Spanish, Portuguese (Brazil), French, Italian
 
@@ -347,28 +336,18 @@ Use these words consistently.
 | AI chat / embedding model | AIチャット / 埋め込みモデル | AI 채팅 / 임베딩 모델 | AI 聊天 / 嵌入模型 |
 | What's New | 新機能 | 새로운 기능 | 新功能 |
 
-## Checking translations
+## Emoji names
 
-```
-python3 -I scripts/check-translations.py
-```
-
-With no arguments it checks every language; pass language folder names (`de fr`) to check only some. It reports XML errors, missing or unknown keys, placeholder mismatches, missing plural forms, wrong apostrophes for the file type, lost `...` or `**` markers, comments, and a `values-in` that differs from `values-id`. It must end with `0 problems`.
-
-## Emoji search names
-
-Emoji names and keywords for search come from Unicode CLDR (Unicode License v3, credited in Settings → About → Open-Source Licenses). When emojis are added to `composeResources/files/data-by-group.json`, rebuild the name files:
+Emoji search names come from Unicode CLDR. If you add emojis to `data-by-group.json`, rebuild them:
 
 ```
 python3 -I scripts/build-emoji-names.py <download folder>
 ```
 
-It downloads the CLDR files into the folder (reused on later runs) and rewrites `composeResources/files/emoji-names/<lang>.json`.
-
 ## Adding a language
 
-1. Copy every `values/strings_*.xml` into a new `values-<lang>/` folder and translate it, plus `androidMain/res/values-<lang>/strings.xml`.
-2. Add the language to `AppLanguage.kt` (with its name in its own language) and to `androidMain/res/xml/locales_config.xml`.
-3. Add its plural rule to the table above and to `scripts/check-translations.py` if it isn't `one`/`other`.
-4. Add it to `LANGUAGES` in `scripts/build-emoji-names.py` and rebuild the emoji names.
-5. Check the bundled fonts cover its script (see `fontFamilyFor` in `ui/theme/Type.kt`), and check one-line buttons and the Daily week strip for overflow.
+1. Copy all `values/strings_*.xml` files into `values-<lang>/` and translate them. Do the same for the Android `strings.xml`.
+2. Add the language to `AppLanguage.kt` and `androidMain/res/xml/locales_config.xml`.
+3. If it needs plural forms other than `one`/`other`, add it to `scripts/check-translations.py`.
+4. Add it to `scripts/build-emoji-names.py` and rebuild the emoji names.
+5. Check that the fonts support it, and that buttons and the Daily week strip still fit.
