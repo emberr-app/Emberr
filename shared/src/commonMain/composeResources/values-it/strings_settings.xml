@@ -218,6 +218,7 @@
     <string name="settings_play_testing_no_data_lost">Aggiorna questa app senza perdere alcun dato.</string>
     <string name="settings_play_testing_join">Unisciti al gruppo</string>
     <string name="settings_play_testing_not_now">Non ora</string>
+    <string name="settings_footer_support_us">Sostienici su</string>
 
     <string name="settings_third_party_group_movies_shows">Film e serie</string>
     <string name="settings_third_party_visit_tmdb">Visita TMDB</string>

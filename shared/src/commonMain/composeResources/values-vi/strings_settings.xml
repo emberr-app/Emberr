@@ -217,6 +217,7 @@
     <string name="settings_play_testing_no_data_lost">Ứng dụng này sẽ được cập nhật, không mất dữ liệu nào.</string>
     <string name="settings_play_testing_join">Tham gia nhóm</string>
     <string name="settings_play_testing_not_now">Để sau</string>
+    <string name="settings_footer_support_us">Ủng hộ chúng tôi trên</string>
 
     <string name="settings_third_party_group_movies_shows">Phim &amp; chương trình</string>
     <string name="settings_third_party_visit_tmdb">Truy cập TMDB</string>

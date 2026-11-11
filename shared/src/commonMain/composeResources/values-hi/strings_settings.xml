@@ -218,6 +218,7 @@
     <string name="settings_play_testing_no_data_lost">यही ऐप अपडेट हो जाता है, कोई डेटा नहीं खोएगा।</string>
     <string name="settings_play_testing_join">ग्रुप से जुड़ें</string>
     <string name="settings_play_testing_not_now">अभी नहीं</string>
+    <string name="settings_footer_support_us">हमें यहाँ सपोर्ट करें</string>
 
     <string name="settings_third_party_group_movies_shows">फ़िल्में और शो</string>
     <string name="settings_third_party_visit_tmdb">TMDB पर जाएँ</string>

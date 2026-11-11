@@ -220,6 +220,7 @@
     <string name="settings_play_testing_no_data_lost">Ta aplikacja zostanie zaktualizowana bez utraty danych.</string>
     <string name="settings_play_testing_join">Dołącz do grupy</string>
     <string name="settings_play_testing_not_now">Nie teraz</string>
+    <string name="settings_footer_support_us">Wesprzyj nas na</string>
 
     <string name="settings_third_party_group_movies_shows">Filmy i seriale</string>
     <string name="settings_third_party_visit_tmdb">Odwiedź TMDB</string>

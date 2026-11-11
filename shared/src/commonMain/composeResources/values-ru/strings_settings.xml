@@ -220,6 +220,7 @@
     <string name="settings_play_testing_no_data_lost">Это приложение обновится, данные не потеряются.</string>
     <string name="settings_play_testing_join">Вступить в группу</string>
     <string name="settings_play_testing_not_now">Не сейчас</string>
+    <string name="settings_footer_support_us">Поддержите нас в</string>
 
     <string name="settings_third_party_group_movies_shows">Фильмы и сериалы</string>
     <string name="settings_third_party_visit_tmdb">Открыть TMDB</string>

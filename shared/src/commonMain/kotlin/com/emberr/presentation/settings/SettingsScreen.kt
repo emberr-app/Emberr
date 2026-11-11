@@ -643,6 +643,8 @@ fun SettingsScreen(
                 DangerZoneSettingsSection(onClearAllData = { showClearAllDataConfirmation = true })
             }
         )
+
+        add(SettingsCategory(title = "Footer") { SettingsFooter() })
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
