@@ -17,7 +17,8 @@ fun SelfHostUpdateRequiredPrompt() {
         onUpdateClick = {
             when {
                 !updateController.canUpdateInApp -> openLinkInRunningBrowser(LATEST_RELEASE_PAGE_URL)
-                updateController.state.value is AppUpdateState.ReadyToRestart -> restartApplication()
+                updateController.state.value is AppUpdateState.ReadyToRestart ->
+                    if (updateController.startInstallerBeforeRestart()) restartApplication()
                 else -> updateController.checkNowAndOfferDownload()
             }
         }
