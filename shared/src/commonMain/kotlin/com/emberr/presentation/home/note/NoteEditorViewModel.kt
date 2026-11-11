@@ -17,8 +17,8 @@ import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.media.WebImageFetcher
 import com.emberr.domain.util.sync.SyncCoordinator
-import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
-import com.emberr.domain.util.system.movedToTrashMessage
+import com.emberr.presentation.shared.components.couldNotMoveToTrashMessage
+import com.emberr.presentation.shared.components.movedToTrashMessage
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.reminders.ReminderScheduler
 import com.emberr.presentation.shared.editor.BaseEditorViewModel
@@ -434,7 +434,7 @@ class NoteEditorViewModel(
 
             withContext(Dispatchers.Main) {
                 if (trashedTitle == null) {
-                    showNativeToast(COULD_NOT_MOVE_TO_TRASH_MESSAGE)
+                    showNativeToast(couldNotMoveToTrashMessage())
                 } else {
                     showNativeToast(movedToTrashMessage(trashedTitle))
                     onMoved()

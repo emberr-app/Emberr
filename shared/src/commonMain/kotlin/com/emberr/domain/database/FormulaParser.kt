@@ -1,6 +1,29 @@
 package com.emberr.domain.database
 
-class FormulaException(message: String) : Exception(message)
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_formula_ends_too_early
+import emberr.shared.generated.resources.message_formula_ifs_needs_pairs
+import emberr.shared.generated.resources.message_formula_missing_closing_quote
+import emberr.shared.generated.resources.message_formula_missing_symbol
+import emberr.shared.generated.resources.message_formula_needs_at_least_values
+import emberr.shared.generated.resources.message_formula_needs_either_values
+import emberr.shared.generated.resources.message_formula_needs_no_values
+import emberr.shared.generated.resources.message_formula_needs_values
+import emberr.shared.generated.resources.message_formula_not_a_number
+import emberr.shared.generated.resources.message_formula_piece_number
+import emberr.shared.generated.resources.message_formula_piece_symbol
+import emberr.shared.generated.resources.message_formula_piece_text
+import emberr.shared.generated.resources.message_formula_piece_word
+import emberr.shared.generated.resources.message_formula_prop_needs_name
+import emberr.shared.generated.resources.message_formula_unexpected
+import emberr.shared.generated.resources.message_formula_unknown_function
+import emberr.shared.generated.resources.message_formula_unknown_word
+import org.jetbrains.compose.resources.StringResource
+
+class FormulaException(val problem: FormulaMessage) : Exception(problem.toString())
+
+internal fun formulaPhrase(resource: StringResource, vararg arguments: Any): FormulaMessage.Phrase =
+    FormulaMessage.Phrase(resource, arguments.toList())
 
 enum class FormulaOperator(val symbol: String) {
     PLUS("+"),
@@ -41,15 +64,26 @@ enum class FormulaFunction(val formulaName: String, val argumentCounts: IntRange
     MOD("mod", 2..2),
     IFS("ifs", 3..Int.MAX_VALUE);
 
-    val argumentCountText: String
+    val argumentCountProblem: FormulaMessage
         get() = when {
-            argumentCounts.last == 0 -> "no values"
-            argumentCounts.last == Int.MAX_VALUE -> "at least ${argumentCounts.first} ${valuesWord(argumentCounts.first)}"
-            argumentCounts.first == argumentCounts.last -> "${argumentCounts.first} ${valuesWord(argumentCounts.first)}"
-            else -> "${argumentCounts.first} or ${argumentCounts.last} values"
+            argumentCounts.last == 0 -> formulaPhrase(Res.string.message_formula_needs_no_values, formulaName)
+            argumentCounts.last == Int.MAX_VALUE -> FormulaMessage.Counted(
+                Res.plurals.message_formula_needs_at_least_values,
+                argumentCounts.first,
+                listOf(formulaName, argumentCounts.first)
+            )
+            argumentCounts.first == argumentCounts.last -> FormulaMessage.Counted(
+                Res.plurals.message_formula_needs_values,
+                argumentCounts.first,
+                listOf(formulaName, argumentCounts.first)
+            )
+            else -> formulaPhrase(
+                Res.string.message_formula_needs_either_values,
+                formulaName,
+                argumentCounts.first,
+                argumentCounts.last
+            )
         }
-
-    private fun valuesWord(count: Int): String = if (count == 1) "value" else "values"
 }
 
 sealed class FormulaExpression {
@@ -97,14 +131,14 @@ private fun tokensOf(text: String): List<FormulaToken> {
                 val start = index
                 while (index < text.length && (text[index].isDigit() || text[index] == '.')) index++
                 val numberText = text.substring(start, index)
-                val number = numberText.toDoubleOrNull() ?: throw FormulaException("\"$numberText\" is not a number")
+                val number = numberText.toDoubleOrNull() ?: throw FormulaException(formulaPhrase(Res.string.message_formula_not_a_number, numberText))
                 tokens += FormulaToken.NumberToken(number)
             }
             character == '"' -> {
                 val quotedText = StringBuilder()
                 index++
                 while (true) {
-                    if (index >= text.length) throw FormulaException("Text is missing its closing quote")
+                    if (index >= text.length) throw FormulaException(formulaPhrase(Res.string.message_formula_missing_closing_quote))
                     val quotedCharacter = text[index]
                     if (quotedCharacter == '"') {
                         index++
@@ -133,7 +167,9 @@ private fun tokensOf(text: String): List<FormulaToken> {
                 tokens += FormulaToken.SymbolToken(character.toString())
                 index++
             }
-            else -> throw FormulaException("Unexpected \"$character\"")
+            else -> throw FormulaException(
+                formulaPhrase(Res.string.message_formula_unexpected, formulaPhrase(Res.string.message_formula_piece_symbol, character.toString()))
+            )
         }
     }
     return tokens
@@ -156,7 +192,7 @@ private class FormulaParser(private val tokens: List<FormulaToken>) {
     fun parseWholeFormula(): FormulaExpression {
         val expression = parseComparison()
         val leftoverToken = tokens.getOrNull(position)
-        if (leftoverToken != null) throw FormulaException("Unexpected ${describe(leftoverToken)}")
+        if (leftoverToken != null) throw FormulaException(formulaPhrase(Res.string.message_formula_unexpected, describe(leftoverToken)))
         return expression
     }
 
@@ -178,14 +214,14 @@ private class FormulaParser(private val tokens: List<FormulaToken>) {
         if (takeSymbol("-")) FormulaExpression.Negation(parseNegation()) else parseSingleValue()
 
     private fun parseSingleValue(): FormulaExpression {
-        val token = tokens.getOrNull(position) ?: throw FormulaException("The formula ends too early")
+        val token = tokens.getOrNull(position) ?: throw FormulaException(formulaPhrase(Res.string.message_formula_ends_too_early))
         position++
         return when (token) {
             is FormulaToken.NumberToken -> FormulaExpression.Literal(FormulaValue.NumberValue(token.number))
             is FormulaToken.TextToken -> FormulaExpression.Literal(FormulaValue.TextValue(token.text))
             is FormulaToken.NameToken -> parseName(token.name)
             is FormulaToken.SymbolToken -> {
-                if (token.symbol != "(") throw FormulaException("Unexpected ${describe(token)}")
+                if (token.symbol != "(") throw FormulaException(formulaPhrase(Res.string.message_formula_unexpected, describe(token)))
                 val expressionInBrackets = parseComparison()
                 expectSymbol(")")
                 expressionInBrackets
@@ -196,22 +232,22 @@ private class FormulaParser(private val tokens: List<FormulaToken>) {
     private fun parseName(name: String): FormulaExpression {
         if (name.equals("true", ignoreCase = true)) return FormulaExpression.Literal(FormulaValue.BooleanValue(true))
         if (name.equals("false", ignoreCase = true)) return FormulaExpression.Literal(FormulaValue.BooleanValue(false))
-        if (!takeSymbol("(")) throw FormulaException("Unknown word \"$name\". To use a property, write prop(\"$name\")")
+        if (!takeSymbol("(")) throw FormulaException(formulaPhrase(Res.string.message_formula_unknown_word, name))
         val arguments = parseArguments()
 
         if (name.equals("prop", ignoreCase = true)) {
             val propertyName = ((arguments.singleOrNull() as? FormulaExpression.Literal)?.value as? FormulaValue.TextValue)?.text
-                ?: throw FormulaException("prop() needs one property name in quotes, like prop(\"Price\")")
+                ?: throw FormulaException(formulaPhrase(Res.string.message_formula_prop_needs_name))
             return FormulaExpression.PropertyReference(propertyName)
         }
 
         val function = FormulaFunction.entries.firstOrNull { it.formulaName.equals(name, ignoreCase = true) }
-            ?: throw FormulaException("Unknown function \"$name\"")
+            ?: throw FormulaException(formulaPhrase(Res.string.message_formula_unknown_function, name))
         if (arguments.size !in function.argumentCounts) {
-            throw FormulaException("${function.formulaName}() needs ${function.argumentCountText}")
+            throw FormulaException(function.argumentCountProblem)
         }
         if (function == FormulaFunction.IFS && arguments.size % 2 == 0) {
-            throw FormulaException("ifs() needs pairs of a condition and a value, then one value to use otherwise")
+            throw FormulaException(formulaPhrase(Res.string.message_formula_ifs_needs_pairs))
         }
         return FormulaExpression.FunctionCall(function, arguments)
     }
@@ -239,13 +275,13 @@ private class FormulaParser(private val tokens: List<FormulaToken>) {
     }
 
     private fun expectSymbol(symbol: String) {
-        if (!takeSymbol(symbol)) throw FormulaException("Missing \"$symbol\"")
+        if (!takeSymbol(symbol)) throw FormulaException(formulaPhrase(Res.string.message_formula_missing_symbol, symbol))
     }
 
-    private fun describe(token: FormulaToken): String = when (token) {
-        is FormulaToken.NumberToken -> "number"
-        is FormulaToken.TextToken -> "text ${formulaTextLiteral(token.text)}"
-        is FormulaToken.NameToken -> "word \"${token.name}\""
-        is FormulaToken.SymbolToken -> "\"${token.symbol}\""
+    private fun describe(token: FormulaToken): FormulaMessage = when (token) {
+        is FormulaToken.NumberToken -> formulaPhrase(Res.string.message_formula_piece_number)
+        is FormulaToken.TextToken -> formulaPhrase(Res.string.message_formula_piece_text, formulaTextLiteral(token.text))
+        is FormulaToken.NameToken -> formulaPhrase(Res.string.message_formula_piece_word, token.name)
+        is FormulaToken.SymbolToken -> formulaPhrase(Res.string.message_formula_piece_symbol, token.symbol)
     }
 }

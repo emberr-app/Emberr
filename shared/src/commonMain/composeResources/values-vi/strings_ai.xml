@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">Tạm dừng tải</string>
     <string name="ai_setup_try_again">Thử lại</string>
     <string name="ai_setup_index_my_notes">Lập chỉ mục ghi chú</string>
-    <string name="ai_ask_anything">Hỏi bất cứ điều gì..</string>
+    <string name="ai_ask_anything">Hỏi bất cứ điều gì...</string>
     <string name="ai_settings">Cài đặt AI</string>
     <string name="ai_stop_generating">Dừng tạo</string>
     <string name="ai_send">Gửi</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">Khóa đã lưu và cài đặt của nhà cung cấp này sẽ bị xóa khỏi thiết bị này.</string>
     <string name="ai_finetune_warning">Mô hình này có vẻ chưa được tinh chỉnh cho chỉ dẫn/trò chuyện. Câu trả lời có thể kém hoặc không mạch lạc.</string>
     <string name="ai_local_ai_cannot_run">AI cục bộ không thể chạy trên phần cứng này.</string>
-    <string name="ai_sorry_error">Rất tiếc, đã xảy ra lỗi.</string>
     <string name="ai_sorry_error_with_reason">Rất tiếc, đã xảy ra lỗi: %1$s</string>
 </resources>

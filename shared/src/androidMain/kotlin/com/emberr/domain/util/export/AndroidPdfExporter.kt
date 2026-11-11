@@ -12,6 +12,7 @@ import com.emberr.domain.util.media.MediaStorageHelper
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.withTranslation
 import androidx.core.graphics.withSave
+import com.emberr.R
 
 private const val PDF_IMAGE_LARGEST_SIDE_PIXELS = 1920
 
@@ -282,9 +283,9 @@ fun generateAndSaveAndroidPdf(
         pdfDocument.finishPage(page)
         context.contentResolver.openOutputStream(uri)?.use { pdfDocument.writeTo(it) }
         pdfDocument.close()
-        Toast.makeText(context, "PDF saved successfully", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.message_pdf_saved), Toast.LENGTH_SHORT).show()
     } catch (e: Exception) {
         e.printStackTrace()
-        Toast.makeText(context, "Failed to save PDF", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.message_pdf_save_failed), Toast.LENGTH_SHORT).show()
     }
 }

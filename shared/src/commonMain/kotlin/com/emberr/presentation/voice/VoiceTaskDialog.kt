@@ -71,7 +71,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.emberr.domain.util.voice.VOICE_RECOGNITION_UNAVAILABLE_MESSAGE
+import com.emberr.domain.util.voice.VoiceRecognitionError
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
@@ -110,6 +110,15 @@ import emberr.shared.generated.resources.voice_tap_the_orb
 import emberr.shared.generated.resources.voice_today
 import emberr.shared.generated.resources.voice_tomorrow
 import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.message_voice_could_not_start
+import emberr.shared.generated.resources.message_voice_microphone_permission
+import emberr.shared.generated.resources.message_voice_network
+import emberr.shared.generated.resources.message_voice_not_supported_on_desktop
+import emberr.shared.generated.resources.message_voice_service_busy
+import emberr.shared.generated.resources.message_voice_service_disconnected
+import emberr.shared.generated.resources.message_voice_something_went_wrong
+import emberr.shared.generated.resources.message_voice_unavailable
+import emberr.shared.generated.resources.message_voice_unclear_audio
 
 private val VoiceTaskDialogShape = RoundedCornerShape(24.dp)
 private const val EMBERR_GHOST_SIZE_FRACTION = 0.5f
@@ -144,7 +153,7 @@ fun VoiceTaskDialog(
     val today = remember { Clock.System.todayIn(timeZone) }
     val statusText = when {
         state.isListening -> stringResource(Res.string.voice_listening)
-        state.errorMessage != null -> state.errorMessage
+        state.error != null -> state.error.message()
         else -> stringResource(Res.string.voice_tap_the_orb)
     }
     val taskListScrollState = rememberScrollState()
@@ -204,7 +213,7 @@ fun VoiceTaskDialog(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
-                    if (state.errorMessage == VOICE_RECOGNITION_UNAVAILABLE_MESSAGE) {
+                    if (state.error == VoiceRecognitionError.UNAVAILABLE) {
                         Spacer(Modifier.height(8.dp))
                         Text(
                             text = stringResource(Res.string.voice_install_speech_app),
@@ -610,3 +619,19 @@ private fun DrawScope.drawSoundWaves(phase: Float, energy: Float, earDegrees: Fl
         )
     }
 }
+
+@Composable
+private fun VoiceRecognitionError.message(): String = stringResource(
+    when (this) {
+        VoiceRecognitionError.UNCLEAR_AUDIO -> Res.string.message_voice_unclear_audio
+        VoiceRecognitionError.MICROPHONE_PERMISSION_NEEDED -> Res.string.message_voice_microphone_permission
+        VoiceRecognitionError.NETWORK -> Res.string.message_voice_network
+        VoiceRecognitionError.SERVICE_BUSY -> Res.string.message_voice_service_busy
+        VoiceRecognitionError.SERVICE_DISCONNECTED -> Res.string.message_voice_service_disconnected
+        VoiceRecognitionError.UNAVAILABLE -> Res.string.message_voice_unavailable
+        VoiceRecognitionError.NOT_SUPPORTED_ON_DESKTOP -> Res.string.message_voice_not_supported_on_desktop
+        VoiceRecognitionError.COULD_NOT_START -> Res.string.message_voice_could_not_start
+        VoiceRecognitionError.NO_SPEECH_HEARD,
+        VoiceRecognitionError.UNKNOWN -> Res.string.message_voice_something_went_wrong
+    }
+)

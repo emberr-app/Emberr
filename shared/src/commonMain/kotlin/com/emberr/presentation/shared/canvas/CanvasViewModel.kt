@@ -59,8 +59,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.CancellationException
-import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
-import com.emberr.domain.util.system.movedToTrashMessage
+import com.emberr.presentation.shared.components.couldNotMoveToTrashMessage
+import com.emberr.presentation.shared.components.movedToTrashMessage
 import com.emberr.domain.util.system.showNativeToast
 import java.util.UUID
 import kotlin.math.max
@@ -178,7 +178,7 @@ class CanvasViewModel(
                 throw e
             } catch (e: Exception) {
                 e.printStackTrace()
-                showNativeToast(COULD_NOT_MOVE_TO_TRASH_MESSAGE)
+                showNativeToast(couldNotMoveToTrashMessage())
                 return@launch
             }
             if (trashedTitle != null) showNativeToast(movedToTrashMessage(trashedTitle))

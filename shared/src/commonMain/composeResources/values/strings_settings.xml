@@ -129,8 +129,8 @@
     <string name="settings_turn_off">Turn Off</string>
     <string name="settings_ai_purge_failed">Couldn't finish removing AI data: %1$s</string>
     <plurals name="settings_ai_purge_files_left">
-        <item quantity="one">Freed %1$s, but %2$d file(s) could not be removed: %3$s</item>
-        <item quantity="other">Freed %1$s, but %2$d file(s) could not be removed: %3$s</item>
+        <item quantity="one">Freed %1$s, but %2$d file could not be removed: %3$s</item>
+        <item quantity="other">Freed %1$s, but %2$d files could not be removed: %3$s</item>
     </plurals>
     <string name="settings_ai_purge_freed">Freed %1$s of model files.</string>
     <string name="settings_ai_purge_nothing_to_remove">No model files were on disk to remove.</string>

@@ -2,6 +2,10 @@
 package com.emberr.core.security.secrets
 
 import com.github.javakeyring.KeyringStorageType
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_secrets_manager_rejected_test_write
+import emberr.shared.generated.resources.message_secrets_no_manager_running
+import emberr.shared.generated.resources.message_secrets_plain_text_file
 
 class SecretBackendSelector(
     private val probe: SecretBackendProbe,
@@ -27,11 +31,11 @@ class SecretBackendSelector(
 
         return SecretBackendSelection(
             backend = plaintextBackend,
-            displayName = PLAIN_TEXT_DISPLAY_NAME,
+            displayName = secretStorePhrase(Res.string.message_secrets_plain_text_file),
             unavailableReason = if (atLeastOneManagerAnswered) {
-                "A credential manager answered but rejected a test write."
+                secretStorePhrase(Res.string.message_secrets_manager_rejected_test_write)
             } else {
-                "No credential manager is running on this system."
+                secretStorePhrase(Res.string.message_secrets_no_manager_running)
             }
         )
     }
@@ -55,7 +59,7 @@ class SecretBackendSelector(
 
             else -> listOf(
                 KeyringCandidate(
-                    fallbackDisplayName = SecretServiceProviderName.UNRECOGNISED_PROVIDER_NAME,
+                    fallbackDisplayName = SecretServiceProviderName.unrecognisedProviderName(),
                     detectDisplayName = { SecretServiceProviderName.detectOrNull() },
                     openBackend = { LibsecretSecretBackend.openOrNull() }
                 )
@@ -68,10 +72,6 @@ class SecretBackendSelector(
         val detectDisplayName: () -> String? = { null },
         val openBackend: () -> SecretBackend?
     )
-
-    private companion object {
-        const val PLAIN_TEXT_DISPLAY_NAME = "Plain text file"
-    }
 }
 
 class SecretBackendSelection(

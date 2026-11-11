@@ -14,6 +14,22 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.pow
 import kotlin.math.roundToLong
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_formula_cannot_compare
+import emberr.shared.generated.resources.message_formula_date_too_far
+import emberr.shared.generated.resources.message_formula_divide_by_zero
+import emberr.shared.generated.resources.message_formula_expected_number
+import emberr.shared.generated.resources.message_formula_expected_true_or_false
+import emberr.shared.generated.resources.message_formula_kind_date
+import emberr.shared.generated.resources.message_formula_kind_error
+import emberr.shared.generated.resources.message_formula_kind_nothing
+import emberr.shared.generated.resources.message_formula_kind_number
+import emberr.shared.generated.resources.message_formula_kind_text
+import emberr.shared.generated.resources.message_formula_kind_true_or_false
+import emberr.shared.generated.resources.message_formula_needs_date
+import emberr.shared.generated.resources.message_formula_needs_whole_number
+import emberr.shared.generated.resources.message_formula_number_too_big
+import emberr.shared.generated.resources.message_formula_unit_must_be
 
 private const val SHOWN_DECIMAL_PLACES = 8
 private const val SHOWN_DECIMAL_SCALE = 100_000_000L
@@ -44,7 +60,7 @@ sealed class FormulaValue {
         override val displayText: String get() = ""
     }
 
-    data class Error(val message: String) : FormulaValue() {
+    data class Error(val problem: FormulaMessage) : FormulaValue() {
         override val displayText: String get() = ""
     }
 }
@@ -67,7 +83,7 @@ fun evaluateFormula(
     try {
         FormulaEvaluator(today, valueOfProperty).valueOf(expression)
     } catch (problem: FormulaException) {
-        FormulaValue.Error(problem.message.orEmpty())
+        FormulaValue.Error(problem.problem)
     }
 
 private class FormulaEvaluator(
@@ -78,7 +94,7 @@ private class FormulaEvaluator(
         is FormulaExpression.Literal -> expression.value
         is FormulaExpression.PropertyReference -> {
             val value = valueOfProperty(expression.propertyName)
-            if (value is FormulaValue.Error) throw FormulaException(value.message)
+            if (value is FormulaValue.Error) throw FormulaException(value.problem)
             value
         }
         is FormulaExpression.Negation -> finiteNumber(-numberOf(expression.operand))
@@ -96,7 +112,7 @@ private class FormulaEvaluator(
         FormulaOperator.TIMES -> finiteNumber(numberFrom(left) * numberFrom(right))
         FormulaOperator.DIVIDE -> {
             val divisor = numberFrom(right)
-            if (divisor == 0.0) throw FormulaException("Can't divide by zero")
+            if (divisor == 0.0) throw FormulaException(formulaPhrase(Res.string.message_formula_divide_by_zero))
             finiteNumber(numberFrom(left) / divisor)
         }
         FormulaOperator.EQUALS -> FormulaValue.BooleanValue(areEqual(left, right))
@@ -139,7 +155,7 @@ private class FormulaEvaluator(
         FormulaFunction.CEIL -> finiteNumber(ceil(numberOf(arguments[0])))
         FormulaFunction.MOD -> {
             val divisor = numberOf(arguments[1])
-            if (divisor == 0.0) throw FormulaException("Can't divide by zero")
+            if (divisor == 0.0) throw FormulaException(formulaPhrase(Res.string.message_formula_divide_by_zero))
             finiteNumber(numberOf(arguments[0]) % divisor)
         }
         FormulaFunction.IFS -> firstMatchingValue(arguments)
@@ -162,7 +178,7 @@ private class FormulaEvaluator(
         return try {
             FormulaValue.DateValue(date.plus(amount, unit))
         } catch (problem: DateTimeArithmeticException) {
-            throw FormulaException("The date is too far away")
+            throw FormulaException(formulaPhrase(Res.string.message_formula_date_too_far))
         }
     }
 
@@ -181,7 +197,7 @@ private class FormulaEvaluator(
     private fun dateUnitNameOf(expression: FormulaExpression): String {
         val unitName = (valueOf(expression) as? FormulaValue.TextValue)?.text?.trim()?.lowercase()?.removeSuffix("s")
         return unitName?.takeIf { it in dateUnitNames }
-            ?: throw FormulaException("The unit must be \"days\", \"weeks\", \"months\" or \"years\"")
+            ?: throw FormulaException(formulaPhrase(Res.string.message_formula_unit_must_be))
     }
 
     private fun numberOf(expression: FormulaExpression): Double = numberFrom(valueOf(expression))
@@ -189,13 +205,13 @@ private class FormulaEvaluator(
     private fun booleanOf(expression: FormulaExpression): Boolean = when (val value = valueOf(expression)) {
         is FormulaValue.BooleanValue -> value.isTrue
         FormulaValue.Empty -> false
-        else -> throw FormulaException("Expected true or false but got ${value.kindName}")
+        else -> throw FormulaException(formulaPhrase(Res.string.message_formula_expected_true_or_false, value.kind))
     }
 
     private fun wholeNumberOf(expression: FormulaExpression, function: FormulaFunction): Int {
         val number = numberOf(expression)
         if (number != floor(number) || abs(number) > Int.MAX_VALUE) {
-            throw FormulaException("${function.formulaName}() needs a whole number")
+            throw FormulaException(formulaPhrase(Res.string.message_formula_needs_whole_number, function.formulaName))
         }
         return number.toInt()
     }
@@ -204,18 +220,18 @@ private class FormulaEvaluator(
         when (val value = valueOf(expression)) {
             is FormulaValue.DateValue -> value.date
             FormulaValue.Empty -> null
-            else -> throw FormulaException("${function.formulaName}() needs a date but got ${value.kindName}")
+            else -> throw FormulaException(formulaPhrase(Res.string.message_formula_needs_date, function.formulaName, value.kind))
         }
 }
 
 private fun numberFrom(value: FormulaValue): Double = when (value) {
     is FormulaValue.NumberValue -> value.number
     FormulaValue.Empty -> 0.0
-    else -> throw FormulaException("Expected a number but got ${value.kindName}")
+    else -> throw FormulaException(formulaPhrase(Res.string.message_formula_expected_number, value.kind))
 }
 
 private fun finiteNumber(number: Double): FormulaValue.NumberValue {
-    if (!number.isFinite()) throw FormulaException("The number is too big")
+    if (!number.isFinite()) throw FormulaException(formulaPhrase(Res.string.message_formula_number_too_big))
     return FormulaValue.NumberValue(number)
 }
 
@@ -230,21 +246,23 @@ private fun compare(left: FormulaValue, right: FormulaValue): Int? = when {
     left is FormulaValue.NumberValue && right is FormulaValue.NumberValue -> left.number.compareTo(right.number)
     left is FormulaValue.DateValue && right is FormulaValue.DateValue -> left.date.compareTo(right.date)
     left is FormulaValue.TextValue && right is FormulaValue.TextValue -> left.text.compareTo(right.text)
-    else -> throw FormulaException("Can't compare ${left.kindName} with ${right.kindName}")
+    else -> throw FormulaException(formulaPhrase(Res.string.message_formula_cannot_compare, left.kind, right.kind))
 }
 
 private fun FormulaValue.isEmptyValue(): Boolean =
     this == FormulaValue.Empty || (this is FormulaValue.TextValue && text.isBlank())
 
-private val FormulaValue.kindName: String
-    get() = when (this) {
-        is FormulaValue.NumberValue -> "a number"
-        is FormulaValue.TextValue -> "text"
-        is FormulaValue.BooleanValue -> "true or false"
-        is FormulaValue.DateValue -> "a date"
-        FormulaValue.Empty -> "nothing"
-        is FormulaValue.Error -> "an error"
-    }
+private val FormulaValue.kind: FormulaMessage
+    get() = formulaPhrase(
+        when (this) {
+            is FormulaValue.NumberValue -> Res.string.message_formula_kind_number
+            is FormulaValue.TextValue -> Res.string.message_formula_kind_text
+            is FormulaValue.BooleanValue -> Res.string.message_formula_kind_true_or_false
+            is FormulaValue.DateValue -> Res.string.message_formula_kind_date
+            FormulaValue.Empty -> Res.string.message_formula_kind_nothing
+            is FormulaValue.Error -> Res.string.message_formula_kind_error
+        }
+    )
 
 private val datePatternPieces = Regex("\\[[^\\]]*]|YYYY|YY|MMMM|MMM|MM|M|DD|D|dddd|ddd")
 

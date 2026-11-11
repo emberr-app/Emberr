@@ -8,6 +8,9 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_model_file_not_usable
+import org.jetbrains.compose.resources.getString
 
 actual class LocalModelUploadManager {
 
@@ -39,7 +42,7 @@ actual class LocalModelUploadManager {
 
                     send(ModelDownloadProgress.Completed)
                 } catch (e: Exception) {
-                    send(ModelDownloadProgress.Failed("Couldn't use that file. Make sure it's a valid GGUF model."))
+                    send(ModelDownloadProgress.Failed(getString(Res.string.message_model_file_not_usable)))
                 }
             }
         }

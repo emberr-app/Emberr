@@ -12,7 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.emberr.domain.selfhost.sync.SELF_HOST_UPDATE_REQUIRED_MESSAGE
 import com.emberr.domain.selfhost.sync.SelfHostUpdateRequiredSignal
 import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
@@ -23,6 +22,7 @@ import emberr.shared.generated.resources.selfhost_update
 import emberr.shared.generated.resources.selfhost_update_required_message
 import emberr.shared.generated.resources.selfhost_update_required_title
 import org.jetbrains.compose.resources.stringResource
+import emberr.shared.generated.resources.message_selfhost_update_required
 
 @Composable
 fun SelfHostUpdateRequiredDialog(onUpdateClick: () -> Unit) {
@@ -34,7 +34,7 @@ fun SelfHostUpdateRequiredDialog(onUpdateClick: () -> Unit) {
         title = stringResource(Res.string.selfhost_update_required_title)
     ) {
         Text(
-            text = stringResource(Res.string.selfhost_update_required_message, SELF_HOST_UPDATE_REQUIRED_MESSAGE),
+            text = stringResource(Res.string.selfhost_update_required_message, stringResource(Res.string.message_selfhost_update_required)),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
         )

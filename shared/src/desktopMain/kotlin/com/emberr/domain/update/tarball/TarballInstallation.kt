@@ -8,6 +8,9 @@ import com.emberr.domain.update.requireMatchingSha256
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_update_could_not_unpack
+import emberr.shared.generated.resources.message_update_no_installer
 
 class TarballInstallation(installDirectory: File) : StagedUpdateInstallation() {
 
@@ -29,7 +32,7 @@ class TarballInstallation(installDirectory: File) : StagedUpdateInstallation() {
             unpackTarball(downloadFile, partialStagingDirectory)
 
             if (!File(partialStagingDirectory, INSTALL_SCRIPT_NAME).isFile) {
-                throw AppUpdateException("The downloaded update has no installer inside, so it was not installed.")
+                throw AppUpdateException(Res.string.message_update_no_installer)
             }
             writeStagedVersion(partialStagingDirectory, release.version)
 
@@ -65,7 +68,7 @@ class TarballInstallation(installDirectory: File) : StagedUpdateInstallation() {
         val tarOutput = process.inputStream.bufferedReader().readText()
         if (process.waitFor() != 0) {
             System.err.println(tarOutput)
-            throw AppUpdateException("The downloaded update couldn't be unpacked, so it was not installed.")
+            throw AppUpdateException(Res.string.message_update_could_not_unpack)
         }
     }
 

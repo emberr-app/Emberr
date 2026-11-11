@@ -14,6 +14,10 @@ import com.emberr.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_sync_failed
+import emberr.shared.generated.resources.message_unexpected_sync_error
+import org.jetbrains.compose.resources.getString
 
 class SelfHostSyncWorker(
     appContext: Context,
@@ -71,7 +75,7 @@ class SelfHostSyncWorker(
 
                 is SelfHostSyncResult.Failure -> {
                     val message =
-                        outcome.cause.localizedMessage ?: outcome.cause.message ?: "Sync failed"
+                        outcome.cause.localizedMessage ?: outcome.cause.message ?: getString(Res.string.message_sync_failed)
                     SelfHostSyncLog.e("Worker: scope=$scope failed: $message", outcome.cause)
                     if (outcome.cause is SelfHostManifestTooNewException) {
                         Result.failure(workDataOf(KEY_ERROR_MESSAGE to message))
@@ -83,7 +87,7 @@ class SelfHostSyncWorker(
         } catch (cause: CancellationException) {
             throw cause
         } catch (cause: Exception) {
-            val message = cause.localizedMessage ?: cause.message ?: "Unexpected sync error"
+            val message = cause.localizedMessage ?: cause.message ?: getString(Res.string.message_unexpected_sync_error)
             SelfHostSyncLog.e(
                 "Worker: unexpected exception during scope=$scope sync: $message",
                 cause

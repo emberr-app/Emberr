@@ -120,6 +120,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import androidx.core.content.IntentCompat
 import android.provider.OpenableColumns
+import com.emberr.domain.backup.manual.backupProblemText
 
 
 private val updateCheckDelayAfterOpening = 30000L.milliseconds
@@ -350,9 +351,9 @@ class MainActivity : FragmentActivity() {
                                 settingsViewModel.setBackupDirectory(it.toString())
                                 settingsViewModel.setAutoBackupEnabled(true)
 
-                                Toast.makeText(context, "Backup folder linked!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.message_backup_folder_linked), Toast.LENGTH_SHORT).show()
                             } catch (_: Exception) {
-                                Toast.makeText(context, "Failed to link folder.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.message_backup_folder_link_failed), Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -374,9 +375,9 @@ class MainActivity : FragmentActivity() {
                                 context.contentResolver.openOutputStream(it)?.use { stream ->
                                     stream.write(pendingMarkdownExport?.markdown.orEmpty().toByteArray())
                                 }
-                                Toast.makeText(context, "Markdown saved", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.message_markdown_saved), Toast.LENGTH_SHORT).show()
                             } catch (_: Exception) {
-                                Toast.makeText(context, "Failed to save file", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.message_file_save_failed), Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -394,13 +395,14 @@ class MainActivity : FragmentActivity() {
                                         }
                                     }
                                     if (missingAttachmentCount == null) {
-                                        "Failed to save file"
+                                        context.getString(R.string.message_file_save_failed)
                                     } else {
                                         MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount)
-                                            ?.let { notice -> "Markdown saved. $notice" } ?: "Markdown saved"
+                                            ?.let { notice -> context.getString(R.string.message_markdown_saved_with_notice, notice) }
+                                            ?: context.getString(R.string.message_markdown_saved)
                                     }
                                 } catch (_: Exception) {
-                                    "Failed to save file"
+                                    context.getString(R.string.message_file_save_failed)
                                 }
                                 withContext(Dispatchers.Main) {
                                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -430,11 +432,11 @@ class MainActivity : FragmentActivity() {
                                     manualBackupExporter.exportToZip(destinationUri, choice)
 
                                     withContext(Dispatchers.Main) {
-                                        Toast.makeText(context, "Backup saved!", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.message_backup_saved), Toast.LENGTH_SHORT).show()
                                     }
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {
-                                        Toast.makeText(context, "Export failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.message_export_failed, backupProblemText(e)), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }
@@ -474,7 +476,7 @@ class MainActivity : FragmentActivity() {
                                 val file = java.io.File(absolutePath)
 
                                 if (!file.exists()) {
-                                    Toast.makeText(this@MainActivity, "This file is no longer available on this device.", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this@MainActivity, getString(R.string.message_file_no_longer_available), Toast.LENGTH_LONG).show()
                                 } else {
                                     val uri = androidx.core.content.FileProvider.getUriForFile(
                                         this@MainActivity,
@@ -496,9 +498,9 @@ class MainActivity : FragmentActivity() {
                                     startActivity(viewIntent)
                                 }
                             } catch (e: ActivityNotFoundException) {
-                                Toast.makeText(this@MainActivity, "No app found to open this document type.", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@MainActivity, getString(R.string.message_no_app_for_document), Toast.LENGTH_LONG).show()
                             } catch (e: Exception) {
-                                Toast.makeText(this@MainActivity, "Failed to open file: ${e.message}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@MainActivity, getString(R.string.message_failed_to_open_file, e.message), Toast.LENGTH_LONG).show()
                             }
                         },
                         onExportMarkdown = { export ->

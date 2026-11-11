@@ -129,7 +129,7 @@
     <string name="settings_turn_off">Désactiver</string>
     <string name="settings_ai_purge_failed">Impossible de supprimer toutes les données IA : %1$s</string>
     <plurals name="settings_ai_purge_files_left">
-        <item quantity="one">%1$s libéré, mais %2$d fichier n'a pas pu être supprimé : %3$s</item>
+        <item quantity="one">%1$s libérés, mais %2$d fichier n'a pas pu être supprimé : %3$s</item>
         <item quantity="other">%1$s libérés, mais %2$d fichiers n'ont pas pu être supprimés : %3$s</item>
     </plurals>
     <string name="settings_ai_purge_freed">%1$s de fichiers de modèles libérés.</string>

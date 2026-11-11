@@ -4,6 +4,9 @@ import java.io.File
 import java.io.OutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_attachments_left_out
+import org.jetbrains.compose.resources.getPluralString
 
 object MarkdownZipWriter {
 
@@ -27,9 +30,10 @@ object MarkdownZipWriter {
         return missingAttachmentCount
     }
 
-    fun missingAttachmentsNotice(missingAttachmentCount: Int): String? = when (missingAttachmentCount) {
-        0 -> null
-        1 -> "1 attachment wasn't on this device, so it was left out."
-        else -> "$missingAttachmentCount attachments weren't on this device, so they were left out."
-    }
+    suspend fun missingAttachmentsNotice(missingAttachmentCount: Int): String? =
+        if (missingAttachmentCount == 0) {
+            null
+        } else {
+            getPluralString(Res.plurals.message_attachments_left_out, missingAttachmentCount, missingAttachmentCount)
+        }
 }

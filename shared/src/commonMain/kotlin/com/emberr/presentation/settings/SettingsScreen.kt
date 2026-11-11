@@ -248,6 +248,8 @@ import emberr.shared.generated.resources.house
 import emberr.shared.generated.resources.info
 import emberr.shared.generated.resources.keyboard
 import emberr.shared.generated.resources.lock
+import emberr.shared.generated.resources.message_lan_sync_could_not_start
+import emberr.shared.generated.resources.message_lan_sync_port_in_use
 import emberr.shared.generated.resources.microphone
 import emberr.shared.generated.resources.quote_down2
 import emberr.shared.generated.resources.palette
@@ -334,7 +336,13 @@ fun SettingsScreen(
     val syncStatus by syncViewModel.syncStatus.collectAsState()
     val syncStatusText = syncStatus.text()
     val serverStatus = syncViewModel.serverStatus?.collectAsState()?.value
-    val serverUnavailableReason = (serverStatus as? SyncServerStatus.Unavailable)?.reason
+    val serverUnavailableReason = (serverStatus as? SyncServerStatus.Unavailable)?.let { unavailable ->
+        when {
+            unavailable.isPortAlreadyTaken -> stringResource(Res.string.message_lan_sync_port_in_use, unavailable.port)
+            unavailable.errorDetail != null -> unavailable.errorDetail
+            else -> stringResource(Res.string.message_lan_sync_could_not_start, unavailable.port)
+        }
+    }
     var showPairingDialog by remember { mutableStateOf(false) }
     var activePairingData by remember { mutableStateOf<SyncPairingData?>(null) }
     var showScannerDialog by remember { mutableStateOf(false) }

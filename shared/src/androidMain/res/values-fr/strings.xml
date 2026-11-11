@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Dîner avec Sam</string>
     <string name="widget_preview_dentist">Dentiste</string>
     <string name="widget_preview_alexs_birthday">Anniversaire d\'Alex</string>
+    <string name="message_sync_failed">Échec de la synchronisation</string>
+    <string name="message_backup_could_not_create_file">Impossible de créer le fichier. Le stockage est peut-être plein.</string>
+    <string name="message_backup_folder_linked">Dossier de sauvegarde associé !</string>
+    <string name="message_backup_folder_link_failed">Impossible d\'associer le dossier.</string>
+    <string name="message_markdown_saved">Markdown enregistré</string>
+    <string name="message_markdown_saved_with_notice">Markdown enregistré. %1$s</string>
+    <string name="message_file_save_failed">Impossible d\'enregistrer le fichier</string>
+    <string name="message_backup_saved">Sauvegarde enregistrée !</string>
+    <string name="message_export_failed">Échec de l\'exportation : %1$s</string>
+    <string name="message_file_no_longer_available">Ce fichier n\'est plus disponible sur cet appareil.</string>
+    <string name="message_no_app_for_document">Aucune app trouvée pour ouvrir ce type de document.</string>
+    <string name="message_failed_to_open_file">Impossible d\'ouvrir le fichier : %1$s</string>
+    <string name="message_pdf_saved">PDF enregistré</string>
+    <string name="message_pdf_save_failed">Impossible d\'enregistrer le PDF</string>
 </resources>

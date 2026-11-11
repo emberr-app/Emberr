@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">सैम के साथ डिनर</string>
     <string name="widget_preview_dentist">डेंटिस्ट</string>
     <string name="widget_preview_alexs_birthday">एलेक्स का जन्मदिन</string>
+    <string name="message_sync_failed">सिंक नहीं हो सका</string>
+    <string name="message_backup_could_not_create_file">फ़ाइल नहीं बन सकी। हो सकता है स्टोरेज भर गया हो।</string>
+    <string name="message_backup_folder_linked">बैकअप फ़ोल्डर जुड़ गया!</string>
+    <string name="message_backup_folder_link_failed">फ़ोल्डर नहीं जुड़ सका।</string>
+    <string name="message_markdown_saved">Markdown सेव हो गया</string>
+    <string name="message_markdown_saved_with_notice">Markdown सेव हो गया। %1$s</string>
+    <string name="message_file_save_failed">फ़ाइल सेव नहीं हो सकी</string>
+    <string name="message_backup_saved">बैकअप सेव हो गया!</string>
+    <string name="message_export_failed">एक्सपोर्ट नहीं हो सका: %1$s</string>
+    <string name="message_file_no_longer_available">यह फ़ाइल अब इस डिवाइस पर उपलब्ध नहीं है।</string>
+    <string name="message_no_app_for_document">इस तरह का दस्तावेज़ खोलने के लिए कोई ऐप नहीं मिला।</string>
+    <string name="message_failed_to_open_file">फ़ाइल नहीं खुल सकी: %1$s</string>
+    <string name="message_pdf_saved">PDF सेव हो गया</string>
+    <string name="message_pdf_save_failed">PDF सेव नहीं हो सका</string>
 </resources>

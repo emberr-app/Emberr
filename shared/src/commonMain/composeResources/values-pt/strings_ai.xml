@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">Pausar download</string>
     <string name="ai_setup_try_again">Tentar de novo</string>
     <string name="ai_setup_index_my_notes">Indexar minhas notas</string>
-    <string name="ai_ask_anything">Pergunte qualquer coisa..</string>
+    <string name="ai_ask_anything">Pergunte qualquer coisa...</string>
     <string name="ai_settings">Configurações de IA</string>
     <string name="ai_stop_generating">Parar de gerar</string>
     <string name="ai_send">Enviar</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">A chave salva e as configurações deste provedor serão removidas deste dispositivo.</string>
     <string name="ai_finetune_warning">Este modelo não parece ajustado para instruções/chat. Ele pode dar respostas ruins ou incoerentes.</string>
     <string name="ai_local_ai_cannot_run">A IA local não pode rodar neste hardware.</string>
-    <string name="ai_sorry_error">Desculpe, ocorreu um erro.</string>
     <string name="ai_sorry_error_with_reason">Desculpe, ocorreu um erro: %1$s</string>
 </resources>

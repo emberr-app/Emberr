@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">Download pausieren</string>
     <string name="ai_setup_try_again">Erneut versuchen</string>
     <string name="ai_setup_index_my_notes">Meine Notizen indexieren</string>
-    <string name="ai_ask_anything">Frag irgendwas..</string>
+    <string name="ai_ask_anything">Frag irgendwas...</string>
     <string name="ai_settings">KI-Einstellungen</string>
     <string name="ai_stop_generating">Generieren stoppen</string>
     <string name="ai_send">Senden</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">Der gespeicherte Schlüssel und die Einstellungen für diesen Anbieter werden von diesem Gerät entfernt.</string>
     <string name="ai_finetune_warning">Dieses Modell scheint nicht für Anweisungen oder Chats trainiert zu sein. Die Chat-Antworten können schlecht oder unzusammenhängend sein.</string>
     <string name="ai_local_ai_cannot_run">Lokale KI kann auf dieser Hardware nicht laufen.</string>
-    <string name="ai_sorry_error">Leider ist ein Fehler aufgetreten.</string>
     <string name="ai_sorry_error_with_reason">Leider ist ein Fehler aufgetreten: %1$s</string>
 </resources>

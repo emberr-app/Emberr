@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Makan malam dengan Sam</string>
     <string name="widget_preview_dentist">Dokter gigi</string>
     <string name="widget_preview_alexs_birthday">Ulang tahun Alex</string>
+    <string name="message_sync_failed">Sinkronisasi gagal</string>
+    <string name="message_backup_could_not_create_file">Gagal membuat file. Penyimpanan mungkin penuh.</string>
+    <string name="message_backup_folder_linked">Folder cadangan ditautkan!</string>
+    <string name="message_backup_folder_link_failed">Gagal menautkan folder.</string>
+    <string name="message_markdown_saved">Markdown disimpan</string>
+    <string name="message_markdown_saved_with_notice">Markdown disimpan. %1$s</string>
+    <string name="message_file_save_failed">Gagal menyimpan file</string>
+    <string name="message_backup_saved">Cadangan disimpan!</string>
+    <string name="message_export_failed">Ekspor gagal: %1$s</string>
+    <string name="message_file_no_longer_available">File ini sudah tidak tersedia di perangkat ini.</string>
+    <string name="message_no_app_for_document">Tidak ada aplikasi untuk membuka jenis dokumen ini.</string>
+    <string name="message_failed_to_open_file">Gagal membuka file: %1$s</string>
+    <string name="message_pdf_saved">PDF berhasil disimpan</string>
+    <string name="message_pdf_save_failed">Gagal menyimpan PDF</string>
 </resources>

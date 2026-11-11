@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">Призупинити завантаження</string>
     <string name="ai_setup_try_again">Спробувати ще раз</string>
     <string name="ai_setup_index_my_notes">Проіндексувати нотатки</string>
-    <string name="ai_ask_anything">Запитайте будь-що..</string>
+    <string name="ai_ask_anything">Запитайте будь-що...</string>
     <string name="ai_settings">Налаштування ШІ</string>
     <string name="ai_stop_generating">Зупинити генерування</string>
     <string name="ai_send">Надіслати</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">Збережений ключ і налаштування цього постачальника буде видалено з цього пристрою.</string>
     <string name="ai_finetune_warning">Схоже, ця модель не налаштована для інструкцій або чату. Її відповіді в чаті можуть бути поганими чи безладними.</string>
     <string name="ai_local_ai_cannot_run">Локальний ШІ не може працювати на цьому обладнанні.</string>
-    <string name="ai_sorry_error">Вибачте, сталася помилка.</string>
     <string name="ai_sorry_error_with_reason">Вибачте, сталася помилка: %1$s</string>
 </resources>

@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Ужин с Сэмом</string>
     <string name="widget_preview_dentist">Стоматолог</string>
     <string name="widget_preview_alexs_birthday">День рождения Алекса</string>
+    <string name="message_sync_failed">Ошибка синхронизации</string>
+    <string name="message_backup_could_not_create_file">Не удалось создать файл. Возможно, память заполнена.</string>
+    <string name="message_backup_folder_linked">Папка для резервных копий подключена!</string>
+    <string name="message_backup_folder_link_failed">Не удалось подключить папку.</string>
+    <string name="message_markdown_saved">Markdown сохранён</string>
+    <string name="message_markdown_saved_with_notice">Markdown сохранён. %1$s</string>
+    <string name="message_file_save_failed">Не удалось сохранить файл</string>
+    <string name="message_backup_saved">Резервная копия сохранена!</string>
+    <string name="message_export_failed">Ошибка экспорта: %1$s</string>
+    <string name="message_file_no_longer_available">Этот файл больше недоступен на этом устройстве.</string>
+    <string name="message_no_app_for_document">Не найдено приложение для открытия документов этого типа.</string>
+    <string name="message_failed_to_open_file">Не удалось открыть файл: %1$s</string>
+    <string name="message_pdf_saved">PDF сохранён</string>
+    <string name="message_pdf_save_failed">Не удалось сохранить PDF</string>
 </resources>

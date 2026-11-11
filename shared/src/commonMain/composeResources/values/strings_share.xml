@@ -8,15 +8,15 @@
     <string name="share_saved_to_inbox">Saved to Inbox</string>
     <string name="share_note_no_longer_available">That note is no longer available.</string>
     <plurals name="share_images_selected">
-        <item quantity="one">%1$d images selected</item>
+        <item quantity="one">%1$d image selected</item>
         <item quantity="other">%1$d images selected</item>
     </plurals>
     <plurals name="share_files_selected">
-        <item quantity="one">%1$d files selected</item>
+        <item quantity="one">%1$d file selected</item>
         <item quantity="other">%1$d files selected</item>
     </plurals>
     <plurals name="share_saved_items_to_inbox">
-        <item quantity="one">Saved %1$d items to Inbox</item>
+        <item quantity="one">Saved %1$d item to Inbox</item>
         <item quantity="other">Saved %1$d items to Inbox</item>
     </plurals>
 </resources>

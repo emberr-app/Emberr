@@ -9,7 +9,8 @@ import com.emberr.data.local.room.getRoomDatabase
 import com.emberr.domain.backup.exportPlainSqliteCopy
 import com.emberr.domain.credentials.CredentialVault
 import java.io.File
-import java.io.IOException
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_backup_could_not_open_file_for_saving
 
 class AndroidManualBackupExporter(
     private val context: Context,
@@ -39,7 +40,7 @@ class AndroidManualBackupExporter(
             val mediaFileNames = keepOnlyChosenContentInCopy(plainDbFile, choice)
             val credentialKeys = credentialVault.allReadableKeys()
             val outputStream = context.contentResolver.openOutputStream(uri)
-                ?: throw IOException("Couldn't open the chosen file for saving.")
+                ?: throw BackupFileException(Res.string.message_backup_could_not_open_file_for_saving)
             outputStream.use { writeBackupZip(it, plainDbFile, File(context.filesDir, "media"), mediaFileNames, credentialKeys) }
         } finally {
             plainDbFile.delete()

@@ -22,7 +22,7 @@ class NativeVoiceRecognizer(private val context: Context) : VoiceRecognizer {
     private var onPartialCallback: ((String) -> Unit)? = null
     private var onSegmentCallback: ((String) -> Unit)? = null
     private var onResultCallback: ((String) -> Unit)? = null
-    private var onErrorCallback: ((String) -> Unit)? = null
+    private var onErrorCallback: ((VoiceRecognitionError) -> Unit)? = null
 
     private val recognitionListener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {}
@@ -32,22 +32,22 @@ class NativeVoiceRecognizer(private val context: Context) : VoiceRecognizer {
         override fun onEndOfSpeech() {}
 
         override fun onError(error: Int) {
-            val message = when (error) {
+            val recognitionError = when (error) {
                 SpeechRecognizer.ERROR_NO_MATCH,
-                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No match"
-                SpeechRecognizer.ERROR_AUDIO -> "Couldn't hear clearly. Please try again."
-                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission required."
+                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> VoiceRecognitionError.NO_SPEECH_HEARD
+                SpeechRecognizer.ERROR_AUDIO -> VoiceRecognitionError.UNCLEAR_AUDIO
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> VoiceRecognitionError.MICROPHONE_PERMISSION_NEEDED
                 SpeechRecognizer.ERROR_NETWORK,
-                SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network error. Please check your connection."
+                SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> VoiceRecognitionError.NETWORK
                 SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
                     speechRecognizer?.cancel()
-                    "Voice service is busy. Please wait."
+                    VoiceRecognitionError.SERVICE_BUSY
                 }
                 SpeechRecognizer.ERROR_CLIENT,
-                SpeechRecognizer.ERROR_SERVER -> "Voice service disconnected. Please try again."
-                else -> "Something went wrong. Please try again."
+                SpeechRecognizer.ERROR_SERVER -> VoiceRecognitionError.SERVICE_DISCONNECTED
+                else -> VoiceRecognitionError.UNKNOWN
             }
-            onErrorCallback?.invoke(message)
+            onErrorCallback?.invoke(recognitionError)
         }
 
         override fun onResults(results: Bundle?) {
@@ -55,7 +55,7 @@ class NativeVoiceRecognizer(private val context: Context) : VoiceRecognizer {
             if (!matches.isNullOrEmpty()) {
                 onResultCallback?.invoke(removeFillerWords(matches[0]))
             } else {
-                onErrorCallback?.invoke("No match")
+                onErrorCallback?.invoke(VoiceRecognitionError.NO_SPEECH_HEARD)
             }
         }
 
@@ -102,7 +102,7 @@ class NativeVoiceRecognizer(private val context: Context) : VoiceRecognizer {
         onPartial: (String) -> Unit,
         onSegment: (String) -> Unit,
         onResult: (String) -> Unit,
-        onError: (String) -> Unit,
+        onError: (VoiceRecognitionError) -> Unit,
         onPermissionNeeded: () -> Unit
     ) {
         Handler(Looper.getMainLooper()).post {
@@ -117,7 +117,7 @@ class NativeVoiceRecognizer(private val context: Context) : VoiceRecognizer {
             }
 
             if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-                onError(VOICE_RECOGNITION_UNAVAILABLE_MESSAGE)
+                onError(VoiceRecognitionError.UNAVAILABLE)
                 return@post
             }
 
@@ -155,7 +155,7 @@ class NativeVoiceRecognizer(private val context: Context) : VoiceRecognizer {
             try {
                 speechRecognizer?.startListening(intent)
             } catch (e: Exception) {
-                onError("Failed to start mic: ${e.message}")
+                onError(VoiceRecognitionError.COULD_NOT_START)
             }
         }
     }

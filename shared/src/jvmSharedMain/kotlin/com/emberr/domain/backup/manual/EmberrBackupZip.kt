@@ -17,6 +17,9 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_backup_from_newer_version
+import emberr.shared.generated.resources.message_backup_not_emberr
 
 private const val DATABASE_ENTRY_NAME = "emberr_database.db"
 private const val MEDIA_ENTRY_PREFIX = "media/"
@@ -25,23 +28,22 @@ private val credentialKeysJson = Json { ignoreUnknownKeys = true }
 private const val SQLITE_HEADER_SIZE = 100
 private const val SQLITE_USER_VERSION_OFFSET = 60L
 private val SQLITE_FILE_START = "SQLite format 3\u0000".toByteArray(Charsets.US_ASCII)
-private const val NOT_AN_EMBERR_BACKUP = "This file is not an Emberr backup."
 private const val PARTIAL_MEDIA_FILE_SUFFIX = ".tmp"
 private const val COPY_BUFFER_SIZE = 64 * 1024
 
 fun checkBackupDatabaseCanBeRestored(databaseFile: File) {
     val backupDatabaseVersion = readDatabaseVersion(databaseFile)
-    check(backupDatabaseVersion <= APP_DATABASE_VERSION) {
-        "This backup was made with a newer version of Emberr. Update Emberr on this device, then try again."
+    if (backupDatabaseVersion > APP_DATABASE_VERSION) {
+        throw BackupFileException(Res.string.message_backup_from_newer_version)
     }
 }
 
 private fun readDatabaseVersion(databaseFile: File): Int =
     RandomAccessFile(databaseFile, "r").use { file ->
-        check(file.length() >= SQLITE_HEADER_SIZE) { NOT_AN_EMBERR_BACKUP }
+        if (file.length() < SQLITE_HEADER_SIZE) throw BackupFileException(Res.string.message_backup_not_emberr)
         val fileStart = ByteArray(SQLITE_FILE_START.size)
         file.readFully(fileStart)
-        check(fileStart.contentEquals(SQLITE_FILE_START)) { NOT_AN_EMBERR_BACKUP }
+        if (!fileStart.contentEquals(SQLITE_FILE_START)) throw BackupFileException(Res.string.message_backup_not_emberr)
         file.seek(SQLITE_USER_VERSION_OFFSET)
         file.readInt()
     }
@@ -86,10 +88,10 @@ suspend fun openEmberrBackupZip(
         ZipFile(zipFileOnDisk)
     } catch (notAZip: ZipException) {
         releaseResources()
-        throw IllegalStateException(NOT_AN_EMBERR_BACKUP, notAZip)
+        throw BackupFileException(Res.string.message_backup_not_emberr)
     }
     try {
-        val databaseEntry = zipFile.getEntry(DATABASE_ENTRY_NAME) ?: error(NOT_AN_EMBERR_BACKUP)
+        val databaseEntry = zipFile.getEntry(DATABASE_ENTRY_NAME) ?: throw BackupFileException(Res.string.message_backup_not_emberr)
         zipFile.getInputStream(databaseEntry).use { input ->
             temporaryDatabaseFile.outputStream().use { output -> input.copyTo(output) }
         }

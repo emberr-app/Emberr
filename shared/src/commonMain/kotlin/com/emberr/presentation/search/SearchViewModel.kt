@@ -35,6 +35,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.calendar_birthdays
+import org.jetbrains.compose.resources.getString
 
 private const val QUERY_SETTLE_MILLIS = 90L
 
@@ -115,7 +118,7 @@ class SearchViewModel(
                 ) { tasks, people, categoryEntities ->
                     val categories = categoryEntities.map { it.toCalendarCategory() }
                     val events = tasks.mapNotNull { it.toCalendarEvent() } + nextBirthdayEvents(people, today)
-                    val matches = searchCalendarEvents(events, categories, query, today)
+                    val matches = searchCalendarEvents(events, categories, query, today, getString(Res.string.calendar_birthdays))
                     (matches.upcomingEvents + matches.pastEvents).map { event ->
                         CalendarEventSearchResult(event, categories.firstOrNull { it.id == event.categoryId })
                     }

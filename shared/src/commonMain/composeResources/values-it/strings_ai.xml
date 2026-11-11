@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">Metti in pausa</string>
     <string name="ai_setup_try_again">Riprova</string>
     <string name="ai_setup_index_my_notes">Indicizza le mie note</string>
-    <string name="ai_ask_anything">Chiedi qualsiasi cosa..</string>
+    <string name="ai_ask_anything">Chiedi qualsiasi cosa...</string>
     <string name="ai_settings">Impostazioni IA</string>
     <string name="ai_stop_generating">Interrompi generazione</string>
     <string name="ai_send">Invia</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">La chiave salvata e le impostazioni di questo provider verranno rimosse da questo dispositivo.</string>
     <string name="ai_finetune_warning">Questo modello non sembra addestrato per istruzioni o chat. Potrebbe dare risposte scarse o incoerenti.</string>
     <string name="ai_local_ai_cannot_run">L'IA locale non può funzionare su questo hardware.</string>
-    <string name="ai_sorry_error">Spiacenti, si è verificato un errore.</string>
     <string name="ai_sorry_error_with_reason">Spiacenti, si è verificato un errore: %1$s</string>
 </resources>

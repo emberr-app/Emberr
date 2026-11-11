@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.import_emberr_unknown_error
 import org.jetbrains.compose.resources.getString
+import com.emberr.domain.backup.manual.backupProblemText
 
 sealed interface PickedBackupState {
     data object NothingPicked : PickedBackupState
@@ -56,7 +57,7 @@ class EmberrImportViewModel(
                 withContext(NonCancellable) { backupFileReader.readBackupFile(location) }
             } catch (error: Exception) {
                 if (isActive && thisReadNumber == latestReadNumber) {
-                    _pickedBackupState.value = PickedBackupState.CouldNotRead(error.message ?: getString(Res.string.import_emberr_unknown_error))
+                    _pickedBackupState.value = PickedBackupState.CouldNotRead(backupProblemText(error) ?: getString(Res.string.import_emberr_unknown_error))
                 }
                 return@launch
             }

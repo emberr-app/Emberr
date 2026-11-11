@@ -48,7 +48,6 @@ import kotlin.uuid.Uuid
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.ai_finetune_warning
 import emberr.shared.generated.resources.ai_local_ai_cannot_run
-import emberr.shared.generated.resources.ai_sorry_error
 import emberr.shared.generated.resources.ai_sorry_error_with_reason
 import org.jetbrains.compose.resources.getString
 
@@ -547,7 +546,7 @@ class RagViewModel(
                     val friendlyMessage = when (e) {
                         is LocalAiUnsupportedException -> e.message
                             ?: getString(Res.string.ai_local_ai_cannot_run)
-                        is ExternalAiException -> e.message ?: getString(Res.string.ai_sorry_error)
+                        is ExternalAiException -> e.friendlyMessage()
                         else -> getString(Res.string.ai_sorry_error_with_reason, e.message.toString())
                     }
                     val list = _messages.value.toMutableList()

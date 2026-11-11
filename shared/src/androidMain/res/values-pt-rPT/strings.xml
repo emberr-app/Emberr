@@ -46,4 +46,16 @@
     <string name="widget_preview_finish_the_slides">Terminar os diapositivos</string>
     <string name="widget_preview_team_sync">Reunião da equipa</string>
     <string name="widget_preview_gym">Ginásio</string>
+    <string name="message_backup_could_not_create_file">Não foi possível criar o ficheiro. O armazenamento pode estar cheio.</string>
+    <string name="message_backup_folder_linked">Pasta de cópias de segurança associada!</string>
+    <string name="message_backup_folder_link_failed">Não foi possível associar a pasta.</string>
+    <string name="message_markdown_saved">Markdown guardado</string>
+    <string name="message_markdown_saved_with_notice">Markdown guardado. %1$s</string>
+    <string name="message_file_save_failed">Não foi possível guardar o ficheiro</string>
+    <string name="message_backup_saved">Cópia de segurança guardada!</string>
+    <string name="message_file_no_longer_available">Este ficheiro já não está disponível neste dispositivo.</string>
+    <string name="message_no_app_for_document">Nenhuma app encontrada para abrir este tipo de documento.</string>
+    <string name="message_failed_to_open_file">Não foi possível abrir o ficheiro: %1$s</string>
+    <string name="message_pdf_saved">PDF guardado com sucesso</string>
+    <string name="message_pdf_save_failed">Não foi possível guardar o PDF</string>
 </resources>

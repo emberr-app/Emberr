@@ -38,6 +38,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
+import com.emberr.R
 
 actual class SelfHostSyncScheduler(
     private val context: Context,
@@ -70,7 +71,7 @@ actual class SelfHostSyncScheduler(
         val failedInfo = infos.firstOrNull { it.state == WorkInfo.State.FAILED }
         if (failedInfo != null) {
             val message = failedInfo.outputData.getString(SelfHostSyncWorker.KEY_ERROR_MESSAGE)
-                ?: "Sync failed"
+                ?: context.getString(R.string.message_sync_failed)
             SelfHostSyncLog.e("Scheduler: manual sync chain failed: $message")
             _syncError.value = message
         }
