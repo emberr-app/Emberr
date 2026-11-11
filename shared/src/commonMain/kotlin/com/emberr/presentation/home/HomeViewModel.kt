@@ -22,8 +22,8 @@ import com.emberr.domain.sample.SampleNotesSeeder
 import com.emberr.domain.space.ActiveSpaceStore
 import com.emberr.domain.template.DefaultTemplateSeeder
 import com.emberr.domain.util.system.isDesktopPlatform
-import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
-import com.emberr.domain.util.system.movedToTrashMessage
+import com.emberr.presentation.shared.components.couldNotMoveToTrashMessage
+import com.emberr.presentation.shared.components.movedToTrashMessage
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.domain.util.system.timeStartupStep
 import com.emberr.domain.util.sync.SyncCoordinator
@@ -562,7 +562,7 @@ class HomeViewModel(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                withContext(Dispatchers.Main) { showNativeToast(COULD_NOT_MOVE_TO_TRASH_MESSAGE) }
+                withContext(Dispatchers.Main) { showNativeToast(couldNotMoveToTrashMessage()) }
                 return@launch
             }
             withContext(Dispatchers.Main) {

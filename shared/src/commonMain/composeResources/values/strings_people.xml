@@ -61,7 +61,7 @@
     </plurals>
     <string name="people_could_not_create_person">Couldn't create the person</string>
     <plurals name="people_moved_people_to_trash">
-        <item quantity="one">Moved %1$d people to Trash</item>
+        <item quantity="one">Moved %1$d person to Trash</item>
         <item quantity="other">Moved %1$d people to Trash</item>
     </plurals>
     <plurals name="people_moved_some_people_to_trash">

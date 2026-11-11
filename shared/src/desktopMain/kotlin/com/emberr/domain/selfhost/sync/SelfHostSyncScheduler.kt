@@ -17,6 +17,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_media_sync_failed
+import emberr.shared.generated.resources.message_text_sync_failed
+import emberr.shared.generated.resources.message_unexpected_sync_error
+import org.jetbrains.compose.resources.getString
 
 actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncEngine) {
 
@@ -104,7 +109,7 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
             try {
                 val textResult = selfHostSyncEngine.runSync()
                 if (textResult is SelfHostSyncResult.Failure) {
-                    val message = textResult.cause.message ?: "Text sync failed"
+                    val message = textResult.cause.message ?: getString(Res.string.message_text_sync_failed)
                     SelfHostSyncLog.e("Scheduler: syncNow() text sync failed: $message", textResult.cause)
                     _syncError.value = message
                 }
@@ -114,12 +119,12 @@ actual class SelfHostSyncScheduler(private val selfHostSyncEngine: SelfHostSyncE
 
                 val mediaResult = selfHostSyncEngine.syncMedia()
                 if (mediaResult is SelfHostSyncResult.Failure) {
-                    val message = mediaResult.cause.message ?: "Media sync failed"
+                    val message = mediaResult.cause.message ?: getString(Res.string.message_media_sync_failed)
                     SelfHostSyncLog.e("Scheduler: syncNow() media sync failed: $message", mediaResult.cause)
                     _syncError.value = message
                 }
             } catch (cause: Exception) {
-                val message = cause.message ?: "Unexpected sync error"
+                val message = cause.message ?: getString(Res.string.message_unexpected_sync_error)
                 SelfHostSyncLog.e("Scheduler: syncNow() threw unexpectedly: $message", cause)
                 _syncError.value = message
             } finally {

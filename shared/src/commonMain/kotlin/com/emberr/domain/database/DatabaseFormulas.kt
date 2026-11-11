@@ -11,6 +11,9 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_formula_no_property_named
+import emberr.shared.generated.resources.message_formula_refers_to_itself
 
 fun todayInThisTimeZone(): LocalDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -29,15 +32,15 @@ fun DatabaseBlock.withFormulaSet(column: DatabaseColumnTarget, formula: String):
     return copy(formulas = updatedFormulas)
 }
 
-fun DatabaseBlock.formulaProblem(formula: String): String? {
+fun DatabaseBlock.formulaProblem(formula: String): FormulaMessage? {
     val expression = try {
         parseFormula(formula)
     } catch (problem: FormulaException) {
-        return problem.message
+        return problem.problem
     }
     val columnsByName = columnsByLowercaseName()
     val unknownName = expression.propertyNames().firstOrNull { it.trim().lowercase() !in columnsByName } ?: return null
-    return "No property named ${formulaTextLiteral(unknownName)}"
+    return formulaPhrase(Res.string.message_formula_no_property_named, formulaTextLiteral(unknownName))
 }
 
 fun String.withPropertyReferenceRenamed(oldName: String, newName: String): String {
@@ -52,7 +55,7 @@ fun List<DatabaseRow>.withFormulaResults(database: DatabaseBlock, today: LocalDa
         try {
             parseFormula(database.formulaOf(column))
         } catch (problem: FormulaException) {
-            FormulaExpression.Literal(FormulaValue.Error(problem.message.orEmpty()))
+            FormulaExpression.Literal(FormulaValue.Error(problem.problem))
         }
     }
     val columnsByName = database.columnsByLowercaseName()
@@ -84,7 +87,7 @@ private class RowFormulaCalculator(
 
     fun resultOf(column: DatabaseColumnTarget): FormulaValue {
         finishedResults[column]?.let { return it }
-        if (!columnsBeingCalculated.add(column)) throw FormulaException("This formula refers to itself")
+        if (!columnsBeingCalculated.add(column)) throw FormulaException(formulaPhrase(Res.string.message_formula_refers_to_itself))
         val result = evaluateFormula(parsedFormulas.getValue(column), today, ::valueOfProperty)
         columnsBeingCalculated.remove(column)
         finishedResults[column] = result
@@ -92,7 +95,7 @@ private class RowFormulaCalculator(
     }
 
     private fun valueOfProperty(name: String): FormulaValue {
-        val column = columnsByName[name.trim().lowercase()] ?: throw FormulaException("No property named ${formulaTextLiteral(name)}")
+        val column = columnsByName[name.trim().lowercase()] ?: throw FormulaException(formulaPhrase(Res.string.message_formula_no_property_named, formulaTextLiteral(name)))
         if (column in parsedFormulas) return resultOf(column)
         return row.formulaInputAt(column, database.valueTypeOf(column))
     }

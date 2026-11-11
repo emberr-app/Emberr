@@ -17,6 +17,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_formula_ends_too_early
+import emberr.shared.generated.resources.message_formula_no_property_named
+import emberr.shared.generated.resources.message_formula_refers_to_itself
 
 class DatabaseFormulasTest {
 
@@ -110,8 +114,8 @@ class DatabaseFormulasTest {
 
         val result = circular.resultsFor(row("a")).single()
 
-        assertEquals(FormulaValue.Error("This formula refers to itself"), result.formulaResult(totalColumn))
-        assertEquals(FormulaValue.Error("This formula refers to itself"), result.formulaResult(formulaColumn))
+        assertEquals(FormulaValue.Error(formulaPhrase(Res.string.message_formula_refers_to_itself)), result.formulaResult(totalColumn))
+        assertEquals(FormulaValue.Error(formulaPhrase(Res.string.message_formula_refers_to_itself)), result.formulaResult(formulaColumn))
     }
 
     @Test
@@ -122,16 +126,16 @@ class DatabaseFormulasTest {
 
         val result = broken.resultsFor(row("a")).single()
 
-        assertEquals(FormulaValue.Error("No property named \"Cost\""), result.formulaResult(totalColumn))
-        assertEquals(FormulaValue.Error("The formula ends too early"), result.formulaResult(formulaColumn))
+        assertEquals(FormulaValue.Error(formulaPhrase(Res.string.message_formula_no_property_named, "\"Cost\"")), result.formulaResult(totalColumn))
+        assertEquals(FormulaValue.Error(formulaPhrase(Res.string.message_formula_ends_too_early)), result.formulaResult(formulaColumn))
     }
 
     @Test
     fun formulaProblemChecksTheTextAndThePropertyNames() {
         assertNull(database.formulaProblem("""prop("Price") * 2"""))
         assertNull(database.formulaProblem(""))
-        assertEquals("No property named \"Cost\"", database.formulaProblem("""prop("Cost") * 2"""))
-        assertEquals("The formula ends too early", database.formulaProblem("2 +"))
+        assertEquals(formulaPhrase(Res.string.message_formula_no_property_named, "\"Cost\""), database.formulaProblem("""prop("Cost") * 2"""))
+        assertEquals(formulaPhrase(Res.string.message_formula_ends_too_early), database.formulaProblem("2 +"))
     }
 
     @Test

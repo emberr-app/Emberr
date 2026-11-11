@@ -62,7 +62,7 @@ class BackupWorker(
             val fileName = "$AUTO_BACKUP_FILE_NAME_PREFIX$timeStamp.emberr"
 
             val newBackupFile = pickedDir.createFile("application/zip", fileName)
-                ?: throw java.io.IOException("Failed to create file. Storage might be full.")
+                ?: throw java.io.IOException(applicationContext.getString(R.string.message_backup_could_not_create_file))
 
             try {
                 backupExporter.exportAllSpacesToZip(newBackupFile.uri)

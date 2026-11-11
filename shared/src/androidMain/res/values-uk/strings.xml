@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Вечеря із Семом</string>
     <string name="widget_preview_dentist">Стоматолог</string>
     <string name="widget_preview_alexs_birthday">День народження Алекса</string>
+    <string name="message_sync_failed">Помилка синхронізації</string>
+    <string name="message_backup_could_not_create_file">Не вдалося створити файл. Можливо, сховище заповнене.</string>
+    <string name="message_backup_folder_linked">Папку для резервних копій підключено!</string>
+    <string name="message_backup_folder_link_failed">Не вдалося підключити папку.</string>
+    <string name="message_markdown_saved">Markdown збережено</string>
+    <string name="message_markdown_saved_with_notice">Markdown збережено. %1$s</string>
+    <string name="message_file_save_failed">Не вдалося зберегти файл</string>
+    <string name="message_backup_saved">Резервну копію збережено!</string>
+    <string name="message_export_failed">Помилка експорту: %1$s</string>
+    <string name="message_file_no_longer_available">Цей файл більше недоступний на цьому пристрої.</string>
+    <string name="message_no_app_for_document">Не знайдено застосунку, щоб відкрити документ цього типу.</string>
+    <string name="message_failed_to_open_file">Не вдалося відкрити файл: %1$s</string>
+    <string name="message_pdf_saved">PDF збережено</string>
+    <string name="message_pdf_save_failed">Не вдалося зберегти PDF</string>
 </resources>

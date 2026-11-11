@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">Приостановить загрузку</string>
     <string name="ai_setup_try_again">Попробовать снова</string>
     <string name="ai_setup_index_my_notes">Проиндексировать заметки</string>
-    <string name="ai_ask_anything">Спросите что угодно..</string>
+    <string name="ai_ask_anything">Спросите что угодно...</string>
     <string name="ai_settings">Настройки ИИ</string>
     <string name="ai_stop_generating">Остановить генерацию</string>
     <string name="ai_send">Отправить</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">Сохранённый ключ и настройки этого провайдера будут удалены с этого устройства.</string>
     <string name="ai_finetune_warning">Похоже, эта модель не дообучена для инструкций или чата. Её ответы могут быть плохими или бессвязными.</string>
     <string name="ai_local_ai_cannot_run">Локальный ИИ не может работать на этом оборудовании.</string>
-    <string name="ai_sorry_error">Извините, произошла ошибка.</string>
     <string name="ai_sorry_error_with_reason">Извините, произошла ошибка: %1$s</string>
 </resources>

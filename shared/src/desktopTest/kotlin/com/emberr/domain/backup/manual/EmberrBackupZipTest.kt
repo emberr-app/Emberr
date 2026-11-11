@@ -21,6 +21,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_backup_not_emberr
 
 class EmberrBackupZipTest {
 
@@ -121,9 +123,9 @@ class EmberrBackupZipTest {
     fun aFileThatIsNotAZipIsRejected() = runTest {
         zipFile.writeText("just some notes")
 
-        val error = assertFailsWith<IllegalStateException> { openBackup() }
+        val error = assertFailsWith<BackupFileException> { openBackup() }
 
-        assertEquals("This file is not an Emberr backup.", error.message)
+        assertEquals(Res.string.message_backup_not_emberr, error.reason)
     }
 
     @Test
@@ -134,8 +136,8 @@ class EmberrBackupZipTest {
             zipOut.closeEntry()
         }
 
-        val error = assertFailsWith<IllegalStateException> { openBackup() }
+        val error = assertFailsWith<BackupFileException> { openBackup() }
 
-        assertEquals("This file is not an Emberr backup.", error.message)
+        assertEquals(Res.string.message_backup_not_emberr, error.reason)
     }
 }

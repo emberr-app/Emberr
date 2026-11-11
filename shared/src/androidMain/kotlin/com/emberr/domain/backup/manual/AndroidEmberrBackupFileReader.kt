@@ -9,8 +9,9 @@ import com.emberr.domain.importer.displayNameOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.IOException
 import java.util.UUID
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_backup_could_not_open_file
 
 private const val BACKUP_IMPORT_FOLDER_NAME = "emberr_backup_import"
 
@@ -31,7 +32,7 @@ class AndroidEmberrBackupFileReader(private val context: Context) : EmberrBackup
             withContext(Dispatchers.IO) {
                 workFolder.mkdirs()
                 val input = context.contentResolver.openInputStream(uri)
-                    ?: throw IOException("Couldn't open the chosen file.")
+                    ?: throw BackupFileException(Res.string.message_backup_could_not_open_file)
                 input.use { stream -> zipCopy.outputStream().use { output -> stream.copyTo(output) } }
             }
         } catch (error: Throwable) {

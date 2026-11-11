@@ -1,6 +1,10 @@
 package com.emberr.domain.ai
 
 import android.os.Build
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_ai_no_processor_build
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.getString
 
 private val BUNDLED_ANDROID_ABIS = setOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
 
@@ -11,6 +15,6 @@ actual fun detectLocalAiSupport(): LocalAiSupport {
 
     val reportedAbi = deviceAbis.firstOrNull() ?: "unknown"
     return LocalAiSupport.Unsupported(
-        "The on-device AI engine has no build for this device's processor ($reportedAbi). Connect a cloud provider with your own API key instead."
+        runBlocking { getString(Res.string.message_ai_no_processor_build, reportedAbi) }
     )
 }

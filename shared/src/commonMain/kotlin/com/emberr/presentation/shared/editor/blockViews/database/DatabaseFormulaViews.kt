@@ -59,6 +59,8 @@ import emberr.shared.generated.resources.database_formula_operations
 import emberr.shared.generated.resources.database_formula_placeholder
 import emberr.shared.generated.resources.database_formula_properties
 import org.jetbrains.compose.resources.stringResource
+import com.emberr.domain.database.FormulaMessage
+import org.jetbrains.compose.resources.pluralStringResource
 
 private val DesktopFormulaMenuWidth = 360.dp
 private val FormulaPieceMinWidth = 36.dp
@@ -106,10 +108,20 @@ internal fun TextFieldValue.withFormulaPieceInserted(piece: FormulaPiece): TextF
     return TextFieldValue(updatedText, TextRange(insertStart + piece.cursorOffset))
 }
 
+@Composable
 internal fun FormulaValue.textToShow(): String = when (this) {
     is FormulaValue.DateValue -> formatPropertyDate(date)
-    is FormulaValue.Error -> message
+    is FormulaValue.Error -> problem.text()
     else -> displayText
+}
+
+@Composable
+private fun FormulaMessage.text(): String {
+    val shownArguments = arguments.map { argument -> if (argument is FormulaMessage) argument.text() else argument }.toTypedArray()
+    return when (this) {
+        is FormulaMessage.Phrase -> stringResource(resource, *shownArguments)
+        is FormulaMessage.Counted -> pluralStringResource(resource, count, *shownArguments)
+    }
 }
 
 @Composable
@@ -170,7 +182,7 @@ private fun DatabaseFormulaPage(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
         Text(
-            text = problem ?: stringResource(Res.string.database_formula_hint),
+            text = problem?.text() ?: stringResource(Res.string.database_formula_hint),
             style = MaterialTheme.typography.labelSmall,
             color = if (problem == null) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.error,
             modifier = Modifier.padding(start = 4.dp, top = 2.dp)

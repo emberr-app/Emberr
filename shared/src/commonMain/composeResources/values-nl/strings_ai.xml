@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">Download pauzeren</string>
     <string name="ai_setup_try_again">Opnieuw proberen</string>
     <string name="ai_setup_index_my_notes">Mijn notities indexeren</string>
-    <string name="ai_ask_anything">Vraag maar raak..</string>
+    <string name="ai_ask_anything">Vraag maar raak...</string>
     <string name="ai_settings">AI-instellingen</string>
     <string name="ai_stop_generating">Stoppen met genereren</string>
     <string name="ai_send">Versturen</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">De opgeslagen sleutel en instellingen voor deze provider worden van dit apparaat verwijderd.</string>
     <string name="ai_finetune_warning">Dit model lijkt niet getraind op instructies of chat. Het kan slechte of onsamenhangende antwoorden geven.</string>
     <string name="ai_local_ai_cannot_run">Lokale AI kan niet draaien op deze hardware.</string>
-    <string name="ai_sorry_error">Sorry, er is een fout opgetreden.</string>
     <string name="ai_sorry_error_with_reason">Sorry, er is een fout opgetreden: %1$s</string>
 </resources>

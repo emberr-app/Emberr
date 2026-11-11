@@ -31,6 +31,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.import_emberr_unknown_error
+import emberr.shared.generated.resources.message_backup_credential_keys_not_saved
+import org.jetbrains.compose.resources.getString
 
 enum class BackupMediaCopyOutcome { COPIED, ALREADY_ON_DEVICE, NOT_IN_BACKUP }
 
@@ -92,7 +96,7 @@ class EmberrBackupImporter(
                 _progress.value = EmberrImportProgress.Stopped
                 throw cancellation
             } catch (error: Throwable) {
-                EmberrImportProgress.Failed(error.message ?: "Unknown error")
+                EmberrImportProgress.Failed(backupProblemText(error) ?: getString(Res.string.import_emberr_unknown_error))
             }
             withContext(NonCancellable) {
                 if (savedData != null) reminderRescheduler.rescheduleUpcomingReminders()
@@ -128,8 +132,8 @@ class EmberrBackupImporter(
         val newId = { Uuid.random().toString() }
         val backup = backupFile.backupData
         if (backupFile.credentialKeys.isNotEmpty()) {
-            check(credentialVault.mergeKeys(backupFile.credentialKeys)) {
-                "Couldn't save this backup's credential keys on this device, so nothing was imported. Try again."
+            if (!credentialVault.mergeKeys(backupFile.credentialKeys)) {
+                throw BackupFileException(Res.string.message_backup_credential_keys_not_saved)
             }
         }
         val categories = resolveCategoriesForImport(

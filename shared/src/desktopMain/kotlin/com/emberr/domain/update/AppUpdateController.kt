@@ -10,6 +10,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_update_cannot_replace_itself
+import emberr.shared.generated.resources.message_update_check_failed
+import emberr.shared.generated.resources.message_update_download_failed
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 
 class AppUpdateController(
     private val settingsManager: SettingsManager,
@@ -51,10 +57,9 @@ class AppUpdateController(
 
         if (!currentInstallation.canInstall()) {
             openLinkInRunningBrowser(LATEST_RELEASE_PAGE_URL)
-            _prompt.value = AppUpdatePrompt.ReportFailure(
-                "Emberr can't replace itself in the folder it is installed in. " +
-                    "The download page is opening in your browser instead."
-            )
+            updateScope.launch {
+                _prompt.value = AppUpdatePrompt.ReportFailure(getString(Res.string.message_update_cannot_replace_itself))
+            }
             return
         }
 
@@ -71,7 +76,7 @@ class AppUpdateController(
                 cause.printStackTrace()
                 _state.value = AppUpdateState.Available(release)
                 _prompt.value = AppUpdatePrompt.ReportFailure(
-                    userFacingMessageFor(cause, "The update couldn't be downloaded. Check your connection and try again.")
+                    userFacingMessageFor(cause, Res.string.message_update_download_failed)
                 )
             } finally {
                 currentInstallation.downloadFile.delete()
@@ -111,13 +116,13 @@ class AppUpdateController(
                 _state.value = AppUpdateState.Failed
                 if (isRequestedByUser) {
                     _prompt.value = AppUpdatePrompt.ReportFailure(
-                        userFacingMessageFor(cause, "Couldn't check for updates. Check your connection and try again.")
+                        userFacingMessageFor(cause, Res.string.message_update_check_failed)
                     )
                 }
             }
         }
     }
 
-    private fun userFacingMessageFor(cause: Exception, fallbackMessage: String): String =
-        (cause as? AppUpdateException)?.message ?: fallbackMessage
+    private suspend fun userFacingMessageFor(cause: Exception, fallbackMessage: StringResource): String =
+        getString((cause as? AppUpdateException)?.reason ?: fallbackMessage)
 }

@@ -9,8 +9,8 @@ import com.emberr.domain.people.ContactImportResult
 import com.emberr.domain.people.ContactImporter
 import com.emberr.domain.people.ContactToImport
 import com.emberr.domain.people.PeopleRepository
-import com.emberr.domain.util.system.COULD_NOT_MOVE_TO_TRASH_MESSAGE
-import com.emberr.domain.util.system.movedToTrashMessage
+import com.emberr.presentation.shared.components.couldNotMoveToTrashMessage
+import com.emberr.presentation.shared.components.movedToTrashMessage
 import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.home.note.NoteEditorViewModel
 import emberr.shared.generated.resources.Res
@@ -134,7 +134,7 @@ class PeopleViewModel(
             }.await()
             showNativeToast(
                 when {
-                    trashedCount == 0 -> COULD_NOT_MOVE_TO_TRASH_MESSAGE
+                    trashedCount == 0 -> couldNotMoveToTrashMessage()
                     selectedPeople.size == 1 -> movedToTrashMessage(selectedPeople.first().title)
                     trashedCount == selectedPeople.size -> getPluralString(Res.plurals.people_moved_people_to_trash, trashedCount, trashedCount)
                     else -> getPluralString(Res.plurals.people_moved_some_people_to_trash, selectedPeople.size, trashedCount, selectedPeople.size)
@@ -150,7 +150,7 @@ class PeopleViewModel(
                 showNativeToast(movedToTrashMessage(person.title))
             } catch (e: Exception) {
                 e.printStackTrace()
-                showNativeToast(COULD_NOT_MOVE_TO_TRASH_MESSAGE)
+                showNativeToast(couldNotMoveToTrashMessage())
             }
         }
     }

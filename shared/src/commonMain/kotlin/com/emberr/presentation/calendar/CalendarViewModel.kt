@@ -58,6 +58,7 @@ import org.jetbrains.compose.resources.getString
 import emberr.shared.generated.resources.notifications_task_reminder
 import emberr.shared.generated.resources.notifications_unfinished_task
 import emberr.shared.generated.resources.notifications_daily_title
+import emberr.shared.generated.resources.calendar_birthdays
 
 class CalendarViewModel(
     private val repository: NoteRepository,
@@ -169,7 +170,13 @@ class CalendarViewModel(
         if (query.isBlank()) {
             CalendarSearchResults(upcomingEvents = emptyList(), pastEvents = emptyList())
         } else {
-            searchCalendarEvents(events + birthdayEvents, currentCategories, query.trim(), todayWhenCalendarOpened)
+            searchCalendarEvents(
+                events + birthdayEvents,
+                currentCategories,
+                query.trim(),
+                todayWhenCalendarOpened,
+                getString(Res.string.calendar_birthdays)
+            )
         }
     }
         .flowOn(Dispatchers.Default)

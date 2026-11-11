@@ -27,7 +27,7 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
 import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.sync.SyncNetworkRule
 import com.emberr.domain.sync.SyncPairingState
-import com.emberr.domain.sync.waitingForNetworkMessage
+import com.emberr.domain.sync.waitingForNetworkPhrase
 import com.emberr.domain.util.system.eraseAllAppData
 import com.emberr.domain.util.system.showNativeToast
 import emberr.shared.generated.resources.Res
@@ -269,7 +269,7 @@ private fun cloudSyncResultMessage(
     CloudSyncResult.Busy -> CloudText.Phrase(Res.string.cloud_sync_busy)
     CloudSyncResult.UpdateRequired -> CloudText.Phrase(Res.string.cloud_sync_update_required)
     CloudSyncResult.AnotherSyncMethodIsOn -> CloudText.Phrase(Res.string.cloud_sync_other_method_on)
-    CloudSyncResult.WaitingForAllowedNetwork -> CloudText.Plain(waitingForNetworkMessage(syncNetwork))
+    CloudSyncResult.WaitingForAllowedNetwork -> CloudText.Phrase(waitingForNetworkPhrase(syncNetwork))
     is CloudSyncResult.Failed -> CloudText.Plain(result.message)
 }
 

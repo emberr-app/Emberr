@@ -13,6 +13,10 @@ import io.ktor.http.isSuccess
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_model_download_failed
+import emberr.shared.generated.resources.message_model_download_timed_out
+import org.jetbrains.compose.resources.getString
 
 sealed interface ModelDownloadProgress {
     data class Downloading(val fraction: Float) : ModelDownloadProgress
@@ -68,10 +72,10 @@ class ModelDownloadManager {
             send(ModelDownloadProgress.Completed)
         } catch (cause: HttpRequestTimeoutException) {
             ModelDownloadLog.e("Timed out downloading $fileName", cause)
-            send(ModelDownloadProgress.Failed("The download timed out. Check your connection and try again."))
+            send(ModelDownloadProgress.Failed(getString(Res.string.message_model_download_timed_out)))
         } catch (cause: Exception) {
             ModelDownloadLog.e("Failed downloading $fileName", cause)
-            send(ModelDownloadProgress.Failed("Couldn't download the model — check your internet connection and try again."))
+            send(ModelDownloadProgress.Failed(getString(Res.string.message_model_download_failed)))
         }
     }
 

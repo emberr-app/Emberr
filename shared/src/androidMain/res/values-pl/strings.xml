@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Kolacja z Samem</string>
     <string name="widget_preview_dentist">Dentysta</string>
     <string name="widget_preview_alexs_birthday">Urodziny Alexa</string>
+    <string name="message_sync_failed">Synchronizacja nie powiodła się</string>
+    <string name="message_backup_could_not_create_file">Nie udało się utworzyć pliku. Pamięć może być pełna.</string>
+    <string name="message_backup_folder_linked">Folder kopii zapasowych połączony!</string>
+    <string name="message_backup_folder_link_failed">Nie udało się połączyć folderu.</string>
+    <string name="message_markdown_saved">Zapisano Markdown</string>
+    <string name="message_markdown_saved_with_notice">Zapisano Markdown. %1$s</string>
+    <string name="message_file_save_failed">Nie udało się zapisać pliku</string>
+    <string name="message_backup_saved">Kopia zapasowa zapisana!</string>
+    <string name="message_export_failed">Eksport nie powiódł się: %1$s</string>
+    <string name="message_file_no_longer_available">Ten plik nie jest już dostępny na tym urządzeniu.</string>
+    <string name="message_no_app_for_document">Nie znaleziono aplikacji do otwarcia tego typu dokumentu.</string>
+    <string name="message_failed_to_open_file">Nie udało się otworzyć pliku: %1$s</string>
+    <string name="message_pdf_saved">Zapisano PDF</string>
+    <string name="message_pdf_save_failed">Nie udało się zapisać PDF</string>
 </resources>

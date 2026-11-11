@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Abendessen mit Sam</string>
     <string name="widget_preview_dentist">Zahnarzt</string>
     <string name="widget_preview_alexs_birthday">Geburtstag von Alex</string>
+    <string name="message_sync_failed">Synchronisierung fehlgeschlagen</string>
+    <string name="message_backup_could_not_create_file">Datei konnte nicht erstellt werden. Der Speicher ist möglicherweise voll.</string>
+    <string name="message_backup_folder_linked">Backup-Ordner verknüpft!</string>
+    <string name="message_backup_folder_link_failed">Ordner konnte nicht verknüpft werden.</string>
+    <string name="message_markdown_saved">Markdown gespeichert</string>
+    <string name="message_markdown_saved_with_notice">Markdown gespeichert. %1$s</string>
+    <string name="message_file_save_failed">Datei konnte nicht gespeichert werden</string>
+    <string name="message_backup_saved">Backup gespeichert!</string>
+    <string name="message_export_failed">Export fehlgeschlagen: %1$s</string>
+    <string name="message_file_no_longer_available">Diese Datei ist auf diesem Gerät nicht mehr verfügbar.</string>
+    <string name="message_no_app_for_document">Keine App zum Öffnen dieses Dokumenttyps gefunden.</string>
+    <string name="message_failed_to_open_file">Datei konnte nicht geöffnet werden: %1$s</string>
+    <string name="message_pdf_saved">PDF gespeichert</string>
+    <string name="message_pdf_save_failed">PDF konnte nicht gespeichert werden</string>
 </resources>

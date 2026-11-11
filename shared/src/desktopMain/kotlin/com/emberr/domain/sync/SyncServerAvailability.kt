@@ -18,19 +18,10 @@ class SyncServerAvailability {
     }
 
     fun markUnavailable(port: Int, cause: Throwable) {
-        _status.value = SyncServerStatus.Unavailable(port, describeFailure(port, cause))
-    }
-
-    private fun describeFailure(port: Int, cause: Throwable): String {
         val isPortAlreadyTaken = generateSequence(cause) { it.cause }
             .take(MAX_CAUSE_DEPTH)
             .any { it is BindException }
-
-        return if (isPortAlreadyTaken) {
-            "Port $port is already in use by another program. Pick a different sync port in Settings to turn LAN sync back on."
-        } else {
-            cause.message ?: "LAN sync could not start on port $port."
-        }
+        _status.value = SyncServerStatus.Unavailable(port, isPortAlreadyTaken, cause.message)
     }
 
     private companion object {

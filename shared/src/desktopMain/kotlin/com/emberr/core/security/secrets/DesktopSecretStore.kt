@@ -7,6 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_secrets_choosing_manager_failed
+import emberr.shared.generated.resources.message_secrets_manager_stopped_accepting_writes
+import emberr.shared.generated.resources.message_secrets_plain_text_file
 
 class DesktopSecretStore(
     private val backendSelector: SecretBackendSelector,
@@ -39,8 +43,8 @@ class DesktopSecretStore(
             applySelection(
                 SecretBackendSelection(
                     backend = plaintextBackend,
-                    displayName = "Plain text file",
-                    unavailableReason = "Choosing a credential manager failed: ${cause.message.orEmpty()}"
+                    displayName = secretStorePhrase(Res.string.message_secrets_plain_text_file),
+                    unavailableReason = secretStorePhrase(Res.string.message_secrets_choosing_manager_failed, cause.message.orEmpty())
                 )
             )
         } finally {
@@ -100,7 +104,7 @@ class DesktopSecretStore(
     private fun reportCredentialManagerStoppedAcceptingWrites(cause: Exception) {
         activeBackend = plaintextBackend
         mutableStorageState.value = SecretStorageState.StoredInPlainText(
-            reason = "The credential manager stopped accepting writes: ${cause.message.orEmpty()}",
+            reason = secretStorePhrase(Res.string.message_secrets_manager_stopped_accepting_writes, cause.message.orEmpty()),
             remedy = CredentialManagerAdvice.remedyForCurrentDesktop()
         )
     }

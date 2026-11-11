@@ -3,8 +3,8 @@ package com.emberr.presentation.trash
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emberr.domain.repository.NoteRepository
-import com.emberr.domain.util.system.COULD_NOT_RESTORE_MESSAGE
-import com.emberr.domain.util.system.restoredMessage
+import com.emberr.presentation.shared.components.couldNotRestoreMessage
+import com.emberr.presentation.shared.components.restoredMessage
 import com.emberr.domain.util.system.showNativeToast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,7 +38,7 @@ class TrashViewModel constructor(
                 throw e
             } catch (e: Exception) {
                 e.printStackTrace()
-                showNativeToast(COULD_NOT_RESTORE_MESSAGE)
+                showNativeToast(couldNotRestoreMessage())
             }
         }
     }

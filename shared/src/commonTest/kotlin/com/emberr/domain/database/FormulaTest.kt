@@ -4,6 +4,29 @@ import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_formula_cannot_compare
+import emberr.shared.generated.resources.message_formula_divide_by_zero
+import emberr.shared.generated.resources.message_formula_ends_too_early
+import emberr.shared.generated.resources.message_formula_expected_number
+import emberr.shared.generated.resources.message_formula_ifs_needs_pairs
+import emberr.shared.generated.resources.message_formula_kind_number
+import emberr.shared.generated.resources.message_formula_kind_text
+import emberr.shared.generated.resources.message_formula_missing_closing_quote
+import emberr.shared.generated.resources.message_formula_missing_symbol
+import emberr.shared.generated.resources.message_formula_needs_at_least_values
+import emberr.shared.generated.resources.message_formula_needs_date
+import emberr.shared.generated.resources.message_formula_needs_no_values
+import emberr.shared.generated.resources.message_formula_needs_values
+import emberr.shared.generated.resources.message_formula_needs_whole_number
+import emberr.shared.generated.resources.message_formula_no_property_named
+import emberr.shared.generated.resources.message_formula_piece_symbol
+import emberr.shared.generated.resources.message_formula_prop_needs_name
+import emberr.shared.generated.resources.message_formula_unexpected
+import emberr.shared.generated.resources.message_formula_unit_must_be
+import emberr.shared.generated.resources.message_formula_unknown_function
+import emberr.shared.generated.resources.message_formula_unknown_word
+import org.jetbrains.compose.resources.StringResource
 
 class FormulaTest {
 
@@ -18,9 +41,11 @@ class FormulaTest {
     )
 
     private fun resultOf(formula: String): FormulaValue =
-        evaluateFormula(parseFormula(formula), today) { name -> properties[name] ?: throw FormulaException("No property named $name") }
+        evaluateFormula(parseFormula(formula), today) { name -> properties[name] ?: throw FormulaException(formulaPhrase(Res.string.message_formula_no_property_named, name)) }
 
-    private fun problemIn(formula: String): String? = assertFailsWith<FormulaException> { parseFormula(formula) }.message
+    private fun problemIn(formula: String): FormulaMessage = assertFailsWith<FormulaException> { parseFormula(formula) }.problem
+
+    private fun errorOf(resource: StringResource, vararg arguments: Any) = FormulaValue.Error(formulaPhrase(resource, *arguments))
 
     private fun number(value: Double) = FormulaValue.NumberValue(value)
     private fun text(value: String) = FormulaValue.TextValue(value)
@@ -133,27 +158,40 @@ class FormulaTest {
 
     @Test
     fun mistakesInTheFormulaTextAreExplained() {
-        assertEquals("Missing \")\"", problemIn("""prop("Price" * 2"""))
-        assertEquals("The formula ends too early", problemIn("2 +"))
-        assertEquals("Unknown function \"sum\"", problemIn("sum(1, 2)"))
-        assertEquals("if() needs 3 values", problemIn("if(true, 1)"))
-        assertEquals("now() needs no values", problemIn("now(1)"))
-        assertEquals("Unknown word \"Price\". To use a property, write prop(\"Price\")", problemIn("Price * 2"))
-        assertEquals("Text is missing its closing quote", problemIn("\"open"))
-        assertEquals("Unexpected \"=\"", problemIn("2 = 2"))
-        assertEquals("prop() needs one property name in quotes, like prop(\"Price\")", problemIn("prop(2)"))
+        assertEquals(formulaPhrase(Res.string.message_formula_missing_symbol, ")"), problemIn("""prop("Price" * 2"""))
+        assertEquals(formulaPhrase(Res.string.message_formula_ends_too_early), problemIn("2 +"))
+        assertEquals(formulaPhrase(Res.string.message_formula_unknown_function, "sum"), problemIn("sum(1, 2)"))
+        assertEquals(
+            FormulaMessage.Counted(Res.plurals.message_formula_needs_values, 3, listOf("if", 3)),
+            problemIn("if(true, 1)")
+        )
+        assertEquals(formulaPhrase(Res.string.message_formula_needs_no_values, "now"), problemIn("now(1)"))
+        assertEquals(formulaPhrase(Res.string.message_formula_unknown_word, "Price"), problemIn("Price * 2"))
+        assertEquals(formulaPhrase(Res.string.message_formula_missing_closing_quote), problemIn("\"open"))
+        assertEquals(
+            formulaPhrase(Res.string.message_formula_unexpected, formulaPhrase(Res.string.message_formula_piece_symbol, "=")),
+            problemIn("2 = 2")
+        )
+        assertEquals(formulaPhrase(Res.string.message_formula_prop_needs_name), problemIn("prop(2)"))
     }
 
     @Test
     fun mistakesWhileCalculatingBecomeErrorValues() {
-        assertEquals(FormulaValue.Error("Can't divide by zero"), resultOf("1 / 0"))
-        assertEquals(FormulaValue.Error("Expected a number but got text"), resultOf("""prop("Name") * 2"""))
-        assertEquals(FormulaValue.Error("Can't compare a number with text"), resultOf("""1 < "a""""))
+        assertEquals(errorOf(Res.string.message_formula_divide_by_zero), resultOf("1 / 0"))
         assertEquals(
-            FormulaValue.Error("The unit must be \"days\", \"weeks\", \"months\" or \"years\""),
-            resultOf("""dateAdd(now(), 1, "hours")""")
+            errorOf(Res.string.message_formula_expected_number, formulaPhrase(Res.string.message_formula_kind_text)),
+            resultOf("""prop("Name") * 2""")
         )
-        assertEquals(FormulaValue.Error("dateAdd() needs a whole number"), resultOf("""dateAdd(now(), 1.5, "days")"""))
+        assertEquals(
+            errorOf(
+                Res.string.message_formula_cannot_compare,
+                formulaPhrase(Res.string.message_formula_kind_number),
+                formulaPhrase(Res.string.message_formula_kind_text)
+            ),
+            resultOf("""1 < "a"""")
+        )
+        assertEquals(errorOf(Res.string.message_formula_unit_must_be), resultOf("""dateAdd(now(), 1, "hours")"""))
+        assertEquals(errorOf(Res.string.message_formula_needs_whole_number, "dateAdd"), resultOf("""dateAdd(now(), 1.5, "days")"""))
     }
 
     @Test
@@ -176,7 +214,10 @@ class FormulaTest {
         assertEquals(number(10.0), resultOf("""month(prop("Due Date"))"""))
         assertEquals(number(5.0), resultOf("""day(prop("Due Date"))"""))
         assertEquals(FormulaValue.Empty, resultOf("""day(prop("Blank"))"""))
-        assertEquals(FormulaValue.Error("year() needs a date but got text"), resultOf("""year(prop("Name"))"""))
+        assertEquals(
+            errorOf(Res.string.message_formula_needs_date, "year", formulaPhrase(Res.string.message_formula_kind_text)),
+            resultOf("""year(prop("Name"))""")
+        )
     }
 
     @Test
@@ -193,7 +234,7 @@ class FormulaTest {
         assertEquals(number(-3.0), resultOf("floor(-2.5)"))
         assertEquals(number(1.0), resultOf("mod(7, 3)"))
         assertEquals(number(0.5), resultOf("mod(prop(\"Price\"), 4)"))
-        assertEquals(FormulaValue.Error("Can't divide by zero"), resultOf("mod(7, 0)"))
+        assertEquals(errorOf(Res.string.message_formula_divide_by_zero), resultOf("mod(7, 0)"))
     }
 
     @Test
@@ -205,7 +246,10 @@ class FormulaTest {
 
     @Test
     fun ifsNeedsAnOddNumberOfValues() {
-        assertEquals("ifs() needs pairs of a condition and a value, then one value to use otherwise", problemIn("ifs(true, 1, false, 2)"))
-        assertEquals("ifs() needs at least 3 values", problemIn("ifs(true, 1)"))
+        assertEquals(formulaPhrase(Res.string.message_formula_ifs_needs_pairs), problemIn("ifs(true, 1, false, 2)"))
+        assertEquals(
+            FormulaMessage.Counted(Res.plurals.message_formula_needs_at_least_values, 3, listOf("ifs", 3)),
+            problemIn("ifs(true, 1)")
+        )
     }
 }

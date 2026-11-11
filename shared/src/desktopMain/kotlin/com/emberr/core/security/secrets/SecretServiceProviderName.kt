@@ -4,10 +4,12 @@ package com.emberr.core.security.secrets
 import java.io.File
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBus
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_secrets_system_keyring
 
 object SecretServiceProviderName {
 
-    const val UNRECOGNISED_PROVIDER_NAME = "System keyring"
+    fun unrecognisedProviderName(): String = secretStorePhrase(Res.string.message_secrets_system_keyring)
 
     fun detectOrNull(): String? {
         val processName = runCatching { readNameOfOwningProcess() }.getOrNull() ?: return null
@@ -36,7 +38,7 @@ object SecretServiceProviderName {
         processName.contains("keepassxc") -> "KeePassXC"
         processName.contains("bitwarden") || processName.contains("goldwarden") -> "Bitwarden"
         processName.contains("seahorse") -> "GNOME Keyring"
-        else -> UNRECOGNISED_PROVIDER_NAME
+        else -> unrecognisedProviderName()
     }
 
     private const val DBUS_DAEMON_SERVICE = "org.freedesktop.DBus"

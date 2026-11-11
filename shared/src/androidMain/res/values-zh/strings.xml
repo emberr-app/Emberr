@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">和 Sam 吃晚饭</string>
     <string name="widget_preview_dentist">看牙医</string>
     <string name="widget_preview_alexs_birthday">Alex 的生日</string>
+    <string name="message_sync_failed">同步失败</string>
+    <string name="message_backup_could_not_create_file">无法创建文件。存储空间可能已满。</string>
+    <string name="message_backup_folder_linked">已关联备份文件夹！</string>
+    <string name="message_backup_folder_link_failed">无法关联文件夹。</string>
+    <string name="message_markdown_saved">Markdown 已保存</string>
+    <string name="message_markdown_saved_with_notice">Markdown 已保存。%1$s</string>
+    <string name="message_file_save_failed">无法保存文件</string>
+    <string name="message_backup_saved">备份已保存！</string>
+    <string name="message_export_failed">导出失败：%1$s</string>
+    <string name="message_file_no_longer_available">此文件在此设备上已不可用。</string>
+    <string name="message_no_app_for_document">找不到可打开此类文档的应用。</string>
+    <string name="message_failed_to_open_file">无法打开文件：%1$s</string>
+    <string name="message_pdf_saved">PDF 已保存</string>
+    <string name="message_pdf_save_failed">无法保存 PDF</string>
 </resources>

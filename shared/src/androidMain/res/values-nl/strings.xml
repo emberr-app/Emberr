@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Eten met Sam</string>
     <string name="widget_preview_dentist">Tandarts</string>
     <string name="widget_preview_alexs_birthday">Verjaardag van Alex</string>
+    <string name="message_sync_failed">Synchronisatie mislukt</string>
+    <string name="message_backup_could_not_create_file">Kon bestand niet maken. De opslag is misschien vol.</string>
+    <string name="message_backup_folder_linked">Back-upmap gekoppeld!</string>
+    <string name="message_backup_folder_link_failed">Kon map niet koppelen.</string>
+    <string name="message_markdown_saved">Markdown opgeslagen</string>
+    <string name="message_markdown_saved_with_notice">Markdown opgeslagen. %1$s</string>
+    <string name="message_file_save_failed">Kon bestand niet opslaan</string>
+    <string name="message_backup_saved">Back-up opgeslagen!</string>
+    <string name="message_export_failed">Exporteren mislukt: %1$s</string>
+    <string name="message_file_no_longer_available">Dit bestand is niet meer beschikbaar op dit apparaat.</string>
+    <string name="message_no_app_for_document">Geen app gevonden om dit type document te openen.</string>
+    <string name="message_failed_to_open_file">Kon bestand niet openen: %1$s</string>
+    <string name="message_pdf_saved">PDF opgeslagen</string>
+    <string name="message_pdf_save_failed">Kon PDF niet opslaan</string>
 </resources>

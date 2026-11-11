@@ -4,6 +4,10 @@ import com.emberr.domain.util.system.showNativeToast
 import java.awt.Desktop
 import java.net.URI
 import java.util.concurrent.TimeUnit
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_could_not_open_link
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.getString
 
 private const val SECONDS_TO_WAIT_FOR_A_LAUNCHER = 6L
 
@@ -59,7 +63,7 @@ private fun openWithFirstWorkingLauncher(url: String) {
     try {
         Desktop.getDesktop().browse(URI(url))
     } catch (_: Exception) {
-        showNativeToast("could not open link")
+        showNativeToast(runBlocking { getString(Res.string.message_could_not_open_link) })
     }
 }
 

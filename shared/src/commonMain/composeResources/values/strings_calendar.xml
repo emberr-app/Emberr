@@ -98,7 +98,7 @@
     <string name="calendar_category">Category</string>
     <string name="calendar_people">People</string>
     <plurals name="calendar_people_count">
-        <item quantity="one">%1$d people</item>
+        <item quantity="one">%1$d person</item>
         <item quantity="other">%1$d people</item>
     </plurals>
     <string name="calendar_does_not_repeat">Does not repeat</string>

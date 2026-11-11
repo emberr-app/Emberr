@@ -14,8 +14,12 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_update_larger_than_expected
+import emberr.shared.generated.resources.message_update_not_verified
+import org.jetbrains.compose.resources.StringResource
 
-class AppUpdateException(message: String) : Exception(message)
+class AppUpdateException(val reason: StringResource) : Exception(reason.key)
 
 class AppUpdateDownloader {
 
@@ -34,7 +38,7 @@ class AppUpdateDownloader {
         val signatureBytes = downloadBytes(LATEST_MANIFEST_SIGNATURE_URL)
 
         if (!isValidManifestSignature(manifestBytes, signatureBytes)) {
-            throw AppUpdateException("The update could not be verified as coming from Emberr, so it was ignored.")
+            throw AppUpdateException(Res.string.message_update_not_verified)
         }
 
         parseAppUpdateManifest(manifestBytes).takeIf { isNewerVersion(it.version, installedVersion) }
@@ -78,7 +82,7 @@ class AppUpdateDownloader {
 
                 bytesWritten += bytesRead
                 if (bytesWritten > expectedSizeBytes) {
-                    throw AppUpdateException("The download is larger than expected, so it was not installed.")
+                    throw AppUpdateException(Res.string.message_update_larger_than_expected)
                 }
                 output.write(buffer, 0, bytesRead)
 

@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">サムとディナー</string>
     <string name="widget_preview_dentist">歯医者</string>
     <string name="widget_preview_alexs_birthday">アレックスの誕生日</string>
+    <string name="message_sync_failed">同期に失敗しました</string>
+    <string name="message_backup_could_not_create_file">ファイルを作成できませんでした。ストレージがいっぱいの可能性があります。</string>
+    <string name="message_backup_folder_linked">バックアップフォルダをリンクしました！</string>
+    <string name="message_backup_folder_link_failed">フォルダをリンクできませんでした。</string>
+    <string name="message_markdown_saved">Markdownを保存しました</string>
+    <string name="message_markdown_saved_with_notice">Markdownを保存しました。%1$s</string>
+    <string name="message_file_save_failed">ファイルを保存できませんでした</string>
+    <string name="message_backup_saved">バックアップを保存しました！</string>
+    <string name="message_export_failed">エクスポートに失敗しました: %1$s</string>
+    <string name="message_file_no_longer_available">このファイルはこのデバイスで利用できなくなりました。</string>
+    <string name="message_no_app_for_document">この種類のドキュメントを開けるアプリが見つかりません。</string>
+    <string name="message_failed_to_open_file">ファイルを開けませんでした: %1$s</string>
+    <string name="message_pdf_saved">PDFを保存しました</string>
+    <string name="message_pdf_save_failed">PDFを保存できませんでした</string>
 </resources>

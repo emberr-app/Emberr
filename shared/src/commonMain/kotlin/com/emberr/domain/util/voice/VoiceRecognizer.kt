@@ -1,6 +1,17 @@
 package com.emberr.domain.util.voice
 
-const val VOICE_RECOGNITION_UNAVAILABLE_MESSAGE = "Voice recognition is unavailable on this device."
+enum class VoiceRecognitionError {
+    NO_SPEECH_HEARD,
+    UNCLEAR_AUDIO,
+    MICROPHONE_PERMISSION_NEEDED,
+    NETWORK,
+    SERVICE_BUSY,
+    SERVICE_DISCONNECTED,
+    UNAVAILABLE,
+    NOT_SUPPORTED_ON_DESKTOP,
+    COULD_NOT_START,
+    UNKNOWN
+}
 
 /**
  * Multiplatform contract for voice-to-text recognition.
@@ -10,7 +21,7 @@ interface VoiceRecognizer {
         onPartial: (String) -> Unit,
         onSegment: (String) -> Unit,
         onResult: (String) -> Unit,
-        onError: (String) -> Unit,
+        onError: (VoiceRecognitionError) -> Unit,
         onPermissionNeeded: () -> Unit
     )
     fun stopListening()

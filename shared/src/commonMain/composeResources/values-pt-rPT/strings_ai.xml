@@ -21,7 +21,7 @@
     <string name="ai_setup_download_model">Transferir modelo</string>
     <string name="ai_setup_pause_download">Pausar transferência</string>
     <string name="ai_setup_try_again">Tentar novamente</string>
-    <string name="ai_ask_anything">Pergunta qualquer coisa..</string>
+    <string name="ai_ask_anything">Pergunta qualquer coisa...</string>
     <string name="ai_settings">Definições de IA</string>
     <string name="ai_ask_emberr">Pergunta ao Emberr</string>
     <string name="ai_delete_this_chat">Eliminar este chat?</string>

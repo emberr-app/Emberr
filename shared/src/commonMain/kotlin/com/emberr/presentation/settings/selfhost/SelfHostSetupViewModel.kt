@@ -9,7 +9,6 @@ import com.emberr.domain.selfhost.crypto.KeyDerivationManager
 import com.emberr.domain.selfhost.crypto.SecureSyncKeyStorage
 import com.emberr.domain.selfhost.crypto.VaultKeyLock
 import com.emberr.domain.selfhost.webdav.SelfHostServerCredentials
-import com.emberr.domain.selfhost.sync.SELF_HOST_UPDATE_REQUIRED_MESSAGE
 import com.emberr.domain.selfhost.sync.SelfHostConnectionState
 import com.emberr.domain.selfhost.sync.SelfHostSyncEngine
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
@@ -21,7 +20,7 @@ import com.emberr.domain.selfhost.webdav.WebDavConflictException
 import com.emberr.domain.selfhost.webdav.WebDavConnectionTestResult
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import com.emberr.domain.sync.SyncNetworkRule
-import com.emberr.domain.sync.waitingForNetworkMessage
+import com.emberr.domain.sync.waitingForNetworkPhrase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -61,6 +60,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import com.emberr.domain.util.time.formatDate
 import com.emberr.domain.util.time.DateTextStyle
+import emberr.shared.generated.resources.message_selfhost_update_required
 
 enum class ConnectionTestStatus { NOT_TESTED, TESTING, VERIFIED, FAILED }
 
@@ -197,7 +197,10 @@ class SelfHostSetupViewModel(
         }
         viewModelScope.launch {
             SelfHostUpdateRequiredSignal.isUpdateRequired.collect { isUpdateRequired ->
-                if (isUpdateRequired) updateConnected { it.copy(syncError = SELF_HOST_UPDATE_REQUIRED_MESSAGE) }
+                if (isUpdateRequired) {
+                    val updateRequiredMessage = getString(Res.string.message_selfhost_update_required)
+                    updateConnected { it.copy(syncError = updateRequiredMessage) }
+                }
             }
         }
     }
@@ -478,7 +481,10 @@ class SelfHostSetupViewModel(
             return
         }
         if (!syncNetworkRule.isOnAllowedNetwork()) {
-            updateConnected { it.copy(syncError = waitingForNetworkMessage(syncNetworkRule.chosenNetwork())) }
+            viewModelScope.launch {
+                val waitingMessage = getString(waitingForNetworkPhrase(syncNetworkRule.chosenNetwork()))
+                updateConnected { it.copy(syncError = waitingMessage) }
+            }
             return
         }
         selfHostSyncScheduler.syncNow()

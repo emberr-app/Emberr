@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Jantar com Sam</string>
     <string name="widget_preview_dentist">Dentista</string>
     <string name="widget_preview_alexs_birthday">Aniversário de Alex</string>
+    <string name="message_sync_failed">Falha na sincronização</string>
+    <string name="message_backup_could_not_create_file">Não foi possível criar o arquivo. O armazenamento pode estar cheio.</string>
+    <string name="message_backup_folder_linked">Pasta de backup vinculada!</string>
+    <string name="message_backup_folder_link_failed">Não foi possível vincular a pasta.</string>
+    <string name="message_markdown_saved">Markdown salvo</string>
+    <string name="message_markdown_saved_with_notice">Markdown salvo. %1$s</string>
+    <string name="message_file_save_failed">Não foi possível salvar o arquivo</string>
+    <string name="message_backup_saved">Backup salvo!</string>
+    <string name="message_export_failed">Falha na exportação: %1$s</string>
+    <string name="message_file_no_longer_available">Este arquivo não está mais disponível neste dispositivo.</string>
+    <string name="message_no_app_for_document">Nenhum app encontrado para abrir este tipo de documento.</string>
+    <string name="message_failed_to_open_file">Não foi possível abrir o arquivo: %1$s</string>
+    <string name="message_pdf_saved">PDF salvo com sucesso</string>
+    <string name="message_pdf_save_failed">Não foi possível salvar o PDF</string>
 </resources>

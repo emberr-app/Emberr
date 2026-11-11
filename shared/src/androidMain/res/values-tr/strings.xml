@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Sam ile akşam yemeği</string>
     <string name="widget_preview_dentist">Dişçi</string>
     <string name="widget_preview_alexs_birthday">Alex\'in doğum günü</string>
+    <string name="message_sync_failed">Eşitleme başarısız oldu</string>
+    <string name="message_backup_could_not_create_file">Dosya oluşturulamadı. Depolama alanı dolu olabilir.</string>
+    <string name="message_backup_folder_linked">Yedek klasörü bağlandı!</string>
+    <string name="message_backup_folder_link_failed">Klasör bağlanamadı.</string>
+    <string name="message_markdown_saved">Markdown kaydedildi</string>
+    <string name="message_markdown_saved_with_notice">Markdown kaydedildi. %1$s</string>
+    <string name="message_file_save_failed">Dosya kaydedilemedi</string>
+    <string name="message_backup_saved">Yedek kaydedildi!</string>
+    <string name="message_export_failed">Dışa aktarma başarısız oldu: %1$s</string>
+    <string name="message_file_no_longer_available">Bu dosya artık bu cihazda yok.</string>
+    <string name="message_no_app_for_document">Bu belge türünü açacak uygulama bulunamadı.</string>
+    <string name="message_failed_to_open_file">Dosya açılamadı: %1$s</string>
+    <string name="message_pdf_saved">PDF başarıyla kaydedildi</string>
+    <string name="message_pdf_save_failed">PDF kaydedilemedi</string>
 </resources>

@@ -2,10 +2,12 @@ package com.emberr.domain.update
 
 import java.io.File
 import java.security.MessageDigest
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_update_damaged
 
 fun requireMatchingSha256(file: File, expectedSha256: String) {
     if (!sha256HexOf(file).equals(expectedSha256, ignoreCase = true)) {
-        throw AppUpdateException("The downloaded update is damaged, so it was not installed. Try again.")
+        throw AppUpdateException(Res.string.message_update_damaged)
     }
 }
 

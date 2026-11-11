@@ -16,6 +16,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import com.emberr.domain.util.voice.VoiceRecognitionError
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VoiceTaskSessionTest {
@@ -26,14 +27,14 @@ class VoiceTaskSessionTest {
         private var onPartial: (String) -> Unit = {}
         private var onSegment: (String) -> Unit = {}
         private var onResult: (String) -> Unit = {}
-        private var onError: (String) -> Unit = {}
+        private var onError: (VoiceRecognitionError) -> Unit = {}
         private var onPermissionNeeded: () -> Unit = {}
 
         override fun startListening(
             onPartial: (String) -> Unit,
             onSegment: (String) -> Unit,
             onResult: (String) -> Unit,
-            onError: (String) -> Unit,
+            onError: (VoiceRecognitionError) -> Unit,
             onPermissionNeeded: () -> Unit
         ) {
             startCount++
@@ -53,7 +54,7 @@ class VoiceTaskSessionTest {
         fun hearPartially(text: String) = onPartial(text)
         fun hearPieceThenKeepListening(text: String) = onSegment(text)
         fun hearSentence(transcript: String) = onResult(transcript)
-        fun fail(message: String) = onError(message)
+        fun fail(error: VoiceRecognitionError) = onError(error)
         fun askForPermission() = onPermissionNeeded()
     }
 
@@ -372,10 +373,10 @@ class VoiceTaskSessionTest {
         val session = createSession(recognizer)
         session.startListening(onPermissionNeeded = {})
 
-        recognizer.fail("No match")
+        recognizer.fail(VoiceRecognitionError.NO_SPEECH_HEARD)
 
         assertTrue(session.state.value.isListening)
-        assertNull(session.state.value.errorMessage)
+        assertNull(session.state.value.error)
         assertEquals(2, recognizer.startCount)
     }
 
@@ -385,10 +386,10 @@ class VoiceTaskSessionTest {
         val session = createSession(recognizer)
         session.startListening(onPermissionNeeded = {})
 
-        recognizer.fail("Voice service is busy. Please wait.")
+        recognizer.fail(VoiceRecognitionError.SERVICE_BUSY)
 
         assertFalse(session.state.value.isListening)
-        assertEquals("Voice service is busy. Please wait.", session.state.value.errorMessage)
+        assertEquals(VoiceRecognitionError.SERVICE_BUSY, session.state.value.error)
     }
 
     @Test
@@ -396,11 +397,11 @@ class VoiceTaskSessionTest {
         val recognizer = FakeVoiceRecognizer()
         val session = createSession(recognizer)
         session.startListening(onPermissionNeeded = {})
-        recognizer.fail("Voice service is busy. Please wait.")
+        recognizer.fail(VoiceRecognitionError.SERVICE_BUSY)
 
         session.startListening(onPermissionNeeded = {})
 
-        assertNull(session.state.value.errorMessage)
+        assertNull(session.state.value.error)
     }
 
     @Test

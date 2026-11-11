@@ -57,6 +57,16 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlin.concurrent.Volatile
 import kotlin.time.Clock
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_cloud_could_not_decrypt
+import emberr.shared.generated.resources.message_cloud_media_stopped
+import emberr.shared.generated.resources.message_cloud_note_unreadable
+import emberr.shared.generated.resources.message_cloud_refused_sync
+import emberr.shared.generated.resources.message_cloud_server_unreachable
+import emberr.shared.generated.resources.message_cloud_signed_out_records_not_cleared
+import emberr.shared.generated.resources.message_cloud_storage_link_refused
+import emberr.shared.generated.resources.message_cloud_sync_went_wrong
+import org.jetbrains.compose.resources.getString
 
 private class PulledChanges(
     val items: List<CloudRemoteItem>,
@@ -203,7 +213,7 @@ class CloudSyncEngine(
                 filesNotReceivedCount = 0,
                 filesWaitingForUploadCount = 0,
                 stoppedBeforeTheEnd = true,
-                lastProblem = "Media sync stopped: ${describeMediaFailure(error)}"
+                lastProblem = getString(Res.string.message_cloud_media_stopped, describeMediaFailure(error))
             )
             mutableStatus.update { it.copy(lastMediaPass = passResult) }
             if (error is CloudWaitingForAllowedNetworkException) rememberResult(CloudSyncResult.WaitingForAllowedNetwork)
@@ -284,20 +294,20 @@ class CloudSyncEngine(
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (_: Exception) {
-                CloudSyncResult.Failed("You were signed out, but this device's sync records could not be cleared.")
+                CloudSyncResult.Failed(getString(Res.string.message_cloud_signed_out_records_not_cleared))
             }
             CloudApiErrorCode.UPGRADE_REQUIRED -> CloudSyncResult.UpdateRequired
-            else -> CloudSyncResult.Failed("Emberr Cloud refused the sync (${error.code}).")
+            else -> CloudSyncResult.Failed(getString(Res.string.message_cloud_refused_sync, error.code.toString()))
         }
-        is CloudServerUnreachableException -> CloudSyncResult.Failed("Can't reach the Emberr Cloud server.")
+        is CloudServerUnreachableException -> CloudSyncResult.Failed(getString(Res.string.message_cloud_server_unreachable))
         is CloudBlobTransferException ->
-            CloudSyncResult.Failed("A storage link expired or was refused (HTTP ${error.httpStatus}). Try again.")
+            CloudSyncResult.Failed(getString(Res.string.message_cloud_storage_link_refused, error.httpStatus))
         is CloudUpdateRequiredException -> CloudSyncResult.UpdateRequired
         is CloudDecryptionException, is CloudKeyNotFoundException ->
-            CloudSyncResult.Failed("Some synced data could not be decrypted.")
-        is NotePayloadSyncException -> CloudSyncResult.Failed("A synced note could not be read.")
+            CloudSyncResult.Failed(getString(Res.string.message_cloud_could_not_decrypt))
+        is NotePayloadSyncException -> CloudSyncResult.Failed(getString(Res.string.message_cloud_note_unreadable))
         is CloudLocalDataBusyException -> CloudSyncResult.Busy
-        else -> CloudSyncResult.Failed("Something went wrong while syncing.")
+        else -> CloudSyncResult.Failed(getString(Res.string.message_cloud_sync_went_wrong))
     }
 
     private suspend fun syncWhilePassLockHeld(): CloudSyncResult {

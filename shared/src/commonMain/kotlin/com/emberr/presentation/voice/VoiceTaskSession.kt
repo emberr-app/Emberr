@@ -13,15 +13,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import com.emberr.domain.util.voice.VoiceRecognitionError
 
-private const val NO_SPEECH_HEARD_MESSAGE = "No match"
 private const val PAUSE_SEPARATOR = ", "
 
 data class VoiceTaskSessionState(
     val isListening: Boolean = false,
     val partialText: String = "",
     val tasks: List<ParsedTask> = emptyList(),
-    val errorMessage: String? = null
+    val error: VoiceRecognitionError? = null
 )
 
 class VoiceTaskSession(
@@ -40,7 +40,7 @@ class VoiceTaskSession(
 
     fun startListening(onPermissionNeeded: () -> Unit) {
         if (_state.value.isListening) return
-        _state.update { it.copy(isListening = true, partialText = "", errorMessage = null) }
+        _state.update { it.copy(isListening = true, partialText = "", error = null) }
         restartSilenceTimeout()
         listen(sessionNumber, onPermissionNeeded)
     }
@@ -87,7 +87,7 @@ class VoiceTaskSession(
             onPartial = { text -> handlePartial(session, text) },
             onSegment = { text -> handleSegment(session, text) },
             onResult = { transcript -> handleResult(session, transcript, onPermissionNeeded) },
-            onError = { message -> handleError(session, message, onPermissionNeeded) },
+            onError = { error -> handleError(session, error, onPermissionNeeded) },
             onPermissionNeeded = { handlePermissionNeeded(session, onPermissionNeeded) }
         )
     }
@@ -126,13 +126,13 @@ class VoiceTaskSession(
         _state.update { it.copy(tasks = finishedTasks + currentRunTasks, partialText = "") }
     }
 
-    private fun handleError(session: Int, message: String, onPermissionNeeded: () -> Unit) {
+    private fun handleError(session: Int, error: VoiceRecognitionError, onPermissionNeeded: () -> Unit) {
         if (session != sessionNumber || !_state.value.isListening) return
-        if (message == NO_SPEECH_HEARD_MESSAGE) {
+        if (error == VoiceRecognitionError.NO_SPEECH_HEARD) {
             listen(session, onPermissionNeeded)
         } else {
             stopListening()
-            _state.update { it.copy(errorMessage = message) }
+            _state.update { it.copy(error = error) }
         }
     }
 

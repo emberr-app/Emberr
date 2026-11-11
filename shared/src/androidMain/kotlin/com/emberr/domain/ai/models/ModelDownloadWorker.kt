@@ -12,6 +12,14 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.emberr.R
 import kotlinx.coroutines.CancellationException
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_model_download_did_not_complete
+import emberr.shared.generated.resources.message_model_download_missing_name
+import emberr.shared.generated.resources.message_model_download_paused
+import emberr.shared.generated.resources.message_model_download_stopped_before_finish
+import emberr.shared.generated.resources.message_model_download_stopped_unexpectedly
+import emberr.shared.generated.resources.message_model_download_unknown_model
+import org.jetbrains.compose.resources.getString
 
 class ModelDownloadWorker(
     appContext: Context,
@@ -23,7 +31,7 @@ class ModelDownloadWorker(
         val fileName = inputData.getString(KEY_FILE_NAME)
         if (fileName == null) {
             ModelDownloadLog.e("Worker started without a model file name")
-            return Result.failure(workDataOf(KEY_ERROR_MESSAGE to "The download request was missing the model name."))
+            return Result.failure(workDataOf(KEY_ERROR_MESSAGE to getString(Res.string.message_model_download_missing_name)))
         }
         val initialFraction = resumeProgressFraction(fileName)
         showDownloadNotification(fileName, initialFraction)
@@ -34,11 +42,11 @@ class ModelDownloadWorker(
             ModelFileNames.GENERATOR -> modelDownloadManager.downloadGeneratorModel()
             else -> {
                 ModelDownloadLog.e("Worker was asked for an unknown model file name $fileName")
-                return Result.failure(workDataOf(KEY_ERROR_MESSAGE to "That model is not one Emberr can download."))
+                return Result.failure(workDataOf(KEY_ERROR_MESSAGE to getString(Res.string.message_model_download_unknown_model)))
             }
         }
 
-        var outcome: ModelDownloadProgress = ModelDownloadProgress.Failed("Download did not complete.")
+        var outcome: ModelDownloadProgress = ModelDownloadProgress.Failed(getString(Res.string.message_model_download_did_not_complete))
         var lastNotifiedPercent = (initialFraction * 100).toInt()
         try {
             downloadFlow.collect { progress ->
@@ -56,7 +64,7 @@ class ModelDownloadWorker(
             throw cancellation
         } catch (cause: Exception) {
             ModelDownloadLog.e("Worker threw while downloading $fileName", cause)
-            return Result.failure(workDataOf(KEY_ERROR_MESSAGE to "The download stopped unexpectedly. Please try again."))
+            return Result.failure(workDataOf(KEY_ERROR_MESSAGE to getString(Res.string.message_model_download_stopped_unexpectedly)))
         }
 
         return when (val result = outcome) {
@@ -69,11 +77,11 @@ class ModelDownloadWorker(
 
             is ModelDownloadProgress.Downloading -> {
                 ModelDownloadLog.e("Worker stopped mid download of $fileName at ${result.fraction}")
-                Result.failure(workDataOf(KEY_ERROR_MESSAGE to "The download stopped before it finished."))
+                Result.failure(workDataOf(KEY_ERROR_MESSAGE to getString(Res.string.message_model_download_stopped_before_finish)))
             }
 
             ModelDownloadProgress.Paused ->
-                Result.failure(workDataOf(KEY_ERROR_MESSAGE to "The download was paused."))
+                Result.failure(workDataOf(KEY_ERROR_MESSAGE to getString(Res.string.message_model_download_paused)))
         }
     }
 

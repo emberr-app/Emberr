@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">Ăn tối với Sam</string>
     <string name="widget_preview_dentist">Nha sĩ</string>
     <string name="widget_preview_alexs_birthday">Sinh nhật của Alex</string>
+    <string name="message_sync_failed">Đồng bộ thất bại</string>
+    <string name="message_backup_could_not_create_file">Không thể tạo tệp. Bộ nhớ có thể đã đầy.</string>
+    <string name="message_backup_folder_linked">Đã liên kết thư mục sao lưu!</string>
+    <string name="message_backup_folder_link_failed">Không thể liên kết thư mục.</string>
+    <string name="message_markdown_saved">Đã lưu Markdown</string>
+    <string name="message_markdown_saved_with_notice">Đã lưu Markdown. %1$s</string>
+    <string name="message_file_save_failed">Không thể lưu tệp</string>
+    <string name="message_backup_saved">Đã lưu bản sao lưu!</string>
+    <string name="message_export_failed">Xuất thất bại: %1$s</string>
+    <string name="message_file_no_longer_available">Tệp này không còn trên thiết bị này.</string>
+    <string name="message_no_app_for_document">Không tìm thấy ứng dụng để mở loại tài liệu này.</string>
+    <string name="message_failed_to_open_file">Không thể mở tệp: %1$s</string>
+    <string name="message_pdf_saved">Đã lưu PDF thành công</string>
+    <string name="message_pdf_save_failed">Không thể lưu PDF</string>
 </resources>

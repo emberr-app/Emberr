@@ -116,4 +116,18 @@
     <string name="widget_preview_dinner_with_sam">Dinner with Sam</string>
     <string name="widget_preview_dentist">Dentist</string>
     <string name="widget_preview_alexs_birthday">Alex\'s birthday</string>
+    <string name="message_sync_failed">Sync failed</string>
+    <string name="message_backup_could_not_create_file">Failed to create file. Storage might be full.</string>
+    <string name="message_backup_folder_linked">Backup folder linked!</string>
+    <string name="message_backup_folder_link_failed">Failed to link folder.</string>
+    <string name="message_markdown_saved">Markdown saved</string>
+    <string name="message_markdown_saved_with_notice">Markdown saved. %1$s</string>
+    <string name="message_file_save_failed">Failed to save file</string>
+    <string name="message_backup_saved">Backup saved!</string>
+    <string name="message_export_failed">Export failed: %1$s</string>
+    <string name="message_file_no_longer_available">This file is no longer available on this device.</string>
+    <string name="message_no_app_for_document">No app found to open this document type.</string>
+    <string name="message_failed_to_open_file">Failed to open file: %1$s</string>
+    <string name="message_pdf_saved">PDF saved successfully</string>
+    <string name="message_pdf_save_failed">Failed to save PDF</string>
 </resources>

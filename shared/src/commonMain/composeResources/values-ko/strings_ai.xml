@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">다운로드 일시 정지</string>
     <string name="ai_setup_try_again">다시 시도</string>
     <string name="ai_setup_index_my_notes">내 노트 색인하기</string>
-    <string name="ai_ask_anything">무엇이든 물어보세요..</string>
+    <string name="ai_ask_anything">무엇이든 물어보세요...</string>
     <string name="ai_settings">AI 설정</string>
     <string name="ai_stop_generating">생성 중지</string>
     <string name="ai_send">보내기</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">이 제공업체의 저장된 키와 설정이 이 기기에서 제거돼요.</string>
     <string name="ai_finetune_warning">이 모델은 지시/채팅용으로 조정되지 않은 것 같아요. 채팅 답변이 부실하거나 엉뚱할 수 있어요.</string>
     <string name="ai_local_ai_cannot_run">이 하드웨어에서는 로컬 AI를 실행할 수 없어요.</string>
-    <string name="ai_sorry_error">죄송해요, 오류가 발생했어요.</string>
     <string name="ai_sorry_error_with_reason">죄송해요, 오류가 발생했어요: %1$s</string>
 </resources>

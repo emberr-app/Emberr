@@ -29,7 +29,7 @@
     <string name="ai_setup_pause_download">ダウンロードを一時停止</string>
     <string name="ai_setup_try_again">再試行</string>
     <string name="ai_setup_index_my_notes">メモのインデックスを作成</string>
-    <string name="ai_ask_anything">何でも聞いてください..</string>
+    <string name="ai_ask_anything">何でも聞いてください...</string>
     <string name="ai_settings">AI設定</string>
     <string name="ai_stop_generating">生成を停止</string>
     <string name="ai_send">送信</string>
@@ -134,6 +134,5 @@
     <string name="ai_delete_api_key_message">このプロバイダの保存済みキーと設定がこのデバイスから削除されます。</string>
     <string name="ai_finetune_warning">このモデルは指示/チャット向けに調整されていないようです。チャットの返答の質が低かったり、支離滅裂になったりする可能性があります。</string>
     <string name="ai_local_ai_cannot_run">このハードウェアではローカルAIを実行できません。</string>
-    <string name="ai_sorry_error">申し訳ありません。エラーが発生しました。</string>
     <string name="ai_sorry_error_with_reason">申し訳ありません。エラーが発生しました: %1$s</string>
 </resources>

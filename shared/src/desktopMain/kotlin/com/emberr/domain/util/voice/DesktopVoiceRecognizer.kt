@@ -6,12 +6,12 @@ class DesktopVoiceRecognizer : VoiceRecognizer {
         onPartial: (String) -> Unit,
         onSegment: (String) -> Unit,
         onResult: (String) -> Unit,
-        onError: (String) -> Unit,
+        onError: (VoiceRecognitionError) -> Unit,
         onPermissionNeeded: () -> Unit
     ) {
         // Desktop platforms don't have a native built-in speech recognizer API
         // like Android does. We immediately return an error so the UI handles it gracefully.
-        onError("Voice recognition is not natively supported on Desktop.")
+        onError(VoiceRecognitionError.NOT_SUPPORTED_ON_DESKTOP)
     }
 
     override fun stopListening() {

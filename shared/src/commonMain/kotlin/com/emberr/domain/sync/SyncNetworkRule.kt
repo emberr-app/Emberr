@@ -3,6 +3,11 @@ package com.emberr.domain.sync
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.domain.selfhost.sync.MeteredNetworkChecker
 import com.emberr.domain.selfhost.sync.SelfHostSyncNetwork
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_sync_waiting_for_mobile_data
+import emberr.shared.generated.resources.message_sync_waiting_for_network
+import emberr.shared.generated.resources.message_sync_waiting_for_wifi
+import org.jetbrains.compose.resources.StringResource
 
 class SyncNetworkRule(
     private val settingsManager: SettingsManager,
@@ -16,8 +21,8 @@ class SyncNetworkRule(
         chosenNetwork().allowsSync(meteredNetworkChecker.isOnMeteredNetwork())
 }
 
-fun waitingForNetworkMessage(syncNetwork: SelfHostSyncNetwork): String = when (syncNetwork) {
-    SelfHostSyncNetwork.WIFI_ONLY -> "Sync is set to Wi-Fi only. It will run when you connect to Wi-Fi."
-    SelfHostSyncNetwork.MOBILE_DATA_ONLY -> "Sync is set to mobile data only. It will run when you are off Wi-Fi."
-    SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA -> "Sync will run when you are back online."
+fun waitingForNetworkPhrase(syncNetwork: SelfHostSyncNetwork): StringResource = when (syncNetwork) {
+    SelfHostSyncNetwork.WIFI_ONLY -> Res.string.message_sync_waiting_for_wifi
+    SelfHostSyncNetwork.MOBILE_DATA_ONLY -> Res.string.message_sync_waiting_for_mobile_data
+    SelfHostSyncNetwork.WIFI_AND_MOBILE_DATA -> Res.string.message_sync_waiting_for_network
 }

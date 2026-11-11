@@ -117,4 +117,18 @@
     <string name="widget_preview_dinner_with_sam">샘과 저녁 식사</string>
     <string name="widget_preview_dentist">치과</string>
     <string name="widget_preview_alexs_birthday">알렉스 생일</string>
+    <string name="message_sync_failed">동기화 실패</string>
+    <string name="message_backup_could_not_create_file">파일을 만들지 못했어요. 저장 공간이 가득 찼을 수 있어요.</string>
+    <string name="message_backup_folder_linked">백업 폴더를 연결했어요!</string>
+    <string name="message_backup_folder_link_failed">폴더를 연결하지 못했어요.</string>
+    <string name="message_markdown_saved">Markdown을 저장했어요</string>
+    <string name="message_markdown_saved_with_notice">Markdown을 저장했어요. %1$s</string>
+    <string name="message_file_save_failed">파일을 저장하지 못했어요</string>
+    <string name="message_backup_saved">백업을 저장했어요!</string>
+    <string name="message_export_failed">내보내기 실패: %1$s</string>
+    <string name="message_file_no_longer_available">이 파일은 이 기기에서 더 이상 사용할 수 없어요.</string>
+    <string name="message_no_app_for_document">이 문서 유형을 열 수 있는 앱이 없어요.</string>
+    <string name="message_failed_to_open_file">파일을 열지 못했어요: %1$s</string>
+    <string name="message_pdf_saved">PDF를 저장했어요</string>
+    <string name="message_pdf_save_failed">PDF를 저장하지 못했어요</string>
 </resources>

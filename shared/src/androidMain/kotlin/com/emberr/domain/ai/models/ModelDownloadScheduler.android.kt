@@ -13,6 +13,10 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformWhile
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_model_download_cancelled
+import emberr.shared.generated.resources.message_model_download_failed
+import org.jetbrains.compose.resources.getString
 
 actual class ModelDownloadScheduler(private val context: Context) {
 
@@ -67,7 +71,7 @@ actual class ModelDownloadScheduler(private val context: Context) {
                 !info.state.isFinished
             }
 
-    private fun WorkInfo.toModelDownloadProgress(): ModelDownloadProgress? = when (state) {
+    private suspend fun WorkInfo.toModelDownloadProgress(): ModelDownloadProgress? = when (state) {
         WorkInfo.State.SUCCEEDED -> ModelDownloadProgress.Completed
         WorkInfo.State.FAILED -> {
             val reportedMessage = outputData.getString(ModelDownloadWorker.KEY_ERROR_MESSAGE)
@@ -75,10 +79,10 @@ actual class ModelDownloadScheduler(private val context: Context) {
                 ModelDownloadLog.e("Work failed before the worker ran, so no reason was reported")
             }
             ModelDownloadProgress.Failed(
-                reportedMessage ?: "Couldn't download the model — check your internet connection and try again."
+                reportedMessage ?: getString(Res.string.message_model_download_failed)
             )
         }
-        WorkInfo.State.CANCELLED -> ModelDownloadProgress.Failed("Download was cancelled.")
+        WorkInfo.State.CANCELLED -> ModelDownloadProgress.Failed(getString(Res.string.message_model_download_cancelled))
         WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED -> null
         else -> {
             val fraction = progress.getFloat(ModelDownloadWorker.KEY_PROGRESS_FRACTION, -1f)

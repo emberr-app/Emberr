@@ -13,6 +13,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlin.math.sqrt
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_ai_no_indexed_notes
+import emberr.shared.generated.resources.message_ai_nothing_relevant
+import org.jetbrains.compose.resources.getString
 
 class RagRepository(
     lazyDatabase: Lazy<EmberrDatabase>,
@@ -62,7 +66,7 @@ class RagRepository(
             .executeAsList()
 
         if (allBlocks.isEmpty()) {
-            emit("I don't have any indexed notes yet. Try writing something first.")
+            emit(getString(Res.string.message_ai_no_indexed_notes))
             return@flow
         }
 
@@ -133,7 +137,7 @@ class RagRepository(
             .take(totalLimit)
 
         if (combinedChunks.isEmpty()) {
-            emit("I couldn't find any relevant information in your notes to answer that.")
+            emit(getString(Res.string.message_ai_nothing_relevant))
             return@flow
         }
 

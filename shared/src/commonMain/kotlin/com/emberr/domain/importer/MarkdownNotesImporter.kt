@@ -41,10 +41,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.message_import_stopped_early
+import org.jetbrains.compose.resources.getString
 
 private const val UNKNOWN_MIME_TYPE = "application/octet-stream"
 private const val UNLINKED_ATTACHMENTS_TITLE = "Unlinked attachments"
-private const val IMPORT_STOPPED_EARLY = "the rest of the import (it stopped early)"
 
 class MarkdownNotesImporter(
     private val repository: NoteRepository,
@@ -80,7 +82,7 @@ class MarkdownNotesImporter(
                     importedNoteCount = savedNotes.size + savedCanvases.size,
                     createdFolderCount = 0,
                     copiedAttachmentCount = 0,
-                    failedNames = listOf(IMPORT_STOPPED_EARLY)
+                    failedNames = listOf(getString(Res.string.message_import_stopped_early))
                 )
             }
             withContext(NonCancellable) {

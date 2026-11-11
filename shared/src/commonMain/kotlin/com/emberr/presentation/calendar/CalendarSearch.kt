@@ -4,8 +4,6 @@ import androidx.compose.runtime.Composable
 import com.emberr.domain.util.search.containsForSearch
 import kotlinx.datetime.LocalDate
 
-private const val BIRTHDAYS_SEARCH_WORD = "Birthdays"
-
 data class CalendarSearchResults(
     val upcomingEvents: List<CalendarEvent>,
     val pastEvents: List<CalendarEvent>
@@ -17,7 +15,8 @@ fun searchCalendarEvents(
     events: List<CalendarEvent>,
     categories: List<CalendarCategory>,
     query: String,
-    today: LocalDate
+    today: LocalDate,
+    birthdaysWord: String
 ): CalendarSearchResults {
     val categoryNamesById = categories.associate { it.id to it.name }
     val matchingEvents = events.filter { event ->
@@ -26,7 +25,7 @@ fun searchCalendarEvents(
             event.description,
             event.url,
             categoryNamesById[event.categoryId],
-            BIRTHDAYS_SEARCH_WORD.takeIf { event.isBirthday }
+            birthdaysWord.takeIf { event.isBirthday }
         )
             .any { it.containsForSearch(query) }
     }
