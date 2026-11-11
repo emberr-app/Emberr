@@ -6,6 +6,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import emberr.shared.generated.resources.Res
@@ -67,8 +68,17 @@ enum class FontStylePreference(val displayName: String) {
 
 val LocalEmberrFontStyle = staticCompositionLocalOf { FontStylePreference.POPPINS }
 
+private val languagesPoppinsCannotDraw = setOf("vi", "ru", "uk")
+
+private fun fontStyleToDraw(preference: FontStylePreference, language: String): FontStylePreference =
+    if (preference == FontStylePreference.POPPINS && language in languagesPoppinsCannotDraw) {
+        FontStylePreference.INTER
+    } else {
+        preference
+    }
+
 @Composable
-fun fontFamilyFor(preference: FontStylePreference): FontFamily = when (preference) {
+fun fontFamilyFor(preference: FontStylePreference): FontFamily = when (fontStyleToDraw(preference, Locale.current.language)) {
     FontStylePreference.POPPINS -> FontFamily(
         Font(Res.font.poppins_regular, FontWeight.Normal),
         Font(Res.font.poppins_medium, FontWeight.Medium),
