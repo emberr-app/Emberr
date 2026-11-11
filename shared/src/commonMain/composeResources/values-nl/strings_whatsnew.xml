@@ -7,7 +7,7 @@
     <string name="whatsnew_new">Nieuw</string>
     <string name="whatsnew_languages_heading">Talen</string>
     <string name="whatsnew_languages_where">Instellingen → Uiterlijk → Taal</string>
-    <string name="whatsnew_languages_description_desktop">Emberr is nu beschikbaar in 18 talen, van Español en Deutsch tot 日本語 en हिन्दी. Het volgt de taal van je computer, of je kiest er zelf een. Emberr start opnieuw om te wisselen. Een vreemde vertaling gezien? Laat het ons weten op GitHub.</string>
+    <string name="whatsnew_languages_description_desktop">Emberr is nu beschikbaar in 18 talen, van Español en Deutsch tot 日本語 en हिन्दी. Het volgt de taal van je computer, of je kiest er zelf een. Het wisselt meteen, zonder herstart. Een vreemde vertaling gezien? Laat het ons weten op GitHub.</string>
     <string name="whatsnew_languages_description_mobile">Emberr is nu beschikbaar in 18 talen, van Español en Deutsch tot 日本語 en हिन्दी. Het volgt de taal van je telefoon, of je kiest er zelf een. Vanaf Android 13 kun je de taal ook instellen via **Instellingen → Apps → Emberr → Taal** op je telefoon. Een vreemde vertaling gezien? Laat het ons weten op GitHub.</string>
     <string name="whatsnew_themes_heading">Thema's</string>
     <string name="whatsnew_themes_where">Instellingen → Uiterlijk → Thema</string>
@@ -33,8 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Voeg de huidige tijd of datum toe aan de titel van een notitie via de toetsenbordwerkbalk.</string>
     <string name="whatsnew_others_sync_network">De netwerkkeuze voor synchronisatie staat nu in **Instellingen → Synchronisatie en back-up**.</string>
     <string name="whatsnew_others_windows_startup">Sneller opstarten op Windows.</string>
-    <string name="whatsnew_others_search_accents">Zoeken negeert accenten, dus **cafe** vindt ook **Café**, en zoeken naar emoji's begrijpt je taal.</string>
-    <string name="whatsnew_others_linux_cjk_font">Japanse, Koreaanse en Chinese tekst heeft een CJK-lettertype nodig, zoals Noto Sans CJK. Zonder zo'n lettertype verschijnen die tekens als vakjes.</string>
+    <string name="whatsnew_others_windows_update_restart">Updates op Windows worden nu goed geïnstalleerd en Emberr gaat na een herstart weer open. Lukt een update niet, dan laat Emberr dat nu weten en opent het de downloadpagina.</string>
+    <string name="whatsnew_others_linux_restart">Op Linux gaat Emberr na een herstart weer open, in plaats van alleen te sluiten.</string>
     <string name="whatsnew_others_small_fixes">Veel kleine verbeteringen.</string>
     <string name="whatsnew_preview_options">Opties</string>
     <string name="whatsnew_preview_trip_title">Weekendje weg</string>

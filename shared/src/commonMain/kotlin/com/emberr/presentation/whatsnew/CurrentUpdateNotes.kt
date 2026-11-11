@@ -35,8 +35,8 @@ import emberr.shared.generated.resources.whatsnew_languages_description_desktop
 import emberr.shared.generated.resources.whatsnew_languages_description_mobile
 import emberr.shared.generated.resources.whatsnew_languages_heading
 import emberr.shared.generated.resources.whatsnew_languages_where
-import emberr.shared.generated.resources.whatsnew_others_linux_cjk_font
-import emberr.shared.generated.resources.whatsnew_others_search_accents
+import emberr.shared.generated.resources.whatsnew_others_linux_restart
+import emberr.shared.generated.resources.whatsnew_others_windows_update_restart
 
 internal class UpdateNotesSection(
     val heading: StringResource,
@@ -53,6 +53,7 @@ internal val CurrentUpdateNotes = listOfNotNull(
         heading = Res.string.whatsnew_languages_heading,
         whereToFind = Res.string.whatsnew_languages_where,
         isNew = true,
+        preview = { LanguagesUpdatePreview() },
         description = if (isDesktopPlatform) {
             Res.string.whatsnew_languages_description_desktop
         } else {
@@ -116,8 +117,8 @@ internal val CurrentUpdateNotes = listOfNotNull(
             },
             if (isDesktopPlatform) null else Res.string.whatsnew_others_sync_network,
             if (isWindowsDesktop) Res.string.whatsnew_others_windows_startup else null,
-            Res.string.whatsnew_others_search_accents,
-            if (isLinuxDesktop) Res.string.whatsnew_others_linux_cjk_font else null,
+            if (isWindowsDesktop) Res.string.whatsnew_others_windows_update_restart else null,
+            if (isLinuxDesktop) Res.string.whatsnew_others_linux_restart else null,
             Res.string.whatsnew_others_small_fixes
         )
     )

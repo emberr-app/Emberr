@@ -7,7 +7,7 @@
     <string name="whatsnew_new">Нове</string>
     <string name="whatsnew_languages_heading">Мови</string>
     <string name="whatsnew_languages_where">Налаштування → Вигляд → Мова</string>
-    <string name="whatsnew_languages_description_desktop">Emberr тепер доступний 18 мовами, від Español і Deutsch до 日本語 і हिन्दी. Застосунок використовує мову вашого комп'ютера, або ви можете вибрати мову самостійно. Щоб змінити мову, Emberr перезапуститься. Помітили дивний переклад? Повідомте нам на GitHub.</string>
+    <string name="whatsnew_languages_description_desktop">Emberr тепер доступний 18 мовами, від Español і Deutsch до 日本語 і हिन्दी. Застосунок використовує мову вашого комп'ютера, або ви можете вибрати мову самостійно. Мова змінюється одразу, без перезапуску. Помітили дивний переклад? Повідомте нам на GitHub.</string>
     <string name="whatsnew_languages_description_mobile">Emberr тепер доступний 18 мовами, від Español і Deutsch до 日本語 і हिन्दी. Застосунок використовує мову вашого телефона, або ви можете вибрати мову самостійно. В Android 13 і новіших версіях її також можна вибрати на телефоні в розділі **Налаштування → Додатки → Emberr → Мова**. Помітили дивний переклад? Повідомте нам на GitHub.</string>
     <string name="whatsnew_themes_heading">Теми</string>
     <string name="whatsnew_themes_where">Налаштування → Вигляд → Тема</string>
@@ -33,8 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Додавайте поточний час або дату в назву нотатки з панелі інструментів клавіатури.</string>
     <string name="whatsnew_others_sync_network">Вибір мережі для синхронізації тепер у **Налаштування → Синхронізація та резервні копії**.</string>
     <string name="whatsnew_others_windows_startup">Швидший запуск на Windows.</string>
-    <string name="whatsnew_others_search_accents">Пошук не зважає на регістр і діакритичні знаки, тож за запитом **uber** знайдеться й **Über**, а пошук емодзі розуміє вашу мову.</string>
-    <string name="whatsnew_others_linux_cjk_font">Для японського, корейського й китайського тексту потрібен шрифт CJK, наприклад Noto Sans CJK. Без нього ці символи показуються як квадратики.</string>
+    <string name="whatsnew_others_windows_update_restart">Оновлення у Windows тепер встановлюються правильно, а Emberr знову відкривається після перезапуску. Якщо оновлення не вдається встановити, Emberr повідомить про це й відкриє сторінку завантаження.</string>
+    <string name="whatsnew_others_linux_restart">У Linux Emberr тепер знову відкривається після перезапуску, а не просто закривається.</string>
     <string name="whatsnew_others_small_fixes">Багато дрібних виправлень.</string>
     <string name="whatsnew_preview_options">Параметри</string>
     <string name="whatsnew_preview_trip_title">Поїздка на вихідні</string>

@@ -7,7 +7,7 @@
     <string name="whatsnew_new">新</string>
     <string name="whatsnew_languages_heading">语言</string>
     <string name="whatsnew_languages_where">设置 → 外观 → 语言</string>
-    <string name="whatsnew_languages_description_desktop">Emberr 现已支持 18 种语言，从 Español、Deutsch 到 日本語 和 हिन्दी。默认跟随电脑的语言，你也可以自己选择。切换语言时 Emberr 会重新启动。发现奇怪的翻译？欢迎在 GitHub 上告诉我们。</string>
+    <string name="whatsnew_languages_description_desktop">Emberr 现已支持 18 种语言，从 Español、Deutsch 到 日本語 和 हिन्दी。默认跟随电脑的语言，你也可以自己选择。切换即时生效，无需重新启动。发现奇怪的翻译？欢迎在 GitHub 上告诉我们。</string>
     <string name="whatsnew_languages_description_mobile">Emberr 现已支持 18 种语言，从 Español、Deutsch 到 日本語 和 हिन्दी。默认跟随手机的语言，你也可以自己选择。在 Android 13 及更高版本上，你还可以在手机的 **设置 → 应用 → Emberr → 语言** 中设置。发现奇怪的翻译？欢迎在 GitHub 上告诉我们。</string>
     <string name="whatsnew_themes_heading">主题</string>
     <string name="whatsnew_themes_where">设置 → 外观 → 主题</string>
@@ -33,8 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">可以通过键盘工具栏将当前时间或日期添加到笔记标题中。</string>
     <string name="whatsnew_others_sync_network">同步所用的网络选项现在位于 **设置 → 同步与备份**。</string>
     <string name="whatsnew_others_windows_startup">Windows 上启动更快。</string>
-    <string name="whatsnew_others_search_accents">搜索会忽略重音符号，搜索 **uber** 也能找到 **Über**；表情符号搜索也能理解你的语言。</string>
-    <string name="whatsnew_others_linux_cjk_font">日文、韩文和中文文本需要 CJK 字体，例如 Noto Sans CJK。没有的话，这些字符会显示为方框。</string>
+    <string name="whatsnew_others_windows_update_restart">Windows 上的更新现在可以正常安装，Emberr 重新启动后也会再次打开。如果更新无法安装，Emberr 会提示你并打开下载页面。</string>
+    <string name="whatsnew_others_linux_restart">在 Linux 上，Emberr 重新启动后会再次打开，而不是直接关闭。</string>
     <string name="whatsnew_others_small_fixes">大量小修复。</string>
     <string name="whatsnew_preview_options">选项</string>
     <string name="whatsnew_preview_trip_title">周末旅行</string>
