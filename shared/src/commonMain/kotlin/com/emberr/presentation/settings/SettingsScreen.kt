@@ -411,7 +411,8 @@ fun SettingsScreen(
 
     val hazeState = remember { HazeState() }
     val listState = rememberLazyListState()
-    val desktopListScrollState = rememberScrollState()
+    val scrollPositionAfterLanguageChange = remember { viewModel.takeScrollPositionKeptForLanguageChange() }
+    val desktopListScrollState = rememberScrollState(initial = scrollPositionAfterLanguageChange)
     val desktopTopEdgeFadeAlpha by remember(desktopSubPage) {
         derivedStateOf { if (desktopSubPage == null && desktopListScrollState.value > 0) 1f else 0f }
     }
@@ -536,6 +537,7 @@ fun SettingsScreen(
                             subtitle = language.nameInCurrentLanguage()
                         ) {
                             if (language != chosenLanguage) {
+                                viewModel.keepScrollPositionForLanguageChange(desktopListScrollState.value)
                                 chooseAppLanguage(language)
                                 chosenLanguage = language
                                 if (appLanguageChangeNeedsRestart) showLanguageRestartNotice = true
