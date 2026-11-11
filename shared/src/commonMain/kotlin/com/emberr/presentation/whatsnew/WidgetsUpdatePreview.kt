@@ -83,11 +83,18 @@ private val JotButtonGlassColor = Color(0x33FFFFFF)
 private val JotTapColor = Color(0x66FFFFFF)
 private val DuskGradientColors = GradientColors(top = Color(0xFF4F5B8A), bottom = Color(0xFF4F7F8A))
 private val CopperGradientColors = GradientColors(top = Color(0xFF7A2E2A), bottom = Color(0xFFB8642F))
-private val CoverSkyTopColor = Color(0xFFE9A27A)
-private val CoverSkyBottomColor = Color(0xFFF6D2B1)
-private val CoverSunColor = Color(0xFFFFF1DC)
-private val CoverFarHillColor = Color(0xFFB8746A)
-private val CoverNearHillColor = Color(0xFF7E4C52)
+private val CoverSkyTopColor = Color(0xFFCF8A74)
+private val CoverSkyMiddleColor = Color(0xFFEDB08C)
+private val CoverHorizonColor = Color(0xFFF8DCC0)
+private val CoverSunColor = Color(0xFFFFF4E4)
+private val CoverFarthestRidgeColor = Color(0xFFE2A48A)
+private val CoverFarRidgeColor = Color(0xFFC88173)
+private val CoverMiddleRidgeColor = Color(0xFF9C5E62)
+private val CoverNearRidgeColor = Color(0xFF6B4150)
+private val CoverFarthestRidgeHeights = listOf(0.54f, 0.47f, 0.51f, 0.43f, 0.49f, 0.45f, 0.52f)
+private val CoverFarRidgeHeights = listOf(0.64f, 0.58f, 0.63f, 0.55f, 0.61f, 0.66f)
+private val CoverMiddleRidgeHeights = listOf(0.73f, 0.79f, 0.69f, 0.75f, 0.7f)
+private val CoverNearRidgeHeights = listOf(0.87f, 0.82f, 0.9f, 0.84f)
 private val LightWallpaperColors = listOf(Color(0xFFCFCFD4), Color(0xFF9EA0A8))
 private val DarkWallpaperColors = listOf(Color(0xFF2A2B31), Color(0xFF0D0D10))
 private const val WIDGET_COUNT = 3
@@ -282,30 +289,49 @@ private fun NoteCardWidgetCopy() {
 @Composable
 private fun SunsetCoverPicture(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
-        drawRect(Brush.verticalGradient(listOf(CoverSkyTopColor, CoverSkyBottomColor)))
+        drawRect(Brush.verticalGradient(listOf(CoverSkyTopColor, CoverSkyMiddleColor, CoverHorizonColor)))
+        val sunCenter = Offset(size.width * 0.68f, size.height * 0.5f)
+        val sunRadius = size.height * 0.13f
         drawCircle(
-            color = CoverSunColor,
-            radius = size.height * 0.16f,
-            center = Offset(size.width * 0.7f, size.height * 0.5f)
+            brush = Brush.radialGradient(
+                colors = listOf(CoverSunColor.copy(alpha = 0.6f), Color.Transparent),
+                center = sunCenter,
+                radius = sunRadius * 4f
+            ),
+            radius = sunRadius * 4f,
+            center = sunCenter
         )
-        drawHill(color = CoverFarHillColor, leftHeight = 0.68f, peakHeight = 0.42f, dipHeight = 0.8f, rightHeight = 0.58f)
-        drawHill(color = CoverNearHillColor, leftHeight = 0.9f, peakHeight = 0.62f, dipHeight = 0.96f, rightHeight = 0.76f)
+        drawCircle(color = CoverSunColor, radius = sunRadius, center = sunCenter)
+        drawRidge(CoverFarthestRidgeColor, CoverFarthestRidgeHeights)
+        drawRidge(CoverFarRidgeColor, CoverFarRidgeHeights)
+        drawRect(
+            Brush.verticalGradient(
+                colors = listOf(Color.Transparent, CoverHorizonColor.copy(alpha = 0.4f)),
+                startY = size.height * 0.5f,
+                endY = size.height * 0.8f
+            )
+        )
+        drawRidge(CoverMiddleRidgeColor, CoverMiddleRidgeHeights)
+        drawRidge(CoverNearRidgeColor, CoverNearRidgeHeights)
     }
 }
 
-private fun DrawScope.drawHill(color: Color, leftHeight: Float, peakHeight: Float, dipHeight: Float, rightHeight: Float) {
-    val hill = Path().apply {
-        moveTo(0f, size.height * leftHeight)
-        cubicTo(
-            size.width * 0.3f, size.height * peakHeight,
-            size.width * 0.65f, size.height * dipHeight,
-            size.width, size.height * rightHeight
-        )
+private fun DrawScope.drawRidge(color: Color, heights: List<Float>) {
+    val points = heights.mapIndexed { index, height ->
+        Offset(size.width * index / (heights.size - 1), size.height * height)
+    }
+    val ridge = Path().apply {
+        moveTo(points.first().x, points.first().y)
+        points.zipWithNext { current, next ->
+            val middle = Offset((current.x + next.x) / 2f, (current.y + next.y) / 2f)
+            quadraticTo(current.x, current.y, middle.x, middle.y)
+        }
+        lineTo(points.last().x, points.last().y)
         lineTo(size.width, size.height)
         lineTo(0f, size.height)
         close()
     }
-    drawPath(hill, color)
+    drawPath(ridge, color)
 }
 
 @Composable
