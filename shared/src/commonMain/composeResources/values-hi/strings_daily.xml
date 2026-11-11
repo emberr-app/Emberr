@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">अभी कुछ नहीं लिखा गया है।</string>
     <string name="daily_code">कोड</string>
     <string name="daily_today">आज</string>
+    <string name="daily_today_chip">आज</string>
     <string name="daily_tomorrow">आने वाला कल</string>
     <string name="daily_yesterday">बीता कल</string>
     <string name="daily_go_to_today">आज पर जाएँ</string>

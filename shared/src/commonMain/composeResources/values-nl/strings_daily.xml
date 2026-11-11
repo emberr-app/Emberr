@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">Nog niets geschreven.</string>
     <string name="daily_code">Code</string>
     <string name="daily_today">Vandaag</string>
+    <string name="daily_today_chip">Vandaag</string>
     <string name="daily_tomorrow">Morgen</string>
     <string name="daily_yesterday">Gisteren</string>
     <string name="daily_go_to_today">Naar vandaag</string>

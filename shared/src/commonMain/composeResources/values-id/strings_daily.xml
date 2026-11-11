@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">Belum ada yang ditulis.</string>
     <string name="daily_code">Kode</string>
     <string name="daily_today">Hari ini</string>
+    <string name="daily_today_chip">Hari ini</string>
     <string name="daily_tomorrow">Besok</string>
     <string name="daily_yesterday">Kemarin</string>
     <string name="daily_go_to_today">Ke hari ini</string>

@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">まだ何も書かれていません。</string>
     <string name="daily_code">コード</string>
     <string name="daily_today">今日</string>
+    <string name="daily_today_chip">今日</string>
     <string name="daily_tomorrow">明日</string>
     <string name="daily_yesterday">昨日</string>
     <string name="daily_go_to_today">今日に移動</string>

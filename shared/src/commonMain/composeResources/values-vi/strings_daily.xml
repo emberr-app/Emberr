@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">Chưa viết gì.</string>
     <string name="daily_code">Mã</string>
     <string name="daily_today">Hôm nay</string>
+    <string name="daily_today_chip">Hôm nay</string>
     <string name="daily_tomorrow">Ngày mai</string>
     <string name="daily_yesterday">Hôm qua</string>
     <string name="daily_go_to_today">Đến hôm nay</string>

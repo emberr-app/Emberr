@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">还没有写任何内容。</string>
     <string name="daily_code">代码</string>
     <string name="daily_today">今天</string>
+    <string name="daily_today_chip">今天</string>
     <string name="daily_tomorrow">明天</string>
     <string name="daily_yesterday">昨天</string>
     <string name="daily_go_to_today">转到今天</string>

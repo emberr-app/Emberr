@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">Ancora niente di scritto.</string>
     <string name="daily_code">Codice</string>
     <string name="daily_today">Oggi</string>
+    <string name="daily_today_chip">Oggi</string>
     <string name="daily_tomorrow">Domani</string>
     <string name="daily_yesterday">Ieri</string>
     <string name="daily_go_to_today">Vai a oggi</string>

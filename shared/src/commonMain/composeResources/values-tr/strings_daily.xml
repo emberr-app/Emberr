@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">Henüz bir şey yazılmadı.</string>
     <string name="daily_code">Kod</string>
     <string name="daily_today">Bugün</string>
+    <string name="daily_today_chip">Bugün</string>
     <string name="daily_tomorrow">Yarın</string>
     <string name="daily_yesterday">Dün</string>
     <string name="daily_go_to_today">Bugüne git</string>
