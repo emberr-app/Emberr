@@ -209,6 +209,14 @@
     <string name="settings_about_tagline">オープンソースでオフラインファーストのメモ・生産性アプリ</string>
     <string name="settings_about_copyright">Copyright © 2026 Benny</string>
     <string name="settings_about_license_notice">GNU AGPL v3.0の下でライセンスされています。いかなる保証もなく提供されます。</string>
+    <string name="settings_play_testing">Playストアのテストに参加</string>
+    <string name="settings_play_testing_dialog_title">EmberrのGoogle Play Store公開にご協力ください</string>
+    <string name="settings_play_testing_dialog_reason">一般公開の前に、12人のテスターに14日間Emberrを使ってもらう必要があります。</string>
+    <string name="settings_play_testing_step_join">Emberrテスターグループに参加します。</string>
+    <string name="settings_play_testing_step_install">次に、グループ内のリンクからGoogle Play StoreでEmberr: Private Workspaceをインストールします。</string>
+    <string name="settings_play_testing_no_data_lost">このアプリがそのまま更新され、データは失われません。</string>
+    <string name="settings_play_testing_join">グループに参加</string>
+    <string name="settings_play_testing_not_now">あとで</string>
 
     <string name="settings_third_party_group_movies_shows">映画と番組</string>
     <string name="settings_third_party_visit_tmdb">TMDBにアクセス</string>

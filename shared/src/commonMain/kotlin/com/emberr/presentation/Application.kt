@@ -69,6 +69,7 @@ import com.emberr.presentation.search.SearchViewModel
 import com.emberr.presentation.share.ShareReceiverSheet
 import com.emberr.presentation.share.ShareViewModel
 import com.emberr.presentation.whatsnew.EmberrUpdatePeek
+import com.emberr.presentation.settings.PlayTestingInvite
 import dev.chrisbanes.haze.hazeSource
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -111,6 +112,7 @@ fun EmberrApp(
     val noteRepository: NoteRepository = koinInject()
     val settingsManager = koinInject<com.emberr.data.local.prefs.SettingsManager>()
     val isUpdatePeekDue = rememberSaveable { claimUpdatePeekForThisLaunch(settingsManager) }
+    val isPlayTestingInviteDue = rememberSaveable { !isUpdatePeekDue && settingsManager.isOnboardingCompleted() }
     val isDailyNotesEnabled by settingsManager.dailyNotesEnabledFlow.collectAsState(
         initial = settingsManager.isDailyNotesEnabled()
     )
@@ -1443,6 +1445,8 @@ fun EmberrApp(
                         onCreateBlankNote = { shareViewModel.createNoteAndSave("") },
                         onDismiss = { shareViewModel.dismiss() }
                     )
+
+                    PlayTestingInvite(isDueThisLaunch = isPlayTestingInviteDue)
 
                     fullScreenContent?.invoke()
 

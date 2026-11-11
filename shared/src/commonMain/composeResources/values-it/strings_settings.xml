@@ -210,6 +210,14 @@
     <string name="settings_about_tagline">App open source per note e produttività, offline-first</string>
     <string name="settings_about_copyright">Copyright © 2026 Benny</string>
     <string name="settings_about_license_notice">Distribuito con licenza GNU AGPL v3.0. Fornito senza alcuna garanzia.</string>
+    <string name="settings_play_testing">Partecipa ai test sul Play Store</string>
+    <string name="settings_play_testing_dialog_title">Aiuta Emberr ad arrivare su Google Play Store</string>
+    <string name="settings_play_testing_dialog_reason">Google richiede 12 tester che usino Emberr per 14 giorni prima che possa essere rilasciato al pubblico.</string>
+    <string name="settings_play_testing_step_join">Unisciti al gruppo dei tester di Emberr.</string>
+    <string name="settings_play_testing_step_install">Poi installa Emberr: Private Workspace da Google Play Store con il link nel gruppo.</string>
+    <string name="settings_play_testing_no_data_lost">Aggiorna questa app senza perdere alcun dato.</string>
+    <string name="settings_play_testing_join">Unisciti al gruppo</string>
+    <string name="settings_play_testing_not_now">Non ora</string>
 
     <string name="settings_third_party_group_movies_shows">Film e serie</string>
     <string name="settings_third_party_visit_tmdb">Visita TMDB</string>

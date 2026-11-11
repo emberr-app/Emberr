@@ -210,6 +210,14 @@
     <string name="settings_about_tagline">ओपन-सोर्स, ऑफ़लाइन-फ़र्स्ट नोट और प्रोडक्टिविटी ऐप</string>
     <string name="settings_about_copyright">Copyright © 2026 Benny</string>
     <string name="settings_about_license_notice">GNU AGPL v3.0 के तहत लाइसेंस प्राप्त। बिना किसी वारंटी के दिया गया।</string>
+    <string name="settings_play_testing">Play Store टेस्टिंग से जुड़ें</string>
+    <string name="settings_play_testing_dialog_title">Emberr को Google Play Store तक पहुँचाने में मदद करें</string>
+    <string name="settings_play_testing_dialog_reason">सबके लिए रिलीज़ होने से पहले Google चाहता है कि 12 टेस्टर 14 दिनों तक Emberr इस्तेमाल करें।</string>
+    <string name="settings_play_testing_step_join">Emberr टेस्टर ग्रुप से जुड़ें।</string>
+    <string name="settings_play_testing_step_install">फिर ग्रुप में दिए लिंक से Google Play Store पर Emberr: Private Workspace इंस्टॉल करें।</string>
+    <string name="settings_play_testing_no_data_lost">यही ऐप अपडेट हो जाता है, कोई डेटा नहीं खोएगा।</string>
+    <string name="settings_play_testing_join">ग्रुप से जुड़ें</string>
+    <string name="settings_play_testing_not_now">अभी नहीं</string>
 
     <string name="settings_third_party_group_movies_shows">फ़िल्में और शो</string>
     <string name="settings_third_party_visit_tmdb">TMDB पर जाएँ</string>

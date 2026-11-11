@@ -1625,6 +1625,7 @@ private fun HelpSettingsSection(onAboutClick: () -> Unit) {
             title = stringResource(Res.string.settings_whats_new),
             onClick = { isWhatsNewOpen = true }
         )
+        PlayTestingSettingsRow()
         SettingsDivider()
         SettingsActionRow(
             icon = painterResource(Res.drawable.shield_alert),
