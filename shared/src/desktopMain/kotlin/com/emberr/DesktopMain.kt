@@ -92,6 +92,7 @@ import com.emberr.domain.util.export.handleExportPdf
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
 import com.emberr.presentation.shared.editor.GlobalEditorState
+import com.emberr.presentation.shared.LanguageChangeTransitionHost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -455,76 +456,78 @@ private fun runEmberrDesktopApp() = application {
                 autoHideTitleBar = autoHideTitleBar,
                 onCloseRequest = { isMainWindowOpen = false }
             ) {
-                EmberrApp(
-                    startRoute = Screen.Splash.route,
-                    onPickImage = { onPathSelected ->
-                        val dialog = java.awt.FileDialog(currentWindow, selectImageTitle, java.awt.FileDialog.LOAD)
-                        dialog.file = "*.png;*.jpg;*.jpeg;*.webp;*.gif"
-                        dialog.isVisible = true
-                        dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
-                    },
-                    onPickDocument = { onPathSelected ->
-                        val dialog = java.awt.FileDialog(currentWindow, selectDocumentTitle, java.awt.FileDialog.LOAD)
-                        dialog.isVisible = true
-                        dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
-                    },
-                    onOpenFile = { path, _ ->
-                        try {
-                            val cleanPath = path.removePrefix("file://")
-                            val originalFile = if (cleanPath.contains("/") || cleanPath.contains("\\")) {
-                                java.io.File(cleanPath)
-                            } else {
-                                java.io.File(DesktopAppStorage.mediaDirectory, cleanPath)
-                            }
+                LanguageChangeTransitionHost(languageTag = appliedAppLanguageTag) {
+                    EmberrApp(
+                        startRoute = Screen.Splash.route,
+                        onPickImage = { onPathSelected ->
+                            val dialog = java.awt.FileDialog(currentWindow, selectImageTitle, java.awt.FileDialog.LOAD)
+                            dialog.file = "*.png;*.jpg;*.jpeg;*.webp;*.gif"
+                            dialog.isVisible = true
+                            dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
+                        },
+                        onPickDocument = { onPathSelected ->
+                            val dialog = java.awt.FileDialog(currentWindow, selectDocumentTitle, java.awt.FileDialog.LOAD)
+                            dialog.isVisible = true
+                            dialog.files.firstOrNull()?.let { file -> onPathSelected(file.absolutePath) }
+                        },
+                        onOpenFile = { path, _ ->
+                            try {
+                                val cleanPath = path.removePrefix("file://")
+                                val originalFile = if (cleanPath.contains("/") || cleanPath.contains("\\")) {
+                                    java.io.File(cleanPath)
+                                } else {
+                                    java.io.File(DesktopAppStorage.mediaDirectory, cleanPath)
+                                }
 
-                            if (!originalFile.exists()) {
-                                SwingUtilities.invokeLater {
-                                    JOptionPane.showMessageDialog(
-                                        currentWindow,
-                                        fileNotFoundMessage,
-                                        fileNotFoundTitle,
-                                        JOptionPane.WARNING_MESSAGE
-                                    )
+                                if (!originalFile.exists()) {
+                                    SwingUtilities.invokeLater {
+                                        JOptionPane.showMessageDialog(
+                                            currentWindow,
+                                            fileNotFoundMessage,
+                                            fileNotFoundTitle,
+                                            JOptionPane.WARNING_MESSAGE
+                                        )
+                                    }
+                                } else {
+                                    java.awt.Desktop.getDesktop().open(originalFile)
                                 }
-                            } else {
-                                java.awt.Desktop.getDesktop().open(originalFile)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                openFileErrorScope.launch {
+                                    val failedMessage = getString(Res.string.desktop_open_file_failed, e.message.toString())
+                                    val errorTitle = getString(Res.string.desktop_error)
+                                    SwingUtilities.invokeLater {
+                                        JOptionPane.showMessageDialog(
+                                            currentWindow,
+                                            failedMessage,
+                                            errorTitle,
+                                            JOptionPane.ERROR_MESSAGE
+                                        )
+                                    }
+                                }
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            openFileErrorScope.launch {
-                                val failedMessage = getString(Res.string.desktop_open_file_failed, e.message.toString())
-                                val errorTitle = getString(Res.string.desktop_error)
-                                SwingUtilities.invokeLater {
-                                    JOptionPane.showMessageDialog(
-                                        currentWindow,
-                                        failedMessage,
-                                        errorTitle,
-                                        JOptionPane.ERROR_MESSAGE
-                                    )
-                                }
+                        },
+                        onExportMarkdown = { export ->
+                            Thread { handleExportMarkdown(currentWindow, export) }.start()
+                        },
+                        onExportPdf = { fileName, title, blocks ->
+                            Thread { handleExportPdf(currentWindow, fileName, title, blocks) }.start()
+                        },
+                        onExportBackup = { choice ->
+                            Thread { handleExportBackup(currentWindow, choice) }.start()
+                        },
+                        onRequestBackupFolder = {
+                            SwingUtilities.invokeLater {
+                                JOptionPane.showMessageDialog(
+                                    currentWindow,
+                                    backupOnlyOnAndroidMessage,
+                                    backupOnlyOnAndroidTitle,
+                                    JOptionPane.INFORMATION_MESSAGE
+                                )
                             }
                         }
-                    },
-                    onExportMarkdown = { export ->
-                        Thread { handleExportMarkdown(currentWindow, export) }.start()
-                    },
-                    onExportPdf = { fileName, title, blocks ->
-                        Thread { handleExportPdf(currentWindow, fileName, title, blocks) }.start()
-                    },
-                    onExportBackup = { choice ->
-                        Thread { handleExportBackup(currentWindow, choice) }.start()
-                    },
-                    onRequestBackupFolder = {
-                        SwingUtilities.invokeLater {
-                            JOptionPane.showMessageDialog(
-                                currentWindow,
-                                backupOnlyOnAndroidMessage,
-                                backupOnlyOnAndroidTitle,
-                                JOptionPane.INFORMATION_MESSAGE
-                            )
-                        }
-                    }
-                )
+                    )
+                }
 
                 PlainTextSecretWarningDialog()
                 AppUpdatePromptDialog()
