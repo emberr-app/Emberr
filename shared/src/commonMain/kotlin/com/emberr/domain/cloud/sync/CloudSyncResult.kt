@@ -14,5 +14,5 @@ sealed interface CloudSyncResult {
     data object UpdateRequired : CloudSyncResult
     data object AnotherSyncMethodIsOn : CloudSyncResult
     data object WaitingForAllowedNetwork : CloudSyncResult
-    data class Failed(val message: String) : CloudSyncResult
+    data class Failed(val problem: CloudSyncProblem) : CloudSyncResult
 }

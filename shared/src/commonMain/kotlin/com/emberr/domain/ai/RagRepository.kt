@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlin.math.sqrt
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.message_ai_no_indexed_notes
-import emberr.shared.generated.resources.message_ai_nothing_relevant
-import org.jetbrains.compose.resources.getString
+
+sealed interface AiReplyPiece {
+    data class Text(val text: String) : AiReplyPiece
+    data object NoIndexedNotes : AiReplyPiece
+    data object NothingRelevantInNotes : AiReplyPiece
+}
 
 class RagRepository(
     lazyDatabase: Lazy<EmberrDatabase>,
@@ -28,11 +30,11 @@ class RagRepository(
 
     private val database by lazyDatabase
 
-    val localAiUnsupportedReason: String? get() = localAiEngine.unsupportedHardwareReason
+    val localAiUnsupportedReason: LocalAiUnsupportedReason? get() = localAiEngine.unsupportedHardwareReason
 
     private val canSearchNoteKnowledge: Boolean get() = localAiUnsupportedReason == null
 
-    fun queryAiStream(userQuestion: String, conversationHistory: List<ChatTurn> = emptyList()): Flow<String> = flow {
+    fun queryAiStream(userQuestion: String, conversationHistory: List<ChatTurn> = emptyList()): Flow<AiReplyPiece> = flow {
         val knowledgeMode = aiSettingsRepository.knowledgeMode.first()
         val generationMode = aiSettingsRepository.aiGenerationMode.first()
         val maxOutputTokens = aiSettingsRepository.maxOutputTokens.first()
@@ -55,7 +57,7 @@ class RagRepository(
                 userQuestion = userQuestion,
                 contextBlock = "",
                 conversationHistory = planned.history
-            ).collect { token -> emit(token) }
+            ).collect { token -> emit(AiReplyPiece.Text(token)) }
             return@flow
         }
 
@@ -66,7 +68,7 @@ class RagRepository(
             .executeAsList()
 
         if (allBlocks.isEmpty()) {
-            emit(getString(Res.string.message_ai_no_indexed_notes))
+            emit(AiReplyPiece.NoIndexedNotes)
             return@flow
         }
 
@@ -137,7 +139,7 @@ class RagRepository(
             .take(totalLimit)
 
         if (combinedChunks.isEmpty()) {
-            emit(getString(Res.string.message_ai_nothing_relevant))
+            emit(AiReplyPiece.NothingRelevantInNotes)
             return@flow
         }
 
@@ -165,7 +167,7 @@ class RagRepository(
             userQuestion = userQuestion,
             contextBlock = contextBlock,
             conversationHistory = planned.history
-        ).collect { token -> emit(token) }
+        ).collect { token -> emit(AiReplyPiece.Text(token)) }
 
     }.flowOn(Dispatchers.Default)
 

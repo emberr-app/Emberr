@@ -1,11 +1,5 @@
 package com.emberr.domain.ai
 
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.message_ai_engine_not_bundled
-import emberr.shared.generated.resources.message_ai_needs_64_bit_processor
-import kotlinx.coroutines.runBlocking
-import org.jetbrains.compose.resources.getString
-
 private val BUNDLED_PROCESSOR_NAMES = setOf("amd64", "x86_64", "x86-64")
 
 private fun nativeEngineDirectoryFor(operatingSystemName: String): String? = when {
@@ -26,13 +20,10 @@ actual fun detectLocalAiSupport(): LocalAiSupport {
 
     return when {
         nativeEngineDirectory == null || !isNativeEngineBundledIn(nativeEngineDirectory) ->
-            LocalAiSupport.Unsupported(
-                runBlocking { getString(Res.string.message_ai_engine_not_bundled, operatingSystemName) }
-            )
+            LocalAiSupport.Unsupported(LocalAiUnsupportedReason.EngineNotBundledForSystem(operatingSystemName))
 
-        processorName !in BUNDLED_PROCESSOR_NAMES -> LocalAiSupport.Unsupported(
-            runBlocking { getString(Res.string.message_ai_needs_64_bit_processor, processorName) }
-        )
+        processorName !in BUNDLED_PROCESSOR_NAMES ->
+            LocalAiSupport.Unsupported(LocalAiUnsupportedReason.Needs64BitProcessor(processorName))
 
         else -> LocalAiSupport.Supported
     }

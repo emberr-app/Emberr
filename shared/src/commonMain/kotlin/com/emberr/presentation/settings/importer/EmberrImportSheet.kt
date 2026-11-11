@@ -105,7 +105,7 @@ fun EmberrImportSheet(
                 is EmberrImportProgress.Failed -> ImportOutcomeMessage(
                     title = stringResource(Res.string.import_emberr_failed),
                     detailLines = listOf(stringResource(Res.string.import_nothing_added)),
-                    errorLine = importProgress.reason,
+                    errorLine = importProgress.problem.text(),
                     onDoneClick = onDismiss
                 )
             }

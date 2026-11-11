@@ -33,14 +33,12 @@ private val READ_ONLY_TIME_AFTER_TRIAL_ENDS = 30.days
 sealed interface CloudText {
     data class Phrase(val resource: StringResource, val arguments: List<Any> = emptyList()) : CloudText
     data class Counted(val resource: PluralStringResource, val count: Int) : CloudText
-    data class Plain(val text: String) : CloudText
 }
 
 @Composable
 internal fun CloudText.asText(): String = when (this) {
     is CloudText.Phrase -> stringResource(resource, *arguments.map { it.asShownArgument() }.toTypedArray())
     is CloudText.Counted -> pluralStringResource(resource, count, count)
-    is CloudText.Plain -> text
 }
 
 private fun Any.asShownArgument(): Any = if (this is LocalDate) formatDate(this, DateTextStyle.FULL_MONTH_DAY_YEAR) else this

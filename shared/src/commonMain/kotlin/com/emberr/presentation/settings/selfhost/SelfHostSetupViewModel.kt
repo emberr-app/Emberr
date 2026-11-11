@@ -17,10 +17,11 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.selfhost.sync.SelfHostUpdateRequiredSignal
 import com.emberr.domain.selfhost.webdav.WebDavConfigurationException
 import com.emberr.domain.selfhost.webdav.WebDavConflictException
+import com.emberr.domain.selfhost.webdav.WebDavAddressProblem
 import com.emberr.domain.selfhost.webdav.WebDavConnectionTestResult
 import com.emberr.domain.selfhost.webdav.WebDavSyncClient
 import com.emberr.domain.sync.SyncNetworkRule
-import com.emberr.domain.sync.waitingForNetworkPhrase
+import com.emberr.presentation.sync.waitingForNetworkPhrase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -61,6 +62,10 @@ import org.jetbrains.compose.resources.stringResource
 import com.emberr.domain.util.time.formatDate
 import com.emberr.domain.util.time.DateTextStyle
 import emberr.shared.generated.resources.message_selfhost_update_required
+import emberr.shared.generated.resources.message_webdav_address_not_valid
+import emberr.shared.generated.resources.message_webdav_needs_https
+import emberr.shared.generated.resources.message_webdav_not_a_url
+import org.jetbrains.compose.resources.StringResource
 
 enum class ConnectionTestStatus { NOT_TESTED, TESTING, VERIFIED, FAILED }
 
@@ -124,6 +129,12 @@ sealed class SelfHostScreenState {
 }
 
 private const val WAIT_BEFORE_SHOWING_SYNC_FINISHED_MS = 1_000L
+
+private val WebDavAddressProblem.phrase: StringResource
+    get() = when (this) {
+        WebDavAddressProblem.NOT_A_URL -> Res.string.message_webdav_not_a_url
+        WebDavAddressProblem.PLAIN_HTTP_OUTSIDE_LOCAL_NETWORK -> Res.string.message_webdav_needs_https
+    }
 
 @Composable
 fun formatLastSynced(epochMillis: Long?, usesTwentyFourHourClock: Boolean): String {
@@ -326,6 +337,10 @@ class SelfHostSetupViewModel(
                         getString(Res.string.selfhost_server_returned_error, result.statusCode)
                     is WebDavConnectionTestResult.NetworkFailure ->
                         result.cause.message ?: getString(Res.string.selfhost_could_not_reach_server)
+                    is WebDavConnectionTestResult.InvalidAddress ->
+                        getString(result.problem.phrase, result.serverUrl)
+                    is WebDavConnectionTestResult.InvalidConfiguration ->
+                        result.detail ?: getString(Res.string.message_webdav_address_not_valid)
                     else -> null
                 }
                 updateForm { current ->
@@ -345,9 +360,14 @@ class SelfHostSetupViewModel(
                             connectionTestMessage = failureMessage
                         )
 
+                        is WebDavConnectionTestResult.InvalidAddress -> current.copy(
+                            connectionTestStatus = ConnectionTestStatus.FAILED,
+                            configurationWarningMessage = failureMessage
+                        )
+
                         is WebDavConnectionTestResult.InvalidConfiguration -> current.copy(
                             connectionTestStatus = ConnectionTestStatus.FAILED,
-                            configurationWarningMessage = result.message
+                            configurationWarningMessage = failureMessage
                         )
 
                         WebDavConnectionTestResult.Success -> current

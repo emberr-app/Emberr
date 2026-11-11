@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Delete this API key?</string>
     <string name="ai_delete_api_key_message">The saved key and settings for this provider will be removed from this device.</string>
     <string name="ai_finetune_warning">This model doesn't appear to be instruction/chat-tuned. It may produce poor or incoherent chat replies.</string>
-    <string name="ai_local_ai_cannot_run">Local AI cannot run on this hardware.</string>
     <string name="ai_sorry_error_with_reason">Sorry, an error occurred: %1$s</string>
 </resources>

@@ -51,6 +51,7 @@ import emberr.shared.generated.resources.import_nothing_added
 import emberr.shared.generated.resources.import_stopped
 import emberr.shared.generated.resources.import_stopping
 import emberr.shared.generated.resources.import_text_and_markdown
+import emberr.shared.generated.resources.message_import_stopped_early
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -208,6 +209,8 @@ private fun ImportFinishedMessage(result: ImportResult, spaceName: String?, onDo
         pluralStringResource(Res.plurals.import_attachment_count, result.copiedAttachmentCount, result.copiedAttachmentCount)
             .takeIf { result.copiedAttachmentCount > 0 }
     ).joinToString(" · ")
+    val stoppedEarlyText = stringResource(Res.string.message_import_stopped_early)
+    val shownFailedNames = if (result.stoppedEarly) result.failedNames + stoppedEarlyText else result.failedNames
 
     ImportOutcomeMessage(
         title = if (spaceName == null) {
@@ -221,7 +224,7 @@ private fun ImportFinishedMessage(result: ImportResult, spaceName: String?, onDo
             )
         },
         detailLines = listOf(extrasLine).filter { it.isNotEmpty() },
-        errorLine = result.failedNames.takeIf { it.isNotEmpty() }?.let { failedNames ->
+        errorLine = shownFailedNames.takeIf { it.isNotEmpty() }?.let { failedNames ->
             stringResource(Res.string.import_markdown_failed_files, failedNames.size, failedNames.joinToString(", "))
         },
         onDoneClick = onDoneClick

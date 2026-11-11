@@ -32,7 +32,7 @@ class LocalAiEngine(
 
     private val embedderFileName = ModelFileNames.EMBEDDER
 
-    val unsupportedHardwareReason: String? =
+    val unsupportedHardwareReason: LocalAiUnsupportedReason? =
         (detectLocalAiSupport() as? LocalAiSupport.Unsupported)?.reason
 
     private val nativeMutex = Mutex()

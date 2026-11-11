@@ -35,21 +35,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.time.Clock
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.message_cloud_media_could_not_ask_download
-import emberr.shared.generated.resources.message_cloud_media_could_not_link
-import emberr.shared.generated.resources.message_cloud_media_could_not_receive
-import emberr.shared.generated.resources.message_cloud_media_could_not_send
-import emberr.shared.generated.resources.message_cloud_media_could_not_unlink
-import emberr.shared.generated.resources.message_cloud_media_no_account_stream
-import emberr.shared.generated.resources.message_cloud_media_reason_cloud_answered
-import emberr.shared.generated.resources.message_cloud_media_reason_key_missing
-import emberr.shared.generated.resources.message_cloud_media_reason_network_not_picked
-import emberr.shared.generated.resources.message_cloud_media_reason_not_decrypted
-import emberr.shared.generated.resources.message_cloud_media_reason_storage_answered
-import emberr.shared.generated.resources.message_cloud_media_reason_unreachable
-import emberr.shared.generated.resources.message_unknown_error
-import org.jetbrains.compose.resources.getString
 
 private const val PROGRESS_REPORT_STEP_BYTES = 256L * 1024
 
@@ -77,18 +62,18 @@ data class CloudMediaPassResult(
     val filesNotReceivedCount: Int,
     val filesWaitingForUploadCount: Int,
     val stoppedBeforeTheEnd: Boolean,
-    val lastProblem: String?,
+    val lastProblem: CloudMediaProblem?,
     val uploadsRefusedReason: CloudUploadsRefusedReason? = null
 )
 
-internal suspend fun describeMediaFailure(error: Exception): String = when (error) {
-    is CloudApiException -> getString(Res.string.message_cloud_media_reason_cloud_answered, error.code.toString(), error.httpStatus)
-    is CloudBlobTransferException -> getString(Res.string.message_cloud_media_reason_storage_answered, error.httpStatus)
-    is CloudServerUnreachableException -> getString(Res.string.message_cloud_media_reason_unreachable)
-    is CloudDecryptionException -> getString(Res.string.message_cloud_media_reason_not_decrypted)
-    is CloudKeyNotFoundException -> getString(Res.string.message_cloud_media_reason_key_missing)
-    is CloudWaitingForAllowedNetworkException -> getString(Res.string.message_cloud_media_reason_network_not_picked)
-    else -> error::class.simpleName ?: getString(Res.string.message_unknown_error)
+internal fun mediaFailureOf(error: Exception): CloudMediaFailure = when (error) {
+    is CloudApiException -> CloudMediaFailure.CloudAnswered(error.code.toString(), error.httpStatus)
+    is CloudBlobTransferException -> CloudMediaFailure.StorageAnswered(error.httpStatus)
+    is CloudServerUnreachableException -> CloudMediaFailure.ServerUnreachable
+    is CloudDecryptionException -> CloudMediaFailure.NotDecrypted
+    is CloudKeyNotFoundException -> CloudMediaFailure.KeyMissing
+    is CloudWaitingForAllowedNetworkException -> CloudMediaFailure.NetworkNotPicked
+    else -> CloudMediaFailure.Other(error::class.simpleName)
 }
 
 private class LocalNoteMedia(val media: CloudNoteMedia, val title: String)
@@ -106,7 +91,7 @@ private class MediaPass(
     var tooLargeCount = 0
     var notSentCount = 0
     var notReceivedCount = 0
-    var lastProblem: String? = null
+    var lastProblem: CloudMediaProblem? = null
     var filesWaitingForUpload = 0
     var bytesOfFinishedUploads = 0L
     var bytesOfFinishedDownloads = 0L
@@ -153,7 +138,7 @@ class CloudMediaSync(
                 filesNotReceivedCount = 0,
                 filesWaitingForUploadCount = 0,
                 stoppedBeforeTheEnd = false,
-                lastProblem = getString(Res.string.message_cloud_media_no_account_stream)
+                lastProblem = CloudMediaProblem.NoAccountStream
             )
         mutableProgress.value = SelfHostSyncProgress()
         try {
@@ -261,7 +246,7 @@ class CloudMediaSync(
                 } else {
                     MediaTransferStatusBus.markFinished(fileName, succeeded = false)
                     pass.notReceivedCount++
-                    pass.lastProblem = getString(Res.string.message_cloud_media_could_not_ask_download, describeMediaFailure(error))
+                    pass.lastProblem = CloudMediaProblem.StepFailed(CloudMediaStep.ASKING_FOR_DOWNLOAD, mediaFailureOf(error))
                 }
                 null
             }
@@ -297,7 +282,7 @@ class CloudMediaSync(
             }
             when (uploadOutcomeOf(error)) {
                 UploadOutcome.REFUSED_BY_PLAN -> pass.uploadsRefusedReason = uploadsRefusedReasonOf(error as CloudApiException)
-                UploadOutcome.FAILED -> pass.lastProblem = getString(Res.string.message_cloud_media_could_not_send, describeMediaFailure(error))
+                UploadOutcome.FAILED -> pass.lastProblem = CloudMediaProblem.StepFailed(CloudMediaStep.SENDING, mediaFailureOf(error))
                 else -> Unit
             }
             uploadOutcomeOf(error)
@@ -337,7 +322,7 @@ class CloudMediaSync(
             if (refusedReason != null) {
                 pass.uploadsRefusedReason = refusedReason
             } else {
-                pass.lastProblem = getString(Res.string.message_cloud_media_could_not_link, describeMediaFailure(error))
+                pass.lastProblem = CloudMediaProblem.StepFailed(CloudMediaStep.LINKING_TO_NOTE, mediaFailureOf(error))
             }
         }
     }
@@ -368,7 +353,7 @@ class CloudMediaSync(
             throw cancellation
         } catch (error: Exception) {
             if (endsTheWholePass(error)) throw error
-            pass.lastProblem = getString(Res.string.message_cloud_media_could_not_unlink, describeMediaFailure(error))
+            pass.lastProblem = CloudMediaProblem.StepFailed(CloudMediaStep.UNLINKING_REMOVED_FILE, mediaFailureOf(error))
         }
     }
 
@@ -416,7 +401,7 @@ class CloudMediaSync(
                 throw error
             }
             pass.notReceivedCount++
-            pass.lastProblem = getString(Res.string.message_cloud_media_could_not_receive, describeMediaFailure(error))
+            pass.lastProblem = CloudMediaProblem.StepFailed(CloudMediaStep.RECEIVING, mediaFailureOf(error))
             false
         }
         MediaTransferStatusBus.markFinished(fileName, succeeded)

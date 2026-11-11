@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Hapus kunci API ini?</string>
     <string name="ai_delete_api_key_message">Kunci tersimpan dan setelan untuk penyedia ini akan dihapus dari perangkat ini.</string>
     <string name="ai_finetune_warning">Model ini sepertinya tidak dilatih untuk instruksi/obrolan. Model ini mungkin memberikan balasan obrolan yang buruk atau tidak masuk akal.</string>
-    <string name="ai_local_ai_cannot_run">AI lokal tidak dapat berjalan di perangkat keras ini.</string>
     <string name="ai_sorry_error_with_reason">Maaf, terjadi kesalahan: %1$s</string>
 </resources>

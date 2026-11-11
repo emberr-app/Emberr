@@ -32,9 +32,7 @@ import kotlinx.coroutines.withContext
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.import_emberr_unknown_error
 import emberr.shared.generated.resources.message_backup_credential_keys_not_saved
-import org.jetbrains.compose.resources.getString
 
 enum class BackupMediaCopyOutcome { COPIED, ALREADY_ON_DEVICE, NOT_IN_BACKUP }
 
@@ -56,7 +54,7 @@ sealed interface EmberrImportProgress {
     data object Stopping : EmberrImportProgress
     data object Stopped : EmberrImportProgress
     data class Finished(val result: EmberrImportResult) : EmberrImportProgress
-    data class Failed(val reason: String) : EmberrImportProgress
+    data class Failed(val problem: BackupProblem) : EmberrImportProgress
 }
 
 data class EmberrImportResult(
@@ -96,7 +94,7 @@ class EmberrBackupImporter(
                 _progress.value = EmberrImportProgress.Stopped
                 throw cancellation
             } catch (error: Throwable) {
-                EmberrImportProgress.Failed(backupProblemText(error) ?: getString(Res.string.import_emberr_unknown_error))
+                EmberrImportProgress.Failed(backupProblemOf(error))
             }
             withContext(NonCancellable) {
                 if (savedData != null) reminderRescheduler.rescheduleUpcomingReminders()

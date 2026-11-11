@@ -20,7 +20,6 @@ import kotlinx.coroutines.withContext
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.import_emberr_unknown_error
 import org.jetbrains.compose.resources.getString
-import com.emberr.domain.backup.manual.backupProblemText
 
 sealed interface PickedBackupState {
     data object NothingPicked : PickedBackupState

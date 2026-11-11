@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">このAPIキーを削除しますか？</string>
     <string name="ai_delete_api_key_message">このプロバイダの保存済みキーと設定がこのデバイスから削除されます。</string>
     <string name="ai_finetune_warning">このモデルは指示/チャット向けに調整されていないようです。チャットの返答の質が低かったり、支離滅裂になったりする可能性があります。</string>
-    <string name="ai_local_ai_cannot_run">このハードウェアではローカルAIを実行できません。</string>
     <string name="ai_sorry_error_with_reason">申し訳ありません。エラーが発生しました: %1$s</string>
 </resources>

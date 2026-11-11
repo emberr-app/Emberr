@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Xóa khóa API này?</string>
     <string name="ai_delete_api_key_message">Khóa đã lưu và cài đặt của nhà cung cấp này sẽ bị xóa khỏi thiết bị này.</string>
     <string name="ai_finetune_warning">Mô hình này có vẻ chưa được tinh chỉnh cho chỉ dẫn/trò chuyện. Câu trả lời có thể kém hoặc không mạch lạc.</string>
-    <string name="ai_local_ai_cannot_run">AI cục bộ không thể chạy trên phần cứng này.</string>
     <string name="ai_sorry_error_with_reason">Rất tiếc, đã xảy ra lỗi: %1$s</string>
 </resources>

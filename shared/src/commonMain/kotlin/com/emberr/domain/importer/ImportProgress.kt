@@ -18,7 +18,8 @@ data class ImportResult(
     val importedNoteCount: Int,
     val createdFolderCount: Int,
     val copiedAttachmentCount: Int,
-    val failedNames: List<String>
+    val failedNames: List<String>,
+    val stoppedEarly: Boolean = false
 )
 
 internal class ImportProgressTracker(

@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Diesen API-Schlüssel löschen?</string>
     <string name="ai_delete_api_key_message">Der gespeicherte Schlüssel und die Einstellungen für diesen Anbieter werden von diesem Gerät entfernt.</string>
     <string name="ai_finetune_warning">Dieses Modell scheint nicht für Anweisungen oder Chats trainiert zu sein. Die Chat-Antworten können schlecht oder unzusammenhängend sein.</string>
-    <string name="ai_local_ai_cannot_run">Lokale KI kann auf dieser Hardware nicht laufen.</string>
     <string name="ai_sorry_error_with_reason">Leider ist ein Fehler aufgetreten: %1$s</string>
 </resources>

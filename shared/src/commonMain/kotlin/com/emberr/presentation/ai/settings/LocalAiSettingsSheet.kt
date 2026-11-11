@@ -34,6 +34,7 @@ import com.emberr.domain.ai.models.ModelDownloadProgress
 import com.emberr.domain.ai.models.ModelFileNames
 import com.emberr.presentation.ai.LocalModelUploadState
 import com.emberr.presentation.ai.RagViewModel
+import com.emberr.presentation.ai.text
 import com.emberr.presentation.ai.components.ModelOptionCard
 import com.emberr.presentation.ai.components.UnsupportedHardwareNotice
 import com.emberr.presentation.shared.components.EmberrAlertDialog
@@ -138,7 +139,7 @@ internal fun LocalAiSettingsSheet(
                 subtitle = when (currentDownloadProgress) {
                     is ModelDownloadProgress.Downloading ->
                         stringResource(Res.string.ai_downloading_percent, (currentDownloadProgress.fraction * 100).toInt())
-                    is ModelDownloadProgress.Failed -> currentDownloadProgress.message
+                    is ModelDownloadProgress.Failed -> currentDownloadProgress.problem.text()
                     ModelDownloadProgress.Paused -> stringResource(Res.string.ai_paused)
                     else -> if (isDefaultModelInstalled)
                         stringResource(Res.string.ai_recommended_downloaded)
@@ -184,7 +185,7 @@ internal fun LocalAiSettingsSheet(
 
             val uploadStatusMessage = when (currentUploadState) {
                 LocalModelUploadState.Success -> stringResource(Res.string.ai_uploaded_successfully)
-                is LocalModelUploadState.Failed -> currentUploadState.message
+                is LocalModelUploadState.Failed -> currentUploadState.problem.text()
                 else -> null
             }
             if (uploadStatusMessage != null) {
