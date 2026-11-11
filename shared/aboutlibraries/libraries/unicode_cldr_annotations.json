@@ -1,0 +1,14 @@
+{
+  "uniqueId": "unicode:cldr-annotations",
+  "artifactVersion": "49.0.0",
+  "name": "Unicode CLDR emoji annotations",
+  "description": "Emoji names and keywords in each app language, used by the emoji picker search.",
+  "website": "https://cldr.unicode.org",
+  "developers": [],
+  "scm": {
+    "url": "https://github.com/unicode-org/cldr-json"
+  },
+  "licenses": [
+    "unicode-license-v3"
+  ]
+}

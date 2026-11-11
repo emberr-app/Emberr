@@ -65,6 +65,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -137,6 +138,7 @@ import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.model.PropertyDateRange
 import com.emberr.domain.model.TextAlignment
 import com.emberr.domain.repository.EmojiRepository
+import com.emberr.domain.util.search.searchFormOf
 import com.emberr.domain.util.system.showFeedback
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrDesktopSubmenu
@@ -1424,8 +1426,9 @@ fun CategorizedEmojiPicker(
     onEmojiSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(Unit) {
-        EmojiRepository.loadIfNeeded()
+    val emojiNamesFile = remember { EmojiRepository.emojiNamesFileFor(Locale.current.language, Locale.current.region) }
+    LaunchedEffect(emojiNamesFile) {
+        EmojiRepository.loadIfNeeded(emojiNamesFile)
     }
 
     if (!EmojiRepository.isLoaded) {
@@ -1441,20 +1444,21 @@ fun CategorizedEmojiPicker(
     val categoryNames = EmojiRepository.categories
     val flatEmojiList = EmojiRepository.flatList
     val categoryEmojiLists = EmojiRepository.categoryEmojiLists
+    val translatedEmojiNames = EmojiRepository.translatedNames
 
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    LaunchedEffect(searchQuery) {
+    LaunchedEffect(searchQuery, translatedEmojiNames) {
         if (searchQuery.isBlank()) {
             searchResults = emptyList()
             return@LaunchedEffect
         }
         delay(200.milliseconds)
-        val q = searchQuery.lowercase()
+        val q = searchFormOf(searchQuery)
         searchResults = withContext(Dispatchers.Default) {
             flatEmojiList.mapNotNullTo(ArrayList(32)) { (emoji, keywords) ->
-                emoji.takeIf { keywords.contains(q) }
+                emoji.takeIf { keywords.contains(q) || translatedEmojiNames[emoji]?.contains(q) == true }
             }
         }
     }
