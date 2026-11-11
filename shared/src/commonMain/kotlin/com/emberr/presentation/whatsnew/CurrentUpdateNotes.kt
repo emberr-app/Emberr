@@ -30,6 +30,13 @@ import emberr.shared.generated.resources.whatsnew_themes_where
 import emberr.shared.generated.resources.whatsnew_widgets_description
 import emberr.shared.generated.resources.whatsnew_widgets_heading
 import emberr.shared.generated.resources.whatsnew_widgets_where
+import com.emberr.domain.util.system.isLinuxDesktop
+import emberr.shared.generated.resources.whatsnew_languages_description_desktop
+import emberr.shared.generated.resources.whatsnew_languages_description_mobile
+import emberr.shared.generated.resources.whatsnew_languages_heading
+import emberr.shared.generated.resources.whatsnew_languages_where
+import emberr.shared.generated.resources.whatsnew_others_linux_cjk_font
+import emberr.shared.generated.resources.whatsnew_others_search_accents
 
 internal class UpdateNotesSection(
     val heading: StringResource,
@@ -42,6 +49,16 @@ internal class UpdateNotesSection(
 )
 
 internal val CurrentUpdateNotes = listOfNotNull(
+    UpdateNotesSection(
+        heading = Res.string.whatsnew_languages_heading,
+        whereToFind = Res.string.whatsnew_languages_where,
+        isNew = true,
+        description = if (isDesktopPlatform) {
+            Res.string.whatsnew_languages_description_desktop
+        } else {
+            Res.string.whatsnew_languages_description_mobile
+        }
+    ),
     UpdateNotesSection(
         heading = Res.string.whatsnew_themes_heading,
         whereToFind = Res.string.whatsnew_themes_where,
@@ -99,6 +116,8 @@ internal val CurrentUpdateNotes = listOfNotNull(
             },
             if (isDesktopPlatform) null else Res.string.whatsnew_others_sync_network,
             if (isWindowsDesktop) Res.string.whatsnew_others_windows_startup else null,
+            Res.string.whatsnew_others_search_accents,
+            if (isLinuxDesktop) Res.string.whatsnew_others_linux_cjk_font else null,
             Res.string.whatsnew_others_small_fixes
         )
     )

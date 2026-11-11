@@ -5,6 +5,10 @@
     <string name="whatsnew_title">新機能</string>
     <string name="whatsnew_version">バージョン%1$s</string>
     <string name="whatsnew_new">新着</string>
+    <string name="whatsnew_languages_heading">言語</string>
+    <string name="whatsnew_languages_where">設定 → 外観 → 言語</string>
+    <string name="whatsnew_languages_description_desktop">Emberrが18言語に対応しました。EspañolやDeutschから日本語、हिन्दीまで揃っています。パソコンの言語に合わせるほか、自分で選ぶこともできます。切り替えるとEmberrが再起動します。おかしな翻訳を見つけたら、GitHubでお知らせください。</string>
+    <string name="whatsnew_languages_description_mobile">Emberrが18言語に対応しました。EspañolやDeutschから日本語、हिन्दीまで揃っています。スマートフォンの言語に合わせるほか、自分で選ぶこともできます。Android 13以降では、スマートフォンの**設定 → アプリ → Emberr → 言語**からも設定できます。おかしな翻訳を見つけたら、GitHubでお知らせください。</string>
     <string name="whatsnew_themes_heading">テーマ</string>
     <string name="whatsnew_themes_where">設定 → 外観 → テーマ</string>
     <string name="whatsnew_themes_description_desktop">Nord、Catppuccin、Tokyo Night、Gruvbox、Rosé Pine、ハイコントラストなど、13種類のカラーテーマから選べます。テーマごとに強さを設定でき、テキストやアイコンにもテーマを適用するかどうかを選べます。</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">キーボードツールバーから、メモのタイトルに現在の時刻や日付を追加できます。</string>
     <string name="whatsnew_others_sync_network">同期に使うネットワークの選択は**設定 → 同期とバックアップ**に移動しました。</string>
     <string name="whatsnew_others_windows_startup">Windowsでの起動が速くなりました。</string>
+    <string name="whatsnew_others_search_accents">検索でアクセント記号が無視されるようになり、**uber**で**Über**も見つかります。絵文字検索もお使いの言語に対応しました。</string>
+    <string name="whatsnew_others_linux_cjk_font">日本語、韓国語、中国語のテキストには、Noto Sans CJKなどのCJKフォントが必要です。フォントがないと、これらの文字は四角で表示されます。</string>
     <string name="whatsnew_others_small_fixes">細かな修正を多数行いました。</string>
     <string name="whatsnew_preview_options">オプション</string>
     <string name="whatsnew_preview_trip_title">週末の旅行</string>

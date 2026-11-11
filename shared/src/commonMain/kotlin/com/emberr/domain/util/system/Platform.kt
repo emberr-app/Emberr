@@ -2,6 +2,7 @@ package com.emberr.domain.util.system
 
 expect val isDesktopPlatform: Boolean
 expect val isWindowsDesktop: Boolean
+expect val isLinuxDesktop: Boolean
 expect val isDebugBuild: Boolean
 expect val appVersionName: String?
 expect fun showFeedback(message: String)

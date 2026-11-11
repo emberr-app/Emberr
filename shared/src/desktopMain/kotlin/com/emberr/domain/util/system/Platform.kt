@@ -12,6 +12,7 @@ import org.koin.mp.KoinPlatform
 
 actual val isDesktopPlatform = true
 actual val isWindowsDesktop: Boolean = System.getProperty("os.name").orEmpty().contains("Windows", ignoreCase = true)
+actual val isLinuxDesktop: Boolean = System.getProperty("os.name").orEmpty().contains("Linux", ignoreCase = true)
 actual val isDebugBuild: Boolean = DesktopAppStorage.isDebugBuild
 actual val appVersionName: String?
     get() = System.getProperty("jpackage.app-version")

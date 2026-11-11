@@ -5,6 +5,10 @@
     <string name="whatsnew_title">Novidades</string>
     <string name="whatsnew_version">Versão %1$s</string>
     <string name="whatsnew_new">Novo</string>
+    <string name="whatsnew_languages_heading">Idiomas</string>
+    <string name="whatsnew_languages_where">Configurações → Aparência → Idioma</string>
+    <string name="whatsnew_languages_description_desktop">O Emberr agora está disponível em 18 idiomas, do Español e Deutsch ao 日本語 e हिन्दी. Ele segue o idioma do seu computador, ou você pode escolher um. O Emberr reinicia para trocar. Viu uma tradução estranha? Avise a gente no GitHub.</string>
+    <string name="whatsnew_languages_description_mobile">O Emberr agora está disponível em 18 idiomas, do Español e Deutsch ao 日本語 e हिन्दी. Ele segue o idioma do seu celular, ou você pode escolher um. No Android 13 ou mais recente, você também pode definir o idioma em **Configurações → Apps → Emberr → Idioma** do celular. Viu uma tradução estranha? Avise a gente no GitHub.</string>
     <string name="whatsnew_themes_heading">Temas</string>
     <string name="whatsnew_themes_where">Configurações → Aparência → Tema</string>
     <string name="whatsnew_themes_description_desktop">Escolha entre 13 temas de cores, como Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine e Alto contraste. Cada um tem um ajuste de intensidade, e você pode escolher se texto e ícones também o seguem.</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Adicione a hora ou a data atual ao título de uma nota pela barra de ferramentas do teclado.</string>
     <string name="whatsnew_others_sync_network">A escolha de rede para sincronização agora fica em **Configurações → Sincronização e backup**.</string>
     <string name="whatsnew_others_windows_startup">Inicialização mais rápida no Windows.</string>
+    <string name="whatsnew_others_search_accents">A pesquisa ignora acentos, então **acao** também encontra **Ação**, e a pesquisa de emojis entende o seu idioma.</string>
+    <string name="whatsnew_others_linux_cjk_font">Textos em japonês, coreano e chinês precisam de uma fonte CJK, como a Noto Sans CJK. Sem ela, esses caracteres aparecem como quadrados.</string>
     <string name="whatsnew_others_small_fixes">Várias pequenas correções.</string>
     <string name="whatsnew_preview_options">Opções</string>
     <string name="whatsnew_preview_trip_title">Viagem de fim de semana</string>

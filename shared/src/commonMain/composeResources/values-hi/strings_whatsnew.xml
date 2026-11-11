@@ -5,6 +5,10 @@
     <string name="whatsnew_title">नया क्या है</string>
     <string name="whatsnew_version">वर्शन %1$s</string>
     <string name="whatsnew_new">नया</string>
+    <string name="whatsnew_languages_heading">भाषाएं</string>
+    <string name="whatsnew_languages_where">सेटिंग → रूप-रंग → भाषा</string>
+    <string name="whatsnew_languages_description_desktop">Emberr अब 18 भाषाओं में उपलब्ध है, Español और Deutsch से लेकर 日本語 और हिन्दी तक। यह आपके कंप्यूटर की भाषा अपनाता है, या आप खुद कोई भाषा चुन सकते हैं। भाषा बदलने के लिए Emberr रीस्टार्ट होता है। कोई अजीब अनुवाद दिखा? GitHub पर हमें बताएं।</string>
+    <string name="whatsnew_languages_description_mobile">Emberr अब 18 भाषाओं में उपलब्ध है, Español और Deutsch से लेकर 日本語 और हिन्दी तक। यह आपके फ़ोन की भाषा अपनाता है, या आप खुद कोई भाषा चुन सकते हैं। Android 13 और उसके बाद के वर्शन पर, आप इसे अपने फ़ोन की **सेटिंग → ऐप्लिकेशन → Emberr → भाषा** में भी सेट कर सकते हैं। कोई अजीब अनुवाद दिखा? GitHub पर हमें बताएं।</string>
     <string name="whatsnew_themes_heading">थीम</string>
     <string name="whatsnew_themes_where">सेटिंग → रूप-रंग → थीम</string>
     <string name="whatsnew_themes_description_desktop">13 कलर थीम में से चुनें, जैसे Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine और हाई कंट्रास्ट। हर थीम की तीव्रता सेट की जा सकती है, और आप चुन सकते हैं कि टेक्स्ट और आइकन भी उसके रंग लें या नहीं।</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">कीबोर्ड टूलबार से नोट के शीर्षक में मौजूदा समय या तारीख जोड़ें।</string>
     <string name="whatsnew_others_sync_network">सिंक के लिए नेटवर्क का विकल्प अब **सेटिंग → सिंक और बैकअप** में है।</string>
     <string name="whatsnew_others_windows_startup">Windows पर ऐप अब तेज़ी से खुलता है।</string>
+    <string name="whatsnew_others_search_accents">सर्च अब एक्सेंट को अनदेखा करता है, इसलिए **uber** से **Über** भी मिल जाता है, और इमोजी सर्च आपकी भाषा समझता है।</string>
+    <string name="whatsnew_others_linux_cjk_font">जापानी, कोरियाई और चीनी टेक्स्ट के लिए Noto Sans CJK जैसा CJK फ़ॉन्ट चाहिए। इसके बिना ये अक्षर डिब्बों जैसे दिखते हैं।</string>
     <string name="whatsnew_others_small_fixes">कई छोटे सुधार।</string>
     <string name="whatsnew_preview_options">विकल्प</string>
     <string name="whatsnew_preview_trip_title">वीकेंड ट्रिप</string>
