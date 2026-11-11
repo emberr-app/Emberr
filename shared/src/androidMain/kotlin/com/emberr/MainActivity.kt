@@ -351,9 +351,9 @@ class MainActivity : FragmentActivity() {
                                 settingsViewModel.setBackupDirectory(it.toString())
                                 settingsViewModel.setAutoBackupEnabled(true)
 
-                                Toast.makeText(context, context.getString(R.string.message_backup_folder_linked), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, getString(R.string.message_backup_folder_linked), Toast.LENGTH_SHORT).show()
                             } catch (_: Exception) {
-                                Toast.makeText(context, context.getString(R.string.message_backup_folder_link_failed), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, getString(R.string.message_backup_folder_link_failed), Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -375,9 +375,9 @@ class MainActivity : FragmentActivity() {
                                 context.contentResolver.openOutputStream(it)?.use { stream ->
                                     stream.write(pendingMarkdownExport?.markdown.orEmpty().toByteArray())
                                 }
-                                Toast.makeText(context, context.getString(R.string.message_markdown_saved), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, getString(R.string.message_markdown_saved), Toast.LENGTH_SHORT).show()
                             } catch (_: Exception) {
-                                Toast.makeText(context, context.getString(R.string.message_file_save_failed), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, getString(R.string.message_file_save_failed), Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -395,14 +395,14 @@ class MainActivity : FragmentActivity() {
                                         }
                                     }
                                     if (missingAttachmentCount == null) {
-                                        context.getString(R.string.message_file_save_failed)
+                                        getString(R.string.message_file_save_failed)
                                     } else {
                                         MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount)
-                                            ?.let { notice -> context.getString(R.string.message_markdown_saved_with_notice, notice) }
-                                            ?: context.getString(R.string.message_markdown_saved)
+                                            ?.let { notice -> getString(R.string.message_markdown_saved_with_notice, notice) }
+                                            ?: getString(R.string.message_markdown_saved)
                                     }
                                 } catch (_: Exception) {
-                                    context.getString(R.string.message_file_save_failed)
+                                    getString(R.string.message_file_save_failed)
                                 }
                                 withContext(Dispatchers.Main) {
                                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -432,11 +432,11 @@ class MainActivity : FragmentActivity() {
                                     manualBackupExporter.exportToZip(destinationUri, choice)
 
                                     withContext(Dispatchers.Main) {
-                                        Toast.makeText(context, context.getString(R.string.message_backup_saved), Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, getString(R.string.message_backup_saved), Toast.LENGTH_SHORT).show()
                                     }
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {
-                                        Toast.makeText(context, context.getString(R.string.message_export_failed, backupProblemText(e)), Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, getString(R.string.message_export_failed, backupProblemText(e)), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }
