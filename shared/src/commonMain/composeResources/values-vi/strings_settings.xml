@@ -137,6 +137,7 @@
     <string name="settings_keyboard_toolbar">Thanh công cụ bàn phím</string>
 
     <string name="settings_faq">Câu hỏi thường gặp</string>
+    <string name="settings_send_feedback">Gửi phản hồi</string>
     <string name="settings_report_issue_or_suggest_feature">Báo lỗi hoặc đề xuất tính năng</string>
     <string name="settings_whats_new">Có gì mới</string>
     <string name="settings_privacy_policy">Chính sách quyền riêng tư</string>

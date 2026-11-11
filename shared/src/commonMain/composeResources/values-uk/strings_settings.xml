@@ -140,6 +140,7 @@
     <string name="settings_keyboard_toolbar">Панель інструментів клавіатури</string>
 
     <string name="settings_faq">Часті запитання</string>
+    <string name="settings_send_feedback">Надіслати відгук</string>
     <string name="settings_report_issue_or_suggest_feature">Повідомити про проблему або запропонувати функцію</string>
     <string name="settings_whats_new">Що нового</string>
     <string name="settings_privacy_policy">Політика конфіденційності</string>

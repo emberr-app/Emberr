@@ -138,6 +138,7 @@
     <string name="settings_keyboard_toolbar">Klavye araç çubuğu</string>
 
     <string name="settings_faq">SSS</string>
+    <string name="settings_send_feedback">Geri bildirim gönder</string>
     <string name="settings_report_issue_or_suggest_feature">Sorun bildir veya özellik öner</string>
     <string name="settings_whats_new">Yenilikler</string>
     <string name="settings_privacy_policy">Gizlilik politikası</string>

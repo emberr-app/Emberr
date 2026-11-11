@@ -137,6 +137,7 @@
     <string name="settings_keyboard_toolbar">키보드 도구 모음</string>
 
     <string name="settings_faq">자주 묻는 질문</string>
+    <string name="settings_send_feedback">의견 보내기</string>
     <string name="settings_report_issue_or_suggest_feature">문제 신고 또는 기능 제안</string>
     <string name="settings_whats_new">새로운 기능</string>
     <string name="settings_privacy_policy">개인정보처리방침</string>

@@ -137,6 +137,7 @@
     <string name="settings_keyboard_toolbar">键盘工具栏</string>
 
     <string name="settings_faq">常见问题</string>
+    <string name="settings_send_feedback">发送反馈</string>
     <string name="settings_report_issue_or_suggest_feature">报告问题或建议新功能</string>
     <string name="settings_whats_new">新功能</string>
     <string name="settings_privacy_policy">隐私政策</string>

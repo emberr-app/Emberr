@@ -140,6 +140,7 @@
     <string name="settings_keyboard_toolbar">Панель над клавиатурой</string>
 
     <string name="settings_faq">Вопросы и ответы</string>
+    <string name="settings_send_feedback">Отправить отзыв</string>
     <string name="settings_report_issue_or_suggest_feature">Сообщить о проблеме или предложить функцию</string>
     <string name="settings_whats_new">Что нового</string>
     <string name="settings_privacy_policy">Политика конфиденциальности</string>
