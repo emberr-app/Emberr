@@ -5,6 +5,10 @@
     <string name="whatsnew_title">Yenilikler</string>
     <string name="whatsnew_version">Sürüm %1$s</string>
     <string name="whatsnew_new">Yeni</string>
+    <string name="whatsnew_languages_heading">Diller</string>
+    <string name="whatsnew_languages_where">Ayarlar → Görünüm → Dil</string>
+    <string name="whatsnew_languages_description_desktop">Emberr artık Español, Deutsch, 日本語 ve हिन्दी dahil 18 dilde kullanılabilir. Bilgisayarınızın dilini izler veya dili kendiniz seçebilirsiniz. Dili değiştirmek için Emberr yeniden başlar. Garip bir çeviri mi gördünüz? GitHub'da bize bildirin.</string>
+    <string name="whatsnew_languages_description_mobile">Emberr artık Español, Deutsch, 日本語 ve हिन्दी dahil 18 dilde kullanılabilir. Telefonunuzun dilini izler veya dili kendiniz seçebilirsiniz. Android 13 ve sonraki sürümlerde dili telefonunuzun **Ayarlar → Uygulamalar → Emberr → Dil** bölümünden de ayarlayabilirsiniz. Garip bir çeviri mi gördünüz? GitHub'da bize bildirin.</string>
     <string name="whatsnew_themes_heading">Temalar</string>
     <string name="whatsnew_themes_where">Ayarlar → Görünüm → Tema</string>
     <string name="whatsnew_themes_description_desktop">Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine ve Yüksek kontrast gibi 13 renk teması arasından seçin. Her birinin bir yoğunluk ayarı var ve metinlerle simgelerin de temayı izleyip izlemeyeceğini seçebilirsiniz.</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Klavye araç çubuğundan not başlığına geçerli saati veya tarihi ekleyin.</string>
     <string name="whatsnew_others_sync_network">Eşitleme için ağ seçimi artık **Ayarlar → Eşitleme ve yedek** bölümünde.</string>
     <string name="whatsnew_others_windows_startup">Windows'ta daha hızlı açılış.</string>
+    <string name="whatsnew_others_search_accents">Arama aksanları yok sayar, yani **cicek** araması **Çiçek** sonucunu da bulur. Emoji araması da dilinizi anlar.</string>
+    <string name="whatsnew_others_linux_cjk_font">Japonca, Korece ve Çince metinler için Noto Sans CJK gibi bir CJK yazı tipi gerekir. Böyle bir yazı tipi yoksa bu karakterler kutu olarak görünür.</string>
     <string name="whatsnew_others_small_fixes">Pek çok küçük düzeltme.</string>
     <string name="whatsnew_preview_options">Seçenekler</string>
     <string name="whatsnew_preview_trip_title">Hafta sonu gezisi</string>

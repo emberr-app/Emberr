@@ -5,6 +5,10 @@
     <string name="whatsnew_title">Nouveautés</string>
     <string name="whatsnew_version">Version %1$s</string>
     <string name="whatsnew_new">Nouveau</string>
+    <string name="whatsnew_languages_heading">Langues</string>
+    <string name="whatsnew_languages_where">Réglages → Apparence → Langue</string>
+    <string name="whatsnew_languages_description_desktop">Emberr est désormais disponible en 18 langues, de Español et Deutsch à 日本語 et हिन्दी. Il suit la langue de votre ordinateur, ou vous pouvez en choisir une vous-même. Emberr redémarre pour changer de langue. Vous avez repéré une traduction bizarre ? Dites-le-nous sur GitHub.</string>
+    <string name="whatsnew_languages_description_mobile">Emberr est désormais disponible en 18 langues, de Español et Deutsch à 日本語 et हिन्दी. Il suit la langue de votre téléphone, ou vous pouvez en choisir une vous-même. Sur Android 13 et versions ultérieures, vous pouvez aussi la définir dans **Paramètres → Applications → Emberr → Langue** sur votre téléphone. Vous avez repéré une traduction bizarre ? Dites-le-nous sur GitHub.</string>
     <string name="whatsnew_themes_heading">Thèmes</string>
     <string name="whatsnew_themes_where">Réglages → Apparence → Thème</string>
     <string name="whatsnew_themes_description_desktop">Choisissez parmi 13 thèmes de couleurs, comme Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine et Contraste élevé. Chacun a un réglage d'intensité, et vous pouvez choisir si le texte et les icônes le suivent aussi.</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Ajoutez l'heure ou la date actuelle au titre d'une note depuis la barre d'outils du clavier.</string>
     <string name="whatsnew_others_sync_network">Le choix du réseau pour la synchro se trouve maintenant dans **Réglages → Synchro et sauvegarde**.</string>
     <string name="whatsnew_others_windows_startup">Démarrage plus rapide sous Windows.</string>
+    <string name="whatsnew_others_search_accents">La recherche ignore les accents : **ecole** trouve aussi **École**, et la recherche d'emojis comprend votre langue.</string>
+    <string name="whatsnew_others_linux_cjk_font">Le texte en japonais, coréen et chinois nécessite une police CJK comme Noto Sans CJK. Sans elle, ces caractères s'affichent sous forme de carrés.</string>
     <string name="whatsnew_others_small_fixes">De nombreuses petites corrections.</string>
     <string name="whatsnew_preview_options">Options</string>
     <string name="whatsnew_preview_trip_title">Week-end en voyage</string>

@@ -5,6 +5,10 @@
     <string name="whatsnew_title">Co nowego</string>
     <string name="whatsnew_version">Wersja %1$s</string>
     <string name="whatsnew_new">Nowość</string>
+    <string name="whatsnew_languages_heading">Języki</string>
+    <string name="whatsnew_languages_where">Ustawienia → Wygląd → Język</string>
+    <string name="whatsnew_languages_description_desktop">Emberr jest teraz dostępny w 18 językach, od Español i Deutsch po 日本語 i हिन्दी. Używa języka Twojego komputera, ale możesz też wybrać inny. Emberr uruchomi się ponownie, aby zmienić język. Widzisz dziwne tłumaczenie? Daj nam znać na GitHubie.</string>
+    <string name="whatsnew_languages_description_mobile">Emberr jest teraz dostępny w 18 językach, od Español i Deutsch po 日本語 i हिन्दी. Używa języka Twojego telefonu, ale możesz też wybrać inny. Na Androidzie 13 i nowszym możesz go też ustawić w telefonie w **Ustawienia → Aplikacje → Emberr → Język**. Widzisz dziwne tłumaczenie? Daj nam znać na GitHubie.</string>
     <string name="whatsnew_themes_heading">Motywy</string>
     <string name="whatsnew_themes_where">Ustawienia → Wygląd → Motyw</string>
     <string name="whatsnew_themes_description_desktop">Wybierz jeden z 13 motywów kolorystycznych, takich jak Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine i Wysoki kontrast. Każdy ma ustawienie intensywności, a Ty decydujesz, czy tekst i ikony też mają za nim podążać.</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Dodaj bieżącą godzinę lub datę do tytułu notatki z paska narzędzi klawiatury.</string>
     <string name="whatsnew_others_sync_network">Wybór sieci do synchronizacji jest teraz w **Ustawienia → Synchronizacja i kopia zapasowa**.</string>
     <string name="whatsnew_others_windows_startup">Szybsze uruchamianie w systemie Windows.</string>
+    <string name="whatsnew_others_search_accents">Wyszukiwanie ignoruje znaki diakrytyczne, więc **lodz** znajdzie też **Łódź**, a wyszukiwanie emoji rozumie Twój język.</string>
+    <string name="whatsnew_others_linux_cjk_font">Tekst japoński, koreański i chiński wymaga czcionki CJK, np. Noto Sans CJK. Bez niej te znaki wyświetlają się jako kwadraty.</string>
     <string name="whatsnew_others_small_fixes">Mnóstwo drobnych poprawek.</string>
     <string name="whatsnew_preview_options">Opcje</string>
     <string name="whatsnew_preview_trip_title">Wyjazd na weekend</string>

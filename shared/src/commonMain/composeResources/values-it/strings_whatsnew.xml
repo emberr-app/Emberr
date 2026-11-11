@@ -5,6 +5,10 @@
     <string name="whatsnew_title">Novità</string>
     <string name="whatsnew_version">Versione %1$s</string>
     <string name="whatsnew_new">Nuovo</string>
+    <string name="whatsnew_languages_heading">Lingue</string>
+    <string name="whatsnew_languages_where">Impostazioni → Aspetto → Lingua</string>
+    <string name="whatsnew_languages_description_desktop">Emberr è ora disponibile in 18 lingue, da Español e Deutsch a 日本語 e हिन्दी. Segue la lingua del tuo computer, oppure puoi sceglierne una tu. Emberr si riavvia per cambiarla. Hai trovato una traduzione strana? Faccelo sapere su GitHub.</string>
+    <string name="whatsnew_languages_description_mobile">Emberr è ora disponibile in 18 lingue, da Español e Deutsch a 日本語 e हिन्दी. Segue la lingua del tuo telefono, oppure puoi sceglierne una tu. Su Android 13 e versioni successive puoi impostarla anche in **Impostazioni → App → Emberr → Lingua** del telefono. Hai trovato una traduzione strana? Faccelo sapere su GitHub.</string>
     <string name="whatsnew_themes_heading">Temi</string>
     <string name="whatsnew_themes_where">Impostazioni → Aspetto → Tema</string>
     <string name="whatsnew_themes_description_desktop">Scegli tra 13 temi di colore, come Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine e Alto contrasto. Ognuno ha un'impostazione di intensità e puoi scegliere se anche testo e icone lo seguono.</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Aggiungi l'ora o la data attuale al titolo di una nota dalla barra della tastiera.</string>
     <string name="whatsnew_others_sync_network">La scelta della rete per la sincronizzazione ora è in **Impostazioni → Sincronizzazione e backup**.</string>
     <string name="whatsnew_others_windows_startup">Avvio più veloce su Windows.</string>
+    <string name="whatsnew_others_search_accents">La ricerca ignora gli accenti, quindi **citta** trova anche **Città**, e la ricerca delle emoji capisce la tua lingua.</string>
+    <string name="whatsnew_others_linux_cjk_font">Il testo in giapponese, coreano e cinese richiede un font CJK come Noto Sans CJK. Senza, quei caratteri appaiono come riquadri.</string>
     <string name="whatsnew_others_small_fixes">Tante piccole correzioni.</string>
     <string name="whatsnew_preview_options">Opzioni</string>
     <string name="whatsnew_preview_trip_title">Gita nel weekend</string>

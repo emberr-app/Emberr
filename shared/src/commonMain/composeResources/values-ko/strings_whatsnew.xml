@@ -5,6 +5,10 @@
     <string name="whatsnew_title">새로운 기능</string>
     <string name="whatsnew_version">버전 %1$s</string>
     <string name="whatsnew_new">신규</string>
+    <string name="whatsnew_languages_heading">언어</string>
+    <string name="whatsnew_languages_where">설정 → 모양 → 언어</string>
+    <string name="whatsnew_languages_description_desktop">이제 Emberr를 Español, Deutsch부터 日本語, हिन्दी까지 18개 언어로 사용할 수 있어요. 컴퓨터의 언어를 따르며, 직접 고를 수도 있어요. 언어를 바꾸면 Emberr가 다시 시작돼요. 어색한 번역을 발견하셨나요? GitHub에서 알려 주세요.</string>
+    <string name="whatsnew_languages_description_mobile">이제 Emberr를 Español, Deutsch부터 日本語, हिन्दी까지 18개 언어로 사용할 수 있어요. 휴대폰의 언어를 따르며, 직접 고를 수도 있어요. Android 13 이상에서는 휴대폰의 **설정 → 앱 → Emberr → 언어**에서도 설정할 수 있어요. 어색한 번역을 발견하셨나요? GitHub에서 알려 주세요.</string>
     <string name="whatsnew_themes_heading">테마</string>
     <string name="whatsnew_themes_where">설정 → 모양 → 테마</string>
     <string name="whatsnew_themes_description_desktop">Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, 고대비 등 13가지 색상 테마 중에서 고르세요. 테마마다 강도를 설정할 수 있고, 텍스트와 아이콘도 테마를 따를지 정할 수 있어요.</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">키보드 도구 모음에서 노트 제목에 현재 시간이나 날짜를 추가하세요.</string>
     <string name="whatsnew_others_sync_network">동기화 네트워크 선택은 이제 **설정 → 동기화 및 백업**에 있어요.</string>
     <string name="whatsnew_others_windows_startup">Windows에서 더 빠르게 시작돼요.</string>
+    <string name="whatsnew_others_search_accents">검색할 때 악센트를 무시해서 **uber**로 **Über**도 찾을 수 있고, 이모지 검색도 사용 중인 언어를 이해해요.</string>
+    <string name="whatsnew_others_linux_cjk_font">일본어, 한국어, 중국어 텍스트에는 Noto Sans CJK 같은 CJK 글꼴이 필요해요. 글꼴이 없으면 해당 문자가 네모로 표시돼요.</string>
     <string name="whatsnew_others_small_fixes">다양한 작은 수정.</string>
     <string name="whatsnew_preview_options">옵션</string>
     <string name="whatsnew_preview_trip_title">주말 여행</string>

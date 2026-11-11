@@ -5,6 +5,10 @@
     <string name="whatsnew_title">What's new</string>
     <string name="whatsnew_version">Version %1$s</string>
     <string name="whatsnew_new">New</string>
+    <string name="whatsnew_languages_heading">Languages</string>
+    <string name="whatsnew_languages_where">Settings → Appearance → Language</string>
+    <string name="whatsnew_languages_description_desktop">Emberr is now available in 18 languages, from Español and Deutsch to 日本語 and हिन्दी. It follows your computer's language, or you can pick one yourself. Emberr restarts to switch. Spotted an odd translation? Let us know on GitHub.</string>
+    <string name="whatsnew_languages_description_mobile">Emberr is now available in 18 languages, from Español and Deutsch to 日本語 and हिन्दी. It follows your phone's language, or you can pick one yourself. On Android 13 and newer, you can also set it in your phone's **Settings → Apps → Emberr → Language**. Spotted an odd translation? Let us know on GitHub.</string>
     <string name="whatsnew_themes_heading">Themes</string>
     <string name="whatsnew_themes_where">Settings → Appearance → Theme</string>
     <string name="whatsnew_themes_description_desktop">Pick from 13 color themes, like Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine and High Contrast. Each one has a strength setting, and you can choose whether text and icons follow it too.</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Add the current time or date to a note's title from the keyboard toolbar.</string>
     <string name="whatsnew_others_sync_network">The network choice for sync is now in **Settings → Sync &amp; Backup**.</string>
     <string name="whatsnew_others_windows_startup">Faster startup on Windows.</string>
+    <string name="whatsnew_others_search_accents">Search ignores accents, so **uber** also finds **Über**, and emoji search understands your language.</string>
+    <string name="whatsnew_others_linux_cjk_font">Japanese, Korean and Chinese text needs a CJK font such as Noto Sans CJK. Without one, those characters show as boxes.</string>
     <string name="whatsnew_others_small_fixes">Plenty of small fixes.</string>
     <string name="whatsnew_preview_options">Options</string>
     <string name="whatsnew_preview_trip_title">Weekend trip</string>

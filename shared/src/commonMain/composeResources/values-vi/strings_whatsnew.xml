@@ -5,6 +5,10 @@
     <string name="whatsnew_title">Có gì mới</string>
     <string name="whatsnew_version">Phiên bản %1$s</string>
     <string name="whatsnew_new">Mới</string>
+    <string name="whatsnew_languages_heading">Ngôn ngữ</string>
+    <string name="whatsnew_languages_where">Cài đặt → Giao diện → Ngôn ngữ</string>
+    <string name="whatsnew_languages_description_desktop">Emberr nay đã có 18 ngôn ngữ, từ Español và Deutsch đến 日本語 và हिन्दी. Ứng dụng dùng ngôn ngữ của máy tính, hoặc bạn có thể tự chọn. Emberr sẽ khởi động lại để chuyển ngôn ngữ. Thấy bản dịch nào lạ? Hãy báo cho chúng tôi trên GitHub.</string>
+    <string name="whatsnew_languages_description_mobile">Emberr nay đã có 18 ngôn ngữ, từ Español và Deutsch đến 日本語 và हिन्दी. Ứng dụng dùng ngôn ngữ của điện thoại, hoặc bạn có thể tự chọn. Trên Android 13 trở lên, bạn cũng có thể đặt ngôn ngữ trong **Cài đặt → Ứng dụng → Emberr → Ngôn ngữ** của điện thoại. Thấy bản dịch nào lạ? Hãy báo cho chúng tôi trên GitHub.</string>
     <string name="whatsnew_themes_heading">Chủ đề</string>
     <string name="whatsnew_themes_where">Cài đặt → Giao diện → Chủ đề</string>
     <string name="whatsnew_themes_description_desktop">Chọn trong 13 chủ đề màu, như Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine và Tương phản cao. Mỗi chủ đề có thể chỉnh độ đậm, và bạn có thể chọn để chữ và biểu tượng cũng theo màu chủ đề.</string>
@@ -29,6 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Thêm giờ hoặc ngày hiện tại vào tiêu đề ghi chú từ thanh công cụ bàn phím.</string>
     <string name="whatsnew_others_sync_network">Lựa chọn mạng cho đồng bộ giờ nằm trong **Cài đặt → Đồng bộ &amp; sao lưu**.</string>
     <string name="whatsnew_others_windows_startup">Khởi động nhanh hơn trên Windows.</string>
+    <string name="whatsnew_others_search_accents">Tìm kiếm bỏ qua dấu, nên gõ **tieng viet** cũng tìm thấy **Tiếng Việt**, và tìm kiếm emoji hiểu ngôn ngữ của bạn.</string>
+    <string name="whatsnew_others_linux_cjk_font">Văn bản tiếng Nhật, tiếng Hàn và tiếng Trung cần phông chữ CJK như Noto Sans CJK. Nếu không có, các ký tự đó sẽ hiện thành ô vuông.</string>
     <string name="whatsnew_others_small_fixes">Nhiều bản sửa lỗi nhỏ.</string>
     <string name="whatsnew_preview_options">Tùy chọn</string>
     <string name="whatsnew_preview_trip_title">Chuyến đi cuối tuần</string>
