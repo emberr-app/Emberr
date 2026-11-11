@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">Поки нічого не написано.</string>
     <string name="daily_code">Код</string>
     <string name="daily_today">Сьогодні</string>
+    <string name="daily_today_chip">Сьогодні</string>
     <string name="daily_tomorrow">Завтра</string>
     <string name="daily_yesterday">Учора</string>
     <string name="daily_go_to_today">Перейти до сьогодні</string>

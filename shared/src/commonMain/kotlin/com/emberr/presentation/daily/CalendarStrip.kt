@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.IconTooltip
@@ -38,6 +39,7 @@ import com.emberr.presentation.shared.components.NoRippleIndicationNodeFactory
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.horizontalScrollFromBackAndForwardButtons
+import com.emberr.presentation.shared.components.shrinkToFitOneLine
 import com.emberr.ui.theme.LocalFirstDayOfWeek
 import dev.chrisbanes.haze.HazeState
 import emberr.shared.generated.resources.Res
@@ -48,7 +50,7 @@ import emberr.shared.generated.resources.daily_next
 import emberr.shared.generated.resources.daily_next_month
 import emberr.shared.generated.resources.daily_previous
 import emberr.shared.generated.resources.daily_previous_month
-import emberr.shared.generated.resources.daily_today
+import emberr.shared.generated.resources.daily_today_chip
 import kotlinx.coroutines.delay
 import kotlinx.datetime.*
 import kotlin.time.Clock
@@ -266,26 +268,37 @@ private fun WeekStripChip(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = NoRippleIndicationNodeFactory
             ) { onClick() }
+            .padding(horizontal = 4.dp)
     ) {
         if (isToday) {
             Text(
-                text = stringResource(Res.string.daily_today),
+                text = stringResource(Res.string.daily_today_chip),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = activeFontWeight,
-                color = primaryTextColor
+                color = primaryTextColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                autoSize = shrinkToFitOneLine(MaterialTheme.typography.labelSmall),
+                modifier = Modifier.weight(1f, fill = false)
             )
         } else {
             Text(
                 text = shortDayName,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = activeFontWeight,
-                color = mutedTextColor
+                color = mutedTextColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                autoSize = shrinkToFitOneLine(MaterialTheme.typography.labelSmall),
+                modifier = Modifier.weight(1f, fill = false)
             )
             Text(
                 text = date.day.toString(),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = activeFontWeight,
-                color = primaryTextColor
+                color = primaryTextColor,
+                maxLines = 1,
+                softWrap = false
             )
         }
     }

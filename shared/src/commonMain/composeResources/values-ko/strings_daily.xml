@@ -10,6 +10,7 @@
     <string name="daily_nothing_written_yet">아직 작성한 내용이 없어요.</string>
     <string name="daily_code">코드</string>
     <string name="daily_today">오늘</string>
+    <string name="daily_today_chip">오늘</string>
     <string name="daily_tomorrow">내일</string>
     <string name="daily_yesterday">어제</string>
     <string name="daily_go_to_today">오늘로 이동</string>
