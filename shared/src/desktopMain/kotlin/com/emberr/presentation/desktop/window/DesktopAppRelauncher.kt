@@ -1,14 +1,19 @@
 package com.emberr.presentation.desktop.window
 
+import com.emberr.core.desktop.windowsPowerShellPathIn
 import com.emberr.core.desktop.withoutLauncherRestartMarker
 import com.emberr.domain.update.appimage.RunningAppImage
 import com.emberr.domain.update.detectStagedUpdateInstallation
 import com.emberr.domain.util.system.appVersionName
+import com.emberr.domain.util.system.isWindowsDesktop
 import java.io.File
 
 object DesktopAppRelauncher {
 
     private const val SECONDS_TO_WAIT_FOR_THIS_PROCESS_TO_EXIT = 2
+    private const val SECONDS_TO_WAIT_FOR_WINDOWS_PROCESS_TO_EXIT = 60
+    private const val WAIT_FOR_PROCESS_VARIABLE = "EMBERR_RESTART_WAIT_FOR_PROCESS"
+    private const val EXECUTABLE_VARIABLE = "EMBERR_RESTART_EXECUTABLE"
 
     val isSupported: Boolean
         get() = currentProcessCommand() != null
@@ -20,8 +25,13 @@ object DesktopAppRelauncher {
         }
 
         val command = currentProcessCommand() ?: return false
-        return runCatching {
+        val relaunchProcess = if (isWindowsDesktop) {
+            windowsRelaunchProcess(executablePath = command.first()) ?: return false
+        } else {
             ProcessBuilder(delayedCommand(command))
+        }
+        return runCatching {
+            relaunchProcess
                 .withoutLauncherRestartMarker()
                 .directory(File(System.getProperty("user.dir")))
                 .redirectOutput(ProcessBuilder.Redirect.DISCARD)
@@ -45,4 +55,20 @@ object DesktopAppRelauncher {
         "sleep $SECONDS_TO_WAIT_FOR_THIS_PROCESS_TO_EXIT; exec \"$@\"",
         "emberr-restart"
     ) + command
+
+    private fun windowsRelaunchProcess(executablePath: String): ProcessBuilder? {
+        val windowsDirectory = System.getenv("SystemRoot")?.let(::File) ?: return null
+        return ProcessBuilder(
+            windowsPowerShellPathIn(windowsDirectory),
+            "-NoProfile",
+            "-NonInteractive",
+            "-WindowStyle", "Hidden",
+            "-Command",
+            "Wait-Process -Id \$env:$WAIT_FOR_PROCESS_VARIABLE -Timeout $SECONDS_TO_WAIT_FOR_WINDOWS_PROCESS_TO_EXIT " +
+                "-ErrorAction SilentlyContinue; Start-Process -FilePath \$env:$EXECUTABLE_VARIABLE"
+        ).apply {
+            environment()[WAIT_FOR_PROCESS_VARIABLE] = ProcessHandle.current().pid().toString()
+            environment()[EXECUTABLE_VARIABLE] = executablePath
+        }
+    }
 }

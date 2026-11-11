@@ -1,5 +1,6 @@
 package com.emberr.domain.update.windows
 
+import com.emberr.core.desktop.windowsPowerShellPathIn
 import com.emberr.domain.update.AppUpdateDownload
 import com.emberr.domain.update.AppUpdateManifest
 import com.emberr.domain.update.StagedUpdateInstallation
@@ -42,7 +43,7 @@ class WindowsInstallation(
     }
 
     override fun installerCommand(appProcessId: Long, launchAfterInstall: Boolean): List<String> = listOf(
-        windowsDirectory.resolve(POWERSHELL_PATH_INSIDE_WINDOWS_DIRECTORY).path,
+        windowsPowerShellPathIn(windowsDirectory),
         "-NoProfile",
         "-NonInteractive",
         "-ExecutionPolicy", "Bypass",
@@ -73,7 +74,6 @@ class WindowsInstallation(
         private const val INSTALLER_FILE_NAME = "Emberr-Setup-x86_64.exe"
         private const val INSTALL_SCRIPT_NAME = "install-update.ps1"
         private const val INSTALL_SCRIPT_RESOURCE = "update/windows/install-update.ps1"
-        private const val POWERSHELL_PATH_INSIDE_WINDOWS_DIRECTORY = "System32/WindowsPowerShell/v1.0/powershell.exe"
 
         fun forRunningAppOrNull(): WindowsInstallation? {
             if (!System.getProperty("os.name").orEmpty().lowercase().contains("win")) return null
