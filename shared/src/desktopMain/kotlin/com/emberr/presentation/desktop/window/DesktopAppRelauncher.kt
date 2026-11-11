@@ -11,12 +11,9 @@ import java.io.File
 object DesktopAppRelauncher {
 
     private const val SECONDS_TO_WAIT_FOR_THIS_PROCESS_TO_EXIT = 2
-    private const val SECONDS_TO_WAIT_FOR_WINDOWS_PROCESS_TO_EXIT = 60
+    private const val MAX_SECONDS_TO_WAIT_FOR_WINDOWS_APP_TO_EXIT = 60
     private const val WAIT_FOR_PROCESS_VARIABLE = "EMBERR_RESTART_WAIT_FOR_PROCESS"
     private const val EXECUTABLE_VARIABLE = "EMBERR_RESTART_EXECUTABLE"
-
-    val isSupported: Boolean
-        get() = currentProcessCommand() != null
 
     fun startNewInstance(): Boolean {
         val stagedUpdateInstallation = detectStagedUpdateInstallation()
@@ -25,11 +22,7 @@ object DesktopAppRelauncher {
         }
 
         val command = currentProcessCommand() ?: return false
-        val relaunchProcess = if (isWindowsDesktop) {
-            windowsRelaunchProcess(executablePath = command.first()) ?: return false
-        } else {
-            ProcessBuilder(delayedCommand(command))
-        }
+        val relaunchProcess = relaunchProcessFor(command) ?: return false
         return runCatching {
             relaunchProcess
                 .withoutLauncherRestartMarker()
@@ -56,6 +49,12 @@ object DesktopAppRelauncher {
         "emberr-restart"
     ) + command
 
+    private fun relaunchProcessFor(command: List<String>): ProcessBuilder? {
+        if (!isWindowsDesktop) return ProcessBuilder(delayedCommand(command))
+        val executablePath = command.first()
+        return windowsRelaunchProcess(executablePath)
+    }
+
     private fun windowsRelaunchProcess(executablePath: String): ProcessBuilder? {
         val windowsDirectory = System.getenv("SystemRoot")?.let(::File) ?: return null
         return ProcessBuilder(
@@ -64,8 +63,8 @@ object DesktopAppRelauncher {
             "-NonInteractive",
             "-WindowStyle", "Hidden",
             "-Command",
-            "Wait-Process -Id \$env:$WAIT_FOR_PROCESS_VARIABLE -Timeout $SECONDS_TO_WAIT_FOR_WINDOWS_PROCESS_TO_EXIT " +
-                "-ErrorAction SilentlyContinue; Start-Process -FilePath \$env:$EXECUTABLE_VARIABLE"
+            "Wait-Process -Id \$env:$WAIT_FOR_PROCESS_VARIABLE -Timeout $MAX_SECONDS_TO_WAIT_FOR_WINDOWS_APP_TO_EXIT" +
+                " -ErrorAction SilentlyContinue; Start-Process -FilePath \$env:$EXECUTABLE_VARIABLE"
         ).apply {
             environment()[WAIT_FOR_PROCESS_VARIABLE] = ProcessHandle.current().pid().toString()
             environment()[EXECUTABLE_VARIABLE] = executablePath
