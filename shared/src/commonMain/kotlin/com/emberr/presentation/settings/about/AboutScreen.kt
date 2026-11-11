@@ -47,7 +47,7 @@ import emberr.shared.generated.resources.settings_about_third_party_services
 import emberr.shared.generated.resources.settings_about_title
 import emberr.shared.generated.resources.code
 import emberr.shared.generated.resources.doc_text
-import emberr.shared.generated.resources.files
+import emberr.shared.generated.resources.documents_stack
 import emberr.shared.generated.resources.info
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -109,7 +109,7 @@ fun AboutScreen(
                     )
                     SettingsDivider()
                     SettingsActionRow(
-                        icon = painterResource(Res.drawable.files),
+                        icon = painterResource(Res.drawable.documents_stack),
                         title = stringResource(Res.string.settings_about_open_source_licenses),
                         onClick = onOpenSourceLicensesClick
                     )

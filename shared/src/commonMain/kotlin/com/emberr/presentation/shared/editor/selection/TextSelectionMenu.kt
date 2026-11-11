@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +21,7 @@ import com.emberr.presentation.shared.editor.slash.SlashMenuSectionData
 import com.emberr.presentation.shared.editor.formatting.HighlightColorCircles
 import com.emberr.presentation.shared.editor.formatting.HighlightColorMenuWidth
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.clipboard_text3
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.format_bold
 import emberr.shared.generated.resources.italic
@@ -96,7 +95,7 @@ fun TextSelectionMenu(
                 val textItems = listOfNotNull(
                     actions.copy?.let { SlashMenuItemData(stringResource(Res.string.editor_copy), Res.drawable.copy, action = closeThen(it)) },
                     actions.cut?.let { SlashMenuItemData(stringResource(Res.string.editor_cut), Res.drawable.scissor2, action = closeThen(it)) },
-                    actions.paste?.let { SlashMenuItemData(stringResource(Res.string.editor_paste), Icons.Default.ContentPaste, action = closeThen(it)) },
+                    actions.paste?.let { SlashMenuItemData(stringResource(Res.string.editor_paste), Res.drawable.clipboard_text3, action = closeThen(it)) },
                     actions.delete?.let { SlashMenuItemData(stringResource(Res.string.common_delete), Res.drawable.trash, action = closeThen(it)) },
                     actions.selectAll?.let { SlashMenuItemData(stringResource(Res.string.editor_select_all_title_case), Res.drawable.select_all, action = closeThen(it)) }
                 )
