@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -29,6 +30,9 @@ fun EmberrTab(
         style = MaterialTheme.typography.bodyLarge,
         fontWeight = FontWeight.Medium,
         color = textColor,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        autoSize = shrinkToFitOneLine(MaterialTheme.typography.bodyLarge),
         modifier = Modifier
             .background(backgroundColor, RoundedCornerShape(8.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick)

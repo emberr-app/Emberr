@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -36,7 +37,11 @@ fun EmberrButtonPrimary(
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            autoSize = shrinkToFitOneLine(MaterialTheme.typography.bodyLarge),
+            modifier = Modifier.weight(1f, fill = false)
         )
         if (showsWavingDots) {
             WavingDots(style = MaterialTheme.typography.bodyLarge)

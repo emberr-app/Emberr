@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.EmberrTextFieldIconButton
 import com.emberr.presentation.shared.components.IconTooltip
@@ -40,6 +41,7 @@ import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import com.emberr.presentation.shared.components.EmberrTextField
+import com.emberr.presentation.shared.components.shrinkToFitOneLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.eye_open
@@ -292,6 +294,9 @@ private fun ProviderChip(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            autoSize = shrinkToFitOneLine(MaterialTheme.typography.labelSmall),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
         )
     }
