@@ -1,5 +1,6 @@
 package com.emberr.domain.update
 
+import com.emberr.core.desktop.withoutLauncherRestartMarker
 import com.emberr.domain.update.tarball.TarballInstallation
 import com.emberr.domain.update.windows.WindowsInstallation
 import java.io.File
@@ -52,6 +53,7 @@ abstract class StagedUpdateInstallation : UpdatableInstallation {
         if (!installerHasStarted.compareAndSet(false, true)) return true
         return try {
             ProcessBuilder(installerCommand(ProcessHandle.current().pid(), launchAfterInstall))
+                .withoutLauncherRestartMarker()
                 .redirectErrorStream(true)
                 .redirectOutput(ProcessBuilder.Redirect.appendTo(installerLogFile))
                 .start()

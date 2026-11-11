@@ -1,5 +1,6 @@
 package com.emberr.presentation.desktop.window
 
+import com.emberr.core.desktop.withoutLauncherRestartMarker
 import com.emberr.domain.update.appimage.RunningAppImage
 import com.emberr.domain.update.detectStagedUpdateInstallation
 import com.emberr.domain.util.system.appVersionName
@@ -21,6 +22,7 @@ object DesktopAppRelauncher {
         val command = currentProcessCommand() ?: return false
         return runCatching {
             ProcessBuilder(delayedCommand(command))
+                .withoutLauncherRestartMarker()
                 .directory(File(System.getProperty("user.dir")))
                 .redirectOutput(ProcessBuilder.Redirect.DISCARD)
                 .redirectError(ProcessBuilder.Redirect.DISCARD)
