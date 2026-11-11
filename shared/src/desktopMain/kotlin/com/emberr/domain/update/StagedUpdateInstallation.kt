@@ -22,12 +22,20 @@ abstract class StagedUpdateInstallation : UpdatableInstallation {
         return isNewerVersion(stagedVersion, installedVersion)
     }
 
-    fun installNewerStagedUpdateInsteadOfStarting(installedVersion: String?): Boolean {
-        if (hasNewerStagedUpdate(installedVersion)) {
-            return installStagedUpdateAfterThisProcessExits(launchAfterInstall = true)
+    fun installNewerStagedUpdateInsteadOfStarting(installedVersion: String?): StagedUpdateStartResult {
+        if (!hasNewerStagedUpdate(installedVersion)) {
+            discardStagedUpdate()
+            return StagedUpdateStartResult.NothingToInstall
         }
+        if (installStagedUpdateAfterThisProcessExits(launchAfterInstall = true)) {
+            return StagedUpdateStartResult.InstallerStarted
+        }
+        discardStagedUpdate()
+        return StagedUpdateStartResult.InstallerCouldNotStart
+    }
+
+    fun discardStagedUpdate() {
         stagingDirectory.deleteRecursively()
-        return false
     }
 
     fun installStagedUpdateWhenAppQuits(installedVersion: String?) {
@@ -63,6 +71,12 @@ abstract class StagedUpdateInstallation : UpdatableInstallation {
         const val STAGED_VERSION_FILE_NAME = "staged-version.txt"
         val installerHasStarted = AtomicBoolean(false)
     }
+}
+
+enum class StagedUpdateStartResult {
+    NothingToInstall,
+    InstallerStarted,
+    InstallerCouldNotStart
 }
 
 fun detectStagedUpdateInstallation(): StagedUpdateInstallation? =

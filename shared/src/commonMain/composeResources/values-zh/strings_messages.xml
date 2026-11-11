@@ -87,6 +87,7 @@
     <string name="message_export_failed_with_reason">导出失败：\n%1$s</string>
     <string name="message_could_not_open_link">无法打开链接</string>
     <string name="message_update_cannot_replace_itself">Emberr 无法在其安装文件夹中替换自身。正在改为在浏览器中打开下载页面。</string>
+    <string name="message_update_installer_could_not_start">Emberr 无法启动更新安装程序。正在浏览器中打开下载页面，以便你自行安装更新。</string>
     <string name="message_update_download_failed">无法下载更新。请检查网络连接后重试。</string>
     <string name="message_update_check_failed">无法检查更新。请检查网络连接后重试。</string>
     <string name="message_update_not_verified">无法验证该更新来自 Emberr，因此已忽略。</string>

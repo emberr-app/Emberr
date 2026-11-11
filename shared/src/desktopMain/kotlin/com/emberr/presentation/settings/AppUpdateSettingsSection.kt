@@ -42,7 +42,7 @@ actual fun AppUpdateSettingsSection() {
             onClick = {
                 when (updateState) {
                     is AppUpdateState.Available -> updateController.startDownload()
-                    is AppUpdateState.ReadyToRestart -> restartApplication()
+                    is AppUpdateState.ReadyToRestart -> if (updateController.startInstallerBeforeRestart()) restartApplication()
                     is AppUpdateState.Checking, is AppUpdateState.Downloading -> Unit
                     else -> updateController.checkNow()
                 }

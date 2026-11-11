@@ -87,6 +87,7 @@
     <string name="message_export_failed_with_reason">Ekspor gagal:\n%1$s</string>
     <string name="message_could_not_open_link">tautan tidak dapat dibuka</string>
     <string name="message_update_cannot_replace_itself">Emberr tidak dapat mengganti dirinya sendiri di folder tempatnya diinstal. Sebagai gantinya, halaman unduhan dibuka di browser Anda.</string>
+    <string name="message_update_installer_could_not_start">Emberr tidak dapat memulai penginstal pembaruan. Halaman unduhan dibuka di browser Anda agar Anda dapat menginstal pembaruan sendiri.</string>
     <string name="message_update_download_failed">Pembaruan tidak dapat diunduh. Periksa koneksi Anda, lalu coba lagi.</string>
     <string name="message_update_check_failed">Tidak dapat memeriksa pembaruan. Periksa koneksi Anda, lalu coba lagi.</string>
     <string name="message_update_not_verified">Pembaruan tidak dapat dipastikan berasal dari Emberr, jadi diabaikan.</string>

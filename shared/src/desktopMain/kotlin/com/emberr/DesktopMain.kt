@@ -46,6 +46,7 @@ import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.cloud.sync.CloudSyncScheduler
 import com.emberr.domain.update.AppUpdateController
+import com.emberr.domain.update.StagedUpdateStartResult
 import com.emberr.domain.update.detectStagedUpdateInstallation
 import com.emberr.presentation.desktop.SmoothShrinkImageDecoder
 import com.emberr.domain.util.system.appVersionName
@@ -141,7 +142,8 @@ fun main() {
     if (!DesktopSingleInstance.claimOwnershipOrWakeRunningApp()) return
 
     val stagedUpdateInstallation = detectStagedUpdateInstallation()
-    if (stagedUpdateInstallation?.installNewerStagedUpdateInsteadOfStarting(appVersionName) == true) {
+    val stagedUpdateStartResult = stagedUpdateInstallation?.installNewerStagedUpdateInsteadOfStarting(appVersionName)
+    if (stagedUpdateStartResult == StagedUpdateStartResult.InstallerStarted) {
         DesktopSingleInstance.releaseOwnership()
         return
     }
@@ -149,10 +151,12 @@ fun main() {
 
     eraseAppDataIfRequested(DesktopAppStorage.emberrDirectory)
 
-    runEmberrDesktopApp()
+    runEmberrDesktopApp(
+        stagedUpdateCouldNotStart = stagedUpdateStartResult == StagedUpdateStartResult.InstallerCouldNotStart
+    )
 }
 
-private fun runEmberrDesktopApp() = application {
+private fun runEmberrDesktopApp(stagedUpdateCouldNotStart: Boolean) = application {
 
     remember {
         StartupLog.step(
@@ -268,6 +272,10 @@ private fun runEmberrDesktopApp() = application {
 
     LaunchedEffect(isBackgroundStartupAllowed) {
         if (!isBackgroundStartupAllowed) return@LaunchedEffect
+        if (stagedUpdateCouldNotStart) {
+            GlobalContext.get().get<AppUpdateController>().reportInstallerCouldNotStart()
+            return@LaunchedEffect
+        }
         delay(MILLIS_TO_WAIT_BEFORE_UPDATE_CHECK)
         withContext(Dispatchers.IO) {
             timeStartupStep("Update check") {

@@ -87,6 +87,7 @@
     <string name="message_export_failed_with_reason">Xuất thất bại:\n%1$s</string>
     <string name="message_could_not_open_link">không thể mở liên kết</string>
     <string name="message_update_cannot_replace_itself">Emberr không thể tự thay thế trong thư mục đã cài đặt. Thay vào đó, trang tải xuống đang mở trong trình duyệt của bạn.</string>
+    <string name="message_update_installer_could_not_start">Emberr không thể khởi chạy trình cài đặt bản cập nhật. Trang tải xuống đang mở trong trình duyệt để bạn có thể tự cài đặt bản cập nhật.</string>
     <string name="message_update_download_failed">Không thể tải bản cập nhật xuống. Hãy kiểm tra kết nối rồi thử lại.</string>
     <string name="message_update_check_failed">Không thể kiểm tra bản cập nhật. Hãy kiểm tra kết nối rồi thử lại.</string>
     <string name="message_update_not_verified">Không thể xác minh bản cập nhật đến từ Emberr nên đã bỏ qua.</string>

@@ -11,7 +11,8 @@ import java.nio.file.StandardCopyOption
 
 class WindowsInstallation(
     private val installDirectory: File,
-    private val localAppDataDirectory: File
+    private val localAppDataDirectory: File,
+    private val windowsDirectory: File
 ) : StagedUpdateInstallation() {
 
     private val partialStagingDirectory = File(localAppDataDirectory, "Emberr-update.partial")
@@ -41,7 +42,7 @@ class WindowsInstallation(
     }
 
     override fun installerCommand(appProcessId: Long, launchAfterInstall: Boolean): List<String> = listOf(
-        "powershell.exe",
+        windowsDirectory.resolve(POWERSHELL_PATH_INSIDE_WINDOWS_DIRECTORY).path,
         "-NoProfile",
         "-NonInteractive",
         "-ExecutionPolicy", "Bypass",
@@ -72,12 +73,14 @@ class WindowsInstallation(
         private const val INSTALLER_FILE_NAME = "Emberr-Setup-x86_64.exe"
         private const val INSTALL_SCRIPT_NAME = "install-update.ps1"
         private const val INSTALL_SCRIPT_RESOURCE = "update/windows/install-update.ps1"
+        private const val POWERSHELL_PATH_INSIDE_WINDOWS_DIRECTORY = "System32/WindowsPowerShell/v1.0/powershell.exe"
 
         fun forRunningAppOrNull(): WindowsInstallation? {
             if (!System.getProperty("os.name").orEmpty().lowercase().contains("win")) return null
             val localAppDataDirectory = System.getenv("LOCALAPPDATA")?.let(::File) ?: return null
+            val windowsDirectory = System.getenv("SystemRoot")?.let(::File) ?: return null
             val installDirectory = windowsInstallDirectoryFor(System.getProperty("java.home")) ?: return null
-            return WindowsInstallation(installDirectory, localAppDataDirectory)
+            return WindowsInstallation(installDirectory, localAppDataDirectory, windowsDirectory)
         }
 
         fun windowsInstallDirectoryFor(javaHome: String?): File? {

@@ -88,6 +88,7 @@
     <string name="message_export_failed_with_reason">Falha na exportação:\n%1$s</string>
     <string name="message_could_not_open_link">não foi possível abrir o link</string>
     <string name="message_update_cannot_replace_itself">O Emberr não pode se substituir na pasta em que está instalado. A página de download vai abrir no seu navegador.</string>
+    <string name="message_update_installer_could_not_start">O Emberr não conseguiu iniciar o instalador da atualização. A página de download vai abrir no seu navegador para você instalar a atualização por conta própria.</string>
     <string name="message_update_download_failed">Não foi possível baixar a atualização. Verifique sua conexão e tente de novo.</string>
     <string name="message_update_check_failed">Não foi possível verificar se há atualizações. Verifique sua conexão e tente de novo.</string>
     <string name="message_update_not_verified">Não foi possível confirmar que a atualização veio do Emberr, então ela foi ignorada.</string>

@@ -88,6 +88,7 @@
     <string name="message_export_failed_with_reason">एक्सपोर्ट नहीं हो सका:\n%1$s</string>
     <string name="message_could_not_open_link">लिंक नहीं खुल सका</string>
     <string name="message_update_cannot_replace_itself">Emberr जिस फ़ोल्डर में इंस्टॉल है, वहाँ खुद को बदल नहीं सकता। इसके बजाय डाउनलोड पेज आपके ब्राउज़र में खुल रहा है।</string>
+    <string name="message_update_installer_could_not_start">Emberr अपडेट इंस्टॉलर शुरू नहीं कर सका। डाउनलोड पेज आपके ब्राउज़र में खुल रहा है, ताकि आप अपडेट खुद इंस्टॉल कर सकें।</string>
     <string name="message_update_download_failed">अपडेट डाउनलोड नहीं हो सका। अपना कनेक्शन जाँचें और फिर से कोशिश करें।</string>
     <string name="message_update_check_failed">अपडेट की जाँच नहीं हो सकी। अपना कनेक्शन जाँचें और फिर से कोशिश करें।</string>
     <string name="message_update_not_verified">यह पक्का नहीं हो सका कि अपडेट Emberr से आया है, इसलिए उसे अनदेखा किया गया।</string>
