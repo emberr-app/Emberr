@@ -5,7 +5,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,11 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -51,6 +49,7 @@ import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.LocalAppIsDark
 import com.emberr.ui.theme.fontFamilyFor
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.whatsnew_note_card_cover
 import emberr.shared.generated.resources.emberr_ghost
 import emberr.shared.generated.resources.pen
 import emberr.shared.generated.resources.star
@@ -83,18 +82,6 @@ private val JotButtonGlassColor = Color(0x33FFFFFF)
 private val JotTapColor = Color(0x66FFFFFF)
 private val DuskGradientColors = GradientColors(top = Color(0xFF4F5B8A), bottom = Color(0xFF4F7F8A))
 private val CopperGradientColors = GradientColors(top = Color(0xFF7A2E2A), bottom = Color(0xFFB8642F))
-private val CoverSkyTopColor = Color(0xFFCF8A74)
-private val CoverSkyMiddleColor = Color(0xFFEDB08C)
-private val CoverHorizonColor = Color(0xFFF8DCC0)
-private val CoverSunColor = Color(0xFFFFF4E4)
-private val CoverFarthestRidgeColor = Color(0xFFE2A48A)
-private val CoverFarRidgeColor = Color(0xFFC88173)
-private val CoverMiddleRidgeColor = Color(0xFF9C5E62)
-private val CoverNearRidgeColor = Color(0xFF6B4150)
-private val CoverFarthestRidgeHeights = listOf(0.54f, 0.47f, 0.51f, 0.43f, 0.49f, 0.45f, 0.52f)
-private val CoverFarRidgeHeights = listOf(0.64f, 0.58f, 0.63f, 0.55f, 0.61f, 0.66f)
-private val CoverMiddleRidgeHeights = listOf(0.73f, 0.79f, 0.69f, 0.75f, 0.7f)
-private val CoverNearRidgeHeights = listOf(0.87f, 0.82f, 0.9f, 0.84f)
 private val LightWallpaperColors = listOf(Color(0xFFCFCFD4), Color(0xFF9EA0A8))
 private val DarkWallpaperColors = listOf(Color(0xFF2A2B31), Color(0xFF0D0D10))
 private const val WIDGET_COUNT = 3
@@ -251,7 +238,10 @@ private fun NoteCardWidgetCopy() {
             .clip(WidgetShape)
             .background(MaterialTheme.colorScheme.background)
     ) {
-        SunsetCoverPicture(
+        Image(
+            painter = painterResource(Res.drawable.whatsnew_note_card_cover),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(coverBandHeight)
@@ -284,54 +274,6 @@ private fun NoteCardWidgetCopy() {
                 .size(14.dp)
         )
     }
-}
-
-@Composable
-private fun SunsetCoverPicture(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier) {
-        drawRect(Brush.verticalGradient(listOf(CoverSkyTopColor, CoverSkyMiddleColor, CoverHorizonColor)))
-        val sunCenter = Offset(size.width * 0.68f, size.height * 0.5f)
-        val sunRadius = size.height * 0.13f
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(CoverSunColor.copy(alpha = 0.6f), Color.Transparent),
-                center = sunCenter,
-                radius = sunRadius * 4f
-            ),
-            radius = sunRadius * 4f,
-            center = sunCenter
-        )
-        drawCircle(color = CoverSunColor, radius = sunRadius, center = sunCenter)
-        drawRidge(CoverFarthestRidgeColor, CoverFarthestRidgeHeights)
-        drawRidge(CoverFarRidgeColor, CoverFarRidgeHeights)
-        drawRect(
-            Brush.verticalGradient(
-                colors = listOf(Color.Transparent, CoverHorizonColor.copy(alpha = 0.4f)),
-                startY = size.height * 0.5f,
-                endY = size.height * 0.8f
-            )
-        )
-        drawRidge(CoverMiddleRidgeColor, CoverMiddleRidgeHeights)
-        drawRidge(CoverNearRidgeColor, CoverNearRidgeHeights)
-    }
-}
-
-private fun DrawScope.drawRidge(color: Color, heights: List<Float>) {
-    val points = heights.mapIndexed { index, height ->
-        Offset(size.width * index / (heights.size - 1), size.height * height)
-    }
-    val ridge = Path().apply {
-        moveTo(points.first().x, points.first().y)
-        points.zipWithNext { current, next ->
-            val middle = Offset((current.x + next.x) / 2f, (current.y + next.y) / 2f)
-            quadraticTo(current.x, current.y, middle.x, middle.y)
-        }
-        lineTo(points.last().x, points.last().y)
-        lineTo(size.width, size.height)
-        lineTo(0f, size.height)
-        close()
-    }
-    drawPath(ridge, color)
 }
 
 @Composable
