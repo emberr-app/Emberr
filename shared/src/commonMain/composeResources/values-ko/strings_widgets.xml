@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">스페이스 선택</string>
+    <string name="widgets_follow_the_app">앱 따라가기</string>
+    <string name="widgets_follow_the_app_detail">항상 지금 있는 스페이스를 보여 줘요</string>
+    <string name="widgets_current_space">현재 스페이스</string>
+    <string name="widgets_untitled_space">제목 없는 스페이스</string>
+    <string name="widgets_favorites">즐겨찾기</string>
+    <string name="widgets_other">기타</string>
+    <string name="widgets_no_notes_yet">아직 노트가 없어요</string>
+    <string name="widgets_no_notes_match">"%1$s"에 일치하는 노트가 없어요</string>
+    <string name="widgets_choose_a_note">노트 선택</string>
+    <string name="widgets_search_notes">노트 검색</string>
+    <string name="widgets_open_the_app_first">위젯을 추가하기 전에 앱을 한 번 여세요</string>
+    <string name="widgets_choose_a_gradient">그라데이션 선택</string>
+    <string name="widgets_whats_on_your_mind">무슨 생각을 하고 있나요?</string>
+    <string name="widgets_selected">선택됨</string>
+    <string name="widgets_gradient_dusk">황혼</string>
+    <string name="widgets_gradient_copper">구리</string>
+    <string name="widgets_gradient_forest">숲</string>
+    <string name="widgets_gradient_lagoon">라군</string>
+    <string name="widgets_gradient_midnight">자정</string>
+    <string name="widgets_gradient_blossom">꽃</string>
+    <string name="widgets_gradient_graphite">그래파이트</string>
+    <string name="widgets_gradient_aurora">오로라</string>
+    <string name="widgets_gradient_sunset">노을</string>
+    <string name="widgets_gradient_slate">슬레이트</string>
+    <string name="widgets_gradient_cocoa">코코아</string>
+    <string name="widgets_gradient_lavender">라벤더</string>
+    <string name="widgets_untitled_event">제목 없는 일정</string>
+    <string name="widgets_untitled_task">제목 없는 할 일</string>
+    <string name="widgets_note">노트</string>
+    <string name="widgets_repeating">반복</string>
+    <string name="widgets_today">오늘</string>
+    <string name="widgets_tomorrow">내일</string>
+    <string name="widgets_yesterday">어제</string>
+    <string name="widgets_all_day">종일</string>
+    <string name="widgets_date_all_day">%1$s · 종일</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · 종일</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="other">%1$d분 전</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="other">%1$d시간 전</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s:  </string>
+    <string name="widgets_linked_note">연결된 노트</string>
+    <string name="widgets_image">이미지</string>
+    <string name="widgets_canvas">캔버스</string>
+    <string name="widgets_database">데이터베이스</string>
+    <string name="widgets_watchlist">볼 목록</string>
+    <string name="widgets_credentials">로그인 정보</string>
+    <string name="widgets_voice_note_length">음성 메모  %1$s</string>
+    <string name="widgets_needs_newer_version">Emberr 최신 버전이 필요해요</string>
+    <string name="widgets_table">표</string>
+</resources>

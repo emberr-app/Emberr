@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">共有されたコンテンツを保存</string>
+    <string name="share_save_to_overview">概要に保存</string>
+    <string name="share_save_to_a_note">メモに保存</string>
+    <string name="share_shared_image">共有された画像</string>
+    <string name="share_failed_to_save">共有されたコンテンツを保存できませんでした。</string>
+    <string name="share_saved_to_inbox">受信トレイに保存しました</string>
+    <string name="share_note_no_longer_available">そのメモはもう利用できません。</string>
+    <plurals name="share_images_selected">
+        <item quantity="other">%1$d枚の画像を選択中</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="other">%1$d件のファイルを選択中</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="other">%1$d件の項目を受信トレイに保存しました</item>
+    </plurals>
+</resources>

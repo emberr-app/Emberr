@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">デイリーメモ</string>
+    <string name="app_shell_home">ホーム</string>
+    <string name="app_shell_ask_ai">AIに質問</string>
+    <string name="app_shell_search">検索</string>
+    <string name="app_shell_voice_task">音声タスク</string>
+    <string name="app_shell_mic">マイク</string>
+    <string name="app_shell_search_anything">何でも検索</string>
+    <string name="app_shell_close_search">検索を閉じる</string>
+    <string name="app_shell_clear_search">検索をクリア</string>
+</resources>

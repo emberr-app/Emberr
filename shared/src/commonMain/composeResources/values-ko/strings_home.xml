@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">즐겨찾기</string>
+    <string name="home_toggle_favorites">즐겨찾기 펼치기/접기</string>
+    <string name="home_notes">노트</string>
+    <string name="home_toggle_notes">노트 펼치기/접기</string>
+    <string name="home_recents">최근 항목</string>
+    <string name="home_toggle_recents">최근 항목 펼치기/접기</string>
+    <string name="home_sort">정렬</string>
+    <string name="home_sort_notes">노트 정렬</string>
+    <string name="home_new_folder">새 폴더</string>
+    <string name="home_new_folder_tooltip">새 폴더</string>
+    <string name="home_new_subfolder">새 하위 폴더</string>
+    <string name="home_folder_name_placeholder">예: 개인, 업무...</string>
+    <string name="home_new_note">새 노트</string>
+    <string name="home_new_note_tooltip">새 노트</string>
+    <string name="home_new_note_in_folder">%1$s에 새 노트</string>
+    <string name="home_note_title_placeholder">노트 제목...</string>
+    <string name="home_templates">템플릿</string>
+    <string name="home_switch_space">스페이스 전환</string>
+    <string name="home_toggle_sidebar">사이드바 열기/닫기</string>
+    <string name="home_open_calendar">캘린더 열기</string>
+    <string name="home_calendar">캘린더</string>
+    <string name="home_settings">설정</string>
+    <string name="home_more_settings">설정 더 보기</string>
+    <string name="home_rename">이름 변경</string>
+    <string name="home_move_to_trash">휴지통으로 이동</string>
+    <string name="home_add_to_favorites">즐겨찾기에 추가</string>
+    <string name="home_remove_from_favorites">즐겨찾기에서 제거</string>
+    <string name="home_sort_last_edited">최근 수정</string>
+    <string name="home_sort_date_created">생성일</string>
+    <string name="home_sort_name">이름 (가-하)</string>
+    <string name="home_sort_type">유형</string>
+    <string name="home_sort_manual">직접 정렬</string>
+    <string name="home_sort_ascending">오름차순</string>
+    <string name="home_sort_descending">내림차순</string>
+    <string name="home_sort_by">정렬 기준</string>
+    <string name="home_empty_space_start_with">이 스페이스는 비어 있어요. 이렇게 시작해 보세요:</string>
+    <string name="home_empty_space_a_new_note">새 노트</string>
+    <string name="home_empty_space_note_or_folder">%1$s 또는 %2$s</string>
+    <string name="home_empty_space_a_folder">폴더</string>
+    <string name="home_breadcrumb_home">홈</string>
+    <string name="home_cover">커버</string>
+    <string name="home_in_parent">%1$s 안</string>
+    <string name="home_canvas">캔버스</string>
+    <string name="home_note">노트</string>
+    <string name="home_empty_note">빈 노트...</string>
+    <string name="home_favorite">즐겨찾기</string>
+    <string name="home_selected">선택됨</string>
+    <string name="home_rename_subtitle">새 이름을 정하세요.</string>
+    <string name="home_name_placeholder">이름...</string>
+    <string name="home_nesting_inside_folder">%1$s 안에 만들어요.</string>
+    <string name="home_organize_your_notes">노트를 정리하세요.</string>
+    <string name="home_search_templates_placeholder">템플릿 검색...</string>
+    <string name="home_search_templates">템플릿 검색</string>
+    <string name="home_no_templates_yet">아직 템플릿이 없어요.</string>
+    <string name="home_no_templates_match">"%1$s"에 일치하는 템플릿이 없어요.</string>
+    <string name="home_new_template">새 템플릿</string>
+    <string name="home_edit_template">템플릿 편집</string>
+    <string name="home_delete_template">템플릿 삭제</string>
+    <string name="home_templates_subtitle">템플릿으로 새 노트를 시작하세요.</string>
+    <string name="home_new_subfolder_in_folder">%1$s에 새 하위 폴더</string>
+    <string name="home_new_note_in_folder_description">%1$s에 새 노트</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="other">%1$d개 남음</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="other">%1$d개 저장됨</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="other">%1$d개 첨부됨</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="other">항목 %1$d개 삭제</item>
+    </plurals>
+</resources>

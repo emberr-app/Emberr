@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">セルフホスト</string>
+
+    <string name="selfhost_group_server_details">サーバーの詳細</string>
+    <string name="selfhost_group_recovery_passphrase">復元用パスフレーズ</string>
+    <string name="selfhost_group_unlock_vault">保管庫のロック解除</string>
+    <string name="selfhost_group_status">ステータス</string>
+
+    <string name="selfhost_setting_up">設定中</string>
+    <string name="selfhost_unlock_and_sync">ロック解除して同期</string>
+    <string name="selfhost_create_vault_and_sync">保管庫を作成して同期</string>
+    <string name="selfhost_server_address_rejected">サーバーアドレスが拒否されました</string>
+    <string name="selfhost_got_it">OK</string>
+
+    <string name="selfhost_status_connected">ステータス: 接続済み</string>
+    <string name="selfhost_cancelling">キャンセル中...</string>
+    <string name="selfhost_cancel_sync">同期をキャンセル</string>
+    <string name="selfhost_cancel_sync_hint">キャンセルすると、アプリを再起動するか「今すぐ同期」をタップするまで同期が一時停止します。</string>
+    <string name="selfhost_sync_now">今すぐ同期</string>
+    <string name="selfhost_syncing">同期中...</string>
+    <string name="selfhost_never_synced">未同期</string>
+    <string name="selfhost_last_synced">最終同期: %1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="other">%1$d件のメモが同期待ちです</item>
+    </plurals>
+    <string name="selfhost_progress_notes">メモ</string>
+    <string name="selfhost_progress_images">画像</string>
+
+    <string name="selfhost_passphrase_needed_hint">別のスマートフォンやコンピュータをこのサーバーに接続するには、このパスフレーズが必要です。</string>
+    <string name="selfhost_show_passphrase_button">パスフレーズを表示</string>
+    <string name="selfhost_unlock_prompt_title">復元用パスフレーズ</string>
+    <string name="selfhost_unlock_prompt_description">ロックを解除して復元用パスフレーズを表示</string>
+    <string name="selfhost_save_passphrase_hint">このデバイスは、Emberrがパスフレーズを保存するようになる前に接続されました。一度入力するとここに保存され、後で確認できるようになります。</string>
+    <string name="selfhost_checking">確認中</string>
+    <string name="selfhost_save_passphrase">パスフレーズを保存</string>
+    <string name="selfhost_disconnect_vault">保管庫を切断</string>
+    <string name="selfhost_recovery_dialog_message">別のデバイスで保管庫のロック解除を求められたら、これを入力してください。誰とも共有しないでください。</string>
+    <string name="selfhost_done">完了</string>
+    <string name="selfhost_disconnect_vault_question">保管庫を切断しますか？</string>
+    <string name="selfhost_disconnect_message">メモはこのデバイスとサーバーに残ります。再接続するには復元用パスフレーズが必要です。</string>
+    <string name="selfhost_disconnect">切断</string>
+
+    <string name="selfhost_checking_for_changes">変更を確認中...</string>
+    <string name="selfhost_finishing_up">仕上げ中...</string>
+    <string name="selfhost_sending_percent">送信中 %1$d%</string>
+    <string name="selfhost_nothing_to_send">送信するものはありません</string>
+    <string name="selfhost_receiving_percent">受信中 %1$d%</string>
+    <string name="selfhost_nothing_to_receive">受信するものはありません</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="other">%1$d/%2$d件のメモ</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s/%2$s MB</string>
+
+    <string name="selfhost_server_details_hint">NextcloudやNASなど、サーバーのWebDAVアドレスとログイン情報を入力してください。Emberrはメモがこのデバイスを離れる前に暗号化します。</string>
+    <string name="selfhost_username">ユーザー名</string>
+    <string name="selfhost_password">パスワード</string>
+    <string name="selfhost_hide_password">パスワードを隠す</string>
+    <string name="selfhost_show_password">パスワードを表示</string>
+    <string name="selfhost_testing">テスト中</string>
+    <string name="selfhost_test_connection">接続をテスト</string>
+    <string name="selfhost_contacting_server">サーバーに接続中...</string>
+
+    <string name="selfhost_restore_hint">このサーバーにはすでにEmberrの保管庫があります。保管庫の作成時に表示された16文字の復元用パスフレーズを入力してください。</string>
+    <string name="selfhost_restore_find_hint">見つかりませんか？すでに接続済みのデバイスで「設定 → セルフホスト → パスフレーズを表示」を開いてください。</string>
+    <string name="selfhost_passphrase_placeholder">16文字のパスフレーズ</string>
+    <string name="selfhost_hide_passphrase">パスフレーズを隠す</string>
+    <string name="selfhost_show_passphrase">パスフレーズを表示</string>
+
+    <string name="selfhost_save_passphrase_now">今すぐこのパスフレーズを保管してください</string>
+    <string name="selfhost_fact_type_on_other_devices">このサーバーに接続する他のスマートフォンやコンピュータすべてで入力します。</string>
+    <string name="selfhost_fact_locks_notes">サーバー上のメモをロックします。これがなければ、Emberrを含め誰もメモを読めません。</string>
+    <string name="selfhost_fact_cannot_reset">Emberrはリセットできません。パスワードマネージャーに保管するか、書き留めてください。</string>
+    <string name="selfhost_fact_see_again_later">接続済みのどのデバイスでも、後で「設定 → セルフホスト」から再確認できます。</string>
+    <string name="selfhost_new_passphrase">新しいパスフレーズ</string>
+    <string name="selfhost_generate_new_passphrase">新しいパスフレーズを生成</string>
+    <string name="selfhost_saved_passphrase_confirmation">このパスフレーズを安全な場所に保管しました</string>
+    <string name="selfhost_copy_passphrase">パスフレーズをコピー</string>
+    <string name="selfhost_copy_address">アドレスをコピー</string>
+    <string name="selfhost_copied_address">アドレスをコピーしました</string>
+
+    <string name="selfhost_invalid_credentials">ユーザー名またはパスワードが無効です</string>
+    <string name="selfhost_server_returned_error">サーバーからエラーが返されました（%1$d）</string>
+    <string name="selfhost_could_not_reach_server">サーバーに接続できませんでした</string>
+    <string name="selfhost_could_not_check_vault">既存の保管庫を確認できませんでした: %1$s</string>
+    <string name="selfhost_unknown_error">不明なエラー</string>
+    <string name="selfhost_existing_vault_found">このサーバーに既存の保管庫が見つかりました</string>
+    <string name="selfhost_no_existing_vault">既存の保管庫はありません。新しく作成します</string>
+    <string name="selfhost_no_vault_file_to_restore">復元に使う保管庫ファイルがサーバーに見つかりませんでした</string>
+    <string name="selfhost_old_or_damaged_vault_data">このサーバーフォルダには、古いか破損した保管庫の同期データがあります。サーバー上のemberr_syncフォルダを削除してから、もう一度設定してください。</string>
+    <string name="selfhost_vault_exists_enter_passphrase">このサーバーにはすでに保管庫があります。復元するには、下にその復元用パスフレーズを入力してください。</string>
+    <string name="selfhost_could_not_set_up">安全な同期を設定できませんでした</string>
+    <string name="selfhost_no_vault_on_server">サーバーに保管庫が見つかりませんでした。</string>
+    <string name="selfhost_wrong_passphrase">そのパスフレーズではこの保管庫のロックを解除できません。</string>
+    <string name="selfhost_could_not_check_passphrase">パスフレーズを確認できませんでした: %1$s</string>
+
+    <string name="selfhost_update_required_title">セルフホスト同期を一時停止しました</string>
+    <string name="selfhost_update_required_message">%1$s メモは安全で、このデバイスに引き続き保存されます。</string>
+    <string name="selfhost_later">後で</string>
+    <string name="selfhost_update">アップデート</string>
+</resources>

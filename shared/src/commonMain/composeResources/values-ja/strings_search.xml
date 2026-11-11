@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">入力すると、タイトル、抜粋、メモの内容を検索します。</string>
+    <string name="search_nothing_found">一致するメモ、予定、人物は見つかりませんでした。</string>
+    <string name="search_people">人物</string>
+    <string name="search_events">予定</string>
+    <string name="search_notes">メモ</string>
+    <string name="search_rename_note">メモの名前を変更</string>
+    <string name="search_note_title_placeholder">メモのタイトル...</string>
+    <string name="search_rename">名前を変更</string>
+    <string name="search_move_to_trash">ゴミ箱に移動</string>
+    <string name="search_untitled_event">無題の予定</string>
+    <string name="search_repeats">繰り返し</string>
+    <string name="search_pinned">ピン留め</string>
+    <string name="search_in_parent">%1$s内</string>
+    <string name="search_daily">デイリー</string>
+    <string name="search_add_to_favorites">お気に入りに追加</string>
+    <string name="search_remove_from_favorites">お気に入りから削除</string>
+    <plurals name="search_show_all_people">
+        <item quantity="other">%1$d人すべて表示</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="other">%1$d件の予定をすべて表示</item>
+    </plurals>
+</resources>

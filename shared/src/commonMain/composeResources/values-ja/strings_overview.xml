@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">タスク</string>
+    <string name="overview_section_bookmarks">ブックマーク</string>
+    <string name="overview_section_images">画像</string>
+    <string name="overview_section_documents">ドキュメント</string>
+    <string name="overview_tasks_repeating">繰り返し</string>
+    <string name="overview_tasks_note">メモ</string>
+    <string name="overview_tasks_today">今日</string>
+    <string name="overview_tasks_tomorrow">明日</string>
+    <string name="overview_tasks_yesterday">昨日</string>
+    <string name="overview_tasks_none_completed">完了したタスクはまだありません。</string>
+    <string name="overview_tasks_all_caught_up">すべて完了しました！</string>
+    <string name="overview_tasks_completed">完了</string>
+    <string name="overview_tasks_completed_tasks">完了したタスク</string>
+    <string name="overview_tasks_hide_completed">完了済みを非表示</string>
+    <string name="overview_tasks_show_completed">完了済みを表示</string>
+    <string name="overview_tasks_add_task_description">タスクを追加</string>
+    <string name="overview_tasks_add_task">タスクを追加</string>
+    <string name="overview_images_empty">保存された画像はまだありません。</string>
+    <string name="overview_images_add_image_description">画像を追加</string>
+    <string name="overview_images_add_image">画像を追加</string>
+    <string name="overview_documents_empty">添付されたドキュメントはまだありません。</string>
+    <string name="overview_documents_add_document_description">ドキュメントを追加</string>
+    <string name="overview_documents_add_document">ドキュメントを追加</string>
+    <string name="overview_bookmarks_empty">保存されたリンクはまだありません。</string>
+    <string name="overview_bookmarks_add_bookmark_description">ブックマークを追加</string>
+    <string name="overview_bookmarks_add_bookmark">ブックマークを追加</string>
+    <string name="overview_bookmarks_add_link">リンクを追加</string>
+    <string name="overview_bookmarks_paste_link">リンクを貼り付け...</string>
+    <string name="overview_bookmarks_clear_link">リンクをクリア</string>
+    <string name="overview_bookmarks_all">すべて</string>
+    <string name="overview_bookmarks_others">その他</string>
+</resources>

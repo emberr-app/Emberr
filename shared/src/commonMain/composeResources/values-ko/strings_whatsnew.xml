@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">다음에 봐요!</string>
+    <string name="whatsnew_whats_new_question">새로운 기능은?</string>
+    <string name="whatsnew_title">새로운 기능</string>
+    <string name="whatsnew_version">버전 %1$s</string>
+    <string name="whatsnew_new">신규</string>
+    <string name="whatsnew_themes_heading">테마</string>
+    <string name="whatsnew_themes_where">설정 → 모양 → 테마</string>
+    <string name="whatsnew_themes_description_desktop">Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, 고대비 등 13가지 색상 테마 중에서 고르세요. 테마마다 강도를 설정할 수 있고, 텍스트와 아이콘도 테마를 따를지 정할 수 있어요.</string>
+    <string name="whatsnew_themes_description_mobile">Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, 고대비 등 14가지 색상 테마 중에서 고르거나, **배경화면** 테마로 배경화면의 색상을 가져오세요. 테마마다 강도를 설정할 수 있고, 텍스트와 아이콘도 테마를 따를지 정할 수 있어요. 홈 화면 위젯도 테마를 따라요.</string>
+    <string name="whatsnew_texture_heading">종이 질감</string>
+    <string name="whatsnew_texture_where">설정 → 모양 → 테마 → 질감</string>
+    <string name="whatsnew_texture_description">실제 종이처럼 앱에 부드러운 입자감을 더하세요. 강도를 정하고, 앱 전체, 노트, 캔버스, 데일리 노트 중 어디에 표시할지 고르세요.</string>
+    <string name="whatsnew_scale_heading">인터페이스 크기</string>
+    <string name="whatsnew_scale_where">설정 → 모양 → 인터페이스 크기</string>
+    <string name="whatsnew_scale_description_desktop">앱의 모든 요소를 80%에서 200%까지 크게 또는 작게 만들거나, **Ctrl +**, **Ctrl −**, **Ctrl 0**을 사용하세요.</string>
+    <string name="whatsnew_scale_description_mobile">앱의 모든 요소를 80%에서 200%까지 크게 또는 작게 만드세요.</string>
+    <string name="whatsnew_widgets_heading">위젯</string>
+    <string name="whatsnew_widgets_where">홈 화면 길게 누르기 → 위젯 → Emberr</string>
+    <string name="whatsnew_widgets_description">모든 위젯이 더 깔끔한 새 모습이 되었고, **노트 카드**, **바로 적기**, **오늘의 명언** 등 세 가지 새 위젯이 추가됐어요. 이제 위젯은 고른 노트를 바로 보여 주고, 그 노트가 삭제되면 알려 줘요.</string>
+    <string name="whatsnew_editor_heading">편집기</string>
+    <string name="whatsnew_editor_where">노트 아무 곳에서나 /를 입력하세요</string>
+    <string name="whatsnew_editor_description">이제 슬래시 메뉴가 공백 뒤뿐만 아니라 어떤 문자 뒤에서든 바로 열려요. 일치하는 항목을 지나쳐 입력했다면 지우면 메뉴가 다시 나타나요.</string>
+    <string name="whatsnew_others_heading">기타</string>
+    <string name="whatsnew_others_where">작은 변경 사항과 수정</string>
+    <string name="whatsnew_others_sliders">앱 전체의 슬라이더가 새롭게 디자인됐어요.</string>
+    <string name="whatsnew_others_title_time_desktop">노트 제목에 **/**를 입력하면 현재 시간이나 날짜를 추가할 수 있어요.</string>
+    <string name="whatsnew_others_title_time_mobile">키보드 도구 모음에서 노트 제목에 현재 시간이나 날짜를 추가하세요.</string>
+    <string name="whatsnew_others_sync_network">동기화 네트워크 선택은 이제 **설정 → 동기화 및 백업**에 있어요.</string>
+    <string name="whatsnew_others_windows_startup">Windows에서 더 빠르게 시작돼요.</string>
+    <string name="whatsnew_others_small_fixes">다양한 작은 수정.</string>
+    <string name="whatsnew_preview_options">옵션</string>
+    <string name="whatsnew_preview_trip_title">주말 여행</string>
+    <string name="whatsnew_preview_trip_text">차가 막히기 전에 오전 8시까지 출발하기.</string>
+    <string name="whatsnew_preview_train_tickets">기차표</string>
+    <string name="whatsnew_preview_passport">여권</string>
+    <string name="whatsnew_preview_camera_charger">카메라 충전기</string>
+    <string name="whatsnew_preview_reading_list">읽을 책 목록</string>
+    <string name="whatsnew_preview_reading_list_books">오버스토리, 피라네시, 프로젝트 헤일메리</string>
+    <string name="whatsnew_preview_meeting_title">팀 회의</string>
+    <string name="whatsnew_preview_meeting_text">목요일 10시, 2번 회의실.</string>
+    <string name="whatsnew_preview_typed_heading">안건</string>
+    <string name="whatsnew_preview_quote">앞서 나가는 비결은 시작하는 것이다.</string>
+    <string name="whatsnew_preview_jot_prompt">무슨 생각을 하고 있나요?</string>
+    <string name="whatsnew_preview_jot_button">바로 적기</string>
+</resources>

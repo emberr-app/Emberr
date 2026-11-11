@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">正在聆听...</string>
+    <string name="voice_tap_the_orb">点按圆球开始说话</string>
+    <string name="voice_add_tasks_with_voice">（用语音添加待办）</string>
+    <string name="voice_install_speech_app">请安装语音识别应用以使用语音待办</string>
+    <string name="voice_tap_a_task_to_fix_it">点按待办即可修改</string>
+    <string name="voice_discard">放弃</string>
+    <string name="voice_add">添加</string>
+    <string name="voice_empty_tasks_are_skipped">空待办将被跳过</string>
+    <string name="voice_today">今天</string>
+    <string name="voice_tomorrow">明天</string>
+    <string name="voice_add_time">添加时间</string>
+</resources>

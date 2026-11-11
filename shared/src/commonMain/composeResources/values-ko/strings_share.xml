@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">공유된 콘텐츠 저장</string>
+    <string name="share_save_to_overview">개요에 저장</string>
+    <string name="share_save_to_a_note">노트에 저장</string>
+    <string name="share_shared_image">공유된 이미지</string>
+    <string name="share_failed_to_save">공유된 콘텐츠를 저장하지 못했어요.</string>
+    <string name="share_saved_to_inbox">받은편지함에 저장됨</string>
+    <string name="share_note_no_longer_available">해당 노트를 더 이상 사용할 수 없어요.</string>
+    <plurals name="share_images_selected">
+        <item quantity="other">이미지 %1$d개 선택됨</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="other">파일 %1$d개 선택됨</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="other">항목 %1$d개를 받은편지함에 저장했어요</item>
+    </plurals>
+</resources>

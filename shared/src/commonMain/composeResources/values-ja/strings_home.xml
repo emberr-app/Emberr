@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">お気に入り</string>
+    <string name="home_toggle_favorites">お気に入りを開閉</string>
+    <string name="home_notes">メモ</string>
+    <string name="home_toggle_notes">メモを開閉</string>
+    <string name="home_recents">最近の項目</string>
+    <string name="home_toggle_recents">最近の項目を開閉</string>
+    <string name="home_sort">並べ替え</string>
+    <string name="home_sort_notes">メモを並べ替え</string>
+    <string name="home_new_folder">新規フォルダ</string>
+    <string name="home_new_folder_tooltip">新規フォルダ</string>
+    <string name="home_new_subfolder">新規サブフォルダ</string>
+    <string name="home_folder_name_placeholder">例：プライベート、仕事...</string>
+    <string name="home_new_note">新規メモ</string>
+    <string name="home_new_note_tooltip">新規メモ</string>
+    <string name="home_new_note_in_folder">%1$sに新規メモ</string>
+    <string name="home_note_title_placeholder">メモのタイトル...</string>
+    <string name="home_templates">テンプレート</string>
+    <string name="home_switch_space">スペースを切り替え</string>
+    <string name="home_toggle_sidebar">サイドバーを切り替え</string>
+    <string name="home_open_calendar">カレンダーを開く</string>
+    <string name="home_calendar">カレンダー</string>
+    <string name="home_settings">設定</string>
+    <string name="home_more_settings">その他の設定</string>
+    <string name="home_rename">名前を変更</string>
+    <string name="home_move_to_trash">ゴミ箱に移動</string>
+    <string name="home_add_to_favorites">お気に入りに追加</string>
+    <string name="home_remove_from_favorites">お気に入りから削除</string>
+    <string name="home_sort_last_edited">最終編集日</string>
+    <string name="home_sort_date_created">作成日</string>
+    <string name="home_sort_name">名前（A-Z）</string>
+    <string name="home_sort_type">種類</string>
+    <string name="home_sort_manual">手動</string>
+    <string name="home_sort_ascending">昇順</string>
+    <string name="home_sort_descending">降順</string>
+    <string name="home_sort_by">並べ替えの基準</string>
+    <string name="home_empty_space_start_with">このスペースは空です。まずは</string>
+    <string name="home_empty_space_a_new_note">新しいメモ</string>
+    <string name="home_empty_space_note_or_folder">%1$sか%2$sを作成しましょう</string>
+    <string name="home_empty_space_a_folder">フォルダ</string>
+    <string name="home_breadcrumb_home">ホーム</string>
+    <string name="home_cover">カバー</string>
+    <string name="home_in_parent">%1$s内</string>
+    <string name="home_canvas">キャンバス</string>
+    <string name="home_note">メモ</string>
+    <string name="home_empty_note">空のメモ...</string>
+    <string name="home_favorite">お気に入り</string>
+    <string name="home_selected">選択中</string>
+    <string name="home_rename_subtitle">新しい名前を入力してください。</string>
+    <string name="home_name_placeholder">名前...</string>
+    <string name="home_nesting_inside_folder">%1$sの中に作成します。</string>
+    <string name="home_organize_your_notes">メモを整理しましょう。</string>
+    <string name="home_search_templates_placeholder">テンプレートを検索...</string>
+    <string name="home_search_templates">テンプレートを検索</string>
+    <string name="home_no_templates_yet">テンプレートはまだありません。</string>
+    <string name="home_no_templates_match">「%1$s」に一致するテンプレートはありません。</string>
+    <string name="home_new_template">新規テンプレート</string>
+    <string name="home_edit_template">テンプレートを編集</string>
+    <string name="home_delete_template">テンプレートを削除</string>
+    <string name="home_templates_subtitle">テンプレートから新しいメモを作成します。</string>
+    <string name="home_new_subfolder_in_folder">%1$sに新規サブフォルダ</string>
+    <string name="home_new_note_in_folder_description">%1$sに新規メモ</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="other">残り%1$d件</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="other">%1$d件保存済み</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="other">%1$d件添付済み</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="other">%1$d件の項目を削除</item>
+    </plurals>
+</resources>

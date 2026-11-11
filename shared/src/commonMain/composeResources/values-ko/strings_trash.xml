@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">휴지통이 비어 있어요</string>
+    <string name="trash_title">휴지통</string>
+    <string name="trash_empty_trash">휴지통 비우기</string>
+    <string name="trash_empty_trash_tooltip">휴지통 비우기</string>
+    <string name="trash_restore_note">노트 복원</string>
+    <string name="trash_delete_permanently">영구 삭제</string>
+    <string name="trash_manage_note">노트 관리</string>
+    <string name="trash_manage_note_subtitle">휴지통의 노트는 30일 후 자동으로 삭제돼요.</string>
+    <string name="trash_empty_trash_question">휴지통을 비울까요?</string>
+    <string name="trash_empty_trash_subtitle">지금 휴지통에 있는 모든 노트가 영구 삭제돼요. 이 작업은 되돌릴 수 없어요.</string>
+</resources>

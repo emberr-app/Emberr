@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">ゴミ箱は空です</string>
+    <string name="trash_title">ゴミ箱</string>
+    <string name="trash_empty_trash">ゴミ箱を空にする</string>
+    <string name="trash_empty_trash_tooltip">ゴミ箱を空にする</string>
+    <string name="trash_restore_note">メモを復元</string>
+    <string name="trash_delete_permanently">完全に削除</string>
+    <string name="trash_manage_note">メモを管理</string>
+    <string name="trash_manage_note_subtitle">ゴミ箱内のメモは30日後に自動的に削除されます。</string>
+    <string name="trash_empty_trash_question">ゴミ箱を空にしますか？</string>
+    <string name="trash_empty_trash_subtitle">現在ゴミ箱にあるすべてのメモが完全に削除されます。この操作は元に戻せません。</string>
+</resources>

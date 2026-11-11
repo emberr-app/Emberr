@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr 已锁定</string>
+    <string name="app_lock_screen_detail">使用指纹、面容或屏幕锁打开。</string>
+    <string name="app_lock_unlock">解锁</string>
+    <string name="app_lock_prompt_subtitle">使用指纹、面容或屏幕锁</string>
+    <string name="app_lock_unlock_emberr">解锁 Emberr</string>
+    <string name="app_lock_off_no_screen_lock">此手机未设置屏幕锁，因此应用锁已关闭。</string>
+</resources>

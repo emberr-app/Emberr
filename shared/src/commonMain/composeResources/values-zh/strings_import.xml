@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">导入来源</string>
+    <string name="import_text_and_markdown">文本与 Markdown</string>
+    <string name="import_text_and_markdown_subtitle">也适用于 Obsidian 和 Bear 笔记。\n部分 Obsidian 功能可能无法完整导入。</string>
+
+    <string name="import_button">导入</string>
+    <string name="import_done">完成</string>
+    <string name="import_stop">停止导入</string>
+    <string name="import_or_drop_here">或拖放到这里</string>
+    <string name="import_choose_again_hint_desktop">点击重新选择，或拖放到这里。</string>
+    <string name="import_choose_again_hint_touch">点按以重新选择。</string>
+    <string name="import_stopping">正在停止并移除已导入的内容…</string>
+    <string name="import_stopped">导入已停止</string>
+    <string name="import_nothing_added">没有添加任何内容。</string>
+
+    <plurals name="import_space_count">
+        <item quantity="other">%1$d 个空间</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="other">%1$d 条笔记</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="other">%1$d 个文件夹</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="other">%1$d 个附件</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">导入备份，不会替换你当前的笔记。</string>
+    <string name="import_emberr_copying_media">正在复制媒体 %1$d / %2$d…</string>
+    <string name="import_emberr_getting_ready">正在准备…</string>
+    <string name="import_emberr_saving">正在保存导入内容…</string>
+    <string name="import_emberr_failed">导入失败</string>
+    <string name="import_emberr_choose_backup_file">选择备份文件</string>
+    <string name="import_emberr_choose_backup_hint">来自“导出备份”的 .emberr 文件</string>
+    <string name="import_emberr_reading_backup">正在读取备份…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">选择其他文件</string>
+    <string name="import_emberr_spaces_to_import">要导入的空间</string>
+    <string name="import_emberr_choose_backup_first">请先选择备份</string>
+    <string name="import_emberr_daily_notes">每日笔记</string>
+    <string name="import_emberr_calendar">日历</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">已添加每日笔记和日历日程</string>
+    <string name="import_emberr_added_daily_notes">已添加每日笔记</string>
+    <string name="import_emberr_added_calendar">已添加日历日程</string>
+    <string name="import_emberr_finished">导入完成</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="other">已导入 %1$d 个空间</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="other">备份中找不到 %1$d 个媒体文件，因此它们会显示为缺失。</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">未知错误</string>
+    <string name="import_emberr_picker_title">选择 Emberr 备份</string>
+
+    <string name="import_markdown_subtitle">将 .md、.txt 和 .canvas 文件，或包含文件夹的 .zip，转换为 Emberr 笔记。</string>
+    <string name="import_markdown_copying_file">正在复制 %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="other">正在导入第 %1$d 条笔记，共 %2$d 条…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">选择文件或 .zip</string>
+    <string name="import_markdown_choose_files_hint">.md、.markdown、.txt、.canvas 或 .zip</string>
+    <string name="import_markdown_reading_files">正在读取文件…</string>
+    <string name="import_markdown_could_not_read">无法读取这些文件。%1$s</string>
+    <string name="import_markdown_save_to_space">保存到空间</string>
+    <string name="import_markdown_import_as">导入为</string>
+    <string name="import_markdown_emberr_notes">Emberr 笔记</string>
+    <string name="import_markdown_emberr_notes_subtitle">每个文件都会变成一条由块组成的笔记。</string>
+    <string name="import_markdown_markdown_files">Markdown 文件</string>
+    <string name="import_markdown_coming_soon">即将推出</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="other">已导入 %1$d 条笔记</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="other">已将 %1$d 条笔记导入到 %2$s</item>
+    </plurals>
+    <string name="import_markdown_failed_files">无法导入 %1$d 个：%2$s</string>
+    <string name="import_markdown_choose_folder">选择文件夹</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="other">%1$d 个文件</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">已跳过 %1$d 个：%2$s</string>
+    <string name="import_markdown_choose_different_files">选择其他文件</string>
+    <string name="import_markdown_picker_title">选择要导入的文件</string>
+</resources>

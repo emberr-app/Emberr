@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">스페이스</string>
+    <string name="space_create_space">스페이스 만들기</string>
+    <string name="space_rename_space">스페이스 이름 변경</string>
+    <string name="space_delete_space">스페이스 삭제</string>
+    <string name="space_new_space">새 스페이스</string>
+    <string name="space_new_space_subtitle">업무, 개인 등 무엇이든 좋아요.</string>
+    <string name="space_name_placeholder">스페이스 이름...</string>
+    <string name="space_rename_subtitle">새 이름을 정하세요.</string>
+    <string name="space_delete_space_question">"%1$s" 스페이스를 삭제할까요?</string>
+    <string name="space_delete_space_message">이 스페이스의 모든 노트, 폴더, 태그, 채팅이 함께 삭제돼요. 이 작업은 되돌릴 수 없어요.</string>
+    <string name="space_reorder_space">스페이스 순서 변경</string>
+</resources>

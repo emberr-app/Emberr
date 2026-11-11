@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">타임라인</string>
+    <string name="daily_close_timeline">타임라인 닫기</string>
+    <string name="daily_open_timeline">타임라인 열기</string>
+    <string name="daily_search_the_timeline">타임라인 검색</string>
+    <string name="daily_previous_match">이전 결과</string>
+    <string name="daily_next_match">다음 결과</string>
+    <string name="daily_nothing_on_this_day_yet">이 날에는 아직 아무것도 없어요.</string>
+    <string name="daily_nothing_written_yet">아직 작성한 내용이 없어요.</string>
+    <string name="daily_code">코드</string>
+    <string name="daily_today">오늘</string>
+    <string name="daily_tomorrow">내일</string>
+    <string name="daily_yesterday">어제</string>
+    <string name="daily_go_to_today">오늘로 이동</string>
+    <string name="daily_previous_month">이전 달</string>
+    <string name="daily_next_month">다음 달</string>
+    <string name="daily_previous">이전</string>
+    <string name="daily_next">다음</string>
+    <string name="daily_open_calendar">캘린더 열기</string>
+    <string name="daily_calendar">캘린더</string>
+    <string name="daily_settings">설정</string>
+    <string name="daily_more_settings">설정 더 보기</string>
+    <string name="daily_click_to_write_your_thoughts">클릭해서 생각을 적어 보세요</string>
+    <string name="daily_tap_to_write_your_thoughts">탭해서 생각을 적어 보세요</string>
+</resources>

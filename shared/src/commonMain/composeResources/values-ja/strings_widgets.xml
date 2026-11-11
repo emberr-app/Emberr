@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">スペースを選択</string>
+    <string name="widgets_follow_the_app">アプリに合わせる</string>
+    <string name="widgets_follow_the_app_detail">アプリで開いているスペースを常に表示します</string>
+    <string name="widgets_current_space">現在のスペース</string>
+    <string name="widgets_untitled_space">無題のスペース</string>
+    <string name="widgets_favorites">お気に入り</string>
+    <string name="widgets_other">その他</string>
+    <string name="widgets_no_notes_yet">メモはまだありません</string>
+    <string name="widgets_no_notes_match">「%1$s」に一致するメモはありません</string>
+    <string name="widgets_choose_a_note">メモを選択</string>
+    <string name="widgets_search_notes">メモを検索</string>
+    <string name="widgets_open_the_app_first">ウィジェットを追加する前に、一度アプリを開いてください</string>
+    <string name="widgets_choose_a_gradient">グラデーションを選択</string>
+    <string name="widgets_whats_on_your_mind">何を考えていますか？</string>
+    <string name="widgets_selected">選択中</string>
+    <string name="widgets_gradient_dusk">ダスク</string>
+    <string name="widgets_gradient_copper">カッパー</string>
+    <string name="widgets_gradient_forest">フォレスト</string>
+    <string name="widgets_gradient_lagoon">ラグーン</string>
+    <string name="widgets_gradient_midnight">ミッドナイト</string>
+    <string name="widgets_gradient_blossom">ブロッサム</string>
+    <string name="widgets_gradient_graphite">グラファイト</string>
+    <string name="widgets_gradient_aurora">オーロラ</string>
+    <string name="widgets_gradient_sunset">サンセット</string>
+    <string name="widgets_gradient_slate">スレート</string>
+    <string name="widgets_gradient_cocoa">ココア</string>
+    <string name="widgets_gradient_lavender">ラベンダー</string>
+    <string name="widgets_untitled_event">無題の予定</string>
+    <string name="widgets_untitled_task">無題のタスク</string>
+    <string name="widgets_note">メモ</string>
+    <string name="widgets_repeating">繰り返し</string>
+    <string name="widgets_today">今日</string>
+    <string name="widgets_tomorrow">明日</string>
+    <string name="widgets_yesterday">昨日</string>
+    <string name="widgets_all_day">終日</string>
+    <string name="widgets_date_all_day">%1$s · 終日</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · 終日</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="other">%1$d分前</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="other">%1$d時間前</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s：</string>
+    <string name="widgets_linked_note">リンクされたメモ</string>
+    <string name="widgets_image">画像</string>
+    <string name="widgets_canvas">キャンバス</string>
+    <string name="widgets_database">データベース</string>
+    <string name="widgets_watchlist">ウォッチリスト</string>
+    <string name="widgets_credentials">ログイン情報</string>
+    <string name="widgets_voice_note_length">ボイスメモ  %1$s</string>
+    <string name="widgets_needs_newer_version">新しいバージョンのEmberrが必要です</string>
+    <string name="widgets_table">表</string>
+</resources>

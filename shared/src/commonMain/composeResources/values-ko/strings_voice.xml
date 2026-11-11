@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">듣는 중...</string>
+    <string name="voice_tap_the_orb">구슬을 탭하고 말하세요</string>
+    <string name="voice_add_tasks_with_voice">(음성으로 할 일 추가)</string>
+    <string name="voice_install_speech_app">음성 할 일을 사용하려면 음성 인식 앱을 설치하세요</string>
+    <string name="voice_tap_a_task_to_fix_it">할 일을 탭해서 수정하세요</string>
+    <string name="voice_discard">버리기</string>
+    <string name="voice_add">추가</string>
+    <string name="voice_empty_tasks_are_skipped">빈 할 일은 건너뛰어요</string>
+    <string name="voice_today">오늘</string>
+    <string name="voice_tomorrow">내일</string>
+    <string name="voice_add_time">시간 추가</string>
+</resources>

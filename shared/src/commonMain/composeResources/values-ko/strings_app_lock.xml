@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberr가 잠겨 있어요</string>
+    <string name="app_lock_screen_detail">지문, 얼굴 또는 화면 잠금을 사용해 여세요.</string>
+    <string name="app_lock_unlock">잠금 해제</string>
+    <string name="app_lock_prompt_subtitle">지문, 얼굴 또는 화면 잠금 사용</string>
+    <string name="app_lock_unlock_emberr">Emberr 잠금 해제</string>
+    <string name="app_lock_off_no_screen_lock">이 휴대전화에 화면 잠금이 없어서 앱 잠금이 꺼져 있어요.</string>
+</resources>

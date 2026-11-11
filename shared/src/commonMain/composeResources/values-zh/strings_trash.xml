@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trash_is_empty">废纸篓是空的</string>
+    <string name="trash_title">废纸篓</string>
+    <string name="trash_empty_trash">清空废纸篓</string>
+    <string name="trash_empty_trash_tooltip">清空废纸篓</string>
+    <string name="trash_restore_note">恢复笔记</string>
+    <string name="trash_delete_permanently">永久删除</string>
+    <string name="trash_manage_note">管理笔记</string>
+    <string name="trash_manage_note_subtitle">废纸篓中的笔记会在 30 天后自动删除。</string>
+    <string name="trash_empty_trash_question">清空废纸篓？</string>
+    <string name="trash_empty_trash_subtitle">这将永久删除废纸篓中的所有笔记。此操作无法撤销。</string>
+</resources>

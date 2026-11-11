@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">設定</string>
+
+    <string name="settings_group_reminders">リマインダー</string>
+    <string name="settings_group_data_storage">データとストレージ</string>
+    <string name="settings_group_sync_backup">同期とバックアップ</string>
+    <string name="settings_group_lan_sync">LAN同期</string>
+    <string name="settings_group_security">セキュリティ</string>
+    <string name="settings_group_editor">エディタ</string>
+    <string name="settings_group_appearance">外観</string>
+    <string name="settings_group_date_time">日付と時刻</string>
+    <string name="settings_group_layout">レイアウト</string>
+    <string name="settings_group_overview">概要</string>
+    <string name="settings_group_desktop_window">デスクトップウインドウ</string>
+    <string name="settings_group_ai">AI</string>
+    <string name="settings_group_need_help">お困りですか？</string>
+    <string name="settings_group_updates">アップデート</string>
+    <string name="settings_group_danger_zone">危険な操作</string>
+
+    <string name="settings_unrestricted_background">バックグラウンドの制限なし</string>
+
+    <string name="settings_import">インポート</string>
+    <string name="settings_export_backup">バックアップをエクスポート</string>
+    <string name="settings_automatic_backups">自動バックアップ</string>
+    <string name="settings_backup_frequency_daily">毎日</string>
+    <string name="settings_backup_frequency_weekly">毎週</string>
+    <string name="settings_backup_day">バックアップの曜日</string>
+    <string name="settings_backup_time">バックアップの時刻</string>
+    <string name="settings_backup_location">バックアップの保存先</string>
+    <string name="settings_backup_location_change">変更</string>
+    <string name="settings_select_backup_day">バックアップの曜日を選択</string>
+
+    <string name="settings_self_host">セルフホスト</string>
+    <string name="settings_self_host_blocked_by_lan_sync">セルフホストを使うにはLAN同期のペアリングを解除してください。</string>
+    <string name="settings_self_host_blocked_by_cloud">セルフホストを使うにはEmberr Cloudからサインアウトしてください。</string>
+    <string name="settings_emberr_cloud">Emberr Cloud</string>
+    <string name="settings_cloud_blocked_by_self_host">Emberr Cloudを使うにはセルフホストを切断してください。</string>
+    <string name="settings_cloud_blocked_by_lan_sync">Emberr Cloudを使うにはLAN同期のペアリングを解除してください。</string>
+    <string name="settings_sync_network_both">両方</string>
+    <string name="settings_sync_network_wifi_only">Wi-Fiのみ</string>
+    <string name="settings_sync_network_data_only">モバイルデータのみ</string>
+    <string name="settings_sync_network_hint">セルフホストとEmberr Cloudは、選択したネットワークでのみ同期します。</string>
+
+    <string name="settings_lan_sync_blocked_by_self_host">LAN同期を使うにはセルフホストを切断してください。</string>
+    <string name="settings_lan_sync_blocked_by_cloud">LAN同期を使うにはEmberr Cloudからサインアウトしてください。</string>
+    <string name="settings_lan_sync_paired_desktop">ペアリング済みです。スマートフォンがLANで接続するたびに、このデスクトップは自動的に同期します。</string>
+    <string name="settings_sync_now">今すぐ同期</string>
+    <string name="settings_unpair_from_mobile_device">モバイルデバイスとのペアリングを解除</string>
+    <string name="settings_unpair_from_desktop">デスクトップとのペアリングを解除</string>
+    <string name="settings_sync_port">同期ポート</string>
+    <string name="settings_sync_port_hint">Emberrを再起動すると反映されます。このコンピュータの別のプログラムが現在のポートを使用している場合は変更してください。</string>
+    <string name="settings_pair_mobile_device">モバイルデバイスをペアリング</string>
+    <string name="settings_pair_with_desktop">デスクトップとペアリング</string>
+    <string name="settings_unpair_dialog_title">デバイスのペアリングを解除しますか？</string>
+    <string name="settings_unpair_dialog_message_desktop">このデスクトップから同期のペアリングを削除します。スマートフォンでも解除してください。</string>
+    <string name="settings_unpair_dialog_message_phone">このデバイスから同期のペアリングを削除します。デスクトップアプリを開いたままにするか、デスクトップでも解除してください。</string>
+    <string name="settings_unpair">ペアリング解除</string>
+
+    <string name="settings_theme">テーマ</string>
+    <string name="settings_top_bar_fade">トップバーのフェード</string>
+    <string name="settings_top_bar_fade_subtitle">スクロール中にトップバーの後ろでコンテンツをどうフェードさせるかを選択します。</string>
+    <string name="settings_top_bar_fade_progressive">グラデーション</string>
+    <string name="settings_top_bar_fade_blur">ぼかし</string>
+    <string name="settings_top_bar_fade_color">カラー</string>
+    <string name="settings_top_bar_fade_none">なし</string>
+    <string name="settings_top_bar_fade_fallback">代替表示</string>
+    <string name="settings_top_bar_fade_progressive_blur">グラデーションぼかし</string>
+    <string name="settings_top_bar_fade_progressive_color">グラデーションカラー</string>
+    <string name="settings_interface_scale">表示倍率</string>
+    <string name="settings_interface_scale_hint">アプリ全体の表示を大きくまたは小さくします。</string>
+    <string name="settings_interface_scale_smaller">縮小</string>
+    <string name="settings_interface_scale_bigger">拡大</string>
+    <string name="settings_interface_scale_reset">100%に戻す</string>
+    <string name="settings_interface_scale_toast">表示倍率%1$d%</string>
+    <string name="settings_font_size">文字サイズ</string>
+    <string name="settings_font_size_extra_small">極小</string>
+    <string name="settings_font_size_small">小</string>
+    <string name="settings_font_size_default">標準</string>
+    <string name="settings_font_size_large">大</string>
+    <string name="settings_font_size_extra_large">特大</string>
+    <string name="settings_font_style">フォント</string>
+    <string name="settings_font_style_system">システム</string>
+    <string name="settings_language">言語</string>
+    <string name="settings_search_languages">言語を検索</string>
+    <string name="settings_language_system">システムのデフォルト</string>
+    <string name="settings_language_restart_message">新しい言語で表示するにはEmberrを再起動する必要があります。入力内容はその都度保存されているため、今すぐ再起動しても問題ありません。</string>
+
+    <string name="settings_time_format">時刻の形式</string>
+    <string name="settings_time_format_system">システムのデフォルト</string>
+    <string name="settings_time_format_twelve_hour">12時間表示</string>
+    <string name="settings_time_format_twenty_four_hour">24時間表示</string>
+    <string name="settings_first_day_of_week">週の始まり</string>
+    <string name="settings_first_day_of_week_desktop_hint">カレンダー設定の「週の始まり」と同じ設定です。</string>
+    <string name="settings_first_day_of_week_system">システムのデフォルト</string>
+    <string name="settings_first_day_of_week_saturday">土曜日</string>
+    <string name="settings_first_day_of_week_sunday">日曜日</string>
+    <string name="settings_first_day_of_week_monday">月曜日</string>
+
+    <string name="settings_daily_notes">デイリーメモ</string>
+    <string name="settings_daily_notes_hint">デイリーメモを非表示にします。既存のメモは残ります。</string>
+    <string name="settings_daily_quote">今日の名言</string>
+    <string name="settings_daily_quote_hint">何もない日に名言を表示します。</string>
+    <string name="settings_open_home_first">最初にホームを開く</string>
+    <string name="settings_mic_button">マイクボタン</string>
+    <string name="settings_overview_sidebar_footnote">サイドバーに表示されるショートカットです。</string>
+
+    <string name="settings_subnote_opening">サブメモの開き方</string>
+    <string name="settings_subnote_opening_side_panel">サイドパネル</string>
+    <string name="settings_subnote_opening_center_dialog">中央のダイアログ</string>
+    <string name="settings_subnote_opening_full_right_panel">右側の全面パネル</string>
+    <string name="settings_show_scrollbar">スクロールバーを表示</string>
+    <string name="settings_show_scrollbar_hint">リスト、メモ、表にスクロールバーを表示します。</string>
+    <string name="settings_custom_title_bar">カスタムタイトルバー</string>
+    <string name="settings_custom_title_bar_hint">Emberr独自のタイトルバーを使います。再起動後に反映されます。</string>
+    <string name="settings_auto_hide_title_bar">タイトルバーを自動的に隠す</string>
+    <string name="settings_auto_hide_title_bar_hint">画面の上端にポインタを合わせるとタイトルバーを表示します。</string>
+    <string name="settings_restart_to_apply_title">再起動して反映</string>
+    <string name="settings_restart_to_apply_message">ウインドウを開いたまま独自のタイトルバーとデスクトップのタイトルバーを切り替えることはできないため、反映するにはEmberrを再起動する必要があります。入力内容はその都度保存されているため、今すぐ再起動しても問題ありません。</string>
+    <string name="settings_restart_later">後で</string>
+    <string name="settings_restart_now">今すぐ再起動</string>
+
+    <string name="settings_turn_off_ai_features">AI機能をオフにする</string>
+    <string name="settings_ai_removing_data">モデル、埋め込み、保存されたキーを削除しています…</string>
+    <string name="settings_ai_off_hint">AIはオフです。モデルとキーは削除されています。チャットは残ります。</string>
+    <string name="settings_ai_on_hint">アシスタントを非表示にし、モデルとキーを削除します。チャットは残ります。</string>
+    <string name="settings_turn_off_ai_dialog_title">AI機能をオフにしますか？</string>
+    <string name="settings_turn_off_ai_dialog_message">ダウンロードしたモデル、検索インデックス、保存されたAPIキーを削除します。メモとチャットは残ります。</string>
+    <string name="settings_turn_off">オフにする</string>
+    <string name="settings_ai_purge_failed">AIデータを削除しきれませんでした: %1$s</string>
+    <plurals name="settings_ai_purge_files_left">
+        <item quantity="other">%1$sを解放しましたが、%2$d個のファイルを削除できませんでした: %3$s</item>
+    </plurals>
+    <string name="settings_ai_purge_freed">モデルファイル%1$sを解放しました。</string>
+    <string name="settings_ai_purge_nothing_to_remove">削除するモデルファイルはありませんでした。</string>
+
+    <string name="settings_keyboard_toolbar">キーボードツールバー</string>
+
+    <string name="settings_faq">よくある質問</string>
+    <string name="settings_whats_new">新機能</string>
+    <string name="settings_privacy_policy">プライバシーポリシー</string>
+    <string name="settings_about_emberr">Emberrについて</string>
+
+    <string name="settings_clear_all_data">すべてのデータを消去</string>
+    <string name="settings_clear_all_data_desktop_hint">このデバイスに保存されているすべてのメモ、リマインダー、添付ファイルを削除します。この操作は元に戻せません。</string>
+    <string name="settings_clear_all_data_dialog_title">すべてのデータを消去しますか？</string>
+    <string name="settings_clear_all_data_dialog_message">このデバイス上のすべてを削除します。他のデバイス、同期サーバー、バックアップには影響しません。</string>
+    <string name="settings_clear_data_failed">データを消去できませんでした。何も削除されていません。</string>
+    <string name="settings_erase_cloud_dialog_message">Emberr Cloudとサインインしているすべてのデバイスから、すべてのデータを消去します。サインインしたままになります。</string>
+    <string name="settings_erase_cloud_password">パスワード</string>
+    <string name="settings_erasing">消去中...</string>
+    <string name="settings_erase">消去</string>
+    <string name="settings_erase_cloud_device_not_cleared">クラウドのデータは消去されましたが、このデバイスを消去できませんでした。もう一度「すべてのデータを消去」をお試しください。</string>
+    <string name="settings_erase_cloud_incorrect_password">パスワードが正しくありません。もう一度お試しください。</string>
+    <string name="settings_erase_cloud_too_many_tries">試行回数が多すぎます。しばらく待ってからもう一度お試しください。</string>
+    <string name="settings_erase_cloud_signed_out">Emberr Cloudからサインアウトされました。何も消去されていません。</string>
+    <string name="settings_erase_cloud_something_went_wrong">問題が発生しました。何も消去されていません。</string>
+    <string name="settings_erase_cloud_server_unreachable">%1$sのサーバーに接続できません。何も消去されていません。</string>
+
+    <string name="settings_theme_mode">モード</string>
+    <string name="settings_theme_mode_system">システム</string>
+    <string name="settings_theme_mode_light">ライト</string>
+    <string name="settings_theme_mode_dark">ダーク</string>
+    <string name="settings_theme_group_strength">強さ</string>
+    <string name="settings_theme_strength">テーマの強さ</string>
+    <string name="settings_theme_group_text_and_icons">テキストとアイコン</string>
+    <string name="settings_theme_text_and_icons">テキストとアイコンにテーマを適用</string>
+    <string name="settings_theme_text_and_icons_hint">オフにすると、テキストとアイコンは白黒のままになります。</string>
+    <string name="settings_theme_group_texture">テクスチャ</string>
+    <string name="settings_paper_texture">紙のテクスチャ</string>
+    <string name="settings_paper_texture_hint">紙のようなやわらかい質感を加えます。</string>
+    <string name="settings_paper_texture_show_on">表示する場所</string>
+    <string name="settings_paper_texture_area_whole_app">アプリ全体</string>
+    <string name="settings_paper_texture_area_daily_notes">デイリーメモ</string>
+    <string name="settings_paper_texture_area_notes">メモ</string>
+    <string name="settings_paper_texture_area_canvas">キャンバス</string>
+    <string name="settings_paper_texture_areas_none">なし</string>
+    <string name="settings_texture_strength">テクスチャの強さ</string>
+    <string name="settings_theme_group_colors">カラー</string>
+    <string name="settings_color_theme_emberr">Emberr</string>
+    <string name="settings_color_theme_soft">ソフト</string>
+    <string name="settings_color_theme_wallpaper">壁紙</string>
+    <string name="settings_color_theme_high_contrast">ハイコントラスト</string>
+    <string name="settings_color_theme_terracotta">テラコッタ</string>
+    <string name="settings_color_theme_paper">ペーパー</string>
+    <string name="settings_color_theme_nord">Nord</string>
+    <string name="settings_color_theme_forest">フォレスト</string>
+    <string name="settings_color_theme_rose_pine">Rosé Pine</string>
+    <string name="settings_color_theme_catppuccin_frappe">Catppuccin Frappé</string>
+    <string name="settings_color_theme_catppuccin_mocha">Catppuccin Mocha</string>
+    <string name="settings_color_theme_tokyo_night">Tokyo Night</string>
+    <string name="settings_color_theme_gruvbox">Gruvbox</string>
+    <string name="settings_color_theme_everforest">Everforest</string>
+
+    <string name="settings_toolbar_group_in_toolbar">ツールバー内</string>
+    <string name="settings_toolbar_empty">ボタンがまだありません。下のリストから追加してください。</string>
+    <string name="settings_toolbar_reorder_footnote">ハンドルをドラッグして並べ替えます。キーボードを閉じるボタンは常に右端に表示されます。</string>
+    <string name="settings_toolbar_group_available">追加できる項目</string>
+    <string name="settings_toolbar_reset_to_default">デフォルトに戻す</string>
+    <string name="settings_toolbar_reorder_button">%1$sを並べ替え</string>
+    <string name="settings_toolbar_remove">削除</string>
+    <string name="settings_toolbar_remove_button">%1$sを削除</string>
+    <string name="settings_toolbar_add_button">%1$sを追加</string>
+
+    <string name="settings_about_title">情報</string>
+    <string name="settings_about_source_code">ソースコード</string>
+    <string name="settings_about_open_source_licenses">オープンソースライセンス</string>
+    <string name="settings_about_third_party_services">サードパーティのサービス</string>
+    <string name="settings_about_tagline">オープンソースでオフラインファーストのメモ・生産性アプリ</string>
+    <string name="settings_about_copyright">Copyright © 2026 Benny</string>
+    <string name="settings_about_license_notice">GNU AGPL v3.0の下でライセンスされています。いかなる保証もなく提供されます。</string>
+
+    <string name="settings_third_party_group_movies_shows">映画と番組</string>
+    <string name="settings_third_party_visit_tmdb">TMDBにアクセス</string>
+    <string name="settings_third_party_tmdb_usage">映画ブロックとウォッチリストブロックは、映画や番組とその詳細を探すためにTMDBを使います。</string>
+    <string name="settings_third_party_tmdb_proxy">映画や番組の検索は、Cloudflare上にあるEmberrの小さなプロキシを経由してTMDBに送られます。このプロキシはログを残しません。ポスターや写真はTMDBから直接届きます。メモの内容は一切送信されません。</string>
+    <string name="settings_third_party_tmdb_notice">この製品はTMDB APIを使用していますが、TMDBによる推奨または認定を受けたものではありません。</string>
+    <string name="settings_third_party_justwatch_notice">配信先のデータはJustWatchによるものです。</string>
+
+    <string name="settings_licenses_group_libraries">ライブラリ</string>
+    <string name="settings_licenses_group_fonts">フォント</string>
+    <string name="settings_licenses_version">バージョン%1$s</string>
+    <string name="settings_licenses_by_authors">作者: %1$s</string>
+    <string name="settings_licenses_unnamed_license">ライセンス</string>
+    <string name="settings_licenses_full_text_at">全文は%1$sで確認できます</string>
+    <string name="settings_licenses_visit_website">ウェブサイトにアクセス</string>
+
+    <string name="settings_app_lock">アプリロック</string>
+    <string name="settings_app_lock_needs_screen_lock">先にスマートフォンの画面ロックを設定してください。</string>
+    <string name="settings_app_lock_turn_on_prompt">アプリロックをオンにする</string>
+    <string name="settings_app_lock_turn_off_prompt">アプリロックをオフにする</string>
+    <string name="settings_auto_lock">自動ロック</string>
+    <string name="settings_auto_lock_immediately">すぐに</string>
+    <string name="settings_auto_lock_after_one_minute">1分後</string>
+    <string name="settings_auto_lock_after_five_minutes">5分後</string>
+    <string name="settings_auto_lock_after_fifteen_minutes">15分後</string>
+    <string name="settings_auto_lock_after_one_hour">1時間後</string>
+    <string name="settings_screen_security">画面のセキュリティ</string>
+    <string name="settings_screen_security_hint">最近使ったアプリの画面でEmberrの内容を隠します。</string>
+    <string name="settings_screen_security_hint_with_screenshots">最近使ったアプリの画面でEmberrの内容を隠します。スクリーンショットもブロックされます。</string>
+
+    <string name="settings_credential_storage">認証情報の保存先</string>
+    <string name="settings_credential_storage_checking">確認中</string>
+    <string name="settings_credential_storage_plain_text">プレーンテキスト</string>
+    <string name="settings_credential_storage_got_it">OK</string>
+    <string name="settings_credential_storage_checking_detail">Emberrは、このシステムで使える認証情報マネージャーをまだ確認しています。</string>
+    <string name="settings_credential_storage_protected_detail">AIのAPIキーと同期キーは、オペレーティングシステムが管理する%1$sに保管されています。Emberr自身のファイルには書き込まれません。</string>
+    <string name="settings_credential_storage_plain_text_detail">AIのAPIキーと同期キーは、~/.emberr/secrets.propertiesに読み取り可能なテキストとして保存されています。ホームフォルダを読み取れる人は誰でもこれらを読むことができます。\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_title">キーが保護されていません</string>
+    <string name="settings_plain_text_warning_message">このシステムにはEmberrが使える認証情報マネージャーがないため、AIのAPIキーと同期キーは~/.emberr/secrets.propertiesに読み取り可能なテキストとして保存されます。このファイルはご自身のユーザーアカウントしか読み取れませんが、暗号化はされていません。\n\n%1$s\n\n%2$s</string>
+    <string name="settings_plain_text_warning_understood">理解しました</string>
+
+    <string name="settings_update_check_on_launch">起動時にアップデートを確認</string>
+    <string name="settings_update_checking">アップデートを確認中...</string>
+    <string name="settings_update_download_version">Emberr %1$sをダウンロード</string>
+    <string name="settings_update_downloading">アップデートをダウンロード中...</string>
+    <string name="settings_update_restart_to_update">再起動してアップデート</string>
+    <string name="settings_update_check_now">アップデートを確認</string>
+    <string name="settings_update_up_to_date">最新です</string>
+    <string name="settings_update_new">新着</string>
+    <string name="settings_update_failed">失敗</string>
+
+    <string name="settings_export_backup_subtitle">保存する内容を選択してください。</string>
+    <string name="settings_export_backup_select_spaces">スペースを選択</string>
+    <string name="settings_export_backup_daily_notes">デイリーメモ</string>
+    <string name="settings_export_backup_calendar">カレンダー</string>
+    <string name="settings_export_backup_export">エクスポート</string>
+</resources>

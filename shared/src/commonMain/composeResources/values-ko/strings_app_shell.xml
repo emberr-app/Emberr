@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">데일리 노트</string>
+    <string name="app_shell_home">홈</string>
+    <string name="app_shell_ask_ai">AI에게 묻기</string>
+    <string name="app_shell_search">검색</string>
+    <string name="app_shell_voice_task">음성 할 일</string>
+    <string name="app_shell_mic">마이크</string>
+    <string name="app_shell_search_anything">무엇이든 검색</string>
+    <string name="app_shell_close_search">검색 닫기</string>
+    <string name="app_shell_clear_search">검색어 지우기</string>
+</resources>

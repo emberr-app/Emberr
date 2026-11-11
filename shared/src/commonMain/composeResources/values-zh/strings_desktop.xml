@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">打开 Emberr</string>
+    <string name="desktop_tray_close_window">关闭窗口</string>
+    <string name="desktop_tray_quit">退出</string>
+    <string name="desktop_sticky_note">便签</string>
+    <string name="desktop_select_image">选择图片</string>
+    <string name="desktop_select_document">选择文档</string>
+    <string name="desktop_file_not_found_message">此文件在此设备上已不可用。</string>
+    <string name="desktop_file_not_found_title">未找到文件</string>
+    <string name="desktop_open_file_failed">无法打开文件：%1$s</string>
+    <string name="desktop_error">错误</string>
+    <string name="desktop_backup_only_on_android_message">自动后台备份目前仅支持 Android 应用。你仍可使用手动的“导出备份”按钮！</string>
+    <string name="desktop_backup_only_on_android_title">桌面版功能</string>
+    <string name="desktop_update_available">有可用更新</string>
+    <string name="desktop_update_available_message">Emberr %1$s 现已推出。你正在使用 %2$s。更新会在后台下载，不影响你继续工作。</string>
+    <string name="desktop_update_download">下载</string>
+    <string name="desktop_update_ready_to_install">更新已可安装</string>
+    <string name="desktop_update_ready_message">重启 Emberr 即可开始使用 %1$s 版本。如果选择“稍后”，更新将在下次打开 Emberr 时生效。</string>
+    <string name="desktop_update_restart">重启</string>
+    <string name="desktop_update_failed">无法更新 Emberr</string>
+    <string name="desktop_update_later">稍后</string>
+    <string name="desktop_ok">确定</string>
+    <string name="desktop_new_note_in_folder">在文件夹中新建笔记</string>
+    <string name="desktop_new_note_here">在此新建笔记</string>
+    <string name="desktop_rename_folder">重命名文件夹</string>
+    <string name="desktop_add_subfolder">添加子文件夹</string>
+    <string name="desktop_rename_note">重命名笔记</string>
+    <string name="desktop_open_in_split_view">在分屏中打开</string>
+    <string name="desktop_toggle_section">展开/收起 %1$s</string>
+    <string name="desktop_empty_space">此空间为空。</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">先创建%1$s或%2$s</string>
+    <string name="desktop_empty_space_a_note">一条笔记</string>
+    <string name="desktop_create_space">创建空间</string>
+    <string name="desktop_add_space">添加空间</string>
+    <string name="desktop_space_options">空间选项</string>
+    <string name="desktop_close_pane">关闭窗格</string>
+    <string name="desktop_close_this_screen">关闭此屏幕</string>
+    <string name="desktop_drag_to_swap_screens">拖动以交换屏幕</string>
+    <string name="desktop_search_no_match">没有与“%1$s”匹配的笔记、日程或人物</string>
+    <string name="desktop_hide_sidebar">隐藏侧边栏</string>
+    <string name="desktop_collapse_sidebar">收起侧边栏</string>
+    <string name="desktop_select_a_note">从侧边栏中选择一条笔记</string>
+    <string name="desktop_folder">文件夹</string>
+    <string name="desktop_sync">同步</string>
+</resources>

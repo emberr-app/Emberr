@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_timeline">时间线</string>
+    <string name="daily_close_timeline">关闭时间线</string>
+    <string name="daily_open_timeline">打开时间线</string>
+    <string name="daily_search_the_timeline">搜索时间线</string>
+    <string name="daily_previous_match">上一个匹配</string>
+    <string name="daily_next_match">下一个匹配</string>
+    <string name="daily_nothing_on_this_day_yet">这一天还没有内容。</string>
+    <string name="daily_nothing_written_yet">还没有写任何内容。</string>
+    <string name="daily_code">代码</string>
+    <string name="daily_today">今天</string>
+    <string name="daily_tomorrow">明天</string>
+    <string name="daily_yesterday">昨天</string>
+    <string name="daily_go_to_today">转到今天</string>
+    <string name="daily_previous_month">上个月</string>
+    <string name="daily_next_month">下个月</string>
+    <string name="daily_previous">上一个</string>
+    <string name="daily_next">下一个</string>
+    <string name="daily_open_calendar">打开日历</string>
+    <string name="daily_calendar">日历</string>
+    <string name="daily_settings">设置</string>
+    <string name="daily_more_settings">更多设置</string>
+    <string name="daily_click_to_write_your_thoughts">点击写下你的想法</string>
+    <string name="daily_tap_to_write_your_thoughts">点按写下你的想法</string>
+</resources>

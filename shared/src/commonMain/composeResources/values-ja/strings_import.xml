@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">インポート元</string>
+    <string name="import_text_and_markdown">テキストとMarkdown</string>
+    <string name="import_text_and_markdown_subtitle">ObsidianやBearのメモにも使えます。\nObsidianの一部の機能は完全にはインポートされない場合があります。</string>
+
+    <string name="import_button">インポート</string>
+    <string name="import_done">完了</string>
+    <string name="import_stop">インポートを停止</string>
+    <string name="import_or_drop_here">またはここにドロップ</string>
+    <string name="import_choose_again_hint_desktop">クリックして選び直すか、ここにドロップしてください。</string>
+    <string name="import_choose_again_hint_touch">タップして選び直してください。</string>
+    <string name="import_stopping">停止して、インポートした内容を削除しています…</string>
+    <string name="import_stopped">インポートを停止しました</string>
+    <string name="import_nothing_added">何も追加されませんでした。</string>
+
+    <plurals name="import_space_count">
+        <item quantity="other">%1$d個のスペース</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="other">%1$d件のメモ</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="other">%1$d個のフォルダ</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="other">%1$d個の添付ファイル</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">現在のメモを置き換えずにバックアップをインポートします。</string>
+    <string name="import_emberr_copying_media">メディアをコピー中（%1$d/%2$d）…</string>
+    <string name="import_emberr_getting_ready">準備中…</string>
+    <string name="import_emberr_saving">インポートを保存中…</string>
+    <string name="import_emberr_failed">インポートに失敗しました</string>
+    <string name="import_emberr_choose_backup_file">バックアップファイルを選択</string>
+    <string name="import_emberr_choose_backup_hint">「バックアップをエクスポート」で作成した.emberrファイル</string>
+    <string name="import_emberr_reading_backup">バックアップを読み込み中…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">別のファイルを選択</string>
+    <string name="import_emberr_spaces_to_import">インポートするスペース</string>
+    <string name="import_emberr_choose_backup_first">先にバックアップを選択してください</string>
+    <string name="import_emberr_daily_notes">デイリーメモ</string>
+    <string name="import_emberr_calendar">カレンダー</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">デイリーメモとカレンダーの予定を追加しました</string>
+    <string name="import_emberr_added_daily_notes">デイリーメモを追加しました</string>
+    <string name="import_emberr_added_calendar">カレンダーの予定を追加しました</string>
+    <string name="import_emberr_finished">インポートが完了しました</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="other">%1$d個のスペースをインポートしました</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="other">バックアップ内に%1$d個のメディアファイルが見つからなかったため、見つからないファイルとして表示されます。</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">不明なエラー</string>
+    <string name="import_emberr_picker_title">Emberrのバックアップを選択</string>
+
+    <string name="import_markdown_subtitle">.md、.txt、.canvasファイル、またはフォルダ入りの.zipをEmberrのメモに変換します。</string>
+    <string name="import_markdown_copying_file">%1$sをコピー中…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="other">メモをインポート中（%1$d/%2$d件）…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">ファイルまたは.zipを選択</string>
+    <string name="import_markdown_choose_files_hint">.md、.markdown、.txt、.canvas、.zip</string>
+    <string name="import_markdown_reading_files">ファイルを読み込み中…</string>
+    <string name="import_markdown_could_not_read">ファイルを読み込めませんでした。%1$s</string>
+    <string name="import_markdown_save_to_space">保存先のスペース</string>
+    <string name="import_markdown_import_as">インポート形式</string>
+    <string name="import_markdown_emberr_notes">Emberrのメモ</string>
+    <string name="import_markdown_emberr_notes_subtitle">各ファイルがブロックで構成されたメモになります。</string>
+    <string name="import_markdown_markdown_files">Markdownファイル</string>
+    <string name="import_markdown_coming_soon">近日公開</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="other">%1$d件のメモをインポートしました</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="other">%1$d件のメモを%2$sにインポートしました</item>
+    </plurals>
+    <string name="import_markdown_failed_files">%1$d件をインポートできませんでした: %2$s</string>
+    <string name="import_markdown_choose_folder">フォルダを選択</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="other">%1$d個のファイル</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d件をスキップ: %2$s</string>
+    <string name="import_markdown_choose_different_files">別のファイルを選択</string>
+    <string name="import_markdown_picker_title">インポートするファイルを選択</string>
+</resources>

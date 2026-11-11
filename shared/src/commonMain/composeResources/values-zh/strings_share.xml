@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_save_shared_content">保存分享的内容</string>
+    <string name="share_save_to_overview">保存到概览</string>
+    <string name="share_save_to_a_note">保存到笔记</string>
+    <string name="share_shared_image">分享的图片</string>
+    <string name="share_failed_to_save">无法保存分享的内容。</string>
+    <string name="share_saved_to_inbox">已保存到收件箱</string>
+    <string name="share_note_no_longer_available">该笔记已不可用。</string>
+    <plurals name="share_images_selected">
+        <item quantity="other">已选择 %1$d 张图片</item>
+    </plurals>
+    <plurals name="share_files_selected">
+        <item quantity="other">已选择 %1$d 个文件</item>
+    </plurals>
+    <plurals name="share_saved_items_to_inbox">
+        <item quantity="other">已将 %1$d 项保存到收件箱</item>
+    </plurals>
+</resources>

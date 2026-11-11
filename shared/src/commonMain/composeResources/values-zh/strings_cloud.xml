@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_title">Emberr Cloud</string>
+
+    <string name="cloud_server_address">服务器地址</string>
+    <string name="cloud_server_address_invalid">请输入以 http:// 或 https:// 开头的地址，例如 http://localhost:8080。</string>
+    <string name="cloud_server_address_saved">服务器地址已保存</string>
+
+    <string name="cloud_welcome_hint">使用端到端加密在设备之间同步笔记。只有你的设备能读取它们。</string>
+    <string name="cloud_create_account">创建账户</string>
+    <string name="cloud_log_in">登录</string>
+    <string name="cloud_send_code">发送验证码</string>
+    <string name="cloud_send_new_code">重新发送验证码</string>
+    <string name="cloud_continue">继续</string>
+    <string name="cloud_done">完成</string>
+    <string name="cloud_password_not_stored_hint">我们不会存储此密码，所以如果你忘记了它，我们将无法解密你的笔记。</string>
+    <string name="cloud_recovery_words">恢复词</string>
+    <string name="cloud_recovery_words_explanation">如果你忘记密码，这 24 个词是找回账户的唯一途径。我们不会存储它们，请将其保存在安全的地方。</string>
+    <string name="cloud_recovery_words_warning">没有密码和这些词，你的云端笔记将无法恢复。</string>
+    <string name="cloud_recovery_words_saved_checkbox">我已将这些词保存在安全的地方</string>
+    <string name="cloud_copy_words">复制恢复词</string>
+    <string name="cloud_recovery_words_copied">恢复词已复制</string>
+    <string name="cloud_forgot_password">忘记密码</string>
+    <string name="cloud_recovery_email_hint">输入你账户的邮箱，我们会给你发送验证码。</string>
+    <string name="cloud_recovery_other_device_hint">已在其他设备上登录？请在那台设备上更改密码。</string>
+    <string name="cloud_recovery_words_entry_hint">输入你在创建账户时保存的 24 个恢复词。</string>
+    <string name="cloud_recovery_words_placeholder">你的 24 个恢复词</string>
+    <string name="cloud_set_new_password">设置新密码</string>
+    <string name="cloud_new_password_hint">输入一个新密码，我们将用它来加密你的笔记。</string>
+    <string name="cloud_reset_password">重置密码</string>
+    <string name="cloud_sign_out_other_devices_title">退出其他设备</string>
+    <string name="cloud_sign_out_other_devices_message">如果你认为有人可能知道你的密码，可以强制所有使用你账户的其他设备退出登录。</string>
+    <string name="cloud_sign_out_other_devices_button">退出其他设备</string>
+    <string name="cloud_do_not_sign_out">不退出</string>
+
+    <string name="cloud_account">账户</string>
+    <string name="cloud_signed_in_as">已登录为 %1$s</string>
+    <string name="cloud_loading_storage_used">正在加载已用存储空间...</string>
+    <string name="cloud_sync">同步</string>
+    <string name="cloud_syncing">正在同步...</string>
+    <string name="cloud_last_synced">上次同步：%1$s</string>
+    <string name="cloud_sync_explanation">发送和接收空间、文件夹、笔记、列表、聊天和媒体。</string>
+    <string name="cloud_sync_now">立即同步</string>
+    <string name="cloud_media">媒体</string>
+    <string name="cloud_media_last_checked">媒体上次检查：%1$s</string>
+    <string name="cloud_devices">设备</string>
+    <string name="cloud_loading_devices">正在加载设备...</string>
+    <string name="cloud_tap_device_to_sign_out">点按设备即可让其退出登录。</string>
+    <string name="cloud_sign_out_of_this_device">在此设备上退出登录</string>
+    <string name="cloud_manage_account">管理账户</string>
+    <string name="cloud_change_password">更改密码</string>
+    <string name="cloud_change_email">更改邮箱</string>
+    <string name="cloud_recovery_words_lock_description">请验证身份以查看你的恢复词</string>
+    <string name="cloud_delete_account">删除账户</string>
+    <string name="cloud_sign_out_device_title">让设备退出登录？</string>
+    <string name="cloud_sign_out_device_message">以下设备将退出登录：\n\n%1$s</string>
+    <string name="cloud_sign_out">退出登录</string>
+    <string name="cloud_delete_account_title">删除账户？</string>
+    <string name="cloud_delete_account_message">你的 Emberr Cloud 账户及其中存储的所有内容将被永久删除。此操作无法撤销。此设备上的笔记会保留，除非你同时选择清除它们。我们会向 %1$s 发送验证码以进行确认。</string>
+    <string name="cloud_last_used">上次使用：%1$s</string>
+    <string name="cloud_this_device">此设备</string>
+    <string name="cloud_sign_out_of_this_device_title">在此设备上退出登录？</string>
+    <string name="cloud_sign_out_of_this_device_message">此设备将停止使用 Emberr Cloud。此设备上的笔记不受影响。</string>
+
+    <string name="cloud_change_password_code_hint">我们会向 %1$s 发送验证码以进行确认。</string>
+    <string name="cloud_sign_out_of_other_devices">退出其他设备</string>
+    <string name="cloud_change_email_hint">输入你的新邮箱地址，我们会向该地址发送验证码。</string>
+    <string name="cloud_recovery_words_password_hint">输入密码以查看你的恢复词。</string>
+    <string name="cloud_clear_notes_on_this_device">同时清除此设备上的笔记</string>
+    <string name="cloud_delete_account_warning">你的 Emberr Cloud 账户将被永久删除。此操作无法撤销。</string>
+
+    <string name="cloud_email">邮箱</string>
+    <string name="cloud_code_placeholder">6 位验证码</string>
+    <string name="cloud_password">密码</string>
+    <string name="cloud_confirm_password">确认密码</string>
+    <string name="cloud_passwords_do_not_match">两次输入的密码不一致。</string>
+    <string name="cloud_hide_password">隐藏密码</string>
+    <string name="cloud_show_password">显示密码</string>
+    <string name="cloud_password_strength_weak">密码强度：弱</string>
+    <string name="cloud_password_strength_moderate">密码强度：中</string>
+    <string name="cloud_password_strength_strong">密码强度：强</string>
+    <string name="cloud_code_sent">我们已向 %1$s 发送验证码。请查看收件箱（以及垃圾邮件）。</string>
+    <string name="cloud_new_code_sent">我们已向 %1$s 发送新的验证码。</string>
+    <string name="cloud_please_wait">请稍候...</string>
+
+    <string name="cloud_sending_file">正在发送第 %1$d 个文件，共 %2$d 个</string>
+    <string name="cloud_receiving_file">正在接收第 %1$d 个文件，共 %2$d 个</string>
+    <string name="cloud_photo_in_note">%1$s 中的照片</string>
+    <string name="cloud_video_in_note">%1$s 中的视频</string>
+    <string name="cloud_audio_in_note">%1$s 中的音频</string>
+    <string name="cloud_document_in_note">%1$s 中的文档</string>
+    <string name="cloud_file_in_note">%1$s 中的文件</string>
+    <string name="cloud_file_progress">%1$d% · %2$s / %3$s</string>
+    <plurals name="cloud_files_waiting_for_upload">
+        <item quantity="other">%1$d 个文件正在等待其他设备上传。</item>
+    </plurals>
+    <string name="cloud_files_not_sent_and_not_received">文件：%1$d 个未发送，%2$d 个未接收。将在下次同步时重试。</string>
+    <string name="cloud_files_not_sent">文件：%1$d 个未发送。将在下次同步时重试。</string>
+    <string name="cloud_files_not_received">文件：%1$d 个未接收。将在下次同步时重试。</string>
+    <string name="cloud_files_sent_and_received_counts">已发送 %1$d / %2$d 个文件 · 已接收 %3$d / %4$d 个文件</string>
+    <string name="cloud_files_sent_count">已发送 %1$d / %2$d 个文件</string>
+    <string name="cloud_files_received_count">已接收 %1$d / %2$d 个文件</string>
+
+    <string name="cloud_trial_ended">免费试用已于 %1$s 结束 · 只读至 %2$s</string>
+    <string name="cloud_trial_ends_today">免费试用 · 今天结束</string>
+    <plurals name="cloud_trial_days_left">
+        <item quantity="other">免费试用 · 剩余 %1$d 天</item>
+    </plurals>
+    <string name="cloud_storage_used">已使用 %1$s / %2$s</string>
+    <string name="cloud_full_with_usage">Emberr Cloud 已满：已使用 %1$s / %2$s。新的笔记和文件会保留在此设备上，有空间时再上传。</string>
+    <string name="cloud_full">Emberr Cloud 已满。新的笔记和文件会保留在此设备上，有空间时再上传。</string>
+    <string name="cloud_trial_ended_read_only">你的免费试用已结束，因此 Emberr Cloud 为只读状态。此设备仍会接收来自其他设备的更改，但不会上传新内容。你的笔记会保留在你的设备上。</string>
+    <plurals name="cloud_files_too_large">
+        <item quantity="other">%1$d 个文件大于 10 GB，因此只保留在此设备上。</item>
+    </plurals>
+    <string name="cloud_copy_removed">你的免费试用已结束，云端副本已于 %1$s 移除。所有笔记仍在此设备上。选择套餐后将重新开始同步。</string>
+
+    <string name="cloud_error_something_went_wrong">出了点问题，请重试。</string>
+    <string name="cloud_error_signed_out">你已退出登录，请重新登录。</string>
+    <string name="cloud_error_incorrect_password">密码不正确，请重试。</string>
+    <string name="cloud_error_invalid_email">请输入有效的邮箱地址。</string>
+    <string name="cloud_error_wrong_email_or_password">邮箱或密码错误。</string>
+    <string name="cloud_error_incorrect_code">验证码不正确。</string>
+    <string name="cloud_error_expired_code">验证码已过期，请重新获取。</string>
+    <string name="cloud_error_too_many_tries">尝试次数过多。请稍等片刻再试。</string>
+    <string name="cloud_error_update_required">请更新 Emberr 以使用 Emberr Cloud。</string>
+    <string name="cloud_error_device_already_signed_out">该设备已退出登录。</string>
+    <string name="cloud_error_email_already_used">此邮箱已被其他账户使用。</string>
+    <string name="cloud_error_server_unreachable">无法连接到 %1$s 上的服务器。</string>
+    <string name="cloud_error_invalid_recovery_words">这些词不是有效的恢复密钥。请确保共有 24 个词，并检查每个词的拼写。</string>
+    <string name="cloud_error_recovery_words_other_account">这些词属于另一个账户。</string>
+    <string name="cloud_account_deleted_notes_not_cleared">你的账户已删除，但此设备上的笔记无法清除。</string>
+    <string name="cloud_password_changed">密码已成功更改</string>
+    <string name="cloud_email_changed">邮箱已更改为 %1$s</string>
+
+    <string name="cloud_synced">已同步：接收 %1$d 项，发送 %2$d 项</string>
+    <string name="cloud_synced_with_not_sent">已同步：接收 %1$d 项，发送 %2$d 项，%3$d 项未发送</string>
+    <string name="cloud_sync_busy">另一个同步正在进行，请稍后再试。</string>
+    <string name="cloud_sync_update_required">请更新 Emberr 以继续与 Emberr Cloud 同步。</string>
+    <string name="cloud_sync_other_method_on">已开启另一种同步方式。请断开自托管或解除局域网同步配对，以继续使用 Emberr Cloud。</string>
+    <string name="cloud_disconnect_self_host_first">请先断开自托管，再使用 Emberr Cloud。</string>
+    <string name="cloud_unpair_lan_sync_first">请先解除局域网同步配对，再使用 Emberr Cloud。</string>
+</resources>

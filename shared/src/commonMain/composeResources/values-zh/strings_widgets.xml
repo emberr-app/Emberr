@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets_choose_a_space">选择空间</string>
+    <string name="widgets_follow_the_app">跟随应用</string>
+    <string name="widgets_follow_the_app_detail">始终显示你当前所在的空间</string>
+    <string name="widgets_current_space">当前空间</string>
+    <string name="widgets_untitled_space">无标题空间</string>
+    <string name="widgets_favorites">收藏</string>
+    <string name="widgets_other">其他</string>
+    <string name="widgets_no_notes_yet">你还没有笔记</string>
+    <string name="widgets_no_notes_match">没有与“%1$s”匹配的笔记</string>
+    <string name="widgets_choose_a_note">选择笔记</string>
+    <string name="widgets_search_notes">搜索笔记</string>
+    <string name="widgets_open_the_app_first">添加小组件前请先打开一次应用</string>
+    <string name="widgets_choose_a_gradient">选择渐变</string>
+    <string name="widgets_whats_on_your_mind">在想什么？</string>
+    <string name="widgets_selected">已选择</string>
+    <string name="widgets_gradient_dusk">黄昏</string>
+    <string name="widgets_gradient_copper">铜色</string>
+    <string name="widgets_gradient_forest">森林</string>
+    <string name="widgets_gradient_lagoon">泻湖</string>
+    <string name="widgets_gradient_midnight">午夜</string>
+    <string name="widgets_gradient_blossom">花开</string>
+    <string name="widgets_gradient_graphite">石墨</string>
+    <string name="widgets_gradient_aurora">极光</string>
+    <string name="widgets_gradient_sunset">日落</string>
+    <string name="widgets_gradient_slate">岩灰</string>
+    <string name="widgets_gradient_cocoa">可可</string>
+    <string name="widgets_gradient_lavender">薰衣草</string>
+    <string name="widgets_untitled_event">无标题日程</string>
+    <string name="widgets_untitled_task">无标题待办</string>
+    <string name="widgets_note">笔记</string>
+    <string name="widgets_repeating">重复</string>
+    <string name="widgets_today">今天</string>
+    <string name="widgets_tomorrow">明天</string>
+    <string name="widgets_yesterday">昨天</string>
+    <string name="widgets_all_day">全天</string>
+    <string name="widgets_date_all_day">%1$s · 全天</string>
+    <string name="widgets_date_range_all_day">%1$s – %2$s · 全天</string>
+    <plurals name="widgets_minutes_ago">
+        <item quantity="other">%1$d 分钟前</item>
+    </plurals>
+    <plurals name="widgets_hours_ago">
+        <item quantity="other">%1$d 小时前</item>
+    </plurals>
+    <string name="widgets_label_prefix">%1$s：</string>
+    <string name="widgets_linked_note">链接的笔记</string>
+    <string name="widgets_image">图片</string>
+    <string name="widgets_canvas">画布</string>
+    <string name="widgets_database">数据库</string>
+    <string name="widgets_watchlist">待看清单</string>
+    <string name="widgets_credentials">登录信息</string>
+    <string name="widgets_voice_note_length">语音笔记  %1$s</string>
+    <string name="widgets_needs_newer_version">需要更新版本的 Emberr</string>
+    <string name="widgets_table">表格</string>
+</resources>

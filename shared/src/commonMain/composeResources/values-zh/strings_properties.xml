@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">属性</string>
+    <string name="properties_built_in">内置</string>
+    <string name="properties_built_in_hint">内置属性无法重命名或删除。</string>
+    <string name="properties_custom">自定义</string>
+    <string name="properties_add_property">添加属性</string>
+    <string name="properties_new_property">新建属性</string>
+    <string name="properties_edit_property">编辑属性</string>
+    <string name="properties_delete_question">删除“%1$s”？它将从所有使用它的笔记中移除。</string>
+    <string name="properties_property_name">属性名称</string>
+    <string name="properties_name_taken">已存在同名属性</string>
+    <string name="properties_value_type">值类型</string>
+    <string name="properties_value_type_locked">属性创建后无法更改值类型。</string>
+    <string name="properties_delete_property">删除属性</string>
+    <string name="properties_add">添加</string>
+</resources>

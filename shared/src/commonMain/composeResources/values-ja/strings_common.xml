@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">戻る</string>
+    <string name="common_cancel">キャンセル</string>
+    <string name="common_save">保存</string>
+    <string name="common_close">閉じる</string>
+    <string name="common_delete">削除</string>
+    <string name="common_on">オン</string>
+    <string name="common_off">オフ</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">無題</string>
+    <string name="common_color_yellow">黄</string>
+    <string name="common_color_lime">ライム</string>
+    <string name="common_color_grey">グレー</string>
+    <string name="common_color_red">赤</string>
+    <string name="common_color_blue">青</string>
+    <string name="common_color_green">緑</string>
+    <string name="common_color_orange">オレンジ</string>
+    <string name="common_color_pink">ピンク</string>
+    <string name="common_color_purple">紫</string>
+    <string name="common_create">作成</string>
+    <string name="common_more">その他</string>
+</resources>

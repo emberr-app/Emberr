@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_lock_emberr_is_locked">Emberrはロックされています</string>
+    <string name="app_lock_screen_detail">指紋、顔、または画面ロックを使って開いてください。</string>
+    <string name="app_lock_unlock">ロック解除</string>
+    <string name="app_lock_prompt_subtitle">指紋、顔、または画面ロックを使用</string>
+    <string name="app_lock_unlock_emberr">Emberrのロックを解除</string>
+    <string name="app_lock_off_no_screen_lock">このスマートフォンに画面ロックが設定されていないため、アプリロックはオフになっています。</string>
+</resources>

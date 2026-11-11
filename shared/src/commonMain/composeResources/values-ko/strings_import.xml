@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="import_from">가져올 위치</string>
+    <string name="import_text_and_markdown">텍스트 &amp; Markdown</string>
+    <string name="import_text_and_markdown_subtitle">Obsidian 및 Bear 노트에도 사용할 수 있어요.\n일부 Obsidian 기능은 완전히 가져오지 못할 수 있어요.</string>
+
+    <string name="import_button">가져오기</string>
+    <string name="import_done">완료</string>
+    <string name="import_stop">가져오기 중지</string>
+    <string name="import_or_drop_here">또는 여기에 놓기</string>
+    <string name="import_choose_again_hint_desktop">클릭하여 다시 선택하거나 여기에 놓으세요.</string>
+    <string name="import_choose_again_hint_touch">탭하여 다시 선택하세요.</string>
+    <string name="import_stopping">중지하고 가져온 항목을 제거하는 중…</string>
+    <string name="import_stopped">가져오기 중지됨</string>
+    <string name="import_nothing_added">추가된 항목이 없어요.</string>
+
+    <plurals name="import_space_count">
+        <item quantity="other">스페이스 %1$d개</item>
+    </plurals>
+    <plurals name="import_note_count">
+        <item quantity="other">노트 %1$d개</item>
+    </plurals>
+    <plurals name="import_folder_count">
+        <item quantity="other">폴더 %1$d개</item>
+    </plurals>
+    <plurals name="import_attachment_count">
+        <item quantity="other">첨부 파일 %1$d개</item>
+    </plurals>
+
+    <string name="import_emberr_subtitle">현재 노트를 바꾸지 않고 백업을 가져와요.</string>
+    <string name="import_emberr_copying_media">미디어 복사 중 %1$d / %2$d…</string>
+    <string name="import_emberr_getting_ready">준비하는 중…</string>
+    <string name="import_emberr_saving">가져온 항목 저장 중…</string>
+    <string name="import_emberr_failed">가져오기 실패</string>
+    <string name="import_emberr_choose_backup_file">백업 파일 선택</string>
+    <string name="import_emberr_choose_backup_hint">백업 내보내기로 만든 .emberr 파일</string>
+    <string name="import_emberr_reading_backup">백업을 읽는 중…</string>
+    <string name="import_emberr_could_not_read">%1$s %2$s</string>
+    <string name="import_emberr_choose_different_file">다른 파일 선택</string>
+    <string name="import_emberr_spaces_to_import">가져올 스페이스</string>
+    <string name="import_emberr_choose_backup_first">먼저 백업을 선택하세요</string>
+    <string name="import_emberr_daily_notes">데일리 노트</string>
+    <string name="import_emberr_calendar">캘린더</string>
+    <string name="import_emberr_added_daily_notes_and_calendar">데일리 노트와 캘린더 일정을 추가했어요</string>
+    <string name="import_emberr_added_daily_notes">데일리 노트를 추가했어요</string>
+    <string name="import_emberr_added_calendar">캘린더 일정을 추가했어요</string>
+    <string name="import_emberr_finished">가져오기 완료</string>
+    <plurals name="import_emberr_imported_spaces">
+        <item quantity="other">스페이스 %1$d개를 가져왔어요</item>
+    </plurals>
+    <plurals name="import_emberr_missing_media">
+        <item quantity="other">백업에서 미디어 파일 %1$d개를 찾지 못해 누락된 것으로 표시돼요.</item>
+    </plurals>
+    <string name="import_emberr_unknown_error">알 수 없는 오류</string>
+    <string name="import_emberr_picker_title">Emberr 백업 선택</string>
+
+    <string name="import_markdown_subtitle">.md, .txt, .canvas 파일 또는 폴더가 담긴 .zip을 Emberr 노트로 바꿔요.</string>
+    <string name="import_markdown_copying_file">복사 중: %1$s…</string>
+    <plurals name="import_markdown_importing_notes">
+        <item quantity="other">노트 %2$d개 중 %1$d개 가져오는 중…</item>
+    </plurals>
+    <string name="import_markdown_choose_files">파일 또는 .zip 선택</string>
+    <string name="import_markdown_choose_files_hint">.md, .markdown, .txt, .canvas 또는 .zip</string>
+    <string name="import_markdown_reading_files">파일을 읽는 중…</string>
+    <string name="import_markdown_could_not_read">파일을 읽지 못했어요. %1$s</string>
+    <string name="import_markdown_save_to_space">저장할 스페이스</string>
+    <string name="import_markdown_import_as">가져오기 형식</string>
+    <string name="import_markdown_emberr_notes">Emberr 노트</string>
+    <string name="import_markdown_emberr_notes_subtitle">각 파일이 블록으로 된 노트가 돼요.</string>
+    <string name="import_markdown_markdown_files">Markdown 파일</string>
+    <string name="import_markdown_coming_soon">곧 제공 예정</string>
+    <plurals name="import_markdown_imported_notes">
+        <item quantity="other">노트 %1$d개를 가져왔어요</item>
+    </plurals>
+    <plurals name="import_markdown_imported_notes_into_space">
+        <item quantity="other">%2$s에 노트 %1$d개를 가져왔어요</item>
+    </plurals>
+    <string name="import_markdown_failed_files">%1$d개를 가져오지 못했어요: %2$s</string>
+    <string name="import_markdown_choose_folder">폴더 선택</string>
+    <plurals name="import_markdown_picked_files">
+        <item quantity="other">파일 %1$d개</item>
+    </plurals>
+    <string name="import_markdown_skipped_files">%1$d개 건너뜀: %2$s</string>
+    <string name="import_markdown_choose_different_files">다른 파일 선택</string>
+    <string name="import_markdown_picker_title">가져올 파일 선택</string>
+</resources>

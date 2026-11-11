@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">タスクのリマインダー</string>
+    <string name="notifications_unfinished_task">未完了のタスク</string>
+    <string name="notifications_daily_note">デイリーメモ</string>
+    <string name="notifications_daily_title">デイリー：%1$s</string>
+    <string name="notifications_note">メモ</string>
+    <string name="notifications_birthday">誕生日</string>
+    <string name="notifications_birthday_turns_age">今日は%1$sの%2$d歳の誕生日です</string>
+    <string name="notifications_birthday_today">今日は%1$sの誕生日です</string>
+    <string name="notifications_open">開く</string>
+</resources>
