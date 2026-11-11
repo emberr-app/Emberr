@@ -210,6 +210,14 @@
     <string name="settings_about_tagline">Açık kaynaklı, çevrimdışı öncelikli not ve verimlilik uygulaması</string>
     <string name="settings_about_copyright">Telif hakkı © 2026 Benny</string>
     <string name="settings_about_license_notice">GNU AGPL v3.0 lisansı altındadır. Hiçbir garanti olmadan sunulur.</string>
+    <string name="settings_play_testing">Play Store testine katılın</string>
+    <string name="settings_play_testing_dialog_title">Emberr'ın Google Play Store'a çıkmasına yardım edin</string>
+    <string name="settings_play_testing_dialog_reason">Emberr'ın herkese sunulabilmesi için Google, 12 test kullanıcısının uygulamayı 14 gün boyunca kullanmasını istiyor.</string>
+    <string name="settings_play_testing_step_join">Emberr test grubuna katılın.</string>
+    <string name="settings_play_testing_step_install">Ardından gruptaki bağlantıyı kullanarak Emberr: Private Workspace uygulamasını Google Play Store'dan yükleyin.</string>
+    <string name="settings_play_testing_no_data_lost">Bu uygulama güncellenir, hiçbir veri kaybolmaz.</string>
+    <string name="settings_play_testing_join">Gruba katıl</string>
+    <string name="settings_play_testing_not_now">Şimdi değil</string>
 
     <string name="settings_third_party_group_movies_shows">Filmler ve diziler</string>
     <string name="settings_third_party_visit_tmdb">TMDB'yi ziyaret et</string>

@@ -209,6 +209,14 @@
     <string name="settings_about_tagline">开源、离线优先的笔记和效率应用</string>
     <string name="settings_about_copyright">Copyright © 2026 Benny</string>
     <string name="settings_about_license_notice">采用 GNU AGPL v3.0 许可。不提供任何担保。</string>
+    <string name="settings_play_testing">加入 Play 商店测试</string>
+    <string name="settings_play_testing_dialog_title">帮助 Emberr 登上 Google Play Store</string>
+    <string name="settings_play_testing_dialog_reason">Google 要求有 12 位测试者使用 Emberr 满 14 天，Emberr 才能向公众发布。</string>
+    <string name="settings_play_testing_step_join">加入 Emberr 测试者群组。</string>
+    <string name="settings_play_testing_step_install">然后，通过群组中的链接从 Google Play Store 安装 Emberr: Private Workspace。</string>
+    <string name="settings_play_testing_no_data_lost">会直接更新这个应用，不会丢失任何数据。</string>
+    <string name="settings_play_testing_join">加入群组</string>
+    <string name="settings_play_testing_not_now">以后再说</string>
 
     <string name="settings_third_party_group_movies_shows">电影与剧集</string>
     <string name="settings_third_party_visit_tmdb">访问 TMDB</string>

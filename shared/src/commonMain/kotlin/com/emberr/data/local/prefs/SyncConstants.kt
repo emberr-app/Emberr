@@ -100,6 +100,7 @@ object SyncConstants {
     const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
     const val DEFAULT_ONBOARDING_COMPLETED = false
     const val KEY_LAST_UPDATE_PEEK_VERSION = "last_update_peek_version"
+    const val KEY_PLAY_TESTING_INVITE_SHOWN = "play_testing_invite_shown"
     const val KEY_SAMPLE_NOTES_SEEDED = "sample_notes_seeded"
     const val DEFAULT_SAMPLE_NOTES_SEEDED = false
     const val KEY_SEEDED_TEMPLATE_NOTE_IDS = "seeded_template_note_ids"

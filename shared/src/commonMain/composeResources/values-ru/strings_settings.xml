@@ -212,6 +212,14 @@
     <string name="settings_about_tagline">Приложение для заметок и продуктивности с открытым кодом, работающее офлайн</string>
     <string name="settings_about_copyright">Авторское право © 2026 Benny</string>
     <string name="settings_about_license_notice">Распространяется по лицензии GNU AGPL v3.0. Предоставляется без каких-либо гарантий.</string>
+    <string name="settings_play_testing">Участвовать в тестировании в Play Маркете</string>
+    <string name="settings_play_testing_dialog_title">Помогите Emberr попасть в Google Play Store</string>
+    <string name="settings_play_testing_dialog_reason">Google требует, чтобы 12 тестировщиков пользовались Emberr 14 дней, прежде чем его можно будет выпустить для всех.</string>
+    <string name="settings_play_testing_step_join">Вступите в группу тестировщиков Emberr.</string>
+    <string name="settings_play_testing_step_install">Затем установите Emberr: Private Workspace из Google Play Store по ссылке в группе.</string>
+    <string name="settings_play_testing_no_data_lost">Это приложение обновится, данные не потеряются.</string>
+    <string name="settings_play_testing_join">Вступить в группу</string>
+    <string name="settings_play_testing_not_now">Не сейчас</string>
 
     <string name="settings_third_party_group_movies_shows">Фильмы и сериалы</string>
     <string name="settings_third_party_visit_tmdb">Открыть TMDB</string>
