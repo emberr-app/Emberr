@@ -68,36 +68,56 @@ object LanguageChangeTransition {
     }
 }
 
+internal class LanguageNameRollState {
+    val blurAmount = Animatable(0f)
+    val namesAlpha = Animatable(0f)
+    val rollPosition = Animatable(0f)
+    var rollingNames by mutableStateOf(emptyList<String>())
+        private set
+
+    suspend fun blurAndRollTo(chosenLanguageName: String, namesRolledPast: List<String>, namesBelow: List<String>) {
+        rollingNames = namesRolledPast + chosenLanguageName + namesBelow
+        rollPosition.snapTo(0f)
+        coroutineScope {
+            launch { blurAmount.animateTo(1f, tween(BLUR_IN_MILLIS)) }
+            launch { namesAlpha.animateTo(1f, tween(NAMES_APPEAR_MILLIS)) }
+            rollPosition.animateTo(namesRolledPast.size.toFloat(), tween(NAME_ROLL_MILLIS, easing = NameRollEasing))
+        }
+    }
+
+    suspend fun sharpen() {
+        coroutineScope {
+            launch { namesAlpha.animateTo(0f, tween(SHARPEN_MILLIS)) }
+            blurAmount.animateTo(0f, tween(SHARPEN_MILLIS))
+        }
+    }
+}
+
 @Composable
 fun LanguageChangeTransitionHost(languageTag: String, content: @Composable () -> Unit) {
-    val blurAmount = remember { Animatable(0f) }
-    val namesAlpha = remember { Animatable(0f) }
-    val rollPosition = remember { Animatable(0f) }
-    var rollingNames by remember { mutableStateOf(emptyList<String>()) }
+    val rollState = remember { LanguageNameRollState() }
     val currentLanguageTag by rememberUpdatedState(languageTag)
 
     LaunchedEffect(Unit) {
         LanguageChangeTransition.languageChangeRequests.collect { request ->
             val languageTagBeforeChange = currentLanguageTag
-            rollingNames = request.namesRolledPast + request.chosenLanguageName + request.namesBelow
-            rollPosition.snapTo(0f)
-            coroutineScope {
-                launch { blurAmount.animateTo(1f, tween(BLUR_IN_MILLIS)) }
-                launch { namesAlpha.animateTo(1f, tween(NAMES_APPEAR_MILLIS)) }
-                rollPosition.animateTo(request.namesRolledPast.size.toFloat(), tween(NAME_ROLL_MILLIS, easing = NameRollEasing))
-            }
+            rollState.blurAndRollTo(request.chosenLanguageName, request.namesRolledPast, request.namesBelow)
             request.applyLanguage()
             withTimeoutOrNull(LONGEST_WAIT_FOR_NEW_LANGUAGE_MILLIS) {
                 snapshotFlow { currentLanguageTag }.first { tag -> tag != languageTagBeforeChange }
             }
             withFrameNanos { }
-            coroutineScope {
-                launch { namesAlpha.animateTo(0f, tween(SHARPEN_MILLIS)) }
-                blurAmount.animateTo(0f, tween(SHARPEN_MILLIS))
-            }
+            rollState.sharpen()
         }
     }
 
+    LanguageNameRollLayer(rollState = rollState) {
+        CompositionLocalProvider(LocalAppLanguageTag provides languageTag, content = content)
+    }
+}
+
+@Composable
+internal fun LanguageNameRollLayer(rollState: LanguageNameRollState, content: @Composable () -> Unit) {
     val nameStyle = MaterialTheme.typography.titleLarge
     val nameColor = MaterialTheme.colorScheme.onBackground
     val rollLineHeight = with(LocalDensity.current) { (nameStyle.fontSize * ROLL_LINE_HEIGHT_TIMES_FONT_SIZE).toDp() }
@@ -107,20 +127,20 @@ fun LanguageChangeTransitionHost(languageTag: String, content: @Composable () ->
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    val blurPixels = StrongestBlur.toPx() * blurAmount.value
+                    val blurPixels = StrongestBlur.toPx() * rollState.blurAmount.value
                     renderEffect = if (blurPixels > 0f) BlurEffect(blurPixels, blurPixels, TileMode.Decal) else null
                 }
         ) {
-            CompositionLocalProvider(LocalAppLanguageTag provides languageTag, content = content)
+            content()
         }
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
                 .fillMaxWidth()
                 .height(rollLineHeight * VISIBLE_NAME_LINES)
-                .graphicsLayer { alpha = namesAlpha.value }
+                .graphicsLayer { alpha = rollState.namesAlpha.value }
         ) {
-            rollingNames.forEachIndexed { index, name ->
+            rollState.rollingNames.forEachIndexed { index, name ->
                 Text(
                     text = name,
                     style = nameStyle,
@@ -128,7 +148,7 @@ fun LanguageChangeTransitionHost(languageTag: String, content: @Composable () ->
                     modifier = Modifier
                         .align(Alignment.Center)
                         .graphicsLayer {
-                            val distanceFromCenter = index - rollPosition.value
+                            val distanceFromCenter = index - rollState.rollPosition.value
                             translationY = distanceFromCenter * rollLineHeight.toPx()
                             alpha = (1f - abs(distanceFromCenter) * NEIGHBOUR_NAME_FADE).coerceIn(0f, 1f)
                             val nameScale = 1f + CENTER_NAME_EXTRA_SCALE * (1f - abs(distanceFromCenter)).coerceIn(0f, 1f)
