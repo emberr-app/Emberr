@@ -140,6 +140,7 @@
     <string name="settings_keyboard_toolbar">Pasek narzędzi klawiatury</string>
 
     <string name="settings_faq">Często zadawane pytania</string>
+    <string name="settings_send_feedback">Wyślij opinię</string>
     <string name="settings_report_issue_or_suggest_feature">Zgłoś problem lub zaproponuj funkcję</string>
     <string name="settings_whats_new">Co nowego</string>
     <string name="settings_privacy_policy">Polityka prywatności</string>

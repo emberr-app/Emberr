@@ -138,6 +138,7 @@
     <string name="settings_keyboard_toolbar">Tastatur-Symbolleiste</string>
 
     <string name="settings_faq">FAQ</string>
+    <string name="settings_send_feedback">Feedback senden</string>
     <string name="settings_report_issue_or_suggest_feature">Problem melden oder Funktion vorschlagen</string>
     <string name="settings_whats_new">Neuigkeiten</string>
     <string name="settings_privacy_policy">Datenschutzerklärung</string>

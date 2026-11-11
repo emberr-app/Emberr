@@ -138,7 +138,8 @@
     <string name="settings_keyboard_toolbar">Keyboard Toolbar</string>
 
     <string name="settings_faq">FAQ</string>
-    <string name="settings_report_issue_or_suggest_feature">Report an Issue or Suggest a Feature</string>
+    <string name="settings_send_feedback">Send Feedback</string>
+    <string name="settings_report_issue_or_suggest_feature">Report an issue or suggest a feature</string>
     <string name="settings_whats_new">What's New</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_about_emberr">About Emberr</string>

@@ -138,6 +138,7 @@
     <string name="settings_keyboard_toolbar">Barra de ferramentas do teclado</string>
 
     <string name="settings_faq">Perguntas frequentes</string>
+    <string name="settings_send_feedback">Enviar feedback</string>
     <string name="settings_report_issue_or_suggest_feature">Relatar um problema ou sugerir um recurso</string>
     <string name="settings_whats_new">Novidades</string>
     <string name="settings_privacy_policy">Política de privacidade</string>
