@@ -138,6 +138,7 @@
     <string name="settings_keyboard_toolbar">कीबोर्ड टूलबार</string>
 
     <string name="settings_faq">अक्सर पूछे जाने वाले सवाल</string>
+    <string name="settings_report_issue_or_suggest_feature">समस्या रिपोर्ट करें या नई सुविधा सुझाएं</string>
     <string name="settings_whats_new">नया क्या है</string>
     <string name="settings_privacy_policy">प्राइवेसी पॉलिसी</string>
     <string name="settings_about_emberr">Emberr के बारे में</string>

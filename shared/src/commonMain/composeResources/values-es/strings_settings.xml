@@ -138,6 +138,7 @@
     <string name="settings_keyboard_toolbar">Barra de herramientas del teclado</string>
 
     <string name="settings_faq">Preguntas frecuentes</string>
+    <string name="settings_report_issue_or_suggest_feature">Informar de un problema o sugerir una función</string>
     <string name="settings_whats_new">Novedades</string>
     <string name="settings_privacy_policy">Política de privacidad</string>
     <string name="settings_about_emberr">Acerca de Emberr</string>
