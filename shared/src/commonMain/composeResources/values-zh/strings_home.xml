@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_favorites">收藏</string>
+    <string name="home_toggle_favorites">展开/收起收藏</string>
+    <string name="home_notes">笔记</string>
+    <string name="home_toggle_notes">展开/收起笔记</string>
+    <string name="home_recents">最近</string>
+    <string name="home_toggle_recents">展开/收起最近</string>
+    <string name="home_sort">排序</string>
+    <string name="home_sort_notes">笔记排序</string>
+    <string name="home_new_folder">新建文件夹</string>
+    <string name="home_new_folder_tooltip">新建文件夹</string>
+    <string name="home_new_subfolder">新建子文件夹</string>
+    <string name="home_folder_name_placeholder">例如：个人、工作...</string>
+    <string name="home_new_note">新建笔记</string>
+    <string name="home_new_note_tooltip">新建笔记</string>
+    <string name="home_new_note_in_folder">在 %1$s 中新建笔记</string>
+    <string name="home_note_title_placeholder">笔记标题...</string>
+    <string name="home_templates">模板</string>
+    <string name="home_switch_space">切换空间</string>
+    <string name="home_toggle_sidebar">切换侧边栏</string>
+    <string name="home_open_calendar">打开日历</string>
+    <string name="home_calendar">日历</string>
+    <string name="home_settings">设置</string>
+    <string name="home_more_settings">更多设置</string>
+    <string name="home_rename">重命名</string>
+    <string name="home_move_to_trash">移到废纸篓</string>
+    <string name="home_add_to_favorites">添加到收藏</string>
+    <string name="home_remove_from_favorites">从收藏中移除</string>
+    <string name="home_sort_last_edited">最后编辑</string>
+    <string name="home_sort_date_created">创建日期</string>
+    <string name="home_sort_name">名称（A-Z）</string>
+    <string name="home_sort_type">类型</string>
+    <string name="home_sort_manual">手动</string>
+    <string name="home_sort_ascending">升序</string>
+    <string name="home_sort_descending">降序</string>
+    <string name="home_sort_by">排序方式</string>
+    <string name="home_empty_space_start_with">此空间为空。可以先创建</string>
+    <string name="home_empty_space_a_new_note">一条新笔记</string>
+    <string name="home_empty_space_note_or_folder">%1$s或%2$s</string>
+    <string name="home_empty_space_a_folder">一个文件夹</string>
+    <string name="home_breadcrumb_home">首页</string>
+    <string name="home_cover">封面</string>
+    <string name="home_in_parent">位于 %1$s</string>
+    <string name="home_canvas">画布</string>
+    <string name="home_note">笔记</string>
+    <string name="home_empty_note">空笔记...</string>
+    <string name="home_favorite">收藏</string>
+    <string name="home_selected">已选择</string>
+    <string name="home_rename_subtitle">起一个新名称。</string>
+    <string name="home_name_placeholder">名称...</string>
+    <string name="home_nesting_inside_folder">将放在 %1$s 中。</string>
+    <string name="home_organize_your_notes">整理你的笔记。</string>
+    <string name="home_search_templates_placeholder">搜索模板...</string>
+    <string name="home_search_templates">搜索模板</string>
+    <string name="home_no_templates_yet">还没有模板。</string>
+    <string name="home_no_templates_match">没有与“%1$s”匹配的模板。</string>
+    <string name="home_new_template">新建模板</string>
+    <string name="home_edit_template">编辑模板</string>
+    <string name="home_delete_template">删除模板</string>
+    <string name="home_templates_subtitle">从模板开始一条新笔记。</string>
+    <string name="home_new_subfolder_in_folder">在 %1$s 中新建子文件夹</string>
+    <string name="home_new_note_in_folder_description">在 %1$s 中新建笔记</string>
+    <plurals name="home_overview_tasks_left">
+        <item quantity="other">剩余 %1$d 项</item>
+    </plurals>
+    <plurals name="home_overview_saved">
+        <item quantity="other">已保存 %1$d 个</item>
+    </plurals>
+    <plurals name="home_overview_attached">
+        <item quantity="other">已附加 %1$d 个</item>
+    </plurals>
+    <plurals name="home_delete_items">
+        <item quantity="other">删除 %1$d 项</item>
+    </plurals>
+</resources>

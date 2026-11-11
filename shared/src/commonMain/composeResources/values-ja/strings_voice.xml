@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_listening">聞き取り中...</string>
+    <string name="voice_tap_the_orb">球体をタップして話してください</string>
+    <string name="voice_add_tasks_with_voice">（音声でタスクを追加）</string>
+    <string name="voice_install_speech_app">音声タスクを使うには、音声認識アプリをインストールしてください</string>
+    <string name="voice_tap_a_task_to_fix_it">タスクをタップして修正</string>
+    <string name="voice_discard">破棄</string>
+    <string name="voice_add">追加</string>
+    <string name="voice_empty_tasks_are_skipped">空のタスクはスキップされます</string>
+    <string name="voice_today">今日</string>
+    <string name="voice_tomorrow">明日</string>
+    <string name="voice_add_time">時刻を追加</string>
+</resources>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selfhost_title">自托管</string>
+
+    <string name="selfhost_group_server_details">服务器详情</string>
+    <string name="selfhost_group_recovery_passphrase">恢复密码短语</string>
+    <string name="selfhost_group_unlock_vault">解锁保险库</string>
+    <string name="selfhost_group_status">状态</string>
+
+    <string name="selfhost_setting_up">正在设置</string>
+    <string name="selfhost_unlock_and_sync">解锁并同步</string>
+    <string name="selfhost_create_vault_and_sync">创建保险库并同步</string>
+    <string name="selfhost_server_address_rejected">服务器地址被拒绝</string>
+    <string name="selfhost_got_it">知道了</string>
+
+    <string name="selfhost_status_connected">状态：已连接</string>
+    <string name="selfhost_cancelling">正在取消...</string>
+    <string name="selfhost_cancel_sync">取消同步</string>
+    <string name="selfhost_cancel_sync_hint">取消后，同步会暂停，直到你重启应用或点按“立即同步”。</string>
+    <string name="selfhost_sync_now">立即同步</string>
+    <string name="selfhost_syncing">正在同步...</string>
+    <string name="selfhost_never_synced">从未同步</string>
+    <string name="selfhost_last_synced">上次同步：%1$s</string>
+    <plurals name="selfhost_notes_waiting_to_sync">
+        <item quantity="other">%1$d 条笔记等待同步</item>
+    </plurals>
+    <string name="selfhost_progress_notes">笔记</string>
+    <string name="selfhost_progress_images">图片</string>
+
+    <string name="selfhost_passphrase_needed_hint">将其他手机或电脑连接到此服务器时，需要使用此密码短语。</string>
+    <string name="selfhost_show_passphrase_button">显示密码短语</string>
+    <string name="selfhost_unlock_prompt_title">恢复密码短语</string>
+    <string name="selfhost_unlock_prompt_description">解锁以查看你的恢复密码短语</string>
+    <string name="selfhost_save_passphrase_hint">此设备是在 Emberr 开始保存密码短语之前连接的。请输入一次以将其保存在这里，之后就能随时查看。</string>
+    <string name="selfhost_checking">正在检查</string>
+    <string name="selfhost_save_passphrase">保存密码短语</string>
+    <string name="selfhost_disconnect_vault">断开保险库</string>
+    <string name="selfhost_recovery_dialog_message">当其他设备要求解锁保险库时，在该设备上输入此内容。不要与任何人分享。</string>
+    <string name="selfhost_done">完成</string>
+    <string name="selfhost_disconnect_vault_question">断开保险库？</string>
+    <string name="selfhost_disconnect_message">你的笔记会保留在此设备和服务器上。重新连接时需要你的恢复密码短语。</string>
+    <string name="selfhost_disconnect">断开连接</string>
+
+    <string name="selfhost_checking_for_changes">正在检查更改...</string>
+    <string name="selfhost_finishing_up">即将完成...</string>
+    <string name="selfhost_sending_percent">正在发送 %1$d%</string>
+    <string name="selfhost_nothing_to_send">没有需要发送的内容</string>
+    <string name="selfhost_receiving_percent">正在接收 %1$d%</string>
+    <string name="selfhost_nothing_to_receive">没有需要接收的内容</string>
+    <plurals name="selfhost_note_count_progress">
+        <item quantity="other">%1$d / %2$d 条笔记</item>
+    </plurals>
+    <string name="selfhost_megabytes_progress">%1$s / %2$s MB</string>
+
+    <string name="selfhost_server_details_hint">输入你服务器的 WebDAV 地址和登录信息，例如 Nextcloud 或 NAS。Emberr 会在笔记离开此设备前对其加密。</string>
+    <string name="selfhost_username">用户名</string>
+    <string name="selfhost_password">密码</string>
+    <string name="selfhost_hide_password">隐藏密码</string>
+    <string name="selfhost_show_password">显示密码</string>
+    <string name="selfhost_testing">正在测试</string>
+    <string name="selfhost_test_connection">测试连接</string>
+    <string name="selfhost_contacting_server">正在连接服务器...</string>
+
+    <string name="selfhost_restore_hint">此服务器上已有一个 Emberr 保险库。请输入创建保险库时显示的 16 位恢复密码短语。</string>
+    <string name="selfhost_restore_find_hint">找不到？请在已连接的设备上打开“设置 → 自托管 → 显示密码短语”。</string>
+    <string name="selfhost_passphrase_placeholder">16 位密码短语</string>
+    <string name="selfhost_hide_passphrase">隐藏密码短语</string>
+    <string name="selfhost_show_passphrase">显示密码短语</string>
+
+    <string name="selfhost_save_passphrase_now">请立即保存此密码短语</string>
+    <string name="selfhost_fact_type_on_other_devices">连接到此服务器的每台其他手机或电脑上都需要输入它。</string>
+    <string name="selfhost_fact_locks_notes">它会锁定服务器上的笔记。没有它，任何人都无法读取，Emberr 也不行。</string>
+    <string name="selfhost_fact_cannot_reset">Emberr 无法重置它。请将其保存在密码管理器中，或者写下来。</string>
+    <string name="selfhost_fact_see_again_later">之后你可以在任何已连接设备的“设置 → 自托管”中再次查看。</string>
+    <string name="selfhost_new_passphrase">新密码短语</string>
+    <string name="selfhost_generate_new_passphrase">生成新的密码短语</string>
+    <string name="selfhost_saved_passphrase_confirmation">我已将此密码短语保存在安全的地方</string>
+    <string name="selfhost_copy_passphrase">复制密码短语</string>
+    <string name="selfhost_copy_address">复制地址</string>
+    <string name="selfhost_copied_address">已复制地址</string>
+
+    <string name="selfhost_invalid_credentials">用户名或密码无效</string>
+    <string name="selfhost_server_returned_error">服务器返回错误（%1$d）</string>
+    <string name="selfhost_could_not_reach_server">无法连接到服务器</string>
+    <string name="selfhost_could_not_check_vault">无法检查是否已有保险库：%1$s</string>
+    <string name="selfhost_unknown_error">未知错误</string>
+    <string name="selfhost_existing_vault_found">在此服务器上找到已有的保险库</string>
+    <string name="selfhost_no_existing_vault">没有已有的保险库，将创建一个新的</string>
+    <string name="selfhost_no_vault_file_to_restore">服务器上找不到可用于恢复的保险库文件</string>
+    <string name="selfhost_old_or_damaged_vault_data">此服务器文件夹中有来自旧版或已损坏保险库的同步数据。请删除服务器上的 emberr_sync 文件夹，然后重新设置。</string>
+    <string name="selfhost_vault_exists_enter_passphrase">此服务器上已存在保险库。请在下方输入其恢复密码短语以进行恢复。</string>
+    <string name="selfhost_could_not_set_up">无法设置安全同步</string>
+    <string name="selfhost_no_vault_on_server">服务器上找不到保险库。</string>
+    <string name="selfhost_wrong_passphrase">该密码短语无法解锁此保险库。</string>
+    <string name="selfhost_could_not_check_passphrase">无法检查密码短语：%1$s</string>
+
+    <string name="selfhost_update_required_title">自托管同步已暂停</string>
+    <string name="selfhost_update_required_message">%1$s 你的笔记很安全，并会继续保存在此设备上。</string>
+    <string name="selfhost_later">稍后</string>
+    <string name="selfhost_update">更新</string>
+</resources>

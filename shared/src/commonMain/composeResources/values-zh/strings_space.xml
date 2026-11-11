@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">空间</string>
+    <string name="space_create_space">创建空间</string>
+    <string name="space_rename_space">重命名空间</string>
+    <string name="space_delete_space">删除空间</string>
+    <string name="space_new_space">新建空间</string>
+    <string name="space_new_space_subtitle">工作、个人，随你喜欢。</string>
+    <string name="space_name_placeholder">空间名称...</string>
+    <string name="space_rename_subtitle">起一个新名称。</string>
+    <string name="space_delete_space_question">删除“%1$s”？</string>
+    <string name="space_delete_space_message">此空间中的所有笔记、文件夹、标签和聊天都会一并删除。此操作无法撤销。</string>
+    <string name="space_reorder_space">调整空间顺序</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="space_spaces">スペース</string>
+    <string name="space_create_space">スペースを作成</string>
+    <string name="space_rename_space">スペースの名前を変更</string>
+    <string name="space_delete_space">スペースを削除</string>
+    <string name="space_new_space">新しいスペース</string>
+    <string name="space_new_space_subtitle">仕事、プライベートなど、自由に作れます。</string>
+    <string name="space_name_placeholder">スペース名...</string>
+    <string name="space_rename_subtitle">新しい名前を入力してください。</string>
+    <string name="space_delete_space_question">「%1$s」を削除しますか？</string>
+    <string name="space_delete_space_message">このスペース内のメモ、フォルダ、タグ、チャットもすべて削除されます。この操作は元に戻せません。</string>
+    <string name="space_reorder_space">スペースを並べ替え</string>
+</resources>

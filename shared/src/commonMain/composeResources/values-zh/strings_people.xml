@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">人物</string>
+    <string name="people_clear_selection">清除选择</string>
+    <string name="people_select_all">全选</string>
+    <string name="people_deselect_all">取消全选</string>
+    <string name="people_add_people">添加人物</string>
+    <string name="people_create_new_contact">新建联系人</string>
+    <string name="people_import_from_vcf_file">从 .vcf 文件导入</string>
+    <string name="people_import_from_phone">从手机导入</string>
+    <string name="people_search_people">搜索人物</string>
+    <string name="people_move_to_trash">移到废纸篓</string>
+    <string name="people_next">下一个</string>
+    <string name="people_untitled_event">无标题日程</string>
+    <string name="people_no_upcoming_events">没有即将到来的日程</string>
+    <string name="people_selected">已选择</string>
+    <string name="people_empty_title">还没有人物</string>
+    <string name="people_empty_message">添加你想记住相关事情的人。你添加到日程中的人也会显示在这里。</string>
+    <string name="people_new_person">新建人物</string>
+    <string name="people_import_contacts">导入联系人</string>
+    <string name="people_no_one_matches">没有与“%1$s”匹配的人物</string>
+    <string name="people_create_named">创建“%1$s”</string>
+    <plurals name="people_selected_count">
+        <item quantity="other">已选择 %1$d 个</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="other">%1$d 人</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="other">%1$d 个日程</item>
+    </plurals>
+
+    <string name="people_importing_contacts">正在导入联系人…</string>
+    <string name="people_importing_contacts_progress">正在导入联系人… %1$d / %2$d</string>
+    <string name="people_already_importing_contacts">正在导入联系人中</string>
+    <string name="people_could_not_read_file">无法读取文件</string>
+    <string name="people_could_not_read_contact">无法读取联系人</string>
+    <string name="people_no_contacts_app_found">未找到通讯录应用</string>
+    <string name="people_choose_contact_files">选择联系人文件</string>
+    <string name="people_no_contacts_found">未找到联系人</string>
+    <string name="people_could_not_add_contacts">无法添加联系人</string>
+    <string name="people_already_in_people">已在人物中</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="other">全部 %1$d 人都已在人物中</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="other">已添加 %1$d 人</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="other">跳过 %1$d 人（已在人物中）</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="other">%1$d 人无法添加</item>
+    </plurals>
+    <string name="people_could_not_create_person">无法创建人物</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="other">已将 %1$d 人移到废纸篓</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="other">已将 %1$d / %2$d 人移到废纸篓</item>
+    </plurals>
+    <string name="people_could_not_save_detail">无法保存详情</string>
+    <string name="people_could_not_remove_detail">无法移除详情</string>
+
+    <string name="people_meta_next_and_last_seen">下次：%1$s · 上次见面：%2$s</string>
+    <string name="people_meta_next">下次：%1$s</string>
+    <string name="people_meta_last_seen">上次见面：%1$s</string>
+    <string name="people_meta_no_events">还没有日程</string>
+    <string name="people_birthday_with_age">%2$d 年 %1$s · 将满 %3$d 岁</string>
+    <string name="people_all_day">全天</string>
+    <string name="people_event_with_names">与 %1$s</string>
+
+    <string name="people_copied">已复制</string>
+    <string name="people_could_not_copy">无法复制</string>
+    <string name="people_could_not_open_link">无法打开链接</string>
+    <string name="people_write_anything_about">写下关于 %1$s 的任何事…</string>
+    <string name="people_write_anything_about_them">写下关于 TA 的任何事…</string>
+    <string name="people_notes">笔记</string>
+    <string name="people_remove_icon">移除图标</string>
+    <string name="people_change_icon">更换图标</string>
+    <string name="people_change_photo">更换照片</string>
+    <string name="people_remove_photo">移除照片</string>
+    <string name="people_open">打开</string>
+    <string name="people_more">更多</string>
+    <string name="people_call">打电话</string>
+    <string name="people_message">发消息</string>
+    <string name="people_email">邮件</string>
+    <string name="people_write_email">写邮件</string>
+    <string name="people_copy">复制</string>
+    <string name="people_new_event">新建日程</string>
+    <string name="people_name">姓名</string>
+
+    <string name="people_details">详情</string>
+    <string name="people_more_details">更多详情</string>
+    <string name="people_upcoming">即将到来</string>
+    <string name="people_nothing_planned_with">还没有与 %1$s 的安排</string>
+    <string name="people_nothing_planned_with_them">还没有与 TA 的安排</string>
+    <string name="people_past">过去</string>
+    <string name="people_no_past_events">没有过去的日程</string>
+    <string name="people_show_fewer">收起</string>
+    <string name="people_show_all_count">显示全部 %1$d 个</string>
+
+    <string name="people_detail_phone">电话</string>
+    <string name="people_detail_email">邮箱</string>
+    <string name="people_detail_birthday">生日</string>
+    <string name="people_detail_address">地址</string>
+    <string name="people_detail_company">公司</string>
+    <string name="people_detail_role">职位</string>
+    <string name="people_detail_website">网站</string>
+    <string name="people_detail_social">社交账号</string>
+    <string name="people_detail_relationship">关系</string>
+    <string name="people_detail_custom">自定义</string>
+    <string name="people_add_phone">添加电话</string>
+    <string name="people_add_email">添加邮箱</string>
+    <string name="people_add_birthday">添加生日</string>
+    <string name="people_add_address">添加地址</string>
+    <string name="people_add_company">添加公司</string>
+    <string name="people_add_role">添加职位</string>
+    <string name="people_add_website">添加网站</string>
+    <string name="people_add_social">添加社交账号</string>
+    <string name="people_add_relationship">添加关系</string>
+    <string name="people_add_custom">添加自定义</string>
+    <string name="people_edit_phone">编辑电话</string>
+    <string name="people_edit_email">编辑邮箱</string>
+    <string name="people_edit_birthday">编辑生日</string>
+    <string name="people_edit_address">编辑地址</string>
+    <string name="people_edit_company">编辑公司</string>
+    <string name="people_edit_role">编辑职位</string>
+    <string name="people_edit_website">编辑网站</string>
+    <string name="people_edit_social">编辑社交账号</string>
+    <string name="people_edit_relationship">编辑关系</string>
+    <string name="people_edit_custom">编辑自定义</string>
+
+    <string name="people_placeholder_phone_number">电话号码</string>
+    <string name="people_placeholder_address">街道、区域、城市</string>
+    <string name="people_placeholder_company">工作单位</string>
+    <string name="people_placeholder_role">从事什么工作</string>
+    <string name="people_placeholder_relationship">大学同学</string>
+    <string name="people_placeholder_custom">任何内容</string>
+
+    <string name="people_add_detail">添加详情</string>
+    <string name="people_already_added">已添加</string>
+    <string name="people_remove">移除</string>
+    <string name="people_cannot_be_empty">此项不能为空</string>
+    <string name="people_custom_label">自定义标签</string>
+    <string name="people_custom_label_placeholder">自定义标签</string>
+    <string name="people_label_optional">标签（可选）</string>
+    <string name="people_birthday_month">月</string>
+    <string name="people_birthday_day">日</string>
+    <string name="people_birthday_year">年</string>
+    <string name="people_birthday_optional">可选</string>
+    <string name="people_birthday_year_example">例如：1996</string>
+    <string name="people_birthday_date_not_in_year">%2$s 年没有 %1$s</string>
+    <string name="people_birthday_year_range">请使用 %1$d 到 %2$d 之间的年份</string>
+</resources>

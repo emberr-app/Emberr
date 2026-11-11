@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">지우기</string>
+    <string name="components_select_all">모두 선택</string>
+    <string name="components_spaces_none_yet">아직 없음</string>
+    <string name="components_spaces_none">없음</string>
+    <plurals name="components_spaces_all">
+        <item quantity="other">스페이스 %1$d개 모두</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="other">스페이스 %2$d개 중 %1$d개</item>
+    </plurals>
+
+    <string name="components_search_notes">노트 검색...</string>
+    <string name="components_create_new_note">새 노트 만들기</string>
+    <string name="components_new_named_note">새 노트 "%1$s"</string>
+    <string name="components_note_picker_hint">입력해서 검색하거나 새 노트를 만드세요</string>
+    <string name="components_link_to_note_heading">노트에 연결</string>
+    <string name="components_link_to_note">노트에 연결</string>
+
+    <string name="components_load_more">더 불러오기</string>
+    <string name="components_show_sidebar">사이드바 표시</string>
+    <string name="components_clear_search">검색어 지우기</string>
+
+    <string name="components_people_search_placeholder">사람 검색 또는 추가</string>
+    <string name="components_people_create_failed">사람을 만들 수 없어요</string>
+    <string name="components_people_type_name_hint">이름을 입력해 사람을 추가하세요</string>
+    <string name="components_people_add_people">사람 추가</string>
+    <string name="components_people_selected">선택됨</string>
+    <string name="components_people_create_named">“%1$s” 만들기</string>
+    <string name="components_people_remove">제거</string>
+    <string name="components_people_remove_named">%1$s 제거</string>
+
+    <string name="components_reminder_later_today">오늘 나중에</string>
+    <string name="components_reminder_tomorrow">내일</string>
+    <string name="components_reminder_this_weekend">이번 주말</string>
+    <string name="components_reminder_next_week">다음 주</string>
+    <string name="components_reminder_custom_date">날짜 직접 선택...</string>
+    <string name="components_reminder_remove">알림 삭제</string>
+    <string name="components_reminder_date">날짜</string>
+    <string name="components_reminder_all_day">종일</string>
+    <string name="components_reminder_in_15_mins">15분 후</string>
+    <string name="components_reminder_in_1_hour">1시간 후</string>
+    <string name="components_reminder_in_3_hours">3시간 후</string>
+    <string name="components_reminder_this_evening">오늘 저녁</string>
+    <string name="components_reminder_custom_time">시간 직접 선택...</string>
+    <string name="components_reminder_time">시간</string>
+    <string name="components_choose_month_or_year">월 또는 연도 선택</string>
+    <string name="components_previous_month">이전 달</string>
+    <string name="components_next_month">다음 달</string>
+    <string name="components_select_date">날짜 선택</string>
+    <string name="components_month_and_year">월 및 연도</string>
+    <string name="components_select_time">시간 선택</string>
+</resources>

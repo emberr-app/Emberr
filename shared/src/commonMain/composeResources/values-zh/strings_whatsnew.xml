@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">回头见！</string>
+    <string name="whatsnew_whats_new_question">有什么新功能？</string>
+    <string name="whatsnew_title">新功能</string>
+    <string name="whatsnew_version">版本 %1$s</string>
+    <string name="whatsnew_new">新</string>
+    <string name="whatsnew_themes_heading">主题</string>
+    <string name="whatsnew_themes_where">设置 → 外观 → 主题</string>
+    <string name="whatsnew_themes_description_desktop">从 13 种颜色主题中选择，例如 Nord、Catppuccin、Tokyo Night、Gruvbox、Rosé Pine 和高对比度。每种主题都可以调节强度，你还可以选择文字和图标是否也跟随主题。</string>
+    <string name="whatsnew_themes_description_mobile">从 14 种颜色主题中选择，例如 Nord、Catppuccin、Tokyo Night、Gruvbox、Rosé Pine 和高对比度，或者让 **壁纸** 从你的壁纸中取色。每种主题都可以调节强度，你还可以选择文字和图标是否也跟随主题。主屏幕小组件也会跟随主题。</string>
+    <string name="whatsnew_texture_heading">纸张纹理</string>
+    <string name="whatsnew_texture_where">设置 → 外观 → 主题 → 纹理</string>
+    <string name="whatsnew_texture_description">为应用添加柔和的颗粒感，就像真正的纸张。设置纹理的强度，并选择显示位置：整个应用、笔记、画布或每日笔记。</string>
+    <string name="whatsnew_scale_heading">界面缩放</string>
+    <string name="whatsnew_scale_where">设置 → 外观 → 界面缩放</string>
+    <string name="whatsnew_scale_description_desktop">将应用中的所有内容放大或缩小，范围从 80% 到 200%，也可以使用 **Ctrl +**、**Ctrl −** 和 **Ctrl 0**。</string>
+    <string name="whatsnew_scale_description_mobile">将应用中的所有内容放大或缩小，范围从 80% 到 200%。</string>
+    <string name="whatsnew_widgets_heading">小组件</string>
+    <string name="whatsnew_widgets_where">长按主屏幕 → 小组件 → Emberr</string>
+    <string name="whatsnew_widgets_description">所有小组件都换上了更简洁的新外观，还新增了三个：**笔记卡片**、**随手记** 和 **每日一句**。小组件现在会立即显示你选择的笔记，并在该笔记被删除时告诉你。</string>
+    <string name="whatsnew_editor_heading">编辑器</string>
+    <string name="whatsnew_editor_where">在笔记中任意位置输入 /</string>
+    <string name="whatsnew_editor_description">斜杠菜单现在会在任意字符后立即打开，而不仅限于空格之后。如果输入超出了匹配项，往回删除，菜单就会重新出现。</string>
+    <string name="whatsnew_others_heading">其他</string>
+    <string name="whatsnew_others_where">较小的改动和修复</string>
+    <string name="whatsnew_others_sliders">应用中的滑块采用了新设计。</string>
+    <string name="whatsnew_others_title_time_desktop">在笔记标题中输入 **/** 即可添加当前时间或日期。</string>
+    <string name="whatsnew_others_title_time_mobile">可以通过键盘工具栏将当前时间或日期添加到笔记标题中。</string>
+    <string name="whatsnew_others_sync_network">同步所用的网络选项现在位于 **设置 → 同步与备份**。</string>
+    <string name="whatsnew_others_windows_startup">Windows 上启动更快。</string>
+    <string name="whatsnew_others_small_fixes">大量小修复。</string>
+    <string name="whatsnew_preview_options">选项</string>
+    <string name="whatsnew_preview_trip_title">周末旅行</string>
+    <string name="whatsnew_preview_trip_text">早上 8 点前出发，避开堵车。</string>
+    <string name="whatsnew_preview_train_tickets">火车票</string>
+    <string name="whatsnew_preview_passport">护照</string>
+    <string name="whatsnew_preview_camera_charger">相机充电器</string>
+    <string name="whatsnew_preview_reading_list">阅读清单</string>
+    <string name="whatsnew_preview_reading_list_books">《树语》、《皮拉内西》、《挽救计划》</string>
+    <string name="whatsnew_preview_meeting_title">团队会议</string>
+    <string name="whatsnew_preview_meeting_text">周四 10 点，2 号会议室。</string>
+    <string name="whatsnew_preview_typed_heading">议程</string>
+    <string name="whatsnew_preview_quote">领先的秘诀在于开始行动。</string>
+    <string name="whatsnew_preview_jot_prompt">在想什么？</string>
+    <string name="whatsnew_preview_jot_button">随手记</string>
+</resources>

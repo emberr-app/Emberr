@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">대기 중</string>
+    <string name="lan_sync_status_not_paired">페어링되지 않음!</string>
+    <string name="lan_sync_status_already_in_progress">이미 동기화 중이에요</string>
+    <string name="lan_sync_status_syncing">동기화 중...</string>
+    <string name="lan_sync_status_auto_syncing">자동 동기화 중...</string>
+    <string name="lan_sync_status_fetching_from_desktop">데스크톱에서 가져오는 중...</string>
+    <string name="lan_sync_status_success">성공!</string>
+    <string name="lan_sync_status_synced_successfully">동기화 완료</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="other">동기화됨, 항목 %1$d개를 저장하지 못했어요</item>
+    </plurals>
+    <string name="lan_sync_status_partial">일부만 동기화됨, 다시 시도할게요</string>
+    <string name="lan_sync_status_update_both_devices">두 기기 모두 Emberr를 업데이트하세요</string>
+    <string name="lan_sync_status_desktop_offline">데스크톱 오프라인</string>
+    <string name="lan_sync_status_failed">실패: %1$s</string>
+    <string name="lan_sync_status_sync_error">동기화 오류: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">모바일 기기 페어링</string>
+    <string name="lan_sync_pair_dialog_message">Emberr 모바일 앱으로 이 QR 코드를 스캔하면 데스크톱에 안전하게 연결돼요.</string>
+    <string name="lan_sync_pair_dialog_secret_token">비밀 토큰: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">데스크톱에 표시된 QR 코드를 스캔하세요.</string>
+    <string name="lan_sync_scanner_desktop_hint">데스크톱에서 설정 → LAN 동기화 → 모바일 기기 페어링을 여세요.</string>
+    <string name="lan_sync_camera_access_needed">카메라 접근 권한 필요</string>
+    <string name="lan_sync_camera_allow_message">데스크톱의 페어링 코드를 스캔하려면 카메라를 허용하세요.</string>
+    <string name="lan_sync_camera_turn_on_message">권한에서 카메라를 켠 다음 여기로 돌아오세요.</string>
+    <string name="lan_sync_allow_camera">카메라 허용</string>
+    <string name="lan_sync_open_app_settings">앱 설정 열기</string>
+    <string name="lan_sync_camera_mobile_only">카메라 스캔은 모바일 기기에서만 지원돼요.</string>
+</resources>

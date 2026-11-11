@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">クリア</string>
+    <string name="components_select_all">すべて選択</string>
+    <string name="components_spaces_none_yet">まだありません</string>
+    <string name="components_spaces_none">なし</string>
+    <plurals name="components_spaces_all">
+        <item quantity="other">全%1$d件のスペース</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="other">%2$d件中%1$d件のスペース</item>
+    </plurals>
+
+    <string name="components_search_notes">メモを検索...</string>
+    <string name="components_create_new_note">新しいメモを作成</string>
+    <string name="components_new_named_note">新しいメモ「%1$s」</string>
+    <string name="components_note_picker_hint">入力して検索するか、新しいメモを作成します</string>
+    <string name="components_link_to_note_heading">メモにリンク</string>
+    <string name="components_link_to_note">メモにリンク</string>
+
+    <string name="components_load_more">さらに読み込む</string>
+    <string name="components_show_sidebar">サイドバーを表示</string>
+    <string name="components_clear_search">検索をクリア</string>
+
+    <string name="components_people_search_placeholder">人物を検索または追加</string>
+    <string name="components_people_create_failed">人物を作成できませんでした</string>
+    <string name="components_people_type_name_hint">名前を入力して人物を追加</string>
+    <string name="components_people_add_people">人物を追加</string>
+    <string name="components_people_selected">選択中</string>
+    <string name="components_people_create_named">「%1$s」を作成</string>
+    <string name="components_people_remove">削除</string>
+    <string name="components_people_remove_named">%1$sを削除</string>
+
+    <string name="components_reminder_later_today">今日の後ほど</string>
+    <string name="components_reminder_tomorrow">明日</string>
+    <string name="components_reminder_this_weekend">今週末</string>
+    <string name="components_reminder_next_week">来週</string>
+    <string name="components_reminder_custom_date">日付を指定...</string>
+    <string name="components_reminder_remove">リマインダーを削除</string>
+    <string name="components_reminder_date">日付</string>
+    <string name="components_reminder_all_day">終日</string>
+    <string name="components_reminder_in_15_mins">15分後</string>
+    <string name="components_reminder_in_1_hour">1時間後</string>
+    <string name="components_reminder_in_3_hours">3時間後</string>
+    <string name="components_reminder_this_evening">今晩</string>
+    <string name="components_reminder_custom_time">時刻を指定...</string>
+    <string name="components_reminder_time">時刻</string>
+    <string name="components_choose_month_or_year">月または年を選択</string>
+    <string name="components_previous_month">前の月</string>
+    <string name="components_next_month">次の月</string>
+    <string name="components_select_date">日付を選択</string>
+    <string name="components_month_and_year">月と年</string>
+    <string name="components_select_time">時刻を選択</string>
+</resources>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">사람</string>
+    <string name="people_clear_selection">선택 해제</string>
+    <string name="people_select_all">모두 선택</string>
+    <string name="people_deselect_all">모두 선택 해제</string>
+    <string name="people_add_people">사람 추가</string>
+    <string name="people_create_new_contact">새 연락처 만들기</string>
+    <string name="people_import_from_vcf_file">.vcf 파일에서 가져오기</string>
+    <string name="people_import_from_phone">휴대전화에서 가져오기</string>
+    <string name="people_search_people">사람 검색</string>
+    <string name="people_move_to_trash">휴지통으로 이동</string>
+    <string name="people_next">다음</string>
+    <string name="people_untitled_event">제목 없는 일정</string>
+    <string name="people_no_upcoming_events">예정된 일정 없음</string>
+    <string name="people_selected">선택됨</string>
+    <string name="people_empty_title">아직 사람이 없어요</string>
+    <string name="people_empty_message">기억해 두고 싶은 사람을 추가하세요. 일정에 추가한 사람도 여기에 표시돼요.</string>
+    <string name="people_new_person">새 사람</string>
+    <string name="people_import_contacts">연락처 가져오기</string>
+    <string name="people_no_one_matches">“%1$s”에 일치하는 사람이 없어요</string>
+    <string name="people_create_named">“%1$s” 만들기</string>
+    <plurals name="people_selected_count">
+        <item quantity="other">%1$d명 선택됨</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="other">%1$d명</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="other">일정 %1$d개</item>
+    </plurals>
+
+    <string name="people_importing_contacts">연락처 가져오는 중…</string>
+    <string name="people_importing_contacts_progress">연락처 가져오는 중… %2$d개 중 %1$d개</string>
+    <string name="people_already_importing_contacts">이미 연락처를 가져오는 중이에요</string>
+    <string name="people_could_not_read_file">파일을 읽을 수 없어요</string>
+    <string name="people_could_not_read_contact">연락처를 읽을 수 없어요</string>
+    <string name="people_no_contacts_app_found">연락처 앱을 찾을 수 없어요</string>
+    <string name="people_choose_contact_files">연락처 파일 선택</string>
+    <string name="people_no_contacts_found">연락처를 찾을 수 없어요</string>
+    <string name="people_could_not_add_contacts">연락처를 추가할 수 없어요</string>
+    <string name="people_already_in_people">이미 사람 목록에 있음</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="other">%1$d명 모두 이미 사람 목록에 있어요</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="other">%1$d명 추가됨</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="other">이미 있는 %1$d명 건너뜀</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="other">%1$d명 추가 실패</item>
+    </plurals>
+    <string name="people_could_not_create_person">사람을 만들 수 없어요</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="other">%1$d명을 휴지통으로 이동했어요</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="other">%2$d명 중 %1$d명을 휴지통으로 이동했어요</item>
+    </plurals>
+    <string name="people_could_not_save_detail">세부정보를 저장할 수 없어요</string>
+    <string name="people_could_not_remove_detail">세부정보를 삭제할 수 없어요</string>
+
+    <string name="people_meta_next_and_last_seen">다음 만남 %1$s · 마지막 만남 %2$s</string>
+    <string name="people_meta_next">다음 만남 %1$s</string>
+    <string name="people_meta_last_seen">마지막 만남 %1$s</string>
+    <string name="people_meta_no_events">아직 일정 없음</string>
+    <string name="people_birthday_with_age">%1$s, %2$d · %3$d세</string>
+    <string name="people_all_day">종일</string>
+    <string name="people_event_with_names">함께: %1$s</string>
+
+    <string name="people_copied">복사됨</string>
+    <string name="people_could_not_copy">복사할 수 없어요</string>
+    <string name="people_could_not_open_link">링크를 열 수 없어요</string>
+    <string name="people_write_anything_about">%1$s 님에 대해 무엇이든 적어 보세요…</string>
+    <string name="people_write_anything_about_them">이 사람에 대해 무엇이든 적어 보세요…</string>
+    <string name="people_notes">노트</string>
+    <string name="people_remove_icon">아이콘 삭제</string>
+    <string name="people_change_icon">아이콘 변경</string>
+    <string name="people_change_photo">사진 변경</string>
+    <string name="people_remove_photo">사진 삭제</string>
+    <string name="people_open">열기</string>
+    <string name="people_more">더 보기</string>
+    <string name="people_call">전화</string>
+    <string name="people_message">메시지</string>
+    <string name="people_email">이메일</string>
+    <string name="people_write_email">이메일 쓰기</string>
+    <string name="people_copy">복사</string>
+    <string name="people_new_event">새 일정</string>
+    <string name="people_name">이름</string>
+
+    <string name="people_details">세부정보</string>
+    <string name="people_more_details">세부정보 더 보기</string>
+    <string name="people_upcoming">예정</string>
+    <string name="people_nothing_planned_with">%1$s 님과 예정된 일정이 없어요</string>
+    <string name="people_nothing_planned_with_them">이 사람과 예정된 일정이 없어요</string>
+    <string name="people_past">지난 일정</string>
+    <string name="people_no_past_events">지난 일정 없음</string>
+    <string name="people_show_fewer">간단히 보기</string>
+    <string name="people_show_all_count">%1$d개 모두 보기</string>
+
+    <string name="people_detail_phone">전화</string>
+    <string name="people_detail_email">이메일</string>
+    <string name="people_detail_birthday">생일</string>
+    <string name="people_detail_address">주소</string>
+    <string name="people_detail_company">회사</string>
+    <string name="people_detail_role">직책</string>
+    <string name="people_detail_website">웹사이트</string>
+    <string name="people_detail_social">소셜</string>
+    <string name="people_detail_relationship">관계</string>
+    <string name="people_detail_custom">사용자 지정</string>
+    <string name="people_add_phone">전화번호 추가</string>
+    <string name="people_add_email">이메일 추가</string>
+    <string name="people_add_birthday">생일 추가</string>
+    <string name="people_add_address">주소 추가</string>
+    <string name="people_add_company">회사 추가</string>
+    <string name="people_add_role">직책 추가</string>
+    <string name="people_add_website">웹사이트 추가</string>
+    <string name="people_add_social">소셜 추가</string>
+    <string name="people_add_relationship">관계 추가</string>
+    <string name="people_add_custom">사용자 지정 추가</string>
+    <string name="people_edit_phone">전화번호 편집</string>
+    <string name="people_edit_email">이메일 편집</string>
+    <string name="people_edit_birthday">생일 편집</string>
+    <string name="people_edit_address">주소 편집</string>
+    <string name="people_edit_company">회사 편집</string>
+    <string name="people_edit_role">직책 편집</string>
+    <string name="people_edit_website">웹사이트 편집</string>
+    <string name="people_edit_social">소셜 편집</string>
+    <string name="people_edit_relationship">관계 편집</string>
+    <string name="people_edit_custom">사용자 지정 편집</string>
+
+    <string name="people_placeholder_phone_number">전화번호</string>
+    <string name="people_placeholder_address">도로명, 동네, 도시</string>
+    <string name="people_placeholder_company">근무하는 곳</string>
+    <string name="people_placeholder_role">하는 일</string>
+    <string name="people_placeholder_relationship">대학 친구</string>
+    <string name="people_placeholder_custom">무엇이든</string>
+
+    <string name="people_add_detail">세부정보 추가</string>
+    <string name="people_already_added">이미 추가됨</string>
+    <string name="people_remove">제거</string>
+    <string name="people_cannot_be_empty">비워 둘 수 없어요</string>
+    <string name="people_custom_label">사용자 지정 라벨</string>
+    <string name="people_custom_label_placeholder">사용자 지정 라벨</string>
+    <string name="people_label_optional">라벨 (선택)</string>
+    <string name="people_birthday_month">월</string>
+    <string name="people_birthday_day">일</string>
+    <string name="people_birthday_year">연도</string>
+    <string name="people_birthday_optional">선택</string>
+    <string name="people_birthday_year_example">예: 1996</string>
+    <string name="people_birthday_date_not_in_year">%2$s년에는 %1$s 날짜가 없어요</string>
+    <string name="people_birthday_year_range">%1$d년에서 %2$d년 사이로 입력하세요</string>
+</resources>

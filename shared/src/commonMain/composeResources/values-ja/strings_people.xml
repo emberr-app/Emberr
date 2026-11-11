@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_title">人物</string>
+    <string name="people_clear_selection">選択を解除</string>
+    <string name="people_select_all">すべて選択</string>
+    <string name="people_deselect_all">すべての選択を解除</string>
+    <string name="people_add_people">人物を追加</string>
+    <string name="people_create_new_contact">新しい連絡先を作成</string>
+    <string name="people_import_from_vcf_file">.vcfファイルからインポート</string>
+    <string name="people_import_from_phone">スマートフォンからインポート</string>
+    <string name="people_search_people">人物を検索</string>
+    <string name="people_move_to_trash">ゴミ箱に移動</string>
+    <string name="people_next">次</string>
+    <string name="people_untitled_event">無題の予定</string>
+    <string name="people_no_upcoming_events">今後の予定はありません</string>
+    <string name="people_selected">選択中</string>
+    <string name="people_empty_title">人物はまだいません</string>
+    <string name="people_empty_message">覚えておきたいことがある人を追加しましょう。予定に追加した人もここに表示されます。</string>
+    <string name="people_new_person">新しい人物</string>
+    <string name="people_import_contacts">連絡先をインポート</string>
+    <string name="people_no_one_matches">「%1$s」に一致する人物はいません</string>
+    <string name="people_create_named">「%1$s」を作成</string>
+    <plurals name="people_selected_count">
+        <item quantity="other">%1$d件選択中</item>
+    </plurals>
+    <plurals name="people_count">
+        <item quantity="other">%1$d人</item>
+    </plurals>
+    <plurals name="people_event_count">
+        <item quantity="other">%1$d件の予定</item>
+    </plurals>
+
+    <string name="people_importing_contacts">連絡先をインポート中…</string>
+    <string name="people_importing_contacts_progress">連絡先をインポート中… %1$d/%2$d</string>
+    <string name="people_already_importing_contacts">すでに連絡先をインポート中です</string>
+    <string name="people_could_not_read_file">ファイルを読み込めませんでした</string>
+    <string name="people_could_not_read_contact">連絡先を読み込めませんでした</string>
+    <string name="people_no_contacts_app_found">連絡先アプリが見つかりません</string>
+    <string name="people_choose_contact_files">連絡先ファイルを選択</string>
+    <string name="people_no_contacts_found">連絡先が見つかりません</string>
+    <string name="people_could_not_add_contacts">連絡先を追加できませんでした</string>
+    <string name="people_already_in_people">すでに人物に登録されています</string>
+    <plurals name="people_all_already_in_people">
+        <item quantity="other">%1$d人ともすでに人物に登録されています</item>
+    </plurals>
+    <plurals name="people_import_added">
+        <item quantity="other">%1$d人を追加しました</item>
+    </plurals>
+    <plurals name="people_import_skipped_already_in_people">
+        <item quantity="other">登録済みの%1$d人はスキップ</item>
+    </plurals>
+    <plurals name="people_import_could_not_add">
+        <item quantity="other">%1$d人は追加できませんでした</item>
+    </plurals>
+    <string name="people_could_not_create_person">人物を作成できませんでした</string>
+    <plurals name="people_moved_people_to_trash">
+        <item quantity="other">%1$d人をゴミ箱に移動しました</item>
+    </plurals>
+    <plurals name="people_moved_some_people_to_trash">
+        <item quantity="other">%2$d人中%1$d人をゴミ箱に移動しました</item>
+    </plurals>
+    <string name="people_could_not_save_detail">詳細を保存できませんでした</string>
+    <string name="people_could_not_remove_detail">詳細を削除できませんでした</string>
+
+    <string name="people_meta_next_and_last_seen">次回：%1$s · 前回：%2$s</string>
+    <string name="people_meta_next">次回：%1$s</string>
+    <string name="people_meta_last_seen">前回：%1$s</string>
+    <string name="people_meta_no_events">予定はまだありません</string>
+    <string name="people_birthday_with_age">%2$d年%1$s · %3$d歳になります</string>
+    <string name="people_all_day">終日</string>
+    <string name="people_event_with_names">%1$sと</string>
+
+    <string name="people_copied">コピーしました</string>
+    <string name="people_could_not_copy">コピーできませんでした</string>
+    <string name="people_could_not_open_link">リンクを開けませんでした</string>
+    <string name="people_write_anything_about">%1$sについて何でも書きましょう…</string>
+    <string name="people_write_anything_about_them">この人について何でも書きましょう…</string>
+    <string name="people_notes">メモ</string>
+    <string name="people_remove_icon">アイコンを削除</string>
+    <string name="people_change_icon">アイコンを変更</string>
+    <string name="people_change_photo">写真を変更</string>
+    <string name="people_remove_photo">写真を削除</string>
+    <string name="people_open">開く</string>
+    <string name="people_more">その他</string>
+    <string name="people_call">電話</string>
+    <string name="people_message">メッセージ</string>
+    <string name="people_email">メール</string>
+    <string name="people_write_email">メールを作成</string>
+    <string name="people_copy">コピー</string>
+    <string name="people_new_event">新しい予定</string>
+    <string name="people_name">名前</string>
+
+    <string name="people_details">詳細</string>
+    <string name="people_more_details">その他の詳細</string>
+    <string name="people_upcoming">今後</string>
+    <string name="people_nothing_planned_with">%1$sとの予定はありません</string>
+    <string name="people_nothing_planned_with_them">この人との予定はありません</string>
+    <string name="people_past">過去</string>
+    <string name="people_no_past_events">過去の予定はありません</string>
+    <string name="people_show_fewer">表示を減らす</string>
+    <string name="people_show_all_count">%1$d件すべて表示</string>
+
+    <string name="people_detail_phone">電話</string>
+    <string name="people_detail_email">メール</string>
+    <string name="people_detail_birthday">誕生日</string>
+    <string name="people_detail_address">住所</string>
+    <string name="people_detail_company">会社</string>
+    <string name="people_detail_role">役職</string>
+    <string name="people_detail_website">ウェブサイト</string>
+    <string name="people_detail_social">SNS</string>
+    <string name="people_detail_relationship">関係</string>
+    <string name="people_detail_custom">カスタム</string>
+    <string name="people_add_phone">電話を追加</string>
+    <string name="people_add_email">メールを追加</string>
+    <string name="people_add_birthday">誕生日を追加</string>
+    <string name="people_add_address">住所を追加</string>
+    <string name="people_add_company">会社を追加</string>
+    <string name="people_add_role">役職を追加</string>
+    <string name="people_add_website">ウェブサイトを追加</string>
+    <string name="people_add_social">SNSを追加</string>
+    <string name="people_add_relationship">関係を追加</string>
+    <string name="people_add_custom">カスタムを追加</string>
+    <string name="people_edit_phone">電話を編集</string>
+    <string name="people_edit_email">メールを編集</string>
+    <string name="people_edit_birthday">誕生日を編集</string>
+    <string name="people_edit_address">住所を編集</string>
+    <string name="people_edit_company">会社を編集</string>
+    <string name="people_edit_role">役職を編集</string>
+    <string name="people_edit_website">ウェブサイトを編集</string>
+    <string name="people_edit_social">SNSを編集</string>
+    <string name="people_edit_relationship">関係を編集</string>
+    <string name="people_edit_custom">カスタムを編集</string>
+
+    <string name="people_placeholder_phone_number">電話番号</string>
+    <string name="people_placeholder_address">都道府県、市区町村、番地</string>
+    <string name="people_placeholder_company">勤務先</string>
+    <string name="people_placeholder_role">仕事内容</string>
+    <string name="people_placeholder_relationship">大学時代の友人</string>
+    <string name="people_placeholder_custom">自由に入力</string>
+
+    <string name="people_add_detail">詳細を追加</string>
+    <string name="people_already_added">追加済み</string>
+    <string name="people_remove">削除</string>
+    <string name="people_cannot_be_empty">空欄にはできません</string>
+    <string name="people_custom_label">カスタムラベル</string>
+    <string name="people_custom_label_placeholder">カスタムラベル</string>
+    <string name="people_label_optional">ラベル（任意）</string>
+    <string name="people_birthday_month">月</string>
+    <string name="people_birthday_day">日</string>
+    <string name="people_birthday_year">年</string>
+    <string name="people_birthday_optional">任意</string>
+    <string name="people_birthday_year_example">例：1996</string>
+    <string name="people_birthday_date_not_in_year">%2$s年に%1$sはありません</string>
+    <string name="people_birthday_year_range">%1$d〜%2$d年の範囲で入力してください</string>
+</resources>

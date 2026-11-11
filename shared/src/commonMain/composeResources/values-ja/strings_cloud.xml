@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_title">Emberr Cloud</string>
+
+    <string name="cloud_server_address">サーバーアドレス</string>
+    <string name="cloud_server_address_invalid">http://またはhttps://で始まるアドレスを入力してください（例: http://localhost:8080）。</string>
+    <string name="cloud_server_address_saved">サーバーアドレスを保存しました</string>
+
+    <string name="cloud_welcome_hint">エンドツーエンド暗号化でデバイス間のメモを同期します。メモを読めるのはご自身のデバイスだけです。</string>
+    <string name="cloud_create_account">アカウントを作成</string>
+    <string name="cloud_log_in">ログイン</string>
+    <string name="cloud_send_code">コードを送信</string>
+    <string name="cloud_send_new_code">新しいコードを送信</string>
+    <string name="cloud_continue">続ける</string>
+    <string name="cloud_done">完了</string>
+    <string name="cloud_password_not_stored_hint">このパスワードは保存されません。忘れた場合、メモを復号できなくなります。</string>
+    <string name="cloud_recovery_words">復元用の単語</string>
+    <string name="cloud_recovery_words_explanation">パスワードを忘れた場合、アカウントに戻る唯一の方法はこの24個の単語です。単語は保存されないため、安全な場所に保管してください。</string>
+    <string name="cloud_recovery_words_warning">パスワードとこれらの単語がないと、クラウドのメモは復元できません。</string>
+    <string name="cloud_recovery_words_saved_checkbox">これらの単語を安全な場所に保管しました</string>
+    <string name="cloud_copy_words">単語をコピー</string>
+    <string name="cloud_recovery_words_copied">復元用の単語をコピーしました</string>
+    <string name="cloud_forgot_password">パスワードを忘れた場合</string>
+    <string name="cloud_recovery_email_hint">アカウントのメールアドレスを入力してください。コードをお送りします。</string>
+    <string name="cloud_recovery_other_device_hint">別のデバイスでサインインしていますか？そのデバイスでパスワードを変更してください。</string>
+    <string name="cloud_recovery_words_entry_hint">アカウント作成時に保管した24個の復元用の単語を入力してください。</string>
+    <string name="cloud_recovery_words_placeholder">24個の復元用の単語</string>
+    <string name="cloud_set_new_password">新しいパスワードを設定</string>
+    <string name="cloud_new_password_hint">メモの暗号化に使う新しいパスワードを入力してください。</string>
+    <string name="cloud_reset_password">パスワードをリセット</string>
+    <string name="cloud_sign_out_other_devices_title">他のデバイスからサインアウト</string>
+    <string name="cloud_sign_out_other_devices_message">パスワードを誰かに知られた可能性がある場合は、このアカウントを使っている他のすべてのデバイスを強制的にサインアウトできます。</string>
+    <string name="cloud_sign_out_other_devices_button">他のデバイスをサインアウト</string>
+    <string name="cloud_do_not_sign_out">サインアウトしない</string>
+
+    <string name="cloud_account">アカウント</string>
+    <string name="cloud_signed_in_as">%1$sでサインイン中</string>
+    <string name="cloud_loading_storage_used">使用容量を読み込み中...</string>
+    <string name="cloud_sync">同期</string>
+    <string name="cloud_syncing">同期中...</string>
+    <string name="cloud_last_synced">最終同期: %1$s</string>
+    <string name="cloud_sync_explanation">スペース、フォルダ、メモ、リスト、チャット、メディアを送受信します。</string>
+    <string name="cloud_sync_now">今すぐ同期</string>
+    <string name="cloud_media">メディア</string>
+    <string name="cloud_media_last_checked">メディアの最終確認: %1$s</string>
+    <string name="cloud_devices">デバイス</string>
+    <string name="cloud_loading_devices">デバイスを読み込み中...</string>
+    <string name="cloud_tap_device_to_sign_out">デバイスをタップするとサインアウトできます。</string>
+    <string name="cloud_sign_out_of_this_device">このデバイスからサインアウト</string>
+    <string name="cloud_manage_account">アカウントを管理</string>
+    <string name="cloud_change_password">パスワードを変更</string>
+    <string name="cloud_change_email">メールアドレスを変更</string>
+    <string name="cloud_recovery_words_lock_description">復元用の単語を表示するには認証してください</string>
+    <string name="cloud_delete_account">アカウントを削除</string>
+    <string name="cloud_sign_out_device_title">デバイスをサインアウトしますか？</string>
+    <string name="cloud_sign_out_device_message">次のデバイスをサインアウトします:\n\n%1$s</string>
+    <string name="cloud_sign_out">サインアウト</string>
+    <string name="cloud_delete_account_title">アカウントを削除しますか？</string>
+    <string name="cloud_delete_account_message">Emberr Cloudアカウントと、そこに保存されているすべてが完全に削除されます。この操作は元に戻せません。このデバイス上のメモは、消去も選択しない限り残ります。確認のため%1$sにコードをお送りします。</string>
+    <string name="cloud_last_used">最終使用: %1$s</string>
+    <string name="cloud_this_device">このデバイス</string>
+    <string name="cloud_sign_out_of_this_device_title">このデバイスからサインアウトしますか？</string>
+    <string name="cloud_sign_out_of_this_device_message">このデバイスでEmberr Cloudの使用を停止します。このデバイス上のメモには影響しません。</string>
+
+    <string name="cloud_change_password_code_hint">確認のため%1$sにコードをお送りします。</string>
+    <string name="cloud_sign_out_of_other_devices">他のデバイスからサインアウト</string>
+    <string name="cloud_change_email_hint">新しいメールアドレスを入力してください。そのアドレスにコードをお送りします。</string>
+    <string name="cloud_recovery_words_password_hint">復元用の単語を表示するにはパスワードを入力してください。</string>
+    <string name="cloud_clear_notes_on_this_device">このデバイス上のメモも消去する</string>
+    <string name="cloud_delete_account_warning">Emberr Cloudアカウントが完全に削除されます。この操作は元に戻せません。</string>
+
+    <string name="cloud_email">メールアドレス</string>
+    <string name="cloud_code_placeholder">6桁のコード</string>
+    <string name="cloud_password">パスワード</string>
+    <string name="cloud_confirm_password">パスワードを確認</string>
+    <string name="cloud_passwords_do_not_match">パスワードが一致しません。</string>
+    <string name="cloud_hide_password">パスワードを隠す</string>
+    <string name="cloud_show_password">パスワードを表示</string>
+    <string name="cloud_password_strength_weak">パスワードの強度: 弱</string>
+    <string name="cloud_password_strength_moderate">パスワードの強度: 中</string>
+    <string name="cloud_password_strength_strong">パスワードの強度: 強</string>
+    <string name="cloud_code_sent">%1$sにコードを送信しました。受信トレイ（と迷惑メール）を確認してください。</string>
+    <string name="cloud_new_code_sent">%1$sに新しいコードを送信しました。</string>
+    <string name="cloud_please_wait">お待ちください...</string>
+
+    <string name="cloud_sending_file">ファイルを送信中（%1$d/%2$d）</string>
+    <string name="cloud_receiving_file">ファイルを受信中（%1$d/%2$d）</string>
+    <string name="cloud_photo_in_note">%1$sの写真</string>
+    <string name="cloud_video_in_note">%1$sの動画</string>
+    <string name="cloud_audio_in_note">%1$sの音声</string>
+    <string name="cloud_document_in_note">%1$sの書類</string>
+    <string name="cloud_file_in_note">%1$sのファイル</string>
+    <string name="cloud_file_progress">%1$d% · %2$s/%3$s</string>
+    <plurals name="cloud_files_waiting_for_upload">
+        <item quantity="other">%1$d個のファイルが、別のデバイスからのアップロードを待っています。</item>
+    </plurals>
+    <string name="cloud_files_not_sent_and_not_received">ファイル: 未送信%1$d個、未受信%2$d個。次回の同期で再試行します。</string>
+    <string name="cloud_files_not_sent">ファイル: 未送信%1$d個。次回の同期で再試行します。</string>
+    <string name="cloud_files_not_received">ファイル: 未受信%1$d個。次回の同期で再試行します。</string>
+    <string name="cloud_files_sent_and_received_counts">%1$d/%2$d個のファイルを送信 · %3$d/%4$d個のファイルを受信</string>
+    <string name="cloud_files_sent_count">%1$d/%2$d個のファイルを送信</string>
+    <string name="cloud_files_received_count">%1$d/%2$d個のファイルを受信</string>
+
+    <string name="cloud_trial_ended">無料トライアルは%1$sに終了しました · %2$sまで読み取り専用</string>
+    <string name="cloud_trial_ends_today">無料トライアル · 本日終了</string>
+    <plurals name="cloud_trial_days_left">
+        <item quantity="other">無料トライアル · 残り%1$d日</item>
+    </plurals>
+    <string name="cloud_storage_used">%2$s中%1$sを使用</string>
+    <string name="cloud_full_with_usage">Emberr Cloudの容量がいっぱいです（%2$s中%1$sを使用）。新しいメモとファイルはこのデバイスに残り、空きができるとアップロードされます。</string>
+    <string name="cloud_full">Emberr Cloudの容量がいっぱいです。新しいメモとファイルはこのデバイスに残り、空きができるとアップロードされます。</string>
+    <string name="cloud_trial_ended_read_only">無料トライアルが終了したため、Emberr Cloudは読み取り専用です。このデバイスは他のデバイスからの変更を引き続き受信しますが、新しい内容はアップロードされません。メモはデバイスに残ります。</string>
+    <plurals name="cloud_files_too_large">
+        <item quantity="other">%1$d個のファイルが10GBを超えているため、このデバイスにのみ保存されます。</item>
+    </plurals>
+    <string name="cloud_copy_removed">無料トライアルが終了したため、%1$sにクラウドのコピーが削除されました。すべてのメモはこのデバイスに残っています。プランを選ぶと同期が再開されます。</string>
+
+    <string name="cloud_error_something_went_wrong">問題が発生しました。もう一度お試しください。</string>
+    <string name="cloud_error_signed_out">サインアウトされました。もう一度ログインしてください。</string>
+    <string name="cloud_error_incorrect_password">パスワードが正しくありません。もう一度お試しください。</string>
+    <string name="cloud_error_invalid_email">有効なメールアドレスを入力してください。</string>
+    <string name="cloud_error_wrong_email_or_password">メールアドレスまたはパスワードが違います。</string>
+    <string name="cloud_error_incorrect_code">コードが正しくありません。</string>
+    <string name="cloud_error_expired_code">コードの有効期限が切れています。新しいコードをリクエストしてください。</string>
+    <string name="cloud_error_too_many_tries">試行回数が多すぎます。しばらく待ってからもう一度お試しください。</string>
+    <string name="cloud_error_update_required">Emberr Cloudを使うにはEmberrをアップデートしてください。</string>
+    <string name="cloud_error_device_already_signed_out">そのデバイスはすでにサインアウトされています。</string>
+    <string name="cloud_error_email_already_used">このメールアドレスは別のアカウントで使用されています。</string>
+    <string name="cloud_error_server_unreachable">%1$sのサーバーに接続できません。</string>
+    <string name="cloud_error_invalid_recovery_words">有効な復元キーではありません。単語が24個あるか、それぞれのつづりが正しいか確認してください。</string>
+    <string name="cloud_error_recovery_words_other_account">これらの単語は別のアカウントのものです。</string>
+    <string name="cloud_account_deleted_notes_not_cleared">アカウントは削除されましたが、このデバイス上のメモを消去できませんでした。</string>
+    <string name="cloud_password_changed">パスワードを変更しました</string>
+    <string name="cloud_email_changed">メールアドレスを%1$sに変更しました</string>
+
+    <string name="cloud_synced">同期しました: 受信%1$d件、送信%2$d件</string>
+    <string name="cloud_synced_with_not_sent">同期しました: 受信%1$d件、送信%2$d件、未送信%3$d件</string>
+    <string name="cloud_sync_busy">別の同期を実行中です。しばらくしてからもう一度お試しください。</string>
+    <string name="cloud_sync_update_required">Emberr Cloudとの同期を続けるにはEmberrをアップデートしてください。</string>
+    <string name="cloud_sync_other_method_on">別の同期方法がオンになっています。Emberr Cloudを使い続けるには、セルフホストを切断するかLAN同期のペアリングを解除してください。</string>
+    <string name="cloud_disconnect_self_host_first">Emberr Cloudを使うにはセルフホストを切断してください。</string>
+    <string name="cloud_unpair_lan_sync_first">Emberr Cloudを使うにはLAN同期のペアリングを解除してください。</string>
+</resources>

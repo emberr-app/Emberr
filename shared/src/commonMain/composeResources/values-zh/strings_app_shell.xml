@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_shell_daily_notes">每日笔记</string>
+    <string name="app_shell_home">首页</string>
+    <string name="app_shell_ask_ai">问 AI</string>
+    <string name="app_shell_search">搜索</string>
+    <string name="app_shell_voice_task">语音待办</string>
+    <string name="app_shell_mic">麦克风</string>
+    <string name="app_shell_search_anything">搜索任何内容</string>
+    <string name="app_shell_close_search">关闭搜索</string>
+    <string name="app_shell_clear_search">清除搜索</string>
+</resources>

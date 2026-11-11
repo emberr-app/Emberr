@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="canvas_options">选项</string>
+    <string name="canvas_more_options">更多选项</string>
+    <string name="canvas_rename">重命名</string>
+    <string name="canvas_open_as_sticky_note">以便签打开</string>
+    <string name="canvas_move_to_trash">移到废纸篓</string>
+    <string name="canvas_add_to_favorites">添加到收藏</string>
+    <string name="canvas_remove_from_favorites">从收藏中移除</string>
+    <string name="canvas_sheet_title">画布</string>
+    <string name="canvas_rename_canvas">重命名画布</string>
+    <string name="canvas_title_placeholder">画布标题...</string>
+    <string name="canvas_untitled_canvas">无标题画布</string>
+
+    <string name="canvas_shapes">形状</string>
+    <string name="canvas_shape_rectangle">矩形</string>
+    <string name="canvas_shape_square">正方形</string>
+    <string name="canvas_shape_circle">圆形</string>
+    <string name="canvas_shape_oval">椭圆</string>
+    <string name="canvas_shape_triangle">三角形</string>
+    <string name="canvas_shape_diamond">菱形</string>
+    <string name="canvas_shape_pentagon">五边形</string>
+    <string name="canvas_shape_hexagon">六边形</string>
+    <string name="canvas_shape_parallelogram">平行四边形</string>
+    <string name="canvas_shape_trapezoid">梯形</string>
+    <string name="canvas_shape_pill">胶囊形</string>
+    <string name="canvas_shape_database">数据库</string>
+    <string name="canvas_shape_double_rectangle">双矩形</string>
+    <string name="canvas_shape_double_square">双正方形</string>
+    <string name="canvas_shape_double_circle">双圆形</string>
+    <string name="canvas_shape_double_triangle">双三角形</string>
+
+    <string name="canvas_clear">清除</string>
+    <string name="canvas_zoom_in">放大</string>
+    <string name="canvas_zoom_out">缩小</string>
+    <string name="canvas_go_to_boxes">转到方框</string>
+    <string name="canvas_undo">撤销</string>
+    <string name="canvas_redo">重做</string>
+
+    <string name="canvas_tool_pen">钢笔</string>
+    <string name="canvas_tool_highlighter">荧光笔</string>
+    <string name="canvas_tool_eraser">橡皮擦</string>
+    <string name="canvas_tool_text">文本</string>
+    <string name="canvas_tool_shapes">形状</string>
+    <string name="canvas_tool_line">线条</string>
+    <string name="canvas_tool_image">图片</string>
+
+    <string name="canvas_default_ink">默认墨色</string>
+    <string name="canvas_no_background">无背景</string>
+    <string name="canvas_stroke">描边</string>
+    <string name="canvas_stroke_width">描边粗细</string>
+    <string name="canvas_pressure">压感</string>
+    <string name="canvas_same_thickness">粗细一致</string>
+    <string name="canvas_follow_pressure">跟随压感</string>
+    <string name="canvas_opacity">不透明度</string>
+    <string name="canvas_size">大小</string>
+    <string name="canvas_font">字体</string>
+    <string name="canvas_weight">字重</string>
+    <string name="canvas_color">颜色</string>
+    <string name="canvas_background">背景</string>
+    <string name="canvas_align">对齐</string>
+    <string name="canvas_line">线条</string>
+    <string name="canvas_line_style">线条样式</string>
+
+    <string name="canvas_width_thin">细</string>
+    <string name="canvas_width_medium">中</string>
+    <string name="canvas_width_thick">粗</string>
+    <string name="canvas_size_small">小</string>
+    <string name="canvas_size_medium">中</string>
+    <string name="canvas_size_large">大</string>
+    <string name="canvas_weight_regular">常规</string>
+    <string name="canvas_weight_medium">中等</string>
+    <string name="canvas_weight_bold">粗体</string>
+    <string name="canvas_font_default">默认</string>
+    <string name="canvas_align_left">左对齐</string>
+    <string name="canvas_align_center">居中对齐</string>
+    <string name="canvas_align_right">右对齐</string>
+
+    <string name="canvas_line_arrow">箭头</string>
+    <string name="canvas_line_dotted_arrow">点线箭头</string>
+    <string name="canvas_line_dashed_arrow">虚线箭头</string>
+    <string name="canvas_line_solid_line">实线</string>
+    <string name="canvas_line_dotted_line">点线</string>
+    <string name="canvas_line_dashed_line">虚线</string>
+
+    <string name="canvas_show_dots">显示网点</string>
+    <string name="canvas_hide_dots">隐藏网点</string>
+    <string name="canvas_full_screen">全屏</string>
+    <string name="canvas_exit_full_screen">退出全屏</string>
+
+    <string name="canvas_delete_box">删除方框</string>
+    <string name="canvas_box_color">方框颜色</string>
+    <string name="canvas_paste_image">粘贴图片</string>
+    <string name="canvas_adding_image">正在添加图片...</string>
+    <string name="canvas_add_label">添加文字</string>
+    <string name="canvas_edit_label">编辑文字</string>
+    <string name="canvas_ungroup">取消编组</string>
+    <string name="canvas_create_group">创建编组</string>
+
+    <string name="canvas_image">画布图片</string>
+    <string name="canvas_image_failed_to_download">图片下载失败</string>
+    <string name="canvas_downloading_image">正在下载图片...</string>
+</resources>

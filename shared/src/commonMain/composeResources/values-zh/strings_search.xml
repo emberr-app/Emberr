@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">输入以搜索标题、摘要和笔记内容。</string>
+    <string name="search_nothing_found">未找到匹配的笔记、日程或人物。</string>
+    <string name="search_people">人物</string>
+    <string name="search_events">日程</string>
+    <string name="search_notes">笔记</string>
+    <string name="search_rename_note">重命名笔记</string>
+    <string name="search_note_title_placeholder">笔记标题...</string>
+    <string name="search_rename">重命名</string>
+    <string name="search_move_to_trash">移到废纸篓</string>
+    <string name="search_untitled_event">无标题日程</string>
+    <string name="search_repeats">重复</string>
+    <string name="search_pinned">已置顶</string>
+    <string name="search_in_parent">位于 %1$s</string>
+    <string name="search_daily">每日</string>
+    <string name="search_add_to_favorites">添加到收藏</string>
+    <string name="search_remove_from_favorites">从收藏中移除</string>
+    <plurals name="search_show_all_people">
+        <item quantity="other">显示全部 %1$d 人</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="other">显示全部 %1$d 个日程</item>
+    </plurals>
+</resources>

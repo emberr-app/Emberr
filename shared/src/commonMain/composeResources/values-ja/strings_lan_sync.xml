@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">待機中</string>
+    <string name="lan_sync_status_not_paired">ペアリングされていません</string>
+    <string name="lan_sync_status_already_in_progress">すでに同期中です</string>
+    <string name="lan_sync_status_syncing">同期中...</string>
+    <string name="lan_sync_status_auto_syncing">自動同期中...</string>
+    <string name="lan_sync_status_fetching_from_desktop">デスクトップから取得中...</string>
+    <string name="lan_sync_status_success">成功しました</string>
+    <string name="lan_sync_status_synced_successfully">同期が完了しました</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="other">同期しました。%1$d件の項目を保存できませんでした</item>
+    </plurals>
+    <string name="lan_sync_status_partial">一部のみ同期しました。再試行します</string>
+    <string name="lan_sync_status_update_both_devices">両方のデバイスで Emberrをアップデートしてください</string>
+    <string name="lan_sync_status_desktop_offline">デスクトップがオフラインです</string>
+    <string name="lan_sync_status_failed">失敗しました: %1$s</string>
+    <string name="lan_sync_status_sync_error">同期エラー: %1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">モバイルデバイスをペアリング</string>
+    <string name="lan_sync_pair_dialog_message">EmberrモバイルアプリでこのQRコードをスキャンすると、デスクトップに安全に接続できます。</string>
+    <string name="lan_sync_pair_dialog_secret_token">シークレットトークン: %1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">デスクトップに表示されたQRコードをスキャンしてください。</string>
+    <string name="lan_sync_scanner_desktop_hint">デスクトップで「設定 → LAN同期 → モバイルデバイスをペアリング」を開いてください。</string>
+    <string name="lan_sync_camera_access_needed">カメラへのアクセスが必要です</string>
+    <string name="lan_sync_camera_allow_message">デスクトップのペアリングコードをスキャンするため、カメラを許可してください。</string>
+    <string name="lan_sync_camera_turn_on_message">権限でカメラをオンにしてから、ここに戻ってください。</string>
+    <string name="lan_sync_allow_camera">カメラを許可</string>
+    <string name="lan_sync_open_app_settings">アプリの設定を開く</string>
+    <string name="lan_sync_camera_mobile_only">カメラでのスキャンはモバイルデバイスでのみ利用できます。</string>
+</resources>

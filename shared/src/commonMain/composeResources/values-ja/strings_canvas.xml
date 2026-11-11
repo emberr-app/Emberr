@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="canvas_options">オプション</string>
+    <string name="canvas_more_options">その他のオプション</string>
+    <string name="canvas_rename">名前を変更</string>
+    <string name="canvas_open_as_sticky_note">付箋として開く</string>
+    <string name="canvas_move_to_trash">ゴミ箱に移動</string>
+    <string name="canvas_add_to_favorites">お気に入りに追加</string>
+    <string name="canvas_remove_from_favorites">お気に入りから削除</string>
+    <string name="canvas_sheet_title">キャンバス</string>
+    <string name="canvas_rename_canvas">キャンバスの名前を変更</string>
+    <string name="canvas_title_placeholder">キャンバスのタイトル...</string>
+    <string name="canvas_untitled_canvas">無題のキャンバス</string>
+
+    <string name="canvas_shapes">図形</string>
+    <string name="canvas_shape_rectangle">長方形</string>
+    <string name="canvas_shape_square">正方形</string>
+    <string name="canvas_shape_circle">円</string>
+    <string name="canvas_shape_oval">楕円</string>
+    <string name="canvas_shape_triangle">三角形</string>
+    <string name="canvas_shape_diamond">ひし形</string>
+    <string name="canvas_shape_pentagon">五角形</string>
+    <string name="canvas_shape_hexagon">六角形</string>
+    <string name="canvas_shape_parallelogram">平行四辺形</string>
+    <string name="canvas_shape_trapezoid">台形</string>
+    <string name="canvas_shape_pill">角丸長方形</string>
+    <string name="canvas_shape_database">データベース</string>
+    <string name="canvas_shape_double_rectangle">二重長方形</string>
+    <string name="canvas_shape_double_square">二重正方形</string>
+    <string name="canvas_shape_double_circle">二重円</string>
+    <string name="canvas_shape_double_triangle">二重三角形</string>
+
+    <string name="canvas_clear">クリア</string>
+    <string name="canvas_zoom_in">拡大</string>
+    <string name="canvas_zoom_out">縮小</string>
+    <string name="canvas_go_to_boxes">ボックスへ移動</string>
+    <string name="canvas_undo">元に戻す</string>
+    <string name="canvas_redo">やり直す</string>
+
+    <string name="canvas_tool_pen">ペン</string>
+    <string name="canvas_tool_highlighter">蛍光ペン</string>
+    <string name="canvas_tool_eraser">消しゴム</string>
+    <string name="canvas_tool_text">テキスト</string>
+    <string name="canvas_tool_shapes">図形</string>
+    <string name="canvas_tool_line">線</string>
+    <string name="canvas_tool_image">画像</string>
+
+    <string name="canvas_default_ink">デフォルトのインク</string>
+    <string name="canvas_no_background">背景なし</string>
+    <string name="canvas_stroke">線</string>
+    <string name="canvas_stroke_width">線の太さ</string>
+    <string name="canvas_pressure">筆圧</string>
+    <string name="canvas_same_thickness">太さを一定にする</string>
+    <string name="canvas_follow_pressure">筆圧に合わせる</string>
+    <string name="canvas_opacity">不透明度</string>
+    <string name="canvas_size">サイズ</string>
+    <string name="canvas_font">フォント</string>
+    <string name="canvas_weight">太さ</string>
+    <string name="canvas_color">色</string>
+    <string name="canvas_background">背景</string>
+    <string name="canvas_align">配置</string>
+    <string name="canvas_line">線</string>
+    <string name="canvas_line_style">線のスタイル</string>
+
+    <string name="canvas_width_thin">細い</string>
+    <string name="canvas_width_medium">普通</string>
+    <string name="canvas_width_thick">太い</string>
+    <string name="canvas_size_small">小</string>
+    <string name="canvas_size_medium">中</string>
+    <string name="canvas_size_large">大</string>
+    <string name="canvas_weight_regular">標準</string>
+    <string name="canvas_weight_medium">中太</string>
+    <string name="canvas_weight_bold">太字</string>
+    <string name="canvas_font_default">デフォルト</string>
+    <string name="canvas_align_left">左揃え</string>
+    <string name="canvas_align_center">中央揃え</string>
+    <string name="canvas_align_right">右揃え</string>
+
+    <string name="canvas_line_arrow">矢印</string>
+    <string name="canvas_line_dotted_arrow">点線の矢印</string>
+    <string name="canvas_line_dashed_arrow">破線の矢印</string>
+    <string name="canvas_line_solid_line">実線</string>
+    <string name="canvas_line_dotted_line">点線</string>
+    <string name="canvas_line_dashed_line">破線</string>
+
+    <string name="canvas_show_dots">ドットを表示</string>
+    <string name="canvas_hide_dots">ドットを非表示</string>
+    <string name="canvas_full_screen">全画面表示</string>
+    <string name="canvas_exit_full_screen">全画面表示を終了</string>
+
+    <string name="canvas_delete_box">ボックスを削除</string>
+    <string name="canvas_box_color">ボックスの色</string>
+    <string name="canvas_paste_image">画像を貼り付け</string>
+    <string name="canvas_adding_image">画像を追加中...</string>
+    <string name="canvas_add_label">ラベルを追加</string>
+    <string name="canvas_edit_label">ラベルを編集</string>
+    <string name="canvas_ungroup">グループ解除</string>
+    <string name="canvas_create_group">グループを作成</string>
+
+    <string name="canvas_image">キャンバスの画像</string>
+    <string name="canvas_image_failed_to_download">画像をダウンロードできませんでした</string>
+    <string name="canvas_downloading_image">画像をダウンロード中...</string>
+</resources>

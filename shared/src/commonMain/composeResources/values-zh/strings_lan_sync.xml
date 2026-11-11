@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_sync_status_idle">空闲</string>
+    <string name="lan_sync_status_not_paired">未配对！</string>
+    <string name="lan_sync_status_already_in_progress">同步已在进行中</string>
+    <string name="lan_sync_status_syncing">正在同步...</string>
+    <string name="lan_sync_status_auto_syncing">正在自动同步...</string>
+    <string name="lan_sync_status_fetching_from_desktop">正在从电脑获取...</string>
+    <string name="lan_sync_status_success">成功！</string>
+    <string name="lan_sync_status_synced_successfully">同步成功</string>
+    <plurals name="lan_sync_status_synced_with_unsaved_items">
+        <item quantity="other">已同步，%1$d 项无法保存</item>
+    </plurals>
+    <string name="lan_sync_status_partial">部分同步，将重试</string>
+    <string name="lan_sync_status_update_both_devices">请在两台设备上更新 Emberr</string>
+    <string name="lan_sync_status_desktop_offline">电脑离线</string>
+    <string name="lan_sync_status_failed">失败：%1$s</string>
+    <string name="lan_sync_status_sync_error">同步错误：%1$s</string>
+
+    <string name="lan_sync_pair_dialog_title">配对移动设备</string>
+    <string name="lan_sync_pair_dialog_message">使用 Emberr 移动应用扫描此二维码，即可安全连接到你的电脑。</string>
+    <string name="lan_sync_pair_dialog_secret_token">密钥令牌：%1$s...</string>
+
+    <string name="lan_sync_scanner_instruction">扫描电脑上显示的二维码。</string>
+    <string name="lan_sync_scanner_desktop_hint">在电脑上打开“设置 → 局域网同步 → 配对移动设备”。</string>
+    <string name="lan_sync_camera_access_needed">需要相机权限</string>
+    <string name="lan_sync_camera_allow_message">允许使用相机以扫描电脑上的配对码。</string>
+    <string name="lan_sync_camera_turn_on_message">请在“权限”中开启相机，然后返回这里。</string>
+    <string name="lan_sync_allow_camera">允许使用相机</string>
+    <string name="lan_sync_open_app_settings">打开应用设置</string>
+    <string name="lan_sync_camera_mobile_only">只有移动设备支持相机扫描。</string>
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whatsnew_see_you_later">またね！</string>
+    <string name="whatsnew_whats_new_question">新機能は？</string>
+    <string name="whatsnew_title">新機能</string>
+    <string name="whatsnew_version">バージョン%1$s</string>
+    <string name="whatsnew_new">新着</string>
+    <string name="whatsnew_themes_heading">テーマ</string>
+    <string name="whatsnew_themes_where">設定 → 外観 → テーマ</string>
+    <string name="whatsnew_themes_description_desktop">Nord、Catppuccin、Tokyo Night、Gruvbox、Rosé Pine、ハイコントラストなど、13種類のカラーテーマから選べます。テーマごとに強さを設定でき、テキストやアイコンにもテーマを適用するかどうかを選べます。</string>
+    <string name="whatsnew_themes_description_mobile">Nord、Catppuccin、Tokyo Night、Gruvbox、Rosé Pine、ハイコントラストなど14種類のカラーテーマから選べるほか、**壁紙**を選ぶと壁紙から色を取り込めます。テーマごとに強さを設定でき、テキストやアイコンにもテーマを適用するかどうかを選べます。ホーム画面のウィジェットもテーマに合わせて変わります。</string>
+    <string name="whatsnew_texture_heading">紙のテクスチャ</string>
+    <string name="whatsnew_texture_where">設定 → 外観 → テーマ → テクスチャ</string>
+    <string name="whatsnew_texture_description">本物の紙のような、やわらかい質感をアプリに加えます。強さを設定し、表示する場所をアプリ全体、メモ、キャンバス、デイリーメモから選べます。</string>
+    <string name="whatsnew_scale_heading">表示倍率</string>
+    <string name="whatsnew_scale_where">設定 → 外観 → 表示倍率</string>
+    <string name="whatsnew_scale_description_desktop">アプリ全体の表示を80%から200%の間で拡大・縮小できます。**Ctrl +**、**Ctrl −**、**Ctrl 0**でも変更できます。</string>
+    <string name="whatsnew_scale_description_mobile">アプリ全体の表示を80%から200%の間で拡大・縮小できます。</string>
+    <string name="whatsnew_widgets_heading">ウィジェット</string>
+    <string name="whatsnew_widgets_where">ホーム画面を長押し → ウィジェット → Emberr</string>
+    <string name="whatsnew_widgets_description">すべてのウィジェットがすっきりした新しいデザインになり、**メモカード**、**さっとメモ**、**今日の名言**の3つが新たに加わりました。選んだメモがすぐに表示されるようになり、そのメモが削除されたときにはお知らせします。</string>
+    <string name="whatsnew_editor_heading">エディタ</string>
+    <string name="whatsnew_editor_where">メモ内のどこでも/を入力</string>
+    <string name="whatsnew_editor_description">スラッシュメニューが、スペースの後だけでなく、どの文字の後でもすぐに開くようになりました。一致する項目を通り過ぎて入力しても、削除して戻ればメニューが再び表示されます。</string>
+    <string name="whatsnew_others_heading">その他</string>
+    <string name="whatsnew_others_where">細かな変更と修正</string>
+    <string name="whatsnew_others_sliders">アプリ全体のスライダーが新しいデザインになりました。</string>
+    <string name="whatsnew_others_title_time_desktop">メモのタイトルで**/**を入力すると、現在の時刻や日付を追加できます。</string>
+    <string name="whatsnew_others_title_time_mobile">キーボードツールバーから、メモのタイトルに現在の時刻や日付を追加できます。</string>
+    <string name="whatsnew_others_sync_network">同期に使うネットワークの選択は**設定 → 同期とバックアップ**に移動しました。</string>
+    <string name="whatsnew_others_windows_startup">Windowsでの起動が速くなりました。</string>
+    <string name="whatsnew_others_small_fixes">細かな修正を多数行いました。</string>
+    <string name="whatsnew_preview_options">オプション</string>
+    <string name="whatsnew_preview_trip_title">週末の旅行</string>
+    <string name="whatsnew_preview_trip_text">渋滞を避けるため8時までに出発。</string>
+    <string name="whatsnew_preview_train_tickets">電車の切符</string>
+    <string name="whatsnew_preview_passport">パスポート</string>
+    <string name="whatsnew_preview_camera_charger">カメラの充電器</string>
+    <string name="whatsnew_preview_reading_list">読書リスト</string>
+    <string name="whatsnew_preview_reading_list_books">オーバーストーリー、ピラネージ、プロジェクト・ヘイル・メアリー</string>
+    <string name="whatsnew_preview_meeting_title">チームミーティング</string>
+    <string name="whatsnew_preview_meeting_text">木曜10時、第2会議室。</string>
+    <string name="whatsnew_preview_typed_heading">議題</string>
+    <string name="whatsnew_preview_quote">前に進む秘訣は、まず始めることだ。</string>
+    <string name="whatsnew_preview_jot_prompt">何を考えていますか？</string>
+    <string name="whatsnew_preview_jot_button">さっとメモ</string>
+</resources>

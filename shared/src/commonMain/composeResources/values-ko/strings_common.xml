@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">뒤로</string>
+    <string name="common_cancel">취소</string>
+    <string name="common_save">저장</string>
+    <string name="common_close">닫기</string>
+    <string name="common_delete">삭제</string>
+    <string name="common_on">켜짐</string>
+    <string name="common_off">꺼짐</string>
+    <string name="common_version_label">v%1$s</string>
+    <string name="common_percent_value">%1$d%</string>
+    <string name="common_untitled">제목 없음</string>
+    <string name="common_color_yellow">노란색</string>
+    <string name="common_color_lime">라임색</string>
+    <string name="common_color_grey">회색</string>
+    <string name="common_color_red">빨간색</string>
+    <string name="common_color_blue">파란색</string>
+    <string name="common_color_green">초록색</string>
+    <string name="common_color_orange">주황색</string>
+    <string name="common_color_pink">분홍색</string>
+    <string name="common_color_purple">보라색</string>
+    <string name="common_create">만들기</string>
+    <string name="common_more">더 보기</string>
+</resources>

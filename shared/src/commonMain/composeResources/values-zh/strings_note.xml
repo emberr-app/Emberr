@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_empty_note_placeholder">输入 / 使用命令...</string>
+    <string name="note_copied_to_clipboard">已复制到剪贴板</string>
+    <string name="note_copied_as_markdown">已复制为 Markdown</string>
+    <string name="note_options">选项</string>
+    <string name="note_more_options">更多选项</string>
+    <string name="note_choose_icon">选择图标</string>
+    <string name="note_search_emojis">搜索表情</string>
+    <string name="note_no_emojis_found">未找到表情</string>
+    <string name="note_editing_template">正在编辑模板</string>
+    <string name="note_icon_options">图标选项</string>
+    <string name="note_change_icon">更换图标</string>
+    <string name="note_add_icon">添加图标</string>
+    <string name="note_remove_icon">移除图标</string>
+    <string name="note_cover_options">封面选项</string>
+    <string name="note_upload_cover">上传封面</string>
+    <string name="note_remove_cover">移除封面</string>
+    <string name="note_hide_word_count">隐藏字数</string>
+    <string name="note_show_word_count">显示字数</string>
+    <string name="note_alignment">对齐</string>
+    <string name="note_note_width">笔记宽度</string>
+    <string name="note_unfavorite">取消收藏</string>
+    <string name="note_favorite">收藏</string>
+    <string name="note_open_as_sticky_note">以便签打开</string>
+    <string name="note_export_note">导出笔记</string>
+    <string name="note_copy_text">复制文本</string>
+    <string name="note_copy_as_markdown">复制为 Markdown</string>
+    <string name="note_download_markdown">下载 .md</string>
+    <string name="note_download_pdf">下载 PDF</string>
+    <string name="note_move_to_trash">移到废纸篓</string>
+    <string name="note_width_narrow">窄</string>
+    <string name="note_width_full">全宽</string>
+    <string name="note_align_left">左对齐</string>
+    <string name="note_align_center">居中</string>
+    <string name="note_align_right">右对齐</string>
+    <string name="note_align_justify">两端对齐</string>
+    <string name="note_note_options">笔记选项</string>
+    <string name="note_export_options">导出选项</string>
+    <string name="note_paste_image_link">粘贴图片链接</string>
+    <string name="note_cover_image">封面图片</string>
+    <string name="note_drag_image_to_reposition">拖动图片调整位置</string>
+    <string name="note_save_position">保存位置</string>
+    <string name="note_reposition">调整位置</string>
+    <string name="note_collapse_panel">收起面板</string>
+    <string name="note_expand_panel">展开面板</string>
+    <plurals name="note_word_count">
+        <item quantity="other">%1$d 字</item>
+    </plurals>
+</resources>

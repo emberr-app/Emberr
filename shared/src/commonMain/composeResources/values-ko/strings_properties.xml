@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">속성</string>
+    <string name="properties_built_in">기본 제공</string>
+    <string name="properties_built_in_hint">기본 제공 속성은 이름을 바꾸거나 삭제할 수 없어요.</string>
+    <string name="properties_custom">사용자 지정</string>
+    <string name="properties_add_property">속성 추가</string>
+    <string name="properties_new_property">새 속성</string>
+    <string name="properties_edit_property">속성 편집</string>
+    <string name="properties_delete_question">"%1$s" 속성을 삭제할까요? 이 속성을 사용하는 모든 노트에서 제거돼요.</string>
+    <string name="properties_property_name">속성 이름</string>
+    <string name="properties_name_taken">같은 이름의 속성이 이미 있어요</string>
+    <string name="properties_value_type">값 유형</string>
+    <string name="properties_value_type_locked">속성을 만든 후에는 값 유형을 바꿀 수 없어요.</string>
+    <string name="properties_delete_property">속성 삭제</string>
+    <string name="properties_add">추가</string>
+</resources>

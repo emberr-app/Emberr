@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="properties_title">プロパティ</string>
+    <string name="properties_built_in">組み込み</string>
+    <string name="properties_built_in_hint">組み込みプロパティは名前の変更や削除ができません。</string>
+    <string name="properties_custom">カスタム</string>
+    <string name="properties_add_property">プロパティを追加</string>
+    <string name="properties_new_property">新しいプロパティ</string>
+    <string name="properties_edit_property">プロパティを編集</string>
+    <string name="properties_delete_question">「%1$s」を削除しますか？このプロパティを使っているすべてのメモから削除されます。</string>
+    <string name="properties_property_name">プロパティ名</string>
+    <string name="properties_name_taken">この名前のプロパティはすでに存在します</string>
+    <string name="properties_value_type">値の種類</string>
+    <string name="properties_value_type_locked">値の種類はプロパティの作成後に変更できません。</string>
+    <string name="properties_delete_property">プロパティを削除</string>
+    <string name="properties_add">追加</string>
+</resources>

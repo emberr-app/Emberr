@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Emberr 열기</string>
+    <string name="desktop_tray_close_window">창 닫기</string>
+    <string name="desktop_tray_quit">종료</string>
+    <string name="desktop_sticky_note">스티커 메모</string>
+    <string name="desktop_select_image">이미지 선택</string>
+    <string name="desktop_select_document">문서 선택</string>
+    <string name="desktop_file_not_found_message">이 파일은 더 이상 이 기기에 없어요.</string>
+    <string name="desktop_file_not_found_title">파일을 찾을 수 없음</string>
+    <string name="desktop_open_file_failed">파일을 열지 못했어요: %1$s</string>
+    <string name="desktop_error">오류</string>
+    <string name="desktop_backup_only_on_android_message">자동 백그라운드 백업은 현재 Android 앱에서만 지원돼요. '백업 내보내기' 버튼으로 직접 백업할 수는 있어요!</string>
+    <string name="desktop_backup_only_on_android_title">데스크톱 기능</string>
+    <string name="desktop_update_available">업데이트 가능</string>
+    <string name="desktop_update_available_message">Emberr %1$s 버전을 사용할 수 있어요. 지금 사용 중인 버전은 %2$s예요. 작업하는 동안 백그라운드에서 다운로드돼요.</string>
+    <string name="desktop_update_download">다운로드</string>
+    <string name="desktop_update_ready_to_install">업데이트 설치 준비 완료</string>
+    <string name="desktop_update_ready_message">%1$s 버전을 사용하려면 Emberr를 다시 시작하세요. 나중에를 선택하면 다음에 Emberr를 열 때 업데이트가 적용돼요.</string>
+    <string name="desktop_update_restart">다시 시작</string>
+    <string name="desktop_update_failed">Emberr를 업데이트하지 못했어요</string>
+    <string name="desktop_update_later">나중에</string>
+    <string name="desktop_ok">확인</string>
+    <string name="desktop_new_note_in_folder">폴더에 새 노트</string>
+    <string name="desktop_new_note_here">여기에 새 노트</string>
+    <string name="desktop_rename_folder">폴더 이름 변경</string>
+    <string name="desktop_add_subfolder">하위 폴더 추가</string>
+    <string name="desktop_rename_note">노트 이름 변경</string>
+    <string name="desktop_open_in_split_view">분할 보기로 열기</string>
+    <string name="desktop_toggle_section">%1$s 펼치기/접기</string>
+    <string name="desktop_empty_space">이 스페이스는 비어 있어요.</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">%1$s 또는 %2$s로 시작해 보세요</string>
+    <string name="desktop_empty_space_a_note">노트</string>
+    <string name="desktop_create_space">스페이스 만들기</string>
+    <string name="desktop_add_space">스페이스 추가</string>
+    <string name="desktop_space_options">스페이스 옵션</string>
+    <string name="desktop_close_pane">패널 닫기</string>
+    <string name="desktop_close_this_screen">이 화면 닫기</string>
+    <string name="desktop_drag_to_swap_screens">드래그해서 화면 바꾸기</string>
+    <string name="desktop_search_no_match">"%1$s"에 일치하는 노트, 일정, 사람이 없어요</string>
+    <string name="desktop_hide_sidebar">사이드바 숨기기</string>
+    <string name="desktop_collapse_sidebar">사이드바 접기</string>
+    <string name="desktop_select_a_note">사이드바에서 노트를 선택하세요</string>
+    <string name="desktop_folder">폴더</string>
+    <string name="desktop_sync">동기화</string>
+</resources>

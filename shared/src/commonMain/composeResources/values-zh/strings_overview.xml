@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overview_section_tasks">待办</string>
+    <string name="overview_section_bookmarks">书签</string>
+    <string name="overview_section_images">图片</string>
+    <string name="overview_section_documents">文档</string>
+    <string name="overview_tasks_repeating">重复</string>
+    <string name="overview_tasks_note">笔记</string>
+    <string name="overview_tasks_today">今天</string>
+    <string name="overview_tasks_tomorrow">明天</string>
+    <string name="overview_tasks_yesterday">昨天</string>
+    <string name="overview_tasks_none_completed">还没有已完成的待办。</string>
+    <string name="overview_tasks_all_caught_up">全部完成！</string>
+    <string name="overview_tasks_completed">已完成</string>
+    <string name="overview_tasks_completed_tasks">已完成的待办</string>
+    <string name="overview_tasks_hide_completed">隐藏已完成</string>
+    <string name="overview_tasks_show_completed">显示已完成</string>
+    <string name="overview_tasks_add_task_description">添加待办</string>
+    <string name="overview_tasks_add_task">添加待办</string>
+    <string name="overview_images_empty">还没有保存图片。</string>
+    <string name="overview_images_add_image_description">添加图片</string>
+    <string name="overview_images_add_image">添加图片</string>
+    <string name="overview_documents_empty">还没有附加文档。</string>
+    <string name="overview_documents_add_document_description">添加文档</string>
+    <string name="overview_documents_add_document">添加文档</string>
+    <string name="overview_bookmarks_empty">还没有保存链接。</string>
+    <string name="overview_bookmarks_add_bookmark_description">添加书签</string>
+    <string name="overview_bookmarks_add_bookmark">添加书签</string>
+    <string name="overview_bookmarks_add_link">添加链接</string>
+    <string name="overview_bookmarks_paste_link">粘贴链接...</string>
+    <string name="overview_bookmarks_clear_link">清除链接</string>
+    <string name="overview_bookmarks_all">全部</string>
+    <string name="overview_bookmarks_others">其他</string>
+</resources>

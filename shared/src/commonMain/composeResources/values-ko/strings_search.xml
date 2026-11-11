@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_start_typing">입력해서 제목, 요약, 노트 내용을 검색하세요.</string>
+    <string name="search_nothing_found">일치하는 노트, 일정, 사람이 없어요.</string>
+    <string name="search_people">사람</string>
+    <string name="search_events">일정</string>
+    <string name="search_notes">노트</string>
+    <string name="search_rename_note">노트 이름 변경</string>
+    <string name="search_note_title_placeholder">노트 제목...</string>
+    <string name="search_rename">이름 변경</string>
+    <string name="search_move_to_trash">휴지통으로 이동</string>
+    <string name="search_untitled_event">제목 없는 일정</string>
+    <string name="search_repeats">반복</string>
+    <string name="search_pinned">고정됨</string>
+    <string name="search_in_parent">%1$s 안</string>
+    <string name="search_daily">데일리</string>
+    <string name="search_add_to_favorites">즐겨찾기에 추가</string>
+    <string name="search_remove_from_favorites">즐겨찾기에서 제거</string>
+    <plurals name="search_show_all_people">
+        <item quantity="other">%1$d명 모두 보기</item>
+    </plurals>
+    <plurals name="search_show_all_events">
+        <item quantity="other">일정 %1$d개 모두 보기</item>
+    </plurals>
+</resources>

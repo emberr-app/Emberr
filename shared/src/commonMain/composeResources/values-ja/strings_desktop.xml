@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="desktop_tray_open_emberr">Emberrを開く</string>
+    <string name="desktop_tray_close_window">ウィンドウを閉じる</string>
+    <string name="desktop_tray_quit">終了</string>
+    <string name="desktop_sticky_note">付箋</string>
+    <string name="desktop_select_image">画像を選択</string>
+    <string name="desktop_select_document">ドキュメントを選択</string>
+    <string name="desktop_file_not_found_message">このファイルはこのデバイスで利用できなくなりました。</string>
+    <string name="desktop_file_not_found_title">ファイルが見つかりません</string>
+    <string name="desktop_open_file_failed">ファイルを開けませんでした：%1$s</string>
+    <string name="desktop_error">エラー</string>
+    <string name="desktop_backup_only_on_android_message">バックグラウンドでの自動バックアップは、現在Androidアプリでのみ利用できます。手動の「バックアップをエクスポート」ボタンは引き続き使えます！</string>
+    <string name="desktop_backup_only_on_android_title">デスクトップの機能</string>
+    <string name="desktop_update_available">アップデートがあります</string>
+    <string name="desktop_update_available_message">Emberr %1$sが利用可能です。現在のバージョンは%2$sです。作業を続けている間にバックグラウンドでダウンロードされます。</string>
+    <string name="desktop_update_download">ダウンロード</string>
+    <string name="desktop_update_ready_to_install">アップデートをインストールできます</string>
+    <string name="desktop_update_ready_message">Emberrを再起動すると、バージョン%1$sを使えます。「後で」を選ぶと、次回Emberrを開いたときにアップデートが適用されます。</string>
+    <string name="desktop_update_restart">再起動</string>
+    <string name="desktop_update_failed">Emberrをアップデートできませんでした</string>
+    <string name="desktop_update_later">後で</string>
+    <string name="desktop_ok">OK</string>
+    <string name="desktop_new_note_in_folder">フォルダに新規メモ</string>
+    <string name="desktop_new_note_here">ここに新規メモ</string>
+    <string name="desktop_rename_folder">フォルダの名前を変更</string>
+    <string name="desktop_add_subfolder">サブフォルダを追加</string>
+    <string name="desktop_rename_note">メモの名前を変更</string>
+    <string name="desktop_open_in_split_view">分割表示で開く</string>
+    <string name="desktop_toggle_section">%1$sを開閉</string>
+    <string name="desktop_empty_space">このスペースは空です。</string>
+    <string name="desktop_empty_space_start_with_note_or_folder">%1$sか%2$sを作成して始めましょう</string>
+    <string name="desktop_empty_space_a_note">メモ</string>
+    <string name="desktop_create_space">スペースを作成</string>
+    <string name="desktop_add_space">スペースを追加</string>
+    <string name="desktop_space_options">スペースのオプション</string>
+    <string name="desktop_close_pane">ペインを閉じる</string>
+    <string name="desktop_close_this_screen">この画面を閉じる</string>
+    <string name="desktop_drag_to_swap_screens">ドラッグして画面を入れ替え</string>
+    <string name="desktop_search_no_match">「%1$s」に一致するメモ、予定、人物はありません</string>
+    <string name="desktop_hide_sidebar">サイドバーを隠す</string>
+    <string name="desktop_collapse_sidebar">サイドバーを折りたたむ</string>
+    <string name="desktop_select_a_note">サイドバーからメモを選択してください</string>
+    <string name="desktop_folder">フォルダ</string>
+    <string name="desktop_sync">同期</string>
+</resources>

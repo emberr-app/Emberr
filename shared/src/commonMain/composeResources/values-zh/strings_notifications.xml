@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_task_reminder">待办提醒</string>
+    <string name="notifications_unfinished_task">未完成的待办</string>
+    <string name="notifications_daily_note">每日笔记</string>
+    <string name="notifications_daily_title">每日：%1$s</string>
+    <string name="notifications_note">笔记</string>
+    <string name="notifications_birthday">生日</string>
+    <string name="notifications_birthday_turns_age">%1$s 今天满 %2$d 岁</string>
+    <string name="notifications_birthday_today">今天是 %1$s 的生日</string>
+    <string name="notifications_open">打开</string>
+</resources>

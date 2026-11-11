@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="components_clear">清除</string>
+    <string name="components_select_all">全选</string>
+    <string name="components_spaces_none_yet">暂无</string>
+    <string name="components_spaces_none">无</string>
+    <plurals name="components_spaces_all">
+        <item quantity="other">全部 %1$d 个空间</item>
+    </plurals>
+    <plurals name="components_spaces_some_of_total">
+        <item quantity="other">%1$d / %2$d 个空间</item>
+    </plurals>
+
+    <string name="components_search_notes">搜索笔记...</string>
+    <string name="components_create_new_note">新建笔记</string>
+    <string name="components_new_named_note">新建笔记“%1$s”</string>
+    <string name="components_note_picker_hint">输入以搜索，或新建笔记</string>
+    <string name="components_link_to_note_heading">链接到笔记</string>
+    <string name="components_link_to_note">链接到笔记</string>
+
+    <string name="components_load_more">加载更多</string>
+    <string name="components_show_sidebar">显示侧边栏</string>
+    <string name="components_clear_search">清除搜索</string>
+
+    <string name="components_people_search_placeholder">搜索或添加人物</string>
+    <string name="components_people_create_failed">无法创建人物</string>
+    <string name="components_people_type_name_hint">输入姓名以添加人物</string>
+    <string name="components_people_add_people">添加人物</string>
+    <string name="components_people_selected">已选择</string>
+    <string name="components_people_create_named">创建“%1$s”</string>
+    <string name="components_people_remove">移除</string>
+    <string name="components_people_remove_named">移除 %1$s</string>
+
+    <string name="components_reminder_later_today">今天稍后</string>
+    <string name="components_reminder_tomorrow">明天</string>
+    <string name="components_reminder_this_weekend">本周末</string>
+    <string name="components_reminder_next_week">下周</string>
+    <string name="components_reminder_custom_date">自定义日期...</string>
+    <string name="components_reminder_remove">移除提醒</string>
+    <string name="components_reminder_date">日期</string>
+    <string name="components_reminder_all_day">全天</string>
+    <string name="components_reminder_in_15_mins">15 分钟后</string>
+    <string name="components_reminder_in_1_hour">1 小时后</string>
+    <string name="components_reminder_in_3_hours">3 小时后</string>
+    <string name="components_reminder_this_evening">今晚</string>
+    <string name="components_reminder_custom_time">自定义时间...</string>
+    <string name="components_reminder_time">时间</string>
+    <string name="components_choose_month_or_year">选择月份或年份</string>
+    <string name="components_previous_month">上个月</string>
+    <string name="components_next_month">下个月</string>
+    <string name="components_select_date">选择日期</string>
+    <string name="components_month_and_year">月份和年份</string>
+    <string name="components_select_time">选择时间</string>
+</resources>
