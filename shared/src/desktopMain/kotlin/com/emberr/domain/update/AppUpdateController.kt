@@ -14,6 +14,7 @@ import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.message_update_cannot_replace_itself
 import emberr.shared.generated.resources.message_update_check_failed
 import emberr.shared.generated.resources.message_update_download_failed
+import emberr.shared.generated.resources.message_update_installer_could_not_start
 import org.jetbrains.compose.resources.StringResource
 
 class AppUpdateController(
@@ -79,6 +80,20 @@ class AppUpdateController(
                 currentInstallation.downloadFile.delete()
             }
         }
+    }
+
+    fun startInstallerBeforeRestart(): Boolean {
+        val stagedInstallation = installation as? StagedUpdateInstallation ?: return true
+        if (stagedInstallation.installStagedUpdateAfterThisProcessExits(launchAfterInstall = true)) return true
+        stagedInstallation.discardStagedUpdate()
+        reportInstallerCouldNotStart()
+        return false
+    }
+
+    fun reportInstallerCouldNotStart() {
+        _state.value = AppUpdateState.Idle
+        openLinkInRunningBrowser(LATEST_RELEASE_PAGE_URL)
+        _prompt.value = AppUpdatePrompt.ReportFailure(Res.string.message_update_installer_could_not_start)
     }
 
     fun dismissPrompt() {

@@ -90,6 +90,7 @@
     <string name="message_export_failed_with_reason">Eksport nie powiódł się:\n%1$s</string>
     <string name="message_could_not_open_link">nie można otworzyć linku</string>
     <string name="message_update_cannot_replace_itself">Emberr nie może zastąpić samego siebie w folderze, w którym jest zainstalowany. Zamiast tego w przeglądarce otwiera się strona pobierania.</string>
+    <string name="message_update_installer_could_not_start">Emberr nie mógł uruchomić instalatora aktualizacji. W przeglądarce otwiera się strona pobierania, aby można było samodzielnie zainstalować aktualizację.</string>
     <string name="message_update_download_failed">Nie udało się pobrać aktualizacji. Sprawdź połączenie i spróbuj ponownie.</string>
     <string name="message_update_check_failed">Nie udało się sprawdzić aktualizacji. Sprawdź połączenie i spróbuj ponownie.</string>
     <string name="message_update_not_verified">Nie udało się potwierdzić, że aktualizacja pochodzi od Emberr, więc ją zignorowano.</string>

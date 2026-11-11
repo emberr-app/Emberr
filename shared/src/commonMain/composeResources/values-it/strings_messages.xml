@@ -88,6 +88,7 @@
     <string name="message_export_failed_with_reason">Esportazione non riuscita:\n%1$s</string>
     <string name="message_could_not_open_link">impossibile aprire il link</string>
     <string name="message_update_cannot_replace_itself">Emberr non può sostituirsi nella cartella in cui è installato. Si sta aprendo invece la pagina di download nel browser.</string>
+    <string name="message_update_installer_could_not_start">Emberr non è riuscito ad avviare il programma di installazione dell'aggiornamento. Si sta aprendo la pagina di download nel browser, così puoi installare l'aggiornamento da solo.</string>
     <string name="message_update_download_failed">Impossibile scaricare l'aggiornamento. Controlla la connessione e riprova.</string>
     <string name="message_update_check_failed">Impossibile verificare gli aggiornamenti. Controlla la connessione e riprova.</string>
     <string name="message_update_not_verified">Non è stato possibile verificare che l'aggiornamento provenga da Emberr, quindi è stato ignorato.</string>

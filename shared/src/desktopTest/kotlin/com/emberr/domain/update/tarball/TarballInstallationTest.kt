@@ -3,6 +3,7 @@ package com.emberr.domain.update.tarball
 import com.emberr.domain.update.AppUpdateDownload
 import com.emberr.domain.update.AppUpdateException
 import com.emberr.domain.update.AppUpdateManifest
+import com.emberr.domain.update.StagedUpdateStartResult
 import com.emberr.domain.update.sha256HexOf
 import java.io.File
 import java.nio.file.Files
@@ -93,9 +94,9 @@ class TarballInstallationTest {
         writeReleaseTarball(includeInstallScript = true)
         installation.install(release("1.0.2"), downloadMatching(installation.downloadFile))
 
-        val startedInstallerInstead = installation.installNewerStagedUpdateInsteadOfStarting(installedVersion = "1.0.2")
+        val startResult = installation.installNewerStagedUpdateInsteadOfStarting(installedVersion = "1.0.2")
 
-        assertFalse(startedInstallerInstead)
+        assertEquals(StagedUpdateStartResult.NothingToInstall, startResult)
         assertFalse(stagingDirectory.exists())
     }
 

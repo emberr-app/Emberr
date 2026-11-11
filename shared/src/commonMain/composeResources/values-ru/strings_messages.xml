@@ -90,6 +90,7 @@
     <string name="message_export_failed_with_reason">Ошибка экспорта:\n%1$s</string>
     <string name="message_could_not_open_link">не удалось открыть ссылку</string>
     <string name="message_update_cannot_replace_itself">Emberr не может заменить себя в папке, где он установлен. Вместо этого в браузере открывается страница загрузки.</string>
+    <string name="message_update_installer_could_not_start">Emberr не удалось запустить установщик обновления. В браузере открывается страница загрузки, чтобы вы могли установить обновление самостоятельно.</string>
     <string name="message_update_download_failed">Не удалось загрузить обновление. Проверьте подключение и попробуйте ещё раз.</string>
     <string name="message_update_check_failed">Не удалось проверить наличие обновлений. Проверьте подключение и попробуйте ещё раз.</string>
     <string name="message_update_not_verified">Не удалось подтвердить, что обновление выпущено Emberr, поэтому оно проигнорировано.</string>

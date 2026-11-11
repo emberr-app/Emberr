@@ -88,6 +88,7 @@
     <string name="message_export_failed_with_reason">Exporteren mislukt:\n%1$s</string>
     <string name="message_could_not_open_link">kon link niet openen</string>
     <string name="message_update_cannot_replace_itself">Emberr kan zichzelf niet vervangen in de map waarin het is geïnstalleerd. De downloadpagina wordt in plaats daarvan in je browser geopend.</string>
+    <string name="message_update_installer_could_not_start">Emberr kon het installatieprogramma van de update niet starten. De downloadpagina wordt in je browser geopend, zodat je de update zelf kunt installeren.</string>
     <string name="message_update_download_failed">De update kon niet worden gedownload. Controleer je verbinding en probeer het opnieuw.</string>
     <string name="message_update_check_failed">Kon niet controleren op updates. Controleer je verbinding en probeer het opnieuw.</string>
     <string name="message_update_not_verified">Er kon niet worden bevestigd dat de update van Emberr komt, dus is hij genegeerd.</string>

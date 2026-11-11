@@ -57,7 +57,7 @@ fun AppUpdatePromptDialog() {
             confirmText = stringResource(Res.string.desktop_update_restart),
             onConfirm = {
                 updateController.dismissPrompt()
-                restartApplication()
+                if (updateController.startInstallerBeforeRestart()) restartApplication()
             },
             onLater = updateController::dismissPrompt
         )

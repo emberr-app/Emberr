@@ -20,6 +20,7 @@ class WindowsInstallationTest {
     private val localAppData = File(workingDirectory, "AppData/Local").apply { mkdirs() }
     private val defaultInstallDirectory = File(localAppData, "Emberr").apply { mkdirs() }
     private val stagingDirectory = File(localAppData, "Emberr-update")
+    private val windowsDirectory = File(workingDirectory, "Windows")
 
     @AfterTest
     fun deleteWorkingDirectory() {
@@ -47,7 +48,7 @@ class WindowsInstallationTest {
 
     @Test
     fun verifiedInstallerIsStagedWithTheUpdateScript() {
-        val installation = WindowsInstallation(defaultInstallDirectory, localAppData)
+        val installation = WindowsInstallation(defaultInstallDirectory, localAppData, windowsDirectory)
         installation.downloadFile.writeText("installer bytes")
 
         installation.install(AppUpdateManifest(version = "1.0.3"), downloadMatching(installation.downloadFile))
@@ -60,7 +61,7 @@ class WindowsInstallationTest {
 
     @Test
     fun damagedInstallerIsNotStaged() {
-        val installation = WindowsInstallation(defaultInstallDirectory, localAppData)
+        val installation = WindowsInstallation(defaultInstallDirectory, localAppData, windowsDirectory)
         installation.downloadFile.writeText("damaged bytes")
 
         assertFailsWith<AppUpdateException> {
@@ -75,7 +76,7 @@ class WindowsInstallationTest {
 
     @Test
     fun defaultInstallFolderIsNotPassedToTheInstaller() {
-        val command = WindowsInstallation(defaultInstallDirectory, localAppData)
+        val command = WindowsInstallation(defaultInstallDirectory, localAppData, windowsDirectory)
             .installerCommand(appProcessId = 42, launchAfterInstall = true)
 
         assertEquals("no", command.valueAfter("-PassInstallDirectory"))
@@ -84,10 +85,21 @@ class WindowsInstallationTest {
     }
 
     @Test
+    fun powerShellIsStartedFromTheWindowsFolderInsteadOfThePath() {
+        val command = WindowsInstallation(defaultInstallDirectory, localAppData, windowsDirectory)
+            .installerCommand(appProcessId = 42, launchAfterInstall = true)
+
+        assertEquals(
+            windowsDirectory.resolve("System32/WindowsPowerShell/v1.0/powershell.exe").path,
+            command.first()
+        )
+    }
+
+    @Test
     fun customInstallFolderIsPassedToTheInstaller() {
         val customInstallDirectory = File(workingDirectory, "My Apps/Emberr").apply { mkdirs() }
 
-        val command = WindowsInstallation(customInstallDirectory, localAppData)
+        val command = WindowsInstallation(customInstallDirectory, localAppData, windowsDirectory)
             .installerCommand(appProcessId = 42, launchAfterInstall = false)
 
         assertEquals("yes", command.valueAfter("-PassInstallDirectory"))

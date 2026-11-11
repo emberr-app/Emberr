@@ -88,6 +88,7 @@
     <string name="message_export_failed_with_reason">Dışa aktarma başarısız oldu:\n%1$s</string>
     <string name="message_could_not_open_link">bağlantı açılamadı</string>
     <string name="message_update_cannot_replace_itself">Emberr, kurulu olduğu klasörde kendini değiştiremiyor. Bunun yerine indirme sayfası tarayıcınızda açılıyor.</string>
+    <string name="message_update_installer_could_not_start">Emberr güncelleme yükleyicisini başlatamadı. Güncellemeyi kendiniz yükleyebilmeniz için indirme sayfası tarayıcınızda açılıyor.</string>
     <string name="message_update_download_failed">Güncelleme indirilemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
     <string name="message_update_check_failed">Güncellemeler denetlenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
     <string name="message_update_not_verified">Güncellemenin Emberr'dan geldiği doğrulanamadı, bu yüzden yok sayıldı.</string>

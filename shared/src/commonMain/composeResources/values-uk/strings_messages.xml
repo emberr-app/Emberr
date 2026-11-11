@@ -90,6 +90,7 @@
     <string name="message_export_failed_with_reason">Помилка експорту:\n%1$s</string>
     <string name="message_could_not_open_link">не вдалося відкрити посилання</string>
     <string name="message_update_cannot_replace_itself">Emberr не може замінити себе в папці, де його встановлено. Натомість у браузері відкривається сторінка завантаження.</string>
+    <string name="message_update_installer_could_not_start">Emberr не вдалося запустити інсталятор оновлення. У браузері відкривається сторінка завантаження, щоб ви могли встановити оновлення самостійно.</string>
     <string name="message_update_download_failed">Не вдалося завантажити оновлення. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="message_update_check_failed">Не вдалося перевірити оновлення. Перевірте з’єднання та спробуйте ще раз.</string>
     <string name="message_update_not_verified">Не вдалося підтвердити, що оновлення походить від Emberr, тому його проігноровано.</string>

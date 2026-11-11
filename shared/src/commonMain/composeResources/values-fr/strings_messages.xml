@@ -88,6 +88,7 @@
     <string name="message_export_failed_with_reason">Échec de l'exportation :\n%1$s</string>
     <string name="message_could_not_open_link">impossible d'ouvrir le lien</string>
     <string name="message_update_cannot_replace_itself">Emberr ne peut pas se remplacer lui-même dans le dossier où il est installé. La page de téléchargement s'ouvre à la place dans votre navigateur.</string>
+    <string name="message_update_installer_could_not_start">Emberr n'a pas pu lancer le programme d'installation de la mise à jour. La page de téléchargement s'ouvre dans votre navigateur pour que vous puissiez installer la mise à jour vous-même.</string>
     <string name="message_update_download_failed">Impossible de télécharger la mise à jour. Vérifiez votre connexion et réessayez.</string>
     <string name="message_update_check_failed">Impossible de rechercher des mises à jour. Vérifiez votre connexion et réessayez.</string>
     <string name="message_update_not_verified">Impossible de vérifier que la mise à jour provient d'Emberr, elle a donc été ignorée.</string>

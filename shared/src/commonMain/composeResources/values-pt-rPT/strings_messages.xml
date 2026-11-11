@@ -67,6 +67,7 @@
     <string name="message_backup_saved_successfully">Cópia de segurança guardada com sucesso!</string>
     <string name="message_could_not_open_link">não foi possível abrir a ligação</string>
     <string name="message_update_cannot_replace_itself">O Emberr não se pode substituir na pasta onde está instalado. A página de transferência vai abrir no teu navegador.</string>
+    <string name="message_update_installer_could_not_start">O Emberr não conseguiu iniciar o instalador da atualização. A página de transferência vai abrir no teu navegador para poderes instalar a atualização tu mesmo.</string>
     <string name="message_update_download_failed">Não foi possível transferir a atualização. Verifica a tua ligação e tenta novamente.</string>
     <string name="message_update_check_failed">Não foi possível procurar atualizações. Verifica a tua ligação e tenta novamente.</string>
     <string name="message_update_not_verified">Não foi possível confirmar que a atualização veio do Emberr, por isso foi ignorada.</string>

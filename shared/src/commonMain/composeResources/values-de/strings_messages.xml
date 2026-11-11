@@ -88,6 +88,7 @@
     <string name="message_export_failed_with_reason">Export fehlgeschlagen:\n%1$s</string>
     <string name="message_could_not_open_link">Link konnte nicht geöffnet werden</string>
     <string name="message_update_cannot_replace_itself">Emberr kann sich in seinem Installationsordner nicht selbst ersetzen. Stattdessen wird die Download-Seite in deinem Browser geöffnet.</string>
+    <string name="message_update_installer_could_not_start">Emberr konnte das Update-Installationsprogramm nicht starten. Die Download-Seite wird in deinem Browser geöffnet, damit du das Update selbst installieren kannst.</string>
     <string name="message_update_download_failed">Das Update konnte nicht heruntergeladen werden. Prüfe deine Verbindung und versuch es noch einmal.</string>
     <string name="message_update_check_failed">Es konnte nicht nach Updates gesucht werden. Prüfe deine Verbindung und versuch es noch einmal.</string>
     <string name="message_update_not_verified">Es konnte nicht bestätigt werden, dass das Update von Emberr stammt, daher wurde es ignoriert.</string>
