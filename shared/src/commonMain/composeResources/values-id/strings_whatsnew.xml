@@ -7,7 +7,7 @@
     <string name="whatsnew_new">Baru</string>
     <string name="whatsnew_languages_heading">Bahasa</string>
     <string name="whatsnew_languages_where">Setelan → Tampilan → Bahasa</string>
-    <string name="whatsnew_languages_description_desktop">Emberr kini tersedia dalam 18 bahasa, dari Español dan Deutsch hingga 日本語 dan हिन्दी. Emberr mengikuti bahasa komputer Anda, atau Anda dapat memilihnya sendiri. Emberr akan dimulai ulang untuk menggantinya. Menemukan terjemahan yang aneh? Beri tahu kami di GitHub.</string>
+    <string name="whatsnew_languages_description_desktop">Emberr kini tersedia dalam 18 bahasa, dari Español dan Deutsch hingga 日本語 dan हिन्दी. Emberr mengikuti bahasa komputer Anda, atau Anda dapat memilihnya sendiri. Bahasa langsung berganti tanpa perlu memulai ulang. Menemukan terjemahan yang aneh? Beri tahu kami di GitHub.</string>
     <string name="whatsnew_languages_description_mobile">Emberr kini tersedia dalam 18 bahasa, dari Español dan Deutsch hingga 日本語 dan हिन्दी. Emberr mengikuti bahasa ponsel Anda, atau Anda dapat memilihnya sendiri. Di Android 13 dan yang lebih baru, Anda juga dapat mengaturnya di **Setelan → Aplikasi → Emberr → Bahasa** pada ponsel Anda. Menemukan terjemahan yang aneh? Beri tahu kami di GitHub.</string>
     <string name="whatsnew_themes_heading">Tema</string>
     <string name="whatsnew_themes_where">Setelan → Tampilan → Tema</string>
@@ -33,8 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Tambahkan waktu atau tanggal saat ini ke judul catatan dari bilah alat keyboard.</string>
     <string name="whatsnew_others_sync_network">Pilihan jaringan untuk sinkronisasi kini ada di **Setelan → Sinkronisasi &amp; cadangan**.</string>
     <string name="whatsnew_others_windows_startup">Pembukaan lebih cepat di Windows.</string>
-    <string name="whatsnew_others_search_accents">Pencarian mengabaikan aksen, jadi **cafe** juga menemukan **Café**, dan pencarian emoji memahami bahasa Anda.</string>
-    <string name="whatsnew_others_linux_cjk_font">Teks Jepang, Korea, dan Mandarin memerlukan font CJK seperti Noto Sans CJK. Tanpa font tersebut, karakternya muncul sebagai kotak.</string>
+    <string name="whatsnew_others_windows_update_restart">Pembaruan di Windows kini terpasang dengan benar, dan Emberr terbuka kembali setelah dimulai ulang. Jika pembaruan tidak dapat dipasang, Emberr kini memberi tahu Anda dan membuka halaman unduhan.</string>
+    <string name="whatsnew_others_linux_restart">Di Linux, Emberr kini terbuka kembali setelah dimulai ulang, bukan hanya tertutup.</string>
     <string name="whatsnew_others_small_fixes">Banyak perbaikan kecil.</string>
     <string name="whatsnew_preview_options">Opsi</string>
     <string name="whatsnew_preview_trip_title">Liburan akhir pekan</string>

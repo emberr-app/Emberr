@@ -2,7 +2,7 @@
 <resources>
     <string name="whatsnew_see_you_later">Até breve!</string>
     <string name="whatsnew_languages_where">Definições → Aparência → Idioma</string>
-    <string name="whatsnew_languages_description_desktop">O Emberr já está disponível em 18 idiomas, do Español e Deutsch ao 日本語 e हिन्दी. Segue o idioma do teu computador, ou podes escolher um. O Emberr reinicia para mudar. Viste uma tradução estranha? Avisa-nos no GitHub.</string>
+    <string name="whatsnew_languages_description_desktop">O Emberr já está disponível em 18 idiomas, do Español e Deutsch ao 日本語 e हिन्दी. Segue o idioma do teu computador, ou podes escolher um. A mudança é imediata, sem reiniciar. Viste uma tradução estranha? Avisa-nos no GitHub.</string>
     <string name="whatsnew_languages_description_mobile">O Emberr já está disponível em 18 idiomas, do Español e Deutsch ao 日本語 e हिन्दी. Segue o idioma do teu telemóvel, ou podes escolher um. No Android 13 ou mais recente, também o podes definir em **Definições → Apps → Emberr → Idioma** do telemóvel. Viste uma tradução estranha? Avisa-nos no GitHub.</string>
     <string name="whatsnew_themes_where">Definições → Aparência → Tema</string>
     <string name="whatsnew_themes_description_desktop">Escolhe entre 13 temas de cores, como Nord, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine e Alto contraste. Cada um tem um ajuste de intensidade, e podes escolher se o texto e os ícones também o seguem.</string>
@@ -20,8 +20,8 @@
     <string name="whatsnew_others_title_time_desktop">Escreve **/** no título de uma nota para adicionar a hora ou a data atual.</string>
     <string name="whatsnew_others_title_time_mobile">Adiciona a hora ou a data atual ao título de uma nota pela barra de ferramentas do teclado.</string>
     <string name="whatsnew_others_sync_network">A escolha de rede para sincronização agora fica em **Definições → Sincronização e backup**.</string>
-    <string name="whatsnew_others_search_accents">A pesquisa ignora acentos, por isso **acao** também encontra **Ação**, e a pesquisa de emojis percebe o teu idioma.</string>
-    <string name="whatsnew_others_linux_cjk_font">Textos em japonês, coreano e chinês precisam de um tipo de letra CJK, como o Noto Sans CJK. Sem ele, esses caracteres aparecem como quadrados.</string>
+    <string name="whatsnew_others_windows_update_restart">As atualizações no Windows já são instaladas corretamente, e o Emberr volta a abrir depois de reiniciar. Se uma atualização não puder ser instalada, o Emberr avisa-te e abre a página de transferência.</string>
+    <string name="whatsnew_others_linux_restart">No Linux, o Emberr volta a abrir depois de reiniciar, em vez de apenas fechar.</string>
     <string name="whatsnew_preview_train_tickets">Bilhetes de comboio</string>
     <string name="whatsnew_preview_camera_charger">Carregador da câmara</string>
     <string name="whatsnew_preview_meeting_title">Reunião da equipa</string>

@@ -7,7 +7,7 @@
     <string name="whatsnew_new">Neu</string>
     <string name="whatsnew_languages_heading">Sprachen</string>
     <string name="whatsnew_languages_where">Einstellungen → Darstellung → Sprache</string>
-    <string name="whatsnew_languages_description_desktop">Emberr gibt es jetzt in 18 Sprachen, von Español und Deutsch bis 日本語 und हिन्दी. Es folgt der Sprache deines Computers, oder du wählst selbst eine aus. Zum Wechseln startet Emberr neu. Dir ist eine seltsame Übersetzung aufgefallen? Sag uns auf GitHub Bescheid.</string>
+    <string name="whatsnew_languages_description_desktop">Emberr gibt es jetzt in 18 Sprachen, von Español und Deutsch bis 日本語 und हिन्दी. Es folgt der Sprache deines Computers, oder du wählst selbst eine aus. Der Wechsel passiert sofort, ohne Neustart. Dir ist eine seltsame Übersetzung aufgefallen? Sag uns auf GitHub Bescheid.</string>
     <string name="whatsnew_languages_description_mobile">Emberr gibt es jetzt in 18 Sprachen, von Español und Deutsch bis 日本語 und हिन्दी. Es folgt der Sprache deines Handys, oder du wählst selbst eine aus. Ab Android 13 kannst du sie auch in den **Einstellungen → Apps → Emberr → Sprache** deines Handys festlegen. Dir ist eine seltsame Übersetzung aufgefallen? Sag uns auf GitHub Bescheid.</string>
     <string name="whatsnew_themes_heading">Designs</string>
     <string name="whatsnew_themes_where">Einstellungen → Darstellung → Design</string>
@@ -33,8 +33,8 @@
     <string name="whatsnew_others_title_time_mobile">Füge die aktuelle Uhrzeit oder das Datum über die Tastatur-Symbolleiste in den Titel einer Notiz ein.</string>
     <string name="whatsnew_others_sync_network">Die Netzwerkwahl für die Synchronisierung findest du jetzt unter **Einstellungen → Synchronisierung &amp; Backup**.</string>
     <string name="whatsnew_others_windows_startup">Schnellerer Start unter Windows.</string>
-    <string name="whatsnew_others_search_accents">Die Suche ignoriert Akzente und Umlaute, **uber** findet also auch **Über**, und die Emoji-Suche versteht deine Sprache.</string>
-    <string name="whatsnew_others_linux_cjk_font">Japanischer, koreanischer und chinesischer Text braucht eine CJK-Schrift wie Noto Sans CJK. Ohne sie erscheinen diese Zeichen als Kästchen.</string>
+    <string name="whatsnew_others_windows_update_restart">Updates unter Windows werden jetzt richtig installiert, und Emberr öffnet sich nach einem Neustart wieder. Wenn sich ein Update nicht installieren lässt, sagt Emberr dir jetzt Bescheid und öffnet die Download-Seite.</string>
+    <string name="whatsnew_others_linux_restart">Unter Linux öffnet sich Emberr nach einem Neustart wieder, statt sich nur zu schließen.</string>
     <string name="whatsnew_others_small_fixes">Viele kleine Fehlerbehebungen.</string>
     <string name="whatsnew_preview_options">Optionen</string>
     <string name="whatsnew_preview_trip_title">Wochenendausflug</string>
