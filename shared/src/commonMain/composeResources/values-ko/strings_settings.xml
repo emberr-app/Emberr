@@ -217,6 +217,7 @@
     <string name="settings_play_testing_no_data_lost">이 앱이 그대로 업데이트되어 데이터가 사라지지 않아요.</string>
     <string name="settings_play_testing_join">그룹 가입</string>
     <string name="settings_play_testing_not_now">나중에</string>
+    <string name="settings_footer_support_us">여기에서 응원해 주세요</string>
 
     <string name="settings_third_party_group_movies_shows">영화 및 시리즈</string>
     <string name="settings_third_party_visit_tmdb">TMDB 방문</string>

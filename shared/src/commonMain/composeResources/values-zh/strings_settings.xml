@@ -217,6 +217,7 @@
     <string name="settings_play_testing_no_data_lost">会直接更新这个应用，不会丢失任何数据。</string>
     <string name="settings_play_testing_join">加入群组</string>
     <string name="settings_play_testing_not_now">以后再说</string>
+    <string name="settings_footer_support_us">在这里支持我们</string>
 
     <string name="settings_third_party_group_movies_shows">电影与剧集</string>
     <string name="settings_third_party_visit_tmdb">访问 TMDB</string>

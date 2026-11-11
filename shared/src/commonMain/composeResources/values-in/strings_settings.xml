@@ -217,6 +217,7 @@
     <string name="settings_play_testing_no_data_lost">Aplikasi ini akan diperbarui tanpa ada data yang hilang.</string>
     <string name="settings_play_testing_join">Gabung ke Grup</string>
     <string name="settings_play_testing_not_now">Nanti Saja</string>
+    <string name="settings_footer_support_us">Dukung kami di</string>
 
     <string name="settings_third_party_group_movies_shows">Film &amp; serial</string>
     <string name="settings_third_party_visit_tmdb">Kunjungi TMDB</string>

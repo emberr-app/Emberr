@@ -218,6 +218,7 @@
     <string name="settings_play_testing_no_data_lost">Deze app wordt bijgewerkt, er gaan geen gegevens verloren.</string>
     <string name="settings_play_testing_join">Lid worden</string>
     <string name="settings_play_testing_not_now">Niet nu</string>
+    <string name="settings_footer_support_us">Steun ons op</string>
 
     <string name="settings_third_party_group_movies_shows">Films en series</string>
     <string name="settings_third_party_visit_tmdb">TMDB bezoeken</string>

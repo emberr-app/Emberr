@@ -75,4 +75,5 @@
     <string name="settings_play_testing_step_install">Depois, instala o Emberr: Private Workspace a partir da Google Play Store com o link do grupo.</string>
     <string name="settings_play_testing_no_data_lost">Esta app é atualizada sem perder nenhum dado.</string>
     <string name="settings_play_testing_join">Juntar-me ao grupo</string>
+    <string name="settings_footer_support_us">Apoia-nos em</string>
 </resources>

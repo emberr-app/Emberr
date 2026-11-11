@@ -217,6 +217,7 @@
     <string name="settings_play_testing_no_data_lost">このアプリがそのまま更新され、データは失われません。</string>
     <string name="settings_play_testing_join">グループに参加</string>
     <string name="settings_play_testing_not_now">あとで</string>
+    <string name="settings_footer_support_us">応援はこちらから</string>
 
     <string name="settings_third_party_group_movies_shows">映画と番組</string>
     <string name="settings_third_party_visit_tmdb">TMDBにアクセス</string>

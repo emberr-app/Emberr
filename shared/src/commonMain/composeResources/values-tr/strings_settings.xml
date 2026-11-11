@@ -218,6 +218,7 @@
     <string name="settings_play_testing_no_data_lost">Bu uygulama güncellenir, hiçbir veri kaybolmaz.</string>
     <string name="settings_play_testing_join">Gruba katıl</string>
     <string name="settings_play_testing_not_now">Şimdi değil</string>
+    <string name="settings_footer_support_us">Bizi destekleyin</string>
 
     <string name="settings_third_party_group_movies_shows">Filmler ve diziler</string>
     <string name="settings_third_party_visit_tmdb">TMDB'yi ziyaret et</string>

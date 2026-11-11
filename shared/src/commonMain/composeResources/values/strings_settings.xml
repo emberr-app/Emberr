@@ -218,6 +218,7 @@
     <string name="settings_play_testing_no_data_lost">It updates this app in place, so no data will be lost.</string>
     <string name="settings_play_testing_join">Join the Group</string>
     <string name="settings_play_testing_not_now">Not Now</string>
+    <string name="settings_footer_support_us">Support us on</string>
 
     <string name="settings_third_party_group_movies_shows">Movies &amp; Shows</string>
     <string name="settings_third_party_visit_tmdb">Visit TMDB</string>
