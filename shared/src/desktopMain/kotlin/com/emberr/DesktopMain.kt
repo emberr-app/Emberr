@@ -100,6 +100,8 @@ import com.emberr.domain.reminders.DesktopReminderShownBus
 import com.emberr.domain.reminders.ReminderClickBus
 import com.emberr.domain.reminders.ReminderRescheduler
 import com.emberr.domain.util.language.applySavedAppLanguage
+import com.emberr.domain.util.language.appliedAppLanguageTag
+import com.emberr.domain.util.language.stringInAppLanguage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.debounce
@@ -308,6 +310,7 @@ private fun runEmberrDesktopApp() = application {
     }
 
     if (isBackgroundStartupAllowed) {
+    key(appliedAppLanguageTag) {
     EmberrSystemTray(
         iconResourcePath = "app_icon.png",
         tooltip = "Emberr",
@@ -320,6 +323,7 @@ private fun runEmberrDesktopApp() = application {
             TrayMenuAction(stringResource(Res.string.desktop_tray_quit)) { exitApplication() }
         )
     )
+    }
     }
 
     LaunchedEffect(DesktopRestartBus.isRestartRequested) {
@@ -360,13 +364,13 @@ private fun runEmberrDesktopApp() = application {
         }
     ) {
         val currentWindow = this.window as Frame
-        val selectImageTitle = stringResource(Res.string.desktop_select_image)
-        val selectDocumentTitle = stringResource(Res.string.desktop_select_document)
-        val fileNotFoundMessage = stringResource(Res.string.desktop_file_not_found_message)
-        val fileNotFoundTitle = stringResource(Res.string.desktop_file_not_found_title)
+        val selectImageTitle = stringInAppLanguage(Res.string.desktop_select_image)
+        val selectDocumentTitle = stringInAppLanguage(Res.string.desktop_select_document)
+        val fileNotFoundMessage = stringInAppLanguage(Res.string.desktop_file_not_found_message)
+        val fileNotFoundTitle = stringInAppLanguage(Res.string.desktop_file_not_found_title)
         val openFileErrorScope = rememberCoroutineScope()
-        val backupOnlyOnAndroidMessage = stringResource(Res.string.desktop_backup_only_on_android_message)
-        val backupOnlyOnAndroidTitle = stringResource(Res.string.desktop_backup_only_on_android_title)
+        val backupOnlyOnAndroidMessage = stringInAppLanguage(Res.string.desktop_backup_only_on_android_message)
+        val backupOnlyOnAndroidTitle = stringInAppLanguage(Res.string.desktop_backup_only_on_android_title)
 
         LaunchedEffect(Unit) {
             withFrameNanos { }
@@ -538,13 +542,14 @@ private fun runEmberrDesktopApp() = application {
 
             Window(
                 onCloseRequest = { StickyNoteWindowBus.close(stickyNoteId) },
-                title = stringResource(Res.string.desktop_sticky_note),
+                title = stringInAppLanguage(Res.string.desktop_sticky_note),
                 state = stickyNoteWindowState,
                 undecorated = useCustomWindowFrame,
                 transparent = useCustomWindowFrame,
                 icon = painterResource("app_icon.png"),
                 onPreviewKeyEvent = { event -> handleInterfaceScaleShortcut(event, mainSettingsManager) }
             ) {
+                key(appliedAppLanguageTag) {
                 val settingsManager = remember { GlobalContext.get().get<SettingsManager>() }
                 val fontSizePreferenceName by settingsManager.fontSizePreferenceFlow.collectAsState(
                     initial = SyncConstants.DEFAULT_FONT_SIZE_PREFERENCE
@@ -686,6 +691,7 @@ private fun runEmberrDesktopApp() = application {
                     }
                     }
                     }
+                }
                 }
                 }
             }

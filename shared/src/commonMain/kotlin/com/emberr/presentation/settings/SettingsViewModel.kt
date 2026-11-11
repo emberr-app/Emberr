@@ -57,6 +57,15 @@ class SettingsViewModel(
     private val cloudSyncScheduler: Lazy<CloudSyncScheduler>
 ) : ViewModel() {
 
+    private var scrollPositionKeptForLanguageChange = 0
+
+    fun keepScrollPositionForLanguageChange(scrollPosition: Int) {
+        scrollPositionKeptForLanguageChange = scrollPosition
+    }
+
+    fun takeScrollPositionKeptForLanguageChange(): Int =
+        scrollPositionKeptForLanguageChange.also { scrollPositionKeptForLanguageChange = 0 }
+
     val spaces: StateFlow<List<SpaceEntity>> = spaceRepository.observeSpaces().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
