@@ -213,7 +213,7 @@
     <string name="settings_play_testing_dialog_title">Emberr가 Google Play Store에 나올 수 있게 도와주세요</string>
     <string name="settings_play_testing_dialog_reason">일반에 출시되려면 테스터 12명이 14일 동안 Emberr를 사용해야 해요.</string>
     <string name="settings_play_testing_step_join">Emberr 테스터 그룹에 가입하세요.</string>
-    <string name="settings_play_testing_step_install">그다음 그룹에 있는 링크로 Google Play Store에서 Emberr: Private Workspace를 설치하세요.</string>
+    <string name="settings_play_testing_step_install">그다음 그룹에 있는 링크로 Google Play Store에서 **Emberr: Private Workspace**를 설치하세요.</string>
     <string name="settings_play_testing_no_data_lost">이 앱이 그대로 업데이트되어 데이터가 사라지지 않아요.</string>
     <string name="settings_play_testing_join">그룹 가입</string>
     <string name="settings_play_testing_not_now">나중에</string>

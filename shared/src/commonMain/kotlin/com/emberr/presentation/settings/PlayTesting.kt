@@ -13,12 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emberr.presentation.shared.components.EmberrAlertDialog
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
 import com.emberr.presentation.shared.components.EmberrButtonSecondary
 import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.textWithBoldMarkedParts
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.logo_google_play
 import emberr.shared.generated.resources.settings_play_testing_dialog_reason
@@ -53,8 +55,8 @@ internal fun PlayTestingDialog(onJoinClick: () -> Unit, onDismissRequest: () -> 
         )
         Spacer(Modifier.height(24.dp))
         Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            PlayTestingStep(number = 1, text = stringResource(Res.string.settings_play_testing_step_join))
-            PlayTestingStep(number = 2, text = stringResource(Res.string.settings_play_testing_step_install))
+            PlayTestingStep(number = 1, text = AnnotatedString(stringResource(Res.string.settings_play_testing_step_join)))
+            PlayTestingStep(number = 2, text = textWithBoldMarkedParts(stringResource(Res.string.settings_play_testing_step_install)))
         }
         Spacer(Modifier.height(24.dp))
         Text(
@@ -79,7 +81,7 @@ internal fun PlayTestingDialog(onJoinClick: () -> Unit, onDismissRequest: () -> 
 }
 
 @Composable
-private fun PlayTestingStep(number: Int, text: String) {
+private fun PlayTestingStep(number: Int, text: AnnotatedString) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             contentAlignment = Alignment.Center,

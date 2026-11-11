@@ -213,7 +213,7 @@
     <string name="settings_play_testing_dialog_title">帮助 Emberr 登上 Google Play Store</string>
     <string name="settings_play_testing_dialog_reason">Google 要求有 12 位测试者使用 Emberr 满 14 天，Emberr 才能向公众发布。</string>
     <string name="settings_play_testing_step_join">加入 Emberr 测试者群组。</string>
-    <string name="settings_play_testing_step_install">然后，通过群组中的链接从 Google Play Store 安装 Emberr: Private Workspace。</string>
+    <string name="settings_play_testing_step_install">然后，通过群组中的链接从 Google Play Store 安装 **Emberr: Private Workspace**。</string>
     <string name="settings_play_testing_no_data_lost">会直接更新这个应用，不会丢失任何数据。</string>
     <string name="settings_play_testing_join">加入群组</string>
     <string name="settings_play_testing_not_now">以后再说</string>

@@ -214,7 +214,7 @@
     <string name="settings_play_testing_dialog_title">Hilf Emberr in den Google Play Store</string>
     <string name="settings_play_testing_dialog_reason">Google verlangt 12 Tester, die Emberr 14 Tage lang nutzen, bevor es für alle veröffentlicht werden kann.</string>
     <string name="settings_play_testing_step_join">Tritt der Emberr-Testergruppe bei.</string>
-    <string name="settings_play_testing_step_install">Installiere dann Emberr: Private Workspace im Google Play Store, über den Link in der Gruppe.</string>
+    <string name="settings_play_testing_step_install">Installiere dann **Emberr: Private Workspace** im Google Play Store, über den Link in der Gruppe.</string>
     <string name="settings_play_testing_no_data_lost">Es aktualisiert diese App direkt, sodass keine Daten verloren gehen.</string>
     <string name="settings_play_testing_join">Gruppe beitreten</string>
     <string name="settings_play_testing_not_now">Später</string>

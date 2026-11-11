@@ -57,11 +57,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
@@ -74,6 +70,7 @@ import com.emberr.presentation.shared.components.EmberrFrontGhost
 import com.emberr.presentation.shared.components.EmberrTopHeaderBar
 import com.emberr.presentation.shared.components.LocalDialogWindowTitleBar
 import com.emberr.presentation.shared.components.TopBarIconButton
+import com.emberr.presentation.shared.components.textWithBoldMarkedParts
 import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.desktopDialogSize
@@ -455,16 +452,6 @@ private fun UpdateNewPill() {
             .emberrBorder(CircleShape)
             .padding(horizontal = 9.dp, vertical = 2.dp)
     )
-}
-
-private fun textWithBoldMarkedParts(text: String): AnnotatedString = buildAnnotatedString {
-    text.split("**").forEachIndexed { index, part ->
-        if (index % 2 == 1) {
-            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part) }
-        } else {
-            append(part)
-        }
-    }
 }
 
 @Composable

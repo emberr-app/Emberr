@@ -214,7 +214,7 @@
     <string name="settings_play_testing_dialog_title">Emberr'ın Google Play Store'a çıkmasına yardım edin</string>
     <string name="settings_play_testing_dialog_reason">Emberr'ın herkese sunulabilmesi için Google, 12 test kullanıcısının uygulamayı 14 gün boyunca kullanmasını istiyor.</string>
     <string name="settings_play_testing_step_join">Emberr test grubuna katılın.</string>
-    <string name="settings_play_testing_step_install">Ardından gruptaki bağlantıyı kullanarak Emberr: Private Workspace uygulamasını Google Play Store'dan yükleyin.</string>
+    <string name="settings_play_testing_step_install">Ardından gruptaki bağlantıyı kullanarak **Emberr: Private Workspace** uygulamasını Google Play Store'dan yükleyin.</string>
     <string name="settings_play_testing_no_data_lost">Bu uygulama güncellenir, hiçbir veri kaybolmaz.</string>
     <string name="settings_play_testing_join">Gruba katıl</string>
     <string name="settings_play_testing_not_now">Şimdi değil</string>
