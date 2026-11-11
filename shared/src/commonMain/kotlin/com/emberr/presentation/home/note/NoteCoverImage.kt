@@ -29,6 +29,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBlur
 import com.emberr.presentation.shared.components.emberrBorder
+import com.emberr.presentation.shared.components.shrinkToFitOneLine
 import com.emberr.presentation.shared.cover.coverAlignmentFor
 import com.emberr.presentation.shared.cover.rememberSavedCoverPosition
 import com.emberr.presentation.shared.editor.blockViews.media.AnimatedGifLayer
@@ -178,6 +180,9 @@ private fun CoverPill(
         text = text,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        autoSize = shrinkToFitOneLine(MaterialTheme.typography.labelMedium),
         modifier = modifier
             .emberrBorder(CircleShape)
             .customEmberrShadow(CircleShape)

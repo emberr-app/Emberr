@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.credentials.LONGEST_GENERATED_PASSWORD
 import com.emberr.domain.credentials.MOST_REQUIRED_CHARACTERS_OF_ONE_KIND
@@ -43,6 +44,7 @@ import com.emberr.presentation.shared.components.LocalSitsOnCard
 import com.emberr.presentation.shared.components.SmallRoundedCornerShape
 import com.emberr.presentation.shared.components.emberrControlContainerColor
 import com.emberr.presentation.shared.components.EmberrSlider
+import com.emberr.presentation.shared.components.shrinkToFitOneLine
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.common_cancel
 import emberr.shared.generated.resources.credentials_avoid_look_alike_characters
@@ -289,7 +291,11 @@ private fun CharacterSetChip(label: String, isOn: Boolean, modifier: Modifier, o
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = if (isOn) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+            color = if (isOn) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            autoSize = shrinkToFitOneLine(MaterialTheme.typography.labelSmall),
+            modifier = Modifier.padding(horizontal = 4.dp)
         )
     }
 }

@@ -79,6 +79,7 @@ import com.emberr.presentation.shared.components.MinimalTimePickerDialog
 import com.emberr.presentation.shared.components.ReminderPresetMenu
 import com.emberr.presentation.shared.components.TimePresetMenu
 import com.emberr.presentation.shared.components.drawEmberrGhostEyes
+import com.emberr.presentation.shared.components.shrinkToFitOneLine
 import com.emberr.presentation.shared.components.traceEmberrGhost
 import com.emberr.ui.theme.LocalAppIsDark
 import emberr.shared.generated.resources.Res
@@ -442,7 +443,10 @@ private fun ReminderChip(icon: Painter, label: String, onClick: () -> Unit) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = chipColor.copy(alpha = 0.6f)
+            color = chipColor.copy(alpha = 0.6f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            autoSize = shrinkToFitOneLine(MaterialTheme.typography.bodySmall)
         )
     }
 }
