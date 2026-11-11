@@ -213,7 +213,7 @@
     <string name="settings_play_testing_dialog_title">Bantu Emberr hadir di Google Play Store</string>
     <string name="settings_play_testing_dialog_reason">Google mewajibkan 12 penguji memakai Emberr selama 14 hari sebelum Emberr bisa dirilis untuk umum.</string>
     <string name="settings_play_testing_step_join">Bergabunglah dengan grup penguji Emberr.</string>
-    <string name="settings_play_testing_step_install">Lalu, instal Emberr: Private Workspace dari Google Play Store melalui tautan di grup.</string>
+    <string name="settings_play_testing_step_install">Lalu, instal **Emberr: Private Workspace** dari Google Play Store melalui tautan di grup.</string>
     <string name="settings_play_testing_no_data_lost">Aplikasi ini akan diperbarui tanpa ada data yang hilang.</string>
     <string name="settings_play_testing_join">Gabung ke Grup</string>
     <string name="settings_play_testing_not_now">Nanti Saja</string>

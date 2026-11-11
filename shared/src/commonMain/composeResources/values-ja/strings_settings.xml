@@ -213,7 +213,7 @@
     <string name="settings_play_testing_dialog_title">EmberrのGoogle Play Store公開にご協力ください</string>
     <string name="settings_play_testing_dialog_reason">一般公開の前に、12人のテスターに14日間Emberrを使ってもらう必要があります。</string>
     <string name="settings_play_testing_step_join">Emberrテスターグループに参加します。</string>
-    <string name="settings_play_testing_step_install">次に、グループ内のリンクからGoogle Play StoreでEmberr: Private Workspaceをインストールします。</string>
+    <string name="settings_play_testing_step_install">次に、グループ内のリンクからGoogle Play Storeで**Emberr: Private Workspace**をインストールします。</string>
     <string name="settings_play_testing_no_data_lost">このアプリがそのまま更新され、データは失われません。</string>
     <string name="settings_play_testing_join">グループに参加</string>
     <string name="settings_play_testing_not_now">あとで</string>
