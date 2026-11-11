@@ -295,7 +295,7 @@ class EmberrBackupImporterTest {
         importer.startImport(backupFile, onlyThePersonalSpace)
         val finished = importer.progress.first { it is EmberrImportProgress.Finished || it is EmberrImportProgress.Failed }
 
-        assertEquals(EmberrImportProgress.Failed("The disk is full"), finished)
+        assertEquals(EmberrImportProgress.Failed(BackupProblem.Unexpected("The disk is full")), finished)
         assertTrue(backupFile.isClosed)
     }
 

@@ -12,13 +12,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.emberr.domain.ai.LocalAiUnsupportedReason
+import com.emberr.presentation.ai.text
 import com.emberr.presentation.shared.components.EmberrShadowElevation
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.ai_on_device_unavailable
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun UnsupportedHardwareNotice(reason: String, modifier: Modifier = Modifier) {
+internal fun UnsupportedHardwareNotice(reason: LocalAiUnsupportedReason, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
@@ -34,7 +36,7 @@ internal fun UnsupportedHardwareNotice(reason: String, modifier: Modifier = Modi
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = reason,
+                text = reason.text(),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )

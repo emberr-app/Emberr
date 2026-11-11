@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.emberr.domain.ai.LocalAiUnsupportedReason
 import com.emberr.domain.ai.models.ModelDownloadProgress
 import com.emberr.presentation.ai.components.ModelOptionCard
 import com.emberr.presentation.ai.components.UnsupportedHardwareNotice
@@ -38,7 +39,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun ModelUnavailablePrompt(
     sidePadding: Dp,
     downloadProgress: ModelDownloadProgress?,
-    localAiUnsupportedReason: String?,
+    localAiUnsupportedReason: LocalAiUnsupportedReason?,
     onDownloadClick: () -> Unit,
     onApiKeyClick: () -> Unit
 ) {

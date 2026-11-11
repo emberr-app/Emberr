@@ -15,7 +15,6 @@ import emberr.shared.generated.resources.message_update_cannot_replace_itself
 import emberr.shared.generated.resources.message_update_check_failed
 import emberr.shared.generated.resources.message_update_download_failed
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 
 class AppUpdateController(
     private val settingsManager: SettingsManager,
@@ -57,9 +56,7 @@ class AppUpdateController(
 
         if (!currentInstallation.canInstall()) {
             openLinkInRunningBrowser(LATEST_RELEASE_PAGE_URL)
-            updateScope.launch {
-                _prompt.value = AppUpdatePrompt.ReportFailure(getString(Res.string.message_update_cannot_replace_itself))
-            }
+            _prompt.value = AppUpdatePrompt.ReportFailure(Res.string.message_update_cannot_replace_itself)
             return
         }
 
@@ -76,7 +73,7 @@ class AppUpdateController(
                 cause.printStackTrace()
                 _state.value = AppUpdateState.Available(release)
                 _prompt.value = AppUpdatePrompt.ReportFailure(
-                    userFacingMessageFor(cause, Res.string.message_update_download_failed)
+                    failureReasonFor(cause, Res.string.message_update_download_failed)
                 )
             } finally {
                 currentInstallation.downloadFile.delete()
@@ -116,13 +113,13 @@ class AppUpdateController(
                 _state.value = AppUpdateState.Failed
                 if (isRequestedByUser) {
                     _prompt.value = AppUpdatePrompt.ReportFailure(
-                        userFacingMessageFor(cause, Res.string.message_update_check_failed)
+                        failureReasonFor(cause, Res.string.message_update_check_failed)
                     )
                 }
             }
         }
     }
 
-    private suspend fun userFacingMessageFor(cause: Exception, fallbackMessage: StringResource): String =
-        getString((cause as? AppUpdateException)?.reason ?: fallbackMessage)
+    private fun failureReasonFor(cause: Exception, fallbackReason: StringResource): StringResource =
+        (cause as? AppUpdateException)?.reason ?: fallbackReason
 }

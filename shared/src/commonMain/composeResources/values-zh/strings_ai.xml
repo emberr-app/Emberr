@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">删除此 API 密钥？</string>
     <string name="ai_delete_api_key_message">此提供商已保存的密钥和设置将从此设备上移除。</string>
     <string name="ai_finetune_warning">此模型似乎未经过指令或对话微调，可能会生成质量较差或不连贯的回复。</string>
-    <string name="ai_local_ai_cannot_run">本地 AI 无法在此硬件上运行。</string>
     <string name="ai_sorry_error_with_reason">抱歉，出现了错误：%1$s</string>
 </resources>

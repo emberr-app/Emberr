@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Excluir esta chave de API?</string>
     <string name="ai_delete_api_key_message">A chave salva e as configurações deste provedor serão removidas deste dispositivo.</string>
     <string name="ai_finetune_warning">Este modelo não parece ajustado para instruções/chat. Ele pode dar respostas ruins ou incoerentes.</string>
-    <string name="ai_local_ai_cannot_run">A IA local não pode rodar neste hardware.</string>
     <string name="ai_sorry_error_with_reason">Desculpe, ocorreu um erro: %1$s</string>
 </resources>

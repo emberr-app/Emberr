@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Deze API-sleutel verwijderen?</string>
     <string name="ai_delete_api_key_message">De opgeslagen sleutel en instellingen voor deze provider worden van dit apparaat verwijderd.</string>
     <string name="ai_finetune_warning">Dit model lijkt niet getraind op instructies of chat. Het kan slechte of onsamenhangende antwoorden geven.</string>
-    <string name="ai_local_ai_cannot_run">Lokale AI kan niet draaien op deze hardware.</string>
     <string name="ai_sorry_error_with_reason">Sorry, er is een fout opgetreden: %1$s</string>
 </resources>

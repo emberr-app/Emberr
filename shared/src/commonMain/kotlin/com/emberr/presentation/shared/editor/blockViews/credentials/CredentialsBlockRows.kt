@@ -74,6 +74,8 @@ import emberr.shared.generated.resources.credentials_waiting_for_key
 import emberr.shared.generated.resources.eye_closed
 import emberr.shared.generated.resources.eye_open
 import emberr.shared.generated.resources.lock
+import emberr.shared.generated.resources.message_unlock_credentials_description
+import emberr.shared.generated.resources.message_unlock_credentials_title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -96,7 +98,7 @@ internal class CredentialSecretReader(
     private val deviceLockPrompt: DeviceLockPrompt
 ) {
     suspend fun readAfterUnlock(field: CredentialField): String? {
-        if (!unlockSession.unlock(deviceLockPrompt)) return null
+        if (!unlock()) return null
         return decryptOrShowLocked(field)
     }
 
@@ -104,11 +106,17 @@ internal class CredentialSecretReader(
         val decryptedSecretsByFieldId = fields
             .filter { field -> field.encryptedValue != null }
             .associate { field -> field.id to (decryptOrShowLocked(field) ?: return null) }
-        if (decryptedSecretsByFieldId.isNotEmpty() && !unlockSession.unlock(deviceLockPrompt)) return null
+        if (decryptedSecretsByFieldId.isNotEmpty() && !unlock()) return null
         return decryptedSecretsByFieldId
     }
 
     suspend fun readWithoutUnlock(field: CredentialField): String? = credentialVault.decrypt(field)
+
+    private suspend fun unlock(): Boolean = unlockSession.unlock(
+        deviceLockPrompt = deviceLockPrompt,
+        promptTitle = getString(Res.string.message_unlock_credentials_title),
+        promptDescription = getString(Res.string.message_unlock_credentials_description)
+    )
 
     private suspend fun decryptOrShowLocked(field: CredentialField): String? {
         val value = credentialVault.decrypt(field)

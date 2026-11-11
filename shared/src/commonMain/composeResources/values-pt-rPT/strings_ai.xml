@@ -67,5 +67,4 @@
     <string name="ai_enter_provider_api_key">Escreve a tua chave de API do %1$s</string>
     <string name="ai_delete_api_key_question">Eliminar esta chave de API?</string>
     <string name="ai_delete_api_key_message">A chave guardada e as definições deste fornecedor serão removidas deste dispositivo.</string>
-    <string name="ai_local_ai_cannot_run">A IA local não pode ser executada neste hardware.</string>
 </resources>

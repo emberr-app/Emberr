@@ -10,9 +10,6 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.message_model_file_not_usable
-import org.jetbrains.compose.resources.getString
 
 actual class LocalModelUploadManager(private val context: Context) {
 
@@ -67,7 +64,7 @@ actual class LocalModelUploadManager(private val context: Context) {
 
                     send(ModelDownloadProgress.Completed)
                 } catch (e: Exception) {
-                    send(ModelDownloadProgress.Failed(getString(Res.string.message_model_file_not_usable)))
+                    send(ModelDownloadProgress.Failed(ModelDownloadFailure.FILE_NOT_USABLE))
                 }
             }
         }

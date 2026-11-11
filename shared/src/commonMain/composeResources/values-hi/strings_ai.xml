@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">यह API की मिटाएँ?</string>
     <string name="ai_delete_api_key_message">इस प्रोवाइडर की सेव की गई की और सेटिंग इस डिवाइस से हटा दी जाएँगी।</string>
     <string name="ai_finetune_warning">यह मॉडल निर्देश/चैट के लिए ट्यून किया हुआ नहीं लगता। यह कमज़ोर या बेतुके चैट जवाब दे सकता है।</string>
-    <string name="ai_local_ai_cannot_run">लोकल AI इस हार्डवेयर पर नहीं चल सकता।</string>
     <string name="ai_sorry_error_with_reason">माफ़ करें, एक गड़बड़ी हुई: %1$s</string>
 </resources>

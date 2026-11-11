@@ -231,7 +231,7 @@ private fun embeddingSetupStatements(
         icon = Res.drawable.download,
         lead = stringResource(Res.string.ai_setup_download_lead),
         headline = state.downloadHeadline(isResumable),
-        detail = (state as? EmbeddingSetupState.DownloadFailed)?.message
+        detail = (state as? EmbeddingSetupState.DownloadFailed)?.problem?.text()
     )
 )
 

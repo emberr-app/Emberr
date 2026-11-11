@@ -10,6 +10,7 @@ import com.emberr.domain.ai.chat.ChatTurn
 import com.emberr.domain.ai.models.InstalledLocalModel
 import com.emberr.domain.ai.KnowledgeMode
 import com.emberr.domain.ai.LocalAiUnsupportedException
+import com.emberr.domain.ai.LocalAiUnsupportedReason
 import com.emberr.domain.ai.RagRepository
 import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.ai.external.ExternalAiException
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import com.emberr.domain.ai.models.LocalModelUploadManager
 import com.emberr.domain.ai.models.ModelDownloadLog
+import com.emberr.domain.ai.models.ModelDownloadProblem
 import com.emberr.domain.ai.models.ModelDownloadProgress
 import com.emberr.domain.ai.models.ModelDownloadScheduler
 import com.emberr.domain.ai.models.ModelFileNames
@@ -47,7 +49,6 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.ai_finetune_warning
-import emberr.shared.generated.resources.ai_local_ai_cannot_run
 import emberr.shared.generated.resources.ai_sorry_error_with_reason
 import org.jetbrains.compose.resources.getString
 
@@ -55,7 +56,7 @@ sealed interface EmbeddingSetupState {
     data object Checking : EmbeddingSetupState
     data object Required : EmbeddingSetupState
     data class Downloading(val progress: Float) : EmbeddingSetupState
-    data class DownloadFailed(val message: String) : EmbeddingSetupState
+    data class DownloadFailed(val problem: ModelDownloadProblem) : EmbeddingSetupState
     data object DownloadComplete : EmbeddingSetupState
     data class Indexing(val completed: Int, val total: Int) : EmbeddingSetupState
     data object Ready : EmbeddingSetupState
@@ -65,7 +66,7 @@ sealed interface LocalModelUploadState {
     data object Idle : LocalModelUploadState
     data object Uploading : LocalModelUploadState
     data object Success : LocalModelUploadState
-    data class Failed(val message: String) : LocalModelUploadState
+    data class Failed(val problem: ModelDownloadProblem) : LocalModelUploadState
 }
 
 class RagViewModel(
@@ -79,7 +80,7 @@ class RagViewModel(
     private val activeSpaceStore: ActiveSpaceStore
 ) : ViewModel() {
 
-    val localAiUnsupportedReason: String? = ragRepository.localAiUnsupportedReason
+    val localAiUnsupportedReason: LocalAiUnsupportedReason? = ragRepository.localAiUnsupportedReason
 
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
@@ -253,7 +254,7 @@ class RagViewModel(
                 _embeddingSetupState.value = when (progress) {
                     is ModelDownloadProgress.Downloading -> EmbeddingSetupState.Downloading(progress.fraction)
                     ModelDownloadProgress.Completed -> EmbeddingSetupState.DownloadComplete
-                    is ModelDownloadProgress.Failed -> EmbeddingSetupState.DownloadFailed(progress.message)
+                    is ModelDownloadProgress.Failed -> EmbeddingSetupState.DownloadFailed(progress.problem)
                     ModelDownloadProgress.Paused -> EmbeddingSetupState.Required
                 }
             }
@@ -316,7 +317,7 @@ class RagViewModel(
     fun downloadGeneratorModel() {
         val unsupportedReason = localAiUnsupportedReason
         if (unsupportedReason != null) {
-            _localGeneratorDownloadProgress.value = ModelDownloadProgress.Failed(unsupportedReason)
+            _localGeneratorDownloadProgress.value = ModelDownloadProgress.Failed(ModelDownloadProblem.LocalAiCannotRun(unsupportedReason))
             return
         }
         if (_localGeneratorDownloadProgress.value is ModelDownloadProgress.Downloading) return
@@ -372,7 +373,7 @@ class RagViewModel(
     fun uploadGeneratorModel(pickedPath: String) {
         val unsupportedReason = localAiUnsupportedReason
         if (unsupportedReason != null) {
-            _localModelUploadState.value = LocalModelUploadState.Failed(unsupportedReason)
+            _localModelUploadState.value = LocalModelUploadState.Failed(ModelDownloadProblem.LocalAiCannotRun(unsupportedReason))
             return
         }
         _localModelUploadState.value = LocalModelUploadState.Uploading
@@ -393,7 +394,7 @@ class RagViewModel(
                         succeeded = true
                         _localModelUploadState.value = LocalModelUploadState.Success
                     }
-                    is ModelDownloadProgress.Failed -> _localModelUploadState.value = LocalModelUploadState.Failed(progress.message)
+                    is ModelDownloadProgress.Failed -> _localModelUploadState.value = LocalModelUploadState.Failed(progress.problem)
                     ModelDownloadProgress.Paused -> Unit
                 }
             }
@@ -529,8 +530,9 @@ class RagViewModel(
             val thisJob = coroutineContext[Job]
             try {
                 ActiveEditorRegistry.forceSyncAndIndexAllForAi()
-                ragRepository.queryAiStream(query, conversationHistory).collect { token ->
+                ragRepository.queryAiStream(query, conversationHistory).collect { replyPiece ->
                     if (activeGenerationJob !== thisJob) return@collect
+                    val token = replyPiece.replyText()
                     val list = _messages.value.toMutableList()
                     val last = list.last()
                     list[list.lastIndex] = last.copy(
@@ -544,8 +546,7 @@ class RagViewModel(
             } catch (e: Exception) {
                 if (activeGenerationJob === thisJob) {
                     val friendlyMessage = when (e) {
-                        is LocalAiUnsupportedException -> e.message
-                            ?: getString(Res.string.ai_local_ai_cannot_run)
+                        is LocalAiUnsupportedException -> e.reason.message()
                         is ExternalAiException -> e.friendlyMessage()
                         else -> getString(Res.string.ai_sorry_error_with_reason, e.message.toString())
                     }

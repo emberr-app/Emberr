@@ -13,16 +13,30 @@ import io.ktor.http.isSuccess
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.message_model_download_failed
-import emberr.shared.generated.resources.message_model_download_timed_out
-import org.jetbrains.compose.resources.getString
+import com.emberr.domain.ai.LocalAiUnsupportedReason
 
 sealed interface ModelDownloadProgress {
     data class Downloading(val fraction: Float) : ModelDownloadProgress
     data object Completed : ModelDownloadProgress
-    data class Failed(val message: String) : ModelDownloadProgress
+    data class Failed(val problem: ModelDownloadProblem) : ModelDownloadProgress
     data object Paused : ModelDownloadProgress
+}
+
+sealed interface ModelDownloadProblem {
+    data class LocalAiCannotRun(val reason: LocalAiUnsupportedReason) : ModelDownloadProblem
+}
+
+enum class ModelDownloadFailure : ModelDownloadProblem {
+    TIMED_OUT,
+    DOWNLOAD_FAILED,
+    CANCELLED,
+    MISSING_FILE_NAME,
+    UNKNOWN_MODEL,
+    DID_NOT_COMPLETE,
+    STOPPED_UNEXPECTEDLY,
+    STOPPED_BEFORE_FINISH,
+    PAUSED,
+    FILE_NOT_USABLE
 }
 
 class ModelDownloadManager {
@@ -72,10 +86,10 @@ class ModelDownloadManager {
             send(ModelDownloadProgress.Completed)
         } catch (cause: HttpRequestTimeoutException) {
             ModelDownloadLog.e("Timed out downloading $fileName", cause)
-            send(ModelDownloadProgress.Failed(getString(Res.string.message_model_download_timed_out)))
+            send(ModelDownloadProgress.Failed(ModelDownloadFailure.TIMED_OUT))
         } catch (cause: Exception) {
             ModelDownloadLog.e("Failed downloading $fileName", cause)
-            send(ModelDownloadProgress.Failed(getString(Res.string.message_model_download_failed)))
+            send(ModelDownloadProgress.Failed(ModelDownloadFailure.DOWNLOAD_FAILED))
         }
     }
 

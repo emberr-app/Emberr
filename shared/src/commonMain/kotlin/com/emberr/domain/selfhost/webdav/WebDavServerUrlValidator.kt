@@ -2,10 +2,6 @@ package com.emberr.domain.selfhost.webdav
 
 import com.emberr.domain.util.network.LocalNetworkHostValidator
 import io.ktor.http.Url
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.message_webdav_needs_https
-import emberr.shared.generated.resources.message_webdav_not_a_url
-import org.jetbrains.compose.resources.StringResource
 
 object WebDavServerUrlValidator {
 
@@ -38,7 +34,7 @@ object WebDavServerUrlValidator {
     }
 }
 
-enum class WebDavAddressProblem(val phrase: StringResource) {
-    NOT_A_URL(Res.string.message_webdav_not_a_url),
-    PLAIN_HTTP_OUTSIDE_LOCAL_NETWORK(Res.string.message_webdav_needs_https)
+enum class WebDavAddressProblem {
+    NOT_A_URL,
+    PLAIN_HTTP_OUTSIDE_LOCAL_NETWORK
 }

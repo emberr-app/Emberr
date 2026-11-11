@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Usunąć ten klucz API?</string>
     <string name="ai_delete_api_key_message">Zapisany klucz i ustawienia tego dostawcy zostaną usunięte z tego urządzenia.</string>
     <string name="ai_finetune_warning">Ten model nie wygląda na dostrojony do instrukcji lub czatu. Może dawać słabe lub niespójne odpowiedzi.</string>
-    <string name="ai_local_ai_cannot_run">Lokalna AI nie może działać na tym sprzęcie.</string>
     <string name="ai_sorry_error_with_reason">Przepraszamy, wystąpił błąd: %1$s</string>
 </resources>

@@ -42,9 +42,6 @@ import kotlin.concurrent.Volatile
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.message_webdav_address_not_valid
-import org.jetbrains.compose.resources.getString
 
 @OptIn(ExperimentalEncodingApi::class)
 class WebDavSyncClient(
@@ -197,7 +194,7 @@ class WebDavSyncClient(
     suspend fun testConnection(credentials: SelfHostServerCredentials): WebDavConnectionTestResult {
         val addressProblem = WebDavServerUrlValidator.problemWith(credentials.serverUrl)
         if (addressProblem != null) {
-            return WebDavConnectionTestResult.InvalidConfiguration(getString(addressProblem.phrase, credentials.serverUrl))
+            return WebDavConnectionTestResult.InvalidAddress(addressProblem, credentials.serverUrl)
         }
         return try {
             WebDavServerUrlValidator.validate(credentials.serverUrl)
@@ -210,7 +207,7 @@ class WebDavSyncClient(
                 else -> WebDavConnectionTestResult.ServerError(response.status.value)
             }
         } catch (cause: WebDavConfigurationException) {
-            WebDavConnectionTestResult.InvalidConfiguration(cause.message ?: getString(Res.string.message_webdav_address_not_valid))
+            WebDavConnectionTestResult.InvalidConfiguration(cause.message)
         } catch (cause: Exception) {
             WebDavConnectionTestResult.NetworkFailure(cause)
         }

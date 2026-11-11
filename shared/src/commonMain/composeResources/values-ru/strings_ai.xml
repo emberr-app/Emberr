@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Удалить этот API-ключ?</string>
     <string name="ai_delete_api_key_message">Сохранённый ключ и настройки этого провайдера будут удалены с этого устройства.</string>
     <string name="ai_finetune_warning">Похоже, эта модель не дообучена для инструкций или чата. Её ответы могут быть плохими или бессвязными.</string>
-    <string name="ai_local_ai_cannot_run">Локальный ИИ не может работать на этом оборудовании.</string>
     <string name="ai_sorry_error_with_reason">Извините, произошла ошибка: %1$s</string>
 </resources>

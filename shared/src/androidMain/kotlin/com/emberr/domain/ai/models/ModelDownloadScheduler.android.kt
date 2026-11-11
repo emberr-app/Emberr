@@ -13,10 +13,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformWhile
-import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.message_model_download_cancelled
-import emberr.shared.generated.resources.message_model_download_failed
-import org.jetbrains.compose.resources.getString
 
 actual class ModelDownloadScheduler(private val context: Context) {
 
@@ -71,18 +67,19 @@ actual class ModelDownloadScheduler(private val context: Context) {
                 !info.state.isFinished
             }
 
-    private suspend fun WorkInfo.toModelDownloadProgress(): ModelDownloadProgress? = when (state) {
+    private fun WorkInfo.toModelDownloadProgress(): ModelDownloadProgress? = when (state) {
         WorkInfo.State.SUCCEEDED -> ModelDownloadProgress.Completed
         WorkInfo.State.FAILED -> {
-            val reportedMessage = outputData.getString(ModelDownloadWorker.KEY_ERROR_MESSAGE)
-            if (reportedMessage == null) {
+            val reportedFailureName = outputData.getString(ModelDownloadWorker.KEY_FAILURE)
+            if (reportedFailureName == null) {
                 ModelDownloadLog.e("Work failed before the worker ran, so no reason was reported")
             }
             ModelDownloadProgress.Failed(
-                reportedMessage ?: getString(Res.string.message_model_download_failed)
+                ModelDownloadFailure.entries.firstOrNull { it.name == reportedFailureName }
+                    ?: ModelDownloadFailure.DOWNLOAD_FAILED
             )
         }
-        WorkInfo.State.CANCELLED -> ModelDownloadProgress.Failed(getString(Res.string.message_model_download_cancelled))
+        WorkInfo.State.CANCELLED -> ModelDownloadProgress.Failed(ModelDownloadFailure.CANCELLED)
         WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED -> null
         else -> {
             val fraction = progress.getFloat(ModelDownloadWorker.KEY_PROGRESS_FRACTION, -1f)

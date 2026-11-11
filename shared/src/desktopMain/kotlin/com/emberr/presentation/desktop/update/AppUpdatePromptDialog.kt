@@ -66,7 +66,7 @@ fun AppUpdatePromptDialog() {
             onDismissRequest = updateController::dismissPrompt,
             title = stringResource(Res.string.desktop_update_failed)
         ) {
-            UpdateDialogMessage(currentPrompt.message)
+            UpdateDialogMessage(stringResource(currentPrompt.reason))
             Spacer(Modifier.height(20.dp))
             EmberrButtonPrimary(
                 text = stringResource(Res.string.desktop_ok),

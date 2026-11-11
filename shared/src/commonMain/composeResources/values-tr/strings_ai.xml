@@ -133,6 +133,5 @@
     <string name="ai_delete_api_key_question">Bu API anahtarı silinsin mi?</string>
     <string name="ai_delete_api_key_message">Bu sağlayıcı için kaydedilen anahtar ve ayarlar bu cihazdan kaldırılacak.</string>
     <string name="ai_finetune_warning">Bu model talimat/sohbet için ayarlanmış görünmüyor. Kötü veya tutarsız sohbet yanıtları üretebilir.</string>
-    <string name="ai_local_ai_cannot_run">Yerel yapay zeka bu donanımda çalışamaz.</string>
     <string name="ai_sorry_error_with_reason">Üzgünüz, bir hata oluştu: %1$s</string>
 </resources>

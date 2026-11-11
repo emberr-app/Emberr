@@ -36,6 +36,7 @@ import com.emberr.domain.util.eventbus.WidgetNavigationBus
 import com.emberr.domain.util.eventbus.ShareEventBus
 import com.emberr.presentation.applock.SystemUnlockPrompt
 import com.emberr.presentation.applock.openAppLockScreen
+import com.emberr.presentation.settings.importer.backupProblemText
 import com.emberr.presentation.settings.selfhost.SelfHostUpdateRequiredDialog
 import com.emberr.presentation.shared.FirstContentRenderSignal
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
@@ -120,7 +121,6 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import androidx.core.content.IntentCompat
 import android.provider.OpenableColumns
-import com.emberr.domain.backup.manual.backupProblemText
 
 
 private val updateCheckDelayAfterOpening = 30000L.milliseconds

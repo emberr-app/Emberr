@@ -599,7 +599,7 @@ private fun SignedInStep(state: CloudAccountScreenState, viewModel: CloudAccount
                     ?.let { reason -> ErrorText(message = uploadsRefusedMessage(reason, state.accountDetails).asText()) }
                 filesTooLargeMessage(lastMediaPass.filesTooLargeCount)?.let { message -> ErrorText(message = message.asText()) }
                 describeFilesNotMoved(lastMediaPass)?.let { message -> ErrorText(message = message.asText()) }
-                lastMediaPass.lastProblem?.let { problem -> ErrorText(message = problem) }
+                lastMediaPass.lastProblem?.let { problem -> ErrorText(message = problem.text()) }
             }
         }
 
