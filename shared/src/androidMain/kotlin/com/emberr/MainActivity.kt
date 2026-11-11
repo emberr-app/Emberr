@@ -104,6 +104,7 @@ import com.emberr.ui.theme.FontStylePreference
 import com.emberr.ui.theme.ThemePreference
 import com.emberr.ui.theme.collectColorThemeSettings
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.util.export.generateAndSaveAndroidPdf
@@ -111,6 +112,7 @@ import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.util.export.MarkdownZipWriter
 import com.emberr.domain.update.AndroidUpdateChecker
 import com.emberr.presentation.navigation.Screen
+import com.emberr.presentation.shared.LanguageChangeTransitionHost
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
@@ -443,87 +445,89 @@ class MainActivity : FragmentActivity() {
                         }
                     }
 
-                    EmberrApp(
-                        startRoute = routeForThisLaunch,
-                        onExitApp = { finish() },
-                        onPickImage = { callback ->
-                            imagePickerCallback = callback
-                            pickImage.launch("image/*")
-                        },
-                        onTakePhoto = { callback ->
-                            takePhotoCallback = callback
+                    LanguageChangeTransitionHost(languageTag = LocalConfiguration.current.locales[0].toLanguageTag()) {
+                        EmberrApp(
+                            startRoute = routeForThisLaunch,
+                            onExitApp = { finish() },
+                            onPickImage = { callback ->
+                                imagePickerCallback = callback
+                                pickImage.launch("image/*")
+                            },
+                            onTakePhoto = { callback ->
+                                takePhotoCallback = callback
 
-                            val photoFile = java.io.File(this@MainActivity.filesDir, "camera_${UUID.randomUUID()}.jpg")
-                            if (!photoFile.exists()) {
-                                photoFile.createNewFile()
-                            }
-
-                            currentPhotoUri = androidx.core.content.FileProvider.getUriForFile(
-                                this@MainActivity,
-                                "${applicationContext.packageName}.fileprovider",
-                                photoFile
-                            )
-                            takePhoto.launch(currentPhotoUri!!)
-                        },
-                        onPickDocument = { callback ->
-                            documentPickerCallback = callback
-                            pickDocument.launch("*/*")
-                        },
-                        onOpenFile = { filePath, mimeType ->
-                            try {
-                                // Use our smart helper to perfectly locate the file!
-                                val absolutePath = mediaStorageHelper.getAbsoluteMediaPath(filePath)
-                                val file = java.io.File(absolutePath)
-
-                                if (!file.exists()) {
-                                    Toast.makeText(this@MainActivity, getString(R.string.message_file_no_longer_available), Toast.LENGTH_LONG).show()
-                                } else {
-                                    val uri = androidx.core.content.FileProvider.getUriForFile(
-                                        this@MainActivity,
-                                        "${applicationContext.packageName}.fileprovider",
-                                        file
-                                    )
-
-                                    var finalMimeType = mimeType
-                                    if (finalMimeType == "*/*" || finalMimeType.isBlank()) {
-                                        val extension = file.extension.lowercase()
-                                        finalMimeType = android.webkit.MimeTypeMap.getSingleton()
-                                            .getMimeTypeFromExtension(extension) ?: "*/*"
-                                    }
-
-                                    val viewIntent = Intent(Intent.ACTION_VIEW).apply {
-                                        setDataAndType(uri, finalMimeType)
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    }
-                                    startActivity(viewIntent)
+                                val photoFile = java.io.File(this@MainActivity.filesDir, "camera_${UUID.randomUUID()}.jpg")
+                                if (!photoFile.exists()) {
+                                    photoFile.createNewFile()
                                 }
-                            } catch (e: ActivityNotFoundException) {
-                                Toast.makeText(this@MainActivity, getString(R.string.message_no_app_for_document), Toast.LENGTH_LONG).show()
-                            } catch (e: Exception) {
-                                Toast.makeText(this@MainActivity, getString(R.string.message_failed_to_open_file, e.message), Toast.LENGTH_LONG).show()
+
+                                currentPhotoUri = androidx.core.content.FileProvider.getUriForFile(
+                                    this@MainActivity,
+                                    "${applicationContext.packageName}.fileprovider",
+                                    photoFile
+                                )
+                                takePhoto.launch(currentPhotoUri!!)
+                            },
+                            onPickDocument = { callback ->
+                                documentPickerCallback = callback
+                                pickDocument.launch("*/*")
+                            },
+                            onOpenFile = { filePath, mimeType ->
+                                try {
+                                    // Use our smart helper to perfectly locate the file!
+                                    val absolutePath = mediaStorageHelper.getAbsoluteMediaPath(filePath)
+                                    val file = java.io.File(absolutePath)
+
+                                    if (!file.exists()) {
+                                        Toast.makeText(this@MainActivity, getString(R.string.message_file_no_longer_available), Toast.LENGTH_LONG).show()
+                                    } else {
+                                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                                            this@MainActivity,
+                                            "${applicationContext.packageName}.fileprovider",
+                                            file
+                                        )
+
+                                        var finalMimeType = mimeType
+                                        if (finalMimeType == "*/*" || finalMimeType.isBlank()) {
+                                            val extension = file.extension.lowercase()
+                                            finalMimeType = android.webkit.MimeTypeMap.getSingleton()
+                                                .getMimeTypeFromExtension(extension) ?: "*/*"
+                                        }
+
+                                        val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+                                            setDataAndType(uri, finalMimeType)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        startActivity(viewIntent)
+                                    }
+                                } catch (e: ActivityNotFoundException) {
+                                    Toast.makeText(this@MainActivity, getString(R.string.message_no_app_for_document), Toast.LENGTH_LONG).show()
+                                } catch (e: Exception) {
+                                    Toast.makeText(this@MainActivity, getString(R.string.message_failed_to_open_file, e.message), Toast.LENGTH_LONG).show()
+                                }
+                            },
+                            onExportMarkdown = { export ->
+                                pendingMarkdownExport = export
+                                if (export.isZip) exportMarkdownZipLauncher.launch(export.fileName)
+                                else exportMarkdownLauncher.launch(export.fileName)
+                            },
+                            onExportPdf = { fileName, title, blocks ->
+                                pendingPdfTitle = title
+                                pendingPdfBlocks = blocks
+                                exportPdfLauncher.launch(fileName)
+                            },
+                            onExportBackup = { choice ->
+                                pendingExportSpaceIds = choice.spaceIds.toList()
+                                pendingExportIncludesDailyNotes = choice.includesDailyNotes
+                                pendingExportIncludesCalendar = choice.includesCalendar
+                                val fileName = "EmberrBackup_${System.currentTimeMillis()}.emberr"
+                                exportBackupLauncher.launch(fileName)
+                            },
+                            onRequestBackupFolder = {
+                                backupFolderPickerLauncher.launch(null)
                             }
-                        },
-                        onExportMarkdown = { export ->
-                            pendingMarkdownExport = export
-                            if (export.isZip) exportMarkdownZipLauncher.launch(export.fileName)
-                            else exportMarkdownLauncher.launch(export.fileName)
-                        },
-                        onExportPdf = { fileName, title, blocks ->
-                            pendingPdfTitle = title
-                            pendingPdfBlocks = blocks
-                            exportPdfLauncher.launch(fileName)
-                        },
-                        onExportBackup = { choice ->
-                            pendingExportSpaceIds = choice.spaceIds.toList()
-                            pendingExportIncludesDailyNotes = choice.includesDailyNotes
-                            pendingExportIncludesCalendar = choice.includesCalendar
-                            val fileName = "EmberrBackup_${System.currentTimeMillis()}.emberr"
-                            exportBackupLauncher.launch(fileName)
-                        },
-                        onRequestBackupFolder = {
-                            backupFolderPickerLauncher.launch(null)
-                        }
-                    )
+                        )
+                    }
 
                     SelfHostUpdateRequiredDialog(onUpdateClick = updateChecker::openReleasePage)
 

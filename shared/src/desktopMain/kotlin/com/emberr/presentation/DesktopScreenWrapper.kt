@@ -1,11 +1,9 @@
 package com.emberr.presentation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.ui.unit.Dp
 import com.emberr.domain.backup.manual.BackupContentChoice
 import com.emberr.domain.model.NoteBlock
-import com.emberr.domain.util.language.appliedAppLanguageTag
 import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.presentation.desktop.DesktopMainScreen
 import com.emberr.presentation.ai.RagViewModel
@@ -29,24 +27,22 @@ actual fun DesktopMainScreenWrapper(
     onDismissAiChat: () -> Unit,
     isUpdatePeekDue: Boolean
 ) {
-    key(appliedAppLanguageTag) {
-        DesktopMainScreen(
-            isSidebarVisible = isSidebarVisible,
-            sidebarWidth = sidebarWidth,
-            onToggleSidebar = onToggleSidebar,
-            onSelectionModeChange = onSelectionModeChange,
-            onPickImage = onPickImage,
-            onTakePhoto = onTakePhoto,
-            onPickDocument = onPickDocument,
-            onOpenFile = onOpenFile,
-            onExportMarkdown = onExportMarkdown,
-            onExportPdf = onExportPdf,
-            onExportBackup = onExportBackup,
-            onAiIconTap = onAiIconTap,
-            isAiChatVisible = isAiChatVisible,
-            ragViewModel = ragViewModel,
-            onDismissAiChat = onDismissAiChat,
-            isUpdatePeekDue = isUpdatePeekDue
-        )
-    }
+    DesktopMainScreen(
+        isSidebarVisible = isSidebarVisible,
+        sidebarWidth = sidebarWidth,
+        onToggleSidebar = onToggleSidebar,
+        onSelectionModeChange = onSelectionModeChange,
+        onPickImage = onPickImage,
+        onTakePhoto = onTakePhoto,
+        onPickDocument = onPickDocument,
+        onOpenFile = onOpenFile,
+        onExportMarkdown = onExportMarkdown,
+        onExportPdf = onExportPdf,
+        onExportBackup = onExportBackup,
+        onAiIconTap = onAiIconTap,
+        isAiChatVisible = isAiChatVisible,
+        ragViewModel = ragViewModel,
+        onDismissAiChat = onDismissAiChat,
+        isUpdatePeekDue = isUpdatePeekDue
+    )
 }

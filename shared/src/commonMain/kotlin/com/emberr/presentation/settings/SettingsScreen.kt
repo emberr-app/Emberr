@@ -272,12 +272,15 @@ import com.emberr.presentation.shared.SubNoteOpenMode
 import com.emberr.presentation.shared.TopBarFadeStyle
 import com.emberr.presentation.shared.components.orHighContrastLine
 import com.emberr.presentation.shared.components.highContrastBorder
+import com.emberr.presentation.shared.LanguageChangeTransition
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.presentation.home.overview.label
 
 private const val PRIVACY_POLICY_URL = "https://github.com/emberr-app/Emberr/blob/main/PRIVACY.md"
+private const val LANGUAGE_NAMES_ROLLED_PAST = 8
+private const val LANGUAGE_NAMES_SHOWN_BELOW = 2
 private val SettingsCardShape = RoundedCornerShape(18.dp)
 private val SettingsRowMinHeight = 62.dp
 private val SettingsRowSidePadding = 16.dp
@@ -369,6 +372,7 @@ fun SettingsScreen(
 
     var chosenLanguage by remember { mutableStateOf(chosenAppLanguage()) }
     var showLanguageRestartNotice by remember { mutableStateOf(false) }
+    val languageLabels = AppLanguage.entries.associateWith { language -> language.label() }
 
     val firstDayOfWeekPreference by viewModel.firstDayOfWeekPreference.collectAsState()
 
@@ -411,8 +415,7 @@ fun SettingsScreen(
 
     val hazeState = remember { HazeState() }
     val listState = rememberLazyListState()
-    val scrollPositionAfterLanguageChange = remember { viewModel.takeScrollPositionKeptForLanguageChange() }
-    val desktopListScrollState = rememberScrollState(initial = scrollPositionAfterLanguageChange)
+    val desktopListScrollState = rememberScrollState()
     val desktopTopEdgeFadeAlpha by remember(desktopSubPage) {
         derivedStateOf { if (desktopSubPage == null && desktopListScrollState.value > 0) 1f else 0f }
     }
@@ -531,16 +534,26 @@ fun SettingsScreen(
                     customWindowFrameEnabled = customWindowFrameEnabled,
                     autoHideTitleBar = autoHideTitleBar,
                     languageChoices = AppLanguage.entries.map { language ->
+                        val languageLabel = languageLabels.getValue(language)
                         SettingsChoice(
-                            label = language.label(),
+                            label = languageLabel,
                             isSelected = language == chosenLanguage,
                             subtitle = language.nameInCurrentLanguage()
                         ) {
                             if (language != chosenLanguage) {
-                                viewModel.keepScrollPositionForLanguageChange(desktopListScrollState.value)
-                                chooseAppLanguage(language)
+                                val otherLanguageNames = AppLanguage.entries
+                                    .filter { other -> other != AppLanguage.SYSTEM && other != chosenLanguage && other != language }
+                                    .map { other -> languageLabels.getValue(other) }
+                                val namesRolledPast = listOf(languageLabels.getValue(chosenLanguage)) +
+                                    otherLanguageNames.take(LANGUAGE_NAMES_ROLLED_PAST)
+                                val namesBelow = otherLanguageNames.drop(LANGUAGE_NAMES_ROLLED_PAST).take(LANGUAGE_NAMES_SHOWN_BELOW)
                                 chosenLanguage = language
-                                if (appLanguageChangeNeedsRestart) showLanguageRestartNotice = true
+                                if (appLanguageChangeNeedsRestart) {
+                                    chooseAppLanguage(language)
+                                    showLanguageRestartNotice = true
+                                } else {
+                                    LanguageChangeTransition.changeLanguage(languageLabel, namesRolledPast, namesBelow) { chooseAppLanguage(language) }
+                                }
                             }
                         }
                     },
