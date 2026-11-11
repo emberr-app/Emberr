@@ -7,6 +7,15 @@
     <string name="note_more_options">更多选项</string>
     <string name="note_choose_icon">选择图标</string>
     <string name="note_search_emojis">搜索表情</string>
+    <string name="note_emoji_group_smileys_emotion">笑脸和情感</string>
+    <string name="note_emoji_group_people_body">人物和身体</string>
+    <string name="note_emoji_group_animals_nature">动物和自然</string>
+    <string name="note_emoji_group_food_drink">食物和饮料</string>
+    <string name="note_emoji_group_travel_places">旅行和地点</string>
+    <string name="note_emoji_group_activities">活动</string>
+    <string name="note_emoji_group_objects">物品</string>
+    <string name="note_emoji_group_symbols">符号</string>
+    <string name="note_emoji_group_flags">旗帜</string>
     <string name="note_no_emojis_found">未找到表情</string>
     <string name="note_editing_template">正在编辑模板</string>
     <string name="note_icon_options">图标选项</string>

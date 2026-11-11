@@ -57,11 +57,11 @@ interface NoteDao {
         """
         SELECT * FROM notes_metadata
         WHERE spaceId IN (:spaceIds) AND trashedAt IS NULL AND NOT (isSubNote = 1 AND kind = 'CANVAS') AND kind != 'DATABASE' AND kind != 'PERSON' AND isTemplate = 0
-        AND (title LIKE '%' || :query || '%' OR snippet LIKE '%' || :query || '%')
+        AND (title GLOB :pattern OR snippet GLOB :pattern)
         ORDER BY updatedAt DESC
         """
     )
-    suspend fun searchNotesByTitleOrSnippet(spaceIds: List<String>, query: String): List<NoteMetadataEntity>
+    suspend fun searchNotesByTitleOrSnippet(spaceIds: List<String>, pattern: String): List<NoteMetadataEntity>
 
     // isTemplate = 0 here too: callers like the tasks widget and the reminder rescheduler look up
     // titles by id and must never resolve a template row.

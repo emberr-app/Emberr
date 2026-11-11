@@ -7,6 +7,15 @@
     <string name="note_more_options">Altre opzioni</string>
     <string name="note_choose_icon">Scegli icona</string>
     <string name="note_search_emojis">Cerca emoji</string>
+    <string name="note_emoji_group_smileys_emotion">Faccine ed emozioni</string>
+    <string name="note_emoji_group_people_body">Persone e corpo</string>
+    <string name="note_emoji_group_animals_nature">Animali e natura</string>
+    <string name="note_emoji_group_food_drink">Cibo e bevande</string>
+    <string name="note_emoji_group_travel_places">Viaggi e luoghi</string>
+    <string name="note_emoji_group_activities">Attività</string>
+    <string name="note_emoji_group_objects">Oggetti</string>
+    <string name="note_emoji_group_symbols">Simboli</string>
+    <string name="note_emoji_group_flags">Bandiere</string>
     <string name="note_no_emojis_found">Nessuna emoji trovata</string>
     <string name="note_editing_template">Modifica del modello</string>
     <string name="note_icon_options">Opzioni icona</string>

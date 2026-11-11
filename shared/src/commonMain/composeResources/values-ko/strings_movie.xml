@@ -45,10 +45,7 @@
     <string name="movie_fact_networks">방송사</string>
     <string name="movie_fact_companies">제작사</string>
     <string name="movie_website">웹사이트</string>
-    <string name="movie_dollars_billions">$%1$sB</string>
-    <string name="movie_dollars_millions">$%1$sM</string>
-    <string name="movie_dollars_thousands">$%1$sK</string>
-    <string name="movie_dollars">$%1$s</string>
+    <string name="movie_dollars">%1$s 달러</string>
     <string name="movie_next_episode">다음 에피소드</string>
     <string name="movie_latest_episode">최신 에피소드</string>
     <string name="movie_season_short">S%1$d</string>

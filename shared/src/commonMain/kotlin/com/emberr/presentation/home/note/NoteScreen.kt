@@ -218,6 +218,15 @@ import emberr.shared.generated.resources.note_open_as_sticky_note
 import emberr.shared.generated.resources.note_options
 import emberr.shared.generated.resources.note_remove_cover
 import emberr.shared.generated.resources.note_remove_icon
+import emberr.shared.generated.resources.note_emoji_group_activities
+import emberr.shared.generated.resources.note_emoji_group_animals_nature
+import emberr.shared.generated.resources.note_emoji_group_flags
+import emberr.shared.generated.resources.note_emoji_group_food_drink
+import emberr.shared.generated.resources.note_emoji_group_objects
+import emberr.shared.generated.resources.note_emoji_group_people_body
+import emberr.shared.generated.resources.note_emoji_group_smileys_emotion
+import emberr.shared.generated.resources.note_emoji_group_symbols
+import emberr.shared.generated.resources.note_emoji_group_travel_places
 import emberr.shared.generated.resources.note_search_emojis
 import emberr.shared.generated.resources.note_show_word_count
 import emberr.shared.generated.resources.note_unfavorite
@@ -1563,7 +1572,7 @@ fun CategorizedEmojiPicker(
                     ) {
                         itemsIndexed(categoryNames) { index, title ->
                             EmojiCategoryPill(
-                                label = title,
+                                label = emojiGroupLabel(title),
                                 isSelected = pagerState.currentPage == index,
                                 hazeState = emojiGridHazeState,
                                 onClick = { onTabClick(index) }
@@ -1590,6 +1599,20 @@ fun CategorizedEmojiPicker(
             )
         }
     }
+}
+
+@Composable
+private fun emojiGroupLabel(groupName: String): String = when (groupName) {
+    "Smileys & Emotion" -> stringResource(Res.string.note_emoji_group_smileys_emotion)
+    "People & Body" -> stringResource(Res.string.note_emoji_group_people_body)
+    "Animals & Nature" -> stringResource(Res.string.note_emoji_group_animals_nature)
+    "Food & Drink" -> stringResource(Res.string.note_emoji_group_food_drink)
+    "Travel & Places" -> stringResource(Res.string.note_emoji_group_travel_places)
+    "Activities" -> stringResource(Res.string.note_emoji_group_activities)
+    "Objects" -> stringResource(Res.string.note_emoji_group_objects)
+    "Symbols" -> stringResource(Res.string.note_emoji_group_symbols)
+    "Flags" -> stringResource(Res.string.note_emoji_group_flags)
+    else -> groupName
 }
 
 @Composable

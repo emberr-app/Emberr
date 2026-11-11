@@ -6,6 +6,7 @@ import com.emberr.data.local.room.entity.DEFAULT_SPACE_ID
 import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.util.search.searchGlobPattern
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.PropertyBlock
 import com.emberr.domain.model.PropertyType
@@ -130,7 +131,7 @@ class DatabaseRowQueriesTest {
         notes.forEach { noteDao.insertOrUpdateMetadata(it.copy(title = "Monday")) }
         val expectedIds = setOf("plain-note", "linked-sub-note", "row")
 
-        val titleMatchIds = noteDao.searchNotesByTitleOrSnippet(listOf(DEFAULT_SPACE_ID), "Monday").map { it.noteId }.toSet()
+        val titleMatchIds = noteDao.searchNotesByTitleOrSnippet(listOf(DEFAULT_SPACE_ID), searchGlobPattern("Monday")).map { it.noteId }.toSet()
         val searchableIds = noteDao.getSearchableNotesByIds(notes.map { it.noteId }).map { it.noteId }.toSet()
 
         assertEquals(expectedIds, titleMatchIds)

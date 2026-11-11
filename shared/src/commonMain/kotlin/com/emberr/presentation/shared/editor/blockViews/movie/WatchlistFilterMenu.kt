@@ -43,6 +43,7 @@ import com.emberr.domain.movie.genreChoices
 import com.emberr.domain.movie.isUsable
 import com.emberr.domain.movie.newWatchlistFilter
 import com.emberr.domain.movie.withCondition
+import com.emberr.domain.util.format.decimalText
 import com.emberr.presentation.shared.components.EmberrTextField
 import com.emberr.presentation.shared.components.MenuChoiceButton
 import com.emberr.presentation.shared.components.MinimalDatePickerDialog
@@ -502,4 +503,4 @@ private fun yearOrDateText(date: LocalDate?, isRangeEnd: Boolean): String {
     return if (isWholeYearEdge) date.year.toString() else releaseDateText(date)
 }
 
-private fun numberText(number: Double): String = if (number % 1.0 == 0.0) number.toInt().toString() else number.toString()
+private fun numberText(number: Double): String = decimalText(number, minimumFractionDigits = 0, maximumFractionDigits = 2)

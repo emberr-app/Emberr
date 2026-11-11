@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">Jaringan</string>
     <string name="movie_fact_companies">Perusahaan</string>
     <string name="movie_website">Situs web</string>
-    <string name="movie_dollars_billions">$%1$s M</string>
-    <string name="movie_dollars_millions">$%1$s jt</string>
-    <string name="movie_dollars_thousands">$%1$s rb</string>
     <string name="movie_dollars">$%1$s</string>
     <string name="movie_next_episode">Episode berikutnya</string>
     <string name="movie_latest_episode">Episode terbaru</string>

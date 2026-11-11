@@ -59,6 +59,7 @@ import androidx.compose.ui.zIndex
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncProgress
 import com.emberr.domain.selfhost.sync.SelfHostSyncStage
+import com.emberr.domain.util.format.decimalText
 import com.emberr.domain.util.system.DeviceLockConfirmation
 import com.emberr.domain.util.system.rememberDeviceLockPrompt
 import com.emberr.domain.util.system.showNativeToast
@@ -707,7 +708,7 @@ internal fun describeImageBytes(done: Long, total: Long): String =
 
 private fun formatMegabytes(bytes: Long): String {
     val tenthsOfMegabyte = bytes * 10 / (1024 * 1024)
-    return "${tenthsOfMegabyte / 10}.${tenthsOfMegabyte % 10}"
+    return decimalText(tenthsOfMegabyte / 10.0, minimumFractionDigits = 1, maximumFractionDigits = 1)
 }
 
 @Composable

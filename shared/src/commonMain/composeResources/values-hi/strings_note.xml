@@ -7,6 +7,15 @@
     <string name="note_more_options">और विकल्प</string>
     <string name="note_choose_icon">आइकन चुनें</string>
     <string name="note_search_emojis">इमोजी खोजें</string>
+    <string name="note_emoji_group_smileys_emotion">स्माइली और भावनाएँ</string>
+    <string name="note_emoji_group_people_body">लोग और शरीर</string>
+    <string name="note_emoji_group_animals_nature">जानवर और प्रकृति</string>
+    <string name="note_emoji_group_food_drink">खाना और पेय</string>
+    <string name="note_emoji_group_travel_places">यात्रा और जगहें</string>
+    <string name="note_emoji_group_activities">गतिविधियाँ</string>
+    <string name="note_emoji_group_objects">वस्तुएँ</string>
+    <string name="note_emoji_group_symbols">प्रतीक</string>
+    <string name="note_emoji_group_flags">झंडे</string>
     <string name="note_no_emojis_found">कोई इमोजी नहीं मिला</string>
     <string name="note_editing_template">टेम्पलेट बदला जा रहा है</string>
     <string name="note_icon_options">आइकन के विकल्प</string>

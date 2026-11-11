@@ -45,10 +45,7 @@
     <string name="movie_fact_networks">放送局</string>
     <string name="movie_fact_companies">製作会社</string>
     <string name="movie_website">Webサイト</string>
-    <string name="movie_dollars_billions">$%1$sB</string>
-    <string name="movie_dollars_millions">$%1$sM</string>
-    <string name="movie_dollars_thousands">$%1$sK</string>
-    <string name="movie_dollars">$%1$s</string>
+    <string name="movie_dollars">%1$sドル</string>
     <string name="movie_next_episode">次のエピソード</string>
     <string name="movie_latest_episode">最新エピソード</string>
     <string name="movie_season_short">S%1$d</string>

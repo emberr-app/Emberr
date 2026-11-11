@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">Телемережі</string>
     <string name="movie_fact_companies">Компанії</string>
     <string name="movie_website">Вебсайт</string>
-    <string name="movie_dollars_billions">$%1$s млрд</string>
-    <string name="movie_dollars_millions">$%1$s млн</string>
-    <string name="movie_dollars_thousands">$%1$s тис.</string>
     <string name="movie_dollars">$%1$s</string>
     <string name="movie_next_episode">Наступна серія</string>
     <string name="movie_latest_episode">Остання серія</string>

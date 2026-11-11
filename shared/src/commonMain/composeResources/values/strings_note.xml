@@ -7,6 +7,15 @@
     <string name="note_more_options">More options</string>
     <string name="note_choose_icon">Choose Icon</string>
     <string name="note_search_emojis">Search emojis</string>
+    <string name="note_emoji_group_smileys_emotion">Smileys &amp; Emotion</string>
+    <string name="note_emoji_group_people_body">People &amp; Body</string>
+    <string name="note_emoji_group_animals_nature">Animals &amp; Nature</string>
+    <string name="note_emoji_group_food_drink">Food &amp; Drink</string>
+    <string name="note_emoji_group_travel_places">Travel &amp; Places</string>
+    <string name="note_emoji_group_activities">Activities</string>
+    <string name="note_emoji_group_objects">Objects</string>
+    <string name="note_emoji_group_symbols">Symbols</string>
+    <string name="note_emoji_group_flags">Flags</string>
     <string name="note_no_emojis_found">No emojis found</string>
     <string name="note_editing_template">Editing Template</string>
     <string name="note_icon_options">Icon Options</string>

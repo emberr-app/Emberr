@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">नेटवर्क</string>
     <string name="movie_fact_companies">कंपनियाँ</string>
     <string name="movie_website">वेबसाइट</string>
-    <string name="movie_dollars_billions">$%1$sB</string>
-    <string name="movie_dollars_millions">$%1$sM</string>
-    <string name="movie_dollars_thousands">$%1$sK</string>
     <string name="movie_dollars">$%1$s</string>
     <string name="movie_next_episode">अगला एपिसोड</string>
     <string name="movie_latest_episode">नया एपिसोड</string>

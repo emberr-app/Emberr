@@ -45,10 +45,7 @@
     <string name="movie_fact_networks">Cadenas</string>
     <string name="movie_fact_companies">Productoras</string>
     <string name="movie_website">Sitio web</string>
-    <string name="movie_dollars_billions">$%1$s mil M</string>
-    <string name="movie_dollars_millions">$%1$s M</string>
-    <string name="movie_dollars_thousands">$%1$s K</string>
-    <string name="movie_dollars">$%1$s</string>
+    <string name="movie_dollars">US$%1$s</string>
     <string name="movie_next_episode">Próximo episodio</string>
     <string name="movie_latest_episode">Último episodio</string>
     <string name="movie_season_short">T%1$d</string>
