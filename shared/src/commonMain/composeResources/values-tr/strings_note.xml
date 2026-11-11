@@ -7,6 +7,15 @@
     <string name="note_more_options">Diğer seçenekler</string>
     <string name="note_choose_icon">Simge seçin</string>
     <string name="note_search_emojis">Emoji ara</string>
+    <string name="note_emoji_group_smileys_emotion">Yüz ifadeleri ve duygular</string>
+    <string name="note_emoji_group_people_body">İnsanlar ve vücut</string>
+    <string name="note_emoji_group_animals_nature">Hayvanlar ve doğa</string>
+    <string name="note_emoji_group_food_drink">Yiyecek ve içecek</string>
+    <string name="note_emoji_group_travel_places">Seyahat ve yerler</string>
+    <string name="note_emoji_group_activities">Etkinlikler</string>
+    <string name="note_emoji_group_objects">Nesneler</string>
+    <string name="note_emoji_group_symbols">Semboller</string>
+    <string name="note_emoji_group_flags">Bayraklar</string>
     <string name="note_no_emojis_found">Emoji bulunamadı</string>
     <string name="note_editing_template">Şablon düzenleniyor</string>
     <string name="note_icon_options">Simge seçenekleri</string>

@@ -25,13 +25,20 @@ interface BlockDao {
     )
     suspend fun findNoteIdsMatchingContent(spaceIds: List<String>, query: String): List<String>
 
+    @Query(
+        "SELECT DISTINCT noteId FROM note_blocks WHERE isDeleted = 0 " +
+            "AND blockDataJson GLOB :pattern " +
+            "AND noteId IN (SELECT noteId FROM notes_metadata WHERE spaceId IN (:spaceIds))"
+    )
+    suspend fun findNoteIdsMatchingSearchPattern(spaceIds: List<String>, pattern: String): List<String>
+
     // Lets SQLite do the "which blocks could possibly match" filtering so cross-note search
     // only ever JSON-decodes blocks that already contain the query text.
     @Query(
         "SELECT * FROM note_blocks WHERE noteId = :noteId AND isDeleted = 0 " +
-            "AND blockDataJson LIKE '%' || :query || '%' ORDER BY displayOrder ASC"
+            "AND blockDataJson GLOB :pattern ORDER BY displayOrder ASC"
     )
-    suspend fun findMatchingBlocksForNote(noteId: String, query: String): List<NoteBlockEntity>
+    suspend fun findMatchingBlocksForNote(noteId: String, pattern: String): List<NoteBlockEntity>
 
     @Query(
         "SELECT * FROM note_blocks WHERE blockId IN (SELECT blockId FROM calendar_event_exceptions) " +

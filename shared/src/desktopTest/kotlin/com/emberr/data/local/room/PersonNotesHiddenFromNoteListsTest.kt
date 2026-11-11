@@ -6,6 +6,7 @@ import com.emberr.data.local.room.entity.ACCOUNT_SPACE_ID
 import com.emberr.data.local.room.entity.DEFAULT_SPACE_ID
 import com.emberr.data.local.room.entity.NoteKind
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.util.search.searchGlobPattern
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -46,7 +47,7 @@ class PersonNotesHiddenFromNoteListsTest {
         assertEquals(listOf("note"), noteDao.getAllNotes(ACCOUNT_SPACE_ID).first().map { it.noteId })
         assertEquals(
             listOf("note"),
-            noteDao.searchNotesByTitleOrSnippet(listOf(DEFAULT_SPACE_ID, ACCOUNT_SPACE_ID), "Maya").map { it.noteId }
+            noteDao.searchNotesByTitleOrSnippet(listOf(DEFAULT_SPACE_ID, ACCOUNT_SPACE_ID), searchGlobPattern("Maya")).map { it.noteId }
         )
         assertEquals(listOf("person"), noteDao.observePeople(ACCOUNT_SPACE_ID).first().map { it.noteId })
     }

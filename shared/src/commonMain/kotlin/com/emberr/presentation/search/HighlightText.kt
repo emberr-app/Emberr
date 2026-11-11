@@ -5,6 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import com.emberr.domain.util.search.searchFormOf
 
 /**
  * Wraps every case-insensitive occurrence of [query] inside [text] in [highlightStyle].
@@ -20,11 +21,11 @@ fun highlightMatches(
     append(text)
     if (query.isBlank()) return@buildAnnotatedString
 
-    val lowerText = text.lowercase()
-    val lowerQuery = query.lowercase()
+    val searchText = searchFormOf(text)
+    val searchQuery = searchFormOf(query)
     var startIndex = 0
     while (true) {
-        val matchIndex = lowerText.indexOf(lowerQuery, startIndex)
+        val matchIndex = searchText.indexOf(searchQuery, startIndex)
         if (matchIndex < 0) break
         addStyle(highlightStyle, matchIndex, matchIndex + query.length)
         startIndex = matchIndex + query.length

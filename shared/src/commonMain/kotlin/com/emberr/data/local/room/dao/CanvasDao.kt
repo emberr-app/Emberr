@@ -31,15 +31,15 @@ interface CanvasDao {
         "SELECT DISTINCT canvas_nodes.noteId FROM canvas_nodes " +
             "JOIN notes_metadata ON notes_metadata.noteId = canvas_nodes.noteId " +
             "WHERE canvas_nodes.isDeleted = 0 AND notes_metadata.trashedAt IS NULL AND notes_metadata.spaceId IN (:spaceIds) " +
-            "AND canvas_nodes.text LIKE '%' || :query || '%'"
+            "AND canvas_nodes.text GLOB :pattern"
     )
-    suspend fun findCanvasNoteIdsWithTextMatching(spaceIds: List<String>, query: String): List<String>
+    suspend fun findCanvasNoteIdsWithTextMatching(spaceIds: List<String>, pattern: String): List<String>
 
     @Query(
         "SELECT text FROM canvas_nodes WHERE noteId = :noteId AND isDeleted = 0 " +
-            "AND text LIKE '%' || :query || '%' ORDER BY createdAt ASC LIMIT 1"
+            "AND text GLOB :pattern ORDER BY createdAt ASC LIMIT 1"
     )
-    suspend fun findFirstNodeTextMatching(noteId: String, query: String): String?
+    suspend fun findFirstNodeTextMatching(noteId: String, pattern: String): String?
 
     @Query("SELECT DISTINCT imagePath FROM canvas_nodes WHERE imagePath IS NOT NULL AND isDeleted = 0")
     suspend fun getAllLiveImagePaths(): List<String>

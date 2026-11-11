@@ -7,6 +7,15 @@
     <string name="note_more_options">Opsi lainnya</string>
     <string name="note_choose_icon">Pilih ikon</string>
     <string name="note_search_emojis">Cari emoji</string>
+    <string name="note_emoji_group_smileys_emotion">Smiley &amp; emosi</string>
+    <string name="note_emoji_group_people_body">Orang &amp; tubuh</string>
+    <string name="note_emoji_group_animals_nature">Hewan &amp; alam</string>
+    <string name="note_emoji_group_food_drink">Makanan &amp; minuman</string>
+    <string name="note_emoji_group_travel_places">Perjalanan &amp; tempat</string>
+    <string name="note_emoji_group_activities">Aktivitas</string>
+    <string name="note_emoji_group_objects">Objek</string>
+    <string name="note_emoji_group_symbols">Simbol</string>
+    <string name="note_emoji_group_flags">Bendera</string>
     <string name="note_no_emojis_found">Emoji tidak ditemukan</string>
     <string name="note_editing_template">Mengedit templat</string>
     <string name="note_icon_options">Opsi ikon</string>

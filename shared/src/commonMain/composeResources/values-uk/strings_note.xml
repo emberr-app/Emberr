@@ -7,6 +7,15 @@
     <string name="note_more_options">Інші параметри</string>
     <string name="note_choose_icon">Вибрати значок</string>
     <string name="note_search_emojis">Шукати емодзі</string>
+    <string name="note_emoji_group_smileys_emotion">Смайлики та емоції</string>
+    <string name="note_emoji_group_people_body">Люди та тіло</string>
+    <string name="note_emoji_group_animals_nature">Тварини та природа</string>
+    <string name="note_emoji_group_food_drink">Їжа та напої</string>
+    <string name="note_emoji_group_travel_places">Подорожі та місця</string>
+    <string name="note_emoji_group_activities">Заняття</string>
+    <string name="note_emoji_group_objects">Предмети</string>
+    <string name="note_emoji_group_symbols">Символи</string>
+    <string name="note_emoji_group_flags">Прапори</string>
     <string name="note_no_emojis_found">Емодзі не знайдено</string>
     <string name="note_editing_template">Редагування шаблону</string>
     <string name="note_icon_options">Параметри значка</string>

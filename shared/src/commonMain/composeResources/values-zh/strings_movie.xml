@@ -45,10 +45,7 @@
     <string name="movie_fact_networks">播出平台</string>
     <string name="movie_fact_companies">制作公司</string>
     <string name="movie_website">官网</string>
-    <string name="movie_dollars_billions">%1$s 十亿美元</string>
-    <string name="movie_dollars_millions">%1$s 百万美元</string>
-    <string name="movie_dollars_thousands">%1$s 千美元</string>
-    <string name="movie_dollars">%1$s 美元</string>
+    <string name="movie_dollars">%1$s美元</string>
     <string name="movie_next_episode">下一集</string>
     <string name="movie_latest_episode">最新一集</string>
     <string name="movie_season_short">第 %1$d 季</string>

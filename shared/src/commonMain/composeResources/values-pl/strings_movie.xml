@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">Stacje</string>
     <string name="movie_fact_companies">Wytwórnie</string>
     <string name="movie_website">Strona internetowa</string>
-    <string name="movie_dollars_billions">%1$s mld $</string>
-    <string name="movie_dollars_millions">%1$s mln $</string>
-    <string name="movie_dollars_thousands">%1$s tys. $</string>
     <string name="movie_dollars">%1$s $</string>
     <string name="movie_next_episode">Następny odcinek</string>
     <string name="movie_latest_episode">Najnowszy odcinek</string>

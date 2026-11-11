@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">Chaînes</string>
     <string name="movie_fact_companies">Sociétés</string>
     <string name="movie_website">Site web</string>
-    <string name="movie_dollars_billions">%1$s Md$</string>
-    <string name="movie_dollars_millions">%1$s M$</string>
-    <string name="movie_dollars_thousands">%1$s k$</string>
     <string name="movie_dollars">%1$s $</string>
     <string name="movie_next_episode">Prochain épisode</string>
     <string name="movie_latest_episode">Dernier épisode</string>

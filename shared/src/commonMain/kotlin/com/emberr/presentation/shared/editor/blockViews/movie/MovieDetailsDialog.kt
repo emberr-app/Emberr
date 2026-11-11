@@ -105,14 +105,10 @@ import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
-import kotlin.math.roundToInt
 import emberr.shared.generated.resources.movie_add_to_watchlist
 import emberr.shared.generated.resources.movie_adding
 import emberr.shared.generated.resources.movie_data_from_justwatch
 import emberr.shared.generated.resources.movie_dollars
-import emberr.shared.generated.resources.movie_dollars_billions
-import emberr.shared.generated.resources.movie_dollars_millions
-import emberr.shared.generated.resources.movie_dollars_thousands
 import emberr.shared.generated.resources.movie_episode_count
 import emberr.shared.generated.resources.movie_fact_box_office
 import emberr.shared.generated.resources.movie_fact_budget
@@ -147,6 +143,7 @@ import emberr.shared.generated.resources.movie_your_rating
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.StringResource
+import com.emberr.domain.util.format.shortNumberText
 import com.emberr.domain.util.time.formatDate
 import com.emberr.domain.util.time.DateTextStyle
 
@@ -1128,15 +1125,7 @@ private fun shownTabsOf(details: MovieDetails): List<MovieDetailsTab> {
 }
 
 @Composable
-private fun dollarsText(dollars: Long): String = when {
-    dollars >= 1_000_000_000L -> stringResource(Res.string.movie_dollars_billions, oneDecimalText(dollars / 1_000_000_000.0))
-    dollars >= 10_000_000L -> stringResource(Res.string.movie_dollars_millions, (dollars / 1_000_000.0).roundToInt().toString())
-    dollars >= 1_000_000L -> stringResource(Res.string.movie_dollars_millions, oneDecimalText(dollars / 1_000_000.0))
-    dollars >= 1_000L -> stringResource(Res.string.movie_dollars_thousands, (dollars / 1_000.0).roundToInt().toString())
-    else -> stringResource(Res.string.movie_dollars, dollars.toString())
-}
-
-private fun oneDecimalText(value: Double): String = ((value * 10).roundToInt() / 10.0).toString()
+private fun dollarsText(dollars: Long): String = stringResource(Res.string.movie_dollars, shortNumberText(dollars))
 
 @Composable
 internal fun episodeCountText(episodes: Int): String = pluralStringResource(Res.plurals.movie_episode_count, episodes, episodes)

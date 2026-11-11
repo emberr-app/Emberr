@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">Emissoras</string>
     <string name="movie_fact_companies">Produtoras</string>
     <string name="movie_website">Site</string>
-    <string name="movie_dollars_billions">US$ %1$s bi</string>
-    <string name="movie_dollars_millions">US$ %1$s mi</string>
-    <string name="movie_dollars_thousands">US$ %1$s mil</string>
     <string name="movie_dollars">US$ %1$s</string>
     <string name="movie_next_episode">Próximo episódio</string>
     <string name="movie_latest_episode">Último episódio</string>

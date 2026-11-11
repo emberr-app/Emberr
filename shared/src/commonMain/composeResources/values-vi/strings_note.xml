@@ -7,6 +7,15 @@
     <string name="note_more_options">Tùy chọn khác</string>
     <string name="note_choose_icon">Chọn biểu tượng</string>
     <string name="note_search_emojis">Tìm emoji</string>
+    <string name="note_emoji_group_smileys_emotion">Mặt cười &amp; cảm xúc</string>
+    <string name="note_emoji_group_people_body">Con người &amp; cơ thể</string>
+    <string name="note_emoji_group_animals_nature">Động vật &amp; thiên nhiên</string>
+    <string name="note_emoji_group_food_drink">Đồ ăn &amp; thức uống</string>
+    <string name="note_emoji_group_travel_places">Du lịch &amp; địa điểm</string>
+    <string name="note_emoji_group_activities">Hoạt động</string>
+    <string name="note_emoji_group_objects">Đồ vật</string>
+    <string name="note_emoji_group_symbols">Biểu tượng</string>
+    <string name="note_emoji_group_flags">Cờ</string>
     <string name="note_no_emojis_found">Không tìm thấy emoji</string>
     <string name="note_editing_template">Đang sửa mẫu</string>
     <string name="note_icon_options">Tùy chọn biểu tượng</string>

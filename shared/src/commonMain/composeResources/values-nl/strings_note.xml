@@ -7,6 +7,15 @@
     <string name="note_more_options">Meer opties</string>
     <string name="note_choose_icon">Pictogram kiezen</string>
     <string name="note_search_emojis">Emoji's zoeken</string>
+    <string name="note_emoji_group_smileys_emotion">Smileys en emoties</string>
+    <string name="note_emoji_group_people_body">Mensen en lichaam</string>
+    <string name="note_emoji_group_animals_nature">Dieren en natuur</string>
+    <string name="note_emoji_group_food_drink">Eten en drinken</string>
+    <string name="note_emoji_group_travel_places">Reizen en plaatsen</string>
+    <string name="note_emoji_group_activities">Activiteiten</string>
+    <string name="note_emoji_group_objects">Objecten</string>
+    <string name="note_emoji_group_symbols">Symbolen</string>
+    <string name="note_emoji_group_flags">Vlaggen</string>
     <string name="note_no_emojis_found">Geen emoji's gevonden</string>
     <string name="note_editing_template">Sjabloon bewerken</string>
     <string name="note_icon_options">Pictogramopties</string>

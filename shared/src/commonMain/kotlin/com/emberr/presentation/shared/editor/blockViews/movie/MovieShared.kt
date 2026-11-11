@@ -31,6 +31,7 @@ import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.MovieDetails
 import com.emberr.domain.model.MovieKind
 import com.emberr.domain.model.WatchStatus
+import com.emberr.domain.util.format.decimalText
 import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.ui.theme.LocalAppIsDark
 import emberr.shared.generated.resources.Res
@@ -169,4 +170,5 @@ internal fun minutesText(minutes: Int): String = when {
     else -> stringResource(Res.string.movie_runtime_hours_minutes, minutes / 60, minutes % 60)
 }
 
-internal fun tmdbRatingText(rating: Double): String = ((rating * 10).roundToInt() / 10.0).toString()
+internal fun tmdbRatingText(rating: Double): String =
+    decimalText((rating * 10).roundToInt() / 10.0, minimumFractionDigits = 1, maximumFractionDigits = 1)

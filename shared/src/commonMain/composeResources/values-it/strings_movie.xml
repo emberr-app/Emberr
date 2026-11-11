@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">Reti</string>
     <string name="movie_fact_companies">Case di produzione</string>
     <string name="movie_website">Sito web</string>
-    <string name="movie_dollars_billions">$%1$s Mld</string>
-    <string name="movie_dollars_millions">$%1$s Mln</string>
-    <string name="movie_dollars_thousands">$%1$sK</string>
     <string name="movie_dollars">$%1$s</string>
     <string name="movie_next_episode">Prossimo episodio</string>
     <string name="movie_latest_episode">Ultimo episodio</string>

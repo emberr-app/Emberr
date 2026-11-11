@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">Kênh phát sóng</string>
     <string name="movie_fact_companies">Công ty sản xuất</string>
     <string name="movie_website">Trang web</string>
-    <string name="movie_dollars_billions">$%1$s tỷ</string>
-    <string name="movie_dollars_millions">$%1$s triệu</string>
-    <string name="movie_dollars_thousands">$%1$s nghìn</string>
     <string name="movie_dollars">$%1$s</string>
     <string name="movie_next_episode">Tập tiếp theo</string>
     <string name="movie_latest_episode">Tập mới nhất</string>

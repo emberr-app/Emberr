@@ -45,9 +45,6 @@
     <string name="movie_fact_networks">Kanallar</string>
     <string name="movie_fact_companies">Şirketler</string>
     <string name="movie_website">Web sitesi</string>
-    <string name="movie_dollars_billions">$%1$s milyar</string>
-    <string name="movie_dollars_millions">$%1$s milyon</string>
-    <string name="movie_dollars_thousands">$%1$s bin</string>
     <string name="movie_dollars">$%1$s</string>
     <string name="movie_next_episode">Sonraki bölüm</string>
     <string name="movie_latest_episode">Son bölüm</string>

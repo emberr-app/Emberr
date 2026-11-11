@@ -1,6 +1,7 @@
 package com.emberr.presentation.calendar
 
 import androidx.compose.runtime.Composable
+import com.emberr.domain.util.search.containsForSearch
 import kotlinx.datetime.LocalDate
 
 private const val BIRTHDAYS_SEARCH_WORD = "Birthdays"
@@ -27,7 +28,7 @@ fun searchCalendarEvents(
             categoryNamesById[event.categoryId],
             BIRTHDAYS_SEARCH_WORD.takeIf { event.isBirthday }
         )
-            .any { it.contains(query, ignoreCase = true) }
+            .any { it.containsForSearch(query) }
     }
     val (upcomingEvents, pastEvents) = matchingEvents.partition { it.dateString >= today.toString() }
     return CalendarSearchResults(
@@ -46,4 +47,4 @@ fun CalendarEvent.searchResultDateLabel(usesTwentyFourHourClock: Boolean): Strin
     "${formatFullDate(LocalDate.parse(dateString))} · ${timeOfDayLabel(usesTwentyFourHourClock)}"
 
 fun CalendarEvent.matchingDetail(query: String): String? =
-    listOfNotNull(description, url).firstOrNull { it.contains(query, ignoreCase = true) }
+    listOfNotNull(description, url).firstOrNull { it.containsForSearch(query) }

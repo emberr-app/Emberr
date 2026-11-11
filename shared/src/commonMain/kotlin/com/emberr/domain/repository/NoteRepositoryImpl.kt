@@ -126,6 +126,8 @@ import com.emberr.domain.search.latestParentByChildId
 import com.emberr.domain.search.subNoteParentTitles
 import com.emberr.domain.search.withSubNoteParents
 import com.emberr.domain.selfhost.media.MediaReferenceScanner
+import com.emberr.domain.util.search.containsForSearch
+import com.emberr.domain.util.search.searchGlobPattern
 import com.emberr.domain.util.sync.SyncCoordinator
 import com.emberr.domain.util.sync.SyncEventBus
 import kotlinx.coroutines.flow.combine
@@ -991,7 +993,7 @@ class NoteRepositoryImpl(
     override suspend fun searchNoteTitlesAndSnippets(query: String): List<NoteSearchResult> =
         withContext(Dispatchers.IO) {
             if (query.isBlank()) return@withContext emptyList()
-            val results = noteDao.searchNotesByTitleOrSnippet(activeSpaceAndAccountIds(), query).map { metadata ->
+            val results = noteDao.searchNotesByTitleOrSnippet(activeSpaceAndAccountIds(), searchGlobPattern(query)).map { metadata ->
                 NoteSearchResult(
                     note = metadata,
                     matchedText = metadata.snippet.ifBlank { metadata.title }
@@ -1014,7 +1016,7 @@ class NoteRepositoryImpl(
             val metadataResults = searchNoteTitlesAndSnippets(query)
             val matchedIds = metadataResults.mapTo(mutableSetOf()) { it.note.noteId }
 
-            val contentMatchIds = blockDao.findNoteIdsMatchingContent(spaceIds, query)
+            val contentMatchIds = blockDao.findNoteIdsMatchingSearchPattern(spaceIds, searchGlobPattern(query))
                 .filterNot { it in matchedIds }
 
             val contentMatches = if (contentMatchIds.isEmpty()) {
@@ -1084,8 +1086,9 @@ class NoteRepositoryImpl(
 
     private suspend fun findCanvasTextMatches(spaceIds: List<String>, query: String): List<NoteSearchResult> {
         val resultsByNoteId = LinkedHashMap<String, NoteSearchResult>()
-        for (canvasNoteId in canvasDao.findCanvasNoteIdsWithTextMatching(spaceIds, query)) {
-            val matchedText = canvasDao.findFirstNodeTextMatching(canvasNoteId, query) ?: continue
+        val pattern = searchGlobPattern(query)
+        for (canvasNoteId in canvasDao.findCanvasNoteIdsWithTextMatching(spaceIds, pattern)) {
+            val matchedText = canvasDao.findFirstNodeTextMatching(canvasNoteId, pattern) ?: continue
             val canvasMetadata = noteDao.getNoteById(canvasNoteId) ?: continue
             val resultNoteIds = if (canvasMetadata.isSubNote) notesContainingCanvas(canvasNoteId) else listOf(canvasNoteId)
             if (resultNoteIds.isEmpty()) continue
@@ -1099,10 +1102,10 @@ class NoteRepositoryImpl(
     private suspend fun findDatabaseTitleMatches(spaceIds: List<String>, query: String, contentMatchIds: List<String>): List<NoteSearchResult> {
         val resultsByNoteId = LinkedHashMap<String, NoteSearchResult>()
         for (databaseNote in noteDao.getNotesByIdsIncludingTemplates(contentMatchIds).filter { it.kind == NoteKind.DATABASE }) {
-            val settings = blockDao.findMatchingBlocksForNote(databaseNote.noteId, query)
+            val settings = blockDao.findMatchingBlocksForNote(databaseNote.noteId, searchGlobPattern(query))
                 .firstNotNullOfOrNull { entity -> (decodeBlockOrNull(entity.blockDataJson) as? DatabaseBlock)?.takeIf { it.holdsSharedSettings } }
                 ?: continue
-            if (!settings.title.contains(query, ignoreCase = true)) continue
+            if (!settings.title.containsForSearch(query)) continue
             noteDao.getSearchableNotesByIds(notesShowingDatabase(settings.databaseId))
                 .filter { it.spaceId in spaceIds }
                 .forEach { note -> resultsByNoteId.putIfAbsent(note.noteId, NoteSearchResult(note = note, matchedText = settings.title)) }
@@ -1130,13 +1133,12 @@ class NoteRepositoryImpl(
     // (case-insensitive). SQLite has already narrowed this to blocks whose raw JSON holds the
     // query, so only a handful of rows ever reach the decoder.
     private suspend fun findMatchingBlockText(noteId: String, query: String): String? {
-        val entities = blockDao.findMatchingBlocksForNote(noteId, query)
-        val lowerQuery = query.lowercase()
+        val entities = blockDao.findMatchingBlocksForNote(noteId, searchGlobPattern(query))
         for (entity in entities) {
             val block = decodeBlockOrNull(entity.blockDataJson) ?: continue
             if (block.isDeleted) continue
             val text = flattenBlockText(block) ?: continue
-            if (text.lowercase().contains(lowerQuery)) return text
+            if (text.containsForSearch(query)) return text
         }
         return null
     }

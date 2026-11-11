@@ -7,6 +7,15 @@
     <string name="note_more_options">옵션 더 보기</string>
     <string name="note_choose_icon">아이콘 선택</string>
     <string name="note_search_emojis">이모지 검색</string>
+    <string name="note_emoji_group_smileys_emotion">스마일리 및 감정</string>
+    <string name="note_emoji_group_people_body">사람 및 신체</string>
+    <string name="note_emoji_group_animals_nature">동물 및 자연</string>
+    <string name="note_emoji_group_food_drink">음식 및 음료</string>
+    <string name="note_emoji_group_travel_places">여행 및 장소</string>
+    <string name="note_emoji_group_activities">활동</string>
+    <string name="note_emoji_group_objects">사물</string>
+    <string name="note_emoji_group_symbols">기호</string>
+    <string name="note_emoji_group_flags">깃발</string>
     <string name="note_no_emojis_found">이모지를 찾을 수 없어요</string>
     <string name="note_editing_template">템플릿 편집 중</string>
     <string name="note_icon_options">아이콘 옵션</string>
