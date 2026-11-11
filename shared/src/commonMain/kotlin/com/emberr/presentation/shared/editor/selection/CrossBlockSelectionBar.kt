@@ -15,8 +15,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -41,6 +39,7 @@ import com.emberr.presentation.shared.components.customEmberrShadow
 import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.editor.formatting.HighlightColorCircles
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.clipboard_text3
 import emberr.shared.generated.resources.copy
 import emberr.shared.generated.resources.format_bold
 import emberr.shared.generated.resources.italic
@@ -149,11 +148,7 @@ private fun SelectionBarContent(
             ) {
                 actions.copy?.let { SelectionBarButton(Res.drawable.copy, stringResource(Res.string.editor_copy), 18.dp, it) }
                 actions.cut?.let { SelectionBarButton(Res.drawable.scissor2, stringResource(Res.string.editor_cut), 18.dp, it) }
-                actions.paste?.let { paste ->
-                    SelectionBarButtonFrame(tooltip = stringResource(Res.string.editor_paste), onClick = paste) {
-                        Icon(Icons.Default.ContentPaste, stringResource(Res.string.editor_paste), modifier = Modifier.size(19.dp), tint = tint)
-                    }
-                }
+                actions.paste?.let { SelectionBarButton(Res.drawable.clipboard_text3, stringResource(Res.string.editor_paste), 18.dp, it) }
                 actions.delete?.let { SelectionBarButton(Res.drawable.trash, stringResource(Res.string.common_delete), 18.dp, it) }
                 actions.selectAll?.let { selectAll ->
                     SelectionBarButton(Res.drawable.select_all, stringResource(Res.string.editor_select_all), 18.dp, selectAll)
