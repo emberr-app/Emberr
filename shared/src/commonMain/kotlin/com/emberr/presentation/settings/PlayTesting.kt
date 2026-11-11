@@ -89,7 +89,7 @@ private fun PlayTestingStep(number: Int, text: String) {
         ) {
             Text(
                 text = number.toString(),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
