@@ -243,7 +243,6 @@ import emberr.shared.generated.resources.daily
 import emberr.shared.generated.resources.download
 import emberr.shared.generated.resources.chevron_left
 import emberr.shared.generated.resources.chevron_right
-import emberr.shared.generated.resources.files
 import emberr.shared.generated.resources.folder_input
 import emberr.shared.generated.resources.folder_sync
 import emberr.shared.generated.resources.house
