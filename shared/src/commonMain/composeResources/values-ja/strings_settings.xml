@@ -137,6 +137,7 @@
     <string name="settings_keyboard_toolbar">キーボードツールバー</string>
 
     <string name="settings_faq">よくある質問</string>
+    <string name="settings_report_issue_or_suggest_feature">問題の報告・機能の提案</string>
     <string name="settings_whats_new">新機能</string>
     <string name="settings_privacy_policy">プライバシーポリシー</string>
     <string name="settings_about_emberr">Emberrについて</string>

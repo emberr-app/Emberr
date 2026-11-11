@@ -195,6 +195,7 @@ import emberr.shared.generated.resources.settings_overview_sidebar_footnote
 import emberr.shared.generated.resources.settings_pair_mobile_device
 import emberr.shared.generated.resources.settings_pair_with_desktop
 import emberr.shared.generated.resources.settings_privacy_policy
+import emberr.shared.generated.resources.settings_report_issue_or_suggest_feature
 import emberr.shared.generated.resources.settings_restart_later
 import emberr.shared.generated.resources.settings_restart_now
 import emberr.shared.generated.resources.settings_restart_to_apply_message
@@ -234,6 +235,7 @@ import emberr.shared.generated.resources.settings_whats_new
 import emberr.shared.generated.resources.astroid
 import emberr.shared.generated.resources.badge_plus
 import emberr.shared.generated.resources.badge_question_mark
+import emberr.shared.generated.resources.bug
 import emberr.shared.generated.resources.bell
 import emberr.shared.generated.resources.calendar
 import emberr.shared.generated.resources.calendar_clock
@@ -279,6 +281,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.emberr.presentation.home.overview.label
 
 private const val PRIVACY_POLICY_URL = "https://github.com/emberr-app/Emberr/blob/main/PRIVACY.md"
+private const val REPORT_ISSUE_URL = "https://github.com/emberr-app/Emberr/issues"
 private const val LANGUAGE_NAMES_ROLLED_PAST = 8
 private const val LANGUAGE_NAMES_SHOWN_BELOW = 2
 private val SettingsCardShape = RoundedCornerShape(18.dp)
@@ -1620,6 +1623,12 @@ private fun HelpSettingsSection(onAboutClick: () -> Unit) {
             title = stringResource(Res.string.settings_faq),
             isEnabled = false,
             onClick = {}
+        )
+        SettingsDivider()
+        SettingsActionRow(
+            icon = painterResource(Res.drawable.bug),
+            title = stringResource(Res.string.settings_report_issue_or_suggest_feature),
+            onClick = { uriHandler.openUri(REPORT_ISSUE_URL) }
         )
         SettingsDivider()
         SettingsActionRow(

@@ -138,6 +138,7 @@
     <string name="settings_keyboard_toolbar">Barra della tastiera</string>
 
     <string name="settings_faq">FAQ</string>
+    <string name="settings_report_issue_or_suggest_feature">Segnala un problema o suggerisci una funzione</string>
     <string name="settings_whats_new">Novità</string>
     <string name="settings_privacy_policy">Informativa sulla privacy</string>
     <string name="settings_about_emberr">Informazioni su Emberr</string>

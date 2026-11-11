@@ -138,6 +138,7 @@
     <string name="settings_keyboard_toolbar">Barre d'outils du clavier</string>
 
     <string name="settings_faq">FAQ</string>
+    <string name="settings_report_issue_or_suggest_feature">Signaler un problème ou suggérer une fonctionnalité</string>
     <string name="settings_whats_new">Nouveautés</string>
     <string name="settings_privacy_policy">Politique de confidentialité</string>
     <string name="settings_about_emberr">À propos d'Emberr</string>

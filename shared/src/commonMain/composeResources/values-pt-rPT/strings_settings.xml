@@ -76,4 +76,5 @@
     <string name="settings_play_testing_no_data_lost">Esta app é atualizada sem perder nenhum dado.</string>
     <string name="settings_play_testing_join">Juntar-me ao grupo</string>
     <string name="settings_footer_support_us">Apoia-nos em</string>
+    <string name="settings_report_issue_or_suggest_feature">Reportar um problema ou sugerir uma funcionalidade</string>
 </resources>
