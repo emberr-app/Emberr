@@ -50,17 +50,6 @@ internal class UpdateNotesSection(
 
 internal val CurrentUpdateNotes = listOfNotNull(
     UpdateNotesSection(
-        heading = Res.string.whatsnew_languages_heading,
-        whereToFind = Res.string.whatsnew_languages_where,
-        isNew = true,
-        preview = { LanguagesUpdatePreview() },
-        description = if (isDesktopPlatform) {
-            Res.string.whatsnew_languages_description_desktop
-        } else {
-            Res.string.whatsnew_languages_description_mobile
-        }
-    ),
-    UpdateNotesSection(
         heading = Res.string.whatsnew_themes_heading,
         whereToFind = Res.string.whatsnew_themes_where,
         isNew = true,
@@ -69,6 +58,17 @@ internal val CurrentUpdateNotes = listOfNotNull(
             Res.string.whatsnew_themes_description_desktop
         } else {
             Res.string.whatsnew_themes_description_mobile
+        }
+    ),
+    UpdateNotesSection(
+        heading = Res.string.whatsnew_languages_heading,
+        whereToFind = Res.string.whatsnew_languages_where,
+        isNew = true,
+        preview = { LanguagesUpdatePreview() },
+        description = if (isDesktopPlatform) {
+            Res.string.whatsnew_languages_description_desktop
+        } else {
+            Res.string.whatsnew_languages_description_mobile
         }
     ),
     UpdateNotesSection(
