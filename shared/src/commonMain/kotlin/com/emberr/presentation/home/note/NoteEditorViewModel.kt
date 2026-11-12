@@ -96,29 +96,11 @@ class NoteEditorViewModel(
                 val syncedEntityId = event.entityId
                 val currentId = currentMetadata?.noteId
                 if (currentId != null && syncedEntityId == currentId) {
-                    if (autosaveJob?.isActive == true) return@collect
-                    if (isWithinLocalMutationCooldown()) return@collect
-
-                    val updatedMeta = withContext(Dispatchers.IO) { repository.getNoteById(currentId) }
-                    if (updatedMeta != null) {
-                        currentMetadata = updatedMeta
-                        _noteTitle.value = updatedMeta.title
-                        _noteIcon.value = updatedMeta.icon
-                        _isFavorite.value = updatedMeta.isFavorite
-                        _coverImagePath.value = updatedMeta.coverImagePath
-                        _showWordCount.value = updatedMeta.showWordCount
-                        _noteUpdatedAt.value = updatedMeta.updatedAt
-                        _isTemplate.value = updatedMeta.isTemplate
+                    if (autosaveJob?.isActive == true || isWithinLocalMutationCooldown()) {
+                        refreshFromDiskOncePaused { reloadNoteFromDisk(currentId) }
+                        return@collect
                     }
-
-                    val content = withContext(Dispatchers.IO) { repository.getNoteContent(currentId) }
-                    val newBlocks = preserveNewerLocalBlocks(content?.blocks ?: emptyList())
-                    val resolved = recalculateNumberedLists(
-                        newBlocks.withSomewhereToType()
-                    )
-                    if (resolved != _blocks.value) {
-                        _blocks.value = resolved
-                    }
+                    reloadNoteFromDisk(currentId)
                 }
             }
         }
@@ -129,8 +111,10 @@ class NoteEditorViewModel(
                 .filterNotNull()
                 .collect { freshContent ->
                     if (_isLoading.value) return@collect
-                    if (autosaveJob?.isActive == true) return@collect
-                    if (isWithinLocalMutationCooldown()) return@collect
+                    if (autosaveJob?.isActive == true || isWithinLocalMutationCooldown()) {
+                        currentlyLoadedNoteId?.let { noteId -> refreshFromDiskOncePaused { reloadNoteFromDisk(noteId) } }
+                        return@collect
+                    }
 
                     val final = recalculateNumberedLists(
                         preserveNewerLocalBlocks(freshContent.blocks).withSomewhereToType()
@@ -172,6 +156,30 @@ class NoteEditorViewModel(
         _isTemplate.value = storedMetadata.isTemplate
         _noteUpdatedAt.value = storedMetadata.updatedAt
         currentMetadata = storedMetadata
+    }
+
+    private suspend fun reloadNoteFromDisk(noteId: String) {
+        if (currentMetadata?.noteId != noteId) return
+        val updatedMeta = withContext(Dispatchers.IO) { repository.getNoteById(noteId) }
+        if (updatedMeta != null) {
+            currentMetadata = updatedMeta
+            _noteTitle.value = updatedMeta.title
+            _noteIcon.value = updatedMeta.icon
+            _isFavorite.value = updatedMeta.isFavorite
+            _coverImagePath.value = updatedMeta.coverImagePath
+            _showWordCount.value = updatedMeta.showWordCount
+            _noteUpdatedAt.value = updatedMeta.updatedAt
+            _isTemplate.value = updatedMeta.isTemplate
+        }
+
+        val content = withContext(Dispatchers.IO) { repository.getNoteContent(noteId) }
+        val newBlocks = preserveNewerLocalBlocks(content?.blocks ?: emptyList())
+        val resolved = recalculateNumberedLists(
+            newBlocks.withSomewhereToType()
+        )
+        if (resolved != _blocks.value) {
+            _blocks.value = resolved
+        }
     }
 
     private suspend fun reconcileWithDisk(noteId: String, snapshot: List<NoteBlock>): List<NoteBlock> =

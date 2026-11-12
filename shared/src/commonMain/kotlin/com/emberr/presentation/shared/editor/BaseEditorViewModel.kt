@@ -414,6 +414,22 @@ abstract class BaseEditorViewModel(
     protected fun isWithinLocalMutationCooldown(): Boolean =
         System.currentTimeMillis() - lastLocalMutationTime < LOCAL_MUTATION_COOLDOWN_MS
 
+    private val POSTPONED_REFRESH_SHORTEST_WAIT_MS = 100L
+    private var postponedDiskRefreshJob: Job? = null
+
+    protected fun refreshFromDiskOncePaused(refresh: suspend () -> Unit) {
+        postponedDiskRefreshJob?.cancel()
+        postponedDiskRefreshJob = viewModelScope.launch {
+            while (true) {
+                autosaveJob?.join()
+                val cooldownLeftMs = LOCAL_MUTATION_COOLDOWN_MS - (System.currentTimeMillis() - lastLocalMutationTime)
+                if (cooldownLeftMs <= 0 && autosaveJob?.isActive != true) break
+                delay(maxOf(cooldownLeftMs, POSTPONED_REFRESH_SHORTEST_WAIT_MS).milliseconds)
+            }
+            refresh()
+        }
+    }
+
     protected val editorDiskReconciler = EditorDiskReconciler()
 
     init {

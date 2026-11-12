@@ -8,6 +8,7 @@ import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteBlockSerializer
 import com.emberr.domain.model.TextBlock
+import com.emberr.domain.model.editableTextOrNull
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.translation.BlockTombstone
@@ -102,13 +103,25 @@ object NoteMergeHelper {
         localBlock: NoteBlockEntity,
         remoteBlock: NoteBlockEntity
     ): NoteBlockEntity? {
-        if (base == null || localBlock.isDeleted || remoteBlock.isDeleted) return null
+        if (localBlock.isDeleted || remoteBlock.isDeleted) return null
         if (localBlock.blockDataJson == remoteBlock.blockDataJson) return null
-        val mergedBlock = BlockTextMerge.mergeTextBlock(
-            base = decodeBlockOrNull(base.blockDataJson) ?: return null,
-            local = decodeBlockOrNull(localBlock.blockDataJson) ?: return null,
-            remote = decodeBlockOrNull(remoteBlock.blockDataJson) ?: return null
-        ) ?: return null
+        val local = decodeBlockOrNull(localBlock.blockDataJson) ?: return null
+        if (local.editableTextOrNull() == null) return null
+        if (base == null) {
+            SelfHostSyncLog.d("TextMerge: block ${localBlock.blockId} differs but has no base copy, newer side wins")
+            return null
+        }
+        val baseBlock = decodeBlockOrNull(base.blockDataJson) ?: return null
+        val remote = decodeBlockOrNull(remoteBlock.blockDataJson) ?: return null
+        val mergedBlock = BlockTextMerge.mergeTextBlock(baseBlock, local, remote)
+        if (mergedBlock == null) {
+            SelfHostSyncLog.d(
+                "TextMerge: block ${localBlock.blockId} not merged, newer side wins " +
+                    "(base=${baseBlock.updatedAt} local=${local.updatedAt} remote=${remote.updatedAt})"
+            )
+            return null
+        }
+        SelfHostSyncLog.d("TextMerge: block ${localBlock.blockId} merged from both sides")
         val newerBlock = if (remoteBlock.updatedAt > localBlock.updatedAt) remoteBlock else localBlock
         return newerBlock.copy(
             blockDataJson = blockJson.encodeToString(NoteBlockSerializer, mergedBlock),
