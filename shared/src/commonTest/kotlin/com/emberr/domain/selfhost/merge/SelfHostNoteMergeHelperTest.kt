@@ -67,7 +67,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = listOf(tableEntity(remoteTable)),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         val mergedTable = decoded(merged.single()) as DatabaseBlock
         assertEquals(listOf(tagsColumn, nameColumn), mergedTable.columns)
@@ -82,7 +82,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = listOf(blockEntity("block-1", "from the other device", 100L)),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertEquals(1, merged.size)
         assertEquals("from the other device", decodedText(merged.single()))
@@ -96,7 +96,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = emptyList(),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertEquals("mine only", decodedText(merged.single()))
     }
@@ -109,7 +109,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = listOf(blockEntity("block-1", "theirs", 200L)),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertEquals("theirs", decodedText(merged.single()))
     }
@@ -122,7 +122,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = listOf(blockEntity("block-1", "theirs", 100L)),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertEquals("mine", decodedText(merged.single()))
     }
@@ -135,7 +135,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = listOf(blockEntity("block-1", "theirs", 100L)),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertEquals("mine", decodedText(merged.single()))
     }
@@ -148,7 +148,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = emptyList(),
             remoteDeletions = listOf(BlockTombstone("block-1", deletedAt = 100L)),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertTrue(merged.single().isDeleted)
     }
@@ -161,7 +161,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = emptyList(),
             remoteDeletions = listOf(BlockTombstone("block-1", deletedAt = 100L)),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertTrue(!merged.single().isDeleted)
         assertEquals("edited after the delete", decodedText(merged.single()))
@@ -175,7 +175,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = emptyList(),
             remoteDeletions = listOf(BlockTombstone("block-1", deletedAt = 200L)),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertEquals(7, merged.single().displayOrder)
         assertEquals(200L, merged.single().updatedAt)
@@ -189,7 +189,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = emptyList(),
             remoteDeletions = listOf(BlockTombstone("block-1", deletedAt = 200L)),
             remoteIsNewer = false
-        )
+        ).blocks
 
         val tombstoned = decoded(merged.single())
 
@@ -205,7 +205,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = emptyList(),
             remoteDeletions = listOf(BlockTombstone("block-unknown", deletedAt = 200L)),
             remoteIsNewer = false
-        )
+        ).blocks
 
         val tombstoned = decoded(merged.single())
 
@@ -231,7 +231,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = emptyList(),
             remoteDeletions = listOf(BlockTombstone("block-1", deletedAt = 200L)),
             remoteIsNewer = false
-        )
+        ).blocks
 
         val tombstoned = decoded(merged.single())
 
@@ -253,7 +253,7 @@ class SelfHostNoteMergeHelperTest {
             ),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertEquals(listOf("block-mine"), merged.map { it.blockId })
     }
@@ -272,7 +272,7 @@ class SelfHostNoteMergeHelperTest {
             ),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertEquals(listOf("block-1", "block-2", "block-3"), merged.map { it.blockId })
         assertEquals("two updated", decodedText(merged[1]))
@@ -286,7 +286,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = emptyList(),
             remoteDeletions = emptyList(),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertTrue(merged.isEmpty())
     }
@@ -299,7 +299,7 @@ class SelfHostNoteMergeHelperTest {
             remoteUpserts = listOf(blockEntity("block-1", "theirs", 200L)),
             remoteDeletions = listOf(BlockTombstone("block-1", deletedAt = 300L)),
             remoteIsNewer = false
-        )
+        ).blocks
 
         assertTrue(merged.single().isDeleted)
         assertEquals(300L, merged.single().updatedAt)
@@ -323,7 +323,7 @@ class SelfHostNoteMergeHelperTest {
             ),
             remoteDeletions = emptyList(),
             remoteIsNewer = true
-        )
+        ).blocks
 
         assertEquals(listOf("block-a", "block-x", "block-y", "block-b", "block-c"), merged.map { it.blockId })
         assertEquals(listOf(0, 1, 2, 3, 4), merged.map { it.displayOrder })
@@ -335,7 +335,7 @@ class SelfHostNoteMergeHelperTest {
         val local = blockEntity("block-a", "Buy oat milk and bread", updatedAt = 200L)
         val remote = blockEntity("block-a", "Buy milk and bread, and eggs", updatedAt = 300L)
 
-        val merged = NoteMergeHelper.mergeBlocks(
+        val mergeResult = NoteMergeHelper.mergeBlocks(
             noteId = noteId,
             localBlocks = listOf(local),
             remoteUpserts = listOf(remote),
@@ -344,8 +344,8 @@ class SelfHostNoteMergeHelperTest {
             bases = mapOf("block-a" to BlockMergeBaseEntity(noteId, "block-a", base.blockDataJson, base.updatedAt))
         )
 
-        assertEquals("Buy oat milk and bread, and eggs", decodedText(merged.single()))
-        assertEquals(301L, merged.single().updatedAt)
-        assertTrue(NoteMergeHelper.containsTextMergedBlocks(merged, listOf(local), listOf(remote)))
+        assertEquals("Buy oat milk and bread, and eggs", decodedText(mergeResult.blocks.single()))
+        assertEquals(301L, mergeResult.blocks.single().updatedAt)
+        assertEquals(setOf("block-a"), mergeResult.textMergedBlockIds)
     }
 }

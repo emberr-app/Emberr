@@ -11,6 +11,11 @@ object BlockTextMerge {
     private const val NEWER_SIDE = 0
     private const val OLDER_SIDE = 1
     private const val MAX_EDIT_DISTANCE = 1000
+    private val HIRAGANA_AND_KATAKANA = 0x3040..0x30FF
+    private val CHINESE_CHARACTERS_EXTENSION_A = 0x3400..0x4DBF
+    private val CHINESE_CHARACTERS = 0x4E00..0x9FFF
+    private val CHINESE_COMPATIBILITY_CHARACTERS = 0xF900..0xFAFF
+    private val HALF_WIDTH_KATAKANA = 0xFF66..0xFF9F
 
     fun mergeTextBlock(base: NoteBlock?, local: NoteBlock, remote: NoteBlock): NoteBlock? {
         if (base == null || local.isDeleted || remote.isDeleted) return null
@@ -49,7 +54,9 @@ object BlockTextMerge {
         var baseCursor = 0
         for (group in overlappingGroups(newerDiff.hunks + olderDiff.hunks)) {
             addBaseTokens(mergedTokens, baseTokens, baseCursor, group.baseStart)
-            lostBaseTokenCount += resolveGroup(group, baseTokens, diffs, mergedTokens)
+            val groupResult = resolveGroup(group, baseTokens, diffs)
+            mergedTokens += groupResult.tokens
+            lostBaseTokenCount += groupResult.lostBaseTokenCount
             baseCursor = group.baseEnd
         }
         addBaseTokens(mergedTokens, baseTokens, baseCursor, baseTokens.size)
@@ -81,7 +88,12 @@ object BlockTextMerge {
 
     private class HunkGroup(val baseStart: Int, val baseEnd: Int, val hunks: List<TextHunk>)
 
-    private class MergedToken(val text: String, val baseIndex: Int, val side: Int, val sideIndex: Int)
+    private sealed class MergedToken(val text: String) {
+        class FromBase(text: String, val baseTokenIndex: Int) : MergedToken(text)
+        class FromSide(text: String, val side: Int, val sideTokenIndex: Int) : MergedToken(text)
+    }
+
+    private class GroupResult(val tokens: List<MergedToken>, val lostBaseTokenCount: Int)
 
     private fun tokenize(text: String): List<String> {
         val tokens = mutableListOf<String>()
@@ -115,11 +127,11 @@ object BlockTextMerge {
 
     private fun isUnspacedScriptCharacter(character: Char): Boolean {
         val code = character.code
-        return code in 0x3040..0x30FF ||
-            code in 0x3400..0x4DBF ||
-            code in 0x4E00..0x9FFF ||
-            code in 0xF900..0xFAFF ||
-            code in 0xFF66..0xFF9F
+        return code in HIRAGANA_AND_KATAKANA ||
+            code in CHINESE_CHARACTERS_EXTENSION_A ||
+            code in CHINESE_CHARACTERS ||
+            code in CHINESE_COMPATIBILITY_CHARACTERS ||
+            code in HALF_WIDTH_KATAKANA
     }
 
     private fun diffAgainstBase(baseTokens: List<String>, sideTokens: List<String>, side: Int): SideDiff? {
@@ -193,9 +205,9 @@ object BlockTextMerge {
             val furthest = history[editCount]
             val diagonal = baseIndex - sideIndex
             val cameFromAbove = diagonal == -editCount || (diagonal != editCount &&
-                furthest[diagonal - 1 + editCount + 1] < furthest[diagonal + 1 + editCount + 1])
+                furthest.atDiagonal(diagonal - 1, editCount) < furthest.atDiagonal(diagonal + 1, editCount))
             val previousDiagonal = if (cameFromAbove) diagonal + 1 else diagonal - 1
-            val previousBaseIndex = furthest[previousDiagonal + editCount + 1]
+            val previousBaseIndex = furthest.atDiagonal(previousDiagonal, editCount)
             val previousSideIndex = previousBaseIndex - previousDiagonal
             while (baseIndex > previousBaseIndex && sideIndex > previousSideIndex) {
                 baseIndex--
@@ -210,6 +222,8 @@ object BlockTextMerge {
         return matches
     }
 
+    private fun IntArray.atDiagonal(diagonal: Int, editCount: Int): Int = this[diagonal + editCount + 1]
+
     private fun slideHunksLeft(
         baseTokens: List<String>,
         sideTokens: List<String>,
@@ -217,38 +231,72 @@ object BlockTextMerge {
         hunks: List<TextHunk>
     ) {
         for (hunk in hunks) {
-            if (hunk.insertsText && !hunk.deletesText) {
-                var start = hunk.sideStart
-                var end = hunk.sideEnd
-                var basePosition = hunk.baseStart
-                while (start > 0 && basePosition > 0 &&
-                    baseIndexOfToken[start - 1] == basePosition - 1 &&
-                    sideTokens[start - 1] == sideTokens[end - 1] &&
-                    (if (start == 1) basePosition == 1 else baseIndexOfToken[start - 2] == basePosition - 2)
-                ) {
-                    baseIndexOfToken[end - 1] = basePosition - 1
-                    baseIndexOfToken[start - 1] = -1
-                    start--
-                    end--
-                    basePosition--
-                }
-            }
-            if (hunk.deletesText && !hunk.insertsText) {
-                var start = hunk.baseStart
-                var end = hunk.baseEnd
-                var sidePosition = hunk.sideStart
-                while (start > 0 && sidePosition > 0 &&
-                    baseIndexOfToken[sidePosition - 1] == start - 1 &&
-                    baseTokens[start - 1] == baseTokens[end - 1] &&
-                    (if (sidePosition == 1) start == 1 else baseIndexOfToken[sidePosition - 2] == start - 2)
-                ) {
-                    baseIndexOfToken[sidePosition - 1] = end - 1
-                    start--
-                    end--
-                    sidePosition--
-                }
+            when {
+                hunk.insertsText && !hunk.deletesText -> slideInsertLeft(hunk, sideTokens, baseIndexOfToken)
+                hunk.deletesText && !hunk.insertsText -> slideDeleteLeft(hunk, baseTokens, baseIndexOfToken)
             }
         }
+    }
+
+    private fun slideInsertLeft(hunk: TextHunk, sideTokens: List<String>, baseIndexOfToken: IntArray) {
+        var sideStart = hunk.sideStart
+        var sideEnd = hunk.sideEnd
+        var basePosition = hunk.baseStart
+        while (canSlideInsertOneMoreToken(sideStart, sideEnd, basePosition, sideTokens, baseIndexOfToken)) {
+            baseIndexOfToken[sideEnd - 1] = basePosition - 1
+            baseIndexOfToken[sideStart - 1] = -1
+            sideStart--
+            sideEnd--
+            basePosition--
+        }
+    }
+
+    private fun canSlideInsertOneMoreToken(
+        sideStart: Int,
+        sideEnd: Int,
+        basePosition: Int,
+        sideTokens: List<String>,
+        baseIndexOfToken: IntArray
+    ): Boolean {
+        if (sideStart == 0 || basePosition == 0) return false
+        val tokenBeforeIsUnchanged = baseIndexOfToken[sideStart - 1] == basePosition - 1
+        val tokenBeforeEqualsLastInsertedToken = sideTokens[sideStart - 1] == sideTokens[sideEnd - 1]
+        val staysApartFromPreviousChange = if (sideStart == 1) {
+            basePosition == 1
+        } else {
+            baseIndexOfToken[sideStart - 2] == basePosition - 2
+        }
+        return tokenBeforeIsUnchanged && tokenBeforeEqualsLastInsertedToken && staysApartFromPreviousChange
+    }
+
+    private fun slideDeleteLeft(hunk: TextHunk, baseTokens: List<String>, baseIndexOfToken: IntArray) {
+        var baseStart = hunk.baseStart
+        var baseEnd = hunk.baseEnd
+        var sidePosition = hunk.sideStart
+        while (canSlideDeleteOneMoreToken(baseStart, baseEnd, sidePosition, baseTokens, baseIndexOfToken)) {
+            baseIndexOfToken[sidePosition - 1] = baseEnd - 1
+            baseStart--
+            baseEnd--
+            sidePosition--
+        }
+    }
+
+    private fun canSlideDeleteOneMoreToken(
+        baseStart: Int,
+        baseEnd: Int,
+        sidePosition: Int,
+        baseTokens: List<String>,
+        baseIndexOfToken: IntArray
+    ): Boolean {
+        if (baseStart == 0 || sidePosition == 0) return false
+        val tokenBeforeIsUnchanged = baseIndexOfToken[sidePosition - 1] == baseStart - 1
+        val tokenBeforeEqualsLastDeletedToken = baseTokens[baseStart - 1] == baseTokens[baseEnd - 1]
+        val staysApartFromPreviousChange = if (sidePosition == 1) {
+            baseStart == 1
+        } else {
+            baseIndexOfToken[sidePosition - 2] == baseStart - 2
+        }
+        return tokenBeforeIsUnchanged && tokenBeforeEqualsLastDeletedToken && staysApartFromPreviousChange
     }
 
     private fun hunksFromMatches(side: Int, baseSize: Int, baseIndexOfToken: IntArray): List<TextHunk> {
@@ -302,9 +350,8 @@ object BlockTextMerge {
     private fun resolveGroup(
         group: HunkGroup,
         baseTokens: List<String>,
-        diffs: List<SideDiff>,
-        mergedTokens: MutableList<MergedToken>
-    ): Int {
+        diffs: List<SideDiff>
+    ): GroupResult {
         val newerHunks = group.hunks.filter { it.side == NEWER_SIDE }
         val olderHunks = group.hunks.filter { it.side == OLDER_SIDE }
         val newerVersion = sideVersion(group, newerHunks, baseTokens, diffs[NEWER_SIDE])
@@ -313,23 +360,16 @@ object BlockTextMerge {
         val olderText = olderVersion.joinToString("") { it.text }
         val newerInsertsText = newerHunks.any { it.insertsText }
         val olderInsertsText = olderHunks.any { it.insertsText }
-        when {
-            olderHunks.isEmpty() || newerText == olderText -> mergedTokens += newerVersion
-            newerHunks.isEmpty() -> mergedTokens += olderVersion
-            !olderInsertsText -> mergedTokens += newerVersion.withoutBaseTokensDeletedBy(olderHunks)
-            !newerInsertsText -> mergedTokens += olderVersion.withoutBaseTokensDeletedBy(newerHunks)
-            newerText.contains(olderText) -> mergedTokens += newerVersion
-            olderText.contains(newerText) -> mergedTokens += olderVersion
-            group.baseStart == group.baseEnd -> {
-                mergedTokens += olderVersion
-                mergedTokens += newerVersion
-            }
-            else -> {
-                mergedTokens += newerVersion
-                return group.baseEnd - group.baseStart
-            }
+        return when {
+            olderHunks.isEmpty() || newerText == olderText -> GroupResult(newerVersion, lostBaseTokenCount = 0)
+            newerHunks.isEmpty() -> GroupResult(olderVersion, lostBaseTokenCount = 0)
+            !olderInsertsText -> GroupResult(newerVersion.withoutBaseTokensDeletedBy(olderHunks), lostBaseTokenCount = 0)
+            !newerInsertsText -> GroupResult(olderVersion.withoutBaseTokensDeletedBy(newerHunks), lostBaseTokenCount = 0)
+            newerText.contains(olderText) -> GroupResult(newerVersion, lostBaseTokenCount = 0)
+            olderText.contains(newerText) -> GroupResult(olderVersion, lostBaseTokenCount = 0)
+            group.baseStart == group.baseEnd -> GroupResult(olderVersion + newerVersion, lostBaseTokenCount = 0)
+            else -> GroupResult(newerVersion, lostBaseTokenCount = group.baseEnd - group.baseStart)
         }
-        return 0
     }
 
     private fun sideVersion(
@@ -343,7 +383,7 @@ object BlockTextMerge {
         for (hunk in sideHunks) {
             addBaseTokens(version, baseTokens, baseCursor, hunk.baseStart)
             for (sideIndex in hunk.sideStart until hunk.sideEnd) {
-                version += MergedToken(diff.tokens[sideIndex], baseIndex = -1, side = hunk.side, sideIndex = sideIndex)
+                version += MergedToken.FromSide(diff.tokens[sideIndex], hunk.side, sideIndex)
             }
             baseCursor = hunk.baseEnd
         }
@@ -352,11 +392,11 @@ object BlockTextMerge {
     }
 
     private fun List<MergedToken>.withoutBaseTokensDeletedBy(hunks: List<TextHunk>): List<MergedToken> =
-        filter { token -> token.baseIndex < 0 || hunks.none { token.baseIndex >= it.baseStart && token.baseIndex < it.baseEnd } }
+        filter { token -> token !is MergedToken.FromBase || hunks.none { token.baseTokenIndex in it.baseStart until it.baseEnd } }
 
     private fun addBaseTokens(destination: MutableList<MergedToken>, baseTokens: List<String>, from: Int, until: Int) {
         for (baseIndex in from until until) {
-            destination += MergedToken(baseTokens[baseIndex], baseIndex = baseIndex, side = -1, sideIndex = -1)
+            destination += MergedToken.FromBase(baseTokens[baseIndex], baseIndex)
         }
     }
 
@@ -381,10 +421,9 @@ object BlockTextMerge {
             val mergedStartOfBaseToken = IntArray(baseSize) { -1 }
             var position = 0
             for (token in mergedTokens) {
-                if (token.baseIndex >= 0) {
-                    mergedStartOfBaseToken[token.baseIndex] = position
-                } else {
-                    mergedStartOfSideToken[token.side][token.sideIndex] = position
+                when (token) {
+                    is MergedToken.FromBase -> mergedStartOfBaseToken[token.baseTokenIndex] = position
+                    is MergedToken.FromSide -> mergedStartOfSideToken[token.side][token.sideTokenIndex] = position
                 }
                 position += token.text.length
             }

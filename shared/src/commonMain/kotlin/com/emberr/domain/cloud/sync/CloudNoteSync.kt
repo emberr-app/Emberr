@@ -199,7 +199,7 @@ class CloudNoteSync(
             remoteDeletions = remoteDeletions,
             remoteIsNewer = localMetadata == null || remoteMetadata.updatedAt > localMetadata.updatedAt,
             bases = blockMergeBaseDao.basesByBlockId(noteId)
-        )
+        ).blocks
         val newerMetadata = pickNewerMetadata(localMetadata, remoteMetadata)
         val mergedMetadata = newerMetadata.copy(
             noteId = noteId,

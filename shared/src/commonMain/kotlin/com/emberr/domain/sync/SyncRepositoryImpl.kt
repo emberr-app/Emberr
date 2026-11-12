@@ -685,8 +685,7 @@ class SyncRepositoryImpl(
     override suspend fun rememberChangesSentToDesktop(changes: List<SyncEnvelope>) = withContext(Dispatchers.IO) {
         val syncKey = settingsManager.getSyncEncryptionKey()
         changes
-            .filter { it.entityType == SyncType.NOTE || it.entityType == SyncType.DAILY_NOTE }
-            .filter { it.contentJson.isNotEmpty() }
+            .filter { (it.entityType == SyncType.NOTE || it.entityType == SyncType.DAILY_NOTE) && it.contentJson.isNotEmpty() }
             .forEach { envelope ->
                 try {
                     val sentMeta = json.decodeFromString<NoteMetadataEntity>(encryptionManager.decryptPayload(envelope.metadataJson, syncKey))
