@@ -379,32 +379,11 @@ class DailyEditorViewModel(
                             if (syncedEntityId == "import_complete") {
                                 autosaveJob?.cancel()
                             } else if (autosaveJob?.isActive == true || isWithinLocalMutationCooldown()) {
+                                currentDateString?.let { dateString -> refreshFromDiskOncePaused { reloadDailyFromDisk(dateString) } }
                                 return@collect
                             }
 
-                            currentDateString?.let { dateString ->
-                                val pinnedContentRaw =
-                                    withContext(Dispatchers.IO) { repository.getDailyNote("global_pinned") }?.blocks.orEmpty()
-                                val pinnedBlocks = pinnedContentRaw.filter { !it.isDeleted }
-                                val content = withContext(Dispatchers.IO) { repository.getDailyNote(dateString) }
-                                val newBlocksRaw = content?.blocks.orEmpty()
-                                val newBlocks = newBlocksRaw.filter { !it.isDeleted }
-
-                                // Include deleted blocks (tombstones) so preserveNewerLocalBlocks can distinguish
-                                // remotely deleted blocks from unsaved local blocks and prevent accidental resurrection.
-                                val tombstones = (newBlocksRaw.filter { it.isDeleted } + pinnedContentRaw.filter { it.isDeleted })
-
-                                // Filter out tombstones immediately after merging so they aren't displayed in UI state.
-                                var merged = preserveNewerLocalBlocks(
-                                    pinnedBlocks + (if (isNoteActuallyEmpty(newBlocks)) emptyList() else newBlocks) + tombstones
-                                ).filter { !it.isDeleted }
-                                merged = ensureTrailingEmptyBlock(merged, dateString)
-                                val finalBlocks = recalculateNumberedLists(merged)
-                                if (finalBlocks != _blocks.value) {
-                                    _blocks.value = finalBlocks
-                                    cachePreviewBlocks(dateString, finalBlocks)
-                                }
-                            }
+                            currentDateString?.let { dateString -> reloadDailyFromDisk(dateString) }
                         }
                     }
                 }
@@ -418,8 +397,10 @@ class DailyEditorViewModel(
                 .collect { freshContent ->
                     val date = currentDateString ?: return@collect
                     if (_loadedDateString.value != date) return@collect
-                    if (autosaveJob?.isActive == true) return@collect
-                    if (isWithinLocalMutationCooldown()) return@collect
+                    if (autosaveJob?.isActive == true || isWithinLocalMutationCooldown()) {
+                        refreshFromDiskOncePaused { reloadDailyFromDisk(date) }
+                        return@collect
+                    }
 
                     val pinnedContentRaw = repository.getDailyNote("global_pinned")?.blocks.orEmpty()
                     val pinnedBlocks = pinnedContentRaw.filter { !it.isDeleted }
@@ -471,6 +452,31 @@ class DailyEditorViewModel(
 
         repository.saveDailyNote("global_pinned", NoteContent(blocks = pinnedBlocks))
         repository.saveDailyNote(dateString, NoteContent(blocks = dayBlocks))
+    }
+
+    private suspend fun reloadDailyFromDisk(dateString: String) {
+        if (currentDateString != dateString) return
+        val pinnedContentRaw =
+            withContext(Dispatchers.IO) { repository.getDailyNote("global_pinned") }?.blocks.orEmpty()
+        val pinnedBlocks = pinnedContentRaw.filter { !it.isDeleted }
+        val content = withContext(Dispatchers.IO) { repository.getDailyNote(dateString) }
+        val newBlocksRaw = content?.blocks.orEmpty()
+        val newBlocks = newBlocksRaw.filter { !it.isDeleted }
+
+        // Include deleted blocks (tombstones) so preserveNewerLocalBlocks can distinguish
+        // remotely deleted blocks from unsaved local blocks and prevent accidental resurrection.
+        val tombstones = (newBlocksRaw.filter { it.isDeleted } + pinnedContentRaw.filter { it.isDeleted })
+
+        // Filter out tombstones immediately after merging so they aren't displayed in UI state.
+        var merged = preserveNewerLocalBlocks(
+            pinnedBlocks + (if (isNoteActuallyEmpty(newBlocks)) emptyList() else newBlocks) + tombstones
+        ).filter { !it.isDeleted }
+        merged = ensureTrailingEmptyBlock(merged, dateString)
+        val finalBlocks = recalculateNumberedLists(merged)
+        if (finalBlocks != _blocks.value) {
+            _blocks.value = finalBlocks
+            cachePreviewBlocks(dateString, finalBlocks)
+        }
     }
 
     override suspend fun performSave(): Boolean {

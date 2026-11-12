@@ -772,13 +772,12 @@ class SelfHostSyncEngine(
 
             suspend fun reconcileCandidate(
                 noteId: String,
-                remoteEntry: SelfHostManifestEntry?,
-                readsServerCopyOfDailyNoteFirst: Boolean = false
+                remoteEntry: SelfHostManifestEntry?
             ) {
                 // Lock each note individually for reconciliation.
                 val outcome = reconcileOrSkipBrokenNote(noteId) {
                     withSyncLock {
-                        reconcileNote(noteId, remoteEntry = remoteEntry, readsServerCopyOfDailyNoteFirst = readsServerCopyOfDailyNoteFirst)
+                        reconcileNote(noteId, remoteEntry = remoteEntry)
                     } ?: run {
                         SelfHostSyncLog.d("TextSync: note=$noteId skipped this cycle, SyncCoordinator.mutex busy - will retry next trigger")
                         ReconcileOutcome.LOCK_BUSY
@@ -886,7 +885,7 @@ class SelfHostSyncEngine(
                     )
                 }
                 for ((noteId, serverEntry) in serverEntryByNoteIdToUploadAfterMerge) {
-                    reconcileCandidate(noteId, serverEntry, readsServerCopyOfDailyNoteFirst = true)
+                    reconcileCandidate(noteId, serverEntry)
                 }
                 _noteSyncProgress.update { it?.copy(stage = SelfHostSyncStage.FINISHING) }
             }
@@ -1534,8 +1533,7 @@ class SelfHostSyncEngine(
 
     private suspend fun reconcileNote(
         candidateId: String,
-        remoteEntry: SelfHostManifestEntry?,
-        readsServerCopyOfDailyNoteFirst: Boolean = false
+        remoteEntry: SelfHostManifestEntry?
     ): ReconcileOutcome {
         if (remoteEntry?.isDeleted == true) {
             return applyRemoteTombstone(candidateId, remoteEntry)
@@ -1556,10 +1554,11 @@ class SelfHostSyncEngine(
             val remoteJsonWithEtag = when {
                 remoteEntry == null -> {
                     val dailyDateString = localMetadata?.dateString
-                    if (readsServerCopyOfDailyNoteFirst && localMetadata != null && localMetadata.isDaily && dailyDateString != null) {
-                        webDavSyncClient.downloadDailyWithEtag(localMetadata.spaceId, dailyDateString)
-                    } else {
-                        null
+                    when {
+                        localMetadata == null -> null
+                        !localMetadata.isDaily -> webDavSyncClient.downloadNoteWithEtag(localMetadata.noteId)
+                        dailyDateString != null -> webDavSyncClient.downloadDailyWithEtag(localMetadata.spaceId, dailyDateString)
+                        else -> null
                     }
                 }
                 isDaily -> {
