@@ -86,7 +86,6 @@ import com.emberr.presentation.shared.components.LocalDesktopSidebarToggle
 import com.emberr.presentation.shared.components.TopHeaderBarTopPadding
 import com.emberr.presentation.shared.components.flippedHorizontally
 import com.emberr.presentation.shared.canvas.CanvasScreen
-import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.sync.SyncViewModel
 import com.emberr.presentation.sync.text
 import com.emberr.domain.util.eventbus.WidgetCalendarEventBus
@@ -529,8 +528,7 @@ private fun SidebarSearchResults(
                         onDrop = { _, _, _ -> },
                         onDropOutsideList = onDropOutsideList,
                         rowHeightPx = rowHeightPx
-                    )
-                    .smoothWheelScroll(resultsListState),
+                    ),
                 contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 16.dp)
             ) {
                 if (personResults.isNotEmpty()) {
@@ -1616,7 +1614,7 @@ fun DesktopMainScreen(
                         ) {
                             LazyColumn(
                                 state = sidebarListState,
-                                modifier = Modifier.fillMaxSize().smoothWheelScroll(sidebarListState),
+                                modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(bottom = 80.dp)
                             ) {
                                 if (visibleOverviewSections.isNotEmpty()) {
