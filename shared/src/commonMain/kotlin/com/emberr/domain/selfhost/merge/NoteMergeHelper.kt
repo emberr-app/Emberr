@@ -15,6 +15,11 @@ import com.emberr.domain.sync.merge.BlockTextMerge
 import kotlinx.serialization.json.Json
 import kotlin.collections.forEach
 
+data class MergedNoteBlocks(
+    val blocks: List<NoteBlockEntity>,
+    val textMergedBlockIds: Set<String>
+)
+
 object NoteMergeHelper {
 
     private val blockJson = Json { ignoreUnknownKeys = true }
@@ -30,12 +35,13 @@ object NoteMergeHelper {
         remoteDeletions: List<BlockTombstone>,
         remoteIsNewer: Boolean,
         bases: Map<String, BlockMergeBaseEntity> = emptyMap()
-    ): List<NoteBlockEntity> {
+    ): MergedNoteBlocks {
         val safeLocalBlocks = localBlocks.filterOwnedBy(noteId, "local")
         val safeRemoteUpserts = remoteUpserts.filterOwnedBy(noteId, "remote")
 
         val merged = LinkedHashMap<String, NoteBlockEntity>()
         safeLocalBlocks.forEach { merged[it.blockId] = it }
+        val textMergedBlockIds = HashSet<String>()
 
         safeRemoteUpserts.forEach { remoteBlock ->
             val localBlock = merged[remoteBlock.blockId]
@@ -53,6 +59,7 @@ object NoteMergeHelper {
                 merged[remoteBlock.blockId] = mergedDatabaseBlock
             } else if (mergedTextBlock != null) {
                 merged[remoteBlock.blockId] = mergedTextBlock
+                textMergedBlockIds += remoteBlock.blockId
             } else if (localBlock == null || remoteBlock.updatedAt > localBlock.updatedAt) {
                 merged[remoteBlock.blockId] = remoteBlock
             }
@@ -78,23 +85,10 @@ object NoteMergeHelper {
             .mapNotNull { blockId -> merged[blockId]?.takeUnless { it.isDeleted } }
             .mapIndexed { index, block -> block.copy(displayOrder = index) }
         val deletedBlocks = merged.values.filter { it.isDeleted }
-        return renumberedLiveBlocks + deletedBlocks
-    }
-
-    fun containsTextMergedBlocks(
-        mergedBlocks: List<NoteBlockEntity>,
-        localBlocks: List<NoteBlockEntity>,
-        remoteUpserts: List<NoteBlockEntity>
-    ): Boolean {
-        val localJsonById = localBlocks.associate { it.blockId to it.blockDataJson }
-        val remoteJsonById = remoteUpserts.associate { it.blockId to it.blockDataJson }
-        return mergedBlocks.any { block ->
-            val localJson = localJsonById[block.blockId]
-            val remoteJson = remoteJsonById[block.blockId]
-            !block.isDeleted && localJson != null && remoteJson != null &&
-                block.blockDataJson != localJson && block.blockDataJson != remoteJson &&
-                DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER !in block.blockDataJson
-        }
+        return MergedNoteBlocks(
+            blocks = renumberedLiveBlocks + deletedBlocks,
+            textMergedBlockIds = textMergedBlockIds.filterTo(HashSet()) { merged[it]?.isDeleted == false }
+        )
     }
 
     private fun mergedTextBlockOrNull(
@@ -105,9 +99,9 @@ object NoteMergeHelper {
         if (base == null || localBlock.isDeleted || remoteBlock.isDeleted) return null
         if (localBlock.blockDataJson == remoteBlock.blockDataJson) return null
         val mergedBlock = BlockTextMerge.mergeTextBlock(
-            base = decodeBlockOrNull(base.blockDataJson) ?: return null,
-            local = decodeBlockOrNull(localBlock.blockDataJson) ?: return null,
-            remote = decodeBlockOrNull(remoteBlock.blockDataJson) ?: return null
+            base = decodeAnyBlockOrNull(base.blockDataJson) ?: return null,
+            local = decodeAnyBlockOrNull(localBlock.blockDataJson) ?: return null,
+            remote = decodeAnyBlockOrNull(remoteBlock.blockDataJson) ?: return null
         ) ?: return null
         val newerBlock = if (remoteBlock.updatedAt > localBlock.updatedAt) remoteBlock else localBlock
         return newerBlock.copy(
@@ -116,7 +110,7 @@ object NoteMergeHelper {
         )
     }
 
-    private fun decodeBlockOrNull(blockDataJson: String): NoteBlock? =
+    private fun decodeAnyBlockOrNull(blockDataJson: String): NoteBlock? =
         try {
             blockJson.decodeFromString(NoteBlockSerializer, blockDataJson)
         } catch (cause: Exception) {

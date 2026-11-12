@@ -1616,7 +1616,7 @@ class SelfHostSyncEngine(
             }
             val remoteUpserts = remoteOps?.blockUpserts.orEmpty().map { it.copy(noteId = noteId) }
             val remoteDeletions = remoteOps?.blockDeletions.orEmpty()
-            val mergedBlocks = NoteMergeHelper.mergeBlocks(
+            val mergeResult = NoteMergeHelper.mergeBlocks(
                 noteId = noteId,
                 localBlocks = localBlocks,
                 remoteUpserts = remoteUpserts,
@@ -1626,7 +1626,8 @@ class SelfHostSyncEngine(
                 } ?: false,
                 bases = blockMergeBaseDao.basesByBlockId(noteId)
             )
-            val textWasMerged = NoteMergeHelper.containsTextMergedBlocks(mergedBlocks, localBlocks, remoteUpserts)
+            val mergedBlocks = mergeResult.blocks
+            val textWasMerged = mergeResult.textMergedBlockIds.isNotEmpty()
             val oldSpaceDailyFileChangedThisNote = isOldSpaceDailyEntry &&
                 mergedBlocks.associate { it.blockId to it.updatedAt } != localBlocks.associate { it.blockId to it.updatedAt }
 

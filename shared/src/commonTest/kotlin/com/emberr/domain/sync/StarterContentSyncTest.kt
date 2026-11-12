@@ -93,7 +93,7 @@ class StarterContentSyncTest {
             remoteUpserts = listOf(blockEntity(welcomeLine("My own notes", laptopEditedAt))),
             remoteDeletions = emptyList(),
             remoteIsNewer = true
-        )
+        ).blocks
 
         assertEquals(laptopEditedAt, merged.single().updatedAt)
     }
@@ -106,7 +106,7 @@ class StarterContentSyncTest {
             remoteUpserts = emptyList(),
             remoteDeletions = listOf(BlockTombstone(blockId = "sample_note_welcome_line", deletedAt = laptopEditedAt)),
             remoteIsNewer = true
-        )
+        ).blocks
 
         assertTrue(merged.single().isDeleted)
     }

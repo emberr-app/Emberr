@@ -17,14 +17,15 @@ suspend fun BlockMergeBaseDao.basesByBlockId(noteId: String): Map<String, BlockM
 
 suspend fun BlockMergeBaseDao.rememberBlocksBothSidesHave(noteId: String, blocks: List<NoteBlockEntity>) {
     val (deletedBlocks, liveBlocks) = blocks.filter { it.noteId == noteId }.partition { it.isDeleted }
-    val textBlocks = liveBlocks.filter { holdsText(it.blockDataJson) }
-    if (textBlocks.isNotEmpty()) {
-        upsertBases(textBlocks.map { BlockMergeBaseEntity(noteId, it.blockId, it.blockDataJson, it.updatedAt) })
+    val savedJsonByBlockId = getBasesOfNote(noteId).associate { it.blockId to it.blockDataJson }
+    val changedTextBlocks = liveBlocks.filter { block ->
+        savedJsonByBlockId[block.blockId] != block.blockDataJson && holdsText(block.blockDataJson)
     }
-    if (deletedBlocks.isEmpty()) return
-    val savedBlockIds = getBasesOfNote(noteId).mapTo(HashSet()) { it.blockId }
+    if (changedTextBlocks.isNotEmpty()) {
+        upsertBases(changedTextBlocks.map { BlockMergeBaseEntity(noteId, it.blockId, it.blockDataJson, it.updatedAt) })
+    }
     deletedBlocks.map { it.blockId }
-        .filter { it in savedBlockIds }
+        .filter { it in savedJsonByBlockId }
         .chunked(MAX_BLOCK_IDS_PER_DELETE)
         .forEach { blockIds -> deleteBasesOfBlocks(noteId, blockIds) }
 }
