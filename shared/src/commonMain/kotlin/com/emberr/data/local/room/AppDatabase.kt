@@ -90,7 +90,7 @@ const val APP_DATABASE_VERSION = 9
     ],
     version = APP_DATABASE_VERSION,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6), AutoMigration(from = 6, to = 7, spec = RecognizePersonNotesSpec::class), AutoMigration(from = 7, to = 8), AutoMigration(from = 8, to = 9)]
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6), AutoMigration(from = 6, to = 7, spec = RecognizePersonNotesSpec::class), AutoMigration(from = 7, to = 8), AutoMigration(from = 8, to = 9, spec = SeedBlockMergeBasesSpec::class)]
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {

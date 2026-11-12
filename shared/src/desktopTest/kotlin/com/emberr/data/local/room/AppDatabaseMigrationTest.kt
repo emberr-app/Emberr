@@ -105,6 +105,26 @@ class AppDatabaseMigrationTest {
         upgraded.close()
     }
 
+    @Test
+    fun upgradingToVersion9CopiesTextOfFullySyncedNotesIntoBaseCopies() {
+        val migrationTestHelper = migrationTestHelperFor("block-merge-bases.db")
+        val textJson = """{"type":"text","id":"paragraph","text":"Buy milk"}"""
+        val databaseJson = """{"type":"database","id":"table","databaseId":"days"}"""
+        migrationTestHelper.createDatabase(8).apply {
+            insertNote(noteId = "synced", spaceId = "default", updatedAt = 5, selfHostSyncedAt = 5)
+            insertBlock(blockId = "paragraph", noteId = "synced", blockDataJson = textJson, isDeleted = false)
+            insertBlock(blockId = "table", noteId = "synced", blockDataJson = databaseJson, isDeleted = false)
+            insertNote(noteId = "edited-since-sync", spaceId = "default", updatedAt = 9, selfHostSyncedAt = 5)
+            insertBlock(blockId = "unsent", noteId = "edited-since-sync", blockDataJson = textJson, isDeleted = false)
+            close()
+        }
+
+        val upgraded = migrationTestHelper.runMigrationsAndValidate(9, emptyList())
+
+        assertEquals("paragraph", upgraded.textInFirstRow("SELECT GROUP_CONCAT(blockId) FROM block_merge_bases"))
+        upgraded.close()
+    }
+
     private fun migrationTestHelperFor(databaseFileName: String) = MigrationTestHelper(
         schemaDirectoryPath = schemaDirectory,
         databasePath = workingDirectory.resolve(databaseFileName),
@@ -112,12 +132,12 @@ class AppDatabaseMigrationTest {
         databaseClass = AppDatabase::class
     )
 
-    private fun SQLiteConnection.insertNote(noteId: String, spaceId: String) {
+    private fun SQLiteConnection.insertNote(noteId: String, spaceId: String, updatedAt: Long = 1, selfHostSyncedAt: Long = 0) {
         execSQL(
             "INSERT INTO notes_metadata (noteId, title, isDaily, createdAt, updatedAt, filePath, snippet, isFavorite, " +
                 "isSubNote, showWordCount, sortOrder, isTemplate, selfHostSyncedAt, spaceId, kind, titleUpdatedAt, " +
                 "folderUpdatedAt, iconUpdatedAt, favoriteUpdatedAt, coverImageUpdatedAt, wordCountUpdatedAt) " +
-                "VALUES ('$noteId', 'Maya', 0, 1, 1, '', '', 0, 0, 0, 0, 0, 0, '$spaceId', 'NOTE', 0, 0, 0, 0, 0, 0)"
+                "VALUES ('$noteId', 'Maya', 0, 1, $updatedAt, '', '', 0, 0, 0, 0, 0, $selfHostSyncedAt, '$spaceId', 'NOTE', 0, 0, 0, 0, 0, 0)"
         )
     }
 
