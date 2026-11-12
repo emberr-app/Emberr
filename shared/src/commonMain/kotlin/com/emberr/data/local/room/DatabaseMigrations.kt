@@ -68,3 +68,24 @@ class RecognizePersonNotesSpec : AutoMigrationSpec {
         )
     }
 }
+
+class SeedBlockMergeBasesSpec : AutoMigrationSpec {
+    override fun onPostMigrate(connection: SQLiteConnection) {
+        val textBlockTypes = listOf("text", "heading", "quote", "checkbox", "bullet", "number", "toggle", "callout", "code")
+        val holdsText = textBlockTypes.joinToString(" OR ") { type -> """note_blocks.blockDataJson LIKE '{"type":"$type",%'""" }
+        connection.execSQL(
+            """
+            INSERT OR REPLACE INTO block_merge_bases (noteId, blockId, blockDataJson, updatedAt)
+            SELECT note_blocks.noteId, note_blocks.blockId, note_blocks.blockDataJson, note_blocks.updatedAt
+            FROM note_blocks
+            JOIN notes_metadata ON notes_metadata.noteId = note_blocks.noteId
+            WHERE note_blocks.isDeleted = 0
+            AND (
+                (notes_metadata.selfHostSyncedAt > 0 AND notes_metadata.updatedAt <= notes_metadata.selfHostSyncedAt)
+                OR (notes_metadata.cloudSyncedAt > 0 AND notes_metadata.updatedAt <= notes_metadata.cloudSyncedAt)
+            )
+            AND ($holdsText)
+            """.trimIndent()
+        )
+    }
+}
