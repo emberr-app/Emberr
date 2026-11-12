@@ -85,6 +85,7 @@ class CloudNoteSyncRefusedUploadsTest {
         cloudItemDao = appDatabase.cloudItemDao(),
         noteDao = appDatabase.noteDao(),
         blockDao = appDatabase.blockDao(),
+        blockMergeBaseDao = appDatabase.blockMergeBaseDao(),
         folderDao = appDatabase.folderDao(),
         selfHostDeletedNoteDao = appDatabase.selfHostDeletedNoteDao(),
         noteRepository = noteRepositoryThatIsNeverUsed,

@@ -2,6 +2,7 @@ package com.emberr.domain.selfhost.sync
 
 import com.emberr.data.local.prefs.SettingsManager
 import com.emberr.data.local.room.dao.BlockDao
+import com.emberr.data.local.room.dao.BlockMergeBaseDao
 import com.emberr.data.local.room.dao.CalendarEventExceptionDao
 import com.emberr.data.local.room.dao.CategoryDao
 import com.emberr.data.local.room.dao.ChatSessionDao
@@ -40,6 +41,8 @@ import com.emberr.domain.model.NoteContent
 import com.emberr.domain.media.MediaReferenceIndex
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.selfhost.merge.NoteMergeHelper
+import com.emberr.domain.sync.merge.basesByBlockId
+import com.emberr.domain.sync.merge.rememberBlocksBothSidesHave
 import com.emberr.domain.selfhost.merge.mergeApiConfig
 import com.emberr.domain.selfhost.merge.mergeCategories
 import com.emberr.domain.selfhost.merge.mergeCustomProperties
@@ -127,6 +130,7 @@ class SelfHostSyncEngine(
     private val webDavSyncClient: WebDavSyncClient,
     private val noteDao: NoteDao,
     private val blockDao: BlockDao,
+    private val blockMergeBaseDao: BlockMergeBaseDao,
     private val folderDao: FolderDao,
     private val categoryDao: CategoryDao,
     private val propertyTagDao: PropertyTagDao,
@@ -1607,8 +1611,10 @@ class SelfHostSyncEngine(
                 remoteDeletions = remoteDeletions,
                 remoteIsNewer = remoteOps?.metadataUpsert?.let { remoteMetadata ->
                     localMetadata == null || remoteMetadata.updatedAt > localMetadata.updatedAt
-                } ?: false
+                } ?: false,
+                bases = blockMergeBaseDao.basesByBlockId(noteId)
             )
+            val textWasMerged = NoteMergeHelper.containsTextMergedBlocks(mergedBlocks, localBlocks, remoteUpserts)
             val oldSpaceDailyFileChangedThisNote = isOldSpaceDailyEntry &&
                 mergedBlocks.associate { it.blockId to it.updatedAt } != localBlocks.associate { it.blockId to it.updatedAt }
 
@@ -1617,7 +1623,11 @@ class SelfHostSyncEngine(
                 spaceId = targetSpaceId,
                 kind = localMetadata?.kind ?: newerMetadata.kind,
                 cloudSyncedAt = localMetadata?.cloudSyncedAt ?: 0L,
-                updatedAt = if (oldSpaceDailyFileChangedThisNote) System.currentTimeMillis() else newerMetadata.updatedAt
+                updatedAt = when {
+                    oldSpaceDailyFileChangedThisNote -> System.currentTimeMillis()
+                    textWasMerged -> newerMetadata.updatedAt + 1
+                    else -> newerMetadata.updatedAt
+                }
             )
 
             spaceRepository.ensureSpaceExists(mergedMetadata.spaceId)
@@ -1698,6 +1708,7 @@ class SelfHostSyncEngine(
             // Only update `selfHostSyncedAt` if the push succeeds.
             // If the push fails, the note remains a sync candidate for the next cycle.
             noteDao.updateSelfHostSyncedAt(noteId, mergedMetadata.updatedAt)
+            blockMergeBaseDao.rememberBlocksBothSidesHave(noteId, mergedBlocks)
             ReconcileOutcome.SYNCED
         } catch (cause: WebDavConflictException) {
             ReconcileOutcome.CONFLICT_SKIPPED

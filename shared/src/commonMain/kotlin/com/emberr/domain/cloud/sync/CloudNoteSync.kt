@@ -1,6 +1,7 @@
 package com.emberr.domain.cloud.sync
 
 import com.emberr.data.local.room.dao.BlockDao
+import com.emberr.data.local.room.dao.BlockMergeBaseDao
 import com.emberr.data.local.room.dao.CloudItemDao
 import com.emberr.data.local.room.dao.FolderDao
 import com.emberr.data.local.room.dao.NoteDao
@@ -37,6 +38,8 @@ import com.emberr.domain.selfhost.translation.NoteJsonCompiler
 import com.emberr.domain.selfhost.translation.NoteJsonParser
 import com.emberr.domain.selfhost.translation.NotePayloadSyncException
 import com.emberr.domain.space.SpaceRepository
+import com.emberr.domain.sync.merge.basesByBlockId
+import com.emberr.domain.sync.merge.rememberBlocksBothSidesHave
 import com.emberr.domain.sync.withNewerDetailsFrom
 import com.emberr.domain.util.sync.SyncEventBus
 import kotlinx.serialization.json.Json
@@ -66,6 +69,7 @@ private class NoteToSend(
     val itemType: CloudItemType,
     val itemId: String,
     val keyParentId: String,
+    val blocks: List<NoteBlockEntity>,
     val noteJson: String
 )
 
@@ -77,6 +81,7 @@ class CloudNoteSync(
     cloudItemDao: CloudItemDao,
     private val noteDao: NoteDao,
     private val blockDao: BlockDao,
+    private val blockMergeBaseDao: BlockMergeBaseDao,
     private val folderDao: FolderDao,
     private val selfHostDeletedNoteDao: SelfHostDeletedNoteDao,
     private val noteRepository: NoteRepository,
@@ -192,7 +197,8 @@ class CloudNoteSync(
             localBlocks = localBlocks,
             remoteUpserts = remoteUpserts,
             remoteDeletions = remoteDeletions,
-            remoteIsNewer = localMetadata == null || remoteMetadata.updatedAt > localMetadata.updatedAt
+            remoteIsNewer = localMetadata == null || remoteMetadata.updatedAt > localMetadata.updatedAt,
+            bases = blockMergeBaseDao.basesByBlockId(noteId)
         )
         val newerMetadata = pickNewerMetadata(localMetadata, remoteMetadata)
         val mergedMetadata = newerMetadata.copy(
@@ -239,6 +245,11 @@ class CloudNoteSync(
             remoteDeletions = remoteDeletions
         )
         if (cloudSyncedAt != mergedMetadata.cloudSyncedAt) noteDao.updateCloudSyncedAt(noteId, cloudSyncedAt)
+        val remoteJsonById = remoteUpserts.associate { it.blockId to it.blockDataJson }
+        blockMergeBaseDao.rememberBlocksBothSidesHave(
+            noteId,
+            mergedBlocks.filter { it.isDeleted || remoteJsonById[it.blockId] == it.blockDataJson }
+        )
 
         streamRecords.saveRow(stream, rowForLiveItem(stream, item, noteId, remoteMetadata.updatedAt))
         return if (noteChangedHere) NoteToIndex(mergedMetadata, refreshedContent) else null
@@ -388,12 +399,13 @@ class CloudNoteSync(
             row.parentId != keyParentId || note.updatedAt > note.cloudSyncedAt
         if (!needsPush || !keyParentHasKey(stream, keyParentId)) return null
 
+        val blocks = blockDao.getAllBlocksForNoteIncludingDeleted(noteId)
         val noteJson = NoteJsonCompiler.compileNoteToJson(
             metadata = note,
-            blocks = blockDao.getAllBlocksForNoteIncludingDeleted(noteId),
+            blocks = blocks,
             canvas = canvasRepository.loadCanvasIncludingDeleted(noteId)
         )
-        return NoteToSend(note, stream, itemType, itemId, keyParentId, noteJson)
+        return NoteToSend(note, stream, itemType, itemId, keyParentId, blocks, noteJson)
     }
 
     private suspend fun commitNote(pass: NotePass, noteId: String) {
@@ -444,7 +456,10 @@ class CloudNoteSync(
                             isDeleted = false
                         )
                     )
-                    withLocalDataLock { noteDao.updateCloudSyncedAt(noteId, note.updatedAt) }
+                    withLocalDataLock {
+                        noteDao.updateCloudSyncedAt(noteId, note.updatedAt)
+                        blockMergeBaseDao.rememberBlocksBothSidesHave(noteId, noteToSend.blocks)
+                    }
                     pass.counts.sentCount++
                     return
                 }

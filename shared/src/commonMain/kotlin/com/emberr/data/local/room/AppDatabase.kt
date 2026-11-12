@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import com.emberr.data.local.room.dao.BackupDao
 import com.emberr.data.local.room.dao.BlockDao
+import com.emberr.data.local.room.dao.BlockMergeBaseDao
 import com.emberr.data.local.room.dao.BookmarkBlockDao
 import com.emberr.data.local.room.dao.CalendarEventExceptionDao
 import com.emberr.data.local.room.dao.CanvasDao
@@ -29,6 +30,7 @@ import com.emberr.data.local.room.dao.SelfHostDeletedNoteDao
 import com.emberr.data.local.room.dao.SpaceDao
 import com.emberr.data.local.room.dao.UnappliedSyncChangeDao
 import com.emberr.data.local.room.dao.UnusedMediaFileDao
+import com.emberr.data.local.room.entity.BlockMergeBaseEntity
 import com.emberr.data.local.room.entity.BookmarkBlockEntity
 import com.emberr.data.local.room.entity.CalendarEventExceptionEntity
 import com.emberr.data.local.room.entity.CalendarTaskEntity
@@ -55,7 +57,7 @@ import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.data.local.room.entity.UnappliedSyncChangeEntity
 import com.emberr.data.local.room.entity.UnusedMediaFileEntity
 
-const val APP_DATABASE_VERSION = 8
+const val APP_DATABASE_VERSION = 9
 
 @Database(
     entities = [
@@ -83,11 +85,12 @@ const val APP_DATABASE_VERSION = 8
         CloudSpaceEntity::class,
         CloudItemEntity::class,
         MovieBlockEntity::class,
-        CloudMediaLockEntity::class
+        CloudMediaLockEntity::class,
+        BlockMergeBaseEntity::class
     ],
     version = APP_DATABASE_VERSION,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6), AutoMigration(from = 6, to = 7, spec = RecognizePersonNotesSpec::class), AutoMigration(from = 7, to = 8)]
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6), AutoMigration(from = 6, to = 7, spec = RecognizePersonNotesSpec::class), AutoMigration(from = 7, to = 8), AutoMigration(from = 8, to = 9)]
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -115,6 +118,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun cloudItemDao(): CloudItemDao
     abstract fun movieBlockDao(): MovieBlockDao
     abstract fun cloudMediaLockDao(): CloudMediaLockDao
+    abstract fun blockMergeBaseDao(): BlockMergeBaseDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
