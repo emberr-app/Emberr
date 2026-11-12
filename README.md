@@ -10,6 +10,9 @@ Emberr is a 100% open-source, offline-first, privacy-focused notes and productiv
 
 <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/emberr-app/Emberr"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="60" /></a>
 
+<a href="https://x.com/emberr_app"><img src="https://img.shields.io/badge/Follow_on_X-000000?style=for-the-badge&logo=x&logoColor=white" alt="Follow Emberr on X" height="32" /></a>
+<a href="https://www.reddit.com/r/Emberr/"><img src="https://img.shields.io/badge/Join_r%2FEmberr-FF4500?style=for-the-badge&logo=reddit&logoColor=white" alt="Join r/Emberr on Reddit" height="32" /></a>
+
 ### Why I Built This
 
 Why spend months building this when apps like Notion and Obsidian already exist? Honestly, I just got annoyed.
@@ -22,11 +25,16 @@ Figured I might as well share it. If you're also tired of ugly UIs, privacy head
 
 ## Features
 
-- Block-based editor for notes, checklists, tables, and more
-- Spaces to keep different parts of your life (work, personal, school) separate
+- Block-based editor: checklists, tables, databases, canvases, logins with a password generator, a movie and show watchlist, and more
 - Attach images, documents, and voice notes to any note
-- Daily notes with automatic task rollover
-- Built-in calendar and reminders
+- Spaces to keep different parts of your life (work, personal, school) separate
+- Daily notes for your thoughts and tasks
+- Built-in calendar and reminders, with all-day and repeating events you can drag to move or resize
+- People, with assigned tasks, their details, imported from your phone or a .vcf file
+- Import notes from Markdown, Obsidian, etc
+- Split view on desktop, with up to 4 notes side by side
+- 13 color themes, paper texture, interface scale from 80% to 200%, and 18 languages
+- Android home screen widgets and App Lock
 - Mobile to desktop sync (your data is encrypted and signed, even on public Wi-Fi)
 - Self-host your data on your own server (the data is encrypted on the server)
 - AI is off by default. If you want it, you can run a local model on your device or use your own API key
@@ -38,10 +46,9 @@ Figured I might as well share it. If you're also tired of ugly UIs, privacy head
 
 - UI / UX and performance improvements
 - Keyboard shortcuts for the desktop app
-- Split views
 - Support for ARM based desktops
 - Improved Kanban and gallery views for the database block
-- Login/credentials block to store important info (hopefully with autofill too)
+- Autofill for the credentials block
 - Improved local AI
 - Code cleanup
 
@@ -71,11 +78,20 @@ Every release is on the [Releases](https://github.com/emberr-app/Emberr/releases
 
 ### Android
 
-**Option 1: Download the APK**
+**Option 1: Google Play (closed testing)**
+
+Help Emberr reach the Google Play Store. Google needs 12 testers to use it for 14 days before it can be released to everyone.
+
+1. Join the [Emberr testers group](https://groups.google.com/g/emberr-testers).
+2. Then, install **Emberr: Private Workspace** from the Google Play Store using the link in the group.
+
+If you already have the APK installed, it updates in place, so no data will be lost.
+
+**Option 2: Download the APK**
 
 Download [Emberr-android.apk](https://github.com/emberr-app/Emberr/releases) and open it on your phone to install it. Android may ask you to allow installing apps from your browser.
 
-**Option 2: Obtainium**
+**Option 3: Obtainium**
 
 Emberr can be tracked and auto-updated with [Obtainium](https://github.com/ImranR98/Obtainium):
 
@@ -115,7 +131,7 @@ The installer isn't code-signed yet, so Windows may show "Windows protected your
 
 ### Updates
 
-In-app updates are available for Linux and Windows. On Android, Emberr checks for new versions and opens the release page, or you can let Obtainium handle updates.
+In-app updates are available for Linux and Windows. On Android, Emberr checks for new versions and opens the release page, or you can let Google Play or Obtainium handle updates.
 
 ### Build from source
 
@@ -125,7 +141,7 @@ In-app updates are available for Linux and Windows. On Android, Emberr checks fo
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) if you would like to help out.
+See [CONTRIBUTING.md](CONTRIBUTING.md) if you would like to help out. Bugs and ideas are welcome on [GitHub issues](https://github.com/emberr-app/Emberr/issues) or [r/Emberr](https://www.reddit.com/r/Emberr/).
 
 ## License
 
