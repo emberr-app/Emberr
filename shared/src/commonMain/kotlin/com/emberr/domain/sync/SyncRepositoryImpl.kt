@@ -2,6 +2,7 @@ package com.emberr.domain.sync
 
 import com.emberr.core.security.SyncEncryptionManager
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.data.local.room.dao.BlockMergeBaseDao
 import com.emberr.data.local.room.dao.CalendarEventExceptionDao
 import com.emberr.data.local.room.dao.ChatSessionDao
 import com.emberr.data.local.room.dao.SelfHostDeletedApiConfigDao
@@ -47,6 +48,8 @@ import com.emberr.domain.util.sync.SyncEventBus
 import com.emberr.domain.util.sync.withSyncCoordinatorWaitingAtMost
 import com.emberr.domain.util.system.appVersionName
 import com.emberr.database.EmberrDatabase
+import com.emberr.domain.sync.merge.decodedBasesByBlockId
+import com.emberr.domain.sync.merge.rememberDecodedBlocksBothSidesHave
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +85,8 @@ class SyncRepositoryImpl(
     private val mediaReferenceIndex: MediaReferenceIndex,
     private val canvasRepository: CanvasRepository,
     private val unappliedSyncChangeDao: UnappliedSyncChangeDao,
-    private val credentialVault: CredentialVault
+    private val credentialVault: CredentialVault,
+    private val blockMergeBaseDao: BlockMergeBaseDao
 ) : SyncRepository {
 
     private val database by lazyDatabase
@@ -314,6 +318,7 @@ class SyncRepositoryImpl(
                                             content = remoteContent,
                                             stampUpdatedAt = false
                                         )
+                                        blockMergeBaseDao.rememberDecodedBlocksBothSidesHave(newMeta.noteId, remoteContent.blocks)
 
                                         // EXPLICIT AI INDEXING CALL
                                         repository.indexNote(newMeta, remoteContent)
@@ -333,7 +338,8 @@ class SyncRepositoryImpl(
                                         localContent = localContent,
                                         remoteMeta = remoteMeta,
                                         remoteContent = remoteContent,
-                                        remoteUpdatedAt = envelope.updatedAt
+                                        remoteUpdatedAt = envelope.updatedAt,
+                                        bases = blockMergeBaseDao.decodedBasesByBlockId(localMeta.noteId)
                                     )
                                     pendingMediaContent = mergedNote.content
                                     pendingCoverImagePath = mergedNote.metadata.coverImagePath
@@ -361,6 +367,7 @@ class SyncRepositoryImpl(
 
                                         SyncEventBus.emitSyncCompleted(envelope.entityId, savedMeta.spaceId)
                                     }
+                                    rememberBlocksMatchingRemote(localMeta.noteId, mergedNote.content, remoteContent)
                                 }
                                 pendingCanvasImageFileNames = applyRemoteCanvasIfPresent(envelope, syncKey)
                             }
@@ -398,6 +405,7 @@ class SyncRepositoryImpl(
                                             remoteMeta.spaceId,
                                             dateString
                                         ) ?: remoteMeta
+                                        blockMergeBaseDao.rememberDecodedBlocksBothSidesHave(finalMeta.noteId, remoteContent.blocks)
                                         repository.indexDailyNote(
                                             dateString,
                                             remoteContent,
@@ -420,7 +428,8 @@ class SyncRepositoryImpl(
                                         localContent = localContent,
                                         localUpdatedAt = localMeta.updatedAt,
                                         remoteContent = remoteContent,
-                                        remoteUpdatedAt = envelope.updatedAt
+                                        remoteUpdatedAt = envelope.updatedAt,
+                                        bases = blockMergeBaseDao.decodedBasesByBlockId(localMeta.noteId)
                                     )
                                     pendingMediaContent = mergedContent
 
@@ -456,6 +465,7 @@ class SyncRepositoryImpl(
 
                                         SyncEventBus.emitSyncCompleted(dateString, mergedMeta.spaceId)
                                     }
+                                    rememberBlocksMatchingRemote(localMeta.noteId, mergedContent, remoteContent)
                                 }
                             }
 
@@ -663,6 +673,32 @@ class SyncRepositoryImpl(
 
             allSucceeded
         }
+
+    private suspend fun rememberBlocksMatchingRemote(noteId: String, mergedContent: NoteContent, remoteContent: NoteContent) {
+        val remoteBlocksById = remoteContent.blocks.associateBy { it.id }
+        blockMergeBaseDao.rememberDecodedBlocksBothSidesHave(
+            noteId,
+            mergedContent.blocks.filter { block -> remoteBlocksById[block.id] == block }
+        )
+    }
+
+    override suspend fun rememberChangesSentToDesktop(changes: List<SyncEnvelope>) = withContext(Dispatchers.IO) {
+        val syncKey = settingsManager.getSyncEncryptionKey()
+        changes
+            .filter { it.entityType == SyncType.NOTE || it.entityType == SyncType.DAILY_NOTE }
+            .filter { it.contentJson.isNotEmpty() }
+            .forEach { envelope ->
+                try {
+                    val sentMeta = json.decodeFromString<NoteMetadataEntity>(encryptionManager.decryptPayload(envelope.metadataJson, syncKey))
+                    val sentContent = json.decodeFromString<NoteContent>(encryptionManager.decryptPayload(envelope.contentJson, syncKey))
+                    blockMergeBaseDao.rememberDecodedBlocksBothSidesHave(sentMeta.noteId, sentContent.blocks)
+                } catch (cause: CancellationException) {
+                    throw cause
+                } catch (cause: Exception) {
+                    LanSyncLog.e("rememberChangesSentToDesktop: could not save base copies for ${envelope.entityId}", cause)
+                }
+            }
+    }
 
     private suspend fun loadChangesReadyToRetry(currentAppVersion: String): List<ChangeWaitingToRetry> =
         try {

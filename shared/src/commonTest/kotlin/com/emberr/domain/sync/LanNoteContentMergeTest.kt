@@ -142,4 +142,15 @@ class LanNoteContentMergeTest {
         assertEquals(1, merged.version)
         assertNull(merged.blocks.firstOrNull { it.id != "block-1" })
     }
+
+    @Test
+    fun aParagraphEditedOnBothDevicesSinceTheBaseKeepsBothEdits() {
+        val base = text("block-1", "Buy milk and bread", 100L)
+        val local = contentOf(text("block-1", "Buy oat milk and bread", 200L))
+        val remote = contentOf(text("block-1", "Buy milk and bread, and eggs", 300L))
+
+        val merged = NoteMergeHelper.mergeNoteContent(local, 200L, remote, 300L, bases = mapOf("block-1" to base))
+
+        assertEquals("Buy oat milk and bread, and eggs", textAt(merged, 0))
+    }
 }
