@@ -1,5 +1,6 @@
 package com.emberr.domain.selfhost.merge
 
+import com.emberr.data.local.room.entity.BlockMergeBaseEntity
 import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.domain.database.withSettingTimesStamped
 import com.emberr.domain.model.DatabaseBlock
@@ -326,5 +327,25 @@ class SelfHostNoteMergeHelperTest {
 
         assertEquals(listOf("block-a", "block-x", "block-y", "block-b", "block-c"), merged.map { it.blockId })
         assertEquals(listOf(0, 1, 2, 3, 4), merged.map { it.displayOrder })
+    }
+
+    @Test
+    fun aParagraphEditedOnBothDevicesSinceTheBaseKeepsBothEdits() {
+        val base = blockEntity("block-a", "Buy milk and bread", updatedAt = 100L)
+        val local = blockEntity("block-a", "Buy oat milk and bread", updatedAt = 200L)
+        val remote = blockEntity("block-a", "Buy milk and bread, and eggs", updatedAt = 300L)
+
+        val merged = NoteMergeHelper.mergeBlocks(
+            noteId = noteId,
+            localBlocks = listOf(local),
+            remoteUpserts = listOf(remote),
+            remoteDeletions = emptyList(),
+            remoteIsNewer = true,
+            bases = mapOf("block-a" to BlockMergeBaseEntity(noteId, "block-a", base.blockDataJson, base.updatedAt))
+        )
+
+        assertEquals("Buy oat milk and bread, and eggs", decodedText(merged.single()))
+        assertEquals(301L, merged.single().updatedAt)
+        assertTrue(NoteMergeHelper.containsTextMergedBlocks(merged, listOf(local), listOf(remote)))
     }
 }

@@ -101,6 +101,7 @@ data class NoteBlockEntity(
 - `chat_sessions` — AI conversations, messages as JSON, per space.
 - `self_host_deleted_notes` — remembers a permanent deletion. Without it another device cannot tell "deleted" from "never existed here".
 - `self_host_deleted_api_configs` — the same for provider settings.
+- `block_merge_bases` — the last copy of each text block that this device and the other sync side both had. Sync compares both sides against it to merge text edited on two devices. `noteId` has `ON DELETE CASCADE`.
 
 ## Media files
 

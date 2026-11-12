@@ -1,14 +1,17 @@
 package com.emberr.domain.selfhost.merge
 
+import com.emberr.data.local.room.entity.BlockMergeBaseEntity
 import com.emberr.data.local.room.entity.NoteBlockEntity
 import com.emberr.domain.database.DatabaseRowCleanup
 import com.emberr.domain.database.mergeDatabaseBlocks
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.NoteBlock
+import com.emberr.domain.model.NoteBlockSerializer
 import com.emberr.domain.model.TextBlock
 import com.emberr.domain.model.markDeleted
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.translation.BlockTombstone
+import com.emberr.domain.sync.merge.BlockTextMerge
 import kotlinx.serialization.json.Json
 import kotlin.collections.forEach
 
@@ -25,7 +28,8 @@ object NoteMergeHelper {
         localBlocks: List<NoteBlockEntity>,
         remoteUpserts: List<NoteBlockEntity>,
         remoteDeletions: List<BlockTombstone>,
-        remoteIsNewer: Boolean
+        remoteIsNewer: Boolean,
+        bases: Map<String, BlockMergeBaseEntity> = emptyMap()
     ): List<NoteBlockEntity> {
         val safeLocalBlocks = localBlocks.filterOwnedBy(noteId, "local")
         val safeRemoteUpserts = remoteUpserts.filterOwnedBy(noteId, "remote")
@@ -36,12 +40,19 @@ object NoteMergeHelper {
         safeRemoteUpserts.forEach { remoteBlock ->
             val localBlock = merged[remoteBlock.blockId]
             val mergedDatabaseBlock = localBlock?.let { mergedDatabaseBlockOrNull(it, remoteBlock) }
+            val mergedTextBlock = if (mergedDatabaseBlock == null) {
+                localBlock?.let { mergedTextBlockOrNull(bases[remoteBlock.blockId], it, remoteBlock) }
+            } else {
+                null
+            }
             // Strictly greater, not >= - on an exact-millisecond tie (two devices editing the same
             // block within the same debounce/merge window), the remote side otherwise always won
             // regardless of which edit actually landed second, silently discarding a local edit that
             // was just as valid.
             if (mergedDatabaseBlock != null) {
                 merged[remoteBlock.blockId] = mergedDatabaseBlock
+            } else if (mergedTextBlock != null) {
+                merged[remoteBlock.blockId] = mergedTextBlock
             } else if (localBlock == null || remoteBlock.updatedAt > localBlock.updatedAt) {
                 merged[remoteBlock.blockId] = remoteBlock
             }
@@ -69,6 +80,49 @@ object NoteMergeHelper {
         val deletedBlocks = merged.values.filter { it.isDeleted }
         return renumberedLiveBlocks + deletedBlocks
     }
+
+    fun containsTextMergedBlocks(
+        mergedBlocks: List<NoteBlockEntity>,
+        localBlocks: List<NoteBlockEntity>,
+        remoteUpserts: List<NoteBlockEntity>
+    ): Boolean {
+        val localJsonById = localBlocks.associate { it.blockId to it.blockDataJson }
+        val remoteJsonById = remoteUpserts.associate { it.blockId to it.blockDataJson }
+        return mergedBlocks.any { block ->
+            val localJson = localJsonById[block.blockId]
+            val remoteJson = remoteJsonById[block.blockId]
+            !block.isDeleted && localJson != null && remoteJson != null &&
+                block.blockDataJson != localJson && block.blockDataJson != remoteJson &&
+                DatabaseRowCleanup.DATABASE_BLOCK_JSON_MARKER !in block.blockDataJson
+        }
+    }
+
+    private fun mergedTextBlockOrNull(
+        base: BlockMergeBaseEntity?,
+        localBlock: NoteBlockEntity,
+        remoteBlock: NoteBlockEntity
+    ): NoteBlockEntity? {
+        if (base == null || localBlock.isDeleted || remoteBlock.isDeleted) return null
+        if (localBlock.blockDataJson == remoteBlock.blockDataJson) return null
+        val mergedBlock = BlockTextMerge.mergeTextBlock(
+            base = decodeBlockOrNull(base.blockDataJson) ?: return null,
+            local = decodeBlockOrNull(localBlock.blockDataJson) ?: return null,
+            remote = decodeBlockOrNull(remoteBlock.blockDataJson) ?: return null
+        ) ?: return null
+        val newerBlock = if (remoteBlock.updatedAt > localBlock.updatedAt) remoteBlock else localBlock
+        return newerBlock.copy(
+            blockDataJson = blockJson.encodeToString(NoteBlockSerializer, mergedBlock),
+            updatedAt = mergedBlock.updatedAt
+        )
+    }
+
+    private fun decodeBlockOrNull(blockDataJson: String): NoteBlock? =
+        try {
+            blockJson.decodeFromString(NoteBlockSerializer, blockDataJson)
+        } catch (cause: Exception) {
+            SelfHostSyncLog.e("NoteMergeHelper: could not decode a block for text merge, keeping the newer copy whole", cause)
+            null
+        }
 
     private fun blockIdsInMergedOrder(newerSide: List<NoteBlockEntity>, olderSide: List<NoteBlockEntity>): List<String> {
         val olderIds = olderSide.liveBlockIdsInOrder()

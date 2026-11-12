@@ -99,6 +99,7 @@ val desktopModule = module {
     single<com.emberr.data.local.room.dao.CloudSpaceDao> { get<AppDatabase>().cloudSpaceDao() }
     single<com.emberr.data.local.room.dao.CloudItemDao> { get<AppDatabase>().cloudItemDao() }
     single<com.emberr.data.local.room.dao.CloudMediaLockDao> { get<AppDatabase>().cloudMediaLockDao() }
+    single<com.emberr.data.local.room.dao.BlockMergeBaseDao> { get<AppDatabase>().blockMergeBaseDao() }
     single<VoiceRecognizer> { DesktopVoiceRecognizer() }
 
     // SQLDelight
