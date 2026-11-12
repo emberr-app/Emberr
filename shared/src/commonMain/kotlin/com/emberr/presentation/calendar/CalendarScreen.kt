@@ -115,7 +115,6 @@ import com.emberr.presentation.shared.components.emberrBorder
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.KmpBackHandler
-import com.emberr.presentation.shared.components.smoothWheelScroll
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import emberr.shared.generated.resources.Res
@@ -1085,7 +1084,6 @@ private fun DayHourGrid(
             .fillMaxSize()
             .onPlaced { resizeAutoScroll.viewportCoordinates = it }
             .verticalScroll(scrollState)
-            .smoothWheelScroll(scrollState)
             .padding(top = topBarHeightDp + headerHeight, bottom = bottomPadding)
     ) {
         HourLabelColumn(hours = hours, hourHeight = hourHeight)
@@ -1534,7 +1532,6 @@ private fun MultiDayGridContent(
             .fillMaxSize()
             .onPlaced { resizeAutoScroll.viewportCoordinates = it }
             .verticalScroll(scrollState)
-            .smoothWheelScroll(scrollState)
             .padding(top = topBarHeightDp + headerHeight, bottom = bottomPadding)
     ) {
         HourLabelColumn(hours = hours, hourHeight = hourHeight)
@@ -1800,7 +1797,7 @@ private fun MonthEventList(
         } else {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize().smoothWheelScroll(listState),
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = bottomPadding),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {

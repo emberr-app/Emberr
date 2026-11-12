@@ -91,7 +91,6 @@ import com.emberr.presentation.shared.components.TopHeaderTitlePlacement
 import com.emberr.presentation.shared.components.TopBarIconButtonGroup
 import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.shared.components.TopBarIconButtonItem
-import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.sync.SyncViewModel
 import com.emberr.presentation.sync.text
 import com.emberr.domain.util.system.showNativeToast
@@ -606,8 +605,7 @@ fun HomeScreen(
                                             fadeOutSpec = rowFadeOutSpec,
                                             placementSpec = rowPlacementSpec
                                         )
-                                        .fillMaxWidth()
-                                        .smoothWheelScroll(favListState, horizontal = true),
+                                        .fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                                     contentPadding = PaddingValues(horizontal = HORIZONTAL_PADDING)
                                 ) {

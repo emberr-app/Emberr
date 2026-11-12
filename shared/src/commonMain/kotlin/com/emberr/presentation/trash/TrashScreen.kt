@@ -40,7 +40,6 @@ import com.emberr.presentation.shared.components.topHeaderBarPadding
 import com.emberr.presentation.home.NoteCard
 import com.emberr.presentation.shared.components.EmberrBlur
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
-import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.shared.components.orHighContrastLine
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -121,7 +120,6 @@ fun TrashScreen(
                     .fillMaxSize()
                     .hazeSource(state = hazeState)
                     .background(backgroundColor)
-                    .smoothWheelScroll(gridState)
             ) {
                 items(trashedNotes, key = { it.noteId }) { note ->
                     if (isDesktopPlatform) {

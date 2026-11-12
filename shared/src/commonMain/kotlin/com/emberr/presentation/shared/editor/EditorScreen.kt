@@ -118,7 +118,6 @@ import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
 import com.emberr.presentation.shared.components.EmberrVerticalScrollbar
 import com.emberr.presentation.shared.components.KmpBackHandler
-import com.emberr.presentation.shared.components.smoothWheelScroll
 import com.emberr.presentation.shared.editor.blockViews.callout.calloutContentPadding
 import com.emberr.presentation.shared.editor.blockViews.callout.calloutFramesByRow
 import com.emberr.presentation.shared.editor.blockViews.callout.displayedIndentationLevelOf
@@ -1057,7 +1056,6 @@ fun EditorScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
-                    .smoothWheelScroll(listState)
                     .then(crossBlockDragModifier)
                     .pointerInput(singleTapStartsTyping) {
                         detectTapGestures(
