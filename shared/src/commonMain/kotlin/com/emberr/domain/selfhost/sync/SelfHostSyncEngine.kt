@@ -183,6 +183,7 @@ class SelfHostSyncEngine(
 
     private companion object {
         const val MAX_MANIFEST_UPLOAD_RETRIES = 3
+        const val MAX_NOTE_UPLOAD_RETRIES = 2
         const val PROGRESS_REPORT_STEP_BYTES = 256L * 1024
         val SYNC_LOCK_MAX_WAIT = 10.seconds
         val LIST_FILE_PATHS = listOf(
@@ -777,7 +778,7 @@ class SelfHostSyncEngine(
                 // Lock each note individually for reconciliation.
                 val outcome = reconcileOrSkipBrokenNote(noteId) {
                     withSyncLock {
-                        reconcileNote(noteId, remoteEntry = remoteEntry)
+                        reconcileNoteRetryingUploadConflicts(noteId, remoteEntry)
                     } ?: run {
                         SelfHostSyncLog.d("TextSync: note=$noteId skipped this cycle, SyncCoordinator.mutex busy - will retry next trigger")
                         ReconcileOutcome.LOCK_BUSY
@@ -1530,6 +1531,18 @@ class SelfHostSyncEngine(
         updatedAt = session.updatedAt,
         isDeleted = session.isDeleted
     )
+
+    private suspend fun reconcileNoteRetryingUploadConflicts(
+        candidateId: String,
+        remoteEntry: SelfHostManifestEntry?
+    ): ReconcileOutcome {
+        repeat(MAX_NOTE_UPLOAD_RETRIES) {
+            val outcome = reconcileNote(candidateId, remoteEntry)
+            if (outcome != ReconcileOutcome.CONFLICT_SKIPPED) return outcome
+            SelfHostSyncLog.d("TextSync: note=$candidateId changed on the server during upload, merging and uploading again")
+        }
+        return reconcileNote(candidateId, remoteEntry)
+    }
 
     private suspend fun reconcileNote(
         candidateId: String,
