@@ -177,7 +177,10 @@ class SyncViewModel(
             try {
                 val localChanges = syncRepository.collectLocalChanges(sinceWithSafetyOverlap(lastPushedTimestamp), uploadMedia = true)
                 val pushedCleanly = syncClient.pushChanges(localChanges)
-                if (pushedCleanly) settingsManager.saveLastPushedTimestamp(syncStart)
+                if (pushedCleanly) {
+                    settingsManager.saveLastPushedTimestamp(syncStart)
+                    syncRepository.rememberChangesSentToDesktop(localChanges)
+                }
 
                 _syncStatus.value = LanSyncStatus.FetchingFromDesktop
                 val fetched = syncClient.fetchChanges(sinceWithSafetyOverlap(lastFetchedTimestamp))
@@ -250,7 +253,10 @@ class SyncViewModel(
 
             val localChanges = syncRepository.collectLocalChanges(sinceWithSafetyOverlap(lastPushedTimestamp), uploadMedia = true)
             val pushedCleanly = syncClient.pushChanges(localChanges)
-            if (pushedCleanly) settingsManager.saveLastPushedTimestamp(syncStart)
+            if (pushedCleanly) {
+                settingsManager.saveLastPushedTimestamp(syncStart)
+                syncRepository.rememberChangesSentToDesktop(localChanges)
+            }
 
             val fetched = syncClient.fetchChanges(sinceWithSafetyOverlap(lastFetchedTimestamp))
             val startedOver = startOverIfThisIsADifferentDesktop(

@@ -4,6 +4,7 @@ import com.emberr.domain.database.mergeDatabaseBlocks
 import com.emberr.domain.model.DatabaseBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
+import com.emberr.domain.sync.merge.BlockTextMerge
 
 object NoteMergeHelper {
 
@@ -11,7 +12,8 @@ object NoteMergeHelper {
         localContent: NoteContent?,
         localUpdatedAt: Long,
         remoteContent: NoteContent,
-        remoteUpdatedAt: Long
+        remoteUpdatedAt: Long,
+        bases: Map<String, NoteBlock> = emptyMap()
     ): NoteContent {
         if (localContent == null) return remoteContent
 
@@ -22,7 +24,7 @@ object NoteMergeHelper {
         val otherContent = if (remoteWins) localContent  else remoteContent
         val baseIds = baseContent.blocks.mapTo(HashSet()) { it.id }
         val otherById = otherContent.blocks.associateBy { it.id }
-        val mergedTree = rebuildTree(baseContent.blocks, otherById)
+        val mergedTree = rebuildTree(baseContent.blocks, otherById, bases)
         val otherOnly = otherContent.blocks.filter { it.id !in baseIds }
 
         val result = mergedTree.toMutableList()
@@ -47,14 +49,15 @@ object NoteMergeHelper {
      */
     private fun rebuildTree(
         baseBlocks: List<NoteBlock>,
-        otherById: Map<String, NoteBlock>
+        otherById: Map<String, NoteBlock>,
+        bases: Map<String, NoteBlock>
     ): List<NoteBlock> = baseBlocks.map { baseBlock ->
         val other = otherById[baseBlock.id]
         when {
             other == null -> baseBlock
             baseBlock is DatabaseBlock && other is DatabaseBlock -> mergeDatabaseBlocks(baseBlock, other)
-            other.updatedAt > baseBlock.updatedAt -> other
-            else -> baseBlock
+            else -> BlockTextMerge.mergeTextBlock(bases[baseBlock.id], baseBlock, other)
+                ?: if (other.updatedAt > baseBlock.updatedAt) other else baseBlock
         }
     }
 }

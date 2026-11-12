@@ -11,6 +11,8 @@ interface SyncRepository {
 
     suspend fun countChangesWaitingToRetry(): Int
 
+    suspend fun rememberChangesSentToDesktop(changes: List<SyncEnvelope>)
+
     // Scans all referenced media against the remote peer's media list and retries transfers for missing files in either direction.
     suspend fun reconcileMedia()
 

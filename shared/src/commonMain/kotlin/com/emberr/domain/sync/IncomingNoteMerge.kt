@@ -1,6 +1,7 @@
 package com.emberr.domain.sync
 
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 
 data class MergedIncomingNote(
@@ -16,13 +17,15 @@ object IncomingNoteMerge {
         localContent: NoteContent?,
         remoteMeta: NoteMetadataEntity,
         remoteContent: NoteContent,
-        remoteUpdatedAt: Long
+        remoteUpdatedAt: Long,
+        bases: Map<String, NoteBlock> = emptyMap()
     ): MergedIncomingNote {
         val mergedContent = NoteMergeHelper.mergeNoteContent(
             localContent = localContent,
             localUpdatedAt = localMeta.updatedAt,
             remoteContent = remoteContent,
-            remoteUpdatedAt = remoteUpdatedAt
+            remoteUpdatedAt = remoteUpdatedAt,
+            bases = bases
         )
         val contentChanged = mergedContent != localContent
         val metadataChanged = localMeta.copy(
