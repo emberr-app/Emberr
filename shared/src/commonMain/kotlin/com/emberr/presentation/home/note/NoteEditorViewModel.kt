@@ -220,6 +220,7 @@ class NoteEditorViewModel(
                     // queued behind a long lock wait would write whatever note the user has since
                     // switched to into meta's note instead of its own - cross-note contamination.
                     if (currentMetadata?.noteId != meta.noteId) return@withLock false
+                    if (repository.getNoteById(meta.noteId) == null) return@withLock false
 
                     val diskBlocks = diskBlocksOf(meta.noteId)
                     val reconciled = _blocks.updateAndGet { editorBlocks -> editorDiskReconciler.reconcile(editorBlocks, diskBlocks) }
@@ -301,7 +302,7 @@ class NoteEditorViewModel(
             // it's true, so a stuck flag silently stops this note from ever picking up a background
             // sync update again until the ViewModel itself is recreated (a full app restart).
             try {
-                if (flushedMeta != null) {
+                if (flushedMeta != null && repository.getNoteById(previousMeta.noteId) != null) {
                     SyncCoordinator.mutex.withLock {
                         val reconciled = reconcileWithDisk(previousMeta.noteId, snapshot)
                         if (!theNoteAlreadyHoldsThis(previousMeta.noteId, flushedMeta, reconciled)) {
