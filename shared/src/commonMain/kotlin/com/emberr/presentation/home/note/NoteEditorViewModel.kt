@@ -3,6 +3,7 @@ package com.emberr.presentation.home.note
 import androidx.lifecycle.viewModelScope
 import com.emberr.domain.people.PeopleRepository
 import com.emberr.domain.people.personNamesLinkedIn
+import com.emberr.domain.canvas.CanvasRepository
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.database.withDatabasesAsTables
 import com.emberr.domain.model.*
@@ -11,7 +12,9 @@ import com.emberr.domain.movie.withWatchlistsExpanded
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.table.DeviceTableLayoutStore
 import com.emberr.domain.util.export.MarkdownAttachment
+import com.emberr.domain.util.export.ExportedCanvas
 import com.emberr.domain.util.export.MarkdownAttachments
+import com.emberr.domain.util.export.MarkdownCanvasFile
 import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
@@ -45,7 +48,8 @@ class NoteEditorViewModel(
     appScope: CoroutineScope,
     deviceTableLayoutStore: DeviceTableLayoutStore,
     movieTitleSource: MovieTitleSource,
-    peopleRepository: PeopleRepository
+    peopleRepository: PeopleRepository,
+    private val canvasRepository: CanvasRepository
 ) : BaseEditorViewModel(repository, mediaStorageHelper, webImageFetcher, reminderScheduler, audioRecorder, appScope, deviceTableLayoutStore, movieTitleSource, peopleRepository) {
 
     private val _isLoading = MutableStateFlow(true)
@@ -463,15 +467,31 @@ class NoteEditorViewModel(
 
     suspend fun blocksForExport(): List<NoteBlock> = _blocks.value.withDatabasesAsTables(repository).withWatchlistsExpanded(repository)
 
-    suspend fun generateMarkdownExport(): String = markdownOf(blocksForExport(), attachments = emptyList())
+    suspend fun generateMarkdownExport(): String = markdownOf(blocksForExport(), attachments = emptyList(), canvasFiles = emptyList())
 
     suspend fun generateMarkdownFileExport(baseFileName: String): MarkdownExport {
         val blocks = blocksForExport()
-        val attachments = MarkdownAttachments.collect(blocks)
-        return MarkdownExport(baseFileName, markdownOf(blocks, attachments), attachments)
+        val canvases = canvasesIn(blocks)
+        val attachments = MarkdownAttachments.collect(blocks, canvases)
+        val canvasFiles = MarkdownAttachments.canvasFilesFor(canvases, attachments)
+        return MarkdownExport(baseFileName, markdownOf(blocks, attachments, canvasFiles), attachments, canvasFiles)
     }
 
-    private suspend fun markdownOf(blocks: List<NoteBlock>, attachments: List<MarkdownAttachment>): String {
+    private suspend fun canvasesIn(blocks: List<NoteBlock>): List<ExportedCanvas> =
+        blocks.filterIsInstance<CanvasBlock>()
+            .filter { !it.isDeleted }
+            .map { it.canvasNoteId }
+            .distinct()
+            .mapNotNull { canvasNoteId ->
+                val canvasNote = repository.getNoteById(canvasNoteId) ?: return@mapNotNull null
+                ExportedCanvas(canvasNoteId, canvasNote.title, canvasRepository.loadCanvasIncludingDeleted(canvasNoteId))
+            }
+
+    private suspend fun markdownOf(
+        blocks: List<NoteBlock>,
+        attachments: List<MarkdownAttachment>,
+        canvasFiles: List<MarkdownCanvasFile>
+    ): String {
         val title = _noteTitle.value.ifBlank { "Untitled Note" }
         val categoryNamesById = repository.getAllCategories().first()
             .filter { !it.isDeleted }
@@ -481,7 +501,8 @@ class NoteEditorViewModel(
             noteTitlesById = linkedNoteTitlesIn(blocks),
             categoryNamesById = categoryNamesById,
             attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport },
-            personNamesById = personNamesLinkedIn(blocks, repository::getNoteById)
+            personNamesById = personNamesLinkedIn(blocks, repository::getNoteById),
+            canvasPathsByNoteId = canvasFiles.associate { it.canvasNoteId to it.pathInExport }
         )
         return "# $title\n\n$body"
     }

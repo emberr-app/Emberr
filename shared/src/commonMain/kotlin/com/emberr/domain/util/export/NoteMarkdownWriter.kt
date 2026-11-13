@@ -54,6 +54,7 @@ private data class RenderOptions(
     val categoryNamesById: Map<String, String>,
     val attachmentPathsByStoredName: Map<String, String>,
     val personNamesById: Map<String, String>,
+    val canvasPathsByNoteId: Map<String, String>,
     val timeZone: TimeZone
 )
 
@@ -65,7 +66,8 @@ object NoteMarkdownWriter {
         noteTitlesById: Map<String, String> = emptyMap(),
         categoryNamesById: Map<String, String> = emptyMap(),
         attachmentPathsByStoredName: Map<String, String> = emptyMap(),
-        personNamesById: Map<String, String> = emptyMap()
+        personNamesById: Map<String, String> = emptyMap(),
+        canvasPathsByNoteId: Map<String, String> = emptyMap()
     ): String {
         val visibleBlocks = blocks.filter { !it.isDeleted }
         val options = RenderOptions(
@@ -73,6 +75,7 @@ object NoteMarkdownWriter {
             categoryNamesById = categoryNamesById,
             attachmentPathsByStoredName = attachmentPathsByStoredName,
             personNamesById = personNamesById,
+            canvasPathsByNoteId = canvasPathsByNoteId,
             timeZone = TimeZone.currentSystemDefault()
         )
 
@@ -191,7 +194,7 @@ object NoteMarkdownWriter {
             is ImageBlock -> renderImage(block, options)
             is DocumentBlock -> renderDocument(block, options)
             is VoiceBlock -> renderVoice(block, options)
-            is CanvasBlock -> ""
+            is CanvasBlock -> options.canvasPathsByNoteId[block.canvasNoteId]?.let { path -> "![[$path]]" } ?: "[Canvas]"
             is PropertyBlock -> renderProperty(block, options)
             is DatabaseBlock -> ""
             is MovieBlock -> renderMovie(block, options)

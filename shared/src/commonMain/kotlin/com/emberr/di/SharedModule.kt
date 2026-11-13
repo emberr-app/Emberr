@@ -387,7 +387,8 @@ val sharedModule = module {
             appScope = get(named("AppScope")),
             deviceTableLayoutStore = get(),
             movieTitleSource = get(),
-            peopleRepository = get()
+            peopleRepository = get(),
+            canvasRepository = get()
         )
     }
     viewModel {

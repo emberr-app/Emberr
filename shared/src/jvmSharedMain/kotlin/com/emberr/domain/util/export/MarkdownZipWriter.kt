@@ -26,6 +26,11 @@ object MarkdownZipWriter {
                 mediaFile.inputStream().use { it.copyTo(zip) }
                 zip.closeEntry()
             }
+            for (canvasFile in export.canvasFiles) {
+                zip.putNextEntry(ZipEntry(canvasFile.pathInExport))
+                zip.write(canvasFile.canvasJson.toByteArray())
+                zip.closeEntry()
+            }
         }
         return missingAttachmentCount
     }
