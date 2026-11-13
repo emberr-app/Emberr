@@ -277,4 +277,9 @@
     <string name="settings_export_backup_daily_notes">Notes du jour</string>
     <string name="settings_export_backup_calendar">Calendrier</string>
     <string name="settings_export_backup_export">Exporter</string>
+    <string name="settings_export_format">Format</string>
+    <string name="settings_export_format_backup">Sauvegarde Emberr</string>
+    <string name="settings_export_format_backup_subtitle">Tout, pour le restaurer dans Emberr</string>
+    <string name="settings_export_format_vault">Coffre Markdown</string>
+    <string name="settings_export_format_vault_subtitle">Notes en fichiers Markdown pour Obsidian et d'autres apps</string>
 </resources>

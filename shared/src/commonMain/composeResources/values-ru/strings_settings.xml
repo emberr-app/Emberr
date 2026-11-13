@@ -279,4 +279,9 @@
     <string name="settings_export_backup_daily_notes">Ежедневные заметки</string>
     <string name="settings_export_backup_calendar">Календарь</string>
     <string name="settings_export_backup_export">Экспортировать</string>
+    <string name="settings_export_format">Формат</string>
+    <string name="settings_export_format_backup">Резервная копия Emberr</string>
+    <string name="settings_export_format_backup_subtitle">Всё, для восстановления в Emberr</string>
+    <string name="settings_export_format_vault">Хранилище Markdown</string>
+    <string name="settings_export_format_vault_subtitle">Заметки в виде файлов Markdown для Obsidian и других приложений</string>
 </resources>

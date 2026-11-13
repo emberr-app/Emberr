@@ -102,6 +102,7 @@ fun EmberrApp(
     onTakePhoto: (onPathSelected: (String) -> Unit) -> Unit = {},
     onExportMarkdown: (MarkdownExport) -> Unit = {},
     onExportBackup: (choice: BackupContentChoice) -> Unit = {},
+    onExportMarkdownVault: (spaceIds: Set<String>) -> Unit = {},
     onRequestBackupFolder: () -> Unit,
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     onExitApp: () -> Unit = {}
@@ -385,6 +386,7 @@ fun EmberrApp(
                             onExportMarkdown = onExportMarkdown,
                             onExportPdf = onExportPdf,
                             onExportBackup = onExportBackup,
+                            onExportMarkdownVault = onExportMarkdownVault,
                             onAiIconTap = openAiChat,
                             isAiChatVisible = showAiChatOverlay,
                             ragViewModel = ragViewModel,
@@ -935,6 +937,7 @@ fun EmberrApp(
                             com.emberr.presentation.settings.SettingsScreen(
                                 onNavigateBack = leaveSettings,
                                 onExportReady = onExportBackup,
+                                onExportMarkdownVaultReady = onExportMarkdownVault,
                                 onRequestBackupFolder = onRequestBackupFolder,
                                 onNavigateToSelfHostSetup = { navController.navigate(Screen.SelfHostSetup.route) },
                                 onNavigateToEmberrCloud = { navController.navigate(Screen.EmberrCloud.route) },

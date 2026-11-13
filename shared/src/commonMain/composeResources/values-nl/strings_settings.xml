@@ -277,4 +277,9 @@
     <string name="settings_export_backup_daily_notes">Dagnotities</string>
     <string name="settings_export_backup_calendar">Agenda</string>
     <string name="settings_export_backup_export">Exporteren</string>
+    <string name="settings_export_format">Indeling</string>
+    <string name="settings_export_format_backup">Emberr-back-up</string>
+    <string name="settings_export_format_backup_subtitle">Alles, om terug te zetten in Emberr</string>
+    <string name="settings_export_format_vault">Markdown-kluis</string>
+    <string name="settings_export_format_vault_subtitle">Notities als Markdown-bestanden voor Obsidian en andere apps</string>
 </resources>

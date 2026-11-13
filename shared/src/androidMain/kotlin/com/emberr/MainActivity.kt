@@ -110,6 +110,8 @@ import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.util.export.generateAndSaveAndroidPdf
 import com.emberr.domain.util.export.MarkdownExport
 import com.emberr.domain.util.export.MarkdownZipWriter
+import com.emberr.domain.util.export.MarkdownVaultExporter
+import com.emberr.domain.util.export.MARKDOWN_VAULT_FILE_NAME
 import com.emberr.domain.update.AndroidUpdateChecker
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.shared.LanguageChangeTransitionHost
@@ -147,6 +149,7 @@ class MainActivity : FragmentActivity() {
 
     private val mediaStorageHelper: com.emberr.domain.util.media.MediaStorageHelper by inject()
     private val manualBackupExporter: com.emberr.domain.backup.manual.AndroidManualBackupExporter by inject()
+    private val markdownVaultExporter: MarkdownVaultExporter by inject()
 
     private val takePhoto = registerForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -367,6 +370,7 @@ class MainActivity : FragmentActivity() {
                     var pendingExportSpaceIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
                     var pendingExportIncludesDailyNotes by rememberSaveable { mutableStateOf(true) }
                     var pendingExportIncludesCalendar by rememberSaveable { mutableStateOf(true) }
+                    var pendingVaultSpaceIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
                     // Markdown Saver
                     val exportMarkdownLauncher = rememberLauncherForActivityResult(
@@ -418,6 +422,36 @@ class MainActivity : FragmentActivity() {
                         ActivityResultContracts.CreateDocument("application/pdf")
                     ) { uri ->
                         uri?.let { generateAndSaveAndroidPdf(context, it, pendingPdfTitle, pendingPdfBlocks, mediaStorageHelper) }
+                    }
+
+                    val exportMarkdownVaultLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.CreateDocument("application/zip")
+                    ) { uri ->
+                        val spaceIds = pendingVaultSpaceIds.toSet()
+                        if (uri != null && spaceIds.isNotEmpty()) {
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                val message = try {
+                                    val vault = markdownVaultExporter.build(spaceIds)
+                                    val missingAttachmentCount = context.contentResolver.openOutputStream(uri)?.use { stream ->
+                                        MarkdownZipWriter.writeVault(vault, stream) { storedFileName ->
+                                            File(mediaStorageHelper.getAbsoluteMediaPath(storedFileName))
+                                        }
+                                    }
+                                    if (missingAttachmentCount == null) {
+                                        getString(R.string.message_file_save_failed)
+                                    } else {
+                                        MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount)
+                                            ?.let { notice -> getString(R.string.message_markdown_saved_with_notice, notice) }
+                                            ?: getString(R.string.message_markdown_saved)
+                                    }
+                                } catch (_: Exception) {
+                                    getString(R.string.message_file_save_failed)
+                                }
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                     }
 
                     val exportBackupLauncher = rememberLauncherForActivityResult(
@@ -522,6 +556,10 @@ class MainActivity : FragmentActivity() {
                                 pendingExportIncludesCalendar = choice.includesCalendar
                                 val fileName = "EmberrBackup_${System.currentTimeMillis()}.emberr"
                                 exportBackupLauncher.launch(fileName)
+                            },
+                            onExportMarkdownVault = { spaceIds ->
+                                pendingVaultSpaceIds = spaceIds.toList()
+                                exportMarkdownVaultLauncher.launch(MARKDOWN_VAULT_FILE_NAME)
                             },
                             onRequestBackupFolder = {
                                 backupFolderPickerLauncher.launch(null)

@@ -21,7 +21,8 @@ object ExportEngine {
         categoryNamesById: Map<String, String> = emptyMap(),
         attachmentPathsByStoredName: Map<String, String> = emptyMap(),
         personNamesById: Map<String, String> = emptyMap(),
-        canvasPathsByNoteId: Map<String, String> = emptyMap()
+        canvasPathsByNoteId: Map<String, String> = emptyMap(),
+        vaultLinkTargetsById: Map<String, String>? = null
     ): String = NoteMarkdownWriter.writeMarkdown(
         blocks = blocks,
         title = title,
@@ -29,7 +30,8 @@ object ExportEngine {
         categoryNamesById = categoryNamesById,
         attachmentPathsByStoredName = attachmentPathsByStoredName,
         personNamesById = personNamesById,
-        canvasPathsByNoteId = canvasPathsByNoteId
+        canvasPathsByNoteId = canvasPathsByNoteId,
+        vaultLinkTargetsById = vaultLinkTargetsById
     )
 
     private fun buildPlainText(blocks: List<NoteBlock>, builder: StringBuilder, personNamesById: Map<String, String>) {

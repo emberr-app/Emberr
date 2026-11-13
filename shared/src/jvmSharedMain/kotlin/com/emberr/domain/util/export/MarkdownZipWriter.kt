@@ -35,6 +35,32 @@ object MarkdownZipWriter {
         return missingAttachmentCount
     }
 
+    fun writeVault(vault: MarkdownVault, destination: OutputStream, mediaFileOf: (storedFileName: String) -> File): Int {
+        var missingAttachmentCount = 0
+        ZipOutputStream(destination).use { zip ->
+            for (folderPath in vault.folderPaths) {
+                zip.putNextEntry(ZipEntry("$folderPath/"))
+                zip.closeEntry()
+            }
+            for (textFile in vault.textFiles) {
+                zip.putNextEntry(ZipEntry(textFile.path))
+                zip.write(textFile.text.toByteArray())
+                zip.closeEntry()
+            }
+            for (attachment in vault.attachments) {
+                val mediaFile = mediaFileOf(attachment.storedFileName)
+                if (!mediaFile.isFile) {
+                    missingAttachmentCount++
+                    continue
+                }
+                zip.putNextEntry(ZipEntry(attachment.pathInExport))
+                mediaFile.inputStream().use { it.copyTo(zip) }
+                zip.closeEntry()
+            }
+        }
+        return missingAttachmentCount
+    }
+
     suspend fun missingAttachmentsNotice(missingAttachmentCount: Int): String? =
         if (missingAttachmentCount == 0) {
             null

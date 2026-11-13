@@ -109,6 +109,44 @@ fun handleExportPdf(window: Frame, fileName: String, title: String, blocks: List
     }
 }
 
+fun handleExportMarkdownVault(window: Frame, spaceIds: Set<String>) {
+    try {
+        val dialog = FileDialog(window, phrase(Res.string.message_export_markdown_title), FileDialog.SAVE)
+        dialog.file = MARKDOWN_VAULT_FILE_NAME
+        dialog.isVisible = true
+
+        val chosenFileStr = dialog.file ?: return
+        val chosenDirStr = dialog.directory
+        var saveFile = if (chosenDirStr != null) java.io.File(chosenDirStr, chosenFileStr)
+        else java.io.File(chosenFileStr)
+        if (!saveFile.name.endsWith(".zip", ignoreCase = true)) {
+            saveFile = java.io.File(saveFile.absolutePath + ".zip")
+        }
+
+        val vault = runBlocking { GlobalContext.get().get<MarkdownVaultExporter>().build(spaceIds) }
+        val mediaStorageHelper = GlobalContext.get().get<MediaStorageHelper>()
+        val missingAttachmentCount = saveFile.outputStream().use { stream ->
+            MarkdownZipWriter.writeVault(vault, stream) { storedFileName ->
+                java.io.File(mediaStorageHelper.getAbsoluteMediaPath(storedFileName))
+            }
+        }
+
+        val missingNotice = runBlocking { MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount) }?.let { "\n\n$it" }.orEmpty()
+        val savedMessage = phrase(Res.string.message_markdown_saved_as, saveFile.name) + missingNotice
+        val successTitle = phrase(Res.string.message_dialog_success_title)
+        SwingUtilities.invokeLater {
+            JOptionPane.showMessageDialog(window, savedMessage, successTitle, JOptionPane.INFORMATION_MESSAGE)
+        }
+    } catch (e: Throwable) {
+        e.printStackTrace()
+        val errorMessage = phrase(Res.string.message_markdown_save_error, e.message.toString())
+        val errorTitle = phrase(Res.string.message_dialog_error_title)
+        SwingUtilities.invokeLater {
+            JOptionPane.showMessageDialog(window, errorMessage, errorTitle, JOptionPane.ERROR_MESSAGE)
+        }
+    }
+}
+
 fun handleExportBackup(window: Frame, choice: BackupContentChoice) {
     try {
         val fileName = "EmberrBackup_${System.currentTimeMillis()}.emberr"

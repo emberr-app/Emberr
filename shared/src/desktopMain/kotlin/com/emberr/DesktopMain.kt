@@ -91,6 +91,7 @@ import com.emberr.ui.theme.collectColorThemeSettings
 import com.emberr.ui.theme.EmberrTheme
 import com.emberr.domain.util.export.handleExportBackup
 import com.emberr.domain.util.export.handleExportMarkdown
+import com.emberr.domain.util.export.handleExportMarkdownVault
 import com.emberr.domain.util.export.handleExportPdf
 import com.emberr.presentation.navigation.Screen
 import com.emberr.presentation.shared.editor.ActiveEditorRegistry
@@ -540,6 +541,9 @@ private fun runEmberrDesktopApp(stagedUpdateCouldNotStart: Boolean, appDataFolde
                         },
                         onExportBackup = { choice ->
                             Thread { handleExportBackup(currentWindow, choice) }.start()
+                        },
+                        onExportMarkdownVault = { spaceIds ->
+                            Thread { handleExportMarkdownVault(currentWindow, spaceIds) }.start()
                         },
                         onRequestBackupFolder = {
                             SwingUtilities.invokeLater {

@@ -276,4 +276,9 @@
     <string name="settings_export_backup_daily_notes">デイリーメモ</string>
     <string name="settings_export_backup_calendar">カレンダー</string>
     <string name="settings_export_backup_export">エクスポート</string>
+    <string name="settings_export_format">形式</string>
+    <string name="settings_export_format_backup">Emberr バックアップ</string>
+    <string name="settings_export_format_backup_subtitle">すべてを保存し、Emberr で復元できます</string>
+    <string name="settings_export_format_vault">Markdown 保管庫</string>
+    <string name="settings_export_format_vault_subtitle">Obsidian などのアプリ向けに、メモを Markdown ファイルとして保存</string>
 </resources>

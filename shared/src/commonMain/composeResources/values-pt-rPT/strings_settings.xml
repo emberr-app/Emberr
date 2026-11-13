@@ -68,6 +68,7 @@
     <string name="settings_update_download_version">Transferir Emberr %1$s</string>
     <string name="settings_update_downloading">A transferir atualização...</string>
     <string name="settings_export_backup_subtitle">Escolhe o que guardar.</string>
+    <string name="settings_export_format_vault_subtitle">Notas como ficheiros Markdown para o Obsidian e outras aplicações</string>
     <string name="settings_play_testing">Participar nos testes na Play Store</string>
     <string name="settings_play_testing_dialog_title">Ajuda o Emberr a chegar à Google Play Store</string>
     <string name="settings_play_testing_dialog_reason">A Google exige 12 testadores a usar o Emberr durante 14 dias antes de poder ser lançado ao público.</string>
