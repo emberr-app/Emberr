@@ -7,6 +7,7 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -99,6 +100,7 @@ import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.isTertiaryPressed
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -113,6 +115,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -288,6 +291,8 @@ fun CanvasScreen(
     val zoomAnimation = remember(noteId) { Animatable(1f) }
     val panAnimation = remember(noteId) { Animatable(Offset.Zero, Offset.VectorConverter) }
     val viewportAnimationProgress = remember(noteId) { Animatable(0f) }
+    val boardGlideAnimation = remember(noteId) { Animatable(Offset.Zero, Offset.VectorConverter) }
+    val boardGlideDecay = rememberSplineBasedDecay<Offset>()
     val zoomScope = rememberCoroutineScope()
     val pasteScope = rememberCoroutineScope()
     val pickImage = LocalImagePicker.current
@@ -491,6 +496,7 @@ fun CanvasScreen(
         val startingZoom = if (zoomAnimation.isRunning) zoomAnimation.targetValue else viewport.zoom
         val targetZoom = (startingZoom * zoomFactor).coerceIn(CANVAS_MIN_ZOOM, CANVAS_MAX_ZOOM)
         zoomScope.launch {
+            boardGlideAnimation.stop()
             if (!zoomAnimation.isRunning) zoomAnimation.snapTo(viewport.zoom)
             zoomAnimation.animateTo(targetZoom, spring(stiffness = Spring.StiffnessMediumLow)) {
                 viewport = viewport.zoomedAround(anchorOnScreen, value / viewport.zoom, pixelDensity)
@@ -510,12 +516,22 @@ fun CanvasScreen(
         }
     }
 
+    fun glideBoard(velocity: Velocity) {
+        zoomScope.launch {
+            boardGlideAnimation.snapTo(viewport.panOffset)
+            boardGlideAnimation.animateDecay(Offset(velocity.x, velocity.y), boardGlideDecay) {
+                viewport = viewport.copy(panOffset = value)
+            }
+        }
+    }
+
     fun animateViewportTo(target: CanvasViewport) {
         val boardCenter = Offset(boardSize.width / 2f, boardSize.height / 2f)
         val startingCenter = viewport.screenToWorld(boardCenter, pixelDensity)
         val targetCenter = target.screenToWorld(boardCenter, pixelDensity)
         val startingZoom = viewport.zoom
         zoomScope.launch {
+            boardGlideAnimation.stop()
             viewportAnimationProgress.snapTo(0f)
             viewportAnimationProgress.animateTo(1f, spring(stiffness = Spring.StiffnessMediumLow)) {
                 viewport = canvasViewportCenteredOn(
@@ -734,6 +750,13 @@ fun CanvasScreen(
                         snapTarget = hitTester().snapTargetNear(screenPoint, dragging.anchoredNodeId, TOUCH_EDGE_SNAP_RADIUS.toPx())
                     )
 
+                    suspend fun AwaitPointerEventScope.panAndPinchBoardThenGlide() {
+                        val releaseVelocity = trackPinchAndPan { centroid, pan, zoom ->
+                            viewport = viewport.pannedBy(pan).zoomedAround(centroid, zoom, density)
+                        }
+                        glideBoard(releaseVelocity)
+                    }
+
                     fun startPositionsOfSelectionAndGroupContents(): Map<String, Offset> {
                         val selectedIds = selection.selectedNodeIds
                         val selectedGroups = canvas.nodes.filter { it.nodeId in selectedIds && it.isGroup }
@@ -743,14 +766,14 @@ fun CanvasScreen(
 
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        val touchStoppedAGlide = boardGlideAnimation.isRunning
+                        if (touchStoppedAGlide) zoomScope.launch { boardGlideAnimation.stop() }
                         pastePillAnchor = null
                         if (activeTool == CanvasTool.SHAPES) dropActiveTool()
                         if (down.isFromStylus) hasSeenStylus = true
                         if (activeTool.drawsOnBoard && hasSeenStylus && !down.isFromStylus) {
                             down.consume()
-                            trackPinchAndPan { centroid, pan, zoom ->
-                                viewport = viewport.pannedBy(pan).zoomedAround(centroid, zoom, density)
-                            }
+                            panAndPinchBoardThenGlide()
                             return@awaitEachGesture
                         }
                         if (activeTool == CanvasTool.LINE) {
@@ -765,9 +788,7 @@ fun CanvasScreen(
                                 finishLiveLine(viewConfiguration.touchSlop)
                             } else {
                                 liveLine = null
-                                trackPinchAndPan { centroid, pan, zoom ->
-                                    viewport = viewport.pannedBy(pan).zoomedAround(centroid, zoom, density)
-                                }
+                                panAndPinchBoardThenGlide()
                             }
                             return@awaitEachGesture
                         }
@@ -795,11 +816,7 @@ fun CanvasScreen(
                             }
                             eraserScreenPosition = null
                             if (strokeTool != null && gestureEnd == OnePointerGestureEnd.Lifted) finishLiveStroke() else liveStrokePoints.clear()
-                            if (gestureEnd == OnePointerGestureEnd.SecondFingerDown) {
-                                trackPinchAndPan { centroid, pan, zoom ->
-                                    viewport = viewport.pannedBy(pan).zoomedAround(centroid, zoom, density)
-                                }
-                            }
+                            if (gestureEnd == OnePointerGestureEnd.SecondFingerDown) panAndPinchBoardThenGlide()
                             return@awaitEachGesture
                         }
                         val downPosition = down.position
@@ -827,11 +844,10 @@ fun CanvasScreen(
                         } ?: CanvasTouchStart.LongPress
 
                         when (touchStart) {
-                            CanvasTouchStart.Pinch -> trackPinchAndPan { centroid, pan, zoom ->
-                                viewport = viewport.pannedBy(pan).zoomedAround(centroid, zoom, density)
-                            }
+                            CanvasTouchStart.Pinch -> panAndPinchBoardThenGlide()
 
                             CanvasTouchStart.Tap -> {
+                                if (touchStoppedAGlide) return@awaitEachGesture
                                 if (activeTool == CanvasTool.TEXT) {
                                     startTextAt(downPosition)
                                     return@awaitEachGesture
@@ -979,9 +995,7 @@ fun CanvasScreen(
                                             viewModel.reconnectEdge(pressedEdge.edgeId, grabbedArrowHead, snapTarget.nodeId, snapTarget.side)
                                         }
                                     }
-                                    else -> trackPinchAndPan { centroid, pan, zoom ->
-                                        viewport = viewport.pannedBy(pan).zoomedAround(centroid, zoom, density)
-                                    }
+                                    else -> panAndPinchBoardThenGlide()
                                 }
                             }
                         }
@@ -1323,6 +1337,7 @@ fun CanvasScreen(
             Canvas(Modifier.fillMaxSize()) {
                 val nodesById = canvas.nodes.associateBy { it.nodeId }
                 val draggingEdgeEnd = dragPreview as? CanvasDragPreview.DraggingEdgeEnd
+                val arrowSize = ARROW_SIZE.toPx() * viewport.zoom.coerceAtMost(1f)
                 canvas.edges.forEach { edge ->
                     if (edge.edgeId == draggingEdgeEnd?.detachedEdgeId) return@forEach
                     val curve = screenCurveFor(edge, nodesById, viewport, pixelDensity) ?: return@forEach
@@ -1331,7 +1346,7 @@ fun CanvasScreen(
                         curve = curve,
                         color = if (isSelected) accentColor else edgeColor,
                         strokeWidth = (if (isSelected) SELECTED_EDGE_STROKE_WIDTH else EDGE_STROKE_WIDTH).toPx(),
-                        arrowSize = ARROW_SIZE.toPx()
+                        arrowSize = arrowSize
                     )
                 }
                 draggingEdgeEnd?.let { preview ->
@@ -1347,7 +1362,7 @@ fun CanvasScreen(
                     } else {
                         edgeCurve(loosePoint, looseSide, anchoredPoint, preview.anchoredSide, controlDistance)
                     }
-                    drawCanvasEdge(worldCurve.toScreen(viewport, pixelDensity), CanvasSelectionColor, SELECTED_EDGE_STROKE_WIDTH.toPx(), ARROW_SIZE.toPx())
+                    drawCanvasEdge(worldCurve.toScreen(viewport, pixelDensity), CanvasSelectionColor, SELECTED_EDGE_STROKE_WIDTH.toPx(), arrowSize)
                 }
             }
 
@@ -2246,12 +2261,21 @@ private suspend fun AwaitPointerEventScope.awaitTouchStart(downId: PointerId, do
     }
 }
 
-private suspend fun AwaitPointerEventScope.trackPinchAndPan(onTransform: (centroid: Offset, pan: Offset, zoom: Float) -> Unit) {
+private suspend fun AwaitPointerEventScope.trackPinchAndPan(onTransform: (centroid: Offset, pan: Offset, zoom: Float) -> Unit): Velocity {
+    val velocityTracker = VelocityTracker()
+    var totalPan = Offset.Zero
     while (true) {
         val event = awaitPointerEvent(PointerEventPass.Initial)
-        if (event.changes.none { it.pressed }) return
+        if (event.changes.none { it.pressed }) {
+            velocityTracker.addPosition(event.changes.first().uptimeMillis, totalPan)
+            val fastestGlide = viewConfiguration.maximumFlingVelocity
+            return velocityTracker.calculateVelocity(Velocity(fastestGlide, fastestGlide))
+        }
         val centroid = event.calculateCentroid(useCurrent = true)
-        if (centroid != Offset.Unspecified) onTransform(centroid, event.calculatePan(), event.calculateZoom())
+        val pan = event.calculatePan()
+        if (centroid != Offset.Unspecified) onTransform(centroid, pan, event.calculateZoom())
+        totalPan += pan
+        velocityTracker.addPosition(event.changes.first().uptimeMillis, totalPan)
         event.changes.forEach { it.consume() }
     }
 }
