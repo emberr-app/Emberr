@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -21,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.LocalPinnableContainer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,6 +53,7 @@ import com.emberr.presentation.shared.components.SmallRoundedCornerShape
 import com.emberr.presentation.shared.editor.DefaultBlockShape
 import com.emberr.presentation.shared.editor.GlobalEditorState
 import com.emberr.presentation.shared.editor.links.rememberWebLinkActions
+import com.emberr.presentation.shared.editor.text.ScrollOnlyWhenHiddenBringIntoViewSpec
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.credentials_edit_fields
 import emberr.shared.generated.resources.credentials_edited_days_ago
@@ -82,6 +86,7 @@ import com.emberr.domain.util.time.DateTextStyle
 private const val MILLIS_PER_MINUTE = 60_000L
 private val WebSchemePrefixPattern = Regex("^https?://", RegexOption.IGNORE_CASE)
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CredentialsBlockView(
     block: CredentialsBlock,
@@ -114,13 +119,24 @@ fun CredentialsBlockView(
     }
 
     val currentEditStart = editStart
+    val isEditing = currentEditStart != null && onSave != null
+    val pinnableContainer = LocalPinnableContainer.current
+
+    DisposableEffect(pinnableContainer, isEditing) {
+        val keepFormWhileOffScreen = if (isEditing) pinnableContainer?.pin() else null
+        onDispose { keepFormWhileOffScreen?.release() }
+    }
+
     val cardModifier = Modifier
         .fillMaxWidth()
         .padding(vertical = 4.dp)
         .clip(DefaultBlockShape)
         .background(MaterialTheme.colorScheme.surface)
 
-    CompositionLocalProvider(LocalSitsOnCard provides true) {
+    CompositionLocalProvider(
+        LocalSitsOnCard provides true,
+        LocalBringIntoViewSpec provides ScrollOnlyWhenHiddenBringIntoViewSpec
+    ) {
         if (currentEditStart != null && onSave != null) {
             Box(modifier = cardModifier) {
                 CredentialsBlockEditor(
