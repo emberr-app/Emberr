@@ -208,20 +208,7 @@ class WebDavSyncClient(
                 HttpStatusCode.MovedPermanently.value,
                 HttpStatusCode.Found.value,
                 HttpStatusCode.TemporaryRedirect.value,
-                HttpStatusCode.PermanentRedirect.value -> {
-                    val suggestedServerUrl = response.headers[HttpHeaders.Location]?.let { redirectLocation ->
-                        WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
-                            requestUrl = response.request.url.toString(),
-                            redirectLocation = redirectLocation,
-                            typedServerUrl = credentials.serverUrl
-                        )
-                    }
-                    if (suggestedServerUrl != null) {
-                        WebDavConnectionTestResult.ServerAddressMoved(suggestedServerUrl)
-                    } else {
-                        WebDavConnectionTestResult.ServerError(response.status.value)
-                    }
-                }
+                HttpStatusCode.PermanentRedirect.value -> redirectResult(response, credentials.serverUrl)
                 else -> WebDavConnectionTestResult.ServerError(response.status.value)
             }
         } catch (cause: WebDavConfigurationException) {
@@ -229,6 +216,17 @@ class WebDavSyncClient(
         } catch (cause: Exception) {
             WebDavConnectionTestResult.NetworkFailure(cause)
         }
+    }
+
+    private fun redirectResult(response: HttpResponse, typedServerUrl: String): WebDavConnectionTestResult {
+        val redirectLocation = response.headers[HttpHeaders.Location]
+            ?: return WebDavConnectionTestResult.ServerError(response.status.value)
+        val suggestedServerUrl = WebDavServerUrlValidator.suggestedServerUrlFromRedirect(
+            requestUrl = response.request.url.toString(),
+            redirectLocation = redirectLocation,
+            typedServerUrl = typedServerUrl
+        ) ?: return WebDavConnectionTestResult.ServerError(response.status.value)
+        return WebDavConnectionTestResult.ServerAddressMoved(suggestedServerUrl)
     }
 
     suspend fun checkVaultExists(credentials: SelfHostServerCredentials): Boolean =

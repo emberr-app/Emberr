@@ -23,7 +23,7 @@ object WebDavServerUrlValidator {
         return if (!isHttps && !isPlainHttpOnLocalNetwork) WebDavAddressProblem.PLAIN_HTTP_OUTSIDE_LOCAL_NETWORK else null
     }
 
-    fun serverUrlFromSyncFolderRedirect(requestUrl: String, redirectLocation: String, typedServerUrl: String): String? {
+    fun suggestedServerUrlFromRedirect(requestUrl: String, redirectLocation: String, typedServerUrl: String): String? {
         val redirectedFolderUrl = try {
             URLBuilder(requestUrl).takeFrom(redirectLocation).buildString()
         } catch (_: Exception) {

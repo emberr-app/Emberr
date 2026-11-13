@@ -266,6 +266,7 @@ class SelfHostSetupViewModel(
                 connectionTestStatus = ConnectionTestStatus.NOT_TESTED,
                 connectionTestMessage = null,
                 configurationWarningMessage = null,
+                movedServerAddress = null,
                 errorMessage = null
             )
         }
@@ -278,6 +279,7 @@ class SelfHostSetupViewModel(
                 connectionTestStatus = ConnectionTestStatus.NOT_TESTED,
                 connectionTestMessage = null,
                 configurationWarningMessage = null,
+                movedServerAddress = null,
                 errorMessage = null
             )
         }
@@ -290,6 +292,7 @@ class SelfHostSetupViewModel(
                 connectionTestStatus = ConnectionTestStatus.NOT_TESTED,
                 connectionTestMessage = null,
                 configurationWarningMessage = null,
+                movedServerAddress = null,
                 errorMessage = null
             )
         }
