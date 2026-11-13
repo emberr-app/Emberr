@@ -428,6 +428,9 @@ fun EmberrApp(
         val currentShare by shareViewModel.currentShare.collectAsState()
         val linkableNotes by shareViewModel.linkableNotes.collectAsState()
         val shareNavigateToNoteId by shareViewModel.navigateToNoteId.collectAsState()
+        val spaceViewModel: com.emberr.presentation.space.SpaceViewModel = koinViewModel()
+        val shareSpaces by spaceViewModel.spaces.collectAsState()
+        val shareActiveSpaceId by spaceViewModel.activeSpaceId.collectAsState()
 
         LaunchedEffect(shareNavigateToNoteId) {
             shareNavigateToNoteId?.let { id ->
@@ -1439,6 +1442,11 @@ fun EmberrApp(
                     ShareReceiverSheet(
                         share = currentShare,
                         linkableNotes = linkableNotes,
+                        spaces = shareSpaces,
+                        activeSpaceId = shareActiveSpaceId,
+                        isDailyNotesEnabled = isDailyNotesEnabled,
+                        onSpaceSelected = spaceViewModel::openSpace,
+                        onSaveToTodaysDailyNote = { shareViewModel.saveToTodaysDailyNote() },
                         onSaveToInbox = { shareViewModel.saveToInbox() },
                         onNoteSelected = { noteId -> shareViewModel.saveToNote(noteId) },
                         onCreateNote = { title -> shareViewModel.createNoteAndSave(title) },

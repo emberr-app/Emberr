@@ -15,4 +15,10 @@
         <item quantity="one">%1$d item guardado na caixa de entrada</item>
         <item quantity="other">%1$d itens guardados na caixa de entrada</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Guardar na nota diária de hoje</string>
+    <string name="share_saved_to_todays_daily">Guardado na nota diária de hoje</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">%1$d item guardado na nota diária de hoje</item>
+        <item quantity="other">%1$d itens guardados na nota diária de hoje</item>
+    </plurals>
 </resources>

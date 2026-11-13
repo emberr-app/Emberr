@@ -19,4 +19,11 @@
         <item quantity="one">%1$d आइटम इनबॉक्स में सेव हुआ</item>
         <item quantity="other">%1$d आइटम इनबॉक्स में सेव हुए</item>
     </plurals>
+    <string name="share_save_to_todays_daily">आज के दैनिक नोट में सेव करें</string>
+    <string name="share_saved_to_todays_daily">आज के दैनिक नोट में सेव हो गया</string>
+    <string name="share_space">स्पेस</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">%1$d आइटम आज के दैनिक नोट में सेव हो गया</item>
+        <item quantity="other">%1$d आइटम आज के दैनिक नोट में सेव हो गए</item>
+    </plurals>
 </resources>

@@ -19,4 +19,11 @@
         <item quantity="one">%1$d elemento salvato in In arrivo</item>
         <item quantity="other">%1$d elementi salvati in In arrivo</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Salva nella nota del giorno di oggi</string>
+    <string name="share_saved_to_todays_daily">Salvato nella nota del giorno di oggi</string>
+    <string name="share_space">Spazio</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">%1$d elemento salvato nella nota del giorno di oggi</item>
+        <item quantity="other">%1$d elementi salvati nella nota del giorno di oggi</item>
+    </plurals>
 </resources>

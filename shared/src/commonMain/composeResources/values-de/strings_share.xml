@@ -19,4 +19,11 @@
         <item quantity="one">%1$d Element im Eingang gespeichert</item>
         <item quantity="other">%1$d Elemente im Eingang gespeichert</item>
     </plurals>
+    <string name="share_save_to_todays_daily">In heutiger Tagesnotiz speichern</string>
+    <string name="share_saved_to_todays_daily">In heutiger Tagesnotiz gespeichert</string>
+    <string name="share_space">Bereich</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">%1$d Element in heutiger Tagesnotiz gespeichert</item>
+        <item quantity="other">%1$d Elemente in heutiger Tagesnotiz gespeichert</item>
+    </plurals>
 </resources>

@@ -25,4 +25,13 @@
         <item quantity="many">Збережено %1$d елементів у «Вхідні»</item>
         <item quantity="other">Збережено %1$d елемента у «Вхідні»</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Зберегти в сьогоднішню щоденну нотатку</string>
+    <string name="share_saved_to_todays_daily">Збережено в сьогоднішню щоденну нотатку</string>
+    <string name="share_space">Простір</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">Збережено %1$d елемент у сьогоднішню щоденну нотатку</item>
+        <item quantity="few">Збережено %1$d елементи у сьогоднішню щоденну нотатку</item>
+        <item quantity="many">Збережено %1$d елементів у сьогоднішню щоденну нотатку</item>
+        <item quantity="other">Збережено %1$d елемента у сьогоднішню щоденну нотатку</item>
+    </plurals>
 </resources>

@@ -1,7 +1,6 @@
 package com.emberr.presentation.share
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,14 +25,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.model.PendingShare
+import com.emberr.domain.util.system.isDesktopPlatform
 import com.emberr.presentation.shared.components.EmberrBottomSheet
+import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrButtonPrimary
+import com.emberr.presentation.shared.components.EmberrChoiceRow
+import com.emberr.presentation.shared.components.EmberrDesktopMenuOption
 import com.emberr.presentation.shared.components.NotePickerDialog
 import com.emberr.presentation.shared.components.orHighContrastLine
+import com.emberr.presentation.shared.components.shownSpaceName
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.daily
 import emberr.shared.generated.resources.download3
 import emberr.shared.generated.resources.floppy
+import emberr.shared.generated.resources.folder
 import org.jetbrains.compose.resources.painterResource
 import emberr.shared.generated.resources.common_close
 import emberr.shared.generated.resources.share_files_selected
@@ -41,14 +48,23 @@ import emberr.shared.generated.resources.share_images_selected
 import emberr.shared.generated.resources.share_save_shared_content
 import emberr.shared.generated.resources.share_save_to_a_note
 import emberr.shared.generated.resources.share_save_to_overview
+import emberr.shared.generated.resources.share_save_to_todays_daily
 import emberr.shared.generated.resources.share_shared_image
+import emberr.shared.generated.resources.share_space
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+
+private val ShareSheetSidePadding = 20.dp
 
 @Composable
 fun ShareReceiverSheet(
     share: PendingShare?,
     linkableNotes: List<NoteMetadataEntity>,
+    spaces: List<SpaceEntity>,
+    activeSpaceId: String,
+    isDailyNotesEnabled: Boolean,
+    onSpaceSelected: (String) -> Unit,
+    onSaveToTodaysDailyNote: () -> Unit,
     onSaveToInbox: () -> Unit,
     onNoteSelected: (String) -> Unit,
     onCreateNote: (String) -> Unit,
@@ -65,16 +81,41 @@ fun ShareReceiverSheet(
     EmberrBottomSheet(
         expanded = share != null,
         onDismiss = onDismiss,
-        title = stringResource(Res.string.share_save_shared_content)
+        title = stringResource(Res.string.share_save_shared_content),
+        contentHorizontalPadding = 0.dp
     ) { _ ->
         Column(modifier = Modifier.padding(bottom = 16.dp)) {
             lastShare?.let { SharePreviewRow(it) }
 
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
+                modifier = Modifier.padding(vertical = 8.dp, horizontal = ShareSheetSidePadding),
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f).orHighContrastLine()
             )
 
+            if (isDailyNotesEnabled) {
+                ShareTargetRow(
+                    icon = painterResource(Res.drawable.daily),
+                    label = stringResource(Res.string.share_save_to_todays_daily),
+                    onClick = onSaveToTodaysDailyNote
+                )
+            }
+            if (spaces.size > 1) {
+                EmberrChoiceRow(
+                    label = stringResource(Res.string.share_space),
+                    value = shownSpaceName(spaces.firstOrNull { it.spaceId == activeSpaceId }?.displayName.orEmpty()),
+                    icon = Res.drawable.folder,
+                    outerHorizontalPadding = 0.dp,
+                    innerHorizontalPadding = ShareSheetSidePadding
+                ) { closeMenuAnd ->
+                    spaces.forEach { space ->
+                        SpaceMenuOption(
+                            label = shownSpaceName(space.displayName),
+                            isSelected = space.spaceId == activeSpaceId,
+                            onClick = { closeMenuAnd { onSpaceSelected(space.spaceId) } }
+                        )
+                    }
+                }
+            }
             ShareTargetRow(
                 icon = painterResource(Res.drawable.download3),
                 label = stringResource(Res.string.share_save_to_overview),
@@ -92,7 +133,7 @@ fun ShareReceiverSheet(
                 text = stringResource(Res.string.common_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 12.dp)
+                    .padding(vertical = 12.dp, horizontal = ShareSheetSidePadding)
             )
         }
     }
@@ -112,7 +153,7 @@ private fun SharePreviewRow(share: PendingShare) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp, horizontal = ShareSheetSidePadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
         when (share) {
@@ -194,25 +235,27 @@ private fun ShareTargetRow(
     label: String,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .clickable(onClick = onClick)
-            .padding(vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(Modifier.width(14.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+    EmberrBottomSheetOption(
+        label = label,
+        icon = {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+        },
+        outerHorizontalPadding = 0.dp,
+        innerHorizontalPadding = ShareSheetSidePadding,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun SpaceMenuOption(label: String, isSelected: Boolean, onClick: () -> Unit) {
+    if (isDesktopPlatform) {
+        EmberrDesktopMenuOption(label = label, isSelected = isSelected, onClick = onClick)
+    } else {
+        EmberrBottomSheetOption(label = label, isSelected = isSelected, onClick = onClick)
     }
 }

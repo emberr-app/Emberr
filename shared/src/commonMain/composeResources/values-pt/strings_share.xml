@@ -19,4 +19,11 @@
         <item quantity="one">%1$d item salvo na caixa de entrada</item>
         <item quantity="other">%1$d itens salvos na caixa de entrada</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Salvar na nota diária de hoje</string>
+    <string name="share_saved_to_todays_daily">Salvo na nota diária de hoje</string>
+    <string name="share_space">Espaço</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">%1$d item salvo na nota diária de hoje</item>
+        <item quantity="other">%1$d itens salvos na nota diária de hoje</item>
+    </plurals>
 </resources>

@@ -16,4 +16,10 @@
     <plurals name="share_saved_items_to_inbox">
         <item quantity="other">%1$d item disimpan ke Kotak Masuk</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Simpan ke catatan harian hari ini</string>
+    <string name="share_saved_to_todays_daily">Disimpan ke catatan harian hari ini</string>
+    <string name="share_space">Ruang</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="other">%1$d item disimpan ke catatan harian hari ini</item>
+    </plurals>
 </resources>

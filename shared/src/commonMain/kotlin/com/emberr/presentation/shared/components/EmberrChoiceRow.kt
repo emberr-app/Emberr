@@ -62,12 +62,16 @@ fun EmberrChoiceRow(
     label: String,
     value: String,
     icon: DrawableResource,
+    outerHorizontalPadding: Dp = OPTION_OUTER_HORIZONTAL_PADDING,
+    innerHorizontalPadding: Dp = OPTION_INNER_HORIZONTAL_PADDING,
     menuContent: @Composable (closeMenuAnd: (() -> Unit) -> Unit) -> Unit
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
 
     EmberrBottomSheetOption(
         label = label,
+        outerHorizontalPadding = outerHorizontalPadding,
+        innerHorizontalPadding = innerHorizontalPadding,
         icon = {
             Icon(
                 painter = painterResource(icon),

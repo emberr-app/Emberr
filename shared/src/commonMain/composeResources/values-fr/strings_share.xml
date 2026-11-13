@@ -19,4 +19,11 @@
         <item quantity="one">%1$d élément enregistré dans la boîte de réception</item>
         <item quantity="other">%1$d éléments enregistrés dans la boîte de réception</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Enregistrer dans la note du jour</string>
+    <string name="share_saved_to_todays_daily">Enregistré dans la note du jour</string>
+    <string name="share_space">Espace</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">%1$d élément enregistré dans la note du jour</item>
+        <item quantity="other">%1$d éléments enregistrés dans la note du jour</item>
+    </plurals>
 </resources>

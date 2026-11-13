@@ -6,10 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,14 +19,19 @@ import androidx.compose.ui.window.PopupProperties
 import com.emberr.data.local.room.entity.NoteMetadataEntity
 import com.emberr.domain.util.system.isDesktopPlatform
 import emberr.shared.generated.resources.Res
-import emberr.shared.generated.resources.common_close
 import emberr.shared.generated.resources.components_create_new_note
 import emberr.shared.generated.resources.components_link_to_note
 import emberr.shared.generated.resources.components_link_to_note_heading
 import emberr.shared.generated.resources.components_new_named_note
 import emberr.shared.generated.resources.components_note_picker_hint
 import emberr.shared.generated.resources.components_search_notes
+import emberr.shared.generated.resources.doc_text
+import emberr.shared.generated.resources.doc_text_plus
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+
+private val DesktopRowHorizontalPadding = 16.dp
+private val SheetRowHorizontalPadding = 20.dp
 
 @Composable
 fun NotePickerDialog(
@@ -54,28 +55,22 @@ fun NotePickerDialog(
     // (mentionQuery goes null -> the `if (!expanded) return` above trips) with no exit animation.
     // Running the action after the hide also stops the inserted link from appearing in the editor
     // underneath a sheet that is still on screen.
-    val headerContent: @Composable (closeAnd: (() -> Unit) -> Unit) -> Unit = { closeAnd ->
-        EmberrTextField(
-            value = query,
-            onValueChange = { query = it },
-            placeholder = stringResource(Res.string.components_search_notes),
-//            trailingIcon = { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+    val rowHorizontalPadding = if (isDesktopPlatform) DesktopRowHorizontalPadding else SheetRowHorizontalPadding
 
+    val createBlankNoteRow: @Composable (closeAnd: (() -> Unit) -> Unit) -> Unit = { closeAnd ->
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { closeAnd { onCreateBlankNote() } }
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = rowHorizontalPadding, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.AutoMirrored.Filled.NoteAdd, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+            Icon(painterResource(Res.drawable.doc_text_plus), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Text(stringResource(Res.string.components_create_new_note), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
 
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine())
+        HorizontalDivider(modifier = Modifier.padding(horizontal = rowHorizontalPadding, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine())
     }
 
     val listContent: @Composable ColumnScope.(closeAnd: (() -> Unit) -> Unit) -> Unit = { closeAnd ->
@@ -84,13 +79,13 @@ fun NotePickerDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { closeAnd { onNoteSelected(note.noteId) } }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = rowHorizontalPadding, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (note.icon != null) {
                     Text(note.icon, style = MaterialTheme.typography.bodyLarge)
                 } else {
-                    Icon(Icons.Default.Description, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                    Icon(painterResource(Res.drawable.doc_text), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
@@ -105,16 +100,16 @@ fun NotePickerDialog(
 
         if (query.isNotBlank()) {
             if (filteredNotes.isNotEmpty()) {
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine())
+                HorizontalDivider(modifier = Modifier.padding(horizontal = rowHorizontalPadding, vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f).orHighContrastLine())
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { closeAnd { onCreateNote(query.trim()) } }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = rowHorizontalPadding, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                Icon(painterResource(Res.drawable.doc_text_plus), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(stringResource(Res.string.components_new_named_note, query), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
@@ -123,7 +118,7 @@ fun NotePickerDialog(
                 text = stringResource(Res.string.components_note_picker_hint),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).padding(bottom = 8.dp)
+                modifier = Modifier.padding(horizontal = rowHorizontalPadding, vertical = 8.dp).padding(bottom = 8.dp)
             )
         }
     }
@@ -168,7 +163,13 @@ fun NotePickerDialog(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
-                    headerContent(immediateClose)
+                    EmberrTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        placeholder = stringResource(Res.string.components_search_notes),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = DesktopRowHorizontalPadding, vertical = 8.dp)
+                    )
+                    createBlankNoteRow(immediateClose)
                     Column(
                         modifier = Modifier
                             .weight(1f, fill = false)
@@ -183,25 +184,18 @@ fun NotePickerDialog(
         EmberrBottomSheet(
             expanded = true,
             onDismiss = onDismiss,
-            title = stringResource(Res.string.components_link_to_note)
+            title = stringResource(Res.string.components_link_to_note),
+            contentHorizontalPadding = 0.dp,
+            scrollsContent = false
         ) { closeAnd ->
-            headerContent(closeAnd)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 280.dp)
-                    .verticalScroll(rememberScrollState())
+            EmberrSearchSheetBody(
+                searchText = query,
+                onSearchTextChange = { query = it },
+                placeholder = stringResource(Res.string.components_search_notes)
             ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(bottom = 26.dp)) {
-                    listContent(closeAnd)
-                }
+                createBlankNoteRow(closeAnd)
+                listContent(closeAnd)
             }
-            EmberrButtonPrimary(
-                text = stringResource(Res.string.common_close),
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 12.dp)
-            )
         }
     }
 }
