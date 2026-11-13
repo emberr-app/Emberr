@@ -15,6 +15,7 @@ import com.emberr.domain.ai.NoteIndexer
 import com.emberr.domain.ai.external.AiSettingsRepository
 import com.emberr.domain.canvas.CanvasRepository
 import com.emberr.domain.model.BookmarkBlock
+import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
@@ -290,7 +291,7 @@ class MarkdownNotesImporterTest {
         val result = importer(backgroundScope).importFiles(
             pickedFiles(
                 "Vault/Boards/Roadmap.canvas" to roadmapJson,
-                "Vault/Plan.md" to "[[Roadmap.canvas]]\n\n![[Roadmap.canvas]]",
+                "Vault/Plan.md" to "[[Roadmap.canvas]]",
                 "Vault/images/cat.png" to "png bytes",
                 "Vault/images/broken.png" to null,
                 "Vault/Broken.canvas" to "{ not a canvas"
@@ -318,7 +319,7 @@ class MarkdownNotesImporterTest {
         assertEquals(2, notes.size)
 
         val planBlocks = repository.getNoteContent(plan.noteId)!!.blocks
-        assertEquals(listOf(roadmap.noteId, roadmap.noteId), planBlocks.map { (it as LinkedNoteBlock).linkedNoteId })
+        assertEquals(listOf(roadmap.noteId), planBlocks.map { (it as LinkedNoteBlock).linkedNoteId })
 
         val canvas = canvasRepository.loadCanvasIncludingDeleted(roadmap.noteId)
         val group = canvas.nodes.single { it.type == CanvasNodeType.GROUP }
@@ -338,6 +339,41 @@ class MarkdownNotesImporterTest {
         assertEquals(startCard.nodeId to CanvasSide.RIGHT, edge.fromNodeId to edge.fromSide)
         assertEquals(planCard.nodeId to CanvasSide.LEFT, edge.toNodeId to edge.toSide)
         assertEquals("then", edge.label)
+    }
+
+    @Test
+    fun anEmberrVaultBringsBackDocumentBlocksAndTheCanvasInsideTheNote() = runTest {
+        val result = importer(backgroundScope).importFiles(
+            pickedFiles(
+                "Vault/Note.md" to "[My notes.md](attachments/My_notes.md)\n\n[photo.png](attachments/photo.png)\n\n![[attachments/Canvas.canvas]]",
+                "Vault/attachments/My_notes.md" to "plain text",
+                "Vault/attachments/photo.png" to "png bytes",
+                "Vault/attachments/Canvas.canvas" to "{\"nodes\": [], \"edges\": []}"
+            ),
+            spaceId = IMPORT_SPACE_ID
+        )
+
+        assertEquals(
+            ImportResult(
+                spaceId = IMPORT_SPACE_ID,
+                importedNoteCount = 2,
+                createdFolderCount = 1,
+                copiedAttachmentCount = 2,
+                failedNames = emptyList()
+            ),
+            result
+        )
+        assertEquals(listOf("Vault"), appDatabase.folderDao().getAllFolders(IMPORT_SPACE_ID).first().map { it.name })
+
+        val notes = importedNotes()
+        val note = notes.single { it.title == "Note" }
+        val canvas = notes.single { it.kind == NoteKind.CANVAS }
+        assertTrue(canvas.isSubNote)
+        assertNull(canvas.folderId)
+
+        val blocks = repository.getNoteContent(note.noteId)!!.blocks
+        assertEquals(listOf("My notes.md", "photo.png"), blocks.take(2).map { (it as DocumentBlock).fileName })
+        assertEquals(canvas.noteId, (blocks[2] as CanvasBlock).canvasNoteId)
     }
 
     @Test

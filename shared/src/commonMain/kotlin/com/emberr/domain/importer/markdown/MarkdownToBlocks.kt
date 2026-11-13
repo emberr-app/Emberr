@@ -8,6 +8,7 @@ import com.emberr.domain.model.CalloutBlock
 import com.emberr.domain.model.CalloutType
 import com.emberr.domain.model.CheckboxBlock
 import com.emberr.domain.model.CodeBlock
+import com.emberr.domain.model.CanvasBlock
 import com.emberr.domain.model.DocumentBlock
 import com.emberr.domain.model.HeadingBlock
 import com.emberr.domain.model.ImageBlock
@@ -263,11 +264,15 @@ private class MarkdownBlockBuilder(
 
         val attachmentPath = linkResolver.attachmentPathFor(wikiLink.target)
         if (attachmentPath != null) {
-            addAttachment(attachmentPath, indentation)
+            addAttachment(attachmentPath, indentation, linkedFileName = attachmentPath.substringAfterLast('/').takeUnless { wikiLink.isEmbed })
             return true
         }
         val noteId = linkResolver.noteIdFor(wikiLink.target) ?: return false
-        blocks += linkedNoteBlock(noteId, indentation)
+        blocks += if (wikiLink.isEmbed && ImportPaths.isCanvasFile(wikiLink.target)) {
+            CanvasBlock(id = newBlockId(), canvasNoteId = noteId, indentationLevel = indentation, updatedAt = now)
+        } else {
+            linkedNoteBlock(noteId, indentation)
+        }
         return true
     }
 
@@ -553,19 +558,19 @@ private class MarkdownBlockBuilder(
         parts.forEach { part ->
             when (part) {
                 is InlinePart.Words -> blocks += wordsBlock(part.styledText, indentation)
-                is InlinePart.Attachment -> addAttachment(part.relativePath, indentation)
+                is InlinePart.Attachment -> addAttachment(part.relativePath, indentation, part.linkedFileName)
                 is InlinePart.WebImage -> addWebImage(part.url, part.altText, indentation)
                 is InlinePart.Embed -> blocks += bookmarkBlock(part.url, labelText = "", indentation)
             }
         }
     }
 
-    private fun addAttachment(relativePath: String, indentation: Int) {
+    private fun addAttachment(relativePath: String, indentation: Int, linkedFileName: String? = null) {
         val id = newBlockId()
-        blocks += if (ImportPaths.isImageFile(relativePath)) {
+        blocks += if (linkedFileName == null && ImportPaths.isImageFile(relativePath)) {
             ImageBlock(id = id, indentationLevel = indentation, updatedAt = now)
         } else {
-            DocumentBlock(id = id, fileName = relativePath.substringAfterLast('/'), indentationLevel = indentation, updatedAt = now)
+            DocumentBlock(id = id, fileName = linkedFileName ?: relativePath.substringAfterLast('/'), indentationLevel = indentation, updatedAt = now)
         }
         pendingAttachments += PendingAttachment(blockId = id, relativePath = relativePath)
     }

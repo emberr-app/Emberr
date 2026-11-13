@@ -82,7 +82,7 @@ internal class MarkdownDocument(private val text: CharSequence, private val link
     }
 }
 
-internal class WikiLink(val target: String, private val alias: String?, private val isEmbed: Boolean, private val innerText: String) {
+internal class WikiLink(val target: String, private val alias: String?, val isEmbed: Boolean, private val innerText: String) {
 
     val shownText: String
         get() = when {
