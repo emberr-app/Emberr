@@ -36,6 +36,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.LocalPinnableContainer
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -44,6 +46,7 @@ import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.model.openableLoginUrl
 import com.emberr.domain.util.system.isDesktopPlatform
+import com.emberr.domain.util.system.showNativeToast
 import com.emberr.presentation.shared.components.EmberrBottomSheet
 import com.emberr.presentation.shared.components.EmberrBottomSheetOption
 import com.emberr.presentation.shared.components.EmberrDesktopMenu
@@ -55,6 +58,9 @@ import com.emberr.presentation.shared.editor.GlobalEditorState
 import com.emberr.presentation.shared.editor.links.rememberWebLinkActions
 import com.emberr.presentation.shared.editor.text.ScrollOnlyWhenHiddenBringIntoViewSpec
 import emberr.shared.generated.resources.Res
+import emberr.shared.generated.resources.copy
+import emberr.shared.generated.resources.credentials_copied_url
+import emberr.shared.generated.resources.credentials_copy_url
 import emberr.shared.generated.resources.credentials_edit_fields
 import emberr.shared.generated.resources.credentials_edited_days_ago
 import emberr.shared.generated.resources.credentials_edited_hours_ago
@@ -201,6 +207,7 @@ private fun CredentialsViewCard(
         CredentialsViewHeader(
             block = block,
             inSelectionMode = inSelectionMode,
+            onToggleSelection = onToggleSelection,
             showsOptions = showsOptions,
             isCardHovered = isHovered,
             onEditFields = onEditFields,
@@ -221,6 +228,7 @@ private fun CredentialsViewCard(
 private fun CredentialsViewHeader(
     block: CredentialsBlock,
     inSelectionMode: Boolean,
+    onToggleSelection: () -> Unit,
     showsOptions: Boolean,
     isCardHovered: Boolean,
     onEditFields: () -> Unit,
@@ -231,6 +239,14 @@ private fun CredentialsViewHeader(
     var isMenuOpen by remember { mutableStateOf(false) }
     val untitledCredentials = stringResource(Res.string.credentials_untitled)
     val credentialsBlockName = stringResource(Res.string.editor_block_credentials)
+    val clipboardManager = LocalClipboardManager.current
+    val copiedUrlMessage = stringResource(Res.string.credentials_copied_url)
+    val hasLoginUrl = block.loginUrl.isNotBlank()
+
+    fun copyLoginUrl() {
+        clipboardManager.setText(AnnotatedString(block.loginUrl.trim()))
+        showNativeToast(copiedUrlMessage)
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
@@ -247,13 +263,19 @@ private fun CredentialsViewHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (block.loginUrl.isNotBlank()) {
+            if (hasLoginUrl) {
                 Text(
                     text = shownLoginUrl(block.loginUrl),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { if (inSelectionMode) onToggleSelection() else copyLoginUrl() },
+                        onLongClick = if (isDesktopPlatform) null else onToggleSelection
+                    )
                 )
             }
         }
@@ -275,7 +297,8 @@ private fun CredentialsViewHeader(
                     title = block.serviceName.ifBlank { credentialsBlockName },
                     updatedAt = block.updatedAt,
                     onDismiss = { isMenuOpen = false },
-                    onEditFields = onEditFields
+                    onEditFields = onEditFields,
+                    onCopyUrl = if (hasLoginUrl) { { copyLoginUrl() } } else null
                 )
             }
         }
@@ -334,7 +357,8 @@ private fun CredentialsOptionsMenu(
     title: String,
     updatedAt: Long,
     onDismiss: () -> Unit,
-    onEditFields: () -> Unit
+    onEditFields: () -> Unit,
+    onCopyUrl: (() -> Unit)?
 ) {
     val editedText = if (expanded && updatedAt > 0L) {
         editedAgoText(updatedAt, Clock.System.now().toEpochMilliseconds())
@@ -350,6 +374,7 @@ private fun CredentialsOptionsMenu(
         )
     }
     val editIcon = painterResource(Res.drawable.pen)
+    val copyIcon = painterResource(Res.drawable.copy)
 
     if (isDesktopPlatform) {
         EmberrDesktopMenu(
@@ -365,6 +390,16 @@ private fun CredentialsOptionsMenu(
                     onEditFields()
                 }
             )
+            if (onCopyUrl != null) {
+                EmberrDesktopMenuOption(
+                    label = stringResource(Res.string.credentials_copy_url),
+                    icon = { optionIcon(copyIcon) },
+                    onClick = {
+                        onDismiss()
+                        onCopyUrl()
+                    }
+                )
+            }
             if (editedText != null) {
                 CredentialsDivider(modifier = Modifier.padding(vertical = 4.dp))
                 Text(
@@ -390,6 +425,14 @@ private fun CredentialsOptionsMenu(
                     outerHorizontalPadding = SheetRowInset,
                     onClick = { closeAnd(onEditFields) }
                 )
+                if (onCopyUrl != null) {
+                    EmberrBottomSheetOption(
+                        label = stringResource(Res.string.credentials_copy_url),
+                        icon = { optionIcon(copyIcon) },
+                        outerHorizontalPadding = SheetRowInset,
+                        onClick = { closeAnd(onCopyUrl) }
+                    )
+                }
                 SheetCloseButton(onClick = { closeAnd { } })
             }
         }
