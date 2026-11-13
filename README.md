@@ -67,7 +67,7 @@ Android, Linux and Windows for now.
 
 - **UI:** Compose Multiplatform (Android & Desktop)
 - **Language:** Kotlin, with Coroutines and Flow for async work
-- **Local storage:** Room (KMP) for app data, SQLDelight for the AI search index, SQLCipher for database encryption on Android (desktop encryption planned)
+- **Local storage:** Room (KMP) for app data, SQLDelight for the AI search index, SQLCipher for database encryption on Android, plain SQLite on desktop
 - **Dependency injection:** Koin
 - **Networking:** Ktor
 - **On-device AI:** llama.cpp based local inference (via llamatik)
