@@ -33,7 +33,7 @@ class DefaultTemplateSeeder(
         for (template in templatesNeverSeededInSpace(spaceId, settingsManager.getSeededTemplateNoteIds(), templates)) {
             val noteId = template.noteIdInSpace(spaceId)
             if (repository.getNoteById(noteId) == null) {
-                template.seedSupportingNotes(repository)
+                template.seedSupportingNotes(repository, spaceId)
                 repository.saveNote(
                     metadata = NoteMetadataEntity(
                         noteId = noteId,
@@ -47,7 +47,7 @@ class DefaultTemplateSeeder(
                         filePath = "",
                         isTemplate = true
                     ),
-                    content = template.buildContent(),
+                    content = template.buildContent(spaceId),
                     stampUpdatedAt = false
                 )
             }

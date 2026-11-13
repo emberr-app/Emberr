@@ -7,5 +7,5 @@ object ResearchTemplate : PredefinedTemplate {
     override val templateId: String = "predefined_template_research"
     override val title: String = "Research"
     override val icon: String? = null
-    override fun buildContent(): NoteContent = NoteContent(blocks = emptyList())
+    override fun buildContent(spaceId: String): NoteContent = NoteContent(blocks = emptyList())
 }

@@ -13,8 +13,8 @@ interface PredefinedTemplate {
     val templateId: String
     val title: String
     val icon: String?
-    fun buildContent(): NoteContent
-    suspend fun seedSupportingNotes(repository: NoteRepository) {}
+    fun buildContent(spaceId: String): NoteContent
+    suspend fun seedSupportingNotes(repository: NoteRepository, spaceId: String) {}
 }
 
 fun PredefinedTemplate.noteIdInSpace(spaceId: String): String = "${templateId}_$spaceId"
