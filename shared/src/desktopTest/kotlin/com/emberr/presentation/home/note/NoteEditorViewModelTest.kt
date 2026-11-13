@@ -1,7 +1,10 @@
 package com.emberr.presentation.home.note
 
 import com.emberr.data.local.prefs.SettingsManager
+import com.emberr.data.local.room.dao.CanvasDao
+import com.emberr.data.local.room.dao.NoteDao
 import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.domain.canvas.CanvasRepository
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.movie.MovieTitleSource
 import com.emberr.domain.people.PeopleRepository
@@ -89,7 +92,8 @@ class NoteEditorViewModelTest {
             appScope = CoroutineScope(Job()),
             deviceTableLayoutStore = DeviceTableLayoutStore(neverCalledStub<SettingsManager>()),
             movieTitleSource = neverCalledStub<MovieTitleSource>(),
-            peopleRepository = peopleRepositoryWithNobody()
+            peopleRepository = peopleRepositoryWithNobody(),
+            canvasRepository = CanvasRepository(neverCalledStub<CanvasDao>(), neverCalledStub<NoteDao>())
         )
         viewModel.loadNote("note-1")
         withTimeout(5_000) { viewModel.isLoading.first { isLoading -> !isLoading } }

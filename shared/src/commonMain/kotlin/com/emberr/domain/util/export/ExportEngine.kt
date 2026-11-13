@@ -20,14 +20,16 @@ object ExportEngine {
         noteTitlesById: Map<String, String> = emptyMap(),
         categoryNamesById: Map<String, String> = emptyMap(),
         attachmentPathsByStoredName: Map<String, String> = emptyMap(),
-        personNamesById: Map<String, String> = emptyMap()
+        personNamesById: Map<String, String> = emptyMap(),
+        canvasPathsByNoteId: Map<String, String> = emptyMap()
     ): String = NoteMarkdownWriter.writeMarkdown(
         blocks = blocks,
         title = title,
         noteTitlesById = noteTitlesById,
         categoryNamesById = categoryNamesById,
         attachmentPathsByStoredName = attachmentPathsByStoredName,
-        personNamesById = personNamesById
+        personNamesById = personNamesById,
+        canvasPathsByNoteId = canvasPathsByNoteId
     )
 
     private fun buildPlainText(blocks: List<NoteBlock>, builder: StringBuilder, personNamesById: Map<String, String>) {
