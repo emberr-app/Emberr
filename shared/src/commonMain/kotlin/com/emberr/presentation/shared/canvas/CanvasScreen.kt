@@ -104,6 +104,7 @@ import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -1418,7 +1419,8 @@ fun CanvasScreen(
                             isEditing = editingNodeId == node.nodeId,
                             scrollState = nodeScrollStates.getOrPut(node.nodeId) { ScrollState(initial = 0) },
                             cursorColor = accentColor,
-                            onTextChange = { text -> viewModel.updateNodeText(node.nodeId, text) }
+                            onTextChange = { text -> viewModel.updateNodeText(node.nodeId, text) },
+                            onTextHeightMeasured = { textHeight -> viewModel.growNodeToFitText(node.nodeId, textHeight) }
                         )
                     }
                 }
@@ -1979,7 +1981,8 @@ internal fun CanvasNodeCard(
     isEditing: Boolean,
     scrollState: ScrollState,
     cursorColor: Color,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    onTextHeightMeasured: (Float) -> Unit
 ) {
     val baseDensity = LocalDensity.current
     val screenTopLeft = viewport.worldToScreen(Offset(node.x, node.y), baseDensity.density)
@@ -2006,7 +2009,19 @@ internal fun CanvasNodeCard(
         CompositionLocalProvider(LocalDensity provides zoomedDensity) {
             Box(
                 modifier = Modifier
-                    .size(node.width.dp, node.height.dp)
+                    .then(
+                        if (isEditing) {
+                            Modifier.layout { measurable, _ ->
+                                val widthPx = node.width.dp.roundToPx()
+                                val placeable = measurable.measure(
+                                    Constraints(minWidth = widthPx, maxWidth = widthPx, minHeight = node.height.dp.roundToPx())
+                                )
+                                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                            }
+                        } else {
+                            Modifier.size(node.width.dp, node.height.dp)
+                        }
+                    )
                     .then(if (isSelected) Modifier.border(selectionBorderWidth, CanvasSelectionColor, cardShape) else Modifier)
                     .clip(cardShape)
                     .background(backgroundColor)
@@ -2028,7 +2043,8 @@ internal fun CanvasNodeCard(
                         textStyle = textStyle,
                         cursorColor = cursorColor,
                         onTextChange = onTextChange,
-                        modifier = if (shape.hasRectangularTextArea) Modifier.fillMaxSize() else Modifier.fillMaxWidth()
+                        onTextLayout = { layout -> onTextHeightMeasured(layout.size.height / zoomedDensity.density) },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 } else {
                     Text(text = node.text, style = textStyle, modifier = Modifier.verticalScroll(scrollState))
@@ -2175,6 +2191,7 @@ private fun CanvasNodeTextField(
     onTextChange: (String) -> Unit,
     singleLine: Boolean = false,
     onDone: (() -> Unit)? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
     modifier: Modifier = Modifier.fillMaxSize()
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -2191,6 +2208,7 @@ private fun CanvasNodeTextField(
         keyboardOptions = if (onDone == null) KeyboardOptions.Default else KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = if (onDone == null) KeyboardActions.Default else KeyboardActions(onDone = { onDone() }),
         cursorBrush = SolidColor(cursorColor),
+        onTextLayout = onTextLayout,
         modifier = modifier.focusRequester(focusRequester)
     )
 }

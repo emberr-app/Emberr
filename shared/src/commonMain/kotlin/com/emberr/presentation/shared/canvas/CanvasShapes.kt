@@ -21,6 +21,7 @@ import kotlin.math.min
 
 const val CANVAS_DOUBLE_LINE_GAP = 5f
 private const val HEXAGON_HEIGHT_TO_CORNER_INSET = 0.2887f
+private const val TEXT_FIT_ROUNDS = 12
 
 data class CanvasTextPadding(val start: Float, val top: Float, val end: Float, val bottom: Float) {
     companion object {
@@ -73,6 +74,15 @@ fun CanvasNodeShape.textPadding(width: Float, height: Float): CanvasTextPadding 
         val rimHeight = databaseRimHeight(width, height)
         CanvasTextPadding(12f, rimHeight + 8f, 12f, rimHeight / 2f + 8f)
     }
+}
+
+fun CanvasNodeShape.heightToFitText(width: Float, currentHeight: Float, textHeight: Float): Float {
+    var height = currentHeight
+    repeat(TEXT_FIT_ROUNDS) {
+        val padding = textPadding(width, height)
+        height = max(height, textHeight + padding.top + padding.bottom)
+    }
+    return height
 }
 
 fun Rect.resizedForShape(shape: CanvasNodeShape, edges: CanvasResizeEdges, delta: Offset): Rect {

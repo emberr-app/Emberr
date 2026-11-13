@@ -425,6 +425,16 @@ class CanvasViewModel(
         it.copy(x = bounds.left, y = bounds.top, width = bounds.width, height = bounds.height)
     }
 
+    fun growNodeToFitText(nodeId: String, textHeight: Float) {
+        val node = _canvas.value.nodes.firstOrNull { it.nodeId == nodeId } ?: return
+        val neededHeight = node.shape.heightToFitText(node.width, node.height, textHeight)
+        if (neededHeight <= node.height) return
+        updateNode(nodeId) {
+            if (it.shape.keepsEqualSides) it.copy(width = neededHeight, height = neededHeight)
+            else it.copy(height = neededHeight)
+        }
+    }
+
     fun updateNodeText(nodeId: String, text: String) {
         if (textEditStepNodeId != nodeId) {
             if (freeTextCreatedInOpenStepId != nodeId) beginUndoStep()

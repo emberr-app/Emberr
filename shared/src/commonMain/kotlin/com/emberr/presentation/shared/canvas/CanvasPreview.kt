@@ -114,7 +114,8 @@ fun CanvasPreview(canvasNoteId: String, lastUpdatedAt: Long, modifier: Modifier 
                         isEditing = false,
                         scrollState = rememberScrollState(),
                         cursorColor = accentColor,
-                        onTextChange = {}
+                        onTextChange = {},
+                        onTextHeightMeasured = {}
                     )
                 }
             }
