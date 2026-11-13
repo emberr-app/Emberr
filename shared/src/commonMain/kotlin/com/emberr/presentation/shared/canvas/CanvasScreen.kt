@@ -452,8 +452,6 @@ fun CanvasScreen(
         }
         selection = CanvasSelection.Nodes(setOf(textNodeId))
         editingNodeId = textNodeId
-        activeTool = null
-        pointerIcon = PointerIcon.Default
     }
 
     fun startLiveLine(screenPosition: Offset) {
