@@ -172,7 +172,7 @@ class WebDavSyncClient(
     }
 
     suspend fun listDirectory(remotePath: String): List<WebDavResourceInfo> {
-        val response = propfind(remotePath, depth = "1", credentials = requireCredentials())
+        val response = propfind(ensureTrailingSlash(remotePath), depth = "1", credentials = requireCredentials())
         if (response.status.value !in 200..299) {
             throw statusException("PROPFIND", remotePath, response)
         }
@@ -198,7 +198,7 @@ class WebDavSyncClient(
         }
         return try {
             WebDavServerUrlValidator.validate(credentials.serverUrl)
-            val response = propfind(WebDavSyncPaths.ROOT, depth = "0", credentials = credentials)
+            val response = propfind(ensureTrailingSlash(WebDavSyncPaths.ROOT), depth = "0", credentials = credentials)
             when (response.status.value) {
                 in 200..299 -> WebDavConnectionTestResult.Success
                 HttpStatusCode.NotFound.value -> WebDavConnectionTestResult.Success
