@@ -186,25 +186,6 @@ class CanvasGeometryTest {
     }
 
     @Test
-    fun theBusiestAreaIsTheMiddleOfTheBiggestClusterOfBoxes() {
-        val clusteredBoxes = listOf(
-            rectCenteredOn(Offset(1000f, 1000f), 100f, 50f),
-            rectCenteredOn(Offset(1100f, 1000f), 100f, 50f),
-            rectCenteredOn(Offset(1000f, 1100f), 100f, 50f)
-        )
-        val loneBox = rectCenteredOn(Offset(-5000f, 0f), 100f, 50f)
-
-        val center = busiestAreaCenter(clusteredBoxes + loneBox, clusterRadius = 600f)
-
-        assertClose(Offset(3100f / 3f, 3100f / 3f), center ?: Offset.Unspecified)
-    }
-
-    @Test
-    fun anEmptyCanvasHasNoBusiestArea() {
-        assertEquals(null, busiestAreaCenter(emptyList(), clusterRadius = 600f))
-    }
-
-    @Test
     fun theBusiestClusterLeavesOutFarAwayBoxes() {
         val clusteredBoxes = listOf(
             rectCenteredOn(Offset(1000f, 1000f), 100f, 50f),
@@ -214,6 +195,22 @@ class CanvasGeometryTest {
         val loneBox = rectCenteredOn(Offset(-5000f, 0f), 100f, 50f)
 
         assertEquals(clusteredBoxes, busiestClusterOf(clusteredBoxes + loneBox, clusterRadius = 600f))
+    }
+
+    @Test
+    fun fittingTheBoardShowsAWholeLongMindMapButLeavesOutAFarAwayBox() {
+        val mindMapBoxes = (0 until 10).map { step -> rectCenteredOn(Offset(step * 500f, 0f), 250f, 80f) }
+        val farAwayBox = rectCenteredOn(Offset(0f, 20_000f), 250f, 80f)
+        val boardSize = Size(1200f, 800f)
+        val boardArea = Rect(Offset.Zero, boardSize)
+
+        val viewport = canvasViewportFittingLargestChain(mindMapBoxes + farAwayBox, boardSize, density)!!
+
+        mindMapBoxes.forEach { box ->
+            val boxOnScreen = viewport.worldRectToScreen(box, density)
+            assertTrue(boardArea.contains(boxOnScreen.topLeft) && boardArea.contains(boxOnScreen.bottomRight), "$boxOnScreen is cut off")
+        }
+        assertTrue(!viewport.worldRectToScreen(farAwayBox, density).overlaps(boardArea))
     }
 
     @Test
@@ -261,17 +258,6 @@ class CanvasGeometryTest {
 
         assertEquals(null, canvasPreviewViewport(emptyList(), Size(300f, 100f), density))
         assertEquals(null, canvasPreviewViewport(listOf(box), Size.Zero, density))
-    }
-
-    @Test
-    fun centeringPutsTheWorldPointInTheMiddleOfTheScreen() {
-        val viewport = CanvasViewport(panOffset = Offset(40f, 40f), zoom = 1.5f)
-        val screenCenter = Offset(400f, 300f)
-        val world = Offset(1000f, -200f)
-
-        val centered = viewport.copy(panOffset = viewport.panOffsetCentering(world, screenCenter, density))
-
-        assertClose(screenCenter, centered.worldToScreen(world, density))
     }
 
     @Test

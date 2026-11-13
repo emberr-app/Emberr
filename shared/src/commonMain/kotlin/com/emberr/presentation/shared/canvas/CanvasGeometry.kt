@@ -10,7 +10,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-const val CANVAS_MIN_ZOOM = 0.25f
+const val CANVAS_MIN_ZOOM = 0.05f
 const val CANVAS_MAX_ZOOM = 4f
 const val CANVAS_MIN_NODE_WIDTH = 80f
 const val CANVAS_MIN_NODE_HEIGHT = 40f
@@ -25,6 +25,9 @@ const val CANVAS_CLUSTER_RADIUS = 600f
 const val CANVAS_PREVIEW_MIN_ZOOM = 0.1f
 const val CANVAS_PREVIEW_MAX_ZOOM = 1f
 const val CANVAS_PREVIEW_FILL_RATIO = 0.85f
+const val CANVAS_FIT_FILL_RATIO = 0.85f
+const val CANVAS_FIT_MAX_ZOOM = 1f
+const val CANVAS_FIT_LINK_DISTANCE = 600f
 const val CANVAS_EDGE_LABEL_MAX_WIDTH = 200f
 
 data class CanvasViewport(
@@ -43,9 +46,6 @@ data class CanvasViewport(
     )
 
     fun pannedBy(screenDelta: Offset): CanvasViewport = copy(panOffset = panOffset + screenDelta)
-
-    fun panOffsetCentering(world: Offset, screenCenter: Offset, density: Float): Offset =
-        screenCenter - world * pixelsPerUnit(density)
 
     fun zoomedAround(screenPoint: Offset, zoomFactor: Float, density: Float): CanvasViewport {
         val worldPointUnderCursor = screenToWorld(screenPoint, density)
@@ -73,11 +73,6 @@ val CanvasNodeEntity.worldRect: Rect
 val CanvasNodeEntity.groupTitleWorldRect: Rect
     get() = Rect(left = x, top = y - CANVAS_GROUP_TITLE_HEIGHT, right = x + width, bottom = y)
 
-fun busiestAreaCenter(boxes: List<Rect>, clusterRadius: Float): Offset? {
-    val busiestCluster = busiestClusterOf(boxes, clusterRadius).ifEmpty { return null }
-    return busiestCluster.map { it.center }.reduce { sum, center -> sum + center } / busiestCluster.size.toFloat()
-}
-
 fun busiestClusterOf(boxes: List<Rect>, clusterRadius: Float): List<Rect> {
     if (boxes.isEmpty()) return emptyList()
     return boxes
@@ -86,12 +81,62 @@ fun busiestClusterOf(boxes: List<Rect>, clusterRadius: Float): List<Rect> {
 }
 
 fun canvasPreviewViewport(contentRects: List<Rect>, previewSize: Size, density: Float): CanvasViewport? {
-    if (previewSize.isEmpty()) return null
     val busiestCluster = busiestClusterOf(contentRects, CANVAS_CLUSTER_RADIUS).ifEmpty { return null }
-    val clusterBounds = busiestCluster.reduce { bounds, rect -> bounds.expandedToInclude(rect) }
-    val fittingZoom = min(previewSize.width / clusterBounds.width, previewSize.height / clusterBounds.height) / density
-    val zoom = (fittingZoom * CANVAS_PREVIEW_FILL_RATIO).coerceIn(CANVAS_PREVIEW_MIN_ZOOM, CANVAS_PREVIEW_MAX_ZOOM)
-    return CanvasViewport(panOffset = previewSize.center - clusterBounds.center * (zoom * density), zoom = zoom)
+    return canvasViewportFitting(
+        contentBounds = busiestCluster.reduce { bounds, rect -> bounds.expandedToInclude(rect) },
+        viewSize = previewSize,
+        density = density,
+        fillRatio = CANVAS_PREVIEW_FILL_RATIO,
+        allowedZoom = CANVAS_PREVIEW_MIN_ZOOM..CANVAS_PREVIEW_MAX_ZOOM
+    )
+}
+
+fun canvasViewportFittingLargestChain(contentRects: List<Rect>, boardSize: Size, density: Float): CanvasViewport? {
+    val largestChain = largestChainOf(contentRects, CANVAS_FIT_LINK_DISTANCE).ifEmpty { return null }
+    return canvasViewportFitting(
+        contentBounds = largestChain.reduce { bounds, rect -> bounds.expandedToInclude(rect) },
+        viewSize = boardSize,
+        density = density,
+        fillRatio = CANVAS_FIT_FILL_RATIO,
+        allowedZoom = CANVAS_MIN_ZOOM..CANVAS_FIT_MAX_ZOOM
+    )
+}
+
+fun largestChainOf(boxes: List<Rect>, linkDistance: Float): List<Rect> {
+    val boxesNotInAChain = boxes.toMutableList()
+    var largestChain = emptyList<Rect>()
+    while (boxesNotInAChain.isNotEmpty()) {
+        val chain = mutableListOf(boxesNotInAChain.removeAt(boxesNotInAChain.lastIndex))
+        var nextIndexToCheck = 0
+        while (nextIndexToCheck < chain.size) {
+            val box = chain[nextIndexToCheck]
+            val nearbyBoxes = boxesNotInAChain.filter { gapBetween(box, it) <= linkDistance }
+            boxesNotInAChain.removeAll(nearbyBoxes)
+            chain += nearbyBoxes
+            nextIndexToCheck++
+        }
+        if (chain.size > largestChain.size) largestChain = chain
+    }
+    return largestChain
+}
+
+private fun gapBetween(first: Rect, second: Rect): Float {
+    val horizontalGap = max(0f, max(first.left - second.right, second.left - first.right))
+    val verticalGap = max(0f, max(first.top - second.bottom, second.top - first.bottom))
+    return Offset(horizontalGap, verticalGap).getDistance()
+}
+
+private fun canvasViewportFitting(
+    contentBounds: Rect,
+    viewSize: Size,
+    density: Float,
+    fillRatio: Float,
+    allowedZoom: ClosedFloatingPointRange<Float>
+): CanvasViewport? {
+    if (viewSize.isEmpty()) return null
+    val fittingZoom = min(viewSize.width / contentBounds.width, viewSize.height / contentBounds.height) / density
+    val zoom = (fittingZoom * fillRatio).coerceIn(allowedZoom)
+    return CanvasViewport(panOffset = viewSize.center - contentBounds.center * (zoom * density), zoom = zoom)
 }
 
 fun Rect.expandedToInclude(other: Rect): Rect = Rect(

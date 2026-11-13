@@ -65,6 +65,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PointMode
@@ -114,6 +115,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import com.emberr.data.local.room.entity.CanvasEdgeEntity
 import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.data.local.room.entity.CanvasNodeShape
@@ -285,6 +287,7 @@ fun CanvasScreen(
     var hasRestoredViewPosition by remember(noteId) { mutableStateOf(false) }
     val zoomAnimation = remember(noteId) { Animatable(1f) }
     val panAnimation = remember(noteId) { Animatable(Offset.Zero, Offset.VectorConverter) }
+    val viewportAnimationProgress = remember(noteId) { Animatable(0f) }
     val zoomScope = rememberCoroutineScope()
     val pasteScope = rememberCoroutineScope()
     val pickImage = LocalImagePicker.current
@@ -507,12 +510,33 @@ fun CanvasScreen(
         }
     }
 
+    fun animateViewportTo(target: CanvasViewport) {
+        val boardCenter = Offset(boardSize.width / 2f, boardSize.height / 2f)
+        val startingCenter = viewport.screenToWorld(boardCenter, pixelDensity)
+        val targetCenter = target.screenToWorld(boardCenter, pixelDensity)
+        val startingZoom = viewport.zoom
+        zoomScope.launch {
+            viewportAnimationProgress.snapTo(0f)
+            viewportAnimationProgress.animateTo(1f, spring(stiffness = Spring.StiffnessMediumLow)) {
+                viewport = canvasViewportCenteredOn(
+                    worldCenter = lerp(startingCenter, targetCenter, value),
+                    zoom = startingZoom * (target.zoom / startingZoom).pow(value),
+                    screenCenter = boardCenter,
+                    density = pixelDensity
+                )
+            }
+        }
+    }
+
     fun showBusiestArea() {
         val textBoxes = canvas.nodes.filter { !it.isGroup }
         val boxesToConsider = textBoxes.ifEmpty { canvas.nodes }
-        val busiestCenter = busiestAreaCenter(boxesToConsider.map { it.worldRect }, CANVAS_CLUSTER_RADIUS) ?: return
-        val boardCenter = Offset(boardSize.width / 2f, boardSize.height / 2f)
-        animatePanTo(viewport.panOffsetCentering(busiestCenter, boardCenter, pixelDensity))
+        val fittedViewport = canvasViewportFittingLargestChain(
+            contentRects = boxesToConsider.map { it.worldRect },
+            boardSize = boardSize.toSize(),
+            density = pixelDensity
+        ) ?: return
+        animateViewportTo(fittedViewport)
     }
 
     fun leaveEditingAndSelection() {
