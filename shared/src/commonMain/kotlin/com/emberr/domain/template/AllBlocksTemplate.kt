@@ -48,14 +48,11 @@ import com.emberr.domain.sample.STARTER_CONTENT_UPDATED_AT
 import kotlinx.datetime.LocalDate
 
 object AllBlocksTemplate : PredefinedTemplate {
-    override val templateId: String = "predefined_template_all_blocks_debug"
+    override val templateId: String = "predefined_template_debug_all_blocks"
     override val title: String = "All blocks (debug)"
     override val icon: String? = "🧪"
 
     private const val ID_PREFIX = "debug_all_blocks"
-    private const val DATABASE_ID = "${ID_PREFIX}_database"
-    private const val CANVAS_NOTE_ID = "${ID_PREFIX}_canvas"
-    private const val WATCHLIST_NOTE_ID = "${ID_PREFIX}_watchlist"
     private const val DATABASE_TITLE = "Reading list"
     private const val CANVAS_TITLE = "Debug canvas"
     private const val STYLED_LINE = "Bold, italic, struck, underlined, highlighted and lime in one line"
@@ -63,17 +60,24 @@ object AllBlocksTemplate : PredefinedTemplate {
     private val statusColumn = DatabaseColumnTarget.Property(PropertyType.STATUS)
     private val databaseRows = listOf("Dune" to "Done", "Piranesi" to "Doing")
 
-    override fun buildContent(): NoteContent = NoteContent(blocks = textBlocks() + listBlocks() + mediaAndLinkBlocks() + structuredBlocks())
+    override fun buildContent(spaceId: String): NoteContent =
+        NoteContent(blocks = textBlocks() + listBlocks() + mediaAndLinkBlocks(spaceId) + structuredBlocks(spaceId))
 
-    override suspend fun seedSupportingNotes(repository: NoteRepository) {
-        if (repository.getNoteById(databaseNoteId(DATABASE_ID)) == null) seedDatabase(repository)
-        if (repository.getNoteById(CANVAS_NOTE_ID) == null) {
-            saveStarterNote(repository, subNoteMetadata(CANVAS_NOTE_ID, CANVAS_TITLE, NoteKind.CANVAS), emptyList())
+    override suspend fun seedSupportingNotes(repository: NoteRepository, spaceId: String) {
+        if (repository.getNoteById(databaseNoteId(databaseIdIn(spaceId))) == null) seedDatabase(repository, spaceId)
+        if (repository.getNoteById(canvasNoteIdIn(spaceId)) == null) {
+            saveStarterNote(repository, spaceId, subNoteMetadata(canvasNoteIdIn(spaceId), CANVAS_TITLE, NoteKind.CANVAS), emptyList())
         }
-        if (repository.getNoteById(WATCHLIST_NOTE_ID) == null) {
-            saveStarterNote(repository, subNoteMetadata(WATCHLIST_NOTE_ID, ""), watchlistTitles())
+        if (repository.getNoteById(watchlistNoteIdIn(spaceId)) == null) {
+            saveStarterNote(repository, spaceId, subNoteMetadata(watchlistNoteIdIn(spaceId), ""), watchlistTitles())
         }
     }
+
+    private fun databaseIdIn(spaceId: String): String = "${ID_PREFIX}_database_$spaceId"
+
+    private fun canvasNoteIdIn(spaceId: String): String = "${ID_PREFIX}_canvas_$spaceId"
+
+    private fun watchlistNoteIdIn(spaceId: String): String = "${ID_PREFIX}_watchlist_$spaceId"
 
     private fun blockId(name: String): String = "${ID_PREFIX}_$name"
 
@@ -133,7 +137,7 @@ object AllBlocksTemplate : PredefinedTemplate {
         TextBlock(id = blockId("toggle_child"), text = "Hidden until the toggle opens", indentationLevel = 1, updatedAt = STARTER_CONTENT_UPDATED_AT)
     )
 
-    private fun mediaAndLinkBlocks(): List<NoteBlock> = listOf(
+    private fun mediaAndLinkBlocks(spaceId: String): List<NoteBlock> = listOf(
         SolidDividerBlock(id = blockId("solid_divider"), updatedAt = STARTER_CONTENT_UPDATED_AT),
         ImageBlock(id = blockId("image"), updatedAt = STARTER_CONTENT_UPDATED_AT),
         DocumentBlock(id = blockId("document"), updatedAt = STARTER_CONTENT_UPDATED_AT),
@@ -145,17 +149,17 @@ object AllBlocksTemplate : PredefinedTemplate {
             description = "Bookmark description",
             updatedAt = STARTER_CONTENT_UPDATED_AT
         ),
-        LinkedNoteBlock(id = blockId("linked_note"), linkedNoteId = CANVAS_NOTE_ID, updatedAt = STARTER_CONTENT_UPDATED_AT),
+        LinkedNoteBlock(id = blockId("linked_note"), linkedNoteId = canvasNoteIdIn(spaceId), updatedAt = STARTER_CONTENT_UPDATED_AT),
         ThreeDotDividerBlock(id = blockId("dot_divider"), updatedAt = STARTER_CONTENT_UPDATED_AT)
     )
 
-    private fun structuredBlocks(): List<NoteBlock> = listOf(
+    private fun structuredBlocks(spaceId: String): List<NoteBlock> = listOf(
         TableBlock(
             id = blockId("table"),
             rows = listOf(listOf("Name", "Note"), listOf("Ann", "Pipe | inside"), listOf("Ben", "Two\nlines")),
             updatedAt = STARTER_CONTENT_UPDATED_AT
         ),
-        DatabaseBlock(id = blockId("database"), databaseId = DATABASE_ID, updatedAt = STARTER_CONTENT_UPDATED_AT),
+        DatabaseBlock(id = blockId("database"), databaseId = databaseIdIn(spaceId), updatedAt = STARTER_CONTENT_UPDATED_AT),
         PropertyBlock(id = blockId("status_property"), propertyType = PropertyType.STATUS, tags = listOf("Doing"), updatedAt = STARTER_CONTENT_UPDATED_AT),
         PropertyBlock(id = blockId("date_property"), propertyType = PropertyType.DATE, date = LocalDate(2026, 11, 13), updatedAt = STARTER_CONTENT_UPDATED_AT),
         PersonDetailBlock(id = blockId("phone"), kind = PersonDetailKind.PHONE, label = "Work", value = "+1 555 0100", updatedAt = STARTER_CONTENT_UPDATED_AT),
@@ -171,8 +175,8 @@ object AllBlocksTemplate : PredefinedTemplate {
             updatedAt = STARTER_CONTENT_UPDATED_AT
         ),
         movieBlock(blockId("movie"), tmdbId = 900_001L, kind = MovieKind.MOVIE, title = "Debug Movie", yearText = "2021", status = WatchStatus.WATCHED, ratingHalfStars = 9),
-        WatchlistBlock(id = blockId("watchlist"), watchlistNoteId = WATCHLIST_NOTE_ID, title = "Debug watchlist", updatedAt = STARTER_CONTENT_UPDATED_AT),
-        CanvasBlock(id = blockId("canvas"), canvasNoteId = CANVAS_NOTE_ID, updatedAt = STARTER_CONTENT_UPDATED_AT)
+        WatchlistBlock(id = blockId("watchlist"), watchlistNoteId = watchlistNoteIdIn(spaceId), title = "Debug watchlist", updatedAt = STARTER_CONTENT_UPDATED_AT),
+        CanvasBlock(id = blockId("canvas"), canvasNoteId = canvasNoteIdIn(spaceId), updatedAt = STARTER_CONTENT_UPDATED_AT)
     )
 
     private fun watchlistTitles(): List<NoteBlock> = listOf(
@@ -220,18 +224,20 @@ object AllBlocksTemplate : PredefinedTemplate {
         )
     }
 
-    private suspend fun seedDatabase(repository: NoteRepository) {
-        val emptySettings = newDatabaseSettings(DATABASE_ID, STARTER_CONTENT_UPDATED_AT)
+    private suspend fun seedDatabase(repository: NoteRepository, spaceId: String) {
+        val databaseId = databaseIdIn(spaceId)
+        val emptySettings = newDatabaseSettings(databaseId, STARTER_CONTENT_UPDATED_AT)
         val settings = emptySettings.copy(title = DATABASE_TITLE)
             .withColumnAdded(statusColumn)
             .withSettingTimesStamped(before = emptySettings, now = STARTER_CONTENT_UPDATED_AT)
         saveStarterNote(
             repository,
-            subNoteMetadata(databaseNoteId(DATABASE_ID), DATABASE_TITLE, NoteKind.DATABASE),
+            spaceId,
+            subNoteMetadata(databaseNoteId(databaseId), DATABASE_TITLE, NoteKind.DATABASE),
             listOf(settings)
         )
         databaseRows.forEachIndexed { index, (rowTitle, status) ->
-            val rowNoteId = "${ID_PREFIX}_database_row_${index + 1}"
+            val rowNoteId = "${databaseId}_row_${index + 1}"
             val rowStatus = PropertyBlock(
                 id = databaseCellBlockId(statusColumn, rowNoteId),
                 propertyType = PropertyType.STATUS,
@@ -240,7 +246,8 @@ object AllBlocksTemplate : PredefinedTemplate {
             )
             saveStarterNote(
                 repository,
-                subNoteMetadata(rowNoteId, rowTitle).copy(databaseId = DATABASE_ID),
+                spaceId,
+                subNoteMetadata(rowNoteId, rowTitle).copy(databaseId = databaseId),
                 listOf(rowStatus)
             )
         }
@@ -260,7 +267,7 @@ object AllBlocksTemplate : PredefinedTemplate {
             kind = kind
         )
 
-    private suspend fun saveStarterNote(repository: NoteRepository, metadata: NoteMetadataEntity, blocks: List<NoteBlock>) {
-        repository.saveNote(metadata = metadata, content = NoteContent(blocks = blocks), stampUpdatedAt = false)
+    private suspend fun saveStarterNote(repository: NoteRepository, spaceId: String, metadata: NoteMetadataEntity, blocks: List<NoteBlock>) {
+        repository.saveNoteInSpace(spaceId = spaceId, metadata = metadata, content = NoteContent(blocks = blocks), stampUpdatedAt = false)
     }
 }
