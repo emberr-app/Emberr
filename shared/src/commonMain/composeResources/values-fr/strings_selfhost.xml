@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">Nom d'utilisateur ou mot de passe incorrect</string>
     <string name="selfhost_server_returned_error">Le serveur a renvoyé une erreur (%1$d)</string>
+    <string name="selfhost_server_address_moved">Votre serveur indique que cette adresse a été déplacée. Remplacez l'adresse du serveur par celle ci-dessous et réessayez.</string>
     <string name="selfhost_could_not_reach_server">Impossible de joindre le serveur</string>
     <string name="selfhost_could_not_check_vault">Impossible de vérifier la présence d'un coffre : %1$s</string>
     <string name="selfhost_unknown_error">erreur inconnue</string>

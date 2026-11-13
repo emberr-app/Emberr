@@ -46,4 +46,5 @@
     <string name="selfhost_old_or_damaged_vault_data">Esta pasta do servidor tem dados de sincronização de um cofre antigo ou danificado. Elimina a pasta emberr_sync no teu servidor e configura novamente.</string>
     <string name="selfhost_vault_exists_enter_passphrase">Já existe um cofre neste servidor. Escreve a frase-senha de recuperação abaixo para o restaurar.</string>
     <string name="selfhost_update_required_message">%1$s As tuas notas estão seguras e continuam a ser guardadas neste dispositivo.</string>
+    <string name="selfhost_server_address_moved">O teu servidor indica que este endereço mudou. Altera o endereço do servidor para o endereço abaixo e tenta novamente.</string>
 </resources>

@@ -15,6 +15,7 @@ import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -204,6 +205,23 @@ class WebDavSyncClient(
                 HttpStatusCode.NotFound.value -> WebDavConnectionTestResult.Success
                 HttpStatusCode.Unauthorized.value -> WebDavConnectionTestResult.InvalidCredentials
                 HttpStatusCode.Forbidden.value -> WebDavConnectionTestResult.InvalidCredentials
+                HttpStatusCode.MovedPermanently.value,
+                HttpStatusCode.Found.value,
+                HttpStatusCode.TemporaryRedirect.value,
+                HttpStatusCode.PermanentRedirect.value -> {
+                    val suggestedServerUrl = response.headers[HttpHeaders.Location]?.let { redirectLocation ->
+                        WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+                            requestUrl = response.request.url.toString(),
+                            redirectLocation = redirectLocation,
+                            typedServerUrl = credentials.serverUrl
+                        )
+                    }
+                    if (suggestedServerUrl != null) {
+                        WebDavConnectionTestResult.ServerAddressMoved(suggestedServerUrl)
+                    } else {
+                        WebDavConnectionTestResult.ServerError(response.status.value)
+                    }
+                }
                 else -> WebDavConnectionTestResult.ServerError(response.status.value)
             }
         } catch (cause: WebDavConfigurationException) {

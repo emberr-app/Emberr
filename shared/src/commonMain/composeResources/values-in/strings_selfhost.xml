@@ -81,6 +81,7 @@
 
     <string name="selfhost_invalid_credentials">Nama pengguna atau kata sandi tidak valid</string>
     <string name="selfhost_server_returned_error">Server mengembalikan kesalahan (%1$d)</string>
+    <string name="selfhost_server_address_moved">Server Anda menyatakan alamat ini telah dipindahkan. Ubah alamat server ke alamat di bawah lalu coba lagi.</string>
     <string name="selfhost_could_not_reach_server">Tidak dapat menjangkau server</string>
     <string name="selfhost_could_not_check_vault">Tidak dapat memeriksa brankas yang ada: %1$s</string>
     <string name="selfhost_unknown_error">kesalahan tidak diketahui</string>

@@ -1,7 +1,9 @@
 package com.emberr.domain.selfhost.webdav
 
 import com.emberr.domain.util.network.LocalNetworkHostValidator
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.takeFrom
 
 object WebDavServerUrlValidator {
 
@@ -19,6 +21,19 @@ object WebDavServerUrlValidator {
             isLocalNetworkHost(url.host)
 
         return if (!isHttps && !isPlainHttpOnLocalNetwork) WebDavAddressProblem.PLAIN_HTTP_OUTSIDE_LOCAL_NETWORK else null
+    }
+
+    fun serverUrlFromSyncFolderRedirect(requestUrl: String, redirectLocation: String, typedServerUrl: String): String? {
+        val redirectedFolderUrl = try {
+            URLBuilder(requestUrl).takeFrom(redirectLocation).buildString()
+        } catch (_: Exception) {
+            return null
+        }
+        val syncFolderEnding = "${WebDavSyncPaths.ROOT}/"
+        val redirectedFolderWithSlash = if (redirectedFolderUrl.endsWith("/")) redirectedFolderUrl else "$redirectedFolderUrl/"
+        if (!redirectedFolderWithSlash.endsWith(syncFolderEnding)) return null
+        val suggestedServerUrl = redirectedFolderWithSlash.removeSuffix(syncFolderEnding)
+        return suggestedServerUrl.takeIf { it != typedServerUrl.trimEnd('/') }
     }
 
     fun validate(serverUrl: String) {

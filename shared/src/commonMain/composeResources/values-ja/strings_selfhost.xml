@@ -81,6 +81,7 @@
 
     <string name="selfhost_invalid_credentials">ユーザー名またはパスワードが無効です</string>
     <string name="selfhost_server_returned_error">サーバーからエラーが返されました（%1$d）</string>
+    <string name="selfhost_server_address_moved">サーバーによると、このアドレスは移動しました。サーバーアドレスを下のアドレスに変更して、もう一度お試しください。</string>
     <string name="selfhost_could_not_reach_server">サーバーに接続できませんでした</string>
     <string name="selfhost_could_not_check_vault">既存の保管庫を確認できませんでした: %1$s</string>
     <string name="selfhost_unknown_error">不明なエラー</string>

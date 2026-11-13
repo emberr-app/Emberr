@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">Usuario o contraseña no válidos</string>
     <string name="selfhost_server_returned_error">El servidor devolvió un error (%1$d)</string>
+    <string name="selfhost_server_address_moved">Tu servidor indica que esta dirección se movió. Cambia la dirección del servidor por la de abajo e inténtalo de nuevo.</string>
     <string name="selfhost_could_not_reach_server">No se pudo conectar con el servidor</string>
     <string name="selfhost_could_not_check_vault">No se pudo comprobar si hay una bóveda: %1$s</string>
     <string name="selfhost_unknown_error">error desconocido</string>

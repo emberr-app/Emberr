@@ -87,6 +87,7 @@
 
     <string name="selfhost_invalid_credentials">Nieprawidłowa nazwa użytkownika lub hasło</string>
     <string name="selfhost_server_returned_error">Serwer zwrócił błąd (%1$d)</string>
+    <string name="selfhost_server_address_moved">Twój serwer informuje, że ten adres został przeniesiony. Zmień adres serwera na ten poniżej i spróbuj ponownie.</string>
     <string name="selfhost_could_not_reach_server">Nie udało się połączyć z serwerem</string>
     <string name="selfhost_could_not_check_vault">Nie udało się sprawdzić istniejącego sejfu: %1$s</string>
     <string name="selfhost_unknown_error">nieznany błąd</string>

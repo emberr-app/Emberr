@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">Ungültiger Benutzername oder ungültiges Passwort</string>
     <string name="selfhost_server_returned_error">Der Server hat einen Fehler gemeldet (%1$d)</string>
+    <string name="selfhost_server_address_moved">Dein Server meldet, dass diese Adresse umgezogen ist. Ändere die Serveradresse in die unten stehende und versuche es erneut.</string>
     <string name="selfhost_could_not_reach_server">Server nicht erreichbar</string>
     <string name="selfhost_could_not_check_vault">Prüfung auf einen vorhandenen Tresor fehlgeschlagen: %1$s</string>
     <string name="selfhost_unknown_error">unbekannter Fehler</string>

@@ -81,6 +81,7 @@
 
     <string name="selfhost_invalid_credentials">Sai tên người dùng hoặc mật khẩu</string>
     <string name="selfhost_server_returned_error">Máy chủ trả về lỗi (%1$d)</string>
+    <string name="selfhost_server_address_moved">Máy chủ của bạn cho biết địa chỉ này đã được chuyển. Hãy đổi địa chỉ máy chủ thành địa chỉ bên dưới rồi thử lại.</string>
     <string name="selfhost_could_not_reach_server">Không kết nối được máy chủ</string>
     <string name="selfhost_could_not_check_vault">Không kiểm tra được kho hiện có: %1$s</string>
     <string name="selfhost_unknown_error">lỗi không xác định</string>
