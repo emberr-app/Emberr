@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emberr.domain.credentials.CredentialVault
+import com.emberr.domain.model.CredentialFieldKind
 import com.emberr.domain.model.CredentialsBlock
 import com.emberr.domain.model.CredentialsEdit
 import com.emberr.domain.model.openableLoginUrl
@@ -126,11 +127,13 @@ fun CredentialsBlockView(
 
     val currentEditStart = editStart
     val isEditing = currentEditStart != null && onSave != null
+    val hasEncryptedNote = block.fields.any { field -> field.kind == CredentialFieldKind.NOTE && field.encryptedValue != null }
+    val keepsComposedWhileOffScreen = isEditing || hasEncryptedNote
     val pinnableContainer = LocalPinnableContainer.current
 
-    DisposableEffect(pinnableContainer, isEditing) {
-        val keepFormWhileOffScreen = if (isEditing) pinnableContainer?.pin() else null
-        onDispose { keepFormWhileOffScreen?.release() }
+    DisposableEffect(pinnableContainer, keepsComposedWhileOffScreen) {
+        val pinHandle = if (keepsComposedWhileOffScreen) pinnableContainer?.pin() else null
+        onDispose { pinHandle?.release() }
     }
 
     val cardModifier = Modifier

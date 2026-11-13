@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.runtime.withFrameNanos
@@ -412,7 +413,7 @@ private val CredentialTileSize: Dp
 @Composable
 internal fun CredentialServiceTile(serviceName: String, iconUrl: String?, modifier: Modifier = Modifier) {
     val firstLetter = serviceName.trim().firstOrNull()?.uppercaseChar()
-    var hasLoadedIcon by remember(iconUrl) { mutableStateOf(false) }
+    var hasLoadedIcon by rememberSaveable(iconUrl) { mutableStateOf(false) }
     Box(
         modifier = modifier
             .size(CredentialTileSize)
@@ -448,7 +449,13 @@ internal fun CredentialServiceTile(serviceName: String, iconUrl: String?, modifi
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
-                onState = { state -> hasLoadedIcon = state is AsyncImagePainter.State.Success },
+                onState = { state ->
+                    when (state) {
+                        is AsyncImagePainter.State.Success -> hasLoadedIcon = true
+                        is AsyncImagePainter.State.Error -> hasLoadedIcon = false
+                        else -> Unit
+                    }
+                },
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(if (hasLoadedIcon) 1f else 0f)
