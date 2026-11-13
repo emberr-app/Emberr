@@ -19,4 +19,11 @@
         <item quantity="one">%1$d item opgeslagen in Inbox</item>
         <item quantity="other">%1$d items opgeslagen in Inbox</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Opslaan in dagnotitie van vandaag</string>
+    <string name="share_saved_to_todays_daily">Opgeslagen in dagnotitie van vandaag</string>
+    <string name="share_space">Ruimte</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">%1$d item opgeslagen in dagnotitie van vandaag</item>
+        <item quantity="other">%1$d items opgeslagen in dagnotitie van vandaag</item>
+    </plurals>
 </resources>

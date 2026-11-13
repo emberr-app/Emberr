@@ -19,4 +19,11 @@
         <item quantity="one">Se guardó %1$d elemento en la bandeja de entrada</item>
         <item quantity="other">Se guardaron %1$d elementos en la bandeja de entrada</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Guardar en la nota diaria de hoy</string>
+    <string name="share_saved_to_todays_daily">Guardado en la nota diaria de hoy</string>
+    <string name="share_space">Espacio</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">Se guardó %1$d elemento en la nota diaria de hoy</item>
+        <item quantity="other">Se guardaron %1$d elementos en la nota diaria de hoy</item>
+    </plurals>
 </resources>

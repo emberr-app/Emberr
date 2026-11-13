@@ -9,6 +9,7 @@ import com.emberr.domain.model.ImageBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.NoteContent
 import com.emberr.domain.model.PendingShare
+import com.emberr.domain.model.TextBlock
 import com.emberr.domain.repository.NoteRepository
 import com.emberr.domain.util.network.HtmlMetadataFetcher
 import com.emberr.domain.util.media.MediaStorageHelper
@@ -26,12 +27,17 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import java.util.UUID
+import kotlin.time.Clock
 import emberr.shared.generated.resources.Res
 import emberr.shared.generated.resources.share_failed_to_save
 import emberr.shared.generated.resources.share_note_no_longer_available
 import emberr.shared.generated.resources.share_saved_items_to_inbox
+import emberr.shared.generated.resources.share_saved_items_to_todays_daily
 import emberr.shared.generated.resources.share_saved_to_inbox
+import emberr.shared.generated.resources.share_saved_to_todays_daily
 import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.getString
 
@@ -127,7 +133,9 @@ class ShareViewModel(
 
                 SyncCoordinator.mutex.withLock {
                     val meta = repository.getNoteById(noteId) ?: return@withLock
-                    val currentContent = repository.getNoteContent(noteId) ?: return@withLock
+                    val dailyDateString = meta.dateString?.takeIf { meta.isDaily }
+                    val currentContent = (if (dailyDateString != null) repository.getDailyNote(dailyDateString) else repository.getNoteContent(noteId))
+                        ?: return@withLock
                     val finalizedBlocks = currentContent.blocks.map {
                         if (it.id == block.id && it is BookmarkBlock) {
                             it.copy(
@@ -138,7 +146,11 @@ class ShareViewModel(
                             )
                         } else it
                     }
-                    repository.saveNote(meta.copy(updatedAt = System.currentTimeMillis()), NoteContent(blocks = finalizedBlocks))
+                    if (dailyDateString != null) {
+                        repository.saveDailyNote(dailyDateString, NoteContent(blocks = finalizedBlocks))
+                    } else {
+                        repository.saveNote(meta.copy(updatedAt = System.currentTimeMillis()), NoteContent(blocks = finalizedBlocks))
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -171,6 +183,42 @@ class ShareViewModel(
                 notify(
                     if (newBlocks.size > 1) getPluralString(Res.plurals.share_saved_items_to_inbox, newBlocks.size, newBlocks.size)
                     else getString(Res.string.share_saved_to_inbox)
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                notify(getString(Res.string.share_failed_to_save))
+            }
+        }
+    }
+
+    fun saveToTodaysDailyNote() {
+        val share = _currentShare.value ?: return
+        _currentShare.value = null
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val newBlocks = buildBlocks(share)
+                if (newBlocks.isEmpty()) {
+                    notify(getString(Res.string.share_failed_to_save))
+                    return@launch
+                }
+
+                val todayDateString = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
+                var dailyNoteId: String? = null
+                SyncCoordinator.mutex.withLock {
+                    val existingBlocks = repository.getDailyNote(todayDateString)?.blocks.orEmpty()
+                    val startingBlocks = existingBlocks.ifEmpty {
+                        listOf(TextBlock(id = "root_$todayDateString", text = "", updatedAt = System.currentTimeMillis()))
+                    }
+                    repository.saveDailyNote(todayDateString, NoteContent(blocks = startingBlocks + newBlocks))
+                    dailyNoteId = repository.getDailyNoteMetadata(todayDateString)?.noteId
+                }
+
+                dailyNoteId?.let { noteId ->
+                    newBlocks.filterIsInstance<BookmarkBlock>().forEach { scheduleLinkMetadataRefresh(noteId, it) }
+                }
+                notify(
+                    if (newBlocks.size > 1) getPluralString(Res.plurals.share_saved_items_to_todays_daily, newBlocks.size, newBlocks.size)
+                    else getString(Res.string.share_saved_to_todays_daily)
                 )
             } catch (e: Exception) {
                 e.printStackTrace()

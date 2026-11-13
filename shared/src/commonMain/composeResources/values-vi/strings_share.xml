@@ -16,4 +16,10 @@
     <plurals name="share_saved_items_to_inbox">
         <item quantity="other">Đã lưu %1$d mục vào Hộp thư đến</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Lưu vào ghi chú hằng ngày hôm nay</string>
+    <string name="share_saved_to_todays_daily">Đã lưu vào ghi chú hằng ngày hôm nay</string>
+    <string name="share_space">Không gian</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="other">Đã lưu %1$d mục vào ghi chú hằng ngày hôm nay</item>
+    </plurals>
 </resources>

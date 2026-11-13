@@ -16,4 +16,10 @@
     <plurals name="share_saved_items_to_inbox">
         <item quantity="other">항목 %1$d개를 받은편지함에 저장했어요</item>
     </plurals>
+    <string name="share_save_to_todays_daily">오늘의 데일리 노트에 저장</string>
+    <string name="share_saved_to_todays_daily">오늘의 데일리 노트에 저장됨</string>
+    <string name="share_space">스페이스</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="other">항목 %1$d개를 오늘의 데일리 노트에 저장했어요</item>
+    </plurals>
 </resources>

@@ -19,4 +19,11 @@
         <item quantity="one">Saved %1$d item to Inbox</item>
         <item quantity="other">Saved %1$d items to Inbox</item>
     </plurals>
+    <string name="share_save_to_todays_daily">Save to Today's Daily Note</string>
+    <string name="share_saved_to_todays_daily">Saved to today's daily note</string>
+    <string name="share_space">Space</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="one">Saved %1$d item to today's daily note</item>
+        <item quantity="other">Saved %1$d items to today's daily note</item>
+    </plurals>
 </resources>

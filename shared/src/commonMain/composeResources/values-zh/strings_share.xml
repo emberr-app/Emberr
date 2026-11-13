@@ -16,4 +16,10 @@
     <plurals name="share_saved_items_to_inbox">
         <item quantity="other">已将 %1$d 项保存到收件箱</item>
     </plurals>
+    <string name="share_save_to_todays_daily">保存到今天的每日笔记</string>
+    <string name="share_saved_to_todays_daily">已保存到今天的每日笔记</string>
+    <string name="share_space">空间</string>
+    <plurals name="share_saved_items_to_todays_daily">
+        <item quantity="other">已将 %1$d 项保存到今天的每日笔记</item>
+    </plurals>
 </resources>
