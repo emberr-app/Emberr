@@ -2,8 +2,8 @@ package com.emberr.domain.selfhost.webdav
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 class WebDavServerUrlValidatorTest {
 
@@ -62,7 +62,7 @@ class WebDavServerUrlValidatorTest {
     fun aSyncFolderRedirectSuggestsTheServerAddressToType() {
         assertEquals(
             "https://www.example.com/dav",
-            WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+            WebDavServerUrlValidator.suggestedServerUrlFromRedirect(
                 requestUrl = "http://example.com/dav/emberr_sync/",
                 redirectLocation = "https://www.example.com/dav/emberr_sync/",
                 typedServerUrl = "http://example.com/dav"
@@ -70,7 +70,7 @@ class WebDavServerUrlValidatorTest {
         )
         assertEquals(
             "https://example.com/remote.php/dav",
-            WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+            WebDavServerUrlValidator.suggestedServerUrlFromRedirect(
                 requestUrl = "https://example.com/dav/emberr_sync/",
                 redirectLocation = "/remote.php/dav/emberr_sync/",
                 typedServerUrl = "https://example.com/dav/"
@@ -81,14 +81,14 @@ class WebDavServerUrlValidatorTest {
     @Test
     fun aRedirectWithNothingToSuggestGivesNoAddress() {
         assertNull(
-            WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+            WebDavServerUrlValidator.suggestedServerUrlFromRedirect(
                 requestUrl = "https://example.com/dav/emberr_sync/",
                 redirectLocation = "https://example.com/login",
                 typedServerUrl = "https://example.com/dav"
             )
         )
         assertNull(
-            WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+            WebDavServerUrlValidator.suggestedServerUrlFromRedirect(
                 requestUrl = "https://example.com/dav/emberr_sync",
                 redirectLocation = "https://example.com/dav/emberr_sync/",
                 typedServerUrl = "https://example.com/dav/"

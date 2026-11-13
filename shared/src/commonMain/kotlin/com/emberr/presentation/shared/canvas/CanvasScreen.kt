@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -2009,19 +2010,8 @@ internal fun CanvasNodeCard(
         CompositionLocalProvider(LocalDensity provides zoomedDensity) {
             Box(
                 modifier = Modifier
-                    .then(
-                        if (isEditing) {
-                            Modifier.layout { measurable, _ ->
-                                val widthPx = node.width.dp.roundToPx()
-                                val placeable = measurable.measure(
-                                    Constraints(minWidth = widthPx, maxWidth = widthPx, minHeight = node.height.dp.roundToPx())
-                                )
-                                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-                            }
-                        } else {
-                            Modifier.size(node.width.dp, node.height.dp)
-                        }
-                    )
+                    .width(node.width.dp)
+                    .then(if (isEditing) Modifier.heightIn(min = node.height.dp) else Modifier.height(node.height.dp))
                     .then(if (isSelected) Modifier.border(selectionBorderWidth, CanvasSelectionColor, cardShape) else Modifier)
                     .clip(cardShape)
                     .background(backgroundColor)
