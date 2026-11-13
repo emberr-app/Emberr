@@ -276,4 +276,9 @@
     <string name="settings_export_backup_daily_notes">每日笔记</string>
     <string name="settings_export_backup_calendar">日历</string>
     <string name="settings_export_backup_export">导出</string>
+    <string name="settings_export_format">格式</string>
+    <string name="settings_export_format_backup">Emberr 备份</string>
+    <string name="settings_export_format_backup_subtitle">全部内容，可在 Emberr 中恢复</string>
+    <string name="settings_export_format_vault">Markdown 仓库</string>
+    <string name="settings_export_format_vault_subtitle">以 Markdown 文件保存笔记，可用于 Obsidian 等应用</string>
 </resources>

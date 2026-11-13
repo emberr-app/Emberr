@@ -77,6 +77,14 @@ val sharedModule = module {
     }
 
     single {
+        com.emberr.domain.util.export.MarkdownVaultExporter(
+            repository = get(),
+            canvasRepository = get(),
+            spaceRepository = get()
+        )
+    }
+
+    single {
         NoteIndexer(
             lazyDatabase = inject(),
             aiEngine = get(),

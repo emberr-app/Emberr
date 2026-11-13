@@ -276,4 +276,9 @@
     <string name="settings_export_backup_daily_notes">Ghi chú hằng ngày</string>
     <string name="settings_export_backup_calendar">Lịch</string>
     <string name="settings_export_backup_export">Xuất</string>
+    <string name="settings_export_format">Định dạng</string>
+    <string name="settings_export_format_backup">Bản sao lưu Emberr</string>
+    <string name="settings_export_format_backup_subtitle">Tất cả, để khôi phục trong Emberr</string>
+    <string name="settings_export_format_vault">Kho Markdown</string>
+    <string name="settings_export_format_vault_subtitle">Ghi chú dưới dạng tệp Markdown cho Obsidian và các ứng dụng khác</string>
 </resources>

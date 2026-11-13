@@ -1004,6 +1004,7 @@ fun DesktopMainScreen(
     onExportMarkdown: (MarkdownExport) -> Unit = {},
     onExportPdf: (fileName: String, title: String, blocks: List<NoteBlock>) -> Unit = { _, _, _ -> },
     onExportBackup: (choice: BackupContentChoice) -> Unit = {},
+    onExportMarkdownVault: (spaceIds: Set<String>) -> Unit = {},
     onAiIconTap: () -> Unit = {},
     isAiChatVisible: Boolean = false,
     ragViewModel: com.emberr.presentation.ai.RagViewModel? = null,
@@ -2072,6 +2073,7 @@ fun DesktopMainScreen(
                     SettingsScreen(
                         onNavigateBack = closeDetailPane,
                         onExportReady = onExportBackup,
+                        onExportMarkdownVaultReady = onExportMarkdownVault,
                         onNavigateToSelfHostSetup = { detail = DetailPane.SelfHostSetup },
                         onNavigateToEmberrCloud = { if (isDebugBuild) detail = DetailPane.EmberrCloud },
                         onNavigateToAbout = { detail = DetailPane.About },

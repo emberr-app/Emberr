@@ -320,6 +320,7 @@ private class SettingsCategory(
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onExportReady: (choice: BackupContentChoice) -> Unit = {},
+    onExportMarkdownVaultReady: (spaceIds: Set<String>) -> Unit = {},
     onRequestBackupFolder: () -> Unit = {},
     onNavigateToSelfHostSetup: () -> Unit = {},
     onNavigateToEmberrCloud: () -> Unit = {},
@@ -798,6 +799,7 @@ fun SettingsScreen(
         ExportSpacesSheet(
             spaces = spaces,
             onExportClick = onExportReady,
+            onExportMarkdownVaultClick = onExportMarkdownVaultReady,
             onDismiss = { showExportSpacesSheet = false }
         )
     }

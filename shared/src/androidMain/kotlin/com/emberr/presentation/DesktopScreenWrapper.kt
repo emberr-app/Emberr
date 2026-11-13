@@ -20,6 +20,7 @@ actual fun DesktopMainScreenWrapper(
     onExportMarkdown: (MarkdownExport) -> Unit,
     onExportPdf: (String, String, List<NoteBlock>) -> Unit,
     onExportBackup: (choice: BackupContentChoice) -> Unit,
+    onExportMarkdownVault: (spaceIds: Set<String>) -> Unit,
     onAiIconTap: () -> Unit,
     isAiChatVisible: Boolean,
     ragViewModel: RagViewModel?,

@@ -277,4 +277,9 @@
     <string name="settings_export_backup_daily_notes">Günlük notlar</string>
     <string name="settings_export_backup_calendar">Takvim</string>
     <string name="settings_export_backup_export">Dışa aktar</string>
+    <string name="settings_export_format">Biçim</string>
+    <string name="settings_export_format_backup">Emberr yedeği</string>
+    <string name="settings_export_format_backup_subtitle">Her şey, Emberr içinde geri yüklemek için</string>
+    <string name="settings_export_format_vault">Markdown kasası</string>
+    <string name="settings_export_format_vault_subtitle">Obsidian ve diğer uygulamalar için Markdown dosyaları olarak notlar</string>
 </resources>
