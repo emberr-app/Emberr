@@ -198,14 +198,14 @@ class ExportEngineTest {
     }
 
     @Test
-    fun imagesAndDocumentsArePlaceholdersInPlainTextAndLinksInMarkdown() {
+    fun imagesAndDocumentsArePlaceholdersInPlainTextAndInMarkdownWithoutAnAttachmentsFolder() {
         val image = ImageBlock(id = "image-1", localFilePath = "photo.png")
         val document = DocumentBlock(id = "document-1", localFilePath = "stored.pdf", fileName = "invoice.pdf")
 
         assertEquals("[Image]", plainTextOf(image))
-        assertEquals("![](photo.png)", markdownOf(image))
+        assertEquals("[Image]", markdownOf(image))
         assertEquals("[File: invoice.pdf]", plainTextOf(document))
-        assertEquals("[invoice.pdf](stored.pdf)", markdownOf(document))
+        assertEquals("[File: invoice.pdf]", markdownOf(document))
     }
 
     @Test
@@ -233,16 +233,21 @@ class ExportEngineTest {
     }
 
     @Test
-    fun aVoiceNoteHasNoPlainTextFormButStillAppearsInMarkdown() {
-        val blocks = arrayOf(
+    fun aVoiceNoteHasNoPlainTextFormAndBecomesALinkToItsAudioFileInMarkdown() {
+        val blocks = listOf(
             TextBlock(id = "text-1", text = "kept"),
-            VoiceBlock(id = "voice-1", localFilePath = "memo.m4a")
+            VoiceBlock(id = "voice-1", localFilePath = "voice_1.wav", durationSeconds = 72)
         )
+        val attachments = MarkdownAttachments.collect(blocks)
 
-        assertEquals("kept", plainTextOf(*blocks))
+        assertEquals("kept", plainTextOf(*blocks.toTypedArray()))
+        assertEquals("kept\n\n[Voice note (1:12)]", markdownOf(*blocks.toTypedArray()))
         assertEquals(
-            "kept\n\n```emberr-voice\nfile: memo.m4a\nseconds: 0\n```",
-            markdownOf(*blocks)
+            "kept\n\n[Voice note (1:12)](attachments/voice_1.wav)",
+            ExportEngine.generateMarkdown(
+                blocks = blocks,
+                attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport }
+            )
         )
     }
 
@@ -307,11 +312,26 @@ class ExportEngineTest {
     @Test
     fun markdownExportIndentsWithTwoSpacesPerLevel() {
         assertEquals(
-            "Parent\n\n  - Child\n    - Grandchild",
+            "- Parent\n  - Child\n    - Grandchild",
             markdownOf(
-                TextBlock(id = "text-1", text = "Parent"),
+                BulletedListBlock(id = "bullet-0", text = "Parent"),
                 BulletedListBlock(id = "bullet-1", text = "Child", indentationLevel = 1),
                 BulletedListBlock(id = "bullet-2", text = "Grandchild", indentationLevel = 2)
+            )
+        )
+    }
+
+    @Test
+    fun blocksNestedUnderAListItemStayInsideItAndOtherIndentsNeverBecomeCode() {
+        assertEquals(
+            "1. Step\n\n   Details\n\n   - Point\n\n     > Said\n\nBack out\n\nNot code",
+            markdownOf(
+                NumberedListBlock(id = "number-1", text = "Step", number = 1),
+                TextBlock(id = "text-1", text = "Details", indentationLevel = 1),
+                BulletedListBlock(id = "bullet-1", text = "Point", indentationLevel = 1),
+                QuoteBlock(id = "quote-1", text = "Said", indentationLevel = 2),
+                TextBlock(id = "text-2", text = "Back out"),
+                TextBlock(id = "text-3", text = "Not code", indentationLevel = 2)
             )
         )
     }
