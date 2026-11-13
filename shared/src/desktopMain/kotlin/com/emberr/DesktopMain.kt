@@ -42,6 +42,8 @@ import com.emberr.domain.media.LocalMediaGarbageCollector
 import com.emberr.domain.media.LocalMediaGcTrigger
 import com.emberr.domain.selfhost.sync.ForegroundSyncPoller
 import com.emberr.domain.selfhost.crypto.SecureSyncKeyStorage
+import com.emberr.domain.ai.external.SecureAiKeyStorage
+import com.emberr.domain.cloud.account.CloudAccountStorage
 import com.emberr.domain.selfhost.sync.SelfHostSyncLog
 import com.emberr.domain.selfhost.sync.SelfHostSyncScheduler
 import com.emberr.domain.cloud.sync.CloudSyncScheduler
@@ -109,6 +111,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
+import org.koin.core.Koin
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.qualifier.named
@@ -150,13 +153,22 @@ fun main() {
     stagedUpdateInstallation?.installStagedUpdateWhenAppQuits(appVersionName)
 
     eraseAppDataIfRequested(DesktopAppStorage.emberrDirectory)
+    val appDataFolderStartsEmpty = DesktopAppStorage.holdsNoAppData(DesktopAppStorage.emberrDirectory)
 
     runEmberrDesktopApp(
-        stagedUpdateCouldNotStart = stagedUpdateStartResult == StagedUpdateStartResult.InstallerCouldNotStart
+        stagedUpdateCouldNotStart = stagedUpdateStartResult == StagedUpdateStartResult.InstallerCouldNotStart,
+        appDataFolderStartsEmpty = appDataFolderStartsEmpty
     )
 }
 
-private fun runEmberrDesktopApp(stagedUpdateCouldNotStart: Boolean) = application {
+private suspend fun forgetSecretsLeftByAnEarlierInstall(koin: Koin) {
+    runCatching { koin.get<SettingsManager>().clearSyncPairing() }
+    runCatching { koin.get<SecureSyncKeyStorage>().clearAll() }
+    runCatching { koin.get<SecureAiKeyStorage>().clearAll() }
+    runCatching { koin.get<CloudAccountStorage>().clearAll() }
+}
+
+private fun runEmberrDesktopApp(stagedUpdateCouldNotStart: Boolean, appDataFolderStartsEmpty: Boolean) = application {
 
     remember {
         StartupLog.step(
@@ -251,6 +263,11 @@ private fun runEmberrDesktopApp(stagedUpdateCouldNotStart: Boolean) = applicatio
         withContext(Dispatchers.IO) {
             val koin = GlobalContext.get()
             koin.get<DesktopSecretStore>().awaitReadyState()
+            if (appDataFolderStartsEmpty) {
+                timeStartupStep("Forgetting secrets left by an earlier install") {
+                    forgetSecretsLeftByAnEarlierInstall(koin)
+                }
+            }
             val secureSyncKeyStorage = koin.get<SecureSyncKeyStorage>()
             val selfHostSyncScheduler = koin.get<SelfHostSyncScheduler>()
             val foregroundSyncPoller = koin.get<ForegroundSyncPoller>()
