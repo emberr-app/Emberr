@@ -1,6 +1,7 @@
 package com.emberr.domain.template
 
 import com.emberr.domain.model.NoteContent
+import com.emberr.domain.repository.NoteRepository
 
 /**
  * Definition of a template the app ships with out of the box. Each implementation lives in its
@@ -13,6 +14,7 @@ interface PredefinedTemplate {
     val title: String
     val icon: String?
     fun buildContent(): NoteContent
+    suspend fun seedSupportingNotes(repository: NoteRepository) {}
 }
 
 fun PredefinedTemplate.noteIdInSpace(spaceId: String): String = "${templateId}_$spaceId"
