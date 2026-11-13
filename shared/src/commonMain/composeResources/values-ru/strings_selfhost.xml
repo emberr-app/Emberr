@@ -87,6 +87,7 @@
 
     <string name="selfhost_invalid_credentials">Неверное имя пользователя или пароль</string>
     <string name="selfhost_server_returned_error">Сервер вернул ошибку (%1$d)</string>
+    <string name="selfhost_server_address_moved">Ваш сервер сообщает, что этот адрес перемещён. Измените адрес сервера на указанный ниже и попробуйте снова.</string>
     <string name="selfhost_could_not_reach_server">Не удалось связаться с сервером</string>
     <string name="selfhost_could_not_check_vault">Не удалось проверить наличие хранилища: %1$s</string>
     <string name="selfhost_unknown_error">неизвестная ошибка</string>

@@ -1,6 +1,8 @@
 package com.emberr.domain.selfhost.webdav
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertFailsWith
 
 class WebDavServerUrlValidatorTest {
@@ -54,6 +56,44 @@ class WebDavServerUrlValidatorTest {
     fun theValidatorAgreesWithTheSharedLocalNetworkCheck() {
         assertAccepted("http://192.168.1.5")
         assertRefused("http://192.169.1.5")
+    }
+
+    @Test
+    fun aSyncFolderRedirectSuggestsTheServerAddressToType() {
+        assertEquals(
+            "https://www.example.com/dav",
+            WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+                requestUrl = "http://example.com/dav/emberr_sync/",
+                redirectLocation = "https://www.example.com/dav/emberr_sync/",
+                typedServerUrl = "http://example.com/dav"
+            )
+        )
+        assertEquals(
+            "https://example.com/remote.php/dav",
+            WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+                requestUrl = "https://example.com/dav/emberr_sync/",
+                redirectLocation = "/remote.php/dav/emberr_sync/",
+                typedServerUrl = "https://example.com/dav/"
+            )
+        )
+    }
+
+    @Test
+    fun aRedirectWithNothingToSuggestGivesNoAddress() {
+        assertNull(
+            WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+                requestUrl = "https://example.com/dav/emberr_sync/",
+                redirectLocation = "https://example.com/login",
+                typedServerUrl = "https://example.com/dav"
+            )
+        )
+        assertNull(
+            WebDavServerUrlValidator.serverUrlFromSyncFolderRedirect(
+                requestUrl = "https://example.com/dav/emberr_sync",
+                redirectLocation = "https://example.com/dav/emberr_sync/",
+                typedServerUrl = "https://example.com/dav/"
+            )
+        )
     }
 
     private fun assertContainsAll(text: String, vararg expectedFragments: String) {

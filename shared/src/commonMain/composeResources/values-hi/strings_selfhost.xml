@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">गलत यूज़रनेम या पासवर्ड</string>
     <string name="selfhost_server_returned_error">सर्वर ने गड़बड़ी लौटाई (%1$d)</string>
+    <string name="selfhost_server_address_moved">आपका सर्वर बता रहा है कि यह पता बदल गया है। सर्वर का पता नीचे दिए गए पते में बदलें और फिर से कोशिश करें।</string>
     <string name="selfhost_could_not_reach_server">सर्वर तक नहीं पहुँच सके</string>
     <string name="selfhost_could_not_check_vault">मौजूदा वॉल्ट की जाँच नहीं हो सकी: %1$s</string>
     <string name="selfhost_unknown_error">अज्ञात गड़बड़ी</string>

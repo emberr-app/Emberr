@@ -53,6 +53,7 @@ import emberr.shared.generated.resources.selfhost_no_existing_vault
 import emberr.shared.generated.resources.selfhost_no_vault_file_to_restore
 import emberr.shared.generated.resources.selfhost_no_vault_on_server
 import emberr.shared.generated.resources.selfhost_old_or_damaged_vault_data
+import emberr.shared.generated.resources.selfhost_server_address_moved
 import emberr.shared.generated.resources.selfhost_server_returned_error
 import emberr.shared.generated.resources.selfhost_unknown_error
 import emberr.shared.generated.resources.selfhost_vault_exists_enter_passphrase
@@ -85,6 +86,7 @@ data class SelfHostSetupFormState(
     val connectionTestStatus: ConnectionTestStatus = ConnectionTestStatus.NOT_TESTED,
     val connectionTestMessage: String? = null,
     val configurationWarningMessage: String? = null,
+    val movedServerAddress: String? = null,
     val vaultMode: VaultMode = VaultMode.UNKNOWN,
     val setupPhase: SetupPhase = SetupPhase.FORM,
     val errorMessage: String? = null
@@ -298,7 +300,7 @@ class SelfHostSetupViewModel(
     }
 
     fun dismissConfigurationWarning() {
-        updateForm { it.copy(configurationWarningMessage = null) }
+        updateForm { it.copy(configurationWarningMessage = null, movedServerAddress = null) }
     }
 
     fun regeneratePassphrase() {
@@ -335,6 +337,8 @@ class SelfHostSetupViewModel(
                     is WebDavConnectionTestResult.InvalidCredentials -> getString(Res.string.selfhost_invalid_credentials)
                     is WebDavConnectionTestResult.ServerError ->
                         getString(Res.string.selfhost_server_returned_error, result.statusCode)
+                    is WebDavConnectionTestResult.ServerAddressMoved ->
+                        getString(Res.string.selfhost_server_address_moved)
                     is WebDavConnectionTestResult.NetworkFailure ->
                         result.cause.message ?: getString(Res.string.selfhost_could_not_reach_server)
                     is WebDavConnectionTestResult.InvalidAddress ->
@@ -358,6 +362,12 @@ class SelfHostSetupViewModel(
                         is WebDavConnectionTestResult.NetworkFailure -> current.copy(
                             connectionTestStatus = ConnectionTestStatus.FAILED,
                             connectionTestMessage = failureMessage
+                        )
+
+                        is WebDavConnectionTestResult.ServerAddressMoved -> current.copy(
+                            connectionTestStatus = ConnectionTestStatus.FAILED,
+                            configurationWarningMessage = failureMessage,
+                            movedServerAddress = result.suggestedServerUrl
                         )
 
                         is WebDavConnectionTestResult.InvalidAddress -> current.copy(

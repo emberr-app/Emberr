@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">Nome utente o password non validi</string>
     <string name="selfhost_server_returned_error">Il server ha restituito un errore (%1$d)</string>
+    <string name="selfhost_server_address_moved">Il tuo server indica che questo indirizzo è stato spostato. Cambia l'indirizzo del server con quello qui sotto e riprova.</string>
     <string name="selfhost_could_not_reach_server">Impossibile raggiungere il server</string>
     <string name="selfhost_could_not_check_vault">Impossibile verificare se esiste una cassaforte: %1$s</string>
     <string name="selfhost_unknown_error">errore sconosciuto</string>

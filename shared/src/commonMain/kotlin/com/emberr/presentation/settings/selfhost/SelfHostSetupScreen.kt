@@ -311,6 +311,10 @@ private fun SetupForm(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
+            form.movedServerAddress?.let { movedServerAddress ->
+                Spacer(Modifier.height(16.dp))
+                ServerAddressBox(serverUrl = movedServerAddress)
+            }
             Spacer(Modifier.height(20.dp))
             EmberrButtonPrimary(
                 text = stringResource(Res.string.selfhost_got_it),

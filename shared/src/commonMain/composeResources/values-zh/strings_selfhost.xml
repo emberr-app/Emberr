@@ -81,6 +81,7 @@
 
     <string name="selfhost_invalid_credentials">用户名或密码无效</string>
     <string name="selfhost_server_returned_error">服务器返回错误（%1$d）</string>
+    <string name="selfhost_server_address_moved">你的服务器表示此地址已移动。请将服务器地址改为下方的地址后重试。</string>
     <string name="selfhost_could_not_reach_server">无法连接到服务器</string>
     <string name="selfhost_could_not_check_vault">无法检查是否已有保险库：%1$s</string>
     <string name="selfhost_unknown_error">未知错误</string>

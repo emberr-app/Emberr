@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">Invalid username or password</string>
     <string name="selfhost_server_returned_error">Server returned an error (%1$d)</string>
+    <string name="selfhost_server_address_moved">Your server says this address has moved. Change the server address to the one below and try again.</string>
     <string name="selfhost_could_not_reach_server">Could not reach the server</string>
     <string name="selfhost_could_not_check_vault">Could not check for an existing vault: %1$s</string>
     <string name="selfhost_unknown_error">unknown error</string>

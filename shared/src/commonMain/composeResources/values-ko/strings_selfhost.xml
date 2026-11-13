@@ -81,6 +81,7 @@
 
     <string name="selfhost_invalid_credentials">사용자 이름 또는 비밀번호가 잘못됐어요</string>
     <string name="selfhost_server_returned_error">서버에서 오류를 반환했어요(%1$d)</string>
+    <string name="selfhost_server_address_moved">서버에서 이 주소가 옮겨졌다고 알려 왔어요. 서버 주소를 아래 주소로 바꾼 뒤 다시 시도해 주세요.</string>
     <string name="selfhost_could_not_reach_server">서버에 연결할 수 없어요</string>
     <string name="selfhost_could_not_check_vault">기존 보관함을 확인할 수 없어요: %1$s</string>
     <string name="selfhost_unknown_error">알 수 없는 오류</string>

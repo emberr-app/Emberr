@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">Geçersiz kullanıcı adı veya şifre</string>
     <string name="selfhost_server_returned_error">Sunucu bir hata döndürdü (%1$d)</string>
+    <string name="selfhost_server_address_moved">Sunucunuz bu adresin taşındığını bildiriyor. Sunucu adresini aşağıdakiyle değiştirip tekrar deneyin.</string>
     <string name="selfhost_could_not_reach_server">Sunucuya ulaşılamadı</string>
     <string name="selfhost_could_not_check_vault">Mevcut bir kasa kontrol edilemedi: %1$s</string>
     <string name="selfhost_unknown_error">bilinmeyen hata</string>

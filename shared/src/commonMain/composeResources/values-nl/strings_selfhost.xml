@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">Ongeldige gebruikersnaam of wachtwoord</string>
     <string name="selfhost_server_returned_error">Server gaf een fout (%1$d)</string>
+    <string name="selfhost_server_address_moved">Je server meldt dat dit adres is verplaatst. Wijzig het serveradres in het adres hieronder en probeer het opnieuw.</string>
     <string name="selfhost_could_not_reach_server">Kon de server niet bereiken</string>
     <string name="selfhost_could_not_check_vault">Kon niet controleren op een bestaande kluis: %1$s</string>
     <string name="selfhost_unknown_error">onbekende fout</string>

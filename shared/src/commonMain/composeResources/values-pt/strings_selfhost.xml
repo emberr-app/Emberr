@@ -83,6 +83,7 @@
 
     <string name="selfhost_invalid_credentials">Nome de usuário ou senha inválidos</string>
     <string name="selfhost_server_returned_error">O servidor retornou um erro (%1$d)</string>
+    <string name="selfhost_server_address_moved">Seu servidor informa que este endereço mudou. Troque o endereço do servidor pelo endereço abaixo e tente de novo.</string>
     <string name="selfhost_could_not_reach_server">Não foi possível acessar o servidor</string>
     <string name="selfhost_could_not_check_vault">Não foi possível verificar se já existe um cofre: %1$s</string>
     <string name="selfhost_unknown_error">erro desconhecido</string>
