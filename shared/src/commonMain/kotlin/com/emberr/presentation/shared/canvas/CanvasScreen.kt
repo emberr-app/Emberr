@@ -105,7 +105,6 @@ import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -2001,6 +2000,8 @@ internal fun CanvasNodeCard(
         textAlign = if (shape.hasRectangularTextArea) TextAlign.Start else TextAlign.Center
     )
     val textPadding = shape.textPadding(node.width, node.height)
+    val textAreaHeight = node.height - textPadding.top - textPadding.bottom
+    var textHiddenWhenEditingStarted by remember(isEditing) { mutableStateOf<Int?>(null) }
 
     Box(
         Modifier
@@ -2033,8 +2034,21 @@ internal fun CanvasNodeCard(
                         textStyle = textStyle,
                         cursorColor = cursorColor,
                         onTextChange = onTextChange,
-                        onTextLayout = { layout -> onTextHeightMeasured(layout.size.height / zoomedDensity.density) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .layout { measurable, constraints ->
+                                val fullTextHeight = measurable.maxIntrinsicHeight(constraints.maxWidth)
+                                val hiddenTextHeight = textHiddenWhenEditingStarted
+                                    ?: (fullTextHeight - textAreaHeight.dp.roundToPx()).coerceAtLeast(0)
+                                        .also { textHiddenWhenEditingStarted = it }
+                                val shownTextHeight = (fullTextHeight - hiddenTextHeight)
+                                    .coerceIn(constraints.minHeight, constraints.maxHeight)
+                                val placeable = measurable.measure(
+                                    constraints.copy(minHeight = shownTextHeight, maxHeight = shownTextHeight)
+                                )
+                                onTextHeightMeasured(shownTextHeight.toDp().value)
+                                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                            }
                     )
                 } else {
                     Text(text = node.text, style = textStyle, modifier = Modifier.verticalScroll(scrollState))
@@ -2181,7 +2195,6 @@ private fun CanvasNodeTextField(
     onTextChange: (String) -> Unit,
     singleLine: Boolean = false,
     onDone: (() -> Unit)? = null,
-    onTextLayout: (TextLayoutResult) -> Unit = {},
     modifier: Modifier = Modifier.fillMaxSize()
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -2198,7 +2211,6 @@ private fun CanvasNodeTextField(
         keyboardOptions = if (onDone == null) KeyboardOptions.Default else KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = if (onDone == null) KeyboardActions.Default else KeyboardActions(onDone = { onDone() }),
         cursorBrush = SolidColor(cursorColor),
-        onTextLayout = onTextLayout,
         modifier = modifier.focusRequester(focusRequester)
     )
 }
