@@ -4,6 +4,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class DesktopAppStorageTest {
 
@@ -30,5 +31,22 @@ class DesktopAppStorageTest {
         assertFalse(DesktopAppStorage.isDebugBuild)
         assertEquals(".emberr", DesktopAppStorage.emberrDirectory.name)
         assertEquals(File(DesktopAppStorage.emberrDirectory, "media"), DesktopAppStorage.mediaDirectory)
+    }
+
+    @Test
+    fun folderCountsAsEmptyOnlyWhenNeitherSettingsNorDatabaseExist() {
+        val emberrDirectory = kotlin.io.path.createTempDirectory("emberr-storage-test").toFile()
+        try {
+            assertTrue(DesktopAppStorage.holdsNoAppData(emberrDirectory))
+
+            File(emberrDirectory, "emberr_database.db").writeText("")
+            assertFalse(DesktopAppStorage.holdsNoAppData(emberrDirectory))
+
+            File(emberrDirectory, "emberr_database.db").delete()
+            File(emberrDirectory, "settings.properties").writeText("")
+            assertFalse(DesktopAppStorage.holdsNoAppData(emberrDirectory))
+        } finally {
+            emberrDirectory.deleteRecursively()
+        }
     }
 }
