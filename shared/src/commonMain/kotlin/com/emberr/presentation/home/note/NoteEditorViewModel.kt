@@ -478,11 +478,19 @@ class NoteEditorViewModel(
             .associate { it.categoryId to it.name }
         val body = com.emberr.domain.util.export.ExportEngine.generateMarkdown(
             blocks = blocks,
+            noteTitlesById = linkedNoteTitlesIn(blocks),
             categoryNamesById = categoryNamesById,
             attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport },
             personNamesById = personNamesLinkedIn(blocks, repository::getNoteById)
         )
         return "# $title\n\n$body"
     }
+
+    private suspend fun linkedNoteTitlesIn(blocks: List<NoteBlock>): Map<String, String> =
+        blocks.filterIsInstance<LinkedNoteBlock>()
+            .map { it.linkedNoteId }
+            .distinct()
+            .mapNotNull { noteId -> repository.getNoteById(noteId)?.let { note -> noteId to note.title.ifBlank { "Untitled" } } }
+            .toMap()
 }
 

@@ -37,7 +37,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
-private const val VOICE_FENCE_NAME = "emberr-voice"
 private const val TOGGLE_MARKER = "- ▸ "
 private const val CHECKED_MARKER = "- [x] "
 private const val UNCHECKED_MARKER = "- [ ] "
@@ -48,7 +47,7 @@ private const val MOVIE_MARKER = "🎬 "
 private const val DEFAULT_CODE_LANGUAGE = "plaintext"
 private const val MAX_HEADING_LEVEL = 6
 private const val MAX_INDENT_LEVELS = 10
-private const val SPACES_PER_INDENT_LEVEL = 2
+private const val SECONDS_PER_MINUTE = 60
 
 private data class RenderOptions(
     val noteTitlesById: Map<String, String>,
@@ -104,26 +103,39 @@ object NoteMarkdownWriter {
             }
         }
 
+        val indentsByLevel = mutableListOf("")
         return joinRenderedBlocks(outerBlocks) { block ->
-            val rendered = renderBlock(block, options, indentationToIgnore)
-            if (block is CalloutBlock) {
-                quoteCallout(block, rendered, calloutBodies.getValue(block.id), options, indentationToIgnore)
-            } else {
-                rendered
+            val level = (block.indentationLevel - indentationToIgnore).coerceIn(0, minOf(indentsByLevel.lastIndex, MAX_INDENT_LEVELS))
+            val indent = indentsByLevel[level]
+            val rendered = renderBlock(block, options, indent)
+            if (rendered.isNotEmpty()) {
+                indentsByLevel.subList(level + 1, indentsByLevel.size).clear()
+                if (isListStyleBlock(block)) indentsByLevel.add(indent + " ".repeat(nestedContentWidthOf(block)))
+            }
+            when {
+                block is CalloutBlock -> quoteCallout(block, rendered, calloutBodies.getValue(block.id), options, indent)
+                isListStyleBlock(block) -> rendered
+                else -> indentEveryLine(rendered, indent)
             }
         }
     }
+
+    private fun nestedContentWidthOf(block: NoteBlock): Int =
+        if (block is NumberedListBlock) "${block.number}. ".length else BULLET_MARKER.length
+
+    private fun indentEveryLine(text: String, indent: String): String =
+        if (indent.isEmpty()) text
+        else text.split('\n').joinToString("\n") { line -> if (line.isEmpty()) line else "$indent$line" }
 
     private fun quoteCallout(
         callout: CalloutBlock,
         renderedHeader: String,
         body: List<NoteBlock>,
         options: RenderOptions,
-        indentationToIgnore: Int
+        indent: String
     ): String {
         val renderedBody = renderBlocks(body, options, indentationToIgnore = callout.indentationLevel + 1)
         val calloutText = if (renderedBody.isEmpty()) renderedHeader else "$renderedHeader\n$renderedBody"
-        val indent = listIndentFor(callout, indentationToIgnore)
         return calloutText
             .split('\n')
             .joinToString("\n") { line -> "$indent> $line".trimEnd() }
@@ -157,8 +169,7 @@ object NoteMarkdownWriter {
         else -> false
     }
 
-    private fun renderBlock(block: NoteBlock, options: RenderOptions, indentationToIgnore: Int): String {
-        val indent = listIndentFor(block, indentationToIgnore)
+    private fun renderBlock(block: NoteBlock, options: RenderOptions, indent: String): String {
         return when (block) {
             is TextBlock -> formatText(block, block.text)
             is HeadingBlock -> renderHeading(block)
@@ -177,7 +188,7 @@ object NoteMarkdownWriter {
             is CodeBlock -> renderCode(block)
             is BookmarkBlock -> renderBookmark(block)
             is LinkedNoteBlock -> renderLinkedNote(block, options)
-            is ImageBlock -> "![](${mediaLinkTargetFor(block.localFilePath, options)})"
+            is ImageBlock -> renderImage(block, options)
             is DocumentBlock -> renderDocument(block, options)
             is VoiceBlock -> renderVoice(block, options)
             is CanvasBlock -> ""
@@ -292,26 +303,37 @@ object NoteMarkdownWriter {
         return "[[${safeTitle.ifEmpty { "Untitled" }}]]"
     }
 
+    private fun renderImage(block: ImageBlock, options: RenderOptions): String {
+        if (MarkdownAttachments.storedFileNameOf(block.localFilePath) == null) return ""
+        val target = exportedMediaLinkTargetOf(block.localFilePath, options) ?: return "[Image]"
+        return "![]($target)"
+    }
+
     private fun renderDocument(block: DocumentBlock, options: RenderOptions): String {
+        if (MarkdownAttachments.storedFileNameOf(block.localFilePath) == null) return ""
         val label = escapeLinkLabel(block.fileName.ifBlank { "Document" })
-        return "[$label](${mediaLinkTargetFor(block.localFilePath, options)})"
+        val target = exportedMediaLinkTargetOf(block.localFilePath, options) ?: return "[File: $label]"
+        return "[$label]($target)"
     }
 
     private fun renderVoice(block: VoiceBlock, options: RenderOptions): String {
-        val fileName = mediaPathOf(block.localFilePath, options)
-        return buildString {
-            appendLine("```$VOICE_FENCE_NAME")
-            if (fileName != null) appendLine("file: $fileName")
-            appendLine("seconds: ${block.durationSeconds}")
-            append("```")
-        }
+        if (MarkdownAttachments.storedFileNameOf(block.localFilePath) == null) return ""
+        val label = "Voice note (${durationTextOf(block.durationSeconds)})"
+        val target = exportedMediaLinkTargetOf(block.localFilePath, options) ?: return "[$label]"
+        return "[$label]($target)"
+    }
+
+    private fun durationTextOf(totalSeconds: Int): String {
+        val minutes = totalSeconds / SECONDS_PER_MINUTE
+        val seconds = totalSeconds % SECONDS_PER_MINUTE
+        return "$minutes:${seconds.toString().padStart(2, '0')}"
     }
 
     private fun renderMovie(block: MovieBlock, options: RenderOptions): String {
         val summary = block.summaryLine() ?: return ""
         val summaryLine = "$MOVIE_MARKER${flattenLineBreaks(summary)}"
-        val posterTarget = mediaLinkTargetFor(block.details?.posterFilePath, options)
-        return if (posterTarget.isEmpty()) summaryLine else "![]($posterTarget)\n\n$summaryLine"
+        val posterTarget = exportedMediaLinkTargetOf(block.details?.posterFilePath, options)
+        return if (posterTarget == null) summaryLine else "![]($posterTarget)\n\n$summaryLine"
     }
 
     private fun renderCredentials(block: CredentialsBlock): String {
@@ -368,10 +390,6 @@ object NoteMarkdownWriter {
             wholeBlockHighlightColorName = block.highlightColorNameOrNull()
         )
 
-    private fun listIndentFor(block: NoteBlock, indentationToIgnore: Int): String =
-        " ".repeat(SPACES_PER_INDENT_LEVEL)
-            .repeat((block.indentationLevel - indentationToIgnore).coerceIn(0, MAX_INDENT_LEVELS))
-
     private fun flattenLineBreaks(text: String): String = buildString(text.length) {
         for (character in text) {
             if (character == '\n' || character == '\r') append(' ') else append(character)
@@ -392,14 +410,10 @@ object NoteMarkdownWriter {
         return longestRun
     }
 
-    private fun mediaPathOf(localFilePath: String?, options: RenderOptions): String? {
+    private fun exportedMediaLinkTargetOf(localFilePath: String?, options: RenderOptions): String? {
         val storedFileName = MarkdownAttachments.storedFileNameOf(localFilePath) ?: return null
-        return options.attachmentPathsByStoredName[storedFileName] ?: storedFileName
-    }
-
-    private fun mediaLinkTargetFor(localFilePath: String?, options: RenderOptions): String {
-        val mediaPath = mediaPathOf(localFilePath, options) ?: return ""
-        return escapeLinkTarget(mediaPath)
+        val pathInExport = options.attachmentPathsByStoredName[storedFileName] ?: return null
+        return escapeLinkTarget(pathInExport)
     }
 
     private fun escapeLinkLabel(label: String): String = flattenLineBreaks(label)
