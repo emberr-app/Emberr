@@ -15,7 +15,7 @@ private val htmlAttributePattern = Regex("""([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(
 
 internal sealed interface InlinePart {
     data class Words(val styledText: StyledText) : InlinePart
-    data class Attachment(val relativePath: String) : InlinePart
+    data class Attachment(val relativePath: String, val linkedFileName: String? = null) : InlinePart
     data class WebImage(val url: String, val altText: String) : InlinePart
     data class Embed(val url: String) : InlinePart
 }
@@ -49,6 +49,13 @@ private fun imagePartOf(destination: String, altText: String, linkResolver: Impo
         isExternalDestination(destination) -> null
         else -> attachmentPathOf(destination, linkResolver)?.let(InlinePart::Attachment)
     }
+}
+
+private fun linkedFileNameOf(labelText: String, attachmentPath: String): String {
+    val fileName = attachmentPath.substringAfterLast('/')
+    val extension = fileName.substringAfterLast('.', missingDelimiterValue = "")
+    val label = labelText.trim()
+    return if (extension.isNotEmpty() && label.endsWith(".$extension", ignoreCase = true)) label else fileName
 }
 
 private fun attachmentPathOf(destination: String, linkResolver: ImportLinkResolver): String? =
@@ -124,7 +131,8 @@ internal class MarkdownInlineConverter(
 
         val attachmentPath = attachmentPathOf(destination, linkResolver)
         if (attachmentPath != null) {
-            addMedia(InlinePart.Attachment(attachmentPath), document.plainTextOf(labelNodes), style)
+            val labelText = document.plainTextOf(labelNodes)
+            addMedia(InlinePart.Attachment(attachmentPath, linkedFileName = linkedFileNameOf(labelText, attachmentPath)), labelText, style)
         } else {
             visitAll(labelNodes, style)
         }
