@@ -33,6 +33,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NoteEditorViewModelTest {
@@ -50,6 +51,7 @@ class NoteEditorViewModelTest {
         )
     )
     private val metadataSavedByEditor = MutableStateFlow<NoteMetadataEntity?>(null)
+    private var noteWasDeleted = false
 
     @BeforeTest
     fun useTestMainDispatcher() {
@@ -59,6 +61,17 @@ class NoteEditorViewModelTest {
     @AfterTest
     fun restoreMainDispatcher() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun aNoteDeletedWhileItIsOpenIsNotSavedBackIntoTheActiveSpace() = runBlocking<Unit> {
+        val viewModel = openedNote()
+        noteWasDeleted = true
+
+        viewModel.toggleWordCount()
+
+        withTimeout(5_000) { viewModel.showWordCount.first { isShown -> !isShown } }
+        assertNull(metadataSavedByEditor.value)
     }
 
     @Test
@@ -111,7 +124,7 @@ class NoteEditorViewModelTest {
                 "toString" -> "stub of NoteRepository"
                 "hashCode" -> System.identityHashCode(stub)
                 "equals" -> stub === arguments?.firstOrNull()
-                "getNoteById" -> storedMetadata.value
+                "getNoteById" -> if (noteWasDeleted) null else storedMetadata.value
                 "getNoteContent" -> NoteContent(blocks = emptyList())
                 "observeNoteMetadata" -> storedMetadata
                 "saveNote" -> {
