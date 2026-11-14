@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">फ़ाइल नहीं मिली</string>
     <string name="desktop_open_file_failed">फ़ाइल नहीं खुल सकी: %1$s</string>
     <string name="desktop_error">गड़बड़ी</string>
-    <string name="desktop_backup_only_on_android_message">बैकग्राउंड में अपने-आप बैकअप अभी सिर्फ़ Android ऐप पर काम करता है। आप फिर भी 'बैकअप एक्सपोर्ट करें' बटन इस्तेमाल कर सकते हैं!</string>
+    <string name="desktop_backup_only_on_android_message">बैकग्राउंड में अपने-आप बैकअप अभी सिर्फ़ Android ऐप पर काम करता है। आप फिर भी 'एक्सपोर्ट करें' बटन इस्तेमाल कर सकते हैं!</string>
     <string name="desktop_backup_only_on_android_title">डेस्कटॉप सुविधा</string>
     <string name="desktop_update_available">अपडेट उपलब्ध है</string>
     <string name="desktop_update_available_message">Emberr %1$s उपलब्ध है। आप %2$s इस्तेमाल कर रहे हैं। आप काम करते रहें, यह बैकग्राउंड में डाउनलोड होगा।</string>

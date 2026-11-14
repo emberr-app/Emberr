@@ -37,7 +37,7 @@
     <string name="import_emberr_saving">Import opslaan…</string>
     <string name="import_emberr_failed">Import mislukt</string>
     <string name="import_emberr_choose_backup_file">Kies een back-upbestand</string>
-    <string name="import_emberr_choose_backup_hint">.emberr-bestand uit Back-up exporteren</string>
+    <string name="import_emberr_choose_backup_hint">.emberr-bestand uit Exporteren</string>
     <string name="import_emberr_reading_backup">Back-up lezen…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">Kies een ander bestand</string>

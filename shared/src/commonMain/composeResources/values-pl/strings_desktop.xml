@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Nie znaleziono pliku</string>
     <string name="desktop_open_file_failed">Nie udało się otworzyć pliku: %1$s</string>
     <string name="desktop_error">Błąd</string>
-    <string name="desktop_backup_only_on_android_message">Automatyczne kopie zapasowe w tle działają obecnie tylko w aplikacji na Androida. Nadal możesz użyć przycisku „Eksportuj kopię zapasową”!</string>
+    <string name="desktop_backup_only_on_android_message">Automatyczne kopie zapasowe w tle działają obecnie tylko w aplikacji na Androida. Nadal możesz użyć przycisku „Eksportuj”!</string>
     <string name="desktop_backup_only_on_android_title">Funkcja wersji desktopowej</string>
     <string name="desktop_update_available">Dostępna aktualizacja</string>
     <string name="desktop_update_available_message">Dostępny jest Emberr %1$s. Używasz wersji %2$s. Pobiera się w tle, a ty możesz dalej pracować.</string>

@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">File tidak ditemukan</string>
     <string name="desktop_open_file_failed">Gagal membuka file: %1$s</string>
     <string name="desktop_error">Kesalahan</string>
-    <string name="desktop_backup_only_on_android_message">Cadangan otomatis di latar belakang saat ini hanya didukung di aplikasi Android. Anda tetap bisa menggunakan tombol 'Ekspor cadangan' secara manual!</string>
+    <string name="desktop_backup_only_on_android_message">Cadangan otomatis di latar belakang saat ini hanya didukung di aplikasi Android. Anda tetap bisa menggunakan tombol 'Ekspor' secara manual!</string>
     <string name="desktop_backup_only_on_android_title">Fitur desktop</string>
     <string name="desktop_update_available">Pembaruan tersedia</string>
     <string name="desktop_update_available_message">Emberr %1$s sudah tersedia. Anda menggunakan %2$s. Pembaruan diunduh di latar belakang selagi Anda bekerja.</string>

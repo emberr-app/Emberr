@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">Работа в фоне без ограничений</string>
 
     <string name="settings_import">Импорт</string>
-    <string name="settings_export_backup">Экспорт резервной копии</string>
+    <string name="settings_export_backup">Экспорт</string>
     <string name="settings_automatic_backups">Автоматическое резервное копирование</string>
     <string name="settings_backup_frequency_daily">Ежедневно</string>
     <string name="settings_backup_frequency_weekly">Еженедельно</string>

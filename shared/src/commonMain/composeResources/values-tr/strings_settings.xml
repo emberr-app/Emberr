@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">Kısıtlamasız arka plan</string>
 
     <string name="settings_import">İçe aktar</string>
-    <string name="settings_export_backup">Yedeği dışa aktar</string>
+    <string name="settings_export_backup">Dışa aktar</string>
     <string name="settings_automatic_backups">Otomatik yedekler</string>
     <string name="settings_backup_frequency_daily">Her gün</string>
     <string name="settings_backup_frequency_weekly">Her hafta</string>

@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Bestand niet gevonden</string>
     <string name="desktop_open_file_failed">Kan bestand niet openen: %1$s</string>
     <string name="desktop_error">Fout</string>
-    <string name="desktop_backup_only_on_android_message">Automatische back-ups op de achtergrond werken momenteel alleen in de Android-app. Je kunt nog steeds de knop 'Back-up exporteren' gebruiken!</string>
+    <string name="desktop_backup_only_on_android_message">Automatische back-ups op de achtergrond werken momenteel alleen in de Android-app. Je kunt nog steeds de knop 'Exporteren' gebruiken!</string>
     <string name="desktop_backup_only_on_android_title">Desktopfunctie</string>
     <string name="desktop_update_available">Update beschikbaar</string>
     <string name="desktop_update_available_message">Emberr %1$s is beschikbaar. Je gebruikt %2$s. De update wordt op de achtergrond gedownload terwijl je verder werkt.</string>

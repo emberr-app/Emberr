@@ -9,7 +9,7 @@
     <string name="import_emberr_getting_ready">A preparar…</string>
     <string name="import_emberr_saving">A guardar a importação…</string>
     <string name="import_emberr_choose_backup_file">Escolher ficheiro de backup</string>
-    <string name="import_emberr_choose_backup_hint">Ficheiro .emberr de Exportar backup</string>
+    <string name="import_emberr_choose_backup_hint">Ficheiro .emberr de Exportar</string>
     <string name="import_emberr_reading_backup">A ler o backup…</string>
     <string name="import_emberr_choose_different_file">Escolher outro ficheiro</string>
     <string name="import_emberr_choose_backup_first">Escolhe um backup primeiro</string>

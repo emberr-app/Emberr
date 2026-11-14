@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">Latar belakang tanpa batasan</string>
 
     <string name="settings_import">Impor</string>
-    <string name="settings_export_backup">Ekspor cadangan</string>
+    <string name="settings_export_backup">Ekspor</string>
     <string name="settings_automatic_backups">Cadangan otomatis</string>
     <string name="settings_backup_frequency_daily">Setiap hari</string>
     <string name="settings_backup_frequency_weekly">Setiap minggu</string>

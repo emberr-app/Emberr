@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">File Not Found</string>
     <string name="desktop_open_file_failed">Failed to open file: %1$s</string>
     <string name="desktop_error">Error</string>
-    <string name="desktop_backup_only_on_android_message">Automated background backups are currently only supported on the Android app. You can still use the manual 'Export Backup' button!</string>
+    <string name="desktop_backup_only_on_android_message">Automated background backups are currently only supported on the Android app. You can still use the manual 'Export' button!</string>
     <string name="desktop_backup_only_on_android_title">Desktop Feature</string>
     <string name="desktop_update_available">Update available</string>
     <string name="desktop_update_available_message">Emberr %1$s is available. You are using %2$s. It downloads in the background while you keep working.</string>

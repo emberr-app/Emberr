@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Файл не знайдено</string>
     <string name="desktop_open_file_failed">Не вдалося відкрити файл: %1$s</string>
     <string name="desktop_error">Помилка</string>
-    <string name="desktop_backup_only_on_android_message">Автоматичне фонове резервне копіювання поки підтримується лише в застосунку для Android. Ви все одно можете скористатися кнопкою «Експорт резервної копії»!</string>
+    <string name="desktop_backup_only_on_android_message">Автоматичне фонове резервне копіювання поки підтримується лише в застосунку для Android. Ви все одно можете скористатися кнопкою «Експорт»!</string>
     <string name="desktop_backup_only_on_android_title">Функція для комп'ютера</string>
     <string name="desktop_update_available">Доступне оновлення</string>
     <string name="desktop_update_available_message">Доступна версія Emberr %1$s. У вас версія %2$s. Вона завантажиться у фоні, поки ви працюєте.</string>

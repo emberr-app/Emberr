@@ -37,7 +37,7 @@
     <string name="import_emberr_saving">Saving the import…</string>
     <string name="import_emberr_failed">Import failed</string>
     <string name="import_emberr_choose_backup_file">Choose a Backup File</string>
-    <string name="import_emberr_choose_backup_hint">.emberr file from Export Backup</string>
+    <string name="import_emberr_choose_backup_hint">.emberr file from Export</string>
     <string name="import_emberr_reading_backup">Reading the backup…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">Choose a different file</string>

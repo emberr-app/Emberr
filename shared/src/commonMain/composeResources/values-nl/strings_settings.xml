@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">Onbeperkt op achtergrond</string>
 
     <string name="settings_import">Importeren</string>
-    <string name="settings_export_backup">Back-up exporteren</string>
+    <string name="settings_export_backup">Exporteren</string>
     <string name="settings_automatic_backups">Automatische back-ups</string>
     <string name="settings_backup_frequency_daily">Dagelijks</string>
     <string name="settings_backup_frequency_weekly">Wekelijks</string>

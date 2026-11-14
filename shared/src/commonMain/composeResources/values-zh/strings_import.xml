@@ -33,7 +33,7 @@
     <string name="import_emberr_saving">正在保存导入内容…</string>
     <string name="import_emberr_failed">导入失败</string>
     <string name="import_emberr_choose_backup_file">选择备份文件</string>
-    <string name="import_emberr_choose_backup_hint">来自“导出备份”的 .emberr 文件</string>
+    <string name="import_emberr_choose_backup_hint">来自“导出”的 .emberr 文件</string>
     <string name="import_emberr_reading_backup">正在读取备份…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">选择其他文件</string>

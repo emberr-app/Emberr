@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">백그라운드 제한 없음</string>
 
     <string name="settings_import">가져오기</string>
-    <string name="settings_export_backup">백업 내보내기</string>
+    <string name="settings_export_backup">내보내기</string>
     <string name="settings_automatic_backups">자동 백업</string>
     <string name="settings_backup_frequency_daily">매일</string>
     <string name="settings_backup_frequency_weekly">매주</string>

@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">不限制后台</string>
 
     <string name="settings_import">导入</string>
-    <string name="settings_export_backup">导出备份</string>
+    <string name="settings_export_backup">导出</string>
     <string name="settings_automatic_backups">自动备份</string>
     <string name="settings_backup_frequency_daily">每天</string>
     <string name="settings_backup_frequency_weekly">每周</string>
