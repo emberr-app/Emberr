@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">Nieograniczone działanie w tle</string>
 
     <string name="settings_import">Importuj</string>
-    <string name="settings_export_backup">Eksportuj kopię zapasową</string>
+    <string name="settings_export_backup">Eksportuj</string>
     <string name="settings_automatic_backups">Automatyczne kopie zapasowe</string>
     <string name="settings_backup_frequency_daily">Codziennie</string>
     <string name="settings_backup_frequency_weekly">Co tydzień</string>

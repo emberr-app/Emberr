@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">バックグラウンドの制限なし</string>
 
     <string name="settings_import">インポート</string>
-    <string name="settings_export_backup">バックアップをエクスポート</string>
+    <string name="settings_export_backup">エクスポート</string>
     <string name="settings_automatic_backups">自動バックアップ</string>
     <string name="settings_backup_frequency_daily">毎日</string>
     <string name="settings_backup_frequency_weekly">毎週</string>

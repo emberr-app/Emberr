@@ -37,7 +37,7 @@
     <string name="import_emberr_saving">इंपोर्ट सेव हो रहा है…</string>
     <string name="import_emberr_failed">इंपोर्ट विफल रहा</string>
     <string name="import_emberr_choose_backup_file">बैकअप फ़ाइल चुनें</string>
-    <string name="import_emberr_choose_backup_hint">बैकअप एक्सपोर्ट से बनी .emberr फ़ाइल</string>
+    <string name="import_emberr_choose_backup_hint">'एक्सपोर्ट करें' से बनी .emberr फ़ाइल</string>
     <string name="import_emberr_reading_backup">बैकअप पढ़ा जा रहा है…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">दूसरी फ़ाइल चुनें</string>

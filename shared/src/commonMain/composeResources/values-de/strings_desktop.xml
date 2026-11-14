@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Datei nicht gefunden</string>
     <string name="desktop_open_file_failed">Datei konnte nicht geöffnet werden: %1$s</string>
     <string name="desktop_error">Fehler</string>
-    <string name="desktop_backup_only_on_android_message">Automatische Backups im Hintergrund gibt es derzeit nur in der Android-App. Du kannst aber jederzeit die Schaltfläche „Backup exportieren“ nutzen!</string>
+    <string name="desktop_backup_only_on_android_message">Automatische Backups im Hintergrund gibt es derzeit nur in der Android-App. Du kannst aber jederzeit die Schaltfläche „Exportieren“ nutzen!</string>
     <string name="desktop_backup_only_on_android_title">Desktop-Funktion</string>
     <string name="desktop_update_available">Update verfügbar</string>
     <string name="desktop_update_available_message">Emberr %1$s ist verfügbar. Du nutzt %2$s. Das Update wird im Hintergrund geladen, während du weiterarbeitest.</string>

@@ -33,7 +33,7 @@
     <string name="import_emberr_saving">가져온 항목 저장 중…</string>
     <string name="import_emberr_failed">가져오기 실패</string>
     <string name="import_emberr_choose_backup_file">백업 파일 선택</string>
-    <string name="import_emberr_choose_backup_hint">백업 내보내기로 만든 .emberr 파일</string>
+    <string name="import_emberr_choose_backup_hint">내보내기로 만든 .emberr 파일</string>
     <string name="import_emberr_reading_backup">백업을 읽는 중…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">다른 파일 선택</string>

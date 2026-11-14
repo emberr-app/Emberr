@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">Chạy nền không giới hạn</string>
 
     <string name="settings_import">Nhập</string>
-    <string name="settings_export_backup">Xuất bản sao lưu</string>
+    <string name="settings_export_backup">Xuất dữ liệu</string>
     <string name="settings_automatic_backups">Sao lưu tự động</string>
     <string name="settings_backup_frequency_daily">Hằng ngày</string>
     <string name="settings_backup_frequency_weekly">Hằng tuần</string>

@@ -21,7 +21,7 @@
     <string name="settings_unrestricted_background">Segundo plano sem restrições</string>
 
     <string name="settings_import">Importar</string>
-    <string name="settings_export_backup">Exportar backup</string>
+    <string name="settings_export_backup">Exportar</string>
     <string name="settings_automatic_backups">Backups automáticos</string>
     <string name="settings_backup_frequency_daily">Diário</string>
     <string name="settings_backup_frequency_weekly">Semanal</string>

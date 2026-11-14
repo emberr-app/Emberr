@@ -33,7 +33,7 @@
     <string name="import_emberr_saving">Đang lưu dữ liệu nhập…</string>
     <string name="import_emberr_failed">Nhập thất bại</string>
     <string name="import_emberr_choose_backup_file">Chọn tệp sao lưu</string>
-    <string name="import_emberr_choose_backup_hint">Tệp .emberr từ Xuất bản sao lưu</string>
+    <string name="import_emberr_choose_backup_hint">Tệp .emberr từ Xuất dữ liệu</string>
     <string name="import_emberr_reading_backup">Đang đọc bản sao lưu…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">Chọn tệp khác</string>

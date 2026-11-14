@@ -37,7 +37,7 @@
     <string name="import_emberr_saving">İçe aktarılanlar kaydediliyor…</string>
     <string name="import_emberr_failed">İçe aktarma başarısız</string>
     <string name="import_emberr_choose_backup_file">Yedek dosyası seç</string>
-    <string name="import_emberr_choose_backup_hint">Yedeği dışa aktar ile oluşturulan .emberr dosyası</string>
+    <string name="import_emberr_choose_backup_hint">Dışa aktar ile oluşturulan .emberr dosyası</string>
     <string name="import_emberr_reading_backup">Yedek okunuyor…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">Başka bir dosya seçin</string>

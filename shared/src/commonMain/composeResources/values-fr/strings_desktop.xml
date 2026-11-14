@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Fichier introuvable</string>
     <string name="desktop_open_file_failed">Impossible d'ouvrir le fichier : %1$s</string>
     <string name="desktop_error">Erreur</string>
-    <string name="desktop_backup_only_on_android_message">Les sauvegardes automatiques en arrière-plan ne sont disponibles que sur l'app Android pour le moment. Vous pouvez toujours utiliser le bouton « Exporter la sauvegarde » !</string>
+    <string name="desktop_backup_only_on_android_message">Les sauvegardes automatiques en arrière-plan ne sont disponibles que sur l'app Android pour le moment. Vous pouvez toujours utiliser le bouton « Exporter » !</string>
     <string name="desktop_backup_only_on_android_title">Fonction de bureau</string>
     <string name="desktop_update_available">Mise à jour disponible</string>
     <string name="desktop_update_available_message">Emberr %1$s est disponible. Vous utilisez la version %2$s. Le téléchargement se fait en arrière-plan pendant que vous travaillez.</string>

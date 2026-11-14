@@ -45,7 +45,7 @@
     <string name="import_emberr_saving">Збереження імпорту…</string>
     <string name="import_emberr_failed">Не вдалося імпортувати</string>
     <string name="import_emberr_choose_backup_file">Виберіть файл резервної копії</string>
-    <string name="import_emberr_choose_backup_hint">Файл .emberr з «Експорт резервної копії»</string>
+    <string name="import_emberr_choose_backup_hint">Файл .emberr з «Експорт»</string>
     <string name="import_emberr_reading_backup">Читання резервної копії…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">Вибрати інший файл</string>

@@ -45,7 +45,7 @@
     <string name="import_emberr_saving">Zapisywanie importu…</string>
     <string name="import_emberr_failed">Import nie powiódł się</string>
     <string name="import_emberr_choose_backup_file">Wybierz plik kopii zapasowej</string>
-    <string name="import_emberr_choose_backup_hint">Plik .emberr z Eksportuj kopię zapasową</string>
+    <string name="import_emberr_choose_backup_hint">Plik .emberr z „Eksportuj”</string>
     <string name="import_emberr_reading_backup">Odczytywanie kopii zapasowej…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">Wybierz inny plik</string>

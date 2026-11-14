@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Archivo no encontrado</string>
     <string name="desktop_open_file_failed">No se pudo abrir el archivo: %1$s</string>
     <string name="desktop_error">Error</string>
-    <string name="desktop_backup_only_on_android_message">Las copias de seguridad automáticas en segundo plano por ahora solo funcionan en la app de Android. ¡Aún puedes usar el botón 'Exportar copia de seguridad'!</string>
+    <string name="desktop_backup_only_on_android_message">Las copias de seguridad automáticas en segundo plano por ahora solo funcionan en la app de Android. ¡Aún puedes usar el botón 'Exportar'!</string>
     <string name="desktop_backup_only_on_android_title">Función de escritorio</string>
     <string name="desktop_update_available">Actualización disponible</string>
     <string name="desktop_update_available_message">Emberr %1$s está disponible. Usas la %2$s. Se descarga en segundo plano mientras sigues trabajando.</string>

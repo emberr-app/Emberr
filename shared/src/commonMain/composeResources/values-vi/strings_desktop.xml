@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Không tìm thấy tệp</string>
     <string name="desktop_open_file_failed">Không mở được tệp: %1$s</string>
     <string name="desktop_error">Lỗi</string>
-    <string name="desktop_backup_only_on_android_message">Sao lưu tự động trong nền hiện chỉ có trên ứng dụng Android. Bạn vẫn có thể dùng nút 'Xuất bản sao lưu'!</string>
+    <string name="desktop_backup_only_on_android_message">Sao lưu tự động trong nền hiện chỉ có trên ứng dụng Android. Bạn vẫn có thể dùng nút 'Xuất dữ liệu'!</string>
     <string name="desktop_backup_only_on_android_title">Tính năng máy tính</string>
     <string name="desktop_update_available">Có bản cập nhật</string>
     <string name="desktop_update_available_message">Đã có Emberr %1$s. Bạn đang dùng %2$s. Bản cập nhật sẽ tải trong nền khi bạn tiếp tục làm việc.</string>

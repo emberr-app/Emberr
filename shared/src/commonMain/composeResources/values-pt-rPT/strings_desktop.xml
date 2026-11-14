@@ -3,7 +3,7 @@
     <string name="desktop_file_not_found_message">Este ficheiro já não está disponível neste dispositivo.</string>
     <string name="desktop_file_not_found_title">Ficheiro não encontrado</string>
     <string name="desktop_open_file_failed">Falha ao abrir o ficheiro: %1$s</string>
-    <string name="desktop_backup_only_on_android_message">Os backups automáticos em segundo plano só são compatíveis com a aplicação Android por enquanto. Ainda podes usar o botão 'Exportar backup'!</string>
+    <string name="desktop_backup_only_on_android_message">Os backups automáticos em segundo plano só são compatíveis com a aplicação Android por enquanto. Ainda podes usar o botão 'Exportar'!</string>
     <string name="desktop_update_available_message">O Emberr %1$s está disponível. Estás a usar a %2$s. A transferência é feita em segundo plano enquanto continuas a trabalhar.</string>
     <string name="desktop_update_download">Transferir</string>
     <string name="desktop_update_ready_message">Reinicia o Emberr para começares a usar a versão %1$s. Se escolheres Depois, a atualização será usada da próxima vez que abrires o Emberr.</string>

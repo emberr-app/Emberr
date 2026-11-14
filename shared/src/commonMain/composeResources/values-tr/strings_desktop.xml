@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Dosya bulunamadı</string>
     <string name="desktop_open_file_failed">Dosya açılamadı: %1$s</string>
     <string name="desktop_error">Hata</string>
-    <string name="desktop_backup_only_on_android_message">Otomatik arka plan yedekleri şimdilik yalnızca Android uygulamasında destekleniyor. Yine de elle 'Yedeği dışa aktar' düğmesini kullanabilirsiniz!</string>
+    <string name="desktop_backup_only_on_android_message">Otomatik arka plan yedekleri şimdilik yalnızca Android uygulamasında destekleniyor. Yine de elle 'Dışa aktar' düğmesini kullanabilirsiniz!</string>
     <string name="desktop_backup_only_on_android_title">Masaüstü özelliği</string>
     <string name="desktop_update_available">Güncelleme var</string>
     <string name="desktop_update_available_message">Emberr %1$s çıktı. Şu anda %2$s sürümünü kullanıyorsunuz. Siz çalışmaya devam ederken arka planda indirilir.</string>

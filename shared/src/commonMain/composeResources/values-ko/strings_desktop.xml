@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">파일을 찾을 수 없음</string>
     <string name="desktop_open_file_failed">파일을 열지 못했어요: %1$s</string>
     <string name="desktop_error">오류</string>
-    <string name="desktop_backup_only_on_android_message">자동 백그라운드 백업은 현재 Android 앱에서만 지원돼요. '백업 내보내기' 버튼으로 직접 백업할 수는 있어요!</string>
+    <string name="desktop_backup_only_on_android_message">자동 백그라운드 백업은 현재 Android 앱에서만 지원돼요. '내보내기' 버튼으로 직접 백업할 수는 있어요!</string>
     <string name="desktop_backup_only_on_android_title">데스크톱 기능</string>
     <string name="desktop_update_available">업데이트 가능</string>
     <string name="desktop_update_available_message">Emberr %1$s 버전을 사용할 수 있어요. 지금 사용 중인 버전은 %2$s예요. 작업하는 동안 백그라운드에서 다운로드돼요.</string>

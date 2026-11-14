@@ -33,7 +33,7 @@
     <string name="import_emberr_saving">Menyimpan hasil impor…</string>
     <string name="import_emberr_failed">Impor gagal</string>
     <string name="import_emberr_choose_backup_file">Pilih file cadangan</string>
-    <string name="import_emberr_choose_backup_hint">File .emberr dari Ekspor cadangan</string>
+    <string name="import_emberr_choose_backup_hint">File .emberr dari Ekspor</string>
     <string name="import_emberr_reading_backup">Membaca cadangan…</string>
     <string name="import_emberr_could_not_read">%1$s %2$s</string>
     <string name="import_emberr_choose_different_file">Pilih file lain</string>

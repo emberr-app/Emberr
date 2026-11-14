@@ -10,7 +10,7 @@
     <string name="desktop_file_not_found_title">Arquivo não encontrado</string>
     <string name="desktop_open_file_failed">Falha ao abrir o arquivo: %1$s</string>
     <string name="desktop_error">Erro</string>
-    <string name="desktop_backup_only_on_android_message">Backups automáticos em segundo plano só são compatíveis com o app Android por enquanto. Você ainda pode usar o botão 'Exportar backup'!</string>
+    <string name="desktop_backup_only_on_android_message">Backups automáticos em segundo plano só são compatíveis com o app Android por enquanto. Você ainda pode usar o botão 'Exportar'!</string>
     <string name="desktop_backup_only_on_android_title">Recurso do desktop</string>
     <string name="desktop_update_available">Atualização disponível</string>
     <string name="desktop_update_available_message">O Emberr %1$s está disponível. Você está usando a %2$s. O download é feito em segundo plano enquanto você continua trabalhando.</string>
