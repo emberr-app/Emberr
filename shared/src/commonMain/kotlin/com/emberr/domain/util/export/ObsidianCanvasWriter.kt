@@ -4,6 +4,9 @@ import com.emberr.data.local.room.entity.CanvasNodeEntity
 import com.emberr.data.local.room.entity.CanvasNodeType
 import com.emberr.domain.canvas.CanvasContent
 import com.emberr.domain.canvas.isGroup
+import com.emberr.domain.model.GREY_HIGHLIGHT_HEX
+import com.emberr.domain.model.LIME_HIGHLIGHT_HEX
+import com.emberr.domain.model.PINK_HIGHLIGHT_HEX
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.math.roundToInt
@@ -20,9 +23,9 @@ private val obsidianColorsByEmberrColorName = mapOf(
     "green" to "4",
     "blue" to "5",
     "purple" to "6",
-    "lime" to "#DCE775",
-    "pink" to "#F8BBD0",
-    "grey" to "#D9D9D9"
+    "lime" to LIME_HIGHLIGHT_HEX,
+    "pink" to PINK_HIGHLIGHT_HEX,
+    "grey" to GREY_HIGHLIGHT_HEX
 )
 
 @Serializable

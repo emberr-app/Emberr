@@ -151,6 +151,13 @@ class MainActivity : FragmentActivity() {
     private val manualBackupExporter: com.emberr.domain.backup.manual.AndroidManualBackupExporter by inject()
     private val markdownVaultExporter: MarkdownVaultExporter by inject()
 
+    private suspend fun markdownZipSavedMessage(missingAttachmentCount: Int?): String {
+        if (missingAttachmentCount == null) return getString(R.string.message_file_save_failed)
+        val missingNotice = MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount)
+        return if (missingNotice == null) getString(R.string.message_markdown_saved)
+        else getString(R.string.message_markdown_saved_with_notice, missingNotice)
+    }
+
     private val takePhoto = registerForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
@@ -400,13 +407,7 @@ class MainActivity : FragmentActivity() {
                                             File(mediaStorageHelper.getAbsoluteMediaPath(storedFileName))
                                         }
                                     }
-                                    if (missingAttachmentCount == null) {
-                                        getString(R.string.message_file_save_failed)
-                                    } else {
-                                        MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount)
-                                            ?.let { notice -> getString(R.string.message_markdown_saved_with_notice, notice) }
-                                            ?: getString(R.string.message_markdown_saved)
-                                    }
+                                    markdownZipSavedMessage(missingAttachmentCount)
                                 } catch (_: Exception) {
                                     getString(R.string.message_file_save_failed)
                                 }
@@ -437,13 +438,7 @@ class MainActivity : FragmentActivity() {
                                             File(mediaStorageHelper.getAbsoluteMediaPath(storedFileName))
                                         }
                                     }
-                                    if (missingAttachmentCount == null) {
-                                        getString(R.string.message_file_save_failed)
-                                    } else {
-                                        MarkdownZipWriter.missingAttachmentsNotice(missingAttachmentCount)
-                                            ?.let { notice -> getString(R.string.message_markdown_saved_with_notice, notice) }
-                                            ?: getString(R.string.message_markdown_saved)
-                                    }
+                                    markdownZipSavedMessage(missingAttachmentCount)
                                 } catch (_: Exception) {
                                     getString(R.string.message_file_save_failed)
                                 }

@@ -59,6 +59,7 @@ fun ExportSpacesSheet(
     var includesCalendar by remember { mutableStateOf(true) }
     val allSpaceIds = spaces.map { it.spaceId }.toSet()
     val checkedSpaceIds = allSpaceIds - uncheckedSpaceIds
+    val hasSomethingToExport = checkedSpaceIds.isNotEmpty() || (!exportsMarkdownVault && (includesDailyNotes || includesCalendar))
 
     EmberrBottomSheet(
         expanded = true,
@@ -123,7 +124,7 @@ fun ExportSpacesSheet(
                         else onExportClick(BackupContentChoice(checkedSpaceIds, includesDailyNotes, includesCalendar))
                     }
                 },
-                enabled = if (exportsMarkdownVault) checkedSpaceIds.isNotEmpty() else checkedSpaceIds.isNotEmpty() || includesDailyNotes || includesCalendar,
+                enabled = hasSomethingToExport,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp, start = ExportSheetButtonPadding, end = ExportSheetButtonPadding)

@@ -10,53 +10,43 @@ import org.jetbrains.compose.resources.getPluralString
 
 object MarkdownZipWriter {
 
-    fun write(export: MarkdownExport, destination: OutputStream, mediaFileOf: (storedFileName: String) -> File): Int {
-        var missingAttachmentCount = 0
+    fun write(export: MarkdownExport, destination: OutputStream, mediaFileOf: (storedFileName: String) -> File): Int =
         ZipOutputStream(destination).use { zip ->
-            zip.putNextEntry(ZipEntry(export.markdownFileName))
-            zip.write(export.markdown.toByteArray())
-            zip.closeEntry()
-            for (attachment in export.attachments) {
-                val mediaFile = mediaFileOf(attachment.storedFileName)
-                if (!mediaFile.isFile) {
-                    missingAttachmentCount++
-                    continue
-                }
-                zip.putNextEntry(ZipEntry(attachment.pathInExport))
-                mediaFile.inputStream().use { it.copyTo(zip) }
-                zip.closeEntry()
-            }
-            for (canvasFile in export.canvasFiles) {
-                zip.putNextEntry(ZipEntry(canvasFile.pathInExport))
-                zip.write(canvasFile.canvasJson.toByteArray())
-                zip.closeEntry()
-            }
+            zip.addTextFile(export.markdownFileName, export.markdown)
+            val missingAttachmentCount = zip.addAttachments(export.attachments, mediaFileOf)
+            export.canvasFiles.forEach { canvasFile -> zip.addTextFile(canvasFile.pathInExport, canvasFile.canvasJson) }
+            missingAttachmentCount
         }
-        return missingAttachmentCount
+
+    fun writeVault(vault: MarkdownVault, destination: OutputStream, mediaFileOf: (storedFileName: String) -> File): Int =
+        ZipOutputStream(destination).use { zip ->
+            vault.folderPaths.forEach { folderPath -> zip.addFolder(folderPath) }
+            vault.textFiles.forEach { textFile -> zip.addTextFile(textFile.path, textFile.text) }
+            zip.addAttachments(vault.attachments, mediaFileOf)
+        }
+
+    private fun ZipOutputStream.addFolder(folderPath: String) {
+        putNextEntry(ZipEntry("$folderPath/"))
+        closeEntry()
     }
 
-    fun writeVault(vault: MarkdownVault, destination: OutputStream, mediaFileOf: (storedFileName: String) -> File): Int {
+    private fun ZipOutputStream.addTextFile(path: String, text: String) {
+        putNextEntry(ZipEntry(path))
+        write(text.toByteArray())
+        closeEntry()
+    }
+
+    private fun ZipOutputStream.addAttachments(attachments: List<MarkdownAttachment>, mediaFileOf: (storedFileName: String) -> File): Int {
         var missingAttachmentCount = 0
-        ZipOutputStream(destination).use { zip ->
-            for (folderPath in vault.folderPaths) {
-                zip.putNextEntry(ZipEntry("$folderPath/"))
-                zip.closeEntry()
+        for (attachment in attachments) {
+            val mediaFile = mediaFileOf(attachment.storedFileName)
+            if (!mediaFile.isFile) {
+                missingAttachmentCount++
+                continue
             }
-            for (textFile in vault.textFiles) {
-                zip.putNextEntry(ZipEntry(textFile.path))
-                zip.write(textFile.text.toByteArray())
-                zip.closeEntry()
-            }
-            for (attachment in vault.attachments) {
-                val mediaFile = mediaFileOf(attachment.storedFileName)
-                if (!mediaFile.isFile) {
-                    missingAttachmentCount++
-                    continue
-                }
-                zip.putNextEntry(ZipEntry(attachment.pathInExport))
-                mediaFile.inputStream().use { it.copyTo(zip) }
-                zip.closeEntry()
-            }
+            putNextEntry(ZipEntry(attachment.pathInExport))
+            mediaFile.inputStream().use { it.copyTo(this) }
+            closeEntry()
         }
         return missingAttachmentCount
     }

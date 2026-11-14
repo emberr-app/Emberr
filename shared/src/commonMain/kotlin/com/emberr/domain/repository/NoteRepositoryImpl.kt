@@ -1523,6 +1523,8 @@ class NoteRepositoryImpl(
 
     override fun getAllFolders(): Flow<List<FolderEntity>> = inActiveSpace { folderDao.getAllFolders(it) }
 
+    override suspend fun getAllFoldersAcrossSpaces(): List<FolderEntity> = folderDao.getAllFoldersAcrossSpaces().first()
+
     override suspend fun getFoldersModifiedSince(timestamp: Long): List<FolderEntity> =
         folderDao.getFoldersModifiedSince(timestamp)
 

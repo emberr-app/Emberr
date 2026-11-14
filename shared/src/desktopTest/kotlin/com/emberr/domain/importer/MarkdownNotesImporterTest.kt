@@ -377,6 +377,19 @@ class MarkdownNotesImporterTest {
     }
 
     @Test
+    fun aFileLinkInsideACodeSampleDoesNotTurnARealNoteIntoAFile() = runTest {
+        importer(backgroundScope).importFiles(
+            pickedFiles(
+                "Vault/Note.md" to "```\n[Plan.md](Plan.md)\n```",
+                "Vault/Plan.md" to "the plan"
+            ),
+            spaceId = IMPORT_SPACE_ID
+        )
+
+        assertEquals(setOf("Note", "Plan"), importedNotes().map { it.title }.toSet())
+    }
+
+    @Test
     fun frontMatterAndTagsBecomePropertiesSavedInTheChosenSpace() = runTest {
         importer(backgroundScope).importFiles(
             pickedFiles(

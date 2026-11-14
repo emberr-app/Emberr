@@ -22,6 +22,14 @@ class ImportedLinkTargets(
     }
 }
 
+internal class NotePathFinder(notePaths: Collection<String>) {
+
+    private val notePathLookup = PathLookup(notePaths)
+
+    fun notePathLinkedFrom(fromNotePath: String, linkTarget: String): String? =
+        notePathLookup.find(ImportPaths.folderOf(fromNotePath), linkTarget, extensionsToTry = noteFileExtensions)
+}
+
 private class PathLookup(paths: Collection<String>) {
 
     private val pathsByLowercasePath = paths.groupBy { it.lowercase() }

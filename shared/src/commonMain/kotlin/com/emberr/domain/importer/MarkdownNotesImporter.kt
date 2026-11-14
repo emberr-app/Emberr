@@ -128,9 +128,10 @@ class MarkdownNotesImporter(
         onNoteSaved: (NoteMetadataEntity, NoteContent) -> Unit
     ): ImportResult {
         val now = System.currentTimeMillis()
-        val markdownTextsByPath = readableMarkdownTextsOf(noteFilesOf(pickedFiles))
+        val allNoteFiles = noteFilesOf(pickedFiles)
+        val markdownTextsByPath = readableMarkdownTextsOf(allNoteFiles)
         val documentLinkedNotePaths = DocumentLinkedNoteFiles.pathsLinkedOnlyAsDocuments(markdownTextsByPath)
-        val noteFiles = noteFilesOf(pickedFiles).filterNot { file -> file.relativePath in documentLinkedNotePaths }
+        val noteFiles = allNoteFiles.filterNot { file -> file.relativePath in documentLinkedNotePaths }
         val attachmentFilesByPath = pickedFiles.files
             .filter { file -> !ImportPaths.isNoteFile(file.relativePath) || file.relativePath in documentLinkedNotePaths }
             .associateBy { file -> file.relativePath }
@@ -244,8 +245,9 @@ class MarkdownNotesImporter(
                         createdAt = fileDateOf(plannedNote.file, now),
                         now = now,
                         spaceId = spaceId,
-                        kind = NoteKind.CANVAS
-                    ).copy(isSubNote = isEmbeddedInANote)
+                        kind = NoteKind.CANVAS,
+                        isSubNote = isEmbeddedInANote
+                    )
                     createdItems.noteIds += metadata.noteId
                     repository.saveNoteInSpace(spaceId, metadata, NoteContent(blocks = emptyList()))
                     canvasRepository.saveChanges(plannedNote.noteId, content, stampNoteUpdatedAt = false)
@@ -504,7 +506,8 @@ class MarkdownNotesImporter(
         now: Long,
         spaceId: String,
         snippet: String = "",
-        kind: NoteKind = NoteKind.NOTE
+        kind: NoteKind = NoteKind.NOTE,
+        isSubNote: Boolean = false
     ): NoteMetadataEntity =
         NoteMetadataEntity(
             noteId = noteId,
@@ -517,7 +520,8 @@ class MarkdownNotesImporter(
             filePath = "",
             snippet = snippet,
             spaceId = spaceId,
-            kind = kind
+            kind = kind,
+            isSubNote = isSubNote
         )
 
     private inline fun rememberFailure(failedNames: MutableSet<String>, name: String, action: () -> Unit) {
