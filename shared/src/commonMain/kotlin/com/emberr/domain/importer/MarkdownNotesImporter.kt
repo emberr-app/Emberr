@@ -129,7 +129,7 @@ class MarkdownNotesImporter(
     ): ImportResult {
         val now = System.currentTimeMillis()
         val allNoteFiles = noteFilesOf(pickedFiles)
-        val markdownTextsByPath = readableMarkdownTextsOf(allNoteFiles)
+        val markdownTextsByPath = DocumentLinkedNoteFiles.readableMarkdownTextsOf(allNoteFiles)
         val documentLinkedNotePaths = DocumentLinkedNoteFiles.pathsLinkedOnlyAsDocuments(markdownTextsByPath)
         val noteFiles = allNoteFiles.filterNot { file -> file.relativePath in documentLinkedNotePaths }
         val attachmentFilesByPath = pickedFiles.files
@@ -537,20 +537,6 @@ class MarkdownNotesImporter(
     private fun fileDateOf(file: ImportFile, now: Long): Long = file.lastModifiedAt?.coerceAtMost(now) ?: now
 
     private fun workBytesOf(noteFile: ImportFile): Long = noteFile.sizeBytes.coerceAtLeast(1)
-
-    private suspend fun readableMarkdownTextsOf(noteFiles: List<ImportFile>): Map<String, String> =
-        noteFiles
-            .filterNot { file -> ImportPaths.isCanvasFile(file.relativePath) }
-            .mapNotNull { file ->
-                try {
-                    file.relativePath to TextFileDecoder.decode(file.readBytes())
-                } catch (cancellation: CancellationException) {
-                    throw cancellation
-                } catch (_: Exception) {
-                    null
-                }
-            }
-            .toMap()
 
     private fun noteFilesOf(pickedFiles: PickedImportFiles): List<ImportFile> =
         pickedFiles.files.filter { file -> ImportPaths.isNoteFile(file.relativePath) }

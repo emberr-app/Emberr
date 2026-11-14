@@ -3,6 +3,7 @@ package com.emberr.domain.importer
 import com.emberr.domain.importer.markdown.WikiLink
 import com.emberr.domain.importer.markdown.internalPathOf
 import com.emberr.domain.importer.markdown.isExternalDestination
+import kotlinx.coroutines.CancellationException
 
 internal object DocumentLinkedNoteFiles {
 
@@ -33,6 +34,20 @@ internal object DocumentLinkedNoteFiles {
         }
         return linkedAsDocument - linkedAsNote
     }
+
+    suspend fun readableMarkdownTextsOf(noteFiles: List<ImportFile>): Map<String, String> =
+        noteFiles
+            .filterNot { file -> ImportPaths.isCanvasFile(file.relativePath) }
+            .mapNotNull { file ->
+                try {
+                    file.relativePath to TextFileDecoder.decode(file.readBytes())
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            .toMap()
 
     private fun withoutCode(text: String): String = text
         .replace(fencedCodeBlockPattern, "")
