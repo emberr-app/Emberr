@@ -155,6 +155,7 @@ interface NoteRepository {
 
     // Folder management
     fun getAllFolders(): Flow<List<FolderEntity>>
+    suspend fun getAllFoldersAcrossSpaces(): List<FolderEntity>
     suspend fun insertFolder(folder: FolderEntity, stampUpdatedAt: Boolean = true)
     suspend fun insertFolderInSpace(spaceId: String, folder: FolderEntity)
     suspend fun deleteFolder(folderId: String)

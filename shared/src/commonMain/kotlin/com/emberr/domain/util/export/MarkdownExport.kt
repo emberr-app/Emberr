@@ -8,7 +8,8 @@ import com.emberr.domain.model.MovieBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.model.VoiceBlock
 
-private const val ATTACHMENTS_FOLDER_NAME = "attachments"
+internal const val MARKDOWN_ATTACHMENTS_FOLDER = "attachments"
+const val UNTITLED_NOTE_TITLE = "Untitled"
 private const val DEFAULT_CANVAS_NAME = "Canvas"
 private const val CANVAS_FILE_EXTENSION = "canvas"
 
@@ -38,10 +39,10 @@ object MarkdownAttachments {
         val usedLowercaseNames = mutableSetOf<String>()
         fun add(storedFileName: String, preferredName: String) {
             if (storedFileName in attachmentsByStoredName) return
-            val exportedName = uniqueNameOf(preferredName, usedLowercaseNames)
+            val exportedName = uniqueAttachmentNameOf(preferredName, usedLowercaseNames)
             usedLowercaseNames += exportedName.lowercase()
             attachmentsByStoredName[storedFileName] =
-                MarkdownAttachment(storedFileName, "$ATTACHMENTS_FOLDER_NAME/$exportedName")
+                MarkdownAttachment(storedFileName, "$MARKDOWN_ATTACHMENTS_FOLDER/$exportedName")
         }
         for (block in blocks) {
             if (block.isDeleted) continue
@@ -63,11 +64,11 @@ object MarkdownAttachments {
         val attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport }
         return canvases.map { canvas ->
             val baseName = safeFileNameOf(canvas.title).ifEmpty { DEFAULT_CANVAS_NAME }
-            val exportedName = uniqueNameOf("$baseName.$CANVAS_FILE_EXTENSION", usedLowercaseNames)
+            val exportedName = uniqueAttachmentNameOf("$baseName.$CANVAS_FILE_EXTENSION", usedLowercaseNames)
             usedLowercaseNames += exportedName.lowercase()
             MarkdownCanvasFile(
                 canvasNoteId = canvas.canvasNoteId,
-                pathInExport = "$ATTACHMENTS_FOLDER_NAME/$exportedName",
+                pathInExport = "$MARKDOWN_ATTACHMENTS_FOLDER/$exportedName",
                 canvasJson = ObsidianCanvasWriter.write(canvas.content, attachmentPathsByStoredName)
             )
         }
@@ -96,7 +97,7 @@ object MarkdownAttachments {
 
     private fun safeFileNameOf(name: String): String = name.trim().replace(unsafeFileNameCharacters, "_").trim('.')
 
-    private fun uniqueNameOf(name: String, usedLowercaseNames: Set<String>): String {
+    private fun uniqueAttachmentNameOf(name: String, usedLowercaseNames: Set<String>): String {
         if (name.lowercase() !in usedLowercaseNames) return name
         val stem = name.substringBeforeLast('.')
         val extension = name.substringAfterLast('.', missingDelimiterValue = "")

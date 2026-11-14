@@ -1,6 +1,9 @@
 package com.emberr.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import com.emberr.domain.model.GREY_HIGHLIGHT_HEX
+import com.emberr.domain.model.LIME_HIGHLIGHT_HEX
+import com.emberr.domain.model.PINK_HIGHLIGHT_HEX
 import com.emberr.domain.model.defaultHighlightColorName
 
 enum class HighlightColor(
@@ -10,13 +13,13 @@ enum class HighlightColor(
     val cellBackgroundHex: String
 ) {
     YELLOW(defaultHighlightColorName, Color(0xFFFFF176), Color(0xFF6B5F10), HighlightCellBackgroundHex),
-    LIME("lime", Color(0xFFDCE775), Color(0xFF55611A), "#DCE775"),
-    GREY("grey", Color(0xFFD9D9D9), Color(0xFF4A4A4A), "#D9D9D9"),
+    LIME("lime", Color(0xFFDCE775), Color(0xFF55611A), LIME_HIGHLIGHT_HEX),
+    GREY("grey", Color(0xFFD9D9D9), Color(0xFF4A4A4A), GREY_HIGHLIGHT_HEX),
     RED("red", Color(0xFFFFAB91), Color(0xFF6E2C1A), "#FFAB91"),
     BLUE("blue", Color(0xFF90CAF9), Color(0xFF1E3E5F), "#90CAF9"),
     GREEN("green", Color(0xFFA5D6A7), Color(0xFF1F4A26), "#A5D6A7"),
     ORANGE("orange", Color(0xFFFFCC80), Color(0xFF6B4415), "#FFCC80"),
-    PINK("pink", Color(0xFFF8BBD0), Color(0xFF5E2740), "#F8BBD0"),
+    PINK("pink", Color(0xFFF8BBD0), Color(0xFF5E2740), PINK_HIGHLIGHT_HEX),
     PURPLE("purple", Color(0xFFD1C4E9), Color(0xFF3E2C5A), "#D1C4E9");
 
     fun backgroundFor(isDarkTheme: Boolean): Color = if (isDarkTheme) darkBackground else lightBackground

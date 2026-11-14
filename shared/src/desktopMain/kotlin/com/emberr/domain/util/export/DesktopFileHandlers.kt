@@ -25,25 +25,27 @@ import emberr.shared.generated.resources.message_pdf_saved_as
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 
+private fun chosenMarkdownSaveFile(window: Frame, suggestedFileName: String, extension: String): java.io.File? {
+    val dialog = FileDialog(window, phrase(Res.string.message_export_markdown_title), FileDialog.SAVE)
+    dialog.file = suggestedFileName
+    dialog.isVisible = true
+
+    val chosenFileName = dialog.file ?: return null
+    val chosenFolder = dialog.directory
+    var saveFile = if (chosenFolder != null) java.io.File(chosenFolder, chosenFileName) else java.io.File(chosenFileName)
+    if (saveFile.name.endsWith(".txt", ignoreCase = true)) {
+        saveFile = java.io.File(saveFile.absolutePath.dropLast(".txt".length))
+    }
+    if (!saveFile.name.endsWith(extension, ignoreCase = true)) {
+        saveFile = java.io.File(saveFile.absolutePath + extension)
+    }
+    return saveFile
+}
+
 fun handleExportMarkdown(window: Frame, export: MarkdownExport) {
     try {
-        val dialog = FileDialog(window, phrase(Res.string.message_export_markdown_title), FileDialog.SAVE)
-        dialog.file = export.fileName
-        dialog.isVisible = true
-
-        val chosenFileStr = dialog.file ?: return
-        val chosenDirStr = dialog.directory
-
-        var saveFile = if (chosenDirStr != null) java.io.File(chosenDirStr, chosenFileStr)
-        else java.io.File(chosenFileStr)
-
-        if (saveFile.name.endsWith(".txt", ignoreCase = true)) {
-            saveFile = java.io.File(saveFile.absolutePath.removeSuffix(".txt").removeSuffix(".TXT"))
-        }
         val extension = if (export.isZip) ".zip" else ".md"
-        if (!saveFile.name.endsWith(extension, ignoreCase = true)) {
-            saveFile = java.io.File(saveFile.absolutePath + extension)
-        }
+        val saveFile = chosenMarkdownSaveFile(window, export.fileName, extension) ?: return
 
         val missingAttachmentCount = if (export.isZip) {
             val mediaStorageHelper = GlobalContext.get().get<MediaStorageHelper>()
@@ -111,17 +113,7 @@ fun handleExportPdf(window: Frame, fileName: String, title: String, blocks: List
 
 fun handleExportMarkdownVault(window: Frame, spaceIds: Set<String>) {
     try {
-        val dialog = FileDialog(window, phrase(Res.string.message_export_markdown_title), FileDialog.SAVE)
-        dialog.file = MARKDOWN_VAULT_FILE_NAME
-        dialog.isVisible = true
-
-        val chosenFileStr = dialog.file ?: return
-        val chosenDirStr = dialog.directory
-        var saveFile = if (chosenDirStr != null) java.io.File(chosenDirStr, chosenFileStr)
-        else java.io.File(chosenFileStr)
-        if (!saveFile.name.endsWith(".zip", ignoreCase = true)) {
-            saveFile = java.io.File(saveFile.absolutePath + ".zip")
-        }
+        val saveFile = chosenMarkdownSaveFile(window, MARKDOWN_VAULT_FILE_NAME, ".zip") ?: return
 
         val vault = runBlocking { GlobalContext.get().get<MarkdownVaultExporter>().build(spaceIds) }
         val mediaStorageHelper = GlobalContext.get().get<MediaStorageHelper>()

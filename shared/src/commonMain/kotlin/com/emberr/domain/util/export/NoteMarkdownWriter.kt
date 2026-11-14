@@ -51,6 +51,8 @@ private const val SECONDS_PER_MINUTE = 60
 private const val WIKI_LINK_ALIAS_SEPARATOR = "|"
 private const val TABLE_WIKI_LINK_ALIAS_SEPARATOR = "\\|"
 
+data class VaultLinks(val linkTargetsById: Map<String, String>)
+
 private val emberrNoteLinkPattern = Regex("""\[([^\]]+)\]\(emberr://note/([^)]+)\)""")
 
 private data class RenderOptions(
@@ -59,7 +61,7 @@ private data class RenderOptions(
     val attachmentPathsByStoredName: Map<String, String>,
     val personNamesById: Map<String, String>,
     val canvasPathsByNoteId: Map<String, String>,
-    val vaultLinkTargetsById: Map<String, String>?,
+    val vaultLinks: VaultLinks?,
     val timeZone: TimeZone
 )
 
@@ -73,7 +75,7 @@ object NoteMarkdownWriter {
         attachmentPathsByStoredName: Map<String, String> = emptyMap(),
         personNamesById: Map<String, String> = emptyMap(),
         canvasPathsByNoteId: Map<String, String> = emptyMap(),
-        vaultLinkTargetsById: Map<String, String>? = null
+        vaultLinks: VaultLinks? = null
     ): String {
         val visibleBlocks = blocks.filter { !it.isDeleted }
         val options = RenderOptions(
@@ -82,7 +84,7 @@ object NoteMarkdownWriter {
             attachmentPathsByStoredName = attachmentPathsByStoredName,
             personNamesById = personNamesById,
             canvasPathsByNoteId = canvasPathsByNoteId,
-            vaultLinkTargetsById = vaultLinkTargetsById,
+            vaultLinks = vaultLinks,
             timeZone = TimeZone.currentSystemDefault()
         )
 
@@ -117,7 +119,8 @@ object NoteMarkdownWriter {
         return joinRenderedBlocks(outerBlocks) { block ->
             val level = (block.indentationLevel - indentationToIgnore).coerceIn(0, minOf(indentsByLevel.lastIndex, MAX_INDENT_LEVELS))
             val indent = indentsByLevel[level]
-            val rendered = withVaultNoteLinks(renderBlock(block, options, indent), block, options)
+            val renderedBlock = renderBlock(block, options, indent)
+            val rendered = if (block is CodeBlock) renderedBlock else withVaultNoteLinks(renderedBlock, block, options)
             if (rendered.isNotEmpty()) {
                 indentsByLevel.subList(level + 1, indentsByLevel.size).clear()
                 if (isListStyleBlock(block)) indentsByLevel.add(indent + " ".repeat(nestedContentWidthOf(block)))
@@ -201,7 +204,7 @@ object NoteMarkdownWriter {
             is ImageBlock -> renderImage(block, options)
             is DocumentBlock -> renderDocument(block, options)
             is VoiceBlock -> renderVoice(block, options)
-            is CanvasBlock -> options.canvasPathsByNoteId[block.canvasNoteId]?.let { path -> "![[$path]]" } ?: "[Canvas]"
+            is CanvasBlock -> renderCanvas(block, options)
             is PropertyBlock -> renderProperty(block, options)
             is DatabaseBlock -> ""
             is MovieBlock -> renderMovie(block, options)
@@ -304,7 +307,7 @@ object NoteMarkdownWriter {
     }
 
     private fun withVaultNoteLinks(rendered: String, block: NoteBlock, options: RenderOptions): String {
-        val linkTargetsById = options.vaultLinkTargetsById ?: return rendered
+        val linkTargetsById = options.vaultLinks?.linkTargetsById ?: return rendered
         val aliasSeparator = if (block is TableBlock) TABLE_WIKI_LINK_ALIAS_SEPARATOR else WIKI_LINK_ALIAS_SEPARATOR
         return emberrNoteLinkPattern.replace(rendered) { link ->
             val title = link.groupValues[1]
@@ -320,8 +323,8 @@ object NoteMarkdownWriter {
 
     private fun renderLinkedNote(block: LinkedNoteBlock, options: RenderOptions): String {
         val knownTitle = options.noteTitlesById[block.linkedNoteId]?.takeIf { it.isNotBlank() }
-        options.vaultLinkTargetsById?.let { linkTargetsById ->
-            val target = linkTargetsById[block.linkedNoteId]
+        options.vaultLinks?.let { vaultLinks ->
+            val target = vaultLinks.linkTargetsById[block.linkedNoteId]
             return when {
                 target != null -> wikiLinkTo(target, knownTitle.orEmpty())
                 knownTitle != null -> InlineMarkdownFormatter.escapeMarkdown(flattenLineBreaks(knownTitle))
@@ -334,7 +337,12 @@ object NoteMarkdownWriter {
             .replace("[", "")
             .replace("]", "")
             .trim()
-        return "[[${safeTitle.ifEmpty { "Untitled" }}]]"
+        return "[[${safeTitle.ifEmpty { UNTITLED_NOTE_TITLE }}]]"
+    }
+
+    private fun renderCanvas(block: CanvasBlock, options: RenderOptions): String {
+        val canvasPath = options.canvasPathsByNoteId[block.canvasNoteId] ?: return "[Canvas]"
+        return "![[$canvasPath]]"
     }
 
     private fun renderImage(block: ImageBlock, options: RenderOptions): String {

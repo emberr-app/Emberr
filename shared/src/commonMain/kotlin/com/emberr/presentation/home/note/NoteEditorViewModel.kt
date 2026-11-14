@@ -16,6 +16,7 @@ import com.emberr.domain.util.export.ExportedCanvas
 import com.emberr.domain.util.export.MarkdownAttachments
 import com.emberr.domain.util.export.MarkdownCanvasFile
 import com.emberr.domain.util.export.MarkdownExport
+import com.emberr.domain.util.export.linkedNoteTitlesIn
 import com.emberr.domain.util.voice.AudioRecorder
 import com.emberr.domain.util.media.MediaStorageHelper
 import com.emberr.domain.util.media.WebImageFetcher
@@ -193,12 +194,11 @@ class NoteEditorViewModel(
         repository.getNoteContent(noteId)?.blocks ?: emptyList()
 
     private suspend fun theNoteAlreadyHoldsThis(
-        noteId: String,
+        storedMetadata: NoteMetadataEntity,
         metadataToSave: NoteMetadataEntity,
         blocksToSave: List<NoteBlock>
     ): Boolean {
-        val storedMetadata = repository.getNoteById(noteId) ?: return false
-        if (blocksToSave != repository.getNoteContent(noteId)?.blocks.orEmpty()) return false
+        if (blocksToSave != repository.getNoteContent(storedMetadata.noteId)?.blocks.orEmpty()) return false
 
         return metadataToSave.copy(
             updatedAt = storedMetadata.updatedAt,
@@ -220,7 +220,7 @@ class NoteEditorViewModel(
                     // queued behind a long lock wait would write whatever note the user has since
                     // switched to into meta's note instead of its own - cross-note contamination.
                     if (currentMetadata?.noteId != meta.noteId) return@withLock false
-                    if (repository.getNoteById(meta.noteId) == null) return@withLock false
+                    val storedMetadata = repository.getNoteById(meta.noteId) ?: return@withLock false
 
                     val diskBlocks = diskBlocksOf(meta.noteId)
                     val reconciled = _blocks.updateAndGet { editorBlocks -> editorDiskReconciler.reconcile(editorBlocks, diskBlocks) }
@@ -230,7 +230,7 @@ class NoteEditorViewModel(
                         updatedAt = System.currentTimeMillis()
                     )
 
-                    if (theNoteAlreadyHoldsThis(meta.noteId, updatedMeta, reconciled)) return@withLock true
+                    if (theNoteAlreadyHoldsThis(storedMetadata, updatedMeta, reconciled)) return@withLock true
 
                     currentMetadata = updatedMeta
                     _noteUpdatedAt.value = updatedMeta.updatedAt
@@ -302,10 +302,11 @@ class NoteEditorViewModel(
             // it's true, so a stuck flag silently stops this note from ever picking up a background
             // sync update again until the ViewModel itself is recreated (a full app restart).
             try {
-                if (flushedMeta != null && repository.getNoteById(previousMeta.noteId) != null) {
+                if (flushedMeta != null) {
                     SyncCoordinator.mutex.withLock {
+                        val storedMetadata = repository.getNoteById(previousMeta.noteId)
                         val reconciled = reconcileWithDisk(previousMeta.noteId, snapshot)
-                        if (!theNoteAlreadyHoldsThis(previousMeta.noteId, flushedMeta, reconciled)) {
+                        if (storedMetadata != null && !theNoteAlreadyHoldsThis(storedMetadata, flushedMeta, reconciled)) {
                             val contentToSave = NoteContent(blocks = reconciled)
                             repository.saveNote(flushedMeta, contentToSave)
                             repository.indexNote(flushedMeta, contentToSave)
@@ -499,7 +500,7 @@ class NoteEditorViewModel(
             .associate { it.categoryId to it.name }
         val body = com.emberr.domain.util.export.ExportEngine.generateMarkdown(
             blocks = blocks,
-            noteTitlesById = linkedNoteTitlesIn(blocks),
+            noteTitlesById = linkedNoteTitlesIn(blocks, repository::getNoteById),
             categoryNamesById = categoryNamesById,
             attachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport },
             personNamesById = personNamesLinkedIn(blocks, repository::getNoteById),
@@ -507,12 +508,5 @@ class NoteEditorViewModel(
         )
         return "# $title\n\n$body"
     }
-
-    private suspend fun linkedNoteTitlesIn(blocks: List<NoteBlock>): Map<String, String> =
-        blocks.filterIsInstance<LinkedNoteBlock>()
-            .map { it.linkedNoteId }
-            .distinct()
-            .mapNotNull { noteId -> repository.getNoteById(noteId)?.let { note -> noteId to note.title.ifBlank { "Untitled" } } }
-            .toMap()
 }
 

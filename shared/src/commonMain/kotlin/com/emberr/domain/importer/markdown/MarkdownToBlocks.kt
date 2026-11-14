@@ -264,7 +264,11 @@ private class MarkdownBlockBuilder(
 
         val attachmentPath = linkResolver.attachmentPathFor(wikiLink.target)
         if (attachmentPath != null) {
-            addAttachment(attachmentPath, indentation, linkedFileName = attachmentPath.substringAfterLast('/').takeUnless { wikiLink.isEmbed })
+            if (wikiLink.isEmbed) {
+                addAttachment(attachmentPath, indentation)
+            } else {
+                addAttachment(attachmentPath, indentation, plainLinkFileName = attachmentPath.substringAfterLast('/'))
+            }
             return true
         }
         val noteId = linkResolver.noteIdFor(wikiLink.target) ?: return false
@@ -558,19 +562,19 @@ private class MarkdownBlockBuilder(
         parts.forEach { part ->
             when (part) {
                 is InlinePart.Words -> blocks += wordsBlock(part.styledText, indentation)
-                is InlinePart.Attachment -> addAttachment(part.relativePath, indentation, part.linkedFileName)
+                is InlinePart.Attachment -> addAttachment(part.relativePath, indentation, part.plainLinkFileName)
                 is InlinePart.WebImage -> addWebImage(part.url, part.altText, indentation)
                 is InlinePart.Embed -> blocks += bookmarkBlock(part.url, labelText = "", indentation)
             }
         }
     }
 
-    private fun addAttachment(relativePath: String, indentation: Int, linkedFileName: String? = null) {
+    private fun addAttachment(relativePath: String, indentation: Int, plainLinkFileName: String? = null) {
         val id = newBlockId()
-        blocks += if (linkedFileName == null && ImportPaths.isImageFile(relativePath)) {
+        blocks += if (plainLinkFileName == null && ImportPaths.isImageFile(relativePath)) {
             ImageBlock(id = id, indentationLevel = indentation, updatedAt = now)
         } else {
-            DocumentBlock(id = id, fileName = linkedFileName ?: relativePath.substringAfterLast('/'), indentationLevel = indentation, updatedAt = now)
+            DocumentBlock(id = id, fileName = plainLinkFileName ?: relativePath.substringAfterLast('/'), indentationLevel = indentation, updatedAt = now)
         }
         pendingAttachments += PendingAttachment(blockId = id, relativePath = relativePath)
     }

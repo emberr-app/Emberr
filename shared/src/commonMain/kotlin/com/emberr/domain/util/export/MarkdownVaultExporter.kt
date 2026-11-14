@@ -1,10 +1,12 @@
 package com.emberr.domain.util.export
 
+import com.emberr.data.local.room.entity.FolderEntity
 import com.emberr.data.local.room.entity.NoteKind
+import com.emberr.data.local.room.entity.NoteMetadataEntity
+import com.emberr.data.local.room.entity.SpaceEntity
 import com.emberr.domain.canvas.CanvasRepository
 import com.emberr.domain.database.withDatabasesAsTables
 import com.emberr.domain.model.CanvasBlock
-import com.emberr.domain.model.LinkedNoteBlock
 import com.emberr.domain.model.NoteBlock
 import com.emberr.domain.movie.withWatchlistsExpanded
 import com.emberr.domain.people.personNamesLinkedIn
@@ -26,6 +28,14 @@ data class MarkdownVault(
     val attachments: List<MarkdownAttachment>
 )
 
+private data class VaultWideDetails(
+    val attachmentPathsFromVaultRoot: Map<String, String>,
+    val categoryNamesById: Map<String, String>,
+    val linkedNoteTitlesById: Map<String, String>,
+    val canvasPathsByNoteId: Map<String, String>,
+    val vaultLinks: VaultLinks
+)
+
 class MarkdownVaultExporter(
     private val repository: NoteRepository,
     private val canvasRepository: CanvasRepository,
@@ -33,62 +43,59 @@ class MarkdownVaultExporter(
 ) {
 
     suspend fun build(spaceIds: Set<String>): MarkdownVault = withContext(Dispatchers.IO) {
-        val spaces = spaceRepository.observeSpaces().first().filter { it.spaceId in spaceIds && !it.isDeleted }
-        val folders = repository.getFoldersModifiedSince(-1L).filter { it.spaceId in spaceIds && !it.isDeleted }
-        val notes = repository.getAllNotesAcrossSpaces().filter { note ->
-            note.spaceId in spaceIds && note.databaseId == null && (note.kind == NoteKind.NOTE || note.kind == NoteKind.CANVAS)
-        }
-        val plan = MarkdownVaultPaths.plan(spaces, folders, notes)
+        val notes = notesIn(spaceIds)
+        val plan = MarkdownVaultPaths.plan(spacesIn(spaceIds), foldersIn(spaceIds), notes)
 
         val textNotes = notes.filter { it.kind == NoteKind.NOTE && it.noteId in plan.notePathsById }
         val blocksByNoteId = textNotes.associate { note -> note.noteId to blocksForExport(note.noteId) }
         val allBlocks = blocksByNoteId.values.flatten()
         val embeddedCanvases = embeddedCanvasesIn(allBlocks)
-        val standaloneCanvases = notes
-            .filter { it.kind == NoteKind.CANVAS && it.noteId in plan.notePathsById }
-            .map { note -> ExportedCanvas(note.noteId, note.title, canvasRepository.loadCanvasIncludingDeleted(note.noteId)) }
+        val standaloneCanvases = standaloneCanvasesIn(notes, plan)
         val attachments = MarkdownAttachments.collect(allBlocks, embeddedCanvases + standaloneCanvases)
-        val canvasFiles = MarkdownAttachments.canvasFilesFor(embeddedCanvases, attachments)
-        val rootAttachmentPathsByStoredName = attachments.associate { it.storedFileName to it.pathInExport }
+        val embeddedCanvasFiles = MarkdownAttachments.canvasFilesFor(embeddedCanvases, attachments)
 
-        val categoryNamesById = repository.getAllCategories().first()
-            .filter { !it.isDeleted }
-            .associate { it.categoryId to it.name }
-        val linkedNoteTitlesById = linkedNoteTitlesIn(allBlocks)
-        val canvasPathsByNoteId = canvasFiles.associate { it.canvasNoteId to it.pathInExport } +
-            standaloneCanvases.associate { it.canvasNoteId to plan.notePathsById.getValue(it.canvasNoteId) }
+        val details = VaultWideDetails(
+            attachmentPathsFromVaultRoot = attachments.associate { it.storedFileName to it.pathInExport },
+            categoryNamesById = categoryNamesById(),
+            linkedNoteTitlesById = linkedNoteTitlesIn(allBlocks, repository::getNoteById),
+            canvasPathsByNoteId = embeddedCanvasFiles.associate { it.canvasNoteId to it.pathInExport } +
+                standaloneCanvases.associate { it.canvasNoteId to plan.notePathsById.getValue(it.canvasNoteId) },
+            vaultLinks = VaultLinks(plan.linkTargetsById)
+        )
 
         val noteFiles = textNotes.map { note ->
-            val notePath = plan.notePathsById.getValue(note.noteId)
-            val blocks = blocksByNoteId.getValue(note.noteId)
-            val stepsToVaultRoot = PARENT_FOLDER_STEP.repeat(notePath.count { it == '/' })
-            MarkdownVaultTextFile(
-                path = notePath,
-                text = ExportEngine.generateMarkdown(
-                    blocks = blocks,
-                    noteTitlesById = linkedNoteTitlesById,
-                    categoryNamesById = categoryNamesById,
-                    attachmentPathsByStoredName = rootAttachmentPathsByStoredName.mapValues { (_, path) -> stepsToVaultRoot + path },
-                    personNamesById = personNamesLinkedIn(blocks, repository::getNoteById),
-                    canvasPathsByNoteId = canvasPathsByNoteId,
-                    vaultLinkTargetsById = plan.linkTargetsById
-                )
-            )
+            noteFileFor(plan.notePathsById.getValue(note.noteId), blocksByNoteId.getValue(note.noteId), details)
         }
         val standaloneCanvasFiles = standaloneCanvases.map { canvas ->
             MarkdownVaultTextFile(
                 path = plan.notePathsById.getValue(canvas.canvasNoteId),
-                text = ObsidianCanvasWriter.write(canvas.content, rootAttachmentPathsByStoredName)
+                text = ObsidianCanvasWriter.write(canvas.content, details.attachmentPathsFromVaultRoot)
             )
         }
-        val embeddedCanvasFiles = canvasFiles.map { MarkdownVaultTextFile(it.pathInExport, it.canvasJson) }
+        val embeddedCanvasTextFiles = embeddedCanvasFiles.map { MarkdownVaultTextFile(it.pathInExport, it.canvasJson) }
 
         MarkdownVault(
             folderPaths = plan.folderPaths,
-            textFiles = noteFiles + standaloneCanvasFiles + embeddedCanvasFiles,
+            textFiles = noteFiles + standaloneCanvasFiles + embeddedCanvasTextFiles,
             attachments = attachments
         )
     }
+
+    private suspend fun spacesIn(spaceIds: Set<String>): List<SpaceEntity> =
+        spaceRepository.observeSpaces().first().filter { it.spaceId in spaceIds && !it.isDeleted }
+
+    private suspend fun foldersIn(spaceIds: Set<String>): List<FolderEntity> =
+        repository.getAllFoldersAcrossSpaces().filter { it.spaceId in spaceIds }
+
+    private suspend fun notesIn(spaceIds: Set<String>): List<NoteMetadataEntity> =
+        repository.getAllNotesAcrossSpaces().filter { note ->
+            note.spaceId in spaceIds && note.databaseId == null && (note.kind == NoteKind.NOTE || note.kind == NoteKind.CANVAS)
+        }
+
+    private suspend fun categoryNamesById(): Map<String, String> =
+        repository.getAllCategories().first()
+            .filter { !it.isDeleted }
+            .associate { it.categoryId to it.name }
 
     private suspend fun blocksForExport(noteId: String): List<NoteBlock> =
         repository.getNoteContent(noteId)?.blocks.orEmpty()
@@ -105,10 +112,24 @@ class MarkdownVaultExporter(
                 ExportedCanvas(canvasNoteId, canvasNote.title, canvasRepository.loadCanvasIncludingDeleted(canvasNoteId))
             }
 
-    private suspend fun linkedNoteTitlesIn(blocks: List<NoteBlock>): Map<String, String> =
-        blocks.filterIsInstance<LinkedNoteBlock>()
-            .map { it.linkedNoteId }
-            .distinct()
-            .mapNotNull { noteId -> repository.getNoteById(noteId)?.let { note -> noteId to note.title.ifBlank { "Untitled" } } }
-            .toMap()
+    private suspend fun standaloneCanvasesIn(notes: List<NoteMetadataEntity>, plan: MarkdownVaultPlan): List<ExportedCanvas> =
+        notes
+            .filter { it.kind == NoteKind.CANVAS && it.noteId in plan.notePathsById }
+            .map { note -> ExportedCanvas(note.noteId, note.title, canvasRepository.loadCanvasIncludingDeleted(note.noteId)) }
+
+    private suspend fun noteFileFor(notePath: String, blocks: List<NoteBlock>, details: VaultWideDetails): MarkdownVaultTextFile {
+        val stepsUpToVaultRoot = PARENT_FOLDER_STEP.repeat(notePath.count { it == '/' })
+        return MarkdownVaultTextFile(
+            path = notePath,
+            text = ExportEngine.generateMarkdown(
+                blocks = blocks,
+                noteTitlesById = details.linkedNoteTitlesById,
+                categoryNamesById = details.categoryNamesById,
+                attachmentPathsByStoredName = details.attachmentPathsFromVaultRoot.mapValues { (_, path) -> stepsUpToVaultRoot + path },
+                personNamesById = personNamesLinkedIn(blocks, repository::getNoteById),
+                canvasPathsByNoteId = details.canvasPathsByNoteId,
+                vaultLinks = details.vaultLinks
+            )
+        )
+    }
 }
